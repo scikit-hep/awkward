@@ -28,9 +28,8 @@ jobs:
           mkdir build
           cd build
           cmake -A x64 ..
-          ls -R
           cmake --build .
-          ls -R
+          ctest --output-on-failure
         
       # - script: |
       #     python -m pip install --upgrade pip
