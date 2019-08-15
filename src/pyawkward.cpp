@@ -1,6 +1,6 @@
 #include <pybind11/pybind11.h>
 
-#include "awkward/cpu-kernels/dummy.h"
+#include "awkward/cpu-kernels/dummy1.h"
 #include "awkward/dummy2.h"
 
 namespace py = pybind11;

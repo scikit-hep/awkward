@@ -46,18 +46,15 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
             build_args += ["--", "-j2"]
 
-        env = os.environ.copy()
-        env["CXXFLAGS"] = "{0} -DVERSION_INFO=\\\"{1}\\\"".format(env.get("CXXFLAGS", ""), self.distribution.get_version())
-
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
+        subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp, env=os.environ)
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(exclude=["tests"]),
       scripts = [],
-      version = "1.0.0-pre1",
+      version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",

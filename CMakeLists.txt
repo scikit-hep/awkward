@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 2.8.12)
 project (awkward)
 
-include_directories(include)
-add_subdirectory(pybind11)
+file(READ "VERSION_INFO" VERSION_INFO)
+string(STRIP ${VERSION_INFO} VERSION_INFO)
+add_definitions(-DVERSION_INFO="${VERSION_INFO}")
+
 file(GLOB CPU_KERNEL_SOURCES "src/cpu-kernels/*.cpp")
 file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp")
+include_directories(include)
+add_subdirectory(pybind11)
 
 add_library(awkward-cpu-kernels SHARED ${CPU_KERNEL_SOURCES})
 
