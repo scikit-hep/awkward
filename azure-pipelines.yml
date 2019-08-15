@@ -1,19 +1,53 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- master
+  - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+jobs:
+  - job: Linux
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+    pool:
+      vmImage: "ubuntu-16.04"
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    strategy:
+      matrix:
+        "py27-np13":
+          python-version: "2.7"
+          numpy-version: "1.13.1"
+        "py27-np*":
+          python-version: "2.7"
+          numpy-version: "latest"
+        "py35-np13":
+          python-version: "3.5"
+          numpy-version: "1.13.1"
+        "py35-np*":
+          python-version: "3.5"
+          numpy-version: "latest"
+        "py37-np13":
+          python-version: "3.7"
+          numpy-version: "1.13.1"
+        "py37-np*":
+          python-version: "3.7"
+          numpy-version: "latest"
+
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "$(python.version)"
+        displayName: "Python $(python.version)"
+
+      - script: |
+          sudo apt install -y build-essential cmake make
+          python -m pip install --update pip
+          if [ ${numpy.version} = "latest" ]; then
+            pip install -r requirements.txt;
+          else
+            sed "s/numpy>=1.13.1/numpy==WHATEVER/" requirements.txt > requirements2.txt;
+            pip install -r requirements2.txt;
+          fi
+          pip install -r test-requirements.txt
+          python -c "import numpy; print(numpy.__version__)"
+        displayName: "Install"
+
+      - script: |
+          python setup.py build
+          pytest -vv tests
+        displayName: "Build and test"
