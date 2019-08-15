@@ -29,6 +29,8 @@ jobs:
           cd build
           cmake -A x64 ..
           cmake --build .
+          ls
+          ls Debug
           ctest --output-on-failure
         
       # - script: |
