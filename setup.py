@@ -48,9 +48,17 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
+
+        print("cmake_args", cmake_args)
+        print("build_args", build_args)
+        print("cwd", self.build_temp)
+
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
+        print("AFTER cmake", os.listdir(self.build_temp))
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
+        print("AFTER cmake --build", os.listdir(self.build_temp))
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
+        print("AFTER ctest", os.listdir(self.build_temp))
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(exclude=["tests"]),
