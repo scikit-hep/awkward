@@ -57,7 +57,8 @@ jobs:
           python setup.py build
           tree -I pybind11
           cd build/lib.*
-          ln -s ../../tests
-          ls -a
+          pwd
+          cp -a ../../tests .
+          tree
           pytest -vv tests
         displayName: "Build and test"
