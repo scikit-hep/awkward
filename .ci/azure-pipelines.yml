@@ -25,16 +25,24 @@ jobs:
         displayName: 'Python $(python.version)'
 
       - script: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt;
-          pip install -r test-requirements.txt
-          python -c "import numpy; print(numpy.__version__)"
-        displayName: "Install"
+          mkdir build
+          cd build
+          cmake ..
+          ls
+          cmake --build
+          ls
+        
+      # - script: |
+      #     python -m pip install --upgrade pip
+      #     pip install -r requirements.txt
+      #     pip install -r test-requirements.txt
+      #     python -c "import numpy; print(numpy.__version__)"
+      #   displayName: "Install"
 
-      - script: |
-          python setup.py build
-          pytest -vv tests
-        displayName: "Build and test"
+      # - script: |
+      #     python setup.py build
+      #     pytest -vv tests
+      #   displayName: "Build and test"
 
   - job: linux
 
