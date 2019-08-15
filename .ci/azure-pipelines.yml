@@ -41,7 +41,7 @@ jobs:
         displayName: 'Python $(python.version)'
 
       - script: |
-          sudo apt install -y build-essential cmake make
+          sudo apt install -y build-essential cmake make tree
           python -m pip install --update pip
           if [ $(numpy.version) = "latest" ]; then
             pip install -r requirements.txt;
@@ -55,5 +55,9 @@ jobs:
 
       - script: |
           python setup.py build
+          tree -I pybind11
+          cd build/lib.*
+          ln -s ../../tests
+          ls -a
           pytest -vv tests
         displayName: "Build and test"

@@ -11,7 +11,7 @@ from setuptools import setup
 
 class CMakeExtension(setuptools.Extension):
     def __init__(self, name, sourcedir=""):
-        super(CMakeExtension, self).__init__(name, sources=[])
+        setuptools.Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
 
 class CMakeBuild(setuptools.command.build_ext.build_ext):
