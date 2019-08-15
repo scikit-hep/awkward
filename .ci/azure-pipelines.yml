@@ -2,7 +2,7 @@ trigger:
   - master
 
 jobs:
-  - job: win
+  - job: win64
 
     pool:
       vmImage: "vs2017-win2016"
@@ -11,6 +11,7 @@ jobs:
       matrix:
         "py37-np*":
           python.version: "3.7"
+          python.architecture: "x64"
           numpy.version: "latest"
 
     steps:
@@ -74,7 +75,7 @@ jobs:
         displayName: 'Python $(python.version)'
 
       - script: |
-          sudo apt install -y build-essential cmake make tree
+          sudo apt install -y tree   # build-essential cmake make
           python -m pip install --upgrade pip
           if [ $(numpy.version) = "latest" ]; then
             pip install -r requirements.txt;
