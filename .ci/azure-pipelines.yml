@@ -25,16 +25,15 @@ jobs:
           python.version: "3.5"
           python.architecture: "x64"
           numpy.version: "latest"
-        "py37-np13":
-          python.version: "3.7"
-          python.architecture: "x64"
-          numpy.version: "1.13.1"
         "py37-np*":
           python.version: "3.7"
           python.architecture: "x64"
           numpy.version: "latest"
 
     steps:
+      - checkout: self
+        submodules: recursive
+
       - task: UsePythonVersion@0
         inputs:
           versionSpec: '$(python.version)'
