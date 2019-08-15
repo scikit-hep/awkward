@@ -27,9 +27,9 @@ jobs:
       - script: |
           mkdir build
           cd build
-          cmake .. -A x64
+          cmake -A x64 ..
           ls -R
-          cmake --build
+          cmake --build .
           ls -R
         
       # - script: |
