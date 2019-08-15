@@ -44,12 +44,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
         else:
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
-            build_args += ["--", "-j2"]
+            # build_args += ["--", "-j8"]
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp, env=os.environ)
+        subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
+        subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(exclude=["tests"]),
@@ -61,8 +62,15 @@ setup(name = "awkward1",
       maintainer_email = "pivarski@princeton.edu",
       description = "Development of awkward 1.0, to replace scikit-hep/awkward-array in 2020.",
       long_description = "",
+      url = "https://github.com/jpivarski/awkward1",
+      download_url = "https://github.com/jpivarski/awkward1/releases",
+      license = "BSD 3-clause",
       ext_modules = [CMakeExtension("awkward")],
       cmdclass = {"build_ext": CMakeBuild},
+      test_suite = "tests",
+      install_requires = ["numpy>=1.13.1"],
+      setup_requires = ["pytest-runner"],
+      tests_require = ["pytest>=3.9"],
       zip_safe = False,
       classifiers = [
           "Development Status :: 1 - Planning",
