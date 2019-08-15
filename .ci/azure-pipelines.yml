@@ -82,7 +82,6 @@ jobs:
         displayName: 'Python $(python.version)'
 
       - script: |
-          sudo apt install -y tree   # build-essential cmake make
           python -m pip install --upgrade pip
           if [ $(numpy.version) = "latest" ]; then
             pip install -r requirements.txt;
@@ -96,10 +95,5 @@ jobs:
 
       - script: |
           python setup.py build
-          tree -I pybind11
-          cd build/lib.*
-          pwd
-          cp -a ../../tests .
-          tree
           pytest -vv tests
         displayName: "Build and test"

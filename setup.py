@@ -3,6 +3,7 @@ import platform
 import re
 import subprocess
 import sys
+import shutil
 
 import distutils.version
 import setuptools
@@ -30,7 +31,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             self.build_extension(x)
 
     def build_extension(self, ext):
-        extdir = os.path.join(os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))), "awkward1")
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir, "-DPYTHON_EXECUTABLE=" + sys.executable]
 
         cfg = "Debug" if self.debug else "Release"
@@ -49,16 +50,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
 
-        print("cmake_args", cmake_args)
-        print("build_args", build_args)
-        print("cwd", self.build_temp)
-
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
-        print("AFTER cmake", os.listdir(self.build_temp))
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
-        print("AFTER cmake --build", os.listdir(self.build_temp))
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
-        print("AFTER ctest", os.listdir(self.build_temp))
+        for lib in os.listdir(extdir):
+            if lib != "awkward1":
+                shutil.copy(os.path.join(extdir, lib), "awkward1")
+                shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(exclude=["tests"]),
