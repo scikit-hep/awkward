@@ -28,9 +28,8 @@ add_library(awkward-cpu-kernels SHARED ${CPU_KERNEL_SOURCES})
 target_compile_features(awkward-cpu-kernels PRIVATE cxx_std_14)
 addtest(test-dummy1 "tests/cpu-kernels/dummy1.cpp")
 
-add_library(awkward SHARED ${LIBAWKWARD_SOURCES})
+add_library(awkward SHARED ${CPU_KERNEL_SOURCES} ${LIBAWKWARD_SOURCES})
 target_compile_features(awkward PRIVATE cxx_std_14)
-target_link_libraries(awkward PRIVATE awkward-cpu-kernels)
 addtest(test-dummy2 "tests/libawkward/dummy2.cpp")
 
 pybind11_add_module(layout src/pyawkward.cpp)
