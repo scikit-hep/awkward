@@ -29,7 +29,9 @@ jobs:
           cd build
           cmake -A x64 ..
           cmake --build .
+          echo "compiled"
           ls
+          echo "the Debug directory is:"
           ls Debug
           ctest --output-on-failure
         
