@@ -3,6 +3,7 @@ import platform
 import re
 import subprocess
 import sys
+import shutil
 
 import distutils.version
 import setuptools
@@ -11,7 +12,7 @@ from setuptools import setup
 
 class CMakeExtension(setuptools.Extension):
     def __init__(self, name, sourcedir=""):
-        super(CMakeExtension, self).__init__(name, sources=[])
+        setuptools.Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
 
 class CMakeBuild(setuptools.command.build_ext.build_ext):
@@ -23,34 +24,45 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
         if platform.system() == "Windows":
             cmake_version = distutils.version.LooseVersion(re.search(r"version\s*([\d.]+)", out.decode()).group(1))
-            if cmake_version < "3.1.0":
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
+            if cmake_version < "3.4":
+                raise RuntimeError("CMake >= 3.4 is required on Windows")
 
         for x in self.extensions:
             self.build_extension(x)
 
     def build_extension(self, ext):
-        extdir = os.path.join(os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))), "awkward1")
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir, "-DPYTHON_EXECUTABLE=" + sys.executable]
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
 
         if platform.system() == "Windows":
-            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir)]
+            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir), "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE"]
             if sys.maxsize > 2**32:
                 cmake_args += ["-A", "x64"]
             build_args += ["--", "/m"]
 
         else:
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
-            # build_args += ["--", "-j8"]
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
+
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
+
+        for lib in os.listdir(extdir):
+            if "layout" in lib or "kernels" in lib:
+                shutil.copy(os.path.join(extdir, lib), "awkward1")
+                shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
+
+        if platform.system() == "Windows":
+            for lib in os.listdir(os.path.join(self.build_temp, cfg)):
+                if lib.endswith("kernels.dll"):
+                    shutil.copy(os.path.join(os.path.join(self.build_temp, cfg), lib), "awkward1")
+                    shutil.move(os.path.join(os.path.join(self.build_temp, cfg), lib), os.path.join(extdir, "awkward1"))
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(exclude=["tests"]),
@@ -68,9 +80,8 @@ setup(name = "awkward1",
       ext_modules = [CMakeExtension("awkward")],
       cmdclass = {"build_ext": CMakeBuild},
       test_suite = "tests",
-      install_requires = ["numpy>=1.13.1"],
-      setup_requires = ["pytest-runner"],
-      tests_require = ["pytest>=3.9"],
+      install_requires = open("requirements.txt").read().strip().split(),
+      tests_require = open("test-requirements.txt").read().strip().split(),
       zip_safe = False,
       classifiers = [
           "Development Status :: 1 - Planning",
