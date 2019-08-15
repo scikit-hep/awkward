@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-project (libawkward)
+project (awkward)
 
 include_directories(include)
 add_subdirectory(pybind11)
