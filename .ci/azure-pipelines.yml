@@ -27,10 +27,10 @@ jobs:
       - script: |
           mkdir build
           cd build
-          cmake ..
-          ls
+          cmake .. -A x64
+          ls -R
           cmake --build
-          ls
+          ls -R
         
       # - script: |
       #     python -m pip install --upgrade pip
