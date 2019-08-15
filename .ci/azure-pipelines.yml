@@ -2,7 +2,7 @@ trigger:
   - master
 
 jobs:
-  - job: Linux
+  - job: linux
 
     pool:
       vmImage: "ubuntu-16.04"
@@ -37,8 +37,8 @@ jobs:
     steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: "${python.version}"
-        displayName: "Python ${python.version}"
+          versionSpec: '$(python.version)'
+        displayName: 'Python $(python.version)'
 
       - script: |
           sudo apt install -y build-essential cmake make
