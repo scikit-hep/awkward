@@ -2,32 +2,15 @@ trigger:
   - master
 
 jobs:
-  - job: linux
+  - job: win
 
     pool:
-      vmImage: "ubuntu-16.04"
+      vmImage: "vs2017-win2016"
 
     strategy:
       matrix:
-        "py27-np13":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "1.13.1"
-        "py27-np*":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py35-np13":
-          python.version: "3.5"
-          python.architecture: "x64"
-          numpy.version: "1.13.1"
-        "py35-np*":
-          python.version: "3.5"
-          python.architecture: "x64"
-          numpy.version: "latest"
         "py37-np*":
           python.version: "3.7"
-          python.architecture: "x64"
           numpy.version: "latest"
 
     steps:
@@ -41,8 +24,58 @@ jobs:
         displayName: 'Python $(python.version)'
 
       - script: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt;
+          pip install -r test-requirements.txt
+          python -c "import numpy; print(numpy.__version__)"
+        displayName: "Install"
+
+      - script: |
+          python setup.py build
+          pytest -vv tests
+        displayName: "Build and test"
+
+  - job: linux
+
+    pool:
+      vmImage: "ubuntu-16.04"
+
+    strategy:
+      matrix:
+        # "py27-np13":
+        #   python.version: "2.7"
+        #   numpy.version: "1.13.1"
+        # "py27-np*":
+        #   python.version: "2.7"
+        #   numpy.version: "latest"
+        # "py35-np13":
+        #   python.version: "3.5"
+        #   numpy.version: "1.13.1"
+        # "py35-np*":
+        #   python.version: "3.5"
+        #   numpy.version: "latest"
+        # "py36-np*":
+        #   python.version: "3.6"
+        #   numpy.version: "latest"
+        "py37-np*":
+          python.version: "3.7"
+          numpy.version: "latest"
+        # "py38-np*":
+        #   python.version: "3.8"
+        #   numpy.version: "latest"
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+        displayName: 'Python $(python.version)'
+
+      - script: |
           sudo apt install -y build-essential cmake make tree
-          python -m pip install --update pip
+          python -m pip install --upgrade pip
           if [ $(numpy.version) = "latest" ]; then
             pip install -r requirements.txt;
           else
