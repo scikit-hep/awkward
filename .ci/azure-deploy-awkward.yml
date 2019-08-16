@@ -42,12 +42,12 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
           python -m pip install twine
-          docker pull $(DOCKER_IMAGE)
+#          docker pull $(DOCKER_IMAGE)
         displayName: "Install"
 
       - script: |
           python setup.py sdist
-          docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
+#          docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
         displayName: "Build"
 
       - script: |
