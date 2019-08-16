@@ -31,6 +31,7 @@ jobs:
         name: pypirc
         inputs:
           secureFile: pivarski-pypirc
+        displayName: "Credentials"
 
       - task: UsePythonVersion@0
         inputs:
@@ -41,11 +42,11 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
           python -m pip install twine
+          docker pull $(DOCKER_IMAGE)
         displayName: "Install"
 
       - script: |
           python setup.py sdist
-          docker pull $(DOCKER_IMAGE)
           docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
         displayName: "Build"
 
