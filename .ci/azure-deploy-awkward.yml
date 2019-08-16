@@ -62,6 +62,120 @@ jobs:
           twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
 
+  - job: MacOS 10.13
+
+    pool:
+      vmImage: "macOS-10.13"
+
+    strategy:
+      matrix:
+        "py27":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py34":
+          python.version: "3.4"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
+      - task: DownloadSecureFile@1
+        name: pypirc
+        inputs:
+          secureFile: pivarski-pypirc
+        displayName: "Credentials"
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
+
+      - script: |
+          python -m pip install --upgrade pip
+          python -m pip install twine wheel
+        displayName: "Install"
+
+      - script: |
+          python setup.py bdist_wheel
+        displayName: "Build"
+
+      - script: |
+          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+        displayName: "Deploy"
+
+  - job: MacOS 10.14
+
+    pool:
+      vmImage: "macOS-10.14"
+
+    strategy:
+      matrix:
+        "py27":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py34":
+          python.version: "3.4"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
+      - task: DownloadSecureFile@1
+        name: pypirc
+        inputs:
+          secureFile: pivarski-pypirc
+        displayName: "Credentials"
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
+
+      - script: |
+          python -m pip install --upgrade pip
+          python -m pip install twine wheel
+        displayName: "Install"
+
+      - script: |
+          python setup.py bdist_wheel
+        displayName: "Build"
+
+      - script: |
+          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+        displayName: "Deploy"
+
   - job: Windows
 
     pool:
@@ -98,63 +212,6 @@ jobs:
           python.architecture: "x86"
           numpy.version: "latest"
         "py37-64bit":
-          python.version: "3.7"
-          python.architecture: "x64"
-          numpy.version: "latest"
-
-    steps:
-      - checkout: self
-        submodules: recursive
-
-      - task: DownloadSecureFile@1
-        name: pypirc
-        inputs:
-          secureFile: pivarski-pypirc
-        displayName: "Credentials"
-
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '$(python.version)'
-          architecture: '$(python.architecture)'
-        displayName: 'Python $(python.version)'
-
-      - script: |
-          python -m pip install --upgrade pip
-          python -m pip install twine wheel
-        displayName: "Install"
-
-      - script: |
-          python setup.py bdist_wheel
-        displayName: "Build"
-
-      - script: |
-          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
-        displayName: "Deploy"
-
-  - job: MacOS
-
-    pool:
-      vmImage: "macOS-10.14"
-
-    strategy:
-      matrix:
-        "py27":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py34":
-          python.version: "3.4"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py35":
-          python.version: "3.5"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py36":
-          python.version: "3.6"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py37":
           python.version: "3.7"
           python.architecture: "x64"
           numpy.version: "latest"
