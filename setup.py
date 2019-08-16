@@ -55,11 +55,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
         for lib in os.listdir(extdir):
             if lib.endswith(".so") or lib.endswith(".dylib") or lib.endswith(".dll"):
+                print("copy/move", os.path.join(extdir, lib), "to awkward1 and", os.path.join(extdir, "awkward1"))
                 shutil.copy(os.path.join(extdir, lib), "awkward1")
                 shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
 
         if platform.system() == "Windows":
             for lib in os.listdir(os.path.join(self.build_temp, cfg)):
+                print("copy/move", os.path.join(os.path.join(self.build_temp, cfg), lib), "to awkward1 and", os.path.join(extdir, "awkward1"))
                 if lib.endswith(".dll"):
                     shutil.copy(os.path.join(os.path.join(self.build_temp, cfg), lib), "awkward1")
                     shutil.move(os.path.join(os.path.join(self.build_temp, cfg), lib), os.path.join(extdir, "awkward1"))
