@@ -54,7 +54,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
         for lib in os.listdir(extdir):
-            if lib != "awkward1":
+            if "layout" in lib or "kernels" in lib:
                 shutil.copy(os.path.join(extdir, lib), "awkward1")
                 shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
 
