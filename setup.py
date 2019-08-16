@@ -33,6 +33,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir, "-DPYTHON_EXECUTABLE=" + sys.executable]
+        build_args = []
 
         cfg = "Debug" if self.debug else "Release"
 
@@ -41,7 +42,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
                 cmake_args += ["-A", "x64"]
 
         else:
-            build_args = ["--config", cfg]
+            build_args += ["--config", cfg]
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
 
         if not os.path.exists(self.build_temp):
