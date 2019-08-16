@@ -14,7 +14,7 @@ include_directories(include)
 if (MSVC)
   set(PYBIND11_CPP_STANDARD /std:c++14)
 else()
-  set(PYBIND11_CPP_STANDARD -std=c++14)
+  set(PYBIND11_CPP_STANDARD -std=c++11)
 endif()
 add_subdirectory(pybind11)
 
