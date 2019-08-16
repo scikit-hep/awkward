@@ -53,5 +53,3 @@ jobs:
       - script: |
           twine upload dist/* --config-file $(pypirc.secureFilePath)
         displayName: "Deploy"
-
-# tmp
