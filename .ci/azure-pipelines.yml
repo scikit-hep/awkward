@@ -28,12 +28,18 @@ jobs:
       #     python -m pip install --upgrade pip
       #     pip install -r requirements.txt
       #     pip install -r test-requirements.txt
+      #     python -c "import numpy; print(numpy.__version__)"
       #   displayName: "Install"
 
       - script: |
-          python -c "import numpy; print(numpy.__version__)"
-          python setup.py build
-          pytest -vv tests
+          mkdir -p build/temp.win-amd64-3.7/Release
+          cd build/temp.win-amd64-3.7/Release
+          cmake --config Release -A x64 ..
+          cmake --build .
+          ctest --output-on-failure
+
+          # python setup.py build
+          # pytest -vv tests
         displayName: "Build and test"
 
           # mkdir build
