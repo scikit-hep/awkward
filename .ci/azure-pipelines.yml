@@ -4,7 +4,8 @@ trigger:
 jobs:
   - job: MacOS
 
-    vmImage: "macOS-10.14"
+    pool:
+      vmImage: "macOS-10.14"
 
     strategy:
       matrix:
