@@ -24,12 +24,12 @@ jobs:
           architecture: '$(python.architecture)'
         displayName: 'Python $(python.version)'
 
-      # - script: |
-      #     python -m pip install --upgrade pip
-      #     pip install -r requirements.txt
-      #     pip install -r test-requirements.txt
-      #     python -c "import numpy; print(numpy.__version__)"
-      #   displayName: "Install"
+      - script: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r test-requirements.txt
+          python -c "import numpy; print(numpy.__version__)"
+        displayName: "Install"
 
       - script: |
           python setup.py build
