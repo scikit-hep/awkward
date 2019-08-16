@@ -2,6 +2,38 @@ trigger:
   - master
 
 jobs:
+  - job: MacOS
+
+    vmImage: "macOS-10.14"
+
+    strategy:
+      matrix:
+        "py37":
+          python.version: "3.7"
+          numpy.version: "latest"
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
+
+      - script: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r test-requirements.txt
+          python -c "import numpy; print(numpy.__version__)"
+        displayName: "Install"
+
+      - script: |
+          python setup.py build
+          pytest -vv tests
+        displayName: "Build and test"
+        
   - job: Windows
 
     pool:
@@ -9,34 +41,34 @@ jobs:
 
     strategy:
       matrix:
-        "py27-32bit":
-          python.version: "2.7"
-          python.architecture: "x86"
-          numpy.version: "latest"
-        "py27-64bit":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py35-32bit":
-          python.version: "3.5"
-          python.architecture: "x86"
-          numpy.version: "latest"
-        "py35-64bit":
-          python.version: "3.5"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py36-32bit":
-          python.version: "3.6"
-          python.architecture: "x86"
-          numpy.version: "latest"
-        "py36-64bit":
-          python.version: "3.6"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py37-32bit":
-          python.version: "3.7"
-          python.architecture: "x86"
-          numpy.version: "latest"
+        # "py27-32bit":
+        #   python.version: "2.7"
+        #   python.architecture: "x86"
+        #   numpy.version: "latest"
+        # "py27-64bit":
+        #   python.version: "2.7"
+        #   python.architecture: "x64"
+        #   numpy.version: "latest"
+        # "py35-32bit":
+        #   python.version: "3.5"
+        #   python.architecture: "x86"
+        #   numpy.version: "latest"
+        # "py35-64bit":
+        #   python.version: "3.5"
+        #   python.architecture: "x64"
+        #   numpy.version: "latest"
+        # "py36-32bit":
+        #   python.version: "3.6"
+        #   python.architecture: "x86"
+        #   numpy.version: "latest"
+        # "py36-64bit":
+        #   python.version: "3.6"
+        #   python.architecture: "x64"
+        #   numpy.version: "latest"
+        # "py37-32bit":
+        #   python.version: "3.7"
+        #   python.architecture: "x86"
+        #   numpy.version: "latest"
         "py37-64bit":
           python.version: "3.7"
           python.architecture: "x64"
@@ -71,21 +103,21 @@ jobs:
 
     strategy:
       matrix:
-        "py27-np13":
-          python.version: "2.7"
-          numpy.version: "1.13.1"
-        "py27-np*":
-          python.version: "2.7"
-          numpy.version: "latest"
-        "py35-np13":
-          python.version: "3.5"
-          numpy.version: "1.13.1"
-        "py35-np*":
-          python.version: "3.5"
-          numpy.version: "latest"
-        "py36-np*":
-          python.version: "3.6"
-          numpy.version: "latest"
+        # "py27-np13":
+        #   python.version: "2.7"
+        #   numpy.version: "1.13.1"
+        # "py27-np*":
+        #   python.version: "2.7"
+        #   numpy.version: "latest"
+        # "py35-np13":
+        #   python.version: "3.5"
+        #   numpy.version: "1.13.1"
+        # "py35-np*":
+        #   python.version: "3.5"
+        #   numpy.version: "latest"
+        # "py36-np*":
+        #   python.version: "3.6"
+        #   numpy.version: "latest"
         "py37-np*":
           python.version: "3.7"
           numpy.version: "latest"
