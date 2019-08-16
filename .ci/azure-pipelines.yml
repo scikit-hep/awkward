@@ -9,6 +9,18 @@ jobs:
 
     strategy:
       matrix:
+        "py27":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
         "py37":
           python.version: "3.7"
           python.architecture: "x64"
@@ -43,34 +55,34 @@ jobs:
 
     strategy:
       matrix:
-        # "py27-32bit":
-        #   python.version: "2.7"
-        #   python.architecture: "x86"
-        #   numpy.version: "latest"
-        # "py27-64bit":
-        #   python.version: "2.7"
-        #   python.architecture: "x64"
-        #   numpy.version: "latest"
-        # "py35-32bit":
-        #   python.version: "3.5"
-        #   python.architecture: "x86"
-        #   numpy.version: "latest"
-        # "py35-64bit":
-        #   python.version: "3.5"
-        #   python.architecture: "x64"
-        #   numpy.version: "latest"
-        # "py36-32bit":
-        #   python.version: "3.6"
-        #   python.architecture: "x86"
-        #   numpy.version: "latest"
-        # "py36-64bit":
-        #   python.version: "3.6"
-        #   python.architecture: "x64"
-        #   numpy.version: "latest"
-        # "py37-32bit":
-        #   python.version: "3.7"
-        #   python.architecture: "x86"
-        #   numpy.version: "latest"
+        "py27-32bit":
+          python.version: "2.7"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py27-64bit":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35-32bit":
+          python.version: "3.5"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py35-64bit":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36-32bit":
+          python.version: "3.6"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py36-64bit":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37-32bit":
+          python.version: "3.7"
+          python.architecture: "x86"
+          numpy.version: "latest"
         "py37-64bit":
           python.version: "3.7"
           python.architecture: "x64"
@@ -105,26 +117,34 @@ jobs:
 
     strategy:
       matrix:
-        # "py27-np13":
-        #   python.version: "2.7"
-        #   python.architecture: "x64"
-        #   numpy.version: "1.13.1"
-        # "py27-np*":
-        #   python.version: "2.7"
-        #   python.architecture: "x64"
-        #   numpy.version: "latest"
-        # "py35-np13":
-        #   python.version: "3.5"
-        #   python.architecture: "x64"
-        #   numpy.version: "1.13.1"
-        # "py35-np*":
-        #   python.version: "3.5"
-        #   python.architecture: "x64"
-        #   numpy.version: "latest"
-        # "py36-np*":
-        #   python.version: "3.6"
-        #   python.architecture: "x64"
-        #   numpy.version: "latest"
+        "py27-np13":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
+        "py27-np*":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35-np13":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
+        "py35-np*":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36-np14":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "1.14.5"
+        "py36-np*":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37-np14":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "1.14.5"
         "py37-np*":
           python.version: "3.7"
           python.architecture: "x64"
