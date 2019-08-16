@@ -8,9 +8,8 @@ __version__ = awkward1.layout.__version__
 
 if platform.system() == "Windows":
     lib1 = ctypes.cdll.LoadLibrary(os.path.join(os.path.dirname(os.path.abspath(__file__)), "awkward-cpu-kernels.dll"))
-    dummy1 = lambda x: x**2
 else:
     lib1 = ctypes.cdll.LoadLibrary(os.path.join(os.path.dirname(os.path.abspath(__file__)), "libawkward-cpu-kernels.so"))
-    dummy1 = lib1.dummy1
 
+dummy1 = lib1.dummy1
 dummy3 = layout.dummy3
