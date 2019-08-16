@@ -11,6 +11,7 @@ jobs:
       matrix:
         "py37":
           python.version: "3.7"
+          python.architecture: "x86"
           numpy.version: "latest"
 
     steps:
@@ -106,21 +107,27 @@ jobs:
       matrix:
         # "py27-np13":
         #   python.version: "2.7"
+        #   python.architecture: "x86"
         #   numpy.version: "1.13.1"
         # "py27-np*":
         #   python.version: "2.7"
+        #   python.architecture: "x86"
         #   numpy.version: "latest"
         # "py35-np13":
         #   python.version: "3.5"
+        #   python.architecture: "x86"
         #   numpy.version: "1.13.1"
         # "py35-np*":
         #   python.version: "3.5"
+        #   python.architecture: "x86"
         #   numpy.version: "latest"
         # "py36-np*":
         #   python.version: "3.6"
+        #   python.architecture: "x86"
         #   numpy.version: "latest"
         "py37-np*":
           python.version: "3.7"
+          python.architecture: "x86"
           numpy.version: "latest"
 
     steps:
