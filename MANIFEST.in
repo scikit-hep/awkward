@@ -1,0 +1,9 @@
+include requirements.txt test-requirements.txt VERSION_INFO CMakeLists.txt LICENSE README.md
+recursive-include include *.h
+recursive-include src *.cpp
+recursive-include awkward1 *.py
+recursive-include tests *.cpp *.py
+
+recursive-include pybind11/include/pybind11 *
+recursive-include pybind11/tools *
+include pybind11/CMakeLists.txt pybind11/LICENSE pybind11/README.md pybind11/CONTRIBUTING.md
