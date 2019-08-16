@@ -19,6 +19,12 @@ jobs:
 
     strategy:
       matrix:
+        manylinux1_i686:
+          DOCKER_IMAGE: quay.io/pypa/manylinux1_i686
+          PLAT: manylinux1_i686
+        manylinux1_x86_64:
+          DOCKER_IMAGE: quay.io/pypa/manylinux1_x86_64
+          PLAT: manylinux1_x86_64
         manylinux2010:
           DOCKER_IMAGE: quay.io/pypa/manylinux2010_x86_64
           PLAT: manylinux2010_x86_64
