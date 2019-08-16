@@ -41,7 +41,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir), "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE"]
             if sys.maxsize > 2**32:
                 cmake_args += ["-A", "x64"]
-            build_args += ['--', '/m']
+            build_args += ["--", "/m"]
 
         else:
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
@@ -57,6 +57,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             if "layout" in lib or "kernels" in lib:
                 shutil.copy(os.path.join(extdir, lib), "awkward1")
                 shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
+
         if platform.system() == "Windows":
             for lib in os.listdir(os.path.join(self.build_temp, cfg)):
                 if lib.endswith("kernels.dll"):

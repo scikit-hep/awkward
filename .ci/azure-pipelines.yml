@@ -33,11 +33,6 @@ jobs:
 
       - script: |
           python setup.py build
-          echo HEY HEY HEY HEY HEY HEY HEY HEY
-          cd awkward1
-          objdump -p awkward-cpu-kernels.dll
-          cd ..
-          echo YOU YOU YOU YOU YOU YOU YOU YOU
           pytest -vv tests
         displayName: "Build and test"
 
@@ -48,27 +43,27 @@ jobs:
 
     strategy:
       matrix:
-        # "py27-np13":
-        #   python.version: "2.7"
-        #   numpy.version: "1.13.1"
-        # "py27-np*":
-        #   python.version: "2.7"
-        #   numpy.version: "latest"
-        # "py35-np13":
-        #   python.version: "3.5"
-        #   numpy.version: "1.13.1"
-        # "py35-np*":
-        #   python.version: "3.5"
-        #   numpy.version: "latest"
-        # "py36-np*":
-        #   python.version: "3.6"
-        #   numpy.version: "latest"
+        "py27-np13":
+          python.version: "2.7"
+          numpy.version: "1.13.1"
+        "py27-np*":
+          python.version: "2.7"
+          numpy.version: "latest"
+        "py35-np13":
+          python.version: "3.5"
+          numpy.version: "1.13.1"
+        "py35-np*":
+          python.version: "3.5"
+          numpy.version: "latest"
+        "py36-np*":
+          python.version: "3.6"
+          numpy.version: "latest"
         "py37-np*":
           python.version: "3.7"
           numpy.version: "latest"
-        # "py38-np*":
-        #   python.version: "3.8"
-        #   numpy.version: "latest"
+        "py38-np*":
+          python.version: "3.8"
+          numpy.version: "latest"
 
     steps:
       - checkout: self
