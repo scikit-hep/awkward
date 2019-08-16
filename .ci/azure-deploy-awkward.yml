@@ -1,15 +1,15 @@
-trigger:
-  branches:
-    exclude:
-      - "*"
-  tags:
-    include:
-      - "*.*.*"
+# trigger:
+#   branches:
+#     exclude:
+#       - "*"
+#   tags:
+#     include:
+#       - "*.*.*"
 
-pr:
-  branches:
-    exclude:
-      - "*"
+# pr:
+#   branches:
+#     exclude:
+#       - "*"
 
 jobs:
   - job: ManyLinux
@@ -17,7 +17,18 @@ jobs:
     pool:
       vmImage: "ubuntu-16.04"
 
+    strategy:
+      matrix:
+        manylinux2010:
+          DOCKER_IMAGE: quay.io/pypa/manylinux2010_x86_64
+          PLAT: manylinux2010_x86_64
+
+
     steps:
       - checkout: self
         submodules: recursive
 
+      - script: |
+          docker pull $(DOCKER_IMAGE)
+          docker run -rm -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
+          ls wheelhouse/
