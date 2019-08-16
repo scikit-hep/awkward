@@ -37,6 +37,14 @@ jobs:
           python.version: "2.7"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py34-32bit":
+          python.version: "3.4"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py34-64bit":
+          python.version: "3.4"
+          python.architecture: "x64"
+          numpy.version: "latest"
         "py35-32bit":
           python.version: "3.5"
           python.architecture: "x86"
@@ -95,6 +103,10 @@ jobs:
           python.version: "2.7"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py34":
+          python.version: "3.4"
+          python.architecture: "x64"
+          numpy.version: "latest"
         "py35":
           python.version: "3.5"
           python.architecture: "x64"
@@ -143,6 +155,14 @@ jobs:
           numpy.version: "1.13.1"
         "py27-np*":
           python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py34-np13":
+          python.version: "3.4"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
+        "py34-np*":
+          python.version: "3.4"
           python.architecture: "x64"
           numpy.version: "latest"
         "py35-np13":
