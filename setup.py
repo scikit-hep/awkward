@@ -47,20 +47,18 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
 
-        print("cmake_args", cmake_args)
-        print("build_args", build_args)
-
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
-        print("cmake is done")
-        subprocess.check_call(["ls", "-R"], cwd=self.build_temp)
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
-        print("build is done")
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
-        print("test is done")
+        print("extdir", extdir)
         for lib in os.listdir(extdir):
+            print("    " + lib)
             if "layout" in lib or "kernels" in lib:
                 shutil.copy(os.path.join(extdir, lib), "awkward1")
                 shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
+        print("moved")
+        subprocess.check_call(["pwd"], cwd=ext.sourcedir)
+        subprocess.check_call(["ls", "awkward1"], cwd=ext.sourcedir)
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(exclude=["tests"]),
