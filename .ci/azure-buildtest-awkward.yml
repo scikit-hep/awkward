@@ -1,5 +1,24 @@
 trigger:
-  - master
+  batch: true
+  branches:
+    include:
+      - "*"
+  paths:
+    exclude:
+      - README.md
+      - VERSION_INFO
+      - docs/*
+
+pr:
+  autoCancel: true
+  branches:
+    include:
+      - "*"
+  paths:
+    exclude:
+      - README.md
+      - VERSION_INFO
+      - docs/*
 
 jobs:
   - job: Windows
