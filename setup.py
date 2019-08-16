@@ -54,16 +54,12 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
 
         for lib in os.listdir(extdir):
-            print("MAYBE1", lib)
             if lib.endswith(".so") or lib.endswith(".dylib") or lib.endswith(".dll") or lib.endswith(".pyd"):
-                print("copy/move", os.path.join(extdir, lib), "to awkward1 and", os.path.join(extdir, "awkward1"))
                 shutil.copy(os.path.join(extdir, lib), "awkward1")
                 shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
 
         if platform.system() == "Windows":
-            print("MAYBE2", lib)
             for lib in os.listdir(os.path.join(self.build_temp, cfg)):
-                print("copy/move", os.path.join(os.path.join(self.build_temp, cfg), lib), "to awkward1 and", os.path.join(extdir, "awkward1"))
                 if lib.endswith(".dll") or lib.endswith(".pyd"):
                     shutil.copy(os.path.join(os.path.join(self.build_temp, cfg), lib), "awkward1")
                     shutil.move(os.path.join(os.path.join(self.build_temp, cfg), lib), os.path.join(extdir, "awkward1"))
