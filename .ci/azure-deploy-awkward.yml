@@ -31,4 +31,4 @@ jobs:
       - script: |
           docker pull $(DOCKER_IMAGE)
           docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
-          ls wheelhouse/
+          ls -l dist/
