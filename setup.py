@@ -53,7 +53,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
 
-        print("build_temp\\Release", os.join(self.build_temp, cfg), os.listdir(os.join(self.build_temp, cfg)))
+        print("build_temp\\Release", os.path.join(self.build_temp, cfg), os.listdir(os.path.join(self.build_temp, cfg)))
         print("extdir", extdir, os.listdir(extdir))
 
         for lib in os.listdir(extdir):
@@ -61,10 +61,10 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
                 shutil.copy(os.path.join(extdir, lib), "awkward1")
                 shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
         if platform.system() == "Windows":
-            for lib in os.listdir(os.join(self.build_temp, cfg)):
+            for lib in os.listdir(os.path.join(self.build_temp, cfg)):
                 if lib.endswith("kernels.dll"):
-                    shutil.copy(os.path.join(os.join(self.build_temp, cfg), lib), "awkward1")
-                    shutil.move(os.path.join(os.join(self.build_temp, cfg), lib), os.path.join(extdir, "awkward1"))
+                    shutil.copy(os.path.join(os.path.join(self.build_temp, cfg), lib), "awkward1")
+                    shutil.move(os.path.join(os.path.join(self.build_temp, cfg), lib), os.path.join(extdir, "awkward1"))
 
         print("pwd")
         subprocess.check_call(["pwd"], cwd=ext.sourcedir)
