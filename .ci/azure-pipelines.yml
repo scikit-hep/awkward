@@ -34,8 +34,8 @@ jobs:
       - script: |
           mkdir HERE
           cd HERE
-          cmake --config Release -A x64 ..
-          cmake --build .
+          cmake -A x64 ..
+          cmake --config Release --build .
           ctest --output-on-failure
 
       #     python setup.py build
