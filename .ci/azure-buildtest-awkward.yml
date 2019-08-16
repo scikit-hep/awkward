@@ -8,6 +8,7 @@ trigger:
       - README.md
       - VERSION_INFO
       - .ci/azure-deploy-awkward.yml
+      - .ci/linux-build.sh
       - docs/*
 
 pr:
