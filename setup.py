@@ -38,9 +38,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         build_args = ["--config", cfg]
 
         if platform.system() == "Windows":
-            # cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir)]
-
-            cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
+            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir)]
 
             if sys.maxsize > 2**32:
                 cmake_args += ["-A", "x64"]
@@ -56,6 +54,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
         print("cmake is done")
+        subprocess.check_call(["ls", "-R"], cwd=self.build_temp)
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
         print("build is done")
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
