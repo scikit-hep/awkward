@@ -1,5 +1,6 @@
 #!/bin/bash
 
+mkdir /io/wheelhouse
 cd /io/awkward-1.0/
 
 for PYBIN in /opt/python/*/bin; do
