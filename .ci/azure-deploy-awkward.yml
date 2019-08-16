@@ -5,15 +5,19 @@ trigger:
   tags:
     include:
       - "*.*.*"
-    
-pool:
-  vmImage: 'ubuntu-latest'
 
-steps:
-  - script: echo Hello, world!
-    displayName: 'Run a one-line script'
+pr:
+  branches:
+    exclude:
+      - "*"
 
-  - script: |
-      echo Add other tasks to build, test, and deploy your project.
-      echo See https://aka.ms/yaml
-    displayName: 'Run a multi-line script'
+jobs:
+  - job: ManyLinux
+
+    pool:
+      vmImage: "ubuntu-16.04"
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
