@@ -52,10 +52,12 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python setup.py sdist
+          if [[ $PLAT = "manylinux2010_x86_64" ]]; then
+            python setup.py sdist
+          fi
           docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
         displayName: "Build"
 
       - script: |
-          twine upload dist/* --config-file $(pypirc.secureFilePath)
+          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
