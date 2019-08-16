@@ -12,6 +12,56 @@ pr:
       - "*"
 
 jobs:
+  - job: Linux
+
+    pool:
+      vmImage: "ubuntu-16.04"
+
+    strategy:
+      matrix:
+        manylinux1_i686:
+          DOCKER_IMAGE: quay.io/pypa/manylinux1_i686
+          PLAT: manylinux1_i686
+        manylinux1_x86_64:
+          DOCKER_IMAGE: quay.io/pypa/manylinux1_x86_64
+          PLAT: manylinux1_x86_64
+        manylinux2010:
+          DOCKER_IMAGE: quay.io/pypa/manylinux2010_x86_64
+          PLAT: manylinux2010_x86_64
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
+      - task: DownloadSecureFile@1
+        name: pypirc
+        inputs:
+          secureFile: pivarski-pypirc
+        displayName: "Credentials"
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+          architecture: "x64"
+        displayName: "Python 3.7 for twine"
+
+      - script: |
+          python -m pip install --upgrade pip
+          python -m pip install twine
+          docker pull $(DOCKER_IMAGE)
+        displayName: "Install"
+
+      - script: |
+          if [[ $PLAT = "manylinux2010_x86_64" ]]; then
+            python setup.py sdist
+          fi
+          docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
+        displayName: "Build"
+
+      - script: |
+          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+        displayName: "Deploy"
+
   - job: Windows
 
     pool:
@@ -19,6 +69,34 @@ jobs:
 
     strategy:
       matrix:
+        "py27-32bit":
+          python.version: "2.7"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py27-64bit":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35-32bit":
+          python.version: "3.5"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py35-64bit":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36-32bit":
+          python.version: "3.6"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py36-64bit":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37-32bit":
+          python.version: "3.7"
+          python.architecture: "x86"
+          numpy.version: "latest"
         "py37-64bit":
           python.version: "3.7"
           python.architecture: "x64"
@@ -60,7 +138,23 @@ jobs:
 
     strategy:
       matrix:
-        "py37-64bit":
+        "py27":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py34":
+          python.version: "3.4"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37":
           python.version: "3.7"
           python.architecture: "x64"
           numpy.version: "latest"
@@ -88,56 +182,6 @@ jobs:
 
       - script: |
           python setup.py bdist_wheel
-        displayName: "Build"
-
-      - script: |
-          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
-        displayName: "Deploy"
-
-  - job: ManyLinux
-
-    pool:
-      vmImage: "ubuntu-16.04"
-
-    strategy:
-      matrix:
-        manylinux1_i686:
-          DOCKER_IMAGE: quay.io/pypa/manylinux1_i686
-          PLAT: manylinux1_i686
-        manylinux1_x86_64:
-          DOCKER_IMAGE: quay.io/pypa/manylinux1_x86_64
-          PLAT: manylinux1_x86_64
-        manylinux2010:
-          DOCKER_IMAGE: quay.io/pypa/manylinux2010_x86_64
-          PLAT: manylinux2010_x86_64
-
-    steps:
-      - checkout: self
-        submodules: recursive
-
-      - task: DownloadSecureFile@1
-        name: pypirc
-        inputs:
-          secureFile: pivarski-pypirc
-        displayName: "Credentials"
-
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: "3.7"
-          architecture: "x64"
-        displayName: "Python 3.7 for twine"
-
-      - script: |
-          python -m pip install --upgrade pip
-          python -m pip install twine
-#          docker pull $(DOCKER_IMAGE)
-        displayName: "Install"
-
-      - script: |
-          if [[ $PLAT = "manylinux2010_x86_64" ]]; then
-            python setup.py sdist
-          fi
-#          docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
         displayName: "Build"
 
       - script: |
