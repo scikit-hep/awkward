@@ -35,7 +35,7 @@ jobs:
           python setup.py build
           echo HEY HEY HEY HEY HEY HEY HEY HEY
           cd awkward1
-          DUMPBIN -EXPORTS awkward-cpu-kernels.dll
+          objdump -p awkward-cpu-kernels.dll
           cd ..
           echo YOU YOU YOU YOU YOU YOU YOU YOU
           pytest -vv tests
