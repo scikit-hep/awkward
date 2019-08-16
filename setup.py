@@ -38,21 +38,28 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         build_args = ["--config", cfg]
 
         if platform.system() == "Windows":
-            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir)]
+            # cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir)]
+
+            cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
+
             if sys.maxsize > 2**32:
                 cmake_args += ["-A", "x64"]
-            build_args += ["--", "/m"]
 
         else:
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
-            # build_args += ["--", "-j8"]
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
 
+        print("cmake_args", cmake_args)
+        print("build_args", build_args)
+
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
+        print("cmake is done")
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
+        print("build is done")
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
+        print("test is done")
         for lib in os.listdir(extdir):
             if "layout" in lib or "kernels" in lib:
                 shutil.copy(os.path.join(extdir, lib), "awkward1")
