@@ -35,15 +35,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         cmake_args = ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir, "-DPYTHON_EXECUTABLE=" + sys.executable]
 
         cfg = "Debug" if self.debug else "Release"
-        build_args = ["--config", cfg]
 
         if platform.system() == "Windows":
-            # cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir)]
-
             if sys.maxsize > 2**32:
                 cmake_args += ["-A", "x64"]
 
         else:
+            build_args = ["--config", cfg]
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
 
         if not os.path.exists(self.build_temp):
