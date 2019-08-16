@@ -62,7 +62,7 @@ jobs:
           twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
 
-  - job: MacOS 10.13
+  - job: MacOS-13
 
     pool:
       vmImage: "macOS-10.13"
@@ -119,7 +119,7 @@ jobs:
           twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
 
-  - job: MacOS 10.14
+  - job: MacOS-14
 
     pool:
       vmImage: "macOS-10.14"
