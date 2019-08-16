@@ -23,12 +23,17 @@ jobs:
           DOCKER_IMAGE: quay.io/pypa/manylinux2010_x86_64
           PLAT: manylinux2010_x86_64
 
-
     steps:
       - checkout: self
         submodules: recursive
 
+      - task: DownloadSecureFile@1
+        name: pypirc
+        inputs:
+          secureFile: pivarski-pypirc
+
       - script: |
+          python setup.py sdist
           docker pull $(DOCKER_IMAGE)
           docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
-          ls -l dist/
+          twine upload dist/* --config $(pypirc.secureFilePath)
