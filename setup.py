@@ -53,9 +53,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
 
-        print("build_temp\\Release", os.path.join(self.build_temp, cfg), os.listdir(os.path.join(self.build_temp, cfg)))
-        print("extdir", extdir, os.listdir(extdir))
-
         for lib in os.listdir(extdir):
             if "layout" in lib or "kernels" in lib:
                 shutil.copy(os.path.join(extdir, lib), "awkward1")
@@ -65,11 +62,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
                 if lib.endswith("kernels.dll"):
                     shutil.copy(os.path.join(os.path.join(self.build_temp, cfg), lib), "awkward1")
                     shutil.move(os.path.join(os.path.join(self.build_temp, cfg), lib), os.path.join(extdir, "awkward1"))
-
-        print("pwd")
-        subprocess.check_call(["pwd"], cwd=ext.sourcedir)
-        print("ls awkward1")
-        subprocess.check_call(["ls", "awkward1"], cwd=ext.sourcedir)
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(exclude=["tests"]),

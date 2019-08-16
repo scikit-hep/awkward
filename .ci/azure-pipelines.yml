@@ -33,6 +33,8 @@ jobs:
 
       - script: |
           python setup.py build
+          echo "okay"
+          ls awkward1
           pytest -vv tests
         displayName: "Build and test"
 
