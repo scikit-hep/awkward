@@ -24,8 +24,8 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
         if platform.system() == "Windows":
             cmake_version = distutils.version.LooseVersion(re.search(r"version\s*([\d.]+)", out.decode()).group(1))
-            if cmake_version < "3.1.0":
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
+            if cmake_version < "3.4":
+                raise RuntimeError("CMake >= 3.4 is required on Windows")
 
         for x in self.extensions:
             self.build_extension(x)
@@ -38,7 +38,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         build_args = ["--config", cfg]
 
         if platform.system() == "Windows":
-            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir)]
+            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir), "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE"]
             if sys.maxsize > 2**32:
                 cmake_args += ["-A", "x64"]
             build_args += ['--', '/m']
