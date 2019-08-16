@@ -34,7 +34,7 @@ jobs:
 
       - script: |
           python -m pip install --upgrade pip
-          python -m pip install -y twine
+          python -m pip install twine
         displayName: "Install"
 
       - script: |
