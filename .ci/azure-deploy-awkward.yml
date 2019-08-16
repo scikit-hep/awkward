@@ -42,7 +42,7 @@ jobs:
 
       - script: |
           python -m pip install --upgrade pip
-          python -m pip install twine
+          python -m pip install twine wheel
         displayName: "Install"
 
       - script: |
