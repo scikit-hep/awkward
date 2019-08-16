@@ -1,8 +1,10 @@
 trigger:
-  branches: none
+  branches:
+    exclude:
+      - "*"
   tags:
     include:
-      - *.*.*
+      - "*.*.*"
     
 pool:
   vmImage: 'ubuntu-latest'
