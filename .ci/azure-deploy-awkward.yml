@@ -5,6 +5,7 @@
 #   tags:
 #     include:
 #       - "*.*.*"
+
 # pr:
 #   branches:
 #     exclude:
@@ -32,7 +33,16 @@ jobs:
           secureFile: pivarski-pypirc
 
       - script: |
+          pip install --upgrade pip
+          pip install -y twine
+        displayName: "Install"
+
+      - script: |
           python setup.py sdist
           docker pull $(DOCKER_IMAGE)
           docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
+        displayName: "Build"
+
+      - script: |
           twine upload dist/* --config $(pypirc.secureFilePath)
+        displayName: "Deploy"
