@@ -32,6 +32,12 @@ jobs:
         inputs:
           secureFile: pivarski-pypirc
 
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+          architecture: "x64"
+        displayName: "Python 3.7 for twine"
+
       - script: |
           python -m pip install --upgrade pip
           python -m pip install twine
