@@ -40,9 +40,11 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         if platform.system() == "Windows":
             if sys.maxsize > 2**32:
                 cmake_args += ["-A", "x64"]
+            resultdir = os.path.join(os.path.join(extdir, cfg), cfg)
 
         else:
             cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir, "-DCMAKE_BUILD_TYPE=" + cfg]
+            resultdir = extdir
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
@@ -50,12 +52,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
-        print("extdir", extdir)
-        for lib in os.listdir(extdir):
+
+        print("resultdir", resultdir)
+        for lib in os.listdir(resultdir):
             print("    " + lib)
             if "layout" in lib or "kernels" in lib:
-                shutil.copy(os.path.join(extdir, lib), "awkward1")
-                shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
+                shutil.copy(os.path.join(resultdir, lib), "awkward1")
+                shutil.move(os.path.join(resultdir, lib), os.path.join(resultdir, "awkward1"))
         print("moved")
         subprocess.check_call(["pwd"], cwd=ext.sourcedir)
         subprocess.check_call(["ls", "awkward1"], cwd=ext.sourcedir)
