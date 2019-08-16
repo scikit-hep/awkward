@@ -74,9 +74,9 @@ jobs:
         displayName: 'Python $(python.version)'
 
       - script: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r test-requirements.txt
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -r test-requirements.txt
           python -c "import numpy; print(numpy.__version__)"
         displayName: "Install"
 
@@ -125,8 +125,8 @@ jobs:
 
       - script: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r test-requirements.txt
+          python -m pip install -r requirements.txt
+          python -m pip install -r test-requirements.txt
           python -c "import numpy; print(numpy.__version__)"
         displayName: "Install"
 
@@ -196,12 +196,12 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
           if [ $(numpy.version) = "latest" ]; then
-            pip install -r requirements.txt;
+            python -m pip install -r requirements.txt;
           else
             sed 's/numpy>=1.13.1/numpy==$(numpy.version)/' requirements.txt > requirements2.txt;
-            pip install -r requirements2.txt;
+            python -m pip install -r requirements2.txt;
           fi
-          pip install -r test-requirements.txt
+          python -m pip install -r test-requirements.txt
           python -c "import numpy; print(numpy.__version__)"
         displayName: "Install"
 

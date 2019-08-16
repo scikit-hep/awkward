@@ -33,8 +33,8 @@ jobs:
           secureFile: pivarski-pypirc
 
       - script: |
-          pip install --upgrade pip
-          pip install -y twine
+          python -m pip install --upgrade pip
+          python -m pip install -y twine
         displayName: "Install"
 
       - script: |
