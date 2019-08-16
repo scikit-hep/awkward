@@ -5,6 +5,8 @@ file(READ "VERSION_INFO" VERSION_INFO)
 string(STRIP ${VERSION_INFO} VERSION_INFO)
 add_definitions(-DVERSION_INFO="${VERSION_INFO}")
 
+set(CMAKE_MACOSX_RPATH 0)
+
 file(GLOB CPU_KERNEL_SOURCES "src/cpu-kernels/*.cpp")
 file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp")
 include_directories(include)
