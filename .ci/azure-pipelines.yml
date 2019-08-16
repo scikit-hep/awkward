@@ -32,21 +32,15 @@ jobs:
       #   displayName: "Install"
 
       - script: |
-          mkdir -p build/temp.win-amd64-3.7/Release
-          cd build/temp.win-amd64-3.7/Release
+          mkdir HERE
+          cd HERE
           cmake --config Release -A x64 ..
           cmake --build .
           ctest --output-on-failure
 
-          # python setup.py build
-          # pytest -vv tests
+      #     python setup.py build
+      #     pytest -vv tests
         displayName: "Build and test"
-
-          # mkdir build
-          # cd build
-          # cmake -A x64 ..
-          # cmake --build .
-          # ctest --output-on-failure
 
   - job: linux
 
