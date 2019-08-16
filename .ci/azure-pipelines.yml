@@ -33,8 +33,6 @@ jobs:
 
       - script: |
           python setup.py build
-          echo "and now"
-          pwd
           pytest -vv tests
         displayName: "Build and test"
 
