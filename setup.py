@@ -32,19 +32,19 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-        cmake_args = ["-DPYTHON_EXECUTABLE=" + sys.executable]
+        cmake_args = ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir, "-DPYTHON_EXECUTABLE=" + sys.executable]
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
 
         if platform.system() == "Windows":
+            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir)]
             if sys.maxsize > 2**32:
                 cmake_args += ["-A", "x64"]
-            resultdir = os.path.join(os.path.join(extdir, cfg), cfg)
+            build_args += ['--', '/m']
 
         else:
-            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir, "-DCMAKE_BUILD_TYPE=" + cfg]
-            resultdir = extdir
+            cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
@@ -53,12 +53,12 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
 
-        print("resultdir", resultdir)
-        for lib in os.listdir(resultdir):
+        print("extdir", extdir)
+        for lib in os.listdir(extdir):
             print("    " + lib)
             if "layout" in lib or "kernels" in lib:
-                shutil.copy(os.path.join(resultdir, lib), "awkward1")
-                shutil.move(os.path.join(resultdir, lib), os.path.join(resultdir, "awkward1"))
+                shutil.copy(os.path.join(extdir, lib), "awkward1")
+                shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
         print("moved")
         subprocess.check_call(["pwd"], cwd=ext.sourcedir)
         subprocess.check_call(["ls", "awkward1"], cwd=ext.sourcedir)
