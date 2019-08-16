@@ -32,15 +32,15 @@ jobs:
       #   displayName: "Install"
 
       - script: |
-          mkdir HERE
-          cd HERE
-          cmake -A x64 ..
-          cmake --build . --config Release
-          ctest --output-on-failure
-
-      #     python setup.py build
-      #     pytest -vv tests
+          python setup.py build
+          pytest -vv tests
         displayName: "Build and test"
+
+          # mkdir HERE
+          # cd HERE
+          # cmake -A x64 ..
+          # cmake --build . --config Release
+          # ctest --output-on-failure
 
   - job: linux
 
