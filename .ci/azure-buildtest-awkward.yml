@@ -1,5 +1,26 @@
 trigger:
-  - master
+  batch: true
+  branches:
+    include:
+      - "*"
+  paths:
+    exclude:
+      - README.md
+      - VERSION_INFO
+      - .ci/azure-deploy-awkward.yml
+      - .ci/linux-build.sh
+      - docs/*
+
+pr:
+  autoCancel: true
+  branches:
+    include:
+      - "*"
+  paths:
+    exclude:
+      - README.md
+      - VERSION_INFO
+      - docs/*
 
 jobs:
   - job: Windows
@@ -54,8 +75,8 @@ jobs:
 
       - script: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r test-requirements.txt
+          python -m pip install -r requirements.txt
+          python -m pip install -r test-requirements.txt
           python -c "import numpy; print(numpy.__version__)"
         displayName: "Install"
 
@@ -64,30 +85,32 @@ jobs:
           pytest -vv tests
         displayName: "Build and test"
 
-  - job: Linux
+  - job: MacOS
 
     pool:
-      vmImage: "ubuntu-16.04"
+      vmImage: "macOS-10.14"
 
     strategy:
       matrix:
-        "py27-np13":
+        "py27":
           python.version: "2.7"
-          numpy.version: "1.13.1"
-        "py27-np*":
-          python.version: "2.7"
+          python.architecture: "x64"
           numpy.version: "latest"
-        "py35-np13":
-          python.version: "3.5"
-          numpy.version: "1.13.1"
-        "py35-np*":
-          python.version: "3.5"
+        "py34":
+          python.version: "3.4"
+          python.architecture: "x64"
           numpy.version: "latest"
-        "py36-np*":
+        "py35":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36":
           python.version: "3.6"
+          python.architecture: "x64"
           numpy.version: "latest"
-        "py37-np*":
+        "py37":
           python.version: "3.7"
+          python.architecture: "x64"
           numpy.version: "latest"
 
     steps:
@@ -97,17 +120,88 @@ jobs:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
+
+      - script: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -r test-requirements.txt
+          python -c "import numpy; print(numpy.__version__)"
+        displayName: "Install"
+
+      - script: |
+          python setup.py build
+          pytest -vv tests
+        displayName: "Build and test"
+        
+  - job: Linux
+
+    pool:
+      vmImage: "ubuntu-16.04"
+
+    strategy:
+      matrix:
+        "py27-np13":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
+        "py27-np*":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py34-np13":
+          python.version: "3.4"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
+        "py34-np*":
+          python.version: "3.4"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35-np13":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
+        "py35-np*":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36-np14":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "1.14.5"
+        "py36-np*":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37-np14":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "1.14.5"
+        "py37-np*":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
         displayName: 'Python $(python.version)'
 
       - script: |
           python -m pip install --upgrade pip
           if [ $(numpy.version) = "latest" ]; then
-            pip install -r requirements.txt;
+            python -m pip install -r requirements.txt;
           else
             sed 's/numpy>=1.13.1/numpy==$(numpy.version)/' requirements.txt > requirements2.txt;
-            pip install -r requirements2.txt;
+            python -m pip install -r requirements2.txt;
           fi
-          pip install -r test-requirements.txt
+          python -m pip install -r test-requirements.txt
           python -c "import numpy; print(numpy.__version__)"
         displayName: "Install"
 

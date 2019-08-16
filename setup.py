@@ -54,13 +54,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
 
         for lib in os.listdir(extdir):
-            if "layout" in lib or "kernels" in lib:
+            if lib.endswith(".so") or lib.endswith(".dylib") or lib.endswith(".dll") or lib.endswith(".pyd"):
                 shutil.copy(os.path.join(extdir, lib), "awkward1")
                 shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
 
         if platform.system() == "Windows":
             for lib in os.listdir(os.path.join(self.build_temp, cfg)):
-                if lib.endswith("kernels.dll"):
+                if lib.endswith(".dll") or lib.endswith(".pyd"):
                     shutil.copy(os.path.join(os.path.join(self.build_temp, cfg), lib), "awkward1")
                     shutil.move(os.path.join(os.path.join(self.build_temp, cfg), lib), os.path.join(extdir, "awkward1"))
 
@@ -74,12 +74,14 @@ setup(name = "awkward1",
       maintainer_email = "pivarski@princeton.edu",
       description = "Development of awkward 1.0, to replace scikit-hep/awkward-array in 2020.",
       long_description = "",
+      long_description_content_type = "text/markdown",
       url = "https://github.com/jpivarski/awkward1",
       download_url = "https://github.com/jpivarski/awkward1/releases",
       license = "BSD 3-clause",
       ext_modules = [CMakeExtension("awkward")],
       cmdclass = {"build_ext": CMakeBuild},
       test_suite = "tests",
+      python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
       install_requires = open("requirements.txt").read().strip().split(),
       tests_require = open("test-requirements.txt").read().strip().split(),
       zip_safe = False,
