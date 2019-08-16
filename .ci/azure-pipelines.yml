@@ -61,9 +61,6 @@ jobs:
         "py37-np*":
           python.version: "3.7"
           numpy.version: "latest"
-        "py38-np*":
-          python.version: "3.8"
-          numpy.version: "latest"
 
     steps:
       - checkout: self
