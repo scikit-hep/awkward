@@ -2,7 +2,7 @@ trigger:
   - master
 
 jobs:
-  - job: win64
+  - job: Win64
 
     pool:
       vmImage: "vs2017-win2016"
@@ -33,12 +33,10 @@ jobs:
 
       - script: |
           python setup.py build
-          echo "okay"
-          ls awkward1
           pytest -vv tests
         displayName: "Build and test"
 
-  - job: linux
+  - job: Linux
 
     pool:
       vmImage: "ubuntu-16.04"
