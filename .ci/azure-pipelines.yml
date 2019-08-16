@@ -2,14 +2,42 @@ trigger:
   - master
 
 jobs:
-  - job: Win64
+  - job: Windows
 
     pool:
       vmImage: "vs2017-win2016"
 
     strategy:
       matrix:
-        "py37-np*":
+        "py27-32bit":
+          python.version: "2.7"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py27-64bit":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35-32bit":
+          python.version: "3.5"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py35-64bit":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36-32bit":
+          python.version: "3.6"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py36-64bit":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37-32bit":
+          python.version: "3.7"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py37-64bit":
           python.version: "3.7"
           python.architecture: "x64"
           numpy.version: "latest"
