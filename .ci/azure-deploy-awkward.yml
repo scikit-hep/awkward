@@ -59,7 +59,7 @@ jobs:
         displayName: "Build"
 
       - script: |
-          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+          python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
 
   - job: Windows
@@ -128,7 +128,7 @@ jobs:
         displayName: "Build"
 
       - script: |
-          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+          python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
 
   - job: MacOS
@@ -201,5 +201,5 @@ jobs:
         displayName: "Build"
 
       - script: |
-          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+          python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
