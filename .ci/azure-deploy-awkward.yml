@@ -59,7 +59,7 @@ jobs:
         displayName: "Build"
 
       - script: |
-          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+          python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
 
   - job: Windows
@@ -128,7 +128,7 @@ jobs:
         displayName: "Build"
 
       - script: |
-          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+          python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
 
   - job: MacOS
@@ -140,14 +140,6 @@ jobs:
       matrix:
         "py27":
           python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py34":
-          python.version: "3.4"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py35":
-          python.version: "3.5"
           python.architecture: "x64"
           numpy.version: "latest"
         "py36":
@@ -169,15 +161,39 @@ jobs:
           secureFile: pivarski-pypirc
         displayName: "Credentials"
 
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '$(python.version)'
-          architecture: '$(python.architecture)'
+      - script: |
+          case $(python.version) in
+          2.7)
+            FULL_VERSION=2.7.16
+            ;;
+          3.6)
+            FULL_VERSION=3.6.8
+            ;;
+          3.7)
+            FULL_VERSION=3.7.3
+            ;;
+          esac
+
+          INSTALLER_NAME=python-$FULL_VERSION-macosx10.9.pkg
+          URL=https://www.python.org/ftp/python/$FULL_VERSION/$INSTALLER_NAME
+
+          PY_PREFIX=/Library/Frameworks/Python.framework/Versions
+
+          set -e -x
+
+          curl $URL > $INSTALLER_NAME
+
+          sudo installer -pkg $INSTALLER_NAME -target /
+
+          sudo rm /usr/local/bin/python
+          sudo ln -s /usr/local/bin/python$PYTHON_VERSION /usr/local/bin/python
+
         displayName: 'Python $(python.version)'
 
       - script: |
+          python -m ensurepip
           python -m pip install --upgrade pip
-          python -m pip install twine wheel
+          python -m pip install setuptools twine wheel
         displayName: "Install"
 
       - script: |
@@ -185,5 +201,5 @@ jobs:
         displayName: "Build"
 
       - script: |
-          twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+          python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
