@@ -13,8 +13,12 @@ include_directories(include)
 
 if (MSVC)
   set(PYBIND11_CPP_STANDARD /std:c++14)
+  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
 else()
   set(PYBIND11_CPP_STANDARD -std=c++11)
+  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 add_subdirectory(pybind11)
 
