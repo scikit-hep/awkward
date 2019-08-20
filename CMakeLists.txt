@@ -1,5 +1,16 @@
+# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+
 cmake_minimum_required(VERSION 2.8.12.2)
 project (awkward)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+if (MSVC)
+  set(PYBIND11_CPP_STANDARD /std:c++14)
+else()
+  set(PYBIND11_CPP_STANDARD -std=c++11)
+endif()
 
 file(READ "VERSION_INFO" VERSION_INFO)
 string(STRIP ${VERSION_INFO} VERSION_INFO)
@@ -11,15 +22,6 @@ file(GLOB CPU_KERNEL_SOURCES "src/cpu-kernels/*.cpp")
 file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp")
 include_directories(include)
 
-if (MSVC)
-  set(PYBIND11_CPP_STANDARD /std:c++14)
-  set(CMAKE_CXX_STANDARD 14)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-else()
-  set(PYBIND11_CPP_STANDARD -std=c++11)
-  set(CMAKE_CXX_STANDARD 11)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
 add_subdirectory(pybind11)
 
 enable_testing()
