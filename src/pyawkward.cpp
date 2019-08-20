@@ -16,6 +16,11 @@ int dummy3(int x) {
   return dummy2(x);
 }
 
+class NumpyArray {
+public:
+private:
+};
+
 PYBIND11_MODULE(layout, m) {
   m.def("dummy3", &dummy3);
 
