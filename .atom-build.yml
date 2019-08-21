@@ -1,2 +1,2 @@
 cmd: ([ ! -d build ]  &&  cmake -Bbuild) ; cmake --build build
-errorMatch: '(?<file>[/0-9a-zA-Z\._-]+):(?<line>\d+):(?<col>\d+):\s+(?<message>.+)'
+errorMatch: '(?<file>[/0-9a-zA-Z\._-]+):(?<line>\d+):(?<col>\d+):\s+error:\s+(?<message>.+)'

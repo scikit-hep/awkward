@@ -13,17 +13,10 @@
 #include "awkward/util.h"
 
 namespace awkward {
-  typedef int32_t IndexType;
-
   class Index {
   public:
     Index(IndexType length)
         : ptr_(std::shared_ptr<IndexType>(new IndexType[length], awkward::util::array_deleter<IndexType>()))
-        , offset_(0)
-        , length_(length) { }
-
-    Index(IndexType *ptr, IndexType length)
-        : ptr_(std::shared_ptr<IndexType>(ptr, awkward::util::no_deleter<IndexType>()))
         , offset_(0)
         , length_(length) { }
 
@@ -32,18 +25,18 @@ namespace awkward {
         , offset_(offset)
         , length_(length) { }
 
-    IndexType len() {
-      return length_;
-    }
+    std::shared_ptr<IndexType> ptr() const { return ptr_; }
+    IndexType offset() const { return offset_; }
+    IndexType length() const { return length_; }
 
-    std::string repr();
-    IndexType get(IndexType at);
-    Index slice(IndexType start, IndexType stop);
+    const std::string repr() const;
+    IndexType get(IndexType at) const; // FIXME: AtType
+    Index slice(IndexType start, IndexType stop) const; // FIXME: AtType, AtType
 
   private:
-    std::shared_ptr<IndexType> ptr_;   // 16 bytes
-    IndexType offset_;                 //  4 bytes
-    IndexType length_;                 //  4 bytes
+    const std::shared_ptr<IndexType> ptr_;
+    const IndexType offset_;
+    const IndexType length_;
   };
 }
 

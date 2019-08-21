@@ -13,18 +13,23 @@
 #endif
 
 namespace awkward {
+  typedef uint32_t AtType;
+  typedef int32_t IndexType;
+  typedef uint8_t byte;
+
   namespace util {
 
-    // https://stackoverflow.com/a/13062069/1623645
     template<typename T>
-    struct array_deleter {
+    class array_deleter {
+    public:
       void operator()(T const *p) {
         delete[] p;
       }
     };
 
     template<typename T>
-    struct no_deleter {
+    class no_deleter {
+    public:
       void operator()(T const *p) { }
     };
 

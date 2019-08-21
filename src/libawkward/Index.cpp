@@ -4,11 +4,11 @@
 
 using namespace awkward;
 
-std::string Index::repr() {
+const std::string Index::repr() const {
   std::stringstream out;
   out << "<Index [";
-  if (len() <= 10) {
-    for (int i = 0;  i < len();  i++) {
+  if (length_ <= 10) {
+    for (int i = 0;  i < length_;  i++) {
       if (i != 0) {
         out << " ";
       }
@@ -23,8 +23,8 @@ std::string Index::repr() {
       out << get(i);
     }
     out << " ... ";
-    for (int i = len() - 6;  i < len();  i++) {
-      if (i != len() - 6) {
+    for (int i = length_ - 6;  i < length_;  i++) {
+      if (i != length_ - 6) {
         out << " ";
       }
       out << get(i);
@@ -35,12 +35,12 @@ std::string Index::repr() {
   return out.str();
 }
 
-IndexType Index::get(IndexType at) {
+IndexType Index::get(IndexType at) const {
   assert(0 <= at  &&  at < length_);
   return ptr_.get()[offset_ + at];
 }
 
-Index Index::slice(IndexType start, IndexType stop) {
+Index Index::slice(IndexType start, IndexType stop) const {
   assert(start == stop  ||  (0 <= start  &&  start < length_));
   assert(start == stop  ||  (0 < stop    &&  stop <= length_));
   assert(start <= stop);
