@@ -14,6 +14,8 @@
 #include "awkward/util.h"
 #include "awkward/Content.h"
 
+#include <iostream>
+
 namespace awkward {
   class NumpyArray: public Content {
   public:
@@ -26,6 +28,10 @@ namespace awkward {
         , format_(format) {
           assert(shape_.size() == strides_.size());
         }
+
+    ~NumpyArray() {
+      std::cout << "NumpyArray destructor" << std::endl;
+    }
 
     const std::shared_ptr<byte> ptr() const { return ptr_; }
     const std::vector<ssize_t> shape() const { return shape_; }

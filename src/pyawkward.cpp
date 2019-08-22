@@ -16,6 +16,8 @@
 namespace py = pybind11;
 namespace ak = awkward;
 
+#include <iostream>
+
 int dummy3(int x) {
   return dummy2(x);
 }
@@ -23,16 +25,18 @@ int dummy3(int x) {
 template<typename T>
 class pyobject_deleter {
 public:
-  pyobject_deleter(PyObject *pyobj): pyobj_(pyobj) {
+  pyobject_deleter(PyObject *pyobj, std::string tmp): pyobj_(pyobj), tmp_(tmp) {
     Py_INCREF(pyobj_);
   }
 
   void operator()(T const *p) {
+    std::cout << "decrementing " << tmp_ << std::endl;
     Py_DECREF(pyobj_);
   }
 
 private:
   PyObject* pyobj_;
+  std::string tmp_;
 };
 
 PYBIND11_MODULE(layout, m) {
@@ -47,6 +51,7 @@ PYBIND11_MODULE(layout, m) {
   /////////////////////////////////////////////////////////////// Index
   py::class_<ak::Index>(m, "Index", py::buffer_protocol())
       .def_buffer([](ak::Index& self) -> py::buffer_info {
+        std::cout << "Index.__array__" << std::endl;
         return py::buffer_info(
           reinterpret_cast<ak::IndexType*>(reinterpret_cast<ssize_t>(self.ptr().get()) +
                                            self.offset()*sizeof(ak::IndexType)),
@@ -66,9 +71,10 @@ PYBIND11_MODULE(layout, m) {
         if (info.strides[0] != sizeof(ak::IndexType)) {
           throw std::invalid_argument("Index must be built from a compact array (array.strides == (array.itemsize,)); try array.copy()");
         }
+        std::cout << "Index.__init__" << std::endl;
         return ak::Index(std::shared_ptr<ak::IndexType>(
           reinterpret_cast<ak::IndexType*>(info.ptr),
-          pyobject_deleter<ak::IndexType>(array.ptr())),
+          pyobject_deleter<ak::IndexType>(array.ptr(), "Index")),
           0,
           info.shape[0]);
       }))
@@ -110,8 +116,9 @@ PYBIND11_MODULE(layout, m) {
         if (info.shape.size() != info.ndim  ||  info.strides.size() != info.ndim) {
           throw std::invalid_argument("len(shape) != ndim or len(strides) != ndim");
         }
+        std::cout << "NumpyArray.__init__" << std::endl;
         return ak::NumpyArray(std::shared_ptr<ak::byte>(
-          reinterpret_cast<ak::byte*>(info.ptr), pyobject_deleter<ak::byte>(array.ptr())),
+          reinterpret_cast<ak::byte*>(info.ptr), pyobject_deleter<ak::byte>(array.ptr(), "NumpyArray")),
           info.shape,
           info.strides,
           0,
@@ -174,12 +181,12 @@ PYBIND11_MODULE(layout, m) {
   py::class_<ak::ListOffsetArray>(m, "ListOffsetArray")
 
       .def(py::init([](ak::Index& offsets, ak::NumpyArray& content) -> ak::ListOffsetArray {
-        return ak::ListOffsetArray(offsets, std::shared_ptr<ak::Content>(new ak::NumpyArray(content)), std::shared_ptr<ak::Index>(nullptr));
-      }), py::keep_alive<1, 2>(), py::keep_alive<1, 3>())
+        return ak::ListOffsetArray(offsets, std::shared_ptr<ak::Content>(new ak::NumpyArray(content)));
+      }))
 
-      .def(py::init([](ak::Index& offsets, ak::ListOffsetArray& content) -> ak::ListOffsetArray {
-        return ak::ListOffsetArray(offsets, std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)), std::shared_ptr<ak::Index>(nullptr));
-      }), py::keep_alive<1, 2>(), py::keep_alive<1, 3>())
+      // .def(py::init([](ak::Index& offsets, ak::ListOffsetArray& content) -> ak::ListOffsetArray {
+      //   return ak::ListOffsetArray(offsets, std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)));
+      // }), py::keep_alive<1, 2>(), py::keep_alive<1, 3>())
 
       .def("__repr__", [](ak::ListOffsetArray& self) -> const std::string {
         return self.repr("", "", "");

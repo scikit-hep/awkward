@@ -11,6 +11,8 @@
 
 #include "awkward/util.h"
 
+#include <iostream>
+
 namespace awkward {
   class Index {
   public:
@@ -23,6 +25,10 @@ namespace awkward {
         : ptr_(ptr)
         , offset_(offset)
         , length_(length) { }
+
+    ~Index() {
+      std::cout << "Index destructor" << std::endl;
+    }
 
     const std::shared_ptr<IndexType> ptr() const { return ptr_; }
     IndexType offset() const { return offset_; }
