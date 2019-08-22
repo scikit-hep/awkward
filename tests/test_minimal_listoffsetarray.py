@@ -7,7 +7,7 @@ import numpy
 
 import awkward1
 
-def test_minimal_listoffsetarray():
+def test():
     offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], dtype="i4"))
     assert numpy.asarray(offsets).tolist() == [0, 2, 2, 3]
     assert offsets[0] == 0
@@ -28,3 +28,5 @@ def test_minimal_listoffsetarray():
     assert numpy.asarray(array[0]).tolist() == [[0, 1, 2, 3], [4, 5, 6, 7]]
     assert numpy.asarray(array[1]).tolist() == []
     assert numpy.asarray(array[2]).tolist() == [[8, 9, 10, 11]]
+    assert numpy.asarray(array[1:3][0]).tolist() == []
+    assert numpy.asarray(array[1:3][1]).tolist() == [[8, 9, 10, 11]]

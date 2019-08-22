@@ -3,8 +3,6 @@
 #ifndef AWKWARD_UTIL_H_
 #define AWKWARD_UTIL_H_
 
-#include <iostream>
-
 #ifdef _MSC_VER
   #ifdef _WIN64
     typedef signed __int64 ssize_t;

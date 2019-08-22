@@ -44,6 +44,5 @@ Index Index::slice(AtType start, AtType stop) const {
   assert(start == stop  ||  (0 <= start  &&  start < length_));
   assert(start == stop  ||  (0 < stop    &&  stop <= length_));
   assert(start <= stop);
-  // return Index(ptr_, offset_ + start*(start != stop), stop - start);
-  throw new std::invalid_argument("");
+  return Index(ptr_, offset_ + start*(start != stop), stop - start);
 }

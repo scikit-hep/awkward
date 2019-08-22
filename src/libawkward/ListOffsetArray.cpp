@@ -24,5 +24,5 @@ std::shared_ptr<Content> ListOffsetArray::get(AtType at) const {
 }
 
 std::shared_ptr<Content> ListOffsetArray::slice(AtType start, AtType stop) const {
-  std::shared_ptr<Content>(new ListOffsetArray(offsets_.slice(start, stop + 1), content_));
+  return std::shared_ptr<Content>(new ListOffsetArray(offsets_.slice(start, stop + 1), content_));
 }

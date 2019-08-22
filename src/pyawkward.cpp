@@ -16,8 +16,6 @@
 namespace py = pybind11;
 namespace ak = awkward;
 
-#include <iostream>
-
 int dummy3(int x) {
   return dummy2(x);
 }
@@ -72,7 +70,6 @@ PYBIND11_MODULE(layout, m) {
   /////////////////////////////////////////////////////////////// Index
   py::class_<ak::Index>(m, "Index", py::buffer_protocol())
       .def_buffer([](ak::Index& self) -> py::buffer_info {
-        std::cout << "Index.__array__" << std::endl;
         return py::buffer_info(
           reinterpret_cast<ak::IndexType*>(reinterpret_cast<ssize_t>(self.ptr().get()) +
                                            self.offset()*sizeof(ak::IndexType)),
