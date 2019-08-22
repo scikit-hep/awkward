@@ -30,3 +30,4 @@ def test():
     assert numpy.asarray(array[2]).tolist() == [[8, 9, 10, 11]]
     assert numpy.asarray(array[1:3][0]).tolist() == []
     assert numpy.asarray(array[1:3][1]).tolist() == [[8, 9, 10, 11]]
+    assert numpy.asarray(array[2:3][0]).tolist() == [[8, 9, 10, 11]]
