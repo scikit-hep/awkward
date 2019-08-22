@@ -24,12 +24,22 @@ class NumpyArrayModel(numba.datamodel.models.StructModel):
 
 @numba.extending.unbox(NumpyArrayType)
 def NumpyArray_unbox(typ, obj, c):
-    asarray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
-    array_obj = c.pyapi.call_function_objargs(asarray_obj, (obj,))
+    convert_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
+    array_obj = c.pyapi.call_function_objargs(convert_obj, (obj,))
     array_val = c.pyapi.to_native_value(typ.arraytype, array_obj).value
     proxy = numba.cgutils.create_struct_proxy(typ)(c.context, c.builder)
     proxy.array = array_val
-    c.pyapi.decref(asarray_obj)
+    c.pyapi.decref(convert_obj)
     c.pyapi.decref(array_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxy._getvalue(), is_error)
+
+@numba.extending.box(NumpyArrayType)
+def NumpyArray_box(typ, val, c):
+    proxy = numba.cgutils.create_struct_proxy(typ)(c.context, c.builder, value=val)
+    array_obj = c.pyapi.from_native_value(typ.arraytype, proxy.array, c.env_manager)
+    convert_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.NumpyArray))
+    out = c.pyapi.call_function_objargs(convert_obj, (array_obj,))
+    c.pyapi.decref(convert_obj)
+    c.pyapi.decref(array_obj)
+    return out
