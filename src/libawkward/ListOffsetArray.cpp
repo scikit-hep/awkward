@@ -13,10 +13,16 @@ const std::string ListOffsetArray::repr(const std::string indent, const std::str
   return out.str();
 }
 
+IndexType ListOffsetArray::length() const {
+  return offsets_.length() - 1;
+}
+
 std::shared_ptr<Content> ListOffsetArray::get(AtType at) const {
-  assert(false);
+  IndexType start = offsets_.get(at);
+  IndexType stop = offsets_.get(at + 1);
+  return content_.get()->slice(start, stop);
 }
 
 std::shared_ptr<Content> ListOffsetArray::slice(AtType start, AtType stop) const {
-  assert(false);
+  std::shared_ptr<Content>(new ListOffsetArray(offsets_.slice(start, stop + 1), content_));
 }

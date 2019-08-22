@@ -25,19 +25,40 @@ int dummy3(int x) {
 template<typename T>
 class pyobject_deleter {
 public:
-  pyobject_deleter(PyObject *pyobj, std::string tmp): pyobj_(pyobj), tmp_(tmp) {
+  pyobject_deleter(PyObject *pyobj): pyobj_(pyobj) {
     Py_INCREF(pyobj_);
   }
-
   void operator()(T const *p) {
-    std::cout << "decrementing " << tmp_ << std::endl;
     Py_DECREF(pyobj_);
   }
-
 private:
   PyObject* pyobj_;
-  std::string tmp_;
 };
+
+py::object unwrap(std::shared_ptr<ak::Content> content) {
+  if (ak::NumpyArray* x = dynamic_cast<ak::NumpyArray*>(content.get())) {
+    if (x->isscalar()) {
+      return py::array(py::buffer_info(
+        x->byteptr(),
+        x->itemsize(),
+        x->format(),
+        x->ndim(),
+        x->shape(),
+        x->strides()
+      )).attr("item")();
+    }
+    else {
+      return py::cast(*x);
+    }
+  }
+  else if (ak::ListOffsetArray* x = dynamic_cast<ak::ListOffsetArray*>(content.get())) {
+    return py::cast(*x);
+  }
+  else {
+    assert(false  &&  "missing unwrapper for Content subtype");
+    return py::none();
+  }
+}
 
 PYBIND11_MODULE(layout, m) {
   m.def("dummy3", &dummy3);
@@ -71,10 +92,9 @@ PYBIND11_MODULE(layout, m) {
         if (info.strides[0] != sizeof(ak::IndexType)) {
           throw std::invalid_argument("Index must be built from a compact array (array.strides == (array.itemsize,)); try array.copy()");
         }
-        std::cout << "Index.__init__" << std::endl;
         return ak::Index(std::shared_ptr<ak::IndexType>(
           reinterpret_cast<ak::IndexType*>(info.ptr),
-          pyobject_deleter<ak::IndexType>(array.ptr(), "Index")),
+          pyobject_deleter<ak::IndexType>(array.ptr())),
           0,
           info.shape[0]);
       }))
@@ -116,9 +136,8 @@ PYBIND11_MODULE(layout, m) {
         if (info.shape.size() != info.ndim  ||  info.strides.size() != info.ndim) {
           throw std::invalid_argument("len(shape) != ndim or len(strides) != ndim");
         }
-        std::cout << "NumpyArray.__init__" << std::endl;
         return ak::NumpyArray(std::shared_ptr<ak::byte>(
-          reinterpret_cast<ak::byte*>(info.ptr), pyobject_deleter<ak::byte>(array.ptr(), "NumpyArray")),
+          reinterpret_cast<ak::byte*>(info.ptr), pyobject_deleter<ak::byte>(array.ptr())),
           info.shape,
           info.strides,
           0,
@@ -139,26 +158,8 @@ PYBIND11_MODULE(layout, m) {
       .def("isempty", &ak::NumpyArray::isempty)
       .def("iscompact", &ak::NumpyArray::iscompact)
 
-      .def("__getitem__", [](ak::NumpyArray& self, ak::IndexType at) -> py::object {
-        std::shared_ptr<ak::Content> got = self.get(at);
-        if (ak::NumpyArray* x = dynamic_cast<ak::NumpyArray*>(got.get())) {
-          if (x->isscalar()) {
-            return py::array(py::buffer_info(
-              x->byteptr(),
-              x->itemsize(),
-              x->format(),
-              x->ndim(),
-              x->shape(),
-              x->strides()
-            )).attr("item")();
-          }
-          else {
-            return py::cast(*x);
-          }
-        }
-        else {
-          assert(false  &&  "NumpyArray::get is supposed to return a NumpyArray");
-        }
+      .def("__getitem__", [](ak::NumpyArray& self, ak::AtType at) -> py::object {
+        return unwrap(self.get(at));
       })
 
       .def("__getitem__", [](ak::NumpyArray& self, py::slice slice) -> py::object {
@@ -166,13 +167,7 @@ PYBIND11_MODULE(layout, m) {
         if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
           throw py::error_already_set();
         }
-        std::shared_ptr<ak::Content> got = self.slice(start, stop);
-        if (ak::NumpyArray* x = dynamic_cast<ak::NumpyArray*>(got.get())) {
-          return py::cast(*x);
-        }
-        else {
-          assert(false  &&  "NumpyArray::slice is supposed to return a NumpyArray");
-        }
+        return unwrap(self.slice(start, stop));
       })
 
   ;
@@ -184,12 +179,24 @@ PYBIND11_MODULE(layout, m) {
         return ak::ListOffsetArray(offsets, std::shared_ptr<ak::Content>(new ak::NumpyArray(content)));
       }))
 
-      // .def(py::init([](ak::Index& offsets, ak::ListOffsetArray& content) -> ak::ListOffsetArray {
-      //   return ak::ListOffsetArray(offsets, std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)));
-      // }), py::keep_alive<1, 2>(), py::keep_alive<1, 3>())
+      .def(py::init([](ak::Index& offsets, ak::ListOffsetArray& content) -> ak::ListOffsetArray {
+        return ak::ListOffsetArray(offsets, std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)));
+      }))
 
       .def("__repr__", [](ak::ListOffsetArray& self) -> const std::string {
         return self.repr("", "", "");
+      })
+
+      .def("__getitem__", [](ak::ListOffsetArray& self, ak::AtType at) -> py::object {
+        return unwrap(self.get(at));
+      })
+
+      .def("__getitem__", [](ak::ListOffsetArray& self, py::slice slice) -> py::object {
+        size_t start, stop, step, length;
+        if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
+          throw py::error_already_set();
+        }
+        return unwrap(self.slice(start, stop));
       })
 
   ;

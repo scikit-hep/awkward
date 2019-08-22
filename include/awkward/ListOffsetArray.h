@@ -10,25 +10,18 @@
 #include "awkward/Index.h"
 #include "awkward/Content.h"
 
-#include <iostream>
-
 namespace awkward {
   class ListOffsetArray: public Content {
   public:
     ListOffsetArray(const Index offsets, const std::shared_ptr<Content> content)
         : offsets_(offsets)
-        , content_(content) {
-          std::cout << "ListOffsetArray constructor" << std::endl;
-        }
-
-    ~ListOffsetArray() {
-      std::cout << "ListOffsetArray destructor" << std::endl;
-    }
+        , content_(content) { }
 
     const Index offsets() const { return offsets_; }
     const std::shared_ptr<Content> content() const { return content_; }
 
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
+    virtual IndexType length() const;
     virtual std::shared_ptr<Content> get(AtType at) const;
     virtual std::shared_ptr<Content> slice(AtType start, AtType stop) const;
 

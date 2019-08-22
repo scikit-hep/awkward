@@ -14,8 +14,6 @@
 #include "awkward/util.h"
 #include "awkward/Content.h"
 
-#include <iostream>
-
 namespace awkward {
   class NumpyArray: public Content {
   public:
@@ -29,10 +27,6 @@ namespace awkward {
           assert(shape_.size() == strides_.size());
         }
 
-    ~NumpyArray() {
-      std::cout << "NumpyArray destructor" << std::endl;
-    }
-
     const std::shared_ptr<byte> ptr() const { return ptr_; }
     const std::vector<ssize_t> shape() const { return shape_; }
     const std::vector<ssize_t> strides() const { return strides_; }
@@ -41,7 +35,6 @@ namespace awkward {
     const std::string format() const { return format_; }
 
     ssize_t ndim() const;
-    ssize_t length() const;
     bool isscalar() const;
     bool isempty() const;
     bool iscompact() const;
@@ -50,6 +43,7 @@ namespace awkward {
     byte getbyte(ssize_t at) const;
 
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
+    virtual IndexType length() const;
     virtual std::shared_ptr<Content> get(AtType at) const;
     virtual std::shared_ptr<Content> slice(AtType start, AtType stop) const;
 
