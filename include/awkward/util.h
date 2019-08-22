@@ -6,16 +6,24 @@
 #include <iostream>
 
 #ifdef _MSC_VER
-#include <BaseTsd.h>
-#define ssize_t SSIZE_T
+  #ifdef _WIN64
+    typedef signed __int64 ssize_t;
+  #else
+    typedef signed   int   ssize_t;
+  #endif
+  typedef unsigned char  uint8_t;
+  typedef signed   int   int32_t;
+  typedef signed __int64 int64_t;
 #else
-#include <cstdint>
+  #include <cstdint>
 #endif
 
 namespace awkward {
-  typedef uint32_t AtType;
+  typedef int64_t AtType;
   typedef int32_t IndexType;
   typedef uint8_t byte;
+
+  const IndexType MAXSIZE = 2147483647;   // 2**31 - 1
 
   namespace util {
 

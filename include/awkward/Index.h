@@ -4,7 +4,6 @@
 #define AWKWARD_INDEX_H_
 
 #include <cassert>
-#include <cstdint>
 #include <iomanip>
 #include <string>
 #include <sstream>
@@ -20,18 +19,18 @@ namespace awkward {
         , offset_(0)
         , length_(length) { }
 
-    Index(std::shared_ptr<IndexType> ptr, IndexType offset, IndexType length)
+    Index(const std::shared_ptr<IndexType> ptr, IndexType offset, IndexType length)
         : ptr_(ptr)
         , offset_(offset)
         , length_(length) { }
 
-    std::shared_ptr<IndexType> ptr() const { return ptr_; }
+    const std::shared_ptr<IndexType> ptr() const { return ptr_; }
     IndexType offset() const { return offset_; }
     IndexType length() const { return length_; }
 
-    const std::string repr() const;
-    IndexType get(IndexType at) const; // FIXME: AtType
-    Index slice(IndexType start, IndexType stop) const; // FIXME: AtType, AtType
+    const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
+    IndexType get(AtType at) const;
+    Index slice(AtType start, AtType stop) const;
 
   private:
     const std::shared_ptr<IndexType> ptr_;
