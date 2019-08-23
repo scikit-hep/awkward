@@ -16,6 +16,15 @@ def test_boxing():
 
     f1(a)
 
+def test_len():
+    a = awkward1.layout.NumpyArray(numpy.arange(10))
+
+    @numba.njit
+    def f1(q):
+        return len(q)
+
+    assert f1(a) == 10
+
 def test_getitem_int():
     a = awkward1.layout.NumpyArray(numpy.arange(12).reshape(3, 4))
 
