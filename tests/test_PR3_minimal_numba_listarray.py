@@ -53,8 +53,8 @@ def test_getitem_slice():
     assert numpy.asarray(out).tolist() == [[4, 5, 6, 7], [8, 9, 10, 11]]
 
 def test_dummy1():
-    a = awkward1.layout.NumpyArray(numpy.arange(10, dtype="i4"))
+    a = awkward1.layout.NumpyArray(numpy.array([5, 4, 3, 2, 1], dtype="i4"))
     @numba.njit
     def f1(q):
         return q.dummy1()
-    raise Exception(f1(a))
+    assert f1(a) == 25
