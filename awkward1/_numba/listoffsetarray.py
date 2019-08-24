@@ -7,13 +7,13 @@ import numba
 import numba.typing.arraydecl
 
 import awkward1.layout
-from .common import ContentType
+from .._numba import cpu, common
 
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray)
 def typeof(val, c):
     return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets)), numba.typeof(val.content))
 
-class ListOffsetArrayType(ContentType):
+class ListOffsetArrayType(common.ContentType):
     def __init__(self, offsetstpe, contenttpe):
         super(ListOffsetArrayType, self).__init__(name="ListOffsetArrayType({0}, {1})".format(offsetstpe.name, contenttpe.name))
         self.offsetstpe = offsetstpe

@@ -3,7 +3,7 @@
 import sys
 
 import numpy
-import numba
+numba = pytest.importorskip("numba")
 
 import awkward1
 

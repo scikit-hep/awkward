@@ -7,13 +7,13 @@ import numba
 import numba.typing.arraydecl
 
 import awkward1.layout
-from .common import ContentType
+from .._numba import cpu, common
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof(val, c):
     return NumpyArrayType(numba.typeof(numpy.asarray(val)))
 
-class NumpyArrayType(ContentType):
+class NumpyArrayType(common.ContentType):
     def __init__(self, arraytpe):
         super(NumpyArrayType, self).__init__(name="NumpyArrayType({0})".format(arraytpe.name))
         self.arraytpe = arraytpe
