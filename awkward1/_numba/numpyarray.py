@@ -91,3 +91,18 @@ def lower_getitem_tuple(context, builder, sig, args):
         return proxyout._getvalue()
     else:
         return out
+
+@numba.typing.templates.infer_getattr
+class type_methods(numba.typing.templates.AttributeTemplate):
+    key = NumpyArrayType
+
+    @numba.typing.templates.bound_function("dummy1")
+    def resolve_dummy1(self, selftpe, args, kwargs):
+        if selftpe.arraytpe.dtype == numba.int32:
+            return numba.int32(selftpe, args)
+
+@numba.extending.lower_builtin("dummy1", NumpyArrayType)
+def dummy1(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+    raise Exception("HERE")

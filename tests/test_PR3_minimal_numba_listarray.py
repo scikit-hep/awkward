@@ -10,20 +10,16 @@ import awkward1
 
 def test_boxing():
     a = awkward1.layout.NumpyArray(numpy.arange(10))
-
     @numba.njit
     def f1(q):
         return q
-
     f1(a)
 
 def test_len():
     a = awkward1.layout.NumpyArray(numpy.arange(10))
-
     @numba.njit
     def f1(q):
         return len(q)
-
     assert f1(a) == 10
 
 def test_getitem_int():
@@ -55,3 +51,10 @@ def test_getitem_slice():
     out = f1(a)
     assert isinstance(out, awkward1.layout.NumpyArray)
     assert numpy.asarray(out).tolist() == [[4, 5, 6, 7], [8, 9, 10, 11]]
+
+def test_dummy1():
+    a = awkward1.layout.NumpyArray(numpy.arange(10, dtype="i4"))
+    @numba.njit
+    def f1(q):
+        return q.dummy1()
+    raise Exception(f1(a))
