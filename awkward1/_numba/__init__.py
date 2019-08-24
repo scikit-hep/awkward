@@ -3,8 +3,9 @@
 try:
     import numba
 except ImportError:
-    pass
+    installed = False
 else:
+    installed = True
     import awkward1._numba.cpu
     import awkward1._numba.common
     import awkward1._numba.numpyarray

@@ -5,5 +5,7 @@ import awkward1._numba
 
 __version__ = awkward1.layout.__version__
 
-dummy1 = awkward1._numba.cpu.kernels.dummy1
+if awkward1._numba.installed:
+    dummy1 = awkward1._numba.cpu.kernels.dummy1
+
 dummy3 = layout.dummy3
