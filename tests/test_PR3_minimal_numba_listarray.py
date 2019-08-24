@@ -2,6 +2,7 @@
 
 import sys
 
+import pytest
 import numpy
 numba = pytest.importorskip("numba")
 
