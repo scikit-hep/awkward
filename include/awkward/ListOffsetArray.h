@@ -18,10 +18,11 @@ namespace awkward {
         , content_(content) { }
 
     const Index offsets() const { return offsets_; }
-    const std::shared_ptr<Content> content() const { return content_; }
+    const std::shared_ptr<Content> content() const { return content_.get()->shallow_copy(); }
 
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
     virtual IndexType length() const;
+    virtual std::shared_ptr<Content> shallow_copy() const;
     virtual std::shared_ptr<Content> get(AtType at) const;
     virtual std::shared_ptr<Content> slice(AtType start, AtType stop) const;
 

@@ -104,6 +104,10 @@ IndexType NumpyArray::length() const {
   }
 }
 
+std::shared_ptr<Content> NumpyArray::shallow_copy() const {
+  return std::shared_ptr<Content>(new NumpyArray(ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
+}
+
 std::shared_ptr<Content> NumpyArray::get(AtType at) const {
   assert(!isscalar());
   ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);

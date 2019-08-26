@@ -17,7 +17,7 @@
 #endif
 
 namespace awkward {
-  typedef int64_t AtType;
+  typedef int32_t AtType;
   typedef int32_t IndexType;
   typedef uint8_t byte;
 

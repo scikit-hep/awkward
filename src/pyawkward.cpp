@@ -93,7 +93,7 @@ PYBIND11_MODULE(layout, m) {
           reinterpret_cast<ak::IndexType*>(info.ptr),
           pyobject_deleter<ak::IndexType>(array.ptr())),
           0,
-          info.shape[0]);
+          (ak::IndexType)(info.shape[0]));
       }))
 
       .def("__repr__", [](ak::Index& self) -> const std::string {
@@ -107,7 +107,7 @@ PYBIND11_MODULE(layout, m) {
         if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
           throw py::error_already_set();
         }
-        return self.slice(start, stop);
+        return self.slice((ak::AtType)start, (ak::AtType)stop);
       })
 
   ;
@@ -155,6 +155,8 @@ PYBIND11_MODULE(layout, m) {
       .def("isempty", &ak::NumpyArray::isempty)
       .def("iscompact", &ak::NumpyArray::iscompact)
 
+      .def("__len__", &ak::NumpyArray::length)
+
       .def("__getitem__", [](ak::NumpyArray& self, ak::AtType at) -> py::object {
         return unwrap(self.get(at));
       })
@@ -164,7 +166,7 @@ PYBIND11_MODULE(layout, m) {
         if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
           throw py::error_already_set();
         }
-        return unwrap(self.slice(start, stop));
+        return unwrap(self.slice((ak::AtType)start, (ak::AtType)stop));
       })
 
   ;
@@ -180,9 +182,17 @@ PYBIND11_MODULE(layout, m) {
         return ak::ListOffsetArray(offsets, std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)));
       }))
 
+      .def_property_readonly("offsets", &ak::ListOffsetArray::offsets)
+
+      .def_property_readonly("content", [](ak::ListOffsetArray& self) -> py::object {
+        return unwrap(self.content());
+      })
+
       .def("__repr__", [](ak::ListOffsetArray& self) -> const std::string {
         return self.repr("", "", "");
       })
+
+      .def("__len__", &ak::ListOffsetArray::length)
 
       .def("__getitem__", [](ak::ListOffsetArray& self, ak::AtType at) -> py::object {
         return unwrap(self.get(at));
@@ -193,7 +203,7 @@ PYBIND11_MODULE(layout, m) {
         if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
           throw py::error_already_set();
         }
-        return unwrap(self.slice(start, stop));
+        return unwrap(self.slice((ak::AtType)start, (ak::AtType)stop));
       })
 
   ;

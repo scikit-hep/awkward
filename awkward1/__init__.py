@@ -1,17 +1,11 @@
-import os
-import ctypes
-import platform
+# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 import awkward1.layout
+import awkward1._numba
 
 __version__ = awkward1.layout.__version__
 
-if platform.system() == "Darwin":
-    lib1 = ctypes.cdll.LoadLibrary(os.path.join(os.path.dirname(os.path.abspath(__file__)), "libawkward-cpu-kernels.dylib"))
-elif platform.system() == "Windows":
-    lib1 = ctypes.cdll.LoadLibrary(os.path.join(os.path.dirname(os.path.abspath(__file__)), "awkward-cpu-kernels.dll"))
-else:
-    lib1 = ctypes.cdll.LoadLibrary(os.path.join(os.path.dirname(os.path.abspath(__file__)), "libawkward-cpu-kernels.so"))
+if awkward1._numba.installed:
+    dummy1 = awkward1._numba.cpu.kernels.dummy1
 
-dummy1 = lib1.dummy1
 dummy3 = layout.dummy3
