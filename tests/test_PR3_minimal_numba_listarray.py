@@ -9,14 +9,17 @@ numba = pytest.importorskip("numba")
 import awkward1
 
 def test_numpyarray_boxing():
-    a = awkward1.layout.NumpyArray(numpy.arange(10))
-    assert sys.getrefcount(a) == 2
+    a = numpy.arange(10)
+    wrapped = awkward1.layout.NumpyArray(a)
+    assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
     @numba.njit
     def f1(q):
         return q
-    out = f1(a)
-    assert sys.getrefcount(a) == 3
+    out = f1(wrapped)
+    assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 3)
     assert numpy.asarray(out).tolist() == list(range(10))
+    del out
+    assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
 
 def test_len():
     a = awkward1.layout.NumpyArray(numpy.arange(10))
