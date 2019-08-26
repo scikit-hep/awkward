@@ -8,7 +8,9 @@ numba = pytest.importorskip("numba")
 
 import awkward1
 
-def test_numpyarray_boxing():
+def test_numpyarray_boxing(capsys):
+    with capsys.disabled():
+        print("numba.__version__", numba.__version__)
     print("numba.__version__", numba.__version__)
     a = numpy.arange(10)
     wrapped = awkward1.layout.NumpyArray(a)

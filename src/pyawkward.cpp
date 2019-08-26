@@ -93,7 +93,7 @@ PYBIND11_MODULE(layout, m) {
           reinterpret_cast<ak::IndexType*>(info.ptr),
           pyobject_deleter<ak::IndexType>(array.ptr())),
           0,
-          reinterpret_cast<ak::IndexType>(info.shape[0]));
+          (ak::IndexType)(info.shape[0]));
       }))
 
       .def("__repr__", [](ak::Index& self) -> const std::string {
@@ -107,7 +107,7 @@ PYBIND11_MODULE(layout, m) {
         if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
           throw py::error_already_set();
         }
-        return self.slice(reinterpret_cast<ak::AtType>(start), reinterpret_cast<ak::AtType>(stop));
+        return self.slice((ak::AtType)start, (ak::AtType)stop);
       })
 
   ;
@@ -164,7 +164,7 @@ PYBIND11_MODULE(layout, m) {
         if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
           throw py::error_already_set();
         }
-        return unwrap(self.slice(reinterpret_cast<AtType>(start), reinterpret_cast<AtType>(stop)));
+        return unwrap(self.slice((ak::AtType)start, (ak::AtType)stop));
       })
 
   ;
@@ -199,7 +199,7 @@ PYBIND11_MODULE(layout, m) {
         if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
           throw py::error_already_set();
         }
-        return unwrap(self.slice(reinterpret_cast<AtType>(start), reinterpret_cast<AtType>(stop)));
+        return unwrap(self.slice((ak::AtType)start, (ak::AtType)stop));
       })
 
   ;
