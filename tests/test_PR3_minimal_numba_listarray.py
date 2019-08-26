@@ -58,3 +58,14 @@ def test_dummy1():
     def f1(q):
         return q.dummy1()
     assert f1(a) == 25
+
+def test_listoffsetarray():
+    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
+    array = awkward1.layout.ListOffsetArray(offsets, content)
+
+    @numba.njit
+    def f1(q):
+        return 3.14
+    print(f1(array))
+    raise Exception

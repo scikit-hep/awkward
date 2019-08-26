@@ -37,21 +37,21 @@ class NumpyArrayModel(numba.datamodel.models.StructModel):
         super(NumpyArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(NumpyArrayType)
-def unbox(typ, obj, c):
+def unbox(tpe, obj, c):
     asarray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
     array_obj = c.pyapi.call_function_objargs(asarray_obj, (obj,))
-    array_val = c.pyapi.to_native_value(typ.arraytpe, array_obj).value
-    proxy = numba.cgutils.create_struct_proxy(typ)(c.context, c.builder)
-    proxy.array = array_val
+    array_val = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
+    proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
+    proxyout.array = array_val
     c.pyapi.decref(asarray_obj)
     c.pyapi.decref(array_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
-    return numba.extending.NativeValue(proxy._getvalue(), is_error)
+    return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
 @numba.extending.box(NumpyArrayType)
-def box(typ, val, c):
-    proxy = numba.cgutils.create_struct_proxy(typ)(c.context, c.builder, value=val)
-    array_obj = c.pyapi.from_native_value(typ.arraytpe, proxy.array, c.env_manager)
+def box(tpe, val, c):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
+    array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
     convert_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.NumpyArray))
     out = c.pyapi.call_function_objargs(convert_obj, (array_obj,))
     c.pyapi.decref(convert_obj)
@@ -62,8 +62,8 @@ def box(typ, val, c):
 def lower_len(context, builder, sig, args):
     tpe, = sig.args
     val, = args
-    proxy = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    return numba.targets.arrayobj.array_len(context, builder, numba.types.intp(tpe.arraytpe), (proxy.array,))
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    return numba.targets.arrayobj.array_len(context, builder, numba.types.intp(tpe.arraytpe), (proxyin.array,))
 
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.Integer)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.SliceType)
