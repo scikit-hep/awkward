@@ -33,3 +33,8 @@ class ListOffsetArrayModel(numba.datamodel.models.StructModel):
         members = [("offsets", fe_type.offsetstpe),
                    ("content", fe_type.contenttpe)]
         super(ListOffsetArrayModel, self).__init__(dmm, fe_type, members)
+
+# @numba.extending.unbox(ListOffsetArrayType)
+# def unbox(tpe, obj, c):
+#     asarray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
+#     array_obj = c.pyapi.call_function_objargs(asarray_obj, (obj,))

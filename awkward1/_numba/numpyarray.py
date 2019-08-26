@@ -38,12 +38,12 @@ class NumpyArrayModel(numba.datamodel.models.StructModel):
 
 @numba.extending.unbox(NumpyArrayType)
 def unbox(typ, obj, c):
-    convert_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
-    array_obj = c.pyapi.call_function_objargs(convert_obj, (obj,))
+    asarray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
+    array_obj = c.pyapi.call_function_objargs(asarray_obj, (obj,))
     array_val = c.pyapi.to_native_value(typ.arraytpe, array_obj).value
     proxy = numba.cgutils.create_struct_proxy(typ)(c.context, c.builder)
     proxy.array = array_val
-    c.pyapi.decref(convert_obj)
+    c.pyapi.decref(asarray_obj)
     c.pyapi.decref(array_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxy._getvalue(), is_error)

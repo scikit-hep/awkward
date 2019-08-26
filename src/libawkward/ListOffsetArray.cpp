@@ -17,6 +17,10 @@ IndexType ListOffsetArray::length() const {
   return offsets_.length() - 1;
 }
 
+std::shared_ptr<Content> ListOffsetArray::shallow_copy() const {
+  return std::shared_ptr<Content>(new ListOffsetArray(offsets_, content_));
+}
+
 std::shared_ptr<Content> ListOffsetArray::get(AtType at) const {
   IndexType start = offsets_.get(at);
   IndexType stop = offsets_.get(at + 1);
