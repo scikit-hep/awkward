@@ -164,13 +164,17 @@ def test_listoffsetarray_getitem_slice():
     array = awkward1.layout.ListOffsetArray(offsets, content)
     @numba.njit
     def f1(q):
-        return q[1:3]
-    # assert numpy.asarray(f1(array)).tolist() == [3.3]
-    print(f1(array))
-    raise Exception
-    # @numba.njit
-    # def f2(q):
-    #     return q[1:]
-    # out = f2(array)
-    # assert numpy.asarray(out[0]).tolist() == []
-    # assert numpy.asarray(out[1]).tolist() == [3.3]
+        return q[1:][1]
+    assert numpy.asarray(f1(array)).tolist() == [3.3]
+    @numba.njit
+    def f2(q, i):
+        return q[i:]
+    out = f2(array, 1)
+    assert numpy.asarray(out[0]).tolist() == []
+    assert numpy.asarray(out[1]).tolist() == [3.3]
+    @numba.njit
+    def f3(q, i):
+        return q[i]
+    out = f3(array, slice(1, None))
+    assert numpy.asarray(out[0]).tolist() == []
+    assert numpy.asarray(out[1]).tolist() == [3.3]

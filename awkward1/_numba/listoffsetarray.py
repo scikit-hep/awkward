@@ -107,8 +107,15 @@ def lower_getitem(context, builder, sig, args):
     val, whereval = args
 
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+
+    proxyslicein = numba.cgutils.create_struct_proxy(wheretpe)(context, builder, value=whereval)
+    proxysliceout = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
+    proxysliceout.start = proxyslicein.start
+    proxysliceout.stop = builder.add(proxyslicein.stop, context.get_constant(numba.types.intp, 1))
+    proxysliceout.step = context.get_constant(numba.types.intp, 1)
+
     proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
-    proxyout.offsets = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
+    proxyout.offsets = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe(tpe.offsetstpe, numba.types.slice2_type), (proxyin.offsets, proxysliceout._getvalue()))
     proxyout.content = proxyin.content
     out = proxyout._getvalue()
     if context.enable_nrt:
