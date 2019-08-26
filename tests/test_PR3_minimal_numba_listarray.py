@@ -9,6 +9,7 @@ numba = pytest.importorskip("numba")
 import awkward1
 
 def test_numpyarray_boxing():
+    print("numba.__version__", numba.__version__)
     a = numpy.arange(10)
     wrapped = awkward1.layout.NumpyArray(a)
     assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
