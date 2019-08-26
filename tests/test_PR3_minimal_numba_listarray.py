@@ -9,9 +9,6 @@ numba = pytest.importorskip("numba")
 import awkward1
 
 def test_numpyarray_boxing(capsys):
-    with capsys.disabled():
-        print("numba.__version__", numba.__version__)
-    print("numba.__version__", numba.__version__)
     a = numpy.arange(10)
     wrapped = awkward1.layout.NumpyArray(a)
     assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
@@ -19,9 +16,11 @@ def test_numpyarray_boxing(capsys):
     def f1(q):
         return q
     out = f1(wrapped)
-    assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 3)
+    out2 = [f1(wrapped) for i in range(100)]
+    assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 3 + 100)
     assert numpy.asarray(out).tolist() == list(range(10))
     del out
+    del out2
     assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
 
 def test_len():
