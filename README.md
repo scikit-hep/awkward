@@ -48,6 +48,7 @@ The following features of awkward 0.x will be features of awkward 1.x.
 ## Status
 
    * 2019-08-17: set up a build process for the four layers with continuous deployment to Linux, MacOS, and Windows wheels.
+   * 2019-08-22: created a basic ListOffsetArray in C++, exposed to Python with pybind11, and ensured correct memory management between Python's reference counts and C++'s `std::shared_ptr`.
 
 ## Roadmap
 

@@ -50,11 +50,11 @@ def unbox(tpe, obj, c):
 
 @numba.extending.box(NumpyArrayType)
 def box(tpe, val, c):
+    NumpyArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.NumpyArray))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
-    convert_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.NumpyArray))
-    out = c.pyapi.call_function_objargs(convert_obj, (array_obj,))
-    c.pyapi.decref(convert_obj)
+    out = c.pyapi.call_function_objargs(NumpyArray_obj, (array_obj,))
+    c.pyapi.decref(NumpyArray_obj)
     c.pyapi.decref(array_obj)
     return out
 

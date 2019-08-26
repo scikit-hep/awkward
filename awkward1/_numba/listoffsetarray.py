@@ -36,25 +36,34 @@ class ListOffsetArrayModel(numba.datamodel.models.StructModel):
 
 @numba.extending.unbox(ListOffsetArrayType)
 def unbox(tpe, obj, c):
+    asarray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
     offsets_obj = c.pyapi.call_method(obj, "offsets")
     content_obj = c.pyapi.call_method(obj, "content")
-    asarray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
     offsetsarray_obj = c.pyapi.call_function_objargs(asarray_obj, (offsets_obj,))
     offsetsarray_val = c.pyapi.to_native_value(tpe.offsetstpe, offsetsarray_obj).value
     content_val = c.pyapi.to_native_value(tpe.contenttpe, content_obj).value
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
     proxyout.offsets = offsetsarray_val
     proxyout.content = content_val
-    # c.pyapi.decref(offsets_obj)
-    # c.pyapi.decref(content_obj)
-    # c.pyapi.decref(asarray_obj)
-    # c.pyapi.decref(offsetsarray_obj)
+    c.pyapi.decref(asarray_obj)
+    c.pyapi.decref(offsets_obj)
+    c.pyapi.decref(content_obj)
+    c.pyapi.decref(offsetsarray_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
 @numba.extending.box(ListOffsetArrayType)
 def box(tpe, val, c):
+    Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Index))
+    ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArray))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     offsetsarray_obj = c.pyapi.from_native_value(tpe.offsetstpe, proxyin.offsets, c.env_manager)
     content_obj = c.pyapi.from_native_value(tpe.contenttpe, proxyin.content, c.env_manager)
-    # ...
+    offsets_obj = c.pyapi.call_function_objargs(Index_obj, (offsetsarray_obj,))
+    out = c.pyapi.call_function_objargs(ListOffsetArray_obj, (offsets_obj, content_obj))
+    c.pyapi.decref(Index_obj)
+    c.pyapi.decref(ListOffsetArray_obj)
+    c.pyapi.decref(offsetsarray_obj)
+    c.pyapi.decref(content_obj)
+    c.pyapi.decref(offsets_obj)
+    return out

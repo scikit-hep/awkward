@@ -8,12 +8,15 @@ numba = pytest.importorskip("numba")
 
 import awkward1
 
-def test_boxing():
+def test_numpyarray_boxing():
     a = awkward1.layout.NumpyArray(numpy.arange(10))
+    assert sys.getrefcount(a) == 2
     @numba.njit
     def f1(q):
         return q
-    f1(a)
+    out = f1(a)
+    assert sys.getrefcount(a) == 3
+    assert numpy.asarray(out).tolist() == list(range(10))
 
 def test_len():
     a = awkward1.layout.NumpyArray(numpy.arange(10))
@@ -59,13 +62,23 @@ def test_dummy1():
         return q.dummy1()
     assert f1(a) == 25
 
-def test_listoffsetarray():
+def test_listoffsetarray_boxing():
     offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
     array = awkward1.layout.ListOffsetArray(offsets, content)
+    assert (sys.getrefcount(offsets), sys.getrefcount(content), sys.getrefcount(array)) == (2, 2, 2)
 
     @numba.njit
     def f1(q):
-        return 3.14
-    print(f1(array))
-    raise Exception
+        return q
+    out = f1(array)
+    assert (sys.getrefcount(offsets), sys.getrefcount(content), sys.getrefcount(array)) == (2, 2, 2)
+    assert numpy.asarray(out.offsets()).tolist() == [0, 2, 2, 3]
+    assert numpy.asarray(out.content()).tolist() == [1.1, 2.2, 3.3]
+
+    array2 = awkward1.layout.ListOffsetArray(offsets, array)
+    out2 = f1(array2)
+    assert (sys.getrefcount(offsets), sys.getrefcount(content), sys.getrefcount(array)) == (2, 2, 2)
+    assert numpy.asarray(out2.offsets()).tolist() == [0, 2, 2, 3]
+    assert numpy.asarray(out2.content().offsets()).tolist() == [0, 2, 2, 3]
+    assert numpy.asarray(out2.content().content()).tolist() == [1.1, 2.2, 3.3]
