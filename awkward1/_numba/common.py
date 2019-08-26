@@ -4,6 +4,9 @@ import operator
 
 import numba
 
+AtType = numba.int64
+IndexType = numba.int32
+
 class ContentType(numba.types.Type):
     pass
 

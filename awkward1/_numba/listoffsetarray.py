@@ -67,3 +67,11 @@ def box(tpe, val, c):
     c.pyapi.decref(content_obj)
     c.pyapi.decref(offsets_obj)
     return out
+
+@numba.extending.lower_builtin(len, ListOffsetArrayType)
+def lower_len(context, builder, sig, args):
+    rettpe, (tpe,) = sig.return_type, sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    offsetlen = numba.targets.arrayobj.array_len(context, builder, numba.types.intp(tpe.offsetstpe), (proxyin.offsets,))
+    return builder.sub(offsetlen, context.get_constant(rettpe, 1))
