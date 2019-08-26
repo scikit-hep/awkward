@@ -69,7 +69,7 @@ def lower_len(context, builder, sig, args):
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.SliceType)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.Array)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.BaseTuple)
-def lower_getitem_tuple(context, builder, sig, args):
+def lower_getitem(context, builder, sig, args):
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)

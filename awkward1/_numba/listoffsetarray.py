@@ -75,3 +75,29 @@ def lower_len(context, builder, sig, args):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     offsetlen = numba.targets.arrayobj.array_len(context, builder, numba.types.intp(tpe.offsetstpe), (proxyin.offsets,))
     return builder.sub(offsetlen, context.get_constant(rettpe, 1))
+
+@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.Integer)
+@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.slice2_type)
+def lower_getitem(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+
+    assert isinstance(wheretpe, numba.types.Integer), "not implemented"
+
+    wherevalp1 = builder.add(whereval, context.get_constant(wheretpe, 1))
+
+    if isinstance(wheretpe, numba.types.Literal):
+        wherevalp1_tpe = wheretpe.literal_type
+    else:
+        wherevalp1_tpe = wheretpe
+
+    start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, common.IndexType(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
+    stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, common.IndexType(tpe.offsetstpe, wherevalp1_tpe), (proxyin.offsets, wherevalp1))
+    proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
+    proxyslice.start = builder.zext(start, context.get_value_type(numba.types.intp))
+    proxyslice.stop = builder.zext(stop, context.get_value_type(numba.types.intp))
+    proxyslice.step = context.get_constant(numba.types.intp, 1)
+
+    fcn = context.get_function(operator.getitem, rettpe(tpe.contenttpe, numba.types.slice2_type))
+    return fcn(builder, (proxyin.content, proxyslice._getvalue()))

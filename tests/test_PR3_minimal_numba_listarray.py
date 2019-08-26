@@ -51,6 +51,11 @@ def test_numpyarray_getitem_int():
         return q[1, 2]
     assert f3(a) == 6
 
+    @numba.njit
+    def f4(q, i):
+        return q[i]
+    assert numpy.asarray(f4(a, 1)).tolist() == [4, 5, 6, 7]
+
 def test_numpyarray_getitem_slice():
     a = awkward1.layout.NumpyArray(numpy.arange(12).reshape(3, 4))
 
@@ -58,6 +63,20 @@ def test_numpyarray_getitem_slice():
     def f1(q):
         return q[1:]
     out = f1(a)
+    assert isinstance(out, awkward1.layout.NumpyArray)
+    assert numpy.asarray(out).tolist() == [[4, 5, 6, 7], [8, 9, 10, 11]]
+
+    @numba.njit
+    def f2(q, i):
+        return q[i:]
+    out = f2(a, 1)
+    assert isinstance(out, awkward1.layout.NumpyArray)
+    assert numpy.asarray(out).tolist() == [[4, 5, 6, 7], [8, 9, 10, 11]]
+
+    @numba.njit
+    def f3(q, i):
+        return q[i]
+    out = f3(a, slice(1, None))
     assert isinstance(out, awkward1.layout.NumpyArray)
     assert numpy.asarray(out).tolist() == [[4, 5, 6, 7], [8, 9, 10, 11]]
 
@@ -97,3 +116,18 @@ def test_listoffsetarray_len():
     def f1(q):
         return len(q)
     assert f1(array) == 3
+
+def test_listoffsetarray_getitem():
+    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
+    array = awkward1.layout.ListOffsetArray(offsets, content)
+    @numba.njit
+    def f1(q):
+        return q[0]
+    assert numpy.asarray(f1(array)).tolist() == [1.1, 2.2]
+    @numba.njit
+    def f2(q, i):
+        return q[i]
+    assert numpy.asarray(f2(array, 0)).tolist() == [1.1, 2.2]
+    assert numpy.asarray(f2(array, 1)).tolist() == []
+    assert numpy.asarray(f2(array, 2)).tolist() == [3.3]
