@@ -7,11 +7,11 @@ import pytest
 import numpy
 numba = pytest.importorskip("numba")
 if sys.version_info[0] < 3 and platform.system() != "Linux":
-    pytest.skip()
+    pytestmark = pytest.mark.skip
 
 import awkward1
 
-def test_numpyarray_boxing(capsys):
+def test_numpyarray_boxing():
     a = numpy.arange(10)
     wrapped = awkward1.layout.NumpyArray(a)
     assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
@@ -24,14 +24,14 @@ def test_numpyarray_boxing(capsys):
     del out
     assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
 
-def test_len():
+def test_numpyarray_len():
     a = awkward1.layout.NumpyArray(numpy.arange(10))
     @numba.njit
     def f1(q):
         return len(q)
     assert f1(a) == 10
 
-def test_getitem_int():
+def test_numpyarray_getitem_int():
     a = awkward1.layout.NumpyArray(numpy.arange(12).reshape(3, 4))
 
     @numba.njit
@@ -51,7 +51,7 @@ def test_getitem_int():
         return q[1, 2]
     assert f3(a) == 6
 
-def test_getitem_slice():
+def test_numpyarray_getitem_slice():
     a = awkward1.layout.NumpyArray(numpy.arange(12).reshape(3, 4))
 
     @numba.njit
@@ -61,7 +61,7 @@ def test_getitem_slice():
     assert isinstance(out, awkward1.layout.NumpyArray)
     assert numpy.asarray(out).tolist() == [[4, 5, 6, 7], [8, 9, 10, 11]]
 
-def test_dummy1():
+def test_numpyarray_dummy1():
     a = awkward1.layout.NumpyArray(numpy.array([5, 4, 3, 2, 1], dtype="i4"))
     @numba.njit
     def f1(q):
@@ -79,12 +79,12 @@ def test_listoffsetarray_boxing():
         return q
     out = f1(array)
     assert (sys.getrefcount(offsets), sys.getrefcount(content), sys.getrefcount(array)) == (2, 2, 2)
-    assert numpy.asarray(out.offsets()).tolist() == [0, 2, 2, 3]
-    assert numpy.asarray(out.content()).tolist() == [1.1, 2.2, 3.3]
+    assert numpy.asarray(out.offsets).tolist() == [0, 2, 2, 3]
+    assert numpy.asarray(out.content).tolist() == [1.1, 2.2, 3.3]
 
     array2 = awkward1.layout.ListOffsetArray(offsets, array)
     out2 = f1(array2)
     assert (sys.getrefcount(offsets), sys.getrefcount(content), sys.getrefcount(array)) == (2, 2, 2)
-    assert numpy.asarray(out2.offsets()).tolist() == [0, 2, 2, 3]
-    assert numpy.asarray(out2.content().offsets()).tolist() == [0, 2, 2, 3]
-    assert numpy.asarray(out2.content().content()).tolist() == [1.1, 2.2, 3.3]
+    assert numpy.asarray(out2.offsets).tolist() == [0, 2, 2, 3]
+    assert numpy.asarray(out2.content.offsets).tolist() == [0, 2, 2, 3]
+    assert numpy.asarray(out2.content.content).tolist() == [1.1, 2.2, 3.3]

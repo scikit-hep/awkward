@@ -180,9 +180,9 @@ PYBIND11_MODULE(layout, m) {
         return ak::ListOffsetArray(offsets, std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)));
       }))
 
-      .def ("offsets", &ak::ListOffsetArray::offsets)
+      .def_property_readonly("offsets", &ak::ListOffsetArray::offsets)
 
-      .def ("content", [](ak::ListOffsetArray& self) -> py::object {
+      .def_property_readonly("content", [](ak::ListOffsetArray& self) -> py::object {
         return unwrap(self.content());
       })
 

@@ -11,7 +11,7 @@ from .._numba import cpu, common
 
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray)
 def typeof(val, c):
-    return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets())), numba.typeof(val.content()))
+    return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets)), numba.typeof(val.content))
 
 class ListOffsetArrayType(common.ContentType):
     def __init__(self, offsetstpe, contenttpe):
@@ -37,8 +37,8 @@ class ListOffsetArrayModel(numba.datamodel.models.StructModel):
 @numba.extending.unbox(ListOffsetArrayType)
 def unbox(tpe, obj, c):
     asarray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
-    offsets_obj = c.pyapi.call_method(obj, "offsets")
-    content_obj = c.pyapi.call_method(obj, "content")
+    offsets_obj = c.pyapi.object_getattr_string(obj, "offsets")
+    content_obj = c.pyapi.object_getattr_string(obj, "content")
     offsetsarray_obj = c.pyapi.call_function_objargs(asarray_obj, (offsets_obj,))
     offsetsarray_val = c.pyapi.to_native_value(tpe.offsetstpe, offsetsarray_obj).value
     content_val = c.pyapi.to_native_value(tpe.contenttpe, content_obj).value
