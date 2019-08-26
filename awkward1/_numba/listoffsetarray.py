@@ -20,12 +20,15 @@ class ListOffsetArrayType(common.ContentType):
         self.contenttpe = contenttpe
 
     def getitem(self, wheretpe):
-        headtpe = wheretpe.types[0]
-        tailtpe = numba.types.Tuple(wheretpe.types[1:])
-        if isinstance(headtpe, numba.types.Integer):
-            return self.contenttpe.getitem(tailtpe)
+        if len(wheretpe.types) == 0:
+            return self
         else:
-            return self.getitem(tailtpe)
+            headtpe = wheretpe.types[0]
+            tailtpe = numba.types.Tuple(wheretpe.types[1:])
+            if isinstance(headtpe, numba.types.Integer):
+                return self.contenttpe.getitem(tailtpe)
+            else:
+                return self.getitem(tailtpe)
 
 @numba.extending.register_model(ListOffsetArrayType)
 class ListOffsetArrayModel(numba.datamodel.models.StructModel):
@@ -77,16 +80,12 @@ def lower_len(context, builder, sig, args):
     return builder.sub(offsetlen, context.get_constant(rettpe, 1))
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.Integer)
-@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.slice2_type)
 def lower_getitem(context, builder, sig, args):
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
 
-    assert isinstance(wheretpe, numba.types.Integer), "not implemented"
-
     wherevalp1 = builder.add(whereval, context.get_constant(wheretpe, 1))
-
     if isinstance(wheretpe, numba.types.Literal):
         wherevalp1_tpe = wheretpe.literal_type
     else:
@@ -101,3 +100,13 @@ def lower_getitem(context, builder, sig, args):
 
     fcn = context.get_function(operator.getitem, rettpe(tpe.contenttpe, numba.types.slice2_type))
     return fcn(builder, (proxyin.content, proxyslice._getvalue()))
+
+@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.slice2_type)
+def lower_getitem(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
+    proxyout.offsets = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
+    proxyout.content = proxyin.content
+    return proxyout._getvalue()

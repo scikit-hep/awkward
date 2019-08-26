@@ -117,7 +117,7 @@ def test_listoffsetarray_len():
         return len(q)
     assert f1(array) == 3
 
-def test_listoffsetarray_getitem():
+def test_listoffsetarray_getitem_int():
     offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
     array = awkward1.layout.ListOffsetArray(offsets, content)
@@ -131,3 +131,18 @@ def test_listoffsetarray_getitem():
     assert numpy.asarray(f2(array, 0)).tolist() == [1.1, 2.2]
     assert numpy.asarray(f2(array, 1)).tolist() == []
     assert numpy.asarray(f2(array, 2)).tolist() == [3.3]
+
+def test_listoffsetarray_getitem_slice():
+    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
+    array = awkward1.layout.ListOffsetArray(offsets, content)
+    @numba.njit
+    def f1(q):
+        return q[1:][1]
+    assert numpy.asarray(f1(array)).tolist() == [3.3]
+    @numba.njit
+    def f2(q):
+        return q[1:]
+    out = f2(array)
+    assert numpy.asarray(out[0]).tolist() == []
+    assert numpy.asarray(out[1]).tolist() == [3.3]
