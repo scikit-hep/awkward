@@ -4,7 +4,7 @@
 
 using awkward;
 
-std::string Index::repr() {
+const std::string IndexOf<T>::repr() const {
   std::stringstream out;
   out << "<Index [";
   if (len() <= 10) {
@@ -35,14 +35,14 @@ std::string Index::repr() {
   return out.str();
 }
 
-IndexType Index::get(IndexType at) {
+T IndexOf<T>::get(T at) {
   assert(0 <= at  &&  at < length_);
   return ptr_.get()[offset_ + at];
 }
 
-Index Index::slice(IndexType start, IndexType stop) {
+IndexOf<T> IndexOf<T>::slice(T start, T stop) {
   assert(start == stop  ||  (0 <= start  &&  start < length_));
   assert(start == stop  ||  (0 < stop    &&  stop <= length_));
   assert(start <= stop);
-  return Index(ptr_, offset_ + start*(start != stop), stop - start);
+  return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
 }
