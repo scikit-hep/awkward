@@ -24,6 +24,32 @@ def test_numpyarray_boxing():
     del out
     assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
 
+def test_numpyarray_refcount1():
+    a = numpy.arange(10)
+    wrapped = awkward1.layout.NumpyArray(a)
+    assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
+    @numba.njit
+    def f1(q):
+        return q[1:9][1:8][1:7]
+    out = f1(wrapped)
+    assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 3)
+    assert numpy.asarray(out).tolist() == list(range(10)[1:9][1:8][1:7])
+    del out
+    assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
+
+def test_numpyarray_refcount2():
+    a = numpy.arange(10)
+    wrapped = awkward1.layout.NumpyArray(a)
+    assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
+    @numba.njit
+    def f1(q):
+        return q[1:9], q[2:8], q[3:7]
+    out = f1(wrapped)
+    assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 3)
+    assert numpy.asarray(out[-1]).tolist() == list(range(3, 7))
+    del out
+    assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
+
 def test_numpyarray_len():
     a = awkward1.layout.NumpyArray(numpy.arange(10))
     @numba.njit
@@ -138,11 +164,13 @@ def test_listoffsetarray_getitem_slice():
     array = awkward1.layout.ListOffsetArray(offsets, content)
     @numba.njit
     def f1(q):
-        return q[1:][1]
-    assert numpy.asarray(f1(array)).tolist() == [3.3]
-    @numba.njit
-    def f2(q):
-        return q[1:]
-    out = f2(array)
-    assert numpy.asarray(out[0]).tolist() == []
-    assert numpy.asarray(out[1]).tolist() == [3.3]
+        return q[1:3]
+    # assert numpy.asarray(f1(array)).tolist() == [3.3]
+    print(f1(array))
+    raise Exception
+    # @numba.njit
+    # def f2(q):
+    #     return q[1:]
+    # out = f2(array)
+    # assert numpy.asarray(out[0]).tolist() == []
+    # assert numpy.asarray(out[1]).tolist() == [3.3]

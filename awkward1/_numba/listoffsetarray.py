@@ -105,8 +105,12 @@ def lower_getitem(context, builder, sig, args):
 def lower_getitem(context, builder, sig, args):
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
+
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
     proxyout.offsets = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
     proxyout.content = proxyin.content
-    return proxyout._getvalue()
+    out = proxyout._getvalue()
+    if context.enable_nrt:
+        context.nrt.incref(builder, rettpe, out)
+    return out
