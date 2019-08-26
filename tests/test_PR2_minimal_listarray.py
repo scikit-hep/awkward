@@ -32,6 +32,13 @@ def test():
     assert numpy.asarray(array[1:3][1]).tolist() == [[8, 9, 10, 11]]
     assert numpy.asarray(array[2:3][0]).tolist() == [[8, 9, 10, 11]]
 
+def test_len():
+    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], dtype="i4"))
+    content = awkward1.layout.NumpyArray(numpy.arange(12).reshape(3, 4))
+    array = awkward1.layout.ListOffsetArray(offsets, content)
+    assert len(content) == 4
+    assert len(array) == 3
+
 def test_members():
     offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], dtype="i4"))
     content = awkward1.layout.NumpyArray(numpy.arange(12).reshape(3, 4))

@@ -155,6 +155,8 @@ PYBIND11_MODULE(layout, m) {
       .def("isempty", &ak::NumpyArray::isempty)
       .def("iscompact", &ak::NumpyArray::iscompact)
 
+      .def("__len__", &ak::NumpyArray::length)
+
       .def("__getitem__", [](ak::NumpyArray& self, ak::AtType at) -> py::object {
         return unwrap(self.get(at));
       })
@@ -189,6 +191,8 @@ PYBIND11_MODULE(layout, m) {
       .def("__repr__", [](ak::ListOffsetArray& self) -> const std::string {
         return self.repr("", "", "");
       })
+
+      .def("__len__", &ak::ListOffsetArray::length)
 
       .def("__getitem__", [](ak::ListOffsetArray& self, ak::AtType at) -> py::object {
         return unwrap(self.get(at));
