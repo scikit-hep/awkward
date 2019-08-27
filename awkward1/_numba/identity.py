@@ -26,8 +26,11 @@ class IdentityModel(numba.datamodel.models.StructModel):
                    ("fieldloc", numba.types.List(numba.types.string)),
                    ("chunkdepth", common.IndexType),
                    ("indexdepth", common.IndexType),
-                   ("array", common.IndexType[:, :])
+                   ("array", fe_type.arraytpe)]
+        super(IdentityModel, self).__init__(dmm, fe_type, members)
 
-
-("array", fe_type.arraytpe)]
-        super(NumpyArrayModel, self).__init__(dmm, fe_type, members)
+numba.extending.make_attribute_wrapper(IdentityType, "ref", "ref")
+numba.extending.make_attribute_wrapper(IdentityType, "fieldloc", "fieldloc")
+numba.extending.make_attribute_wrapper(IdentityType, "chunkdepth", "chunkdepth")
+numba.extending.make_attribute_wrapper(IdentityType, "indexdepth", "indexdepth")
+numba.extending.make_attribute_wrapper(IdentityType, "array", "array")
