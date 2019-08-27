@@ -104,7 +104,15 @@ const std::string NumpyArray::repr(const std::string indent, const std::string p
     }
   }
   out << "\" at=\"0x";
-  out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
+  out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get());
+  if (id_.get() == nullptr) {
+    out << "\"/>" << post;
+  }
+  else {
+    out << "\">\n";
+    out << id_.get()->repr(indent + std::string("    "), "", "\n");
+    out << indent << "</NumpyArray>" << post;
+  }
   return out.str();
 }
 

@@ -13,16 +13,24 @@ void ListOffsetArray::setid() {
 }
 
 void ListOffsetArray::setid(const std::shared_ptr<Identity> id) {
-  std::shared_ptr<Identity> newid(new Identity(Identity::newref(), id.get()->fieldloc(), id.get()->chunkdepth(), id.get()->indexdepth() + 1, content_.get()->length()));
-  Error err = awkward_identity_from_listfoffsets(length(), id.get()->keydepth(), offsets_.ptr().get(), id.get()->ptr().get(), content_.get()->length(), newid.get()->ptr().get());
-  HANDLE_ERROR(err);
-  content_.get()->setid(newid);
+  if (id.get() == nullptr) {
+    content_.get()->setid(id);
+  }
+  else {
+    std::shared_ptr<Identity> newid(new Identity(Identity::newref(), id.get()->fieldloc(), id.get()->chunkdepth(), id.get()->indexdepth() + 1, content_.get()->length()));
+    Error err = awkward_identity_from_listfoffsets(length(), id.get()->keydepth(), offsets_.ptr().get(), id.get()->ptr().get(), content_.get()->length(), newid.get()->ptr().get());
+    HANDLE_ERROR(err);
+    content_.get()->setid(newid);
+  }
   id_ = id;
 }
 
 const std::string ListOffsetArray::repr(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
-  out << indent << pre << "<ListOffsetArray>" << std::endl;
+  out << indent << pre << "<ListOffsetArray>\n";
+  if (id_.get() != nullptr) {
+    out << id_.get()->repr(indent + std::string("    "), "", "\n");
+  }
   out << offsets_.repr(indent + std::string("    "), "<offsets>", "</offsets>\n");
   out << content_.get()->repr(indent + std::string("    "), "<content>", "</content>\n");
   out << indent << "</ListOffsetArray>" << post;
