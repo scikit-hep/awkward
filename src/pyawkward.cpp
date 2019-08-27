@@ -116,8 +116,25 @@ PYBIND11_MODULE(layout, m) {
 
   /////////////////////////////////////////////////////////////// Identity
 
-  py::class_<ak::Identity>(m, "Identity")
+  py::class_<ak::Identity>(m, "Identity", py::buffer_protocol())
+      .def_buffer([](ak::Identity& self) -> py::buffer_info {
+        ak::Index keys(self.keys());
+        return py::buffer_info(
+          reinterpret_cast<ak::IndexType*>(reinterpret_cast<ssize_t>(keys.ptr().get()) +
+                                           keys.offset()*sizeof(ak::IndexType)),
+          sizeof(ak::IndexType),
+          py::format_descriptor<ak::IndexType>::format(),
+          2,
+          { keys.length()/self.keydepth(), self.keydepth() },
+          { sizeof(ak::IndexType)*self.keydepth(), sizeof(ak::IndexType)}
+        );
+      })
+
       .def(py::init([](ak::RefType ref, ak::FieldLocation fieldloc, ak::Index keys, ak::IndexType chunkdepth, ak::IndexType indexdepth) -> ak::Identity {
+        ak::IndexType keydepth = (sizeof(ak::ChunkOffsetType)/sizeof(ak::IndexType))*chunkdepth + indexdepth;
+        if (keys.length() % keydepth != 0) {
+          throw std::invalid_argument("key length must be evenly divisible by keydepth");
+        }
         return ak::Identity(ref, fieldloc, keys, chunkdepth, indexdepth);
       }))
 
