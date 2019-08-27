@@ -4,15 +4,7 @@
 
 using namespace awkward;
 
-const Identity ListOffsetArray::id() const {
-  throw std::runtime_error("not implemented");
-}
-
 void ListOffsetArray::setid() {
-  throw std::runtime_error("not implemented");
-}
-
-void ListOffsetArray::setid(const Identity& parent) {
   throw std::runtime_error("not implemented");
 }
 

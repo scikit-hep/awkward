@@ -180,6 +180,13 @@ PYBIND11_MODULE(layout, m) {
           info.format);
       }))
 
+      .def_property("id", &ak::NumpyArray::id, [](ak::NumpyArray& self, ak::Identity& id) {
+        self.setid(std::shared_ptr<ak::Identity>(new ak::Identity(id)));
+      })
+      .def("setid", [](ak::NumpyArray& self) -> void {
+        self.setid();
+      })
+
       .def("__repr__", [](ak::NumpyArray& self) -> const std::string {
         return self.repr("", "", "");
       })
@@ -224,6 +231,11 @@ PYBIND11_MODULE(layout, m) {
 
       .def_property_readonly("content", [](ak::ListOffsetArray& self) -> py::object {
         return unwrap(self.content());
+      })
+
+      .def_property_readonly("id", &ak::ListOffsetArray::id)
+      .def("setid", [](ak::ListOffsetArray& self) -> void {
+        self.setid();
       })
 
       .def("__repr__", [](ak::ListOffsetArray& self) -> const std::string {

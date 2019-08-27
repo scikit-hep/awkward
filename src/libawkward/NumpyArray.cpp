@@ -45,15 +45,7 @@ byte NumpyArray::getbyte(ssize_t at) const {
   return *reinterpret_cast<byte*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
 }
 
-const Identity NumpyArray::id() const {
-  throw std::runtime_error("not implemented");
-}
-
 void NumpyArray::setid() {
-  throw std::runtime_error("not implemented");
-}
-
-void NumpyArray::setid(const Identity& parent) {
   throw std::runtime_error("not implemented");
 }
 
