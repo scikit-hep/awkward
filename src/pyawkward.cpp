@@ -180,9 +180,16 @@ PYBIND11_MODULE(layout, m) {
           info.format);
       }))
 
-      .def_property("id", &ak::NumpyArray::id, [](ak::NumpyArray& self, ak::Identity& id) {
-        self.setid(std::shared_ptr<ak::Identity>(new ak::Identity(id)));
-      }, py::return_value_policy::copy)
+      .def_property("id", [](ak::NumpyArray& self) -> ak::Identity* {
+        return self.id().get();
+      }, [](ak::NumpyArray& self, ak::Identity* id) -> void {
+        if (id) {
+          self.setid(std::shared_ptr<ak::Identity>(new ak::Identity(*id)));
+        }
+        else {
+          self.setid(std::shared_ptr<ak::Identity>(nullptr));
+        }
+      })
       .def("setid", [](ak::NumpyArray& self) -> void {
         self.setid();
       })
@@ -233,7 +240,16 @@ PYBIND11_MODULE(layout, m) {
         return unwrap(self.content());
       })
 
-      .def_property_readonly("id", &ak::ListOffsetArray::id)
+      .def_property("id", [](ak::ListOffsetArray& self) -> ak::Identity* {
+        return self.id().get();
+      }, [](ak::ListOffsetArray& self, ak::Identity* id) -> void {
+        if (id) {
+          self.setid(std::shared_ptr<ak::Identity>(new ak::Identity(*id)));
+        }
+        else {
+          self.setid(std::shared_ptr<ak::Identity>(nullptr));
+        }
+      })
       .def("setid", [](ak::ListOffsetArray& self) -> void {
         self.setid();
       })
