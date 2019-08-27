@@ -6,7 +6,8 @@
 #include "awkward/cpu-kernels/util.h"
 
 extern "C" {
-  Error awkward_identity_new(IndexType* ptr, IndexType length);
+  Error awkward_identity_new(IndexType length, IndexType* to);
+  Error awkward_identity_from_listfoffsets(IndexType length, IndexType width, IndexType* offsets, IndexType* from, IndexType tolength, IndexType* to);
 }
 
 #endif // AWKWARDCPU_IDENTITY_H_

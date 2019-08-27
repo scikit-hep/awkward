@@ -17,8 +17,8 @@
 namespace awkward {
   class NumpyArray: public Content {
   public:
-    NumpyArray(const std::shared_ptr<byte> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
-        : id_(nullptr)
+    NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<byte> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
+        : id_(id)
         , ptr_(ptr)
         , shape_(shape)
         , strides_(strides)
@@ -44,8 +44,8 @@ namespace awkward {
     byte getbyte(ssize_t at) const;
 
     virtual const std::shared_ptr<Identity> id() const { return id_; }
-    virtual void setid(const std::shared_ptr<Identity> id) { id_ = id; };
     virtual void setid();
+    virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
     virtual IndexType length() const;
     virtual std::shared_ptr<Content> shallow_copy() const;

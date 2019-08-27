@@ -13,8 +13,8 @@
 namespace awkward {
   class ListOffsetArray: public Content {
   public:
-    ListOffsetArray(const Index offsets, const std::shared_ptr<Content> content)
-        : id_(nullptr)
+    ListOffsetArray(const std::shared_ptr<Identity> id, const Index offsets, const std::shared_ptr<Content> content)
+        : id_(id)
         , offsets_(offsets)
         , content_(content) { }
 
@@ -22,8 +22,8 @@ namespace awkward {
     const std::shared_ptr<Content> content() const { return content_.get()->shallow_copy(); }
 
     virtual const std::shared_ptr<Identity> id() const { return id_; }
-    virtual void setid(const std::shared_ptr<Identity> id) { id_ = id; };
     virtual void setid();
+    virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
     virtual IndexType length() const;
     virtual std::shared_ptr<Content> shallow_copy() const;

@@ -5,6 +5,8 @@
 
 using namespace awkward;
 
+#include <iostream>
+
 ssize_t NumpyArray::ndim() const {
   return shape_.size();
 }
@@ -46,12 +48,23 @@ byte NumpyArray::getbyte(ssize_t at) const {
   return *reinterpret_cast<byte*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
 }
 
+void NumpyArray::setid(const std::shared_ptr<Identity> id) {
+  std::cout << "NumpyArray::setid(" << id.get()->ref() << ")" << std::endl;
+  id_ = id;
+}
+
 void NumpyArray::setid() {
   assert(!isscalar());
-  Identity* newid = new Identity(Identity::newref(), FieldLocation(), 0, 1, length());
-  Error err = awkward_identity_new(newid->ptr().get(), length());
+
+  std::cout << "NumpyArray::setid()" << std::endl;
+
+  std::shared_ptr<Identity> newid(new Identity(Identity::newref(), FieldLocation(), 0, 1, length()));
+
+  std::cout << "    new id with " << newid.get()->ref() << std::endl;
+
+  Error err = awkward_identity_new(length(), newid.get()->ptr().get());
   HANDLE_ERROR(err);
-  id_ = std::shared_ptr<Identity>(newid);
+  setid(newid);
 }
 
 const std::string NumpyArray::repr(const std::string indent, const std::string pre, const std::string post) const {
@@ -114,7 +127,7 @@ IndexType NumpyArray::length() const {
 }
 
 std::shared_ptr<Content> NumpyArray::shallow_copy() const {
-  return std::shared_ptr<Content>(new NumpyArray(ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
+  return std::shared_ptr<Content>(new NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
 }
 
 std::shared_ptr<Content> NumpyArray::get(IndexType at) const {
@@ -122,7 +135,11 @@ std::shared_ptr<Content> NumpyArray::get(IndexType at) const {
   ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
   const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
   const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
-  return std::shared_ptr<Content>(new NumpyArray(ptr_, shape, strides, byteoffset, itemsize_, format_));
+  std::shared_ptr<Identity> id;
+  if (id_.get() != nullptr) {
+    id = id_.get()->slice(at, at + 1);
+  }
+  return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset, itemsize_, format_));
 }
 
 std::shared_ptr<Content> NumpyArray::slice(IndexType start, IndexType stop) const {
@@ -131,5 +148,9 @@ std::shared_ptr<Content> NumpyArray::slice(IndexType start, IndexType stop) cons
   std::vector<ssize_t> shape;
   shape.push_back((ssize_t)(stop - start));
   shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-  return std::shared_ptr<Content>(new NumpyArray(ptr_, shape, strides_, byteoffset, itemsize_, format_));
+  std::shared_ptr<Identity> id;
+  if (id_.get() != nullptr) {
+    id = id_.get()->slice(start, stop);
+  }
+  return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
 }

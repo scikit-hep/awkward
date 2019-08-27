@@ -27,3 +27,10 @@ const std::string Identity::repr(const std::string indent, const std::string pre
   out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
   return out.str();
 }
+
+const std::shared_ptr<Identity> Identity::slice(IndexType start, IndexType stop) const {
+  assert(start == stop  ||  (0 <= start  &&  start < length_));
+  assert(start == stop  ||  (0 < stop    &&  stop <= length_));
+  assert(start <= stop);
+  return std::shared_ptr<Identity>(new Identity(ref_, fieldloc_, chunkdepth_, indexdepth_, ptr_, offset_ + keydepth()*start*(start != stop), keydepth()*(stop - start)));
+}

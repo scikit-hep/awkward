@@ -184,7 +184,7 @@ PYBIND11_MODULE(layout, m) {
         if (info.shape.size() != info.ndim  ||  info.strides.size() != info.ndim) {
           throw std::invalid_argument("len(shape) != ndim or len(strides) != ndim");
         }
-        return ak::NumpyArray(std::shared_ptr<ak::byte>(
+        return ak::NumpyArray(std::shared_ptr<ak::Identity>(nullptr), std::shared_ptr<ak::byte>(
           reinterpret_cast<ak::byte*>(info.ptr), pyobject_deleter<ak::byte>(array.ptr())),
           info.shape,
           info.strides,
@@ -243,11 +243,11 @@ PYBIND11_MODULE(layout, m) {
   py::class_<ak::ListOffsetArray>(m, "ListOffsetArray")
 
       .def(py::init([](ak::Index& offsets, ak::NumpyArray& content) -> ak::ListOffsetArray {
-        return ak::ListOffsetArray(offsets, std::shared_ptr<ak::Content>(new ak::NumpyArray(content)));
+        return ak::ListOffsetArray(std::shared_ptr<ak::Identity>(nullptr), offsets, std::shared_ptr<ak::Content>(new ak::NumpyArray(content)));
       }))
 
       .def(py::init([](ak::Index& offsets, ak::ListOffsetArray& content) -> ak::ListOffsetArray {
-        return ak::ListOffsetArray(offsets, std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)));
+        return ak::ListOffsetArray(std::shared_ptr<ak::Identity>(nullptr), offsets, std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)));
       }))
 
       .def_property_readonly("offsets", &ak::ListOffsetArray::offsets)

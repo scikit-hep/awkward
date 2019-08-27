@@ -3,6 +3,7 @@
 #ifndef AWKWARD_IDENTITY_H_
 #define AWKWARD_IDENTITY_H_
 
+#include <cassert>
 #include <atomic>
 #include <iomanip>
 #include <utility>
@@ -49,6 +50,7 @@ namespace awkward {
     const IndexType keydepth() const { return keydepth(chunkdepth_, indexdepth_); }
 
     const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
+    const std::shared_ptr<Identity> slice(IndexType start, IndexType stop) const;
 
   private:
     const RefType ref_;
