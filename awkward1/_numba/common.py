@@ -4,8 +4,11 @@ import operator
 
 import numba
 
-AtType = numba.int64
-IndexType = numba.int32
+byte            = numba.uint8
+IndexType       = numba.int32
+TagType         = numba.uint8
+ChunkOffsetType = numba.int64
+RefType         = numba.int64
 
 class ContentType(numba.types.Type):
     pass
