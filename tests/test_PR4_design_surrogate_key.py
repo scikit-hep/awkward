@@ -14,7 +14,7 @@ def test():
     i2 = awkward1.layout.Index(i)
     assert sys.getrefcount(i) == 3
 
-    x = awkward1.layout.Identity(0, [(0, "hey"), (1, "there")], i2, 1, 2)
+    x = awkward1.layout.Identity(i2, [(0, "hey"), (1, "there")], 1, 2)
     assert sys.getrefcount(i) == 3
 
     tmp = numpy.asarray(x)

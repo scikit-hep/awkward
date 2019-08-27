@@ -3,6 +3,7 @@
 #ifndef AWKWARD_IDENTITY_H_
 #define AWKWARD_IDENTITY_H_
 
+#include <atomic>
 #include <iomanip>
 #include <utility>
 #include <string>
@@ -16,29 +17,31 @@ namespace awkward {
 
   class Identity {
   public:
-    Identity(const RefType ref, const FieldLocation fieldloc, const Index keys, const IndexType chunkdepth, const IndexType indexdepth)
-        : ref_(ref)
-        , fieldloc_(fieldloc)
-        , keys_(keys)
-        , chunkdepth_(chunkdepth)
-        , indexdepth_(indexdepth) { }
+    static RefType newref();
 
-    const RefType ref() const { return ref_; }
-    const FieldLocation fieldloc() const { return fieldloc_; }
+    Identity(const Index keys, const FieldLocation fieldloc, const IndexType chunkdepth, const IndexType indexdepth)
+        : keys_(keys)
+        , fieldloc_(fieldloc)
+        , chunkdepth_(chunkdepth)
+        , indexdepth_(indexdepth)
+        , ref_(newref()) { }
+
     const Index keys() const { return keys_; }
+    const FieldLocation fieldloc() const { return fieldloc_; }
     const IndexType chunkdepth() const { return chunkdepth_; }
     const IndexType indexdepth() const { return indexdepth_; }
+    const RefType ref() const { return ref_; }
 
     const IndexType keydepth() const { return (sizeof(ChunkOffsetType)/sizeof(IndexType))*chunkdepth_ + indexdepth_; }
 
     const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
 
   private:
-    const RefType ref_;
-    const FieldLocation fieldloc_;
     const Index keys_;
+    const FieldLocation fieldloc_;
     const IndexType chunkdepth_;
     const IndexType indexdepth_;
+    const RefType ref_;
   };
 }
 

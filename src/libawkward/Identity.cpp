@@ -4,6 +4,12 @@
 
 using namespace awkward;
 
+std::atomic<RefType> numrefs{0};
+
+RefType Identity::newref() {
+  return numrefs++;
+}
+
 const std::string Identity::repr(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
   out << indent << pre << "<Identity ref=\"" << ref_ << "\" fieldloc=\"[";

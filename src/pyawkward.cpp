@@ -130,17 +130,23 @@ PYBIND11_MODULE(layout, m) {
         );
       })
 
-      .def(py::init([](ak::RefType ref, ak::FieldLocation fieldloc, ak::Index keys, ak::IndexType chunkdepth, ak::IndexType indexdepth) -> ak::Identity {
+      .def(py::init([](ak::Index keys, ak::FieldLocation fieldloc, ak::IndexType chunkdepth, ak::IndexType indexdepth) -> ak::Identity {
         ak::IndexType keydepth = (sizeof(ak::ChunkOffsetType)/sizeof(ak::IndexType))*chunkdepth + indexdepth;
         if (keys.length() % keydepth != 0) {
           throw std::invalid_argument("key length must be evenly divisible by keydepth");
         }
-        return ak::Identity(ref, fieldloc, keys, chunkdepth, indexdepth);
+        return ak::Identity(keys, fieldloc, chunkdepth, indexdepth);
       }))
 
       .def("__repr__", [](ak::Identity& self) -> const std::string {
         return self.repr("", "", "");
       })
+
+      .def_property_readonly("fieldloc", &ak::Identity::fieldloc)
+      .def_property_readonly("chunkdepth", &ak::Identity::chunkdepth)
+      .def_property_readonly("indexdepth", &ak::Identity::indexdepth)
+      .def_property_readonly("ref", &ak::Identity::ref)
+      .def_property_readonly("keydepth", &ak::Identity::keydepth)
 
   ;
 
@@ -178,14 +184,14 @@ PYBIND11_MODULE(layout, m) {
         return self.repr("", "", "");
       })
 
-      .def("shape", &ak::NumpyArray::shape)
-      .def("strides", &ak::NumpyArray::strides)
-      .def("itemsize", &ak::NumpyArray::itemsize)
-      .def("format", &ak::NumpyArray::format)
-      .def("ndim", &ak::NumpyArray::ndim)
-      .def("isscalar", &ak::NumpyArray::isscalar)
-      .def("isempty", &ak::NumpyArray::isempty)
-      .def("iscompact", &ak::NumpyArray::iscompact)
+      .def_property_readonly("shape", &ak::NumpyArray::shape)
+      .def_property_readonly("strides", &ak::NumpyArray::strides)
+      .def_property_readonly("itemsize", &ak::NumpyArray::itemsize)
+      .def_property_readonly("format", &ak::NumpyArray::format)
+      .def_property_readonly("ndim", &ak::NumpyArray::ndim)
+      .def_property_readonly("isscalar", &ak::NumpyArray::isscalar)
+      .def_property_readonly("isempty", &ak::NumpyArray::isempty)
+      .def_property_readonly("iscompact", &ak::NumpyArray::iscompact)
 
       .def("__len__", &ak::NumpyArray::length)
 
