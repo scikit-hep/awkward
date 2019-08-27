@@ -37,13 +37,13 @@ const std::string IndexOf<T>::repr(const std::string indent, const std::string p
 }
 
 template <typename T>
-T IndexOf<T>::get(AtType at) const {
+T IndexOf<T>::get(IndexType at) const {
   assert(0 <= at  &&  at < length_);
   return ptr_.get()[offset_ + at];
 }
 
 template <typename T>
-IndexOf<T> IndexOf<T>::slice(AtType start, AtType stop) const {
+IndexOf<T> IndexOf<T>::slice(IndexType start, IndexType stop) const {
   assert(start == stop  ||  (0 <= start  &&  start < length_));
   assert(start == stop  ||  (0 < stop    &&  stop <= length_));
   assert(start <= stop);

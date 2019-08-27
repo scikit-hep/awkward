@@ -21,12 +21,12 @@ std::shared_ptr<Content> ListOffsetArray::shallow_copy() const {
   return std::shared_ptr<Content>(new ListOffsetArray(offsets_, content_));
 }
 
-std::shared_ptr<Content> ListOffsetArray::get(AtType at) const {
+std::shared_ptr<Content> ListOffsetArray::get(IndexType at) const {
   IndexType start = offsets_.get(at);
   IndexType stop = offsets_.get(at + 1);
   return content_.get()->slice(start, stop);
 }
 
-std::shared_ptr<Content> ListOffsetArray::slice(AtType start, AtType stop) const {
+std::shared_ptr<Content> ListOffsetArray::slice(IndexType start, IndexType stop) const {
   return std::shared_ptr<Content>(new ListOffsetArray(offsets_.slice(start, stop + 1), content_));
 }

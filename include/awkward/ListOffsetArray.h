@@ -23,8 +23,8 @@ namespace awkward {
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
     virtual IndexType length() const;
     virtual std::shared_ptr<Content> shallow_copy() const;
-    virtual std::shared_ptr<Content> get(AtType at) const;
-    virtual std::shared_ptr<Content> slice(AtType start, AtType stop) const;
+    virtual std::shared_ptr<Content> get(IndexType at) const;
+    virtual std::shared_ptr<Content> slice(IndexType start, IndexType stop) const;
 
   private:
     const Index offsets_;

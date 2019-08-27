@@ -108,7 +108,7 @@ std::shared_ptr<Content> NumpyArray::shallow_copy() const {
   return std::shared_ptr<Content>(new NumpyArray(ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
 }
 
-std::shared_ptr<Content> NumpyArray::get(AtType at) const {
+std::shared_ptr<Content> NumpyArray::get(IndexType at) const {
   assert(!isscalar());
   ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
   const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
@@ -116,7 +116,7 @@ std::shared_ptr<Content> NumpyArray::get(AtType at) const {
   return std::shared_ptr<Content>(new NumpyArray(ptr_, shape, strides, byteoffset, itemsize_, format_));
 }
 
-std::shared_ptr<Content> NumpyArray::slice(AtType start, AtType stop) const {
+std::shared_ptr<Content> NumpyArray::slice(IndexType start, IndexType stop) const {
   assert(!isscalar());
   ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
   std::vector<ssize_t> shape;

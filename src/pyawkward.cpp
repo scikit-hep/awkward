@@ -109,7 +109,7 @@ PYBIND11_MODULE(layout, m) {
         if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
           throw py::error_already_set();
         }
-        return self.slice((ak::AtType)start, (ak::AtType)stop);
+        return self.slice((ak::IndexType)start, (ak::IndexType)stop);
       })
 
   ;
@@ -189,7 +189,7 @@ PYBIND11_MODULE(layout, m) {
 
       .def("__len__", &ak::NumpyArray::length)
 
-      .def("__getitem__", [](ak::NumpyArray& self, ak::AtType at) -> py::object {
+      .def("__getitem__", [](ak::NumpyArray& self, ak::IndexType at) -> py::object {
         return unwrap(self.get(at));
       })
 
@@ -198,7 +198,7 @@ PYBIND11_MODULE(layout, m) {
         if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
           throw py::error_already_set();
         }
-        return unwrap(self.slice((ak::AtType)start, (ak::AtType)stop));
+        return unwrap(self.slice((ak::IndexType)start, (ak::IndexType)stop));
       })
 
   ;
@@ -226,7 +226,7 @@ PYBIND11_MODULE(layout, m) {
 
       .def("__len__", &ak::ListOffsetArray::length)
 
-      .def("__getitem__", [](ak::ListOffsetArray& self, ak::AtType at) -> py::object {
+      .def("__getitem__", [](ak::ListOffsetArray& self, ak::IndexType at) -> py::object {
         return unwrap(self.get(at));
       })
 
@@ -235,7 +235,7 @@ PYBIND11_MODULE(layout, m) {
         if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
           throw py::error_already_set();
         }
-        return unwrap(self.slice((ak::AtType)start, (ak::AtType)stop));
+        return unwrap(self.slice((ak::IndexType)start, (ak::IndexType)stop));
       })
 
   ;
