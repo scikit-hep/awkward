@@ -17,10 +17,11 @@
 #endif
 
 namespace awkward {
-  typedef int64_t ChunkedAtType;
+  typedef uint8_t byte;
   typedef int32_t AtType;
   typedef int32_t IndexType;
-  typedef uint8_t byte;
+  typedef int8_t TagType;
+  typedef int64_t ChunkOffsetType;
 
   const IndexType MAXSIZE = 2147483647;   // 2**31 - 1
 

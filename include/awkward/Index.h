@@ -38,7 +38,9 @@ namespace awkward {
     const T length_;
   };
 
-  class Index: public IndexOf<IndexType> { };
+  typedef IndexOf<IndexType> Index;
+  typedef IndexOf<TagType> TagIndex;
+  typedef IndexOf<ChunkOffsetType> ChunkOffsetIndex;
 }
 
 #endif // AWKWARD_INDEX_H_
