@@ -5,8 +5,6 @@
 
 using namespace awkward;
 
-#include <iostream>
-
 ssize_t NumpyArray::ndim() const {
   return shape_.size();
 }
@@ -49,19 +47,12 @@ byte NumpyArray::getbyte(ssize_t at) const {
 }
 
 void NumpyArray::setid(const std::shared_ptr<Identity> id) {
-  std::cout << "NumpyArray::setid(" << id.get()->ref() << ")" << std::endl;
   id_ = id;
 }
 
 void NumpyArray::setid() {
   assert(!isscalar());
-
-  std::cout << "NumpyArray::setid()" << std::endl;
-
   std::shared_ptr<Identity> newid(new Identity(Identity::newref(), FieldLocation(), 0, 1, length()));
-
-  std::cout << "    new id with " << newid.get()->ref() << std::endl;
-
   Error err = awkward_identity_new(length(), newid.get()->ptr().get());
   HANDLE_ERROR(err);
   setid(newid);

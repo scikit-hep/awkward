@@ -32,5 +32,5 @@ const std::shared_ptr<Identity> Identity::slice(IndexType start, IndexType stop)
   assert(start == stop  ||  (0 <= start  &&  start < length_));
   assert(start == stop  ||  (0 < stop    &&  stop <= length_));
   assert(start <= stop);
-  return std::shared_ptr<Identity>(new Identity(ref_, fieldloc_, chunkdepth_, indexdepth_, ptr_, offset_ + keydepth()*start*(start != stop), keydepth()*(stop - start)));
+  return std::shared_ptr<Identity>(new Identity(ref_, fieldloc_, chunkdepth_, indexdepth_, ptr_, offset_ + keydepth()*start*(start != stop), (stop - start)));
 }

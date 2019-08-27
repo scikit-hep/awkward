@@ -62,3 +62,17 @@ def test_numpyarray_setid():
     x2 = awkward1.layout.NumpyArray(x)
     x2.setid()
     assert numpy.asarray(x2.id).tolist() == numpy.arange(40).reshape(40, 1).tolist()
+
+def test_listoffsetarray_setid():
+    content = awkward1.layout.NumpyArray(numpy.arange(10))
+    offsets = awkward1.layout.Index(numpy.array([0, 3, 3, 5, 10], dtype="i4"))
+    jagged = awkward1.layout.ListOffsetArray(offsets, content)
+    jagged.setid()
+    assert numpy.asarray(jagged.id).tolist() == [[0], [1], [2], [3]]
+    assert numpy.asarray(jagged.content.id).tolist() == [[0, 0], [0, 1], [0, 2], [2, 0], [2, 1], [3, 0], [3, 1], [3, 2], [3, 3], [3, 4]]
+    assert numpy.asarray(jagged.content[3:7].id).tolist() == [[2, 0], [2, 1], [3, 0], [3, 1]]
+    assert numpy.asarray(jagged[0].id).tolist() == [[0, 0], [0, 1], [0, 2]]
+    assert numpy.asarray(jagged[1].id).tolist() == []
+    assert numpy.asarray(jagged[2].id).tolist() == [[2, 0], [2, 1]]
+    assert numpy.asarray(jagged[3].id).tolist() == [[3, 0], [3, 1], [3, 2], [3, 3], [3, 4]]
+    assert numpy.asarray(jagged[1:3].id).tolist() == [[1], [2]]

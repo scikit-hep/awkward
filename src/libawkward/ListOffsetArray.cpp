@@ -3,27 +3,17 @@
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/ListOffsetArray.h"
 
-#include <iostream>
-
 using namespace awkward;
 
 void ListOffsetArray::setid() {
-  std::cout << "ListOffsetArray::setid()" << std::endl;
-
   std::shared_ptr<Identity> newid(new Identity(Identity::newref(), FieldLocation(), 0, 1, length()));
-  std::cout << "    new id with " << newid.get()->ref() << std::endl;
-
   Error err = awkward_identity_new(length(), newid.get()->ptr().get());
   HANDLE_ERROR(err);
   setid(newid);
 }
 
 void ListOffsetArray::setid(const std::shared_ptr<Identity> id) {
-  std::cout << "ListOffsetArray::setid(" << id.get()->ref() << ")" << std::endl;
-
   std::shared_ptr<Identity> newid(new Identity(Identity::newref(), id.get()->fieldloc(), id.get()->chunkdepth(), id.get()->indexdepth() + 1, content_.get()->length()));
-  std::cout << "    new id with " << newid.get()->ref() << std::endl;
-
   Error err = awkward_identity_from_listfoffsets(length(), id.get()->keydepth(), offsets_.ptr().get(), id.get()->ptr().get(), content_.get()->length(), newid.get()->ptr().get());
   HANDLE_ERROR(err);
   content_.get()->setid(newid);
