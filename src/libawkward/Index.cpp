@@ -50,6 +50,8 @@ IndexOf<T> IndexOf<T>::slice(AtType start, AtType stop) const {
   return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
 }
 
-template class IndexOf<IndexType>;
-template class IndexOf<TagType>;
-template class IndexOf<ChunkOffsetType>;
+namespace awkward {
+  template class IndexOf<IndexType>;
+  template class IndexOf<TagType>;
+  template class IndexOf<ChunkOffsetType>;
+}

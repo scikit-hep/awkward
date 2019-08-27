@@ -22,6 +22,7 @@ namespace awkward {
   typedef int32_t IndexType;
   typedef int8_t TagType;
   typedef int64_t ChunkOffsetType;
+  typedef int64_t RefType;
 
   const IndexType MAXSIZE = 2147483647;   // 2**31 - 1
 
