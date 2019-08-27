@@ -4,11 +4,13 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include <pybind11/stl.h>
 
 #include "awkward/cpu-kernels/dummy1.h"
 #include "awkward/dummy2.h"
 
 #include "awkward/Index.h"
+#include "awkward/Identity.h"
 #include "awkward/Content.h"
 #include "awkward/NumpyArray.h"
 #include "awkward/ListOffsetArray.h"
@@ -108,6 +110,19 @@ PYBIND11_MODULE(layout, m) {
           throw py::error_already_set();
         }
         return self.slice((ak::AtType)start, (ak::AtType)stop);
+      })
+
+  ;
+
+  /////////////////////////////////////////////////////////////// Identity
+
+  py::class_<ak::Identity>(m, "Identity")
+      .def(py::init([](ak::RefType ref, ak::FieldLocation fieldloc, ak::Index keys, ak::IndexType chunkdepth, ak::IndexType indexdepth) -> ak::Identity {
+        return ak::Identity(ref, fieldloc, keys, chunkdepth, indexdepth);
+      }))
+
+      .def("__repr__", [](ak::Identity& self) -> const std::string {
+        return self.repr("", "", "");
       })
 
   ;

@@ -24,7 +24,8 @@ namespace awkward {
   typedef int64_t ChunkOffsetType;
   typedef int64_t RefType;
 
-  const IndexType MAXSIZE = 2147483647;   // 2**31 - 1
+  const IndexType       kMaxIndexType       =          2147483647;   // 2**31 - 1
+  const ChunkOffsetType kMaxChunkOffsetType = 9223372036854775807;   // 2**63 - 1
 
   namespace util {
 
