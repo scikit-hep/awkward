@@ -8,9 +8,10 @@
 #include <utility>
 #include <string>
 #include <vector>
+#include <memory>
+#include <sstream>
 
 #include "awkward/util.h"
-#include "awkward/Index.h"
 
 namespace awkward {
   typedef std::vector<std::pair<IndexType, std::string>> FieldLocation;
@@ -18,30 +19,45 @@ namespace awkward {
   class Identity {
   public:
     static RefType newref();
+    static IndexType keydepth(IndexType chunkdepth, IndexType indexdepth);
 
-    Identity(const Index keys, const FieldLocation fieldloc, const IndexType chunkdepth, const IndexType indexdepth, const RefType ref)
-        : keys_(keys)
+    Identity(const RefType ref, const FieldLocation fieldloc, IndexType chunkdepth, IndexType indexdepth, IndexType length)
+        : ref_(ref)
         , fieldloc_(fieldloc)
         , chunkdepth_(chunkdepth)
         , indexdepth_(indexdepth)
-        , ref_(ref) { }
+        , ptr_(std::shared_ptr<IndexType>(new IndexType[length*Identity::keydepth(chunkdepth, indexdepth)]))
+        , offset_(0)
+        , length_(length) { }
+    Identity(const RefType ref, const FieldLocation fieldloc, IndexType chunkdepth, IndexType indexdepth, const std::shared_ptr<IndexType> ptr, IndexType offset, IndexType length)
+        : ref_(ref)
+        , fieldloc_(fieldloc)
+        , chunkdepth_(chunkdepth)
+        , indexdepth_(indexdepth)
+        , ptr_(ptr)
+        , offset_(offset)
+        , length_(length) { }
 
-    const Index keys() const { return keys_; }
+    const RefType ref() const { return ref_; }
     const FieldLocation fieldloc() const { return fieldloc_; }
     const IndexType chunkdepth() const { return chunkdepth_; }
     const IndexType indexdepth() const { return indexdepth_; }
-    const RefType ref() const { return ref_; }
+    const std::shared_ptr<IndexType> ptr() const { return ptr_; }
+    const IndexType offset() const { return offset_; }
+    const IndexType length() const { return length_; }
 
-    const IndexType keydepth() const { return (sizeof(ChunkOffsetType)/sizeof(IndexType))*chunkdepth_ + indexdepth_; }
+    const IndexType keydepth() const { return keydepth(chunkdepth_, indexdepth_); }
 
     const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
 
   private:
-    const Index keys_;
+    const RefType ref_;
     const FieldLocation fieldloc_;
     const IndexType chunkdepth_;
     const IndexType indexdepth_;
-    const RefType ref_;
+    const std::shared_ptr<IndexType> ptr_;
+    IndexType offset_;
+    IndexType length_;
   };
 }
 

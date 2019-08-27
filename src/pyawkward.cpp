@@ -22,6 +22,8 @@ int dummy3(int x) {
   return dummy2(x);
 }
 
+#include <iostream>
+
 template<typename T>
 class pyobject_deleter {
 public:
@@ -29,6 +31,7 @@ public:
     Py_INCREF(pyobj_);
   }
   void operator()(T const *p) {
+    std::cout << "decrementing from " << Py_REFCNT(pyobj_) << std::endl;
     Py_DECREF(pyobj_);
   }
 private:
@@ -95,12 +98,13 @@ PYBIND11_MODULE(layout, m) {
           reinterpret_cast<ak::IndexType*>(info.ptr),
           pyobject_deleter<ak::IndexType>(array.ptr())),
           0,
-          (ak::IndexType)(info.shape[0]));
+          (ak::IndexType)info.shape[0]);
       }))
 
       .def("__repr__", [](ak::Index& self) -> const std::string {
         return self.repr("", "", "");
       })
+      .def("__len__", &ak::Index::length)
 
       .def("__getitem__", &ak::Index::get)
 
@@ -118,35 +122,47 @@ PYBIND11_MODULE(layout, m) {
 
   py::class_<ak::Identity>(m, "Identity", py::buffer_protocol())
       .def_buffer([](ak::Identity& self) -> py::buffer_info {
-        ak::Index keys(self.keys());
         return py::buffer_info(
-          reinterpret_cast<ak::IndexType*>(reinterpret_cast<ssize_t>(keys.ptr().get()) +
-                                           keys.offset()*sizeof(ak::IndexType)),
+          reinterpret_cast<ak::IndexType*>(reinterpret_cast<ssize_t>(self.ptr().get()) +
+                                           self.offset()*sizeof(ak::IndexType)),
           sizeof(ak::IndexType),
           py::format_descriptor<ak::IndexType>::format(),
           2,
-          { keys.length()/self.keydepth(), self.keydepth() },
+          { self.length(), self.keydepth() },
           { sizeof(ak::IndexType)*self.keydepth(), sizeof(ak::IndexType)}
         );
       })
 
-      .def(py::init([](ak::Index keys, ak::FieldLocation fieldloc, ak::IndexType chunkdepth, ak::IndexType indexdepth) -> ak::Identity {
-        ak::IndexType keydepth = (sizeof(ak::ChunkOffsetType)/sizeof(ak::IndexType))*chunkdepth + indexdepth;
-        if (keys.length() % keydepth != 0) {
-          throw std::invalid_argument("key length must be evenly divisible by keydepth");
+      .def_static("newref", &ak::Identity::newref)
+
+      .def(py::init([](ak::RefType ref, ak::FieldLocation fieldloc, ak::IndexType chunkdepth, ak::IndexType indexdepth, py::array_t<ak::IndexType, py::array::c_style | py::array::forcecast> array) {
+        py::buffer_info info = array.request();
+        if (info.ndim != 2) {
+          throw std::invalid_argument("Identity must be built from a two-dimensional array");
         }
-        return ak::Identity(keys, fieldloc, chunkdepth, indexdepth, ak::Identity::newref());
+        if (ak::Identity::keydepth(chunkdepth, indexdepth) != info.shape[1]) {
+          throw std::invalid_argument("second dimension of array must be consistent with chunkdepth and indexdepth");
+        }
+        if (info.strides[0] != sizeof(ak::IndexType)*info.shape[1]  ||  info.strides[1] != sizeof(ak::IndexType)) {
+          throw std::invalid_argument("Identity must be built from a compact array (array.strides == (array.shape[1]*array.itemsize, array.itemsize)); try array.copy()");
+        }
+        return ak::Identity(ref, fieldloc, chunkdepth, indexdepth,
+                            std::shared_ptr<ak::IndexType>(reinterpret_cast<ak::IndexType*>(info.ptr),
+                                                           pyobject_deleter<ak::IndexType>(array.ptr())),
+                            0,
+                            (ak::IndexType)info.shape[0]);
       }))
 
       .def("__repr__", [](ak::Identity& self) -> const std::string {
         return self.repr("", "", "");
       })
+      .def("__len__", &ak::Identity::length)
 
+      .def_property_readonly("ref", &ak::Identity::ref)
       .def_property_readonly("fieldloc", &ak::Identity::fieldloc)
       .def_property_readonly("chunkdepth", &ak::Identity::chunkdepth)
       .def_property_readonly("indexdepth", &ak::Identity::indexdepth)
-      .def_property_readonly("ref", &ak::Identity::ref)
-      .def_property_readonly("keydepth", &ak::Identity::keydepth)
+      .def_property_readonly("keydepth", [](ak::Identity& self) { return self.keydepth(); })
 
   ;
 
