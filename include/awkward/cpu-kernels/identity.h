@@ -6,7 +6,7 @@
 #include "awkward/cpu-kernels/util.h"
 
 extern "C" {
-  Error awkward_identity_numpyarray_newid(IndexType* ptr, IndexType length);
+  Error awkward_identity_new(IndexType* ptr, IndexType length);
 }
 
 #endif // AWKWARDCPU_IDENTITY_H_

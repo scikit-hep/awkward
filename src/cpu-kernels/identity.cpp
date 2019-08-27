@@ -2,7 +2,7 @@
 
 #include "awkward/cpu-kernels/identity.h"
 
-Error awkward_identity_numpyarray_newid(IndexType* ptr, IndexType length) {
+Error awkward_identity_new(IndexType* ptr, IndexType length) {
   for (IndexType i = 0;  i < length;  i++) {
     ptr[i] = i;
   }

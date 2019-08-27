@@ -56,3 +56,9 @@ def test_refcount3():
     assert sys.getrefcount(i) == 3
     x2.id = None
     assert sys.getrefcount(i) == 2
+
+def test_numpyarray_setid():
+    x = numpy.arange(160).reshape(40, 4)
+    x2 = awkward1.layout.NumpyArray(x)
+    x2.setid()
+    assert numpy.asarray(x2.id).tolist() == numpy.arange(40).reshape(40, 1).tolist()

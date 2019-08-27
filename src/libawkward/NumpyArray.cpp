@@ -49,7 +49,7 @@ byte NumpyArray::getbyte(ssize_t at) const {
 void NumpyArray::setid() {
   assert(!isscalar());
   Identity* newid = new Identity(Identity::newref(), FieldLocation(), 0, 1, length());
-  Error err = awkward_identity_numpyarray_newid(newid->ptr().get(), length());
+  Error err = awkward_identity_new(newid->ptr().get(), length());
   HANDLE_ERROR(err);
   id_ = std::shared_ptr<Identity>(newid);
 }

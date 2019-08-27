@@ -23,7 +23,7 @@ namespace awkward {
 
   typedef uint8_t byte;
   typedef int32_t IndexType;
-  typedef int8_t TagType;
+  typedef unsigned char TagType;
   typedef int64_t ChunkOffsetType;
   typedef int64_t RefType;
 
