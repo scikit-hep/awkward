@@ -19,12 +19,12 @@ namespace awkward {
   public:
     static RefType newref();
 
-    Identity(const Index keys, const FieldLocation fieldloc, const IndexType chunkdepth, const IndexType indexdepth)
+    Identity(const Index keys, const FieldLocation fieldloc, const IndexType chunkdepth, const IndexType indexdepth, const RefType ref)
         : keys_(keys)
         , fieldloc_(fieldloc)
         , chunkdepth_(chunkdepth)
         , indexdepth_(indexdepth)
-        , ref_(newref()) { }
+        , ref_(ref) { }
 
     const Index keys() const { return keys_; }
     const FieldLocation fieldloc() const { return fieldloc_; }

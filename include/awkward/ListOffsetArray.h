@@ -20,6 +20,9 @@ namespace awkward {
     const Index offsets() const { return offsets_; }
     const std::shared_ptr<Content> content() const { return content_.get()->shallow_copy(); }
 
+    virtual const Identity id() const;
+    virtual void setid();
+    virtual void setid(const Identity& parent);
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
     virtual IndexType length() const;
     virtual std::shared_ptr<Content> shallow_copy() const;

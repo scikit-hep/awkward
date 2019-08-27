@@ -4,6 +4,18 @@
 
 using namespace awkward;
 
+const Identity ListOffsetArray::id() const {
+  throw std::runtime_error("not implemented");
+}
+
+void ListOffsetArray::setid() {
+  throw std::runtime_error("not implemented");
+}
+
+void ListOffsetArray::setid(const Identity& parent) {
+  throw std::runtime_error("not implemented");
+}
+
 const std::string ListOffsetArray::repr(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
   out << indent << pre << "<ListOffsetArray>" << std::endl;

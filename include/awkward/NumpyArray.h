@@ -42,6 +42,9 @@ namespace awkward {
     ssize_t bytelength() const;
     byte getbyte(ssize_t at) const;
 
+    virtual const Identity id() const;
+    virtual void setid();
+    virtual void setid(const Identity& parent);
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
     virtual IndexType length() const;
     virtual std::shared_ptr<Content> shallow_copy() const;

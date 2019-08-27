@@ -135,7 +135,7 @@ PYBIND11_MODULE(layout, m) {
         if (keys.length() % keydepth != 0) {
           throw std::invalid_argument("key length must be evenly divisible by keydepth");
         }
-        return ak::Identity(keys, fieldloc, chunkdepth, indexdepth);
+        return ak::Identity(keys, fieldloc, chunkdepth, indexdepth, ak::Identity::newref());
       }))
 
       .def("__repr__", [](ak::Identity& self) -> const std::string {
