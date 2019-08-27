@@ -1,5 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include "awkward/cpu-kernels/identity.h"
 #include "awkward/NumpyArray.h"
 
 using namespace awkward;
@@ -43,6 +44,18 @@ ssize_t NumpyArray::bytelength() const {
 
 byte NumpyArray::getbyte(ssize_t at) const {
   return *reinterpret_cast<byte*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
+}
+
+void NumpyArray::setid(const std::shared_ptr<Identity> id) {
+  id_ = id;
+}
+
+void NumpyArray::setid() {
+  assert(!isscalar());
+  std::shared_ptr<Identity> newid(new Identity(Identity::newref(), FieldLocation(), 0, 1, length()));
+  Error err = awkward_identity_new(length(), newid.get()->ptr().get());
+  HANDLE_ERROR(err);
+  setid(newid);
 }
 
 const std::string NumpyArray::repr(const std::string indent, const std::string pre, const std::string post) const {
@@ -91,7 +104,15 @@ const std::string NumpyArray::repr(const std::string indent, const std::string p
     }
   }
   out << "\" at=\"0x";
-  out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
+  out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get());
+  if (id_.get() == nullptr) {
+    out << "\"/>" << post;
+  }
+  else {
+    out << "\">\n";
+    out << id_.get()->repr(indent + std::string("    "), "", "\n");
+    out << indent << "</NumpyArray>" << post;
+  }
   return out.str();
 }
 
@@ -100,27 +121,35 @@ IndexType NumpyArray::length() const {
     return -1;
   }
   else {
-    return shape_[shape_.size() - 1];
+    return (IndexType)shape_[0];
   }
 }
 
 std::shared_ptr<Content> NumpyArray::shallow_copy() const {
-  return std::shared_ptr<Content>(new NumpyArray(ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
+  return std::shared_ptr<Content>(new NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
 }
 
-std::shared_ptr<Content> NumpyArray::get(AtType at) const {
+std::shared_ptr<Content> NumpyArray::get(IndexType at) const {
   assert(!isscalar());
   ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
   const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
   const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
-  return std::shared_ptr<Content>(new NumpyArray(ptr_, shape, strides, byteoffset, itemsize_, format_));
+  std::shared_ptr<Identity> id;
+  if (id_.get() != nullptr) {
+    id = id_.get()->slice(at, at + 1);
+  }
+  return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset, itemsize_, format_));
 }
 
-std::shared_ptr<Content> NumpyArray::slice(AtType start, AtType stop) const {
+std::shared_ptr<Content> NumpyArray::slice(IndexType start, IndexType stop) const {
   assert(!isscalar());
   ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
   std::vector<ssize_t> shape;
   shape.push_back((ssize_t)(stop - start));
   shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-  return std::shared_ptr<Content>(new NumpyArray(ptr_, shape, strides_, byteoffset, itemsize_, format_));
+  std::shared_ptr<Identity> id;
+  if (id_.get() != nullptr) {
+    id = id_.get()->slice(start, stop);
+  }
+  return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
 }

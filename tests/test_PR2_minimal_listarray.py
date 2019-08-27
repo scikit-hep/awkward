@@ -34,7 +34,7 @@ def test():
 
 def test_len():
     offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], dtype="i4"))
-    content = awkward1.layout.NumpyArray(numpy.arange(12).reshape(3, 4))
+    content = awkward1.layout.NumpyArray(numpy.arange(12).reshape(4, 3))
     array = awkward1.layout.ListOffsetArray(offsets, content)
     assert len(content) == 4
     assert len(array) == 3

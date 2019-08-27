@@ -1,2 +1,4 @@
-cmd: ([ ! -d build ]  &&  cmake -Bbuild) ; cmake --build build
+# cmd: ([ ! -d build ]  &&  cmake -Bbuild) ; cmake --build build
+# cmd: 'rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc ; python setup.py build'
+cmd: 'python setup.py build'
 errorMatch: '(?<file>[/0-9a-zA-Z\._-]+):(?<line>\d+):(?<col>\d+):\s+error:\s+(?<message>.+)'

@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import shutil
+import glob
 
 import distutils.version
 import setuptools
@@ -54,6 +55,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
+
+        for lib in (glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.so")) +
+                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.dylib")) +
+                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.dll")) +
+                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.pyd"))):
+          if os.path.exists(lib):
+              os.remove(lib)
 
         for lib in os.listdir(extdir):
             if lib.endswith(".so") or lib.endswith(".dylib") or lib.endswith(".dll") or lib.endswith(".pyd"):

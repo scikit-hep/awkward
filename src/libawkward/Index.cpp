@@ -4,11 +4,12 @@
 
 using namespace awkward;
 
-const std::string Index::repr(const std::string indent, const std::string pre, const std::string post) const {
+template <typename T>
+const std::string IndexOf<T>::repr(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
   out << indent << pre << "<Index i=\"[";
   if (length_ <= 10) {
-    for (IndexType i = 0;  i < length_;  i++) {
+    for (T i = 0;  i < length_;  i++) {
       if (i != 0) {
         out << " ";
       }
@@ -16,14 +17,14 @@ const std::string Index::repr(const std::string indent, const std::string pre, c
     }
   }
   else {
-    for (IndexType i = 0;  i < 5;  i++) {
+    for (T i = 0;  i < 5;  i++) {
       if (i != 0) {
         out << " ";
       }
       out << get(i);
     }
     out << " ... ";
-    for (IndexType i = length_ - 6;  i < length_;  i++) {
+    for (T i = length_ - 6;  i < length_;  i++) {
       if (i != length_ - 6) {
         out << " ";
       }
@@ -35,14 +36,22 @@ const std::string Index::repr(const std::string indent, const std::string pre, c
   return out.str();
 }
 
-IndexType Index::get(AtType at) const {
+template <typename T>
+T IndexOf<T>::get(T at) const {
   assert(0 <= at  &&  at < length_);
   return ptr_.get()[offset_ + at];
 }
 
-Index Index::slice(AtType start, AtType stop) const {
+template <typename T>
+IndexOf<T> IndexOf<T>::slice(T start, T stop) const {
   assert(start == stop  ||  (0 <= start  &&  start < length_));
   assert(start == stop  ||  (0 < stop    &&  stop <= length_));
   assert(start <= stop);
-  return Index(ptr_, offset_ + start*(start != stop), stop - start);
+  return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
+}
+
+namespace awkward {
+  template class IndexOf<IndexType>;
+  template class IndexOf<TagType>;
+  template class IndexOf<ChunkOffsetType>;
 }

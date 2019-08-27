@@ -12,31 +12,35 @@
 #include "awkward/util.h"
 
 namespace awkward {
-  class Index {
+  template <typename T>
+  class IndexOf {
   public:
-    Index(IndexType length)
-        : ptr_(std::shared_ptr<IndexType>(new IndexType[length], awkward::util::array_deleter<IndexType>()))
+    IndexOf<T>(T length)
+        : ptr_(std::shared_ptr<T>(new T[length], awkward::util::array_deleter<T>()))
         , offset_(0)
         , length_(length) { }
-
-    Index(const std::shared_ptr<IndexType> ptr, IndexType offset, IndexType length)
+    IndexOf<T>(const std::shared_ptr<T> ptr, T offset, T length)
         : ptr_(ptr)
         , offset_(offset)
         , length_(length) { }
 
-    const std::shared_ptr<IndexType> ptr() const { return ptr_; }
-    IndexType offset() const { return offset_; }
-    IndexType length() const { return length_; }
+    const std::shared_ptr<T> ptr() const { return ptr_; }
+    T offset() const { return offset_; }
+    T length() const { return length_; }
 
     const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
-    IndexType get(AtType at) const;
-    Index slice(AtType start, AtType stop) const;
+    T get(T at) const;
+    IndexOf<T> slice(T start, T stop) const;
 
   private:
-    const std::shared_ptr<IndexType> ptr_;
-    const IndexType offset_;
-    const IndexType length_;
+    const std::shared_ptr<T> ptr_;
+    const T offset_;
+    const T length_;
   };
+
+  typedef IndexOf<IndexType> Index;
+  typedef IndexOf<TagType> TagIndex;
+  typedef IndexOf<ChunkOffsetType> ChunkOffsetIndex;
 }
 
 #endif // AWKWARD_INDEX_H_

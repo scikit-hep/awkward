@@ -15,7 +15,7 @@ libpath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 
 kernels = ctypes.cdll.LoadLibrary(libpath)
 
-kernels.dummy1.argtypes = (ctypes.c_int32,)
+# kernels.dummy1.argtypes = (ctypes.c_int32,)
 
 # builder.call(fcnptr, args)
 ############################

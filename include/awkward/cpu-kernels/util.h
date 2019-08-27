@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_UTIL_H_
-#define AWKWARD_UTIL_H_
+#ifndef AWKWARDCPU_UTIL_H_
+#define AWKWARDCPU_UTIL_H_
 
 #ifdef _MSC_VER
   #ifdef _WIN64
@@ -16,10 +16,9 @@
   #include <cstdint>
 #endif
 
-namespace awkward {
+extern "C" {
   typedef const char* Error;
   const Error kNoError = nullptr;
-  #define HANDLE_ERROR(err) { if (err != kNoError) { throw std::invalid_argument(err); } }
 
   typedef uint8_t byte;
   typedef int32_t IndexType;
@@ -29,22 +28,6 @@ namespace awkward {
 
   const IndexType       kMaxIndexType       =          2147483647;   // 2**31 - 1
   const ChunkOffsetType kMaxChunkOffsetType = 9223372036854775807;   // 2**63 - 1
-
-  namespace util {
-    template<typename T>
-    class array_deleter {
-    public:
-      void operator()(T const *p) {
-        delete[] p;
-      }
-    };
-
-    template<typename T>
-    class no_deleter {
-    public:
-      void operator()(T const *p) { }
-    };
-  }
 }
 
-#endif // AWKWARD_UTIL_H_
+#endif // AWKWARDCPU_UTIL_H_
