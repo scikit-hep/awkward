@@ -104,7 +104,7 @@ IndexType NumpyArray::length() const {
     return -1;
   }
   else {
-    return (IndexType)shape_[shape_.size() - 1];
+    return (IndexType)shape_[0];
   }
 }
 

@@ -22,8 +22,6 @@ int dummy3(int x) {
   return dummy2(x);
 }
 
-#include <iostream>
-
 template<typename T>
 class pyobject_deleter {
 public:
@@ -31,7 +29,6 @@ public:
     Py_INCREF(pyobj_);
   }
   void operator()(T const *p) {
-    std::cout << "decrementing from " << Py_REFCNT(pyobj_) << std::endl;
     Py_DECREF(pyobj_);
   }
 private:
@@ -200,6 +197,9 @@ PYBIND11_MODULE(layout, m) {
         return self.id().get();
       }, [](ak::NumpyArray& self, ak::Identity* id) -> void {
         if (id) {
+          if (id->length() != self.length()) {
+            throw std::invalid_argument("Identity must have the same length as NumpyArray");
+          }
           self.setid(std::shared_ptr<ak::Identity>(new ak::Identity(*id)));
         }
         else {
@@ -260,6 +260,9 @@ PYBIND11_MODULE(layout, m) {
         return self.id().get();
       }, [](ak::ListOffsetArray& self, ak::Identity* id) -> void {
         if (id) {
+          if (id->length() != self.length()) {
+            throw std::invalid_argument("Identity must have the same length as ListOffsetArray");
+          }
           self.setid(std::shared_ptr<ak::Identity>(new ak::Identity(*id)));
         }
         else {
