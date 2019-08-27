@@ -182,7 +182,7 @@ PYBIND11_MODULE(layout, m) {
 
       .def_property("id", &ak::NumpyArray::id, [](ak::NumpyArray& self, ak::Identity& id) {
         self.setid(std::shared_ptr<ak::Identity>(new ak::Identity(id)));
-      })
+      }, py::return_value_policy::copy)
       .def("setid", [](ak::NumpyArray& self) -> void {
         self.setid();
       })

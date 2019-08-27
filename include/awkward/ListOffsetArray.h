@@ -22,7 +22,7 @@ namespace awkward {
     const std::shared_ptr<Content> content() const { return content_.get()->shallow_copy(); }
 
     virtual const std::shared_ptr<Identity> id() const { return id_; }
-    virtual void setid(const std::shared_ptr<Identity> id) { id_ = id };
+    virtual void setid(const std::shared_ptr<Identity> id) { id_ = id; };
     virtual void setid();
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
     virtual IndexType length() const;
@@ -31,7 +31,7 @@ namespace awkward {
     virtual std::shared_ptr<Content> slice(IndexType start, IndexType stop) const;
 
   private:
-    const std::shared_ptr<Identity> id_;
+    std::shared_ptr<Identity> id_;
     const Index offsets_;
     const std::shared_ptr<Content> content_;
   };
