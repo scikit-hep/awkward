@@ -1,5 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include "awkward/cpu-kernels/identity.h"
 #include "awkward/NumpyArray.h"
 
 using namespace awkward;
@@ -46,7 +47,11 @@ byte NumpyArray::getbyte(ssize_t at) const {
 }
 
 void NumpyArray::setid() {
-  throw std::runtime_error("not implemented");
+  assert(!isscalar());
+  Identity* newid = new Identity(Identity::newref(), FieldLocation(), 0, 1, length());
+  Error err = awkward_identity_numpyarray_newid(newid->ptr().get(), length());
+  HANDLE_ERROR(err);
+  id_ = std::shared_ptr<Identity>(newid);
 }
 
 const std::string NumpyArray::repr(const std::string indent, const std::string pre, const std::string post) const {
