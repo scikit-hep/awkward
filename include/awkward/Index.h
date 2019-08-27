@@ -29,8 +29,8 @@ namespace awkward {
     T length() const { return length_; }
 
     const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
-    T get(IndexType at) const;
-    IndexOf<T> slice(IndexType start, IndexType stop) const;
+    T get(T at) const;
+    IndexOf<T> slice(T start, T stop) const;
 
   private:
     const std::shared_ptr<T> ptr_;
