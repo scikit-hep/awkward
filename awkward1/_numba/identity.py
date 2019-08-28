@@ -20,6 +20,7 @@ class IdentityType(common.ContentType):
         self.arraytpe = arraytpe
 
 FieldLocation = numba.types.List(numba.types.Tuple((common.IndexType, numba.types.string)))
+# FieldLocation = numba.typeof([(0, "")])
 
 @numba.extending.register_model(IdentityType)
 class IdentityModel(numba.datamodel.models.StructModel):
@@ -46,8 +47,58 @@ def unbox(tpe, obj, c):
     array_obj = c.pyapi.object_getattr_string(obj, "array")
     ref_val = c.pyapi.to_native_value(common.RefType, ref_obj).value
     fieldloc_val = c.pyapi.to_native_value(FieldLocation, fieldloc_obj).value
-    chunkdepth_val = c.pyapi.to_native_value(common.IndexType, chunkdepth_obj)
-    indexdepth_val = c.pyapi.to_native_value(common.IndexType, indexdepth_obj)
-    array_val = c.pyapi.to_native_value(tpe.arraytpe, array_obj)
+    chunkdepth_val = c.pyapi.to_native_value(common.IndexType, chunkdepth_obj).value
+    indexdepth_val = c.pyapi.to_native_value(common.IndexType, indexdepth_obj).value
+    array_val = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
-    HERE
+    proxyout.ref = ref_val
+    proxyout.fieldloc = fieldloc_val
+    proxyout.chunkdepth = chunkdepth_val
+    proxyout.indexdepth = indexdepth_val
+    proxyout.array = array_val
+    c.pyapi.decref(ref_obj)
+    c.pyapi.decref(fieldloc_obj)
+    c.pyapi.decref(chunkdepth_obj)
+    c.pyapi.decref(indexdepth_obj)
+    c.pyapi.decref(array_obj)
+    is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    return numba.extending.NativeValue(proxyout._getvalue(), is_error)
+
+@numba.extending.box(IdentityType)
+def box(tpe, val, c):
+    Identity_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Identity))
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
+    ref_obj = c.pyapi.from_native_value(common.RefType, proxyin.ref, c.env_manager)
+    fieldloc_obj = c.pyapi.from_native_value(FieldLocation, proxyin.fieldloc, c.env_manager)
+    chunkdepth_obj = c.pyapi.from_native_value(common.IndexType, proxyin.chunkdepth, c.env_manager)
+    indexdepth_obj = c.pyapi.from_native_value(common.IndexType, proxyin.indexdepth, c.env_manager)
+    array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
+    out = c.pyapi.call_function_objargs(Identity_obj, (ref_obj, fieldloc_obj, chunkdepth_obj, indexdepth_obj, array_obj))
+    c.pyapi.decref(Identity_obj)
+    c.pyapi.decref(ref_obj)
+    c.pyapi.decref(fieldloc_obj)
+    c.pyapi.decref(chunkdepth_obj)
+    c.pyapi.decref(indexdepth_obj)
+    c.pyapi.decref(array_obj)
+    return out
+
+@numba.extending.lower_builtin(len, IdentityType)
+def lower_len(context, builder, sig, args):
+    tpe, = sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    return numba.targets.arrayobj.array_len(context, builder, numba.types.intp(tpe.arraytpe), (proxyin.array,))
+
+@numba.typing.templates.infer_getattr
+class type_methods(numba.typing.templates.AttributeTemplate):
+    key = IdentityType
+
+    def generic_resolve(self, tpe, attr):
+        if attr == "keydepth":
+            return common.IndexType
+
+@numba.extending.lower_getattr(IdentityType, "keydepth")
+def lower_keydepth(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    multiplier = context.get_constant(common.IndexType, int(numba.int64.bitwidth / numba.int32.bitwidth))
+    return builder.add(builder.mul(multiplier, proxyin.chunkdepth), proxyin.indexdepth)
