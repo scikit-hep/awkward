@@ -43,10 +43,9 @@ class NumpyArrayModel(numba.datamodel.models.StructModel):
 def unbox(tpe, obj, c):
     asarray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
     array_obj = c.pyapi.call_function_objargs(asarray_obj, (obj,))
-    array_val = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
     id_obj = c.pyapi.object_getattr_string(obj, "id")
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
-    proxyout.array = array_val
+    proxyout.array = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
     proxyout.id = numba.targets.boxing.unbox_optional(tpe.idtpe, id_obj, c).value
     c.pyapi.decref(asarray_obj)
     c.pyapi.decref(array_obj)
@@ -59,9 +58,11 @@ def box(tpe, val, c):
     NumpyArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.NumpyArray))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
-    out = c.pyapi.call_function_objargs(NumpyArray_obj, (array_obj,))
+    id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
+    out = c.pyapi.call_function_objargs(NumpyArray_obj, (array_obj, id_obj))
     c.pyapi.decref(NumpyArray_obj)
     c.pyapi.decref(array_obj)
+    c.pyapi.decref(id_obj)
     return out
 
 @numba.extending.lower_builtin(len, NumpyArrayType)

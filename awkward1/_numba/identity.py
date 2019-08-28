@@ -44,17 +44,12 @@ def unbox(tpe, obj, c):
     chunkdepth_obj = c.pyapi.object_getattr_string(obj, "chunkdepth")
     indexdepth_obj = c.pyapi.object_getattr_string(obj, "indexdepth")
     array_obj = c.pyapi.object_getattr_string(obj, "array")
-    ref_val = c.pyapi.to_native_value(common.RefType, ref_obj).value
-    fieldloc_val = c.pyapi.to_native_value(tpe.fieldloctpe, fieldloc_obj).value
-    chunkdepth_val = c.pyapi.to_native_value(common.IndexType, chunkdepth_obj).value
-    indexdepth_val = c.pyapi.to_native_value(common.IndexType, indexdepth_obj).value
-    array_val = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
-    proxyout.ref = ref_val
-    proxyout.fieldloc = fieldloc_val
-    proxyout.chunkdepth = chunkdepth_val
-    proxyout.indexdepth = indexdepth_val
-    proxyout.array = array_val
+    proxyout.ref = c.pyapi.to_native_value(common.RefType, ref_obj).value
+    proxyout.fieldloc = c.pyapi.to_native_value(tpe.fieldloctpe, fieldloc_obj).value
+    proxyout.chunkdepth = c.pyapi.to_native_value(common.IndexType, chunkdepth_obj).value
+    proxyout.indexdepth = c.pyapi.to_native_value(common.IndexType, indexdepth_obj).value
+    proxyout.array = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
     c.pyapi.decref(ref_obj)
     c.pyapi.decref(fieldloc_obj)
     c.pyapi.decref(chunkdepth_obj)

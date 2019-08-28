@@ -67,3 +67,25 @@ def test_keydepth():
     def f1(q):
         return q.chunkdepth, q.indexdepth, q.keydepth
     assert f1(identity) == (1, 2, 4)
+
+def test_numpyarray():
+    i1 = numpy.arange(3, dtype="i4").reshape(-1, 1)
+    i2 = awkward1.layout.Identity(0, [], 0, 1, i1)
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]), id=i2)
+
+    print(sys.getrefcount(i1), sys.getrefcount(i2), sys.getrefcount(content))
+
+    @numba.njit
+    def f1(q):
+        return q
+
+    tmp = f1(content)
+    print(sys.getrefcount(i1), sys.getrefcount(i2), sys.getrefcount(content))
+
+    # HERE
+
+
+def test_listoffsetarray():
+    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
+    array = awkward1.layout.ListOffsetArray(offsets, content)
