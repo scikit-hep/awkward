@@ -8,13 +8,15 @@ import numba.typing.arraydecl
 import numba.typing.ctypes_utils
 
 import awkward1.layout
-from .._numba import cpu, common
+from .._numba import cpu, common, identity
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof(val, c):
     return NumpyArrayType(numba.typeof(numpy.asarray(val)))
 
 class NumpyArrayType(common.ContentType):
+    idtpe = numba.types.optional(identity.IdentityType())
+
     def __init__(self, arraytpe):
         super(NumpyArrayType, self).__init__(name="NumpyArrayType({0})".format(arraytpe.name))
         self.arraytpe = arraytpe
@@ -33,7 +35,8 @@ class NumpyArrayType(common.ContentType):
 @numba.extending.register_model(NumpyArrayType)
 class NumpyArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("array", fe_type.arraytpe)]
+        members = [("array", fe_type.arraytpe),
+                   ("id", fe_type.idtpe)]
         super(NumpyArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(NumpyArrayType)
@@ -41,10 +44,13 @@ def unbox(tpe, obj, c):
     asarray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
     array_obj = c.pyapi.call_function_objargs(asarray_obj, (obj,))
     array_val = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
+    id_obj = c.pyapi.object_getattr_string(obj, "id")
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
     proxyout.array = array_val
+    proxyout.id = numba.targets.boxing.unbox_optional(tpe.idtpe, id_obj, c).value
     c.pyapi.decref(asarray_obj)
     c.pyapi.decref(array_obj)
+    # c.pyapi.decref(id_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 

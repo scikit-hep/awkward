@@ -12,21 +12,20 @@ from .._numba import cpu, common
 
 @numba.extending.typeof_impl.register(awkward1.layout.Identity)
 def typeof(val, c):
-    return IdentityType(numba.typeof(numpy.asarray(val)))
+    return IdentityType()
 
 class IdentityType(common.ContentType):
-    def __init__(self, arraytpe):
-        super(IdentityType, self).__init__(name="IdentityType({0})".format(arraytpe.name))
-        self.arraytpe = arraytpe
+    fieldloctpe = numba.types.List(numba.types.Tuple((common.IndexType, numba.types.string)))
+    arraytpe = common.IndexType[:,:]
 
-FieldLocation = numba.types.List(numba.types.Tuple((common.IndexType, numba.types.string)))
-# FieldLocation = numba.typeof([(0, "")])
+    def __init__(self):
+        super(IdentityType, self).__init__(name="IdentityType")
 
 @numba.extending.register_model(IdentityType)
 class IdentityModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("ref", common.RefType),
-                   ("fieldloc", FieldLocation),
+                   ("fieldloc", fe_type.fieldloctpe),
                    ("chunkdepth", common.IndexType),
                    ("indexdepth", common.IndexType),
                    ("array", fe_type.arraytpe)]
@@ -46,7 +45,7 @@ def unbox(tpe, obj, c):
     indexdepth_obj = c.pyapi.object_getattr_string(obj, "indexdepth")
     array_obj = c.pyapi.object_getattr_string(obj, "array")
     ref_val = c.pyapi.to_native_value(common.RefType, ref_obj).value
-    fieldloc_val = c.pyapi.to_native_value(FieldLocation, fieldloc_obj).value
+    fieldloc_val = c.pyapi.to_native_value(tpe.fieldloctpe, fieldloc_obj).value
     chunkdepth_val = c.pyapi.to_native_value(common.IndexType, chunkdepth_obj).value
     indexdepth_val = c.pyapi.to_native_value(common.IndexType, indexdepth_obj).value
     array_val = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
@@ -69,7 +68,7 @@ def box(tpe, val, c):
     Identity_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Identity))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     ref_obj = c.pyapi.from_native_value(common.RefType, proxyin.ref, c.env_manager)
-    fieldloc_obj = c.pyapi.from_native_value(FieldLocation, proxyin.fieldloc, c.env_manager)
+    fieldloc_obj = c.pyapi.from_native_value(tpe.fieldloctpe, proxyin.fieldloc, c.env_manager)
     chunkdepth_obj = c.pyapi.from_native_value(common.IndexType, proxyin.chunkdepth, c.env_manager)
     indexdepth_obj = c.pyapi.from_native_value(common.IndexType, proxyin.indexdepth, c.env_manager)
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)

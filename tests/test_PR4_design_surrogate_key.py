@@ -104,3 +104,10 @@ def test_setid_none():
     array.id = None
     assert array.id is None
     assert array.content.id is None
+
+def test_setid_constructor():
+    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]), id=awkward1.layout.Identity(awkward1.layout.Identity.newref(), [], 0, 2, numpy.array([[0, 0], [0, 1], [2, 0]], dtype="i4")))
+    array = awkward1.layout.ListOffsetArray(offsets, content, id=awkward1.layout.Identity(awkward1.layout.Identity.newref(), [], 0, 1, numpy.array([[0], [1], [2]], dtype="i4")))
+    assert numpy.asarray(array.id).tolist() == [[0], [1], [2]]
+    assert numpy.asarray(array.content.id).tolist() == [[0, 0], [0, 1], [2, 0]]

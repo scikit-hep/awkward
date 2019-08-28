@@ -53,6 +53,18 @@ py::object unwrap(std::shared_ptr<ak::Content> content) {
   }
 }
 
+void setid(ak::Content* obj, ak::Identity* id) {
+  if (id == nullptr) {
+    obj->setid(std::shared_ptr<ak::Identity>(nullptr));
+  }
+  else {
+    if (id->length() != obj->length()) {
+      throw std::invalid_argument("Identity must have the same length as array");
+    }
+    obj->setid(std::shared_ptr<ak::Identity>(new ak::Identity(*id)));
+  }
+}
+
 PYBIND11_MODULE(layout, m) {
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
@@ -170,7 +182,7 @@ PYBIND11_MODULE(layout, m) {
         );
       })
 
-      .def(py::init([](py::array array) -> ak::NumpyArray {
+      .def(py::init([](py::array array, ak::Identity* id) -> ak::NumpyArray {
         py::buffer_info info = array.request();
         if (info.ndim == 0) {
           throw std::invalid_argument("NumpyArray must not be scalar; try array.reshape(1)");
@@ -178,27 +190,21 @@ PYBIND11_MODULE(layout, m) {
         if (info.shape.size() != info.ndim  ||  info.strides.size() != info.ndim) {
           throw std::invalid_argument("len(shape) != ndim or len(strides) != ndim");
         }
-        return ak::NumpyArray(std::shared_ptr<ak::Identity>(nullptr), std::shared_ptr<ak::byte>(
+        ak::NumpyArray out = ak::NumpyArray(std::shared_ptr<ak::Identity>(nullptr), std::shared_ptr<ak::byte>(
           reinterpret_cast<ak::byte*>(info.ptr), pyobject_deleter<ak::byte>(array.ptr())),
           info.shape,
           info.strides,
           0,
           info.itemsize,
           info.format);
-      }))
+        setid(&out, id);
+        return out;
+      }), py::arg("array"), py::arg("id") = py::none())
 
       .def_property("id", [](ak::NumpyArray& self) -> ak::Identity* {
         return self.id().get();
       }, [](ak::NumpyArray& self, ak::Identity* id) -> void {
-        if (id) {
-          if (id->length() != self.length()) {
-            throw std::invalid_argument("Identity must have the same length as NumpyArray");
-          }
-          self.setid(std::shared_ptr<ak::Identity>(new ak::Identity(*id)));
-        }
-        else {
-          self.setid(std::shared_ptr<ak::Identity>(nullptr));
-        }
+        setid(&self, id);
       })
       .def("setid", [](ak::NumpyArray& self) -> void {
         self.setid();
@@ -236,13 +242,17 @@ PYBIND11_MODULE(layout, m) {
   /////////////////////////////////////////////////////////////// ListOffsetArray
   py::class_<ak::ListOffsetArray>(m, "ListOffsetArray")
 
-      .def(py::init([](ak::Index& offsets, ak::NumpyArray& content) -> ak::ListOffsetArray {
-        return ak::ListOffsetArray(std::shared_ptr<ak::Identity>(nullptr), offsets, std::shared_ptr<ak::Content>(new ak::NumpyArray(content)));
-      }))
+      .def(py::init([](ak::Index& offsets, ak::NumpyArray* content, ak::Identity* id) -> ak::ListOffsetArray {
+        ak::ListOffsetArray out = ak::ListOffsetArray(std::shared_ptr<ak::Identity>(nullptr), offsets, std::shared_ptr<ak::Content>(content->shallow_copy()));
+        setid(&out, id);
+        return out;
+      }), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
 
-      .def(py::init([](ak::Index& offsets, ak::ListOffsetArray& content) -> ak::ListOffsetArray {
-        return ak::ListOffsetArray(std::shared_ptr<ak::Identity>(nullptr), offsets, std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)));
-      }))
+      .def(py::init([](ak::Index& offsets, ak::ListOffsetArray* content, ak::Identity* id) -> ak::ListOffsetArray {
+        ak::ListOffsetArray out = ak::ListOffsetArray(std::shared_ptr<ak::Identity>(nullptr), offsets, std::shared_ptr<ak::Content>(content->shallow_copy()));
+        setid(&out, id);
+        return out;
+      }), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
 
       .def_property_readonly("offsets", &ak::ListOffsetArray::offsets)
 
@@ -253,15 +263,7 @@ PYBIND11_MODULE(layout, m) {
       .def_property("id", [](ak::ListOffsetArray& self) -> ak::Identity* {
         return self.id().get();
       }, [](ak::ListOffsetArray& self, ak::Identity* id) -> void {
-        if (id) {
-          if (id->length() != self.length()) {
-            throw std::invalid_argument("Identity must have the same length as ListOffsetArray");
-          }
-          self.setid(std::shared_ptr<ak::Identity>(new ak::Identity(*id)));
-        }
-        else {
-          self.setid(std::shared_ptr<ak::Identity>(nullptr));
-        }
+        setid(&self, id);
       })
       .def("setid", [](ak::ListOffsetArray& self) -> void {
         self.setid();
