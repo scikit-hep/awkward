@@ -151,6 +151,9 @@ PYBIND11_MODULE(layout, m) {
       .def_property_readonly("chunkdepth", &ak::Identity::chunkdepth)
       .def_property_readonly("indexdepth", &ak::Identity::indexdepth)
       .def_property_readonly("keydepth", [](ak::Identity& self) { return self.keydepth(); })
+      .def_property_readonly("array", [](py::buffer& self) -> py::array {
+        return py::array(self);
+      })
 
   ;
 

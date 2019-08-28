@@ -27,6 +27,16 @@ def test_refcount1():
     del tmp
     assert (sys.getrefcount(i), sys.getrefcount(i2)) == (3, 2)
 
+    tmp2 = i2.array
+    assert tmp2.tolist() == [[0,  1,  2,  3],
+                             [4,  5,  6,  7],
+                             [8,  9, 10, 11]]
+
+    assert (sys.getrefcount(i), sys.getrefcount(i2)) == (3, 2 + 1*py27)
+
+    del tmp2
+    assert (sys.getrefcount(i), sys.getrefcount(i2)) == (3, 2)
+
     del i2
     assert sys.getrefcount(i) == 2
 
