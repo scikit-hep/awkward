@@ -2,6 +2,14 @@
 
 # ...
 
+############################################################# Doxygen
+
+awkward1/signatures/*.xsd
+awkward1/signatures/*.xslt
+awkward1/signatures/index.xml
+awkward1/signatures/dir_*.xml
+awkward1/signatures/namespace*.xml
+
 ############################################################# Python
 
 # Byte-compiled / optimized / DLL files

@@ -14,10 +14,17 @@ def test_numpyarray_boxing():
     a = numpy.arange(10)
     wrapped = awkward1.layout.NumpyArray(a)
     assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2)
+
     @numba.njit
     def f1(q):
+        pass
+    f1(wrapped)
+
+    @numba.njit
+    def f2(q):
         return q
-    out = f1(wrapped)
+    out = f2(wrapped)
+
     assert (sys.getrefcount(a), sys.getrefcount(wrapped)) == (3, 2 + 1*py27)
     assert numpy.asarray(out).tolist() == list(range(10))
     del out

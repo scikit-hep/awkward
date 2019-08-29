@@ -7,6 +7,7 @@
 
 extern "C" {
   Error awkward_identity_new(IndexType length, IndexType* to);
+
   Error awkward_identity_from_listfoffsets(IndexType length, IndexType width, IndexType* offsets, IndexType* from, IndexType tolength, IndexType* to);
 }
 

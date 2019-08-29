@@ -4,11 +4,10 @@ import operator
 
 import numba
 
-AtType = numba.int64
-IndexType = numba.int32
+from .._numba import cpu, identity
 
 class ContentType(numba.types.Type):
-    pass
+    idtpe = numba.types.optional(identity.IdentityType())
 
 @numba.typing.templates.infer_global(len)
 class type_len(numba.typing.templates.AbstractTemplate):

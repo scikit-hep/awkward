@@ -8,13 +8,13 @@ import numba.typing.arraydecl
 import numba.typing.ctypes_utils
 
 import awkward1.layout
-from .._numba import cpu, common
+from .._numba import cpu, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof(val, c):
     return NumpyArrayType(numba.typeof(numpy.asarray(val)))
 
-class NumpyArrayType(common.ContentType):
+class NumpyArrayType(content.ContentType):
     def __init__(self, arraytpe):
         super(NumpyArrayType, self).__init__(name="NumpyArrayType({0})".format(arraytpe.name))
         self.arraytpe = arraytpe
@@ -33,18 +33,21 @@ class NumpyArrayType(common.ContentType):
 @numba.extending.register_model(NumpyArrayType)
 class NumpyArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("array", fe_type.arraytpe)]
+        members = [("array", fe_type.arraytpe),
+                   ("id", fe_type.idtpe)]
         super(NumpyArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(NumpyArrayType)
 def unbox(tpe, obj, c):
     asarray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
     array_obj = c.pyapi.call_function_objargs(asarray_obj, (obj,))
-    array_val = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
+    id_obj = c.pyapi.object_getattr_string(obj, "id")
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
-    proxyout.array = array_val
+    proxyout.array = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
+    proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
     c.pyapi.decref(asarray_obj)
     c.pyapi.decref(array_obj)
+    c.pyapi.decref(id_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
@@ -53,9 +56,11 @@ def box(tpe, val, c):
     NumpyArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.NumpyArray))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
-    out = c.pyapi.call_function_objargs(NumpyArray_obj, (array_obj,))
+    id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
+    out = c.pyapi.call_function_objargs(NumpyArray_obj, (array_obj, id_obj))
     c.pyapi.decref(NumpyArray_obj)
     c.pyapi.decref(array_obj)
+    c.pyapi.decref(id_obj)
     return out
 
 @numba.extending.lower_builtin(len, NumpyArrayType)
@@ -96,6 +101,17 @@ def lower_getitem(context, builder, sig, args):
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):
     key = NumpyArrayType
+
+    def generic_resolve(self, tpe, attr):
+        if attr == "id":
+            return tpe.idtpe
+
+@numba.extending.lower_getattr(NumpyArrayType, "id")
+def lower_id(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe.idtpe, proxyin.id)
+    return proxyin.id
 
 #     @numba.typing.templates.bound_function("dummy1")
 #     def resolve_dummy1(self, selftpe, args, kwargs):

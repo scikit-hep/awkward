@@ -7,6 +7,8 @@ except ImportError:
 else:
     installed = True
     import awkward1._numba.cpu
-    import awkward1._numba.common
+    import awkward1._numba.util
+    import awkward1._numba.identity
+    import awkward1._numba.content
     import awkward1._numba.numpyarray
     import awkward1._numba.listoffsetarray
