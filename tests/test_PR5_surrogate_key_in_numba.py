@@ -114,7 +114,38 @@ def test_id_attribute():
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
     content.setid()
     assert numpy.asarray(content.id).tolist() == [[0], [1], [2]]
+
     @numba.njit
     def f1(q):
         return q.id
+
     assert numpy.asarray(f1(content)).tolist() == [[0], [1], [2]]
+
+    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    array = awkward1.layout.ListOffsetArray(offsets, content)
+    array.setid()
+    assert numpy.asarray(array.id).tolist() == [[0], [1], [2]]
+    assert numpy.asarray(array.content.id).tolist() == [[0, 0], [0, 1], [2, 0]]
+
+    @numba.njit
+    def f2(q):
+        return q.id
+
+    assert numpy.asarray(f2(array)).tolist() == [[0], [1], [2]]
+
+def test_other_attributes():
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
+    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    array = awkward1.layout.ListOffsetArray(offsets, content)
+
+    @numba.njit
+    def f1(q):
+        return q.content
+
+    assert numpy.asarray(f1(array)).tolist() == [1.1, 2.2, 3.3]
+
+    @numba.njit
+    def f2(q):
+        return q.offsets
+
+    assert numpy.asarray(f2(array)).tolist() == [0, 2, 2, 3]

@@ -126,3 +126,38 @@ def lower_getitem(context, builder, sig, args):
     if context.enable_nrt:
         context.nrt.incref(builder, rettpe, out)
     return out
+
+@numba.typing.templates.infer_getattr
+class type_methods(numba.typing.templates.AttributeTemplate):
+    key = ListOffsetArrayType
+
+    def generic_resolve(self, tpe, attr):
+        if attr == "offsets":
+            return tpe.offsetstpe
+
+        elif attr == "content":
+            return tpe.contenttpe
+
+        elif attr == "id":
+            return tpe.idtpe
+
+@numba.extending.lower_getattr(ListOffsetArrayType, "offsets")
+def lower_offsets(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe.offsetstpe, proxyin.offsets)
+    return proxyin.offsets
+
+@numba.extending.lower_getattr(ListOffsetArrayType, "content")
+def lower_content(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe.contenttpe, proxyin.content)
+    return proxyin.content
+
+@numba.extending.lower_getattr(ListOffsetArrayType, "id")
+def lower_id(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe.idtpe, proxyin.id)
+    return proxyin.id
