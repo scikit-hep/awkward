@@ -77,6 +77,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 setup(name = "awkward1",
       packages = setuptools.find_packages(exclude=["tests"]),
       scripts = [],
+      data_files = [(os.path.join("awkward1", "signatures"), [x for x in glob.glob(os.path.join(os.path.join("awkward1", "signatures"), "*.xml")) if x != "index.xml" and not x.startswith("dir_") and not x.startswith("namespace")])],
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",

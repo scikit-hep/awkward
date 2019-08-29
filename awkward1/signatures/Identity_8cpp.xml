@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
+  <compounddef id="Identity_8cpp" kind="file" language="C++">
+    <compoundname>Identity.cpp</compoundname>
+    <includes local="yes">awkward/Identity.h</includes>
+    <incdepgraph>
+      <node id="1">
+        <label>src/libawkward/Identity.cpp</label>
+        <link refid="Identity_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>awkward/Identity.h</label>
+      </node>
+    </incdepgraph>
+      <sectiondef kind="var">
+      <memberdef kind="variable" id="Identity_8cpp_1a07c884b2d263cddb2ae21c2677280c60" prot="public" static="no" mutable="no">
+        <type>std::atomic&lt; RefType &gt;</type>
+        <definition>std::atomic&lt;RefType&gt; numrefs</definition>
+        <argsstring></argsstring>
+        <name>numrefs</name>
+        <initializer>{0}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/Identity.cpp" line="7" column="13" bodyfile="src/libawkward/Identity.cpp" bodystart="7" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/libawkward/Identity.cpp"/>
+  </compounddef>
+</doxygen>

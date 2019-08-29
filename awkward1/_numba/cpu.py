@@ -3,6 +3,8 @@
 import os
 import ctypes
 import platform
+import glob
+import xml.etree.ElementTree
 
 if platform.system() == "Windows":
     libname = "awkward-cpu-kernels.dll"
@@ -15,7 +17,22 @@ libpath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 
 kernels = ctypes.cdll.LoadLibrary(libpath)
 
-# kernels.dummy1.argtypes = (ctypes.c_int32,)
+h2ctypes = {
+    "IndexType": ctypes.c_int32,
+    "IndexType *": ctypes.POINTER(ctypes.c_int32),
+    "Error": ctypes.c_char_p,
+    }
+
+for hfile in glob.glob(os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), "signatures"), "*_8cpp.xml")):
+    xfile = xml.etree.ElementTree.parse(hfile)
+    if xfile.find("./compounddef/location").attrib["file"].startswith("src/cpu-kernels"):
+        for xfcn in xfile.findall(".//memberdef[@kind='function']"):
+            name = xfcn.find("./name").text
+            rettype = xfcn.find("./type").text
+            params = [(x.find("./declname").text, x.find("./type").text) for x in xfcn.findall("./param")]
+            if hasattr(kernels, name):
+                getattr(kernels, name).argtypes = [h2ctypes[t] for n, t in params]
+                getattr(kernels, name).restype = h2ctypes[rettype]
 
 # builder.call(fcnptr, args)
 ############################

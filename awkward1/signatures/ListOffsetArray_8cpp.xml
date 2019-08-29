@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
+  <compounddef id="ListOffsetArray_8cpp" kind="file" language="C++">
+    <compoundname>ListOffsetArray.cpp</compoundname>
+    <includes local="yes">awkward/cpu-kernels/identity.h</includes>
+    <includes local="yes">awkward/ListOffsetArray.h</includes>
+    <incdepgraph>
+      <node id="2">
+        <label>awkward/cpu-kernels/identity.h</label>
+      </node>
+      <node id="3">
+        <label>awkward/ListOffsetArray.h</label>
+      </node>
+      <node id="1">
+        <label>src/libawkward/ListOffsetArray.cpp</label>
+        <link refid="ListOffsetArray_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/libawkward/ListOffsetArray.cpp"/>
+  </compounddef>
+</doxygen>
