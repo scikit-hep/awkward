@@ -8,15 +8,15 @@ import numba.typing.arraydecl
 import numba.typing.ctypes_utils
 
 import awkward1.layout
-from .._numba import cpu, common
+from .._numba import cpu, util
 
 @numba.extending.typeof_impl.register(awkward1.layout.Identity)
 def typeof(val, c):
     return IdentityType()
 
 class IdentityType(numba.types.Type):
-    fieldloctpe = numba.types.List(numba.types.Tuple((common.IndexType, numba.types.string)))
-    arraytpe = common.IndexType[:,:]
+    fieldloctpe = numba.types.List(numba.types.Tuple((util.IndexType, numba.types.string)))
+    arraytpe = util.IndexType[:,:]
 
     def __init__(self):
         super(IdentityType, self).__init__(name="IdentityType")
@@ -24,10 +24,10 @@ class IdentityType(numba.types.Type):
 @numba.extending.register_model(IdentityType)
 class IdentityModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("ref", common.RefType),
+        members = [("ref", util.RefType),
                    ("fieldloc", fe_type.fieldloctpe),
-                   ("chunkdepth", common.IndexType),
-                   ("indexdepth", common.IndexType),
+                   ("chunkdepth", util.IndexType),
+                   ("indexdepth", util.IndexType),
                    ("array", fe_type.arraytpe)]
         super(IdentityModel, self).__init__(dmm, fe_type, members)
 
@@ -45,10 +45,10 @@ def unbox(tpe, obj, c):
     indexdepth_obj = c.pyapi.object_getattr_string(obj, "indexdepth")
     array_obj = c.pyapi.object_getattr_string(obj, "array")
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
-    proxyout.ref = c.pyapi.to_native_value(common.RefType, ref_obj).value
+    proxyout.ref = c.pyapi.to_native_value(util.RefType, ref_obj).value
     proxyout.fieldloc = c.pyapi.to_native_value(tpe.fieldloctpe, fieldloc_obj).value
-    proxyout.chunkdepth = c.pyapi.to_native_value(common.IndexType, chunkdepth_obj).value
-    proxyout.indexdepth = c.pyapi.to_native_value(common.IndexType, indexdepth_obj).value
+    proxyout.chunkdepth = c.pyapi.to_native_value(util.IndexType, chunkdepth_obj).value
+    proxyout.indexdepth = c.pyapi.to_native_value(util.IndexType, indexdepth_obj).value
     proxyout.array = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
     c.pyapi.decref(ref_obj)
     c.pyapi.decref(fieldloc_obj)
@@ -62,10 +62,10 @@ def unbox(tpe, obj, c):
 def box(tpe, val, c):
     Identity_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Identity))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
-    ref_obj = c.pyapi.from_native_value(common.RefType, proxyin.ref, c.env_manager)
+    ref_obj = c.pyapi.from_native_value(util.RefType, proxyin.ref, c.env_manager)
     fieldloc_obj = c.pyapi.from_native_value(tpe.fieldloctpe, proxyin.fieldloc, c.env_manager)
-    chunkdepth_obj = c.pyapi.from_native_value(common.IndexType, proxyin.chunkdepth, c.env_manager)
-    indexdepth_obj = c.pyapi.from_native_value(common.IndexType, proxyin.indexdepth, c.env_manager)
+    chunkdepth_obj = c.pyapi.from_native_value(util.IndexType, proxyin.chunkdepth, c.env_manager)
+    indexdepth_obj = c.pyapi.from_native_value(util.IndexType, proxyin.indexdepth, c.env_manager)
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
     out = c.pyapi.call_function_objargs(Identity_obj, (ref_obj, fieldloc_obj, chunkdepth_obj, indexdepth_obj, array_obj))
     c.pyapi.decref(Identity_obj)
@@ -89,10 +89,10 @@ class type_methods(numba.typing.templates.AttributeTemplate):
 
     def generic_resolve(self, tpe, attr):
         if attr == "keydepth":
-            return common.IndexType
+            return util.IndexType
 
 @numba.extending.lower_getattr(IdentityType, "keydepth")
 def lower_keydepth(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    multiplier = context.get_constant(common.IndexType, int(numba.int64.bitwidth / numba.int32.bitwidth))
+    multiplier = context.get_constant(util.IndexType, int(numba.int64.bitwidth / numba.int32.bitwidth))
     return builder.add(builder.mul(multiplier, proxyin.chunkdepth), proxyin.indexdepth)

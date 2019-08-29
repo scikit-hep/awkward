@@ -7,14 +7,14 @@ import numba
 import numba.typing.arraydecl
 
 import awkward1.layout
-from .._numba import cpu, common, content
+from .._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray)
 def typeof(val, c):
     return ListOffsetArrayType(numba.typeof(val.content))
 
 class ListOffsetArrayType(content.ContentType):
-    offsetstpe = common.IndexType[:]
+    offsetstpe = util.IndexType[:]
 
     def __init__(self, contenttpe):
         super(ListOffsetArrayType, self).__init__(name="ListOffsetArrayType({0})".format(contenttpe.name))
@@ -96,8 +96,8 @@ def lower_getitem(context, builder, sig, args):
     else:
         wherevalp1_tpe = wheretpe
 
-    start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, common.IndexType(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
-    stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, common.IndexType(tpe.offsetstpe, wherevalp1_tpe), (proxyin.offsets, wherevalp1))
+    start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, util.IndexType(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
+    stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, util.IndexType(tpe.offsetstpe, wherevalp1_tpe), (proxyin.offsets, wherevalp1))
     proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
     proxyslice.start = builder.zext(start, context.get_value_type(numba.types.intp))
     proxyslice.stop = builder.zext(stop, context.get_value_type(numba.types.intp))

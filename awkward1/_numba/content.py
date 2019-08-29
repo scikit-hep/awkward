@@ -4,7 +4,7 @@ import operator
 
 import numba
 
-from .._numba import cpu, common, identity
+from .._numba import cpu, identity
 
 class ContentType(numba.types.Type):
     idtpe = numba.types.optional(identity.IdentityType())
