@@ -50,6 +50,8 @@ def unbox(tpe, obj, c):
     proxyout.chunkdepth = c.pyapi.to_native_value(util.IndexType, chunkdepth_obj).value
     proxyout.indexdepth = c.pyapi.to_native_value(util.IndexType, indexdepth_obj).value
     proxyout.array = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
+    if c.context.enable_nrt:
+        c.context.nrt.incref(c.builder, tpe.fieldloctpe, proxyout.fieldloc)
     c.pyapi.decref(ref_obj)
     c.pyapi.decref(fieldloc_obj)
     c.pyapi.decref(chunkdepth_obj)
