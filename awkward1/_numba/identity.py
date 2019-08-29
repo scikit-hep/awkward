@@ -14,7 +14,7 @@ from .._numba import cpu, common
 def typeof(val, c):
     return IdentityType()
 
-class IdentityType(common.ContentType):
+class IdentityType(numba.types.Type):
     fieldloctpe = numba.types.List(numba.types.Tuple((common.IndexType, numba.types.string)))
     arraytpe = common.IndexType[:,:]
 

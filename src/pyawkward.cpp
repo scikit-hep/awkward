@@ -205,7 +205,7 @@ PYBIND11_MODULE(layout, m) {
         return self.id().get();
       }, [](ak::NumpyArray& self, ak::Identity* id) -> void {
         setid(&self, id);
-      })
+      }, py::return_value_policy::copy)
       .def("setid", [](ak::NumpyArray& self) -> void {
         self.setid();
       })
@@ -264,7 +264,7 @@ PYBIND11_MODULE(layout, m) {
         return self.id().get();
       }, [](ak::ListOffsetArray& self, ak::Identity* id) -> void {
         setid(&self, id);
-      })
+      }, py::return_value_policy::copy)
       .def("setid", [](ak::ListOffsetArray& self) -> void {
         self.setid();
       })

@@ -8,15 +8,13 @@ import numba.typing.arraydecl
 import numba.typing.ctypes_utils
 
 import awkward1.layout
-from .._numba import cpu, common, identity
+from .._numba import cpu, common, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof(val, c):
     return NumpyArrayType(numba.typeof(numpy.asarray(val)))
 
-class NumpyArrayType(common.ContentType):
-    idtpe = numba.types.optional(identity.IdentityType())
-
+class NumpyArrayType(content.ContentType):
     def __init__(self, arraytpe):
         super(NumpyArrayType, self).__init__(name="NumpyArrayType({0})".format(arraytpe.name))
         self.arraytpe = arraytpe
@@ -46,10 +44,10 @@ def unbox(tpe, obj, c):
     id_obj = c.pyapi.object_getattr_string(obj, "id")
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
     proxyout.array = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
-    proxyout.id = numba.targets.boxing.unbox_optional(tpe.idtpe, id_obj, c).value
+    proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
     c.pyapi.decref(asarray_obj)
     c.pyapi.decref(array_obj)
-    # c.pyapi.decref(id_obj)
+    c.pyapi.decref(id_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
