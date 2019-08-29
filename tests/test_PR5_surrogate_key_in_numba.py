@@ -109,3 +109,12 @@ def test_listoffsetarray():
 
     del tmp
     assert (sys.getrefcount(i1), sys.getrefcount(i2), sys.getrefcount(array)) == (3, 2, 2)
+
+def test_id_attribute():
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
+    content.setid()
+    assert numpy.asarray(content.id).tolist() == [[0], [1], [2]]
+    @numba.njit
+    def f1(q):
+        return q.id
+    assert numpy.asarray(f1(content)).tolist() == [[0], [1], [2]]

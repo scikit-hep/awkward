@@ -102,6 +102,17 @@ def lower_getitem(context, builder, sig, args):
 class type_methods(numba.typing.templates.AttributeTemplate):
     key = NumpyArrayType
 
+    def generic_resolve(self, tpe, attr):
+        if attr == "id":
+            return tpe.idtpe
+
+@numba.extending.lower_getattr(NumpyArrayType, "id")
+def lower_id(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe.idtpe, proxyin.id)
+    return proxyin.id
+
 #     @numba.typing.templates.bound_function("dummy1")
 #     def resolve_dummy1(self, selftpe, args, kwargs):
 #         if selftpe.arraytpe.dtype == numba.int32:
