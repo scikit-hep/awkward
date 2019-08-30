@@ -17,4 +17,4 @@ def tolist(array):
     else:
         raise TypeError("unrecognized array type: {0}".format(repr(array)))
 
-__all__ = [x for x in globals() if not x.startswith("_") and x not in ("awkward1", "numpy")]
+__all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("awkward1", "numpy")]
