@@ -4,7 +4,7 @@ import sys
 
 import pytest
 import numpy
-# numba = pytest.importorskip("numba")
+numba = pytest.importorskip("numba")
 
 import awkward1
 
@@ -41,3 +41,16 @@ def test_refcount():
     del iter2
     del x2
     assert (sys.getrefcount(content), sys.getrefcount(array)) == (2, 2)
+
+def test_numba_numpyarray():
+    array = awkward1.layout.NumpyArray(numpy.arange(12))
+
+    @numba.njit
+    def f1(q):
+        out = 0.0
+        for x in q:
+            out += x
+        return out
+
+    print(f1(array))
+    raise Exception

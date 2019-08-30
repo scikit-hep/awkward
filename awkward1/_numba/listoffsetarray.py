@@ -85,7 +85,7 @@ def lower_len(context, builder, sig, args):
     return builder.sub(offsetlen, context.get_constant(rettpe, 1))
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.Integer)
-def lower_getitem(context, builder, sig, args):
+def lower_getitem_int(context, builder, sig, args):
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
@@ -107,7 +107,7 @@ def lower_getitem(context, builder, sig, args):
     return fcn(builder, (proxyin.content, proxyslice._getvalue()))
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.slice2_type)
-def lower_getitem(context, builder, sig, args):
+def lower_getitem_slice(context, builder, sig, args):
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
 

@@ -1,4 +1,4 @@
-tpe# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 import numpy
 import numba
@@ -12,7 +12,7 @@ class IteratorType(numba.types.common.SimpleIteratorType):
 
     def __init__(self, arraytpe):
         self.arraytpe = arraytpe
-        super(IteratorType, self).__init__("iter({0})".format(self.arraytpe.name), self.arraytpe.getitem(self.wheretpe))
+        super(IteratorType, self).__init__("iter({0})".format(self.arraytpe.name), self.arraytpe.getitem(numba.types.Tuple((self.wheretpe,))))
 
 @numba.typing.templates.infer
 class ContentType_type_getiter(numba.typing.templates.AbstractTemplate):
@@ -22,7 +22,7 @@ class ContentType_type_getiter(numba.typing.templates.AbstractTemplate):
         if len(args) == 1 and len(kwargs) == 0:
             arraytpe, = args
             if isinstance(arraytpe, content.ContentType):
-                return numba.typing.templates.signature(IteratorType(arraytpe), arraytpe)
+                return IteratorType(arraytpe)(arraytpe)
 
 @numba.datamodel.registry.register_default(IteratorType)
 class IteratorModel(numba.datamodel.models.StructModel):
@@ -31,9 +31,9 @@ class IteratorModel(numba.datamodel.models.StructModel):
                    ("where", numba.types.EphemeralPointer(fe_type.wheretpe))]
         super(IteratorModel, self).__init__(dmm, fe_type, members)
 
-@numba.extending.lower_builtin("getiter", ContentType)
+@numba.extending.lower_builtin("getiter", content.ContentType)
 def lower_getiter(context, builder, sig, args):
-    rettpe, (tpe,) = sig.args, sig.return_type
+    rettpe, (tpe,) = sig.return_type, sig.args
     val, = args
     proxyout = context.make_helper(builder, rettpe)
     proxyout.array = val
@@ -45,17 +45,31 @@ def lower_getiter(context, builder, sig, args):
 @numba.extending.lower_builtin("iternext", IteratorType)
 @numba.targets.imputils.iternext_impl(numba.targets.imputils.RefType.BORROWED)
 def lower_iternext(context, builder, sig, args, result):
+    print("itenext BEGIN")
     tpe, = sig.args
     val, = args
 
-    proxyin = context.make_helper(builder, tpe, value=val)
-    array = numba.cgutils.create_struct_proxy(tpe.arraytpe)(context, builder, value=proxyin.array)
+    print("ONE")
 
-    where = builder.load(proxyin.where)
-    is_valid = builder.icmp_signed("<", where, tpe.arraytype.len_impl(context, builder, numba.types.intp(tpe.arraytype), (proxyin.array,)))
+    iterator_proxy = context.make_helper(builder, tpe, value=val)
+    array_proxy = numba.cgutils.create_struct_proxy(tpe.arraytpe)(context, builder, value=iterator_proxy.array)
+
+    print("TWO", iterator_proxy.where)
+
+    where = builder.load(iterator_proxy.where)
+
+    print("TWO.FIVE", tpe.arraytpe.lower_len)
+
+    is_valid = builder.icmp_signed("<", where, tpe.arraytpe.__module__.lower_len(context, builder, numba.types.intp(tpe.arraytype), (iterator_proxy.array,)))
+
+    print("TWO.SIX")
+
     result.set_valid(is_valid)
 
+    print("THREE")
+
     with builder.if_then(is_valid, likely=True):
-        result.yield_(tpe.arraytype.getitem_impl(context, builder, tpe.yield_type(tpe.arraytpe, tpe.wheretpe), (proxyin.array, where)))
-        nextwhere = numba.cgutils.increment_where(builder, where)
-        builder.store(nextwhere, proxyin.where)
+        result.yield_(tpe.arraytpe.__module__.lower_getitem_int(context, builder, tpe.yield_type(tpe.arraytpe, tpe.wheretpe), (proxyin.array, where)))
+        nextwhere = numba.cgutils.increment_index(builder, where)
+        builder.store(nextwhere, iterator_proxy.where)
+    print("itenext END")
