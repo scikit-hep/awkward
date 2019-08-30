@@ -31,6 +31,14 @@ class ListOffsetArrayType(content.ContentType):
             else:
                 return self.getitem(tailtpe)
 
+    @property
+    def lower_len(self):
+        return lower_len
+
+    @property
+    def lower_getitem_int(self):
+        return lower_getitem_int
+
 @numba.extending.register_model(ListOffsetArrayType)
 class ListOffsetArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):

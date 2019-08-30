@@ -30,6 +30,14 @@ class NumpyArrayType(content.ContentType):
         else:
             assert False
 
+    @property
+    def lower_len(self):
+        return lower_len
+
+    @property
+    def lower_getitem_int(self):
+        return lower_getitem
+
 @numba.extending.register_model(NumpyArrayType)
 class NumpyArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
@@ -65,8 +73,6 @@ def box(tpe, val, c):
 
 @numba.extending.lower_builtin(len, NumpyArrayType)
 def lower_len(context, builder, sig, args):
-    print("HERE", sig)
-
     tpe, = sig.args
     val, = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
@@ -99,8 +105,6 @@ def lower_getitem(context, builder, sig, args):
         return proxyout._getvalue()
     else:
         return out
-
-lower_getitem_int = lower_getitem
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):

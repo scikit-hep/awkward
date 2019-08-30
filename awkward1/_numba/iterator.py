@@ -45,31 +45,16 @@ def lower_getiter(context, builder, sig, args):
 @numba.extending.lower_builtin("iternext", IteratorType)
 @numba.targets.imputils.iternext_impl(numba.targets.imputils.RefType.BORROWED)
 def lower_iternext(context, builder, sig, args, result):
-    print("itenext BEGIN")
     tpe, = sig.args
     val, = args
 
-    print("ONE")
+    proxyin = context.make_helper(builder, tpe, value=val)
+    where = builder.load(proxyin.where)
 
-    iterator_proxy = context.make_helper(builder, tpe, value=val)
-    array_proxy = numba.cgutils.create_struct_proxy(tpe.arraytpe)(context, builder, value=iterator_proxy.array)
-
-    print("TWO", iterator_proxy.where)
-
-    where = builder.load(iterator_proxy.where)
-
-    print("TWO.FIVE", tpe.arraytpe.lower_len)
-
-    is_valid = builder.icmp_signed("<", where, tpe.arraytpe.__module__.lower_len(context, builder, numba.types.intp(tpe.arraytype), (iterator_proxy.array,)))
-
-    print("TWO.SIX")
-
+    is_valid = builder.icmp_signed("<", where, tpe.arraytpe.lower_len(context, builder, numba.types.intp(tpe.arraytpe), (proxyin.array,)))
     result.set_valid(is_valid)
 
-    print("THREE")
-
     with builder.if_then(is_valid, likely=True):
-        result.yield_(tpe.arraytpe.__module__.lower_getitem_int(context, builder, tpe.yield_type(tpe.arraytpe, tpe.wheretpe), (proxyin.array, where)))
+        result.yield_(tpe.arraytpe.lower_getitem_int(context, builder, tpe.yield_type(tpe.arraytpe, tpe.wheretpe), (proxyin.array, where)))
         nextwhere = numba.cgutils.increment_index(builder, where)
-        builder.store(nextwhere, iterator_proxy.where)
-    print("itenext END")
+        builder.store(nextwhere, proxyin.where)
