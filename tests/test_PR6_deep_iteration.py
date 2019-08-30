@@ -81,3 +81,9 @@ def test_numba_listoffsetarray():
         for x in q:
             return x
     assert numpy.asarray(f2(array)).tolist() == [1.1, 2.2]
+
+def test_tolist():
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
+    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    array = awkward1.layout.ListOffsetArray(offsets, content)
+    assert awkward1.tolist(array) == [[1.1, 2.2], [], [3.3]]
