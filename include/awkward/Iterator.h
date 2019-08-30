@@ -17,7 +17,7 @@ namespace awkward {
     const IndexType where() const { return where_; }
 
     const bool isdone() const { return where_ >= content_.get()->length(); }
-    const std::shared_ptr<Content> next() { return content_.get()->get(where_++)->shallow_copy(); }
+    const std::shared_ptr<Content> next() { return content_.get()->get(where_++); }
 
     const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
 

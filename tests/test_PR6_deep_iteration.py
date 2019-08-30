@@ -14,8 +14,5 @@ def test_iterator():
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
     offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
     array = awkward1.layout.ListOffsetArray(offsets, content)
-
-    # for x in content:
-    #     print(x)
-    #
-    # raise Exception
+    assert list(content) == [1.1, 2.2, 3.3]
+    assert [numpy.asarray(x).tolist() for x in array] == [[1.1, 2.2], [], [3.3]]

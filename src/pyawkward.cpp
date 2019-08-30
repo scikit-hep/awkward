@@ -181,11 +181,11 @@ PYBIND11_MODULE(layout, m) {
         return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)));
       }))
 
-      .def("__next__", [](ak::Iterator& iterator) -> std::shared_ptr<ak::Content> {
+      .def("__next__", [](ak::Iterator& iterator) -> py::object {
         if (iterator.isdone()) {
           throw py::stop_iteration();
         }
-        return iterator.next();
+        return unwrap(iterator.next());
       })
 
       .def("next", [](ak::Iterator& iterator) -> py::object {

@@ -59,6 +59,7 @@ void NumpyArray::setid() {
 }
 
 const std::string NumpyArray::repr(const std::string indent, const std::string pre, const std::string post) const {
+  assert(!isscalar());
   std::stringstream out;
   out << indent << pre << "<NumpyArray format=\"" << format_ << "\" shape=\"";
   for (ssize_t i = 0;  i < ndim();  i++) {
