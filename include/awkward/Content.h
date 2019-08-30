@@ -18,12 +18,6 @@ namespace awkward {
     virtual std::shared_ptr<Content> get(IndexType at) const = 0;
     virtual std::shared_ptr<Content> slice(IndexType start, IndexType stop) const = 0;
   };
-
-  class ContentIterator {
-  public:
-  private:
-    IndexType pos_;
-  };
 }
 
 #endif // AWKWARD_CONTENT_H_
