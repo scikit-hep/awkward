@@ -76,7 +76,7 @@ def lower_len(context, builder, sig, args):
     tpe, = sig.args
     val, = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    return numba.targets.arrayobj.array_len(context, builder, numba.types.intp(tpe.arraytpe), (proxyin.array,))
+    return numba.targets.arrayobj.array_len(context, builder, numba.intp(tpe.arraytpe), (proxyin.array,))
 
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.Integer)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.SliceType)

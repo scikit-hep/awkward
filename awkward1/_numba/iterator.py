@@ -50,8 +50,11 @@ def lower_iternext(context, builder, sig, args, result):
 
     proxyin = context.make_helper(builder, tpe, value=val)
     where = builder.load(proxyin.where)
+    length = tpe.arraytpe.lower_len(context, builder, numba.intp(tpe.arraytpe), (proxyin.array,))
+    if tpe.wheretpe != numba.intp:
+        length = builder.zext(length, context.get_value_type(tpe.wheretpe))
 
-    is_valid = builder.icmp_signed("<", where, tpe.arraytpe.lower_len(context, builder, numba.types.intp(tpe.arraytpe), (proxyin.array,)))
+    is_valid = builder.icmp_signed("<", where, length)
     result.set_valid(is_valid)
 
     with builder.if_then(is_valid, likely=True):
