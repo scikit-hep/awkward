@@ -9,6 +9,7 @@
 #include "awkward/Index.h"
 #include "awkward/Identity.h"
 #include "awkward/Content.h"
+#include "awkward/Iterator.h"
 #include "awkward/NumpyArray.h"
 #include "awkward/ListOffsetArray.h"
 
@@ -169,6 +170,37 @@ PYBIND11_MODULE(layout, m) {
 
   ;
 
+  /////////////////////////////////////////////////////////////// Iterator
+
+  py::class_<ak::Iterator>(m, "Iterator")
+      .def(py::init([](ak::NumpyArray& content) -> ak::Iterator {
+        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(content)));
+      }))
+
+      .def(py::init([](ak::ListOffsetArray& content) -> ak::Iterator {
+        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)));
+      }))
+
+      .def("__next__", [](ak::Iterator& iterator) -> py::object {
+        if (iterator.isdone()) {
+          throw py::stop_iteration();
+        }
+        return unwrap(iterator.next());
+      })
+
+      .def("next", [](ak::Iterator& iterator) -> py::object {
+        if (iterator.isdone()) {
+          throw py::stop_iteration();
+        }
+        return unwrap(iterator.next());
+      })
+
+      .def("__repr__", [](ak::Iterator& self) -> const std::string {
+        return self.repr("", "", "");
+      })
+
+  ;
+
   /////////////////////////////////////////////////////////////// NumpyArray
   py::class_<ak::NumpyArray>(m, "NumpyArray", py::buffer_protocol())
       .def_buffer([](ak::NumpyArray& self) -> py::buffer_info {
@@ -237,6 +269,10 @@ PYBIND11_MODULE(layout, m) {
         return unwrap(self.slice((ak::IndexType)start, (ak::IndexType)stop));
       })
 
+      .def("__iter__", [](ak::NumpyArray& self) -> ak::Iterator {
+        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(self)));
+      })
+
   ;
 
   /////////////////////////////////////////////////////////////// ListOffsetArray
@@ -285,6 +321,10 @@ PYBIND11_MODULE(layout, m) {
           throw py::error_already_set();
         }
         return unwrap(self.slice((ak::IndexType)start, (ak::IndexType)stop));
+      })
+
+      .def("__iter__", [](ak::ListOffsetArray& self) -> ak::Iterator {
+        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArray(self)));
       })
 
   ;

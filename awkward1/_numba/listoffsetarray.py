@@ -31,6 +31,14 @@ class ListOffsetArrayType(content.ContentType):
             else:
                 return self.getitem(tailtpe)
 
+    @property
+    def lower_len(self):
+        return lower_len
+
+    @property
+    def lower_getitem_int(self):
+        return lower_getitem_int
+
 @numba.extending.register_model(ListOffsetArrayType)
 class ListOffsetArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
@@ -81,11 +89,11 @@ def lower_len(context, builder, sig, args):
     rettpe, (tpe,) = sig.return_type, sig.args
     val, = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    offsetlen = numba.targets.arrayobj.array_len(context, builder, numba.types.intp(tpe.offsetstpe), (proxyin.offsets,))
+    offsetlen = numba.targets.arrayobj.array_len(context, builder, numba.intp(tpe.offsetstpe), (proxyin.offsets,))
     return builder.sub(offsetlen, context.get_constant(rettpe, 1))
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.Integer)
-def lower_getitem(context, builder, sig, args):
+def lower_getitem_int(context, builder, sig, args):
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
@@ -99,15 +107,15 @@ def lower_getitem(context, builder, sig, args):
     start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, util.IndexType(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
     stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, util.IndexType(tpe.offsetstpe, wherevalp1_tpe), (proxyin.offsets, wherevalp1))
     proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
-    proxyslice.start = builder.zext(start, context.get_value_type(numba.types.intp))
-    proxyslice.stop = builder.zext(stop, context.get_value_type(numba.types.intp))
-    proxyslice.step = context.get_constant(numba.types.intp, 1)
+    proxyslice.start = builder.zext(start, context.get_value_type(numba.intp))
+    proxyslice.stop = builder.zext(stop, context.get_value_type(numba.intp))
+    proxyslice.step = context.get_constant(numba.intp, 1)
 
     fcn = context.get_function(operator.getitem, rettpe(tpe.contenttpe, numba.types.slice2_type))
     return fcn(builder, (proxyin.content, proxyslice._getvalue()))
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.slice2_type)
-def lower_getitem(context, builder, sig, args):
+def lower_getitem_slice(context, builder, sig, args):
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
 
@@ -116,8 +124,8 @@ def lower_getitem(context, builder, sig, args):
     proxyslicein = numba.cgutils.create_struct_proxy(wheretpe)(context, builder, value=whereval)
     proxysliceout = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
     proxysliceout.start = proxyslicein.start
-    proxysliceout.stop = builder.add(proxyslicein.stop, context.get_constant(numba.types.intp, 1))
-    proxysliceout.step = context.get_constant(numba.types.intp, 1)
+    proxysliceout.stop = builder.add(proxyslicein.stop, context.get_constant(numba.intp, 1))
+    proxysliceout.step = context.get_constant(numba.intp, 1)
 
     proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
     proxyout.offsets = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe(tpe.offsetstpe, numba.types.slice2_type), (proxyin.offsets, proxysliceout._getvalue()))
