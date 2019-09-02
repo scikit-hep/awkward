@@ -86,8 +86,8 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
           sizeof(T),
           py::format_descriptor<T>::format(),
           1,
-          { self.length() },
-          { sizeof(T) });
+          { (ssize_t)self.length() },
+          { (ssize_t)sizeof(T) });
         })
 
       .def(py::init([name](py::array_t<T, py::array::c_style | py::array::forcecast> array) -> ak::IndexOf<T> {
@@ -131,8 +131,8 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
           sizeof(T),
           py::format_descriptor<T>::format(),
           2,
-          { self.length(), self.width() },
-          { sizeof(T)*self.width(), sizeof(T) });
+          { (ssize_t)self.length(), (ssize_t)self.width() },
+          { (ssize_t)(sizeof(T)*self.width()), (ssize_t)sizeof(T) });
         })
 
       .def_static("newref", &ak::Identity::newref)
@@ -180,6 +180,36 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
   ;
 }
 
+/////////////////////////////////////////////////////////////// Iterator
+py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
+  auto next = [](ak::Iterator& iterator) -> py::object {
+    if (iterator.isdone()) {
+      throw py::stop_iteration();
+    }
+    return unwrap(iterator.next());
+  };
+
+  return py::class_<ak::Iterator>(m, name.c_str())
+      .def(py::init([](ak::NumpyArray& content) -> ak::Iterator {
+        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(content)));
+      }))
+      .def(py::init([](ak::ListOffsetArrayOf<int32_t>& content) -> ak::Iterator {
+        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArrayOf<int32_t>(content)));
+      }))
+      .def(py::init([](ak::ListOffsetArrayOf<int64_t>& content) -> ak::Iterator {
+        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArrayOf<int64_t>(content)));
+      }))
+
+      .def("__next__", next)
+      .def("next", next)
+
+      .def("__repr__", [](ak::Iterator& self) -> const std::string {
+        return self.repr();
+      })
+
+  ;
+}
+
 PYBIND11_MODULE(layout, m) {
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
@@ -193,37 +223,8 @@ PYBIND11_MODULE(layout, m) {
   make_IdentityOf<int32_t>(m, "Identity32");
   make_IdentityOf<int64_t>(m, "Identity64");
 
-  // /////////////////////////////////////////////////////////////// Iterator
-  //
-  // py::class_<ak::Iterator>(m, "Iterator")
-  //     .def(py::init([](ak::NumpyArray& content) -> ak::Iterator {
-  //       return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(content)));
-  //     }))
-  //
-  //     .def(py::init([](ak::ListOffsetArray& content) -> ak::Iterator {
-  //       return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArray(content)));
-  //     }))
-  //
-  //     .def("__next__", [](ak::Iterator& iterator) -> py::object {
-  //       if (iterator.isdone()) {
-  //         throw py::stop_iteration();
-  //       }
-  //       return unwrap(iterator.next());
-  //     })
-  //
-  //     .def("next", [](ak::Iterator& iterator) -> py::object {
-  //       if (iterator.isdone()) {
-  //         throw py::stop_iteration();
-  //       }
-  //       return unwrap(iterator.next());
-  //     })
-  //
-  //     .def("__repr__", [](ak::Iterator& self) -> const std::string {
-  //       return self.repr("", "", "");
-  //     })
-  //
-  // ;
-  //
+  make_Iterator(m, "Iterator");
+
   // /////////////////////////////////////////////////////////////// NumpyArray
   // py::class_<ak::NumpyArray>(m, "NumpyArray", py::buffer_protocol())
   //     .def_buffer([](ak::NumpyArray& self) -> py::buffer_info {

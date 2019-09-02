@@ -11,3 +11,7 @@ const std::string Iterator::repr(const std::string indent, const std::string pre
   out << indent << "</Iterator>" << post;
   return out.str();
 }
+
+const std::string Iterator::repr() const {
+  return repr("", "", "");
+}

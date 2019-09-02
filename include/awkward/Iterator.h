@@ -21,6 +21,7 @@ namespace awkward {
     const std::shared_ptr<Content> next() { return content_.get()->get(where_++); }
 
     const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
+    const std::string repr() const;
 
   private:
     const std::shared_ptr<Content> content_;
