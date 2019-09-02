@@ -104,6 +104,26 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
           (T)info.shape[0]);
       }))
 
+      .def("__repr__", [](ak::IndexOf<T>& self) -> const std::string {
+        return self.repr("", "", "");
+      })
+
+      .def("__len__", [](ak::IndexOf<T>& self) -> int64_t {
+        return self.length();
+      })
+
+      .def("__getitem__", [](ak::IndexOf<T>& self, int64_t at) -> T {
+        return self.get(at);
+      })
+
+      .def("__getitem__", [](ak::IndexOf<T>& self, py::slice slice) -> ak::IndexOf<T> {
+        size_t start, stop, step, length;
+        if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
+          throw py::error_already_set();
+        }
+        return self.slice((int64_t)start, (int64_t)stop);
+      })
+
   ;
 }
 
@@ -117,38 +137,6 @@ PYBIND11_MODULE(layout, m) {
   make_IndexOf<int32_t>(m, "Index32");
   make_IndexOf<int64_t>(m, "Index64");
 
-  //     .def(py::init([](py::array_t<IndexType, py::array::c_style | py::array::forcecast> array) -> ak::Index {
-  //       py::buffer_info info = array.request();
-  //       if (info.ndim != 1) {
-  //         throw std::invalid_argument("Index must be built from a one-dimensional array; try array.ravel()");
-  //       }
-  //       if (info.strides[0] != sizeof(IndexType)) {
-  //         throw std::invalid_argument("Index must be built from a compact array (array.strides == (array.itemsize,)); try array.copy()");
-  //       }
-  //       return ak::Index(std::shared_ptr<IndexType>(
-  //         reinterpret_cast<IndexType*>(info.ptr),
-  //         pyobject_deleter<IndexType>(array.ptr())),
-  //         0,
-  //         (IndexType)info.shape[0]);
-  //     }))
-  //
-  //     .def("__repr__", [](ak::Index& self) -> const std::string {
-  //       return self.repr("", "", "");
-  //     })
-  //     .def("__len__", &ak::Index::length)
-  //
-  //     .def("__getitem__", &ak::Index::get)
-  //
-  //     .def("__getitem__", [](ak::Index& self, py::slice slice) -> ak::Index {
-  //       size_t start, stop, step, length;
-  //       if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
-  //         throw py::error_already_set();
-  //       }
-  //       return self.slice((IndexType)start, (IndexType)stop);
-  //     })
-  //
-  // ;
-  //
   // /////////////////////////////////////////////////////////////// Identity
   //
   // py::class_<ak::Identity>(m, "Identity", py::buffer_protocol())

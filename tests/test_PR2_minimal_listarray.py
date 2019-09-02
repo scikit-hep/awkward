@@ -8,13 +8,26 @@ import numpy
 import awkward1
 
 def test():
-    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], dtype="i4"))
+    data = numpy.array([0, 2, 2, 3], dtype="i8")
+    offsets = awkward1.layout.Index64(data)
     assert numpy.asarray(offsets).tolist() == [0, 2, 2, 3]
-#     assert offsets[0] == 0
-#     assert offsets[1] == 2
-#     assert offsets[2] == 2
-#     assert offsets[3] == 3
-#
+    assert offsets[0] == 0
+    assert offsets[1] == 2
+    assert offsets[2] == 2
+    assert offsets[3] == 3
+    data[2] = 999
+    assert offsets[2] == 999
+
+    data = numpy.array([0, 2, 2, 3], dtype="i4")
+    offsets = awkward1.layout.Index32(data)
+    assert numpy.asarray(offsets).tolist() == [0, 2, 2, 3]
+    assert offsets[0] == 0
+    assert offsets[1] == 2
+    assert offsets[2] == 2
+    assert offsets[3] == 3
+    data[2] = 999
+    assert offsets[2] == 999
+
 #     content = awkward1.layout.NumpyArray(numpy.arange(12).reshape(3, 4))
 #     assert numpy.asarray(content).tolist() == [[0,  1,  2,  3],
 #                                                [4,  5,  6,  7],
