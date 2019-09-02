@@ -4,28 +4,33 @@
     <compoundname>identity.cpp</compoundname>
     <includes local="yes">awkward/cpu-kernels/identity.h</includes>
     <incdepgraph>
+      <node id="2">
+        <label>awkward/cpu-kernels/identity.h</label>
+      </node>
       <node id="1">
         <label>src/cpu-kernels/identity.cpp</label>
         <link refid="identity_8cpp"/>
         <childnode refid="2" relation="include">
         </childnode>
       </node>
-      <node id="2">
-        <label>awkward/cpu-kernels/identity.h</label>
-      </node>
     </incdepgraph>
       <sectiondef kind="func">
-      <memberdef kind="function" id="identity_8cpp_1a1b50272e4d973fe45101301304e5741b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="identity_8cpp_1adaa57e00478cb69ceafa0cc7f929b7ca" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
         <type>Error</type>
         <definition>Error awkward_identity_new</definition>
-        <argsstring>(IndexType length, IndexType *to)</argsstring>
+        <argsstring>(int64_t length, T *to)</argsstring>
         <name>awkward_identity_new</name>
         <param>
-          <type>IndexType</type>
+          <type>int64_t</type>
           <declname>length</declname>
         </param>
         <param>
-          <type>IndexType *</type>
+          <type>T *</type>
           <declname>to</declname>
         </param>
         <briefdescription>
@@ -34,35 +39,65 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/identity.cpp" line="5" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="5" bodyend="10"/>
+        <location file="src/cpu-kernels/identity.cpp" line="6" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="6" bodyend="11"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1a3813ead29e11eb4b9fc1f352e172b9d4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="identity_8cpp_1a56afed838ae716b8815f202353b8540a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
-        <definition>Error awkward_identity_from_listfoffsets</definition>
-        <argsstring>(IndexType length, IndexType width, IndexType *offsets, IndexType *from, IndexType tolength, IndexType *to)</argsstring>
-        <name>awkward_identity_from_listfoffsets</name>
+        <definition>Error awkward_identity_new32</definition>
+        <argsstring>(int64_t length, int32_t *to)</argsstring>
+        <name>awkward_identity_new32</name>
         <param>
-          <type>IndexType</type>
+          <type>int64_t</type>
           <declname>length</declname>
         </param>
         <param>
-          <type>IndexType</type>
-          <declname>width</declname>
+          <type>int32_t *</type>
+          <declname>to</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identity.cpp" line="12" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="12" bodyend="14"/>
+      </memberdef>
+      <memberdef kind="function" id="identity_8cpp_1a533f02b6f831031959dfe7ff7246d163" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_identity_new64</definition>
+        <argsstring>(int64_t length, int64_t *to)</argsstring>
+        <name>awkward_identity_new64</name>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
         </param>
         <param>
-          <type>IndexType *</type>
-          <declname>offsets</declname>
+          <type>int64_t *</type>
+          <declname>to</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identity.cpp" line="15" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="15" bodyend="17"/>
+      </memberdef>
+      <memberdef kind="function" id="identity_8cpp_1a20731cb4b45dd78944d2c903fb2f3ede" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_identity_32to64</definition>
+        <argsstring>(int64_t length, int32_t *from, int64_t *to)</argsstring>
+        <name>awkward_identity_32to64</name>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
         </param>
         <param>
-          <type>IndexType *</type>
+          <type>int32_t *</type>
           <declname>from</declname>
         </param>
         <param>
-          <type>IndexType</type>
-          <declname>tolength</declname>
-        </param>
-        <param>
-          <type>IndexType *</type>
+          <type>int64_t *</type>
           <declname>to</declname>
         </param>
         <briefdescription>
@@ -71,7 +106,123 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/identity.cpp" line="12" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="12" bodyend="25"/>
+        <location file="src/cpu-kernels/identity.cpp" line="19" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="19" bodyend="24"/>
+      </memberdef>
+      <memberdef kind="function" id="identity_8cpp_1a0bbc66da21fabae183d4603e4414c4cc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward_identity_from_listfoffsets</definition>
+        <argsstring>(int64_t length, int64_t width, T *offsets, T *from, int64_t tolength, T *to)</argsstring>
+        <name>awkward_identity_from_listfoffsets</name>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>offsets</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>from</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>to</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identity.cpp" line="27" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="27" bodyend="39"/>
+      </memberdef>
+      <memberdef kind="function" id="identity_8cpp_1a8ac914a8677b72b1c7f48b6ca0aab055" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_identity_from_listfoffsets32</definition>
+        <argsstring>(int64_t length, int64_t width, int32_t *offsets, int32_t *from, int64_t tolength, int32_t *to)</argsstring>
+        <name>awkward_identity_from_listfoffsets32</name>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>offsets</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>from</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>to</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identity.cpp" line="40" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="40" bodyend="42"/>
+      </memberdef>
+      <memberdef kind="function" id="identity_8cpp_1a33834d6b33dc1d10168b9222ff803e89" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_identity_from_listfoffsets64</definition>
+        <argsstring>(int64_t length, int64_t width, int64_t *offsets, int64_t *from, int64_t tolength, int64_t *to)</argsstring>
+        <name>awkward_identity_from_listfoffsets64</name>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>offsets</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>from</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>to</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identity.cpp" line="43" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="43" bodyend="45"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

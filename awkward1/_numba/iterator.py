@@ -8,11 +8,9 @@ import awkward1.layout
 from .._numba import cpu, util, content
 
 class IteratorType(numba.types.common.SimpleIteratorType):
-    wheretpe = util.ChunkOffsetType
-
     def __init__(self, arraytpe):
         self.arraytpe = arraytpe
-        super(IteratorType, self).__init__("iter({0})".format(self.arraytpe.name), self.arraytpe.getitem(numba.types.Tuple((self.wheretpe,))))
+        super(IteratorType, self).__init__("iter({0})".format(self.arraytpe.name), self.arraytpe.getitem(numba.types.Tuple((numba.int64,))))
 
 @numba.typing.templates.infer
 class ContentType_type_getiter(numba.typing.templates.AbstractTemplate):
@@ -28,7 +26,7 @@ class ContentType_type_getiter(numba.typing.templates.AbstractTemplate):
 class IteratorModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("array", fe_type.arraytpe),
-                   ("where", numba.types.EphemeralPointer(fe_type.wheretpe))]
+                   ("where", numba.types.EphemeralPointer(numba.int64))]
         super(IteratorModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.lower_builtin("getiter", content.ContentType)
@@ -37,7 +35,7 @@ def lower_getiter(context, builder, sig, args):
     val, = args
     proxyout = context.make_helper(builder, rettpe)
     proxyout.array = val
-    proxyout.where = numba.cgutils.alloca_once_value(builder, context.get_constant(rettpe.wheretpe, 0))
+    proxyout.where = numba.cgutils.alloca_once_value(builder, context.get_constant(numba.int64, 0))
     if context.enable_nrt:
         context.nrt.incref(builder, tpe, val)
     return numba.targets.imputils.impl_ret_new_ref(context, builder, rettpe, proxyout._getvalue())
@@ -51,13 +49,13 @@ def lower_iternext(context, builder, sig, args, result):
     proxyin = context.make_helper(builder, tpe, value=val)
     where = builder.load(proxyin.where)
     length = tpe.arraytpe.lower_len(context, builder, numba.intp(tpe.arraytpe), (proxyin.array,))
-    if tpe.wheretpe != numba.intp:
-        length = builder.zext(length, context.get_value_type(tpe.wheretpe))
+    if numba.int64 != numba.intp:
+        length = builder.zext(length, context.get_value_type(numba.int64))
 
     is_valid = builder.icmp_signed("<", where, length)
     result.set_valid(is_valid)
 
     with builder.if_then(is_valid, likely=True):
-        result.yield_(tpe.arraytpe.lower_getitem_int(context, builder, tpe.yield_type(tpe.arraytpe, tpe.wheretpe), (proxyin.array, where)))
+        result.yield_(tpe.arraytpe.lower_getitem_int(context, builder, tpe.yield_type(tpe.arraytpe, numba.int64), (proxyin.array, where)))
         nextwhere = numba.cgutils.increment_index(builder, where)
         builder.store(nextwhere, proxyin.where)

@@ -18,8 +18,10 @@ libpath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 kernels = ctypes.cdll.LoadLibrary(libpath)
 
 h2ctypes = {
-    "IndexType": ctypes.c_int32,
-    "IndexType *": ctypes.POINTER(ctypes.c_int32),
+    "int32_t": ctypes.c_int32,
+    "int32_t *": ctypes.POINTER(ctypes.c_int32),
+    "int64_t": ctypes.c_int64,
+    "int64_t *": ctypes.POINTER(ctypes.c_int64),
     "Error": ctypes.c_char_p,
     }
 

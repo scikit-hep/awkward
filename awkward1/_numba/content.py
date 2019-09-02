@@ -7,7 +7,7 @@ import numba
 from .._numba import cpu, identity
 
 class ContentType(numba.types.Type):
-    idtpe = numba.types.optional(identity.IdentityType())
+    pass
 
 @numba.typing.templates.infer_global(len)
 class type_len(numba.typing.templates.AbstractTemplate):
