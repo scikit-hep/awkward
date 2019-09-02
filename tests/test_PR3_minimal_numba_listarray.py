@@ -113,9 +113,9 @@ def test_numpyarray_getitem_slice():
     assert numpy.asarray(out).tolist() == [[4, 5, 6, 7], [8, 9, 10, 11]]
 
 def test_listoffsetarray_boxing():
-    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
-    array = awkward1.layout.ListOffsetArray(offsets, content)
+    array = awkward1.layout.ListOffsetArray32(offsets, content)
     assert (sys.getrefcount(offsets), sys.getrefcount(content), sys.getrefcount(array)) == (2, 2, 2)
 
     @numba.njit
@@ -126,7 +126,7 @@ def test_listoffsetarray_boxing():
     assert numpy.asarray(out.offsets).tolist() == [0, 2, 2, 3]
     assert numpy.asarray(out.content).tolist() == [1.1, 2.2, 3.3]
 
-    array2 = awkward1.layout.ListOffsetArray(offsets, array)
+    array2 = awkward1.layout.ListOffsetArray32(offsets, array)
     out2 = f1(array2)
     assert (sys.getrefcount(offsets), sys.getrefcount(content), sys.getrefcount(array)) == (2, 2, 2)
     assert numpy.asarray(out2.offsets).tolist() == [0, 2, 2, 3]
@@ -134,18 +134,18 @@ def test_listoffsetarray_boxing():
     assert numpy.asarray(out2.content.content).tolist() == [1.1, 2.2, 3.3]
 
 def test_listoffsetarray_len():
-    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
-    array = awkward1.layout.ListOffsetArray(offsets, content)
+    array = awkward1.layout.ListOffsetArray32(offsets, content)
     @numba.njit
     def f1(q):
         return len(q)
     assert f1(array) == 3
 
 def test_listoffsetarray_getitem_int():
-    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
-    array = awkward1.layout.ListOffsetArray(offsets, content)
+    array = awkward1.layout.ListOffsetArray32(offsets, content)
     @numba.njit
     def f1(q):
         return q[0]
@@ -158,9 +158,9 @@ def test_listoffsetarray_getitem_int():
     assert numpy.asarray(f2(array, 2)).tolist() == [3.3]
 
 def test_listoffsetarray_getitem_slice():
-    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
-    array = awkward1.layout.ListOffsetArray(offsets, content)
+    array = awkward1.layout.ListOffsetArray32(offsets, content)
     @numba.njit
     def f1(q):
         return q[1:][1]

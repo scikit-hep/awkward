@@ -8,6 +8,10 @@ const std::string Iterator::repr(const std::string indent, const std::string pre
   std::stringstream out;
   out << indent << pre << "<Iterator where=\"" << where_ << "\">\n";
   out << content_.get()->repr(indent + std::string("    "), "", "\n");
-  out << indent << "</NumpyArray>" << post;
+  out << indent << "</Iterator>" << post;
   return out.str();
+}
+
+const std::string Iterator::repr() const {
+  return repr("", "", "");
 }

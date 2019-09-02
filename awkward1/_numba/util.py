@@ -2,8 +2,4 @@
 
 import numba
 
-byte            = numba.uint8
-IndexType       = numba.int32
-TagType         = numba.uint8
-ChunkOffsetType = numba.int64
-RefType         = numba.int64
+RefType = numba.int64

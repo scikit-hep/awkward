@@ -8,19 +8,17 @@ numba = pytest.importorskip("numba")
 
 import awkward1
 
-# py27 = 2 if sys.version_info[0] < 3 else 1
-
 def test_iterator():
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
-    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
-    array = awkward1.layout.ListOffsetArray(offsets, content)
+    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
+    array = awkward1.layout.ListOffsetArray32(offsets, content)
     assert list(content) == [1.1, 2.2, 3.3]
     assert [numpy.asarray(x).tolist() for x in array] == [[1.1, 2.2], [], [3.3]]
 
 def test_refcount():
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
-    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
-    array = awkward1.layout.ListOffsetArray(offsets, content)
+    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
+    array = awkward1.layout.ListOffsetArray32(offsets, content)
 
     assert (sys.getrefcount(content), sys.getrefcount(array)) == (2, 2)
 
@@ -64,8 +62,8 @@ def test_numba_numpyarray():
 
 def test_numba_listoffsetarray():
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
-    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
-    array = awkward1.layout.ListOffsetArray(offsets, content)
+    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
+    array = awkward1.layout.ListOffsetArray32(offsets, content)
 
     @numba.njit
     def f1(q):
@@ -84,6 +82,6 @@ def test_numba_listoffsetarray():
 
 def test_tolist():
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
-    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
-    array = awkward1.layout.ListOffsetArray(offsets, content)
+    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
+    array = awkward1.layout.ListOffsetArray32(offsets, content)
     assert awkward1.tolist(array) == [[1.1, 2.2], [], [3.3]]

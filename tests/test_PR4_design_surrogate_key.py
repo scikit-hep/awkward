@@ -14,7 +14,7 @@ def test_refcount1():
     i = numpy.arange(12, dtype="i4").reshape(3, 4)
     assert sys.getrefcount(i) == 2
 
-    i2 = awkward1.layout.Identity(awkward1.layout.Identity.newref(), [(0, "hey"), (1, "there")], 1, 2, i)
+    i2 = awkward1.layout.Identity32(awkward1.layout.Identity32.newref(), [(0, "hey"), (1, "there")], i)
     assert (sys.getrefcount(i), sys.getrefcount(i2)) == (3, 2)
 
     tmp = numpy.asarray(i2)
@@ -42,7 +42,7 @@ def test_refcount1():
 
 def test_refcount2():
     i = numpy.arange(6, dtype="i4").reshape(3, 2)
-    i2 = awkward1.layout.Identity(awkward1.layout.Identity.newref(), [], 0, 2, i)
+    i2 = awkward1.layout.Identity32(awkward1.layout.Identity32.newref(), [], i)
     x = numpy.arange(12).reshape(3, 4)
     x2 = awkward1.layout.NumpyArray(x)
     x2.id = i2
@@ -58,7 +58,7 @@ def test_refcount2():
 
 def test_refcount3():
     i = numpy.arange(6, dtype="i4").reshape(3, 2)
-    i2 = awkward1.layout.Identity(awkward1.layout.Identity.newref(), [], 0, 2, i)
+    i2 = awkward1.layout.Identity32(awkward1.layout.Identity32.newref(), [], i)
     x = numpy.arange(12).reshape(3, 4)
     x2 = awkward1.layout.NumpyArray(x)
     x2.id = i2
@@ -75,8 +75,8 @@ def test_numpyarray_setid():
 
 def test_listoffsetarray_setid():
     content = awkward1.layout.NumpyArray(numpy.arange(10))
-    offsets = awkward1.layout.Index(numpy.array([0, 3, 3, 5, 10], dtype="i4"))
-    jagged = awkward1.layout.ListOffsetArray(offsets, content)
+    offsets = awkward1.layout.Index32(numpy.array([0, 3, 3, 5, 10], dtype="i4"))
+    jagged = awkward1.layout.ListOffsetArray32(offsets, content)
     jagged.setid()
     assert numpy.asarray(jagged.id).tolist() == [[0], [1], [2], [3]]
     assert numpy.asarray(jagged.content.id).tolist() == [[0, 0], [0, 1], [0, 2], [2, 0], [2, 1], [3, 0], [3, 1], [3, 2], [3, 3], [3, 4]]
@@ -88,9 +88,9 @@ def test_listoffsetarray_setid():
     assert numpy.asarray(jagged[1:3].id).tolist() == [[1], [2]]
 
 def test_setid_none():
-    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
+    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
-    array = awkward1.layout.ListOffsetArray(offsets, content)
+    array = awkward1.layout.ListOffsetArray32(offsets, content)
     assert array.id is None
     assert array.content.id is None
     array.id = None
@@ -106,8 +106,8 @@ def test_setid_none():
     assert array.content.id is None
 
 def test_setid_constructor():
-    offsets = awkward1.layout.Index(numpy.array([0, 2, 2, 3], "i4"))
-    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]), id=awkward1.layout.Identity(awkward1.layout.Identity.newref(), [], 0, 2, numpy.array([[0, 0], [0, 1], [2, 0]], dtype="i4")))
-    array = awkward1.layout.ListOffsetArray(offsets, content, id=awkward1.layout.Identity(awkward1.layout.Identity.newref(), [], 0, 1, numpy.array([[0], [1], [2]], dtype="i4")))
+    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]), id=awkward1.layout.Identity32(awkward1.layout.Identity32.newref(), [], numpy.array([[0, 0], [0, 1], [2, 0]], dtype="i4")))
+    array = awkward1.layout.ListOffsetArray32(offsets, content, id=awkward1.layout.Identity32(awkward1.layout.Identity32.newref(), [], numpy.array([[0], [1], [2]], dtype="i4")))
     assert numpy.asarray(array.id).tolist() == [[0], [1], [2]]
     assert numpy.asarray(array.content.id).tolist() == [[0, 0], [0, 1], [2, 0]]

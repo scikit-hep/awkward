@@ -4,20 +4,21 @@
     <compoundname>Identity.cpp</compoundname>
     <includes local="yes">awkward/Identity.h</includes>
     <incdepgraph>
+      <node id="2">
+        <label>awkward/Identity.h</label>
+      </node>
       <node id="1">
         <label>src/libawkward/Identity.cpp</label>
         <link refid="Identity_8cpp"/>
         <childnode refid="2" relation="include">
         </childnode>
       </node>
-      <node id="2">
-        <label>awkward/Identity.h</label>
-      </node>
     </incdepgraph>
+    <innernamespace refid="namespaceawkward">awkward</innernamespace>
       <sectiondef kind="var">
-      <memberdef kind="variable" id="Identity_8cpp_1a07c884b2d263cddb2ae21c2677280c60" prot="public" static="no" mutable="no">
-        <type>std::atomic&lt; RefType &gt;</type>
-        <definition>std::atomic&lt;RefType&gt; numrefs</definition>
+      <memberdef kind="variable" id="Identity_8cpp_1a8723163cb11d85420d4e6f3ab54171e0" prot="public" static="no" mutable="no">
+        <type>std::atomic&lt; Identity::Ref &gt;</type>
+        <definition>std::atomic&lt;Identity::Ref&gt; numrefs</definition>
         <argsstring></argsstring>
         <name>numrefs</name>
         <initializer>{0}</initializer>

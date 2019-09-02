@@ -1,2 +1,2 @@
 pytest>=3.9
-numba
+numba>=0.44.0
