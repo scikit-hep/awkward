@@ -277,6 +277,7 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
 
       .def_property("id", [](ak::NumpyArray& self) -> py::object { return unwrap(self.id()); }, &setid<ak::NumpyArray>)
       .def("setid", &setid<ak::NumpyArray>)
+      .def("setid", [](ak::NumpyArray& self) -> void { self.setid(); })
       .def("__repr__", [](ak::NumpyArray* self) -> const std::string {
         return ((ak::Content*)self)->repr();
       })
@@ -312,7 +313,7 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
 /////////////////////////////////////////////////////////////// ListOffsetArray
 
 template <typename T, typename CONTENT, typename IDENTITY>
-ak::ListOffsetArrayOf<T> init_ListOffsetArrayOf(ak::IndexOf<T>& offsets, ak::NumpyArray& content, py::object id) {
+ak::ListOffsetArrayOf<T> init_ListOffsetArrayOf(ak::IndexOf<T>& offsets, CONTENT& content, py::object id) {
   ak::ListOffsetArrayOf<T> out = ak::ListOffsetArrayOf<T>(std::shared_ptr<ak::Identity>(nullptr), offsets, std::shared_ptr<ak::Content>(content.shallow_copy()));
   setid(out, id);
   return out;
@@ -335,6 +336,7 @@ py::class_<ak::ListOffsetArrayOf<T>> make_ListOffsetArrayOf(py::handle m, std::s
 
       .def_property("id", [](ak::ListOffsetArrayOf<T>& self) -> py::object { return unwrap(self.id()); }, &setid<ak::ListOffsetArrayOf<T>>)
       .def("setid", &setid<ak::ListOffsetArrayOf<T>>)
+      .def("setid", [](ak::ListOffsetArrayOf<T>& self) -> void { self.setid(); })
       .def("__repr__", [](ak::ListOffsetArrayOf<T>* self) -> const std::string {
         return ((ak::Content*)self)->repr();
       })
