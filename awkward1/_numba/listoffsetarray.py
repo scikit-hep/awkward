@@ -77,9 +77,11 @@ def box(tpe, val, c):
     if tpe.bitwidth() == 32:
         Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Index32))
         ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArray32))
-    else:
+    elif tpe.bitwidth() == 64:
         Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Index64))
         ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArray64))
+    else:
+        assert False, "unrecognized bitwidth"
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     offsetsarray_obj = c.pyapi.from_native_value(tpe.offsetstpe, proxyin.offsets, c.env_manager)
     content_obj = c.pyapi.from_native_value(tpe.contenttpe, proxyin.content, c.env_manager)

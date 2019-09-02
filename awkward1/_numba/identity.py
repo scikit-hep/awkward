@@ -18,6 +18,9 @@ def typeof(val, c):
 class IdentityType(numba.types.Type):
     fieldloctpe = numba.types.List(numba.types.Tuple((numba.int64, numba.types.string)))
 
+    def bitwidth(self):
+        return self.arraytpe.dtype.bitwidth
+
     def __init__(self, arraytpe):
         super(IdentityType, self).__init__(name="Identity{0}Type".format(arraytpe.dtype.bitwidth))
         self.arraytpe = arraytpe
@@ -53,7 +56,12 @@ def unbox(tpe, obj, c):
 
 @numba.extending.box(IdentityType)
 def box(tpe, val, c):
-    Identity_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Identity))
+    if tpe.bitwidth() == 32:
+        Identity_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Identity32))
+    elif tpe.bitwidth() == 64:
+        Identity_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Identity64))
+    else:
+        assert False, "unrecognized bitwidth"
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     ref_obj = c.pyapi.from_native_value(util.RefType, proxyin.ref, c.env_manager)
     fieldloc_obj = c.pyapi.from_native_value(tpe.fieldloctpe, proxyin.fieldloc, c.env_manager)
@@ -75,3 +83,16 @@ def lower_len(context, builder, sig, args):
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):
     key = IdentityType
+
+    def generic_resolve(self, tpe, attr):
+        if attr == "width":
+            return numba.int64
+
+@numba.extending.lower_getattr(IdentityType, "width")
+def lower_content(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    array_proxy = numba.cgutils.create_struct_proxy(tpe.arraytpe)(context, builder, value=proxyin.array)
+    out = builder.extract_value(array_proxy.shape, 1)
+    if numba.int64 != numba.intp:
+        out = builder.zext(out, context.get_value_type(numba.int64))
+    return out
