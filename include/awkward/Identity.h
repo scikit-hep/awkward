@@ -19,6 +19,7 @@
 namespace awkward {
   class Identity {
   public:
+    typedef int64_t Ref;
     typedef std::vector<std::pair<int64_t, std::string>> FieldLoc;
 
     static Ref newref();
@@ -61,6 +62,9 @@ namespace awkward {
 
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
     virtual const std::shared_ptr<Identity> slice(int64_t start, int64_t stop) const;
+
+    const std::string repr() const;
+    const std::vector<T> get(int64_t at) const;
 
   private:
     const std::shared_ptr<T> ptr_;

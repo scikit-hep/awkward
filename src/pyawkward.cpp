@@ -108,20 +108,73 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
         return self.repr("", "", "");
       })
 
-      .def("__len__", [](ak::IndexOf<T>& self) -> int64_t {
-        return self.length();
-      })
-
-      .def("__getitem__", [](ak::IndexOf<T>& self, int64_t at) -> T {
-        return self.get(at);
-      })
-
+      .def("__len__", &ak::IndexOf<T>::length)
+      .def("__getitem__", &ak::IndexOf<T>::get)
       .def("__getitem__", [](ak::IndexOf<T>& self, py::slice slice) -> ak::IndexOf<T> {
         size_t start, stop, step, length;
         if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
           throw py::error_already_set();
         }
         return self.slice((int64_t)start, (int64_t)stop);
+      })
+
+  ;
+}
+
+/////////////////////////////////////////////////////////////// Identity
+template <typename T>
+py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
+  return py::class_<ak::IdentityOf<T>>(m, name.c_str(), py::buffer_protocol())
+      .def_buffer([](ak::IdentityOf<T>& self) -> py::buffer_info {
+        return py::buffer_info(
+          reinterpret_cast<void*>(reinterpret_cast<ssize_t>(self.ptr().get()) + self.offset()*sizeof(T)),
+          sizeof(T),
+          py::format_descriptor<T>::format(),
+          2,
+          { self.length(), self.width() },
+          { sizeof(T)*self.width(), sizeof(T) });
+        })
+
+      .def_static("newref", &ak::Identity::newref)
+
+      .def(py::init([](ak::Identity::Ref ref, ak::Identity::FieldLoc fieldloc, int64_t width, int64_t length) {
+        return ak::IdentityOf<T>(ref, fieldloc, width, length);
+      }))
+
+      .def(py::init([name](ak::Identity::Ref ref, ak::Identity::FieldLoc fieldloc, py::array_t<T, py::array::c_style | py::array::forcecast> array) {
+        py::buffer_info info = array.request();
+        if (info.ndim != 2) {
+          throw std::invalid_argument(name + std::string(" must be built from a two-dimensional array"));
+        }
+        if (info.strides[0] != sizeof(T)*info.shape[1]  ||  info.strides[1] != sizeof(T)) {
+          throw std::invalid_argument(name + std::string(" must be built from a compact array (array.stries == (array.shape[1]*array.itemsize, array.itemsize)); try array.copy()"));
+        }
+        return ak::IdentityOf<T>(ref, fieldloc, 0, info.shape[1], info.shape[0],
+            std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr), pyobject_deleter<T>(array.ptr())));
+      }))
+
+      .def("__repr__", [](ak::IdentityOf<T>& self) -> const std::string {
+        return self.repr();
+      })
+
+      .def("__len__", &ak::IdentityOf<T>::length)
+      .def("__getitem__", &ak::IdentityOf<T>::get)
+      .def("__getitem__", [](ak::IdentityOf<T>& self, py::slice slice) -> ak::IdentityOf<T> {
+        size_t start, stop, step, length;
+        if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
+          throw py::error_already_set();
+        }
+        std::shared_ptr<ak::Identity> out = self.slice((int64_t)start, (int64_t)stop);
+        ak::IdentityOf<T>* raw = dynamic_cast<ak::IdentityOf<T>*>(out.get());
+        return ak::IdentityOf<T>(raw->ref(), raw->fieldloc(), raw->offset(), raw->width(), raw->length(), raw->ptr());
+      })
+
+      .def_property_readonly("ref", &ak::IdentityOf<T>::ref)
+      .def_property_readonly("fieldloc", &ak::IdentityOf<T>::fieldloc)
+      .def_property_readonly("width", &ak::IdentityOf<T>::width)
+      .def_property_readonly("length", &ak::IdentityOf<T>::length)
+      .def_property_readonly("array", [](py::buffer& self) -> py::array {
+        return py::array(self);
       })
 
   ;
@@ -137,57 +190,9 @@ PYBIND11_MODULE(layout, m) {
   make_IndexOf<int32_t>(m, "Index32");
   make_IndexOf<int64_t>(m, "Index64");
 
-  // /////////////////////////////////////////////////////////////// Identity
-  //
-  // py::class_<ak::Identity>(m, "Identity", py::buffer_protocol())
-  //     .def_buffer([](ak::Identity& self) -> py::buffer_info {
-  //       return py::buffer_info(
-  //         reinterpret_cast<IndexType*>(reinterpret_cast<ssize_t>(self.ptr().get()) +
-  //                                          self.offset()*sizeof(IndexType)),
-  //         sizeof(IndexType),
-  //         py::format_descriptor<IndexType>::format(),
-  //         2,
-  //         { self.length(), self.keydepth() },
-  //         { sizeof(IndexType)*self.keydepth(), sizeof(IndexType)}
-  //       );
-  //     })
-  //
-  //     .def_static("newref", &ak::Identity::newref)
-  //
-  //     .def(py::init([](RefType ref, ak::FieldLocation fieldloc, IndexType chunkdepth, IndexType indexdepth, py::array_t<IndexType, py::array::c_style | py::array::forcecast> array) {
-  //       py::buffer_info info = array.request();
-  //       if (info.ndim != 2) {
-  //         throw std::invalid_argument("Identity must be built from a two-dimensional array");
-  //       }
-  //       if (ak::Identity::keydepth(chunkdepth, indexdepth) != info.shape[1]) {
-  //         throw std::invalid_argument("second dimension of array must be consistent with chunkdepth and indexdepth");
-  //       }
-  //       if (info.strides[0] != sizeof(IndexType)*info.shape[1]  ||  info.strides[1] != sizeof(IndexType)) {
-  //         throw std::invalid_argument("Identity must be built from a compact array (array.strides == (array.shape[1]*array.itemsize, array.itemsize)); try array.copy()");
-  //       }
-  //       return ak::Identity(ref, fieldloc, chunkdepth, indexdepth,
-  //                           std::shared_ptr<IndexType>(reinterpret_cast<IndexType*>(info.ptr),
-  //                                                          pyobject_deleter<IndexType>(array.ptr())),
-  //                           0,
-  //                           (IndexType)info.shape[0]);
-  //     }))
-  //
-  //     .def("__repr__", [](ak::Identity& self) -> const std::string {
-  //       return self.repr("", "", "");
-  //     })
-  //     .def("__len__", &ak::Identity::length)
-  //
-  //     .def_property_readonly("ref", &ak::Identity::ref)
-  //     .def_property_readonly("fieldloc", &ak::Identity::fieldloc)
-  //     .def_property_readonly("chunkdepth", &ak::Identity::chunkdepth)
-  //     .def_property_readonly("indexdepth", &ak::Identity::indexdepth)
-  //     .def_property_readonly("keydepth", [](ak::Identity& self) { return self.keydepth(); })
-  //     .def_property_readonly("array", [](py::buffer& self) -> py::array {
-  //       return py::array(self);
-  //     })
-  //
-  // ;
-  //
+  make_IdentityOf<int32_t>(m, "Identity32");
+  make_IdentityOf<int64_t>(m, "Identity64");
+
   // /////////////////////////////////////////////////////////////// Iterator
   //
   // py::class_<ak::Iterator>(m, "Iterator")

@@ -18,6 +18,8 @@ namespace awkward {
     virtual std::shared_ptr<Content> shallow_copy() const = 0;
     virtual std::shared_ptr<Content> get(int64_t at) const = 0;
     virtual std::shared_ptr<Content> slice(int64_t start, int64_t stop) const = 0;
+
+    const std::string repr() const;
   };
 }
 

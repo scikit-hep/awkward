@@ -8,8 +8,6 @@
 namespace awkward {
   #define HANDLE_ERROR(err) { if (err != kNoError) { throw std::invalid_argument(err); } }
 
-  typedef int64_t Ref;
-
   namespace util {
     template<typename T>
     class array_deleter {

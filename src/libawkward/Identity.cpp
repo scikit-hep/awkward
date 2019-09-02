@@ -4,9 +4,9 @@
 
 using namespace awkward;
 
-std::atomic<Ref> numrefs{0};
+std::atomic<Identity::Ref> numrefs{0};
 
-Ref Identity::newref() {
+Identity::Ref Identity::newref() {
   return numrefs++;
 }
 
@@ -33,8 +33,22 @@ const std::string IdentityOf<T>::repr(const std::string indent, const std::strin
 }
 
 template <typename T>
+const std::string IdentityOf<T>::repr() const {
+  return repr("", "", "");
+}
+
+template <typename T>
 const std::shared_ptr<Identity> IdentityOf<T>::slice(int64_t start, int64_t stop) const {
   return std::shared_ptr<Identity>(new IdentityOf<T>(ref(), fieldloc(), offset() + width()*start*(start != stop), width(), (stop - start), ptr_));
+}
+
+template <typename T>
+const std::vector<T> IdentityOf<T>::get(int64_t at) const {
+  std::vector<T> out;
+  for (ssize_t i = offset() + at;  i < offset() + at + width();  i++) {
+    out.push_back(ptr_.get()[i]);
+  }
+  return out;
 }
 
 namespace awkward {

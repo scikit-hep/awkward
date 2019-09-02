@@ -5,6 +5,11 @@
 using namespace awkward;
 
 template <typename T>
+const std::string IndexOf<T>::repr() const {
+  return repr("", "", "");
+}
+
+template <typename T>
 const std::string IndexOf<T>::repr(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
   std::string name = "Unrecognized Index";

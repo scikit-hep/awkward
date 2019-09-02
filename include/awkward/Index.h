@@ -30,6 +30,7 @@ namespace awkward {
     int64_t offset() const { return offset_; }
     int64_t length() const { return length_; }
 
+    const std::string repr() const;
     const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
     T get(int64_t at) const;
     IndexOf<T> slice(int64_t start, int64_t stop) const;
