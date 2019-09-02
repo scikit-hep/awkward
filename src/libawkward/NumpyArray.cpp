@@ -52,8 +52,9 @@ void NumpyArray::setid(const std::shared_ptr<Identity> id) {
 
 void NumpyArray::setid() {
   assert(!isscalar());
-  std::shared_ptr<Identity> newid(new Identity(Identity::newref(), FieldLocation(), 1, length()));
-  Error err = awkward_identity_new32(length(), newid.get()->ptr().get());
+  Identity32* id32 = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
+  std::shared_ptr<Identity> newid(id32);
+  Error err = awkward_identity_new32(length(), id32->ptr().get());
   HANDLE_ERROR(err);
   setid(newid);
 }
@@ -122,7 +123,7 @@ int64_t NumpyArray::length() const {
     return -1;
   }
   else {
-    return (Index64)shape_[0];
+    return (int64_t)shape_[0];
   }
 }
 
@@ -130,7 +131,7 @@ std::shared_ptr<Content> NumpyArray::shallow_copy() const {
   return std::shared_ptr<Content>(new NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
 }
 
-std::shared_ptr<Content> get(int64_t at) const {
+std::shared_ptr<Content> NumpyArray::get(int64_t at) const {
   assert(!isscalar());
   ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
   const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
@@ -142,7 +143,7 @@ std::shared_ptr<Content> get(int64_t at) const {
   return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset, itemsize_, format_));
 }
 
-std::shared_ptr<Content> slice(int64_t start, int64_t stop) const {
+std::shared_ptr<Content> NumpyArray::slice(int64_t start, int64_t stop) const {
   assert(!isscalar());
   ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
   std::vector<ssize_t> shape;

@@ -17,12 +17,12 @@
 #include "awkward/util.h"
 
 namespace awkward {
-  typedef std::vector<std::pair<int64_t, std::string>> FieldLoc;
-
-  static Ref newref();
-
   class Identity {
   public:
+    typedef std::vector<std::pair<int64_t, std::string>> FieldLoc;
+
+    static Ref newref();
+
     Identity(const Ref ref, const FieldLoc fieldloc, int64_t offset, int64_t width, int64_t length)
         : ref_(ref)
         , fieldloc_(fieldloc)

@@ -54,7 +54,7 @@ IndexOf<T> IndexOf<T>::slice(int64_t start, int64_t stop) const {
 }
 
 namespace awkward {
-  template class IndexOf<int8_t>  Index8;
-  template class IndexOf<int32_t> Index32;
-  template class IndexOf<int64_t> Index64;
+  template class IndexOf<int8_t>;
+  template class IndexOf<int32_t>;
+  template class IndexOf<int64_t>;
 }

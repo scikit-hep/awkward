@@ -65,7 +65,15 @@ void setid(ak::Content* obj, ak::Identity* id) {
     if (id->length() != obj->length()) {
       throw std::invalid_argument("Identity must have the same length as array");
     }
-    obj->setid(std::shared_ptr<ak::Identity>(new ak::Identity(*id)));
+    if (ak::Identity32* id32 = dynamic_cast<ak::Identity32*>(id)) {
+      obj->setid(std::shared_ptr<ak::Identity>(new ak::Identity32(id->ref(), id->fieldloc(), id->offset(), id->width(), id->length(), id32->ptr())));
+    }
+    else if (ak::Identity64* id64 = dynamic_cast<ak::Identity64*>(id)) {
+      obj->setid(std::shared_ptr<ak::Identity>(new ak::Identity64(id->ref(), id->fieldloc(), id->offset(), id->width(), id->length(), id64->ptr())));
+    }
+    else {
+      throw std::runtime_error("unrecognized Identity specialization");
+    }
   }
 }
 

@@ -7,8 +7,9 @@ using namespace awkward;
 
 template <typename T>
 void ListOffsetArrayOf<T>::setid() {
-  std::shared_ptr<Identity> newid(new Identity(Identity::newref(), FieldLocation(), 1, length()));
-  Error err = awkward_identity_new32(length(), newid.get()->ptr().get());
+  Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
+  std::shared_ptr<Identity> newid(rawid);
+  Error err = awkward_identity_new32(length(), rawid->ptr().get());
   HANDLE_ERROR(err);
   setid(newid);
 }
@@ -19,10 +20,18 @@ void ListOffsetArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
     content_.get()->setid(id);
   }
   else {
-    std::shared_ptr<Identity> newid(new Identity32(Identity::newref(), id.get()->fieldloc(), id.get()->width() + 1, content_.get()->length()));
-    Error err = awkward_identity_from_listfoffsets32(length(), id.get()->width(), offsets_.ptr().get(), id.get()->ptr().get(), content_.get()->length(), newid.get()->ptr().get());
-    HANDLE_ERROR(err);
-    content_.get()->setid(newid);
+    Identity32* rawid32 = dynamic_cast<Identity32*>(id.get());
+    Identity64* rawid64 = dynamic_cast<Identity64*>(id.get());
+    if (rawid32  &&  std::is_same<T, int32_t>::value) {
+      Identity32* rawsubid = new Identity32(Identity::newref(), rawid32->fieldloc(), rawid32->width() + 1, content_.get()->length());
+      std::shared_ptr<Identity> newsubid(rawsubid);
+      Error err = awkward_identity_from_listfoffsets32(length(), rawid32->width(), reinterpret_cast<int32_t*>(offsets_.ptr().get()), rawid32->ptr().get(), content_.get()->length(), rawsubid->ptr().get());
+      HANDLE_ERROR(err);
+      content_.get()->setid(newsubid);
+    }
+    else {
+      throw std::runtime_error("unhandled Identity specialization case");
+    }
   }
   id_ = id;
 }
@@ -74,6 +83,6 @@ std::shared_ptr<Content> ListOffsetArrayOf<T>::slice(int64_t start, int64_t stop
 }
 
 namespace awkward {
-  template class ListOffsetArrayOf<int32_t> ListOffsetArray32;
-  template class ListOffsetArrayOf<int64_t> ListOffsetArray64;
+  template class ListOffsetArrayOf<int32_t>;
+  template class ListOffsetArrayOf<int64_t>;
 }
