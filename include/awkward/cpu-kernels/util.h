@@ -5,13 +5,14 @@
 
 #ifdef _MSC_VER
   #ifdef _WIN64
-    typedef signed __int64 ssize_t;
+    typedef signed   __int64 ssize_t;
   #else
-    typedef signed   int   ssize_t;
+    typedef signed   int     ssize_t;
   #endif
-  typedef unsigned char  uint8_t;
-  typedef signed   int   int32_t;
-  typedef signed __int64 int64_t;
+  typedef   unsigned char    uint8_t;
+  typedef   signed   char    int8_t;
+  typedef   signed   int     int32_t;
+  typedef   signed   __int64 int64_t;
 #else
   #include <cstdint>
 #endif
