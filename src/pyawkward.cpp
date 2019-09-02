@@ -71,23 +71,33 @@ py::object unwrap(std::shared_ptr<ak::Identity> id) {
   }
 }
 
-void setid(ak::Content* obj, ak::Identity* id) {
-  if (id == nullptr) {
-    obj->setid(std::shared_ptr<ak::Identity>(nullptr));
+template <typename CONTENT>
+void setid(CONTENT& self, py::object obj) {
+  ak::Identity32* id32;
+  ak::Identity64* id64;
+  try {
+    id32 = obj.cast<ak::Identity32*>();
+  }
+  catch (py::cast_error err) {
+    try {
+      id64 = obj.cast<ak::Identity64*>();
+    }
+    catch (py::cast_error err) {
+      throw std::invalid_argument("'id' member must be Identity32 or Identity64");
+    }
+    if (id64->length() != self.length()) {
+      throw std::invalid_argument("Identity must have the same length as the Content to which it is assigned");
+    }
+    if (id64 != nullptr) {
+      self.setid(std::shared_ptr<ak::Identity>(new ak::Identity64(id64->ref(), id64->fieldloc(), id64->offset(), id64->width(), id64->length(), id64->ptr())));
+      return;
+    }
+  }
+  if (id32 != nullptr) {
+    self.setid(std::shared_ptr<ak::Identity>(new ak::Identity32(id32->ref(), id32->fieldloc(), id32->offset(), id32->width(), id32->length(), id32->ptr())));
   }
   else {
-    if (id->length() != obj->length()) {
-      throw std::invalid_argument("Identity must have the same length as array");
-    }
-    if (ak::Identity32* id32 = dynamic_cast<ak::Identity32*>(id)) {
-      obj->setid(std::shared_ptr<ak::Identity>(new ak::Identity32(id->ref(), id->fieldloc(), id->offset(), id->width(), id->length(), id32->ptr())));
-    }
-    else if (ak::Identity64* id64 = dynamic_cast<ak::Identity64*>(id)) {
-      obj->setid(std::shared_ptr<ak::Identity>(new ak::Identity64(id->ref(), id->fieldloc(), id->offset(), id->width(), id->length(), id64->ptr())));
-    }
-    else {
-      throw std::runtime_error("unrecognized Identity specialization");
-    }
+    self.setid(std::shared_ptr<ak::Identity>(nullptr));
   }
 }
 
@@ -230,6 +240,26 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
 
 /////////////////////////////////////////////////////////////// NumpyArray
 
+template <typename IDENTITY>
+ak::NumpyArray init_NumpyArray(py::array array, py::object id) {
+  py::buffer_info info = array.request();
+  if (info.ndim == 0) {
+    throw std::invalid_argument("NumpyArray must not be scalar; try array.reshape(1)");
+  }
+  if (info.shape.size() != info.ndim  ||  info.strides.size() != info.ndim) {
+    throw std::invalid_argument("NumpyArray len(shape) != ndim or len(strides) != ndim");
+  }
+  ak::NumpyArray out = ak::NumpyArray(std::shared_ptr<ak::Identity>(nullptr), std::shared_ptr<void>(
+        reinterpret_cast<void*>(info.ptr), pyobject_deleter<void>(array.ptr())),
+      info.shape,
+      info.strides,
+      0,
+      info.itemsize,
+      info.format);
+  setid<ak::NumpyArray>(out, id);
+  return out;
+}
+
 py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
   return py::class_<ak::NumpyArray>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](ak::NumpyArray& self) -> py::buffer_info {
@@ -242,34 +272,11 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
           self.strides());
       })
 
-      .def(py::init([name](py::array array, ak::Identity32* id) -> ak::NumpyArray {
-        py::buffer_info info = array.request();
-        if (info.ndim == 0) {
-          throw std::invalid_argument(name + std::string(" must not be scalar; try array.reshape(1)"));
-        }
-        if (info.shape.size() != info.ndim  ||  info.strides.size() != info.ndim) {
-          throw std::invalid_argument(name + std::string(" len(shape) != ndim or len(strides) != ndim"));
-        }
-        ak::NumpyArray out = ak::NumpyArray(std::shared_ptr<ak::Identity>(nullptr), std::shared_ptr<void>(
-              reinterpret_cast<void*>(info.ptr), pyobject_deleter<void>(array.ptr())),
-            info.shape,
-            info.strides,
-            0,
-            info.itemsize,
-            info.format);
-        setid(&out, id);
-        return out;
-      }), py::arg("array"), py::arg("id") = py::none())
+      .def(py::init(&init_NumpyArray<ak::Identity32>), py::arg("array"), py::arg("id") = py::none())
+      .def(py::init(&init_NumpyArray<ak::Identity64>), py::arg("array"), py::arg("id") = py::none())
 
-      .def_property("id", [](ak::NumpyArray& self) -> py::object {
-        return unwrap(self.id());
-      }, [](ak::NumpyArray& self, ak::Identity32* id) -> void {
-        setid(&self, id);
-      })
-      .def("setid", [](ak::NumpyArray& self) -> void {
-        self.setid();
-      })
-
+      .def_property("id", [](ak::NumpyArray& self) -> py::object { return unwrap(self.id()); }, &setid<ak::NumpyArray>)
+      .def("setid", &setid<ak::NumpyArray>)
       .def("__repr__", [](ak::NumpyArray* self) -> const std::string {
         return ((ak::Content*)self)->repr();
       })
@@ -284,31 +291,72 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
       .def_property_readonly("iscompact", &ak::NumpyArray::iscompact)
 
       .def("__len__", &ak::NumpyArray::length)
+      .def("__getitem__", [](ak::NumpyArray& self, int64_t at) -> py::object {
+        return unwrap(self.get(at));
+      })
+      .def("__getitem__", [](ak::NumpyArray& self, py::slice slice) -> py::object {
+        size_t start, stop, step, length;
+        if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
+          throw py::error_already_set();
+        }
+        return unwrap(self.slice((int64_t)start, (int64_t)stop));
+      })
+
+      .def("__iter__", [](ak::NumpyArray& self) -> ak::Iterator {
+        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(self)));
+      })
 
   ;
 }
 
-  //     .def("__len__", &ak::NumpyArray::length)
-  //
-  //     .def("__getitem__", [](ak::NumpyArray& self, IndexType at) -> py::object {
-  //       return unwrap(self.get(at));
-  //     })
-  //
-  //     .def("__getitem__", [](ak::NumpyArray& self, py::slice slice) -> py::object {
-  //       size_t start, stop, step, length;
-  //       if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
-  //         throw py::error_already_set();
-  //       }
-  //       return unwrap(self.slice((IndexType)start, (IndexType)stop));
-  //     })
-  //
-  //     .def("__iter__", [](ak::NumpyArray& self) -> ak::Iterator {
-  //       return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(self)));
-  //     })
-  //
-  // ;
-  //
+/////////////////////////////////////////////////////////////// ListOffsetArray
 
+template <typename T, typename CONTENT, typename IDENTITY>
+ak::ListOffsetArrayOf<T> init_ListOffsetArrayOf(ak::IndexOf<T>& offsets, ak::NumpyArray& content, py::object id) {
+  ak::ListOffsetArrayOf<T> out = ak::ListOffsetArrayOf<T>(std::shared_ptr<ak::Identity>(nullptr), offsets, std::shared_ptr<ak::Content>(content.shallow_copy()));
+  setid(out, id);
+  return out;
+}
+
+template <typename T>
+py::class_<ak::ListOffsetArrayOf<T>> make_ListOffsetArrayOf(py::handle m, std::string name) {
+  return py::class_<ak::ListOffsetArrayOf<T>>(m, name.c_str())
+      .def(py::init(&init_ListOffsetArrayOf<T, ak::NumpyArray, ak::Identity32>), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
+      .def(py::init(&init_ListOffsetArrayOf<T, ak::NumpyArray, ak::Identity64>), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
+      .def(py::init(&init_ListOffsetArrayOf<T, ak::ListOffsetArray32, ak::Identity32>), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
+      .def(py::init(&init_ListOffsetArrayOf<T, ak::ListOffsetArray32, ak::Identity64>), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
+      .def(py::init(&init_ListOffsetArrayOf<T, ak::ListOffsetArray64, ak::Identity32>), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
+      .def(py::init(&init_ListOffsetArrayOf<T, ak::ListOffsetArray64, ak::Identity64>), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
+
+      .def_property_readonly("offsets", &ak::ListOffsetArrayOf<T>::offsets)
+      .def_property_readonly("content", [](ak::ListOffsetArrayOf<T>& self) -> py::object {
+        return unwrap(self.content());
+      })
+
+      .def_property("id", [](ak::ListOffsetArrayOf<T>& self) -> py::object { return unwrap(self.id()); }, &setid<ak::ListOffsetArrayOf<T>>)
+      .def("setid", &setid<ak::ListOffsetArrayOf<T>>)
+      .def("__repr__", [](ak::ListOffsetArrayOf<T>* self) -> const std::string {
+        return ((ak::Content*)self)->repr();
+      })
+
+      .def("__len__", &ak::ListOffsetArrayOf<T>::length)
+      .def("__getitem__", [](ak::ListOffsetArrayOf<T>& self, int64_t at) -> py::object {
+        return unwrap(self.get(at));
+      })
+      .def("__getitem__", [](ak::ListOffsetArrayOf<T>& self, py::slice slice) -> py::object {
+        size_t start, stop, step, length;
+        if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
+          throw py::error_already_set();
+        }
+        return unwrap(self.slice((int64_t)start, (int64_t)stop));
+      })
+
+      .def("__iter__", [](ak::ListOffsetArrayOf<T>& self) -> ak::Iterator {
+        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArrayOf<T>(self)));
+      })
+
+  ;
+}
 
 PYBIND11_MODULE(layout, m) {
 #ifdef VERSION_INFO
@@ -327,57 +375,6 @@ PYBIND11_MODULE(layout, m) {
 
   make_NumpyArray(m, "NumpyArray");
 
-  // /////////////////////////////////////////////////////////////// ListOffsetArray
-  // py::class_<ak::ListOffsetArray>(m, "ListOffsetArray")
-  //
-  //     .def(py::init([](ak::Index& offsets, ak::NumpyArray* content, ak::Identity* id) -> ak::ListOffsetArray {
-  //       ak::ListOffsetArray out = ak::ListOffsetArray(std::shared_ptr<ak::Identity>(nullptr), offsets, std::shared_ptr<ak::Content>(content->shallow_copy()));
-  //       setid(&out, id);
-  //       return out;
-  //     }), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
-  //
-  //     .def(py::init([](ak::Index& offsets, ak::ListOffsetArray* content, ak::Identity* id) -> ak::ListOffsetArray {
-  //       ak::ListOffsetArray out = ak::ListOffsetArray(std::shared_ptr<ak::Identity>(nullptr), offsets, std::shared_ptr<ak::Content>(content->shallow_copy()));
-  //       setid(&out, id);
-  //       return out;
-  //     }), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
-  //
-  //     .def_property_readonly("offsets", &ak::ListOffsetArray::offsets)
-  //
-  //     .def_property_readonly("content", [](ak::ListOffsetArray& self) -> py::object {
-  //       return unwrap(self.content());
-  //     })
-  //
-  //     .def_property("id", [](ak::ListOffsetArray& self) -> ak::Identity* {
-  //       return self.id().get();
-  //     }, [](ak::ListOffsetArray& self, ak::Identity* id) -> void {
-  //       setid(&self, id);
-  //     }, py::return_value_policy::copy)
-  //     .def("setid", [](ak::ListOffsetArray& self) -> void {
-  //       self.setid();
-  //     })
-  //
-  //     .def("__repr__", [](ak::ListOffsetArray& self) -> const std::string {
-  //       return self.repr("", "", "");
-  //     })
-  //
-  //     .def("__len__", &ak::ListOffsetArray::length)
-  //
-  //     .def("__getitem__", [](ak::ListOffsetArray& self, IndexType at) -> py::object {
-  //       return unwrap(self.get(at));
-  //     })
-  //
-  //     .def("__getitem__", [](ak::ListOffsetArray& self, py::slice slice) -> py::object {
-  //       size_t start, stop, step, length;
-  //       if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
-  //         throw py::error_already_set();
-  //       }
-  //       return unwrap(self.slice((IndexType)start, (IndexType)stop));
-  //     })
-  //
-  //     .def("__iter__", [](ak::ListOffsetArray& self) -> ak::Iterator {
-  //       return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArray(self)));
-  //     })
-  //
-  // ;
+  make_ListOffsetArrayOf<int32_t>(m, "ListOffsetArray32");
+  make_ListOffsetArrayOf<int64_t>(m, "ListOffsetArray64");
 }
