@@ -52,8 +52,7 @@ py::object unwrap(std::shared_ptr<ak::Content> content) {
     return py::cast(*x);
   }
   else {
-    assert(false  &&  "missing unwrapper for Content subtype");
-    return py::none();
+    throw std::runtime_error("missing unwrapper for Content subtype");
   }
 }
 
@@ -77,6 +76,37 @@ void setid(ak::Content* obj, ak::Identity* id) {
   }
 }
 
+/////////////////////////////////////////////////////////////// Index
+template <typename T>
+py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
+  return py::class_<ak::IndexOf<T>>(m, name.c_str(), py::buffer_protocol())
+      .def_buffer([](ak::IndexOf<T>& self) -> py::buffer_info {
+        return py::buffer_info(
+          reinterpret_cast<void*>(reinterpret_cast<ssize_t>(self.ptr().get()) + self.offset()*sizeof(T)),
+          sizeof(T),
+          py::format_descriptor<T>::format(),
+          1,
+          { self.length() },
+          { sizeof(T) });
+        })
+
+      .def(py::init([name](py::array_t<T, py::array::c_style | py::array::forcecast> array) -> ak::IndexOf<T> {
+        py::buffer_info info = array.request();
+        if (info.ndim != 1) {
+          throw std::invalid_argument(name + std::string(" must be built from a one-dimensional array; try array.ravel()"));
+        }
+        if (info.strides[0] != sizeof(T)) {
+          throw std::invalid_argument(name + std::string(" must be built from a compact array (array.strides == (array.itemsize,)); try array.copy()"));
+        }
+        return ak::IndexOf<T>(
+          std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr), pyobject_deleter<T>(array.ptr())),
+          0,
+          (T)info.shape[0]);
+      }))
+
+  ;
+}
+
 PYBIND11_MODULE(layout, m) {
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
@@ -84,20 +114,9 @@ PYBIND11_MODULE(layout, m) {
   m.attr("__version__") = "dev";
 #endif
 
-  // /////////////////////////////////////////////////////////////// Index
-  // py::class_<ak::Index>(m, "Index", py::buffer_protocol())
-  //     .def_buffer([](ak::Index& self) -> py::buffer_info {
-  //       return py::buffer_info(
-  //         reinterpret_cast<IndexType*>(reinterpret_cast<ssize_t>(self.ptr().get()) +
-  //                                          self.offset()*sizeof(IndexType)),
-  //         sizeof(IndexType),
-  //         py::format_descriptor<IndexType>::format(),
-  //         1,
-  //         { self.length() },
-  //         { sizeof(IndexType) }
-  //       );
-  //     })
-  //
+  make_IndexOf<int32_t>(m, "Index32");
+  make_IndexOf<int64_t>(m, "Index64");
+
   //     .def(py::init([](py::array_t<IndexType, py::array::c_style | py::array::forcecast> array) -> ak::Index {
   //       py::buffer_info info = array.request();
   //       if (info.ndim != 1) {

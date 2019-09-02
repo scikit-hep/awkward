@@ -76,6 +76,7 @@ jobs:
 
       - script: |
           python setup.py build
+          pytest -vv tests
         displayName: "Build and test"
 
   - job: MacOS
@@ -125,6 +126,7 @@ jobs:
 
       - script: |
           python setup.py build
+          pytest -vv tests
         displayName: "Build and test"
 
   - job: Linux
@@ -199,4 +201,5 @@ jobs:
 
       - script: |
           python setup.py build
+          pytest -vv tests
         displayName: "Build and test"
