@@ -8,7 +8,9 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include <type_traits>
 
+#include "awkward/cpu-kernels/util.h"
 #include "awkward/util.h"
 
 namespace awkward {
@@ -19,28 +21,28 @@ namespace awkward {
         : ptr_(std::shared_ptr<T>(new T[length], awkward::util::array_deleter<T>()))
         , offset_(0)
         , length_(length) { }
-    IndexOf<T>(const std::shared_ptr<T> ptr, T offset, T length)
+    IndexOf<T>(const std::shared_ptr<T> ptr, int64_t offset, int64_t length)
         : ptr_(ptr)
         , offset_(offset)
         , length_(length) { }
 
     const std::shared_ptr<T> ptr() const { return ptr_; }
-    T offset() const { return offset_; }
-    T length() const { return length_; }
+    int64_t offset() const { return offset_; }
+    int64_t length() const { return length_; }
 
     const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
-    T get(T at) const;
-    IndexOf<T> slice(T start, T stop) const;
+    T get(int64_t at) const;
+    IndexOf<T> slice(int64_t start, int64_t stop) const;
 
   private:
     const std::shared_ptr<T> ptr_;
-    const T offset_;
-    const T length_;
+    const int64_t offset_;
+    const int64_t length_;
   };
 
-  typedef IndexOf<IndexType> Index;
-  typedef IndexOf<TagType> TagIndex;
-  typedef IndexOf<ChunkOffsetType> ChunkOffsetIndex;
+  typedef IndexOf<int8_t>  Index8;
+  typedef IndexOf<int32_t> Index32;
+  typedef IndexOf<int64_t> Index64;
 }
 
 #endif // AWKWARD_INDEX_H_

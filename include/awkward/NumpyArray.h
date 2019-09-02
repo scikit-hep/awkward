@@ -11,13 +11,14 @@
 #include <memory>
 #include <stdexcept>
 
+#include "awkward/cpu-kernels/util.h"
 #include "awkward/util.h"
 #include "awkward/Content.h"
 
 namespace awkward {
   class NumpyArray: public Content {
   public:
-    NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<byte> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
+    NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<void> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
         : id_(id)
         , ptr_(ptr)
         , shape_(shape)
@@ -28,7 +29,7 @@ namespace awkward {
           assert(shape_.size() == strides_.size());
         }
 
-    const std::shared_ptr<byte> ptr() const { return ptr_; }
+    const std::shared_ptr<void> ptr() const { return ptr_; }
     const std::vector<ssize_t> shape() const { return shape_; }
     const std::vector<ssize_t> strides() const { return strides_; }
     ssize_t byteoffset() const { return byteoffset_; }
@@ -41,20 +42,20 @@ namespace awkward {
     bool iscompact() const;
     void* byteptr() const;
     ssize_t bytelength() const;
-    byte getbyte(ssize_t at) const;
+    uint8_t getbyte(ssize_t at) const;
 
     virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
-    virtual IndexType length() const;
+    virtual int64_t length() const;
     virtual std::shared_ptr<Content> shallow_copy() const;
-    virtual std::shared_ptr<Content> get(IndexType at) const;
-    virtual std::shared_ptr<Content> slice(IndexType start, IndexType stop) const;
+    virtual std::shared_ptr<Content> get(int64_t at) const;
+    virtual std::shared_ptr<Content> slice(int64_t start, int64_t stop) const;
 
   private:
     std::shared_ptr<Identity> id_;
-    const std::shared_ptr<byte> ptr_;
+    const std::shared_ptr<void> ptr_;
     const std::vector<ssize_t> shape_;
     const std::vector<ssize_t> strides_;
     const ssize_t byteoffset_;

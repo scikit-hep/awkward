@@ -42,8 +42,8 @@ ssize_t NumpyArray::bytelength() const {
   }
 }
 
-byte NumpyArray::getbyte(ssize_t at) const {
-  return *reinterpret_cast<byte*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
+uint8_t NumpyArray::getbyte(ssize_t at) const {
+  return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
 }
 
 void NumpyArray::setid(const std::shared_ptr<Identity> id) {
@@ -52,8 +52,8 @@ void NumpyArray::setid(const std::shared_ptr<Identity> id) {
 
 void NumpyArray::setid() {
   assert(!isscalar());
-  std::shared_ptr<Identity> newid(new Identity(Identity::newref(), FieldLocation(), 0, 1, length()));
-  Error err = awkward_identity_new(length(), newid.get()->ptr().get());
+  std::shared_ptr<Identity> newid(new Identity(Identity::newref(), FieldLocation(), 1, length()));
+  Error err = awkward_identity_new32(length(), newid.get()->ptr().get());
   HANDLE_ERROR(err);
   setid(newid);
 }
@@ -117,12 +117,12 @@ const std::string NumpyArray::repr(const std::string indent, const std::string p
   return out.str();
 }
 
-IndexType NumpyArray::length() const {
+int64_t NumpyArray::length() const {
   if (isscalar()) {
     return -1;
   }
   else {
-    return (IndexType)shape_[0];
+    return (Index64)shape_[0];
   }
 }
 
@@ -130,7 +130,7 @@ std::shared_ptr<Content> NumpyArray::shallow_copy() const {
   return std::shared_ptr<Content>(new NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
 }
 
-std::shared_ptr<Content> NumpyArray::get(IndexType at) const {
+std::shared_ptr<Content> get(int64_t at) const {
   assert(!isscalar());
   ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
   const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
@@ -142,7 +142,7 @@ std::shared_ptr<Content> NumpyArray::get(IndexType at) const {
   return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset, itemsize_, format_));
 }
 
-std::shared_ptr<Content> NumpyArray::slice(IndexType start, IndexType stop) const {
+std::shared_ptr<Content> slice(int64_t start, int64_t stop) const {
   assert(!isscalar());
   ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
   std::vector<ssize_t> shape;

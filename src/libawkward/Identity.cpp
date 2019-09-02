@@ -4,33 +4,40 @@
 
 using namespace awkward;
 
-std::atomic<RefType> numrefs{0};
+std::atomic<Ref> numrefs{0};
 
-RefType Identity::newref() {
+Ref newref() {
   return numrefs++;
 }
 
-IndexType Identity::keydepth(IndexType chunkdepth, IndexType indexdepth) {
-  return (sizeof(ChunkOffsetType)/sizeof(IndexType))*chunkdepth + indexdepth;
-}
-
-const std::string Identity::repr(const std::string indent, const std::string pre, const std::string post) const {
+template <typename T>
+const std::string IdentityOf<T>::repr(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
-  out << indent << pre << "<Identity ref=\"" << ref_ << "\" fieldloc=\"[";
-  for (int i = 0;  i < fieldloc_.size();  i++) {
+  std::string name = "Unrecognized Identity";
+  if (std::is_same<T, int32_t>::value) {
+    name = "Identity32";
+  }
+  else if (std::is_same<T, int64_t>::value) {
+    name = "Identity64";
+  }
+  out << indent << pre << "<" << name << " ref=\"" << ref_ << "\" fieldloc=\"[";
+  for (int64_t i = 0;  i < fieldloc_.size();  i++) {
     if (i != 0) {
       out << " ";
     }
     out << "(" << fieldloc_[i].first << ", '" << fieldloc_[i].second << "')";
   }
-  out << "]\" keydepth=\"" << keydepth() << "\" length=\"" << length_ << "\" at=\"0x";
+  out << "]\" width=\"" << width() << "\" length=\"" << length_ << "\" at=\"0x";
   out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
   return out.str();
 }
 
-const std::shared_ptr<Identity> Identity::slice(IndexType start, IndexType stop) const {
-  assert(start == stop  ||  (0 <= start  &&  start < length_));
-  assert(start == stop  ||  (0 < stop    &&  stop <= length_));
-  assert(start <= stop);
-  return std::shared_ptr<Identity>(new Identity(ref_, fieldloc_, chunkdepth_, indexdepth_, ptr_, offset_ + keydepth()*start*(start != stop), (stop - start)));
+template <typename T>
+const std::shared_ptr<Identity> IdentityOf<T>::slice(int64_t start, int64_t stop) const {
+  return std::shared_ptr<Identity>(new IdentityOf<T>(ref_, fieldloc_, ptr_, offset_ + width_*start*(start != stop), width_, (stop - start)));
+}
+
+namespace awkward {
+  template class IdentityOf<int32_t> Identity32;
+  template class IdentityOf<int64_t> Identity64;
 }

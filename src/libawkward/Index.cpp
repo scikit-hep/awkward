@@ -7,9 +7,16 @@ using namespace awkward;
 template <typename T>
 const std::string IndexOf<T>::repr(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
-  out << indent << pre << "<Index i=\"[";
+  std::string name = "Unrecognized Index";
+  if (std::is_same<T, int32_t>::value) {
+    name = "Index32";
+  }
+  else if (std::is_same<T, int64_t>::value) {
+    name = "Index64";
+  }
+  out << indent << pre << "<" << name << " i=\"[";
   if (length_ <= 10) {
-    for (T i = 0;  i < length_;  i++) {
+    for (int64_t i = 0;  i < length_;  i++) {
       if (i != 0) {
         out << " ";
       }
@@ -17,14 +24,14 @@ const std::string IndexOf<T>::repr(const std::string indent, const std::string p
     }
   }
   else {
-    for (T i = 0;  i < 5;  i++) {
+    for (int64_t i = 0;  i < 5;  i++) {
       if (i != 0) {
         out << " ";
       }
       out << get(i);
     }
     out << " ... ";
-    for (T i = length_ - 6;  i < length_;  i++) {
+    for (int64_t i = length_ - 6;  i < length_;  i++) {
       if (i != length_ - 6) {
         out << " ";
       }
@@ -37,21 +44,17 @@ const std::string IndexOf<T>::repr(const std::string indent, const std::string p
 }
 
 template <typename T>
-T IndexOf<T>::get(T at) const {
-  assert(0 <= at  &&  at < length_);
+T IndexOf<T>::get(int64_t at) const {
   return ptr_.get()[offset_ + at];
 }
 
 template <typename T>
-IndexOf<T> IndexOf<T>::slice(T start, T stop) const {
-  assert(start == stop  ||  (0 <= start  &&  start < length_));
-  assert(start == stop  ||  (0 < stop    &&  stop <= length_));
-  assert(start <= stop);
+IndexOf<T> IndexOf<T>::slice(int64_t start, int64_t stop) const {
   return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
 }
 
 namespace awkward {
-  template class IndexOf<IndexType>;
-  template class IndexOf<TagType>;
-  template class IndexOf<ChunkOffsetType>;
+  template class IndexOf<int8_t>  Index8;
+  template class IndexOf<int32_t> Index32;
+  template class IndexOf<int64_t> Index64;
 }

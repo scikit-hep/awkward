@@ -20,14 +20,9 @@ extern "C" {
   typedef const char* Error;
   const Error kNoError = nullptr;
 
-  typedef uint8_t byte;
-  typedef int32_t IndexType;
-  typedef unsigned char TagType;
-  typedef int64_t ChunkOffsetType;
-  typedef int64_t RefType;
-
-  const IndexType       kMaxIndexType       =          2147483647;   // 2**31 - 1
-  const ChunkOffsetType kMaxChunkOffsetType = 9223372036854775807;   // 2**63 - 1
+  const int8_t  kMaxInt8  =                 127;   // 2**7  - 1
+  const int32_t kMaxInt32 =          2147483647;   // 2**31 - 1
+  const int64_t kMaxInt64 = 9223372036854775807;   // 2**63 - 1
 }
 
 #endif // AWKWARDCPU_UTIL_H_

@@ -3,32 +3,12 @@
 #ifndef AWKWARD_UTIL_H_
 #define AWKWARD_UTIL_H_
 
-#ifdef _MSC_VER
-  #ifdef _WIN64
-    typedef signed __int64 ssize_t;
-  #else
-    typedef signed   int   ssize_t;
-  #endif
-  typedef unsigned char  uint8_t;
-  typedef signed   int   int32_t;
-  typedef signed __int64 int64_t;
-#else
-  #include <cstdint>
-#endif
+#include "awkward/cpu-kernels/util.h"
 
 namespace awkward {
-  typedef const char* Error;
-  const Error kNoError = nullptr;
   #define HANDLE_ERROR(err) { if (err != kNoError) { throw std::invalid_argument(err); } }
 
-  typedef uint8_t byte;
-  typedef int32_t IndexType;
-  typedef unsigned char TagType;
-  typedef int64_t ChunkOffsetType;
-  typedef int64_t RefType;
-
-  const IndexType       kMaxIndexType       =          2147483647;   // 2**31 - 1
-  const ChunkOffsetType kMaxChunkOffsetType = 9223372036854775807;   // 2**63 - 1
+  typedef int64_t Ref;
 
   namespace util {
     template<typename T>
