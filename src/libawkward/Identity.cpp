@@ -43,6 +43,11 @@ const std::shared_ptr<Identity> IdentityOf<T>::slice(int64_t start, int64_t stop
 }
 
 template <typename T>
+const std::shared_ptr<Identity> IdentityOf<T>::shallow_copy() const {
+  return std::shared_ptr<Identity>(new IdentityOf<T>(ref(), fieldloc(), offset(), width(), length(), ptr_));
+}
+
+template <typename T>
 const std::vector<T> IdentityOf<T>::get(int64_t at) const {
   std::vector<T> out;
   for (ssize_t i = offset() + at;  i < offset() + at + width();  i++) {

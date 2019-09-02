@@ -39,6 +39,7 @@ namespace awkward {
 
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const = 0;
     virtual const std::shared_ptr<Identity> slice(int64_t start, int64_t stop) const = 0;
+    virtual const std::shared_ptr<Identity> shallow_copy() const = 0;
 
   private:
     const Ref ref_;
@@ -62,6 +63,7 @@ namespace awkward {
 
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
     virtual const std::shared_ptr<Identity> slice(int64_t start, int64_t stop) const;
+    virtual const std::shared_ptr<Identity> shallow_copy() const;
 
     const std::string repr() const;
     const std::vector<T> get(int64_t at) const;

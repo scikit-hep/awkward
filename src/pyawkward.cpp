@@ -30,29 +30,44 @@ private:
 };
 
 py::object unwrap(std::shared_ptr<ak::Content> content) {
-  if (ak::NumpyArray* x = dynamic_cast<ak::NumpyArray*>(content.get())) {
-    if (x->isscalar()) {
+  if (ak::NumpyArray* raw = dynamic_cast<ak::NumpyArray*>(content.get())) {
+    if (raw->isscalar()) {
       return py::array(py::buffer_info(
-        x->byteptr(),
-        x->itemsize(),
-        x->format(),
-        x->ndim(),
-        x->shape(),
-        x->strides()
+        raw->byteptr(),
+        raw->itemsize(),
+        raw->format(),
+        raw->ndim(),
+        raw->shape(),
+        raw->strides()
       )).attr("item")();
     }
     else {
-      return py::cast(*x);
+      return py::cast(*raw);
     }
   }
-  else if (ak::ListOffsetArray32* x = dynamic_cast<ak::ListOffsetArray32*>(content.get())) {
-    return py::cast(*x);
+  else if (ak::ListOffsetArray32* raw = dynamic_cast<ak::ListOffsetArray32*>(content.get())) {
+    return py::cast(*raw);
   }
-  else if (ak::ListOffsetArray64* x = dynamic_cast<ak::ListOffsetArray64*>(content.get())) {
-    return py::cast(*x);
+  else if (ak::ListOffsetArray64* raw = dynamic_cast<ak::ListOffsetArray64*>(content.get())) {
+    return py::cast(*raw);
   }
   else {
     throw std::runtime_error("missing unwrapper for Content subtype");
+  }
+}
+
+py::object unwrap(std::shared_ptr<ak::Identity> id) {
+  if (id.get() == nullptr) {
+    return py::none();
+  }
+  else if (ak::Identity32* raw = dynamic_cast<ak::Identity32*>(id.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::Identity64* raw = dynamic_cast<ak::Identity64*>(id.get())) {
+    return py::cast(*raw);
+  }
+  else {
+    throw std::runtime_error("missing unwrapper for Identity subtype");
   }
 }
 
@@ -77,6 +92,7 @@ void setid(ak::Content* obj, ak::Identity* id) {
 }
 
 /////////////////////////////////////////////////////////////// Index
+
 template <typename T>
 py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
   return py::class_<ak::IndexOf<T>>(m, name.c_str(), py::buffer_protocol())
@@ -122,6 +138,7 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
 }
 
 /////////////////////////////////////////////////////////////// Identity
+
 template <typename T>
 py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
   return py::class_<ak::IdentityOf<T>>(m, name.c_str(), py::buffer_protocol())
@@ -181,6 +198,7 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
 }
 
 /////////////////////////////////////////////////////////////// Iterator
+
 py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
   auto next = [](ak::Iterator& iterator) -> py::object {
     if (iterator.isdone()) {
@@ -210,75 +228,66 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
   ;
 }
 
-PYBIND11_MODULE(layout, m) {
-#ifdef VERSION_INFO
-  m.attr("__version__") = VERSION_INFO;
-#else
-  m.attr("__version__") = "dev";
-#endif
+/////////////////////////////////////////////////////////////// NumpyArray
 
-  make_IndexOf<int32_t>(m, "Index32");
-  make_IndexOf<int64_t>(m, "Index64");
+py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
+  return py::class_<ak::NumpyArray>(m, name.c_str(), py::buffer_protocol())
+      .def_buffer([](ak::NumpyArray& self) -> py::buffer_info {
+        return py::buffer_info(
+          self.byteptr(),
+          self.itemsize(),
+          self.format(),
+          self.ndim(),
+          self.shape(),
+          self.strides());
+      })
 
-  make_IdentityOf<int32_t>(m, "Identity32");
-  make_IdentityOf<int64_t>(m, "Identity64");
+      .def(py::init([name](py::array array, ak::Identity32* id) -> ak::NumpyArray {
+        py::buffer_info info = array.request();
+        if (info.ndim == 0) {
+          throw std::invalid_argument(name + std::string(" must not be scalar; try array.reshape(1)"));
+        }
+        if (info.shape.size() != info.ndim  ||  info.strides.size() != info.ndim) {
+          throw std::invalid_argument(name + std::string(" len(shape) != ndim or len(strides) != ndim"));
+        }
+        ak::NumpyArray out = ak::NumpyArray(std::shared_ptr<ak::Identity>(nullptr), std::shared_ptr<void>(
+              reinterpret_cast<void*>(info.ptr), pyobject_deleter<void>(array.ptr())),
+            info.shape,
+            info.strides,
+            0,
+            info.itemsize,
+            info.format);
+        setid(&out, id);
+        return out;
+      }), py::arg("array"), py::arg("id") = py::none())
 
-  make_Iterator(m, "Iterator");
+      .def_property("id", [](ak::NumpyArray& self) -> py::object {
+        return unwrap(self.id());
+      }, [](ak::NumpyArray& self, ak::Identity32* id) -> void {
+        setid(&self, id);
+      })
+      .def("setid", [](ak::NumpyArray& self) -> void {
+        self.setid();
+      })
 
-  // /////////////////////////////////////////////////////////////// NumpyArray
-  // py::class_<ak::NumpyArray>(m, "NumpyArray", py::buffer_protocol())
-  //     .def_buffer([](ak::NumpyArray& self) -> py::buffer_info {
-  //       return py::buffer_info(
-  //         self.byteptr(),
-  //         self.itemsize(),
-  //         self.format(),
-  //         self.ndim(),
-  //         self.shape(),
-  //         self.strides()
-  //       );
-  //     })
-  //
-  //     .def(py::init([](py::array array, ak::Identity* id) -> ak::NumpyArray {
-  //       py::buffer_info info = array.request();
-  //       if (info.ndim == 0) {
-  //         throw std::invalid_argument("NumpyArray must not be scalar; try array.reshape(1)");
-  //       }
-  //       if (info.shape.size() != info.ndim  ||  info.strides.size() != info.ndim) {
-  //         throw std::invalid_argument("len(shape) != ndim or len(strides) != ndim");
-  //       }
-  //       ak::NumpyArray out = ak::NumpyArray(std::shared_ptr<ak::Identity>(nullptr), std::shared_ptr<byte>(
-  //         reinterpret_cast<byte*>(info.ptr), pyobject_deleter<byte>(array.ptr())),
-  //         info.shape,
-  //         info.strides,
-  //         0,
-  //         info.itemsize,
-  //         info.format);
-  //       setid(&out, id);
-  //       return out;
-  //     }), py::arg("array"), py::arg("id") = py::none())
-  //
-  //     .def_property("id", [](ak::NumpyArray& self) -> ak::Identity* {
-  //       return self.id().get();
-  //     }, [](ak::NumpyArray& self, ak::Identity* id) -> void {
-  //       setid(&self, id);
-  //     }, py::return_value_policy::copy)
-  //     .def("setid", [](ak::NumpyArray& self) -> void {
-  //       self.setid();
-  //     })
-  //
-  //     .def("__repr__", [](ak::NumpyArray& self) -> const std::string {
-  //       return self.repr("", "", "");
-  //     })
-  //
-  //     .def_property_readonly("shape", &ak::NumpyArray::shape)
-  //     .def_property_readonly("strides", &ak::NumpyArray::strides)
-  //     .def_property_readonly("itemsize", &ak::NumpyArray::itemsize)
-  //     .def_property_readonly("format", &ak::NumpyArray::format)
-  //     .def_property_readonly("ndim", &ak::NumpyArray::ndim)
-  //     .def_property_readonly("isscalar", &ak::NumpyArray::isscalar)
-  //     .def_property_readonly("isempty", &ak::NumpyArray::isempty)
-  //     .def_property_readonly("iscompact", &ak::NumpyArray::iscompact)
-  //
+      .def("__repr__", [](ak::NumpyArray* self) -> const std::string {
+        return ((ak::Content*)self)->repr();
+      })
+
+      .def_property_readonly("shape", &ak::NumpyArray::shape)
+      .def_property_readonly("strides", &ak::NumpyArray::strides)
+      .def_property_readonly("itemsize", &ak::NumpyArray::itemsize)
+      .def_property_readonly("format", &ak::NumpyArray::format)
+      .def_property_readonly("ndim", &ak::NumpyArray::ndim)
+      .def_property_readonly("isscalar", &ak::NumpyArray::isscalar)
+      .def_property_readonly("isempty", &ak::NumpyArray::isempty)
+      .def_property_readonly("iscompact", &ak::NumpyArray::iscompact)
+
+      .def("__len__", &ak::NumpyArray::length)
+
+  ;
+}
+
   //     .def("__len__", &ak::NumpyArray::length)
   //
   //     .def("__getitem__", [](ak::NumpyArray& self, IndexType at) -> py::object {
@@ -299,6 +308,25 @@ PYBIND11_MODULE(layout, m) {
   //
   // ;
   //
+
+
+PYBIND11_MODULE(layout, m) {
+#ifdef VERSION_INFO
+  m.attr("__version__") = VERSION_INFO;
+#else
+  m.attr("__version__") = "dev";
+#endif
+
+  make_IndexOf<int32_t>(m, "Index32");
+  make_IndexOf<int64_t>(m, "Index64");
+
+  make_IdentityOf<int32_t>(m, "Identity32");
+  make_IdentityOf<int64_t>(m, "Identity64");
+
+  make_Iterator(m, "Iterator");
+
+  make_NumpyArray(m, "NumpyArray");
+
   // /////////////////////////////////////////////////////////////// ListOffsetArray
   // py::class_<ak::ListOffsetArray>(m, "ListOffsetArray")
   //
