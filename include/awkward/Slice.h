@@ -122,6 +122,16 @@ namespace awkward {
     std::vector<int64_t> index_;
   };
 
+  class SliceEllipsis: public Slice {
+  public:
+    SliceEllipsis() { }
+  };
+
+  class SliceNewAsis: public Slice {
+  public:
+    SliceNewAxis() { }
+  };
+
   class SliceTuple {
   public:
     SliceTuple(const std::vector<std::shared_ptr<Slice>> items): items_(std::move(items)) { }
