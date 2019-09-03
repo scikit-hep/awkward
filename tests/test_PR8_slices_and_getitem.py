@@ -9,4 +9,4 @@ import awkward1
 
 def test_slice():
     print(awkward1.layout.testslice(3))
-    raise Exception
+    # raise Exception
