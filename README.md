@@ -48,7 +48,7 @@ The following features of awkward 0.x will be features of awkward 1.x.
 ## Status
 
    * 2019-08-17: set up a build process for the four layers with continuous deployment to Linux, MacOS, and Windows wheels.
-   * 2019-08-22 (PR [#2](pull/2)): created a basic `NumpyArray` and `ListOffsetArray` in C++, exposed to Python with pybind11, and ensured correct memory management between Python's reference counts and C++'s `std::shared_ptr`.
+   * 2019-08-22 (PR [#2](../../pull/2)): created a basic `NumpyArray` and `ListOffsetArray` in C++, exposed to Python with pybind11, and ensured correct memory management between Python's reference counts and C++'s `std::shared_ptr`.
    * 2019-08-26 (PR #3): extended Numba so that `NumpyArray` and `ListOffsetArray` can be used in Numba-compiled functions, ensuring no memory leaks/double frees.
    * 2019-08-27 (PR #4): introduced `Identity`, an optional surrogate key whose use is illustrated in [PartiQL](https://github.com/jpivarski/PartiQL#readme).
    * 2019-08-29 (PR #5): extended Numba to use `Identity` as well, ensuring no memory leaks/double frees.
