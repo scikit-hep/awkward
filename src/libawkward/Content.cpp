@@ -5,6 +5,6 @@
 
 using namespace awkward;
 
-const std::string Content::repr() const {
-  return repr("", "", "");
+const std::string Content::tostring() const {
+  return tostring_part("", "", "");
 }

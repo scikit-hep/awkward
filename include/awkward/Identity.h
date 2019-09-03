@@ -23,6 +23,7 @@ namespace awkward {
     typedef std::vector<std::pair<int64_t, std::string>> FieldLoc;
 
     static Ref newref();
+    static std::shared_ptr<Identity> none() { return std::shared_ptr<Identity>(nullptr); }
 
     Identity(const Ref ref, const FieldLoc fieldloc, int64_t offset, int64_t width, int64_t length)
         : ref_(ref)
@@ -37,7 +38,7 @@ namespace awkward {
     const int64_t width() const { return width_; }
     const int64_t length() const { return length_; }
 
-    virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const = 0;
+    virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
     virtual const std::shared_ptr<Identity> slice(int64_t start, int64_t stop) const = 0;
     virtual const std::shared_ptr<Identity> shallow_copy() const = 0;
 
@@ -61,11 +62,11 @@ namespace awkward {
 
     const std::shared_ptr<T> ptr() const { return ptr_; }
 
-    virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
+    virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual const std::shared_ptr<Identity> slice(int64_t start, int64_t stop) const;
     virtual const std::shared_ptr<Identity> shallow_copy() const;
 
-    const std::string repr() const;
+    const std::string tostring() const;
     const std::vector<T> get(int64_t at) const;
 
   private:

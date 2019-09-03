@@ -127,7 +127,7 @@ namespace awkward {
     SliceEllipsis() { }
   };
 
-  class SliceNewAsis: public Slice {
+  class SliceNewAxis: public Slice {
   public:
     SliceNewAxis() { }
   };

@@ -59,7 +59,7 @@ void NumpyArray::setid() {
   setid(newid);
 }
 
-const std::string NumpyArray::repr(const std::string indent, const std::string pre, const std::string post) const {
+const std::string NumpyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
   assert(!isscalar());
   std::stringstream out;
   out << indent << pre << "<NumpyArray format=\"" << format_ << "\" shape=\"";
@@ -80,14 +80,14 @@ const std::string NumpyArray::repr(const std::string indent, const std::string p
     }
     out << "\" ";
   }
-  out << "data=\"" << std::hex << std::setw(2) << std::setfill('0');
+  out << "data=\"";
   ssize_t len = bytelength();
   if (len <= 32) {
     for (ssize_t i = 0;  i < len;  i++) {
       if (i != 0  &&  i % 4 == 0) {
         out << " ";
       }
-      out << int(getbyte(i));
+      out << std::hex << std::setw(2) << std::setfill('0') << int(getbyte(i));
     }
   }
   else {
@@ -95,14 +95,14 @@ const std::string NumpyArray::repr(const std::string indent, const std::string p
       if (i != 0  &&  i % 4 == 0) {
         out << " ";
       }
-      out << int(getbyte(i));
+      out << std::hex << std::setw(2) << std::setfill('0') << int(getbyte(i));
     }
     out << " ... ";
     for (ssize_t i = len - 16;  i < len;  i++) {
       if (i != len - 16  &&  i % 4 == 0) {
         out << " ";
       }
-      out << int(getbyte(i));
+      out << std::hex << std::setw(2) << std::setfill('0') << int(getbyte(i));
     }
   }
   out << "\" at=\"0x";
@@ -112,7 +112,7 @@ const std::string NumpyArray::repr(const std::string indent, const std::string p
   }
   else {
     out << "\">\n";
-    out << id_.get()->repr(indent + std::string("    "), "", "\n");
+    out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     out << indent << "</NumpyArray>" << post;
   }
   return out.str();

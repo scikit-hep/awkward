@@ -131,7 +131,7 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
       }))
 
       .def("__repr__", [](ak::IndexOf<T>& self) -> const std::string {
-        return self.repr("", "", "");
+        return self.tostring();
       })
 
       .def("__len__", &ak::IndexOf<T>::length)
@@ -181,7 +181,7 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
       }))
 
       .def("__repr__", [](ak::IdentityOf<T>& self) -> const std::string {
-        return self.repr();
+        return self.tostring();
       })
 
       .def("__len__", &ak::IdentityOf<T>::length)
@@ -232,7 +232,7 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
       .def("next", next)
 
       .def("__repr__", [](ak::Iterator& self) -> const std::string {
-        return self.repr();
+        return self.tostring();
       })
 
   ;
@@ -278,8 +278,8 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
       .def_property("id", [](ak::NumpyArray& self) -> py::object { return unwrap(self.id()); }, &setid<ak::NumpyArray>)
       .def("setid", &setid<ak::NumpyArray>)
       .def("setid", [](ak::NumpyArray& self) -> void { self.setid(); })
-      .def("__repr__", [](ak::NumpyArray* self) -> const std::string {
-        return ((ak::Content*)self)->repr();
+      .def("__repr__", [](ak::NumpyArray& self) -> const std::string {
+        return self.tostring();
       })
 
       .def_property_readonly("shape", &ak::NumpyArray::shape)
@@ -337,8 +337,8 @@ py::class_<ak::ListOffsetArrayOf<T>> make_ListOffsetArrayOf(py::handle m, std::s
       .def_property("id", [](ak::ListOffsetArrayOf<T>& self) -> py::object { return unwrap(self.id()); }, &setid<ak::ListOffsetArrayOf<T>>)
       .def("setid", &setid<ak::ListOffsetArrayOf<T>>)
       .def("setid", [](ak::ListOffsetArrayOf<T>& self) -> void { self.setid(); })
-      .def("__repr__", [](ak::ListOffsetArrayOf<T>* self) -> const std::string {
-        return ((ak::Content*)self)->repr();
+      .def("__repr__", [](ak::ListOffsetArrayOf<T>& self) -> const std::string {
+        return self.tostring();
       })
 
       .def("__len__", &ak::ListOffsetArrayOf<T>::length)

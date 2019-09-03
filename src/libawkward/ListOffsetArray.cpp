@@ -37,7 +37,7 @@ void ListOffsetArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
 }
 
 template <typename T>
-const std::string ListOffsetArrayOf<T>::repr(const std::string indent, const std::string pre, const std::string post) const {
+const std::string ListOffsetArrayOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
   std::string name = "Unrecognized ListOffsetArray";
   if (std::is_same<T, int32_t>::value) {
@@ -48,10 +48,10 @@ const std::string ListOffsetArrayOf<T>::repr(const std::string indent, const std
   }
   out << indent << pre << "<" << name << ">\n";
   if (id_.get() != nullptr) {
-    out << id_.get()->repr(indent + std::string("    "), "", "\n");
+    out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
   }
-  out << offsets_.repr(indent + std::string("    "), "<offsets>", "</offsets>\n");
-  out << content_.get()->repr(indent + std::string("    "), "<content>", "</content>\n");
+  out << offsets_.tostring_part(indent + std::string("    "), "<offsets>", "</offsets>\n");
+  out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
   out << indent << "</" << name << ">" << post;
   return out.str();
 }

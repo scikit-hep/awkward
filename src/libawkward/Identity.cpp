@@ -11,7 +11,7 @@ Identity::Ref Identity::newref() {
 }
 
 template <typename T>
-const std::string IdentityOf<T>::repr(const std::string indent, const std::string pre, const std::string post) const {
+const std::string IdentityOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
   std::string name = "Unrecognized Identity";
   if (std::is_same<T, int32_t>::value) {
@@ -33,8 +33,8 @@ const std::string IdentityOf<T>::repr(const std::string indent, const std::strin
 }
 
 template <typename T>
-const std::string IdentityOf<T>::repr() const {
-  return repr("", "", "");
+const std::string IdentityOf<T>::tostring() const {
+  return tostring_part("", "", "");
 }
 
 template <typename T>

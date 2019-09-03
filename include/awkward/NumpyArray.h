@@ -47,7 +47,7 @@ namespace awkward {
     virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
-    virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
+    virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual const std::shared_ptr<Content> get(int64_t at) const;
