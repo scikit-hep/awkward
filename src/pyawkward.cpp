@@ -150,11 +150,90 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
 
 /////////////////////////////////////////////////////////////// Slice
 
-ak::Slice toslice(py::object obj) {
+#include <iostream>
+
+std::shared_ptr<ak::SliceItem> toslice_part(py::object obj) {
   if (py::isinstance<py::int_>(obj)) {
-    return ak::Slice().with(ak::SliceAt(obj.cast<int64_t>()));
+    return std::shared_ptr<ak::SliceItem>(new ak::SliceAt(obj.cast<int64_t>()));
   }
-  return ak::Slice();
+  else if (py::isinstance<py::slice>(obj)) {
+    py::object pystart = obj.attr("start");
+    py::object pystop = obj.attr("stop");
+    py::object pystep = obj.attr("step");
+    int64_t start = ak::Slice::none();
+    int64_t stop = ak::Slice::none();
+    int64_t step = ak::Slice::none();
+    if (!pystart.is(py::none())) {
+      start = pystart.cast<int64_t>();
+    }
+    if (!pystop.is(py::none())) {
+      stop = pystop.cast<int64_t>();
+    }
+    if (!pystep.is(py::none())) {
+      step = pystep.cast<int64_t>();
+      return std::shared_ptr<ak::SliceItem>(new ak::SliceStartStopStep(start, stop, step));
+    }
+    else {
+      return std::shared_ptr<ak::SliceItem>(new ak::SliceStartStop(start, stop));
+    }
+  }
+#if PY_MAJOR_VERSION >= 3
+  else if (py::isinstance<py::ellipsis>(obj)) {
+    return std::shared_ptr<ak::SliceItem>(new ak::SliceEllipsis());
+  }
+#endif
+  else if (obj.is(py::module::import("numpy").attr("newaxis"))) {
+    return std::shared_ptr<ak::SliceItem>(new ak::SliceNewAxis());
+  }
+  else if (py::isinstance<py::iterable>(obj)) {
+    py::object objarray = py::module::import("numpy").attr("ascontiguousarray")(obj);
+    if (!py::isinstance<py::array>(objarray)) {
+      throw std::invalid_argument("iterable cannot be cast as an array");
+    }
+    py::array array = objarray.cast<py::array>();
+    if (array.ndim() != 1) {
+      throw std::invalid_argument("an array used as an index must be one-dimensional");
+    }
+    py::buffer_info info = array.request();
+    if (info.format.compare("l") == 0) {
+      ak::Index64 index = ak::Index64(
+        std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(info.ptr), pyobject_deleter<int64_t>(array.ptr())),
+        0,
+        (int64_t)info.shape[0]);
+      return std::shared_ptr<ak::SliceItem>(new ak::SliceIndex64(index));
+    }
+    else if (info.format.compare("i") == 0) {
+      ak::Index32 index = ak::Index32(
+        std::shared_ptr<int32_t>(reinterpret_cast<int32_t*>(info.ptr), pyobject_deleter<int32_t>(array.ptr())),
+        0,
+        (int64_t)info.shape[0]);
+      return std::shared_ptr<ak::SliceItem>(new ak::SliceIndex32(index));
+    }
+    else if (info.format.compare("?") == 0) {
+      ak::Index8 index = ak::Index8(
+        std::shared_ptr<unsigned int8_t>(reinterpret_cast<unsigned int8_t*>(info.ptr), pyobject_deleter<unsigned int8_t>(array.ptr())),
+        0,
+        (int64_t)info.shape[0]);
+      return std::shared_ptr<ak::SliceItem>(new ak::SliceByteMask(index));
+    }
+    else {
+      throw std::invalid_argument("an array used as an index must be integer (32 or 64-bit, native endian) or boolean");
+    }
+  }
+  else {
+    throw std::invalid_argument("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), and integer or boolean arrays (possibly jagged) are valid indices");
+  }
+}
+
+ak::Slice toslice(py::object obj) {
+  ak::Slice out;
+  if (py::isinstance<py::tuple>(obj)) {
+    throw std::runtime_error("not implemented");
+  }
+  else {
+    out.append(toslice_part(obj));
+  }
+  return out;
 }
 
 /////////////////////////////////////////////////////////////// Identity

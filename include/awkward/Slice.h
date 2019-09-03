@@ -108,7 +108,7 @@ namespace awkward {
   public:
     static int64_t none() { return SliceItem::none(); }
 
-    Slice(): items_() { }
+    Slice(): items_(std::vector<std::shared_ptr<SliceItem>>()) { }
     Slice(const std::vector<std::shared_ptr<SliceItem>> items): items_(items) { }
     const SliceItem* borrow(int64_t which) const { return items_[which].get(); }
     const int64_t length() const { return (int64_t)items_.size(); }
@@ -119,6 +119,9 @@ namespace awkward {
     const Slice tail() const {
       assert(items_.size() != 0);
       return Slice(std::vector<std::shared_ptr<SliceItem>>(items_.begin() + 1, items_.end()));
+    }
+    void append(std::shared_ptr<SliceItem> x) {
+      items_.push_back(x);
     }
     Slice with(SliceAt x) {
       Slice out(std::vector<std::shared_ptr<SliceItem>>(items_.begin(), items_.end()));
