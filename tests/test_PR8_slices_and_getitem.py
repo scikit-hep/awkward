@@ -18,7 +18,7 @@ def test_slice():
     awkward1.layout.testslice(slice(None, 2, 3))
     awkward1.layout.testslice(slice(1, None, 3))
     if not py27:
-        awkward1.layout.testslice(...)
+        awkward1.layout.testslice(Ellipsis)
     awkward1.layout.testslice(numpy.newaxis)
     awkward1.layout.testslice(None)
     awkward1.layout.testslice(numpy.array([1, 2, 3, 4, 5, 6, 7], dtype="i4"))
