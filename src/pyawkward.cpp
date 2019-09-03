@@ -195,21 +195,24 @@ std::shared_ptr<ak::SliceItem> toslice_part(py::object obj) {
       throw std::invalid_argument("an array used as an index must be one-dimensional");
     }
     py::buffer_info info = array.request();
-    if (info.format.compare("l") == 0) {
+
+    std::cout << "format '" << info.format << "' vs '" << py::format_descriptor<int32_t>::format() << "' and '" << py::format_descriptor<int64_t>::format() << "' and '" << py::format_descriptor<bool>::format() << "'" << std::endl;
+
+    if (info.format.compare("l") == 0  ||  info.format.compare("q") == 0  ||  info.format.compare(py::format_descriptor<int64_t>::format()) == 0) {
       ak::Index64 index = ak::Index64(
         std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(info.ptr), pyobject_deleter<int64_t>(array.ptr())),
         0,
         (int64_t)info.shape[0]);
       return std::shared_ptr<ak::SliceItem>(new ak::SliceIndex64(index));
     }
-    else if (info.format.compare("i") == 0) {
+    else if (info.format.compare("i") == 0  ||  info.format.compare(py::format_descriptor<int32_t>::format()) == 0) {
       ak::Index32 index = ak::Index32(
         std::shared_ptr<int32_t>(reinterpret_cast<int32_t*>(info.ptr), pyobject_deleter<int32_t>(array.ptr())),
         0,
         (int64_t)info.shape[0]);
       return std::shared_ptr<ak::SliceItem>(new ak::SliceIndex32(index));
     }
-    else if (info.format.compare("?") == 0) {
+    else if (info.format.compare("q") == 0  ||  info.format.compare(py::format_descriptor<bool>::format()) == 0) {
       ak::Index8 index = ak::Index8(
         std::shared_ptr<uint8_t>(reinterpret_cast<uint8_t*>(info.ptr), pyobject_deleter<uint8_t>(array.ptr())),
         0,
