@@ -15,7 +15,7 @@
 namespace awkward {
   class SliceItem {
   public:
-    static int64_t none() { return kMaxInt64; }
+    static int64_t none() { return kMaxInt64 + 1; }
 
     virtual const std::string tostring_part() const = 0;
   };
@@ -109,31 +109,40 @@ namespace awkward {
     static int64_t none() { return SliceItem::none(); }
 
     Slice(): items_() { }
+    Slice(const std::vector<std::shared_ptr<SliceItem>> items): items_(items) { }
     const SliceItem* borrow(int64_t which) const { return items_[which].get(); }
     const int64_t length() const { return (int64_t)items_.size(); }
-    void append(SliceAt x) {
-      items_.push_back(std::unique_ptr<SliceItem>(new SliceAt(x)));
+    const std::shared_ptr<SliceItem> head() const {
+      assert(items_.size() != 0);
+      return items_[0];
     }
-    void append(SliceStartStop x) {
-      items_.push_back(std::unique_ptr<SliceItem>(new SliceStartStop(x)));
+    const Slice tail() const {
+      assert(items_.size() != 0);
+      return Slice(std::vector<std::shared_ptr<SliceItem>>(items_.begin() + 1, items_.end()));
     }
-    void append(SliceStartStopStep x) {
-      items_.push_back(std::unique_ptr<SliceItem>(new SliceStartStopStep(x)));
+    void push_back(SliceAt x) {
+      items_.push_back(std::shared_ptr<SliceItem>(new SliceAt(x)));
     }
-    void append(SliceByteMask x) {
-      items_.push_back(std::unique_ptr<SliceItem>(new SliceByteMask(x)));
+    void push_back(SliceStartStop x) {
+      items_.push_back(std::shared_ptr<SliceItem>(new SliceStartStop(x)));
     }
-    void append(SliceIndex32 x) {
-      items_.push_back(std::unique_ptr<SliceItem>(new SliceIndex32(x)));
+    void push_back(SliceStartStopStep x) {
+      items_.push_back(std::shared_ptr<SliceItem>(new SliceStartStopStep(x)));
     }
-    void append(SliceIndex64 x) {
-      items_.push_back(std::unique_ptr<SliceItem>(new SliceIndex64(x)));
+    void push_back(SliceByteMask x) {
+      items_.push_back(std::shared_ptr<SliceItem>(new SliceByteMask(x)));
     }
-    void append(SliceEllipsis x) {
-      items_.push_back(std::unique_ptr<SliceItem>(new SliceEllipsis(x)));
+    void push_back(SliceIndex32 x) {
+      items_.push_back(std::shared_ptr<SliceItem>(new SliceIndex32(x)));
     }
-    void append(SliceNewAxis x) {
-      items_.push_back(std::unique_ptr<SliceItem>(new SliceNewAxis(x)));
+    void push_back(SliceIndex64 x) {
+      items_.push_back(std::shared_ptr<SliceItem>(new SliceIndex64(x)));
+    }
+    void push_back(SliceEllipsis x) {
+      items_.push_back(std::shared_ptr<SliceItem>(new SliceEllipsis(x)));
+    }
+    void push_back(SliceNewAxis x) {
+      items_.push_back(std::shared_ptr<SliceItem>(new SliceNewAxis(x)));
     }
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const {
       std::string out;
@@ -150,7 +159,7 @@ namespace awkward {
       return tostring_part("", "", "");
     }
   private:
-    std::vector<std::unique_ptr<SliceItem>> items_;
+    std::vector<std::shared_ptr<SliceItem>> items_;
   };
 
 }

@@ -15,6 +15,7 @@
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/util.h"
+#include "awkward/Slice.h"
 #include "awkward/Content.h"
 
 namespace awkward {
@@ -114,6 +115,10 @@ namespace awkward {
       return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + start, stop - start, stride_));
     }
     virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
+
+    // const std::shared_ptr<Content> getitem_next(SliceItem& head, Slice& tail, std::shared_ptr<Index> advanced) {
+    //   return std::shared_ptr<Content>(nullptr);
+    // }
 
     T* borrow(int64_t at) const { return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)stride_*(ssize_t)(offset_ + at)); }
 

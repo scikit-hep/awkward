@@ -14,8 +14,10 @@
 #include "awkward/util.h"
 
 namespace awkward {
+  class Index { };
+
   template <typename T>
-  class IndexOf {
+  class IndexOf: public Index {
   public:
     IndexOf<T>(T length)
         : ptr_(std::shared_ptr<T>(new T[length], awkward::util::array_deleter<T>()))
