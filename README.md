@@ -49,11 +49,11 @@ The following features of awkward 0.x will be features of awkward 1.x.
 
    * 2019-08-17: set up a build process for the four layers with continuous deployment to Linux, MacOS, and Windows wheels.
    * 2019-08-22 (PR [#2](../../pull/2)): created a basic `NumpyArray` and `ListOffsetArray` in C++, exposed to Python with pybind11, and ensured correct memory management between Python's reference counts and C++'s `std::shared_ptr`.
-   * 2019-08-26 (PR #3): extended Numba so that `NumpyArray` and `ListOffsetArray` can be used in Numba-compiled functions, ensuring no memory leaks/double frees.
-   * 2019-08-27 (PR #4): introduced `Identity`, an optional surrogate key whose use is illustrated in [PartiQL](https://github.com/jpivarski/PartiQL#readme).
-   * 2019-08-29 (PR #5): extended Numba to use `Identity` as well, ensuring no memory leaks/double frees.
-   * 2019-08-30 (PR #6): added iteration to both C++ and Numba, as well as the first "operation," `awkward1.tolist`, which turns an awkward array into Python lists (and eventually dicts, etc.).
-   * 2019-09-02 (PR #7): refactored `Index`, `Identity`, and `ListOffsetArray` (and any other array types with `Index`, which is nearly all of them) to have a 32-bit and a 64-bit version. Earlier plans to only support 64-bit in "chunked arrays" were scrapped—both bit widths will be supported everywhere. Non-native endian, non-trivial strides, and multidimensional `Index`/`Identity` are not supported, though all of these features are allowed for `NumpyArray` (_content_, not an _index_). The only limitation on `NumpyArray` is that data must be C-ordered, not Fortran-ordered. (TODO: must enforce that.)
+   * 2019-08-26 (PR [#3](../../pull/3)): extended Numba so that `NumpyArray` and `ListOffsetArray` can be used in Numba-compiled functions, ensuring no memory leaks/double frees.
+   * 2019-08-27 (PR [#4](../../pull/4)): introduced `Identity`, an optional surrogate key whose use is illustrated in [PartiQL](https://github.com/jpivarski/PartiQL#readme).
+   * 2019-08-29 (PR [#5](../../pull/5)): extended Numba to use `Identity` as well, ensuring no memory leaks/double frees.
+   * 2019-08-30 (PR [#6](../../pull/6)): added iteration to both C++ and Numba, as well as the first "operation," `awkward1.tolist`, which turns an awkward array into Python lists (and eventually dicts, etc.).
+   * 2019-09-02 (PR [#7](../../pull/7)): refactored `Index`, `Identity`, and `ListOffsetArray` (and any other array types with `Index`, which is nearly all of them) to have a 32-bit and a 64-bit version. My original plan to only support 64-bit in "chunked arrays" with 32-bit everywhere else is hereby scrapped—both bit widths will be supported on all indexes. Non-native endian, non-trivial strides, and multidimensional `Index`/`Identity` are not supported, though all of these features are allowed for `NumpyArray` (which is _content_, not an _index_). The only limitation on `NumpyArray` is that data must be C-ordered, not Fortran-ordered. (TODO: enforce that!)
 
 ## Roadmap
 
