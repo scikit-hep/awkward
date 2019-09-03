@@ -20,11 +20,17 @@ void rawarray() {
 }
 
 void slices() {
-  Slices slices;
-  slices.append(Slice1(1));
-  slices.append(Slice2(1, 3));
-
-  std::cout << slices->tostring() << std::endl;
+  Slice slice;
+  slice.append(SliceAt(1));
+  slice.append(SliceStartStop(1, 3));
+  slice.append(SliceStartStop(Slice::none(), Slice::none()));
+  slice.append(SliceStartStopStep(Slice::none(), Slice::none(), 2));
+  slice.append(SliceByteMask(Index8(10)));
+  slice.append(SliceIndex32(Index32(15)));
+  slice.append(SliceIndex64(Index64(20)));
+  slice.append(SliceEllipsis());
+  slice.append(SliceNewAxis());
+  assert(slice.length() == 9);
 }
 
 int main(int, char**) {
