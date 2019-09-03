@@ -211,7 +211,7 @@ std::shared_ptr<ak::SliceItem> toslice_part(py::object obj) {
     }
     else if (info.format.compare("?") == 0) {
       ak::Index8 index = ak::Index8(
-        std::shared_ptr<unsigned int8_t>(reinterpret_cast<unsigned int8_t*>(info.ptr), pyobject_deleter<unsigned int8_t>(array.ptr())),
+        std::shared_ptr<uint8_t>(reinterpret_cast<uint8_t*>(info.ptr), pyobject_deleter<uint8_t>(array.ptr())),
         0,
         (int64_t)info.shape[0]);
       return std::shared_ptr<ak::SliceItem>(new ak::SliceByteMask(index));
@@ -228,7 +228,9 @@ std::shared_ptr<ak::SliceItem> toslice_part(py::object obj) {
 ak::Slice toslice(py::object obj) {
   ak::Slice out;
   if (py::isinstance<py::tuple>(obj)) {
-    throw std::runtime_error("not implemented");
+    for (auto x : obj.cast<py::tuple>()) {
+      out.append(toslice_part(x.cast<py::object>()));
+    }
   }
   else {
     out.append(toslice_part(obj));

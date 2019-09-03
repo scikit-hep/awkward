@@ -165,14 +165,20 @@ namespace awkward {
     }
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const {
       std::string out;
-      out += indent + pre + ("<Slice at=\"[");
+      out += indent + pre + std::string("<Slice expr=\"");
+      if (length() != 1) {
+        out += std::string("(");
+      }
       for (std::vector<SliceItem>::size_type i = 0;  i < items_.size();  i++) {
         if (i != 0) {
           out += ", ";
         }
         out += items_[i].get()->tostring_part();
       }
-      return out + std::string("]\"/>") + post;
+      if (length() != 1) {
+        out += std::string(")");
+      }
+      return out + std::string("\"/>") + post;
     }
     const std::string tostring() const {
       return tostring_part("", "", "");
