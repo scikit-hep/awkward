@@ -3,6 +3,8 @@
 #ifndef AWKWARD_CONTENT_H_
 #define AWKWARD_CONTENT_H_
 
+#include <utility>
+
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/util.h"
 #include "awkward/Identity.h"
@@ -18,6 +20,7 @@ namespace awkward {
     virtual std::shared_ptr<Content> shallow_copy() const = 0;
     virtual std::shared_ptr<Content> get(int64_t at) const = 0;
     virtual std::shared_ptr<Content> slice(int64_t start, int64_t stop) const = 0;
+    virtual std::pair<int64_t, int64_t> minmax_depth() const = 0;
 
     const std::string repr() const;
   };

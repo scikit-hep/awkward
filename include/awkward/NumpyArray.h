@@ -52,6 +52,7 @@ namespace awkward {
     virtual std::shared_ptr<Content> shallow_copy() const;
     virtual std::shared_ptr<Content> get(int64_t at) const;
     virtual std::shared_ptr<Content> slice(int64_t start, int64_t stop) const;
+    virtual std::pair<int64_t, int64_t> minmax_depth() const;
 
   private:
     std::shared_ptr<Identity> id_;

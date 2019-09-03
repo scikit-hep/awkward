@@ -155,3 +155,8 @@ std::shared_ptr<Content> NumpyArray::slice(int64_t start, int64_t stop) const {
   }
   return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
 }
+
+std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
+  assert(!isscalar());
+  return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
+}

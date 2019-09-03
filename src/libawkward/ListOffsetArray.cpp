@@ -82,6 +82,12 @@ std::shared_ptr<Content> ListOffsetArrayOf<T>::slice(int64_t start, int64_t stop
   return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id, offsets_.slice(start, stop + 1), content_));
 }
 
+template <typename T>
+std::pair<int64_t, int64_t> ListOffsetArrayOf<T>::minmax_depth() const {
+  std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
+  return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);
+}
+
 namespace awkward {
   template class ListOffsetArrayOf<int32_t>;
   template class ListOffsetArrayOf<int64_t>;
