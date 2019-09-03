@@ -20,16 +20,15 @@ void rawarray() {
 }
 
 void slices() {
-  Slice slice;
-  slice.push_back(SliceAt(1));
-  slice.push_back(SliceStartStop(1, 3));
-  slice.push_back(SliceStartStop(Slice::none(), Slice::none()));
-  slice.push_back(SliceStartStopStep(Slice::none(), Slice::none(), 2));
-  slice.push_back(SliceByteMask(Index8(10)));
-  slice.push_back(SliceIndex32(Index32(15)));
-  slice.push_back(SliceIndex64(Index64(20)));
-  slice.push_back(SliceEllipsis());
-  slice.push_back(SliceNewAxis());
+  Slice slice = Slice().with(SliceAt(1))
+                       .with(SliceStartStop(1, 3))
+                       .with(SliceStartStop(Slice::none(), Slice::none()))
+                       .with(SliceStartStopStep(Slice::none(), Slice::none(), 2))
+                       .with(SliceByteMask(Index8(10)))
+                       .with(SliceIndex32(Index32(15)))
+                       .with(SliceIndex64(Index64(20)))
+                       .with(SliceEllipsis())
+                       .with(SliceNewAxis());
   assert(slice.length() == 9);
 }
 

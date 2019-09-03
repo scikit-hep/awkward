@@ -159,3 +159,7 @@ const std::shared_ptr<Content> NumpyArray::slice(int64_t start, int64_t stop) co
 const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
   return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
 }
+
+const std::shared_ptr<Content> getitem_next(SliceItem& head, Slice& tail, std::shared_ptr<Index> carry) {
+  return std::shared_ptr<Content>(nullptr);
+}

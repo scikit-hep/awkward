@@ -120,29 +120,45 @@ namespace awkward {
       assert(items_.size() != 0);
       return Slice(std::vector<std::shared_ptr<SliceItem>>(items_.begin() + 1, items_.end()));
     }
-    void push_back(SliceAt x) {
-      items_.push_back(std::shared_ptr<SliceItem>(new SliceAt(x)));
+    Slice with(SliceAt x) {
+      Slice out(std::vector<std::shared_ptr<SliceItem>>(items_.begin(), items_.end()));
+      out.items_.push_back(std::shared_ptr<SliceItem>(new SliceAt(x)));
+      return out;
     }
-    void push_back(SliceStartStop x) {
-      items_.push_back(std::shared_ptr<SliceItem>(new SliceStartStop(x)));
+    Slice with(SliceStartStop x) {
+      Slice out(std::vector<std::shared_ptr<SliceItem>>(items_.begin(), items_.end()));
+      out.items_.push_back(std::shared_ptr<SliceItem>(new SliceStartStop(x)));
+      return out;
     }
-    void push_back(SliceStartStopStep x) {
-      items_.push_back(std::shared_ptr<SliceItem>(new SliceStartStopStep(x)));
+    Slice with(SliceStartStopStep x) {
+      Slice out(std::vector<std::shared_ptr<SliceItem>>(items_.begin(), items_.end()));
+      out.items_.push_back(std::shared_ptr<SliceItem>(new SliceStartStopStep(x)));
+      return out;
     }
-    void push_back(SliceByteMask x) {
-      items_.push_back(std::shared_ptr<SliceItem>(new SliceByteMask(x)));
+    Slice with(SliceByteMask x) {
+      Slice out(std::vector<std::shared_ptr<SliceItem>>(items_.begin(), items_.end()));
+      out.items_.push_back(std::shared_ptr<SliceItem>(new SliceByteMask(x)));
+      return out;
     }
-    void push_back(SliceIndex32 x) {
-      items_.push_back(std::shared_ptr<SliceItem>(new SliceIndex32(x)));
+    Slice with(SliceIndex32 x) {
+      Slice out(std::vector<std::shared_ptr<SliceItem>>(items_.begin(), items_.end()));
+      out.items_.push_back(std::shared_ptr<SliceItem>(new SliceIndex32(x)));
+      return out;
     }
-    void push_back(SliceIndex64 x) {
-      items_.push_back(std::shared_ptr<SliceItem>(new SliceIndex64(x)));
+    Slice with(SliceIndex64 x) {
+      Slice out(std::vector<std::shared_ptr<SliceItem>>(items_.begin(), items_.end()));
+      out.items_.push_back(std::shared_ptr<SliceItem>(new SliceIndex64(x)));
+      return out;
     }
-    void push_back(SliceEllipsis x) {
-      items_.push_back(std::shared_ptr<SliceItem>(new SliceEllipsis(x)));
+    Slice with(SliceEllipsis x) {
+      Slice out(std::vector<std::shared_ptr<SliceItem>>(items_.begin(), items_.end()));
+      out.items_.push_back(std::shared_ptr<SliceItem>(new SliceEllipsis(x)));
+      return out;
     }
-    void push_back(SliceNewAxis x) {
-      items_.push_back(std::shared_ptr<SliceItem>(new SliceNewAxis(x)));
+    Slice with(SliceNewAxis x) {
+      Slice out(std::vector<std::shared_ptr<SliceItem>>(items_.begin(), items_.end()));
+      out.items_.push_back(std::shared_ptr<SliceItem>(new SliceNewAxis(x)));
+      return out;
     }
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const {
       std::string out;

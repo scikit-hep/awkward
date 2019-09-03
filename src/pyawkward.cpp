@@ -7,6 +7,7 @@
 #include <pybind11/stl.h>
 
 #include "awkward/Index.h"
+#include "awkward/Slice.h"
 #include "awkward/Identity.h"
 #include "awkward/Content.h"
 #include "awkward/Iterator.h"
@@ -145,6 +146,15 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
       })
 
   ;
+}
+
+/////////////////////////////////////////////////////////////// Slice
+
+ak::Slice toslice(py::object obj) {
+  if (py::isinstance<py::int_>(obj)) {
+    return ak::Slice().with(ak::SliceAt(obj.cast<int64_t>()));
+  }
+  return ak::Slice();
 }
 
 /////////////////////////////////////////////////////////////// Identity
@@ -379,4 +389,8 @@ PYBIND11_MODULE(layout, m) {
 
   make_ListOffsetArrayOf<int32_t>(m, "ListOffsetArray32");
   make_ListOffsetArrayOf<int64_t>(m, "ListOffsetArray64");
+
+  m.def("testslice", [](py::object obj) -> std::string {
+    return toslice(obj).tostring();
+  });
 }

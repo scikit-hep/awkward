@@ -12,7 +12,9 @@
 #include <stdexcept>
 
 #include "awkward/cpu-kernels/util.h"
+#include "awkward/cpu-kernels/getitem.h"
 #include "awkward/util.h"
+#include "awkward/Slice.h"
 #include "awkward/Content.h"
 
 namespace awkward {
@@ -53,6 +55,8 @@ namespace awkward {
     virtual const std::shared_ptr<Content> get(int64_t at) const;
     virtual const std::shared_ptr<Content> slice(int64_t start, int64_t stop) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
+
+    const std::shared_ptr<Content> getitem_next(SliceItem& head, Slice& tail, std::shared_ptr<Index> advanced);
 
   private:
     std::shared_ptr<Identity> id_;
