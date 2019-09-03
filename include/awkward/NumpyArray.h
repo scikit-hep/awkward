@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_NUMPYARRAYINDEX_H_
-#define AWKWARD_NUMPYARRAYINDEX_H_
+#ifndef AWKWARD_NUMPYARRAY_H_
+#define AWKWARD_NUMPYARRAY_H_
 
 #include <cassert>
 #include <vector>
@@ -49,10 +49,10 @@ namespace awkward {
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
     virtual int64_t length() const;
-    virtual std::shared_ptr<Content> shallow_copy() const;
-    virtual std::shared_ptr<Content> get(int64_t at) const;
-    virtual std::shared_ptr<Content> slice(int64_t start, int64_t stop) const;
-    virtual std::pair<int64_t, int64_t> minmax_depth() const;
+    virtual const std::shared_ptr<Content> shallow_copy() const;
+    virtual const std::shared_ptr<Content> get(int64_t at) const;
+    virtual const std::shared_ptr<Content> slice(int64_t start, int64_t stop) const;
+    virtual const std::pair<int64_t, int64_t> minmax_depth() const;
 
   private:
     std::shared_ptr<Identity> id_;
@@ -65,4 +65,4 @@ namespace awkward {
   };
 }
 
-#endif // AWKWARD_NUMPYARRAYINDEX_H_
+#endif // AWKWARD_NUMPYARRAY_H_

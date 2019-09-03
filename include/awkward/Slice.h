@@ -124,7 +124,7 @@ namespace awkward {
 
   class SliceTuple {
   public:
-    SliceTuple(const std::vector<std::unique_ptr> items): items_(std::move(items)) { }
+    SliceTuple(const std::vector<std::shared_ptr<Slice>> items): items_(std::move(items)) { }
     SliceTuple(SliceTuple&& other) { *this = std::move(other); }
     SliceTuple(SliceTuple& other) { *this = other; }
     SliceTuple& operator=(const SliceTuple& other) {
@@ -137,7 +137,7 @@ namespace awkward {
     const Slice* item(int64_t where) const { return items_[where].get(); }
     const int64_t length() const { return (int64_t)items_.size(); }
   private:
-    std::vector<std::unique_ptr> items_;
+    std::vector<std::shared_ptr<Slice>> items_;
   };
 
 }

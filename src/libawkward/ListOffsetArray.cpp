@@ -62,20 +62,20 @@ int64_t ListOffsetArrayOf<T>::length() const {
 }
 
 template <typename T>
-std::shared_ptr<Content> ListOffsetArrayOf<T>::shallow_copy() const {
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::shallow_copy() const {
   return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, offsets_, content_));
 }
 
 template <typename T>
-std::shared_ptr<Content> ListOffsetArrayOf<T>::get(int64_t at) const {
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::get(int64_t at) const {
   int64_t start = (int64_t)offsets_.get(at);
   int64_t stop = (int64_t)offsets_.get(at + 1);
   return content_.get()->slice(start, stop);
 }
 
 template <typename T>
-std::shared_ptr<Content> ListOffsetArrayOf<T>::slice(int64_t start, int64_t stop) const {
-  std::shared_ptr<Identity> id;
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::slice(int64_t start, int64_t stop) const {
+  std::shared_ptr<Identity> id(nullptr);
   if (id_.get() != nullptr) {
     id = id_.get()->slice(start, stop);
   }
@@ -83,7 +83,7 @@ std::shared_ptr<Content> ListOffsetArrayOf<T>::slice(int64_t start, int64_t stop
 }
 
 template <typename T>
-std::pair<int64_t, int64_t> ListOffsetArrayOf<T>::minmax_depth() const {
+const std::pair<int64_t, int64_t> ListOffsetArrayOf<T>::minmax_depth() const {
   std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
   return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);
 }
