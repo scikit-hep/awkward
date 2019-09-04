@@ -64,4 +64,4 @@ def test_numpyarray_getitem():
     print(awkward1.tolist(a[(2, slice(1, 3))]))
     print(awkward1.tolist(b.getitem((2, slice(1, 3)))))
 
-    raise Exception
+    # raise Exception
