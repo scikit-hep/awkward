@@ -21,7 +21,7 @@ const std::string IdentityOf<T>::tostring_part(const std::string indent, const s
     name = "Identity64";
   }
   out << indent << pre << "<" << name << " ref=\"" << ref() << "\" fieldloc=\"[";
-  for (Identity::FieldLoc::size_type i = 0;  i < fieldloc().size();  i++) {
+  for (ssize_t i = 0;  i < fieldloc().size();  i++) {
     if (i != 0) {
       out << " ";
     }
@@ -50,7 +50,7 @@ const std::shared_ptr<Identity> IdentityOf<T>::shallow_copy() const {
 template <typename T>
 const std::vector<T> IdentityOf<T>::get(int64_t at) const {
   std::vector<T> out;
-  for (typename std::vector<T>::size_type i = offset() + at;  i < offset() + at + width();  i++) {
+  for (size_t i = (size_t)(offset() + at);  i < (size_t)(offset() + at + width());  i++) {
     out.push_back(ptr_.get()[i]);
   }
   return out;

@@ -50,7 +50,7 @@ const std::string IndexOf<T>::tostring_part(const std::string indent, const std:
 
 template <typename T>
 T IndexOf<T>::get(int64_t at) const {
-  return ptr_.get()[offset_ + at];
+  return ptr_.get()[(size_t)(offset_ + at)];
 }
 
 template <typename T>

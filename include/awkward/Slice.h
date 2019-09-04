@@ -110,7 +110,7 @@ namespace awkward {
 
     Slice(): items_(std::vector<std::shared_ptr<SliceItem>>()) { }
     Slice(const std::vector<std::shared_ptr<SliceItem>> items): items_(items) { }
-    const SliceItem* borrow(int64_t which) const { return items_[(std::vector<std::shared_ptr<SliceItem>>::size_type)which].get(); }
+    const SliceItem* borrow(int64_t which) const { return items_[(size_t)which].get(); }
     const int64_t length() const { return (int64_t)items_.size(); }
     const std::shared_ptr<SliceItem> head() const {
       assert(items_.size() != 0);
@@ -169,7 +169,7 @@ namespace awkward {
       if (length() != 1) {
         out += std::string("(");
       }
-      for (std::vector<std::shared_ptr<SliceItem>>::size_type i = 0;  i < items_.size();  i++) {
+      for (size_t i = 0;  i < items_.size();  i++) {
         if (i != 0) {
           out += ", ";
         }
