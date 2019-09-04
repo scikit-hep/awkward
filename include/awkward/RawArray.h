@@ -40,7 +40,7 @@ namespace awkward {
 
     RawArrayOf<T>(const std::shared_ptr<Identity> id, const int64_t length)
         : id_(id)
-        , ptr_(std::shared_ptr<T>(new T[length], awkward::util::array_deleter<T>()))
+        , ptr_(std::shared_ptr<T>(new T[(size_t)length], awkward::util::array_deleter<T>()))
         , offset_(0)
         , length_(length)
         , stride_(sizeof(T)) { }
