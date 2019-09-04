@@ -227,90 +227,135 @@ const std::vector<ssize_t> shape2strides(const std::vector<ssize_t>& shape, ssiz
   return out;
 }
 
-const std::shared_ptr<Content> NumpyArray::getitem(Slice& slice) const {
+const std::shared_ptr<Content> NumpyArray::getitem(const Slice& slice) const {
   std::shared_ptr<SliceItem> head = slice.head();
   Slice tail = slice.tail();
-  return getitem_next(head, tail, std::shared_ptr<Index>(nullptr));
+  return getitem_next(head, tail);
 }
 
-const std::shared_ptr<Content> NumpyArray::getitem_next(std::shared_ptr<SliceItem> head, Slice& tail, std::shared_ptr<Index> carry) const {
-  assert(!isscalar());
+const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail) const {
+  std::cout << "no carry" << std::endl;
 
   if (head.get() == nullptr) {
+    std::cout << "empty head" << std::endl;
+
     return shallow_copy();
   }
 
   else if (SliceAt* h = dynamic_cast<SliceAt*>(head.get())) {
-    if (carry.get() == nullptr) {
-      std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
-      ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)h->at());
+    std::cout << "SliceAt" << std::endl;
 
-      std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
+    std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+    ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)h->at());
 
-      return next.get()->getitem_next(nexthead, nexttail, std::shared_ptr<Index>(nullptr));
-    }
-    else if (Index32* c = dynamic_cast<Index32*>(carry.get())) {
-      std::vector<ssize_t> shape = { c->length() };
-      shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-      uint8_t* src = reinterpret_cast<uint8_t*>(ptr_.get());
-      uint8_t* dst = new uint8_t[c->length()*strides_[0]];
-      for (int64_t i = 0;  i < c->length();  i++) {
-        std::memcpy(&dst[strides_[0]*i], &src[byteoffset_ + strides_[0]*(c->get(i) + h->at())], strides_[0]);
-      }
-      std::cout << "c->length() " << c->length() << " strides_[0] " << strides_[0] << " itemsize_ " << itemsize_ << std::endl;
-      std::cout << "c";
-      for (int64_t i = 0;  i < c->length();  i++) {
-        std::cout << " " << c->get(i);
-      }
-      std::cout << std::endl;
-      std::cout << "dst";
-      for (int64_t i = 0;  i < c->length()*strides_[0];  i++) {
-        std::cout << " " << (int)dst[i];
-      }
-      std::cout << std::endl;
+    std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
 
-      std::shared_ptr<void> ptr(dst);
-
-      return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr, shape, shape2strides(shape, itemsize_), 0, itemsize_, format_));
-    }
-    else {
-      throw std::runtime_error("not implemented A");
-    }
+    return next.get()->getitem_next(nexthead, nexttail);
   }
 
   else if (SliceStartStop* h = dynamic_cast<SliceStartStop*>(head.get())) {
-    if (carry.get() == nullptr) {
-      std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
-      ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)h->start());
+    std::cout << "SliceStartStop" << std::endl;
 
-      std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
-      Index32 nextcarry(h->stop() - h->start());
-      int32_t step = (shape_.size() == 1 ? 1 : shape_[1]);
-      for (int64_t i = 0;  i < nextcarry.length();  i++) {
-        nextcarry.ptr().get()[i] = step*i;
-      }
-      std::cout << "nextcarry";
-      for (int64_t i = 0;  i < nextcarry.length();  i++) {
-        std::cout << " " << nextcarry.get(i);
-      }
-      std::cout << std::endl;
+    std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+    ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)h->start());
 
-      return next.get()->getitem_next(nexthead, nexttail, std::shared_ptr<Index>(new Index32(nextcarry)));
+    std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+
+    Slice nexttail = tail.tail();
+    Index64 nextcarry(h->stop() - h->start());
+    int64_t step = (shape_.size() == 1 ? 1 : (int64_t)shape_[1]);
+    for (int64_t i = 0;  i < nextcarry.length();  i++) {
+      nextcarry.ptr().get()[i] = step*i;
     }
-    else if (Index32* c = dynamic_cast<Index32*>(carry.get())) {
-      throw std::runtime_error("FIXME");
+    std::cout << "nextcarry";
+    for (int64_t i = 0;  i < nextcarry.length();  i++) {
+      std::cout << " " << nextcarry.get(i);
     }
-    else {
-      throw std::runtime_error("not implemented B");
-    }
+    std::cout << std::endl;
+
+    return next.get()->getitem_next(nexthead, nexttail, nextcarry);
   }
 
   else {
-    throw std::runtime_error("not implemented C");
+    assert(false);
+  }
+}
+
+const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry) const {
+  std::cout << "CARRY!" << std::endl;
+
+  if (head.get() == nullptr) {
+    std::cout << "empty head" << std::endl;
+    std::cout << "carry.length() " << carry.length() << std::endl;
+    std::cout << "carry";
+    for (int64_t i = 0;  i < carry.length();  i++) {
+      std::cout << " " << carry.get(i);
+    }
+    std::cout << std::endl;
+
+    std::vector<ssize_t> shape = { carry.length() };
+    int64_t skip = itemsize_;
+    if (shape_.size() != 0) {
+      shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+      skip = strides_[0];
+    }
+    uint8_t* src = reinterpret_cast<uint8_t*>(ptr_.get());
+    uint8_t* dst = new uint8_t[carry.length()*skip];
+    std::cout << "dst " << carry.length()*skip << std::endl;;
+    for (int64_t i = 0;  i < carry.length();  i++) {
+      std::memcpy(&dst[skip*i], &src[byteoffset_ + skip*carry.get(i)], skip);
+    }
+    std::cout << "dst";
+    for (int64_t i = 0;  i < carry.length()*skip;  i++) {
+      std::cout << " " << (int)dst[i];
+    }
+    std::cout << std::endl;
+
+    std::shared_ptr<uint8_t> ptr(dst, awkward::util::array_deleter<uint8_t>());
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr, shape, shape2strides(shape, itemsize_), 0, itemsize_, format_));
+  }
+
+  else if (SliceAt* h = dynamic_cast<SliceAt*>(head.get())) {
+    std::cout << "SliceAt" << std::endl;
+
+    std::vector<ssize_t> shape = { carry.length() };
+    int64_t skip = itemsize_;
+    if (shape_.size() != 0) {
+      shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+      skip = strides_[0];
+    }
+    uint8_t* src = reinterpret_cast<uint8_t*>(ptr_.get());
+    uint8_t* dst = new uint8_t[carry.length()*skip];
+    for (int64_t i = 0;  i < carry.length();  i++) {
+      std::memcpy(&dst[skip*i], &src[byteoffset_ + skip*(carry.get(i) + h->at())], skip);
+    }
+    std::cout << "carry.length() " << carry.length() << " skip " << skip << " itemsize_ " << itemsize_ << std::endl;
+    std::cout << "carry";
+    for (int64_t i = 0;  i < carry.length();  i++) {
+      std::cout << " " << carry.get(i);
+    }
+    std::cout << std::endl;
+    std::cout << "dst";
+    for (int64_t i = 0;  i < carry.length()*skip;  i++) {
+      std::cout << " " << (int)dst[i];
+    }
+    std::cout << std::endl;
+
+    std::shared_ptr<uint8_t> ptr(dst, awkward::util::array_deleter<uint8_t>());
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr, shape, shape2strides(shape, itemsize_), 0, itemsize_, format_));
+  }
+
+  else if (SliceStartStop* h = dynamic_cast<SliceStartStop*>(head.get())) {
+    std::cout << "SliceStartStop" << std::endl;
+
+    throw std::runtime_error("FIXME");
+  }
+
+  else {
+    assert(false);
   }
 }
 

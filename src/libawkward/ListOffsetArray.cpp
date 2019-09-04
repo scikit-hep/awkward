@@ -89,12 +89,17 @@ const std::pair<int64_t, int64_t> ListOffsetArrayOf<T>::minmax_depth() const {
 }
 
 template <typename T>
-const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem(Slice& slice) const {
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem(const Slice& slice) const {
   throw std::runtime_error("not implemented");
 }
 
 template <typename T>
-const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(std::shared_ptr<SliceItem> head, Slice& tail, std::shared_ptr<Index> carry) const {
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail) const {
+  throw std::runtime_error("not implemented");
+}
+
+template <typename T>
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry) const {
   throw std::runtime_error("not implemented");
 }
 
