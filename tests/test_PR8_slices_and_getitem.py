@@ -35,3 +35,7 @@ def test_slice():
         awkward1.layout.testslice(numpy.array(["one", "two", "three"]))
     with pytest.raises(ValueError):
         awkward1.layout.testslice(numpy.array([1, 2, 3, None, 4, 5]))
+
+def test_numpyarray_getitem():
+    a = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    assert a.getitem(4) == 4.4

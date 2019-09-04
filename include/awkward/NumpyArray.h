@@ -56,7 +56,8 @@ namespace awkward {
     virtual const std::shared_ptr<Content> slice(int64_t start, int64_t stop) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
 
-    const std::shared_ptr<Content> getitem_next(SliceItem& head, Slice& tail, std::shared_ptr<Index> advanced);
+    const std::shared_ptr<Content> getitem(Slice& slice);
+    const std::shared_ptr<Content> getitem_next(std::shared_ptr<SliceItem> head, Slice& tail, std::shared_ptr<Index> carry);
 
   private:
     std::shared_ptr<Identity> id_;

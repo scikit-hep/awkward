@@ -185,11 +185,7 @@ const std::shared_ptr<Content> NumpyArray::get(int64_t at) const {
   ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
   const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
   const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
-  std::shared_ptr<Identity> id(nullptr);
-  if (id_.get() != nullptr) {
-    id = id_.get()->slice(at, at + 1);
-  }
-  return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset, itemsize_, format_));
+  return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, strides, byteoffset, itemsize_, format_));
 }
 
 const std::shared_ptr<Content> NumpyArray::slice(int64_t start, int64_t stop) const {
@@ -209,6 +205,49 @@ const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
   return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
 }
 
-const std::shared_ptr<Content> getitem_next(SliceItem& head, Slice& tail, std::shared_ptr<Index> carry) {
-  return std::shared_ptr<Content>(nullptr);
+const std::shared_ptr<Content> NumpyArray::getitem(Slice& slice) {
+  std::shared_ptr<SliceItem> head = slice.head();
+  Slice tail = slice.tail();
+  return getitem_next(head, tail, std::shared_ptr<Index>(nullptr));
+}
+
+const std::shared_ptr<Content> NumpyArray::getitem_next(std::shared_ptr<SliceItem> head, Slice& tail, std::shared_ptr<Index> carry) {
+  assert(!isscalar());
+  if (head.get() == nullptr) {
+    return shallow_copy();
+  }
+  else if (SliceAt* x = dynamic_cast<SliceAt*>(head.get())) {
+    int64_t at = x->at() + (x->at() < 0 ? length() : 0);
+    if (at < 0  ||  at >= length()) {
+      throw std::invalid_argument("integer index out of range");
+    }
+    ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
+    const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+    const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, strides, byteoffset, itemsize_, format_));
+  }
+  else if (SliceStartStop* x = dynamic_cast<SliceStartStop*>(head.get())) {
+    throw std::runtime_error("not implemented");
+  }
+  else if (SliceStartStopStep* x = dynamic_cast<SliceStartStopStep*>(head.get())) {
+    throw std::runtime_error("not implemented");
+  }
+  else if (SliceByteMask* x = dynamic_cast<SliceByteMask*>(head.get())) {
+    throw std::runtime_error("not implemented");
+  }
+  else if (SliceIndex32* x = dynamic_cast<SliceIndex32*>(head.get())) {
+    throw std::runtime_error("not implemented");
+  }
+  else if (SliceIndex64* x = dynamic_cast<SliceIndex64*>(head.get())) {
+    throw std::runtime_error("not implemented");
+  }
+  else if (SliceEllipsis* x = dynamic_cast<SliceEllipsis*>(head.get())) {
+    throw std::runtime_error("not implemented");
+  }
+  else if (SliceNewAxis* x = dynamic_cast<SliceNewAxis*>(head.get())) {
+    throw std::runtime_error("not implemented");
+  }
+  else {
+    assert(false);
+  }
 }

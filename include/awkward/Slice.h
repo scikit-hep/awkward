@@ -113,12 +113,20 @@ namespace awkward {
     const SliceItem* borrow(int64_t which) const { return items_[(size_t)which].get(); }
     const int64_t length() const { return (int64_t)items_.size(); }
     const std::shared_ptr<SliceItem> head() const {
-      assert(items_.size() != 0);
-      return items_[0];
+      if (items_.size() == 0) {
+        return std::shared_ptr<SliceItem>(nullptr);
+      }
+      else {
+        return items_[0];
+      }
     }
     const Slice tail() const {
-      assert(items_.size() != 0);
-      return Slice(std::vector<std::shared_ptr<SliceItem>>(items_.begin() + 1, items_.end()));
+      if (items_.size() == 0) {
+        return Slice();
+      }
+      else {
+        return Slice(std::vector<std::shared_ptr<SliceItem>>(items_.begin() + 1, items_.end()));
+      }
     }
     void append(std::shared_ptr<SliceItem> x) {
       items_.push_back(x);
