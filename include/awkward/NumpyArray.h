@@ -4,6 +4,7 @@
 #define AWKWARD_NUMPYARRAY_H_
 
 #include <cassert>
+#include <cstring>
 #include <vector>
 #include <string>
 #include <iomanip>

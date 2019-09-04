@@ -205,6 +205,28 @@ const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
   return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
 }
 
+#include <iostream>
+
+std::string stupid(std::vector<ssize_t> v) {
+  std::string out("[");
+  for (size_t i = 0;  i < v.size();  i++) {
+    if (i != 0) {
+      out += std::string(" ");
+    }
+    out += std::to_string(v[i]);
+  }
+  return out + std::string("]");
+}
+
+const std::vector<ssize_t> shape2strides(const std::vector<ssize_t>& shape, ssize_t itemsize) {
+  std::vector<ssize_t> out;
+  for (auto dim = shape.rbegin();  dim != shape.rend();  ++dim) {
+    out.insert(out.begin(), itemsize);
+    itemsize *= *dim;
+  }
+  return out;
+}
+
 const std::shared_ptr<Content> NumpyArray::getitem(Slice& slice) const {
   std::shared_ptr<SliceItem> head = slice.head();
   Slice tail = slice.tail();
@@ -213,81 +235,222 @@ const std::shared_ptr<Content> NumpyArray::getitem(Slice& slice) const {
 
 const std::shared_ptr<Content> NumpyArray::getitem_next(std::shared_ptr<SliceItem> head, Slice& tail, std::shared_ptr<Index> carry) const {
   assert(!isscalar());
+
   if (head.get() == nullptr) {
     return shallow_copy();
   }
-  else if (SliceAt* x = dynamic_cast<SliceAt*>(head.get())) {
-    int64_t at = x->at();
-    if (at < 0) {
-      at += length();
+
+  else if (SliceAt* h = dynamic_cast<SliceAt*>(head.get())) {
+    if (carry.get() == nullptr) {
+      std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+      ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)h->at());
+
+      std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
+      std::shared_ptr<SliceItem> nexthead = tail.head();
+      Slice nexttail = tail.tail();
+
+      return next.get()->getitem_next(nexthead, nexttail, std::shared_ptr<Index>(nullptr));
     }
-    if (at < 0  ||  at >= length()) {
-      throw std::invalid_argument("integer index out of range");
+    else if (Index32* c = dynamic_cast<Index32*>(carry.get())) {
+      std::vector<ssize_t> shape = { c->length() };
+      shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+      uint8_t* src = reinterpret_cast<uint8_t*>(ptr_.get());
+      uint8_t* dst = new uint8_t[c->length()*strides_[0]];
+      for (int64_t i = 0;  i < c->length();  i++) {
+        std::memcpy(&dst[strides_[0]*i], &src[byteoffset_ + strides_[0]*(c->get(i) + h->at())], strides_[0]);
+      }
+      std::cout << "c->length() " << c->length() << " strides_[0] " << strides_[0] << " itemsize_ " << itemsize_ << std::endl;
+      std::cout << "c";
+      for (int64_t i = 0;  i < c->length();  i++) {
+        std::cout << " " << c->get(i);
+      }
+      std::cout << std::endl;
+      std::cout << "dst";
+      for (int64_t i = 0;  i < c->length()*strides_[0];  i++) {
+        std::cout << " " << (int)dst[i];
+      }
+      std::cout << std::endl;
+
+      std::shared_ptr<void> ptr(dst);
+
+      return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr, shape, shape2strides(shape, itemsize_), 0, itemsize_, format_));
     }
-    ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
-    const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
-    const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
-    std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, strides, byteoffset, itemsize_, format_));
-    std::shared_ptr<SliceItem> nexthead = tail.head();
-    Slice nexttail = tail.tail();
-    return next.get()->getitem_next(nexthead, nexttail, std::shared_ptr<Index>(nullptr));
+    else {
+      throw std::runtime_error("not implemented A");
+    }
   }
-  else if (SliceStartStop* x = dynamic_cast<SliceStartStop*>(head.get())) {
-    int64_t start = x->start();
-    if (start == Slice::none()) {
-      start = 0;
+
+  else if (SliceStartStop* h = dynamic_cast<SliceStartStop*>(head.get())) {
+    if (carry.get() == nullptr) {
+      std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+      ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)h->start());
+
+      std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
+      std::shared_ptr<SliceItem> nexthead = tail.head();
+      Slice nexttail = tail.tail();
+      Index32 nextcarry(h->stop() - h->start());
+      int32_t step = (shape_.size() == 1 ? 1 : shape_[1]);
+      for (int64_t i = 0;  i < nextcarry.length();  i++) {
+        nextcarry.ptr().get()[i] = step*i;
+      }
+      std::cout << "nextcarry";
+      for (int64_t i = 0;  i < nextcarry.length();  i++) {
+        std::cout << " " << nextcarry.get(i);
+      }
+      std::cout << std::endl;
+
+      return next.get()->getitem_next(nexthead, nexttail, std::shared_ptr<Index>(new Index32(nextcarry)));
     }
-    if (start < 0) {
-      start += length();
+    else if (Index32* c = dynamic_cast<Index32*>(carry.get())) {
+      throw std::runtime_error("FIXME");
     }
-    if (start < 0) {
-      start = 0;
+    else {
+      throw std::runtime_error("not implemented B");
     }
-    if (start > length()) {
-      start = length();
-    }
-    int64_t stop = x->stop();
-    if (stop == Slice::none()) {
-      stop = length();
-    }
-    if (stop < 0) {
-      stop += length();
-    }
-    if (stop < 0) {
-      stop = 0;
-    }
-    if (stop > length()) {
-      stop = length();
-    }
-    ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
-    std::vector<ssize_t> shape;
-    shape.push_back((ssize_t)(stop - start));
-    shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-    std::shared_ptr<Identity> id(nullptr);
-    if (id_.get() != nullptr) {
-      id = id_.get()->slice(start, stop);
-    }
-    return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
   }
-  else if (SliceStartStopStep* x = dynamic_cast<SliceStartStopStep*>(head.get())) {
-    throw std::runtime_error("not implemented");
-  }
-  else if (SliceByteMask* x = dynamic_cast<SliceByteMask*>(head.get())) {
-    throw std::runtime_error("not implemented");
-  }
-  else if (SliceIndex32* x = dynamic_cast<SliceIndex32*>(head.get())) {
-    throw std::runtime_error("not implemented");
-  }
-  else if (SliceIndex64* x = dynamic_cast<SliceIndex64*>(head.get())) {
-    throw std::runtime_error("not implemented");
-  }
-  else if (SliceEllipsis* x = dynamic_cast<SliceEllipsis*>(head.get())) {
-    throw std::runtime_error("not implemented");
-  }
-  else if (SliceNewAxis* x = dynamic_cast<SliceNewAxis*>(head.get())) {
-    throw std::runtime_error("not implemented");
-  }
+
   else {
-    assert(false);
+    throw std::runtime_error("not implemented C");
   }
 }
+
+
+
+
+// const std::shared_ptr<Content> NumpyArray::getitem(Slice& slice) const {
+//   std::shared_ptr<SliceItem> head = slice.head();
+//   Slice tail = slice.tail();
+//   return getitem_next(head, tail, std::shared_ptr<Index>(nullptr));
+// }
+//
+// const std::shared_ptr<Content> NumpyArray::getitem_next(std::shared_ptr<SliceItem> head, Slice& tail, std::shared_ptr<Index> carry) const {
+//   assert(!isscalar());
+//   if (head.get() == nullptr) {
+//     return shallow_copy();
+//   }
+//   else if (SliceAt* x = dynamic_cast<SliceAt*>(head.get())) {
+//     if (carry.get() == nullptr) {
+//       int64_t at = x->at();
+//       if (at < 0) {
+//         at += length();
+//       }
+//       if (at < 0  ||  at >= length()) {
+//         throw std::invalid_argument("integer index out of range");
+//       }
+//       ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
+//       const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+//       const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+//       std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, strides, byteoffset, itemsize_, format_));
+//       std::shared_ptr<SliceItem> nexthead = tail.head();
+//       Slice nexttail = tail.tail();
+//       return next.get()->getitem_next(nexthead, nexttail, std::shared_ptr<Index>(nullptr));
+//     }
+//     else if (Index32* carry32 = dynamic_cast<Index32*>(carry.get())) {
+//       ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
+//       std::vector<ssize_t> shape;
+//       shape.push_back(carry32->length());
+//       shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+//       std::vector<ssize_t> strides;
+//       if (strides_.size() == 1) {
+//         strides.push_back(carry32->length()*itemsize_);
+//       }
+//       else {
+//         strides.push_back(carry32->length()*strides_[1]);
+//       }
+//       uint8_t* ptr = new uint8_t[(size_t)length];
+//
+//       std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), std::shared_ptr<void>(ptr, awkward::util::array_deleter<void>()), ...));
+//
+//
+//
+//     }
+//   }
+//   else if (SliceStartStop* x = dynamic_cast<SliceStartStop*>(head.get())) {
+//     int64_t start = x->start();
+//     if (start == Slice::none()) {
+//       start = 0;
+//     }
+//     if (start < 0) {
+//       start += length();
+//     }
+//     if (start < 0) {
+//       start = 0;
+//     }
+//     if (start > length()) {
+//       start = length();
+//     }
+//     int64_t stop = x->stop();
+//     if (stop == Slice::none()) {
+//       stop = length();
+//     }
+//     if (stop < 0) {
+//       stop += length();
+//     }
+//     if (stop < 0) {
+//       stop = 0;
+//     }
+//     if (stop > length()) {
+//       stop = length();
+//     }
+//     // ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
+//     // std::vector<ssize_t> shape;
+//     // shape.push_back((ssize_t)(stop - start));
+//     // shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+//     // std::shared_ptr<Identity> id(nullptr);
+//     // if (id_.get() != nullptr) {
+//     //   id = id_.get()->slice(start, stop);
+//     // }
+//     // return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
+//
+//     std::vector<ssize_t> shape;
+//     for (size_t i = 1;  i < shape_.size();  i++) {
+//       if (i == 1) {
+//         shape.push_back(shape_[i] * (stop - start));
+//       }
+//       else {
+//         shape.push_back(shape_[i]);
+//       }
+//     }
+//
+//     std::cout << "before " << stupid(shape_) << " after " << stupid(shape) << std::endl;
+//
+//     std::vector<ssize_t> strides;
+//     strides.insert(strides.end(), strides_.begin() + 1, strides_.end());
+//     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
+//
+//     Index32 nextcarry(stop - start);
+//     int32_t* carryptr = nextcarry.ptr().get();
+//     for (int64_t i = 0;  i < (stop - start);  i++) {
+//       carryptr[i] = shape_[1]*i;
+//       std::cout << "and " << carryptr[i] << std::endl;
+//     }
+//     std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, strides, byteoffset, itemsize_, format_));
+//
+//     std::shared_ptr<SliceItem> nexthead = tail.head();
+//     Slice nexttail = tail.tail();
+//     return next.get()->getitem_next(nexthead, nexttail, nextcarry.shallow_copy());
+//     return next;
+//
+//   }
+//   else if (SliceStartStopStep* x = dynamic_cast<SliceStartStopStep*>(head.get())) {
+//     throw std::runtime_error("not implemented");
+//   }
+//   else if (SliceByteMask* x = dynamic_cast<SliceByteMask*>(head.get())) {
+//     throw std::runtime_error("not implemented");
+//   }
+//   else if (SliceIndex32* x = dynamic_cast<SliceIndex32*>(head.get())) {
+//     throw std::runtime_error("not implemented");
+//   }
+//   else if (SliceIndex64* x = dynamic_cast<SliceIndex64*>(head.get())) {
+//     throw std::runtime_error("not implemented");
+//   }
+//   else if (SliceEllipsis* x = dynamic_cast<SliceEllipsis*>(head.get())) {
+//     throw std::runtime_error("not implemented");
+//   }
+//   else if (SliceNewAxis* x = dynamic_cast<SliceNewAxis*>(head.get())) {
+//     throw std::runtime_error("not implemented");
+//   }
+//   else {
+//     assert(false);
+//   }
+// }

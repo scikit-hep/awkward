@@ -14,7 +14,9 @@
 #include "awkward/util.h"
 
 namespace awkward {
-  class Index { };
+  class Index {
+    virtual const std::shared_ptr<Index> shallow_copy() const = 0;
+  };
 
   template <typename T>
   class IndexOf: public Index {
@@ -36,6 +38,7 @@ namespace awkward {
     const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     T get(int64_t at) const;
     IndexOf<T> slice(int64_t start, int64_t stop) const;
+    virtual const std::shared_ptr<Index> shallow_copy() const;
 
   private:
     const std::shared_ptr<T> ptr_;

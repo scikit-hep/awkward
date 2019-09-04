@@ -61,6 +61,11 @@ IndexOf<T> IndexOf<T>::slice(int64_t start, int64_t stop) const {
   return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
 }
 
+template <typename T>
+const std::shared_ptr<Index> IndexOf<T>::shallow_copy() const {
+  return std::shared_ptr<Index>(new IndexOf<T>(ptr_, offset_, length_));
+}
+
 namespace awkward {
   template class IndexOf<uint8_t>;
   template class IndexOf<int32_t>;
