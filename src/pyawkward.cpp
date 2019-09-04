@@ -212,60 +212,34 @@ std::shared_ptr<ak::SliceItem> toslice_part(py::object obj) {
           format.compare("i") == 0  ||
           format.compare("I") == 0  ||
 #ifdef _MSC_VER
-          format.compare("l") == 0  ||   // on Windows (32-bit and 64-bit), "l" is a 32-bit integer
+          format.compare("l") == 0  ||   // on Windows (both 32-bit and 64-bit Python), "l/L" is a 32-bit integer
           format.compare("L") == 0  ||
 #endif
           false) {
         auto nativearray = array.cast<py::array_t<int32_t, py::array::c_style | py::array::forcecast>>();
         py::buffer_info nativeinfo = nativearray.request();
-
-        if (array.ptr() == nativearray.ptr()) {
-          std::cout << "same" << std::endl;
-        }
-        else {
-          std::cout << "DIFFERENT!" << std::endl;
-        }
-
         ak::Index32 index = ak::Index32(
           std::shared_ptr<int32_t>(reinterpret_cast<int32_t*>(nativeinfo.ptr), pyobject_deleter<int32_t>(nativearray.ptr())),
           0,
           (int32_t)nativeinfo.shape[0]);
-
-        std::cout << index.tostring() << std::endl;
-
         return std::shared_ptr<ak::SliceItem>(new ak::SliceIndex32(index));
       }
-
-      if (true                      ||
-#ifndef _MSC_VER
-          format.compare("l") == 0  ||   // see above
-          format.compare("L") == 0  ||
-#endif
-          format.compare("q") == 0  ||
-          format.compare("Q") == 0  ||
-          format.compare("n") == 0  ||
-          format.compare("N") == 0) {
+      else if (format.compare("l") == 0  ||
+               format.compare("L") == 0  ||
+               format.compare("q") == 0  ||
+               format.compare("Q") == 0  ||
+               format.compare("n") == 0  ||
+               format.compare("N") == 0) {
         auto nativearray = array.cast<py::array_t<int64_t, py::array::c_style | py::array::forcecast>>();
         py::buffer_info nativeinfo = nativearray.request();
-
-        if (array.ptr() == nativearray.ptr()) {
-          std::cout << "same" << std::endl;
-        }
-        else {
-          std::cout << "DIFFERENT!" << std::endl;
-        }
-
         ak::Index64 index = ak::Index64(
           std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(nativeinfo.ptr), pyobject_deleter<int64_t>(nativearray.ptr())),
           0,
           (int64_t)nativeinfo.shape[0]);
-
-        std::cout << index.tostring() << std::endl;
-
         return std::shared_ptr<ak::SliceItem>(new ak::SliceIndex64(index));
       }
       else {
-        throw std::invalid_argument("an array used as an index must be integer (32 or 64-bit, native endian) or boolean");
+        throw std::invalid_argument("an array used as an index must be integer or boolean");
       }
     }
   }
