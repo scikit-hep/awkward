@@ -13,7 +13,10 @@ template <typename T>
 const std::string IndexOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
   std::string name = "Unrecognized Index";
-  if (std::is_same<T, int32_t>::value) {
+  if (std::is_same<T, uint8_t>::value) {
+    name = "Index8";
+  }
+  else if (std::is_same<T, int32_t>::value) {
     name = "Index32";
   }
   else if (std::is_same<T, int64_t>::value) {
@@ -25,7 +28,7 @@ const std::string IndexOf<T>::tostring_part(const std::string indent, const std:
       if (i != 0) {
         out << " ";
       }
-      out << get(i);
+      out << (int64_t)get(i);
     }
   }
   else {
@@ -33,14 +36,14 @@ const std::string IndexOf<T>::tostring_part(const std::string indent, const std:
       if (i != 0) {
         out << " ";
       }
-      out << get(i);
+      out << (int64_t)get(i);
     }
     out << " ... ";
-    for (int64_t i = length_ - 6;  i < length_;  i++) {
-      if (i != length_ - 6) {
+    for (int64_t i = length_ - 5;  i < length_;  i++) {
+      if (i != length_ - 5) {
         out << " ";
       }
-      out << get(i);
+      out << (int64_t)get(i);
     }
   }
   out << "]\" at=\"0x";

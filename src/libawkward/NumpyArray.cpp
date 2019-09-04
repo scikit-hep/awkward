@@ -59,6 +59,33 @@ void NumpyArray::setid() {
   setid(newid);
 }
 
+template <typename T>
+void tostring_as(std::stringstream& out, T* ptr, int64_t length) {
+  if (length <= 10) {
+    for (int64_t i = 0;  i < length;  i++) {
+      if (i != 0) {
+        out << " ";
+      }
+      out << ptr[i];
+    }
+  }
+  else {
+    for (int64_t i = 0;  i < 5;  i++) {
+      if (i != 0) {
+        out << " ";
+      }
+      out << ptr[i];
+    }
+    out << " ... ";
+    for (int64_t i = length - 5;  i < length;  i++) {
+      if (i != length - 5) {
+        out << " ";
+      }
+      out << ptr[i];
+    }
+  }
+}
+
 const std::string NumpyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
   assert(!isscalar());
   std::stringstream out;
@@ -81,28 +108,50 @@ const std::string NumpyArray::tostring_part(const std::string indent, const std:
     out << "\" ";
   }
   out << "data=\"";
-  ssize_t len = bytelength();
-  if (len <= 32) {
-    for (ssize_t i = 0;  i < len;  i++) {
-      if (i != 0  &&  i % 4 == 0) {
-        out << " ";
-      }
-      out << std::hex << std::setw(2) << std::setfill('0') << int(getbyte(i));
-    }
+#ifdef _MSC_VER
+  if (ndim() == 1  &&  format_.compare("l") == 0) {
+#else
+  if (ndim() == 1  &&  format_.compare("i") == 0) {
+#endif
+    tostring_as<int32_t>(out, reinterpret_cast<int32_t*>(byteptr()), length());
+  }
+#ifdef _MSC_VER
+  else if (ndim() == 1  &&  format_.compare("q") == 0) {
+#else
+  else if (ndim() == 1  &&  format_.compare("l") == 0) {
+#endif
+    tostring_as<int64_t>(out, reinterpret_cast<int64_t*>(byteptr()), length());
+  }
+  else if (ndim() == 1  &&  format_.compare("f") == 0) {
+    tostring_as<float>(out, reinterpret_cast<float*>(byteptr()), length());
+  }
+  else if (ndim() == 1  &&  format_.compare("d") == 0) {
+    tostring_as<double>(out, reinterpret_cast<double*>(byteptr()), length());
   }
   else {
-    for (ssize_t i = 0;  i < 16;  i++) {
-      if (i != 0  &&  i % 4 == 0) {
-        out << " ";
+    ssize_t len = bytelength();
+    if (len <= 32) {
+      for (ssize_t i = 0;  i < len;  i++) {
+        if (i != 0  &&  i % 4 == 0) {
+          out << " ";
+        }
+        out << std::hex << std::setw(2) << std::setfill('0') << int(getbyte(i));
       }
-      out << std::hex << std::setw(2) << std::setfill('0') << int(getbyte(i));
     }
-    out << " ... ";
-    for (ssize_t i = len - 16;  i < len;  i++) {
-      if (i != len - 16  &&  i % 4 == 0) {
-        out << " ";
+    else {
+      for (ssize_t i = 0;  i < 16;  i++) {
+        if (i != 0  &&  i % 4 == 0) {
+          out << " ";
+        }
+        out << std::hex << std::setw(2) << std::setfill('0') << int(getbyte(i));
       }
-      out << std::hex << std::setw(2) << std::setfill('0') << int(getbyte(i));
+      out << " ... ";
+      for (ssize_t i = len - 16;  i < len;  i++) {
+        if (i != len - 16  &&  i % 4 == 0) {
+          out << " ";
+        }
+        out << std::hex << std::setw(2) << std::setfill('0') << int(getbyte(i));
+      }
     }
   }
   out << "\" at=\"0x";

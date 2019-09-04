@@ -481,6 +481,7 @@ PYBIND11_MODULE(layout, m) {
   m.attr("__version__") = "dev";
 #endif
 
+  make_IndexOf<uint8_t>(m, "Index8");
   make_IndexOf<int32_t>(m, "Index32");
   make_IndexOf<int64_t>(m, "Index64");
 
