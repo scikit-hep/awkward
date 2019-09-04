@@ -5,6 +5,14 @@
 
 #include "awkward/cpu-kernels/util.h"
 
+#ifdef _MSC_VER
+  #define PYBIND11_INT32_FORMAT "l"
+  #define PYBIND11_INT64_FORMAT "q"
+#else
+  #define PYBIND11_INT32_FORMAT "i"
+  #define PYBIND11_INT64_FORMAT "l"
+#endif
+
 namespace awkward {
   #define HANDLE_ERROR(err) { if (err != kNoError) { throw std::invalid_argument(err); } }
 

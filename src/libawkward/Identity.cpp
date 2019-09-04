@@ -21,7 +21,7 @@ const std::string IdentityOf<T>::tostring_part(const std::string indent, const s
     name = "Identity64";
   }
   out << indent << pre << "<" << name << " ref=\"" << ref() << "\" fieldloc=\"[";
-  for (ssize_t i = 0;  i < fieldloc().size();  i++) {
+  for (size_t i = 0;  i < fieldloc().size();  i++) {
     if (i != 0) {
       out << " ";
     }
