@@ -269,18 +269,18 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
 }
 
 const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry) const {
-  std::vector<ssize_t> shape = { carry.length() };
+  std::vector<ssize_t> shape = { (ssize_t)carry.length() };
   int64_t skip = itemsize_;
   if (shape_.size() != 0) {
     shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
     skip = strides_[0];
   }
   uint8_t* src = reinterpret_cast<uint8_t*>(ptr_.get());
-  uint8_t* dst = new uint8_t[carry.length()*skip];
+  uint8_t* dst = new uint8_t[(size_t)(carry.length()*skip)];
 
   if (head.get() == nullptr) {
     for (int64_t i = 0;  i < carry.length();  i++) {
-      std::memcpy(&dst[skip*i], &src[byteoffset_ + skip*carry.get(i)], skip);
+      std::memcpy(&dst[(size_t)(skip*i)], &src[(size_t)(byteoffset_ + skip*carry.get(i))], skip);
     }
     std::shared_ptr<uint8_t> ptr(dst, awkward::util::array_deleter<uint8_t>());
     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr, shape, shape2strides(shape, itemsize_), 0, itemsize_, format_));
@@ -288,7 +288,7 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
 
   else if (SliceAt* h = dynamic_cast<SliceAt*>(head.get())) {
     for (int64_t i = 0;  i < carry.length();  i++) {
-      std::memcpy(&dst[skip*i], &src[byteoffset_ + skip*(carry.get(i) + h->at())], skip);
+      std::memcpy(&dst[(size_t)(skip*i)], &src[(size_t)(byteoffset_ + skip*(carry.get(i) + h->at()))], skip);
     }
     std::shared_ptr<uint8_t> ptr(dst, awkward::util::array_deleter<uint8_t>());
     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr, shape, shape2strides(shape, itemsize_), 0, itemsize_, format_));
