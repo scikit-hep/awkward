@@ -74,5 +74,6 @@ def test_numpyarray_getitem():
     print("----------------------------------------------------")
     print(awkward1.tolist(a[(slice(1, 3), slice(2, 5))]))
     print(awkward1.tolist(b.getitem((slice(1, 3), slice(2, 5)))))
+    assert awkward1.tolist(a[(slice(1, 3), slice(2, 5))]) == awkward1.tolist(b.getitem((slice(1, 3), slice(2, 5))))
 
     # raise Exception

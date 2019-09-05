@@ -205,19 +205,6 @@ const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
   return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
 }
 
-#include <iostream>
-
-std::string stupid(std::vector<ssize_t> v) {
-  std::string out("[");
-  for (size_t i = 0;  i < v.size();  i++) {
-    if (i != 0) {
-      out += std::string(" ");
-    }
-    out += std::to_string(v[i]);
-  }
-  return out + std::string("]");
-}
-
 const std::vector<ssize_t> shape2strides(const std::vector<ssize_t>& shape, ssize_t itemsize) {
   std::vector<ssize_t> out;
   for (auto dim = shape.rbegin();  dim != shape.rend();  ++dim) {
@@ -276,7 +263,7 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
       else {
         NumpyArray* donearray = dynamic_cast<NumpyArray*>(done.get());
         std::vector<ssize_t> doneshape = donearray->shape();
-        std::vector<ssize_t> outshape({ nextcarry.length(), donearray->length() / nextcarry.length() });
+        std::vector<ssize_t> outshape({ (ssize_t)nextcarry.length(), (ssize_t)(donearray->length() / nextcarry.length()) });
         outshape.insert(outshape.end(), doneshape.begin() + 1, doneshape.end());
         return std::shared_ptr<Content>(new NumpyArray(Identity::none(), donearray->ptr(), outshape, shape2strides(outshape, itemsize_), donearray->byteoffset(), itemsize_, format_));
       }
