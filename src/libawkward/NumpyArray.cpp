@@ -271,14 +271,24 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
       if (donearray->length() == nextcarry.length()) {
         return done;
       }
-      else {
-        std::cout << "BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH" << std::endl;
-
+      else {   //  if (dynamic_cast<SliceAt*>(nexthead.get()) != nullptr) {
         std::vector<ssize_t> doneshape = donearray->shape();
         std::vector<ssize_t> outshape({ (ssize_t)nextcarry.length(), (ssize_t)(donearray->length() / nextcarry.length()) });
         outshape.insert(outshape.end(), doneshape.begin() + 1, doneshape.end());
         return std::shared_ptr<Content>(new NumpyArray(Identity::none(), donearray->ptr(), outshape, shape2strides(outshape, itemsize_), donearray->byteoffset(), itemsize_, format_));
       }
+      // else {
+      //   std::cout << "WTF " << nextcarry.length() << " " << donearray->length() << std::endl;
+      //   std::vector<ssize_t> doneshape = donearray->shape();
+      //   std::cout << "doneshape " << doneshape.size() << std::endl;
+      //   for (int i = 0;  i < doneshape.size();  i++) {
+      //     std::cout << "doneshape[" << i << "] " << doneshape[i] << std::endl;
+      //   }
+      //
+      //   std::vector<ssize_t> outshape({ (ssize_t)nextcarry.length(), (ssize_t)donearray->length() });
+      //   outshape.insert(outshape.end(), doneshape.begin() + 1, doneshape.end());
+      //   return std::shared_ptr<Content>(new NumpyArray(Identity::none(), donearray->ptr(), outshape, shape2strides(outshape, itemsize_), donearray->byteoffset(), itemsize_, format_));
+      // }
     }
   }
 
@@ -302,6 +312,7 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
     uint8_t* dst = new uint8_t[(size_t)(carry.length()*skip*copylen)];
 
     for (int64_t i = 0;  i < carry.length();  i++) {
+      std::cout << "COPYING " << skip << "*" << carry.get(i) << " = " << skip*carry.get(i) << " for " << copylen << " which is " << *reinterpret_cast<int64_t*>(&src[(size_t)(byteoffset_ + skip*carry.get(i))]) << std::endl;
       std::memcpy(&dst[(size_t)(skip*copylen*i)], &src[(size_t)(byteoffset_ + skip*carry.get(i))], skip*copylen);
     }
     std::shared_ptr<uint8_t> ptr(dst, awkward::util::array_deleter<uint8_t>());
@@ -338,14 +349,16 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
     //     k++;
     //   }
     // }
-    int64_t step = shape_product(std::vector<ssize_t>(shape_.begin() + 1, shape_.end()));
-    Index64 nextcarry(carry.length()*(h->stop() - h->start()));
-    int64_t k = 0;
+
+    // int64_t step = shape_[0];
+    Index64 nextcarry(carry.length());   // *(h->stop() - h->start())
+    // int64_t k = 0;
     for (int64_t i = 0;  i < carry.length();  i++) {
-      for (int64_t j = h->start();  j < h->stop();  j++) {
-        nextcarry.ptr().get()[k] = carry.ptr().get()[i] + j*step;
-        k++;
-      }
+      // for (int64_t j = h->start();  j < h->stop();  j++) {
+      //   nextcarry.ptr().get()[k] = carry.ptr().get()[i] + j*step;
+      //   k++;
+      // }
+      nextcarry.ptr().get()[i] = carry.ptr().get()[i] / 5;
     }
     std::cout << "carry " << carry.length() << std::endl;
     for (int i = 0;  i < carry.length();  i++) {
@@ -362,6 +375,11 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
     std::cout << "shape " << shape.size() << std::endl;
     for (int i = 0;  i < shape.size();  i++) {
       std::cout << "shape[" << i << "] " << shape[i] << std::endl;
+    }
+    std::vector<ssize_t> strides(shape2strides(shape, itemsize_));
+    std::cout << "strides " << strides.size() << std::endl;
+    for (int i = 0;  i < strides.size();  i++) {
+      std::cout << "strides[" << i << "] " << strides[i] << std::endl;
     }
 
     std::shared_ptr<Content> next(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset_, itemsize_, format_));
