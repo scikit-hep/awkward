@@ -329,7 +329,7 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
     Slice nexttail = tail.tail();
     Index64 nextcarry(carry.length()*(h->stop() - h->start()));
     int64_t k = 0;
-    for (int64_t i = 0;  i < nextcarry.length();  i++) {
+    for (int64_t i = 0;  i < carry.length();  i++) {
       for (int64_t j = 0;  j < h->stop() - h->start();  j++) {
         nextcarry.ptr().get()[k] = carry.ptr().get()[i] + h->start() + j;
         k++;
