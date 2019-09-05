@@ -52,10 +52,10 @@ def test_numpyarray_getitem():
                 print()
                 assert acut == bcut
 
-    # cuts = (slice(1, 3), 0)
-    # acut = awkward1.tolist(a[cuts])
-    # bcut = awkward1.tolist(b.getitem(cuts))
-    # print(acut)
-    # print(bcut)
+    cuts = (slice(1, 3), slice(0, 2))
+    acut = a[cuts]
+    bcut = b.getitem(cuts)
+    print(awkward1.tolist(acut), acut.shape)
+    print(awkward1.tolist(bcut), bcut.shape)
 
-    # raise Exception
+    raise Exception

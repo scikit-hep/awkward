@@ -272,6 +272,8 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
         return done;
       }
       else {
+        std::cout << "BLAH BLAH BLAH BLAH BLAH BLAH BLAH BLAH" << std::endl;
+
         std::vector<ssize_t> doneshape = donearray->shape();
         std::vector<ssize_t> outshape({ (ssize_t)nextcarry.length(), (ssize_t)(donearray->length() / nextcarry.length()) });
         outshape.insert(outshape.end(), doneshape.begin() + 1, doneshape.end());
@@ -328,15 +330,40 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
     }
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
+    // Index64 nextcarry(carry.length()*(h->stop() - h->start()));
+    // int64_t k = 0;
+    // for (int64_t i = 0;  i < carry.length();  i++) {
+    //   for (int64_t j = 0;  j < h->stop() - h->start();  j++) {
+    //     nextcarry.ptr().get()[k] = carry.ptr().get()[i] + h->start() + j;
+    //     k++;
+    //   }
+    // }
+    int64_t step = shape_product(std::vector<ssize_t>(shape_.begin() + 1, shape_.end()));
     Index64 nextcarry(carry.length()*(h->stop() - h->start()));
     int64_t k = 0;
     for (int64_t i = 0;  i < carry.length();  i++) {
-      for (int64_t j = 0;  j < h->stop() - h->start();  j++) {
-        nextcarry.ptr().get()[k] = carry.ptr().get()[i] + h->start() + j;
+      for (int64_t j = h->start();  j < h->stop();  j++) {
+        nextcarry.ptr().get()[k] = carry.ptr().get()[i] + j*step;
         k++;
       }
     }
-    std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+    std::cout << "carry " << carry.length() << std::endl;
+    for (int i = 0;  i < carry.length();  i++) {
+      std::cout << "carry[" << i << "] " << carry.ptr().get()[i] << std::endl;
+    }
+    std::cout << "nextcarry " << nextcarry.length() << std::endl;
+    for (int i = 0;  i < nextcarry.length();  i++) {
+      std::cout << "nextcarry[" << i << "] " << nextcarry.ptr().get()[i] << std::endl;
+    }
+
+    std::vector<ssize_t> shape({ (ssize_t)(h->stop() - h->start()) });
+    shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+
+    std::cout << "shape " << shape.size() << std::endl;
+    for (int i = 0;  i < shape.size();  i++) {
+      std::cout << "shape[" << i << "] " << shape[i] << std::endl;
+    }
+
     std::shared_ptr<Content> next(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset_, itemsize_, format_));
     return next.get()->getitem_next(nexthead, nexttail, nextcarry);
   }
