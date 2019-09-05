@@ -269,7 +269,17 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
         nextcarry.ptr().get()[i] = step*i;
       }
       std::shared_ptr<Content> next(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
-      return next.get()->getitem_next(nexthead, nexttail, nextcarry);
+      std::shared_ptr<Content> done = next.get()->getitem_next(nexthead, nexttail, nextcarry);
+      if (dynamic_cast<SliceAt*>(nexthead.get()) != nullptr) {
+        return done;
+      }
+      else {
+        NumpyArray* donearray = dynamic_cast<NumpyArray*>(done.get());
+        std::vector<ssize_t> doneshape = donearray->shape();
+        std::vector<ssize_t> outshape({ nextcarry.length(), donearray->length() / nextcarry.length() });
+        outshape.insert(outshape.end(), doneshape.begin() + 1, doneshape.end());
+        return std::shared_ptr<Content>(new NumpyArray(Identity::none(), donearray->ptr(), outshape, shape2strides(outshape, itemsize_), donearray->byteoffset(), itemsize_, format_));
+      }
     }
   }
 
@@ -312,9 +322,22 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
   }
 
   else if (SliceStartStop* h = dynamic_cast<SliceStartStop*>(head.get())) {
-    std::cout << "SliceStartStop" << std::endl;
-
-    throw std::runtime_error("FIXME");
+    if (isscalar()) {
+      throw std::invalid_argument("too many dimensions in index for this array");
+    }
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    Index64 nextcarry(carry.length()*(h->stop() - h->start()));
+    int64_t k = 0;
+    for (int64_t i = 0;  i < nextcarry.length();  i++) {
+      for (int64_t j = 0;  j < h->stop() - h->start();  j++) {
+        nextcarry.ptr().get()[k] = carry.ptr().get()[i] + h->start() + j;
+        k++;
+      }
+    }
+    std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+    std::shared_ptr<Content> next(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset_, itemsize_, format_));
+    return next.get()->getitem_next(nexthead, nexttail, nextcarry);
   }
 
   else {
@@ -325,121 +348,6 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
 
 
 
-// const std::shared_ptr<Content> NumpyArray::getitem(Slice& slice) const {
-//   std::shared_ptr<SliceItem> head = slice.head();
-//   Slice tail = slice.tail();
-//   return getitem_next(head, tail, std::shared_ptr<Index>(nullptr));
-// }
-//
-// const std::shared_ptr<Content> NumpyArray::getitem_next(std::shared_ptr<SliceItem> head, Slice& tail, std::shared_ptr<Index> carry) const {
-//   assert(!isscalar());
-//   if (head.get() == nullptr) {
-//     return shallow_copy();
-//   }
-//   else if (SliceAt* x = dynamic_cast<SliceAt*>(head.get())) {
-//     if (carry.get() == nullptr) {
-//       int64_t at = x->at();
-//       if (at < 0) {
-//         at += length();
-//       }
-//       if (at < 0  ||  at >= length()) {
-//         throw std::invalid_argument("integer index out of range");
-//       }
-//       ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
-//       const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
-//       const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
-//       std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, strides, byteoffset, itemsize_, format_));
-//       std::shared_ptr<SliceItem> nexthead = tail.head();
-//       Slice nexttail = tail.tail();
-//       return next.get()->getitem_next(nexthead, nexttail, std::shared_ptr<Index>(nullptr));
-//     }
-//     else if (Index32* carry32 = dynamic_cast<Index32*>(carry.get())) {
-//       ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
-//       std::vector<ssize_t> shape;
-//       shape.push_back(carry32->length());
-//       shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-//       std::vector<ssize_t> strides;
-//       if (strides_.size() == 1) {
-//         strides.push_back(carry32->length()*itemsize_);
-//       }
-//       else {
-//         strides.push_back(carry32->length()*strides_[1]);
-//       }
-//       uint8_t* ptr = new uint8_t[(size_t)length];
-//
-//       std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), std::shared_ptr<void>(ptr, awkward::util::array_deleter<void>()), ...));
-//
-//
-//
-//     }
-//   }
-//   else if (SliceStartStop* x = dynamic_cast<SliceStartStop*>(head.get())) {
-//     int64_t start = x->start();
-//     if (start == Slice::none()) {
-//       start = 0;
-//     }
-//     if (start < 0) {
-//       start += length();
-//     }
-//     if (start < 0) {
-//       start = 0;
-//     }
-//     if (start > length()) {
-//       start = length();
-//     }
-//     int64_t stop = x->stop();
-//     if (stop == Slice::none()) {
-//       stop = length();
-//     }
-//     if (stop < 0) {
-//       stop += length();
-//     }
-//     if (stop < 0) {
-//       stop = 0;
-//     }
-//     if (stop > length()) {
-//       stop = length();
-//     }
-//     // ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
-//     // std::vector<ssize_t> shape;
-//     // shape.push_back((ssize_t)(stop - start));
-//     // shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-//     // std::shared_ptr<Identity> id(nullptr);
-//     // if (id_.get() != nullptr) {
-//     //   id = id_.get()->slice(start, stop);
-//     // }
-//     // return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
-//
-//     std::vector<ssize_t> shape;
-//     for (size_t i = 1;  i < shape_.size();  i++) {
-//       if (i == 1) {
-//         shape.push_back(shape_[i] * (stop - start));
-//       }
-//       else {
-//         shape.push_back(shape_[i]);
-//       }
-//     }
-//
-//     std::cout << "before " << stupid(shape_) << " after " << stupid(shape) << std::endl;
-//
-//     std::vector<ssize_t> strides;
-//     strides.insert(strides.end(), strides_.begin() + 1, strides_.end());
-//     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
-//
-//     Index32 nextcarry(stop - start);
-//     int32_t* carryptr = nextcarry.ptr().get();
-//     for (int64_t i = 0;  i < (stop - start);  i++) {
-//       carryptr[i] = shape_[1]*i;
-//       std::cout << "and " << carryptr[i] << std::endl;
-//     }
-//     std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, strides, byteoffset, itemsize_, format_));
-//
-//     std::shared_ptr<SliceItem> nexthead = tail.head();
-//     Slice nexttail = tail.tail();
-//     return next.get()->getitem_next(nexthead, nexttail, nextcarry.shallow_copy());
-//     return next;
-//
-//   }
 //   else if (SliceStartStopStep* x = dynamic_cast<SliceStartStopStep*>(head.get())) {
 //     throw std::runtime_error("not implemented");
 //   }
