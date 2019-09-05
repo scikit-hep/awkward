@@ -57,6 +57,10 @@ def test_numpyarray_getitem():
     # print(awkward1.tolist(a[1:3]))
     # print((b.getitem((slice(1, 3), 2))))
 
+    print(awkward1.tolist(a[(slice(1, 3),)]))
+    print(awkward1.tolist(b.getitem((slice(1, 3),))))
+    assert awkward1.tolist(a[(slice(1, 3),)]) == awkward1.tolist(b.getitem((slice(1, 3),)))
+
     print(awkward1.tolist(a[(slice(1, 3), 2)]))
     print(awkward1.tolist(b.getitem((slice(1, 3), 2))))
     assert awkward1.tolist(a[(slice(1, 3), 2)]) == awkward1.tolist(b.getitem((slice(1, 3), 2)))
@@ -64,7 +68,6 @@ def test_numpyarray_getitem():
     print("----------------------------------------------------")
     print(awkward1.tolist(a[(2, slice(1, 3))]))
     print(awkward1.tolist(b.getitem((2, slice(1, 3)))))
-
     assert awkward1.tolist(a[(2, slice(1, 3))]) == awkward1.tolist(b.getitem((2, slice(1, 3))))
 
-    # raise Exception
+    raise Exception

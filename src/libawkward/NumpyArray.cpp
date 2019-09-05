@@ -239,28 +239,38 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
   }
 
   else if (SliceAt* h = dynamic_cast<SliceAt*>(head.get())) {
+    if (isscalar()) {
+      throw std::invalid_argument("too many dimensions in index for this array");
+    }
     std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)h->at());
-    std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
-
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
+    std::shared_ptr<Content> next(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
     return next.get()->getitem_next(nexthead, nexttail);
   }
 
   else if (SliceStartStop* h = dynamic_cast<SliceStartStop*>(head.get())) {
+    if (isscalar()) {
+      throw std::invalid_argument("too many dimensions in index for this array");
+    }
     std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)h->start());
-    std::shared_ptr<Content> next = std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
-
-    std::shared_ptr<SliceItem> nexthead = tail.head();
-    Slice nexttail = tail.tail();
-    Index64 nextcarry(h->stop() - h->start());
-    int64_t step = (shape_.size() == 1 ? 1 : (int64_t)shape_[1]);
-    for (int64_t i = 0;  i < nextcarry.length();  i++) {
-      nextcarry.ptr().get()[i] = step*i;
+    if (tail.length() == 0) {
+      shape.insert(shape.begin(), (ssize_t)(h->stop() - h->start()));
+      return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
     }
-    return next.get()->getitem_next(nexthead, nexttail, nextcarry);
+    else {
+      std::shared_ptr<SliceItem> nexthead = tail.head();
+      Slice nexttail = tail.tail();
+      Index64 nextcarry(h->stop() - h->start());
+      int64_t step = (shape_.size() == 1 ? 1 : (int64_t)shape_[1]);
+      for (int64_t i = 0;  i < nextcarry.length();  i++) {
+        nextcarry.ptr().get()[i] = step*i;
+      }
+      std::shared_ptr<Content> next(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
+      return next.get()->getitem_next(nexthead, nexttail, nextcarry);
+    }
   }
 
   else {
@@ -269,16 +279,16 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
 }
 
 const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry) const {
-  std::vector<ssize_t> shape = { (ssize_t)carry.length() };
-  int64_t skip = itemsize_;
-  if (shape_.size() != 0) {
-    shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-    skip = strides_[0];
-  }
-  uint8_t* src = reinterpret_cast<uint8_t*>(ptr_.get());
-  uint8_t* dst = new uint8_t[(size_t)(carry.length()*skip)];
-
   if (head.get() == nullptr) {
+    std::vector<ssize_t> shape = { (ssize_t)carry.length() };
+    int64_t skip = itemsize_;
+    if (shape_.size() != 0) {
+      shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+      skip = strides_[0];
+    }
+    uint8_t* src = reinterpret_cast<uint8_t*>(ptr_.get());
+    uint8_t* dst = new uint8_t[(size_t)(carry.length()*skip)];
+
     for (int64_t i = 0;  i < carry.length();  i++) {
       std::memcpy(&dst[(size_t)(skip*i)], &src[(size_t)(byteoffset_ + skip*carry.get(i))], skip);
     }
@@ -287,11 +297,18 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
   }
 
   else if (SliceAt* h = dynamic_cast<SliceAt*>(head.get())) {
-    for (int64_t i = 0;  i < carry.length();  i++) {
-      std::memcpy(&dst[(size_t)(skip*i)], &src[(size_t)(byteoffset_ + skip*(carry.get(i) + h->at()))], skip);
+    if (isscalar()) {
+      throw std::invalid_argument("too many dimensions in index for this array");
     }
-    std::shared_ptr<uint8_t> ptr(dst, awkward::util::array_deleter<uint8_t>());
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr, shape, shape2strides(shape, itemsize_), 0, itemsize_, format_));
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    Index64 nextcarry(carry.length());
+    for (int64_t i = 0;  i < nextcarry.length();  i++) {
+      nextcarry.ptr().get()[i] = carry.ptr().get()[i] + h->at();
+    }
+    std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+    std::shared_ptr<Content> next(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset_, itemsize_, format_));
+    return next.get()->getitem_next(nexthead, nexttail, nextcarry);
   }
 
   else if (SliceStartStop* h = dynamic_cast<SliceStartStop*>(head.get())) {
