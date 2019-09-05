@@ -214,11 +214,21 @@ const std::vector<ssize_t> shape2strides(const std::vector<ssize_t>& shape, ssiz
   return out;
 }
 
+ssize_t shape_product(const std::vector<ssize_t>& shape) {
+  ssize_t out = 1;
+  for (auto dim : shape) {
+    out *= dim;
+  }
+  return out;
+}
+
 const std::shared_ptr<Content> NumpyArray::getitem(const Slice& slice) const {
   std::shared_ptr<SliceItem> head = slice.head();
   Slice tail = slice.tail();
   return getitem_next(head, tail);
 }
+
+#include <iostream>
 
 const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail) const {
   if (head.get() == nullptr) {
@@ -251,17 +261,17 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
       std::shared_ptr<SliceItem> nexthead = tail.head();
       Slice nexttail = tail.tail();
       Index64 nextcarry(h->stop() - h->start());
-      int64_t step = (shape_.size() == 1 ? 1 : (int64_t)shape_[1]);
+      int64_t step = shape_product(std::vector<ssize_t>(shape_.begin() + 1, shape_.end())); //(shape_.size() == 1 ? 1 : (int64_t)shape_[1]);
       for (int64_t i = 0;  i < nextcarry.length();  i++) {
         nextcarry.ptr().get()[i] = step*i;
       }
       std::shared_ptr<Content> next(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset, itemsize_, format_));
       std::shared_ptr<Content> done = next.get()->getitem_next(nexthead, nexttail, nextcarry);
-      if (dynamic_cast<SliceAt*>(nexthead.get()) != nullptr) {
+      NumpyArray* donearray = dynamic_cast<NumpyArray*>(done.get());
+      if (donearray->length() == nextcarry.length()) {
         return done;
       }
       else {
-        NumpyArray* donearray = dynamic_cast<NumpyArray*>(done.get());
         std::vector<ssize_t> doneshape = donearray->shape();
         std::vector<ssize_t> outshape({ (ssize_t)nextcarry.length(), (ssize_t)(donearray->length() / nextcarry.length()) });
         outshape.insert(outshape.end(), doneshape.begin() + 1, doneshape.end());
@@ -277,17 +287,20 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
 
 const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry) const {
   if (head.get() == nullptr) {
-    std::vector<ssize_t> shape = { (ssize_t)carry.length() };
+    std::vector<ssize_t> shape = { 0 };   // reassigned below
     int64_t skip = itemsize_;
+    int64_t copylen = 1;
     if (shape_.size() != 0) {
       shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
       skip = strides_[0];
+      copylen = shape_[0];
     }
+    shape[0] = carry.length()*copylen;
     uint8_t* src = reinterpret_cast<uint8_t*>(ptr_.get());
-    uint8_t* dst = new uint8_t[(size_t)(carry.length()*skip)];
+    uint8_t* dst = new uint8_t[(size_t)(carry.length()*skip*copylen)];
 
     for (int64_t i = 0;  i < carry.length();  i++) {
-      std::memcpy(&dst[(size_t)(skip*i)], &src[(size_t)(byteoffset_ + skip*carry.get(i))], skip);
+      std::memcpy(&dst[(size_t)(skip*copylen*i)], &src[(size_t)(byteoffset_ + skip*carry.get(i))], skip*copylen);
     }
     std::shared_ptr<uint8_t> ptr(dst, awkward::util::array_deleter<uint8_t>());
     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr, shape, shape2strides(shape, itemsize_), 0, itemsize_, format_));
@@ -300,8 +313,9 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     Index64 nextcarry(carry.length());
+    int64_t skip = (shape_.size() > 1 ? shape_[1] : 1);
     for (int64_t i = 0;  i < nextcarry.length();  i++) {
-      nextcarry.ptr().get()[i] = carry.ptr().get()[i] + h->at();
+      nextcarry.ptr().get()[i] = carry.ptr().get()[i] + skip*h->at();
     }
     std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
     std::shared_ptr<Content> next(new NumpyArray(Identity::none(), ptr_, shape, shape2strides(shape, itemsize_), byteoffset_, itemsize_, format_));
