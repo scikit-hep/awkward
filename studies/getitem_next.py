@@ -87,8 +87,23 @@ class NumpyArray:
     def getitem_next_carry(self, head, tail, carry):
         if head == ():
             # this is correct for slice2 -> int
+            # chunksize = shape_product(self.shape[1:])
+            # ptr = numpy.full(len(carry)*chunksize, 999)
+            # for i, x in enumerate(carry):
+            #     ptr[i*chunksize : (i + 1)*chunksize] = self.ptr[self.offset + x*chunksize : self.offset + (x + 1)*chunksize]
+            # return NumpyArray(ptr, (len(carry),) + self.shape[1:], 0)
+
             # this is correct for slice2 -> int -> int
+
+            print("head ", head)
+            print("self ", self.tolist())
+            print("carry", carry)
+            print("this ", numpy.array(self.tolist())[carry])
+
+            print("shape", self.shape)
             chunksize = shape_product(self.shape[1:])
+            print("chunksize", chunksize)
+
             ptr = numpy.full(len(carry)*chunksize, 999)
             for i, x in enumerate(carry):
                 ptr[i*chunksize : (i + 1)*chunksize] = self.ptr[self.offset + x*chunksize : self.offset + (x + 1)*chunksize]
@@ -123,7 +138,7 @@ class NumpyArray:
             raise AssertionError
 
 # a = numpy.arange(7*5).reshape(7, 5)
-a = numpy.arange(7*5*6).reshape(7, 5, 6)
+a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
 # a = numpy.arange(7*5*6).reshape(6, 7, 5, 6)
 b = NumpyArray.fromarray(a)
 
