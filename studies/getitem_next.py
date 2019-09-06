@@ -6,6 +6,18 @@ import operator
 def shape_product(x):
     return functools.reduce(operator.mul, x, 1)
 
+def shape_innersize(x):
+    if len(x) < 2:
+        return 1
+    else:
+        return x[1]
+
+def shape_flatten(x):
+    if len(x) < 2:
+        return x
+    else:
+        return (x[0]*x[1],) + x[2:]
+
 def head_tail(x):
     head = () if len(x) == 0 else x[0]
     tail = x[1:]
@@ -74,6 +86,8 @@ class NumpyArray:
 
     def getitem_next_carry(self, head, tail, carry):
         if head == ():
+            # this is correct for slice2 -> int
+            # this is correct for slice2 -> int -> int
             chunksize = shape_product(self.shape[1:])
             ptr = numpy.full(len(carry)*chunksize, 999)
             for i, x in enumerate(carry):
@@ -81,9 +95,18 @@ class NumpyArray:
             return NumpyArray(ptr, (len(carry),) + self.shape[1:], 0)
 
         elif isinstance(head, int):
-            nextcarry = [x + head for x in carry]
+            # this is correct for slice2 -> int
+            # nexthead, nexttail = head_tail(tail)
+            # nextcarry = [x + head for x in carry]
+            # return self.getitem_next_carry(nexthead, nexttail, nextcarry)
+
+            # this is correct for slice2 -> int -> int
             nexthead, nexttail = head_tail(tail)
-            return self.getitem_next_carry(nexthead, nexttail, nextcarry)
+            innersize = shape_innersize(self.shape)
+            nextcarry = [(x + head)*innersize for x in carry]
+            nextshape = shape_flatten(self.shape)
+            next = NumpyArray(self.ptr, nextshape, self.offset)
+            return next.getitem_next_carry(nexthead, nexttail, nextcarry)
 
         elif isinstance(head, slice) and head.step is None:
             length = head.stop - head.start
@@ -104,13 +127,20 @@ a = numpy.arange(7*5*6).reshape(7, 5, 6)
 # a = numpy.arange(7*5*6).reshape(6, 7, 5, 6)
 b = NumpyArray.fromarray(a)
 
-for depth in 1, 2:
-    for cuts in itertools.permutations((0, 1, 2, slice(0, 2), slice(1, 3), slice(1, 4)), depth):
-        print(cuts)
-        acut = a[cuts].tolist()
-        bcut = b[cuts].tolist()
-        print(acut)
-        print(bcut)
-        print()
-        assert acut == bcut
+print(a[slice(2, 5), 1, 2].tolist())
+print(b[slice(2, 5), 1, 2].tolist())
+
+
+
+
+
+# for depth in 1, 2:
+#     for cuts in itertools.permutations((0, 1, 2, slice(0, 2), slice(1, 3), slice(1, 4)), depth):
+#         print(cuts)
+#         acut = a[cuts].tolist()
+#         bcut = b[cuts].tolist()
+#         print(acut)
+#         print(bcut)
+#         print()
+#         assert acut == bcut
 
