@@ -89,8 +89,8 @@ class NumpyArray:
                 stops[i]  = (i + 1)*innersize
 
             next = NumpyArray(self.ptr, nextshape, self.offset + head.start*shape_product(self.shape[1:]))
-            out = next.getitem_next_carry(nexthead, nexttail, starts, stops)
-            if len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail):
+            out = next.getitem_next_carry(nexthead, nexttail, starts, stops, False)
+            if len(self.shape[1:]) == sum(1 if isinstance(x, (int, numpy.ndarray)) else 0 for x in tail):
                 return out
             else:
                 outshape = shape_unflatten(out.shape, len(starts))
@@ -111,8 +111,8 @@ class NumpyArray:
                 stops[i]  = (head[i] + 1)*innersize
 
             next = NumpyArray(self.ptr, nextshape, self.offset)
-            out = next.getitem_next_carry(nexthead, nexttail, starts, stops)
-            if len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail):
+            out = next.getitem_next_carry(nexthead, nexttail, starts, stops, True)
+            if len(self.shape[1:]) == sum(1 if isinstance(x, (int, numpy.ndarray)) else 0 for x in tail):
                 return out
             else:
                 outshape = shape_unflatten(out.shape, len(starts))
@@ -121,7 +121,7 @@ class NumpyArray:
         else:
             raise AssertionError
 
-    def getitem_next_carry(self, head, tail, starts, stops):
+    def getitem_next_carry(self, head, tail, starts, stops, advanced):
         nexthead, nexttail = head_tail(tail)
 
         if isinstance(head, tuple) and len(head) == 0:
@@ -154,7 +154,7 @@ class NumpyArray:
                 nextstops[i]  = (starts[i] + head + 1)*innersize
 
             next = NumpyArray(self.ptr, self.shape[1:], self.offset)
-            return next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops)
+            return next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops, advanced)
 
         elif isinstance(head, slice) and head.step is None:
             if len(self.shape) == 0:
@@ -175,8 +175,8 @@ class NumpyArray:
                     k += 1
 
             next = NumpyArray(self.ptr, nextshape, self.offset)
-            out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops)
-            if len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail):
+            out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops, advanced)
+            if len(self.shape[1:]) == sum(1 if isinstance(x, (int, numpy.ndarray)) else 0 for x in tail):
                 return out
             else:
                 outshape = shape_unflatten(out.shape, len(nextstarts))
@@ -187,19 +187,27 @@ class NumpyArray:
                 raise IndexError("too many indices for array")
             innersize = shape_innersize(self.shape)
             nextshape = shape_flatten(self.shape)
-            count = len(head)
-            nextstarts = numpy.full(len(starts)*count, 999)
-            nextstops  = numpy.full(len(starts)*count, 999)
-            k = 0
-            for i in range(len(starts)):
-                for j in range(count):
-                    nextstarts[k] = (starts[i] + head[j])*innersize
-                    nextstops[k]  = (starts[i] + head[j] + 1)*innersize
-                    k += 1
+            if advanced:
+                nextstarts = numpy.full(len(starts), 999)
+                nextstops  = numpy.full(len(starts), 999)
+                for i in range(len(starts)):
+                    nextstarts[i] = (starts[i] + head[i])*innersize
+                    nextstops[i]  = (starts[i] + head[i] + 1)*innersize
+
+            else:
+                count = len(head)
+                nextstarts = numpy.full(len(starts)*count, 999)
+                nextstops  = numpy.full(len(starts)*count, 999)
+                k = 0
+                for i in range(len(starts)):
+                    for j in range(count):
+                        nextstarts[k] = (starts[i] + head[j])*innersize
+                        nextstops[k]  = (starts[i] + head[j] + 1)*innersize
+                        k += 1
 
             next = NumpyArray(self.ptr, nextshape, self.offset)
-            out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops)
-            if len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail):
+            out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops, advanced)
+            if len(self.shape[1:]) == sum(1 if isinstance(x, (int, numpy.ndarray)) else 0 for x in tail):
                 return out
             else:
                 outshape = shape_unflatten(out.shape, len(nextstarts))
@@ -230,7 +238,7 @@ class NumpyArray:
 a = numpy.arange(7*5).reshape(7, 5)
 b = NumpyArray.fromarray(a)
 print(a)
-cut = (slice(1, 3), numpy.array([3, 1, 1, 2]))
+cut = (numpy.array([0, 1]), 2)
 acut = a[cut]
 bcut = b[cut]
 print(acut.shape)
