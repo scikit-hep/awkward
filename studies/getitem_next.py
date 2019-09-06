@@ -5,13 +5,11 @@ import operator
 
 def condition1(self, tail):
     out = len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail)
-    print("condition1", out)
     return out
 
 def condition2(self, tail):
     out1 = len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail)
     out2 = any(isinstance(x, numpy.ndarray) for x in tail)
-    print("condition2", out1, out2)
     return out1 or out2
 
 def shape_product(x):
@@ -43,6 +41,21 @@ def head_tail(x):
     tail = x[1:]
     return head, tail
 
+def spread_tail(tail, count):
+    newtail = ()
+    for unspread in tail:
+        if not isinstance(unspread, numpy.ndarray):
+            newtail = newtail + (unspread,)
+        else:
+            spread = numpy.full(len(unspread)*count, 999)
+            k = 0
+            for i in range(len(unspread)):
+                for j in range(count):
+                    spread[k] = unspread[i]
+                    k += 1
+            newtail = newtail + (spread,)
+    return newtail
+
 class NumpyArray:
     @classmethod
     def fromarray(cls, array):
@@ -70,19 +83,21 @@ class NumpyArray:
         return self.getitem_next(head, tail)
 
     def getitem_next(self, head, tail):
-        nexthead, nexttail = head_tail(tail)
-
         if isinstance(head, tuple) and len(head) == 0:
+            # print("null")
             return self
 
         elif isinstance(head, int):
+            # print("int")
             if len(self.shape) == 0:
                 raise IndexError("too many indices for array")
             assert 0 <= head < self.shape[0]
             next = NumpyArray(self.ptr, self.shape[1:], self.offset + head*shape_product(self.shape[1:]))
+            nexthead, nexttail = head_tail(tail)
             return next.getitem_next(nexthead, nexttail)
 
         elif isinstance(head, slice) and head.step is None:
+            # print("slice2")
             if len(self.shape) == 0:
                 raise IndexError("too many indices for array")
             assert head.stop > head.start
@@ -102,6 +117,12 @@ class NumpyArray:
                 starts[i] = (i)*innersize
                 stops[i]  = (i + 1)*innersize
 
+            # print(" starts", starts)
+            # print("   tail", tail)
+            # newtail = spread_tail(tail, count)
+            # print("newtail", newtail)
+            nexthead, nexttail = head_tail(tail)   # newtail
+
             next = NumpyArray(self.ptr, nextshape, self.offset + head.start*shape_product(self.shape[1:]))
             out = next.getitem_next_carry(nexthead, nexttail, starts, stops, False)
             if condition1(self, tail):
@@ -111,6 +132,7 @@ class NumpyArray:
                 return NumpyArray(out.ptr, outshape, out.offset)
 
         elif isinstance(head, numpy.ndarray) and issubclass(head.dtype.type, numpy.integer) and len(head.shape) == 1:
+            # print("array")
             if len(self.shape) == 0:
                 raise IndexError("too many indices for array")
 
@@ -125,6 +147,7 @@ class NumpyArray:
                 stops[i]  = (head[i] + 1)*innersize
 
             next = NumpyArray(self.ptr, nextshape, self.offset)
+            nexthead, nexttail = head_tail(tail)
             out = next.getitem_next_carry(nexthead, nexttail, starts, stops, True)
             if condition2(self, tail):
                 return out
@@ -137,6 +160,7 @@ class NumpyArray:
 
     def getitem_next_carry(self, head, tail, starts, stops, advanced):
         if isinstance(head, tuple) and len(head) == 0:
+            # print("carry null", starts)
             deepsize = shape_deepsize(self.shape)
             length = sum((stop - start) for start, stop in zip(starts, stops))
             deeplength = deepsize*length
@@ -155,6 +179,7 @@ class NumpyArray:
             return NumpyArray(ptr, (length,) + self.shape[1:], 0)
 
         elif isinstance(head, int):
+            # print("carry int", starts)
             if len(self.shape) == 0:
                 raise IndexError("too many indices for array")
             innersize = shape_innersize(self.shape)
@@ -170,6 +195,7 @@ class NumpyArray:
             return next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops, advanced)
 
         elif isinstance(head, slice) and head.step is None:
+            # print("carry slice2", starts)
             if len(self.shape) == 0:
                 raise IndexError("too many indices for array")
             assert head.stop > head.start
@@ -187,25 +213,8 @@ class NumpyArray:
                     nextstops[k]  = (starts[i] + head.start + j + 1)*innersize
                     k += 1
 
-            print("HERE", tail)
-
-            newtail = ()
-            for unspread in tail:
-                if not isinstance(unspread, numpy.ndarray):
-                    newtail = newtail + (unspread,)
-                else:
-                    spread = numpy.full(len(unspread)*count, 999)
-                    k = 0
-                    for i in range(len(unspread)):
-                        for j in range(count):
-                            spread[k] = unspread[i]
-                            k += 1
-                    newtail = newtail + (spread,)
-                    print("head    ", head)
-                    print("unspread", unspread)
-                    print("  spread", spread)
-
-            nexthead, nexttail = head_tail(newtail)
+            # newtail = spread_tail(tail, count)
+            nexthead, nexttail = head_tail(tail)   # newtail
 
             next = NumpyArray(self.ptr, nextshape, self.offset)
             out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops, advanced)
@@ -216,19 +225,21 @@ class NumpyArray:
                 return NumpyArray(out.ptr, outshape, out.offset)
 
         elif isinstance(head, numpy.ndarray) and issubclass(head.dtype.type, numpy.integer) and len(head.shape) == 1:
+            # print("carry array", starts)
             if len(self.shape) == 0:
                 raise IndexError("too many indices for array")
             innersize = shape_innersize(self.shape)
             nextshape = shape_flatten(self.shape)
             if advanced:
-                print(numpy.vstack((starts, stops)))
-                print(head)
-
+                # print("starts", starts)
+                # print("head  ", head)
                 nextstarts = numpy.full(len(starts), 999)
                 nextstops  = numpy.full(len(starts), 999)
                 for i in range(len(starts)):
                     nextstarts[i] = (starts[i] + head[i])*innersize
                     nextstops[i]  = (starts[i] + head[i] + 1)*innersize
+
+                # newtail = tail
 
             else:
                 count = len(head)
@@ -241,8 +252,11 @@ class NumpyArray:
                         nextstops[k]  = (starts[i] + head[j] + 1)*innersize
                         k += 1
 
+                # newtail = spread_tail(tail, count)
+
+            nexthead, nexttail = head_tail(tail)   # newtail
+
             next = NumpyArray(self.ptr, nextshape, self.offset)
-            nexthead, nexttail = head_tail(tail)
             out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops, True)
             if condition2(self, tail):
                 return out
@@ -253,24 +267,24 @@ class NumpyArray:
         else:
             raise AssertionError
 
-# # a = numpy.arange(7*5).reshape(7, 5)
-# # a = numpy.arange(7*5*6).reshape(7, 5, 6)
-# a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
-# b = NumpyArray.fromarray(a)
+# a = numpy.arange(7*5).reshape(7, 5)
+# a = numpy.arange(7*5*6).reshape(7, 5, 6)
+a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
+b = NumpyArray.fromarray(a)
 
-# # for depth in 1, 2:
-# #     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# # for depth in 1, 2, 3:
-# #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# for depth in 1, 2, 3, 4:
-#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3), numpy.array([0, 1, 0])), depth):
-#         print(cuts)
-#         acut = a[cuts].tolist()
-#         bcut = b[cuts].tolist()
-#         print(acut)
-#         print(bcut)
-#         print()
-#         assert acut == bcut
+# for depth in 1, 2:
+#     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# for depth in 1, 2, 3:
+#     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+for depth in 1, 2, 3, 4:
+    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3)), depth):
+        print(cuts)
+        acut = a[cuts].tolist()
+        bcut = b[cuts].tolist()
+        print(acut)
+        print(bcut)
+        print()
+        assert acut == bcut
 
 # a = numpy.arange(7*5).reshape(7, 5)
 # b = NumpyArray.fromarray(a)
@@ -285,17 +299,17 @@ class NumpyArray:
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
 
-cut = (numpy.array([1, 2]), slice(0, 2), numpy.array([0, 2]))
-a = numpy.arange(7*5*6).reshape(7, 5, 6)
-b = NumpyArray.fromarray(a)
-acut = a[cut]
-bcut = b[cut]
-print(acut.shape)
-print(bcut.shape)
-print(acut.tolist())
-print(bcut.tolist())
-if acut.tolist() != bcut.tolist():
-    print("WRONG!!!")
+# cut = (slice(0, 2), numpy.array([0, 1, 2]), numpy.array([3, 4, 5]))
+# a = numpy.arange(7*5*6).reshape(7, 5, 6)
+# b = NumpyArray.fromarray(a)
+# acut = a[cut]
+# bcut = b[cut]
+# print(acut.shape)
+# print(bcut.shape)
+# print(acut.tolist())
+# print(bcut.tolist())
+# if acut.tolist() != bcut.tolist():
+#     print("WRONG!!!")
 
 # a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
 # b = NumpyArray.fromarray(a)
