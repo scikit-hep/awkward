@@ -58,7 +58,7 @@ class NumpyArray:
     def getitem_next(self, head, tail):
         nexthead, nexttail = head_tail(tail)
 
-        if head == ():
+        if isinstance(head, tuple) and len(head) == 0:
             return self
 
         elif isinstance(head, int):
@@ -75,6 +75,10 @@ class NumpyArray:
             assert 0 <= head.start <  self.shape[0]
             assert 0 <  head.stop  <= self.shape[0]
 
+            if len(tail) == 0:
+                # an optimization: no carry needed if this is the last slice
+                return NumpyArray(self.ptr, (head.stop - head.start,) + self.shape[1:], self.offset + head.start*shape_product(self.shape[1:]))
+
             innersize = shape_innersize(self.shape)
             nextshape = shape_flatten(self.shape)
             count = head.stop - head.start
@@ -86,7 +90,28 @@ class NumpyArray:
 
             next = NumpyArray(self.ptr, nextshape, self.offset + head.start*shape_product(self.shape[1:]))
             out = next.getitem_next_carry(nexthead, nexttail, starts, stops)
-            # if len(self.shape) > 1:   # and not isinstance(nexthead, int):
+            if len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail):
+                return out
+            else:
+                outshape = shape_unflatten(out.shape, len(starts))
+                return NumpyArray(out.ptr, outshape, out.offset)
+
+        elif isinstance(head, numpy.ndarray) and issubclass(head.dtype.type, numpy.integer) and len(head.shape) == 1:
+            if len(self.shape) == 0:
+                raise IndexError("too many indices for array")
+
+            innersize = shape_innersize(self.shape)
+            nextshape = shape_flatten(self.shape)
+            count = len(head)
+            starts = numpy.full(count, 999)
+            stops  = numpy.full(count, 999)
+            for i in range(count):
+                assert 0 <= head[i] < self.shape[0]
+                starts[i] = (head[i])*innersize
+                stops[i]  = (head[i] + 1)*innersize
+
+            next = NumpyArray(self.ptr, nextshape, self.offset)
+            out = next.getitem_next_carry(nexthead, nexttail, starts, stops)
             if len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail):
                 return out
             else:
@@ -99,7 +124,7 @@ class NumpyArray:
     def getitem_next_carry(self, head, tail, starts, stops):
         nexthead, nexttail = head_tail(tail)
 
-        if head == ():
+        if isinstance(head, tuple) and len(head) == 0:
             deepsize = shape_deepsize(self.shape)
             length = sum((stop - start) for start, stop in zip(starts, stops))
             deeplength = deepsize*length
@@ -151,51 +176,73 @@ class NumpyArray:
 
             next = NumpyArray(self.ptr, nextshape, self.offset)
             out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops)
-            # if len(self.shape) > 1:  #  and not isinstance(nexthead, int):
             if len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail):
                 return out
             else:
                 outshape = shape_unflatten(out.shape, len(nextstarts))
                 return NumpyArray(out.ptr, outshape, out.offset)
-            
+
+        elif isinstance(head, numpy.ndarray) and issubclass(head.dtype.type, numpy.integer) and len(head.shape) == 1:
+            if len(self.shape) == 0:
+                raise IndexError("too many indices for array")
+            innersize = shape_innersize(self.shape)
+            nextshape = shape_flatten(self.shape)
+            count = len(head)
+            nextstarts = numpy.full(len(starts)*count, 999)
+            nextstops  = numpy.full(len(starts)*count, 999)
+            k = 0
+            for i in range(len(starts)):
+                for j in range(count):
+                    nextstarts[k] = (starts[i] + head[j])*innersize
+                    nextstops[k]  = (starts[i] + head[j] + 1)*innersize
+                    k += 1
+
+            next = NumpyArray(self.ptr, nextshape, self.offset)
+            out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops)
+            if len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail):
+                return out
+            else:
+                outshape = shape_unflatten(out.shape, len(nextstarts))
+                return NumpyArray(out.ptr, outshape, out.offset)
+
         else:
             raise AssertionError
 
-# a = numpy.arange(7*5).reshape(7, 5)
-# a = numpy.arange(7*5*6).reshape(7, 5, 6)
-a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
+# # a = numpy.arange(7*5).reshape(7, 5)
+# # a = numpy.arange(7*5*6).reshape(7, 5, 6)
+# a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
+# b = NumpyArray.fromarray(a)
+
+# # for depth in 1, 2:
+# #     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# # for depth in 1, 2, 3:
+# #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# for depth in 1, 2, 3, 4:
+#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3)), depth):
+#         print(cuts)
+#         acut = a[cuts].tolist()
+#         bcut = b[cuts].tolist()
+#         print(acut)
+#         print(bcut)
+#         print()
+#         assert acut == bcut
+
+a = numpy.arange(7*5).reshape(7, 5)
 b = NumpyArray.fromarray(a)
-
-# for depth in 1, 2:
-#     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# for depth in 1, 2, 3:
-#     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-for depth in 1, 2, 3, 4:
-    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3)), depth):
-        print(cuts)
-        acut = a[cuts].tolist()
-        bcut = b[cuts].tolist()
-        print(acut)
-        print(bcut)
-        print()
-        assert acut == bcut
-
-# a = numpy.arange(7*5).reshape(7, 5)
-# b = NumpyArray.fromarray(a)
-# print(a)
-# cut = (slice(0, 3), 2)
-# acut = a[cut]
-# bcut = b[cut]
-# print(acut.shape)
-# print(bcut.shape)
-# print(acut.tolist())
-# print(bcut.tolist())
-# if acut.tolist() != bcut.tolist():
-#     print("WRONG!!!")
+print(a)
+cut = (slice(1, 3), numpy.array([3, 1, 1, 2]))
+acut = a[cut]
+bcut = b[cut]
+print(acut.shape)
+print(bcut.shape)
+print(acut.tolist())
+print(bcut.tolist())
+if acut.tolist() != bcut.tolist():
+    print("WRONG!!!")
 
 # a = numpy.arange(7*5*6).reshape(7, 5, 6)
 # b = NumpyArray.fromarray(a)
-# cut = (slice(1, 6), 2, 3)
+# cut = (numpy.array([1, 0, 1]), slice(1, 3), 1)
 # acut = a[cut]
 # bcut = b[cut]
 # print(acut.shape)
