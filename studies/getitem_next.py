@@ -86,12 +86,12 @@ class NumpyArray:
 
             next = NumpyArray(self.ptr, nextshape, self.offset + head.start*shape_product(self.shape[1:]))
             out = next.getitem_next_carry(nexthead, nexttail, starts, stops)
-            if len(self.shape) > 1:
-                # outshape = (len(starts), out.shape[0] // len(starts)) + out.shape[1:]
+            # if len(self.shape) > 1:   # and not isinstance(nexthead, int):
+            if len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail):
+                return out
+            else:
                 outshape = shape_unflatten(out.shape, len(starts))
                 return NumpyArray(out.ptr, outshape, out.offset)
-            else:
-                return out
 
         else:
             raise AssertionError
@@ -151,50 +151,51 @@ class NumpyArray:
 
             next = NumpyArray(self.ptr, nextshape, self.offset)
             out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops)
-            if len(self.shape) > 1:
+            # if len(self.shape) > 1:  #  and not isinstance(nexthead, int):
+            if len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail):
+                return out
+            else:
                 outshape = shape_unflatten(out.shape, len(nextstarts))
                 return NumpyArray(out.ptr, outshape, out.offset)
-            else:
-                return out
             
         else:
             raise AssertionError
 
-# # a = numpy.arange(7*5).reshape(7, 5)
-# # a = numpy.arange(7*5*6).reshape(7, 5, 6)
-# a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
-# b = NumpyArray.fromarray(a)
-
-# # for depth in 1, 2:
-# #     for cuts in itertools.permutations((slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# # for depth in 1, 2, 3:
-# #     for cuts in itertools.permutations((slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# for depth in 1, 2, 3, 4:
-#     for cuts in itertools.permutations((slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3)), depth):
-#         print(cuts)
-#         acut = a[cuts].tolist()
-#         bcut = b[cuts].tolist()
-#         print(acut)
-#         print(bcut)
-#         print()
-#         assert acut == bcut
-
-a = numpy.arange(7*5).reshape(7, 5)
+# a = numpy.arange(7*5).reshape(7, 5)
+# a = numpy.arange(7*5*6).reshape(7, 5, 6)
+a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
 b = NumpyArray.fromarray(a)
-print(a)
-cut = (slice(0, 3), 2)
-acut = a[cut]
-bcut = b[cut]
-print(acut.shape)
-print(bcut.shape)
-print(acut.tolist())
-print(bcut.tolist())
-if acut.tolist() != bcut.tolist():
-    print("WRONG!!!")
+
+# for depth in 1, 2:
+#     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# for depth in 1, 2, 3:
+#     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+for depth in 1, 2, 3, 4:
+    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3)), depth):
+        print(cuts)
+        acut = a[cuts].tolist()
+        bcut = b[cuts].tolist()
+        print(acut)
+        print(bcut)
+        print()
+        assert acut == bcut
+
+# a = numpy.arange(7*5).reshape(7, 5)
+# b = NumpyArray.fromarray(a)
+# print(a)
+# cut = (slice(0, 3), 2)
+# acut = a[cut]
+# bcut = b[cut]
+# print(acut.shape)
+# print(bcut.shape)
+# print(acut.tolist())
+# print(bcut.tolist())
+# if acut.tolist() != bcut.tolist():
+#     print("WRONG!!!")
 
 # a = numpy.arange(7*5*6).reshape(7, 5, 6)
 # b = NumpyArray.fromarray(a)
-# cut = (slice(0, 7), slice(0, 5), slice(0, 6))
+# cut = (slice(1, 6), 2, 3)
 # acut = a[cut]
 # bcut = b[cut]
 # print(acut.shape)
@@ -206,7 +207,7 @@ if acut.tolist() != bcut.tolist():
 
 # a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
 # b = NumpyArray.fromarray(a)
-# cut = (2, slice(1, 4), 0, slice(0, 4))
+# cut = (slice(1, 4), 2, slice(3, 4), 2)
 # acut = a[cut]
 # bcut = b[cut]
 # print(acut.shape)
