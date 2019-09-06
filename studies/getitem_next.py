@@ -3,6 +3,17 @@ import itertools
 import functools
 import operator
 
+def condition1(self, tail):
+    out = len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail)
+    print("condition1", out)
+    return out
+
+def condition2(self, tail):
+    out1 = len(self.shape[1:]) == sum(1 if isinstance(x, int) else 0 for x in tail)
+    out2 = any(isinstance(x, numpy.ndarray) for x in tail)
+    print("condition2", out1, out2)
+    return out1 or out2
+
 def shape_product(x):
     return functools.reduce(operator.mul, x, 1)
 
@@ -52,6 +63,9 @@ class NumpyArray:
     def __getitem__(self, where):
         if not isinstance(where, tuple):
             where = (where,)
+
+        where = tuple(int(x[0]) if isinstance(x, numpy.ndarray) and issubclass(x.dtype.type, numpy.integer) and x.shape == (1,) else x for x in where)
+
         head, tail = head_tail(where)
         return self.getitem_next(head, tail)
 
@@ -90,7 +104,7 @@ class NumpyArray:
 
             next = NumpyArray(self.ptr, nextshape, self.offset + head.start*shape_product(self.shape[1:]))
             out = next.getitem_next_carry(nexthead, nexttail, starts, stops, False)
-            if len(self.shape[1:]) == sum(1 if isinstance(x, (int, numpy.ndarray)) else 0 for x in tail):
+            if condition1(self, tail):
                 return out
             else:
                 outshape = shape_unflatten(out.shape, len(starts))
@@ -112,7 +126,7 @@ class NumpyArray:
 
             next = NumpyArray(self.ptr, nextshape, self.offset)
             out = next.getitem_next_carry(nexthead, nexttail, starts, stops, True)
-            if len(self.shape[1:]) == sum(1 if isinstance(x, (int, numpy.ndarray)) else 0 for x in tail):
+            if condition2(self, tail):
                 return out
             else:
                 outshape = shape_unflatten(out.shape, len(starts))
@@ -122,8 +136,6 @@ class NumpyArray:
             raise AssertionError
 
     def getitem_next_carry(self, head, tail, starts, stops, advanced):
-        nexthead, nexttail = head_tail(tail)
-
         if isinstance(head, tuple) and len(head) == 0:
             deepsize = shape_deepsize(self.shape)
             length = sum((stop - start) for start, stop in zip(starts, stops))
@@ -154,6 +166,7 @@ class NumpyArray:
                 nextstops[i]  = (starts[i] + head + 1)*innersize
 
             next = NumpyArray(self.ptr, self.shape[1:], self.offset)
+            nexthead, nexttail = head_tail(tail)
             return next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops, advanced)
 
         elif isinstance(head, slice) and head.step is None:
@@ -174,9 +187,29 @@ class NumpyArray:
                     nextstops[k]  = (starts[i] + head.start + j + 1)*innersize
                     k += 1
 
+            print("HERE", tail)
+
+            newtail = ()
+            for unspread in tail:
+                if not isinstance(unspread, numpy.ndarray):
+                    newtail = newtail + (unspread,)
+                else:
+                    spread = numpy.full(len(unspread)*count, 999)
+                    k = 0
+                    for i in range(len(unspread)):
+                        for j in range(count):
+                            spread[k] = unspread[i]
+                            k += 1
+                    newtail = newtail + (spread,)
+                    print("head    ", head)
+                    print("unspread", unspread)
+                    print("  spread", spread)
+
+            nexthead, nexttail = head_tail(newtail)
+
             next = NumpyArray(self.ptr, nextshape, self.offset)
             out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops, advanced)
-            if len(self.shape[1:]) == sum(1 if isinstance(x, (int, numpy.ndarray)) else 0 for x in tail):
+            if condition1(self, tail):
                 return out
             else:
                 outshape = shape_unflatten(out.shape, len(nextstarts))
@@ -188,6 +221,9 @@ class NumpyArray:
             innersize = shape_innersize(self.shape)
             nextshape = shape_flatten(self.shape)
             if advanced:
+                print(numpy.vstack((starts, stops)))
+                print(head)
+
                 nextstarts = numpy.full(len(starts), 999)
                 nextstops  = numpy.full(len(starts), 999)
                 for i in range(len(starts)):
@@ -206,8 +242,9 @@ class NumpyArray:
                         k += 1
 
             next = NumpyArray(self.ptr, nextshape, self.offset)
-            out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops, advanced)
-            if len(self.shape[1:]) == sum(1 if isinstance(x, (int, numpy.ndarray)) else 0 for x in tail):
+            nexthead, nexttail = head_tail(tail)
+            out = next.getitem_next_carry(nexthead, nexttail, nextstarts, nextstops, True)
+            if condition2(self, tail):
                 return out
             else:
                 outshape = shape_unflatten(out.shape, len(nextstarts))
@@ -226,7 +263,7 @@ class NumpyArray:
 # # for depth in 1, 2, 3:
 # #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
 # for depth in 1, 2, 3, 4:
-#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3)), depth):
+#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3), numpy.array([0, 1, 0])), depth):
 #         print(cuts)
 #         acut = a[cuts].tolist()
 #         bcut = b[cuts].tolist()
@@ -235,22 +272,10 @@ class NumpyArray:
 #         print()
 #         assert acut == bcut
 
-a = numpy.arange(7*5).reshape(7, 5)
-b = NumpyArray.fromarray(a)
-print(a)
-cut = (numpy.array([0, 1]), 2)
-acut = a[cut]
-bcut = b[cut]
-print(acut.shape)
-print(bcut.shape)
-print(acut.tolist())
-print(bcut.tolist())
-if acut.tolist() != bcut.tolist():
-    print("WRONG!!!")
-
-# a = numpy.arange(7*5*6).reshape(7, 5, 6)
+# a = numpy.arange(7*5).reshape(7, 5)
 # b = NumpyArray.fromarray(a)
-# cut = (numpy.array([1, 0, 1]), slice(1, 3), 1)
+# print(a)
+# cut = (numpy.array([0, 1]), 2)
 # acut = a[cut]
 # bcut = b[cut]
 # print(acut.shape)
@@ -259,6 +284,18 @@ if acut.tolist() != bcut.tolist():
 # print(bcut.tolist())
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
+
+cut = (numpy.array([1, 2]), slice(0, 2), numpy.array([0, 2]))
+a = numpy.arange(7*5*6).reshape(7, 5, 6)
+b = NumpyArray.fromarray(a)
+acut = a[cut]
+bcut = b[cut]
+print(acut.shape)
+print(bcut.shape)
+print(acut.tolist())
+print(bcut.tolist())
+if acut.tolist() != bcut.tolist():
+    print("WRONG!!!")
 
 # a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
 # b = NumpyArray.fromarray(a)
