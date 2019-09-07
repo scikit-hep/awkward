@@ -113,8 +113,7 @@ class NumpyArray:
 
             nextshape = (repetition*len(head),) + self.shape[1:]
 
-            # copyto.tostring()
-            next = self.copy(ptr=copyto, shape=flatten(nextshape), strides=self.strides[1:], byteoffset=0)
+            next = self.copy(ptr=copyto.tostring(), shape=flatten(nextshape), strides=self.strides[1:], byteoffset=0)
 
             nexthead, nexttail = head_tail(tail)
             out = next.getitem_next(nexthead, nexttail, repetition*len(head))
@@ -126,11 +125,7 @@ class NumpyArray:
 
             tostrides = (self.strides[0],) + out.strides
 
-            tmp = out.copy(shape=toshape, strides=tostrides)
-
-            print("tmp", tmp.tolist())
-
-            return tmp
+            return out.copy(shape=toshape, strides=tostrides)
 
         else:
             raise AssertionError
@@ -185,7 +180,7 @@ def shape_innersize(x):
 
 a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
 b = NumpyArray(a)
-cut = (slice(1, 3), slice(1, 3), numpy.array([0, 1]))
+cut = (slice(0, 2), slice(0, 1), numpy.array([3, 2, 3]),)
 acut = a[cut]
 bcut = b[cut]
 print(acut.shape, acut.strides)
