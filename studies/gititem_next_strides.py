@@ -81,12 +81,19 @@ class NumpyArray:
             nexthead, nexttail = head_tail(tail)
             out = next.getitem_next(nexthead, nexttail, repetition*nextshape[0])
 
-            if len(tail) == 0:
+            if isinstance(nexthead, tuple) and len(nexthead) == 0:
                 toshape = nextshape
-            else:
+            elif self.ptr is out.ptr:
                 toshape = (nextshape[0],) + out.shape
+            else:
+                toshape = unflatten(head.stop - head.start, out.shape)
 
-            tostrides = (out.shape[0]*out.strides[0],) + out.strides
+            if len(out.strides) == 0:
+                tostrides = (out.itemsize,)
+            elif self.ptr is out.ptr:
+                tostrides = (self.strides[0],) + out.strides
+            else:
+                tostrides = (out.strides[0]*out.shape[0] // nextshape[0],) + out.strides
 
             return out.copy(shape=toshape, strides=tostrides)
 
@@ -99,14 +106,31 @@ class NumpyArray:
             copyfrom = numpy.frombuffer(self.ptr, dtype=numpy.uint8)
             copyto   = numpy.zeros(repetition*len(head)*copylen, dtype=numpy.uint8)
             skip     = self.shape[0] // repetition
+
             for rep in range(repetition):
                 for i in range(len(head)):
-                    copyto[(rep*len(head) + i)*copylen : (rep*len(head) + i + 1)*copylen] = copyfrom[(rep*skip + head[i])*copylen : (rep*skip + head[i] + 1)*copylen]
+                    copyto[(rep*len(head) + i)*copylen : (rep*len(head) + i + 1)*copylen] = copyfrom[self.byteoffset + (rep*skip + head[i])*copylen : self.byteoffset + (rep*skip + head[i] + 1)*copylen]
 
-            nextshape = (len(head),) + self.shape[1:]
-            next = self.copy(ptr=copyto, shape=nextshape, byteoffset=0)
+            nextshape = (repetition*len(head),) + self.shape[1:]
 
-            return next
+            # copyto.tostring()
+            next = self.copy(ptr=copyto, shape=flatten(nextshape), strides=self.strides[1:], byteoffset=0)
+
+            nexthead, nexttail = head_tail(tail)
+            out = next.getitem_next(nexthead, nexttail, repetition*len(head))
+
+            if len(tail) == 0:
+                toshape = nextshape
+            else:
+                toshape = (nextshape[0],) + out.shape
+
+            tostrides = (self.strides[0],) + out.strides
+
+            tmp = out.copy(shape=toshape, strides=tostrides)
+
+            print("tmp", tmp.tolist())
+
+            return tmp
 
         else:
             raise AssertionError
@@ -122,8 +146,8 @@ def flatten(x):
     else:
         return (x[0]*x[1],) + x[2:]
 
-# def unflatten(x, by):
-#     return (by, x[0] // by) + x[1:]
+def unflatten(by, x):
+    return (by, x[0] // by) + x[1:]
 
 def shape_product(x):
     return functools.reduce(operator.mul, x, 1)
@@ -134,18 +158,18 @@ def shape_innersize(x):
     else:
         return x[1]
 
-a = numpy.arange(7*5).reshape(7, 5)
-b = NumpyArray(a)
-print(a)
-cut = (slice(0, 2), numpy.array([2, 1, 4]),)
-acut = a[cut]
-bcut = b[cut]
-print(acut.shape)
-print(bcut.shape)
-print(acut.tolist())
-print(bcut.tolist())
-if acut.tolist() != bcut.tolist():
-    print("WRONG!!!")
+# a = numpy.arange(7*5).reshape(7, 5)
+# b = NumpyArray(a)
+# print(a)
+# cut = (numpy.array([4, 3, 1]), slice(1, 4))
+# acut = a[cut]
+# bcut = b[cut]
+# print(acut.shape, acut.strides)
+# print(bcut.shape, bcut.strides)
+# print(acut.tolist())
+# print(bcut.tolist())
+# if acut.tolist() != bcut.tolist():
+#     print("WRONG!!!")
 
 # cut = (slice(2, 3), slice(1, 3), slice(2, 5))
 # a = numpy.arange(7*5*6).reshape(7, 5, 6)
@@ -159,17 +183,17 @@ if acut.tolist() != bcut.tolist():
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
 
-# a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
-# b = NumpyArray(a)
-# cut = (slice(1, 4), slice(3, 4), slice(0, 3), slice(1, 4))
-# acut = a[cut]
-# bcut = b[cut]
-# print(acut.shape)
-# print(bcut.shape)
-# print(acut.tolist())
-# print(bcut.tolist())
-# if acut.tolist() != bcut.tolist():
-#     print("WRONG!!!")
+a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
+b = NumpyArray(a)
+cut = (slice(1, 3), slice(1, 3), numpy.array([0, 1]))
+acut = a[cut]
+bcut = b[cut]
+print(acut.shape, acut.strides)
+print(bcut.shape, bcut.strides)
+print(acut.tolist())
+print(bcut.tolist())
+if acut.tolist() != bcut.tolist():
+    print("WRONG!!!")
 
 # # a = numpy.arange(7*5).reshape(7, 5)
 # # a = numpy.arange(7*5*6).reshape(7, 5, 6)
