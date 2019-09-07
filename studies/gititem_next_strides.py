@@ -53,16 +53,19 @@ class NumpyArray:
         where = tuple(int(x[0]) if isinstance(x, numpy.ndarray) and issubclass(x.dtype.type, numpy.integer) and x.shape == (1,) else x for x in where)
 
         head, tail = head_tail(where)
-        return self.getitem_next(head, tail)
+        return self.getitem_next(head, tail, 1)
 
-    def getitem_next(self, head, tail):
+    def getitem_next(self, head, tail, repetition):
         if isinstance(head, tuple) and len(head) == 0:
+            print("null")
             return self
 
         elif isinstance(head, int):
+            print("int")
             raise NotImplementedError
 
         elif isinstance(head, slice) and head.step is None:
+            print("slice2")
             if len(self.shape) == 0:
                 raise IndexError("too many indices for array")
 
@@ -76,14 +79,34 @@ class NumpyArray:
             next = self.copy(shape=flatten(nextshape), strides=self.strides[1:], byteoffset=nextbyteoffset)
 
             nexthead, nexttail = head_tail(tail)
-            out = next.getitem_next(nexthead, nexttail)
+            out = next.getitem_next(nexthead, nexttail, repetition*nextshape[0])
 
             if len(tail) == 0:
                 toshape = nextshape
             else:
                 toshape = (nextshape[0],) + out.shape
 
-            return out.copy(shape=toshape, strides=self.strides)
+            tostrides = (out.shape[0]*out.strides[0],) + out.strides
+
+            return out.copy(shape=toshape, strides=tostrides)
+
+        elif isinstance(head, numpy.ndarray) and issubclass(head.dtype.type, numpy.integer) and len(head.shape) == 1:
+            print("intarray")
+            if len(self.shape) == 0:
+                raise IndexError("too many indices for array")
+
+            copylen  = shape_product(self.shape[1:])*self.itemsize
+            copyfrom = numpy.frombuffer(self.ptr, dtype=numpy.uint8)
+            copyto   = numpy.zeros(repetition*len(head)*copylen, dtype=numpy.uint8)
+            skip     = self.shape[0] // repetition
+            for rep in range(repetition):
+                for i in range(len(head)):
+                    copyto[(rep*len(head) + i)*copylen : (rep*len(head) + i + 1)*copylen] = copyfrom[(rep*skip + head[i])*copylen : (rep*skip + head[i] + 1)*copylen]
+
+            nextshape = (len(head),) + self.shape[1:]
+            next = self.copy(ptr=copyto, shape=nextshape, byteoffset=0)
+
+            return next
 
         else:
             raise AssertionError
@@ -111,18 +134,18 @@ def shape_innersize(x):
     else:
         return x[1]
 
-# a = numpy.arange(7*5).reshape(7, 5)
-# b = NumpyArray(a)
-# print(a)
-# cut = (slice(1, 4), slice(2, 5))
-# acut = a[cut]
-# bcut = b[cut]
-# print(acut.shape)
-# print(bcut.shape)
-# print(acut.tolist())
-# print(bcut.tolist())
-# if acut.tolist() != bcut.tolist():
-#     print("WRONG!!!")
+a = numpy.arange(7*5).reshape(7, 5)
+b = NumpyArray(a)
+print(a)
+cut = (slice(0, 2), numpy.array([2, 1, 4]),)
+acut = a[cut]
+bcut = b[cut]
+print(acut.shape)
+print(bcut.shape)
+print(acut.tolist())
+print(bcut.tolist())
+if acut.tolist() != bcut.tolist():
+    print("WRONG!!!")
 
 # cut = (slice(2, 3), slice(1, 3), slice(2, 5))
 # a = numpy.arange(7*5*6).reshape(7, 5, 6)
@@ -148,21 +171,21 @@ def shape_innersize(x):
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
 
-# a = numpy.arange(7*5).reshape(7, 5)
-# a = numpy.arange(7*5*6).reshape(7, 5, 6)
-a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
-b = NumpyArray(a)
+# # a = numpy.arange(7*5).reshape(7, 5)
+# # a = numpy.arange(7*5*6).reshape(7, 5, 6)
+# a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
+# b = NumpyArray(a)
 
-# for depth in 1, 2:
-#     for cuts in itertools.permutations((slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# for depth in 1, 2, 3:
-#     for cuts in itertools.permutations((slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-for depth in 1, 2, 3, 4:
-    for cuts in itertools.permutations((slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3)), depth):
-        print(cuts)
-        acut = a[cuts].tolist()
-        bcut = b[cuts].tolist()
-        print(acut)
-        print(bcut)
-        print()
-        assert acut == bcut
+# # for depth in 1, 2:
+# #     for cuts in itertools.permutations((slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# # for depth in 1, 2, 3:
+# #     for cuts in itertools.permutations((slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# for depth in 1, 2, 3, 4:
+#     for cuts in itertools.permutations((slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3)), depth):
+#         print(cuts)
+#         acut = a[cuts].tolist()
+#         bcut = b[cuts].tolist()
+#         print(acut)
+#         print(bcut)
+#         print()
+#         assert acut == bcut
