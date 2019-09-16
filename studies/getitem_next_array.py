@@ -11,7 +11,6 @@ class NumpyArray:
         self.itemsize = array.itemsize
         self.dtype = array.dtype
         self.byteoffset = 0
-        print("__init__ shape", self.shape, "strides", self.strides)
 
     def copy(self, ptr=None, shape=None, strides=None, itemsize=None, dtype=None, byteoffset=None):
         out = type(self).__new__(type(self))
@@ -51,15 +50,16 @@ class NumpyArray:
         return self.shape[0]
 
     def __getitem__(self, where):
+        assert len(self.shape) != 0
+
         if not isinstance(where, tuple):
             where = (where,)
-
         head, tail = head_tail(where)
-        carry = numpy.array([0])
-        return self.getitem_next(head, tail, carry)
+        return self.getitem_next(head, tail, numpy.array([0]), 1, self.shape[0]*self.strides[0])
 
-    def getitem_next(self, head, tail, carry):
-        print("getitem_next shape", self.shape, "strides", self.strides, "carry", carry)
+    def getitem_next(self, head, tail, carry, length, stride):
+        print("getitem_next shape", self.shape, "strides", self.strides, "carry", carry, "length", length, "stride", stride)
+        assert len(self.shape) == len(self.strides)
 
         if head is numpy.newaxis:
             raise NotImplementedError("numpy.newaxis")
@@ -68,18 +68,18 @@ class NumpyArray:
             raise NotImplementedError("...")
 
         elif isinstance(head, tuple) and len(head) == 0:
-            if len(self.strides) == 0:
-                size = self.itemsize
-            else:
-                size = self.strides[0]
-
-            ptr = numpy.full(len(carry)*size, 123, dtype=numpy.uint8)
+            ptr = numpy.full(len(carry)*stride, 123, dtype=numpy.uint8)
             for i in range(len(carry)):
-                ptr[i*size : (i + 1)*size] = self.ptr[self.byteoffset + carry[i]*size : self.byteoffset + (carry[i] + 1)*size]
+                ptr[i*stride : (i + 1)*stride] = self.ptr[self.byteoffset + carry[i]*stride : self.byteoffset + (carry[i] + 1)*stride]
 
-            print("new ptr", ptr.view(self.dtype))
-
-            return self.copy(ptr=self.ptr, shape=(len(carry),), strides=(self.itemsize,), byteoffset=0)
+            if len(self.shape) == 0:
+                shape = (len(carry),)
+                strides = (self.itemsize,)
+            else:
+                innerlength = self.shape[0] // length
+                shape = (len(carry), innerlength) + self.shape[1:]
+                strides = (innerlength*self.strides[0],) + self.strides
+            return self.copy(ptr=ptr, shape=shape, strides=strides, byteoffset=0)
 
         elif isinstance(head, (int, numpy.integer)):
             raise NotImplementedError("int")
@@ -101,9 +101,7 @@ class NumpyArray:
                     for j in range(len(head)):
                         nextcarry[i*len(head) + j] = carry[i] + head[j]
 
-                out = next.getitem_next(nexthead, nexttail, nextcarry)
-
-                return out.copy(shape=unflatten_shape(len(head), self.shape), strides=unflatten_strides(len(head), self.strides, self.itemsize))
+                return next.getitem_next(nexthead, nexttail, nextcarry, self.shape[0], self.strides[0])
 
             elif issubclass(head.dtype.type, (numpy.bool_, numpy.bool)):
                 raise NotImplementedError("boolarray")
@@ -122,25 +120,12 @@ def flatten_shape(shape):
     else:
         return (shape[0]*shape[1],) + shape[2:]
 
-def unflatten_shape(length, shape):
-    if len(shape) == 0:
-        return (length,)
-    else:
-        return (length, shape[0] // length) + shape[1:]
-
 def flatten_strides(strides):
     return strides[1:]
 
-def unflatten_strides(length, strides, itemsize):
-    if len(strides) == 0:
-        return (itemsize,)
-    else:
-        return (length*strides[0],) + strides
-
-a = numpy.arange(7).reshape(7)
+a = numpy.arange(7*5).reshape(7, 5)
 b = NumpyArray(a)
-print(a)
-cut = (numpy.array([0]),)
+cut = (numpy.array([1, 0, 1]),)
 acut = a[cut]
 bcut = b[cut]
 print("should be shape", acut.shape, "strides", acut.strides)
