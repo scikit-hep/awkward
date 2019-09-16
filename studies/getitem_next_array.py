@@ -110,9 +110,12 @@ class NumpyArray:
                 nextcarry = numpy.full(len(carry)*len(head), 999, dtype=int)
                 for i in range(len(carry)):
                     for j in range(len(head)):
-                        nextcarry[i*len(head) + j] = carry[i] + head[j]
+                        nextcarry[i*len(head) + j] = self.shape[1]*carry[i] + head[j]
 
-                return next.getitem_next(nexthead, nexttail, nextcarry, self.shape[0], self.strides[0])
+                out = next.getitem_next(nexthead, nexttail, nextcarry, length*len(head), next.strides[0])
+                shape = (length, out.shape[0] // length) + out.shape[1:]
+                strides = (shape[1]*out.strides[0],) + out.strides
+                return out.copy(shape=shape, strides=strides)
 
             elif issubclass(head.dtype.type, (numpy.bool_, numpy.bool)):
                 raise NotImplementedError("boolarray")
@@ -134,9 +137,9 @@ def flatten_shape(shape):
 def flatten_strides(strides):
     return strides[1:]
 
-a = numpy.arange(7*5*6).reshape(7, 5, 6)
+a = numpy.arange(7*5).reshape(7, 5)
 b = NumpyArray(a)
-cut = (slice(1, 5), slice(1, 4), slice(1, 3))
+cut = (numpy.array([2, 1, 1, 0]),)
 acut = a[cut]
 bcut = b[cut]
 print("should be shape", acut.shape, "strides", acut.strides)
