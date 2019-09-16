@@ -58,4 +58,4 @@ def test_numpyarray_getitem():
     print(awkward1.tolist(acut), acut.shape)
     print(awkward1.tolist(bcut), bcut.shape)
 
-    raise Exception
+    # raise Exception
