@@ -75,21 +75,9 @@ class NumpyArray:
             ptr = numpy.full(len(carry)*stride, 123, dtype=numpy.uint8)
             for i in range(len(carry)):
                 ptr[i*stride : (i + 1)*stride] = self.ptr[self.byteoffset + carry[i]*stride : self.byteoffset + (carry[i] + 1)*stride]
-
-            print("ptr", ptr.view(self.dtype))
-
             shape = (len(carry),) + self.shape[1:]
             strides = (stride,) + self.strides[1:]
             return self.copy(ptr=ptr, shape=shape, strides=strides, byteoffset=0)
-
-            # if len(self.shape) == 0:
-            #     shape = (len(carry),)
-            #     strides = (self.itemsize,)
-            # else:
-            #     innerlength = self.shape[0] // length
-            #     shape = (len(carry), innerlength) + self.shape[1:]
-            #     strides = (innerlength*self.strides[0],) + self.strides
-            # return self.copy(ptr=ptr, shape=shape, strides=strides, byteoffset=0)
 
         elif isinstance(head, (int, numpy.integer)):
             raise NotImplementedError("int")
@@ -98,43 +86,16 @@ class NumpyArray:
             assert len(self.shape) > 1
             next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides))
 
-            # innerlength = self.shape[0] // length
             nexthead, nexttail = head_tail(tail)
             nextcarry = numpy.full(len(carry)*(head.stop - head.start), 999, dtype=int)
             for i in range(len(carry)):
                 for j in range(head.stop - head.start):
-                    # nextcarry[i*(head.stop - head.start) + j] = innerlength*carry[i] + head.start + j
                     nextcarry[i*(head.stop - head.start) + j] = self.shape[1]*carry[i] + head.start + j
 
-            print("nextcarry", nextcarry)
-
-            out = next.getitem_next(nexthead, nexttail, nextcarry, head.stop - head.start, next.strides[0])
-
+            out = next.getitem_next(nexthead, nexttail, nextcarry, length*(head.stop - head.start), next.strides[0])
             shape = (length, out.shape[0] // length) + out.shape[1:]
             strides = (shape[1]*out.strides[0],) + out.strides
-            print("out shape", out.shape, "->", shape, "strides", out.strides, "->", strides)
             return out.copy(shape=shape, strides=strides)
-
-
-
-            # if len(tail) == 0:
-            #     shape = (head.stop - head.start, out.shape[0] // innerlength) + out.shape[1:]
-            #     strides = (shape[1]*out.strides[0],) + out.strides
-            # else:
-            #     shape = (head.stop - head.start,) + out.shape
-            #     strides = (shape[1]*out.strides[0],) + out.strides
-
-            # if len(out.shape) == 0:
-            #     shape = (head.stop - head.start,)
-            #     strides = (self.itemsize,)
-            # elif len(tail) == 0:
-            #     shape = (head.stop - head.start, out.shape[0] // innerlength) + out.shape[1:]
-            #     strides = (shape[1]*out.strides[0],) + out.strides
-            # else:
-            #     shape = (head.stop - head.start,) + out.shape
-            #     strides = (shape[1]*out.strides[0],) + out.strides
-
-            # return out.copy(shape=shape, strides=strides)
 
         elif isinstance(head, slice):
             raise NotImplementedError("slice3")
@@ -173,9 +134,9 @@ def flatten_shape(shape):
 def flatten_strides(strides):
     return strides[1:]
 
-a = numpy.arange(7*5).reshape(7, 5)
+a = numpy.arange(7*5*6).reshape(7, 5, 6)
 b = NumpyArray(a)
-cut = (slice(1, 5), slice(2, 4))
+cut = (slice(1, 5), slice(1, 4), slice(1, 3))
 acut = a[cut]
 bcut = b[cut]
 print("should be shape", acut.shape, "strides", acut.strides)
