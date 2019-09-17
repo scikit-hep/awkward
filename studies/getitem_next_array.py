@@ -7,7 +7,7 @@ import numpy
 
 class NumpyArray:
     def __init__(self, array):
-        self.ptr = numpy.lib.stride_tricks.as_strided(array, (array.shape[0]*array.strides[0],), (1,))
+        self.ptr = numpy.lib.stride_tricks.as_strided(array, (array.shape[0]*array.strides[0] // array.itemsize,), (array.itemsize,)).view(numpy.uint8)
         self.shape = array.shape
         self.strides = array.strides
         self.itemsize = array.itemsize
@@ -52,17 +52,50 @@ class NumpyArray:
         return self.shape[0]
 
     @property
+    def isscalar(self):
+        return len(self.shape) == 0
+
+    @property
     def iscompact(self):
+        # isscalar implies iscompact
         test = self.itemsize
         for sh, st in zip(self.shape[::-1], self.strides[::-1]):
             if st != test:
                 return False
             test *= sh
-        else:
-            return True
+        return True
 
     def compact(self):
-        raise NotImplementedError
+        if self.iscompact:
+            return self
+        else:
+            bytepos = numpy.arange(0, self.shape[0]*self.strides[0], self.strides[0])
+            return self.compact_next(bytepos)
+
+    def compact_next(self, bytepos):
+        if self.iscompact:
+            ptr = numpy.full(len(bytepos)*self.strides[0], 123, dtype=numpy.uint8)
+            for i in range(len(bytepos)):
+                print("to", i*self.strides[0], ":", (i + 1)*self.strides[0], "from", self.byteoffset + bytepos[i], ":", self.byteoffset + bytepos[i] + self.strides[0], "which is", self.ptr[self.byteoffset + bytepos[i] : self.byteoffset + bytepos[i] + self.strides[0]])
+                ptr[i*self.strides[0] : (i + 1)*self.strides[0]] = self.ptr[self.byteoffset + bytepos[i] : self.byteoffset + bytepos[i] + self.strides[0]]
+            return self.copy(ptr=ptr, byteoffset=0)
+
+        elif len(self.shape) == 1:
+            ptr = numpy.full(len(bytepos)*self.itemsize, 123, dtype=numpy.uint8)
+            for i in range(len(bytepos)):
+                print("to", i*self.itemsize, ":", (i + 1)*self.itemsize, "from", self.byteoffset + bytepos[i], ":", self.byteoffset + bytepos[i] + self.itemsize, "which is", self.ptr[self.byteoffset + bytepos[i] : self.byteoffset + bytepos[i] + self.itemsize])
+
+                ptr[i*self.itemsize : (i + 1)*self.itemsize] = self.ptr[self.byteoffset + bytepos[i] : self.byteoffset + bytepos[i] + self.itemsize]
+            return self.copy(ptr=ptr, strides=(self.itemsize,), byteoffset=0)
+
+        else:
+            next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides))
+            nextbytepos = numpy.full(len(bytepos)*self.shape[1], 999, dtype=int)
+            for i in range(len(bytepos)):
+                for j in range(self.shape[1]):
+                    nextbytepos[i*self.shape[1] + j] = bytepos[i] + j*self.strides[1]
+            out = next.compact_next(nextbytepos)
+            return out.copy(shape=self.shape, strides=(self.shape[1]*out.strides[0],) + out.strides)
 
     def __getitem__(self, where):
         assert len(self.shape) != 0
@@ -113,7 +146,8 @@ class NumpyArray:
             nexthead, nexttail = head_tail(tail)
             nextcarry = numpy.full(len(carry)*(head.stop - head.start), 999, dtype=int)
 
-            skip = self.strides[0] // self.strides[1]
+            skip, remainder = divmod(self.strides[0], self.strides[1])
+            assert remainder == 0
             for i in range(len(carry)):
                 for j in range(head.stop - head.start):
                     nextcarry[i*(head.stop - head.start) + j] = skip*carry[i] + head.start + j
@@ -134,7 +168,9 @@ class NumpyArray:
 
                 nexthead, nexttail = head_tail(tail)
                 nextcarry = numpy.full(len(carry)*len(head), 999, dtype=int)
-                skip = self.strides[0] // self.strides[1]
+
+                skip, remainder = divmod(self.strides[0], self.strides[1])
+                assert remainder == 0
                 for i in range(len(carry)):
                     for j in range(len(head)):
                         nextcarry[i*len(head) + j] = skip*carry[i] + head[j]
@@ -164,11 +200,19 @@ def flatten_shape(shape):
 def flatten_strides(strides):
     return strides[1:]
 
-a = numpy.arange(8*9).reshape(8, 9)[:,:]
+a = numpy.arange(10)[::-1]
 b = NumpyArray(a)
-print(b.iscompact)
+print("b.shape", b.shape, "b.strides", b.strides)
+c = b.compact()
+print("c.shape", c.shape, "c.strides", c.strides)
+print(a.tolist())
+print(c.tolist())
+assert c.iscompact
+if a.tolist() != c.tolist():
+    print("WRONG!!!")
 
-# cut = (slice(0, 4), slice(0, 3))
+
+# cut = (slice(0, 5), slice(0, 1))
 # acut = a[cut]
 # bcut = b[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
