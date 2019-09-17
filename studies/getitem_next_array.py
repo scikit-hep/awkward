@@ -52,8 +52,6 @@ class NumpyArray:
         if len(self.shape) == 0:
             return numpy.frombuffer(self.ptr[self.byteoffset : self.byteoffset + self.itemsize], dtype=self.dtype).reshape(())
         else:
-            # ptr = self.ptr[self.byteoffset : self.byteoffset + self.strides[0]*self.shape[0]]
-            # return numpy.lib.stride_tricks.as_strided(numpy.frombuffer(ptr, dtype=self.dtype), self.shape, self.strides)
             return numpy.lib.stride_tricks.as_strided(self.ptr[self.byteoffset : self.byteoffset + self.itemsize].view(self.dtype), self.shape, self.strides)
 
     def tolist(self):
@@ -77,24 +75,31 @@ class NumpyArray:
         return True
 
     def compact(self):
+        out = self.compacted()
+        self.ptr = out.ptr
+        self.shape = out.shape
+        self.strides = out.strides
+        self.itemsize = out.itemsize
+        self.dtype = out.dtype
+        self.byteoffset = out.byteoffset
+        
+    def compacted(self):
         if self.iscompact:
             return self
         else:
             bytepos = numpy.arange(0, self.shape[0]*self.strides[0], self.strides[0])
-            return self.compact_next(bytepos)
+            return self.compacted_next(bytepos)
 
-    def compact_next(self, bytepos):
+    def compacted_next(self, bytepos):
         if self.iscompact:
             ptr = numpy.full(len(bytepos)*self.strides[0], 123, dtype=numpy.uint8)
             for i in range(len(bytepos)):
-                print("to", i*self.strides[0], ":", (i + 1)*self.strides[0], "from", self.byteoffset + bytepos[i], ":", self.byteoffset + bytepos[i] + self.strides[0], "which is", self.ptr[self.byteoffset + bytepos[i] : self.byteoffset + bytepos[i] + self.strides[0]])
                 ptr[i*self.strides[0] : (i + 1)*self.strides[0]] = self.ptr[self.byteoffset + bytepos[i] : self.byteoffset + bytepos[i] + self.strides[0]]
             return self.copy(ptr=ptr, byteoffset=0)
 
         elif len(self.shape) == 1:
             ptr = numpy.full(len(bytepos)*self.itemsize, 123, dtype=numpy.uint8)
             for i in range(len(bytepos)):
-                print("to", i*self.itemsize, ":", (i + 1)*self.itemsize, "from", self.byteoffset + bytepos[i], ":", self.byteoffset + bytepos[i] + self.itemsize, "which is", self.ptr[self.byteoffset + bytepos[i] : self.byteoffset + bytepos[i] + self.itemsize])
                 ptr[i*self.itemsize : (i + 1)*self.itemsize] = self.ptr[self.byteoffset + bytepos[i] : self.byteoffset + bytepos[i] + self.itemsize]
             return self.copy(ptr=ptr, strides=(self.itemsize,), byteoffset=0)
 
@@ -104,7 +109,7 @@ class NumpyArray:
             for i in range(len(bytepos)):
                 for j in range(self.shape[1]):
                     nextbytepos[i*self.shape[1] + j] = bytepos[i] + j*self.strides[1]
-            out = next.compact_next(nextbytepos)
+            out = next.compacted_next(nextbytepos)
             return out.copy(shape=self.shape, strides=(self.shape[1]*out.strides[0],) + out.strides)
 
     def __getitem__(self, where):
@@ -112,18 +117,18 @@ class NumpyArray:
 
         if not isinstance(where, tuple):
             where = (where,)
-
-        # if any strides are not an even multiple of their underlying stride
-        # or any strides are negative, compact before doing a getitem
-
-        next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
         nexthead, nexttail = head_tail(where)
-        nextcarry = numpy.array([0])
-        out = next.getitem_next(nexthead, nexttail, nextcarry, 1, next.strides[0])
-        return out.copy(shape=out.shape[1:], strides=out.strides[1:])
+
+        if False and all(x is numpy.newaxis or x is Ellipsis or (isinstance(x, tuple) and len(x) == 0) or isinstance(x, (int, numpy.integer, slice))):
+            return getitem_bystrides(nexthead, nexttail)
+        else:
+            self.compact()
+            next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
+            nextcarry = numpy.array([0])
+            out = next.getitem_next(nexthead, nexttail, nextcarry, 1, next.strides[0])
+            return out.copy(shape=out.shape[1:], strides=out.strides[1:])
 
     def getitem_next(self, head, tail, carry, length, stride):
-        print("getitem_next shape", self.shape, "strides", self.strides, "carry", carry, "length", length, "stride", stride)
         assert len(self.shape) == len(self.strides)
 
         if head is numpy.newaxis:
@@ -133,24 +138,31 @@ class NumpyArray:
             raise NotImplementedError("...")
 
         elif isinstance(head, tuple) and len(head) == 0:
-            print("shape", self.shape, "strides", self.strides, "carry", carry, "length", length, "stride", stride)
-
             ptr = numpy.full(len(carry)*stride, 123, dtype=numpy.uint8)
             for i in range(len(carry)):
-                print("to", i*stride, ":", (i + 1)*stride, "from", self.byteoffset + carry[i]*stride, ":", self.byteoffset + (carry[i] + 1)*stride, "which is", self.ptr[self.byteoffset + carry[i]*stride : self.byteoffset + (carry[i] + 1)*stride])
                 ptr[i*stride : (i + 1)*stride] = self.ptr[self.byteoffset + carry[i]*stride : self.byteoffset + (carry[i] + 1)*stride]
-
-            print("ptr", ptr.view(self.dtype))
-
             shape = (len(carry),) + self.shape[1:]
             strides = (stride,) + self.strides[1:]
             return self.copy(ptr=ptr, shape=shape, strides=strides, byteoffset=0)
 
         elif isinstance(head, (int, numpy.integer)):
-            raise NotImplementedError("int")
+            assert len(self.shape) >= 2
+            next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides))
+
+            nexthead, nexttail = head_tail(tail)
+            nextcarry = numpy.full(len(carry), 999, dtype=int)
+
+            skip, remainder = divmod(self.strides[0], self.strides[1])
+            assert remainder == 0
+            for i in range(len(carry)):
+                nextcarry[i] = skip*carry[i] + head
+
+            out = next.getitem_next(nexthead, nexttail, nextcarry, length, next.strides[0])
+            shape = (length,) + out.shape[1:]
+            return out.copy(shape=shape)
 
         elif isinstance(head, slice) and head.step is None:
-            assert len(self.shape) > 1
+            assert len(self.shape) >= 2
             next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides))
 
             nexthead, nexttail = head_tail(tail)
@@ -163,7 +175,7 @@ class NumpyArray:
                     nextcarry[i*(head.stop - head.start) + j] = skip*carry[i] + head.start + j
 
             out = next.getitem_next(nexthead, nexttail, nextcarry, length*(head.stop - head.start), next.strides[0])
-            shape = (length, out.shape[0] // length) + out.shape[1:]   # maybe out.shape[0] // length == head.stop - head.start
+            shape = (length, head.stop - head.start) + out.shape[1:]
             strides = (shape[1]*out.strides[0],) + out.strides
             return out.copy(shape=shape, strides=strides)
 
@@ -173,7 +185,7 @@ class NumpyArray:
         else:
             head = numpy.asarray(head)
             if issubclass(head.dtype.type, numpy.integer):
-                assert len(self.shape) != 0
+                assert len(self.shape) >= 2
                 next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides))
 
                 nexthead, nexttail = head_tail(tail)
@@ -186,7 +198,7 @@ class NumpyArray:
                         nextcarry[i*len(head) + j] = skip*carry[i] + head[j]
 
                 out = next.getitem_next(nexthead, nexttail, nextcarry, length*len(head), next.strides[0])
-                shape = (length, out.shape[0] // length) + out.shape[1:]   # maybe out.shape[0] // length == len(head)
+                shape = (length, len(head)) + out.shape[1:]
                 strides = (shape[1]*out.strides[0],) + out.strides
                 return out.copy(shape=shape, strides=strides)
 
@@ -210,21 +222,9 @@ def flatten_shape(shape):
 def flatten_strides(strides):
     return strides[1:]
 
-a = numpy.arange(7*5).reshape(7, 5)[5::-2, 3::-1]
-b = NumpyArray(a)
-print(b.shape, b.strides, numpy.array(b))
-print("b.shape", b.shape, "b.strides", b.strides, "b.ptr", b.ptr)
-c = b.compact()
-print("c.shape", c.shape, "c.strides", c.strides, "c.ptr", c.ptr)
-print(a.tolist())
-print(c.tolist())
-assert c.iscompact
-if a.tolist() != c.tolist():
-    print("WRONG!!!")
-
-# a = numpy.arange(9*6).reshape(9, 6)[1::3, 1::2]
+# a = numpy.arange(7*5).reshape(7, 5)
 # b = NumpyArray(a)
-# cut = (slice(1, 3), slice(1, 3))
+# cut = (slice(0, 4), 3)
 # acut = a[cut]
 # bcut = b[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
@@ -233,3 +233,22 @@ if a.tolist() != c.tolist():
 # print(bcut.tolist())
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
+
+# a = numpy.arange(7*5).reshape(7, 5)
+# a = numpy.arange(7*5*6).reshape(7, 5, 6)
+a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
+b = NumpyArray(a)
+
+# for depth in 1, 2:
+#     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# for depth in 1, 2, 3:
+#     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+for depth in 1, 2, 3, 4:
+    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3)), depth):
+        print(cuts)
+        acut = a[cuts].tolist()
+        bcut = b[cuts].tolist()
+        print(acut)
+        print(bcut)
+        print()
+        assert acut == bcut
