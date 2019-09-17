@@ -1,7 +1,9 @@
-import numpy
+import math
 import itertools
 import functools
 import operator
+
+import numpy
 
 class NumpyArray:
     def __init__(self, array):
@@ -49,11 +51,27 @@ class NumpyArray:
     def __len__(self):
         return self.shape[0]
 
+    @property
+    def iscompact(self):
+        test = self.itemsize
+        for sh, st in zip(self.shape[::-1], self.strides[::-1]):
+            if st != test:
+                return False
+            test *= sh
+        else:
+            return True
+
+    def compact(self):
+        raise NotImplementedError
+
     def __getitem__(self, where):
         assert len(self.shape) != 0
 
         if not isinstance(where, tuple):
             where = (where,)
+
+        # if any strides are not an even multiple of their underlying stride
+        # or any strides are negative, compact before doing a getitem
 
         next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
         nexthead, nexttail = head_tail(where)
@@ -94,10 +112,11 @@ class NumpyArray:
 
             nexthead, nexttail = head_tail(tail)
             nextcarry = numpy.full(len(carry)*(head.stop - head.start), 999, dtype=int)
-            skip = self.strides[0] // self.strides[1] // self.shape[1]
+
+            skip = self.strides[0] // self.strides[1]
             for i in range(len(carry)):
                 for j in range(head.stop - head.start):
-                    nextcarry[i*(head.stop - head.start) + j] = skip*self.shape[1]*carry[i] + head.start + j
+                    nextcarry[i*(head.stop - head.start) + j] = skip*carry[i] + head.start + j
 
             out = next.getitem_next(nexthead, nexttail, nextcarry, length*(head.stop - head.start), next.strides[0])
             shape = (length, out.shape[0] // length) + out.shape[1:]   # maybe out.shape[0] // length == head.stop - head.start
@@ -115,10 +134,10 @@ class NumpyArray:
 
                 nexthead, nexttail = head_tail(tail)
                 nextcarry = numpy.full(len(carry)*len(head), 999, dtype=int)
-                skip = self.strides[0] // self.strides[1] // self.shape[1]
+                skip = self.strides[0] // self.strides[1]
                 for i in range(len(carry)):
                     for j in range(len(head)):
-                        nextcarry[i*len(head) + j] = skip*self.shape[1]*carry[i] + head[j]
+                        nextcarry[i*len(head) + j] = skip*carry[i] + head[j]
 
                 out = next.getitem_next(nexthead, nexttail, nextcarry, length*len(head), next.strides[0])
                 shape = (length, out.shape[0] // length) + out.shape[1:]   # maybe out.shape[0] // length == len(head)
@@ -145,14 +164,16 @@ def flatten_shape(shape):
 def flatten_strides(strides):
     return strides[1:]
 
-a = numpy.arange(8*6).reshape(8, 6)[::2, ::3]
+a = numpy.arange(8*9).reshape(8, 9)[:,:]
 b = NumpyArray(a)
-cut = (slice(0, 4), numpy.array([1, 0, 0, 1]))
-acut = a[cut]
-bcut = b[cut]
-print("should be shape", acut.shape, "strides", acut.strides)
-print("       is shape", bcut.shape, "strides", bcut.strides)
-print(acut.tolist())
-print(bcut.tolist())
-if acut.tolist() != bcut.tolist():
-    print("WRONG!!!")
+print(b.iscompact)
+
+# cut = (slice(0, 4), slice(0, 3))
+# acut = a[cut]
+# bcut = b[cut]
+# print("should be shape", acut.shape, "strides", acut.strides)
+# print("       is shape", bcut.shape, "strides", bcut.strides)
+# print(acut.tolist())
+# print(bcut.tolist())
+# if acut.tolist() != bcut.tolist():
+#     print("WRONG!!!")
