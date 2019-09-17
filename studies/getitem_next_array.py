@@ -1,3 +1,4 @@
+import ctypes
 import math
 import itertools
 import functools
@@ -7,12 +8,21 @@ import numpy
 
 class NumpyArray:
     def __init__(self, array):
-        self.ptr = numpy.lib.stride_tricks.as_strided(array, (array.shape[0]*array.strides[0] // array.itemsize,), (array.itemsize,)).view(numpy.uint8)
+        assert len(array.shape) == len(array.strides)
+
+        minpos, maxpos = 0, 0
+        for i in range(len(array.shape)):
+            if array.strides[i] < 0:
+                minpos += (array.shape[i] - 1)*array.strides[i]
+            else:
+                maxpos += array.shape[i]*array.strides[i]
+
+        self.ptr = numpy.ctypeslib.as_array(ctypes.cast(array.ctypes.data + minpos, ctypes.POINTER(ctypes.c_uint8)), (maxpos - minpos,))
         self.shape = array.shape
         self.strides = array.strides
         self.itemsize = array.itemsize
         self.dtype = array.dtype
-        self.byteoffset = 0
+        self.byteoffset = -minpos
 
     def copy(self, ptr=None, shape=None, strides=None, itemsize=None, dtype=None, byteoffset=None):
         out = type(self).__new__(type(self))
@@ -41,9 +51,9 @@ class NumpyArray:
         if len(self.shape) == 0:
             return numpy.frombuffer(self.ptr[self.byteoffset : self.byteoffset + self.itemsize], dtype=self.dtype).reshape(())
         else:
-            ptr = self.ptr[self.byteoffset : self.byteoffset + self.strides[0]*self.shape[0]]
-            return numpy.lib.stride_tricks.as_strided(numpy.frombuffer(ptr, dtype=self.dtype), self.shape, self.strides)
-            return out
+            # ptr = self.ptr[self.byteoffset : self.byteoffset + self.strides[0]*self.shape[0]]
+            # return numpy.lib.stride_tricks.as_strided(numpy.frombuffer(ptr, dtype=self.dtype), self.shape, self.strides)
+            return numpy.lib.stride_tricks.as_strided(self.ptr[self.byteoffset : self.byteoffset + self.itemsize].view(self.dtype), self.shape, self.strides)
 
     def tolist(self):
         return numpy.array(self).tolist()
@@ -127,7 +137,7 @@ class NumpyArray:
 
             ptr = numpy.full(len(carry)*stride, 123, dtype=numpy.uint8)
             for i in range(len(carry)):
-                print("from", self.byteoffset + carry[i]*stride, ":", self.byteoffset + (carry[i] + 1)*stride, "to", i*stride, ":", (i + 1)*stride)
+                print("to", i*stride, ":", (i + 1)*stride, "from", self.byteoffset + carry[i]*stride, ":", self.byteoffset + (carry[i] + 1)*stride, "which is", self.ptr[self.byteoffset + carry[i]*stride : self.byteoffset + (carry[i] + 1)*stride])
                 ptr[i*stride : (i + 1)*stride] = self.ptr[self.byteoffset + carry[i]*stride : self.byteoffset + (carry[i] + 1)*stride]
 
             print("ptr", ptr.view(self.dtype))
@@ -200,24 +210,26 @@ def flatten_shape(shape):
 def flatten_strides(strides):
     return strides[1:]
 
-a = numpy.arange(10)[::-1]
-b = NumpyArray(a)
-print("b.shape", b.shape, "b.strides", b.strides)
-c = b.compact()
-print("c.shape", c.shape, "c.strides", c.strides)
-print(a.tolist())
-print(c.tolist())
-assert c.iscompact
-if a.tolist() != c.tolist():
-    print("WRONG!!!")
-
-
-# cut = (slice(0, 5), slice(0, 1))
-# acut = a[cut]
-# bcut = b[cut]
-# print("should be shape", acut.shape, "strides", acut.strides)
-# print("       is shape", bcut.shape, "strides", bcut.strides)
-# print(acut.tolist())
-# print(bcut.tolist())
-# if acut.tolist() != bcut.tolist():
+# a = numpy.arange(10)[::-1]
+# b = NumpyArray(a)
+# print(b.shape, b.strides, numpy.array(b))
+# print("b.shape", b.shape, "b.strides", b.strides, "b.ptr", b.ptr)
+# c = b.compact()
+# print("c.shape", c.shape, "c.strides", c.strides, "c.ptr", c.ptr)
+# print(a.tolist())
+# print(c.tolist())
+# assert c.iscompact
+# if a.tolist() != c.tolist():
 #     print("WRONG!!!")
+
+a = numpy.arange(9*6).reshape(9, 6)[1::3, 1::2]
+b = NumpyArray(a)
+cut = (slice(1, 3), slice(1, 3))
+acut = a[cut]
+bcut = b[cut]
+print("should be shape", acut.shape, "strides", acut.strides)
+print("       is shape", bcut.shape, "strides", bcut.strides)
+print(acut.tolist())
+print(bcut.tolist())
+if acut.tolist() != bcut.tolist():
+    print("WRONG!!!")
