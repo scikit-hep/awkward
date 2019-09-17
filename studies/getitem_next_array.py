@@ -124,10 +124,10 @@ class NumpyArray:
             self.compact()
             next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
             nextcarry = numpy.array([0])
-            out = next.getitem_next(nexthead, nexttail, nextcarry, 1, next.strides[0])
+            out = next.getitem_next(nexthead, nexttail, nextcarry, None, 1, next.strides[0])
             return out.copy(shape=out.shape[1:], strides=out.strides[1:])
 
-    def getitem_next(self, head, tail, carry, length, stride):
+    def getitem_next(self, head, tail, carry, advanced, length, stride):
         assert len(self.shape) == len(self.strides)
 
         if head is numpy.newaxis:
@@ -156,7 +156,7 @@ class NumpyArray:
             for i in range(len(carry)):
                 nextcarry[i] = skip*carry[i] + head
 
-            out = next.getitem_next(nexthead, nexttail, nextcarry, length, next.strides[0])
+            out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length, next.strides[0])
             shape = (length,) + out.shape[1:]
             return out.copy(shape=shape)
 
@@ -176,11 +176,21 @@ class NumpyArray:
 
             skip, remainder = divmod(self.strides[0], self.strides[1])
             assert remainder == 0
-            for i in range(len(carry)):
-                for j in range(headlen):
-                    nextcarry[i*headlen + j] = skip*carry[i] + head.start + j*step
 
-            out = next.getitem_next(nexthead, nexttail, nextcarry, length*headlen, next.strides[0])
+            if advanced is None:
+                nextadvanced = None
+                for i in range(len(carry)):
+                    for j in range(headlen):
+                        nextcarry[i*headlen + j] = skip*carry[i] + head.start + j*step
+
+            else:
+                nextadvanced = numpy.full(len(carry)*headlen, 999, dtype=int)
+                for i in range(len(carry)):
+                    for j in range(headlen):
+                        nextcarry[i*headlen + j] = skip*carry[i] + head.start + j*step
+                        nextadvanced[i*headlen + j] = advanced[i]
+
+            out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*headlen, next.strides[0])
             shape = (length, headlen) + out.shape[1:]
             strides = (shape[1]*out.strides[0],) + out.strides
             return out.copy(shape=shape, strides=strides)
@@ -192,18 +202,33 @@ class NumpyArray:
                 next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides))
 
                 nexthead, nexttail = head_tail(tail)
-                nextcarry = numpy.full(len(carry)*len(head), 999, dtype=int)
 
                 skip, remainder = divmod(self.strides[0], self.strides[1])
                 assert remainder == 0
-                for i in range(len(carry)):
-                    for j in range(len(head)):
-                        nextcarry[i*len(head) + j] = skip*carry[i] + head[j]
 
-                out = next.getitem_next(nexthead, nexttail, nextcarry, length*len(head), next.strides[0])
-                shape = (length, len(head)) + out.shape[1:]
-                strides = (shape[1]*out.strides[0],) + out.strides
-                return out.copy(shape=shape, strides=strides)
+                if advanced is None:
+                    nextcarry = numpy.full(len(carry)*len(head), 999, dtype=int)
+                    nextadvanced = numpy.full(len(carry)*len(head), 999, dtype=int)
+                    for i in range(len(carry)):
+                        for j in range(len(head)):
+                            nextcarry[i*len(head) + j] = skip*carry[i] + head[j]
+                            nextadvanced[i*len(head) + j] = j
+
+                    out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*len(head), next.strides[0])
+                    shape = (length, len(head)) + out.shape[1:]
+                    strides = (shape[1]*out.strides[0],) + out.strides
+                    return out.copy(shape=shape, strides=strides)
+
+                else:
+                    nextcarry = numpy.full(len(carry), 999, dtype=int)
+                    nextadvanced = numpy.full(len(carry), 999, dtype=int)
+                    for i in range(len(carry)):
+                        nextcarry[i] = skip*carry[i] + head[advanced[i]]
+                        nextadvanced[i] = advanced[i]
+
+                    out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*len(head), next.strides[0])
+                    shape = (length,) + out.shape[1:]
+                    return out.copy(shape=shape)
 
             elif issubclass(head.dtype.type, (numpy.bool_, numpy.bool)):
                 raise NotImplementedError("boolarray")
@@ -225,32 +250,32 @@ def flatten_shape(shape):
 def flatten_strides(strides):
     return strides[1:]
 
-# a = numpy.arange(7*5).reshape(7, 5)
-# b = NumpyArray(a)
-# cut = (slice(4, 0, -1), 3)
-# acut = a[cut]
-# bcut = b[cut]
-# print("should be shape", acut.shape, "strides", acut.strides)
-# print("       is shape", bcut.shape, "strides", bcut.strides)
-# print(acut.tolist())
-# print(bcut.tolist())
-# if acut.tolist() != bcut.tolist():
-#     print("WRONG!!!")
-
-# a = numpy.arange(7*5).reshape(7, 5)
-# a = numpy.arange(7*5*6).reshape(7, 5, 6)
-a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
+a = numpy.arange(7*5*6).reshape(7, 5, 6)
 b = NumpyArray(a)
-# for depth in 1, 2:
-#     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# for depth in 1, 2, 3:
-#     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-for depth in 1, 2, 3, 4:
-    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1)), depth):
-        print(cuts)
-        acut = a[cuts].tolist()
-        bcut = b[cuts].tolist()
-        print(acut)
-        print(bcut)
-        print()
-        assert acut == bcut
+cut = (numpy.array([2, 0, 0, 1]), slice(1, 4), numpy.array([0, 1, 1, 0]))
+acut = a[cut]
+bcut = b[cut]
+print("should be shape", acut.shape, "strides", acut.strides)
+print("       is shape", bcut.shape, "strides", bcut.strides)
+print(acut.tolist())
+print(bcut.tolist())
+if acut.tolist() != bcut.tolist():
+    print("WRONG!!!")
+
+# # a = numpy.arange(7*5).reshape(7, 5)
+# # a = numpy.arange(7*5*6).reshape(7, 5, 6)
+# a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
+# b = NumpyArray(a)
+# # for depth in 1, 2:
+# #     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# # for depth in 1, 2, 3:
+# #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# for depth in 1, 2, 3, 4:
+#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1)), depth):
+#         print(cuts)
+#         acut = a[cuts].tolist()
+#         bcut = b[cuts].tolist()
+#         print(acut)
+#         print(bcut)
+#         print()
+#         assert acut == bcut
