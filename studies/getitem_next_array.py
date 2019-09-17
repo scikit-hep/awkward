@@ -3,6 +3,7 @@ import math
 import itertools
 import functools
 import operator
+import collections.abc
 
 import numpy
 
@@ -116,13 +117,27 @@ class NumpyArray:
 
         if not isinstance(where, tuple):
             where = (where,)
-        nexthead, nexttail = head_tail(where)
 
-        if False and all(x is numpy.newaxis or x is Ellipsis or (isinstance(x, tuple) and len(x) == 0) or isinstance(x, (int, numpy.integer, slice))):
+        if False and all(x is numpy.newaxis or x is Ellipsis or (isinstance(x, tuple) and len(x) == 0) or isinstance(x, (int, numpy.integer, slice)) for x in where):
+            nexthead, nexttail = head_tail(where)
             return getitem_bystrides(nexthead, nexttail)
+
         else:
             self.compact()
+
+            where = tuple(numpy.array(x) if isinstance(x, collections.abc.Iterable) and not (isinstance(x, tuple) and len(x) == 0) else x for x in where)
+
+            advlen = -1
+            for x in where:
+                if isinstance(x, numpy.ndarray) and not (len(x) == 1 and issubclass(x.dtype.type, numpy.integer)):
+                    advlen = len(x)
+                    break
+
+            if advlen != -1:
+                where = tuple(numpy.repeat(x, advlen) if isinstance(x, (int, numpy.integer)) or (isinstance(x, numpy.ndarray) and len(x) == 1 and issubclass(x.dtype.type, numpy.integer)) else x for x in where)
+
             next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
+            nexthead, nexttail = head_tail(where)
             nextcarry = numpy.array([0])
             out = next.getitem_next(nexthead, nexttail, nextcarry, None, 1, next.strides[0])
             return out.copy(shape=out.shape[1:], strides=out.strides[1:])
@@ -250,9 +265,9 @@ def flatten_shape(shape):
 def flatten_strides(strides):
     return strides[1:]
 
-a = numpy.arange(7*5*6).reshape(7, 5, 6)
+a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
 b = NumpyArray(a)
-cut = (numpy.array([2, 0, 0, 1]), slice(1, 4), numpy.array([0, 1, 1, 0]))
+cut = (slice(0, 5), 0, slice(1, 4), numpy.array([1, 0, 0, 1]))
 acut = a[cut]
 bcut = b[cut]
 print("should be shape", acut.shape, "strides", acut.strides)
@@ -271,7 +286,7 @@ if acut.tolist() != bcut.tolist():
 # # for depth in 1, 2, 3:
 # #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
 # for depth in 1, 2, 3, 4:
-#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1)), depth):
+#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1])), depth):
 #         print(cuts)
 #         acut = a[cuts].tolist()
 #         bcut = b[cuts].tolist()
