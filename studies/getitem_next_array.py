@@ -66,13 +66,12 @@ class NumpyArray:
 
     @property
     def iscompact(self):
-        # isscalar implies iscompact
         test = self.itemsize
         for sh, st in zip(self.shape[::-1], self.strides[::-1]):
             if st != test:
                 return False
             test *= sh
-        return True
+        return True   # isscalar implies iscompact
 
     def compact(self):
         out = self.compacted()
@@ -161,26 +160,30 @@ class NumpyArray:
             shape = (length,) + out.shape[1:]
             return out.copy(shape=shape)
 
-        elif isinstance(head, slice) and head.step is None:
+        elif isinstance(head, slice):
             assert len(self.shape) >= 2
             next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides))
 
+            start, stop, step = head.start, head.stop, head.step
+            if step is None:
+                step = 1
+            assert step != 0
+            d, m = divmod(abs(start - stop), abs(step))
+            headlen = d + (1 if m != 0 else 0)
+
             nexthead, nexttail = head_tail(tail)
-            nextcarry = numpy.full(len(carry)*(head.stop - head.start), 999, dtype=int)
+            nextcarry = numpy.full(len(carry)*headlen, 999, dtype=int)
 
             skip, remainder = divmod(self.strides[0], self.strides[1])
             assert remainder == 0
             for i in range(len(carry)):
-                for j in range(head.stop - head.start):
-                    nextcarry[i*(head.stop - head.start) + j] = skip*carry[i] + head.start + j
+                for j in range(headlen):
+                    nextcarry[i*headlen + j] = skip*carry[i] + head.start + j*step
 
-            out = next.getitem_next(nexthead, nexttail, nextcarry, length*(head.stop - head.start), next.strides[0])
-            shape = (length, head.stop - head.start) + out.shape[1:]
+            out = next.getitem_next(nexthead, nexttail, nextcarry, length*headlen, next.strides[0])
+            shape = (length, headlen) + out.shape[1:]
             strides = (shape[1]*out.strides[0],) + out.strides
             return out.copy(shape=shape, strides=strides)
-
-        elif isinstance(head, slice):
-            raise NotImplementedError("slice3")
 
         else:
             head = numpy.asarray(head)
@@ -224,7 +227,7 @@ def flatten_strides(strides):
 
 # a = numpy.arange(7*5).reshape(7, 5)
 # b = NumpyArray(a)
-# cut = (slice(0, 4), 3)
+# cut = (slice(4, 0, -1), 3)
 # acut = a[cut]
 # bcut = b[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
@@ -236,15 +239,14 @@ def flatten_strides(strides):
 
 # a = numpy.arange(7*5).reshape(7, 5)
 # a = numpy.arange(7*5*6).reshape(7, 5, 6)
-a = numpy.arange(7*5*6*4).reshape(7, 5, 6, 4)
+a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
 b = NumpyArray(a)
-
 # for depth in 1, 2:
 #     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
 # for depth in 1, 2, 3:
 #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
 for depth in 1, 2, 3, 4:
-    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 4), slice(1, 3), slice(1, 2), slice(2, 3)), depth):
+    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1)), depth):
         print(cuts)
         acut = a[cuts].tolist()
         bcut = b[cuts].tolist()
