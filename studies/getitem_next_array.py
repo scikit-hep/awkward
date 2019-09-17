@@ -10,14 +10,15 @@ class NumpyArray:
     def __init__(self, array):
         assert len(array.shape) == len(array.strides)
 
-        minpos, maxpos = 0, 0
+        minpos, nbytes = 0, 0
         for i in range(len(array.shape)):
             if array.strides[i] < 0:
                 minpos += (array.shape[i] - 1)*array.strides[i]
+                nbytes -= array.shape[i]*array.strides[i]
             else:
-                maxpos += array.shape[i]*array.strides[i]
+                nbytes += array.shape[i]*array.strides[i]
 
-        self.ptr = numpy.ctypeslib.as_array(ctypes.cast(array.ctypes.data + minpos, ctypes.POINTER(ctypes.c_uint8)), (maxpos - minpos,))
+        self.ptr = numpy.ctypeslib.as_array(ctypes.cast(array.ctypes.data + minpos, ctypes.POINTER(ctypes.c_uint8)), (nbytes,))
         self.shape = array.shape
         self.strides = array.strides
         self.itemsize = array.itemsize
@@ -94,7 +95,6 @@ class NumpyArray:
             ptr = numpy.full(len(bytepos)*self.itemsize, 123, dtype=numpy.uint8)
             for i in range(len(bytepos)):
                 print("to", i*self.itemsize, ":", (i + 1)*self.itemsize, "from", self.byteoffset + bytepos[i], ":", self.byteoffset + bytepos[i] + self.itemsize, "which is", self.ptr[self.byteoffset + bytepos[i] : self.byteoffset + bytepos[i] + self.itemsize])
-
                 ptr[i*self.itemsize : (i + 1)*self.itemsize] = self.ptr[self.byteoffset + bytepos[i] : self.byteoffset + bytepos[i] + self.itemsize]
             return self.copy(ptr=ptr, strides=(self.itemsize,), byteoffset=0)
 
@@ -210,26 +210,26 @@ def flatten_shape(shape):
 def flatten_strides(strides):
     return strides[1:]
 
-# a = numpy.arange(10)[::-1]
-# b = NumpyArray(a)
-# print(b.shape, b.strides, numpy.array(b))
-# print("b.shape", b.shape, "b.strides", b.strides, "b.ptr", b.ptr)
-# c = b.compact()
-# print("c.shape", c.shape, "c.strides", c.strides, "c.ptr", c.ptr)
-# print(a.tolist())
-# print(c.tolist())
-# assert c.iscompact
-# if a.tolist() != c.tolist():
-#     print("WRONG!!!")
-
-a = numpy.arange(9*6).reshape(9, 6)[1::3, 1::2]
+a = numpy.arange(7*5).reshape(7, 5)[5::-2, 3::-1]
 b = NumpyArray(a)
-cut = (slice(1, 3), slice(1, 3))
-acut = a[cut]
-bcut = b[cut]
-print("should be shape", acut.shape, "strides", acut.strides)
-print("       is shape", bcut.shape, "strides", bcut.strides)
-print(acut.tolist())
-print(bcut.tolist())
-if acut.tolist() != bcut.tolist():
+print(b.shape, b.strides, numpy.array(b))
+print("b.shape", b.shape, "b.strides", b.strides, "b.ptr", b.ptr)
+c = b.compact()
+print("c.shape", c.shape, "c.strides", c.strides, "c.ptr", c.ptr)
+print(a.tolist())
+print(c.tolist())
+assert c.iscompact
+if a.tolist() != c.tolist():
     print("WRONG!!!")
+
+# a = numpy.arange(9*6).reshape(9, 6)[1::3, 1::2]
+# b = NumpyArray(a)
+# cut = (slice(1, 3), slice(1, 3))
+# acut = a[cut]
+# bcut = b[cut]
+# print("should be shape", acut.shape, "strides", acut.strides)
+# print("       is shape", bcut.shape, "strides", bcut.strides)
+# print(acut.tolist())
+# print(bcut.tolist())
+# if acut.tolist() != bcut.tolist():
+#     print("WRONG!!!")
