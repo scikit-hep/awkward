@@ -177,7 +177,15 @@ class NumpyArray:
             return self
 
         elif isinstance(head, (int, numpy.integer)):
-            raise NotImplementedError("int")
+            assert len(self.shape) >= 2
+
+            nextbyteoffset = self.byteoffset + head*self.strides[1]
+            next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides), byteoffset=nextbyteoffset)
+            nexthead, nexttail = head_tail(tail)
+
+            out = next.getitem_bystrides(nexthead, nexttail, length)
+            shape = (length,) + out.shape[1:]
+            return out.copy(shape=shape)
 
         elif isinstance(head, slice):
             assert len(self.shape) >= 2
@@ -375,10 +383,10 @@ def bool2int_arrays(whereitem):
             return numpy.nonzero(whereitem)
     return (whereitem,)
 
-# a = numpy.arange(10)[::-1]
+# a = numpy.arange(10)[9::-2]
 # print(a.tolist())
 # b = NumpyArray(a)
-# cut = (slice(7, 0, -2),)
+# cut = (3,)
 # acut = a[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
 # print(acut.tolist())
@@ -388,9 +396,9 @@ def bool2int_arrays(whereitem):
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
 
-a = numpy.arange(7*5).reshape(7, 5)[::-1, ::-1]
+a = numpy.arange(7*5).reshape(7, 5)[6::-2, ::-1]
 b = NumpyArray(a)
-cut = (slice(6, 0, -2), slice(4, 0, -1))
+cut = (slice(0, 3), 2)
 acut = a[cut]
 print("should be shape", acut.shape, "strides", acut.strides)
 print(acut.tolist())
