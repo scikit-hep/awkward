@@ -13,65 +13,83 @@
 #include "awkward/Index.h"
 
 namespace awkward {
-  // class SliceItem {
-  // public:
-  //   static int64_t none() { return kMaxInt64 + 1; }
-  //
-  //   virtual const std::string tostring_part() const = 0;
-  // };
-  //
-  // class SliceAt: public SliceItem {
-  // public:
-  //   SliceAt(int64_t at): at_(at) { }
-  //   int64_t at() const { return at_; }
-  //   virtual const std::string tostring_part() const { return std::to_string(at_); }
-  // private:
-  //   const int64_t at_;
-  // };
-  //
-  // class SliceStartStop: public SliceItem {
-  // public:
-  //   SliceStartStop(int64_t start, int64_t stop): start_(start), stop_(stop) { }
-  //   int64_t start() const { return start_; }
-  //   int64_t stop() const { return stop_; }
-  //   bool hasstart() const { return start_ != none(); }
-  //   bool hasstop() const { return stop_ != none(); }
-  //   virtual const std::string tostring_part() const {
-  //     return (hasstart() ? std::to_string(start_) : std::string("")) + std::string(":") + (hasstop() ? std::to_string(stop_) : std::string(""));
-  //   }
-  // private:
-  //   const int64_t start_;
-  //   const int64_t stop_;
-  // };
-  //
-  // class SliceStartStopStep: public SliceItem {
-  // public:
-  //   SliceStartStopStep(int64_t start, int64_t stop, int64_t step): start_(start), stop_(stop), step_(step) { }
-  //   int64_t start() const { return start_; }
-  //   int64_t stop() const { return stop_; }
-  //   int64_t step() const { return step_; }
-  //   bool hasstart() const { return start_ != none(); }
-  //   bool hasstop() const { return stop_ != none(); }
-  //   bool hasstep() const { return step_ != none(); }
-  //   virtual const std::string tostring_part() const {
-  //     return (hasstart() ? std::to_string(start_) : std::string("")) + std::string(":") + (hasstop() ? std::to_string(stop_) : std::string("")) + std::string(":") + (hasstep() ? std::to_string(step_) : std::string(""));
-  //   }
-  // private:
-  //   const int64_t start_;
-  //   const int64_t stop_;
-  //   const int64_t step_;
-  // };
-  //
-  // class SliceByteMask: public SliceItem {
-  // public:
-  //   SliceByteMask(Index8 mask): mask_(mask) { }
-  //   Index8 mask() const { return mask_; }
-  //   int64_t length() const { return mask_.length(); }
-  //   virtual const std::string tostring_part() const { return std::string("<bytemask[") + std::to_string(length()) + std::string("]>"); }
-  // private:
-  //   const Index8 mask_;
-  // };
-  //
+  class SliceItem {
+  public:
+    static int64_t none() { return kMaxInt64 + 1; }
+
+    virtual const std::string tostring_part() const = 0;
+  };
+
+  class SliceAt: public SliceItem {
+  public:
+    SliceAt(int64_t at): at_(at) { }
+    int64_t at() const { return at_; }
+    virtual const std::string tostring_part() const { return std::to_string(at_); }
+  private:
+    const int64_t at_;
+  };
+
+  class SliceRange: public SliceItem {
+  public:
+    SliceRange(int64_t start, int64_t stop, int64_t step): start_(start), stop_(stop), step_(step) { assert(step_ != 0); }
+    int64_t start() const { return start_; }
+    int64_t stop() const { return stop_; }
+    int64_t step() const { return step_; }
+    bool hasstart() const { return start_ != none(); }
+    bool hasstop() const { return stop_ != none(); }
+    bool hasstep() const { return step_ != none(); }
+    virtual const std::string tostring_part() const {
+      return (hasstart() ? std::to_string(start_) : std::string("")) + std::string(":") +
+             (hasstop() ? std::to_string(stop_) : std::string("")) + std::string(":") +
+             (hasstep() ? std::to_string(step_) : std::string(""));
+    }
+  private:
+    const int64_t start_;
+    const int64_t stop_;
+    const int64_t step_;
+  };
+
+  const SliceIndex64: public SliceItem {
+  public:
+    SliceIndex64(Index64 index, const std::vector<int64_t>& shape): index_(index), shape_(shape) { assert(ndim() > 0); }
+    const Index64 index() const { return index_; }
+    const std::vector<int64_t> shape() const { return shape_; }
+    int64_t ndim() const { return shape_.size(); }
+    const SliceIndex64 get(int64_t i) const {
+      Index64 subindex(index_.ptr(), index_.offset() + HERE)
+
+
+
+    }
+    virtual const std::string tostring_part() const {
+      std::stringstream out;
+      out << "[";
+      // if (shape_ > 6) {
+      // }
+      {
+        if (ndim() == 1) {
+          for (int64_t i = 0;  i < shape_[0];  i++) {
+            if (i != 0) {
+              out << ", ";
+            }
+            out << index_.get(i);
+          }
+        }
+        else {
+
+        }
+      }
+      out << "]";
+      return out.str();
+    }
+  private:
+    const Int64 index_;
+    const std::vector<int64_t> shape_;
+  };
+
+
+
+
   // class SliceIndex32: public SliceItem {
   // public:
   //   SliceIndex32(Index32 index): index_(index) { }
