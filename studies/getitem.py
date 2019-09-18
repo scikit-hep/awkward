@@ -408,17 +408,17 @@ def bool2int_arrays(whereitem):
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
 
-a = numpy.arange(7*5).reshape(7, 5)[6::-2, ::-1]
-b = NumpyArray(a)
-cut = (numpy.newaxis, numpy.newaxis, ..., slice(0, 3))
-acut = a[cut]
-print("should be shape", acut.shape, "strides", acut.strides)
-print(acut.tolist())
-bcut = b[cut]
-print("       is shape", bcut.shape, "strides", bcut.strides)
-print(bcut.tolist())
-if acut.tolist() != bcut.tolist():
-    print("WRONG!!!")
+# a = numpy.arange(7*5).reshape(7, 5)[6::-2, ::-1]
+# b = NumpyArray(a)
+# cut = (numpy.newaxis, numpy.newaxis, ..., slice(0, 3))
+# acut = a[cut]
+# print("should be shape", acut.shape, "strides", acut.strides)
+# print(acut.tolist())
+# bcut = b[cut]
+# print("       is shape", bcut.shape, "strides", bcut.strides)
+# print(bcut.tolist())
+# if acut.tolist() != bcut.tolist():
+#     print("WRONG!!!")
 
 # a = numpy.arange(7*5*6).reshape(7, 5, 6)
 # b = NumpyArray(a)
@@ -454,23 +454,23 @@ if acut.tolist() != bcut.tolist():
 # b.become_contiguous()
 # assert a.tolist() == b.tolist()
 
-# # a = numpy.arange(7*5).reshape(7, 5)
-# # a = numpy.arange(7*5*6).reshape(7, 5, 6)
-# a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
-# b = NumpyArray(a)
-# # for depth in 0, 1, 2:
-# #     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# # for depth in 0, 1, 2, 3:
-# #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# for depth in 0, 1, 2, 3, 4:
-#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1]), numpy.array([[1], [0]]), Ellipsis, numpy.newaxis), depth):
-#         try:
-#             print(cuts)
-#             acut = a[cuts].tolist()
-#             bcut = b[cuts].tolist()
-#             # print(acut)
-#             # print(bcut)
-#             # print()
-#             assert acut == bcut
-#         except ValueError:
-#             pass
+# a = numpy.arange(7*5).reshape(7, 5)
+# a = numpy.arange(7*5*6).reshape(7, 5, 6)
+a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
+b = NumpyArray(a)
+# for depth in 0, 1, 2:
+#     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# for depth in 0, 1, 2, 3:
+#     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+for depth in 0, 1, 2, 3, 4:
+    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1]), numpy.array([[1], [0]]), Ellipsis, numpy.newaxis), depth):
+        try:
+            print(cuts)
+            acut = a[cuts].tolist()
+            bcut = b[cuts].tolist()
+            # print(acut)
+            # print(bcut)
+            # print()
+            assert acut == bcut
+        except ValueError:
+            pass
