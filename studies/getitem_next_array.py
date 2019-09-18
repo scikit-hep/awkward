@@ -118,6 +118,9 @@ class NumpyArray:
         if not isinstance(where, tuple):
             where = (where,)
 
+        if len(where) > len(self.shape):
+            raise ValueError("too many indexes for array")
+
         if False and all(x is numpy.newaxis or x is Ellipsis or (isinstance(x, tuple) and len(x) == 0) or isinstance(x, (int, numpy.integer, slice)) for x in where):
             nexthead, nexttail = head_tail(where)
             return getitem_bystrides(nexthead, nexttail)
@@ -222,47 +225,73 @@ class NumpyArray:
             strides = (shape[1]*out.strides[0],) + out.strides
             return out.copy(shape=shape, strides=strides)
 
-        else:
-            head = numpy.asarray(head)
-            if issubclass(head.dtype.type, numpy.integer):
-                assert len(self.shape) >= 2
-                next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides))
+        elif isinstance(head, numpy.ndarray) and issubclass(head.dtype.type, numpy.integer):
+            assert len(self.shape) >= 2
+            next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides))
 
-                nexthead, nexttail = head_tail(tail)
+            nexthead, nexttail = head_tail(tail)
 
-                skip, remainder = divmod(self.strides[0], self.strides[1])
-                assert skip == self.shape[1]
-                assert remainder == 0
+            skip, remainder = divmod(self.strides[0], self.strides[1])
+            assert skip == self.shape[1]
+            assert remainder == 0
 
-                if advanced is None:
-                    nextcarry = numpy.full(len(carry)*len(head), 999, dtype=int)
-                    nextadvanced = numpy.full(len(carry)*len(head), 999, dtype=int)
-                    for i in range(len(carry)):
-                        for j in range(len(head)):
-                            nextcarry[i*len(head) + j] = skip*carry[i] + head[j]
-                            nextadvanced[i*len(head) + j] = j
+            flathead = head.ravel()   # Zork!
 
-                    out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*len(head), next.strides[0])
-                    shape = (length, len(head)) + out.shape[1:]
-                    strides = (shape[1]*out.strides[0],) + out.strides
-                    return out.copy(shape=shape, strides=strides)
+            if advanced is None:
+                nextcarry = numpy.full(len(carry)*len(flathead), 999, dtype=int)
+                nextadvanced = numpy.full(len(carry)*len(flathead), 999, dtype=int)
+                for i in range(len(carry)):
+                    for j in range(len(flathead)):
+                        nextcarry[i*len(flathead) + j] = skip*carry[i] + flathead[j]
+                        nextadvanced[i*len(flathead) + j] = j
 
-                else:
-                    nextcarry = numpy.full(len(carry), 999, dtype=int)
-                    nextadvanced = numpy.full(len(carry), 999, dtype=int)
-                    for i in range(len(carry)):
-                        nextcarry[i] = skip*carry[i] + head[advanced[i]]
-                        nextadvanced[i] = advanced[i]
-
-                    out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*len(head), next.strides[0])
-                    shape = (length,) + out.shape[1:]
-                    return out.copy(shape=shape)
-
-            elif issubclass(head.dtype.type, (numpy.bool_, numpy.bool)):
-                raise NotImplementedError("boolarray")
+                out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*len(flathead), next.strides[0])
+                shape = (length,) + head.shape + out.shape[1:]
+                strides = out.strides
+                for x in head.shape[::-1]:
+                    strides = (x*strides[0],) + strides
+                return out.copy(shape=shape, strides=strides)
 
             else:
-                raise TypeError("cannot use {0} as an index".format(head))
+                nextcarry = numpy.full(len(carry), 999, dtype=int)
+                nextadvanced = numpy.full(len(carry), 999, dtype=int)
+                for i in range(len(carry)):
+                    nextcarry[i] = skip*carry[i] + flathead[advanced[i]]
+                    nextadvanced[i] = advanced[i]
+
+                out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*len(head), next.strides[0])
+                shape = (length,) + out.shape[1:]
+                return out.copy(shape=shape)
+
+            # if advanced is None:
+            #     nextcarry = numpy.full(len(carry)*len(head), 999, dtype=int)
+            #     nextadvanced = numpy.full(len(carry)*len(head), 999, dtype=int)
+            #     for i in range(len(carry)):
+            #         for j in range(len(head)):
+            #             nextcarry[i*len(head) + j] = skip*carry[i] + head[j]
+            #             nextadvanced[i*len(head) + j] = j
+
+            #     out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*len(head), next.strides[0])
+            #     shape = (length, len(head)) + out.shape[1:]
+            #     strides = (shape[1]*out.strides[0],) + out.strides
+            #     return out.copy(shape=shape, strides=strides)
+
+            # else:
+            #     nextcarry = numpy.full(len(carry), 999, dtype=int)
+            #     nextadvanced = numpy.full(len(carry), 999, dtype=int)
+            #     for i in range(len(carry)):
+            #         nextcarry[i] = skip*carry[i] + head[advanced[i]]
+            #         nextadvanced[i] = advanced[i]
+
+            #     out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*len(head), next.strides[0])
+            #     shape = (length,) + out.shape[1:]
+            #     return out.copy(shape=shape)
+
+        elif isinstance(head, numpy.ndarray) and issubclass(head.dtype.type, (numpy.bool_, numpy.bool)):
+            raise NotImplementedError("boolarray")
+
+        else:
+            raise TypeError("cannot use {0} as an index".format(head))
 
 def head_tail(x):
     head = () if len(x) == 0 else x[0]
@@ -286,23 +315,35 @@ def broadcast_arrays(*args):
 # b = NumpyArray(a)
 # cut = (numpy.array([[0, 1, 2], [3, 4, 5]]),)
 # acut = a[cut]
-# bcut = b[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
-# print("       is shape", bcut.shape, "strides", bcut.strides)
 # print(acut.tolist())
+# bcut = b[cut]
+# print("       is shape", bcut.shape, "strides", bcut.strides)
 # print(bcut.tolist())
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
 
 # a = numpy.arange(7*5).reshape(7, 5)
-# print(a.tolist())
 # b = NumpyArray(a)
-# cut = (numpy.array([2, 0, 0, 1]), numpy.array([0, 1, 2, 0]),)
+# cut = (slice(0, 7), numpy.array([[1, 0, 0, 1]]),)
 # acut = a[cut]
-# bcut = b[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
-# print("       is shape", bcut.shape, "strides", bcut.strides)
 # print(acut.tolist())
+# bcut = b[cut]
+# print("       is shape", bcut.shape, "strides", bcut.strides)
+# print(bcut.tolist())
+# if acut.tolist() != bcut.tolist():
+#     print("WRONG!!!")
+
+# a = numpy.arange(7*5*6).reshape(7, 5, 6)
+# b = NumpyArray(a)
+# # cut = (slice(0, 5), numpy.array([[1, 0, 0, 1]]), numpy.array([[1], [0]]),)
+# cut = (slice(0, 5), numpy.array([[1, 0, 0, 1], [1, 0, 0, 1]]), numpy.array([[1, 1, 1, 1], [0, 0, 0, 0]]),)
+# acut = a[cut]
+# print("should be shape", acut.shape, "strides", acut.strides)
+# print(acut.tolist())
+# bcut = b[cut]
+# print("       is shape", bcut.shape, "strides", bcut.strides)
 # print(bcut.tolist())
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
@@ -316,7 +357,7 @@ b = NumpyArray(a)
 # for depth in 1, 2, 3:
 #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
 for depth in 1, 2, 3, 4:
-    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1])), depth):
+    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1]), numpy.array([[1], [0]])), depth):
         try:
             print(cuts)
             acut = a[cuts].tolist()
