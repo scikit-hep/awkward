@@ -115,15 +115,6 @@ namespace awkward {
       return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + start, stop - start, stride_));
     }
     virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
-    virtual const std::shared_ptr<Content> getitem(const Slice& slice) const {
-      throw std::runtime_error("not implemented");
-    };
-    virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail) const {
-      throw std::runtime_error("not implemented");
-    };
-    virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry) const {
-      throw std::runtime_error("not implemented");
-    };
 
     T* borrow(int64_t at) const { return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)stride_*(ssize_t)(offset_ + at)); }
 
