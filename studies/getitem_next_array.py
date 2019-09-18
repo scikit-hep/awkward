@@ -127,33 +127,33 @@ class NumpyArray:
         if len([x for x in where if x is not numpy.newaxis and x is not Ellipsis]) > len(self.shape):
             raise ValueError("too many indexes for array")
 
-        if False and all(x is numpy.newaxis or x is Ellipsis or (isinstance(x, tuple) and len(x) == 0) or isinstance(x, (int, numpy.integer, slice)) for x in where):
+        if all(x is numpy.newaxis or x is Ellipsis or (isinstance(x, tuple) and len(x) == 0) or isinstance(x, (int, numpy.integer, slice)) for x in where):
+            next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
             nexthead, nexttail = head_tail(where)
-            return getitem_bystrides(nexthead, nexttail)
+            length = 1
+            out = next.getitem_bystrides(nexthead, nexttail, length)
+            return out.copy(shape=out.shape[1:], strides=out.strides[1:])
 
         else:
-            if any(isinstance(x, collections.abc.Iterable) and not (isinstance(x, tuple) and len(x) == 0) for x in where):
-                # FIXME: the above check won't be necessary once you implement getitem_bystrides
+            where = sum([bool2int_arrays(x) for x in where], ())
 
-                where = sum([bool2int_arrays(x) for x in where], ())
+            broadcastable, broadcastable_j = [], []
+            for i, x in enumerate(where):
+                if not isinstance(x, tuple) and isinstance(x, (int, numpy.integer, collections.abc.Iterable)):
+                    broadcastable_j.append(len(broadcastable))
+                    broadcastable.append(x)
+                else:
+                    broadcastable_j.append(None)
+            broadcasted = broadcast_arrays(*broadcastable)
 
-                broadcastable, broadcastable_j = [], []
-                for i, x in enumerate(where):
-                    if not isinstance(x, tuple) and isinstance(x, (int, numpy.integer, collections.abc.Iterable)):
-                        broadcastable_j.append(len(broadcastable))
-                        broadcastable.append(x)
-                    else:
-                        broadcastable_j.append(None)
-                broadcasted = broadcast_arrays(*broadcastable)
+            where = tuple(x if broadcastable_j[i] is None else broadcasted[broadcastable_j[i]] for i, x in enumerate(where))
 
-                where = tuple(x if broadcastable_j[i] is None else broadcasted[broadcastable_j[i]] for i, x in enumerate(where))
-
-                while broadcastable_j[0] is None:
-                    broadcastable_j.pop(0)
-                while broadcastable_j[-1] is None:
-                    broadcastable_j.pop()
-                if any(x is None for x in broadcastable_j) and any(isinstance(x, int) for x in broadcastable_j):
-                    raise ValueError("awkward-array does not allow basic indexes (slices, etc.) between two advanced indexes (integer or array)")
+            while broadcastable_j[0] is None:
+                broadcastable_j.pop(0)
+            while broadcastable_j[-1] is None:
+                broadcastable_j.pop()
+            if any(x is None for x in broadcastable_j) and any(isinstance(x, int) for x in broadcastable_j):
+                raise ValueError("awkward-array does not allow basic indexes (slices, etc.) between two advanced indexes (integer or array)")
 
             self.become_contiguous()
             next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
@@ -163,6 +163,55 @@ class NumpyArray:
             length = 1
             out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length, next.strides[0])
             return out.copy(shape=out.shape[1:], strides=out.strides[1:])
+
+    def getitem_bystrides(self, head, tail, length):
+        assert len(self.shape) == len(self.strides)
+
+        if head is numpy.newaxis:
+            raise NotImplementedError("newaxis")
+
+        elif head is Ellipsis:
+            raise NotImplementedError("Ellipsis")
+
+        elif isinstance(head, tuple) and len(head) == 0:
+            return self
+
+        elif isinstance(head, (int, numpy.integer)):
+            raise NotImplementedError("int")
+
+        elif isinstance(head, slice):
+            assert len(self.shape) >= 2
+
+            start, stop, step = head.start, head.stop, head.step
+            if step is None:
+                step = 1
+            assert step != 0
+            if step > 0:
+                if start is None:
+                    start = 0
+                if stop is None:
+                    stop = self.shape[1]
+            else:
+                if start is None:
+                    start = self.shape[1] - 1
+                if stop is None:
+                    stop = -1
+
+            d, m = divmod(abs(start - stop), abs(step))
+            headlen = d + (1 if m != 0 else 0)
+
+            nextbyteoffset = self.byteoffset + start*self.strides[1]
+            next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides), byteoffset=nextbyteoffset)
+            nexthead, nexttail = head_tail(tail)
+
+            out = next.getitem_bystrides(nexthead, nexttail, length*headlen)
+            shape = (length, headlen) + out.shape[1:]
+            strides = (self.strides[0], self.strides[1] * step) + out.strides[1:]
+
+            return out.copy(shape=shape, strides=strides)
+
+        else:
+            raise TypeError("cannot use {0} as an index".format(head))
 
     def getitem_next(self, head, tail, carry, advanced, length, stride):
         assert len(self.shape) == len(self.strides)
@@ -194,6 +243,8 @@ class NumpyArray:
             return self.copy(ptr=ptr, shape=shape, strides=strides, byteoffset=0)
 
         elif isinstance(head, (int, numpy.integer)):
+            raise Exception("these should now be broadcasted into arrays")
+
             assert len(self.shape) >= 2
             next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides))
 
@@ -253,7 +304,7 @@ class NumpyArray:
 
             out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*headlen, next.strides[0])
             shape = (length, headlen) + out.shape[1:]
-            strides = (shape[1]*out.strides[0],) + out.strides
+            strides = (shape[1]*out.strides[0],) + out.strides    # FIXME: this 'shape[1]' could be 'headlen'
             return out.copy(shape=shape, strides=strides)
 
         elif isinstance(head, numpy.ndarray) and issubclass(head.dtype.type, numpy.integer):
@@ -302,6 +353,9 @@ def head_tail(x):
     tail = x[1:]
     return head, tail
 
+def product_shape(shape):
+    return functools.reduce(operator.mul, shape, 1)
+
 def flatten_shape(shape):
     if len(shape) == 1:
         return ()
@@ -321,10 +375,10 @@ def bool2int_arrays(whereitem):
             return numpy.nonzero(whereitem)
     return (whereitem,)
 
-# a = numpy.arange(10)
+# a = numpy.arange(10)[::-1]
 # print(a.tolist())
 # b = NumpyArray(a)
-# cut = (numpy.array([True, True, True, False, False, False, True, False, True, False]),)
+# cut = (slice(7, 0, -2),)
 # acut = a[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
 # print(acut.tolist())
@@ -334,17 +388,17 @@ def bool2int_arrays(whereitem):
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
 
-# a = numpy.arange(7*5).reshape(7, 5)
-# b = NumpyArray(a)
-# cut = (..., numpy.newaxis)
-# acut = a[cut]
-# print("should be shape", acut.shape, "strides", acut.strides)
-# print(acut.tolist())
-# bcut = b[cut]
-# print("       is shape", bcut.shape, "strides", bcut.strides)
-# print(bcut.tolist())
-# if acut.tolist() != bcut.tolist():
-#     print("WRONG!!!")
+a = numpy.arange(7*5).reshape(7, 5)[::-1, ::-1]
+b = NumpyArray(a)
+cut = (slice(6, 0, -2), slice(4, 0, -1))
+acut = a[cut]
+print("should be shape", acut.shape, "strides", acut.strides)
+print(acut.tolist())
+bcut = b[cut]
+print("       is shape", bcut.shape, "strides", bcut.strides)
+print(bcut.tolist())
+if acut.tolist() != bcut.tolist():
+    print("WRONG!!!")
 
 # a = numpy.arange(7*5*6).reshape(7, 5, 6)
 # b = NumpyArray(a)
@@ -380,23 +434,23 @@ def bool2int_arrays(whereitem):
 # b.become_contiguous()
 # assert a.tolist() == b.tolist()
 
-# a = numpy.arange(7*5).reshape(7, 5)
-# a = numpy.arange(7*5*6).reshape(7, 5, 6)
-a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
-b = NumpyArray(a)
-# for depth in 1, 2:
-#     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# for depth in 1, 2, 3:
-#     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-for depth in 1, 2, 3, 4:
-    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1]), numpy.array([[1], [0]]), Ellipsis, numpy.newaxis), depth):
-        try:
-            print(cuts)
-            acut = a[cuts].tolist()
-            bcut = b[cuts].tolist()
-            # print(acut)
-            # print(bcut)
-            # print()
-            assert acut == bcut
-        except ValueError:
-            pass
+# # a = numpy.arange(7*5).reshape(7, 5)
+# # a = numpy.arange(7*5*6).reshape(7, 5, 6)
+# a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
+# b = NumpyArray(a)
+# # for depth in 0, 1, 2:
+# #     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# # for depth in 0, 1, 2, 3:
+# #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# for depth in 0, 1, 2, 3, 4:
+#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1]), numpy.array([[1], [0]]), Ellipsis, numpy.newaxis), depth):
+#         try:
+#             print(cuts)
+#             acut = a[cuts].tolist()
+#             bcut = b[cuts].tolist()
+#             # print(acut)
+#             # print(bcut)
+#             # print()
+#             assert acut == bcut
+#         except ValueError:
+#             pass
