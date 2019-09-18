@@ -66,32 +66,32 @@ class NumpyArray:
         return len(self.shape) == 0
 
     @property
-    def iscompact(self):
+    def iscontiguous(self):
         test = self.itemsize
         for sh, st in zip(self.shape[::-1], self.strides[::-1]):
             if st != test:
                 return False
             test *= sh
-        return True   # isscalar implies iscompact
+        return True   # isscalar implies iscontiguous
 
-    def compact(self):
-        out = self.compacted()
+    def become_contiguous(self):
+        out = self.contiguous()
         self.ptr = out.ptr
         self.shape = out.shape
         self.strides = out.strides
         self.itemsize = out.itemsize
         self.dtype = out.dtype
         self.byteoffset = out.byteoffset
-        
-    def compacted(self):
-        if self.iscompact:
+
+    def contiguous(self):
+        if self.iscontiguous:
             return self
         else:
             bytepos = numpy.arange(0, self.shape[0]*self.strides[0], self.strides[0])
-            return self.compacted_next(bytepos)
+            return self.contiguous_next(bytepos)
 
-    def compacted_next(self, bytepos):
-        if self.iscompact:
+    def contiguous_next(self, bytepos):
+        if self.iscontiguous:
             ptr = numpy.full(len(bytepos)*self.strides[0], 123, dtype=numpy.uint8)
             for i in range(len(bytepos)):
                 ptr[i*self.strides[0] : (i + 1)*self.strides[0]] = self.ptr[self.byteoffset + bytepos[i] : self.byteoffset + bytepos[i] + self.strides[0]]
@@ -109,7 +109,7 @@ class NumpyArray:
             for i in range(len(bytepos)):
                 for j in range(self.shape[1]):
                     nextbytepos[i*self.shape[1] + j] = bytepos[i] + j*self.strides[1]
-            out = next.compacted_next(nextbytepos)
+            out = next.contiguous_next(nextbytepos)
             return out.copy(shape=self.shape, strides=(self.shape[1]*out.strides[0],) + out.strides)
 
     def __getitem__(self, where):
@@ -123,8 +123,20 @@ class NumpyArray:
             return getitem_bystrides(nexthead, nexttail)
 
         else:
-            self.compact()
+            self.become_contiguous()
 
+            broadcastable, broadcastable_i = [], []
+            for i, x in enumerate(where):
+                if not isinstance(x, tuple) and isinstance(x, (int, numpy.integer, collections.abc.Iterable)):
+                    broadcastable.append(x)
+                    broadcastable_i.append(i)
+            broadcasted = broadcast_arrays(broadcastable)
+
+            where = tuple(broadcasted[broadcastable_i[i]] if i in broadcastable_i else x for i, x in enumerate(where))
+            print(where)
+
+            raise Exception
+            
             where = tuple(numpy.array(x) if isinstance(x, collections.abc.Iterable) and not (isinstance(x, tuple) and len(x) == 0) else x for x in where)
 
             advlen = -1
@@ -275,6 +287,9 @@ def flatten_shape(shape):
 def flatten_strides(strides):
     return strides[1:]
 
+def broadcast_arrays(*args):
+    return numpy.broadcast_arrays(*args)
+
 # a = numpy.arange(2*1*3*1).reshape(2, 1, 3, 1)
 # print(a.tolist())
 # b = NumpyArray(a)
@@ -313,25 +328,31 @@ def flatten_strides(strides):
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
 
-# a = numpy.arange(7*5).reshape(7, 5)
-# a = numpy.arange(7*5*6).reshape(7, 5, 6)
-a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
-b = NumpyArray(a)
-# for depth in 1, 2:
-#     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# for depth in 1, 2, 3:
-#     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-for depth in 1, 2, 3, 4:
-    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1])), depth):
-        doit = True
-        for i in range(max(0, len(cuts) - 2)):
-            if isinstance(cuts[i], (int, numpy.ndarray)) and isinstance(cuts[i + 1], slice) and isinstance(cuts[i + 2], (int, numpy.ndarray)):
-                doit = False
-        if doit:
-            print(cuts)
-            acut = a[cuts].tolist()
-            bcut = b[cuts].tolist()
-            # print(acut)
-            # print(bcut)
-            # print()
-            assert acut == bcut
+# # a = numpy.arange(7*5).reshape(7, 5)
+# # a = numpy.arange(7*5*6).reshape(7, 5, 6)
+# a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
+# b = NumpyArray(a)
+# # for depth in 1, 2:
+# #     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# # for depth in 1, 2, 3:
+# #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# for depth in 1, 2, 3, 4:
+#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1])), depth):
+#         doit = True
+#         for i in range(max(0, len(cuts) - 2)):
+#             if isinstance(cuts[i], (int, numpy.ndarray)) and isinstance(cuts[i + 1], slice) and isinstance(cuts[i + 2], (int, numpy.ndarray)):
+#                 doit = False
+#         if doit:
+#             print(cuts)
+#             acut = a[cuts].tolist()
+#             bcut = b[cuts].tolist()
+#             # print(acut)
+#             # print(bcut)
+#             # print()
+#             assert acut == bcut
+
+# a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)[::2, ::3, ::-1, ::-2]
+# b = NumpyArray(a)
+# assert a.tolist() == b.tolist()
+# b.become_contiguous()
+# assert a.tolist() == b.tolist()
