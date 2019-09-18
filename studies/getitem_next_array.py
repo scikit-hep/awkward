@@ -125,30 +125,39 @@ class NumpyArray:
         else:
             self.become_contiguous()
 
-            broadcastable, broadcastable_i = [], []
-            for i, x in enumerate(where):
-                if not isinstance(x, tuple) and isinstance(x, (int, numpy.integer, collections.abc.Iterable)):
-                    broadcastable.append(x)
-                    broadcastable_i.append(i)
-            broadcasted = broadcast_arrays(broadcastable)
+            if any(isinstance(x, collections.abc.Iterable) and not (isinstance(x, tuple) and len(x) == 0) for x in where):
+                # FIXME: this check won't be necessary once you implement getitem_bystrides
 
-            where = tuple(broadcasted[broadcastable_i[i]] if i in broadcastable_i else x for i, x in enumerate(where))
-            print(where)
+                broadcastable, broadcastable_j = [], []
+                for i, x in enumerate(where):
+                    if not isinstance(x, tuple) and isinstance(x, (int, numpy.integer, collections.abc.Iterable)):
+                        broadcastable_j.append(len(broadcastable))
+                        broadcastable.append(x)
+                    else:
+                        broadcastable_j.append(None)
+                broadcasted = broadcast_arrays(*broadcastable)
 
-            raise Exception
-            
-            where = tuple(numpy.array(x) if isinstance(x, collections.abc.Iterable) and not (isinstance(x, tuple) and len(x) == 0) else x for x in where)
+                where = tuple(x if broadcastable_j[i] is None else broadcasted[broadcastable_j[i]] for i, x in enumerate(where))
 
-            advlen = -1
-            for x in where:
-                if isinstance(x, numpy.ndarray) and not (len(x) == 1 and issubclass(x.dtype.type, numpy.integer)):
-                    advlen = len(x)
-                    break
+                while broadcastable_j[0] is None:
+                    broadcastable_j.pop(0)
+                while broadcastable_j[-1] is None:
+                    broadcastable_j.pop()
+                if any(x is None for x in broadcastable_j) and any(isinstance(x, int) for x in broadcastable_j):
+                    raise ValueError("awkward-array does not allow basic indexes (slices, etc.) between two advanced indexes (integer or array)")
 
-            originalhead, originaltail = head_tail(where)
+            # where = tuple(numpy.array(x) if isinstance(x, collections.abc.Iterable) and not (isinstance(x, tuple) and len(x) == 0) else x for x in where)
 
-            if advlen != -1:
-                where = tuple(numpy.repeat(x, advlen) if isinstance(x, (int, numpy.integer)) or (isinstance(x, numpy.ndarray) and len(x) == 1 and issubclass(x.dtype.type, numpy.integer)) else x for x in where)
+            # advlen = -1
+            # for x in where:
+            #     if isinstance(x, numpy.ndarray) and not (len(x) == 1 and issubclass(x.dtype.type, numpy.integer)):
+            #         advlen = len(x)
+            #         break
+
+            # originalhead, originaltail = head_tail(where)
+
+            # if advlen != -1:
+            #     where = tuple(numpy.repeat(x, advlen) if isinstance(x, (int, numpy.integer)) or (isinstance(x, numpy.ndarray) and len(x) == 1 and issubclass(x.dtype.type, numpy.integer)) else x for x in where)
 
             nexthead, nexttail = head_tail(where)
 
@@ -328,31 +337,30 @@ def broadcast_arrays(*args):
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
 
-# # a = numpy.arange(7*5).reshape(7, 5)
-# # a = numpy.arange(7*5*6).reshape(7, 5, 6)
-# a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
-# b = NumpyArray(a)
-# # for depth in 1, 2:
-# #     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# # for depth in 1, 2, 3:
-# #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# for depth in 1, 2, 3, 4:
-#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1])), depth):
-#         doit = True
-#         for i in range(max(0, len(cuts) - 2)):
-#             if isinstance(cuts[i], (int, numpy.ndarray)) and isinstance(cuts[i + 1], slice) and isinstance(cuts[i + 2], (int, numpy.ndarray)):
-#                 doit = False
-#         if doit:
-#             print(cuts)
-#             acut = a[cuts].tolist()
-#             bcut = b[cuts].tolist()
-#             # print(acut)
-#             # print(bcut)
-#             # print()
-#             assert acut == bcut
+# a = numpy.arange(7*5).reshape(7, 5)
+# a = numpy.arange(7*5*6).reshape(7, 5, 6)
+a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
+b = NumpyArray(a)
+# for depth in 1, 2:
+#     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# for depth in 1, 2, 3:
+#     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+for depth in 1, 2, 3, 4:
+    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1])), depth):
+        try:
+            print(cuts)
+            acut = a[cuts].tolist()
+            bcut = b[cuts].tolist()
+            # print(acut)
+            # print(bcut)
+            # print()
+            assert acut == bcut
+        except ValueError:
+            pass
 
 # a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)[::2, ::3, ::-1, ::-2]
 # b = NumpyArray(a)
 # assert a.tolist() == b.tolist()
 # b.become_contiguous()
 # assert a.tolist() == b.tolist()
+
