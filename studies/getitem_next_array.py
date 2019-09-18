@@ -129,6 +129,8 @@ class NumpyArray:
             if any(isinstance(x, collections.abc.Iterable) and not (isinstance(x, tuple) and len(x) == 0) for x in where):
                 # FIXME: the above check won't be necessary once you implement getitem_bystrides
 
+                where = sum([bool2int_arrays(x) for x in where], ())
+
                 broadcastable, broadcastable_j = [], []
                 for i, x in enumerate(where):
                     if not isinstance(x, tuple) and isinstance(x, (int, numpy.integer, collections.abc.Iterable)):
@@ -263,33 +265,6 @@ class NumpyArray:
                 shape = (length,) + out.shape[1:]
                 return out.copy(shape=shape)
 
-            # if advanced is None:
-            #     nextcarry = numpy.full(len(carry)*len(head), 999, dtype=int)
-            #     nextadvanced = numpy.full(len(carry)*len(head), 999, dtype=int)
-            #     for i in range(len(carry)):
-            #         for j in range(len(head)):
-            #             nextcarry[i*len(head) + j] = skip*carry[i] + head[j]
-            #             nextadvanced[i*len(head) + j] = j
-
-            #     out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*len(head), next.strides[0])
-            #     shape = (length, len(head)) + out.shape[1:]
-            #     strides = (shape[1]*out.strides[0],) + out.strides
-            #     return out.copy(shape=shape, strides=strides)
-
-            # else:
-            #     nextcarry = numpy.full(len(carry), 999, dtype=int)
-            #     nextadvanced = numpy.full(len(carry), 999, dtype=int)
-            #     for i in range(len(carry)):
-            #         nextcarry[i] = skip*carry[i] + head[advanced[i]]
-            #         nextadvanced[i] = advanced[i]
-
-            #     out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*len(head), next.strides[0])
-            #     shape = (length,) + out.shape[1:]
-            #     return out.copy(shape=shape)
-
-        elif isinstance(head, numpy.ndarray) and issubclass(head.dtype.type, (numpy.bool_, numpy.bool)):
-            raise NotImplementedError("boolarray")
-
         else:
             raise TypeError("cannot use {0} as an index".format(head))
 
@@ -310,10 +285,17 @@ def flatten_strides(strides):
 def broadcast_arrays(*args):
     return numpy.broadcast_arrays(*args)
 
+def bool2int_arrays(whereitem):
+    if isinstance(whereitem, collections.abc.Iterable):
+        whereitem = numpy.asarray(whereitem)
+        if issubclass(whereitem.dtype.type, (numpy.bool, numpy.bool_)):
+            return numpy.nonzero(whereitem)
+    return (whereitem,)
+
 # a = numpy.arange(10)
 # print(a.tolist())
 # b = NumpyArray(a)
-# cut = (numpy.array([[0, 1, 2], [3, 4, 5]]),)
+# cut = (numpy.array([True, True, True, False, False, False, True, False, True, False]),)
 # acut = a[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
 # print(acut.tolist())
