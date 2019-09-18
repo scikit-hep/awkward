@@ -61,6 +61,9 @@ class NumpyArray:
     def __len__(self):
         return self.shape[0]
 
+    def minmax_depth(self):
+        return len(self.shape), len(self.shape)
+
     @property
     def isscalar(self):
         return len(self.shape) == 0
@@ -118,7 +121,10 @@ class NumpyArray:
         if not isinstance(where, tuple):
             where = (where,)
 
-        if len(where) > len(self.shape):
+        if where.count(Ellipsis) > 1:
+            raise ValueError("an index can only have a single ellipsis ('...')")
+
+        if len([x for x in where if x is not numpy.newaxis and x is not Ellipsis]) > len(self.shape):
             raise ValueError("too many indexes for array")
 
         if False and all(x is numpy.newaxis or x is Ellipsis or (isinstance(x, tuple) and len(x) == 0) or isinstance(x, (int, numpy.integer, slice)) for x in where):
@@ -162,10 +168,22 @@ class NumpyArray:
         assert len(self.shape) == len(self.strides)
 
         if head is numpy.newaxis:
-            raise NotImplementedError("numpy.newaxis")
+            nexthead, nexttail = head_tail(tail)
+            out = self.getitem_next(nexthead, nexttail, carry, advanced, length, stride)
+
+            shape = (length, 1) + out.shape[1:]
+            strides = (out.strides[0],) + out.strides
+            return out.copy(shape=shape, strides=strides)
 
         elif head is Ellipsis:
-            raise NotImplementedError("...")
+            mindepth, maxdepth = self.minmax_depth()
+            assert mindepth == maxdepth
+
+            if mindepth - 1 == sum(0 if x is numpy.newaxis else 1 for x in tail) or len(tail) == 0:
+                nexthead, nexttail = head_tail(tail)
+                return self.getitem_next(nexthead, nexttail, carry, advanced, length, stride)
+            else:
+                return self.getitem_next(slice(None), (Ellipsis,) + tail, carry, advanced, length, stride)
 
         elif isinstance(head, tuple) and len(head) == 0:
             ptr = numpy.full(len(carry)*stride, 123, dtype=numpy.uint8)
@@ -199,6 +217,17 @@ class NumpyArray:
             if step is None:
                 step = 1
             assert step != 0
+            if step > 0:
+                if start is None:
+                    start = 0
+                if stop is None:
+                    stop = self.shape[1]
+            else:
+                if start is None:
+                    start = self.shape[1] - 1
+                if stop is None:
+                    stop = -1
+
             d, m = divmod(abs(start - stop), abs(step))
             headlen = d + (1 if m != 0 else 0)
 
@@ -213,13 +242,13 @@ class NumpyArray:
                 nextadvanced = None
                 for i in range(len(carry)):
                     for j in range(headlen):
-                        nextcarry[i*headlen + j] = skip*carry[i] + head.start + j*step
+                        nextcarry[i*headlen + j] = skip*carry[i] + start + j*step
 
             else:
                 nextadvanced = numpy.full(len(carry)*headlen, 999, dtype=int)
                 for i in range(len(carry)):
                     for j in range(headlen):
-                        nextcarry[i*headlen + j] = skip*carry[i] + head.start + j*step
+                        nextcarry[i*headlen + j] = skip*carry[i] + start + j*step
                         nextadvanced[i*headlen + j] = advanced[i]
 
             out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*headlen, next.strides[0])
@@ -307,7 +336,7 @@ def bool2int_arrays(whereitem):
 
 # a = numpy.arange(7*5).reshape(7, 5)
 # b = NumpyArray(a)
-# cut = (slice(0, 7), numpy.array([[1, 0, 0, 1]]),)
+# cut = (..., numpy.newaxis)
 # acut = a[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
 # print(acut.tolist())
@@ -320,7 +349,8 @@ def bool2int_arrays(whereitem):
 # a = numpy.arange(7*5*6).reshape(7, 5, 6)
 # b = NumpyArray(a)
 # # cut = (slice(0, 5), numpy.array([[1, 0, 0, 1]]), numpy.array([[1], [0]]),)
-# cut = (slice(0, 5), numpy.array([[1, 0, 0, 1], [1, 0, 0, 1]]), numpy.array([[1, 1, 1, 1], [0, 0, 0, 0]]),)
+# # cut = (slice(0, 5), numpy.array([[1, 0, 0, 1], [1, 0, 0, 1]]), numpy.array([[1, 1, 1, 1], [0, 0, 0, 0]]),)
+# cut = (numpy.newaxis, numpy.newaxis, slice(1, 3), numpy.newaxis, slice(0, 2), numpy.newaxis, slice(2, 5))
 # acut = a[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
 # print(acut.tolist())
@@ -329,6 +359,26 @@ def bool2int_arrays(whereitem):
 # print(bcut.tolist())
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
+
+# a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
+# b = NumpyArray(a)
+# # cut = (slice(0, 5), numpy.array([[1, 0, 0, 1]]), numpy.array([[1], [0]]),)
+# # cut = (slice(0, 5), numpy.array([[1, 0, 0, 1], [1, 0, 0, 1]]), numpy.array([[1, 1, 1, 1], [0, 0, 0, 0]]),)
+# cut = (..., None)
+# acut = a[cut]
+# print("should be shape", acut.shape, "strides", acut.strides)
+# print(acut.tolist())
+# bcut = b[cut]
+# print("       is shape", bcut.shape, "strides", bcut.strides)
+# print(bcut.tolist())
+# if acut.tolist() != bcut.tolist():
+#     print("WRONG!!!")
+
+# a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)[::2, ::3, ::-1, ::-2]
+# b = NumpyArray(a)
+# assert a.tolist() == b.tolist()
+# b.become_contiguous()
+# assert a.tolist() == b.tolist()
 
 # a = numpy.arange(7*5).reshape(7, 5)
 # a = numpy.arange(7*5*6).reshape(7, 5, 6)
@@ -339,7 +389,7 @@ b = NumpyArray(a)
 # for depth in 1, 2, 3:
 #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
 for depth in 1, 2, 3, 4:
-    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1]), numpy.array([[1], [0]])), depth):
+    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1]), numpy.array([[1], [0]]), Ellipsis, numpy.newaxis), depth):
         try:
             print(cuts)
             acut = a[cuts].tolist()
@@ -350,10 +400,3 @@ for depth in 1, 2, 3, 4:
             assert acut == bcut
         except ValueError:
             pass
-
-# a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)[::2, ::3, ::-1, ::-2]
-# b = NumpyArray(a)
-# assert a.tolist() == b.tolist()
-# b.become_contiguous()
-# assert a.tolist() == b.tolist()
-
