@@ -168,10 +168,22 @@ class NumpyArray:
         assert len(self.shape) == len(self.strides)
 
         if head is numpy.newaxis:
-            raise NotImplementedError("newaxis")
+            nexthead, nexttail = head_tail(tail)
+            out = self.getitem_bystrides(nexthead, nexttail, length)
+
+            shape = (length, 1) + out.shape[1:]
+            strides = (out.strides[0],) + out.strides
+            return out.copy(shape=shape, strides=strides)
 
         elif head is Ellipsis:
-            raise NotImplementedError("Ellipsis")
+            mindepth, maxdepth = self.minmax_depth()
+            assert mindepth == maxdepth
+
+            if mindepth - 1 == sum(0 if x is numpy.newaxis else 1 for x in tail) or len(tail) == 0:
+                nexthead, nexttail = head_tail(tail)
+                return self.getitem_bystrides(nexthead, nexttail, length)
+            else:
+                return self.getitem_bystrides(slice(None), (Ellipsis,) + tail, length)
 
         elif isinstance(head, tuple) and len(head) == 0:
             return self
@@ -398,7 +410,7 @@ def bool2int_arrays(whereitem):
 
 a = numpy.arange(7*5).reshape(7, 5)[6::-2, ::-1]
 b = NumpyArray(a)
-cut = (slice(0, 3), 2)
+cut = (numpy.newaxis, numpy.newaxis, ..., slice(0, 3))
 acut = a[cut]
 print("should be shape", acut.shape, "strides", acut.strides)
 print(acut.tolist())
