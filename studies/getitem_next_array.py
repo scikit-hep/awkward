@@ -140,22 +140,12 @@ class NumpyArray:
 
             nexthead, nexttail = head_tail(where)
 
-            if advlen != -1 and not (isinstance(originalhead, numpy.ndarray) and issubclass(originalhead.dtype.type, numpy.integer)) > 0 and not len([isinstance(x, numpy.ndarray) and issubclass(x.dtype.type, numpy.integer) for x in originaltail]) > 0:
-                print("first")
-                nextcarry = numpy.repeat(0, advlen)
-                nextadvanced = numpy.repeat(0, advlen)
-                length = advlen
-                next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
-                return next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length, next.strides[0])
-                
-            else:
-                print("second")
-                nextcarry = numpy.array([0])
-                nextadvanced = None
-                length = 1
-                next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
-                out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length, next.strides[0])
-                return out.copy(shape=out.shape[1:], strides=out.strides[1:])
+            nextcarry = numpy.array([0])
+            nextadvanced = None
+            length = 1
+            next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
+            out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length, next.strides[0])
+            return out.copy(shape=out.shape[1:], strides=out.strides[1:])
 
     def getitem_next(self, head, tail, carry, advanced, length, stride):
         assert len(self.shape) == len(self.strides)
@@ -311,32 +301,37 @@ def flatten_strides(strides):
 # if acut.tolist() != bcut.tolist():
 #     print("WRONG!!!")
 
-a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
-b = NumpyArray(a)
-cut = (slice(0, 5), 0, slice(1, 4), numpy.array([1, 0, 0, 1]))
-acut = a[cut]
-bcut = b[cut]
-print("should be shape", acut.shape, "strides", acut.strides)
-print("       is shape", bcut.shape, "strides", bcut.strides)
-print(acut.tolist())
-print(bcut.tolist())
-if acut.tolist() != bcut.tolist():
-    print("WRONG!!!")
-
-# # a = numpy.arange(7*5).reshape(7, 5)
-# # a = numpy.arange(7*5*6).reshape(7, 5, 6)
 # a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
 # b = NumpyArray(a)
-# # for depth in 1, 2:
-# #     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# # for depth in 1, 2, 3:
-# #     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
-# for depth in 1, 2, 3, 4:
-#     for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1])), depth):
-#         print(cuts)
-#         acut = a[cuts].tolist()
-#         bcut = b[cuts].tolist()
-#         # print(acut)
-#         # print(bcut)
-#         # print()
-#         assert acut == bcut
+# cut = (slice(0, 5), 0, slice(1, 4), numpy.array([1, 0, 0, 1]))
+# acut = a[cut]
+# bcut = b[cut]
+# print("should be shape", acut.shape, "strides", acut.strides)
+# print("       is shape", bcut.shape, "strides", bcut.strides)
+# print(acut.tolist())
+# print(bcut.tolist())
+# if acut.tolist() != bcut.tolist():
+#     print("WRONG!!!")
+
+# a = numpy.arange(7*5).reshape(7, 5)
+# a = numpy.arange(7*5*6).reshape(7, 5, 6)
+a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
+b = NumpyArray(a)
+# for depth in 1, 2:
+#     for cuts in itertools.permutations((0, 1, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+# for depth in 1, 2, 3:
+#     for cuts in itertools.permutations((0, 1, 2, slice(0, 5), slice(1, 4), slice(2, 3)), depth):
+for depth in 1, 2, 3, 4:
+    for cuts in itertools.permutations((0, 1, 2, 3, slice(0, 5), slice(1, 4), slice(1, 4), slice(1, 4), slice(2, 0, -1), slice(2, 0, -1), numpy.array([1, 0, 0, 1]), numpy.array([2, 2, 0, 1])), depth):
+        doit = True
+        for i in range(max(0, len(cuts) - 2)):
+            if isinstance(cuts[i], (int, numpy.ndarray)) and isinstance(cuts[i + 1], slice) and isinstance(cuts[i + 2], (int, numpy.ndarray)):
+                doit = False
+        if doit:
+            print(cuts)
+            acut = a[cuts].tolist()
+            bcut = b[cuts].tolist()
+            # print(acut)
+            # print(bcut)
+            # print()
+            assert acut == bcut
