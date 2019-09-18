@@ -11,7 +11,9 @@ if (MSVC)
 else()
   set(PYBIND11_CPP_STANDARD -std=c++11)
 endif()
+
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+cmake_policy(SET CMP0063 NEW)
 
 file(READ "VERSION_INFO" VERSION_INFO)
 string(STRIP ${VERSION_INFO} VERSION_INFO)
