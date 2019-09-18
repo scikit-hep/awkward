@@ -123,10 +123,8 @@ class NumpyArray:
             return getitem_bystrides(nexthead, nexttail)
 
         else:
-            self.become_contiguous()
-
             if any(isinstance(x, collections.abc.Iterable) and not (isinstance(x, tuple) and len(x) == 0) for x in where):
-                # FIXME: this check won't be necessary once you implement getitem_bystrides
+                # FIXME: the above check won't be necessary once you implement getitem_bystrides
 
                 broadcastable, broadcastable_j = [], []
                 for i, x in enumerate(where):
@@ -146,25 +144,12 @@ class NumpyArray:
                 if any(x is None for x in broadcastable_j) and any(isinstance(x, int) for x in broadcastable_j):
                     raise ValueError("awkward-array does not allow basic indexes (slices, etc.) between two advanced indexes (integer or array)")
 
-            # where = tuple(numpy.array(x) if isinstance(x, collections.abc.Iterable) and not (isinstance(x, tuple) and len(x) == 0) else x for x in where)
-
-            # advlen = -1
-            # for x in where:
-            #     if isinstance(x, numpy.ndarray) and not (len(x) == 1 and issubclass(x.dtype.type, numpy.integer)):
-            #         advlen = len(x)
-            #         break
-
-            # originalhead, originaltail = head_tail(where)
-
-            # if advlen != -1:
-            #     where = tuple(numpy.repeat(x, advlen) if isinstance(x, (int, numpy.integer)) or (isinstance(x, numpy.ndarray) and len(x) == 1 and issubclass(x.dtype.type, numpy.integer)) else x for x in where)
-
+            self.become_contiguous()
+            next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
             nexthead, nexttail = head_tail(where)
-
             nextcarry = numpy.array([0])
             nextadvanced = None
             length = 1
-            next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
             out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length, next.strides[0])
             return out.copy(shape=out.shape[1:], strides=out.strides[1:])
 
@@ -216,6 +201,7 @@ class NumpyArray:
             nextcarry = numpy.full(len(carry)*headlen, 999, dtype=int)
 
             skip, remainder = divmod(self.strides[0], self.strides[1])
+            assert skip == self.shape[1]
             assert remainder == 0
 
             if advanced is None:
@@ -224,11 +210,6 @@ class NumpyArray:
                     for j in range(headlen):
                         nextcarry[i*headlen + j] = skip*carry[i] + head.start + j*step
 
-                out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*headlen, next.strides[0])
-                shape = (length, headlen) + out.shape[1:]
-                strides = (shape[1]*out.strides[0],) + out.strides
-                return out.copy(shape=shape, strides=strides)
-
             else:
                 nextadvanced = numpy.full(len(carry)*headlen, 999, dtype=int)
                 for i in range(len(carry)):
@@ -236,10 +217,10 @@ class NumpyArray:
                         nextcarry[i*headlen + j] = skip*carry[i] + head.start + j*step
                         nextadvanced[i*headlen + j] = advanced[i]
 
-                out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*headlen, next.strides[0])
-                shape = (length, headlen) + out.shape[1:]
-                strides = (shape[1]*out.strides[0],) + out.strides
-                return out.copy(shape=shape, strides=strides)
+            out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*headlen, next.strides[0])
+            shape = (length, headlen) + out.shape[1:]
+            strides = (shape[1]*out.strides[0],) + out.strides
+            return out.copy(shape=shape, strides=strides)
 
         else:
             head = numpy.asarray(head)
@@ -250,6 +231,7 @@ class NumpyArray:
                 nexthead, nexttail = head_tail(tail)
 
                 skip, remainder = divmod(self.strides[0], self.strides[1])
+                assert skip == self.shape[1]
                 assert remainder == 0
 
                 if advanced is None:
@@ -299,10 +281,10 @@ def flatten_strides(strides):
 def broadcast_arrays(*args):
     return numpy.broadcast_arrays(*args)
 
-# a = numpy.arange(2*1*3*1).reshape(2, 1, 3, 1)
+# a = numpy.arange(10)
 # print(a.tolist())
 # b = NumpyArray(a)
-# cut = (slice(0, 2), numpy.array([0, 0, 0, 0]), slice(0, 3), numpy.array([0, 0, 0, 0]))
+# cut = (numpy.array([[0, 1, 2], [3, 4, 5]]),)
 # acut = a[cut]
 # bcut = b[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
@@ -316,18 +298,6 @@ def broadcast_arrays(*args):
 # print(a.tolist())
 # b = NumpyArray(a)
 # cut = (numpy.array([2, 0, 0, 1]), numpy.array([0, 1, 2, 0]),)
-# acut = a[cut]
-# bcut = b[cut]
-# print("should be shape", acut.shape, "strides", acut.strides)
-# print("       is shape", bcut.shape, "strides", bcut.strides)
-# print(acut.tolist())
-# print(bcut.tolist())
-# if acut.tolist() != bcut.tolist():
-#     print("WRONG!!!")
-
-# a = numpy.arange(7*5*6*8).reshape(7, 5, 6, 8)
-# b = NumpyArray(a)
-# cut = (slice(0, 5), 0, slice(1, 4), numpy.array([1, 0, 0, 1]))
 # acut = a[cut]
 # bcut = b[cut]
 # print("should be shape", acut.shape, "strides", acut.strides)
