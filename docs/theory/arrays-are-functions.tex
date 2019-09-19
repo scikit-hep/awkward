@@ -176,6 +176,28 @@ H[G][F]            # → [14.3  5.5  3.3  3.3  5.5 14.3 27.5 45.1 67.1 93.5]
 H[G[F]]            # → [14.3  5.5  3.3  3.3  5.5 14.3 27.5 45.1 67.1 93.5]
 \end{minted}
 
+\subsection*{Multidimensional slicing}
+
+If Numpy's integer-array indexing for multiple dimensions worked the same was as its range-slicing does, then the above would be trivially extensible to any number of dimensions. However, Numpy's integer-array indexing (called ``advanced indexing'')\footnote{\url{https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html}} couples iteration over integer arrays supplied to each of the $k$ slots in a rank-$k$ array.
+
+To work-around this caveat, consider rank-$k$ integer arrays in each of the $k$ slots, in which the integer array in slot $i$ has shape $(1, \ldots, n_i, \ldots, 1)$. For example, a three-dimensional slice
+\[ \mintinline{python}{array[start1:stop1, start2:stop2, start3:stop3]} \]
+\noindent can be simulated with integer arrays
+\begin{align*}
+\mintinline{python}{array[} & \mintinline{python}{numpy.arange(start1, stop1).reshape(-1, 1, 1),} \\
+                            & \mintinline{python}{numpy.arange(start2, stop2).reshape(1, -1, 1),} \\
+                            & \mintinline{python}{numpy.arange(start3, stop3).reshape(1, 1, -1)]}
+\end{align*}
+\noindent because Numpy broadcasts the three integer arrays into a common three-dimensional shape, and the symmetry of these arrays decouples their effects in each dimension.
+
+\section*{Awkward Array extensions}
+
+
+
+
+
+
+
 
 
 \end{document}
