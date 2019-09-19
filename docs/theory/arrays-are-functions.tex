@@ -4,8 +4,9 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage[utf8x]{inputenc}
 
-\title{Arrays are Functions}
+\title{Array manipulations as functional programming}
 \author{Jim Pivarski}
 \date{\today}
 
@@ -25,7 +26,7 @@ The central features of an array library like Numpy or Awkward Array simplify if
 Specified this way, this is a partial function\footnote{\url{https://en.wikipedia.org/wiki/Partial_function}}---for some integers, it raises an exception rather than returning a value in $d$. (Integers greater than or equal to the array's length or less than its negated length, if the array implements Python's negative indexing, are outside the bounds of the array and do not return a value.) It can be made into a total function by restricting the domain to $[0, n)$ where $n$ is the length of the array:
 \[ \mintinline{python}{array}: [0, n) \to d. \]
 
-We can choose $[0, n)$ as the domain and work with total functions or $\mathbb{Z}$ as the domain and work with partial functions---it is a matter of the granularity of the type system. Numpy has a single type \mintinline{python}{ndarray} for all arrays, Numba has an array type that depends on the array's dimension, and C++ has a \mintinline{c++}{std::array<d, n>} type that depends on the exact size of the array, like our functional description above. As we'll see later, a consequence of this specificity is that the return value of some functions will depend on the values given to that function, a feature known as dependent types\footnote{\url{https://en.wikipedia.org/wiki/Dependent_type}}.
+We can choose $[0, n)$ as the domain and work with total functions or $\mathbb{Z}$ as the domain and work with partial functions---it is a matter of the granularity of the type system. Numpy has a single type \mintinline{python}{ndarray} for all arrays, Numba has an array type that depends on the array's dimension, and C++ has a \mintinline{c++}{std::array<dtype, n>} type that depends on the exact size (\mintinline{c++}{n}) of the array, like our functional description above. As we'll see later, a consequence of this specificity is that the return value of some functions will depend on the values given to that function, a feature known as dependent types\footnote{\url{https://en.wikipedia.org/wiki/Dependent_type}}.
 
 In this note, we'll describe arrays as total functions in a dependent type system.
 
@@ -56,14 +57,125 @@ Numpy also has record arrays\footnote{\url{https://docs.scipy.org/doc/numpy/user
 \[ \mintinline{python}{array[i1, i2, i3][fieldname]} \]
 \noindent where \mintinline{python}{fieldname} is a string, the name of one of the record's fields. (Numpy does not allow the \mintinline{python}{fieldname} to be uncurried---to be in the same tuple with \mintinline{python}{i1}, \mintinline{python}{i2}, \mintinline{python}{i3}.)
 
-Since record fields are accessed through a similar syntax, let's consider it part of the array's functional type, making no distinction between \mintinline{python}{shape} elements and field names. For a record type in which field names $f_1$, $f_2$, \ldots, $f_m$ map to \mintinline{python}{dtypes} $d_1$, $d_2$, \ldots, $d_m$, we can write
+Since record fields are accessed through a similar syntax, let's consider it part of the array's functional type, making no distinction between \mintinline{python}{shape} elements and field names. For a record type in which string-valued field names $s_1$, $s_2$, \ldots, $s_m$ map to \mintinline{python}{dtypes} $d_1$, $d_2$, \ldots, $d_m$, we can write
 \begin{align*}
-\mintinline{python}{recarray}: [0, n) \to & f_1 \to d_1 \\
-                                          & f_2 \to d_2 \\
-                                          & \ldots \\
-                                          & f_m \to d_m
+\mintinline{python}{recarray}: [0, n) \to & s_1 \to d_1 \\
+ & s_2 \to d_2 \\
+ & \ldots \\
+ & s_m \to d_m
 \end{align*}
-\noindent to represent a one-dimensional record array of length $n$.
+\noindent to represent a one-dimensional record array of length $n$. This is a dependent type because the choice of field name determines the return type of the function.
+
+A multidimensional record array could be described as
+\begin{align*}
+\mintinline{python}{recarray}: [0, n_1) \to [0, n_2) \to \ldots \to [0, n_k) \to & s_1 \to d_1 \\
+ & s_2 \to d_2 \\
+ & \ldots \\
+ & s_m \to d_m
+\end{align*}
+\noindent or as
+\begin{align*}
+\mintinline{python}{recarray}: [0, n_1) \to & s_1 \to [0, n_2) \to \ldots \to [0, n_k) \to d_1 \\
+ & s_2 \to [0, n_2) \to \ldots \to [0, n_k) \to d_2 \\
+ & \ldots \\
+ & s_m \to [0, n_2) \to \ldots \to [0, n_k) \to d_m
+\end{align*}
+\noindent or any other placement of the field name index within the ordered sequence of dimensional indexes. In general, the string indexes (field names) commute with the integer indexes (dimensions). This is evident in Numpy's syntax:
+\begin{align*}
+\mintinline{python}{recarray[i1][i2][i3][fieldname]} & \mintinline{python}{ == recarray[i1][i2][fieldname][i3]} \\
+ & \mintinline{python}{ == recarray[i1][fieldname][i2][i3]} \\
+ & \mintinline{python}{ == recarray[fieldname][i1][i2][i3]}
+\end{align*}
+\noindent It is also evident if the array is arranged as a rectilinear table, in which $[0, n_1)$, $[0, n_2)$, \ldots $[0, n_k)$ form a $k$-dimensional lattice of bounded integers and the field names are an additional dimension, indexed by a finite set of strings with no predefined order. This dimension of category labels is usually called the ``columns'' and all other dimensions are called ``rows.'' In this picture, rearranging the order of the string index and the integer indexes corresponds to selecting a column before a row, rather than a row before a column.
+
+\section*{Vectorized functions}
+
+Numpy uses so-called ``vectorized'' functions or ``universal'' functions (``ufuncs'') for most calculations\footnote{\url{https://docs.scipy.org/doc/numpy/reference/ufuncs.html}}. (These are not to be confused with vectorized instructions in CPU hardware, but are based on a similar idea.) Any function $f$ that maps scalar \mintinline{python}{dtypes} $d^A$ to $d^B$,
+\[ f: d^A \to d^B\mbox{,} \]
+\noindent can be lifted to a vectorized function that maps arrays of \mintinline{python}{dtype} $d^A$ to arrays of \mintinline{python}{dtype} $d^B$:
+\[ \mbox{ufunc}(f): \left([0, n) \to d^A\right) \to \left([0, n) \to d^B\right)\mbox{.} \]
+\noindent Note that the \mintinline{python}{shape} of the array, $[0, n)$ in this case, is the same for the argument type of $\mbox{ufunc}(f)$ as for its return type.
+
+This $\mbox{ufunc}$ functor is a partial application of what would be called $\mbox{map}$ in most functional languages\footnote{\url{https://en.wikipedia.org/wiki/Map_(higher-order_function)}}. The $\mbox{map}$ functor takes a function and a collection, returning a collection of the same length with the function applied to each element. The $\mbox{ufunc}$ functor only takes a function, and its result is applied to collections (arrays) later.
+
+Since arrays are themselves functions, applying $\mbox{ufunc}(f)$ to an array is a composition\footnote{\url{https://en.wikipedia.org/wiki/Function_composition}} of the array with $f$. Thus, the following is true for any \mintinline{python}{i} $\in [0, n)$:
+\begin{align*}
+\underbrace{\mbox{ufunc}(f)(\mintinline{python}{array})}_{\mbox{\scriptsize mapped array}}(\mintinline{python}{i}) = & \,f(\underbrace{\mintinline{python}{array}(\mintinline{python}{i})}_{\mbox{\scriptsize mapped scalar}}) \\[0.5\baselineskip]
+\mintinline{python}{numpy.vectorize(f)(array)[i]} = & \,\mintinline{python}{f(array[i])}\mbox{.}
+\end{align*}
+\noindent by associativity of function composition. This composition always applies $f$ to the {\it output} of the array (function composition is not commutative).
+\begin{align*}
+f: & \mbox{ } d^A \to d^B \\
+\mintinline{python}{array}: & \mbox{ } [0, n) \to d^A \\
+\mbox{ufunc}(f)(\mintinline{python}{array}) = f \circ \mintinline{python}{array} : & \mbox{ } [0, n) \to d^B\mbox{.}
+\end{align*}
+
+Using associativity again, we should be able to compose a sequence of scalar functions $f: d^A \to d^B$, $g: d^B \to d^C$, \ldots, $h: d^Y \to d^Z$ before applying them to the array. If the scalar function can be extracted from a ufunc object, it would be possible to compose
+\[ \mbox{ufunc}(f) \circ \mbox{ufunc}(g) \circ \ldots \circ \mbox{ufunc}(h) \]
+\noindent into a single
+\[ \mbox{ufunc}(f \circ g \circ \ldots \circ h): \left([0, n) \to d^A\right) \to \left([0, n) \to d^Z\right) \]
+\noindent that can be applied to an array. This is an optimization known as loop fusion\footnote{\url{https://en.wikipedia.org/wiki/Loop_fission_and_fusion}}, and is often faster than making multiple passes over arrays and possibly allocating large temporary arrays between ufuncs. There have been proposals\footnote{\url{https://numpy.org/doc/1.14/neps/deferred-ufunc-evaluation.html}} and external libraries\footnote{\url{https://www.weld.rs/weldnumpy}} to add this feature transparently to Numpy. In principle, it could even be an explicit feature of the ufunc object, but to my knowledge, it has never been implemented as such.
+
+\section*{Array slicing}
+
+Whereas ufuncs compose scalar functions to the output of an array, slicing composes \mintinline{python}{index} arrays (which are functions) to the input of an array.
+
+The fact that array slicing is itself composition may not be obvious because of the way that slicing is presented:
+\[ \mintinline{python}{array[i:j]} \]
+\noindent does not seem to be a composition of two arrays. The first point to make is that all of Numpy's slicing mechanisms---range slices (Python's \mintinline{python}{slice} operator or \mintinline{python}{start:stop:step}), \mintinline{python}{numpy.compress} with boolean arrays, and \mintinline{python}{numpy.take} with integer arrays---can be rewritten in terms of \mintinline{python}{numpy.take} with integer arrays:
+\begin{itemize}
+\item A range slice \mintinline{python}{start:stop:step} can be replaced with an integer sequence
+\[ \mintinline{python}{range(start, stop, step)} \]
+(ignoring the effect of negative \mintinline{python}{start} and \mintinline{python}{stop}).
+\item A boolean array \mintinline{python}{mask} can be replaced with \mintinline{python}{numpy.nonzero(mask)}.
+\item An integer array \mintinline{python}{index} is already an integer array.
+\end{itemize}
+
+As an array, \mintinline{python}{index} is a function $\mintinline{python}{index}: [0, x) \to [0, n)$ that can be composed with $\mintinline{python}{array}: [0, n) \to d$ to produce
+\[ \mintinline{python}{array} \circ \mintinline{python}{index}: [0, x) \to d \]
+\noindent Note that \mintinline{python}{index} is to the right (transforms the input) of \mintinline{python}{array}, whereas $\mbox{ufunc}(f)$ put $f$ to the left (transforms the output) of \mintinline{python}{array}.
+
+Numpy uses the same syntax for this function composition, \mintinline{python}{array[index]}, as it does for function evaluation, \mintinline{python}{array[i]}. Let's illustrate this with an extended example.
+
+\subsection*{Example}
+
+Consider two functions that are defined on all non-negative integers (at least).
+\begin{minted}{python}
+def f(x):
+    return x**2 - 5*x + 10
+def g(y):
+    return max(0, 2*y - 10) + 3
+\end{minted}
+
+They may be transformed into arrays by sampling \mintinline{python}{f}, \mintinline{python}{g}, and $\mintinline{python}{f} \circ \mintinline{python}{g}$ at enough points to avoid edge effects from their finite domains. For \mintinline{python}{f} and \mintinline{python}{g} above, 100 points in \mintinline{python}{g} is enough to accept the entire range of \mintinline{python}{f} when \mintinline{python}{f} is sampled at 10 points.
+\begin{minted}{python}
+F   = numpy.array([f(i) for i in range(10)])     # F is f at 10 elements
+G   = numpy.array([g(i) for i in range(100)])    # G is g at 100 elements
+GoF = numpy.array([g(f(i)) for i in range(10)])  # GoF is g∘f at 10 elements
+\end{minted}
+\noindent Now $\mintinline{python}{F}: [0, 10) \to [4, 46)$, $\mintinline{python}{G}: [0, 100) \to [3, 191)$, and $\mintinline{python}{GoF}: [0, 10) \to [3, 85)$.
+
+Indexing \mintinline{python}{G} by \mintinline{python}{F} can be expressed with square-bracket syntax or \mintinline{python}{numpy.take}, and it returns the same result as the sampled composition \mintinline{python}{GoF}.
+\begin{minted}{python}
+G[F]               # → [13,  5,  3,  3,  5, 13, 25, 41, 61, 85]
+G.take(F)          # → [13,  5,  3,  3,  5, 13, 25, 41, 61, 85]
+numpy.take(G, F)   # → [13,  5,  3,  3,  5, 13, 25, 41, 61, 85]
+
+GoF                # → [13,  5,  3,  3,  5, 13, 25, 41, 61, 85]
+\end{minted}
+
+In \mintinline{python}{GoF}, the functions are composed before being transformed into arrays, and in \mintinline{python}{G[F]}, the arrays themselves are composed via integer-array indexing. Function composition is associative, so we should be able to change the order of two integer-array indexings.
+
+To demonstrate associativity, introduce another array, which need not have integer \mintinline{python}{dtype}.
+\begin{minted}{python}
+H = numpy.arange(1000)*1.1
+\end{minted}
+\noindent When we compute \mintinline{python}{H} indexed by \mintinline{python}{G} indexed by \mintinline{python}{F}, it shouldn't matter whether the \mintinline{python}{H[G]} index is computed first or the \mintinline{python}{G[F]} index is computed first, and we see that this is the case.
+\begin{minted}{python}
+H[G][F]            # → [14.3  5.5  3.3  3.3  5.5 14.3 27.5 45.1 67.1 93.5]
+H[G[F]]            # → [14.3  5.5  3.3  3.3  5.5 14.3 27.5 45.1 67.1 93.5]
+\end{minted}
+
 
 
 \end{document}
