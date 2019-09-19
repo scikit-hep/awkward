@@ -83,6 +83,7 @@ namespace awkward {
     const SliceItem* borrow(int64_t which) const { return items_[(size_t)which].get(); }
     const int64_t length() const { return (int64_t)items_.size(); }
     const std::string tostring() const;
+    void append(const std::shared_ptr<SliceItem>& item);
 
   private:
     std::vector<std::shared_ptr<SliceItem>> items_;

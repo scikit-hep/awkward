@@ -42,3 +42,7 @@ const std::string Slice::tostring() const {
   out << "]";
   return out.str();
 }
+
+void Slice::append(const std::shared_ptr<SliceItem>& item) {
+  items_.push_back(item);
+}

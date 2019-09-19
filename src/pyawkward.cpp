@@ -150,39 +150,43 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
 
 /////////////////////////////////////////////////////////////// Slice
 
-// std::shared_ptr<ak::SliceItem> toslice_part(py::object obj) {
-//   if (py::isinstance<py::int_>(obj)) {
-//     return std::shared_ptr<ak::SliceItem>(new ak::SliceAt(obj.cast<int64_t>()));
-//   }
-//   else if (py::isinstance<py::slice>(obj)) {
-//     py::object pystart = obj.attr("start");
-//     py::object pystop = obj.attr("stop");
-//     py::object pystep = obj.attr("step");
-//     int64_t start = ak::Slice::none();
-//     int64_t stop = ak::Slice::none();
-//     int64_t step = ak::Slice::none();
-//     if (!pystart.is(py::none())) {
-//       start = pystart.cast<int64_t>();
-//     }
-//     if (!pystop.is(py::none())) {
-//       stop = pystop.cast<int64_t>();
-//     }
-//     if (!pystep.is(py::none())) {
-//       step = pystep.cast<int64_t>();
-//       return std::shared_ptr<ak::SliceItem>(new ak::SliceStartStopStep(start, stop, step));
-//     }
-//     else {
-//       return std::shared_ptr<ak::SliceItem>(new ak::SliceStartStop(start, stop));
-//     }
-//   }
-// #if PY_MAJOR_VERSION >= 3
-//   else if (py::isinstance<py::ellipsis>(obj)) {
-//     return std::shared_ptr<ak::SliceItem>(new ak::SliceEllipsis());
-//   }
-// #endif
-//   else if (obj.is(py::module::import("numpy").attr("newaxis"))) {
-//     return std::shared_ptr<ak::SliceItem>(new ak::SliceNewAxis());
-//   }
+void toslice_part(ak::Slice& slice, py::object obj) {
+  if (py::isinstance<py::int_>(obj)) {
+    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceAt(obj.cast<int64_t>())));
+  }
+  else if (py::isinstance<py::slice>(obj)) {
+    py::object pystart = obj.attr("start");
+    py::object pystop = obj.attr("stop");
+    py::object pystep = obj.attr("step");
+    int64_t start = ak::Slice::none();
+    int64_t stop = ak::Slice::none();
+    int64_t step = ak::Slice::none();
+    if (!pystart.is(py::none())) {
+      start = pystart.cast<int64_t>();
+    }
+    if (!pystop.is(py::none())) {
+      stop = pystop.cast<int64_t>();
+    }
+    if (!pystep.is(py::none())) {
+      step = pystep.cast<int64_t>();
+    }
+    if (step == 0) {
+      throw std::invalid_argument("slice step must not be 0");
+    }
+    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceRange(start, stop, step)));
+  }
+#if PY_MAJOR_VERSION >= 3
+  else if (py::isinstance<py::ellipsis>(obj)) {
+    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceEllipsis()));
+  }
+#endif
+  else if (obj.is(py::module::import("numpy").attr("newaxis"))) {
+    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceNewAxis()));
+  }
+
+}
+
+
 //   else if (py::isinstance<py::iterable>(obj)) {
 //     py::object objarray = py::module::import("numpy").attr("ascontiguousarray")(obj);
 //     if (!py::isinstance<py::array>(objarray)) {
@@ -247,19 +251,19 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
 //     throw std::invalid_argument("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), and integer or boolean arrays (possibly jagged) are valid indices");
 //   }
 // }
-//
-// ak::Slice toslice(py::object obj) {
-//   ak::Slice out;
-//   if (py::isinstance<py::tuple>(obj)) {
-//     for (auto x : obj.cast<py::tuple>()) {
-//       out.append(toslice_part(x.cast<py::object>()));
-//     }
-//   }
-//   else {
-//     out.append(toslice_part(obj));
-//   }
-//   return out;
-// }
+
+ak::Slice toslice(py::object obj) {
+  ak::Slice out;
+  if (py::isinstance<py::tuple>(obj)) {
+    for (auto x : obj.cast<py::tuple>()) {
+      toslice_part(out, x.cast<py::object>());
+    }
+  }
+  else {
+    toslice_part(out, obj);
+  }
+  return out;
+}
 
 /////////////////////////////////////////////////////////////// Identity
 
