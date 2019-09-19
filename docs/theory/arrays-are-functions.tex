@@ -26,7 +26,7 @@ The central features of an array library like Numpy or Awkward Array simplify if
 Specified this way, this is a partial function\footnote{\url{https://en.wikipedia.org/wiki/Partial_function}}---for some integers, it raises an exception rather than returning a value in $d$. (Integers greater than or equal to the array's length or less than its negated length, if the array implements Python's negative indexing, are outside the bounds of the array and do not return a value.) It can be made into a total function by restricting the domain to $[0, n)$ where $n$ is the length of the array:
 \[ \mintinline{python}{array}: [0, n) \to d. \]
 
-We can choose $[0, n)$ as the domain and work with total functions or $\mathbb{Z}$ as the domain and work with partial functions---it is a matter of the granularity of the type system. Numpy has a single type \mintinline{python}{ndarray} for all arrays, Numba has an array type that depends on the array's dimension, and C++ has a \mintinline{c++}{std::array<dtype, n>} type that depends on the exact size (\mintinline{c++}{n}) of the array, like our functional description above. As we'll see later, a consequence of this specificity is that the return value of some functions will depend on the values given to that function, a feature known as dependent types\footnote{\url{https://en.wikipedia.org/wiki/Dependent_type}}.
+We can choose $[0, n)$ as the domain and work with total functions or $\mathbb{Z}$ as the domain and work with partial functions---it is a matter of the granularity of the type system. Numpy has a single type \mintinline{python}{ndarray} for all arrays (effectively untyped), Numba has an array type that depends on the array's dimension, and C++ has a \mintinline{c++}{std::array<dtype, n>} type that depends on the exact size (\mintinline{c++}{n}) of the array, like our functional description above. As we'll see later, a consequence of this specificity is that the return value of some functions will depend on the values given to that function, a feature known as dependent types\footnote{\url{https://en.wikipedia.org/wiki/Dependent_type}}.
 
 In this note, we'll describe arrays as total functions in a dependent type system.
 
@@ -34,7 +34,7 @@ In this note, we'll describe arrays as total functions in a dependent type syste
 
 Numpy arrays can have arbitrarily many dimensions, referred to as the array's \mintinline{python}{shape}. The \mintinline{python}{shape} is a tuple of positive integers specifying the length of each dimension: $(n_1, n_2, \ldots, n_k)$ is a rank-$k$ tensor ($k = 1$ is a vector, $k = 2$ is a matrix, etc.).
 
-To get values of $d$ from a rank-$k$ array of \mintinline{python}{dtype} $d$, we must specify $k$ integers, each in a restricted domain $[0, n_i)$. In Numpy syntax, this is an implicit Python \mintinline{python}{tuple} between the square brackets:
+To get values of type $d$ from a rank-$k$ array of \mintinline{python}{dtype} $d$, we must specify $k$ integers, each in a restricted domain $[0, n_i)$. In Numpy syntax, this is an implicit Python \mintinline{python}{tuple} between the square brackets:
 \[ \mintinline{python}{array[i1, i2, ..., ik]} \]
 \noindent In mathematical syntax, we can represent a $k$-tuple as a cartesian product,
 \[ [0, n_1) \times [0, n_2) \times \ldots \times [0, n_k) \]
@@ -46,8 +46,8 @@ A function with multiple arguments can be replaced with functions of one argumen
 \noindent by noting that
 \[ \mintinline{python}{array[i1]} \]
 \noindent returns an array of rank $k - 1$ and \mintinline{python}{dtype} $d$, which is a function
-\[ \mintinline{python}{array[i1]}: [0, n_2) \to \ldots \to [0, n_k) \to d. \]
-\noindent In fact, Numpy's indexing syntax illustrates this clearly:
+\[ \mintinline{python}{array[i1]}: [0, n_2) \to \ldots \to [0, n_k) \to d \]
+\noindent (and so on, for each dimension). In fact, Numpy's indexing syntax illustrates this clearly:
 \[ \mintinline{python}{array[i1, i2, i3] == array[i1][i2][i3]} \]
 \noindent for any \mintinline{python}{i1}, \mintinline{python}{i2}, \mintinline{python}{i3} that satisfy a three-dimensional array's domain.
 
@@ -55,30 +55,30 @@ A function with multiple arguments can be replaced with functions of one argumen
 
 Numpy also has record arrays\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.rec.html}} for arrays of record-like structures (e.g.\ \mintinline{c++}{struct} in C). In Numpy, the named fields and their types are considered part of the array's \mintinline{python}{dtype}, but they are accessed through the same square bracket syntax as elements of the array's \mintinline{python}{shape}:
 \[ \mintinline{python}{array[i1, i2, i3][fieldname]} \]
-\noindent where \mintinline{python}{fieldname} is a string, the name of one of the record's fields. (Numpy does not allow the \mintinline{python}{fieldname} to be uncurried---to be in the same tuple with \mintinline{python}{i1}, \mintinline{python}{i2}, \mintinline{python}{i3}.)
+\noindent where \mintinline{python}{fieldname} is a string, the name of one of the record's fields. (Numpy does not allow the \mintinline{python}{fieldname} to be uncurried---it must be in a different set of brackets from \mintinline{python}{i1}, \mintinline{python}{i2}, \mintinline{python}{i3}.)
 
 Since record fields are accessed through a similar syntax, let's consider it part of the array's functional type, making no distinction between \mintinline{python}{shape} elements and field names. For a record type in which string-valued field names $s_1$, $s_2$, \ldots, $s_m$ map to \mintinline{python}{dtypes} $d_1$, $d_2$, \ldots, $d_m$, we can write
 \begin{align*}
-\mintinline{python}{recarray}: [0, n) \to & s_1 \to d_1 \\
- & s_2 \to d_2 \\
- & \ldots \\
- & s_m \to d_m
+\mintinline{python}{recarray}: [0, n) \to &\ s_1 \to d_1 \\
+ &\ s_2 \to d_2 \\
+ &\ \ldots \\
+ &\ s_m \to d_m
 \end{align*}
 \noindent to represent a one-dimensional record array of length $n$. This is a dependent type because the choice of field name determines the return type of the function.
 
-A multidimensional record array could be described as
+A multidimensional record array can be described as
 \begin{align*}
-\mintinline{python}{recarray}: [0, n_1) \to [0, n_2) \to \ldots \to [0, n_k) \to & s_1 \to d_1 \\
- & s_2 \to d_2 \\
- & \ldots \\
- & s_m \to d_m
+\mintinline{python}{recarray}: [0, n_1) \to [0, n_2) \to \ldots \to [0, n_k) \to &\ s_1 \to d_1 \\
+ &\ s_2 \to d_2 \\
+ &\ \ldots \\
+ &\ s_m \to d_m
 \end{align*}
 \noindent or as
 \begin{align*}
-\mintinline{python}{recarray}: [0, n_1) \to & s_1 \to [0, n_2) \to \ldots \to [0, n_k) \to d_1 \\
- & s_2 \to [0, n_2) \to \ldots \to [0, n_k) \to d_2 \\
- & \ldots \\
- & s_m \to [0, n_2) \to \ldots \to [0, n_k) \to d_m
+\mintinline{python}{recarray}: [0, n_1) \to &\ s_1 \to [0, n_2) \to \ldots \to [0, n_k) \to d_1 \\
+ &\ s_2 \to [0, n_2) \to \ldots \to [0, n_k) \to d_2 \\
+ &\ \ldots \\
+ &\ s_m \to [0, n_2) \to \ldots \to [0, n_k) \to d_m
 \end{align*}
 \noindent or any other placement of the field name index within the ordered sequence of dimensional indexes. In general, the string indexes (field names) commute with the integer indexes (dimensions). This is evident in Numpy's syntax:
 \begin{align*}
@@ -96,7 +96,7 @@ Numpy uses so-called ``vectorized'' functions or ``universal'' functions (``ufun
 \[ \mbox{ufunc}(f): \left([0, n) \to d^A\right) \to \left([0, n) \to d^B\right)\mbox{.} \]
 \noindent Note that the \mintinline{python}{shape} of the array, $[0, n)$ in this case, is the same for the argument type of $\mbox{ufunc}(f)$ as for its return type.
 
-This $\mbox{ufunc}$ functor is a partial application of what would be called $\mbox{map}$ in most functional languages\footnote{\url{https://en.wikipedia.org/wiki/Map_(higher-order_function)}}. The $\mbox{map}$ functor takes a function and a collection, returning a collection of the same length with the function applied to each element. The $\mbox{ufunc}$ functor only takes a function, and its result is applied to collections (arrays) later.
+This $\mbox{ufunc}$ functor is a partial application of what would be called ``$\mbox{map}$'' in most functional languages\footnote{\url{https://en.wikipedia.org/wiki/Map_(higher-order_function)}}. The $\mbox{map}$ functor takes a function and a collection, returning a collection of the same length with the function applied to each element. The $\mbox{ufunc}$ functor only takes a function, and its result is applied to collections (arrays) later.
 
 Since arrays are themselves functions, applying $\mbox{ufunc}(f)$ to an array is a composition\footnote{\url{https://en.wikipedia.org/wiki/Function_composition}} of the array with $f$. Thus, the following is true for any \mintinline{python}{i} $\in [0, n)$:
 \begin{align*}
@@ -114,7 +114,7 @@ Using associativity again, we should be able to compose a sequence of scalar fun
 \[ \mbox{ufunc}(f) \circ \mbox{ufunc}(g) \circ \ldots \circ \mbox{ufunc}(h) \]
 \noindent into a single
 \[ \mbox{ufunc}(f \circ g \circ \ldots \circ h): \left([0, n) \to d^A\right) \to \left([0, n) \to d^Z\right) \]
-\noindent that can be applied to an array. This is an optimization known as loop fusion\footnote{\url{https://en.wikipedia.org/wiki/Loop_fission_and_fusion}}, and is often faster than making multiple passes over arrays and possibly allocating large temporary arrays between ufuncs. There have been proposals\footnote{\url{https://numpy.org/doc/1.14/neps/deferred-ufunc-evaluation.html}} and external libraries\footnote{\url{https://www.weld.rs/weldnumpy}} to add this feature transparently to Numpy. In principle, it could even be an explicit feature of the ufunc object, but to my knowledge, it has never been implemented as such.
+\noindent that can be applied to an array. This is an optimization known as loop fusion\footnote{\url{https://en.wikipedia.org/wiki/Loop_fission_and_fusion}}, and is often faster than making multiple passes over arrays and possibly allocating large temporary arrays between ufuncs. There have been proposals\footnote{\url{https://numpy.org/doc/1.14/neps/deferred-ufunc-evaluation.html}} and external libraries\footnote{\url{https://www.weld.rs/weldnumpy}} to add this feature transparently to Numpy. In principle, it could even be an explicit (user-visible) feature of the ufunc object, but to my knowledge, it has never been implemented as such.
 
 \section*{Array slicing}
 
@@ -195,7 +195,7 @@ Numpy is a library for contiguous, rectangular grids of numbers---within that sc
 
 However, we often want more general data structures, so Awkward Array extends Numpy by interpreting collections of rectilinear arrays as non-rectilinear arrays. The two most important additions are
 \begin{itemize}
-\item more general record types and
+\item records containing fields of any type and
 \item arrays of unequal-length subarrays.
 \end{itemize}
 \noindent (Although union types, nullable types, and cross-referencing are also included in the Awkward Array library, they are less related to this note's focus on arrays as functions.)
@@ -206,7 +206,7 @@ However, we often want more general data structures, so Awkward Array extends Nu
 
 Numpy's record array only allows one dimension of category labels, and all arrays identified by a category label share the same \mintinline{python}{shape}. This is because the location of each of these arrays is defined by a stride. It also means that Numpy is limited to ``arrays of structs.''\footnote{\url{https://en.wikipedia.org/wiki/AoS_and_SoA}}
 
-Suppose we want field $s_1$ of an array to have shape $[0, n_1)$ and field $s_2$ to have shape $[0, n_1) \times [0, n_2)$. That is, at each $i_1$, field $s_1$ has a scalar and field $s_2$ has an array. This could be described as the dependent type
+Suppose we want field $s_1$ of an array to have shape $[0, n_1)$ and field $s_2$ to have shape $[0, n_1) \times [0, n_2)$. That is, at each $i_1$, field $s_1$ has a scalar and field $s_2$ has an array. This can be described as the dependent type
 \begin{align*}
 \phantom{\mbox{ufunc}(f)(}\mintinline{python}{array}\phantom{)}: [0, n_1) \to & s_1 \to d^A \\
  & s_2 \to [0, n_2) \to d^A\mbox{.}
@@ -218,26 +218,26 @@ With \mintinline{python}{i1} $\in [0, n_1)$ and \mintinline{python}{i2} $\in [0,
 \mintinline{python}{array[i1][s2][i2]} & \mbox{ returns } d^A\mbox{ (a scalar).}
 \end{align*}
 
-Such an array could still be passed into ufuncs because ufuncs compose a function $f: d^A \to d^B$ to the {\it output} of an array. For example,
+Such an array can still be passed into ufuncs because ufuncs compose a function $f: d^A \to d^B$ to the {\it output} of an array. For example,
 \begin{align*}
 \mbox{ufunc}(f)(\mintinline{python}{array}): [0, n_1) \to & s_1 \to d^B \\
  & s_2 \to [0, n_2) \to d^B\mbox{.}
 \end{align*}
 
-Such an array could still be sliced because slicing composes an integer array $\mintinline{python}{index}: [0, x) -> [0, n_1)$ to the {\it input} of the array. For example,
+Such an array can still be sliced because slicing composes an integer array $\mintinline{python}{index}: [0, x) -> [0, n_1)$ to the {\it input} of the array. For example,
 \begin{align*}
 \mintinline{python}{array}(\mintinline{python}{index}): [0, x) \to & s_1 \to d^A \\
  & s_2 \to [0, n_2) \to d^A\mbox{.}
 \end{align*}
 
-The string-index/integer-index commutativity partially applies: the domain $\{s_1, s_2\}$ could be moved from the middle of this function type to the left, like so:
+The string-index/integer-index can be {\it partially} commuted: the domain $\{s_1, s_2\}$ can be moved from the middle of this function type to the left, like so:
 \begin{align*}
 \mintinline{python}{array}: & s_1 \to [0, n_1) \to d^A \\
 & s_2 \to [0, n_1) \to [0, n_2) \to d^A\mbox{,}
 \end{align*}
-\noindent but it could not be moved to the right.
+\noindent but it cannot be moved to the right, where the type of each field is different.
 
-Similarly, if we had nested records, with $s_1$ containing \mintinline{python}{dtype} $d$ and $s_2$ containing a record with fields $t_1$ and $t_2$, our options for commuting indexes would be limited to one move:
+Similarly, if we had nested records, with $s_1$ containing \mintinline{python}{dtype} $d$ and $s_2$ containing a record with fields $t_1$ and $t_2$, our options for commuting indexes would be limited to one possibility:
 \begin{align*}
 \mintinline{python}{array}: [0, n_1) \to & s_1 \to d & \mintinline{python}{array}: &\ s_1 \to [0, n_1) \to d \\
  & {s_2 \to\ }t_1 \to d                              & &\ {s_2 \to [0, n_1) \to\ }t_1 \to d \\
@@ -250,7 +250,7 @@ Similarly, if we had nested records, with $s_1$ containing \mintinline{python}{d
 
 We can also consider arrays of unequal-length subarrays (``jagged'' or ``ragged'' arrays).
 
-Like records, jagged arrays must be described by a dependent type if the function is to be defined on its whole domain. Just as each value in a record's domain, $\{s_1, s_2\}$, could return a different type, each value in a jagged array's domain can return a different type.
+Like records, jagged arrays must be described by a dependent type if the function is to be defined on its whole domain. Just as each value in a record's domain, $\{s_1, s_2\}$, can return a different type, each value in a jagged array's domain can return a different type.
 
 For example, the type of an array like \mintinline{python}{[[1.1, 2.2, 3.3], [], [4.4, 5.5]]} is
 \begin{align*}
@@ -271,7 +271,7 @@ Jagged arrays can be passed into ufuncs and sliced for the same reasons as non-r
 
 Non-rectilinear record types and non-rectilinear shapes can be combined, and these two generators can already produce data types as general as JSON. (Note that the explicit enumeration of dependent types for each array index allows heterogeneous lists and \mintinline{json}{null}.)
 
-String-valued field indexes can always commute to the left through a jagged dimension, but it can only commute to the right if domains match for all elements of a jagged dimension. For example, $\{s_1, s_2\}$ can commute through both levels of this jagged array, but only because it has the same combinations of nested shapes for both $s_1$ and $s_2$.
+String-valued field indexes can always commute to the left through a jagged dimension, but it can only commute to the right if domains match for all elements of a jagged dimension. For example, $\{s_1, s_2\}$ can commute through both levels of the following jagged array, but only because it has the same combinations of nested shapes for both $s_1$ and $s_2$.
 \begin{align*}
 \mintinline{python}{a}: &\ s_1 \to\mbox{\hspace{-0.5 cm}} & 0 \to [0, 3) \to d^A & \mbox{\hspace{0.5 cm}\mintinline{python}{a}:\hspace{-0.5 cm}} &\ 0 \to &\ s_1 \to [0, 3) \to d^A & \mintinline{python}{a}: &\ 0 \to [0, 3) \to\mbox{\hspace{-0.5 cm}} &\ s_1 \to d^A \\
 & &\ 1 \to [0, 0) \to d^A                                  & & &\ s_2 \to [0, 3) \to d^B                                & & & s_2 \to d^B \\
@@ -281,5 +281,10 @@ String-valued field indexes can always commute to the left through a jagged dime
 & &\ 2 \to [0, 2) \to d^B                                  & & &\ s_2 \to [0, 2) \to d^B                                & & & s_2 \to d^B
 \end{align*}
 
+\section*{Conclusions}
+
+The reason Awkward Array can make use of Numpy's ufunc and slicing concepts, despite a much more general data model, is because arrays are functions and these two operations correspond to function composition at the {\it output} or the {\it input} of the array.
+
+This note does not discuss the implementation details of Numpy or Awkward Array, though their scopes are well drawn by technical considerations. Numpy focuses on rectilinear arrays because stride tricks greatly optimize that domain. Awkward Array is more general, but it cannot use stride tricks on non-rectilinear data. Parts of a data structure must be physically separated in memory to allow generalized reshaping. However, the fact that slices can be explicitly composed with one another before applying them to an array (the associativity of function composition) has been very useful when dealing with separated data: slices do not need to be propagated all the way down a tree of nested structures---the meaning is preserved by lazy evaluation.
 
 \end{document}
