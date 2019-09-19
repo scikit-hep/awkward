@@ -100,10 +100,10 @@ This $\mbox{ufunc}$ functor is a partial application of what would be called $\m
 
 Since arrays are themselves functions, applying $\mbox{ufunc}(f)$ to an array is a composition\footnote{\url{https://en.wikipedia.org/wiki/Function_composition}} of the array with $f$. Thus, the following is true for any \mintinline{python}{i} $\in [0, n)$:
 \begin{align*}
-\underbrace{\mbox{ufunc}(f)(\mintinline{python}{array})}_{\mbox{\scriptsize mapped array}}(\mintinline{python}{i}) = & \,f(\underbrace{\mintinline{python}{array}(\mintinline{python}{i})}_{\mbox{\scriptsize mapped scalar}}) \\[0.5\baselineskip]
-\mintinline{python}{numpy.vectorize(f)(array)[i]} = & \,\mintinline{python}{f(array[i])}\mbox{.}
+\underbrace{\mbox{ufunc}(f)(\mintinline{python}{array})}_{\mbox{\scriptsize array}}(\mintinline{python}{i}) = & \,f(\underbrace{\mintinline{python}{array}(\mintinline{python}{i})}_{\mbox{\scriptsize scalar}}) \\[0.5\baselineskip]
+\underbrace{\mintinline{python}{numpy.vectorize(f)(array)}}_{\mbox{\scriptsize array}}\mintinline{python}{[i]} = & \,\mintinline{python}{f(}\underbrace{\mintinline{python}{array[i]}}_{\mbox{\scriptsize scalar}}\mintinline{python}{)}\mbox{.}
 \end{align*}
-\noindent by associativity of function composition. This composition always applies $f$ to the {\it output} of the array (function composition is not commutative).
+\noindent by associativity of function composition. This composition always applies $f$ to the {\it output} of the array, never the {\it input} (function composition is not commutative).
 \begin{align*}
 f: & \mbox{ } d^A \to d^B \\
 \mintinline{python}{array}: & \mbox{ } [0, n) \to d^A \\
@@ -133,9 +133,9 @@ The fact that array slicing is itself composition may not be obvious because of 
 
 As an array, \mintinline{python}{index} is a function $\mintinline{python}{index}: [0, x) \to [0, n)$ that can be composed with $\mintinline{python}{array}: [0, n) \to d$ to produce
 \[ \mintinline{python}{array} \circ \mintinline{python}{index}: [0, x) \to d \]
-\noindent Note that \mintinline{python}{index} is to the right (transforms the input) of \mintinline{python}{array}, whereas $\mbox{ufunc}(f)$ put $f$ to the left (transforms the output) of \mintinline{python}{array}.
+\noindent Note that \mintinline{python}{index} is to the right (transforms the {\it input}) of \mintinline{python}{array}, whereas $\mbox{ufunc}(f)$ put $f$ to the left (transforms the {\it output}) of \mintinline{python}{array}.
 
-Numpy uses the same syntax for this function composition, \mintinline{python}{array[index]}, as it does for function evaluation, \mintinline{python}{array[i]}. Let's illustrate this with an extended example.
+Numpy uses the same syntax for this function composition, \mintinline{python}{array[index]}, as it does for function evaluation, \mintinline{python}{array[i]}, which is potentially confusing. Let's illustrate this with an extended example.
 
 \subsection*{Example}
 
@@ -163,10 +163,9 @@ numpy.take(G, F)   # → [13,  5,  3,  3,  5, 13, 25, 41, 61, 85]
 
 GoF                # → [13,  5,  3,  3,  5, 13, 25, 41, 61, 85]
 \end{minted}
+\noindent In \mintinline{python}{GoF}, the functions are composed before being transformed into arrays, and in \mintinline{python}{G[F]}, the arrays themselves are composed via integer-array indexing.
 
-In \mintinline{python}{GoF}, the functions are composed before being transformed into arrays, and in \mintinline{python}{G[F]}, the arrays themselves are composed via integer-array indexing. Function composition is associative, so we should be able to change the order of two integer-array indexings.
-
-To demonstrate associativity, introduce another array, which need not have integer \mintinline{python}{dtype}.
+Function composition is associative, so we should be able to change the order of two integer-array indexings. To demonstrate this, introduce another array, which need not have integer \mintinline{python}{dtype}.
 \begin{minted}{python}
 H = numpy.arange(1000)*1.1
 \end{minted}
