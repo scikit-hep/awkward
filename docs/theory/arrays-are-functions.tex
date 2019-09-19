@@ -269,10 +269,17 @@ Jagged arrays can be passed into ufuncs and sliced for the same reasons as non-r
 \end{align*}
 \noindent for $f: d^A \to d^B$ and \mintinline{python}{index = [2, 0, 0, 1]}, for example.
 
+Non-rectilinear record types and non-rectilinear shapes can be combined, and these two generators can already produce data types as general as JSON. (Note that the explicit enumeration of dependent types for each array index allows heterogeneous lists and \mintinline{json}{null}.)
 
-
-
-
+String-valued field indexes can always commute to the left through a jagged dimension, but it can only commute to the right if domains match for all elements of a jagged dimension. For example, $\{s_1, s_2\}$ can commute through both levels of this jagged array, but only because it has the same combinations of nested shapes for both $s_1$ and $s_2$.
+\begin{align*}
+\mintinline{python}{a}: &\ s_1 \to\mbox{\hspace{-0.5 cm}} & 0 \to [0, 3) \to d^A & \mbox{\hspace{0.5 cm}\mintinline{python}{a}:\hspace{-0.5 cm}} &\ 0 \to &\ s_1 \to [0, 3) \to d^A & \mintinline{python}{a}: &\ 0 \to [0, 3) \to\mbox{\hspace{-0.5 cm}} &\ s_1 \to d^A \\
+& &\ 1 \to [0, 0) \to d^A                                  & & &\ s_2 \to [0, 3) \to d^B                                & & & s_2 \to d^B \\
+& &\ 2 \to [0, 2) \to d^A                                  & &\ 1 \to &\ s_1 \to [0, 0) \to d^B                         & &\ 1 \to [0, 0) \to\mbox{\hspace{-0.5 cm}} &\ s_1 \to d^A \\
+&\ s_2 \to\mbox{\hspace{-0.5 cm}} & 0 \to [0, 3) \to d^B                         & & &\ s_2 \to [0, 0) \to d^B                                & & & s_2 \to d^B \\
+& &\ 1 \to [0, 0) \to d^B                                  & &\ 2 \to &\ s_1 \to [0, 2) \to d^B                         & &\ 2 \to [0, 2) \to\mbox{\hspace{-0.5 cm}} &\ s_1 \to d^A \\
+& &\ 2 \to [0, 2) \to d^B                                  & & &\ s_2 \to [0, 2) \to d^B                                & & & s_2 \to d^B
+\end{align*}
 
 
 \end{document}
