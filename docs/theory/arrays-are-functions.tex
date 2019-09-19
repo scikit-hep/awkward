@@ -12,50 +12,58 @@
 \begin{document}
 \maketitle
 
+\setlength{\parskip}{0.5\baselineskip}
+
 \section*{Introduction}
 
-The central features of an array library like Numpy or Awkward Array simplify if we think of arrays as functions and these features as function composition. A simple, one-dimensional array of \mintinline{python}{dtype} $d$ (e.g.\ \mintinline{python}{int32} or \mintinline{python}{float64}) can be thought of as a function from integer indexes to members of $d$. Thus,
-
-\begin{center}
-\mintinline{python}{array[i]}
-\end{center}
-
+The central features of an array library like Numpy or Awkward Array simplify if we think of arrays as functions and these features as function composition. A one-dimensional array of \mintinline{python}{dtype} $d$ (e.g.\ \mintinline{python}{int32} or \mintinline{python}{float64}) can be thought of as a function from integer indexes to members of $d$. Thus,
+\[ \mintinline{python}{array[i]} \]
 \noindent becomes
-
 \[ \mintinline{python}{array}: \mathbb{Z} \to d \]
+\noindent because given an integer \mintinline{python}{i} $\in \mathbb{Z}$, it returns a value in $d$.  In Python, this function is the implementation of the array's \mintinline{python}{__getitem__} method.
 
-\noindent because given an integer \mintinline{python}{i} $\in \mathbb{Z}$, it returns a value in $d$. Specifying it this way, the function is not complete---integers greater than or equal to the array's length or less than zero (or less than its negated length, if it implements Python's negative indexing) would cause it to raise an exception, rather than returning a value. If we restrict the domain of this function to $[0, n)$ where $n$ is the length of the array, then
+Specified this way, this is a partial function\footnote{\url{https://en.wikipedia.org/wiki/Partial_function}}---for some integers, it raises an exception rather than returning a value in $d$. (Integers greater than or equal to the array's length or less than its negated length, if the array implements Python's negative indexing, are outside the bounds of the array and do not return a value.) It can be made into a total function by restricting the domain to $[0, n)$ where $n$ is the length of the array:
+\[ \mintinline{python}{array}: [0, n) \to d. \]
 
-\[ \mintinline{python}{array}: [0, n) \to d \]
+We can choose $[0, n)$ as the domain and work with total functions or $\mathbb{Z}$ as the domain and work with partial functions---it is a matter of the granularity of the type system. Numpy has a single type \mintinline{python}{ndarray} for all arrays, Numba has an array type that depends on the array's dimension, and C++ has a \mintinline{c++}{std::array<d, n>} type that depends on the exact size of the array, like our functional description above. As we'll see later, a consequence of this specificity is that the return value of some functions will depend on the values given to that function, a feature known as dependent types\footnote{\url{https://en.wikipedia.org/wiki/Dependent_type}}.
 
-\noindent is a {\it complete} function representing the array. In Python, this function is the implementation of \mintinline{python}{__getitem__}.
+In this note, we'll describe arrays as total functions in a dependent type system.
 
 \section*{Multidimensional arrays}
 
-Numpy arrays can have arbitrarily many dimensions, referred to as the array's \mintinline{python}{shape}. The \mintinline{python}{shape} is a tuple of positive integers specifying the length of each dimension: $(n_1, n_2, \ldots n_k)$ is a rank-$k$ tensor ($k = 1$ is a vector, $k = 2$ is a matrix, etc.).
+Numpy arrays can have arbitrarily many dimensions, referred to as the array's \mintinline{python}{shape}. The \mintinline{python}{shape} is a tuple of positive integers specifying the length of each dimension: $(n_1, n_2, \ldots, n_k)$ is a rank-$k$ tensor ($k = 1$ is a vector, $k = 2$ is a matrix, etc.).
 
-To get elements of \mintinline{python}{dtype} $d$ from a rank-$k$ array, we must specify $k$ integers, each in a domain of integers $[0, n_i)$. In Numpy syntax, this is an implicit Python \mintinline{python}{tuple} between the square brackets:
-
-\begin{center}
-\mintinline{python}{array[i1, i2, ..., ik]}
-\end{center}
-
+To get values of $d$ from a rank-$k$ array of \mintinline{python}{dtype} $d$, we must specify $k$ integers, each in a restricted domain $[0, n_i)$. In Numpy syntax, this is an implicit Python \mintinline{python}{tuple} between the square brackets:
+\[ \mintinline{python}{array[i1, i2, ..., ik]} \]
 \noindent In mathematical syntax, we can represent a $k$-tuple as a cartesian product,
-
 \[ [0, n_1) \times [0, n_2) \times \ldots \times [0, n_k) \]
-
 \noindent so the function corresponding to this array is
-
 \[ \mintinline{python}{array}: [0, n_1) \times [0, n_2) \times \ldots \times [0, n_k) \to d. \]
 
-\noindent 
+A function with multiple arguments can be replaced with functions of one argument that each return a function, a process known as currying\footnote{\url{https://en.wikipedia.org/wiki/Currying}}. For example, the function above can be replaced with
+\[ \mintinline{python}{array}: [0, n_1) \to [0, n_2) \to \ldots \to [0, n_k) \to d \]
+\noindent by noting that
+\[ \mintinline{python}{array[i1]} \]
+\noindent returns an array of rank $k - 1$ and \mintinline{python}{dtype} $d$, which is a function
+\[ \mintinline{python}{array[i1]}: [0, n_2) \to \ldots \to [0, n_k) \to d. \]
+\noindent In fact, Numpy's indexing syntax illustrates this clearly:
+\[ \mintinline{python}{array[i1, i2, i3] == array[i1][i2][i3]} \]
+\noindent for any \mintinline{python}{i1}, \mintinline{python}{i2}, \mintinline{python}{i3} that satisfy a three-dimensional array's domain.
 
+\section*{Record arrays}
 
-curried\footnote{\url{https://en.wikipedia.org/wiki/Currying}}
+Numpy also has record arrays\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.rec.html}} for arrays of record-like structures (e.g.\ \mintinline{c++}{struct} in C). In Numpy, the named fields and their types are considered part of the array's \mintinline{python}{dtype}, but they are accessed through the same square bracket syntax as elements of the array's \mintinline{python}{shape}:
+\[ \mintinline{python}{array[i1, i2, i3][fieldname]} \]
+\noindent where \mintinline{python}{fieldname} is a string, the name of one of the record's fields. (Numpy does not allow the \mintinline{python}{fieldname} to be uncurried---to be in the same tuple with \mintinline{python}{i1}, \mintinline{python}{i2}, \mintinline{python}{i3}.)
 
-
-
-
+Since record fields are accessed through a similar syntax, let's consider it part of the array's functional type, making no distinction between \mintinline{python}{shape} elements and field names. For a record type in which field names $f_1$, $f_2$, \ldots, $f_m$ map to \mintinline{python}{dtypes} $d_1$, $d_2$, \ldots, $d_m$, we can write
+\begin{align*}
+\mintinline{python}{recarray}: [0, n) \to & f_1 \to d_1 \\
+                                          & f_2 \to d_2 \\
+                                          & \ldots \\
+                                          & f_m \to d_m
+\end{align*}
+\noindent to represent a one-dimensional record array of length $n$.
 
 
 \end{document}
