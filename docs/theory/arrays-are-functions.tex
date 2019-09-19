@@ -1,0 +1,61 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage}
+\usepackage{minted}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\title{Arrays are Functions}
+\author{Jim Pivarski}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Introduction}
+
+The central features of an array library like Numpy or Awkward Array simplify if we think of arrays as functions and these features as function composition. A simple, one-dimensional array of \mintinline{python}{dtype} $d$ (e.g.\ \mintinline{python}{int32} or \mintinline{python}{float64}) can be thought of as a function from integer indexes to members of $d$. Thus,
+
+\begin{center}
+\mintinline{python}{array[i]}
+\end{center}
+
+\noindent becomes
+
+\[ \mintinline{python}{array}: \mathbb{Z} \to d \]
+
+\noindent because given an integer \mintinline{python}{i} $\in \mathbb{Z}$, it returns a value in $d$. Specifying it this way, the function is not complete---integers greater than or equal to the array's length or less than zero (or less than its negated length, if it implements Python's negative indexing) would cause it to raise an exception, rather than returning a value. If we restrict the domain of this function to $[0, n)$ where $n$ is the length of the array, then
+
+\[ \mintinline{python}{array}: [0, n) \to d \]
+
+\noindent is a {\it complete} function representing the array. In Python, this function is the implementation of \mintinline{python}{__getitem__}.
+
+\section*{Multidimensional arrays}
+
+Numpy arrays can have arbitrarily many dimensions, referred to as the array's \mintinline{python}{shape}. The \mintinline{python}{shape} is a tuple of positive integers specifying the length of each dimension: $(n_1, n_2, \ldots n_k)$ is a rank-$k$ tensor ($k = 1$ is a vector, $k = 2$ is a matrix, etc.).
+
+To get elements of \mintinline{python}{dtype} $d$ from a rank-$k$ array, we must specify $k$ integers, each in a domain of integers $[0, n_i)$. In Numpy syntax, this is an implicit Python \mintinline{python}{tuple} between the square brackets:
+
+\begin{center}
+\mintinline{python}{array[i1, i2, ..., ik]}
+\end{center}
+
+\noindent In mathematical syntax, we can represent a $k$-tuple as a cartesian product,
+
+\[ [0, n_1) \times [0, n_2) \times \ldots \times [0, n_k) \]
+
+\noindent so the function corresponding to this array is
+
+\[ \mintinline{python}{array}: [0, n_1) \times [0, n_2) \times \ldots \times [0, n_k) \to d. \]
+
+\noindent 
+
+
+curried\footnote{\url{https://en.wikipedia.org/wiki/Currying}}
+
+
+
+
+
+
+\end{document}
