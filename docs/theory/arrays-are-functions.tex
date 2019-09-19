@@ -189,9 +189,85 @@ To work-around this caveat, consider rank-$k$ integer arrays in each of the $k$ 
 \end{align*}
 \noindent because Numpy broadcasts the three integer arrays into a common three-dimensional shape, and the symmetry of these arrays decouples their effects in each dimension.
 
-\section*{Awkward Array extensions}
+\section*{Beyond rectilinear arrays}
 
+Numpy is a library for contiguous, rectangular grids of numbers---within that scope, range-slicing and broadcasting\footnote{\url{https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html}} can be effectively computed without modifying or copying array buffers, using stride tricks\footnote{\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.lib.stride_tricks.as_strided.html}}.
 
+However, we often want more general data structures, so Awkward Array extends Numpy by interpreting collections of rectilinear arrays as non-rectilinear arrays. The two most important additions are
+\begin{itemize}
+\item more general record types and
+\item arrays of unequal-length subarrays.
+\end{itemize}
+\noindent (Although union types, nullable types, and cross-referencing are also included in the Awkward Array library, they are less related to this note's focus on arrays as functions.)
+
+\vfill
+
+\section*{Non-rectilinear record types}
+
+Numpy's record array only allows one dimension of category labels, and all arrays identified by a category label share the same \mintinline{python}{shape}. This is because the location of each of these arrays is defined by a stride. It also means that Numpy is limited to ``arrays of structs.''\footnote{\url{https://en.wikipedia.org/wiki/AoS_and_SoA}}
+
+Suppose we want field $s_1$ of an array to have shape $[0, n_1)$ and field $s_2$ to have shape $[0, n_1) \times [0, n_2)$. That is, at each $i_1$, field $s_1$ has a scalar and field $s_2$ has an array. This could be described as the dependent type
+\begin{align*}
+\phantom{\mbox{ufunc}(f)(}\mintinline{python}{array}\phantom{)}: [0, n_1) \to & s_1 \to d^A \\
+ & s_2 \to [0, n_2) \to d^A\mbox{.}
+\end{align*}
+With \mintinline{python}{i1} $\in [0, n_1)$ and \mintinline{python}{i2} $\in [0, n_2)$,
+\begin{align*}
+\mintinline{python}{array[i1][s1]} & \mbox{ returns } d^A\mbox{ (a scalar)} \\
+\mintinline{python}{array[i1][s2]} & \mbox{ returns } [0, n_2) \to d^A\mbox{ (an array), and} \\
+\mintinline{python}{array[i1][s2][i2]} & \mbox{ returns } d^A\mbox{ (a scalar).}
+\end{align*}
+
+Such an array could still be passed into ufuncs because ufuncs compose a function $f: d^A \to d^B$ to the {\it output} of an array. For example,
+\begin{align*}
+\mbox{ufunc}(f)(\mintinline{python}{array}): [0, n_1) \to & s_1 \to d^B \\
+ & s_2 \to [0, n_2) \to d^B\mbox{.}
+\end{align*}
+
+Such an array could still be sliced because slicing composes an integer array $\mintinline{python}{index}: [0, x) -> [0, n_1)$ to the {\it input} of the array. For example,
+\begin{align*}
+\mintinline{python}{array}(\mintinline{python}{index}): [0, x) \to & s_1 \to d^A \\
+ & s_2 \to [0, n_2) \to d^A\mbox{.}
+\end{align*}
+
+The string-index/integer-index commutativity partially applies: the domain $\{s_1, s_2\}$ could be moved from the middle of this function type to the left, like so:
+\begin{align*}
+\mintinline{python}{array}: & s_1 \to [0, n_1) \to d^A \\
+& s_2 \to [0, n_1) \to [0, n_2) \to d^A\mbox{,}
+\end{align*}
+\noindent but it could not be moved to the right.
+
+Similarly, if we had nested records, with $s_1$ containing \mintinline{python}{dtype} $d$ and $s_2$ containing a record with fields $t_1$ and $t_2$, our options for commuting indexes would be limited to one move:
+\begin{align*}
+\mintinline{python}{array}: [0, n_1) \to & s_1 \to d & \mintinline{python}{array}: &\ s_1 \to [0, n_1) \to d \\
+ & {s_2 \to\ }t_1 \to d                              & &\ {s_2 \to [0, n_1) \to\ }t_1 \to d \\
+ & \phantom{s_2 \to\ }t_2 \to d                      & &\ \phantom{s_2 \to [0, n_1) \to\ }t_2 \to d\mbox{.}
+\end{align*}
+
+\vfill
+
+\section*{Non-rectilinear shapes}
+
+We can also consider arrays of unequal-length subarrays (``jagged'' or ``ragged'' arrays).
+
+Like records, jagged arrays must be described by a dependent type if the function is to be defined on its whole domain. Just as each value in a record's domain, $\{s_1, s_2\}$, could return a different type, each value in a jagged array's domain can return a different type.
+
+For example, the type of an array like \mintinline{python}{[[1.1, 2.2, 3.3], [], [4.4, 5.5]]} is
+\begin{align*}
+\mintinline{python}{array}: &\ 0 \to [0, 3) \to d^A \\
+ &\ 1 \to [0, 0) \to d^A \\
+ &\ 2 \to [0, 2) \to d^A\mbox{.}
+\end{align*}
+\noindent The type description grows with the length of the array---while it may be practical to fully enumerate a record's fields, it's not practical to enumerate a large jagged array's type.
+
+Jagged arrays can be passed into ufuncs and sliced for the same reasons as non-rectilinear records: these features are composition to the {\it output} and {\it input} of the array, respectively:
+\begin{align*}
+\mbox{ufunc}(f)(\mintinline{python}{array}): &\ 0 \to [0, 3) \to d^B & \mintinline{python}{array}(\mintinline{python}{index}): &\ 0 \to [0, 2) \to d^A \\
+ &\ 1 \to [0, 0) \to d^B                                             & &\ 1 \to [0, 3) \to d^A \\
+ &\ 2 \to [0, 2) \to d^B                                             & &\ 2 \to [0, 3) \to d^A \\
+ &                                                                   & &\ 3 \to [0, 0) \to d^A
+\end{align*}
+\noindent for $f: d^A \to d^B$ and \mintinline{python}{index = [2, 0, 0, 1]}, for example.
 
 
 
