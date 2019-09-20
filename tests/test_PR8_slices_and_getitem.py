@@ -67,3 +67,7 @@ def test_numpyarray_getitem():
     a = numpy.arange(10)
     b = awkward1.layout.NumpyArray(a)
     assert b.getitem(3) == 3
+
+    print(awkward1.tolist(b.getitem(slice(3, 7))))
+    print(awkward1.tolist(b.getitem(slice(1, 7, 2))))
+    raise Exception

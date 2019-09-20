@@ -305,7 +305,24 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem> 
     int64_t step = range->step();
     set_range(start, stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
 
-    throw std::invalid_argument("HERE");
+    int64_t numer = abs(start - stop);
+    int64_t denom = abs(step);
+    int64_t d = numer / denom;
+    int64_t m = numer % denom;
+    int64_t headlen = d + (m != 0 ? 1 : 0);
+
+    ssize_t nextbyteoffset = byteoffset_ + start*strides_[1];
+    NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
+
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    NumpyArray out = next.getitem_bystrides(nexthead, nexttail, length*headlen);
+
+    std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)headlen };
+    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    std::vector<ssize_t> outstrides = { strides_[0], strides_[1]*step };
+    outstrides.insert(outstrides.end(), out.strides_.begin() + 1, out.strides_.end());
+    return NumpyArray(id_, ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
   }
 
   else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
