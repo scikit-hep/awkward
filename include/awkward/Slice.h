@@ -88,8 +88,11 @@ namespace awkward {
     Slice(): items_(std::vector<std::shared_ptr<SliceItem>>()), sealed_(false) { }
     Slice(const std::vector<std::shared_ptr<SliceItem>> items): items_(items), sealed_(false) { }
     Slice(const std::vector<std::shared_ptr<SliceItem>> items, bool sealed): items_(items), sealed_(sealed) { }
+    const std::vector<std::shared_ptr<SliceItem>> items() const { return items_; }
+    bool sealed() const { return sealed_; }
 
     int64_t length() const;
+    int64_t dimlength() const;
     const std::shared_ptr<SliceItem> head() const;
     const Slice tail() const;
     const std::string tostring() const;

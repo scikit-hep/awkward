@@ -93,3 +93,11 @@ def test_numpyarray_getitem():
     assert awkward1.tolist(b[(slice(1, 4), 3)]) == awkward1.tolist(a[slice(1, 4), 3])
     assert awkward1.tolist(b[(slice(1, 4), slice(2, None))]) == awkward1.tolist(a[slice(1, 4), slice(2, None)])
     assert awkward1.tolist(b[(slice(None, None, -1), slice(2, None))]) == awkward1.tolist(a[slice(None, None, -1), slice(2, None)])
+
+    assert awkward1.tolist(b[:, numpy.newaxis, :]) == awkward1.tolist(a[:, numpy.newaxis, :])
+    assert awkward1.tolist(b[numpy.newaxis, :, numpy.newaxis, :, numpy.newaxis]) == awkward1.tolist(a[numpy.newaxis, :, numpy.newaxis, :, numpy.newaxis])
+
+    assert awkward1.tolist(b[..., 3]) == awkward1.tolist(a[..., 3])
+    assert awkward1.tolist(b[..., 3, 2]) == awkward1.tolist(a[..., 3, 2])
+    assert awkward1.tolist(b[3, ...]) == awkward1.tolist(a[3, ...])
+    assert awkward1.tolist(b[3, 2, ...]) == awkward1.tolist(a[3, 2, ...])

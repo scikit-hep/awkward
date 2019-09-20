@@ -101,6 +101,25 @@ int64_t Slice::length() const {
   return (int64_t)items_.size();
 }
 
+int64_t Slice::dimlength() const {
+  int64_t out = 0;
+  for (auto x : items_) {
+    if (dynamic_cast<SliceAt*>(x.get()) != nullptr) {
+      out += 1;
+    }
+    else if (dynamic_cast<SliceRange*>(x.get()) != nullptr) {
+      out += 1;
+    }
+    else if (dynamic_cast<SliceArray64*>(x.get()) != nullptr) {
+      out += 1;
+    }
+    else {
+      throw std::runtime_error("unrecognized slice item type");
+    }
+  }
+  return out;
+}
+
 const std::shared_ptr<SliceItem> Slice::head() const {
   if (items_.size() != 0) {
     return items_[0];

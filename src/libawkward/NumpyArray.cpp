@@ -281,11 +281,11 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem> 
     return NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
 
-  if (ndim() < 2) {
-    throw std::invalid_argument("too many indexes for array");
-  }
-
   if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+    if (ndim() < 2) {
+      throw std::invalid_argument("too many indexes for array");
+    }
+
     int64_t i = at->at();
     if (i < 0) i += shape_[1];
     if (i < 0  ||  i >= shape_[1]) {
@@ -305,6 +305,10 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem> 
   }
 
   else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+    if (ndim() < 2) {
+      throw std::invalid_argument("too many indexes for array");
+    }
+
     int64_t start = range->start();
     int64_t stop = range->stop();
     int64_t step = range->step();
@@ -331,14 +335,39 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem> 
   }
 
   else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
-    throw std::invalid_argument("getitem_bystrides ellipsis");
+    std::pair<int64_t, int64_t> minmax = minmax_depth();
+    assert(minmax.first == minmax.second);
+    int64_t mindepth = minmax.first;
+
+    if (tail.length() == 0  ||  mindepth - 1 == tail.dimlength()) {
+      std::shared_ptr<SliceItem> nexthead = tail.head();
+      Slice nexttail = tail.tail();
+      return getitem_bystrides(nexthead, nexttail, length);
+    }
+    else {
+      std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
+      std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
+      items.insert(items.end(), tailitems.begin(), tailitems.end());
+
+      std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
+      Slice nexttail(items, true);
+      return getitem_bystrides(nexthead, nexttail, length);
+    }
   }
 
   else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
-    throw std::invalid_argument("getitem_bystrides newaxis");
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    NumpyArray out = getitem_bystrides(nexthead, nexttail, length);
+
+    std::vector<ssize_t> outshape = { (ssize_t)length, 1 };
+    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    std::vector<ssize_t> outstrides = { out.strides_[0] };
+    outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
+    return NumpyArray(id_, ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
   }
 
   else {
-    throw std::runtime_error("unrecognized slice object");
+    throw std::runtime_error("unrecognized slice item type");
   }
 }
