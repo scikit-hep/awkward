@@ -52,6 +52,17 @@ def test_slice():
     assert repr(awkward1.layout.Slice(([[100, 200, 300, 400]], [[1], [2], [3]]))) == "[array([[100, 200, 300, 400], [100, 200, 300, 400], [100, 200, 300, 400]]), array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]])]"
     assert repr(awkward1.layout.Slice(([[1], [2], [3]], [[100, 200, 300, 400]]))) == "[array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]), array([[100, 200, 300, 400], [100, 200, 300, 400], [100, 200, 300, 400]])]"
 
+    with pytest.raises(ValueError):
+        awkward1.layout.Slice((3, slice(None), [[1], [2], [3]]))
+    with pytest.raises(ValueError):
+        awkward1.layout.Slice(([[1, 2, 3, 4]], slice(None), [[1], [2], [3]]))
+    with pytest.raises(ValueError):
+        awkward1.layout.Slice((slice(None), 3, slice(None), [[1], [2], [3]], slice(None)))
+    with pytest.raises(ValueError):
+        awkward1.layout.Slice((slice(None), [[1, 2, 3, 4]], slice(None), [[1], [2], [3]], slice(None)))
+    assert repr(awkward1.layout.Slice((slice(None), 3, [[1], [2], [3]], slice(None)))) == "[::, array([[3], [3], [3]]), array([[1], [2], [3]]), ::]"
+    assert repr(awkward1.layout.Slice((slice(None), [[1, 2, 3, 4]], [[1], [2], [3]], slice(None)))) == "[::, array([[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]), array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]), ::]"
+
 # def test_numpyarray_getitem():
 #     a = numpy.arange(120).reshape(6, 4, 5)
 #     b = awkward1.layout.NumpyArray(a)

@@ -4,6 +4,7 @@
 #define AWKWARD_SLICE_H_
 
 #include <cassert>
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <memory>

@@ -114,11 +114,7 @@ void Slice::append(const std::shared_ptr<SliceItem>& item) {
   items_.push_back(item);
 }
 
-#include <iostream>
-
 void Slice::broadcast() {
-  std::cout << "broadcast" << std::endl;
-
   std::vector<int64_t> shape;
   for (int64_t i = 0;  i < items_.size();  i++) {
     if (SliceArray64* array = dynamic_cast<SliceArray64*>(items_[i].get())) {
@@ -140,12 +136,6 @@ void Slice::broadcast() {
   }
 
   if (shape.size() != 0) {
-    std::cout << "shape ";
-    for (auto x : shape) {
-      std::cout << x << " ";
-    }
-    std::cout << std::endl;
-
     for (int64_t i = 0;  i < items_.size();  i++) {
       if (SliceAt* at = dynamic_cast<SliceAt*>(items_[i].get())) {
         Index64 index(1);
@@ -175,7 +165,21 @@ void Slice::broadcast() {
       }
     }
 
-    // more checks...
-
+    std::string isadvanced;
+    for (int64_t i = 0;  i < items_.size();  i++) {
+      if (dynamic_cast<SliceArray64*>(items_[i].get()) == nullptr) {
+        isadvanced.push_back('.');
+      }
+      else {
+        isadvanced.push_back('*');
+      }
+    }
+    int64_t numadvanced = std::count(isadvanced.begin(), isadvanced.end(), '*');
+    if (numadvanced != 0) {
+      isadvanced = isadvanced.substr(0, isadvanced.find_last_of("*") + 1).substr(isadvanced.find_first_of("*"));
+      if (numadvanced != isadvanced.size()) {
+        throw std::invalid_argument("advanced indexes separated by basic indexes is not permitted (simple integers are advanced when any arrays are present)");
+      }
+    }
   }
 }
