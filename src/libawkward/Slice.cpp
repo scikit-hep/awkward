@@ -140,7 +140,7 @@ void Slice::seal() {
   assert(!sealed_);
 
   std::vector<int64_t> shape;
-  for (int64_t i = 0;  i < items_.size();  i++) {
+  for (size_t i = 0;  i < items_.size();  i++) {
     if (SliceArray64* array = dynamic_cast<SliceArray64*>(items_[i].get())) {
       if (shape.size() == 0) {
         shape = array->shape();
@@ -160,12 +160,12 @@ void Slice::seal() {
   }
 
   if (shape.size() != 0) {
-    for (int64_t i = 0;  i < items_.size();  i++) {
+    for (size_t i = 0;  i < items_.size();  i++) {
       if (SliceAt* at = dynamic_cast<SliceAt*>(items_[i].get())) {
         Index64 index(1);
         index.ptr().get()[0] = at->at();
         std::vector<int64_t> strides;
-        for (int64_t j = 0;  j < shape.size();  j++) {
+        for (size_t j = 0;  j < shape.size();  j++) {
           strides.push_back(0);
         }
         items_[i] = std::shared_ptr<SliceItem>(new SliceArray64(index, shape, strides));
@@ -174,7 +174,7 @@ void Slice::seal() {
         std::vector<int64_t> arrayshape = array->shape();
         std::vector<int64_t> arraystrides = array->strides();
         std::vector<int64_t> strides;
-        for (int64_t j = 0;  j < shape.size();  j++) {
+        for (size_t j = 0;  j < shape.size();  j++) {
           if (arrayshape[j] == shape[j]) {
             strides.push_back(arraystrides[j]);
           }
@@ -190,7 +190,7 @@ void Slice::seal() {
     }
 
     std::string types;
-    for (int64_t i = 0;  i < items_.size();  i++) {
+    for (size_t i = 0;  i < items_.size();  i++) {
       if (dynamic_cast<SliceAt*>(items_[i].get()) != nullptr) {
         types.push_back('@');
       }
@@ -212,7 +212,7 @@ void Slice::seal() {
       throw std::invalid_argument("a slice can have no more than one ellipsis ('...')");
     }
 
-    int64_t numadvanced = std::count(types.begin(), types.end(), 'A');
+    size_t numadvanced = std::count(types.begin(), types.end(), 'A');
     if (numadvanced != 0) {
       types = types.substr(0, types.find_last_of("A") + 1).substr(types.find_first_of("A"));
       if (numadvanced != types.size()) {
@@ -226,7 +226,7 @@ void Slice::seal() {
 
 bool Slice::isadvanced() const {
   assert(sealed_);
-  for (int64_t i = 0;  i < items_.size();  i++) {
+  for (size_t i = 0;  i < items_.size();  i++) {
     if (dynamic_cast<SliceArray64*>(items_[i].get()) != nullptr) {
       return true;
     }
