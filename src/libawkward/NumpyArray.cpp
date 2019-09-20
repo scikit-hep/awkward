@@ -220,12 +220,41 @@ const NumpyArray NumpyArray::contiguous() const {
     return NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
   else {
-    throw std::invalid_argument("FIXME");
+    Index64 bytepos(shape_[0]);
+
+    int64_t* rawptr = bytepos.ptr().get();
+    int64_t skip = strides_[0];
+    for (int64_t i = 0;  i < shape_[0];  i++) {
+      rawptr[i] = i*skip;
+    }
+
+    return contiguous_next(bytepos);
   }
 }
 
 const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
-  throw std::invalid_argument("FIXME");
+  if (iscontiguous()) {
+    int64_t length = bytepos.length();
+    int64_t skip = strides_[0];
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*skip)], awkward::util::array_deleter<uint8_t>());
+
+    int64_t offset = byteoffset_;
+    int64_t* pos = bytepos.ptr().get();
+    uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
+    uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
+    for (int64_t i = 0;  i < length;  i++) {
+      memcpy(&toptr[i*skip], &fromptr[offset + pos[i]], skip);
+    }
+    return NumpyArray(id_, ptr, shape_, strides_, 0, itemsize_, format_);
+  }
+
+  else if (shape_.size() == 1) {
+    throw std::invalid_argument("FIXME");
+  }
+
+  else {
+    throw std::invalid_argument("FIXME");
+  }
 }
 
 const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
