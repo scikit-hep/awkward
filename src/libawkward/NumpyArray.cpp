@@ -195,6 +195,26 @@ const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
   return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
 }
 
+const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
+  if (shape.size() == 1) {
+    return std::vector<ssize_t>();
+  }
+  else {
+    std::vector<ssize_t> out = { shape[0]*shape[1] };
+    out.insert(out.end(), shape.begin() + 2, shape.end());
+    return out;
+  }
+}
+
+const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t> strides) {
+  if (strides.size() == 1) {
+    return std::vector<ssize_t>();
+  }
+  else {
+    return std::vector<ssize_t>(strides.begin() + 1, strides.end());
+  }
+}
+
 bool NumpyArray::iscontiguous() const {
   ssize_t x = itemsize_;
   for (ssize_t i = ndim() - 1;  i >= 0;  i--) {
@@ -245,15 +265,47 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
     for (int64_t i = 0;  i < length;  i++) {
       memcpy(&toptr[i*skip], &fromptr[offset + pos[i]], skip);
     }
+
     return NumpyArray(id_, ptr, shape_, strides_, 0, itemsize_, format_);
   }
 
   else if (shape_.size() == 1) {
-    throw std::invalid_argument("FIXME");
+    int64_t length = bytepos.length();
+    int64_t skip = itemsize_;
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*skip)], awkward::util::array_deleter<uint8_t>());
+
+    int64_t offset = byteoffset_;
+    int64_t* pos = bytepos.ptr().get();
+    uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
+    uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
+    for (int64_t i = 0;  i < length;  i++) {
+      memcpy(&toptr[i*skip], &fromptr[offset + pos[i]], skip);
+    }
+
+    std::vector<ssize_t> strides = { itemsize_ };
+    return NumpyArray(id_, ptr, shape_, strides, 0, itemsize_, format_);
   }
 
   else {
-    throw std::invalid_argument("FIXME");
+    NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+
+    int64_t length = bytepos.length();
+    int64_t shape1 = (int64_t)shape_[1];
+    int64_t strides1 = (int64_t)strides_[1];
+    Index64 nextbytepos(length*shape1);
+
+    int64_t* frompos = bytepos.ptr().get();
+    int64_t* topos = nextbytepos.ptr().get();
+    for (int64_t i = 0;  i < length;  i++) {
+      for (int64_t j = 0;  j < shape1;  j++) {
+        topos[i*shape1 + j] = frompos[i] + j*strides1;
+      }
+    }
+
+    NumpyArray out = next.contiguous_next(nextbytepos);
+    std::vector<ssize_t> outstrides = { shape_[1]*out.strides_[0] };
+    outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
+    return NumpyArray(out.id_, out.ptr_, shape_, outstrides, out.byteoffset_, itemsize_, format_);
   }
 }
 
@@ -278,26 +330,6 @@ const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
     std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
     std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
     return std::shared_ptr<Content>(new NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_));
-  }
-}
-
-const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
-  if (shape.size() == 1) {
-    return std::vector<ssize_t>();
-  }
-  else {
-    std::vector<ssize_t> out = { shape[0]*shape[1] };
-    out.insert(out.end(), shape.begin() + 2, shape.end());
-    return out;
-  }
-}
-
-const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t> strides) {
-  if (strides.size() == 1) {
-    return std::vector<ssize_t>();
-  }
-  else {
-    return std::vector<ssize_t>(strides.begin() + 1, strides.end());
   }
 }
 

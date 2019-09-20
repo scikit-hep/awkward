@@ -63,7 +63,7 @@ def test_slice():
     assert repr(awkward1.layout.Slice((slice(None), 3, [[1], [2], [3]], slice(None)))) == "[::, array([[3], [3], [3]]), array([[1], [2], [3]]), ::]"
     assert repr(awkward1.layout.Slice((slice(None), [[1, 2, 3, 4]], [[1], [2], [3]], slice(None)))) == "[::, array([[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]), array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]), ::]"
 
-def test_numpyarray_getitem():
+def test_numpyarray_getitem_bystrides():
     a = numpy.arange(10)
     b = awkward1.layout.NumpyArray(a)
     assert b[3] == a[3]
@@ -102,3 +102,20 @@ def test_numpyarray_getitem():
         assert awkward1.tolist(b[Ellipsis, 3, 2]) == awkward1.tolist(a[Ellipsis, 3, 2])
         assert awkward1.tolist(b[3, Ellipsis]) == awkward1.tolist(a[3, Ellipsis])
         assert awkward1.tolist(b[3, 2, Ellipsis]) == awkward1.tolist(a[3, 2, Ellipsis])
+
+def test_numpyarray_contiguous():
+    a = numpy.arange(10)[8::-2]
+    b = awkward1.layout.NumpyArray(a)
+
+    assert awkward1.tolist(b) == awkward1.tolist(a)
+    assert awkward1.tolist(b.contiguous()) == awkward1.tolist(a)
+    b.become_contiguous()
+    assert awkward1.tolist(b) == awkward1.tolist(a)
+
+    a = numpy.arange(7*5).reshape(7, 5)[::-1, ::2]
+    b = awkward1.layout.NumpyArray(a)
+
+    assert awkward1.tolist(b) == awkward1.tolist(a)
+    assert awkward1.tolist(b.contiguous())
+    b.become_contiguous()
+    assert awkward1.tolist(b) == awkward1.tolist(a)
