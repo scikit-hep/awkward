@@ -65,6 +65,9 @@ namespace awkward {
       assert(shape_.size() == strides_.size());
     }
     const IndexOf<T> index() const { return index_; }
+    const std::vector<int64_t> shape() const { return shape_; }
+    const std::vector<int64_t> strides() const { return strides_; }
+    int64_t ndim() const { return (int64_t)shape_.size(); }
     virtual const std::string tostring() const;
     const std::string tostring_part() const;
   private:
@@ -85,6 +88,7 @@ namespace awkward {
     const int64_t length() const { return (int64_t)items_.size(); }
     const std::string tostring() const;
     void append(const std::shared_ptr<SliceItem>& item);
+    void broadcast();
 
   private:
     std::vector<std::shared_ptr<SliceItem>> items_;

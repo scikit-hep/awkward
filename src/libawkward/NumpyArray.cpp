@@ -205,7 +205,9 @@ const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
   return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
 }
 
-
+const std::shared_ptr<Content> NumpyArray::getitem(const Slice& slice) const {
+  return shallow_copy();
+}
 
 
 

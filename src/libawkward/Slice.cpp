@@ -113,3 +113,69 @@ const std::string Slice::tostring() const {
 void Slice::append(const std::shared_ptr<SliceItem>& item) {
   items_.push_back(item);
 }
+
+#include <iostream>
+
+void Slice::broadcast() {
+  std::cout << "broadcast" << std::endl;
+
+  std::vector<int64_t> shape;
+  for (int64_t i = 0;  i < items_.size();  i++) {
+    if (SliceArray64* array = dynamic_cast<SliceArray64*>(items_[i].get())) {
+      if (shape.size() == 0) {
+        shape = array->shape();
+      }
+      else if (shape.size() != array->ndim()) {
+        throw std::invalid_argument("cannot broadcast arrays in slice");
+      }
+      else {
+        std::vector<int64_t> arrayshape = array->shape();
+        for (int64_t j = 0;  j < shape.size();  j++) {
+          if (arrayshape[j] > shape[j]) {
+            shape[j] = arrayshape[j];
+          }
+        }
+      }
+    }
+  }
+
+  if (shape.size() != 0) {
+    std::cout << "shape ";
+    for (auto x : shape) {
+      std::cout << x << " ";
+    }
+    std::cout << std::endl;
+
+    for (int64_t i = 0;  i < items_.size();  i++) {
+      if (SliceAt* at = dynamic_cast<SliceAt*>(items_[i].get())) {
+        Index64 index(1);
+        index.ptr().get()[0] = at->at();
+        std::vector<int64_t> strides;
+        for (int64_t j = 0;  j < shape.size();  j++) {
+          strides.push_back(0);
+        }
+        items_[i] = std::shared_ptr<SliceItem>(new SliceArray64(index, shape, strides));
+      }
+      else if (SliceArray64* array = dynamic_cast<SliceArray64*>(items_[i].get())) {
+        std::vector<int64_t> arrayshape = array->shape();
+        std::vector<int64_t> arraystrides = array->strides();
+        std::vector<int64_t> strides;
+        for (int64_t j = 0;  j < shape.size();  j++) {
+          if (arrayshape[j] == shape[j]) {
+            strides.push_back(arraystrides[j]);
+          }
+          else if (arrayshape[j] == 1) {
+            strides.push_back(0);
+          }
+          else {
+            throw std::invalid_argument("cannot broadcast arrays in slice");
+          }
+        }
+        items_[i] = std::shared_ptr<SliceItem>(new SliceArray64(array->index(), shape, strides));
+      }
+    }
+
+    // more checks...
+
+  }
+}

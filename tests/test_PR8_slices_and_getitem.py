@@ -47,6 +47,11 @@ def test_slice():
     with pytest.raises(ValueError):
         awkward1.layout.Slice(numpy.array([1, 2, 3, None, 4, 5]))
 
+    assert repr(awkward1.layout.Slice((123, [[1, 1], [2, 2], [3, 3]]))) == "[array([[123, 123], [123, 123], [123, 123]]), array([[1, 1], [2, 2], [3, 3]])]"
+    assert repr(awkward1.layout.Slice(([[1, 1], [2, 2], [3, 3]], 123))) == "[array([[1, 1], [2, 2], [3, 3]]), array([[123, 123], [123, 123], [123, 123]])]"
+    assert repr(awkward1.layout.Slice(([[100, 200, 300, 400]], [[1], [2], [3]]))) == "[array([[100, 200, 300, 400], [100, 200, 300, 400], [100, 200, 300, 400]]), array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]])]"
+    assert repr(awkward1.layout.Slice(([[1], [2], [3]], [[100, 200, 300, 400]]))) == "[array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]), array([[100, 200, 300, 400], [100, 200, 300, 400], [100, 200, 300, 400]])]"
+
 # def test_numpyarray_getitem():
 #     a = numpy.arange(120).reshape(6, 4, 5)
 #     b = awkward1.layout.NumpyArray(a)

@@ -318,6 +318,7 @@ ak::Slice toslice(py::object obj) {
   else {
     toslice_part(out, obj);
   }
+  out.broadcast();
   return out;
 }
 
@@ -434,10 +435,10 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
         return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(self)));
       })
 
-      // .def("getitem", [](ak::NumpyArray& self, py::object pyslice) -> py::object {
-      //   ak::Slice slice = toslice(pyslice);
-      //   return unwrap(self.getitem(slice));
-      // })
+      .def("getitem", [](ak::NumpyArray& self, py::object pyslice) -> py::object {
+        ak::Slice slice = toslice(pyslice);
+        return unwrap(self.getitem(slice));
+      })
 
   ;
 }
