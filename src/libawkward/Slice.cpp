@@ -150,7 +150,7 @@ void Slice::seal() {
       }
       else {
         std::vector<int64_t> arrayshape = array->shape();
-        for (int64_t j = 0;  j < shape.size();  j++) {
+        for (size_t j = 0;  j < shape.size();  j++) {
           if (arrayshape[j] > shape[j]) {
             shape[j] = arrayshape[j];
           }
