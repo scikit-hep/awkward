@@ -348,6 +348,21 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
   ;
 }
 
+/////////////////////////////////////////////////////////////// Slice
+
+py::class_<ak::Slice> make_Slice(py::handle m, std::string name) {
+  return py::class_<ak::Slice>(m, name.c_str())
+      .def(py::init([](py::object obj) {
+        return toslice(obj);
+      }))
+
+      .def("__repr__", [](ak::Slice& self) -> const std::string {
+        return self.tostring();
+      })
+
+  ;
+}
+
 /////////////////////////////////////////////////////////////// Iterator
 
 py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
@@ -520,14 +535,12 @@ PYBIND11_MODULE(layout, m) {
   make_IdentityOf<int32_t>(m, "Identity32");
   make_IdentityOf<int64_t>(m, "Identity64");
 
+  make_Slice(m, "Slice");
+
   make_Iterator(m, "Iterator");
 
   make_NumpyArray(m, "NumpyArray");
 
   make_ListOffsetArrayOf<int32_t>(m, "ListOffsetArray32");
   make_ListOffsetArrayOf<int64_t>(m, "ListOffsetArray64");
-
-  // m.def("testslice", [](py::object obj) -> std::string {
-  //   return toslice(obj).tostring();
-  // });
 }

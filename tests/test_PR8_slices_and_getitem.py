@@ -10,6 +10,9 @@ import awkward1
 
 py27 = (sys.version_info[0] < 3)
 
+def test_slice():
+    print(awkward1.layout.Slice(3))
+
 # def test_slice():
 #     awkward1.layout.testslice(3)
 #     awkward1.layout.testslice(slice(1, 2))

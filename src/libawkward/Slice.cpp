@@ -14,6 +14,14 @@ const std::string SliceRange::tostring() const {
          (hasstep() ? std::to_string(step_) : std::string(""));
 }
 
+const std::string SliceEllipsis::tostring() const {
+  return std::string("...");
+}
+
+const std::string SliceNewAxis::tostring() const {
+  return std::string("newaxis");
+}
+
 template <typename T>
 const std::string SliceArrayOf<T>::tostring() const {
   std::stringstream out;
@@ -22,12 +30,8 @@ const std::string SliceArrayOf<T>::tostring() const {
   return out.str();
 }
 
-const std::string SliceEllipsis::tostring() const {
-  return std::string("...");
-}
-
-const std::string SliceNewAxis::tostring() const {
-  return std::string("newaxis");
+namespace awkward {
+  template class SliceArrayOf<int64_t>;
 }
 
 const std::string Slice::tostring() const {
