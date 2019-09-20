@@ -152,6 +152,7 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
 
 void toslice_part(ak::Slice& slice, py::object obj) {
   if (py::isinstance<py::int_>(obj)) {
+    // FIXME: what happens if you give this a Numpy integer? a Numpy 0-dimensional array?
     slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceAt(obj.cast<int64_t>())));
   }
   else if (py::isinstance<py::slice>(obj)) {
@@ -183,28 +184,54 @@ void toslice_part(ak::Slice& slice, py::object obj) {
   else if (obj.is(py::module::import("numpy").attr("newaxis"))) {
     slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceNewAxis()));
   }
+  else if (py::isinstance<py::iterable>(obj)) {
+    py::object objarray = py::module::import("numpy").attr("asarray")(obj);
+    if (!py::isinstance<py::array>(objarray)) {
+      throw std::invalid_argument("iterable cannot be cast as an array");
+    }
+    py::array array = objarray.cast<py::array>();
+    if (array.ndim() == 0) {
+      throw std::invalid_argument("arrays used as an index must have at least one dimension");
+    }
 
+    py::buffer_info info = array.request();
+    if (info.format.compare("?") == 0) {
+      py::object nonzero_tuple = py::module::import("numpy").attr("nonzero")(array);
+      for (auto x : nonzero_tuple.cast<py::tuple>()) {
+        py::object intarray_object = py::module::import("numpy").attr("asarray")(x.cast<py::object>(), py::module::import("numpy").attr("int64"));
+        py::array intarray = intarray_object.cast<py::array>();
+        py::buffer_info intinfo = intarray.request();
+        std::vector<int64_t> shape;
+        std::vector<int64_t> strides;
+        for (ssize_t i = 0;  i < intinfo.ndim;  i++) {
+          shape.push_back((int64_t)intinfo.shape[i]);
+          strides.push_back((int64_t)intinfo.strides[i]);
+        }
+        ak::Index64 index(std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(intinfo.ptr), pyobject_deleter<int64_t>(intarray.ptr())), 0, shape[0]);
+        slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceArray64(index, shape, strides)));
+      }
+    }
+
+    else {
+      py::object intarray_object = py::module::import("numpy").attr("asarray")(array, py::module::import("numpy").attr("int64"));
+      py::array intarray = intarray_object.cast<py::array>();
+      py::buffer_info intinfo = intarray.request();
+      std::vector<int64_t> shape;
+      std::vector<int64_t> strides;
+      for (ssize_t i = 0;  i < intinfo.ndim;  i++) {
+        shape.push_back((int64_t)intinfo.shape[i]);
+        strides.push_back((int64_t)intinfo.strides[i]);
+      }
+      ak::Index64 index(std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(intinfo.ptr), pyobject_deleter<int64_t>(intarray.ptr())), 0, shape[0]);
+      slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceArray64(index, shape, strides)));
+    }
+
+  }
+  else {
+    throw std::invalid_argument("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), and integer or boolean arrays (possibly jagged) are valid indices");
+  }
 }
 
-
-//   else if (py::isinstance<py::iterable>(obj)) {
-//     py::object objarray = py::module::import("numpy").attr("ascontiguousarray")(obj);
-//     if (!py::isinstance<py::array>(objarray)) {
-//       throw std::invalid_argument("iterable cannot be cast as an array");
-//     }
-//     py::array array = objarray.cast<py::array>();
-//     if (array.ndim() != 1) {
-//       throw std::invalid_argument("an array used as an index must be one-dimensional");
-//     }
-//     py::buffer_info info = array.request();
-//
-//     if (info.format.compare("?") == 0) {
-//       ak::Index8 index = ak::Index8(
-//         std::shared_ptr<uint8_t>(reinterpret_cast<uint8_t*>(info.ptr), pyobject_deleter<uint8_t>(array.ptr())),
-//         0,
-//         (int64_t)info.shape[0]);
-//       return std::shared_ptr<ak::SliceItem>(new ak::SliceByteMask(index));
-//     }
 //     else {
 //       std::string format(info.format);
 //       format.erase(0, format.find_first_not_of("@=<>!"));
@@ -247,10 +274,6 @@ void toslice_part(ak::Slice& slice, py::object obj) {
 //       }
 //     }
 //   }
-//   else {
-//     throw std::invalid_argument("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), and integer or boolean arrays (possibly jagged) are valid indices");
-//   }
-// }
 
 ak::Slice toslice(py::object obj) {
   ak::Slice out;

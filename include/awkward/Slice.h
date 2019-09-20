@@ -45,6 +45,18 @@ namespace awkward {
     const int64_t step_;
   };
 
+  class SliceEllipsis: public SliceItem {
+  public:
+    SliceEllipsis() { }
+    virtual const std::string tostring() const;
+  };
+
+  class SliceNewAxis: public SliceItem {
+  public:
+    SliceNewAxis() { }
+    virtual const std::string tostring() const;
+  };
+
   template <typename T>
   class SliceArrayOf: public SliceItem {
   public:
@@ -61,18 +73,6 @@ namespace awkward {
   };
 
   typedef SliceArrayOf<int64_t> SliceArray64;
-
-  class SliceEllipsis: public SliceItem {
-  public:
-    SliceEllipsis() { }
-    virtual const std::string tostring() const;
-  };
-
-  class SliceNewAxis: public SliceItem {
-  public:
-    SliceNewAxis() { }
-    virtual const std::string tostring() const;
-  };
 
   class Slice {
   public:
