@@ -66,8 +66,16 @@ def test_slice():
 def test_numpyarray_getitem():
     a = numpy.arange(10)
     b = awkward1.layout.NumpyArray(a)
-    assert b.getitem(3) == 3
-
-    print(awkward1.tolist(b.getitem(slice(3, 7))))
-    print(awkward1.tolist(b.getitem(slice(1, 7, 2))))
-    raise Exception
+    assert b.getitem(3) == a[3]
+    assert b.getitem(-3) == a[-3]
+    assert awkward1.tolist(b.getitem(())) == awkward1.tolist(a[()])
+    assert awkward1.tolist(b.getitem(slice(None))) == awkward1.tolist(a[slice(None)])
+    assert awkward1.tolist(b.getitem(slice(3, 7))) == awkward1.tolist(a[slice(3, 7)])
+    assert awkward1.tolist(b.getitem(slice(3, -3))) == awkward1.tolist(a[slice(3, -3)])
+    assert awkward1.tolist(b.getitem(slice(1, 7, 2))) == awkward1.tolist(a[slice(1, 7, 2)])
+    assert awkward1.tolist(b.getitem(slice(-8, 7, 2))) == awkward1.tolist(a[slice(-8, 7, 2)])
+    assert awkward1.tolist(b.getitem(slice(None, 7, 2))) == awkward1.tolist(a[slice(None, 7, 2)])
+    assert awkward1.tolist(b.getitem(slice(None, -3, 2))) == awkward1.tolist(a[slice(None, -3, 2)])
+    assert awkward1.tolist(b.getitem(slice(8, None, -1))) == awkward1.tolist(a[slice(8, None, -1)])
+    assert awkward1.tolist(b.getitem(slice(8, None, -2))) == awkward1.tolist(a[slice(8, None, -2)])
+    assert awkward1.tolist(b.getitem(slice(-2, None, -2))) == awkward1.tolist(a[slice(-2, None, -2)])

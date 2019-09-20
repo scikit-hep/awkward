@@ -287,7 +287,13 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem> 
   }
 
   if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
-    ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)at->at())*strides_[1];
+    int64_t i = at->at();
+    if (i < 0) i += shape_[1];
+    if (i < 0  ||  i >= shape_[1]) {
+      throw std::invalid_argument("index out of range");
+    }
+
+    ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)i)*strides_[1];
     NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
 
     std::shared_ptr<SliceItem> nexthead = tail.head();
