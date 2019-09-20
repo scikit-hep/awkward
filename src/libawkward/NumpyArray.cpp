@@ -243,9 +243,9 @@ const NumpyArray NumpyArray::contiguous() const {
     Index64 bytepos(shape_[0]);
 
     int64_t* rawptr = bytepos.ptr().get();
-    int64_t skip = strides_[0];
+    int64_t stride = strides_[0];
     for (int64_t i = 0;  i < shape_[0];  i++) {
-      rawptr[i] = i*skip;
+      rawptr[i] = i*stride;
     }
 
     return contiguous_next(bytepos);
@@ -255,15 +255,15 @@ const NumpyArray NumpyArray::contiguous() const {
 const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
   if (iscontiguous()) {
     int64_t length = bytepos.length();
-    int64_t skip = strides_[0];
-    std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*skip)], awkward::util::array_deleter<uint8_t>());
+    int64_t stride = strides_[0];
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*stride)], awkward::util::array_deleter<uint8_t>());
 
     int64_t offset = byteoffset_;
     int64_t* pos = bytepos.ptr().get();
     uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
     uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
     for (int64_t i = 0;  i < length;  i++) {
-      memcpy(&toptr[i*skip], &fromptr[offset + pos[i]], skip);
+      memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], stride);
     }
 
     return NumpyArray(id_, ptr, shape_, strides_, 0, itemsize_, format_);
@@ -271,15 +271,15 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
 
   else if (shape_.size() == 1) {
     int64_t length = bytepos.length();
-    int64_t skip = itemsize_;
-    std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*skip)], awkward::util::array_deleter<uint8_t>());
+    int64_t stride = itemsize_;
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*stride)], awkward::util::array_deleter<uint8_t>());
 
     int64_t offset = byteoffset_;
     int64_t* pos = bytepos.ptr().get();
     uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
     uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
     for (int64_t i = 0;  i < length;  i++) {
-      memcpy(&toptr[i*skip], &fromptr[offset + pos[i]], skip);
+      memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], stride);
     }
 
     std::vector<ssize_t> strides = { itemsize_ };
@@ -474,9 +474,59 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
 }
 
 const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, Index64& carry, Index64& advanced, int64_t length, int64_t stride) const {
+  if (head.get() == nullptr) {
+    int64_t length = carry.length();
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*stride)], awkward::util::array_deleter<uint8_t>());
+
+    int64_t offset = byteoffset_;
+    int64_t* pos = carry.ptr().get();
+    uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
+    uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
+    for (int64_t i = 0;  i < length;  i++) {
+      memcpy(&toptr[i*stride], &fromptr[offset + pos[i]*stride], stride);
+    }
 
 
-  throw std::runtime_error("FIXME");
+    // int64_t length = bytepos.length();
+    // int64_t stride = itemsize_;
+    // std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*stride)], awkward::util::array_deleter<uint8_t>());
+    //
+    // int64_t offset = byteoffset_;
+    // int64_t* pos = bytepos.ptr().get();
+    // uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
+    // uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
+    // for (int64_t i = 0;  i < length;  i++) {
+    //   memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], stride);
+    // }
 
 
+
+    throw std::runtime_error("getitem_next null");
+  }
+
+  if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+    if (ndim() < 2) {
+      throw std::invalid_argument("too many indexes for array");
+    }
+    throw std::runtime_error("getitem_next range");
+  }
+
+  else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+    throw std::runtime_error("getitem_next ellipsis");
+  }
+
+  else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+    throw std::runtime_error("getitem_next newaxis");
+  }
+
+  else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+    if (ndim() < 2) {
+      throw std::invalid_argument("too many indexes for array");
+    }
+    throw std::runtime_error("getitem_next array");
+  }
+
+  else {
+    throw std::runtime_error("unrecognized slice item type");
+  }
 }
