@@ -32,13 +32,15 @@ namespace awkward {
 
   class SliceRange: public SliceItem {
   public:
-    SliceRange(int64_t start, int64_t stop, int64_t step): start_(start), stop_(stop), step_(step) { assert(step_ != 0); }
+    SliceRange(int64_t start, int64_t stop, int64_t step): start_(start), stop_(stop), step_(step) {
+      assert(step_ != none());
+      assert(step_ != 0);
+    }
     int64_t start() const { return start_; }
     int64_t stop() const { return stop_; }
     int64_t step() const { return step_; }
     bool hasstart() const { return start_ != none(); }
     bool hasstop() const { return stop_ != none(); }
-    bool hasstep() const { return step_ != none(); }
     virtual const std::string tostring() const;
   private:
     const int64_t start_;

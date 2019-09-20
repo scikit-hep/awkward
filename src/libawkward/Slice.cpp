@@ -11,7 +11,7 @@ const std::string SliceAt::tostring() const {
 const std::string SliceRange::tostring() const {
   return (hasstart() ? std::to_string(start_) : std::string("")) + std::string(":") +
          (hasstop() ? std::to_string(stop_) : std::string("")) + std::string(":") +
-         (hasstep() ? std::to_string(step_) : std::string(""));
+         (step_ != 1 ? std::to_string(step_) : std::string(""));
 }
 
 const std::string SliceEllipsis::tostring() const {

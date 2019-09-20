@@ -249,6 +249,34 @@ const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t> strides) {
   }
 }
 
+void set_range(int64_t& start, int64_t& stop, bool posstep, bool hasstart, bool hasstop, int64_t length) {
+  if (posstep) {
+    if (!hasstart)          start = 0;
+    else if (start < 0)     start += length;
+    if (start < 0)          start = 0;
+    if (start > length)     start = length;
+
+    if (!hasstop)           stop = length;
+    else if (stop < 0)      stop += length;
+    if (stop < 0)           stop = 0;
+    if (stop > length)      stop = length;
+    if (stop < start)       stop = start;
+  }
+
+  else {
+    if (!hasstart)          start = length - 1;
+    else if (start < 0)     start += length;
+    if (start < -1)         start = -1;
+    if (start > length - 1) start = length - 1;
+
+    if (!hasstop)           stop = -1;
+    else if (stop < 0)      stop += length;
+    if (stop < -1)          stop = -1;
+    if (stop > length - 1)  stop = length - 1;
+    if (stop > start)       stop = start;
+  }
+}
+
 const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem> head, const Slice& tail, int64_t length) const {
   if (head.get() == nullptr) {
     return NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
@@ -272,7 +300,12 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem> 
   }
 
   else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
-    throw std::invalid_argument("getitem_bystrides range");
+    int64_t start = range->start();
+    int64_t stop = range->stop();
+    int64_t step = range->step();
+    set_range(start, stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
+
+    throw std::invalid_argument("HERE");
   }
 
   else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {

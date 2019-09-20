@@ -221,7 +221,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
     py::object pystep = obj.attr("step");
     int64_t start = ak::Slice::none();
     int64_t stop = ak::Slice::none();
-    int64_t step = ak::Slice::none();
+    int64_t step = 1;
     if (!pystart.is(py::none())) {
       start = pystart.cast<int64_t>();
     }
