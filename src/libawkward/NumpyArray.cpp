@@ -312,11 +312,7 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
 const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
   assert(!isscalar());
 
-  if (where.isadvanced()) {
-    throw std::invalid_argument("FIXME");
-  }
-
-  else {
+  if (!where.isadvanced()) {
     std::vector<ssize_t> nextshape = { 1 };
     nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
     std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };
@@ -326,6 +322,26 @@ const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
     std::shared_ptr<SliceItem> nexthead = where.head();
     Slice nexttail = where.tail();
     NumpyArray out = next.getitem_bystrides(nexthead, nexttail, 1);
+
+    std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
+    std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
+    return std::shared_ptr<Content>(new NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_));
+  }
+
+  else {
+    NumpyArray safe = contiguous();   // maybe become_contiguous()
+
+    std::vector<ssize_t> nextshape = { 1 };
+    nextshape.insert(nextshape.end(), safe.shape_.begin(), safe.shape_.end());
+    std::vector<ssize_t> nextstrides = { safe.shape_[0]*safe.strides_[0] };
+    nextstrides.insert(nextstrides.end(), safe.strides_.begin(), safe.strides_.end());
+    NumpyArray next(safe.id_, safe.ptr_, nextshape, nextstrides, safe.byteoffset_, itemsize_, format_);
+
+    std::shared_ptr<SliceItem> nexthead = where.head();
+    Slice nexttail = where.tail();
+    Index64 nextcarry(1);
+    Index64 nextadvanced(0);
+    NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, 1, next.strides_[0]);
 
     std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
     std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
@@ -361,7 +377,7 @@ void set_range(int64_t& start, int64_t& stop, bool posstep, bool hasstart, bool 
   }
 }
 
-const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem> head, const Slice& tail, int64_t length) const {
+const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>& head, const Slice& tail, int64_t length) const {
   if (head.get() == nullptr) {
     return NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
@@ -455,4 +471,12 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem> 
   else {
     throw std::runtime_error("unrecognized slice item type");
   }
+}
+
+const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, Index64& carry, Index64& advanced, int64_t length, int64_t stride) const {
+
+
+  throw std::runtime_error("FIXME");
+
+
 }

@@ -61,7 +61,8 @@ namespace awkward {
     const NumpyArray contiguous() const;
     const NumpyArray contiguous_next(Index64 bytepos) const;
     const std::shared_ptr<Content> getitem(const Slice& slice) const;
-    const NumpyArray getitem_bystrides(const std::shared_ptr<SliceItem> head, const Slice& tail, int64_t length) const;
+    const NumpyArray getitem_bystrides(const std::shared_ptr<SliceItem>& head, const Slice& tail, int64_t length) const;
+    const NumpyArray getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, Index64& carry, Index64& advanced, int64_t length, int64_t stride) const;
 
   private:
     std::shared_ptr<Identity> id_;

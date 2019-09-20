@@ -155,7 +155,7 @@ class NumpyArray:
             if any(x is None for x in broadcastable_j) and any(isinstance(x, int) for x in broadcastable_j):
                 raise ValueError("awkward-array does not allow basic indexes (slices, etc.) between two advanced indexes (integer or array)")
 
-            self.become_contiguous()
+            self.become_contiguous()   # on second thought, no in-place
             next = self.copy(shape=(1,) + self.shape, strides=(self.shape[0]*self.strides[0],) + self.strides)
             nexthead, nexttail = head_tail(where)
             nextcarry = numpy.array([0])
