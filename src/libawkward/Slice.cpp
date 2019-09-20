@@ -24,9 +24,34 @@ const std::string SliceNewAxis::tostring() const {
 
 template <typename T>
 const std::string SliceArrayOf<T>::tostring() const {
+  return std::string("array(") + tostring_part() + std::string(")");
+}
+
+template <typename T>
+const std::string SliceArrayOf<T>::tostring_part() const {
   std::stringstream out;
-  out << "array([";
-  out << "])";
+  out << "[";
+  if (shape_.size() == 1) {
+    for (int64_t i = 0;  i < shape_[0];  i++) {
+      if (i != 0) {
+        out << ", ";
+      }
+      out << (T)index_.get(i*strides_[0]);
+    }
+  }
+  else {
+    std::vector<int64_t> shape(shape_.begin() + 1, shape_.end());
+    std::vector<int64_t> strides(strides_.begin() + 1, strides_.end());
+    for (int64_t i = 0;  i < shape_[0];  i++) {
+      if (i != 0) {
+        out << ", ";
+      }
+      IndexOf<T> index(index_.ptr(), index_.offset() + i*strides_[0], shape_[1]);
+      SliceArrayOf<T> subarray(index, shape, strides);
+      out << subarray.tostring_part();
+    }
+  }
+  out << "]";
   return out.str();
 }
 

@@ -66,6 +66,7 @@ namespace awkward {
     }
     const IndexOf<T> index() const { return index_; }
     virtual const std::string tostring() const;
+    const std::string tostring_part() const;
   private:
     const IndexOf<T> index_;
     const std::vector<int64_t> shape_;
