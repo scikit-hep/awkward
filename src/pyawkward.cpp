@@ -420,24 +420,12 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
       .def_property_readonly("iscompact", &ak::NumpyArray::iscompact)
 
       .def("__len__", &ak::NumpyArray::length)
-      .def("__getitem__", [](ak::NumpyArray& self, int64_t at) -> py::object {
-        return unwrap(self.get(at));
-      })
-      .def("__getitem__", [](ak::NumpyArray& self, py::slice slice) -> py::object {
-        size_t start, stop, step, length;
-        if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
-          throw py::error_already_set();
-        }
-        return unwrap(self.slice((int64_t)start, (int64_t)stop));
+      .def("__getitem__", [](ak::NumpyArray& self, py::object pyslice) -> py::object {
+        return unwrap(self.getitem(toslice(pyslice)));
       })
 
       .def("__iter__", [](ak::NumpyArray& self) -> ak::Iterator {
         return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(self)));
-      })
-
-      .def("getitem", [](ak::NumpyArray& self, py::object pyslice) -> py::object {
-        ak::Slice slice = toslice(pyslice);
-        return unwrap(self.getitem(slice));
       })
 
   ;
