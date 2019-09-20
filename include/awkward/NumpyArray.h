@@ -58,6 +58,7 @@ namespace awkward {
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
 
     const std::shared_ptr<Content> getitem(const Slice& slice) const;
+    const NumpyArray getitem_bystrides(const std::shared_ptr<SliceItem> head, const Slice& tail, int64_t length) const;
 
   private:
     std::shared_ptr<Identity> id_;

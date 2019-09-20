@@ -97,6 +97,27 @@ namespace awkward {
   template class SliceArrayOf<int64_t>;
 }
 
+int64_t Slice::length() const {
+  return (int64_t)items_.size();
+}
+
+const std::shared_ptr<SliceItem> Slice::head() const {
+  if (items_.size() != 0) {
+    return items_[0];
+  }
+  else {
+    return std::shared_ptr<SliceItem>(nullptr);
+  }
+}
+
+const Slice Slice::tail() const {
+  std::vector<std::shared_ptr<SliceItem>> items;
+  if (items_.size() != 0) {
+    items.insert(items.end(), items_.begin() + 1, items_.end());
+  }
+  return Slice(items, true);
+}
+
 const std::string Slice::tostring() const {
   std::stringstream out;
   out << "[";
@@ -111,10 +132,13 @@ const std::string Slice::tostring() const {
 }
 
 void Slice::append(const std::shared_ptr<SliceItem>& item) {
+  assert(!sealed_);
   items_.push_back(item);
 }
 
-void Slice::broadcast() {
+void Slice::seal() {
+  assert(!sealed_);
+
   std::vector<int64_t> shape;
   for (int64_t i = 0;  i < items_.size();  i++) {
     if (SliceArray64* array = dynamic_cast<SliceArray64*>(items_[i].get())) {
@@ -165,21 +189,47 @@ void Slice::broadcast() {
       }
     }
 
-    std::string isadvanced;
+    std::string types;
     for (int64_t i = 0;  i < items_.size();  i++) {
-      if (dynamic_cast<SliceArray64*>(items_[i].get()) == nullptr) {
-        isadvanced.push_back('.');
+      if (dynamic_cast<SliceAt*>(items_[i].get()) != nullptr) {
+        types.push_back('@');
       }
-      else {
-        isadvanced.push_back('*');
+      else if (dynamic_cast<SliceRange*>(items_[i].get()) != nullptr) {
+        types.push_back(':');
+      }
+      else if (dynamic_cast<SliceEllipsis*>(items_[i].get()) != nullptr) {
+        types.push_back('.');
+      }
+      else if (dynamic_cast<SliceNewAxis*>(items_[i].get()) != nullptr) {
+        types.push_back('1');
+      }
+      else if (dynamic_cast<SliceArray64*>(items_[i].get()) != nullptr) {
+        types.push_back('A');
       }
     }
-    int64_t numadvanced = std::count(isadvanced.begin(), isadvanced.end(), '*');
+
+    if (std::count(types.begin(), types.end(), '.') > 1) {
+      throw std::invalid_argument("a slice can have no more than one ellipsis ('...')");
+    }
+
+    int64_t numadvanced = std::count(types.begin(), types.end(), 'A');
     if (numadvanced != 0) {
-      isadvanced = isadvanced.substr(0, isadvanced.find_last_of("*") + 1).substr(isadvanced.find_first_of("*"));
-      if (numadvanced != isadvanced.size()) {
+      types = types.substr(0, types.find_last_of("A") + 1).substr(types.find_first_of("A"));
+      if (numadvanced != types.size()) {
         throw std::invalid_argument("advanced indexes separated by basic indexes is not permitted (simple integers are advanced when any arrays are present)");
       }
     }
   }
+
+  sealed_ = true;
+}
+
+bool Slice::isadvanced() const {
+  assert(sealed_);
+  for (int64_t i = 0;  i < items_.size();  i++) {
+    if (dynamic_cast<SliceArray64*>(items_[i].get()) != nullptr) {
+      return true;
+    }
+  }
+  return false;
 }

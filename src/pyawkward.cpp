@@ -318,7 +318,7 @@ ak::Slice toslice(py::object obj) {
   else {
     toslice_part(out, obj);
   }
-  out.broadcast();
+  out.seal();
   return out;
 }
 

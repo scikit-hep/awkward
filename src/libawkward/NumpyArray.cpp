@@ -205,11 +205,87 @@ const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
   return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
 }
 
-const std::shared_ptr<Content> NumpyArray::getitem(const Slice& slice) const {
-  return shallow_copy();
+const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
+  assert(!isscalar());
+
+  if (where.isadvanced()) {
+    throw std::invalid_argument("FIXME");
+  }
+  else {
+    std::vector<ssize_t> nextshape = { 1 };
+    nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
+    std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };
+    nextstrides.insert(nextstrides.end(), strides_.begin(), strides_.end());
+    NumpyArray next(id_, ptr_, nextshape, nextstrides, byteoffset_, itemsize_, format_);
+
+    std::shared_ptr<SliceItem> nexthead = where.head();
+    Slice nexttail = where.tail();
+    NumpyArray out = next.getitem_bystrides(nexthead, nexttail, 1);
+
+    std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
+    std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
+    return std::shared_ptr<Content>(new NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_));
+  }
 }
 
+const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
+  if (shape.size() == 1) {
+    return std::vector<ssize_t>();
+  }
+  else {
+    std::vector<ssize_t> out = { shape[0]*shape[1] };
+    out.insert(out.end(), shape.begin() + 2, shape.end());
+    return out;
+  }
+}
 
+const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t> strides) {
+  if (strides.size() == 1) {
+    return std::vector<ssize_t>();
+  }
+  else {
+    return std::vector<ssize_t>(strides.begin() + 1, strides.end());
+  }
+}
+
+const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem> head, const Slice& tail, int64_t length) const {
+  if (head.get() == nullptr) {
+    return NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
+  }
+
+  if (ndim() < 2) {
+    throw std::invalid_argument("too many indexes for array");
+  }
+
+  if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+    ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)at->at())*strides_[1];
+    NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
+
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    NumpyArray out = next.getitem_bystrides(nexthead, nexttail, length);
+
+    std::vector<ssize_t> outshape = { length };
+    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    return NumpyArray(id_, ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+  }
+
+  else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+    throw std::invalid_argument("getitem_bystrides range");
+  }
+
+  else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+    throw std::invalid_argument("getitem_bystrides ellipsis");
+  }
+
+  else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+    throw std::invalid_argument("getitem_bystrides newaxis");
+  }
+
+  else {
+    throw std::runtime_error("unrecognized slice object");
+  }
+}
 
 
 // const std::vector<ssize_t> shape2strides(const std::vector<ssize_t>& shape, ssize_t itemsize) {

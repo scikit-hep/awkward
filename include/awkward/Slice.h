@@ -83,16 +83,21 @@ namespace awkward {
   public:
     static int64_t none() { return SliceItem::none(); }
 
-    Slice(): items_(std::vector<std::shared_ptr<SliceItem>>()) { }
-    Slice(const std::vector<std::shared_ptr<SliceItem>> items): items_(items) { }
-    const SliceItem* borrow(int64_t which) const { return items_[(size_t)which].get(); }
-    const int64_t length() const { return (int64_t)items_.size(); }
+    Slice(): items_(std::vector<std::shared_ptr<SliceItem>>()), sealed_(false) { }
+    Slice(const std::vector<std::shared_ptr<SliceItem>> items): items_(items), sealed_(false) { }
+    Slice(const std::vector<std::shared_ptr<SliceItem>> items, bool sealed): items_(items), sealed_(sealed) { }
+
+    int64_t length() const;
+    const std::shared_ptr<SliceItem> head() const;
+    const Slice tail() const;
     const std::string tostring() const;
     void append(const std::shared_ptr<SliceItem>& item);
-    void broadcast();
+    void seal();
+    bool isadvanced() const;
 
   private:
     std::vector<std::shared_ptr<SliceItem>> items_;
+    bool sealed_;
   };
 }
 

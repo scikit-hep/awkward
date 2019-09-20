@@ -63,25 +63,7 @@ def test_slice():
     assert repr(awkward1.layout.Slice((slice(None), 3, [[1], [2], [3]], slice(None)))) == "[::, array([[3], [3], [3]]), array([[1], [2], [3]]), ::]"
     assert repr(awkward1.layout.Slice((slice(None), [[1, 2, 3, 4]], [[1], [2], [3]], slice(None)))) == "[::, array([[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]), array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]), ::]"
 
-# def test_numpyarray_getitem():
-#     a = numpy.arange(120).reshape(6, 4, 5)
-#     b = awkward1.layout.NumpyArray(a)
-#
-#     for depth in 1, 2, 3:
-#         for cuts in itertools.permutations((0, 1, 2, slice(0, 2), slice(1, 3), slice(1, 4)), depth):
-#             if sum(1 if isinstance(x, slice) else 0 for x in cuts) <= 1:
-#                 print(cuts)
-#                 acut = awkward1.tolist(a[cuts])
-#                 bcut = awkward1.tolist(b.getitem(cuts))
-#                 print(acut)
-#                 print(bcut)
-#                 print()
-#                 assert acut == bcut
-#
-#     cuts = (slice(1, 3), slice(0, 2))
-#     acut = a[cuts]
-#     bcut = b.getitem(cuts)
-#     print(awkward1.tolist(acut), acut.shape)
-#     print(awkward1.tolist(bcut), bcut.shape)
-#
-#     # raise Exception
+def test_numpyarray_getitem():
+    a = numpy.arange(10)
+    b = awkward1.layout.NumpyArray(a)
+    assert b.getitem(3) == 3
