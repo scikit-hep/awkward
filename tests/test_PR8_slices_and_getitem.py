@@ -79,3 +79,10 @@ def test_numpyarray_getitem():
     assert awkward1.tolist(b.getitem(slice(8, None, -1))) == awkward1.tolist(a[slice(8, None, -1)])
     assert awkward1.tolist(b.getitem(slice(8, None, -2))) == awkward1.tolist(a[slice(8, None, -2)])
     assert awkward1.tolist(b.getitem(slice(-2, None, -2))) == awkward1.tolist(a[slice(-2, None, -2)])
+
+    # a = numpy.arange(7*5).reshape(7, 5)
+    # b = awkward1.layout.NumpyArray(a)
+    #
+    # print(a[1:4])
+    # print(awkward1.tolist(b.getitem(slice(1, 4))))
+    # raise Exception

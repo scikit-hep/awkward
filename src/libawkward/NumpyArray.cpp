@@ -181,24 +181,23 @@ const std::shared_ptr<Content> NumpyArray::shallow_copy() const {
 }
 
 const std::shared_ptr<Content> NumpyArray::get(int64_t at) const {
-  assert(!isscalar());
-  ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
-  const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
-  const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
-  return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr_, shape, strides, byteoffset, itemsize_, format_));
+  return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceAt(at)) }), true));
 }
 
 const std::shared_ptr<Content> NumpyArray::slice(int64_t start, int64_t stop) const {
-  assert(!isscalar());
-  ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
-  std::vector<ssize_t> shape;
-  shape.push_back((ssize_t)(stop - start));
-  shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-  std::shared_ptr<Identity> id(nullptr);
-  if (id_.get() != nullptr) {
-    id = id_.get()->slice(start, stop);
-  }
-  return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
+  return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceRange(start, stop, 1)) }), true));
+
+  // FIXME: id should be propagated through the new getitem
+  // assert(!isscalar());
+  // ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
+  // std::vector<ssize_t> shape;
+  // shape.push_back((ssize_t)(stop - start));
+  // shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+  // std::shared_ptr<Identity> id(nullptr);
+  // if (id_.get() != nullptr) {
+  //   id = id_.get()->slice(start, stop);
+  // }
+  // return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
 }
 
 const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
