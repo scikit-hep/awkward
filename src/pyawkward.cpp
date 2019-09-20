@@ -123,7 +123,7 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
           throw std::invalid_argument(name + std::string(" must be built from a one-dimensional array; try array.ravel()"));
         }
         if (info.strides[0] != sizeof(T)) {
-          throw std::invalid_argument(name + std::string(" must be built from a compact array (array.strides == (array.itemsize,)); try array.copy()"));
+          throw std::invalid_argument(name + std::string(" must be built from a contiguous array (array.strides == (array.itemsize,)); try array.copy()"));
         }
         return ak::IndexOf<T>(
           std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr), pyobject_deleter<T>(array.ptr())),
@@ -175,7 +175,7 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
           throw std::invalid_argument(name + std::string(" must be built from a two-dimensional array"));
         }
         if (info.strides[0] != sizeof(T)*info.shape[1]  ||  info.strides[1] != sizeof(T)) {
-          throw std::invalid_argument(name + std::string(" must be built from a compact array (array.stries == (array.shape[1]*array.itemsize, array.itemsize)); try array.copy()"));
+          throw std::invalid_argument(name + std::string(" must be built from a contiguous array (array.stries == (array.shape[1]*array.itemsize, array.itemsize)); try array.copy()"));
         }
         return ak::IdentityOf<T>(ref, fieldloc, 0, info.shape[1], info.shape[0],
             std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr), pyobject_deleter<T>(array.ptr())));
@@ -318,7 +318,7 @@ ak::Slice toslice(py::object obj) {
   else {
     toslice_part(out, obj);
   }
-  out.seal();
+  out.become_sealed();
   return out;
 }
 
@@ -417,13 +417,15 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
       .def_property_readonly("ndim", &ak::NumpyArray::ndim)
       .def_property_readonly("isscalar", &ak::NumpyArray::isscalar)
       .def_property_readonly("isempty", &ak::NumpyArray::isempty)
-      .def_property_readonly("iscompact", &ak::NumpyArray::iscompact)
+
+      .def_property_readonly("iscontiguous", &ak::NumpyArray::iscontiguous)
+      .def("contiguous", &ak::NumpyArray::contiguous)
+      .def("become_contiguous", &ak::NumpyArray::become_contiguous)
 
       .def("__len__", &ak::NumpyArray::length)
       .def("__getitem__", [](ak::NumpyArray& self, py::object pyslice) -> py::object {
         return unwrap(self.getitem(toslice(pyslice)));
       })
-
       .def("__iter__", [](ak::NumpyArray& self) -> ak::Iterator {
         return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(self)));
       })

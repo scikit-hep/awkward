@@ -42,7 +42,6 @@ namespace awkward {
     ssize_t ndim() const;
     bool isscalar() const;
     bool isempty() const;
-    bool iscompact() const;
     void* byteptr() const;
     ssize_t bytelength() const;
     uint8_t getbyte(ssize_t at) const;
@@ -57,15 +56,19 @@ namespace awkward {
     virtual const std::shared_ptr<Content> slice(int64_t start, int64_t stop) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
 
+    bool iscontiguous() const;
+    void become_contiguous();
+    const NumpyArray contiguous() const;
+    const NumpyArray contiguous_next(Index64 bytepos) const;
     const std::shared_ptr<Content> getitem(const Slice& slice) const;
     const NumpyArray getitem_bystrides(const std::shared_ptr<SliceItem> head, const Slice& tail, int64_t length) const;
 
   private:
     std::shared_ptr<Identity> id_;
-    const std::shared_ptr<void> ptr_;
-    const std::vector<ssize_t> shape_;
-    const std::vector<ssize_t> strides_;
-    const ssize_t byteoffset_;
+    std::shared_ptr<void> ptr_;
+    std::vector<ssize_t> shape_;
+    std::vector<ssize_t> strides_;
+    ssize_t byteoffset_;
     const ssize_t itemsize_;
     const std::string format_;
   };

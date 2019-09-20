@@ -20,15 +20,6 @@ bool NumpyArray::isempty() const {
   return false;  // false for isscalar(), too
 }
 
-bool NumpyArray::iscompact() const {
-  ssize_t x = itemsize_;
-  for (ssize_t i = ndim() - 1;  i >= 0;  i--) {
-    if (x != strides_[i]) return false;
-    x *= shape_[i];
-  }
-  return true;  // true for isscalar(), too
-}
-
 void* NumpyArray::byteptr() const {
   return reinterpret_cast<void*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_);
 }
@@ -97,7 +88,7 @@ const std::string NumpyArray::tostring_part(const std::string indent, const std:
     out << shape_[i];
   }
   out << "\" ";
-  if (!iscompact()) {
+  if (!iscontiguous()) {
     out << "strides=\"";
     for (ssize_t i = 0;  i < ndim();  i++) {
       if (i != 0) {
@@ -202,6 +193,39 @@ const std::shared_ptr<Content> NumpyArray::slice(int64_t start, int64_t stop) co
 
 const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
   return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
+}
+
+bool NumpyArray::iscontiguous() const {
+  ssize_t x = itemsize_;
+  for (ssize_t i = ndim() - 1;  i >= 0;  i--) {
+    if (x != strides_[i]) return false;
+    x *= shape_[i];
+  }
+  return true;  // true for isscalar(), too
+}
+
+void NumpyArray::become_contiguous() {
+  if (!iscontiguous()) {
+    NumpyArray x = contiguous();
+    id_ = x.id_;
+    ptr_ = x.ptr_;
+    shape_ = x.shape_;
+    strides_ = x.strides_;
+    byteoffset_ = x.byteoffset_;
+  }
+}
+
+const NumpyArray NumpyArray::contiguous() const {
+  if (iscontiguous()) {
+    return NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
+  }
+  else {
+    throw std::invalid_argument("FIXME");
+  }
+}
+
+const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
+  throw std::invalid_argument("FIXME");
 }
 
 const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {

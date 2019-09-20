@@ -155,7 +155,7 @@ void Slice::append(const std::shared_ptr<SliceItem>& item) {
   items_.push_back(item);
 }
 
-void Slice::seal() {
+void Slice::become_sealed() {
   assert(!sealed_);
 
   std::vector<int64_t> shape;

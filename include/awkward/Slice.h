@@ -97,7 +97,7 @@ namespace awkward {
     const Slice tail() const;
     const std::string tostring() const;
     void append(const std::shared_ptr<SliceItem>& item);
-    void seal();
+    void become_sealed();
     bool isadvanced() const;
 
   private:
