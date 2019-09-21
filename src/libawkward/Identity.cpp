@@ -1,5 +1,12 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <cassert>
+#include <atomic>
+#include <iomanip>
+#include <sstream>
+#include <type_traits>
+// #include <utility>
+
 #include "awkward/Identity.h"
 
 using namespace awkward;

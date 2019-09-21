@@ -3,13 +3,9 @@
 #ifndef AWKWARD_LISTOFFSETARRAYCONTENT_H_
 #define AWKWARD_LISTOFFSETARRAYCONTENT_H_
 
-#include <sstream>
 #include <memory>
-#include <type_traits>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/cpu-kernels/identity.h"
-#include "awkward/util.h"
 #include "awkward/Index.h"
 #include "awkward/Identity.h"
 #include "awkward/Content.h"

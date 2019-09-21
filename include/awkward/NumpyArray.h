@@ -4,17 +4,11 @@
 #define AWKWARD_NUMPYARRAY_H_
 
 #include <cassert>
-#include <cstring>
-#include <vector>
 #include <string>
-#include <iomanip>
-#include <sstream>
 #include <memory>
-#include <stdexcept>
+#include <vector>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/util.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
 

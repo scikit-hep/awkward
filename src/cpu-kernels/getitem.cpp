@@ -1,7 +1,8 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/cpu-kernels/getitem.h"
 #include <cstring>
+
+#include "awkward/cpu-kernels/getitem.h"
 
 void awkward_regularize_rangeslice(int64_t& start, int64_t& stop, bool posstep, bool hasstart, bool hasstop, int64_t length) {
   if (posstep) {

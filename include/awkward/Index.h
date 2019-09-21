@@ -3,12 +3,8 @@
 #ifndef AWKWARD_INDEX_H_
 #define AWKWARD_INDEX_H_
 
-#include <cassert>
-#include <iomanip>
 #include <string>
-#include <sstream>
 #include <memory>
-#include <type_traits>
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/util.h"

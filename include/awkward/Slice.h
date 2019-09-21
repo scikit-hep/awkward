@@ -4,14 +4,11 @@
 #define AWKWARD_SLICE_H_
 
 #include <cassert>
-#include <algorithm>
 #include <string>
 #include <vector>
 #include <memory>
-#include <type_traits>
 
-#include "awkward/cpu-kernels/util.h"
-#include "awkward/util.h"
+#include "awkward/cpu-kernels/getitem.h"
 #include "awkward/Index.h"
 
 namespace awkward {

@@ -3,11 +3,7 @@
 #ifndef AWKWARD_CONTENT_H_
 #define AWKWARD_CONTENT_H_
 
-#include <utility>
-
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/util.h"
-#include "awkward/Slice.h"
 #include "awkward/Identity.h"
 
 namespace awkward {

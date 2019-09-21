@@ -3,18 +3,11 @@
 #ifndef AWKWARD_IDENTITY_H_
 #define AWKWARD_IDENTITY_H_
 
-#include <cassert>
-#include <atomic>
-#include <iomanip>
-#include <utility>
 #include <string>
 #include <vector>
 #include <memory>
-#include <sstream>
-#include <type_traits>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/util.h"
 
 namespace awkward {
   class Identity {
