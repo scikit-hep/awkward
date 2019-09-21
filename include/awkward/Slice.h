@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <type_traits>
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/util.h"
@@ -73,6 +74,7 @@ namespace awkward {
     int64_t ndim() const { return (int64_t)shape_.size(); }
     virtual const std::string tostring() const;
     const std::string tostring_part() const;
+    const IndexOf<T> ravel() const;
   private:
     const IndexOf<T> index_;
     const std::vector<int64_t> shape_;

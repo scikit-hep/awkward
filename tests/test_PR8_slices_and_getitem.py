@@ -119,3 +119,14 @@ def test_numpyarray_contiguous():
     assert awkward1.tolist(b.contiguous())
     b.become_contiguous()
     assert awkward1.tolist(b) == awkward1.tolist(a)
+
+def test_numpyarray_getitem_next():
+    a = numpy.arange(10)
+    b = awkward1.layout.NumpyArray(a)
+    c = numpy.array([7, 3, 3, 5])
+    assert awkward1.tolist(b[c]) == awkward1.tolist(a[c])
+
+    a = numpy.arange(10*3).reshape(10, 3)
+    b = awkward1.layout.NumpyArray(a)
+    c = numpy.array([7, 3, 3, 5])
+    assert awkward1.tolist(b[c]) == awkward1.tolist(a[c])

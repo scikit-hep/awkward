@@ -254,15 +254,15 @@ const NumpyArray NumpyArray::contiguous() const {
 
 const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
   if (iscontiguous()) {
-    int64_t length = bytepos.length();
+    int64_t len = bytepos.length();
     int64_t stride = strides_[0];
-    std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*stride)], awkward::util::array_deleter<uint8_t>());
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(len*stride)], awkward::util::array_deleter<uint8_t>());
 
     int64_t offset = byteoffset_;
     int64_t* pos = bytepos.ptr().get();
     uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
     uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
-    for (int64_t i = 0;  i < length;  i++) {
+    for (int64_t i = 0;  i < len;  i++) {
       memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], stride);
     }
 
@@ -270,15 +270,15 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
   }
 
   else if (shape_.size() == 1) {
-    int64_t length = bytepos.length();
+    int64_t len = bytepos.length();
     int64_t stride = itemsize_;
-    std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*stride)], awkward::util::array_deleter<uint8_t>());
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(len*stride)], awkward::util::array_deleter<uint8_t>());
 
     int64_t offset = byteoffset_;
     int64_t* pos = bytepos.ptr().get();
     uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
     uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
-    for (int64_t i = 0;  i < length;  i++) {
+    for (int64_t i = 0;  i < len;  i++) {
       memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], stride);
     }
 
@@ -289,14 +289,14 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
   else {
     NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
 
-    int64_t length = bytepos.length();
+    int64_t len = bytepos.length();
     int64_t shape1 = (int64_t)shape_[1];
     int64_t strides1 = (int64_t)strides_[1];
-    Index64 nextbytepos(length*shape1);
+    Index64 nextbytepos(len*shape1);
 
     int64_t* frompos = bytepos.ptr().get();
     int64_t* topos = nextbytepos.ptr().get();
-    for (int64_t i = 0;  i < length;  i++) {
+    for (int64_t i = 0;  i < len;  i++) {
       for (int64_t j = 0;  j < shape1;  j++) {
         topos[i*shape1 + j] = frompos[i] + j*strides1;
       }
@@ -340,6 +340,7 @@ const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
     std::shared_ptr<SliceItem> nexthead = where.head();
     Slice nexttail = where.tail();
     Index64 nextcarry(1);
+    nextcarry.ptr().get()[0] = 0;
     Index64 nextadvanced(0);
     NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, 1, next.strides_[0]);
 
@@ -475,33 +476,22 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
 
 const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, Index64& carry, Index64& advanced, int64_t length, int64_t stride) const {
   if (head.get() == nullptr) {
-    int64_t length = carry.length();
-    std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*stride)], awkward::util::array_deleter<uint8_t>());
+    int64_t len = carry.length();
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(len*stride)], awkward::util::array_deleter<uint8_t>());
 
     int64_t offset = byteoffset_;
     int64_t* pos = carry.ptr().get();
     uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
     uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
-    for (int64_t i = 0;  i < length;  i++) {
+    for (int64_t i = 0;  i < len;  i++) {
       memcpy(&toptr[i*stride], &fromptr[offset + pos[i]*stride], stride);
     }
 
-
-    // int64_t length = bytepos.length();
-    // int64_t stride = itemsize_;
-    // std::shared_ptr<void> ptr(new uint8_t[(size_t)(length*stride)], awkward::util::array_deleter<uint8_t>());
-    //
-    // int64_t offset = byteoffset_;
-    // int64_t* pos = bytepos.ptr().get();
-    // uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
-    // uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
-    // for (int64_t i = 0;  i < length;  i++) {
-    //   memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], stride);
-    // }
-
-
-
-    throw std::runtime_error("getitem_next null");
+    std::vector<ssize_t> shape = { (ssize_t)len };
+    shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+    std::vector<ssize_t> strides = { (ssize_t)stride };
+    strides.insert(strides.end(), strides_.begin() + 1, strides_.end());
+    return NumpyArray(id_, ptr, shape, strides, 0, itemsize_, format_);
   }
 
   if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
@@ -523,7 +513,61 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
     if (ndim() < 2) {
       throw std::invalid_argument("too many indexes for array");
     }
-    throw std::runtime_error("getitem_next array");
+
+    // FIXME: handle empty array separately
+
+    NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+
+    Index64 flathead = array->ravel();
+
+    int64_t lencarry = carry.length();
+    int64_t lenflathead = flathead.length();
+    int64_t* flatheadptr = flathead.ptr().get();
+    int64_t skip = shape_[1];
+    for (int64_t i = 0;  i < lenflathead;  i++) {
+      if (flatheadptr[i] < 0) {
+        flatheadptr[i] += skip;
+      }
+      if (flatheadptr[i] < 0  ||  flatheadptr[i] >= skip) {
+        throw std::invalid_argument("index out of range");
+      }
+    }
+
+    if (advanced.length() == 0) {
+      Index64 nextcarry(lencarry*lenflathead);
+      Index64 nextadvanced(lencarry*lenflathead);
+      int64_t* carryptr = carry.ptr().get();
+      int64_t* nextcarryptr = nextcarry.ptr().get();
+      int64_t* nextadvancedptr = nextadvanced.ptr().get();
+      for (int64_t i = 0;  i < lencarry;  i++) {
+        for (int64_t j = 0;  j < lenflathead;  j++) {
+          nextcarryptr[i*lenflathead + j] = skip*carryptr[i] + flatheadptr[j];
+          nextadvancedptr[i*lenflathead + j] = j;
+        }
+      }
+
+      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenflathead, next.strides_[0]);
+
+      std::vector<ssize_t> outshape = { (ssize_t)length };
+      std::vector<int64_t> arrayshape = array->shape();
+      for (auto x = arrayshape.begin();  x != arrayshape.end();  ++x) {
+        outshape.push_back((ssize_t)(*x));
+      }
+      outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+
+      std::vector<ssize_t> outstrides(out.strides_.begin(), out.strides_.end());
+      for (auto x = arrayshape.rbegin();  x != arrayshape.rend();  ++x) {
+        outstrides.insert(outstrides.begin(), ((ssize_t)(*x))*outstrides[0]);
+      }
+
+      return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    }
+
+    else {
+      throw std::runtime_error("FIXME");
+    }
   }
 
   else {

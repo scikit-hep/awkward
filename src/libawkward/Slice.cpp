@@ -93,6 +93,37 @@ const std::string SliceArrayOf<T>::tostring_part() const {
   return out.str();
 }
 
+void ravel_index64(int64_t* toptr, const int64_t* fromptr, const int64_t ndim, const int64_t* shape, const int64_t* strides) {
+  if (ndim == 1) {
+    for (int64_t i = 0;  i < shape[0];  i++) {
+      toptr[i] = fromptr[i*strides[0]];
+    }
+  }
+  else {
+    for (int64_t i = 0;  i < shape[0];  i++) {
+      ravel_index64(&toptr[i*shape[1]], &fromptr[i*strides[0]], ndim - 1, &shape[1], &strides[1]);
+    }
+  }
+}
+
+template <typename T>
+const IndexOf<T> SliceArrayOf<T>::ravel() const {
+  int64_t length = 1;
+  for (size_t i = 0;  i < ndim();  i++) {
+    length *= shape_[i];
+  }
+
+  IndexOf<T> index(length);
+  if (std::is_same<T, int64_t>::value) {
+    ravel_index64(index.ptr().get(), index_.ptr().get(), ndim(), shape_.data(), strides_.data());
+  }
+  else {
+    throw std::runtime_error("unrecognized SliceArrayOf<T> type");
+  }
+
+  return index;
+}
+
 namespace awkward {
   template class SliceArrayOf<int64_t>;
 }
