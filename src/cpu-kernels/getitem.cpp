@@ -80,6 +80,41 @@ void awkward_numpyarray_contiguous_next_64(int64_t* topos, const int64_t* frompo
   awkward_numpyarray_contiguous_next<int64_t>(topos, frompos, len, skip, stride);
 }
 
+template <typename T>
+void awkward_numpyarray_getitem_next_null(uint8_t* toptr, const uint8_t* fromptr, int64_t len, int64_t stride, int64_t offset, const T* pos) {
+  for (int64_t i = 0;  i < len;  i++) {
+    std::memcpy(&toptr[i*stride], &fromptr[offset + pos[i]*stride], (size_t)stride);
+  }
+}
+void awkward_numpyarray_getitem_next_null_64(uint8_t* toptr, const uint8_t* fromptr, int64_t len, int64_t stride, int64_t offset, const int64_t* pos) {
+  awkward_numpyarray_getitem_next_null(toptr, fromptr, len, stride, offset, pos);
+}
+
+template <typename T>
+void awkward_numpyarray_getitem_next_slice(T* nextcarryptr, const T* carryptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    for (int64_t j = 0;  j < lenhead;  j++) {
+      nextcarryptr[i*lenhead + j] = skip*carryptr[i] + start + j*step;
+    }
+  }
+}
+void awkward_numpyarray_getitem_next_slice_64(int64_t* nextcarryptr, const int64_t* carryptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step) {
+  awkward_numpyarray_getitem_next_slice(nextcarryptr, carryptr, lencarry, lenhead, skip, start, step);
+}
+
+template <typename T>
+void awkward_numpyarray_getitem_next_slice_advanced(T* nextcarryptr, T* nextadvancedptr, const T* carryptr, const T* advancedptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    for (int64_t j = 0;  j < lenhead;  j++) {
+      nextcarryptr[i*lenhead + j] = skip*carryptr[i] + start + j*step;
+      nextadvancedptr[i*lenhead + j] = advancedptr[i];
+    }
+  }
+}
+void awkward_numpyarray_getitem_next_slice_advanced_64(int64_t* nextcarryptr, int64_t* nextadvancedptr, const int64_t* carryptr, const int64_t* advancedptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step) {
+  awkward_numpyarray_getitem_next_slice_advanced(nextcarryptr, nextadvancedptr, carryptr, advancedptr, lencarry, lenhead, skip, start, step);
+}
+
 Error awkward_getitem() {
   return "not implemented";
 }

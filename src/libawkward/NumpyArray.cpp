@@ -242,14 +242,7 @@ const NumpyArray NumpyArray::contiguous() const {
   }
   else {
     Index64 bytepos(shape_[0]);
-
-    // int64_t* rawptr = bytepos.ptr().get();
-    // int64_t stride = strides_[0];
-    // for (int64_t i = 0;  i < shape_[0];  i++) {
-    //   rawptr[i] = i*stride;
-    // }
     awkward_numpyarray_contiguous_init_64(bytepos.ptr().get(), shape_[0], strides_[0]);
-
     return contiguous_next(bytepos);
   }
 }
@@ -257,16 +250,6 @@ const NumpyArray NumpyArray::contiguous() const {
 const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
   if (iscontiguous()) {
     std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
-
-    // int64_t len = bytepos.length();
-    // int64_t stride = strides_[0];
-    // int64_t offset = byteoffset_;
-    // int64_t* pos = bytepos.ptr().get();
-    // uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
-    // uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
-    // for (int64_t i = 0;  i < len;  i++) {
-    //   memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], (size_t)stride);
-    // }
     awkward_numpyarray_contiguous_copy_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -274,22 +257,11 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
       strides_[0],
       byteoffset_,
       bytepos.ptr().get());
-
     return NumpyArray(id_, ptr, shape_, strides_, 0, itemsize_, format_);
   }
 
   else if (shape_.size() == 1) {
     std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*itemsize_)], awkward::util::array_deleter<uint8_t>());
-
-    // int64_t len = bytepos.length();
-    // int64_t stride = itemsize_;
-    // int64_t offset = byteoffset_;
-    // int64_t* pos = bytepos.ptr().get();
-    // uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
-    // uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
-    // for (int64_t i = 0;  i < len;  i++) {
-    //   memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], (size_t)stride);
-    // }
     awkward_numpyarray_contiguous_copy_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -297,25 +269,14 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
       itemsize_,
       byteoffset_,
       bytepos.ptr().get());
-
     std::vector<ssize_t> strides = { itemsize_ };
     return NumpyArray(id_, ptr, shape_, strides, 0, itemsize_, format_);
   }
 
   else {
     NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
-    Index64 nextbytepos(bytepos.length()*shape_[1]);
 
-    // int64_t len = bytepos.length();
-    // int64_t shape1 = (int64_t)shape_[1];
-    // int64_t strides1 = (int64_t)strides_[1];
-    // int64_t* frompos = bytepos.ptr().get();
-    // int64_t* topos = nextbytepos.ptr().get();
-    // for (int64_t i = 0;  i < len;  i++) {
-    //   for (int64_t j = 0;  j < shape1;  j++) {
-    //     topos[i*shape1 + j] = frompos[i] + j*strides1;
-    //   }
-    // }
+    Index64 nextbytepos(bytepos.length()*shape_[1]);
     awkward_numpyarray_contiguous_next_64(
       nextbytepos.ptr().get(),
       bytepos.ptr().get(),
@@ -350,7 +311,7 @@ const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
   }
 
   else {
-    NumpyArray safe = contiguous();   // maybe become_contiguous()
+    NumpyArray safe = contiguous();   // maybe become_contiguous() to change in-place?
 
     std::vector<ssize_t> nextshape = { 1 };
     nextshape.insert(nextshape.end(), safe.shape_.begin(), safe.shape_.end());
@@ -469,18 +430,16 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
 
 const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, Index64& carry, Index64& advanced, int64_t length, int64_t stride) const {
   if (head.get() == nullptr) {
-    int64_t len = carry.length();
-    std::shared_ptr<void> ptr(new uint8_t[(size_t)(len*stride)], awkward::util::array_deleter<uint8_t>());
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*stride)], awkward::util::array_deleter<uint8_t>());
+    awkward_numpyarray_getitem_next_null_64(
+      reinterpret_cast<uint8_t*>(ptr.get()),
+      reinterpret_cast<uint8_t*>(ptr_.get()),
+      carry.length(),
+      stride,
+      byteoffset_,
+      carry.ptr().get());
 
-    int64_t offset = byteoffset_;
-    int64_t* pos = carry.ptr().get();
-    uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
-    uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
-    for (int64_t i = 0;  i < len;  i++) {
-      std::memcpy(&toptr[i*stride], &fromptr[offset + pos[i]*stride], (size_t)stride);
-    }
-
-    std::vector<ssize_t> shape = { (ssize_t)len };
+    std::vector<ssize_t> shape = { (ssize_t)carry.length() };
     shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
     std::vector<ssize_t> strides = { (ssize_t)stride };
     strides.insert(strides.end(), strides_.begin() + 1, strides_.end());
@@ -507,18 +466,17 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
-    int64_t lencarry = carry.length();
-    int64_t skip = shape_[1];   // because this is contiguous
-    int64_t* carryptr = carry.ptr().get();
-
     if (advanced.length() == 0) {
-      Index64 nextcarry(lencarry*lenhead);
-      int64_t* nextcarryptr = nextcarry.ptr().get();
-      for (int64_t i = 0;  i < lencarry;  i++) {
-        for (int64_t j = 0;  j < lenhead;  j++) {
-          nextcarryptr[i*lenhead + j] = skip*carryptr[i] + start + j*step;
-        }
-      }
+      Index64 nextcarry(carry.length()*lenhead);
+      awkward_numpyarray_getitem_next_slice_64(
+        nextcarry.ptr().get(),
+        carry.ptr().get(),
+        carry.length(),
+        lenhead,
+        shape_[1],   // because this is contiguous
+        start,
+        step);
+
       NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*lenhead, next.strides_[0]);
       std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
       outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
@@ -528,17 +486,19 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
     }
 
     else {
-      int64_t* advancedptr = advanced.ptr().get();
-      Index64 nextcarry(lencarry*lenhead);
-      int64_t* nextcarryptr = nextcarry.ptr().get();
-      Index64 nextadvanced(lencarry*lenhead);
-      int64_t* nextadvancedptr = nextadvanced.ptr().get();
-      for (int64_t i = 0;  i < lencarry;  i++) {
-        for (int64_t j = 0;  j < lenhead;  j++) {
-          nextcarryptr[i*lenhead + j] = skip*carryptr[i] + start + j*step;
-          nextadvancedptr[i*lenhead + j] = advancedptr[i];
-        }
-      }
+      Index64 nextcarry(carry.length()*lenhead);
+      Index64 nextadvanced(carry.length()*lenhead);
+      awkward_numpyarray_getitem_next_slice_advanced_64(
+        nextcarry.ptr().get(),
+        nextadvanced.ptr().get(),
+        carry.ptr().get(),
+        advanced.ptr().get(),
+        carry.length(),
+        lenhead,
+        shape_[1],   // because this is contiguous
+        start,
+        step);
+
       NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenhead, next.strides_[0]);
       std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
       outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
