@@ -263,7 +263,7 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
     uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
     uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
     for (int64_t i = 0;  i < len;  i++) {
-      memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], stride);
+      memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], (size_t)stride);
     }
 
     return NumpyArray(id_, ptr, shape_, strides_, 0, itemsize_, format_);
@@ -279,7 +279,7 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
     uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
     uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
     for (int64_t i = 0;  i < len;  i++) {
-      memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], stride);
+      memcpy(&toptr[i*stride], &fromptr[offset + pos[i]], (size_t)stride);
     }
 
     std::vector<ssize_t> strides = { itemsize_ };
@@ -484,7 +484,7 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
     uint8_t* fromptr = reinterpret_cast<uint8_t*>(ptr_.get());
     uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
     for (int64_t i = 0;  i < len;  i++) {
-      memcpy(&toptr[i*stride], &fromptr[offset + pos[i]*stride], stride);
+      memcpy(&toptr[i*stride], &fromptr[offset + pos[i]*stride], (size_t)stride);
     }
 
     std::vector<ssize_t> shape = { (ssize_t)len };

@@ -109,7 +109,7 @@ void ravel_index64(int64_t* toptr, const int64_t* fromptr, const int64_t ndim, c
 template <typename T>
 const IndexOf<T> SliceArrayOf<T>::ravel() const {
   int64_t length = 1;
-  for (size_t i = 0;  i < ndim();  i++) {
+  for (int64_t i = 0;  i < ndim();  i++) {
     length *= shape_[i];
   }
 
