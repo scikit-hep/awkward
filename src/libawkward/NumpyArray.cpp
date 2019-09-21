@@ -342,7 +342,7 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
     return NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
 
-  if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+  else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
     if (ndim() < 2) {
       throw std::invalid_argument("too many indexes for array");
     }
@@ -451,7 +451,34 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
     return NumpyArray(id_, ptr, shape, strides, 0, itemsize_, format_);
   }
 
-  if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+  else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+    if (ndim() < 2) {
+      throw std::invalid_argument("too many indexes for array");
+    }
+
+    NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+
+    // if we had any array slices, this int would become an array
+    assert(advanced.length() == 0);
+
+    Index64 nextcarry(carry.length());
+    awkward_numpyarray_getitem_next_at_64(
+      nextcarry.ptr().get(),
+      carry.ptr().get(),
+      carry.length(),
+      shape_[1],   // because this is contiguous
+      at->at());
+
+    NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length, next.strides_[0]);
+
+    std::vector<ssize_t> outshape = { (ssize_t)length };
+    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+  }
+
+  else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
     if (ndim() < 2) {
       throw std::invalid_argument("too many indexes for array");
     }

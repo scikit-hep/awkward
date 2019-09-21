@@ -108,6 +108,16 @@ void awkward_numpyarray_getitem_next_null_64(uint8_t* toptr, const uint8_t* from
 }
 
 template <typename T>
+void awkward_numpyarray_getitem_next_at(T* nextcarryptr, const T* carryptr, int64_t lencarry, int64_t skip, int64_t at) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    nextcarryptr[i] = skip*carryptr[i] + at;
+  }
+}
+void awkward_numpyarray_getitem_next_at_64(int64_t* nextcarryptr, const int64_t* carryptr, int64_t lencarry, int64_t skip, int64_t at) {
+  awkward_numpyarray_getitem_next_at(nextcarryptr, carryptr, lencarry, skip, at);
+}
+
+template <typename T>
 void awkward_numpyarray_getitem_next_slice(T* nextcarryptr, const T* carryptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step) {
   for (int64_t i = 0;  i < lencarry;  i++) {
     for (int64_t j = 0;  j < lenhead;  j++) {
