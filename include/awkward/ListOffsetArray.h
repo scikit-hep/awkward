@@ -3,13 +3,9 @@
 #ifndef AWKWARD_LISTOFFSETARRAYCONTENT_H_
 #define AWKWARD_LISTOFFSETARRAYCONTENT_H_
 
-#include <sstream>
 #include <memory>
-#include <type_traits>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/cpu-kernels/identity.h"
-#include "awkward/util.h"
 #include "awkward/Index.h"
 #include "awkward/Identity.h"
 #include "awkward/Content.h"
@@ -29,11 +25,12 @@ namespace awkward {
     virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
-    virtual const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
+    virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual int64_t length() const;
-    virtual std::shared_ptr<Content> shallow_copy() const;
-    virtual std::shared_ptr<Content> get(int64_t at) const;
-    virtual std::shared_ptr<Content> slice(int64_t start, int64_t stop) const;
+    virtual const std::shared_ptr<Content> shallow_copy() const;
+    virtual const std::shared_ptr<Content> get(int64_t at) const;
+    virtual const std::shared_ptr<Content> slice(int64_t start, int64_t stop) const;
+    virtual const std::pair<int64_t, int64_t> minmax_depth() const;
 
   private:
     std::shared_ptr<Identity> id_;

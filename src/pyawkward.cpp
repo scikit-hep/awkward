@@ -7,6 +7,7 @@
 #include <pybind11/stl.h>
 
 #include "awkward/Index.h"
+#include "awkward/Slice.h"
 #include "awkward/Identity.h"
 #include "awkward/Content.h"
 #include "awkward/Iterator.h"
@@ -122,7 +123,7 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
           throw std::invalid_argument(name + std::string(" must be built from a one-dimensional array; try array.ravel()"));
         }
         if (info.strides[0] != sizeof(T)) {
-          throw std::invalid_argument(name + std::string(" must be built from a compact array (array.strides == (array.itemsize,)); try array.copy()"));
+          throw std::invalid_argument(name + std::string(" must be built from a contiguous array (array.strides == (array.itemsize,)); try array.copy()"));
         }
         return ak::IndexOf<T>(
           std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr), pyobject_deleter<T>(array.ptr())),
@@ -131,7 +132,7 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
       }))
 
       .def("__repr__", [](ak::IndexOf<T>& self) -> const std::string {
-        return self.repr("", "", "");
+        return self.tostring();
       })
 
       .def("__len__", &ak::IndexOf<T>::length)
@@ -174,14 +175,14 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
           throw std::invalid_argument(name + std::string(" must be built from a two-dimensional array"));
         }
         if (info.strides[0] != sizeof(T)*info.shape[1]  ||  info.strides[1] != sizeof(T)) {
-          throw std::invalid_argument(name + std::string(" must be built from a compact array (array.stries == (array.shape[1]*array.itemsize, array.itemsize)); try array.copy()"));
+          throw std::invalid_argument(name + std::string(" must be built from a contiguous array (array.stries == (array.shape[1]*array.itemsize, array.itemsize)); try array.copy()"));
         }
         return ak::IdentityOf<T>(ref, fieldloc, 0, info.shape[1], info.shape[0],
             std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr), pyobject_deleter<T>(array.ptr())));
       }))
 
       .def("__repr__", [](ak::IdentityOf<T>& self) -> const std::string {
-        return self.repr();
+        return self.tostring();
       })
 
       .def("__len__", &ak::IdentityOf<T>::length)
@@ -202,6 +203,133 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
       .def_property_readonly("length", &ak::IdentityOf<T>::length)
       .def_property_readonly("array", [](py::buffer& self) -> py::array {
         return py::array(self);
+      })
+
+  ;
+}
+
+/////////////////////////////////////////////////////////////// Slice
+
+void toslice_part(ak::Slice& slice, py::object obj) {
+  if (py::isinstance<py::int_>(obj)) {
+    // FIXME: what happens if you give this a Numpy integer? a Numpy 0-dimensional array?
+    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceAt(obj.cast<int64_t>())));
+  }
+  else if (py::isinstance<py::slice>(obj)) {
+    py::object pystart = obj.attr("start");
+    py::object pystop = obj.attr("stop");
+    py::object pystep = obj.attr("step");
+    int64_t start = ak::Slice::none();
+    int64_t stop = ak::Slice::none();
+    int64_t step = 1;
+    if (!pystart.is(py::none())) {
+      start = pystart.cast<int64_t>();
+    }
+    if (!pystop.is(py::none())) {
+      stop = pystop.cast<int64_t>();
+    }
+    if (!pystep.is(py::none())) {
+      step = pystep.cast<int64_t>();
+    }
+    if (step == 0) {
+      throw std::invalid_argument("slice step must not be 0");
+    }
+    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceRange(start, stop, step)));
+  }
+#if PY_MAJOR_VERSION >= 3
+  else if (py::isinstance<py::ellipsis>(obj)) {
+    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceEllipsis()));
+  }
+#endif
+  else if (obj.is(py::module::import("numpy").attr("newaxis"))) {
+    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceNewAxis()));
+  }
+  else if (py::isinstance<py::iterable>(obj)) {
+    py::object objarray = py::module::import("numpy").attr("asarray")(obj);
+    if (!py::isinstance<py::array>(objarray)) {
+      throw std::invalid_argument("iterable cannot be cast as an array");
+    }
+    py::array array = objarray.cast<py::array>();
+    if (array.ndim() == 0) {
+      throw std::invalid_argument("arrays used as an index must have at least one dimension");
+    }
+
+    py::buffer_info info = array.request();
+    if (info.format.compare("?") == 0) {
+      py::object nonzero_tuple = py::module::import("numpy").attr("nonzero")(array);
+      for (auto x : nonzero_tuple.cast<py::tuple>()) {
+        py::object intarray_object = py::module::import("numpy").attr("asarray")(x.cast<py::object>(), py::module::import("numpy").attr("int64"));
+        py::array intarray = intarray_object.cast<py::array>();
+        py::buffer_info intinfo = intarray.request();
+        std::vector<int64_t> shape;
+        std::vector<int64_t> strides;
+        for (ssize_t i = 0;  i < intinfo.ndim;  i++) {
+          shape.push_back((int64_t)intinfo.shape[i]);
+          strides.push_back((int64_t)intinfo.strides[i] / sizeof(int64_t));
+        }
+        ak::Index64 index(std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(intinfo.ptr), pyobject_deleter<int64_t>(intarray.ptr())), 0, shape[0]);
+        slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceArray64(index, shape, strides)));
+      }
+    }
+
+    else {
+      std::string format(info.format);
+      format.erase(0, format.find_first_not_of("@=<>!"));
+      if (format.compare("c") != 0  &&
+          format.compare("b") != 0  &&
+          format.compare("B") != 0  &&
+          format.compare("h") != 0  &&
+          format.compare("H") != 0  &&
+          format.compare("i") != 0  &&
+          format.compare("I") != 0  &&
+          format.compare("l") != 0  &&
+          format.compare("L") != 0  &&
+          format.compare("q") != 0  &&
+          format.compare("Q") != 0) {
+        throw std::invalid_argument("arrays used as an index must be integer or boolean");
+      }
+
+      py::object intarray_object = py::module::import("numpy").attr("asarray")(array, py::module::import("numpy").attr("int64"));
+      py::array intarray = intarray_object.cast<py::array>();
+      py::buffer_info intinfo = intarray.request();
+      std::vector<int64_t> shape;
+      std::vector<int64_t> strides;
+      for (ssize_t i = 0;  i < intinfo.ndim;  i++) {
+        shape.push_back((int64_t)intinfo.shape[i]);
+        strides.push_back((int64_t)intinfo.strides[i] / (int64_t)sizeof(int64_t));
+      }
+      ak::Index64 index(std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(intinfo.ptr), pyobject_deleter<int64_t>(intarray.ptr())), 0, shape[0]);
+      slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceArray64(index, shape, strides)));
+    }
+
+  }
+  else {
+    throw std::invalid_argument("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), and integer or boolean arrays (possibly jagged) are valid indices");
+  }
+}
+
+ak::Slice toslice(py::object obj) {
+  ak::Slice out;
+  if (py::isinstance<py::tuple>(obj)) {
+    for (auto x : obj.cast<py::tuple>()) {
+      toslice_part(out, x.cast<py::object>());
+    }
+  }
+  else {
+    toslice_part(out, obj);
+  }
+  out.become_sealed();
+  return out;
+}
+
+py::class_<ak::Slice> make_Slice(py::handle m, std::string name) {
+  return py::class_<ak::Slice>(m, name.c_str())
+      .def(py::init([](py::object obj) {
+        return toslice(obj);
+      }))
+
+      .def("__repr__", [](ak::Slice& self) -> const std::string {
+        return self.tostring();
       })
 
   ;
@@ -232,7 +360,7 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
       .def("next", next)
 
       .def("__repr__", [](ak::Iterator& self) -> const std::string {
-        return self.repr();
+        return self.tostring();
       })
 
   ;
@@ -278,8 +406,8 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
       .def_property("id", [](ak::NumpyArray& self) -> py::object { return unwrap(self.id()); }, &setid<ak::NumpyArray>)
       .def("setid", &setid<ak::NumpyArray>)
       .def("setid", [](ak::NumpyArray& self) -> void { self.setid(); })
-      .def("__repr__", [](ak::NumpyArray* self) -> const std::string {
-        return ((ak::Content*)self)->repr();
+      .def("__repr__", [](ak::NumpyArray& self) -> const std::string {
+        return self.tostring();
       })
 
       .def_property_readonly("shape", &ak::NumpyArray::shape)
@@ -289,20 +417,15 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
       .def_property_readonly("ndim", &ak::NumpyArray::ndim)
       .def_property_readonly("isscalar", &ak::NumpyArray::isscalar)
       .def_property_readonly("isempty", &ak::NumpyArray::isempty)
-      .def_property_readonly("iscompact", &ak::NumpyArray::iscompact)
+
+      .def_property_readonly("iscontiguous", &ak::NumpyArray::iscontiguous)
+      .def("contiguous", &ak::NumpyArray::contiguous)
+      .def("become_contiguous", &ak::NumpyArray::become_contiguous)
 
       .def("__len__", &ak::NumpyArray::length)
-      .def("__getitem__", [](ak::NumpyArray& self, int64_t at) -> py::object {
-        return unwrap(self.get(at));
+      .def("__getitem__", [](ak::NumpyArray& self, py::object pyslice) -> py::object {
+        return unwrap(self.getitem(toslice(pyslice)));
       })
-      .def("__getitem__", [](ak::NumpyArray& self, py::slice slice) -> py::object {
-        size_t start, stop, step, length;
-        if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
-          throw py::error_already_set();
-        }
-        return unwrap(self.slice((int64_t)start, (int64_t)stop));
-      })
-
       .def("__iter__", [](ak::NumpyArray& self) -> ak::Iterator {
         return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(self)));
       })
@@ -337,8 +460,8 @@ py::class_<ak::ListOffsetArrayOf<T>> make_ListOffsetArrayOf(py::handle m, std::s
       .def_property("id", [](ak::ListOffsetArrayOf<T>& self) -> py::object { return unwrap(self.id()); }, &setid<ak::ListOffsetArrayOf<T>>)
       .def("setid", &setid<ak::ListOffsetArrayOf<T>>)
       .def("setid", [](ak::ListOffsetArrayOf<T>& self) -> void { self.setid(); })
-      .def("__repr__", [](ak::ListOffsetArrayOf<T>* self) -> const std::string {
-        return ((ak::Content*)self)->repr();
+      .def("__repr__", [](ak::ListOffsetArrayOf<T>& self) -> const std::string {
+        return self.tostring();
       })
 
       .def("__len__", &ak::ListOffsetArrayOf<T>::length)
@@ -367,11 +490,14 @@ PYBIND11_MODULE(layout, m) {
   m.attr("__version__") = "dev";
 #endif
 
+  make_IndexOf<uint8_t>(m, "Index8");
   make_IndexOf<int32_t>(m, "Index32");
   make_IndexOf<int64_t>(m, "Index64");
 
   make_IdentityOf<int32_t>(m, "Identity32");
   make_IdentityOf<int64_t>(m, "Identity64");
+
+  make_Slice(m, "Slice");
 
   make_Iterator(m, "Iterator");
 

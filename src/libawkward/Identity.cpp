@@ -1,5 +1,12 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <cassert>
+#include <atomic>
+#include <iomanip>
+#include <sstream>
+#include <type_traits>
+// #include <utility>
+
 #include "awkward/Identity.h"
 
 using namespace awkward;
@@ -11,7 +18,7 @@ Identity::Ref Identity::newref() {
 }
 
 template <typename T>
-const std::string IdentityOf<T>::repr(const std::string indent, const std::string pre, const std::string post) const {
+const std::string IdentityOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
   std::string name = "Unrecognized Identity";
   if (std::is_same<T, int32_t>::value) {
@@ -21,7 +28,7 @@ const std::string IdentityOf<T>::repr(const std::string indent, const std::strin
     name = "Identity64";
   }
   out << indent << pre << "<" << name << " ref=\"" << ref() << "\" fieldloc=\"[";
-  for (int64_t i = 0;  i < fieldloc().size();  i++) {
+  for (size_t i = 0;  i < fieldloc().size();  i++) {
     if (i != 0) {
       out << " ";
     }
@@ -33,8 +40,8 @@ const std::string IdentityOf<T>::repr(const std::string indent, const std::strin
 }
 
 template <typename T>
-const std::string IdentityOf<T>::repr() const {
-  return repr("", "", "");
+const std::string IdentityOf<T>::tostring() const {
+  return tostring_part("", "", "");
 }
 
 template <typename T>
@@ -50,7 +57,7 @@ const std::shared_ptr<Identity> IdentityOf<T>::shallow_copy() const {
 template <typename T>
 const std::vector<T> IdentityOf<T>::get(int64_t at) const {
   std::vector<T> out;
-  for (ssize_t i = offset() + at;  i < offset() + at + width();  i++) {
+  for (size_t i = (size_t)(offset() + at);  i < (size_t)(offset() + at + width());  i++) {
     out.push_back(ptr_.get()[i]);
   }
   return out;

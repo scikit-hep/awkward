@@ -1,6 +1,11 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <sstream>
+#include <type_traits>
+
 #include "awkward/cpu-kernels/identity.h"
+// #include "awkward/util.h"
+
 #include "awkward/ListOffsetArray.h"
 
 using namespace awkward;
@@ -37,7 +42,7 @@ void ListOffsetArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
 }
 
 template <typename T>
-const std::string ListOffsetArrayOf<T>::repr(const std::string indent, const std::string pre, const std::string post) const {
+const std::string ListOffsetArrayOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
   std::stringstream out;
   std::string name = "Unrecognized ListOffsetArray";
   if (std::is_same<T, int32_t>::value) {
@@ -48,10 +53,10 @@ const std::string ListOffsetArrayOf<T>::repr(const std::string indent, const std
   }
   out << indent << pre << "<" << name << ">\n";
   if (id_.get() != nullptr) {
-    out << id_.get()->repr(indent + std::string("    "), "", "\n");
+    out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
   }
-  out << offsets_.repr(indent + std::string("    "), "<offsets>", "</offsets>\n");
-  out << content_.get()->repr(indent + std::string("    "), "<content>", "</content>\n");
+  out << offsets_.tostring_part(indent + std::string("    "), "<offsets>", "</offsets>\n");
+  out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
   out << indent << "</" << name << ">" << post;
   return out.str();
 }
@@ -62,24 +67,30 @@ int64_t ListOffsetArrayOf<T>::length() const {
 }
 
 template <typename T>
-std::shared_ptr<Content> ListOffsetArrayOf<T>::shallow_copy() const {
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::shallow_copy() const {
   return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, offsets_, content_));
 }
 
 template <typename T>
-std::shared_ptr<Content> ListOffsetArrayOf<T>::get(int64_t at) const {
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::get(int64_t at) const {
   int64_t start = (int64_t)offsets_.get(at);
   int64_t stop = (int64_t)offsets_.get(at + 1);
   return content_.get()->slice(start, stop);
 }
 
 template <typename T>
-std::shared_ptr<Content> ListOffsetArrayOf<T>::slice(int64_t start, int64_t stop) const {
-  std::shared_ptr<Identity> id;
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::slice(int64_t start, int64_t stop) const {
+  std::shared_ptr<Identity> id(nullptr);
   if (id_.get() != nullptr) {
     id = id_.get()->slice(start, stop);
   }
   return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id, offsets_.slice(start, stop + 1), content_));
+}
+
+template <typename T>
+const std::pair<int64_t, int64_t> ListOffsetArrayOf<T>::minmax_depth() const {
+  std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
+  return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);
 }
 
 namespace awkward {

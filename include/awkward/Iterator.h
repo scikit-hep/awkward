@@ -4,7 +4,6 @@
 #define AWKWARD_ITERATOR_H_
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/util.h"
 #include "awkward/Content.h"
 
 namespace awkward {
@@ -20,8 +19,8 @@ namespace awkward {
     const bool isdone() const { return where_ >= content_.get()->length(); }
     const std::shared_ptr<Content> next() { return content_.get()->get(where_++); }
 
-    const std::string repr(const std::string indent, const std::string pre, const std::string post) const;
-    const std::string repr() const;
+    const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
+    const std::string tostring() const;
 
   private:
     const std::shared_ptr<Content> content_;
