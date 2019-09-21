@@ -514,8 +514,6 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
       throw std::invalid_argument("too many indexes for array");
     }
 
-    // FIXME: handle empty array separately
-
     NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();

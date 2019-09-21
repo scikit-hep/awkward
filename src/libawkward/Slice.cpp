@@ -110,7 +110,7 @@ template <typename T>
 const IndexOf<T> SliceArrayOf<T>::ravel() const {
   int64_t length = 1;
   for (int64_t i = 0;  i < ndim();  i++) {
-    length *= shape_[i];
+    length *= shape_[(size_t)i];
   }
 
   IndexOf<T> index(length);
