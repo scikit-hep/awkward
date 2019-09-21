@@ -32,6 +32,22 @@ void awkward_regularize_rangeslice(int64_t& start, int64_t& stop, bool posstep, 
 }
 
 template <typename T>
+Error awkward_regularize_arrayslice(T* flatheadptr, int64_t lenflathead, int64_t length) {
+  for (int64_t i = 0;  i < lenflathead;  i++) {
+    if (flatheadptr[i] < 0) {
+      flatheadptr[i] += length;
+    }
+    if (flatheadptr[i] < 0  ||  flatheadptr[i] >= length) {
+      return "index out of range";
+    }
+  }
+  return kNoError;
+}
+Error awkward_regularize_arrayslice_64(int64_t* flatheadptr, int64_t lenflathead, int64_t length) {
+  return awkward_regularize_arrayslice<int64_t>(flatheadptr, lenflathead, length);
+}
+
+template <typename T>
 void awkward_slicearray_ravel(T* toptr, const T* fromptr, int64_t ndim, const int64_t* shape, const int64_t* strides) {
   if (ndim == 1) {
     for (T i = 0;  i < shape[0];  i++) {
@@ -115,6 +131,25 @@ void awkward_numpyarray_getitem_next_slice_advanced_64(int64_t* nextcarryptr, in
   awkward_numpyarray_getitem_next_slice_advanced(nextcarryptr, nextadvancedptr, carryptr, advancedptr, lencarry, lenhead, skip, start, step);
 }
 
-Error awkward_getitem() {
-  return "not implemented";
+template <typename T>
+void awkward_numpyarray_getitem_next_array(T* nextcarryptr, T* nextadvancedptr, const T* carryptr, const T* flatheadptr, int64_t lencarry, int64_t lenflathead, int64_t skip) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    for (int64_t j = 0;  j < lenflathead;  j++) {
+      nextcarryptr[i*lenflathead + j] = skip*carryptr[i] + flatheadptr[j];
+      nextadvancedptr[i*lenflathead + j] = j;
+    }
+  }
+}
+void awkward_numpyarray_getitem_next_array_64(int64_t* nextcarryptr, int64_t* nextadvancedptr, const int64_t* carryptr, const int64_t* flatheadptr, int64_t lencarry, int64_t lenflathead, int64_t skip) {
+  awkward_numpyarray_getitem_next_array(nextcarryptr, nextadvancedptr, carryptr, flatheadptr, lencarry, lenflathead, skip);
+}
+
+template <typename T>
+void awkward_numpyarray_getitem_next_array_advanced(T* nextcarryptr, const T* carryptr, const T* advancedptr, const T* flatheadptr, int64_t lencarry, int64_t skip) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    nextcarryptr[i] = skip*carryptr[i] + flatheadptr[advancedptr[i]];
+  }
+}
+void awkward_numpyarray_getitem_next_array_advanced_64(int64_t* nextcarryptr, const int64_t* carryptr, const int64_t* advancedptr, const int64_t* flatheadptr, int64_t lencarry, int64_t skip) {
+  awkward_numpyarray_getitem_next_array_advanced(nextcarryptr, carryptr, advancedptr, flatheadptr, lencarry, skip);
 }

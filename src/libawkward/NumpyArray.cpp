@@ -551,34 +551,25 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
     Slice nexttail = tail.tail();
 
     Index64 flathead = array->ravel();
-
-    int64_t lencarry = carry.length();
-    int64_t lenflathead = flathead.length();
-    int64_t* flatheadptr = flathead.ptr().get();
-    int64_t skip = shape_[1];   // because this is contiguous
-    for (int64_t i = 0;  i < lenflathead;  i++) {
-      if (flatheadptr[i] < 0) {
-        flatheadptr[i] += skip;
-      }
-      if (flatheadptr[i] < 0  ||  flatheadptr[i] >= skip) {
-        throw std::invalid_argument("index out of range");
-      }
-    }
+    Error regularize_error = awkward_regularize_arrayslice_64(
+      flathead.ptr().get(),
+      flathead.length(),
+      shape_[1]);
+    HANDLE_ERROR(regularize_error)
 
     if (advanced.length() == 0) {
-      Index64 nextcarry(lencarry*lenflathead);
-      Index64 nextadvanced(lencarry*lenflathead);
-      int64_t* carryptr = carry.ptr().get();
-      int64_t* nextcarryptr = nextcarry.ptr().get();
-      int64_t* nextadvancedptr = nextadvanced.ptr().get();
-      for (int64_t i = 0;  i < lencarry;  i++) {
-        for (int64_t j = 0;  j < lenflathead;  j++) {
-          nextcarryptr[i*lenflathead + j] = skip*carryptr[i] + flatheadptr[j];
-          nextadvancedptr[i*lenflathead + j] = j;
-        }
-      }
+      Index64 nextcarry(carry.length()*flathead.length());
+      Index64 nextadvanced(carry.length()*flathead.length());
+      awkward_numpyarray_getitem_next_array_64(
+        nextcarry.ptr().get(),
+        nextadvanced.ptr().get(),
+        carry.ptr().get(),
+        flathead.ptr().get(),
+        carry.length(),
+        flathead.length(),
+        shape_[1]);   // because this is contiguous
 
-      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenflathead, next.strides_[0]);
+      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*flathead.length(), next.strides_[0]);
 
       std::vector<ssize_t> outshape = { (ssize_t)length };
       std::vector<int64_t> arrayshape = array->shape();
@@ -591,25 +582,24 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
       for (auto x = arrayshape.rbegin();  x != arrayshape.rend();  ++x) {
         outstrides.insert(outstrides.begin(), ((ssize_t)(*x))*outstrides[0]);
       }
-
       return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
 
     else {
-      Index64 nextcarry(lencarry);
-      Index64 nextadvanced(lencarry);
-      int64_t* carryptr = carry.ptr().get();
-      int64_t* advancedptr = advanced.ptr().get();
-      int64_t* nextcarryptr = nextcarry.ptr().get();
-      for (int64_t i = 0;  i < lencarry;  i++) {
-        nextcarryptr[i] = skip*carryptr[i] + flatheadptr[advancedptr[i]];
-      }
+      Index64 nextcarry(carry.length());
+      Index64 nextadvanced(carry.length());
+      awkward_numpyarray_getitem_next_array_advanced_64(
+        nextcarry.ptr().get(),
+        carry.ptr().get(),
+        advanced.ptr().get(),
+        flathead.ptr().get(),
+        carry.length(),
+        shape_[1]);   // because this is contiguous
 
       NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*array->length(), next.strides_[0]);
 
       std::vector<ssize_t> outshape = { (ssize_t)length };
       outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-
       return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
     }
   }
