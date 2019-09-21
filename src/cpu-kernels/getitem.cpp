@@ -35,6 +35,24 @@ void awkward_regularize_rangeslice_64(int64_t& start, int64_t& stop, bool posste
   awkward_regularize_rangeslice<int64_t>(start, stop, posstep, hasstart, hasstop, length);
 }
 
+template <typename T>
+void awkward_slicearray_ravel(T* toptr, const T* fromptr, T ndim, const T* shape, const T* strides) {
+  if (ndim == 1) {
+    for (T i = 0;  i < shape[0];  i++) {
+      toptr[i] = fromptr[i*strides[0]];
+    }
+  }
+  else {
+    for (T i = 0;  i < shape[0];  i++) {
+      awkward_slicearray_ravel<T>(&toptr[i*shape[1]], &fromptr[i*strides[0]], ndim - 1, &shape[1], &strides[1]);
+    }
+  }
+}
+
+void awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_t ndim, const int64_t* shape, const int64_t* strides) {
+  awkward_slicearray_ravel<int64_t>(toptr, fromptr, ndim, shape, strides);
+}
+
 Error awkward_getitem() {
   return "not implemented";
 }

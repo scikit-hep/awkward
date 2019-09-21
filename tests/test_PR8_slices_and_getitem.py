@@ -166,5 +166,6 @@ def test_numpyarray_getitem_next():
     assert awkward1.tolist(b[c, numpy.newaxis, 1:4]) == awkward1.tolist(a[c, numpy.newaxis, 1:4])
     assert awkward1.tolist(b[1:4, numpy.newaxis, numpy.newaxis, c]) == awkward1.tolist(a[1:4, numpy.newaxis, numpy.newaxis, c])
     assert awkward1.tolist(b[c, numpy.newaxis, numpy.newaxis, 1:4]) == awkward1.tolist(a[c, numpy.newaxis, numpy.newaxis, 1:4])
-    assert awkward1.tolist(b[..., c]) == awkward1.tolist(a[..., c])
-    assert awkward1.tolist(b[c, ...]) == awkward1.tolist(a[c, ...])
+    if not py27:
+        assert awkward1.tolist(b[Ellipsis, c]) == awkward1.tolist(a[Ellipsis, c])
+        assert awkward1.tolist(b[c, Ellipsis]) == awkward1.tolist(a[c, Ellipsis])
