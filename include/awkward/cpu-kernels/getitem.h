@@ -11,7 +11,8 @@ extern "C" {
   void awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_t ndim, const int64_t* shape, const int64_t* strides);
 
   void awkward_numpyarray_contiguous_init_64(int64_t* toptr, int64_t skip, int64_t stride);
-  void awkward_numpyarray_contiguous_next_64(uint8_t* toptr, const uint8_t* fromptr, int64_t len, int64_t stride, int64_t offset, const int64_t* pos);
+  void awkward_numpyarray_contiguous_copy_64(uint8_t* toptr, const uint8_t* fromptr, int64_t len, int64_t stride, int64_t offset, const int64_t* pos);
+  void awkward_numpyarray_contiguous_next_64(int64_t* topos, const int64_t* frompos, int64_t len, int64_t skip, int64_t stride);
 
   Error awkward_getitem();
 }

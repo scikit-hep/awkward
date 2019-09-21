@@ -59,13 +59,25 @@ void awkward_numpyarray_contiguous_init_64(int64_t* toptr, int64_t skip, int64_t
 }
 
 template <typename T>
-void awkward_numpyarray_contiguous_next(uint8_t* toptr, const uint8_t* fromptr, int64_t len, int64_t stride, int64_t offset, const T* pos) {
+void awkward_numpyarray_contiguous_copy(uint8_t* toptr, const uint8_t* fromptr, int64_t len, int64_t stride, int64_t offset, const T* pos) {
   for (int64_t i = 0;  i < len;  i++) {
     memcpy(&toptr[i*stride], &fromptr[offset + (int64_t)pos[i]], (size_t)stride);
   }
 }
-void awkward_numpyarray_contiguous_next_64(uint8_t* toptr, const uint8_t* fromptr, int64_t len, int64_t stride, int64_t offset, const int64_t* pos) {
-  awkward_numpyarray_contiguous_next<int64_t>(toptr, fromptr, len, stride, offset, pos);
+void awkward_numpyarray_contiguous_copy_64(uint8_t* toptr, const uint8_t* fromptr, int64_t len, int64_t stride, int64_t offset, const int64_t* pos) {
+  awkward_numpyarray_contiguous_copy<int64_t>(toptr, fromptr, len, stride, offset, pos);
+}
+
+template <typename T>
+void awkward_numpyarray_contiguous_next(T* topos, const T* frompos, int64_t len, int64_t skip, int64_t stride) {
+  for (int64_t i = 0;  i < len;  i++) {
+    for (int64_t j = 0;  j < skip;  j++) {
+      topos[i*skip + j] = frompos[i] + j*stride;
+    }
+  }
+}
+void awkward_numpyarray_contiguous_next_64(int64_t* topos, const int64_t* frompos, int64_t len, int64_t skip, int64_t stride) {
+  awkward_numpyarray_contiguous_next<int64_t>(topos, frompos, len, skip, stride);
 }
 
 Error awkward_getitem() {
