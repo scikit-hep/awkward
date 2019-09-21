@@ -48,7 +48,7 @@ add_library(awkward-static STATIC $<TARGET_OBJECTS:awkward-objects>)
 add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects>)
 target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static)
 target_link_libraries(awkward        PRIVATE awkward-cpu-kernels-static)
-addtest(test-PR8-rawarray "tests/test_PR8_rawarray_and_slices.cpp")
+addtest(test-PR10 "tests/test_PR10_rawarray_getitem.cpp")
 
 pybind11_add_module(layout src/pyawkward.cpp)
 target_link_libraries(layout PRIVATE awkward-static)

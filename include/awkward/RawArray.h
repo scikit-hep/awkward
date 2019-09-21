@@ -114,6 +114,7 @@ namespace awkward {
     }
     virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
 
+    T* borrow() const { return borrow(0); }
     T* borrow(int64_t at) const { return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)itemsize_*(ssize_t)(offset_ + at)); }
 
   private:

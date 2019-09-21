@@ -71,6 +71,9 @@ docs/_build/
 
 ############################################################# C and C++
 
+# ctest
+Testing/
+
 # Prerequisites
 *.d
 
