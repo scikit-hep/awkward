@@ -177,23 +177,46 @@ const std::shared_ptr<Content> NumpyArray::shallow_copy() const {
 }
 
 const std::shared_ptr<Content> NumpyArray::get(int64_t at) const {
-  return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceAt(at)) }), true));
+  assert(!isscalar());
+  // return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceAt(at)) }), true));
+  int64_t regular_at = at;
+  if (regular_at < 0) {
+    regular_at += shape_[0];
+  }
+  if (regular_at < 0  ||  regular_at >= shape_[0]) {
+    throw std::invalid_argument("index out of range");
+  }
+  ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)regular_at);
+  const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+  const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+  std::shared_ptr<Identity> id;
+  if (id_.get() != nullptr) {
+    if (regular_at >= id_.get()->length()) {
+      throw std::invalid_argument("index out of range for identity");
+    }
+    id = id_.get()->slice(regular_at, regular_at + 1);
+  }
+  return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset, itemsize_, format_));
 }
 
 const std::shared_ptr<Content> NumpyArray::slice(int64_t start, int64_t stop) const {
-  return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceRange(start, stop, 1)) }), true));
-
-  // FIXME: id should be propagated through the new getitem
-  // assert(!isscalar());
-  // ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
-  // std::vector<ssize_t> shape;
-  // shape.push_back((ssize_t)(stop - start));
-  // shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-  // std::shared_ptr<Identity> id(nullptr);
-  // if (id_.get() != nullptr) {
-  //   id = id_.get()->slice(start, stop);
-  // }
-  // return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
+  assert(!isscalar());
+  // return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceRange(start, stop, 1)) }), true));
+  int64_t regular_start = start;
+  int64_t regular_stop = stop;
+  awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), shape_[0]);
+  ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)regular_start);
+  std::vector<ssize_t> shape;
+  shape.push_back((ssize_t)(regular_stop - regular_start));
+  shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+  std::shared_ptr<Identity> id;
+  if (id_.get() != nullptr) {
+    if (regular_stop > id_.get()->length()) {
+      throw std::invalid_argument("index out of range for identity");
+    }
+    id = id_.get()->slice(regular_start, regular_stop);
+  }
+  return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
 }
 
 const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {

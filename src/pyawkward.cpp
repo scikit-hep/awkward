@@ -423,7 +423,26 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
       .def("become_contiguous", &ak::NumpyArray::become_contiguous)
 
       .def("__len__", &ak::NumpyArray::length)
+      .def("__getitem__", [](ak::NumpyArray& self, int64_t at) -> py::object {
+        return unwrap(self.get(at));
+      })
       .def("__getitem__", [](ak::NumpyArray& self, py::object pyslice) -> py::object {
+        if (py::isinstance<py::slice>(pyslice)) {
+          py::object pystep = pyslice.attr("step");
+          if ((py::isinstance<py::int_>(pystep)  &&  pystep.cast<int64_t>() == 1)  ||  pystep.is(py::none())) {
+            int64_t start = ak::Slice::none();
+            int64_t stop = ak::Slice::none();
+            py::object pystart = pyslice.attr("start");
+            py::object pystop = pyslice.attr("stop");
+            if (!pystart.is(py::none())) {
+              start = pystart.cast<int64_t>();
+            }
+            if (!pystop.is(py::none())) {
+              stop = pystop.cast<int64_t>();
+            }
+            return unwrap(self.slice(start, stop));
+          }
+        }
         return unwrap(self.getitem(toslice(pyslice)));
       })
       .def("__iter__", [](ak::NumpyArray& self) -> ak::Iterator {

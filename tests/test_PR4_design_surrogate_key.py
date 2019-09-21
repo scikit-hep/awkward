@@ -81,13 +81,12 @@ def test_listoffsetarray_setid():
     assert numpy.asarray(jagged.id).tolist() == [[0], [1], [2], [3]]
     assert numpy.asarray(jagged.content.id).tolist() == [[0, 0], [0, 1], [0, 2], [2, 0], [2, 1], [3, 0], [3, 1], [3, 2], [3, 3], [3, 4]]
 
-    # FIXME: id should be propagated through the new getitem
-    # assert numpy.asarray(jagged.content[3:7].id).tolist() == [[2, 0], [2, 1], [3, 0], [3, 1]]
-    # assert numpy.asarray(jagged[0].id).tolist() == [[0, 0], [0, 1], [0, 2]]
-    # assert numpy.asarray(jagged[1].id).tolist() == []
-    # assert numpy.asarray(jagged[2].id).tolist() == [[2, 0], [2, 1]]
-    # assert numpy.asarray(jagged[3].id).tolist() == [[3, 0], [3, 1], [3, 2], [3, 3], [3, 4]]
-    # assert numpy.asarray(jagged[1:3].id).tolist() == [[1], [2]]
+    assert numpy.asarray(jagged.content[3:7].id).tolist() == [[2, 0], [2, 1], [3, 0], [3, 1]]
+    assert numpy.asarray(jagged[0].id).tolist() == [[0, 0], [0, 1], [0, 2]]
+    assert numpy.asarray(jagged[1].id).tolist() == []
+    assert numpy.asarray(jagged[2].id).tolist() == [[2, 0], [2, 1]]
+    assert numpy.asarray(jagged[3].id).tolist() == [[3, 0], [3, 1], [3, 2], [3, 3], [3, 4]]
+    assert numpy.asarray(jagged[1:3].id).tolist() == [[1], [2]]
 
 def test_setid_none():
     offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))

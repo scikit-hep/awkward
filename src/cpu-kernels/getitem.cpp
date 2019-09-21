@@ -69,7 +69,7 @@ template <typename ID, typename T>
 Error awkward_identity_getitem_carry(ID* newidentityptr, const ID* identityptr, const T* carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length) {
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (carryptr[i] >= length) {
-      return "index out of range in identity";
+      return "index out of range for identity";
     }
     for (int64_t j = 0;  j < width;  j++) {
       newidentityptr[width*i + j] = identityptr[offset + width*carryptr[i] + j];
