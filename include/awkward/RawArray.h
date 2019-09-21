@@ -14,6 +14,7 @@
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/getitem.h"
 #include "awkward/util.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
@@ -54,6 +55,8 @@ namespace awkward {
     uint8_t* byteptr() const { return reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset()); }
     ssize_t bytelength() const { return (ssize_t)itemsize_*(ssize_t)length_; }
     uint8_t getbyte(ssize_t at) const { return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)(byteoffset() + at)); }
+    T* borrow() const { return borrow(0); }
+    T* borrow(int64_t at) const { return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)itemsize_*(ssize_t)(offset_ + at)); }
 
     virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid() {
@@ -106,16 +109,62 @@ namespace awkward {
     virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, ptr_, offset_, length_, itemsize_)); }
     virtual const std::shared_ptr<Content> get(int64_t at) const { return slice(at, at + 1); }
     virtual const std::shared_ptr<Content> slice(int64_t start, int64_t stop) const {
+      int64_t regular_start = start;
+      int64_t regular_stop = stop;
+      awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
       std::shared_ptr<Identity> id(nullptr);
       if (id_.get() != nullptr) {
-        id = id_.get()->slice(start, stop);
+        if (regular_stop > id_.get()->length()) {
+          throw std::invalid_argument("index out of range for identity");
+        }
+        id = id_.get()->slice(regular_start, regular_stop);
       }
-      return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + start, stop - start, itemsize_));
+      return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + regular_start, regular_stop - regular_start, itemsize_));
     }
     virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
 
-    T* borrow() const { return borrow(0); }
-    T* borrow(int64_t at) const { return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)itemsize_*(ssize_t)(offset_ + at)); }
+    const std::shared_ptr<Content> getitem(const Slice& where) const {
+      std::shared_ptr<SliceItem> nexthead = where.head();
+      Slice nexttail = where.tail();
+      Index64 nextcarry(1);
+      nextcarry.ptr().get()[0] = 0;
+      Index64 nextadvanced(0);
+      return getitem_next(nexthead, nexttail, nextcarry, nextadvanced);
+    }
+
+    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced) const {
+      if (tail.length() != 0) {
+        throw std::invalid_argument("too many indexes for array");
+      }
+
+      if (head.get() == nullptr) {
+        throw std::runtime_error("null");
+      }
+
+      else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+        return get(at->at());
+      }
+
+      else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+        throw std::runtime_error("range");
+      }
+
+      else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+        throw std::runtime_error("ellipsis");
+      }
+
+      else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+        throw std::runtime_error("newaxis");
+      }
+
+      else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+        throw std::runtime_error("array");
+      }
+
+      else {
+        throw std::runtime_error("unrecognized slice item type");
+      }
+    }
 
   private:
     std::shared_ptr<Identity> id_;

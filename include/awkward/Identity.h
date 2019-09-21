@@ -35,7 +35,7 @@ namespace awkward {
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
     virtual const std::shared_ptr<Identity> slice(int64_t start, int64_t stop) const = 0;
     virtual const std::shared_ptr<Identity> shallow_copy() const = 0;
-    virtual const std::shared_ptr<Identity> getitem_carry_64(Index64& carry) const = 0;
+    virtual const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const = 0;
 
   protected:
     const Ref ref_;
@@ -60,7 +60,7 @@ namespace awkward {
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual const std::shared_ptr<Identity> slice(int64_t start, int64_t stop) const;
     virtual const std::shared_ptr<Identity> shallow_copy() const;
-    virtual const std::shared_ptr<Identity> getitem_carry_64(Index64& carry) const;
+    virtual const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const;
 
     const std::string tostring() const;
     const std::vector<T> get(int64_t at) const;

@@ -20,7 +20,24 @@ void rawarray() {
   assert(*dynamic_cast<RawArrayOf<float>*>(data.slice(1, 3).get())->borrow(1) == 2.2f);
 }
 
-// void slices() {
+void slices() {
+  RawArrayOf<float> data(Identity::none(), 9);
+  *data.borrow(0) = 0.0f;
+  *data.borrow(1) = 1.1f;
+  *data.borrow(2) = 2.2f;
+  *data.borrow(3) = 3.3f;
+  *data.borrow(4) = 4.4f;
+  *data.borrow(5) = 5.5f;
+  *data.borrow(6) = 6.6f;
+  *data.borrow(7) = 7.7f;
+  *data.borrow(8) = 8.8f;
+  *data.borrow(9) = 9.9f;
+
+  Slice at(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceAt(1)) }), true);
+  data.getitem(at);
+
+}
+
 //   Slice slice = Slice().with(SliceAt(1))
 //                        .with(SliceStartStop(1, 3))
 //                        .with(SliceStartStop(Slice::none(), Slice::none()))
@@ -35,5 +52,5 @@ void rawarray() {
 
 int main(int, char**) {
   rawarray();
-  // slices();
+  slices();
 }

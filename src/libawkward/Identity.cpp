@@ -56,7 +56,7 @@ const std::shared_ptr<Identity> IdentityOf<T>::shallow_copy() const {
 }
 
 template <typename T>
-const std::shared_ptr<Identity> IdentityOf<T>::getitem_carry_64(Index64& carry) const {
+const std::shared_ptr<Identity> IdentityOf<T>::getitem_carry_64(const Index64& carry) const {
   IdentityOf<T>* rawout = new IdentityOf<T>(ref_, fieldloc_, width_, carry.length());
   std::shared_ptr<Identity> out(rawout);
 
