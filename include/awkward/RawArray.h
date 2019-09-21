@@ -22,13 +22,13 @@ namespace awkward {
   template <typename T>
   class RawArrayOf: public Content {
   public:
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<T> ptr, const int64_t offset, const int64_t length, const int64_t stride)
+    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<T> ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
         : id_(id)
         , ptr_(ptr)
         , offset_(offset)
         , length_(length)
-        , stride_(stride) {
-          assert(sizeof(T) <= stride);
+        , itemsize_(itemsize) {
+          assert(sizeof(T) == itemsize);
         }
 
     RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<T> ptr, const int64_t length)
@@ -36,24 +36,23 @@ namespace awkward {
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
-        , stride_(sizeof(T)) { }
+        , itemsize_(sizeof(T)) { }
 
     RawArrayOf<T>(const std::shared_ptr<Identity> id, const int64_t length)
         : id_(id)
         , ptr_(std::shared_ptr<T>(new T[(size_t)length], awkward::util::array_deleter<T>()))
         , offset_(0)
         , length_(length)
-        , stride_(sizeof(T)) { }
+        , itemsize_(sizeof(T)) { }
 
     const std::shared_ptr<T> ptr() const { return ptr_; }
     const int64_t offset() const { return offset_; }
-    const int64_t stride() const { return stride_; }
+    const int64_t itemsize() const { return itemsize_; }
 
     bool isempty() const { return length_ == 0; }
-    bool iscompact() const { return sizeof(T) == stride_; }
-    ssize_t byteoffset() const { return (ssize_t)stride_*(ssize_t)offset_; }
-    void* byteptr() const { return reinterpret_cast<void*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset()); }
-    ssize_t bytelength() const { return (ssize_t)stride_*(ssize_t)length_; }
+    ssize_t byteoffset() const { return (ssize_t)itemsize_*(ssize_t)offset_; }
+    uint8_t* byteptr() const { return reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset()); }
+    ssize_t bytelength() const { return (ssize_t)itemsize_*(ssize_t)length_; }
     uint8_t getbyte(ssize_t at) const { return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)(byteoffset() + at)); }
 
     virtual const std::shared_ptr<Identity> id() const { return id_; }
@@ -66,7 +65,7 @@ namespace awkward {
     virtual void setid(const std::shared_ptr<Identity> id) { id_ = id; }
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const {
       std::stringstream out;
-      out << indent << pre << "<RawArray of=\"" << typeid(T).name() << "\" length=\"" << length_ << "\" stride=\"" << stride_ << "\" data=\"";
+      out << indent << pre << "<RawArray of=\"" << typeid(T).name() << "\" length=\"" << length_ << "\" itemsize=\"" << itemsize_ << "\" data=\"";
       ssize_t len = bytelength();
       if (len <= 32) {
         for (ssize_t i = 0;  i < len;  i++) {
@@ -104,25 +103,25 @@ namespace awkward {
       return out.str();
     }
     virtual int64_t length() const { return length_; }
-    virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, ptr_, offset_, length_, stride_)); }
+    virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, ptr_, offset_, length_, itemsize_)); }
     virtual const std::shared_ptr<Content> get(int64_t at) const { return slice(at, at + 1); }
     virtual const std::shared_ptr<Content> slice(int64_t start, int64_t stop) const {
       std::shared_ptr<Identity> id(nullptr);
       if (id_.get() != nullptr) {
         id = id_.get()->slice(start, stop);
       }
-      return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + start, stop - start, stride_));
+      return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + start, stop - start, itemsize_));
     }
     virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
 
-    T* borrow(int64_t at) const { return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)stride_*(ssize_t)(offset_ + at)); }
+    T* borrow(int64_t at) const { return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)itemsize_*(ssize_t)(offset_ + at)); }
 
   private:
     std::shared_ptr<Identity> id_;
     const std::shared_ptr<T> ptr_;
     const int64_t offset_;
     const int64_t length_;
-    const int64_t stride_;
+    const int64_t itemsize_;
   };
 }
 
