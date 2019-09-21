@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/getitem.h"
 #include "awkward/NumpyArray.h"
 
 using namespace awkward;
@@ -350,34 +351,6 @@ const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
   }
 }
 
-void set_range(int64_t& start, int64_t& stop, bool posstep, bool hasstart, bool hasstop, int64_t length) {
-  if (posstep) {
-    if (!hasstart)          start = 0;
-    else if (start < 0)     start += length;
-    if (start < 0)          start = 0;
-    if (start > length)     start = length;
-
-    if (!hasstop)           stop = length;
-    else if (stop < 0)      stop += length;
-    if (stop < 0)           stop = 0;
-    if (stop > length)      stop = length;
-    if (stop < start)       stop = start;
-  }
-
-  else {
-    if (!hasstart)          start = length - 1;
-    else if (start < 0)     start += length;
-    if (start < -1)         start = -1;
-    if (start > length - 1) start = length - 1;
-
-    if (!hasstop)           stop = -1;
-    else if (stop < 0)      stop += length;
-    if (stop < -1)          stop = -1;
-    if (stop > length - 1)  stop = length - 1;
-    if (stop > start)       stop = start;
-  }
-}
-
 const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>& head, const Slice& tail, int64_t length) const {
   if (head.get() == nullptr) {
     return NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
@@ -414,22 +387,22 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
     int64_t start = range->start();
     int64_t stop = range->stop();
     int64_t step = range->step();
-    set_range(start, stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
+    awkward_regularize_rangeslice_64(start, stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
 
     int64_t numer = abs(start - stop);
     int64_t denom = abs(step);
     int64_t d = numer / denom;
     int64_t m = numer % denom;
-    int64_t headlen = d + (m != 0 ? 1 : 0);
+    int64_t lenhead = d + (m != 0 ? 1 : 0);
 
     ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)start)*strides_[1];
     NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
 
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
-    NumpyArray out = next.getitem_bystrides(nexthead, nexttail, length*headlen);
+    NumpyArray out = next.getitem_bystrides(nexthead, nexttail, length*lenhead);
 
-    std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)headlen };
+    std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
     outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
     std::vector<ssize_t> outstrides = { strides_[0], strides_[1]*((ssize_t)step) };
     outstrides.insert(outstrides.end(), out.strides_.begin() + 1, out.strides_.end());
@@ -498,6 +471,62 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
     if (ndim() < 2) {
       throw std::invalid_argument("too many indexes for array");
     }
+
+    int64_t start = range->start();
+    int64_t stop = range->stop();
+    int64_t step = range->step();
+    awkward_regularize_rangeslice_64(start, stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
+
+    int64_t numer = abs(start - stop);
+    int64_t denom = abs(step);
+    int64_t d = numer / denom;
+    int64_t m = numer % denom;
+    int64_t lenhead = d + (m != 0 ? 1 : 0);
+
+    NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+
+    int64_t lencarry = carry.length();
+    int64_t skip = shape_[1];   // because this is contiguous
+    int64_t* carryptr = carry.ptr().get();
+
+    if (advanced.length() == 0) {
+      Index64 nextcarry(lencarry*lenhead);
+      int64_t* nextcarryptr = nextcarry.ptr().get();
+      for (int64_t i = 0;  i < lencarry;  i++) {
+        for (int64_t j = 0;  j < lenhead;  j++) {
+          nextcarryptr[i*lenhead + j] = skip*carryptr[i] + start + j*step;
+        }
+      }
+      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*lenhead, next.strides_[0]);
+      std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
+      outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+      std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
+      outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
+      return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    }
+
+    else {
+      int64_t* advancedptr = advanced.ptr().get();
+      Index64 nextcarry(lencarry*lenhead);
+      int64_t* nextcarryptr = nextcarry.ptr().get();
+      Index64 nextadvanced(lencarry*lenhead);
+      int64_t* nextadvancedptr = nextadvanced.ptr().get();
+      for (int64_t i = 0;  i < lencarry;  i++) {
+        for (int64_t j = 0;  j < lenhead;  j++) {
+          nextcarryptr[i*lenhead + j] = skip*carryptr[i] + start + j*step;
+          nextadvancedptr[i*lenhead + j] = advancedptr[i];
+        }
+      }
+      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenhead, next.strides_[0]);
+      std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
+      outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+      std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
+      outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
+      return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    }
+
     throw std::runtime_error("getitem_next range");
   }
 
@@ -523,7 +552,7 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
     int64_t lencarry = carry.length();
     int64_t lenflathead = flathead.length();
     int64_t* flatheadptr = flathead.ptr().get();
-    int64_t skip = shape_[1];
+    int64_t skip = shape_[1];   // because this is contiguous
     for (int64_t i = 0;  i < lenflathead;  i++) {
       if (flatheadptr[i] < 0) {
         flatheadptr[i] += skip;

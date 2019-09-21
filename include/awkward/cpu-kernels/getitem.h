@@ -6,6 +6,8 @@
 #include "awkward/cpu-kernels/util.h"
 
 extern "C" {
+  void awkward_regularize_rangeslice_64(int64_t& start, int64_t& stop, bool posstep, bool hasstart, bool hasstop, int64_t length);
+
   Error awkward_getitem();
 }
 

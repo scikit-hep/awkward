@@ -218,14 +218,14 @@ class NumpyArray:
                     stop = -1
 
             d, m = divmod(abs(start - stop), abs(step))
-            headlen = d + (1 if m != 0 else 0)
+            lenhead = d + (1 if m != 0 else 0)
 
             nextbyteoffset = self.byteoffset + start*self.strides[1]
             next = self.copy(shape=flatten_shape(self.shape), strides=flatten_strides(self.strides), byteoffset=nextbyteoffset)
             nexthead, nexttail = head_tail(tail)
 
-            out = next.getitem_bystrides(nexthead, nexttail, length*headlen)
-            shape = (length, headlen) + out.shape[1:]
+            out = next.getitem_bystrides(nexthead, nexttail, length*lenhead)
+            shape = (length, lenhead) + out.shape[1:]
             strides = (self.strides[0], self.strides[1] * step) + out.strides[1:]
 
             return out.copy(shape=shape, strides=strides)
@@ -300,10 +300,10 @@ class NumpyArray:
                     stop = -1
 
             d, m = divmod(abs(start - stop), abs(step))
-            headlen = d + (1 if m != 0 else 0)
+            lenhead = d + (1 if m != 0 else 0)
 
             nexthead, nexttail = head_tail(tail)
-            nextcarry = numpy.full(len(carry)*headlen, 999, dtype=int)
+            nextcarry = numpy.full(len(carry)*lenhead, 999, dtype=int)
 
             skip, remainder = divmod(self.strides[0], self.strides[1])
             assert skip == self.shape[1]
@@ -312,19 +312,19 @@ class NumpyArray:
             if advanced is None:
                 nextadvanced = None
                 for i in range(len(carry)):
-                    for j in range(headlen):
-                        nextcarry[i*headlen + j] = skip*carry[i] + start + j*step
+                    for j in range(lenhead):
+                        nextcarry[i*lenhead + j] = skip*carry[i] + start + j*step
 
             else:
-                nextadvanced = numpy.full(len(carry)*headlen, 999, dtype=int)
+                nextadvanced = numpy.full(len(carry)*lenhead, 999, dtype=int)
                 for i in range(len(carry)):
-                    for j in range(headlen):
-                        nextcarry[i*headlen + j] = skip*carry[i] + start + j*step
-                        nextadvanced[i*headlen + j] = advanced[i]
+                    for j in range(lenhead):
+                        nextcarry[i*lenhead + j] = skip*carry[i] + start + j*step
+                        nextadvanced[i*lenhead + j] = advanced[i]
 
-            out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*headlen, next.strides[0])
-            shape = (length, headlen) + out.shape[1:]
-            strides = (shape[1]*out.strides[0],) + out.strides    # FIXME: this 'shape[1]' could be 'headlen'
+            out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenhead, next.strides[0])
+            shape = (length, lenhead) + out.shape[1:]
+            strides = (shape[1]*out.strides[0],) + out.strides    # FIXME: this 'shape[1]' could be 'lenhead'
             return out.copy(shape=shape, strides=strides)
 
         elif isinstance(head, numpy.ndarray) and issubclass(head.dtype.type, numpy.integer):
