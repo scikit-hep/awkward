@@ -130,3 +130,12 @@ def test_numpyarray_getitem_next():
     b = awkward1.layout.NumpyArray(a)
     c = numpy.array([7, 3, 3, 5])
     assert awkward1.tolist(b[c]) == awkward1.tolist(a[c])
+
+    a = numpy.arange(7*5).reshape(7, 5)
+    b = awkward1.layout.NumpyArray(a)
+    c1 = numpy.array([4, 1, 1, 3])
+    c2 = numpy.array([2, 2, 0, 1])
+    assert awkward1.tolist(b[c1, c2]) == awkward1.tolist(a[c1, c2])
+    c1 = numpy.array([[4, 1], [1, 3], [0, 4]])
+    c2 = numpy.array([[2, 2], [0, 1], [1, 3]])
+    assert awkward1.tolist(b[c1, c2]) == awkward1.tolist(a[c1, c2])

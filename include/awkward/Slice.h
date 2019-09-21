@@ -69,6 +69,7 @@ namespace awkward {
       assert(shape_.size() == strides_.size());
     }
     const IndexOf<T> index() const { return index_; }
+    const int64_t length() const { return shape_[0]; }
     const std::vector<int64_t> shape() const { return shape_; }
     const std::vector<int64_t> strides() const { return strides_; }
     int64_t ndim() const { return (int64_t)shape_.size(); }

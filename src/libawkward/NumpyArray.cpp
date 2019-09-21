@@ -566,7 +566,21 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
     }
 
     else {
-      throw std::runtime_error("FIXME");
+      Index64 nextcarry(lencarry);
+      Index64 nextadvanced(lencarry);
+      int64_t* carryptr = carry.ptr().get();
+      int64_t* advancedptr = advanced.ptr().get();
+      int64_t* nextcarryptr = nextcarry.ptr().get();
+      for (int64_t i = 0;  i < lencarry;  i++) {
+        nextcarryptr[i] = skip*carryptr[i] + flatheadptr[advancedptr[i]];
+      }
+
+      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*array->length(), next.strides_[0]);
+
+      std::vector<ssize_t> outshape = { (ssize_t)length };
+      outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+
+      return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
     }
   }
 
