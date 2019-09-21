@@ -51,8 +51,7 @@ void NumpyArray::setid() {
   assert(!isscalar());
   Identity32* id32 = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
   std::shared_ptr<Identity> newid(id32);
-  Error err = awkward_identity_new32(length(), id32->ptr().get());
-  HANDLE_ERROR(err);
+  awkward_identity_new32(length(), id32->ptr().get());
   setid(newid);
 }
 
@@ -299,7 +298,7 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
 const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
   assert(!isscalar());
 
-  if (!where.isadvanced()) {
+  if (!where.isadvanced()  &&  id_.get() == nullptr) {
     std::vector<ssize_t> nextshape = { 1 };
     nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
     std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };
@@ -362,7 +361,7 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
 
     std::vector<ssize_t> outshape = { (ssize_t)length };
     outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-    return NumpyArray(id_, ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+    return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
   }
 
   else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
@@ -392,7 +391,7 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
     outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
     std::vector<ssize_t> outstrides = { strides_[0], strides_[1]*((ssize_t)step) };
     outstrides.insert(outstrides.end(), out.strides_.begin() + 1, out.strides_.end());
-    return NumpyArray(id_, ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
   }
 
   else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
@@ -444,11 +443,16 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
       byteoffset_,
       carry.ptr().get());
 
+    std::shared_ptr<Identity> id(nullptr);
+    if (id_.get() != nullptr) {
+      id = id_.get()->getitem_carry_64(carry);
+    }
+
     std::vector<ssize_t> shape = { (ssize_t)carry.length() };
     shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
     std::vector<ssize_t> strides = { (ssize_t)stride };
     strides.insert(strides.end(), strides_.begin() + 1, strides_.end());
-    return NumpyArray(id_, ptr, shape, strides, 0, itemsize_, format_);
+    return NumpyArray(id, ptr, shape, strides, 0, itemsize_, format_);
   }
 
   else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {

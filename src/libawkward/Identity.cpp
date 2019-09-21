@@ -5,7 +5,8 @@
 #include <iomanip>
 #include <sstream>
 #include <type_traits>
-// #include <utility>
+
+#include "awkward/cpu-kernels/getitem.h"
 
 #include "awkward/Identity.h"
 
@@ -52,6 +53,40 @@ const std::shared_ptr<Identity> IdentityOf<T>::slice(int64_t start, int64_t stop
 template <typename T>
 const std::shared_ptr<Identity> IdentityOf<T>::shallow_copy() const {
   return std::shared_ptr<Identity>(new IdentityOf<T>(ref(), fieldloc(), offset(), width(), length(), ptr_));
+}
+
+template <typename T>
+const std::shared_ptr<Identity> IdentityOf<T>::getitem_carry_64(Index64& carry) const {
+  IdentityOf<T>* rawout = new IdentityOf<T>(ref_, fieldloc_, width_, carry.length());
+  std::shared_ptr<Identity> out(rawout);
+
+  Error assign_err = kNoError;
+  if (std::is_same<T, int32_t>::value) {
+    assign_err = awkward_identity32_getitem_carry_64(
+      reinterpret_cast<int32_t*>(rawout->ptr().get()),
+      reinterpret_cast<int32_t*>(ptr_.get()),
+      carry.ptr().get(),
+      carry.length(),
+      offset_,
+      width_,
+      length_);
+  }
+  else if (std::is_same<T, int64_t>::value) {
+    assign_err = awkward_identity64_getitem_carry_64(
+      reinterpret_cast<int64_t*>(rawout->ptr().get()),
+      reinterpret_cast<int64_t*>(ptr_.get()),
+      carry.ptr().get(),
+      carry.length(),
+      offset_,
+      width_,
+      length_);
+  }
+  else {
+    throw std::runtime_error("unrecognized identity");
+  }
+  HANDLE_ERROR(assign_err)
+
+  return out;
 }
 
 template <typename T>
