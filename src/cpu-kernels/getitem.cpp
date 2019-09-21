@@ -65,6 +65,25 @@ void awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_t
   awkward_slicearray_ravel<int64_t>(toptr, fromptr, ndim, shape, strides);
 }
 
+template <typename ID, typename T>
+Error awkward_identity_getitem_carry(ID* newidentityptr, const ID* identityptr, const T* carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    if (carryptr[i] >= length) {
+      return "index out of range for identity";
+    }
+    for (int64_t j = 0;  j < width;  j++) {
+      newidentityptr[width*i + j] = identityptr[offset + width*carryptr[i] + j];
+    }
+  }
+  return kNoError;
+}
+Error awkward_identity32_getitem_carry_64(int32_t* newidentityptr, const int32_t* identityptr, const int64_t* carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length) {
+  return awkward_identity_getitem_carry<int32_t, int64_t>(newidentityptr, identityptr, carryptr, lencarry, offset, width, length);
+}
+Error awkward_identity64_getitem_carry_64(int64_t* newidentityptr, const int64_t* identityptr, const int64_t* carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length) {
+  return awkward_identity_getitem_carry<int64_t, int64_t>(newidentityptr, identityptr, carryptr, lencarry, offset, width, length);
+}
+
 template <typename T>
 void awkward_numpyarray_contiguous_init(T* toptr, int64_t skip, int64_t stride) {
   for (int64_t i = 0;  i < skip;  i++) {
@@ -105,6 +124,16 @@ void awkward_numpyarray_getitem_next_null(uint8_t* toptr, const uint8_t* fromptr
 }
 void awkward_numpyarray_getitem_next_null_64(uint8_t* toptr, const uint8_t* fromptr, int64_t len, int64_t stride, int64_t offset, const int64_t* pos) {
   awkward_numpyarray_getitem_next_null(toptr, fromptr, len, stride, offset, pos);
+}
+
+template <typename T>
+void awkward_numpyarray_getitem_next_at(T* nextcarryptr, const T* carryptr, int64_t lencarry, int64_t skip, int64_t at) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    nextcarryptr[i] = skip*carryptr[i] + at;
+  }
+}
+void awkward_numpyarray_getitem_next_at_64(int64_t* nextcarryptr, const int64_t* carryptr, int64_t lencarry, int64_t skip, int64_t at) {
+  awkward_numpyarray_getitem_next_at(nextcarryptr, carryptr, lencarry, skip, at);
 }
 
 template <typename T>

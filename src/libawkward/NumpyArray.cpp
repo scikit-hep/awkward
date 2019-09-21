@@ -51,8 +51,7 @@ void NumpyArray::setid() {
   assert(!isscalar());
   Identity32* id32 = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
   std::shared_ptr<Identity> newid(id32);
-  Error err = awkward_identity_new32(length(), id32->ptr().get());
-  HANDLE_ERROR(err);
+  awkward_identity_new32(length(), id32->ptr().get());
   setid(newid);
 }
 
@@ -178,23 +177,46 @@ const std::shared_ptr<Content> NumpyArray::shallow_copy() const {
 }
 
 const std::shared_ptr<Content> NumpyArray::get(int64_t at) const {
-  return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceAt(at)) }), true));
+  assert(!isscalar());
+  // return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceAt(at)) }), true));
+  int64_t regular_at = at;
+  if (regular_at < 0) {
+    regular_at += shape_[0];
+  }
+  if (regular_at < 0  ||  regular_at >= shape_[0]) {
+    throw std::invalid_argument("index out of range");
+  }
+  ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)regular_at);
+  const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+  const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+  std::shared_ptr<Identity> id;
+  if (id_.get() != nullptr) {
+    if (regular_at >= id_.get()->length()) {
+      throw std::invalid_argument("index out of range for identity");
+    }
+    id = id_.get()->slice(regular_at, regular_at + 1);
+  }
+  return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset, itemsize_, format_));
 }
 
 const std::shared_ptr<Content> NumpyArray::slice(int64_t start, int64_t stop) const {
-  return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceRange(start, stop, 1)) }), true));
-
-  // FIXME: id should be propagated through the new getitem
-  // assert(!isscalar());
-  // ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
-  // std::vector<ssize_t> shape;
-  // shape.push_back((ssize_t)(stop - start));
-  // shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-  // std::shared_ptr<Identity> id(nullptr);
-  // if (id_.get() != nullptr) {
-  //   id = id_.get()->slice(start, stop);
-  // }
-  // return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
+  assert(!isscalar());
+  // return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceRange(start, stop, 1)) }), true));
+  int64_t regular_start = start;
+  int64_t regular_stop = stop;
+  awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), shape_[0]);
+  ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)regular_start);
+  std::vector<ssize_t> shape;
+  shape.push_back((ssize_t)(regular_stop - regular_start));
+  shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+  std::shared_ptr<Identity> id;
+  if (id_.get() != nullptr) {
+    if (regular_stop > id_.get()->length()) {
+      throw std::invalid_argument("index out of range for identity");
+    }
+    id = id_.get()->slice(regular_start, regular_stop);
+  }
+  return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
 }
 
 const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
@@ -299,7 +321,7 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
 const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
   assert(!isscalar());
 
-  if (!where.isadvanced()) {
+  if (!where.isadvanced()  &&  id_.get() == nullptr) {
     std::vector<ssize_t> nextshape = { 1 };
     nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
     std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };
@@ -342,7 +364,7 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
     return NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
 
-  if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+  else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
     if (ndim() < 2) {
       throw std::invalid_argument("too many indexes for array");
     }
@@ -362,7 +384,7 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
 
     std::vector<ssize_t> outshape = { (ssize_t)length };
     outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-    return NumpyArray(id_, ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+    return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
   }
 
   else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
@@ -392,7 +414,7 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
     outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
     std::vector<ssize_t> outstrides = { strides_[0], strides_[1]*((ssize_t)step) };
     outstrides.insert(outstrides.end(), out.strides_.begin() + 1, out.strides_.end());
-    return NumpyArray(id_, ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
   }
 
   else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
@@ -444,14 +466,46 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
       byteoffset_,
       carry.ptr().get());
 
+    std::shared_ptr<Identity> id(nullptr);
+    if (id_.get() != nullptr) {
+      id = id_.get()->getitem_carry_64(carry);
+    }
+
     std::vector<ssize_t> shape = { (ssize_t)carry.length() };
     shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
     std::vector<ssize_t> strides = { (ssize_t)stride };
     strides.insert(strides.end(), strides_.begin() + 1, strides_.end());
-    return NumpyArray(id_, ptr, shape, strides, 0, itemsize_, format_);
+    return NumpyArray(id, ptr, shape, strides, 0, itemsize_, format_);
   }
 
-  if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+  else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+    if (ndim() < 2) {
+      throw std::invalid_argument("too many indexes for array");
+    }
+
+    NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+
+    // if we had any array slices, this int would become an array
+    assert(advanced.length() == 0);
+
+    Index64 nextcarry(carry.length());
+    awkward_numpyarray_getitem_next_at_64(
+      nextcarry.ptr().get(),
+      carry.ptr().get(),
+      carry.length(),
+      shape_[1],   // because this is contiguous
+      at->at());
+
+    NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length, next.strides_[0]);
+
+    std::vector<ssize_t> outshape = { (ssize_t)length };
+    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+  }
+
+  else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
     if (ndim() < 2) {
       throw std::invalid_argument("too many indexes for array");
     }

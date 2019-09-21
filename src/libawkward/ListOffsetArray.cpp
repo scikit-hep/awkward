@@ -14,8 +14,7 @@ template <typename T>
 void ListOffsetArrayOf<T>::setid() {
   Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
   std::shared_ptr<Identity> newid(rawid);
-  Error err = awkward_identity_new32(length(), rawid->ptr().get());
-  HANDLE_ERROR(err);
+  awkward_identity_new32(length(), rawid->ptr().get());
   setid(newid);
 }
 
@@ -30,8 +29,7 @@ void ListOffsetArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
     if (rawid32  &&  std::is_same<T, int32_t>::value) {
       Identity32* rawsubid = new Identity32(Identity::newref(), rawid32->fieldloc(), rawid32->width() + 1, content_.get()->length());
       std::shared_ptr<Identity> newsubid(rawsubid);
-      Error err = awkward_identity_from_listfoffsets32(length(), rawid32->width(), reinterpret_cast<int32_t*>(offsets_.ptr().get()), rawid32->ptr().get(), content_.get()->length(), rawsubid->ptr().get());
-      HANDLE_ERROR(err);
+      awkward_identity_from_listfoffsets32(length(), rawid32->width(), reinterpret_cast<int32_t*>(offsets_.ptr().get()), rawid32->ptr().get(), content_.get()->length(), rawsubid->ptr().get());
       content_.get()->setid(newsubid);
     }
     else {

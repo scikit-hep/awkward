@@ -60,8 +60,7 @@ namespace awkward {
     virtual void setid() {
       Identity32* id32 = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
       std::shared_ptr<Identity> newid(id32);
-      Error err = awkward_identity_new32(length(), id32->ptr().get());
-      HANDLE_ERROR(err);
+      awkward_identity_new32(length(), id32->ptr().get());
       setid(newid);
     }
     virtual void setid(const std::shared_ptr<Identity> id) { id_ = id; }
