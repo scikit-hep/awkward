@@ -1,9 +1,9 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include "awkward/cpu-kernels/getitem.h"
+#include <cstring>
 
-template <typename T>
-void awkward_regularize_rangeslice(T& start, T& stop, bool posstep, bool hasstart, bool hasstop, T length) {
+void awkward_regularize_rangeslice(int64_t& start, int64_t& stop, bool posstep, bool hasstart, bool hasstop, int64_t length) {
   if (posstep) {
     if (!hasstart)          start = 0;
     else if (start < 0)     start += length;
@@ -31,12 +31,8 @@ void awkward_regularize_rangeslice(T& start, T& stop, bool posstep, bool hasstar
   }
 }
 
-void awkward_regularize_rangeslice_64(int64_t& start, int64_t& stop, bool posstep, bool hasstart, bool hasstop, int64_t length) {
-  awkward_regularize_rangeslice<int64_t>(start, stop, posstep, hasstart, hasstop, length);
-}
-
 template <typename T>
-void awkward_slicearray_ravel(T* toptr, const T* fromptr, T ndim, const T* shape, const T* strides) {
+void awkward_slicearray_ravel(T* toptr, const T* fromptr, int64_t ndim, const int64_t* shape, const int64_t* strides) {
   if (ndim == 1) {
     for (T i = 0;  i < shape[0];  i++) {
       toptr[i] = fromptr[i*strides[0]];
@@ -48,9 +44,28 @@ void awkward_slicearray_ravel(T* toptr, const T* fromptr, T ndim, const T* shape
     }
   }
 }
-
 void awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_t ndim, const int64_t* shape, const int64_t* strides) {
   awkward_slicearray_ravel<int64_t>(toptr, fromptr, ndim, shape, strides);
+}
+
+template <typename T>
+void awkward_numpyarray_contiguous_init(T* toptr, int64_t skip, int64_t stride) {
+  for (int64_t i = 0;  i < skip;  i++) {
+    toptr[i] = i*stride;
+  }
+}
+void awkward_numpyarray_contiguous_init_64(int64_t* toptr, int64_t skip, int64_t stride) {
+  awkward_numpyarray_contiguous_init<int64_t>(toptr, skip, stride);
+}
+
+template <typename T>
+void awkward_numpyarray_contiguous_next(uint8_t* toptr, const uint8_t* fromptr, int64_t len, int64_t stride, int64_t offset, const T* pos) {
+  for (int64_t i = 0;  i < len;  i++) {
+    memcpy(&toptr[i*stride], &fromptr[offset + (int64_t)pos[i]], (size_t)stride);
+  }
+}
+void awkward_numpyarray_contiguous_next_64(uint8_t* toptr, const uint8_t* fromptr, int64_t len, int64_t stride, int64_t offset, const int64_t* pos) {
+  awkward_numpyarray_contiguous_next<int64_t>(toptr, fromptr, len, stride, offset, pos);
 }
 
 Error awkward_getitem() {

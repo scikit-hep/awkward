@@ -6,14 +6,17 @@
 #ifdef _MSC_VER
   #ifdef _WIN64
     typedef signed   __int64 ssize_t;
+    typedef unsigned __int64 size_t;
   #else
     typedef signed   int     ssize_t;
+    typedef unsigned int     size_t;
   #endif
   typedef   unsigned char    uint8_t;
   typedef   signed   char    int8_t;
   typedef   signed   int     int32_t;
   typedef   signed   __int64 int64_t;
 #else
+  #include <cstddef>
   #include <cstdint>
 #endif
 
