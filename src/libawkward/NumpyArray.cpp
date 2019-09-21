@@ -439,7 +439,7 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
     outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
     std::vector<ssize_t> outstrides = { out.strides_[0] };
     outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
-    return NumpyArray(id_, ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
   }
 
   else {
@@ -526,16 +526,39 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
       outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
       return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
-
-    throw std::runtime_error("getitem_next range");
   }
 
   else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
-    throw std::runtime_error("getitem_next ellipsis");
+    std::pair<int64_t, int64_t> minmax = minmax_depth();
+    assert(minmax.first == minmax.second);
+    int64_t mindepth = minmax.first;
+
+    if (tail.length() == 0  ||  mindepth - 1 == tail.dimlength()) {
+      std::shared_ptr<SliceItem> nexthead = tail.head();
+      Slice nexttail = tail.tail();
+      return getitem_next(nexthead, nexttail, carry, advanced, length, stride);
+    }
+    else {
+      std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
+      std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
+      items.insert(items.end(), tailitems.begin(), tailitems.end());
+
+      std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
+      Slice nexttail(items, true);
+      return getitem_next(nexthead, nexttail, carry, advanced, length, stride);
+    }
   }
 
   else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
-    throw std::runtime_error("getitem_next newaxis");
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    NumpyArray out = getitem_next(nexthead, nexttail, carry, advanced, length, stride);
+
+    std::vector<ssize_t> outshape = { (ssize_t)length, 1 };
+    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    std::vector<ssize_t> outstrides = { out.strides_[0] };
+    outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
+    return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
   }
 
   else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {

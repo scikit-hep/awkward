@@ -144,9 +144,6 @@ int64_t Slice::dimlength() const {
     else if (dynamic_cast<SliceArray64*>(x.get()) != nullptr) {
       out += 1;
     }
-    else {
-      throw std::runtime_error("unrecognized slice item type");
-    }
   }
   return out;
 }
