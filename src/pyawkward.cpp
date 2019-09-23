@@ -167,6 +167,21 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
 /////////////////////////////////////////////////////////////// Identity
 
 template <typename T>
+py::object getid(T& self) {
+  return box(self.id());
+}
+
+template <typename T>
+void setid(T& self, py::object id) {
+  self.setid(unbox_id(id));
+}
+
+template <typename T>
+void setid_noarg(T& self) {
+  self.setid();
+}
+
+template <typename T>
 py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
   return py::class_<ak::IdentityOf<T>>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](ak::IdentityOf<T>& self) -> py::buffer_info {
@@ -376,6 +391,33 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
   ;
 }
 
+/////////////////////////////////////////////////////////////// Content
+
+template <typename T>
+py::object getitem(T& self, py::object pyslice) {
+  if (py::isinstance<py::int_>(pyslice)) {
+    return box(self.get(pyslice.cast<int64_t>()));
+  }
+  if (py::isinstance<py::slice>(pyslice)) {
+    py::object pystep = pyslice.attr("step");
+    if ((py::isinstance<py::int_>(pystep)  &&  pystep.cast<int64_t>() == 1)  ||  pystep.is(py::none())) {
+      int64_t start = ak::Slice::none();
+      int64_t stop = ak::Slice::none();
+      py::object pystart = pyslice.attr("start");
+      py::object pystop = pyslice.attr("stop");
+      if (!pystart.is(py::none())) {
+        start = pystart.cast<int64_t>();
+      }
+      if (!pystop.is(py::none())) {
+        stop = pystop.cast<int64_t>();
+      }
+      return box(self.slice(start, stop));
+    }
+    // NOTE: control flow can pass through here; don't make the last line an 'else'!
+  }
+  return box(self.getitem(toslice(pyslice)));
+}
+
 /////////////////////////////////////////////////////////////// NumpyArray
 
 py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
@@ -431,28 +473,7 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
       .def("become_contiguous", &ak::NumpyArray::become_contiguous)
 
       .def("__len__", &ak::NumpyArray::length)
-      .def("__getitem__", [](ak::NumpyArray& self, int64_t at) -> py::object {
-        return box(self.get(at));
-      })
-      .def("__getitem__", [](ak::NumpyArray& self, py::object pyslice) -> py::object {
-        if (py::isinstance<py::slice>(pyslice)) {
-          py::object pystep = pyslice.attr("step");
-          if ((py::isinstance<py::int_>(pystep)  &&  pystep.cast<int64_t>() == 1)  ||  pystep.is(py::none())) {
-            int64_t start = ak::Slice::none();
-            int64_t stop = ak::Slice::none();
-            py::object pystart = pyslice.attr("start");
-            py::object pystop = pyslice.attr("stop");
-            if (!pystart.is(py::none())) {
-              start = pystart.cast<int64_t>();
-            }
-            if (!pystop.is(py::none())) {
-              stop = pystop.cast<int64_t>();
-            }
-            return box(self.slice(start, stop));
-          }
-        }
-        return box(self.getitem(toslice(pyslice)));
-      })
+      .def("__getitem__", &getitem<ak::NumpyArray>)
       .def("__iter__", [](ak::NumpyArray& self) -> ak::Iterator {
         return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(self)));
       })
@@ -492,13 +513,10 @@ py::class_<ak::ListOffsetArrayOf<T>> make_ListOffsetArrayOf(py::handle m, std::s
         return box(self.content());
       })
 
-      .def_property("id", [](ak::ListOffsetArrayOf<T>& self) -> py::object { return box(self.id()); }, [](ak::ListOffsetArrayOf<T>& self, py::object id) -> void { self.setid(unbox_id(id)); })
-      .def("setid", [](ak::ListOffsetArrayOf<T>& self, py::object id) -> void {
-        self.setid(unbox_id(id));
-      })
-      .def("setid", [](ak::ListOffsetArrayOf<T>& self) -> void {
-        self.setid();
-      })
+      .def_property("id", &getid<ak::ListOffsetArrayOf<T>>, &setid<ak::ListOffsetArrayOf<T>>)
+      .def("setid", &setid<ak::ListOffsetArrayOf<T>>)
+      .def("setid", &setid_noarg<ak::ListOffsetArrayOf<T>>)
+
       .def("__repr__", [](ak::ListOffsetArrayOf<T>& self) -> const std::string {
         return self.tostring();
       })

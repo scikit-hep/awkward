@@ -230,6 +230,47 @@ const std::shared_ptr<Content> NumpyArray::slice(int64_t start, int64_t stop) co
   return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
 }
 
+const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
+  assert(!isscalar());
+
+  if (!where.isadvanced()  &&  id_.get() == nullptr) {
+    std::vector<ssize_t> nextshape = { 1 };
+    nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
+    std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };
+    nextstrides.insert(nextstrides.end(), strides_.begin(), strides_.end());
+    NumpyArray next(id_, ptr_, nextshape, nextstrides, byteoffset_, itemsize_, format_);
+
+    std::shared_ptr<SliceItem> nexthead = where.head();
+    Slice nexttail = where.tail();
+    NumpyArray out = next.getitem_bystrides(nexthead, nexttail, 1);
+
+    std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
+    std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
+    return std::shared_ptr<Content>(new NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_));
+  }
+
+  else {
+    NumpyArray safe = contiguous();   // maybe become_contiguous() to change in-place?
+
+    std::vector<ssize_t> nextshape = { 1 };
+    nextshape.insert(nextshape.end(), safe.shape_.begin(), safe.shape_.end());
+    std::vector<ssize_t> nextstrides = { safe.shape_[0]*safe.strides_[0] };
+    nextstrides.insert(nextstrides.end(), safe.strides_.begin(), safe.strides_.end());
+    NumpyArray next(safe.id_, safe.ptr_, nextshape, nextstrides, safe.byteoffset_, itemsize_, format_);
+
+    std::shared_ptr<SliceItem> nexthead = where.head();
+    Slice nexttail = where.tail();
+    Index64 nextcarry(1);
+    nextcarry.ptr().get()[0] = 0;
+    Index64 nextadvanced(0);
+    NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, 1, next.strides_[0]);
+
+    std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
+    std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
+    return std::shared_ptr<Content>(new NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_));
+  }
+}
+
 const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
   return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
 }
@@ -326,47 +367,6 @@ const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
     std::vector<ssize_t> outstrides = { shape_[1]*out.strides_[0] };
     outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
     return NumpyArray(out.id_, out.ptr_, shape_, outstrides, out.byteoffset_, itemsize_, format_);
-  }
-}
-
-const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
-  assert(!isscalar());
-
-  if (!where.isadvanced()  &&  id_.get() == nullptr) {
-    std::vector<ssize_t> nextshape = { 1 };
-    nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
-    std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };
-    nextstrides.insert(nextstrides.end(), strides_.begin(), strides_.end());
-    NumpyArray next(id_, ptr_, nextshape, nextstrides, byteoffset_, itemsize_, format_);
-
-    std::shared_ptr<SliceItem> nexthead = where.head();
-    Slice nexttail = where.tail();
-    NumpyArray out = next.getitem_bystrides(nexthead, nexttail, 1);
-
-    std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
-    std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
-    return std::shared_ptr<Content>(new NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_));
-  }
-
-  else {
-    NumpyArray safe = contiguous();   // maybe become_contiguous() to change in-place?
-
-    std::vector<ssize_t> nextshape = { 1 };
-    nextshape.insert(nextshape.end(), safe.shape_.begin(), safe.shape_.end());
-    std::vector<ssize_t> nextstrides = { safe.shape_[0]*safe.strides_[0] };
-    nextstrides.insert(nextstrides.end(), safe.strides_.begin(), safe.strides_.end());
-    NumpyArray next(safe.id_, safe.ptr_, nextshape, nextstrides, safe.byteoffset_, itemsize_, format_);
-
-    std::shared_ptr<SliceItem> nexthead = where.head();
-    Slice nexttail = where.tail();
-    Index64 nextcarry(1);
-    nextcarry.ptr().get()[0] = 0;
-    Index64 nextadvanced(0);
-    NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, 1, next.strides_[0]);
-
-    std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
-    std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
-    return std::shared_ptr<Content>(new NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_));
   }
 }
 

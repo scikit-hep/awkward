@@ -89,6 +89,11 @@ const std::shared_ptr<Content> ListArrayOf<T>::slice(int64_t start, int64_t stop
 }
 
 template <typename T>
+const std::shared_ptr<Content> ListArrayOf<T>::getitem(const Slice& where) const {
+  throw std::runtime_error("FIXME");
+}
+
+template <typename T>
 const std::pair<int64_t, int64_t> ListArrayOf<T>::minmax_depth() const {
   std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
   return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);

@@ -5,6 +5,7 @@
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Identity.h"
+#include "awkward/Slice.h"
 
 namespace awkward {
   class Content {
@@ -17,10 +18,22 @@ namespace awkward {
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
     virtual const std::shared_ptr<Content> get(int64_t at) const = 0;
     virtual const std::shared_ptr<Content> slice(int64_t start, int64_t stop) const = 0;
+    virtual const std::shared_ptr<Content> getitem(const Slice& slice) const = 0;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const = 0;
 
     const std::string tostring() const;
   };
+
+  class NumpyArray;
+
+  template <typename T>
+  class RawArray;
+
+  template <typename T>
+  class ListArrayOf;
+
+  template <typename T>
+  class ListOffsetArrayOf;
 }
 
 #endif // AWKWARD_CONTENT_H_

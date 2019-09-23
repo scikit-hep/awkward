@@ -105,6 +105,11 @@ const std::shared_ptr<Content> ListOffsetArrayOf<T>::slice(int64_t start, int64_
 }
 
 template <typename T>
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem(const Slice& where) const {
+  throw std::runtime_error("FIXME");
+}
+
+template <typename T>
 const std::pair<int64_t, int64_t> ListOffsetArrayOf<T>::minmax_depth() const {
   std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
   return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);
