@@ -79,7 +79,7 @@ py::object box(std::shared_ptr<ak::Identity> id) {
   }
 }
 
-std::shared_ptr<ak::Content> unbox(py::object obj) {
+std::shared_ptr<ak::Content> unbox_content(py::object obj) {
   try {
     return obj.cast<ak::NumpyArray*>()->shallow_copy();
   }
@@ -362,20 +362,8 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
   };
 
   return py::class_<ak::Iterator>(m, name.c_str())
-      .def(py::init([](ak::NumpyArray& content) -> ak::Iterator {
-        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(content)));
-      }))
-      .def(py::init([](ak::ListArrayOf<int32_t>& content) -> ak::Iterator {
-        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListArrayOf<int32_t>(content)));
-      }))
-      .def(py::init([](ak::ListArrayOf<int64_t>& content) -> ak::Iterator {
-        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListArrayOf<int64_t>(content)));
-      }))
-      .def(py::init([](ak::ListOffsetArrayOf<int32_t>& content) -> ak::Iterator {
-        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArrayOf<int32_t>(content)));
-      }))
-      .def(py::init([](ak::ListOffsetArrayOf<int64_t>& content) -> ak::Iterator {
-        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArrayOf<int64_t>(content)));
+      .def(py::init([](py::object content) -> ak::Iterator {
+        return ak::Iterator(unbox_content(content));
       }))
 
       .def("__next__", next)
@@ -474,18 +462,11 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
 
 /////////////////////////////////////////////////////////////// ListArray
 
-// template <typename T, typename CONTENT, typename IDENTITY>
-// ak::ListArrayOf<T> init_ListArrayOf(ak::IndexOf<T>& starts, ak::IndexOf<T>& stops, CONTENT& content, py::object id) {
-//   ak::ListArrayOf<T> out = ak::ListArrayOf<T>(std::shared_ptr<ak::Identity>(nullptr), starts, stops, std::shared_ptr<ak::Content>(content.shallow_copy()));
-//   setid(out, id);
-//   return out;
-// }
-
 template <typename T>
 py::class_<ak::ListArrayOf<T>> make_ListArrayOf(py::handle m, std::string name) {
   return py::class_<ak::ListArrayOf<T>>(m, name.c_str())
       .def(py::init([](ak::IndexOf<T>& starts, ak::IndexOf<T>& stops, py::object content, py::object id) -> ak::ListArrayOf<T> {
-        return ak::ListArrayOf<T>(unbox_id(id), starts, stops, unbox(content));
+        return ak::ListArrayOf<T>(unbox_id(id), starts, stops, unbox_content(content));
       }), py::arg("starts"), py::arg("stops"), py::arg("content"), py::arg("id") = py::none())
 
       .def_property_readonly("starts", &ak::ListArrayOf<T>::starts)
@@ -493,29 +474,6 @@ py::class_<ak::ListArrayOf<T>> make_ListArrayOf(py::handle m, std::string name) 
       .def_property_readonly("content", [](ak::ListArrayOf<T>& self) -> py::object {
         return box(self.content());
       })
-
-      // .def_property("id", [](ak::ListOffsetArrayOf<T>& self) -> py::object { return box(self.id()); }, &setid<ak::ListOffsetArrayOf<T>>)
-      // .def("setid", &setid<ak::ListOffsetArrayOf<T>>)
-      // .def("setid", [](ak::ListOffsetArrayOf<T>& self) -> void { self.setid(); })
-      // .def("__repr__", [](ak::ListOffsetArrayOf<T>& self) -> const std::string {
-      //   return self.tostring();
-      // })
-      //
-      // .def("__len__", &ak::ListOffsetArrayOf<T>::length)
-      // .def("__getitem__", [](ak::ListOffsetArrayOf<T>& self, int64_t at) -> py::object {
-      //   return box(self.get(at));
-      // })
-      // .def("__getitem__", [](ak::ListOffsetArrayOf<T>& self, py::slice slice) -> py::object {
-      //   size_t start, stop, step, length;
-      //   if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
-      //     throw py::error_already_set();
-      //   }
-      //   return box(self.slice((int64_t)start, (int64_t)stop));
-      // })
-      //
-      // .def("__iter__", [](ak::ListOffsetArrayOf<T>& self) -> ak::Iterator {
-      //   return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArrayOf<T>(self)));
-      // })
 
   ;
 }
@@ -526,7 +484,7 @@ template <typename T>
 py::class_<ak::ListOffsetArrayOf<T>> make_ListOffsetArrayOf(py::handle m, std::string name) {
   return py::class_<ak::ListOffsetArrayOf<T>>(m, name.c_str())
       .def(py::init([](ak::IndexOf<T>& offsets, py::object content, py::object id) -> ak::ListOffsetArrayOf<T> {
-        return ak::ListOffsetArrayOf<T>(unbox_id(id), offsets, std::shared_ptr<ak::Content>(unbox(content)));
+        return ak::ListOffsetArrayOf<T>(unbox_id(id), offsets, std::shared_ptr<ak::Content>(unbox_content(content)));
       }), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
 
       .def_property_readonly("offsets", &ak::ListOffsetArrayOf<T>::offsets)
