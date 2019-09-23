@@ -126,8 +126,7 @@ namespace awkward {
     const std::shared_ptr<Content> getitem(const Slice& where) const {
       std::shared_ptr<SliceItem> nexthead = where.head();
       Slice nexttail = where.tail();
-      Index64 nextcarry(1);
-      nextcarry.ptr().get()[0] = 0;
+      Index64 nextcarry(0);
       Index64 nextadvanced(0);
       return getitem_next(nexthead, nexttail, nextcarry, nextadvanced);
     }
@@ -146,7 +145,37 @@ namespace awkward {
       }
 
       else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
-        throw std::runtime_error("range");
+        if (range->step() == Slice::none()  ||  range->step() == 1) {
+          return slice(range->start(), range->stop());
+        }
+        else {
+          int64_t start = range->start();
+          int64_t stop = range->stop();
+          int64_t step = range->step();
+          if (step == Slice::none()) {
+            step = 1;
+          }
+          else if (step == 0) {
+            throw std::invalid_argument("slice step must not be 0");
+          }
+          awkward_regularize_rangeslice(start, stop, step > 0, start != Slice::none(), stop != Slice::none(), length_);
+
+          throw std::runtime_error("stop here for now");
+
+
+
+          // int64_t regular_start = start;
+          // int64_t regular_stop = stop;
+          // awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
+          // std::shared_ptr<Identity> id(nullptr);
+          // if (id_.get() != nullptr) {
+          //   if (regular_stop > id_.get()->length()) {
+          //     throw std::invalid_argument("index out of range for identity");
+          //   }
+          //   id = id_.get()->slice(regular_start, regular_stop);
+          // }
+          // return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + regular_start, regular_stop - regular_start, itemsize_));
+        }
       }
 
       else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {

@@ -33,22 +33,24 @@ void slices() {
   *data.borrow(8) = 8.8f;
   *data.borrow(9) = 9.9f;
 
-  Slice at(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceAt(1)) }), true);
-  data.getitem(at);
+  // Slice none(std::vector<std::shared_ptr<SliceItem>>(), true);
+  // assert(*dynamic_cast<RawArrayOf<float>*>(data.getitem(none).get())->borrow() == 0.0f);
+
+  Slice at1(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceAt(1)) }), true);
+  assert(*dynamic_cast<RawArrayOf<float>*>(data.getitem(at1).get())->borrow() == 1.1f);
+  Slice at2(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceAt(2)) }), true);
+  assert(*dynamic_cast<RawArrayOf<float>*>(data.getitem(at2).get())->borrow() == 2.2f);
+
+  Slice range1(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceRange(1, 3, Slice::none())) }));
+  assert(*dynamic_cast<RawArrayOf<float>*>(data.getitem(range1).get())->borrow(0) == 1.1f);
+
+  Slice range2(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceRange(Slice::none(), 4, 1)) }));
+  assert(*dynamic_cast<RawArrayOf<float>*>(data.getitem(range2).get())->borrow(0) == 0.0f);
+
+  // Slice range3(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceRange(1, Slice::none(), 2)) }));
+  // assert(*dynamic_cast<RawArrayOf<float>*>(data.getitem(range3).get())->borrow(1) == 3.3f);
 
 }
-
-//   Slice slice = Slice().with(SliceAt(1))
-//                        .with(SliceStartStop(1, 3))
-//                        .with(SliceStartStop(Slice::none(), Slice::none()))
-//                        .with(SliceStartStopStep(Slice::none(), Slice::none(), 2))
-//                        .with(SliceByteMask(Index8(10)))
-//                        .with(SliceIndex32(Index32(15)))
-//                        .with(SliceIndex64(Index64(20)))
-//                        .with(SliceEllipsis())
-//                        .with(SliceNewAxis());
-//   assert(slice.length() == 9);
-// }
 
 int main(int, char**) {
   rawarray();

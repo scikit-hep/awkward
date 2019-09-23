@@ -395,6 +395,9 @@ const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>&
     int64_t start = range->start();
     int64_t stop = range->stop();
     int64_t step = range->step();
+    if (step == Slice::none()) {
+      step = 1;
+    }
     awkward_regularize_rangeslice(start, stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
 
     int64_t numer = abs(start - stop);
@@ -513,6 +516,9 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
     int64_t start = range->start();
     int64_t stop = range->stop();
     int64_t step = range->step();
+    if (step == Slice::none()) {
+      step = 1;
+    }
     awkward_regularize_rangeslice(start, stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
 
     int64_t numer = abs(start - stop);
