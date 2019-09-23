@@ -32,6 +32,7 @@ namespace awkward {
     const int64_t width() const { return width_; }
     const int64_t length() const { return length_; }
 
+    virtual const std::shared_ptr<Identity> to64() const = 0;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
     virtual const std::shared_ptr<Identity> slice(int64_t start, int64_t stop) const = 0;
     virtual const std::shared_ptr<Identity> shallow_copy() const = 0;
@@ -57,6 +58,7 @@ namespace awkward {
 
     const std::shared_ptr<T> ptr() const { return ptr_; }
 
+    virtual const std::shared_ptr<Identity> to64() const;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual const std::shared_ptr<Identity> slice(int64_t start, int64_t stop) const;
     virtual const std::shared_ptr<Identity> shallow_copy() const;

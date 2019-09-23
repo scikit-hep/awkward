@@ -44,15 +44,26 @@ uint8_t NumpyArray::getbyte(ssize_t at) const {
 }
 
 void NumpyArray::setid(const std::shared_ptr<Identity> id) {
+  if (id.get() != nullptr  &&  length() != id.get()->length()) {
+    throw std::invalid_argument("content and its id must have the same length");
+  }
   id_ = id;
 }
 
 void NumpyArray::setid() {
   assert(!isscalar());
-  Identity32* id32 = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
-  std::shared_ptr<Identity> newid(id32);
-  awkward_identity_new32(length(), id32->ptr().get());
-  setid(newid);
+  if (length() <= kMaxInt32) {
+    Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
+    std::shared_ptr<Identity> newid(rawid);
+    awkward_new_identity32(rawid->ptr().get(), length());
+    setid(newid);
+  }
+  else {
+    Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, length());
+    std::shared_ptr<Identity> newid(rawid);
+    awkward_new_identity64(rawid->ptr().get(), length());
+    setid(newid);
+  }
 }
 
 template <typename T>

@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_LISTARRAYCONTENT_H_
-#define AWKWARD_LISTARRAYCONTENT_H_
+#ifndef AWKWARD_LISTARRAY_H_
+#define AWKWARD_LISTARRAY_H_
 
 #include <memory>
 
@@ -45,4 +45,4 @@ namespace awkward {
   typedef ListArrayOf<int64_t> ListArray64;
 }
 
-#endif // AWKWARD_LISTARRAYCONTENT_H_
+#endif // AWKWARD_LISTARRAY_H_

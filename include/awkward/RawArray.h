@@ -60,12 +60,25 @@ namespace awkward {
 
     virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid() {
-      Identity32* id32 = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
-      std::shared_ptr<Identity> newid(id32);
-      awkward_identity_new32(length(), id32->ptr().get());
-      setid(newid);
+      if (length() <= kMaxInt32) {
+        Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
+        std::shared_ptr<Identity> newid(rawid);
+        awkward_new_identity32(rawid->ptr().get(), length());
+        setid(newid);
+      }
+      else {
+        Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, length());
+        std::shared_ptr<Identity> newid(rawid);
+        awkward_new_identity64(rawid->ptr().get(), length());
+        setid(newid);
+      }
     }
-    virtual void setid(const std::shared_ptr<Identity> id) { id_ = id; }
+    virtual void setid(const std::shared_ptr<Identity> id) {
+      if (id.get() != nullptr  &&  length() != id.get()->length()) {
+        throw std::invalid_argument("content and its id must have the same length");
+      }
+      id_ = id;
+    }
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const {
       std::stringstream out;
       out << indent << pre << "<RawArray of=\"" << typeid(T).name() << "\" length=\"" << length_ << "\" itemsize=\"" << itemsize_ << "\" data=\"";

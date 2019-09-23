@@ -6,6 +6,7 @@
 #include <sstream>
 #include <type_traits>
 
+#include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 
 #include "awkward/Identity.h"
@@ -16,6 +17,19 @@ std::atomic<Identity::Ref> numrefs{0};
 
 Identity::Ref Identity::newref() {
   return numrefs++;
+}
+
+template <typename T>
+const std::shared_ptr<Identity> IdentityOf<T>::to64() const {
+  if (std::is_same<T, int64_t>::value) {
+    return shallow_copy();
+  }
+  else if (std::is_same<T, int32_t>::value) {
+    Identity64* raw = new Identity64(ref_, fieldloc_, width_, length_);
+    std::shared_ptr<Identity> out(raw);
+    awkward_identity32_to_identity64(raw->ptr().get(), reinterpret_cast<int32_t*>(ptr_.get()), length_);
+    return out;
+  }
 }
 
 template <typename T>
