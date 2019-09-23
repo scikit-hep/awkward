@@ -4,7 +4,6 @@
 #include <type_traits>
 
 #include "awkward/cpu-kernels/identity.h"
-// #include "awkward/util.h"
 
 #include "awkward/ListOffsetArray.h"
 
