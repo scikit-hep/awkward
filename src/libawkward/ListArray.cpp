@@ -106,10 +106,12 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem(const Slice& where) const
   return dynamic_cast<ListArrayOf<int64_t>*>(out.get())->content();
 }
 
+// #include <iostream>
+
 template <typename T>
 const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
   if (head.get() == nullptr) {
-        throw std::runtime_error("ListArray[null]");
+    return shallow_copy();
   }
 
   else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
@@ -129,60 +131,75 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
   }
 
   else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       throw std::invalid_argument("len(stops) < len(starts)");
     }
 
     Index64 flathead = array->ravel();
+    Index64 nextcarry(advanced.length() == 0 ? lenstarts*flathead.length() : lenstarts);
+    Index64 nextadvanced(nextcarry.length());
+    if (std::is_same<T, int32_t>::value) {
+      Index32 nextstarts(lenstarts);
+      Index32 nextstops(lenstarts);
+      Error err = awkward_listarray32_getitem_next_array_64(
+        nextstarts.ptr().get(),
+        nextstops.ptr().get(),
+        nextcarry.ptr().get(),
+        nextadvanced.ptr().get(),
+        reinterpret_cast<int32_t*>(starts_.ptr().get()),
+        reinterpret_cast<int32_t*>(stops_.ptr().get()),
+        flathead.ptr().get(),
+        advanced.ptr().get(),
+        starts_.offset(),
+        stops_.offset(),
+        lenstarts,
+        flathead.length(),
+        content_.get()->length());
+      HANDLE_ERROR(err)
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+      return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      Index64 nextstarts(lenstarts);
+      Index64 nextstops(lenstarts);
+      Error err = awkward_listarray64_getitem_next_array_64(
+        nextstarts.ptr().get(),
+        nextstops.ptr().get(),
+        nextcarry.ptr().get(),
+        nextadvanced.ptr().get(),
+        reinterpret_cast<int64_t*>(starts_.ptr().get()),
+        reinterpret_cast<int64_t*>(stops_.ptr().get()),
+        flathead.ptr().get(),
+        advanced.ptr().get(),
+        starts_.offset(),
+        stops_.offset(),
+        lenstarts,
+        flathead.length(),
+        content_.get()->length());
+      HANDLE_ERROR(err)
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
-    if (advanced.length() == 0) {
-      Index64 nextcarry(lenstarts*flathead.length());
-      Index64 nextadvanced(lenstarts*flathead.length());
-      if (std::is_same<T, int32_t>::value) {
-        Index32 nextstarts(lenstarts);
-        Index32 nextstops(lenstarts);
-        Error err = awkward_listarray32_getitem_next_array_64(
-          nextstarts.ptr().get(),
-          nextstops.ptr().get(),
-          nextcarry.ptr().get(),
-          nextadvanced.ptr().get(),
-          reinterpret_cast<int32_t*>(starts_.ptr().get()),
-          reinterpret_cast<int32_t*>(stops_.ptr().get()),
-          flathead.ptr().get(),
-          starts_.offset(),
-          stops_.offset(),
-          lenstarts,
-          flathead.length(),
-          content_.get()->length());
-        HANDLE_ERROR(err)
-        return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, content_.get()->carry(nextcarry)));
-      }
-      else if (std::is_same<T, int64_t>::value) {
-        Index64 nextstarts(lenstarts);
-        Index64 nextstops(lenstarts);
-        Error err = awkward_listarray64_getitem_next_array_64(
-          nextstarts.ptr().get(),
-          nextstops.ptr().get(),
-          nextcarry.ptr().get(),
-          nextadvanced.ptr().get(),
-          reinterpret_cast<int64_t*>(starts_.ptr().get()),
-          reinterpret_cast<int64_t*>(stops_.ptr().get()),
-          flathead.ptr().get(),
-          starts_.offset(),
-          stops_.offset(),
-          lenstarts,
-          flathead.length(),
-          content_.get()->length());
-        HANDLE_ERROR(err)
-        return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, content_.get()->carry(nextcarry)));
-      }
-      else {
-        throw std::runtime_error("unrecognized ListArray specialization");
-      }
+      // std::cout << "nextstarts" << std::endl;
+      // std::cout << nextstarts.tostring() << std::endl;
+      // std::cout << "nextstops" << std::endl;
+      // std::cout << nextstops.tostring() << std::endl;
+      // std::cout << "nextcarry" << std::endl;
+      // std::cout << nextcarry.tostring() << std::endl;
+      //
+      // std::cout << "nextcontent" << std::endl;
+      // std::cout << nextcontent.get()->tostring() << std::endl << std::endl;
+      //
+      // std::cout << "nextadvanced" << std::endl;
+      // std::cout << nextadvanced.tostring() << std::endl << std::endl;
+
+      return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
     }
     else {
-      throw std::runtime_error("FIXME");
+      throw std::runtime_error("unrecognized ListArray specialization");
     }
   }
 
