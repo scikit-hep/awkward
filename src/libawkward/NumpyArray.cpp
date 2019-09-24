@@ -269,7 +269,7 @@ const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
   }
 }
 
-const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced) const {
+const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
   if (head.get() == nullptr) {
         throw std::runtime_error("NumpyArray[null]");
   }
@@ -297,6 +297,10 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
   else {
     throw std::runtime_error("unrecognized slice item type");
   }
+}
+
+const std::shared_ptr<Content> NumpyArray::carry(const Index64& carry) const {
+  throw std::runtime_error("NumpyArray::carry");
 }
 
 const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {

@@ -61,7 +61,7 @@ const std::string IdentityOf<T>::tostring() const {
 
 template <typename T>
 const std::shared_ptr<Identity> IdentityOf<T>::getitem_range(int64_t start, int64_t stop) const {
-  assert(0 <= start < length_  &&  0 <= stop < length_);
+  assert(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop < length_);
   return std::shared_ptr<Identity>(new IdentityOf<T>(ref_, fieldloc_, offset_ + width_*start*(start != stop), width_, (stop - start), ptr_));
 }
 

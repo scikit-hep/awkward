@@ -110,7 +110,7 @@ const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem(const Slice& where)
 }
 
 template <typename T>
-const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced) const {
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
   if (head.get() == nullptr) {
         throw std::runtime_error("ListOffsetArray[null]");
   }
@@ -138,6 +138,11 @@ const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const std::sha
   else {
     throw std::runtime_error("unrecognized slice item type");
   }
+}
+
+template <typename T>
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::carry(const Index64& carry) const {
+  throw std::runtime_error("ListOffsetArrayOf<T>::carry");
 }
 
 template <typename T>

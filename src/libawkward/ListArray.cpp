@@ -7,6 +7,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 
 #include "awkward/Slice.h"
+#include "awkward/ListOffsetArray.h"
 
 #include "awkward/ListArray.h"
 
@@ -90,11 +91,23 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_range(int64_t start, int6
 
 template <typename T>
 const std::shared_ptr<Content> ListArrayOf<T>::getitem(const Slice& where) const {
-  throw std::runtime_error("FIXME");
+  // FIXME: find a better way to wrap these
+  Index64 nextstarts(1);
+  Index64 nextstops(1);
+  *nextstarts.ptr().get() = 0;
+  *nextstops.ptr().get() = length();
+  ListArrayOf<int64_t> next(std::shared_ptr<Identity>(nullptr), nextstarts, nextstops, shallow_copy());
+
+  std::shared_ptr<SliceItem> nexthead = where.head();
+  Slice nexttail = where.tail();
+  Index64 nextadvanced(0);
+  std::shared_ptr<Content> out = next.getitem_next(nexthead, nexttail, nextadvanced);
+
+  return dynamic_cast<ListArrayOf<int64_t>*>(out.get())->content();
 }
 
 template <typename T>
-const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced) const {
+const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
   if (head.get() == nullptr) {
         throw std::runtime_error("ListArray[null]");
   }
@@ -116,11 +129,97 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
   }
 
   else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
-    throw std::runtime_error("ListArray[array]");
+    int64_t lenstarts = starts_.length();
+    if (stops_.length() < lenstarts) {
+      throw std::invalid_argument("len(stops) < len(starts)");
+    }
+
+    Index64 flathead = array->ravel();
+
+    if (advanced.length() == 0) {
+      Index64 nextcarry(lenstarts*flathead.length());
+      Index64 nextadvanced(lenstarts*flathead.length());
+      if (std::is_same<T, int32_t>::value) {
+        Index32 nextstarts(lenstarts);
+        Index32 nextstops(lenstarts);
+        Error err = awkward_listarray32_getitem_next_array_64(
+          nextstarts.ptr().get(),
+          nextstops.ptr().get(),
+          nextcarry.ptr().get(),
+          nextadvanced.ptr().get(),
+          reinterpret_cast<int32_t*>(starts_.ptr().get()),
+          reinterpret_cast<int32_t*>(stops_.ptr().get()),
+          flathead.ptr().get(),
+          lenstarts,
+          flathead.length(),
+          content_.get()->length());
+        HANDLE_ERROR(err)
+        return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, content_.get()->carry(nextcarry)));
+      }
+      else if (std::is_same<T, int64_t>::value) {
+        Index64 nextstarts(lenstarts);
+        Index64 nextstops(lenstarts);
+        Error err = awkward_listarray64_getitem_next_array_64(
+          nextstarts.ptr().get(),
+          nextstops.ptr().get(),
+          nextcarry.ptr().get(),
+          nextadvanced.ptr().get(),
+          reinterpret_cast<int64_t*>(starts_.ptr().get()),
+          reinterpret_cast<int64_t*>(stops_.ptr().get()),
+          flathead.ptr().get(),
+          lenstarts,
+          flathead.length(),
+          content_.get()->length());
+        HANDLE_ERROR(err)
+        return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, content_.get()->carry(nextcarry)));
+      }
+      else {
+        throw std::runtime_error("unrecognized ListArray specialization");
+      }
+    }
+    else {
+      throw std::runtime_error("FIXME");
+    }
   }
 
   else {
     throw std::runtime_error("unrecognized slice item type");
+  }
+}
+
+template <typename T>
+const std::shared_ptr<Content> ListArrayOf<T>::carry(const Index64& carry) const {
+  if (stops_.length() < starts_.length()) {
+    throw std::invalid_argument("len(stops) < len(starts)");
+  }
+  if (std::is_same<T, int32_t>::value) {
+    Index32 nextstarts(carry.length());
+    Index32 nextstops(carry.length());
+    awkward_listarray32_carry_64(
+      nextstarts.ptr().get(),
+      nextstops.ptr().get(),
+      reinterpret_cast<int32_t*>(starts_.ptr().get()),
+      reinterpret_cast<int32_t*>(stops_.ptr().get()),
+      carry.ptr().get(),
+      carry.length());
+    std::shared_ptr<Identity> id(nullptr);  // FIXME
+    return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id, nextstarts, nextstops, content_));
+  }
+  else if (std::is_same<T, int64_t>::value) {
+    Index64 nextstarts(carry.length());
+    Index64 nextstops(carry.length());
+    awkward_listarray64_carry_64(
+      nextstarts.ptr().get(),
+      nextstops.ptr().get(),
+      reinterpret_cast<int64_t*>(starts_.ptr().get()),
+      reinterpret_cast<int64_t*>(stops_.ptr().get()),
+      carry.ptr().get(),
+      carry.length());
+    std::shared_ptr<Identity> id(nullptr);  // FIXME
+    return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id, nextstarts, nextstops, content_));
+  }
+  else {
+    throw std::runtime_error("unrecognized ListArray specialization");
   }
 }
 

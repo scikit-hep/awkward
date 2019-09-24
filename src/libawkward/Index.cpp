@@ -59,13 +59,13 @@ const std::string IndexOf<T>::tostring_part(const std::string indent, const std:
 
 template <typename T>
 T IndexOf<T>::getitem_at(int64_t at) const {
-  assert(0 <= at < length_);
+  assert(0 <= at  &&  at < length_);
   return ptr_.get()[(size_t)(offset_ + at)];
 }
 
 template <typename T>
 IndexOf<T> IndexOf<T>::getitem_range(int64_t start, int64_t stop) const {
-  assert(0 <= start < length_  &&  0 <= stop < length_);
+  assert(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop < length_);
   return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
 }
 
