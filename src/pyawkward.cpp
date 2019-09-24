@@ -118,11 +118,21 @@ std::shared_ptr<ak::Identity> unbox_id(py::object id) {
   throw std::invalid_argument("id argument must be an Identity subtype");
 }
 
+template <typename T>
+std::string repr(T& self) {
+  return self.tostring();
+}
+
+template <typename T>
+int64_t len(T& self) {
+  return self.length();
+}
+
 /////////////////////////////////////////////////////////////// Index
 
 template <typename T>
 py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
-  return py::class_<ak::IndexOf<T>>(m, name.c_str(), py::buffer_protocol())
+  return (py::class_<ak::IndexOf<T>>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](ak::IndexOf<T>& self) -> py::buffer_info {
         return py::buffer_info(
           reinterpret_cast<void*>(reinterpret_cast<ssize_t>(self.ptr().get()) + self.offset()*sizeof(T)),
@@ -147,21 +157,12 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
           (T)info.shape[0]);
       }))
 
-      .def("__repr__", [](ak::IndexOf<T>& self) -> const std::string {
-        return self.tostring();
-      })
-
+      .def("__repr__", &ak::IndexOf<T>::tostring)
       .def("__len__", &ak::IndexOf<T>::length)
       .def("__getitem__", &ak::IndexOf<T>::get)
-      .def("__getitem__", [](ak::IndexOf<T>& self, py::slice slice) -> ak::IndexOf<T> {
-        size_t start, stop, step, length;
-        if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
-          throw py::error_already_set();
-        }
-        return self.slice((int64_t)start, (int64_t)stop);
-      })
+      .def("__getitem__", &ak::IndexOf<T>::slice)
 
-  ;
+  );
 }
 
 /////////////////////////////////////////////////////////////// Identity
@@ -183,7 +184,7 @@ void setid_noarg(T& self) {
 
 template <typename T>
 py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
-  return py::class_<ak::IdentityOf<T>>(m, name.c_str(), py::buffer_protocol())
+  return (py::class_<ak::IdentityOf<T>>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](ak::IdentityOf<T>& self) -> py::buffer_info {
         return py::buffer_info(
           reinterpret_cast<void*>(reinterpret_cast<ssize_t>(self.ptr().get()) + self.offset()*sizeof(T)),
@@ -212,21 +213,10 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
             std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr), pyobject_deleter<T>(array.ptr())));
       }))
 
-      .def("__repr__", [](ak::IdentityOf<T>& self) -> const std::string {
-        return self.tostring();
-      })
-
+      .def("__repr__", &ak::IdentityOf<T>::tostring)
       .def("__len__", &ak::IdentityOf<T>::length)
       .def("__getitem__", &ak::IdentityOf<T>::get)
-      .def("__getitem__", [](ak::IdentityOf<T>& self, py::slice slice) -> ak::IdentityOf<T> {
-        size_t start, stop, step, length;
-        if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
-          throw py::error_already_set();
-        }
-        std::shared_ptr<ak::Identity> out = self.slice((int64_t)start, (int64_t)stop);
-        ak::IdentityOf<T>* raw = dynamic_cast<ak::IdentityOf<T>*>(out.get());
-        return ak::IdentityOf<T>(raw->ref(), raw->fieldloc(), raw->offset(), raw->width(), raw->length(), raw->ptr());
-      })
+      .def("__getitem__", &ak::IdentityOf<T>::slice)
 
       .def_property_readonly("ref", &ak::IdentityOf<T>::ref)
       .def_property_readonly("fieldloc", &ak::IdentityOf<T>::fieldloc)
@@ -236,7 +226,7 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
         return py::array(self);
       })
 
-  ;
+  );
 }
 
 /////////////////////////////////////////////////////////////// Slice
@@ -354,7 +344,7 @@ ak::Slice toslice(py::object obj) {
 }
 
 py::class_<ak::Slice> make_Slice(py::handle m, std::string name) {
-  return py::class_<ak::Slice>(m, name.c_str())
+  return (py::class_<ak::Slice>(m, name.c_str())
       .def(py::init([](py::object obj) {
         return toslice(obj);
       }))
@@ -362,8 +352,7 @@ py::class_<ak::Slice> make_Slice(py::handle m, std::string name) {
       .def("__repr__", [](ak::Slice& self) -> const std::string {
         return self.tostring();
       })
-
-  ;
+  );
 }
 
 /////////////////////////////////////////////////////////////// Iterator
@@ -376,35 +365,30 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
     return box(iterator.next());
   };
 
-  return py::class_<ak::Iterator>(m, name.c_str())
+  return (py::class_<ak::Iterator>(m, name.c_str())
       .def(py::init([](py::object content) -> ak::Iterator {
         return ak::Iterator(unbox_content(content));
       }))
-
+      .def("__repr__", &ak::Iterator::tostring)
       .def("__next__", next)
       .def("next", next)
-
-      .def("__repr__", [](ak::Iterator& self) -> const std::string {
-        return self.tostring();
-      })
-
-  ;
+  );
 }
 
 /////////////////////////////////////////////////////////////// Content
 
 template <typename T>
-py::object getitem(T& self, py::object pyslice) {
-  if (py::isinstance<py::int_>(pyslice)) {
-    return box(self.get(pyslice.cast<int64_t>()));
+py::object getitem(T& self, py::object obj) {
+  if (py::isinstance<py::int_>(obj)) {
+    return box(self.get(obj.cast<int64_t>()));
   }
-  if (py::isinstance<py::slice>(pyslice)) {
-    py::object pystep = pyslice.attr("step");
+  if (py::isinstance<py::slice>(obj)) {
+    py::object pystep = obj.attr("step");
     if ((py::isinstance<py::int_>(pystep)  &&  pystep.cast<int64_t>() == 1)  ||  pystep.is(py::none())) {
       int64_t start = ak::Slice::none();
       int64_t stop = ak::Slice::none();
-      py::object pystart = pyslice.attr("start");
-      py::object pystop = pyslice.attr("stop");
+      py::object pystart = obj.attr("start");
+      py::object pystop = obj.attr("stop");
       if (!pystart.is(py::none())) {
         start = pystart.cast<int64_t>();
       }
@@ -415,13 +399,33 @@ py::object getitem(T& self, py::object pyslice) {
     }
     // NOTE: control flow can pass through here; don't make the last line an 'else'!
   }
-  return box(self.getitem(toslice(pyslice)));
+  return box(self.getitem(toslice(obj)));
+}
+
+template <typename T>
+ak::Iterator iter(T& self) {
+  return ak::Iterator(self.shallow_copy());
+}
+
+template <typename T>
+py::class_<T> content(py::class_<T>& x) {
+  return x.def("__repr__", &repr<T>)
+          .def_property("id", [](T& self) -> py::object { return box(self.id()); }, [](T& self, py::object id) -> void { self.setid(unbox_id(id)); })
+          .def("setid", [](T& self, py::object id) -> void {
+           self.setid(unbox_id(id));
+          })
+         .def("setid", [](T& self) -> void {
+           self.setid();
+         })
+         .def("__len__", &len<T>)
+         .def("__getitem__", &getitem<T>)
+         .def("__iter__", &iter<T>);
 }
 
 /////////////////////////////////////////////////////////////// NumpyArray
 
 py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
-  return py::class_<ak::NumpyArray>(m, name.c_str(), py::buffer_protocol())
+  return content(py::class_<ak::NumpyArray>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](ak::NumpyArray& self) -> py::buffer_info {
         return py::buffer_info(
           self.byteptr(),
@@ -449,17 +453,6 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
           info.format);
       }), py::arg("array"), py::arg("id") = py::none())
 
-      .def_property("id", [](ak::NumpyArray& self) -> py::object { return box(self.id()); }, [](ak::NumpyArray& self, py::object id) -> void { self.setid(unbox_id(id)); })
-      .def("setid", [](ak::NumpyArray& self, py::object id) -> void {
-        self.setid(unbox_id(id));
-      })
-      .def("setid", [](ak::NumpyArray& self) -> void {
-        self.setid();
-      })
-      .def("__repr__", [](ak::NumpyArray& self) -> const std::string {
-        return self.tostring();
-      })
-
       .def_property_readonly("shape", &ak::NumpyArray::shape)
       .def_property_readonly("strides", &ak::NumpyArray::strides)
       .def_property_readonly("itemsize", &ak::NumpyArray::itemsize)
@@ -471,21 +464,14 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
       .def_property_readonly("iscontiguous", &ak::NumpyArray::iscontiguous)
       .def("contiguous", &ak::NumpyArray::contiguous)
       .def("become_contiguous", &ak::NumpyArray::become_contiguous)
-
-      .def("__len__", &ak::NumpyArray::length)
-      .def("__getitem__", &getitem<ak::NumpyArray>)
-      .def("__iter__", [](ak::NumpyArray& self) -> ak::Iterator {
-        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::NumpyArray(self)));
-      })
-
-  ;
+  );
 }
 
 /////////////////////////////////////////////////////////////// ListArray
 
 template <typename T>
 py::class_<ak::ListArrayOf<T>> make_ListArrayOf(py::handle m, std::string name) {
-  return py::class_<ak::ListArrayOf<T>>(m, name.c_str())
+  return content(py::class_<ak::ListArrayOf<T>>(m, name.c_str())
       .def(py::init([](ak::IndexOf<T>& starts, ak::IndexOf<T>& stops, py::object content, py::object id) -> ak::ListArrayOf<T> {
         return ak::ListArrayOf<T>(unbox_id(id), starts, stops, unbox_content(content));
       }), py::arg("starts"), py::arg("stops"), py::arg("content"), py::arg("id") = py::none())
@@ -495,15 +481,14 @@ py::class_<ak::ListArrayOf<T>> make_ListArrayOf(py::handle m, std::string name) 
       .def_property_readonly("content", [](ak::ListArrayOf<T>& self) -> py::object {
         return box(self.content());
       })
-
-  ;
+  );
 }
 
 /////////////////////////////////////////////////////////////// ListOffsetArray
 
 template <typename T>
 py::class_<ak::ListOffsetArrayOf<T>> make_ListOffsetArrayOf(py::handle m, std::string name) {
-  return py::class_<ak::ListOffsetArrayOf<T>>(m, name.c_str())
+  return content(py::class_<ak::ListOffsetArrayOf<T>>(m, name.c_str())
       .def(py::init([](ak::IndexOf<T>& offsets, py::object content, py::object id) -> ak::ListOffsetArrayOf<T> {
         return ak::ListOffsetArrayOf<T>(unbox_id(id), offsets, std::shared_ptr<ak::Content>(unbox_content(content)));
       }), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
@@ -512,33 +497,10 @@ py::class_<ak::ListOffsetArrayOf<T>> make_ListOffsetArrayOf(py::handle m, std::s
       .def_property_readonly("content", [](ak::ListOffsetArrayOf<T>& self) -> py::object {
         return box(self.content());
       })
-
-      .def_property("id", &getid<ak::ListOffsetArrayOf<T>>, &setid<ak::ListOffsetArrayOf<T>>)
-      .def("setid", &setid<ak::ListOffsetArrayOf<T>>)
-      .def("setid", &setid_noarg<ak::ListOffsetArrayOf<T>>)
-
-      .def("__repr__", [](ak::ListOffsetArrayOf<T>& self) -> const std::string {
-        return self.tostring();
-      })
-
-      .def("__len__", &ak::ListOffsetArrayOf<T>::length)
-      .def("__getitem__", [](ak::ListOffsetArrayOf<T>& self, int64_t at) -> py::object {
-        return box(self.get(at));
-      })
-      .def("__getitem__", [](ak::ListOffsetArrayOf<T>& self, py::slice slice) -> py::object {
-        size_t start, stop, step, length;
-        if (!slice.compute(self.length(), &start, &stop, &step, &length)) {
-          throw py::error_already_set();
-        }
-        return box(self.slice((int64_t)start, (int64_t)stop));
-      })
-
-      .def("__iter__", [](ak::ListOffsetArrayOf<T>& self) -> ak::Iterator {
-        return ak::Iterator(std::shared_ptr<ak::Content>(new ak::ListOffsetArrayOf<T>(self)));
-      })
-
-  ;
+  );
 }
+
+/////////////////////////////////////////////////////////////// module
 
 PYBIND11_MODULE(layout, m) {
 #ifdef VERSION_INFO
