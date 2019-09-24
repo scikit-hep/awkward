@@ -11,3 +11,4 @@ def test_listarray():
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     array = awkward1.layout.ListArray64(starts, stops, content)
     assert awkward1.tolist(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(array[1:]) == [[], [4.4, 5.5]]

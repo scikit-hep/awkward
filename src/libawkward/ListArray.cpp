@@ -73,7 +73,7 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_range(int64_t start, int6
   int64_t regular_start = start;
   int64_t regular_stop = stop;
   awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), starts_.length());
-  if (regular_stop >= stops_.length()) {
+  if (regular_stop > stops_.length()) {
     throw std::invalid_argument("len(stops) < len(starts) in ListArray");
   }
 
