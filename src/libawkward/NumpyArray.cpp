@@ -187,9 +187,8 @@ const std::shared_ptr<Content> NumpyArray::shallow_copy() const {
   return std::shared_ptr<Content>(new NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
 }
 
-const std::shared_ptr<Content> NumpyArray::get(int64_t at) const {
+const std::shared_ptr<Content> NumpyArray::getitem_at(int64_t at) const {
   assert(!isscalar());
-  // return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceAt(at)) }), true));
   int64_t regular_at = at;
   if (regular_at < 0) {
     regular_at += shape_[0];
@@ -205,14 +204,13 @@ const std::shared_ptr<Content> NumpyArray::get(int64_t at) const {
     if (regular_at >= id_.get()->length()) {
       throw std::invalid_argument("index out of range for identity");
     }
-    id = id_.get()->slice(regular_at, regular_at + 1);
+    id = id_.get()->getitem_range(regular_at, regular_at + 1);
   }
   return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset, itemsize_, format_));
 }
 
-const std::shared_ptr<Content> NumpyArray::slice(int64_t start, int64_t stop) const {
+const std::shared_ptr<Content> NumpyArray::getitem_range(int64_t start, int64_t stop) const {
   assert(!isscalar());
-  // return getitem(Slice(std::vector<std::shared_ptr<SliceItem>>({ std::shared_ptr<SliceItem>(new SliceRange(start, stop, 1)) }), true));
   int64_t regular_start = start;
   int64_t regular_stop = stop;
   awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), shape_[0]);
@@ -225,7 +223,7 @@ const std::shared_ptr<Content> NumpyArray::slice(int64_t start, int64_t stop) co
     if (regular_stop > id_.get()->length()) {
       throw std::invalid_argument("index out of range for identity");
     }
-    id = id_.get()->slice(regular_start, regular_stop);
+    id = id_.get()->getitem_range(regular_start, regular_stop);
   }
   return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
 }

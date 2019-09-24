@@ -54,7 +54,7 @@ const std::shared_ptr<Content> ListArrayOf<T>::shallow_copy() const {
 }
 
 template <typename T>
-const std::shared_ptr<Content> ListArrayOf<T>::get(int64_t at) const {
+const std::shared_ptr<Content> ListArrayOf<T>::getitem_at(int64_t at) const {
   int64_t regular_at = at;
   if (regular_at < 0) {
     regular_at += starts_.length();
@@ -65,11 +65,11 @@ const std::shared_ptr<Content> ListArrayOf<T>::get(int64_t at) const {
   if (regular_at >= stops_.length()) {
     throw std::invalid_argument("len(stops) < len(starts) in ListArray");
   }
-  return content_.get()->slice(starts_.get(regular_at), stops_.get(regular_at));
+  return content_.get()->getitem_range(starts_.getitem_at(regular_at), stops_.getitem_at(regular_at));
 }
 
 template <typename T>
-const std::shared_ptr<Content> ListArrayOf<T>::slice(int64_t start, int64_t stop) const {
+const std::shared_ptr<Content> ListArrayOf<T>::getitem_range(int64_t start, int64_t stop) const {
   int64_t regular_start = start;
   int64_t regular_stop = stop;
   awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), starts_.length());
@@ -82,10 +82,10 @@ const std::shared_ptr<Content> ListArrayOf<T>::slice(int64_t start, int64_t stop
     if (regular_stop > id_.get()->length()) {
       throw std::invalid_argument("index out of range for identity");
     }
-    id = id_.get()->slice(regular_start, regular_stop);
+    id = id_.get()->getitem_range(regular_start, regular_stop);
   }
 
-  return std::shared_ptr<Content>(new ListArrayOf<T>(id, starts_.slice(regular_start, regular_stop), stops_.slice(regular_start, regular_stop), content_));
+  return std::shared_ptr<Content>(new ListArrayOf<T>(id, starts_.getitem_range(regular_start, regular_stop), stops_.getitem_range(regular_start, regular_stop), content_));
 }
 
 template <typename T>

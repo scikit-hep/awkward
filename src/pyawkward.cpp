@@ -159,8 +159,8 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
 
       .def("__repr__", &ak::IndexOf<T>::tostring)
       .def("__len__", &ak::IndexOf<T>::length)
-      .def("__getitem__", &ak::IndexOf<T>::get)
-      .def("__getitem__", &ak::IndexOf<T>::slice)
+      .def("__getitem__", &ak::IndexOf<T>::getitem_at)
+      .def("__getitem__", &ak::IndexOf<T>::getitem_range)
 
   );
 }
@@ -216,7 +216,7 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
       .def("__repr__", &ak::IdentityOf<T>::tostring)
       .def("__len__", &ak::IdentityOf<T>::length)
       .def("__getitem__", &ak::IdentityOf<T>::get)
-      .def("__getitem__", &ak::IdentityOf<T>::slice)
+      .def("__getitem__", &ak::IdentityOf<T>::getitem_range)
 
       .def_property_readonly("ref", &ak::IdentityOf<T>::ref)
       .def_property_readonly("fieldloc", &ak::IdentityOf<T>::fieldloc)
@@ -380,7 +380,7 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
 template <typename T>
 py::object getitem(T& self, py::object obj) {
   if (py::isinstance<py::int_>(obj)) {
-    return box(self.get(obj.cast<int64_t>()));
+    return box(self.getitem_at(obj.cast<int64_t>()));
   }
   if (py::isinstance<py::slice>(obj)) {
     py::object pystep = obj.attr("step");
@@ -395,7 +395,7 @@ py::object getitem(T& self, py::object obj) {
       if (!pystop.is(py::none())) {
         stop = pystop.cast<int64_t>();
       }
-      return box(self.slice(start, stop));
+      return box(self.getitem_range(start, stop));
     }
     // NOTE: control flow can pass through here; don't make the last line an 'else'!
   }

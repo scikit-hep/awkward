@@ -32,7 +32,7 @@ const std::string IndexOf<T>::tostring_part(const std::string indent, const std:
       if (i != 0) {
         out << " ";
       }
-      out << (int64_t)get(i);
+      out << (int64_t)getitem_at(i);
     }
   }
   else {
@@ -40,14 +40,14 @@ const std::string IndexOf<T>::tostring_part(const std::string indent, const std:
       if (i != 0) {
         out << " ";
       }
-      out << (int64_t)get(i);
+      out << (int64_t)getitem_at(i);
     }
     out << " ... ";
     for (int64_t i = length_ - 5;  i < length_;  i++) {
       if (i != length_ - 5) {
         out << " ";
       }
-      out << (int64_t)get(i);
+      out << (int64_t)getitem_at(i);
     }
   }
   out << "]\" at=\"0x";
@@ -56,12 +56,12 @@ const std::string IndexOf<T>::tostring_part(const std::string indent, const std:
 }
 
 template <typename T>
-T IndexOf<T>::get(int64_t at) const {
+T IndexOf<T>::getitem_at(int64_t at) const {
   return ptr_.get()[(size_t)(offset_ + at)];
 }
 
 template <typename T>
-IndexOf<T> IndexOf<T>::slice(int64_t start, int64_t stop) const {
+IndexOf<T> IndexOf<T>::getitem_range(int64_t start, int64_t stop) const {
   return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
 }
 

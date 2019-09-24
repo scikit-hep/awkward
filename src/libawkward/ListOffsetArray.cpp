@@ -89,19 +89,19 @@ const std::shared_ptr<Content> ListOffsetArrayOf<T>::shallow_copy() const {
 }
 
 template <typename T>
-const std::shared_ptr<Content> ListOffsetArrayOf<T>::get(int64_t at) const {
-  int64_t start = (int64_t)offsets_.get(at);
-  int64_t stop = (int64_t)offsets_.get(at + 1);
-  return content_.get()->slice(start, stop);
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_at(int64_t at) const {
+  int64_t start = (int64_t)offsets_.getitem_at(at);
+  int64_t stop = (int64_t)offsets_.getitem_at(at + 1);
+  return content_.get()->getitem_range(start, stop);
 }
 
 template <typename T>
-const std::shared_ptr<Content> ListOffsetArrayOf<T>::slice(int64_t start, int64_t stop) const {
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_range(int64_t start, int64_t stop) const {
   std::shared_ptr<Identity> id(nullptr);
   if (id_.get() != nullptr) {
-    id = id_.get()->slice(start, stop);
+    id = id_.get()->getitem_range(start, stop);
   }
-  return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id, offsets_.slice(start, stop + 1), content_));
+  return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id, offsets_.getitem_range(start, stop + 1), content_));
 }
 
 template <typename T>

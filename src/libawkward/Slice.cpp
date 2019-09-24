@@ -41,7 +41,7 @@ const std::string SliceArrayOf<T>::tostring_part() const {
         if (i != 0) {
           out << ", ";
         }
-        out << (T)index_.get(i*strides_[0]);
+        out << (T)index_.getitem_at(i*strides_[0]);
       }
     }
     else {
@@ -49,14 +49,14 @@ const std::string SliceArrayOf<T>::tostring_part() const {
         if (i != 0) {
           out << ", ";
         }
-        out << (T)index_.get(i*strides_[0]);
+        out << (T)index_.getitem_at(i*strides_[0]);
       }
       out << ", ..., ";
       for (int64_t i = shape_[0] - 3;  i < shape_[0];  i++) {
         if (i != shape_[0] - 3) {
           out << ", ";
         }
-        out << (T)index_.get(i*strides_[0]);
+        out << (T)index_.getitem_at(i*strides_[0]);
       }
     }
   }

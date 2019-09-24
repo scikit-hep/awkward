@@ -60,7 +60,7 @@ const std::string IdentityOf<T>::tostring() const {
 }
 
 template <typename T>
-const std::shared_ptr<Identity> IdentityOf<T>::slice(int64_t start, int64_t stop) const {
+const std::shared_ptr<Identity> IdentityOf<T>::getitem_range(int64_t start, int64_t stop) const {
   return std::shared_ptr<Identity>(new IdentityOf<T>(ref(), fieldloc(), offset() + width()*start*(start != stop), width(), (stop - start), ptr_));
 }
 

@@ -120,8 +120,8 @@ namespace awkward {
     }
     virtual int64_t length() const { return length_; }
     virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, ptr_, offset_, length_, itemsize_)); }
-    virtual const std::shared_ptr<Content> get(int64_t at) const { return slice(at, at + 1); }
-    virtual const std::shared_ptr<Content> slice(int64_t start, int64_t stop) const {
+    virtual const std::shared_ptr<Content> getitem_at(int64_t at) const { return getitem_range(at, at + 1); }
+    virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
@@ -130,7 +130,7 @@ namespace awkward {
         if (regular_stop > id_.get()->length()) {
           throw std::invalid_argument("index out of range for identity");
         }
-        id = id_.get()->slice(regular_start, regular_stop);
+        id = id_.get()->getitem_range(regular_start, regular_stop);
       }
       return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + regular_start, regular_stop - regular_start, itemsize_));
     }
@@ -153,12 +153,12 @@ namespace awkward {
       }
 
       else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
-        return get(at->at());
+        return getitem_at(at->at());
       }
 
       else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
         if (range->step() == Slice::none()  ||  range->step() == 1) {
-          return slice(range->start(), range->stop());
+          return getitem_range(range->start(), range->stop());
         }
         else {
           int64_t start = range->start();

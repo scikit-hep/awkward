@@ -17,7 +17,7 @@ namespace awkward {
     const int64_t where() const { return where_; }
 
     const bool isdone() const { return where_ >= content_.get()->length(); }
-    const std::shared_ptr<Content> next() { return content_.get()->get(where_++); }
+    const std::shared_ptr<Content> next() { return content_.get()->getitem_at(where_++); }
 
     const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     const std::string tostring() const;
