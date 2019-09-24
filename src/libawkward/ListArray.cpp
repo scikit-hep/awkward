@@ -106,8 +106,6 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem(const Slice& where) const
   return dynamic_cast<ListArrayOf<int64_t>*>(out.get())->content();
 }
 
-// #include <iostream>
-
 template <typename T>
 const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
   if (head.get() == nullptr) {
@@ -161,7 +159,13 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
         content_.get()->length());
       HANDLE_ERROR(err)
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-      return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a Tensor
+      if (advanced.length() == 0) {
+        return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      }
+      else {
+        return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
+      }
     }
     else if (std::is_same<T, int64_t>::value) {
       Index64 nextstarts(lenstarts);
@@ -182,21 +186,13 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
         content_.get()->length());
       HANDLE_ERROR(err)
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-
-      // std::cout << "nextstarts" << std::endl;
-      // std::cout << nextstarts.tostring() << std::endl;
-      // std::cout << "nextstops" << std::endl;
-      // std::cout << nextstops.tostring() << std::endl;
-      // std::cout << "nextcarry" << std::endl;
-      // std::cout << nextcarry.tostring() << std::endl;
-      //
-      // std::cout << "nextcontent" << std::endl;
-      // std::cout << nextcontent.get()->tostring() << std::endl << std::endl;
-      //
-      // std::cout << "nextadvanced" << std::endl;
-      // std::cout << nextadvanced.tostring() << std::endl << std::endl;
-
-      return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a Tensor
+      if (advanced.length() == 0) {
+        return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      }
+      else {
+        return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
+      }
     }
     else {
       throw std::runtime_error("unrecognized ListArray specialization");

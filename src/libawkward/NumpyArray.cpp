@@ -271,7 +271,7 @@ const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
 
 const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
   if (head.get() == nullptr) {
-        throw std::runtime_error("NumpyArray[null]");
+    return shallow_copy();
   }
 
   else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
@@ -300,7 +300,25 @@ const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<Sl
 }
 
 const std::shared_ptr<Content> NumpyArray::carry(const Index64& carry) const {
-  throw std::runtime_error("NumpyArray::carry");
+  assert(!isscalar);
+
+  std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
+  awkward_numpyarray_getitem_next_null_64(
+    reinterpret_cast<uint8_t*>(ptr.get()),
+    reinterpret_cast<uint8_t*>(ptr_.get()),
+    carry.length(),
+    strides_[0],
+    byteoffset_,
+    carry.ptr().get());
+
+  std::shared_ptr<Identity> id(nullptr);
+  if (id_.get() != nullptr) {
+    id = id_.get()->getitem_carry_64(carry);
+  }
+
+  std::vector<ssize_t> shape = { (ssize_t)carry.length() };
+  shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
+  return std::shared_ptr<Content>(new NumpyArray(id, ptr, shape, strides_, 0, itemsize_, format_));
 }
 
 const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
