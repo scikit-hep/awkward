@@ -110,6 +110,37 @@ const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem(const Slice& where)
 }
 
 template <typename T>
+const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced) const {
+  if (head.get() == nullptr) {
+        throw std::runtime_error("ListOffsetArray[null]");
+  }
+
+  else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+    throw std::runtime_error("ListOffsetArray[at]");
+  }
+
+  else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+    throw std::runtime_error("ListOffsetArray[range]");
+  }
+
+  else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+    throw std::runtime_error("ListOffsetArray[ellipsis]");
+  }
+
+  else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+    throw std::runtime_error("ListOffsetArray[newaxis]");
+  }
+
+  else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+    throw std::runtime_error("ListOffsetArray[array]");
+  }
+
+  else {
+    throw std::runtime_error("unrecognized slice item type");
+  }
+}
+
+template <typename T>
 const std::pair<int64_t, int64_t> ListOffsetArrayOf<T>::minmax_depth() const {
   std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
   return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);

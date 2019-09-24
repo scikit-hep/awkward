@@ -94,6 +94,37 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem(const Slice& where) const
 }
 
 template <typename T>
+const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced) const {
+  if (head.get() == nullptr) {
+        throw std::runtime_error("ListArray[null]");
+  }
+
+  else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+    throw std::runtime_error("ListArray[at]");
+  }
+
+  else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+    throw std::runtime_error("ListArray[range]");
+  }
+
+  else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+    throw std::runtime_error("ListArray[ellipsis]");
+  }
+
+  else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+    throw std::runtime_error("ListArray[newaxis]");
+  }
+
+  else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+    throw std::runtime_error("ListArray[array]");
+  }
+
+  else {
+    throw std::runtime_error("unrecognized slice item type");
+  }
+}
+
+template <typename T>
 const std::pair<int64_t, int64_t> ListArrayOf<T>::minmax_depth() const {
   std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
   return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);

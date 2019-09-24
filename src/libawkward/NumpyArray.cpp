@@ -269,6 +269,36 @@ const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
   }
 }
 
+const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced) const {
+  if (head.get() == nullptr) {
+        throw std::runtime_error("NumpyArray[null]");
+  }
+
+  else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+    throw std::runtime_error("NumpyArray[at]");
+  }
+
+  else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+    throw std::runtime_error("NumpyArray[range]");
+  }
+
+  else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+    throw std::runtime_error("NumpyArray[ellipsis]");
+  }
+
+  else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+    throw std::runtime_error("NumpyArray[newaxis]");
+  }
+
+  else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+    throw std::runtime_error("NumpyArray[array]");
+  }
+
+  else {
+    throw std::runtime_error("unrecognized slice item type");
+  }
+}
+
 const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
   return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
 }
