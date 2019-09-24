@@ -269,34 +269,95 @@ const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
   }
 }
 
+#include <iostream>
+
 const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
-  if (head.get() == nullptr) {
-    return shallow_copy();
-  }
 
-  else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
-    throw std::runtime_error("NumpyArray[at]");
-  }
+////////////////////////////////////////////
 
-  else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
-    throw std::runtime_error("NumpyArray[range]");
-  }
 
-  else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
-    throw std::runtime_error("NumpyArray[ellipsis]");
-  }
 
-  else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
-    throw std::runtime_error("NumpyArray[newaxis]");
-  }
+  assert(!isscalar());
 
-  else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
-    throw std::runtime_error("NumpyArray[array]");
-  }
+  // if (!where.isadvanced()  &&  id_.get() == nullptr) {
+  //   std::vector<ssize_t> nextshape = { 1 };
+  //   nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
+  //   std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };
+  //   nextstrides.insert(nextstrides.end(), strides_.begin(), strides_.end());
+  //   NumpyArray next(id_, ptr_, nextshape, nextstrides, byteoffset_, itemsize_, format_);
+  //
+  //   std::shared_ptr<SliceItem> nexthead = head;
+  //   Slice nexttail = tail;
+  //   NumpyArray out = next.getitem_bystrides(nexthead, nexttail, 1);
+  //
+  //   std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
+  //   std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
+  //   return std::shared_ptr<Content>(new NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_));
+  // }
+  //
+  // else {
+    NumpyArray safe = contiguous();   // maybe become_contiguous() to change in-place?
 
-  else {
-    throw std::runtime_error("unrecognized slice item type");
-  }
+    std::vector<ssize_t> nextshape = { advanced.length() };
+    nextshape.insert(nextshape.end(), safe.shape_.begin(), safe.shape_.end());
+    std::vector<ssize_t> nextstrides = { safe.shape_[0]*safe.strides_[0] };
+    nextstrides.insert(nextstrides.end(), safe.strides_.begin(), safe.strides_.end());
+    NumpyArray next(safe.id_, safe.ptr_, nextshape, nextstrides, safe.byteoffset_, itemsize_, format_);
+
+    std::shared_ptr<SliceItem> nexthead = head;
+    Slice nexttail = tail;
+    Index64 nextcarry(advanced.length());
+
+    int64_t* tocarry = nextcarry.ptr().get();
+    int64_t length = nextcarry.length();
+
+    for (int64_t i = 0;  i < length;  i++) {
+      tocarry[i] = i;
+    }
+
+    Index64 nextadvanced = advanced;
+    NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, nextcarry.length(), next.strides_[0]);
+
+    std::cout << "out" << std::endl;
+    std::cout << out.tostring() << std::endl;
+
+    std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
+    std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
+    return std::shared_ptr<Content>(new NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_));
+  // }
+
+
+
+
+//////////////////////////////////////////////
+
+  // if (head.get() == nullptr) {
+  //   return shallow_copy();
+  // }
+  //
+  // else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+  //   throw std::runtime_error("NumpyArray[at]");
+  // }
+  //
+  // else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+  //   throw std::runtime_error("NumpyArray[range]");
+  // }
+  //
+  // else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+  //   throw std::runtime_error("NumpyArray[ellipsis]");
+  // }
+  //
+  // else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+  //   throw std::runtime_error("NumpyArray[newaxis]");
+  // }
+  //
+  // else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+  //   throw std::runtime_error("NumpyArray[array]");
+  // }
+  //
+  // else {
+  //   throw std::runtime_error("unrecognized slice item type");
+  // }
 }
 
 const std::shared_ptr<Content> NumpyArray::carry(const Index64& carry) const {
