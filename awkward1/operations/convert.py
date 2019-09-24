@@ -16,7 +16,7 @@ def tolist(array):
     elif isinstance(array, awkward1.layout.NumpyArray):
         return numpy.asarray(array).tolist()
 
-    elif isinstance(array, (awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArray64)):
+    elif isinstance(array, awkward1.layout.Content):
         return [tolist(x) for x in array]
 
     else:
