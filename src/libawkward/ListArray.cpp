@@ -150,6 +150,8 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
           reinterpret_cast<int32_t*>(starts_.ptr().get()),
           reinterpret_cast<int32_t*>(stops_.ptr().get()),
           flathead.ptr().get(),
+          starts_.offset(),
+          stops_.offset(),
           lenstarts,
           flathead.length(),
           content_.get()->length());
@@ -167,6 +169,8 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
           reinterpret_cast<int64_t*>(starts_.ptr().get()),
           reinterpret_cast<int64_t*>(stops_.ptr().get()),
           flathead.ptr().get(),
+          starts_.offset(),
+          stops_.offset(),
           lenstarts,
           flathead.length(),
           content_.get()->length());
@@ -195,27 +199,37 @@ const std::shared_ptr<Content> ListArrayOf<T>::carry(const Index64& carry) const
   if (std::is_same<T, int32_t>::value) {
     Index32 nextstarts(carry.length());
     Index32 nextstops(carry.length());
-    awkward_listarray32_carry_64(
+    awkward_listarray32_getitem_carry_64(
       nextstarts.ptr().get(),
       nextstops.ptr().get(),
       reinterpret_cast<int32_t*>(starts_.ptr().get()),
       reinterpret_cast<int32_t*>(stops_.ptr().get()),
       carry.ptr().get(),
+      starts_.offset(),
+      stops_.offset(),
       carry.length());
-    std::shared_ptr<Identity> id(nullptr);  // FIXME
+    std::shared_ptr<Identity> id(nullptr);
+    if (id_.get() != nullptr) {
+      id = id_.get()->getitem_carry_64(carry);
+    }
     return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id, nextstarts, nextstops, content_));
   }
   else if (std::is_same<T, int64_t>::value) {
     Index64 nextstarts(carry.length());
     Index64 nextstops(carry.length());
-    awkward_listarray64_carry_64(
+    awkward_listarray64_getitem_carry_64(
       nextstarts.ptr().get(),
       nextstops.ptr().get(),
       reinterpret_cast<int64_t*>(starts_.ptr().get()),
       reinterpret_cast<int64_t*>(stops_.ptr().get()),
       carry.ptr().get(),
+      starts_.offset(),
+      stops_.offset(),
       carry.length());
-    std::shared_ptr<Identity> id(nullptr);  // FIXME
+    std::shared_ptr<Identity> id(nullptr);
+    if (id_.get() != nullptr) {
+      id = id_.get()->getitem_carry_64(carry);
+    }
     return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id, nextstarts, nextstops, content_));
   }
   else {

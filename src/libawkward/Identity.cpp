@@ -97,7 +97,7 @@ const std::shared_ptr<Identity> IdentityOf<T>::getitem_carry_64(const Index64& c
       length_);
   }
   else {
-    throw std::runtime_error("unrecognized identity");
+    throw std::runtime_error("unrecognized Identity specialization");
   }
   HANDLE_ERROR(assign_err)
 
