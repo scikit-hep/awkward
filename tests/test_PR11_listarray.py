@@ -23,3 +23,8 @@ def test_listarray():
 
     assert awkward1.tolist(array1[numpy.array([2, 0, 0, 1, -1])]) == [[4.4, 5.5], [1.1, 2.2, 3.3], [1.1, 2.2, 3.3], [], [7.7, 8.8, 9.9]]
     assert awkward1.tolist(array1[numpy.array([2, 0, 0, -1]), numpy.array([1, 1, 0, 0])]) == [5.5, 2.2, 1.1, 7.7]
+
+    # content_deep = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]).reshape(-1, 1))
+    # array1_deep  = awkward1.layout.ListArray64(starts1, stops1, content_deep)
+    # assert awkward1.tolist(array1_deep) == [[[1.1], [2.2], [3.3]], [], [[4.4], [5.5]], [[6.6]], [[7.7], [8.8], [9.9]]]
+    # assert awkward1.tolist(array1_deep[numpy.array([2, 0, 0, -1]), numpy.array([1, 1, 0, 0]), numpy.array([0, 0, 0, 0])]) == [5.5, 2.2, 1.1, 7.7]

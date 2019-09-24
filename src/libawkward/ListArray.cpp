@@ -138,64 +138,95 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
     }
 
     Index64 flathead = array->ravel();
-    Index64 nextcarry(advanced.length() == 0 ? lenstarts*flathead.length() : lenstarts);
-    Index64 nextadvanced(nextcarry.length());
-    if (std::is_same<T, int32_t>::value) {
-      Index32 nextstarts(lenstarts);
-      Index32 nextstops(lenstarts);
-      Error err = awkward_listarray32_getitem_next_array_64(
-        nextstarts.ptr().get(),
-        nextstops.ptr().get(),
-        nextcarry.ptr().get(),
-        nextadvanced.ptr().get(),
-        reinterpret_cast<int32_t*>(starts_.ptr().get()),
-        reinterpret_cast<int32_t*>(stops_.ptr().get()),
-        flathead.ptr().get(),
-        advanced.ptr().get(),
-        starts_.offset(),
-        stops_.offset(),
-        lenstarts,
-        flathead.length(),
-        content_.get()->length());
-      HANDLE_ERROR(err)
-      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-      // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a Tensor
-      if (advanced.length() == 0) {
+    if (advanced.length() == 0) {
+      Index64 nextcarry(lenstarts*flathead.length());
+      Index64 nextadvanced(lenstarts*flathead.length());
+      if (std::is_same<T, int32_t>::value) {
+        Index32 nextstarts(lenstarts);
+        Index32 nextstops(lenstarts);
+        Error err = awkward_listarray32_getitem_next_array_64(
+          nextstarts.ptr().get(),
+          nextstops.ptr().get(),
+          nextcarry.ptr().get(),
+          nextadvanced.ptr().get(),
+          reinterpret_cast<int32_t*>(starts_.ptr().get()),
+          reinterpret_cast<int32_t*>(stops_.ptr().get()),
+          flathead.ptr().get(),
+          starts_.offset(),
+          stops_.offset(),
+          lenstarts,
+          flathead.length(),
+          content_.get()->length());
+        HANDLE_ERROR(err)
+        std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+        // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a Tensor
         return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
       }
-      else {
-        return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
-      }
-    }
-    else if (std::is_same<T, int64_t>::value) {
-      Index64 nextstarts(lenstarts);
-      Index64 nextstops(lenstarts);
-      Error err = awkward_listarray64_getitem_next_array_64(
-        nextstarts.ptr().get(),
-        nextstops.ptr().get(),
-        nextcarry.ptr().get(),
-        nextadvanced.ptr().get(),
-        reinterpret_cast<int64_t*>(starts_.ptr().get()),
-        reinterpret_cast<int64_t*>(stops_.ptr().get()),
-        flathead.ptr().get(),
-        advanced.ptr().get(),
-        starts_.offset(),
-        stops_.offset(),
-        lenstarts,
-        flathead.length(),
-        content_.get()->length());
-      HANDLE_ERROR(err)
-      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-      // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a Tensor
-      if (advanced.length() == 0) {
+      else if (std::is_same<T, int64_t>::value) {
+        Index64 nextstarts(lenstarts);
+        Index64 nextstops(lenstarts);
+        Error err = awkward_listarray64_getitem_next_array_64(
+          nextstarts.ptr().get(),
+          nextstops.ptr().get(),
+          nextcarry.ptr().get(),
+          nextadvanced.ptr().get(),
+          reinterpret_cast<int64_t*>(starts_.ptr().get()),
+          reinterpret_cast<int64_t*>(stops_.ptr().get()),
+          flathead.ptr().get(),
+          starts_.offset(),
+          stops_.offset(),
+          lenstarts,
+          flathead.length(),
+          content_.get()->length());
+        HANDLE_ERROR(err)
+        std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+        // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a Tensor
         return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
       }
       else {
-        return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
+        throw std::runtime_error("unrecognized ListArray specialization");
       }
     }
     else {
-      throw std::runtime_error("unrecognized ListArray specialization");
+      Index64 nextcarry(lenstarts);
+      Index64 nextadvanced(lenstarts);
+      if (std::is_same<T, int32_t>::value) {
+        Error err = awkward_listarray32_getitem_next_array_advanced_64(
+          nextcarry.ptr().get(),
+          nextadvanced.ptr().get(),
+          reinterpret_cast<int32_t*>(starts_.ptr().get()),
+          reinterpret_cast<int32_t*>(stops_.ptr().get()),
+          flathead.ptr().get(),
+          advanced.ptr().get(),
+          starts_.offset(),
+          stops_.offset(),
+          lenstarts,
+          flathead.length(),
+          content_.get()->length());
+        HANDLE_ERROR(err)
+        std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+        return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
+      }
+      else if (std::is_same<T, int64_t>::value) {
+        Error err = awkward_listarray64_getitem_next_array_advanced_64(
+          nextcarry.ptr().get(),
+          nextadvanced.ptr().get(),
+          reinterpret_cast<int64_t*>(starts_.ptr().get()),
+          reinterpret_cast<int64_t*>(stops_.ptr().get()),
+          flathead.ptr().get(),
+          advanced.ptr().get(),
+          starts_.offset(),
+          stops_.offset(),
+          lenstarts,
+          flathead.length(),
+          content_.get()->length());
+        HANDLE_ERROR(err)
+        std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+        return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
+      }
+      else {
+        throw std::runtime_error("unrecognized ListArray specialization");
+      }
     }
   }
 
