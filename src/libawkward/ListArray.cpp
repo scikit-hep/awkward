@@ -91,7 +91,7 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_range(int64_t start, int6
 
 template <typename T>
 const std::shared_ptr<Content> ListArrayOf<T>::getitem(const Slice& where) const {
-  // FIXME: find a better way to wrap these
+  // FIXME: find a better way to wrap these. TensorArray?
   Index64 nextstarts(1);
   Index64 nextstops(1);
   *nextstarts.ptr().get() = 0;
@@ -122,39 +122,34 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
   else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
     assert(advanced.length() == 0);
     if (std::is_same<T, int32_t>::value) {
-
-
+      Index64 nextcarry(lenstarts);
+      Error err = awkward_listarray32_getitem_next_at_64(
+        nextcarry.ptr().get(),
+        reinterpret_cast<int32_t*>(starts_.ptr().get()),
+        reinterpret_cast<int32_t*>(stops_.ptr().get()),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset(),
+        at->at());
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+      return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
     }
     else if (std::is_same<T, int64_t>::value) {
       Index64 nextcarry(lenstarts);
-
-      int64_t* tocarry = nextcarry.ptr().get();
-      int64_t* fromstarts = reinterpret_cast<int64_t*>(starts_.ptr().get());
-      int64_t* fromstops = reinterpret_cast<int64_t*>(stops_.ptr().get());
-      // int64_t lenstarts = lenstarts;
-      int64_t startsoffset = starts_.offset();
-      int64_t stopsoffset = stops_.offset();
-      int64_t pos = at->at();
-
-      for (int64_t i = 0;  i < lenstarts;  i++) {
-        int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
-        int64_t regular_at = pos;
-        if (regular_at < 0) {
-          regular_at += length;
-        }
-        if (!(0 <= regular_at  &&  regular_at < length)) {
-          throw std::invalid_argument("index out of range");
-        }
-        tocarry[i] = fromstarts[startsoffset + i] + regular_at;
-      }
-
+      Error err = awkward_listarray64_getitem_next_at_64(
+        nextcarry.ptr().get(),
+        reinterpret_cast<int64_t*>(starts_.ptr().get()),
+        reinterpret_cast<int64_t*>(stops_.ptr().get()),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset(),
+        at->at());
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
     }
     else {
       throw std::runtime_error("unrecognized ListArray specialization");
     }
-    throw std::runtime_error("ListArray[at]");
   }
 
   else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
