@@ -65,6 +65,16 @@ void awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_t
   awkward_slicearray_ravel<int64_t>(toptr, fromptr, ndim, shape, strides);
 }
 
+template <typename T>
+void awkward_carry_arange(T* toptr, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toptr[i] = i;
+  }
+}
+void awkward_carry_arange_64(int64_t* toptr, int64_t length) {
+  awkward_carry_arange<int64_t>(toptr, length);
+}
+
 template <typename ID, typename T>
 Error awkward_identity_getitem_carry(ID* newidentityptr, const ID* identityptr, const T* carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length) {
   for (int64_t i = 0;  i < lencarry;  i++) {
