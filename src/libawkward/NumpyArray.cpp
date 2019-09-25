@@ -571,7 +571,7 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
 
     if (advanced.length() == 0) {
       Index64 nextcarry(carry.length()*lenhead);
-      awkward_numpyarray_getitem_next_slice_64(
+      awkward_numpyarray_getitem_next_range_64(
         nextcarry.ptr().get(),
         carry.ptr().get(),
         carry.length(),
@@ -591,7 +591,7 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
     else {
       Index64 nextcarry(carry.length()*lenhead);
       Index64 nextadvanced(carry.length()*lenhead);
-      awkward_numpyarray_getitem_next_slice_advanced_64(
+      awkward_numpyarray_getitem_next_range_advanced_64(
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         carry.ptr().get(),

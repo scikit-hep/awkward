@@ -21,6 +21,13 @@ def test_basic():
     assert awkward1.tolist(array2[1]) == [[4.4, 5.5]]
     assert awkward1.tolist(array2[1:-1]) == [[[4.4, 5.5]], []]
 
+def test_at():
+    assert awkward1.tolist(array1[2]) == [4.4, 5.5]
+    assert awkward1.tolist(array1[2,]) == [4.4, 5.5]
+    assert awkward1.tolist(array1[2, 1:]) == [5.5]
+    assert awkward1.tolist(array1[2:, 0]) == [4.4, 6.6, 7.7]
+    assert awkward1.tolist(array1[2:, -1]) == [5.5, 6.6, 9.9]
+
 def test_slice():
     assert awkward1.tolist(array1[1:-1]) == [[], [4.4, 5.5], [6.6]]
     assert awkward1.tolist(array1[1:-1,]) == [[], [4.4, 5.5], [6.6]]
