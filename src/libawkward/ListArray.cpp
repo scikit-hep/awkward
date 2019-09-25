@@ -89,8 +89,6 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_range(int64_t start, int6
   return std::shared_ptr<Content>(new ListArrayOf<T>(id, starts_.getitem_range(regular_start, regular_stop), stops_.getitem_range(regular_start, regular_stop), content_));
 }
 
-#include <iostream>
-
 template <typename T>
 const std::shared_ptr<Content> ListArrayOf<T>::getitem(const Slice& where) const {
   // FIXME: find a better way to wrap these
@@ -104,10 +102,6 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem(const Slice& where) const
   Slice nexttail = where.tail();
   Index64 nextadvanced(0);
   std::shared_ptr<Content> out = next.getitem_next(nexthead, nexttail, nextadvanced);
-
-  std::cout << "out" << std::endl;
-  std::cout << out.get()->tostring() << std::endl;
-
   return dynamic_cast<ListArrayOf<int64_t>*>(out.get())->content();
 }
 
@@ -130,9 +124,6 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
   }
 
   else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
-    std::cout << "self" << std::endl;
-    std::cout << tostring() << std::endl;
-
     int64_t start = range->start();
     int64_t stop = range->stop();
     int64_t step = range->step();
@@ -140,133 +131,110 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
       step = 1;
     }
     if (std::is_same<T, int32_t>::value) {
+      int64_t carrylength;
+      awkward_listarray32_getitem_next_slice_carrylength(
+        carrylength,
+        reinterpret_cast<int32_t*>(starts_.ptr().get()),
+        reinterpret_cast<int32_t*>(stops_.ptr().get()),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset(),
+        start,
+        stop,
+        step);
 
-    }
-    else if (std::is_same<T, int64_t>::value) {
-      int64_t k;
-      int64_t* fromstarts = reinterpret_cast<int64_t*>(starts_.ptr().get());
-      int64_t* fromstops = reinterpret_cast<int64_t*>(stops_.ptr().get());
-      // int64_t lenstarts = lenstarts;
-      int64_t startsoffset = starts_.offset();
-      int64_t stopsoffset = stops_.offset();
+      Index32 nextstarts(lenstarts);
+      Index32 nextstops(lenstarts);
+      Index64 nextcarry(carrylength);
 
-      k = 0;
-      for (int64_t i = 0;  i < lenstarts;  i++) {
-        int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
-        int64_t regular_start = start;
-        int64_t regular_stop = stop;
-        awkward_regularize_rangeslice(regular_start, regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length);
-        if (step > 0) {
-          for (int64_t j = regular_start;  j < regular_stop;  j += step) {
-            k++;
-          }
-        }
-        else {
-          for (int64_t j = regular_start;  j > regular_stop;  j += step) {
-            k++;
-          }
-        }
-      }
-
-      Index64 nextstarts(lenstarts);
-      Index64 nextstops(lenstarts);
-      Index64 nextcarry(k);
-      int64_t nextcarrylen;
-
-      int64_t* tostarts = nextstarts.ptr().get();
-      int64_t* tostops = nextstops.ptr().get();
-      int64_t* tocarry = nextcarry.ptr().get();
-      // int64_t k;
-      // int64_t* fromstarts = reinterpret_cast<int64_t*>(starts_.ptr().get());
-      // int64_t* fromstops = reinterpret_cast<int64_t*>(stops_.ptr().get());
-      // int64_t lenstarts = lenstarts;
-      // int64_t startsoffset = starts_.offset();
-      // int64_t stopsoffset = stops_.offset();
-      // int64_t start = start;
-      // int64_t stop = stop;
-      // int64_t step = step;
-
-      if (lenstarts != 0) {
-        tostarts[0] = 0;
-      }
-      k = 0;
-      for (int64_t i = 0;  i < lenstarts;  i++) {
-        int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
-        int64_t regular_start = start;
-        int64_t regular_stop = stop;
-        awkward_regularize_rangeslice(regular_start, regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length);
-        if (step > 0) {
-          for (int64_t j = regular_start;  j < regular_stop;  j += step) {
-            tocarry[k] = fromstarts[startsoffset + i] + j;
-            k++;
-          }
-        }
-        else {
-          for (int64_t j = regular_start;  j > regular_stop;  j += step) {
-            tocarry[k] = fromstarts[startsoffset + i] + j;
-            k++;
-          }
-        }
-        if (i + 1 < lenstarts) {
-          tostarts[i + 1] = k;
-        }
-        tostops[i] = k;
-      }
-
-      std::cout << "nextcarry" << std::endl;
-      std::cout << nextcarry.tostring() << std::endl;
-
+      awkward_listarray32_getitem_next_slice_64(
+        nextstarts.ptr().get(),
+        nextstops.ptr().get(),
+        nextcarry.ptr().get(),
+        reinterpret_cast<int32_t*>(starts_.ptr().get()),
+        reinterpret_cast<int32_t*>(stops_.ptr().get()),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset(),
+        start,
+        stop,
+        step);
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
-      std::cout << "nextcontent" << std::endl;
-      std::cout << nextcontent.get()->tostring() << std::endl;
-
-      std::cout << "nextstarts" << std::endl;
-      std::cout << nextstarts.tostring() << std::endl;
-      std::cout << "nextstops" << std::endl;
-      std::cout << nextstops.tostring() << std::endl;
-
       if (advanced.length() == 0) {
-        std::shared_ptr<Content> tmp = nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
-
-        std::cout << "tmp" << std::endl;
-        std::cout << tmp.get()->tostring() << std::endl;
-
-        return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, tmp));
+        return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));
       }
       else {
         Index64 counts(nextstarts.length());
         int64_t total;
-
-        int64_t* tocounts = counts.ptr().get();
-        // int64_t total = total;
-        int64_t* fromstarts = nextstarts.ptr().get();
-        int64_t* fromstops = nextstops.ptr().get();
-        // int64_t lenstarts = lenstarts;
-
-        total = 0;
-        for (int64_t i = 0;  i < lenstarts;  i++) {
-          tocounts[i] = fromstops[i] - fromstarts[i];
-          total += tocounts[i];
-        }
-
+        awkward_listarray32_getitem_next_slice_counts_64(
+          counts.ptr().get(),
+          total,
+          reinterpret_cast<int32_t*>(nextstarts.ptr().get()),
+          reinterpret_cast<int32_t*>(nextstops.ptr().get()),
+          lenstarts);
         Index64 nextadvanced(total);
+        awkward_listarray32_getitem_next_slice_spreadadvanced_64(
+          nextadvanced.ptr().get(),
+          advanced.ptr().get(),
+          reinterpret_cast<int32_t*>(nextstarts.ptr().get()),
+          counts.ptr().get(),
+          lenstarts);
+        return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      }
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      int64_t carrylength;
+      awkward_listarray64_getitem_next_slice_carrylength(
+        carrylength,
+        reinterpret_cast<int64_t*>(starts_.ptr().get()),
+        reinterpret_cast<int64_t*>(stops_.ptr().get()),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset(),
+        start,
+        stop,
+        step);
 
-        int64_t* toadvanced = nextadvanced.ptr().get();
-        int64_t* fromadvanced = advanced.ptr().get();
-        // int64_t* fromstarts = nextstarts.ptr().get();
-        int64_t* fromcounts = counts.ptr().get();
-        // int64_t lenstarts = lenstarts;
+      Index64 nextstarts(lenstarts);
+      Index64 nextstops(lenstarts);
+      Index64 nextcarry(carrylength);
 
-        for (int64_t i = 0;  i < lenstarts;  i++) {
-          for (int64_t j = 0;  j < fromcounts[i];  j++) {
-            toadvanced[fromstarts[i] + j] = fromadvanced[i];
-          }
-        }
+      awkward_listarray64_getitem_next_slice_64(
+        nextstarts.ptr().get(),
+        nextstops.ptr().get(),
+        nextcarry.ptr().get(),
+        reinterpret_cast<int64_t*>(starts_.ptr().get()),
+        reinterpret_cast<int64_t*>(stops_.ptr().get()),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset(),
+        start,
+        stop,
+        step);
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
+      if (advanced.length() == 0) {
+        return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));
+      }
+      else {
+        Index64 counts(nextstarts.length());
+        int64_t total;
+        awkward_listarray64_getitem_next_slice_counts_64(
+          counts.ptr().get(),
+          total,
+          reinterpret_cast<int64_t*>(nextstarts.ptr().get()),
+          reinterpret_cast<int64_t*>(nextstops.ptr().get()),
+          lenstarts);
+        Index64 nextadvanced(total);
+        awkward_listarray64_getitem_next_slice_spreadadvanced_64(
+          nextadvanced.ptr().get(),
+          advanced.ptr().get(),
+          reinterpret_cast<int64_t*>(nextstarts.ptr().get()),
+          counts.ptr().get(),
+          lenstarts);
         return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
       }
-
     }
     else {
       throw std::runtime_error("unrecognized ListArray specialization");
