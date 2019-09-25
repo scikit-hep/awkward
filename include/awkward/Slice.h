@@ -14,7 +14,7 @@
 namespace awkward {
   class SliceItem {
   public:
-    static int64_t none() { return kMaxInt64 + 1; }
+    static int64_t none() { return kSliceNone; }
 
     virtual const std::string tostring() const = 0;
   };

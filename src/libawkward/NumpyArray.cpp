@@ -271,9 +271,9 @@ const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
 
 const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
   assert(!isscalar());
-  Index64 carry(advanced.length());
-  awkward_carry_arange_64(carry.ptr().get(), advanced.length());
-  return getitem_next(head, tail, carry, advanced, advanced.length(), strides_[0]).shallow_copy();
+  Index64 carry(shape_[0]);
+  awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
+  return getitem_next(head, tail, carry, advanced, shape_[0], strides_[0]).shallow_copy();
 }
 
 const std::shared_ptr<Content> NumpyArray::carry(const Index64& carry) const {

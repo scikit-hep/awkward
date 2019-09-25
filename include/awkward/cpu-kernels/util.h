@@ -24,10 +24,11 @@ extern "C" {
   typedef const char* Error;
   const Error kNoError = nullptr;
 
-  const int8_t  kMaxInt8  =                 127;   // 2**7  - 1
-  const uint8_t kMaxUInt8 =                 255;   // 2**8  - 1
-  const int32_t kMaxInt32 =          2147483647;   // 2**31 - 1
-  const int64_t kMaxInt64 = 9223372036854775806;   // 2**63 - 2: kMaxInt64 + 1 is Slice::none()
+  const int8_t  kMaxInt8   =                 127;   // 2**7  - 1
+  const uint8_t kMaxUInt8  =                 255;   // 2**8  - 1
+  const int32_t kMaxInt32  =          2147483647;   // 2**31 - 1
+  const int64_t kMaxInt64  = 9223372036854775806;   // 2**63 - 2: see below
+  const int64_t kSliceNone = kMaxInt64 + 1;         // reserved for Slice::none()
 }
 
 #endif // AWKWARDCPU_UTIL_H_
