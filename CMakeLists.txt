@@ -45,5 +45,5 @@ target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static)
 target_link_libraries(awkward        PRIVATE awkward-cpu-kernels-static)
 
 pybind11_add_module(layout src/pyawkward.cpp)
-set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
+set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET default)
 target_link_libraries(layout PRIVATE awkward-static)
