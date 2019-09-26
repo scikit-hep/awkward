@@ -1,9 +1,13 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+import sys
+
 import pytest
 import numpy
 
 import awkward1
+
+py27 = (sys.version_info[0] < 3)
 
 content  = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
 starts1  = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6]))
@@ -83,14 +87,16 @@ def test_listoffsetarray_slice_slice():
 def test_listarray_ellipsis():
     array1 = awkward1.layout.ListArray64(starts1, stops1, content)
     array2 = awkward1.layout.ListArray64(starts2, stops2, array1)
-    assert awkward1.tolist(array1[Ellipsis, 1:]) == [[2.2, 3.3], [], [5.5], [], [8.8, 9.9]]
-    assert awkward1.tolist(array2[Ellipsis, 1:]) == [[[2.2, 3.3], []], [[5.5]], [], [[], [8.8, 9.9]]]
+    if py27:
+        assert awkward1.tolist(array1[Ellipsis, 1:]) == [[2.2, 3.3], [], [5.5], [], [8.8, 9.9]]
+        assert awkward1.tolist(array2[Ellipsis, 1:]) == [[[2.2, 3.3], []], [[5.5]], [], [[], [8.8, 9.9]]]
 
 def test_listoffsetarray_ellipsis():
     array1 = awkward1.layout.ListOffsetArray64(offsets1, content)
     array2 = awkward1.layout.ListOffsetArray64(offsets2, array1)
-    assert awkward1.tolist(array1[Ellipsis, 1:]) == [[2.2, 3.3], [], [5.5], [], [8.8, 9.9]]
-    assert awkward1.tolist(array2[Ellipsis, 1:]) == [[[2.2, 3.3], []], [[5.5]], [], [[], [8.8, 9.9]]]
+    if py27:
+        assert awkward1.tolist(array1[Ellipsis, 1:]) == [[2.2, 3.3], [], [5.5], [], [8.8, 9.9]]
+        assert awkward1.tolist(array2[Ellipsis, 1:]) == [[[2.2, 3.3], []], [[5.5]], [], [[], [8.8, 9.9]]]
 
 def test_listarray_array_slice():
     array1 = awkward1.layout.ListArray64(starts1, stops1, content)
