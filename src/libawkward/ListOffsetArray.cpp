@@ -10,56 +10,159 @@
 
 namespace awkward {
   template <typename T>
-  void ListOffsetArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
-    std::shared_ptr<Identity> theid = id;
-    if (theid.get() == nullptr) {
-      content_.get()->setid(theid);
+  IndexOf<T> make_starts(const IndexOf<T>& offsets) {
+    return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
+  }
+
+  template <typename T>
+  IndexOf<T> make_stops(const IndexOf<T>& offsets) {
+    return IndexOf<T>(offsets.ptr(), offsets.offset() + 1, offsets.length() - 1);
+  }
+
+  template <>
+  void ListOffsetArrayOf<int32_t>::setid(const std::shared_ptr<Identity> id) {
+    if (id.get() == nullptr) {
+      content_.get()->setid(id);
     }
     else {
       if (length() != id.get()->length()) {
         throw std::invalid_argument("content and its id must have the same length");
       }
-      if (std::is_same<T, int64_t>::value) {
-        theid = theid.get()->to64();
+      Index32 starts = make_starts(offsets_);
+      Index32 stops = make_stops(offsets_);
+      std::shared_ptr<Identity> bigid = id;
+      if (content_.get()->length() > kMaxInt32) {
+        bigid = id.get()->to64();
       }
-      if (Identity64* rawid = dynamic_cast<Identity64*>(theid.get())) {
-        Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        std::shared_ptr<Identity> newsubid(rawsubid);
-        if (std::is_same<T, int32_t>::value) {
-          awkward_identity64_from_listoffsets32(
-            rawsubid->ptr().get(),
-            rawid->ptr().get(),
-            content_.get()->length(),
-            reinterpret_cast<int32_t*>(offsets_.ptr().get()),
-            rawid->width(),
-            length());
-        }
-        else {
-          awkward_identity64_from_listoffsets64(
-            rawsubid->ptr().get(),
-            rawid->ptr().get(),
-            content_.get()->length(),
-            reinterpret_cast<int64_t*>(offsets_.ptr().get()),
-            rawid->width(),
-            length());
-        }
-        content_.get()->setid(newsubid);
-      }
-      else if (Identity32* rawid = dynamic_cast<Identity32*>(theid.get())) {
+      if (Identity32* rawid = dynamic_cast<Identity32*>(bigid.get())) {
         Identity32* rawsubid = new Identity32(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        std::shared_ptr<Identity> newsubid(rawsubid);
-        awkward_identity32_from_listoffsets32(
+        std::shared_ptr<Identity> subid(rawsubid);
+        Error err = awkward_identity32_from_listarray32(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
+          starts.ptr().get(),
+          stops.ptr().get(),
+          rawid->offset(),
+          starts.offset(),
+          stops.offset(),
           content_.get()->length(),
-          reinterpret_cast<int32_t*>(offsets_.ptr().get()),
-          rawid->width(),
-          length());
-        content_.get()->setid(newsubid);
+          length(),
+          rawid->width());
+        HANDLE_ERROR(err)
+        content_.get()->setid(subid);
+      }
+      else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
+        Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        std::shared_ptr<Identity> subid(rawsubid);
+        Error err = awkward_identity64_from_listarray32(
+          rawsubid->ptr().get(),
+          rawid->ptr().get(),
+          starts.ptr().get(),
+          stops.ptr().get(),
+          rawid->offset(),
+          starts.offset(),
+          stops.offset(),
+          content_.get()->length(),
+          length(),
+          rawid->width());
+        HANDLE_ERROR(err)
+        content_.get()->setid(subid);
+      }
+      else {
+        throw std::runtime_error("unrecognized Identity specialization");
       }
     }
-    id_ = theid;
+    id_ = id;
   }
+
+  template <>
+  void ListOffsetArrayOf<int64_t>::setid(const std::shared_ptr<Identity> id) {
+    if (id.get() == nullptr) {
+      content_.get()->setid(id);
+    }
+    else {
+      if (length() != id.get()->length()) {
+        throw std::invalid_argument("content and its id must have the same length");
+      }
+      Index64 starts = make_starts(offsets_);
+      Index64 stops = make_stops(offsets_);
+      std::shared_ptr<Identity> bigid = id.get()->to64();
+      if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
+        Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        std::shared_ptr<Identity> subid(rawsubid);
+        Error err = awkward_identity64_from_listarray64(
+          rawsubid->ptr().get(),
+          rawid->ptr().get(),
+          starts.ptr().get(),
+          stops.ptr().get(),
+          rawid->offset(),
+          starts.offset(),
+          stops.offset(),
+          content_.get()->length(),
+          length(),
+          rawid->width());
+        HANDLE_ERROR(err)
+        content_.get()->setid(subid);
+      }
+      else {
+        throw std::runtime_error("unrecognized Identity specialization");
+      }
+    }
+    id_ = id;
+  }
+
+  // template <typename T>
+  // void ListOffsetArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
+  //   std::shared_ptr<Identity> theid = id;
+  //   if (theid.get() == nullptr) {
+  //     content_.get()->setid(theid);
+  //   }
+  //   else {
+  //     if (length() != id.get()->length()) {
+  //       throw std::invalid_argument("content and its id must have the same length");
+  //     }
+  //     if (std::is_same<T, int64_t>::value) {
+  //       theid = theid.get()->to64();
+  //     }
+  //     if (Identity64* rawid = dynamic_cast<Identity64*>(theid.get())) {
+  //       Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+  //       std::shared_ptr<Identity> newsubid(rawsubid);
+  //       if (std::is_same<T, int32_t>::value) {
+  //         awkward_identity64_from_listoffsets32(
+  //           rawsubid->ptr().get(),
+  //           rawid->ptr().get(),
+  //           content_.get()->length(),
+  //           reinterpret_cast<int32_t*>(offsets_.ptr().get()),
+  //           rawid->width(),
+  //           length());
+  //       }
+  //       else {
+  //         awkward_identity64_from_listoffsets64(
+  //           rawsubid->ptr().get(),
+  //           rawid->ptr().get(),
+  //           content_.get()->length(),
+  //           reinterpret_cast<int64_t*>(offsets_.ptr().get()),
+  //           rawid->width(),
+  //           length());
+  //       }
+  //       content_.get()->setid(newsubid);
+  //     }
+  //     else if (Identity32* rawid = dynamic_cast<Identity32*>(theid.get())) {
+  //       Identity32* rawsubid = new Identity32(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+  //       std::shared_ptr<Identity> newsubid(rawsubid);
+  //       awkward_identity32_from_listoffsets32(
+  //         rawsubid->ptr().get(),
+  //         rawid->ptr().get(),
+  //         content_.get()->length(),
+  //         reinterpret_cast<int32_t*>(offsets_.ptr().get()),
+  //         rawid->width(),
+  //         length());
+  //       content_.get()->setid(newsubid);
+  //     }
+  //   }
+  //   id_ = theid;
+  // }
+
   template <typename T>
   void ListOffsetArrayOf<T>::setid() {
     if (length() <= kMaxInt32) {
@@ -128,16 +231,6 @@ namespace awkward {
     }
 
     return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id, offsets_.getitem_range(regular_start, regular_stop + 1), content_));
-  }
-
-  template <typename T>
-  IndexOf<T> make_starts(const IndexOf<T>& offsets) {
-    return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
-  }
-
-  template <typename T>
-  IndexOf<T> make_stops(const IndexOf<T>& offsets) {
-    return IndexOf<T>(offsets.ptr(), offsets.offset() + 1, offsets.length() - 1);
   }
 
   template <>
