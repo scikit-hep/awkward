@@ -11,5 +11,6 @@ for PYBIN in /opt/python/*/bin; do
     echo "========================================================="
     echo $PYBIN
     echo "========================================================="
+    "${PYBIN}/pip" install scikit-build
     "${PYBIN}/python" setup.py bdist_wheel -p $PLAT
 done
