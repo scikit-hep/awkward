@@ -625,7 +625,6 @@ const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head,
       std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
       std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
       items.insert(items.end(), tailitems.begin(), tailitems.end());
-
       std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
       Slice nexttail(items, true);
       return getitem_next(nexthead, nexttail, carry, advanced, length, stride);

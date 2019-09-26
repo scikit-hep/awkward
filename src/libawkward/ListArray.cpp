@@ -91,7 +91,7 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_range(int64_t start, int6
 
 template <typename T>
 const std::shared_ptr<Content> ListArrayOf<T>::getitem(const Slice& where) const {
-  // FIXME: find a better way to wrap these. TensorArray?
+  // FIXME: find a better way to wrap these. RegularArray?
   Index64 nextstarts(1);
   Index64 nextstops(1);
   *nextstarts.ptr().get() = 0;
@@ -112,15 +112,14 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
     throw std::invalid_argument("len(stops) < len(starts)");
   }
 
-  std::shared_ptr<SliceItem> nexthead = tail.head();
-  Slice nexttail = tail.tail();
-
   if (head.get() == nullptr) {
     return shallow_copy();
   }
 
   else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
     assert(advanced.length() == 0);
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
     if (std::is_same<T, int32_t>::value) {
       Index64 nextcarry(lenstarts);
       Error err = awkward_listarray32_getitem_next_at_64(
@@ -153,6 +152,8 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
   }
 
   else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
     int64_t start = range->start();
     int64_t stop = range->stop();
     int64_t step = range->step();
@@ -271,14 +272,16 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
   }
 
   else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
-    throw std::runtime_error("ListArray[ellipsis]");
+    return getitem_ellipsis(tail, advanced);
   }
 
   else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
-    throw std::runtime_error("ListArray[newaxis]");
+    return getitem_newaxis(tail, advanced);
   }
 
   else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
     Index64 flathead = array->ravel();
     if (advanced.length() == 0) {
       Index64 nextcarry(lenstarts*flathead.length());
@@ -301,7 +304,7 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
           content_.get()->length());
         HANDLE_ERROR(err)
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-        // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a Tensor
+        // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
         return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
       }
       else if (std::is_same<T, int64_t>::value) {
@@ -322,7 +325,7 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const std::shared_pt
           content_.get()->length());
         HANDLE_ERROR(err)
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-        // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a Tensor
+        // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
         return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
       }
       else {

@@ -39,6 +39,10 @@ def test_slice_slice():
     assert awkward1.tolist(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
     assert awkward1.tolist(array1[2:,:-1]) == [[4.4], [], [7.7, 8.8]]
 
+def test_ellipsis():
+    assert awkward1.tolist(array1[..., 1:]) == [[2.2, 3.3], [], [5.5], [], [8.8, 9.9]]
+    assert awkward1.tolist(array2[..., 1:]) == [[[2.2, 3.3], []], [[5.5]], [], [[], [8.8, 9.9]]]
+
 def test_array_slice():
     assert awkward1.tolist(array2[[0, 0, 1, 1, 1, 0]]) == [[[1.1, 2.2, 3.3], []], [[1.1, 2.2, 3.3], []], [[4.4, 5.5]], [[4.4, 5.5]], [[4.4, 5.5]], [[1.1, 2.2, 3.3], []]]
     assert awkward1.tolist(array2[[0, 0, 1, 1, 1, 0], :]) == [[[1.1, 2.2, 3.3], []], [[1.1, 2.2, 3.3], []], [[4.4, 5.5]], [[4.4, 5.5]], [[4.4, 5.5]], [[1.1, 2.2, 3.3], []]]
