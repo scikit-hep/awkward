@@ -36,7 +36,7 @@ Error awkward_identity_from_listarray(ID* toptr, const ID* fromptr, const T* fro
       for (int64_t k = 0;  k < fromwidth;  k++) {
         toptr[j*(fromwidth + 1) + k] = fromptr[fromptroffset + i*(fromwidth) + k];
       }
-      toptr[j*(fromwidth + 1) + fromwidth] = j - start;
+      toptr[j*(fromwidth + 1) + fromwidth] = ID(j - start);
     }
   }
   return kNoError;

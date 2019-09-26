@@ -327,7 +327,7 @@ Error awkward_listarray_getitem_next_array(C* tooffsets, T* tocarry, T* toadvanc
       tocarry[i*lenarray + j] = fromstarts[startsoffset + i] + regular_at;
       toadvanced[i*lenarray + j] = j;
     }
-    tooffsets[i + 1] = (C)(i + 1)*lenarray;
+    tooffsets[i + 1] = (C)((i + 1)*lenarray);
   }
   return kNoError;
 }
