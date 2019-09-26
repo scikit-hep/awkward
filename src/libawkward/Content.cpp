@@ -1,11 +1,26 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include "awkward/ListOffsetArray.h"
+
 #include "awkward/Content.h"
 
 using namespace awkward;
 
 const std::string Content::tostring() const {
   return tostring_part("", "", "");
+}
+
+const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
+  Index64 nextoffsets(2);
+  nextoffsets.ptr().get()[0] = 0;
+  nextoffsets.ptr().get()[1] = length();
+  ListOffsetArrayOf<int64_t> next(std::shared_ptr<Identity>(nullptr), nextoffsets, shallow_copy());
+
+  std::shared_ptr<SliceItem> nexthead = where.head();
+  Slice nexttail = where.tail();
+  Index64 nextadvanced(0);
+  std::shared_ptr<Content> out = next.getitem_next(nexthead, nexttail, nextadvanced);
+  return out.get()->getitem_at(0);
 }
 
 const std::shared_ptr<Content> Content::getitem_ellipsis(const Slice& tail, const Index64& advanced) const {

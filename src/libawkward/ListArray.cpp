@@ -88,22 +88,6 @@ const std::shared_ptr<Content> ListArrayOf<T>::getitem_range(int64_t start, int6
   return std::shared_ptr<Content>(new ListArrayOf<T>(id, starts_.getitem_range(regular_start, regular_stop), stops_.getitem_range(regular_start, regular_stop), content_));
 }
 
-template <typename T>
-const std::shared_ptr<Content> ListArrayOf<T>::getitem(const Slice& where) const {
-  // FIXME: find a better way to wrap these. RegularArray?
-  Index64 nextstarts(1);
-  Index64 nextstops(1);
-  *nextstarts.ptr().get() = 0;
-  *nextstops.ptr().get() = length();
-  ListArrayOf<int64_t> next(std::shared_ptr<Identity>(nullptr), nextstarts, nextstops, shallow_copy());
-
-  std::shared_ptr<SliceItem> nexthead = where.head();
-  Slice nexttail = where.tail();
-  Index64 nextadvanced(0);
-  std::shared_ptr<Content> out = next.getitem_next(nexthead, nexttail, nextadvanced);
-  return out.get()->getitem_at(0);
-}
-
 template <>
 const std::shared_ptr<Content> ListArrayOf<int32_t>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
   int64_t lenstarts = starts_.length();

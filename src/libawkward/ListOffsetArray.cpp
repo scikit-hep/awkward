@@ -132,21 +132,6 @@ const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_range(int64_t start
 }
 
 template <typename T>
-const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem(const Slice& where) const {
-  // FIXME: find a better way to wrap these. RegularArray?
-  Index64 nextoffsets(2);
-  nextoffsets.ptr().get()[0] = 0;
-  nextoffsets.ptr().get()[1] = length();
-  ListOffsetArrayOf<int64_t> next(std::shared_ptr<Identity>(nullptr), nextoffsets, shallow_copy());
-
-  std::shared_ptr<SliceItem> nexthead = where.head();
-  Slice nexttail = where.tail();
-  Index64 nextadvanced(0);
-  std::shared_ptr<Content> out = next.getitem_next(nexthead, nexttail, nextadvanced);
-  return out.get()->getitem_at(0);
-}
-
-template <typename T>
 IndexOf<T> make_starts(const IndexOf<T>& offsets) {
   return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
 }
