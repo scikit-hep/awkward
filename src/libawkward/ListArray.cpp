@@ -11,14 +11,108 @@
 #include "awkward/ListArray.h"
 
 namespace awkward {
-  template <typename T>
-  void ListArrayOf<T>::setid() {
-    throw std::runtime_error("FIXME");
+  template <>
+  void ListArrayOf<int32_t>::setid(const std::shared_ptr<Identity> id) {
+    if (id.get() == nullptr) {
+      content_.get()->setid(id);
+    }
+    else {
+      if (length() != id.get()->length()) {
+        throw std::invalid_argument("content and its id must have the same length");
+      }
+      std::shared_ptr<Identity> bigid = id;
+      if (content_.get()->length() > kMaxInt32) {
+        bigid = id.get()->to64();
+      }
+      if (Identity32* rawid = dynamic_cast<Identity32*>(bigid.get())) {
+        Identity32* rawsubid = new Identity32(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        std::shared_ptr<Identity> subid(rawsubid);
+        Error err = awkward_identity32_from_listarray32(
+          rawsubid->ptr().get(),
+          rawid->ptr().get(),
+          starts_.ptr().get(),
+          stops_.ptr().get(),
+          rawid->offset(),
+          starts_.offset(),
+          stops_.offset(),
+          content_.get()->length(),
+          length(),
+          rawid->width());
+        HANDLE_ERROR(err)
+        content_.get()->setid(subid);
+      }
+      else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
+        Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        std::shared_ptr<Identity> subid(rawsubid);
+        Error err = awkward_identity64_from_listarray32(
+          rawsubid->ptr().get(),
+          rawid->ptr().get(),
+          starts_.ptr().get(),
+          stops_.ptr().get(),
+          rawid->offset(),
+          starts_.offset(),
+          stops_.offset(),
+          content_.get()->length(),
+          length(),
+          rawid->width());
+        HANDLE_ERROR(err)
+        content_.get()->setid(subid);
+      }
+      else {
+        throw std::runtime_error("unrecognized Identity specialization");
+      }
+    }
+    id_ = id;
+  }
+
+  template <>
+  void ListArrayOf<int64_t>::setid(const std::shared_ptr<Identity> id) {
+    if (id.get() == nullptr) {
+      content_.get()->setid(id);
+    }
+    else {
+      if (length() != id.get()->length()) {
+        throw std::invalid_argument("content and its id must have the same length");
+      }
+      std::shared_ptr<Identity> bigid = id.get()->to64();
+      if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
+        Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        std::shared_ptr<Identity> subid(rawsubid);
+        Error err = awkward_identity64_from_listarray64(
+          rawsubid->ptr().get(),
+          rawid->ptr().get(),
+          starts_.ptr().get(),
+          stops_.ptr().get(),
+          rawid->offset(),
+          starts_.offset(),
+          stops_.offset(),
+          content_.get()->length(),
+          length(),
+          rawid->width());
+        HANDLE_ERROR(err)
+        content_.get()->setid(subid);
+      }
+      else {
+        throw std::runtime_error("unrecognized Identity specialization");
+      }
+    }
+    id_ = id;
   }
 
   template <typename T>
-  void ListArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
-    throw std::runtime_error("FIXME");
+  void ListArrayOf<T>::setid() {
+    if (length() <= kMaxInt32) {
+      Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
+      std::shared_ptr<Identity> newid(rawid);
+      awkward_new_identity32(rawid->ptr().get(), length());
+      setid(newid);
+    }
+    else {
+      Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, length());
+      std::shared_ptr<Identity> newid(rawid);
+      awkward_new_identity64(rawid->ptr().get(), length());
+      setid(newid);
+    }
   }
 
   template <typename T>

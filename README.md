@@ -56,6 +56,7 @@ The following features of awkward 0.x will be features of awkward 1.x.
    * 2019-09-02 (PR [#7](../../pull/7)): refactored `Index`, `Identity`, and `ListOffsetArray` (and any other array types with `Index`, which is nearly all of them) to have a 32-bit and a 64-bit version. My original plan to only support 64-bit in "chunked arrays" with 32-bit everywhere else is hereby scrapped—both bit widths will be supported on all indexes. Non-native endian, non-trivial strides, and multidimensional `Index`/`Identity` are not supported, though all of these features are allowed for `NumpyArray` (which is _content_, not an _index_). The only limitation on `NumpyArray` is that data must be C-ordered, not Fortran-ordered.
    * 2019-09-21 (PR [#8](../../pull/8)): C++ NumpyArray::getitem is done, setting the pattern for other classes (external C functions). The Numba and Identity extensions are not done, which would be necessary to fully set the pattern. This involved a lot of investigation (see [studies/getitem.py](https://github.com/jpivarski/awkward-1.0/blob/master/studies/getitem.py)).
    * 2019-09-21 (PR [#9](../../pull/9)): `Identity` is correctly passed through `NumpyArray` slices and `__getitem__` uses `get`, `slice`, or the full `getitem`, depending on argument complexity.
+   * 2019-09-26 (PR [#11](../../pull/11)): fully implemented `ListArray` and `ListOffsetArray`'s `__getitem__`.
 
 ## Roadmap
 

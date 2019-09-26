@@ -22,29 +22,6 @@ void awkward_identity32_to_identity64(int64_t* toptr, const int32_t* fromptr, in
 }
 
 template <typename ID, typename T>
-void awkward_identity_from_listoffsets(ID* toptr, const ID* fromptr, int64_t tolength, const T* offsets, int64_t width, int64_t length) {
-  int64_t k = 0;
-  for (int64_t i = 0;  i < length;  i++) {
-    for (T subi = 0;  subi < offsets[i + 1] - offsets[i];  subi++) {
-      for (int64_t j = 0;  j < width;  j++) {
-        toptr[(width + 1)*k + j] = fromptr[(width)*i + j];
-      }
-      toptr[(width + 1)*k + width] = subi;
-      k++;
-    }
-  }
-}
-void awkward_identity32_from_listoffsets32(int32_t* toptr, const int32_t* fromptr, int64_t tolength, const int32_t* offsets, int64_t width, int64_t length) {
-  awkward_identity_from_listoffsets<int32_t, int32_t>(toptr, fromptr, tolength, offsets, width, length);
-}
-void awkward_identity64_from_listoffsets32(int64_t* toptr, const int64_t* fromptr, int64_t tolength, const int32_t* offsets, int64_t width, int64_t length) {
-  awkward_identity_from_listoffsets<int64_t, int32_t>(toptr, fromptr, tolength, offsets, width, length);
-}
-void awkward_identity64_from_listoffsets64(int64_t* toptr, const int64_t* fromptr, int64_t tolength, const int64_t* offsets, int64_t width, int64_t length) {
-  awkward_identity_from_listoffsets<int64_t, int64_t>(toptr, fromptr, tolength, offsets, width, length);
-}
-
-template <typename ID, typename T>
 Error awkward_identity_from_listarray(ID* toptr, const ID* fromptr, const T* fromstarts, const T* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
   for (int64_t k = 0;  k < tolength*(fromwidth + 1);  k++) {
     toptr[k] = -1;

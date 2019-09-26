@@ -111,58 +111,6 @@ namespace awkward {
     id_ = id;
   }
 
-  // template <typename T>
-  // void ListOffsetArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
-  //   std::shared_ptr<Identity> theid = id;
-  //   if (theid.get() == nullptr) {
-  //     content_.get()->setid(theid);
-  //   }
-  //   else {
-  //     if (length() != id.get()->length()) {
-  //       throw std::invalid_argument("content and its id must have the same length");
-  //     }
-  //     if (std::is_same<T, int64_t>::value) {
-  //       theid = theid.get()->to64();
-  //     }
-  //     if (Identity64* rawid = dynamic_cast<Identity64*>(theid.get())) {
-  //       Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-  //       std::shared_ptr<Identity> newsubid(rawsubid);
-  //       if (std::is_same<T, int32_t>::value) {
-  //         awkward_identity64_from_listoffsets32(
-  //           rawsubid->ptr().get(),
-  //           rawid->ptr().get(),
-  //           content_.get()->length(),
-  //           reinterpret_cast<int32_t*>(offsets_.ptr().get()),
-  //           rawid->width(),
-  //           length());
-  //       }
-  //       else {
-  //         awkward_identity64_from_listoffsets64(
-  //           rawsubid->ptr().get(),
-  //           rawid->ptr().get(),
-  //           content_.get()->length(),
-  //           reinterpret_cast<int64_t*>(offsets_.ptr().get()),
-  //           rawid->width(),
-  //           length());
-  //       }
-  //       content_.get()->setid(newsubid);
-  //     }
-  //     else if (Identity32* rawid = dynamic_cast<Identity32*>(theid.get())) {
-  //       Identity32* rawsubid = new Identity32(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-  //       std::shared_ptr<Identity> newsubid(rawsubid);
-  //       awkward_identity32_from_listoffsets32(
-  //         rawsubid->ptr().get(),
-  //         rawid->ptr().get(),
-  //         content_.get()->length(),
-  //         reinterpret_cast<int32_t*>(offsets_.ptr().get()),
-  //         rawid->width(),
-  //         length());
-  //       content_.get()->setid(newsubid);
-  //     }
-  //   }
-  //   id_ = theid;
-  // }
-
   template <typename T>
   void ListOffsetArrayOf<T>::setid() {
     if (length() <= kMaxInt32) {
