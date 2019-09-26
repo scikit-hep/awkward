@@ -76,7 +76,6 @@ jobs:
 
       - script: |
           python setup.py build
-          python -c "import awkward1"
           pytest -vv tests
         displayName: "Build and test"
 
@@ -127,7 +126,6 @@ jobs:
 
       - script: |
           python setup.py build
-          python -c 'import awkward1'
           pytest -vv tests
         displayName: "Build and test"
 
@@ -203,6 +201,5 @@ jobs:
 
       - script: |
           python setup.py build
-          python -c 'import awkward1'
           pytest -vv tests
         displayName: "Build and test"

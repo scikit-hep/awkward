@@ -50,7 +50,6 @@ for hfile in glob.glob(os.path.join(os.path.join(os.path.dirname(os.path.dirname
                 params = [(x.find("./declname").text, x.find("./type").text) for x in xfcn.findall("./param")]
                 getattr(kernels, name).argtypes = [h2ctypes[t] for n, t in params]
                 getattr(kernels, name).restype = h2ctypes[rettype]
-                print(name, ":", params, "->", rettype)
 
 # builder.call(fcnptr, args)
 ############################
