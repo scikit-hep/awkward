@@ -276,7 +276,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::carry(const Index64& carry) const {
-    assert(!isscalar);
+    assert(!isscalar());
 
     std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
     awkward_numpyarray_getitem_next_null_64(
