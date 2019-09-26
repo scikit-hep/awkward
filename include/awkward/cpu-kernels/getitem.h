@@ -32,14 +32,14 @@ extern "C" {
   void awkward_listarray32_getitem_next_range_carrylength(int64_t& carrylength, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step);
   void awkward_listarray64_getitem_next_range_carrylength(int64_t& carrylength, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step);
 
-  void awkward_listarray32_getitem_next_range_64(int32_t* tostarts, int32_t* tostops, int64_t* tocarry, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step);
-  void awkward_listarray64_getitem_next_range_64(int64_t* tostarts, int64_t* tostops, int64_t* tocarry, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step);
+  void awkward_listarray32_getitem_next_range_64(int32_t* tooffsets, int64_t* tocarry, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step);
+  void awkward_listarray64_getitem_next_range_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step);
 
-  void awkward_listarray32_getitem_next_range_counts_64(int64_t* tocounts, int64_t& total, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts);
-  void awkward_listarray64_getitem_next_range_counts_64(int64_t* tocounts, int64_t& total, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts);
+  void awkward_listarray32_getitem_next_range_counts_64(int64_t& total, const int32_t* fromoffsets, int64_t lenstarts);
+  void awkward_listarray64_getitem_next_range_counts_64(int64_t& total, const int64_t* fromoffsets, int64_t lenstarts);
 
-  void awkward_listarray32_getitem_next_range_spreadadvanced_64(int64_t* toadvanced, const int64_t* fromadvanced, const int32_t* fromstarts, const int64_t* fromcounts, int64_t lenstarts);
-  void awkward_listarray64_getitem_next_range_spreadadvanced_64(int64_t* toadvanced, const int64_t* fromadvanced, const int64_t* fromstarts, const int64_t* fromcounts, int64_t lenstarts);
+  void awkward_listarray32_getitem_next_range_spreadadvanced_64(int64_t* toadvanced, const int64_t* fromadvanced, const int32_t* fromoffsets, int64_t lenstarts);
+  void awkward_listarray64_getitem_next_range_spreadadvanced_64(int64_t* toadvanced, const int64_t* fromadvanced, const int64_t* fromoffsets, int64_t lenstarts);
 
   Error awkward_listarray32_getitem_next_array_64(int32_t* tostarts, int32_t* tostops, int64_t* tocarry, int64_t* toadvanced, const int32_t* fromstarts, const int32_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent);
   Error awkward_listarray64_getitem_next_array_64(int64_t* tostarts, int64_t* tostops, int64_t* tocarry, int64_t* toadvanced, const int64_t* fromstarts, const int64_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent);

@@ -153,13 +153,11 @@ const std::shared_ptr<Content> ListArrayOf<int32_t>::getitem_next(const std::sha
       stop,
       step);
 
-    Index32 nextstarts(lenstarts);
-    Index32 nextstops(lenstarts);
+    Index32 nextoffsets(lenstarts + 1);
     Index64 nextcarry(carrylength);
 
     awkward_listarray32_getitem_next_range_64(
-      nextstarts.ptr().get(),
-      nextstops.ptr().get(),
+      nextoffsets.ptr().get(),
       nextcarry.ptr().get(),
       starts_.ptr().get(),
       stops_.ptr().get(),
@@ -172,25 +170,21 @@ const std::shared_ptr<Content> ListArrayOf<int32_t>::getitem_next(const std::sha
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
     if (advanced.length() == 0) {
-      return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<int32_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));
     }
     else {
-      Index64 counts(nextstarts.length());
       int64_t total;
       awkward_listarray32_getitem_next_range_counts_64(
-        counts.ptr().get(),
         total,
-        nextstarts.ptr().get(),
-        nextstops.ptr().get(),
+        nextoffsets.ptr().get(),
         lenstarts);
       Index64 nextadvanced(total);
       awkward_listarray32_getitem_next_range_spreadadvanced_64(
         nextadvanced.ptr().get(),
         advanced.ptr().get(),
-        nextstarts.ptr().get(),
-        counts.ptr().get(),
+        nextoffsets.ptr().get(),
         lenstarts);
-      return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<int32_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
     }
   }
 
@@ -304,13 +298,11 @@ const std::shared_ptr<Content> ListArrayOf<int64_t>::getitem_next(const std::sha
       stop,
       step);
 
-    Index64 nextstarts(lenstarts);
-    Index64 nextstops(lenstarts);
+    Index64 nextoffsets(lenstarts + 1);
     Index64 nextcarry(carrylength);
 
     awkward_listarray64_getitem_next_range_64(
-      nextstarts.ptr().get(),
-      nextstops.ptr().get(),
+      nextoffsets.ptr().get(),
       nextcarry.ptr().get(),
       starts_.ptr().get(),
       stops_.ptr().get(),
@@ -323,25 +315,21 @@ const std::shared_ptr<Content> ListArrayOf<int64_t>::getitem_next(const std::sha
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
     if (advanced.length() == 0) {
-      return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<int64_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));
     }
     else {
-      Index64 counts(nextstarts.length());
       int64_t total;
       awkward_listarray64_getitem_next_range_counts_64(
-        counts.ptr().get(),
         total,
-        nextstarts.ptr().get(),
-        nextstops.ptr().get(),
+        nextoffsets.ptr().get(),
         lenstarts);
       Index64 nextadvanced(total);
       awkward_listarray64_getitem_next_range_spreadadvanced_64(
         nextadvanced.ptr().get(),
         advanced.ptr().get(),
-        nextstarts.ptr().get(),
-        counts.ptr().get(),
+        nextoffsets.ptr().get(),
         lenstarts);
-      return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<int64_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
     }
   }
 
