@@ -18,7 +18,7 @@ namespace awkward {
   class IndexOf: public Index {
   public:
     IndexOf<T>(int64_t length)
-        : ptr_(std::shared_ptr<T>(new T[(size_t)length], awkward::util::array_deleter<T>()))
+        : ptr_(std::shared_ptr<T>(length == 0 ? nullptr : new T[(size_t)length], awkward::util::array_deleter<T>()))
         , offset_(0)
         , length_(length) { }
     IndexOf<T>(const std::shared_ptr<T> ptr, int64_t offset, int64_t length)
@@ -32,8 +32,8 @@ namespace awkward {
 
     const std::string tostring() const;
     const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
-    T get(int64_t at) const;
-    IndexOf<T> slice(int64_t start, int64_t stop) const;
+    T getitem_at(int64_t at) const;
+    IndexOf<T> getitem_range(int64_t start, int64_t stop) const;
     virtual const std::shared_ptr<Index> shallow_copy() const;
 
   private:

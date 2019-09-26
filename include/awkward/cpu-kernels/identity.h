@@ -6,11 +6,14 @@
 #include "awkward/cpu-kernels/util.h"
 
 extern "C" {
-  void awkward_identity_new32(int64_t length, int32_t* to);
-  void awkward_identity_new64(int64_t length, int32_t* to);
-  void awkward_identity_32to64(int64_t length, int32_t* from, int64_t* to);
-  void awkward_identity_from_listfoffsets32(int64_t length, int64_t width, int32_t* offsets, int32_t* from, int64_t tolength, int32_t* to);
-  void awkward_identity_from_listfoffsets64(int64_t length, int64_t width, int64_t* offsets, int64_t* from, int64_t tolength, int64_t* to);
+  void awkward_new_identity32(int32_t* toptr, int64_t length);
+  void awkward_new_identity64(int64_t* toptr, int64_t length);
+
+  void awkward_identity32_to_identity64(int64_t* toptr, const int32_t* fromptr, int64_t length);
+
+  Error awkward_identity32_from_listarray32(int32_t* toptr, const int32_t* fromptr, const int32_t* fromstarts, const int32_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+  Error awkward_identity64_from_listarray32(int64_t* toptr, const int64_t* fromptr, const int32_t* fromstarts, const int32_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+  Error awkward_identity64_from_listarray64(int64_t* toptr, const int64_t* fromptr, const int64_t* fromstarts, const int64_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
 }
 
 #endif // AWKWARDCPU_IDENTITY_H_

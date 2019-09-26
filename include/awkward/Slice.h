@@ -14,7 +14,7 @@
 namespace awkward {
   class SliceItem {
   public:
-    static int64_t none() { return kMaxInt64 + 1; }
+    static int64_t none() { return kSliceNone; }
 
     virtual const std::string tostring() const = 0;
   };
@@ -31,7 +31,6 @@ namespace awkward {
   class SliceRange: public SliceItem {
   public:
     SliceRange(int64_t start, int64_t stop, int64_t step): start_(start), stop_(stop), step_(step) {
-      assert(step_ != none());
       assert(step_ != 0);
     }
     int64_t start() const { return start_; }

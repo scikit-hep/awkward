@@ -46,17 +46,19 @@ namespace awkward {
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
-    virtual const std::shared_ptr<Content> get(int64_t at) const;
-    virtual const std::shared_ptr<Content> slice(int64_t start, int64_t stop) const;
+    virtual const std::shared_ptr<Content> getitem_at(int64_t at) const;
+    virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;
+    virtual const std::shared_ptr<Content> getitem(const Slice& where) const;
+    virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const;
+    virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
 
     bool iscontiguous() const;
     void become_contiguous();
     const NumpyArray contiguous() const;
     const NumpyArray contiguous_next(Index64 bytepos) const;
-    const std::shared_ptr<Content> getitem(const Slice& slice) const;
     const NumpyArray getitem_bystrides(const std::shared_ptr<SliceItem>& head, const Slice& tail, int64_t length) const;
-    const NumpyArray getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, Index64& carry, Index64& advanced, int64_t length, int64_t stride) const;
+    const NumpyArray getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride) const;
 
   private:
     std::shared_ptr<Identity> id_;
