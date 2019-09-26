@@ -87,14 +87,14 @@ def test_listoffsetarray_slice_slice():
 def test_listarray_ellipsis():
     array1 = awkward1.layout.ListArray64(starts1, stops1, content)
     array2 = awkward1.layout.ListArray64(starts2, stops2, array1)
-    if py27:
+    if not py27:
         assert awkward1.tolist(array1[Ellipsis, 1:]) == [[2.2, 3.3], [], [5.5], [], [8.8, 9.9]]
         assert awkward1.tolist(array2[Ellipsis, 1:]) == [[[2.2, 3.3], []], [[5.5]], [], [[], [8.8, 9.9]]]
 
 def test_listoffsetarray_ellipsis():
     array1 = awkward1.layout.ListOffsetArray64(offsets1, content)
     array2 = awkward1.layout.ListOffsetArray64(offsets2, array1)
-    if py27:
+    if not py27:
         assert awkward1.tolist(array1[Ellipsis, 1:]) == [[2.2, 3.3], [], [5.5], [], [8.8, 9.9]]
         assert awkward1.tolist(array2[Ellipsis, 1:]) == [[[2.2, 3.3], []], [[5.5]], [], [[], [8.8, 9.9]]]
 
