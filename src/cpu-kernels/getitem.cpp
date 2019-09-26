@@ -4,31 +4,31 @@
 
 #include "awkward/cpu-kernels/getitem.h"
 
-void awkward_regularize_rangeslice(int64_t& start, int64_t& stop, bool posstep, bool hasstart, bool hasstop, int64_t length) {
+void awkward_regularize_rangeslice(int64_t* start, int64_t* stop, bool posstep, bool hasstart, bool hasstop, int64_t length) {
   if (posstep) {
-    if (!hasstart)          start = 0;
-    else if (start < 0)     start += length;
-    if (start < 0)          start = 0;
-    if (start > length)     start = length;
+    if (!hasstart)           *start = 0;
+    else if (*start < 0)     *start += length;
+    if (*start < 0)          *start = 0;
+    if (*start > length)     *start = length;
 
-    if (!hasstop)           stop = length;
-    else if (stop < 0)      stop += length;
-    if (stop < 0)           stop = 0;
-    if (stop > length)      stop = length;
-    if (stop < start)       stop = start;
+    if (!hasstop)            *stop = length;
+    else if (*stop < 0)      *stop += length;
+    if (*stop < 0)           *stop = 0;
+    if (*stop > length)      *stop = length;
+    if (*stop < *start)      *stop = *start;
   }
 
   else {
-    if (!hasstart)          start = length - 1;
-    else if (start < 0)     start += length;
-    if (start < -1)         start = -1;
-    if (start > length - 1) start = length - 1;
+    if (!hasstart)           *start = length - 1;
+    else if (*start < 0)     *start += length;
+    if (*start < -1)         *start = -1;
+    if (*start > length - 1) *start = length - 1;
 
-    if (!hasstop)           stop = -1;
-    else if (stop < 0)      stop += length;
-    if (stop < -1)          stop = -1;
-    if (stop > length - 1)  stop = length - 1;
-    if (stop > start)       stop = start;
+    if (!hasstop)            *stop = -1;
+    else if (*stop < 0)      *stop += length;
+    if (*stop < -1)          *stop = -1;
+    if (*stop > length - 1)  *stop = length - 1;
+    if (*stop > *start)      *stop = *start;
   }
 }
 
@@ -217,29 +217,29 @@ Error awkward_listarray64_getitem_next_at_64(int64_t* tocarry, const int64_t* fr
 }
 
 template <typename C>
-void awkward_listarray_getitem_next_range_carrylength(int64_t& carrylength, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
-  carrylength = 0;
+void awkward_listarray_getitem_next_range_carrylength(int64_t* carrylength, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
+  *carrylength = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(regular_start, regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length);
+    awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length);
     if (step > 0) {
       for (int64_t j = regular_start;  j < regular_stop;  j += step) {
-        carrylength++;
+        *carrylength = *carrylength + 1;
       }
     }
     else {
       for (int64_t j = regular_start;  j > regular_stop;  j += step) {
-        carrylength++;
+        *carrylength = *carrylength + 1;
       }
     }
   }
 }
-void awkward_listarray32_getitem_next_range_carrylength(int64_t& carrylength, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
+void awkward_listarray32_getitem_next_range_carrylength(int64_t* carrylength, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
   awkward_listarray_getitem_next_range_carrylength<int32_t>(carrylength, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, start, stop, step);
 }
-void awkward_listarray64_getitem_next_range_carrylength(int64_t& carrylength, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
+void awkward_listarray64_getitem_next_range_carrylength(int64_t* carrylength, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
   awkward_listarray_getitem_next_range_carrylength<int64_t>(carrylength, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, start, stop, step);
 }
 
@@ -252,7 +252,7 @@ void awkward_listarray_getitem_next_range(C* tooffsets, T* tocarry, const C* fro
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(regular_start, regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length);
+    awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length);
     if (step > 0) {
       for (int64_t j = regular_start;  j < regular_stop;  j += step) {
         tocarry[k] = fromstarts[startsoffset + i] + j;
@@ -276,16 +276,16 @@ void awkward_listarray64_getitem_next_range_64(int64_t* tooffsets, int64_t* toca
 }
 
 template <typename C, typename T>
-void awkward_listarray_getitem_next_range_counts(int64_t& total, const C* fromoffsets, int64_t lenstarts) {
-  total = 0;
+void awkward_listarray_getitem_next_range_counts(int64_t* total, const C* fromoffsets, int64_t lenstarts) {
+  *total = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    total += fromoffsets[i + 1] - fromoffsets[i];
+    *total = *total + fromoffsets[i + 1] - fromoffsets[i];
   }
 }
-void awkward_listarray32_getitem_next_range_counts_64(int64_t& total, const int32_t* fromoffsets, int64_t lenstarts) {
+void awkward_listarray32_getitem_next_range_counts_64(int64_t* total, const int32_t* fromoffsets, int64_t lenstarts) {
   awkward_listarray_getitem_next_range_counts<int32_t, int64_t>(total, fromoffsets, lenstarts);
 }
-void awkward_listarray64_getitem_next_range_counts_64(int64_t& total, const int64_t* fromoffsets, int64_t lenstarts) {
+void awkward_listarray64_getitem_next_range_counts_64(int64_t* total, const int64_t* fromoffsets, int64_t lenstarts) {
   awkward_listarray_getitem_next_range_counts<int64_t, int64_t>(total, fromoffsets, lenstarts);
 }
 

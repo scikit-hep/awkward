@@ -21,17 +21,17 @@
       </node>
     </incdepgraph>
       <sectiondef kind="func">
-      <memberdef kind="function" id="getitem_8cpp_1a4fd2a09ec0abaa87d91590b182d362e9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a84bfd8f63d086600280f6d7bd53fe97e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>void</type>
         <definition>void awkward_regularize_rangeslice</definition>
-        <argsstring>(int64_t &amp;start, int64_t &amp;stop, bool posstep, bool hasstart, bool hasstop, int64_t length)</argsstring>
+        <argsstring>(int64_t *start, int64_t *stop, bool posstep, bool hasstart, bool hasstop, int64_t length)</argsstring>
         <name>awkward_regularize_rangeslice</name>
         <param>
-          <type>int64_t &amp;</type>
+          <type>int64_t *</type>
           <declname>start</declname>
         </param>
         <param>
-          <type>int64_t &amp;</type>
+          <type>int64_t *</type>
           <declname>stop</declname>
         </param>
         <param>
@@ -1204,7 +1204,7 @@
         </inbodydescription>
         <location file="src/cpu-kernels/getitem.cpp" line="215" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="215" bodyend="217"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1af02fcad029cb7318b5f8e18374d8a6c7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a7d95905a1236d7f567a49d041273a584" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename C</type>
@@ -1212,10 +1212,10 @@
         </templateparamlist>
         <type>void</type>
         <definition>void awkward_listarray_getitem_next_range_carrylength</definition>
-        <argsstring>(int64_t &amp;carrylength, const C *fromstarts, const C *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <argsstring>(int64_t *carrylength, const C *fromstarts, const C *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
         <name>awkward_listarray_getitem_next_range_carrylength</name>
         <param>
-          <type>int64_t &amp;</type>
+          <type>int64_t *</type>
           <declname>carrylength</declname>
         </param>
         <param>
@@ -1258,13 +1258,13 @@
         </inbodydescription>
         <location file="src/cpu-kernels/getitem.cpp" line="220" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="220" bodyend="238"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a9017446c2cc8b400c9644ced74dca818" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a836fcc02db5b212d17b4f9cd7b6e764d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>void</type>
         <definition>void awkward_listarray32_getitem_next_range_carrylength</definition>
-        <argsstring>(int64_t &amp;carrylength, const int32_t *fromstarts, const int32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <argsstring>(int64_t *carrylength, const int32_t *fromstarts, const int32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
         <name>awkward_listarray32_getitem_next_range_carrylength</name>
         <param>
-          <type>int64_t &amp;</type>
+          <type>int64_t *</type>
           <declname>carrylength</declname>
         </param>
         <param>
@@ -1307,13 +1307,13 @@
         </inbodydescription>
         <location file="src/cpu-kernels/getitem.cpp" line="239" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="239" bodyend="241"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1aad8d8f8c8244825d361a4c96389360f2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a3353b3b098b98a1b6dba1630bfe8c010" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>void</type>
         <definition>void awkward_listarray64_getitem_next_range_carrylength</definition>
-        <argsstring>(int64_t &amp;carrylength, const int64_t *fromstarts, const int64_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <argsstring>(int64_t *carrylength, const int64_t *fromstarts, const int64_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
         <name>awkward_listarray64_getitem_next_range_carrylength</name>
         <param>
-          <type>int64_t &amp;</type>
+          <type>int64_t *</type>
           <declname>carrylength</declname>
         </param>
         <param>
@@ -1523,7 +1523,7 @@
         </inbodydescription>
         <location file="src/cpu-kernels/getitem.cpp" line="274" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="274" bodyend="276"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1ac9671eb3e2ac1e48f82f625a2a181512" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a36fbbba3da97f5c1cbb005c132bf3e23" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename C</type>
@@ -1534,10 +1534,10 @@
         </templateparamlist>
         <type>void</type>
         <definition>void awkward_listarray_getitem_next_range_counts</definition>
-        <argsstring>(int64_t &amp;total, const C *fromoffsets, int64_t lenstarts)</argsstring>
+        <argsstring>(int64_t *total, const C *fromoffsets, int64_t lenstarts)</argsstring>
         <name>awkward_listarray_getitem_next_range_counts</name>
         <param>
-          <type>int64_t &amp;</type>
+          <type>int64_t *</type>
           <declname>total</declname>
         </param>
         <param>
@@ -1556,13 +1556,13 @@
         </inbodydescription>
         <location file="src/cpu-kernels/getitem.cpp" line="279" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="279" bodyend="284"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a53fbd8ad9331e709bb396e91fa8d5077" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a44a066c4dd464934491a33333a9a9a9f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>void</type>
         <definition>void awkward_listarray32_getitem_next_range_counts_64</definition>
-        <argsstring>(int64_t &amp;total, const int32_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <argsstring>(int64_t *total, const int32_t *fromoffsets, int64_t lenstarts)</argsstring>
         <name>awkward_listarray32_getitem_next_range_counts_64</name>
         <param>
-          <type>int64_t &amp;</type>
+          <type>int64_t *</type>
           <declname>total</declname>
         </param>
         <param>
@@ -1581,13 +1581,13 @@
         </inbodydescription>
         <location file="src/cpu-kernels/getitem.cpp" line="285" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="285" bodyend="287"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a15d42da6afb6a31716874cd67b23ba3b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a5bfb6ae56f3f3f9332671cb1431a67d4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>void</type>
         <definition>void awkward_listarray64_getitem_next_range_counts_64</definition>
-        <argsstring>(int64_t &amp;total, const int64_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <argsstring>(int64_t *total, const int64_t *fromoffsets, int64_t lenstarts)</argsstring>
         <name>awkward_listarray64_getitem_next_range_counts_64</name>
         <param>
-          <type>int64_t &amp;</type>
+          <type>int64_t *</type>
           <declname>total</declname>
         </param>
         <param>
