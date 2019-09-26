@@ -258,11 +258,10 @@ const std::shared_ptr<Content> ListOffsetArrayOf<int32_t>::getitem_next(const st
     if (advanced.length() == 0) {
       Index64 nextcarry(lenstarts*flathead.length());
       Index64 nextadvanced(lenstarts*flathead.length());
-      Index32 nextstarts(lenstarts);
+      Index32 nextoffsets(lenstarts + 1);
       Index32 nextstops(lenstarts);
       Error err = awkward_listarray32_getitem_next_array_64(
-        nextstarts.ptr().get(),
-        nextstops.ptr().get(),
+        nextoffsets.ptr().get(),
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         starts.ptr().get(),
@@ -276,7 +275,7 @@ const std::shared_ptr<Content> ListOffsetArrayOf<int32_t>::getitem_next(const st
       HANDLE_ERROR(err)
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
-      return std::shared_ptr<Content>(new ListArrayOf<int32_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<int32_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
     }
     else {
       Index64 nextcarry(lenstarts);
@@ -406,11 +405,10 @@ const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::getitem_next(const st
     if (advanced.length() == 0) {
       Index64 nextcarry(lenstarts*flathead.length());
       Index64 nextadvanced(lenstarts*flathead.length());
-      Index64 nextstarts(lenstarts);
+      Index64 nextoffsets(lenstarts + 1);
       Index64 nextstops(lenstarts);
       Error err = awkward_listarray64_getitem_next_array_64(
-        nextstarts.ptr().get(),
-        nextstops.ptr().get(),
+        nextoffsets.ptr().get(),
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         starts.ptr().get(),
@@ -424,7 +422,7 @@ const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::getitem_next(const st
       HANDLE_ERROR(err)
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
-      return std::shared_ptr<Content>(new ListArrayOf<int64_t>(id_, nextstarts, nextstops, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<int64_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
     }
     else {
       Index64 nextcarry(lenstarts);
