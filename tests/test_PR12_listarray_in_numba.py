@@ -6,6 +6,7 @@ import pytest
 import numpy
 
 import awkward1
+import awkward1._numba.content
 
 py27 = (sys.version_info[0] < 3)
 
