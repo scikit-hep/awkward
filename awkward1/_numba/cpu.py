@@ -17,15 +17,6 @@ libpath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 
 kernels = ctypes.cdll.LoadLibrary(libpath)
 
-h2cskip = [
-    "T *",
-    "const T *",
-    "ID *",
-    "const ID *",
-    "C *",
-    "const C *",
-    ]
-
 h2ctypes = {
     "bool": ctypes.c_uint8,
     "uint8_t *": ctypes.POINTER(ctypes.c_uint8),

@@ -24,6 +24,10 @@ class ListOffsetArrayType(content.ContentType):
     def bitwidth(self):
         return self.offsetstpe.dtype.bitwidth
 
+    @property
+    def ndim(self):
+        return 1 + self.contenttpe.ndim
+
     def getitem(self, wheretpe):
         if len(wheretpe.types) == 0:
             return self

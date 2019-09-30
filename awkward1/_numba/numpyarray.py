@@ -20,6 +20,10 @@ class NumpyArrayType(content.ContentType):
         self.arraytpe = arraytpe
         self.idtpe = idtpe
 
+    @property
+    def ndim(self):
+        return self.arraytpe.ndim
+
     def getitem(self, wheretpe):
         if len(wheretpe.types) > self.arraytpe.ndim:
             raise IndexError("too many indices for array")
