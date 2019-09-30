@@ -18,3 +18,9 @@ def test_slice_utils():
     assert [x.tolist() for x in numpy.broadcast_arrays(a, b)] == [x.tolist() for x in awkward1_numba_content.broadcast_arrays((a, b))]
     assert [x.tolist() for x in numpy.broadcast_arrays(b, c)] == [x.tolist() for x in awkward1_numba_content.broadcast_arrays((b, c))]
     assert [x.tolist() for x in numpy.broadcast_arrays(c, a)] == [x.tolist() for x in awkward1_numba_content.broadcast_arrays((c, a))]
+    assert [x.tolist() for x in numpy.broadcast_arrays(a, b, c)] == [x.tolist() for x in awkward1_numba_content.broadcast_arrays((a, b, c))]
+
+    assert awkward1_numba_content.broadcast_arrays(("hello", a))[0] == "hello"
+    assert awkward1_numba_content.broadcast_arrays((a, "hello"))[1] == "hello"
+    assert awkward1_numba_content.broadcast_arrays(("hello", c)) == ("hello", c)
+    assert awkward1_numba_content.broadcast_arrays((c, "hello")) == (c, "hello")
