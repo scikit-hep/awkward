@@ -6,15 +6,15 @@ import pytest
 import numpy
 
 import awkward1
+awkward1_numba_content = pytest.importorskip("awkward1._numba.content")
 
 py27 = (sys.version_info[0] < 3)
 
-@pytest.mark.skipif(awkward1._numba.installed, reason="requires Numba")
 def test_slice_utils():
     a = numpy.array([1, 2, 3])
     b = numpy.array([[4], [5], [6], [7]])
     c = 999
 
-    assert [x.tolist() for x in numpy.broadcast_arrays(a, b)] == [x.tolist() for x in awkward1._numba.content.broadcast_arrays((a, b))]
-    assert [x.tolist() for x in numpy.broadcast_arrays(b, c)] == [x.tolist() for x in awkward1._numba.content.broadcast_arrays((b, c))]
-    assert [x.tolist() for x in numpy.broadcast_arrays(c, a)] == [x.tolist() for x in awkward1._numba.content.broadcast_arrays((c, a))]
+    assert [x.tolist() for x in numpy.broadcast_arrays(a, b)] == [x.tolist() for x in awkward1_numba_content.broadcast_arrays((a, b))]
+    assert [x.tolist() for x in numpy.broadcast_arrays(b, c)] == [x.tolist() for x in awkward1_numba_content.broadcast_arrays((b, c))]
+    assert [x.tolist() for x in numpy.broadcast_arrays(c, a)] == [x.tolist() for x in awkward1_numba_content.broadcast_arrays((c, a))]
