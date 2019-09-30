@@ -6,7 +6,7 @@ import pytest
 import numpy
 
 import awkward1
-awkward1_numba_content = pytest.importorskip("awkward1._numba.content")
+awkward1_numba_util = pytest.importorskip("awkward1._numba.util")
 
 py27 = (sys.version_info[0] < 3)
 
@@ -15,12 +15,13 @@ def test_slice_utils():
     b = numpy.array([[4], [5], [6], [7]])
     c = 999
 
-    assert [x.tolist() for x in numpy.broadcast_arrays(a, b)] == [x.tolist() for x in awkward1_numba_content.broadcast_arrays((a, b))]
-    assert [x.tolist() for x in numpy.broadcast_arrays(b, c)] == [x.tolist() for x in awkward1_numba_content.broadcast_arrays((b, c))]
-    assert [x.tolist() for x in numpy.broadcast_arrays(c, a)] == [x.tolist() for x in awkward1_numba_content.broadcast_arrays((c, a))]
-    assert [x.tolist() for x in numpy.broadcast_arrays(a, b, c)] == [x.tolist() for x in awkward1_numba_content.broadcast_arrays((a, b, c))]
+    assert [x.tolist() for x in numpy.broadcast_arrays(a, b)] == [x.tolist() for x in awkward1_numba_util.broadcast_arrays((a, b))]
+    assert [x.tolist() for x in numpy.broadcast_arrays(b, c)] == [x.tolist() for x in awkward1_numba_util.broadcast_arrays((b, c))]
+    assert [x.tolist() for x in numpy.broadcast_arrays(c, a)] == [x.tolist() for x in awkward1_numba_util.broadcast_arrays((c, a))]
+    assert [x.tolist() for x in numpy.broadcast_arrays(a, b, c)] == [x.tolist() for x in awkward1_numba_util.broadcast_arrays((a, b, c))]
 
-    assert awkward1_numba_content.broadcast_arrays(("hello", a))[0] == "hello"
-    assert awkward1_numba_content.broadcast_arrays((a, "hello"))[1] == "hello"
-    assert awkward1_numba_content.broadcast_arrays(("hello", c)) == ("hello", c)
-    assert awkward1_numba_content.broadcast_arrays((c, "hello")) == (c, "hello")
+    assert awkward1_numba_util.broadcast_arrays(("hello", a))[0] == "hello"
+    assert awkward1_numba_util.broadcast_arrays((a, "hello"))[1] == "hello"
+    assert awkward1_numba_util.broadcast_arrays(("hello", c)) == ("hello", c)
+    assert awkward1_numba_util.broadcast_arrays((c, "hello")) == (c, "hello")
+    assert [x.tolist() for x in numpy.broadcast_arrays(a, b)] == [x.tolist() for x in awkward1_numba_util.broadcast_arrays(("hello", a, b))[1:]]
