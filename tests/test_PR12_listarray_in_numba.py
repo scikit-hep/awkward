@@ -25,3 +25,14 @@ def test_slice_utils():
     assert awkward1_numba_util.broadcast_arrays(("hello", c)) == ("hello", c)
     assert awkward1_numba_util.broadcast_arrays((c, "hello")) == (c, "hello")
     assert [x.tolist() for x in numpy.broadcast_arrays(a, b)] == [x.tolist() for x in awkward1_numba_util.broadcast_arrays(("hello", a, b))[1:]]
+
+    assert [x.tolist() for x in awkward1_numba_util.maskarrays_to_indexarrays((numpy.array([0, 1, 2, 3]), numpy.array([[True, False], [False, True], [True, True], [False, False]])))]
+
+def test_simple():
+    starts  = numpy.array([0, 3, 3, 5, 6])
+    stops   = numpy.array([3, 3, 5, 6, 10])
+    content = numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    array   = awkward1.layout.ListArray64(awkward1.layout.Index64(starts),
+                                          awkward1.layout.Index64(stops),
+                                          awkward1.layout.NumpyArray(content))
+    assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]

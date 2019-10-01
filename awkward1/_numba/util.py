@@ -74,6 +74,6 @@ def maskarrays_to_indexarrays(arrays):
                 indexes.append("arrays[{}],".format(i))
         code += "    return ({})".format(" ".join(indexes))
         print(code)
-        g = {}
+        g = {"numpy": numpy}
         exec(code, g)
         return g["impl"]
