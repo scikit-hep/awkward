@@ -21,6 +21,7 @@ class ListOffsetArrayType(content.ContentType):
         self.contenttpe = contenttpe
         self.idtpe = idtpe
 
+    @property
     def bitwidth(self):
         return self.offsetstpe.dtype.bitwidth
 
@@ -29,21 +30,24 @@ class ListOffsetArrayType(content.ContentType):
         return 1 + self.contenttpe.ndim
 
     def getitem_int(self):
-        return self.getitem_tuple(numba.types.Tuple((numba.int64,)), False)
+        return self.getitem_tuple(numba.types.Tuple((numba.int64,)))
 
     def getitem_range(self):
-        return self.getitem_tuple(numba.types.Tuple((numba.types.slice2_type,)), False)
+        return self.getitem_tuple(numba.types.Tuple((numba.types.slice2_type,)))
 
-    def getitem_tuple(self, wheretpe, isadvanced):
+    def getitem_tuple(self, wheretpe):
+        return self.getitem_next(wheretpe, False)
+
+    def getitem_next(self, wheretpe, isadvanced):
         if len(wheretpe.types) == 0:
             return self
         else:
             headtpe = wheretpe.types[0]
             tailtpe = numba.types.Tuple(wheretpe.types[1:])
             if isinstance(headtpe, numba.types.Integer):
-                return self.contenttpe.getitem_tuple(tailtpe, isadvanced)
+                return self.contenttpe.getitem_next(tailtpe, isadvanced)
             else:
-                return self.getitem_tuple(tailtpe, isadvanced)
+                return self.getitem_next(tailtpe, isadvanced)
 
     @property
     def lower_len(self):
@@ -84,10 +88,10 @@ def unbox(tpe, obj, c):
 
 @numba.extending.box(ListOffsetArrayType)
 def box(tpe, val, c):
-    if tpe.bitwidth() == 32:
+    if tpe.bitwidth == 32:
         Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Index32))
         ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArray32))
-    elif tpe.bitwidth() == 64:
+    elif tpe.bitwidth == 64:
         Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Index64))
         ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArray64))
     else:
