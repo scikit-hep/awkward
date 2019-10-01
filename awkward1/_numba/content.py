@@ -29,17 +29,19 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
                 if not isinstance(wheretpe, numba.types.BaseTuple):
                     wheretpe = numba.types.Tuple((wheretpe,))
                 if len(wheretpe.types) == 0:
-                    return arraytpe
+                    return numba.typing.templates.signature(arraytpe, arraytpe, original_wheretpe)
 
                 if any(isinstance(t, numba.types.Array) and t.ndim == 1 for t in wheretpe.types):
                     newwhere = ()
                     for t in wheretpe:
                         if isinstance(t, numba.types.Integer):
-                            newwhere = newwhere + (numba.types.Array(t, 1, "C"),)
+                            newwhere = newwhere + (numba.int64[:],)
+                        elif isinstance(t, numba.types.Array) and isinstance(t.dtype, numba.types.Integer):
+                            newwhere = newwhere + (numba.types.Array(numba.int64, t.ndim, "C"),)
                         elif isinstance(t, numba.types.Array) and isinstance(t.dtype, numba.types.Boolean):
                             for i in range(t.ndim):
-                                newwhere = newwhere + (numba.types.Array(numba.int64, 1, "C"),)
-                        elif isinstance(t, numba.types.Array) and not isinstance(t.dtype, numba.types.Integer):
+                                newwhere = newwhere + (numba.int64[:],)
+                        elif isinstance(t, numba.types.Array):
                             raise TypeError("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), and integer or boolean arrays (possibly jagged) are valid indices")
                         else:
                             newwhere = newwhere + (t,)

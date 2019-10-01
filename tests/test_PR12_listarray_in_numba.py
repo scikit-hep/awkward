@@ -43,11 +43,17 @@ def test_boxing():
         return q
     assert awkward1.tolist(f1(array)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
 
-# def test_simple():
-#     @numba.njit
-#     def f1(q):
-#         return q[(2,)]
-#
-#     print(f1(array))
-#
-#     raise Exception
+def test_simple():
+    @numba.njit
+    def f1(q):
+        return q[()]
+
+    assert awkward1.tolist(f1(array)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
+
+    # @numba.njit
+    # def f2(q):
+    #     return q[2:4,]
+    #
+    # print(awkward1.tolist(f2(array)))
+
+    # raise Exception

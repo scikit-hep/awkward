@@ -35,12 +35,14 @@ class ListArrayType(content.ContentType):
         return 1 + self.contenttpe.ndim
 
     def getitem(self, wheretpe, isadvanced):
+        import awkward1._numba.listoffsetarray
+
         headtpe = wheretpe.types[0]
         tailtpe = numba.types.Tuple(wheretpe.types[1:])
         if isinstance(headtpe, numba.types.Integer):
             return self.contenttpe.getitem(tailtpe, isadvanced)
         elif isinstance(headtpe, numba.types.SliceType):
-            return ListOffsetArrayType(self.startstpe, self.contenttpe.getitem(tailtpe, isadvanced), self.idtpe)
+            return awkward1._numba.listoffsetarray.ListOffsetArrayType(self.startstpe, self.contenttpe.getitem(tailtpe, isadvanced), self.idtpe)
         elif isinstance(headtpe, numba.types.EllipsisType):
             raise NotImplementedError("ellipsis")
         elif isinstance(headtpe, numba.typeof(numpy.newaxis)):
@@ -48,7 +50,7 @@ class ListArrayType(content.ContentType):
         elif isinstance(headtpe, numba.types.Array) and not isadvanced:
             if headtpe.ndim != 1:
                 raise NotImplementedError("array.ndim != 1")
-            return ListOffsetArrayType(self.startstpe, self.contenttpe.getitem(tailtpe, True), self.idtpe)
+            return awkward1._numba.listoffsetarray.ListOffsetArrayType(self.startstpe, self.contenttpe.getitem(tailtpe, True), self.idtpe)
         elif isinstance(headtpe, numba.types.Array):
             return self.contenttpe.getitem(tailtpe, True)
         else:
@@ -135,3 +137,21 @@ def lower_len(context, builder, sig, args):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     startslen = numba.targets.arrayobj.array_len(context, builder, numba.intp(tpe.startstpe), (proxyin.starts,))
     return startslen
+
+@numba.extending.lower_builtin(operator.getitem, ListArrayType, numba.types.BaseTuple)
+def lower_getitem_tuple(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+
+    newwheretpe = util._typing_maskarrays_to_indexarrays(wheretpe)
+    util.maskarrays_to_indexarrays.compile(newwheretpe(wheretpe))
+    cres = util.maskarrays_to_indexarrays.overloads[(wheretpe,)]
+    newwhere = context.call_internal(builder, cres.fndesc, newwheretpe(wheretpe), (whereval,))
+
+    if len(newwheretpe.types) == 0:
+        if context.enable_nrt:
+            context.nrt.incref(builder, rettpe, val)
+        return val
+
+    else:
+        raise NotImplementedError(wheretpe)
