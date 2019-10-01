@@ -59,7 +59,7 @@ def _typing_broadcast_arrays(arrays):
     if not isinstance(arrays, numba.types.BaseTuple) or not any(isinstance(x, numba.types.Array) for x in arrays.types):
         return arrays
     else:
-        return numba.types.Tuple([numba.int64[:] if isinstance(t, numba.types.Integer) else t for t in arrays.types])
+        return numba.types.Tuple([numba.types.Array(numba.int64, 1, "C") if isinstance(t, numba.types.Integer) else t for t in arrays.types])
 
 @numba.generated_jit(nopython=True)
 def maskarrays_to_indexarrays(arrays):
@@ -91,7 +91,7 @@ def maskarrays_to_indexarrays(arrays):
 def _typing_maskarrays_to_indexarrays(arrays):
     out = ()
     if not isinstance(arrays, numba.types.BaseTuple) and isinstance(arrays, numba.types.Array) and isinstance(arrays.dtype, numba.types.Boolean):
-        return numba.types.Tuple(arrays.ndims*(numba.int64[:],))
+        return numba.types.Tuple(arrays.ndims*(numba.types.Array(numba.int64, 1, "C"),))
 
     elif not isinstance(arrays, numba.types.BaseTuple) or not any(isinstance(t, numba.types.Array) and isinstance(t.dtype, numba.types.Boolean) for t in arrays.types):
         return arrays
@@ -99,9 +99,9 @@ def _typing_maskarrays_to_indexarrays(arrays):
     else:
         for t in arrays.types:
             if isinstance(t, numba.types.Array) and isinstance(t.dtype, numba.types.Boolean):
-                out = out + t.ndims*(numba.int64[:],)
+                out = out + t.ndims*(numba.types.Array(numba.int64, 1, "C"),)
             elif isinstance(t, numba.types.Array) and isinstance(t.dtype, numba.types.Integer):
-                out = out + (numba.int64[:],)
+                out = out + (numba.types.Array(numba.int64, 1, "C"),)
             elif isinstance(t, numba.types.Array):
                 raise TypeError("arrays must have boolean or integer type")
             else:

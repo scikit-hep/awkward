@@ -45,7 +45,7 @@ class ListArrayType(content.ContentType):
             return awkward1._numba.listoffsetarray.ListOffsetArrayType(self.startstpe, self.contenttpe.getitem(tailtpe, isadvanced), self.idtpe)
         elif isinstance(headtpe, numba.types.EllipsisType):
             raise NotImplementedError("ellipsis")
-        elif isinstance(headtpe, numba.typeof(numpy.newaxis)):
+        elif isinstance(headtpe, type(numba.typeof(numpy.newaxis))):
             raise NotImplementedError("newaxis")
         elif isinstance(headtpe, numba.types.Array) and not isadvanced:
             if headtpe.ndim != 1:
@@ -140,18 +140,100 @@ def lower_len(context, builder, sig, args):
 
 @numba.extending.lower_builtin(operator.getitem, ListArrayType, numba.types.BaseTuple)
 def lower_getitem_tuple(context, builder, sig, args):
-    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
-    val, whereval = args
+    rettpe, (arraytpe, wheretpe) = sig.return_type, sig.args
+    arrayval, whereval = args
 
-    newwheretpe = util._typing_maskarrays_to_indexarrays(wheretpe)
-    util.maskarrays_to_indexarrays.compile(newwheretpe(wheretpe))
+    wheretpe2 = util._typing_maskarrays_to_indexarrays(wheretpe)
+    util.maskarrays_to_indexarrays.compile(wheretpe2(wheretpe))
     cres = util.maskarrays_to_indexarrays.overloads[(wheretpe,)]
-    newwhere = context.call_internal(builder, cres.fndesc, newwheretpe(wheretpe), (whereval,))
+    whereval2 = context.call_internal(builder, cres.fndesc, wheretpe2(wheretpe), (whereval,))
 
-    if len(newwheretpe.types) == 0:
+    wheretpe3 = util._typing_broadcast_arrays(wheretpe2)
+    util.broadcast_arrays.compile(wheretpe3(wheretpe2))
+    cres2 = util.broadcast_arrays.overloads[(wheretpe2,)]
+    whereval3 = context.call_internal(builder, cres2.fndesc, wheretpe3(wheretpe2), (whereval2,))
+
+    return lower_getitem_next(context, builder, rettpe, arraytpe, wheretpe3, arrayval, whereval3, None)
+
+def lower_getitem_next(context, builder, rettpe, arraytpe, wheretpe, arrayval, whereval, advanced):
+    if len(wheretpe.types) == 0:
         if context.enable_nrt:
-            context.nrt.incref(builder, rettpe, val)
-        return val
+            context.nrt.incref(builder, rettpe, arrayval)
+        return arrayval
+
+    proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+    lenstarts = numba.targets.arrayobj.array_len(context, builder, numba.types.intp(arraytpe.startstpe), (proxyin.starts,))
+    lenstops = numba.targets.arrayobj.array_len(context, builder, numba.types.intp(arraytpe.stopstpe), (proxyin.stops,))
+    lencontent = arraytpe.contenttpe.lower_len(context, builder, numba.types.intp(arraytpe.contenttpe), (proxyin.content,))
+    with builder.if_then(builder.icmp_signed("<", lenstops, lenstarts), likely=False):
+        context.call_conv.return_user_exc(builder, ValueError, ("len(stops) < len(starts)",))
+
+    headtpe = wheretpe.types[0]
+    tailtpe = numba.types.Tuple(wheretpe.types[1:])
+    headval = numba.cgutils.unpack_tuple(builder, whereval)[0]
+    tailval = context.make_tuple(builder, tailtpe, numba.cgutils.unpack_tuple(builder, whereval)[1:])
+
+    if isinstance(headtpe, numba.types.Integer):
+        raise NotImplementedError("ListArray.getitem_next(int)")
+
+    elif isinstance(headtpe, numba.types.SliceType):
+        raise NotImplementedError("ListArray.getitem_next(slice)")
+
+    elif isinstance(headtpe, numba.types.EllipsisType):
+        raise NotImplementedError("ListArray.getitem_next(ellipsis)")
+
+    elif isinstance(headtpe, type(numba.typeof(numpy.newaxis))):
+        raise NotImplementedError("ListArray.getitem_next(newaxis)")
+
+    elif isinstance(headtpe, numba.types.Array) and advanced is None:
+        if headtpe.ndim != 1:
+            raise NotImplementedError("array.ndim != 1")
+
+        flathead = numba.targets.arrayobj.array_ravel(context, builder, numba.types.Array(numba.int64, 1, "C")(headtpe), (headval,))
+        lenflathead = numba.targets.arrayobj.array_len(context, builder, numba.types.intp(numba.types.Array(numba.int64, 1, "C")), (flathead,))
+
+        lencarry = builder.mul(lenstarts, lenflathead)
+        lenoffsets = builder.add(lenstarts, context.get_constant(numba.intp, 1))
+
+        nextcarry = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.types.intp), (lencarry,))
+        nextadvanced = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.types.intp), (lencarry,))
+        nextoffsets = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.types.intp), (lenoffsets,))
+
+        proxynextcarry = numba.cgutils.create_struct_proxy(numba.types.Array(numba.int64, 1, "C"))(context, builder, value=nextcarry)
+        proxynextadvanced = numba.cgutils.create_struct_proxy(numba.types.Array(numba.int64, 1, "C"))(context, builder, value=nextadvanced)
+        proxynextoffsets = numba.cgutils.create_struct_proxy(numba.types.Array(numba.int64, 1, "C"))(context, builder, value=nextoffsets)
+        proxystarts = numba.cgutils.create_struct_proxy(arraytpe.startstpe)(context, builder, value=proxyin.starts)
+        proxystops = numba.cgutils.create_struct_proxy(arraytpe.stopstpe)(context, builder, value=proxyin.stops)
+        proxyflathead = numba.cgutils.create_struct_proxy(numba.types.Array(numba.int64, 1, "C"))(context, builder, value=flathead)
+
+        fcn = cpu.kernels.awkward_listarray64_getitem_next_array_64
+        fcntpe = context.get_function_pointer_type(fcn.numbatpe)
+        fcnval = context.add_dynamic_addr(builder, fcn.numbatpe.get_pointer(fcn), info=fcn.name)
+        fcnptr = builder.bitcast(fcnval, fcntpe)
+
+        err = context.call_function_pointer(builder, fcnptr,
+            (proxynextoffsets.data,
+             proxynextcarry.data,
+             proxynextadvanced.data,
+             proxystarts.data,
+             proxystops.data,
+             proxyflathead.data,
+             context.get_constant(numba.int64, 0),
+             context.get_constant(numba.int64, 0),
+             lenstarts,
+             lenflathead,
+             lencontent))
+
+        proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
+        proxyout.offsets = nextoffsets
+        proxyout.content = proxyin.content
+        out = proxyout._getvalue()
+        if context.enable_nrt:
+            context.nrt.incref(builder, rettpe, out)
+        return out
+
+    elif isinstance(headtpe, numba.types.Array):
+        raise NotImplementedError("ListArray.getitem_next(advanced Array)")
 
     else:
-        raise NotImplementedError(wheretpe)
+        raise AssertionError(headtpe)

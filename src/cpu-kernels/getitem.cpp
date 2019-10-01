@@ -305,14 +305,21 @@ void awkward_listarray64_getitem_next_range_spreadadvanced_64(int64_t* toadvance
   awkward_listarray_getitem_next_range_spreadadvanced<int64_t, int64_t>(toadvanced, fromadvanced, fromoffsets, lenstarts);
 }
 
+#include <iostream>
+
 template <typename C, typename T>
 Error awkward_listarray_getitem_next_array(C* tooffsets, T* tocarry, T* toadvanced, const C* fromstarts, const C* fromstops, const T* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
+
+  std::cout << "startsoffset " << startsoffset << " stopsoffset " << stopsoffset << " lenstarts " << lenstarts << " lenarray " << lenarray << " lencontent " << lencontent << std::endl;
+
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
     if (fromstops[stopsoffset + i] < fromstarts[startsoffset + i]) {
+      std::cout << "stops[i] < starts[i]" << std::endl;
       return "stops[i] < starts[i]";
     }
     if (fromstarts[startsoffset + i] != fromstops[stopsoffset + i]  &&  fromstops[stopsoffset + i] > lencontent) {
+      std::cout << "stops[i] > len(content)" << std::endl;
       return "stops[i] > len(content)";
     }
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
@@ -322,12 +329,18 @@ Error awkward_listarray_getitem_next_array(C* tooffsets, T* tocarry, T* toadvanc
         regular_at += length;
       }
       if (!(0 <= regular_at  &&  regular_at < length)) {
+        std::cout << "array[i] is out of range for at least one sublist" << std::endl;
         return "array[i] is out of range for at least one sublist";
       }
       tocarry[i*lenarray + j] = fromstarts[startsoffset + i] + regular_at;
       toadvanced[i*lenarray + j] = j;
     }
     tooffsets[i + 1] = (C)((i + 1)*lenarray);
+
+    for (int64_t q = 0;  q < lenstarts + 1;  q++) {
+      std::cout << tooffsets[q] << " ";
+    }
+    std::cout << std::endl;
   }
   return kNoError;
 }
