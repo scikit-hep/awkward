@@ -280,6 +280,9 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         if headtpe.ndim != 1:
             raise NotImplementedError("array.ndim != 1")
 
+        print("before ravel, headtpe", headtpe, "headtpe.dtype", headtpe.dtype)
+        print("              headval", headval)
+
         flathead = numba.targets.arrayobj.array_ravel(context, builder, numba.types.Array(numba.int64, 1, "C")(headtpe), (headval,))
         lenflathead = numba.targets.arrayobj.array_len(context, builder, numba.intp(numba.types.Array(numba.int64, 1, "C")), (flathead,))
 
@@ -317,8 +320,8 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
 
         nexttpe = arraytpe.contenttpe
         nextval = proxyin.content      # FIXME: carry
-        contenttpe = nexttpe.getitem_next(tailtpe, True)
-        contentval = contenttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
+        contenttpe = nexttpe  # nexttpe.getitem_next(tailtpe, True)
+        contentval = nextval  # contenttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
         if not isinstance(arraytpe.idtpe, numba.types.NoneType):
             raise NotImplementedError("array.id is not None")
@@ -330,6 +333,8 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         proxyout.content = contentval
         outval = proxyout._getvalue()
         if context.enable_nrt:
+            context.nrt.incref(builder, arraytpe.startstpe, nextoffsets)
+            context.nrt.incref(builder, arraytpe.startstpe, nextoffsets)
             context.nrt.incref(builder, outtpe, outval)
         return outval
 

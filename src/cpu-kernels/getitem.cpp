@@ -336,12 +336,24 @@ Error awkward_listarray_getitem_next_array(C* tooffsets, T* tocarry, T* toadvanc
       toadvanced[i*lenarray + j] = j;
     }
     tooffsets[i + 1] = (C)((i + 1)*lenarray);
-
-    for (int64_t q = 0;  q < lenstarts + 1;  q++) {
-      std::cout << tooffsets[q] << " ";
-    }
-    std::cout << std::endl;
   }
+
+  std::cout << "tooffsets ";
+  for (int64_t q = 0;  q < lenstarts + 1;  q++) {
+    std::cout << tooffsets[q] << " ";
+  }
+  std::cout << std::endl;
+  std::cout << "tocarry ";
+  for (int64_t q = 0;  q < lenstarts*lenarray;  q++) {
+    std::cout << tocarry[q] << " ";
+  }
+  std::cout << std::endl;
+  std::cout << "toadvanced ";
+  for (int64_t q = 0;  q < lenstarts*lenarray;  q++) {
+    std::cout << toadvanced[q] << " ";
+  }
+  std::cout << std::endl;
+
   return kNoError;
 }
 Error awkward_listarray32_getitem_next_array_64(int32_t* tooffsets, int64_t* tocarry, int64_t* toadvanced, const int32_t* fromstarts, const int32_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
