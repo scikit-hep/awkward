@@ -52,6 +52,18 @@ class NumpyArrayType(content.ContentType):
     def lower_getitem_int(self):
         return lower_getitem
 
+    @property
+    def lower_getitem_range(self):
+        return lower_getitem_range
+
+    @property
+    def lower_getitem_next(self):
+        return lower_getitem_next
+
+    @property
+    def lower_carry(self):
+        return lower_carry
+
 @numba.extending.register_model(NumpyArrayType)
 class NumpyArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
@@ -124,6 +136,9 @@ def lower_getitem(context, builder, sig, args):
         return proxyout._getvalue()
     else:
         return out
+
+def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
+    return numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe(arraytpe, carrytpe), (arrayval, carryval))
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):

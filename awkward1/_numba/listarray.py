@@ -63,7 +63,8 @@ class ListArrayType(content.ContentType):
         elif isinstance(headtpe, numba.types.Array) and not isadvanced:
             if headtpe.ndim != 1:
                 raise NotImplementedError("array.ndim != 1")
-            return awkward1._numba.listoffsetarray.ListOffsetArrayType(self.startstpe, self.contenttpe.getitem_next(tailtpe, True), self.idtpe)
+            # return awkward1._numba.listoffsetarray.ListOffsetArrayType(self.startstpe, self.contenttpe.getitem_next(tailtpe, True), self.idtpe)
+            return ListArrayType(self.startstpe, self.stopstpe, self.contenttpe.getitem_next(tailtpe, True), self.idtpe)
         elif isinstance(headtpe, numba.types.Array):
             return self.contenttpe.getitem_next(tailtpe, True)
         else:
@@ -84,6 +85,10 @@ class ListArrayType(content.ContentType):
     @property
     def lower_getitem_next(self):
         return lower_getitem_next
+
+    @property
+    def lower_carry(self):
+        return lower_carry
 
 @numba.extending.register_model(ListArrayType)
 class ListArrayModel(numba.datamodel.models.StructModel):
@@ -221,26 +226,30 @@ def lower_getitem_tuple(context, builder, sig, args):
     cres2 = util.broadcast_arrays.overloads[(wheretpe2,)]
     whereval3 = context.call_internal(builder, cres2.fndesc, wheretpe3(wheretpe2), (whereval2,))
 
+    length = lower_len(context, builder, numba.intp(arraytpe), (arrayval,))
+    if numba.int64.bitwidth > numba.intp.bitwidth:
+        length = builder.zext(length, context.get_value_type(numba.int64))
+
     nexttpe = ListArrayType(numba.types.Array(numba.int64, 1, "C"), numba.types.Array(numba.int64, 1, "C"), arraytpe, numba.types.none)
     proxynext = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
     proxynext.starts = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.intp), (context.get_constant(numba.intp, 1),))
     proxynext.stops = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.intp), (context.get_constant(numba.intp, 1),))
     numba.targets.arrayobj.store_item(context, builder, numba.types.Array(numba.int64, 1, "C"), context.get_constant(numba.int64, 0), numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, proxynext.starts).data)
-    numba.targets.arrayobj.store_item(context, builder, numba.types.Array(numba.int64, 1, "C"), lower_len(context, builder, numba.intp(arraytpe), (arrayval,)), numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, proxynext.stops).data)
+    numba.targets.arrayobj.store_item(context, builder, numba.types.Array(numba.int64, 1, "C"), length, numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, proxynext.stops).data)
     proxynext.content = arrayval
     nextval = proxynext._getvalue()
     if context.enable_nrt:
         context.nrt.incref(builder, nexttpe, nextval)
 
     outtpe = nexttpe.getitem_next(wheretpe3, False)
-    outval = nexttpe.lower_getitem_next(context, builder, outtpe, nexttpe, wheretpe3, nextval, whereval3, None)
+    outval = nexttpe.lower_getitem_next(context, builder, outtpe, wheretpe3, nextval, whereval3, None)
 
     return outtpe.lower_getitem_int(context, builder, rettpe(outtpe, numba.int64), (outval, context.get_constant(numba.int64, 0)))
 
-def lower_getitem_next(context, builder, rettpe, arraytpe, wheretpe, arrayval, whereval, advanced):
+def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval, advanced):
     if len(wheretpe.types) == 0:
         if context.enable_nrt:
-            context.nrt.incref(builder, rettpe, arrayval)
+            context.nrt.incref(builder, arraytpe, arrayval)
         return arrayval
 
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
@@ -306,16 +315,39 @@ def lower_getitem_next(context, builder, rettpe, arraytpe, wheretpe, arrayval, w
              lenflathead,
              lencontent))
 
-        proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
-        proxyout.offsets = nextoffsets
-        proxyout.content = proxyin.content
-        out = proxyout._getvalue()
+        nexttpe = arraytpe.contenttpe
+        nextval = proxyin.content      # FIXME: carry
+        contenttpe = nexttpe.getitem_next(tailtpe, True)
+        contentval = contenttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
+
+        if not isinstance(arraytpe.idtpe, numba.types.NoneType):
+            raise NotImplementedError("array.id is not None")
+
+        outtpe = ListArrayType(arraytpe.startstpe, arraytpe.stopstpe, contenttpe, arraytpe.idtpe)
+        proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
+        proxyout.starts = nextoffsets
+        proxyout.stops = nextoffsets
+        proxyout.content = contentval
+        outval = proxyout._getvalue()
         if context.enable_nrt:
-            context.nrt.incref(builder, rettpe, out)
-        return out
+            context.nrt.incref(builder, outtpe, outval)
+        return outval
 
     elif isinstance(headtpe, numba.types.Array):
         raise NotImplementedError("ListArray.getitem_next(advanced Array)")
 
     else:
         raise AssertionError(headtpe)
+
+def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
+    proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+    proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)
+    proxyout.starts = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.startstpe(arraytpe.startstpe, carrytpe), (proxyin.starts, carryval))
+    proxyout.stops = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.stopstpe(arraytpe.stopstpe, carrytpe), (proxyin.stops, carryval))
+    proxyout.content = proxyin.content
+    if not isinstance(arraytpe.idtpe, numba.types.NoneType):
+        raise NotImplementedError("array.id is not None")
+    outval = proxyout._getvalue()
+    if context.enable_nrt:
+        context.nrt.incref(builder, arraytpe, outval)
+    return outval

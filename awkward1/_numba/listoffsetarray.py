@@ -57,6 +57,18 @@ class ListOffsetArrayType(content.ContentType):
     def lower_getitem_int(self):
         return lower_getitem_int
 
+    @property
+    def lower_getitem_range(self):
+        return lower_getitem_range
+
+    @property
+    def lower_getitem_next(self):
+        return lower_getitem_next
+
+    @property
+    def lower_carry(self):
+        return lower_carry
+
 @numba.extending.register_model(ListOffsetArrayType)
 class ListOffsetArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
@@ -163,6 +175,19 @@ def lower_getitem_slice(context, builder, sig, args):
     if context.enable_nrt:
         context.nrt.incref(builder, rettpe, out)
     return out
+
+# def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
+#     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+#     proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)
+#     proxyout.starts = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.startstpe(arraytpe.startstpe, carrytpe), (proxyin.starts, carryval))
+#     proxyout.stops = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.stopstpe(arraytpe.stopstpe, carrytpe), (proxyin.stops, carryval))
+#     proxyout.content = proxyin.content
+#     if not isinstance(arraytpe.idtpe, numba.types.NoneType):
+#         raise NotImplementedError("array.id is not None")
+#     outval = proxyout._getvalue()
+#     if context.enable_nrt:
+#         context.nrt.incref(builder, arraytpe, outval)
+#     return outval
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):
