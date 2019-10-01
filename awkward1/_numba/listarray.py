@@ -290,9 +290,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
 
         flathead = numba.targets.arrayobj.array_ravel(context, builder, numba.types.Array(numba.int64, 1, "C")(headtpe), (headval,))
         lenflathead = numba.targets.arrayobj.array_len(context, builder, numba.intp(numba.types.Array(numba.int64, 1, "C")), (flathead,))
-
         lencarry = builder.mul(lenstarts, lenflathead)
         lenoffsets = builder.add(lenstarts, context.get_constant(numba.intp, 1))
+        if numba.int64.bitwidth > numba.intp.bitwidth:
+            lenflathead = builder.zext(lenflathead, context.get_value_type(numba.int64))
+            lencarry = builder.zext(lencarry, context.get_value_type(numba.int64))
+            lenoffsets = builder.zext(lenoffsets, context.get_value_type(numba.int64))
 
         nextcarry = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.intp), (lencarry,))
         nextadvanced = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.intp), (lencarry,))
