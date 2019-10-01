@@ -28,7 +28,7 @@ def test_slice_utils():
         assert awkward1_numba_util.broadcast_arrays((c, "hello")) == (c, "hello")
         assert [x.tolist() for x in numpy.broadcast_arrays(a, b)] == [x.tolist() for x in awkward1_numba_util.broadcast_arrays(("hello", a, b))[1:]]
 
-    assert [x.tolist() for x in awkward1_numba_util.maskarrays_to_indexarrays((numpy.array([0, 1, 2, 3]), numpy.array([[True, False], [False, True], [True, True], [False, False]])))]
+    assert [x.tolist() for x in awkward1_numba_util._regularize_slice((numpy.array([0, 1, 2, 3]), numpy.array([[True, False], [False, True], [True, True], [False, False]])))]
 
 starts  = numpy.array([0, 3, 3, 5, 6])
 stops   = numpy.array([3, 3, 5, 6, 10])
@@ -66,8 +66,6 @@ def test_simple():
 def test_array():
     @numba.njit
     def f4(q):
-        return q[numpy.array([2, 0, 0, 1]),]
+        return q[[2, 0, 0, 1],]
 
     assert awkward1.tolist(f4(array)) == [[3.3, 4.4], [0.0, 1.1, 2.2], [0.0, 1.1, 2.2], []]
-
-    raise Exception

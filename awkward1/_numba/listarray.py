@@ -219,9 +219,9 @@ def lower_getitem_tuple(context, builder, sig, args):
     rettpe, (arraytpe, wheretpe1) = sig.return_type, sig.args
     arrayval, whereval1 = args
 
-    wheretpe2 = util._typing_maskarrays_to_indexarrays(wheretpe1)
-    util.maskarrays_to_indexarrays.compile(wheretpe2(wheretpe1))
-    cres = util.maskarrays_to_indexarrays.overloads[(wheretpe1,)]
+    wheretpe2 = util._typing_regularize_slice(wheretpe1)
+    util._regularize_slice.compile(wheretpe2(wheretpe1))
+    cres = util._regularize_slice.overloads[(wheretpe1,)]
     whereval2 = context.call_internal(builder, cres.fndesc, wheretpe2(wheretpe1), (whereval1,))
 
     wheretpe3 = util._typing_broadcast_arrays(wheretpe2)
