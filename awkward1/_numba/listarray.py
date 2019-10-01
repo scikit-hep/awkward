@@ -184,12 +184,15 @@ def lower_getitem_int(context, builder, sig, args):
     if tpe.bitwidth < numba.intp.bitwidth:
         proxyslice.start = builder.zext(start, context.get_value_type(numba.intp))
         proxyslice.stop = builder.zext(stop, context.get_value_type(numba.intp))
+        print("ONE", proxyslice.start)
     elif tpe.bitwidth == numba.intp.bitwidth:
         proxyslice.start = start
         proxyslice.stop = stop
+        print("TWO")
     elif tpe.bitwidth > numba.intp.bitwidth:
         proxyslice.start = builder.trunc(start, context.get_value_type(numba.intp))
         proxyslice.stop = builder.trunc(stop, context.get_value_type(numba.intp))
+        print("THREE", proxyslice.start)
     proxyslice.step = context.get_constant(numba.intp, 1)
 
     fcn = context.get_function(operator.getitem, rettpe(tpe.contenttpe, numba.types.slice2_type))
@@ -232,6 +235,7 @@ def lower_getitem_tuple(context, builder, sig, args):
     length = lower_len(context, builder, numba.intp(arraytpe), (arrayval,))
     if numba.int64.bitwidth > numba.intp.bitwidth:
         length = builder.zext(length, context.get_value_type(numba.int64))
+        print("FOUR", length)
 
     nexttpe = ListArrayType(numba.types.Array(numba.int64, 1, "C"), numba.types.Array(numba.int64, 1, "C"), arraytpe, numba.types.none)
     proxynext = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
@@ -265,6 +269,9 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         lenstarts = builder.zext(lenstarts, context.get_value_type(numba.int64))
         lenstops = builder.zext(lenstops, context.get_value_type(numba.int64))
         lencontent = builder.zext(lencontent, context.get_value_type(numba.int64))
+        print("FIVE", lenstarts)
+        print("SIX", lenstops)
+        print("SEVEN", lencontent)
 
     with builder.if_then(builder.icmp_signed("<", lenstops, lenstarts), likely=False):
         context.call_conv.return_user_exc(builder, ValueError, ("len(stops) < len(starts)",))
@@ -297,6 +304,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         lenflathead = numba.targets.arrayobj.array_len(context, builder, numba.intp(numba.types.Array(numba.int64, 1, "C")), (flathead,))
         if numba.int64.bitwidth > numba.intp.bitwidth:
             lenflathead = builder.zext(lenflathead, context.get_value_type(numba.int64))
+            print("EIGHT", lenflathead)
         lencarry = builder.mul(lenstarts, lenflathead)
         lenoffsets = builder.add(lenstarts, context.get_constant(numba.int64, 1))
 
