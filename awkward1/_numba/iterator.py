@@ -10,7 +10,7 @@ from .._numba import cpu, util, content
 class IteratorType(numba.types.common.SimpleIteratorType):
     def __init__(self, arraytpe):
         self.arraytpe = arraytpe
-        super(IteratorType, self).__init__("iter({0})".format(self.arraytpe.name), self.arraytpe.getitem(numba.types.Tuple((numba.int64,)), False))
+        super(IteratorType, self).__init__("iter({0})".format(self.arraytpe.name), self.arraytpe.getitem_int())
 
 @numba.typing.templates.infer
 class ContentType_type_getiter(numba.typing.templates.AbstractTemplate):

@@ -26,10 +26,13 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
 
             if isinstance(arraytpe, ContentType):
                 original_wheretpe = wheretpe
+                if isinstance(wheretpe, numba.types.Integer):
+                    return numba.typing.templates.signature(arraytpe.getitem_int(), arraytpe, original_wheretpe)
+                if isinstance(wheretpe, numba.types.SliceType) and not wheretpe.has_step:
+                    return numba.typing.templates.signature(arraytpe.getitem_range(), arraytpe, original_wheretpe)
+
                 if not isinstance(wheretpe, numba.types.BaseTuple):
                     wheretpe = numba.types.Tuple((wheretpe,))
-                if len(wheretpe.types) == 0:
-                    return numba.typing.templates.signature(arraytpe, arraytpe, original_wheretpe)
 
                 if any(isinstance(t, numba.types.Array) and t.ndim == 1 for t in wheretpe.types):
                     newwhere = ()
@@ -50,4 +53,4 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
                 if any(not isinstance(t, (numba.types.Integer, numba.types.SliceType, numba.types.EllipsisType, type(numba.typeof(numpy.newaxis)), numba.types.Array)) for t in wheretpe.types):
                     raise TypeError("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), and integer or boolean arrays (possibly jagged) are valid indices")
 
-                return numba.typing.templates.signature(arraytpe.getitem(wheretpe, False), arraytpe, original_wheretpe)
+                return numba.typing.templates.signature(arraytpe.getitem_tuple(wheretpe, False), arraytpe, original_wheretpe)

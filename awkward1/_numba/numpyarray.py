@@ -24,7 +24,13 @@ class NumpyArrayType(content.ContentType):
     def ndim(self):
         return self.arraytpe.ndim
 
-    def getitem(self, wheretpe, isadvanced):
+    def getitem_int(self):
+        return self.getitem_tuple(numba.types.Tuple((numba.int64,)), False)
+
+    def getitem_range(self):
+        return self.getitem_tuple(numba.types.Tuple((numba.types.slice2_type,)), False)
+
+    def getitem_tuple(self, wheretpe, isadvanced):
         if len(wheretpe.types) > self.arraytpe.ndim:
             raise IndexError("too many indices for array")
         numreduce = sum(1 if isinstance(x, numba.types.Integer) else 0 for x in wheretpe.types)

@@ -28,16 +28,22 @@ class ListOffsetArrayType(content.ContentType):
     def ndim(self):
         return 1 + self.contenttpe.ndim
 
-    def getitem(self, wheretpe, isadvanced):
+    def getitem_int(self):
+        return self.getitem_tuple(numba.types.Tuple((numba.int64,)), False)
+
+    def getitem_range(self):
+        return self.getitem_tuple(numba.types.Tuple((numba.types.slice2_type,)), False)
+
+    def getitem_tuple(self, wheretpe, isadvanced):
         if len(wheretpe.types) == 0:
             return self
         else:
             headtpe = wheretpe.types[0]
             tailtpe = numba.types.Tuple(wheretpe.types[1:])
             if isinstance(headtpe, numba.types.Integer):
-                return self.contenttpe.getitem(tailtpe, isadvanced)
+                return self.contenttpe.getitem_tuple(tailtpe, isadvanced)
             else:
-                return self.getitem(tailtpe, isadvanced)
+                return self.getitem_tuple(tailtpe, isadvanced)
 
     @property
     def lower_len(self):
