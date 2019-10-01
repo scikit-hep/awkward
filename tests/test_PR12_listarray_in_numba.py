@@ -70,4 +70,4 @@ def test_array():
 
     assert awkward1.tolist(f4(array)) == [[3.3, 4.4], [0.0, 1.1, 2.2], [0.0, 1.1, 2.2], []]
 
-    raise Exception
+    # raise Exception
