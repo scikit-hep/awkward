@@ -149,11 +149,22 @@ def lower_getitem_int(context, builder, sig, args):
     else:
         wherevalp1_tpe = wheretpe
 
-    start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, numba.int64(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
-    stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, numba.int64(tpe.offsetstpe, wherevalp1_tpe), (proxyin.offsets, wherevalp1))
+    start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe.dtype(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
+    stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe.dtype(tpe.offsetstpe, wherevalp1_tpe), (proxyin.offsets, wherevalp1))
     proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
-    proxyslice.start = builder.zext(start, context.get_value_type(numba.intp))
-    proxyslice.stop = builder.zext(stop, context.get_value_type(numba.intp))
+    if numba.intp.bitwidth < tpe.offsetstpe.dtype.bitwidth:
+        proxyslice.start = builder.trunc(start, context.get_value_type(numba.intp))
+        proxyslice.stop = builder.trunc(stop, context.get_value_type(numba.intp))
+        print("UNO", proxyslice.start)
+    elif numba.intp.bitwidth == tpe.offsetstpe.dtype.bitwidth:
+        proxyslice.start = start
+        proxyslice.stop = stop
+        print("DOS", proxyslice.start)
+    elif numba.intp.bitwidth > tpe.offsetstpe.dtype.bitwidth:
+        proxyslice.start = builder.zext(start, context.get_value_type(numba.intp))
+        proxyslice.stop = builder.zext(stop, context.get_value_type(numba.intp))
+        print("TRES", proxyslice.start)
+
     proxyslice.step = context.get_constant(numba.intp, 1)
 
     fcn = context.get_function(operator.getitem, rettpe(tpe.contenttpe, numba.types.slice2_type))
