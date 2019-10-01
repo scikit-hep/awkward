@@ -261,6 +261,11 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     lenstarts = numba.targets.arrayobj.array_len(context, builder, numba.intp(arraytpe.startstpe), (proxyin.starts,))
     lenstops = numba.targets.arrayobj.array_len(context, builder, numba.intp(arraytpe.stopstpe), (proxyin.stops,))
     lencontent = arraytpe.contenttpe.lower_len(context, builder, numba.intp(arraytpe.contenttpe), (proxyin.content,))
+    if numba.int64.bitwidth > numba.intp.bitwidth:
+        lenstarts = builder.zext(lenstarts, context.get_value_type(numba.int64))
+        lenstops = builder.zext(lenstops, context.get_value_type(numba.int64))
+        lencontent = builder.zext(lencontent, context.get_value_type(numba.int64))
+
     with builder.if_then(builder.icmp_signed("<", lenstops, lenstarts), likely=False):
         context.call_conv.return_user_exc(builder, ValueError, ("len(stops) < len(starts)",))
 
