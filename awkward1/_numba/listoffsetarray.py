@@ -16,7 +16,7 @@ def typeof(val, c):
 
 class ListOffsetArrayType(content.ContentType):
     def __init__(self, offsetstpe, contenttpe, idtpe):
-        super(ListOffsetArrayType, self).__init__(name="ListOffsetArray{0}Type({1}, id={2})".format(offsetstpe.dtype.bitwidth, contenttpe.name, idtpe.name))
+        super(ListOffsetArrayType, self).__init__(name="ListOffsetArray{}Type({}, id={})".format(offsetstpe.dtype.bitwidth, contenttpe.name, idtpe.name))
         self.offsetstpe = offsetstpe
         self.contenttpe = contenttpe
         self.idtpe = idtpe
@@ -28,16 +28,16 @@ class ListOffsetArrayType(content.ContentType):
     def ndim(self):
         return 1 + self.contenttpe.ndim
 
-    def getitem(self, wheretpe):
+    def getitem(self, wheretpe, isadvanced):
         if len(wheretpe.types) == 0:
             return self
         else:
             headtpe = wheretpe.types[0]
             tailtpe = numba.types.Tuple(wheretpe.types[1:])
             if isinstance(headtpe, numba.types.Integer):
-                return self.contenttpe.getitem(tailtpe)
+                return self.contenttpe.getitem(tailtpe, isadvanced)
             else:
-                return self.getitem(tailtpe)
+                return self.getitem(tailtpe, isadvanced)
 
     @property
     def lower_len(self):
@@ -85,7 +85,7 @@ def box(tpe, val, c):
         Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Index64))
         ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArray64))
     else:
-        assert False, "unrecognized bitwidth"
+        raise AssertionError("unrecognized bitwidth")
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     offsetsarray_obj = c.pyapi.from_native_value(tpe.offsetstpe, proxyin.offsets, c.env_manager)
     content_obj = c.pyapi.from_native_value(tpe.contenttpe, proxyin.content, c.env_manager)

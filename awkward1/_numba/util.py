@@ -57,17 +57,17 @@ def impl(arrays):
 
 @numba.generated_jit(nopython=True)
 def maskarrays_to_indexarrays(arrays):
-    if not isinstance(arrays, numba.types.BaseTuple) and isinstance(arrays, numba.types.Array) and isinstance(arrays.dtype, numba.types.scalars.Boolean):
+    if not isinstance(arrays, numba.types.BaseTuple) and isinstance(arrays, numba.types.Array) and isinstance(arrays.dtype, numba.types.Boolean):
         return lambda arrays: numpy.nonzero(arrays)
 
-    elif not isinstance(arrays, numba.types.BaseTuple) or not any(isinstance(t, numba.types.Array) and isinstance(t.dtype, numba.types.scalars.Boolean) for t in arrays.types):
+    elif not isinstance(arrays, numba.types.BaseTuple) or not any(isinstance(t, numba.types.Array) and isinstance(t.dtype, numba.types.Boolean) for t in arrays.types):
         return lambda arrays: arrays
 
     else:
         code = "def impl(arrays):\n"
         indexes = []
         for i, t in enumerate(arrays.types):
-            if isinstance(t, numba.types.Array) and isinstance(t.dtype, numba.types.scalars.Boolean):
+            if isinstance(t, numba.types.Array) and isinstance(t.dtype, numba.types.Boolean):
                 code += "    x{} = numpy.nonzero(arrays[{}])\n".format(i, i)
                 indexes.extend(["x{}[{}],".format(i, j) for j in range(arrays.types[i].ndim)])
             else:

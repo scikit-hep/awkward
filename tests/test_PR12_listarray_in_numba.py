@@ -4,6 +4,7 @@ import sys
 
 import pytest
 import numpy
+numba = pytest.importorskip("numba")
 
 import awkward1
 awkward1_numba_util = pytest.importorskip("awkward1._numba.util")
@@ -28,11 +29,25 @@ def test_slice_utils():
 
     assert [x.tolist() for x in awkward1_numba_util.maskarrays_to_indexarrays((numpy.array([0, 1, 2, 3]), numpy.array([[True, False], [False, True], [True, True], [False, False]])))]
 
-def test_simple():
-    starts  = numpy.array([0, 3, 3, 5, 6])
-    stops   = numpy.array([3, 3, 5, 6, 10])
-    content = numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
-    array   = awkward1.layout.ListArray64(awkward1.layout.Index64(starts),
-                                          awkward1.layout.Index64(stops),
-                                          awkward1.layout.NumpyArray(content))
+starts  = numpy.array([0, 3, 3, 5, 6])
+stops   = numpy.array([3, 3, 5, 6, 10])
+content = numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+array   = awkward1.layout.ListArray64(awkward1.layout.Index64(starts),
+                                      awkward1.layout.Index64(stops),
+                                      awkward1.layout.NumpyArray(content))
+
+def test_boxing():
     assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    @numba.njit
+    def f1(q):
+        return q
+    assert awkward1.tolist(f1(array)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
+
+# def test_simple():
+#     @numba.njit
+#     def f1(q):
+#         return q[(2,)]
+#
+#     print(f1(array))
+#
+#     raise Exception

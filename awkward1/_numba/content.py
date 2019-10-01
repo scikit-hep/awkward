@@ -2,6 +2,7 @@
 
 import operator
 
+import numpy
 import numba
 
 from .._numba import cpu, identity
@@ -22,12 +23,29 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
     def generic(self, args, kwargs):
         if len(args) == 2 and len(kwargs) == 0:
             arraytpe, wheretpe = args
+
             if isinstance(arraytpe, ContentType):
                 original_wheretpe = wheretpe
                 if not isinstance(wheretpe, numba.types.BaseTuple):
                     wheretpe = numba.types.Tuple((wheretpe,))
                 if len(wheretpe.types) == 0:
                     return arraytpe
-                if any(isinstance(x, numba.types.Array) and x.ndim == 1 for x in wheretpe.types):
-                    wheretpe = numba.types.Tuple(tuple(numba.types.Array(x, 1, "C") if isinstance(x, numba.types.Integer) else x for x in wheretpe))
-                return numba.typing.templates.signature(arraytpe.getitem(wheretpe), arraytpe, original_wheretpe)
+
+                if any(isinstance(t, numba.types.Array) and t.ndim == 1 for t in wheretpe.types):
+                    newwhere = ()
+                    for t in wheretpe:
+                        if isinstance(t, numba.types.Integer):
+                            newwhere = newwhere + (numba.types.Array(t, 1, "C"),)
+                        elif isinstance(t, numba.types.Array) and isinstance(t.dtype, numba.types.Boolean):
+                            for i in range(t.ndim):
+                                newwhere = newwhere + (numba.types.Array(numba.int64, 1, "C"),)
+                        elif isinstance(t, numba.types.Array) and not isinstance(t.dtype, numba.types.Integer):
+                            raise TypeError("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), and integer or boolean arrays (possibly jagged) are valid indices")
+                        else:
+                            newwhere = newwhere + (t,)
+                    where = newwhere
+
+                if any(not isinstance(t, (numba.types.Integer, numba.types.SliceType, numba.types.EllipsisType, numba.typeof(numpy.newaxis), numba.types.Array)) for t in wheretpe.types):
+                    raise TypeError("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), and integer or boolean arrays (possibly jagged) are valid indices")
+
+                return numba.typing.templates.signature(arraytpe.getitem(wheretpe, False), arraytpe, original_wheretpe)
