@@ -298,25 +298,31 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         nextadvanced = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.intp), (lencarry,))
         nextoffsets = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.intp), (lenoffsets,))
 
-        proxynextcarry = numba.cgutils.create_struct_proxy(numba.types.Array(numba.int64, 1, "C"))(context, builder, value=nextcarry)
-        proxynextadvanced = numba.cgutils.create_struct_proxy(numba.types.Array(numba.int64, 1, "C"))(context, builder, value=nextadvanced)
-        proxynextoffsets = numba.cgutils.create_struct_proxy(numba.types.Array(numba.int64, 1, "C"))(context, builder, value=nextoffsets)
-        proxystarts = numba.cgutils.create_struct_proxy(arraytpe.startstpe)(context, builder, value=proxyin.starts)
-        proxystops = numba.cgutils.create_struct_proxy(arraytpe.stopstpe)(context, builder, value=proxyin.stops)
-        proxyflathead = numba.cgutils.create_struct_proxy(numba.types.Array(numba.int64, 1, "C"))(context, builder, value=flathead)
-
         fcn = cpu.kernels.awkward_listarray64_getitem_next_array_64
         fcntpe = context.get_function_pointer_type(fcn.numbatpe)
         fcnval = context.add_dynamic_addr(builder, fcn.numbatpe.get_pointer(fcn), info=fcn.name)
         fcnptr = builder.bitcast(fcnval, fcntpe)
 
+        print("argtypes", fcn.argtypes)
+        print(" a1", numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, nextoffsets).data)
+        print(" a2", numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, nextcarry).data)
+        print(" a3", numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, nextadvanced).data)
+        print(" a4", numba.targets.arrayobj.make_array(arraytpe.startstpe)(context, builder, proxyin.starts).data)
+        print(" a5", numba.targets.arrayobj.make_array(arraytpe.stopstpe)(context, builder, proxyin.stops).data)
+        print(" a6", numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, flathead).data)
+        print(" a7", context.get_constant(numba.int64, 0))
+        print(" a8", context.get_constant(numba.int64, 0))
+        print(" a9", lenstarts)
+        print("a10", lenflathead)
+        print("a11", lencontent)
+
         err = context.call_function_pointer(builder, fcnptr,
-            (proxynextoffsets.data,
-             proxynextcarry.data,
-             proxynextadvanced.data,
-             proxystarts.data,
-             proxystops.data,
-             proxyflathead.data,
+            (numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, nextoffsets).data,
+             numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, nextcarry).data,
+             numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, nextadvanced).data,
+             numba.targets.arrayobj.make_array(arraytpe.startstpe)(context, builder, proxyin.starts).data,
+             numba.targets.arrayobj.make_array(arraytpe.stopstpe)(context, builder, proxyin.stops).data,
+             numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, flathead).data,
              context.get_constant(numba.int64, 0),
              context.get_constant(numba.int64, 0),
              lenstarts,

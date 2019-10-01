@@ -5,6 +5,8 @@ import numba
 
 RefType = numba.int64
 
+# index64tpe = numba.types.Array(numba.int64, 1, "C")
+
 @numba.jit(nopython=True)
 def _shapeat(shapeat, array, at, ndim):
     redat = at - (ndim - array.ndim)
