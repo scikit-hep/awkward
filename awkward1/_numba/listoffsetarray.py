@@ -49,6 +49,10 @@ class ListOffsetArrayType(content.ContentType):
             else:
                 return self.getitem_next(tailtpe, isadvanced)
 
+    def carry(self):
+        import awkward1._numba.listarray
+        return awkward1._numba.listarray.ListArrayType(self.offsettpe, self.offsettpe, self.contenttpe, self.idtpe)
+
     @property
     def lower_len(self):
         return lower_len

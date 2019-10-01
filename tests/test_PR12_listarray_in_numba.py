@@ -63,11 +63,11 @@ def test_simple():
 
     assert awkward1.tolist(f3(array)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
 
-def test_current():
+def test_array():
     @numba.njit
     def f4(q):
         return q[numpy.array([2, 0, 0, 1]),]
 
-    print(f4(array))
+    assert awkward1.tolist(f4(array)) == [[3.3, 4.4], [0.0, 1.1, 2.2], [0.0, 1.1, 2.2], []]
 
-    # raise Exception
+    raise Exception

@@ -44,6 +44,9 @@ class NumpyArrayType(content.ContentType):
         else:
             assert False
 
+    def carry(self):
+        return self
+
     @property
     def lower_len(self):
         return lower_len
