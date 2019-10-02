@@ -21,7 +21,7 @@
 #endif
 
 extern "C" {
-  typedef const char* Error;          // FIXME: will be a struct
+  typedef const char* Error;        // FIXME: will be a struct
   const Error kNoError = nullptr;
 
   const int8_t  kMaxInt8   =                 127;   // 2**7  - 1
