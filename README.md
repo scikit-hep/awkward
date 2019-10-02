@@ -57,6 +57,7 @@ The following features of awkward 0.x will be features of awkward 1.x.
    * 2019-09-21 (PR [#8](../../pull/8)): C++ NumpyArray::getitem is done, setting the pattern for other classes (external C functions). The Numba and Identity extensions are not done, which would be necessary to fully set the pattern. This involved a lot of investigation (see [studies/getitem.py](https://github.com/jpivarski/awkward-1.0/blob/master/studies/getitem.py)).
    * 2019-09-21 (PR [#9](../../pull/9)): `Identity` is correctly passed through `NumpyArray` slices and `__getitem__` uses `get`, `slice`, or the full `getitem`, depending on argument complexity.
    * 2019-09-26 (PR [#11](../../pull/11)): fully implemented `ListArray` and `ListOffsetArray`'s `__getitem__`.
+   * 2019-10-02 (PR [#12](../../pull/12)): implemented `ListArray.__getitem__(array)` in Numba, setting the pattern for all the other cases.
 
 ## Roadmap
 

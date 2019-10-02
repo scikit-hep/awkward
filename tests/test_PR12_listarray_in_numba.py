@@ -45,43 +45,27 @@ def test_boxing():
     assert awkward1.tolist(f1(array)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
 
 def test_simple():
-    import gc
-
     @numba.njit
     def f1(q):
         return q[2]
 
-    for i in range(100):
-        x = f1(array)
-        gc.collect()
-        assert awkward1.tolist(x) == [3.3, 4.4]
+    assert awkward1.tolist(f1(array)) == [3.3, 4.4]
 
     @numba.njit
     def f2(q):
         return q[2:4]
 
-    for i in range(100):
-        x = f2(array)
-        gc.collect()
-        assert awkward1.tolist(x) == [[3.3, 4.4], [5.5]]
+    assert awkward1.tolist(f2(array)) == [[3.3, 4.4], [5.5]]
 
     @numba.njit
     def f3(q):
         return q[()]
 
-    for i in range(100):
-        x = f3(array)
-        gc.collect()
-        assert awkward1.tolist(x) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(f3(array)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
 
 def test_array():
-    import gc
-
     @numba.njit
     def f4(q):
         return q[[2, 0, 0, 1],]
 
-    for i in range(100):
-        x = f4(array)
-        gc.collect()
-        assert awkward1.tolist(x) == [[3.3, 4.4], [0.0, 1.1, 2.2], [0.0, 1.1, 2.2], []]
+    assert awkward1.tolist(f4(array)) == [[3.3, 4.4], [0.0, 1.1, 2.2], [0.0, 1.1, 2.2], []]

@@ -15,6 +15,29 @@ def cast(context, builder, fromtpe, totpe, val):
     else:
         return val
 
+def arrayptr(context, builder, tpe, val):
+    return numba.targets.arrayobj.make_array(tpe)(context, builder, val).data
+
+def arraylen(context, builder, tpe, val, totpe=None):
+    if isinstance(tpe, numba.types.Array):
+        out = numba.targets.arrayobj.array_len(context, builder, numba.intp(tpe), (val,))
+    else:
+        out = tpe.lower_len(context, builder, numba.intp(tpe), (val,))
+    if totpe is None:
+        return out
+    else:
+        return cast(context, builder, numba.intp, totpe, out)
+
+def call(context, builder, fcn, args):
+    fcntpe = context.get_function_pointer_type(fcn.numbatpe)
+    fcnval = context.add_dynamic_addr(builder, fcn.numbatpe.get_pointer(fcn), info=fcn.name)
+    fcnptr = builder.bitcast(fcnval, fcntpe)
+    err = context.call_function_pointer(builder, fcnptr, args)
+    # FIXME: handle error
+
+def newindex64(context, builder, lentpe, lenval):
+    return numba.targets.arrayobj.numpy_empty_nd(context, builder, index64tpe(lentpe), (lenval,))
+
 @numba.jit(nopython=True)
 def _shapeat(shapeat, array, at, ndim):
     redat = at - (ndim - array.ndim)
