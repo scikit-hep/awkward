@@ -154,16 +154,6 @@ def lower_getitem_int(context, builder, sig, args):
     proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
     proxyslice.start = util.cast(context, builder, tpe.offsetstpe.dtype, numba.intp, start)
     proxyslice.stop = util.cast(context, builder, tpe.offsetstpe.dtype, numba.intp, stop)
-    # if numba.intp.bitwidth < tpe.offsetstpe.dtype.bitwidth:
-    #     proxyslice.start = builder.trunc(start, context.get_value_type(numba.intp))
-    #     proxyslice.stop = builder.trunc(stop, context.get_value_type(numba.intp))
-    # elif numba.intp.bitwidth == tpe.offsetstpe.dtype.bitwidth:
-    #     proxyslice.start = start
-    #     proxyslice.stop = stop
-    # elif numba.intp.bitwidth > tpe.offsetstpe.dtype.bitwidth:
-    #     proxyslice.start = builder.zext(start, context.get_value_type(numba.intp))
-    #     proxyslice.stop = builder.zext(stop, context.get_value_type(numba.intp))
-
     proxyslice.step = context.get_constant(numba.intp, 1)
 
     fcn = context.get_function(operator.getitem, rettpe(tpe.contenttpe, numba.types.slice2_type))
