@@ -163,23 +163,3 @@ def lower_id(context, builder, tpe, val):
         if context.enable_nrt:
             context.nrt.incref(builder, tpe.idtpe, proxyin.id)
         return proxyin.id
-
-#     @numba.typing.templates.bound_function("dummy1")
-#     def resolve_dummy1(self, selftpe, args, kwargs):
-#         if selftpe.arraytpe.dtype == numba.int32:
-#             return numba.int32()
-#
-# dummy1tpe = numba.typing.ctypes_utils.make_function_type(cpu.kernels.dummy1)
-#
-# @numba.extending.lower_builtin("dummy1", NumpyArrayType)
-# def lower_dummy1(context, builder, sig, args):
-#     tpe, = sig.args
-#     val, = args
-#     proxy = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-#     inval = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, numba.int32(tpe.arraytpe, numba.intp), (proxy.array, context.get_constant(numba.intp, 0)))
-#
-#     ptrtpe = context.get_function_pointer_type(dummy1tpe)
-#     ptrval = context.add_dynamic_addr(builder, dummy1tpe.get_pointer(cpu.kernels.dummy1), info="dummy1")
-#     funcptr = builder.bitcast(ptrval, ptrtpe)
-#
-#     return context.call_function_pointer(builder, funcptr, [inval])

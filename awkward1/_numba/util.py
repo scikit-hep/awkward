@@ -85,7 +85,6 @@ def _regularize_slice(arrays):
             else:
                 indexes.append("arrays[{}]".format(i))
         code += "    return ({})".format(" ".join(indexes))
-        print(code)
         g = {"numpy": numpy}
         exec(code, g)
         return g["impl"]

@@ -155,15 +155,12 @@ def lower_getitem_int(context, builder, sig, args):
     if numba.intp.bitwidth < tpe.offsetstpe.dtype.bitwidth:
         proxyslice.start = builder.trunc(start, context.get_value_type(numba.intp))
         proxyslice.stop = builder.trunc(stop, context.get_value_type(numba.intp))
-        print("UNO", proxyslice.start)
     elif numba.intp.bitwidth == tpe.offsetstpe.dtype.bitwidth:
         proxyslice.start = start
         proxyslice.stop = stop
-        print("DOS", proxyslice.start)
     elif numba.intp.bitwidth > tpe.offsetstpe.dtype.bitwidth:
         proxyslice.start = builder.zext(start, context.get_value_type(numba.intp))
         proxyslice.stop = builder.zext(stop, context.get_value_type(numba.intp))
-        print("TRES", proxyslice.start)
 
     proxyslice.step = context.get_constant(numba.intp, 1)
 
