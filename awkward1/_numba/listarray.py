@@ -42,7 +42,7 @@ class ListArrayType(content.ContentType):
         return self
 
     def getitem_tuple(self, wheretpe):
-        nexttpe = ListArrayType(numba.types.Array(numba.int64, 1, "C"), numba.types.Array(numba.int64, 1, "C"), self, numba.none)
+        nexttpe = ListArrayType(util.index64tpe, util.index64tpe, self, numba.none)
         out = nexttpe.getitem_next(wheretpe, False)
         return out.getitem_int()
 
@@ -181,15 +181,17 @@ def lower_getitem_int(context, builder, sig, args):
     start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, starttpe(tpe.startstpe, wheretpe), (proxyin.starts, whereval))
     stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, stoptpe(tpe.stopstpe, wheretpe), (proxyin.stops, whereval))
     proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
-    if tpe.bitwidth < numba.intp.bitwidth:
-        proxyslice.start = builder.zext(start, context.get_value_type(numba.intp))
-        proxyslice.stop = builder.zext(stop, context.get_value_type(numba.intp))
-    elif tpe.bitwidth == numba.intp.bitwidth:
-        proxyslice.start = start
-        proxyslice.stop = stop
-    elif tpe.bitwidth > numba.intp.bitwidth:
-        proxyslice.start = builder.trunc(start, context.get_value_type(numba.intp))
-        proxyslice.stop = builder.trunc(stop, context.get_value_type(numba.intp))
+    proxyslice.start = util.cast(context, builder, tpe, numba.intp, start)
+    proxyslice.stop = util.cast(context, builder, tpe, numba.intp, stop)
+    # if tpe.bitwidth < numba.intp.bitwidth:
+    #     proxyslice.start = builder.zext(start, context.get_value_type(numba.intp))
+    #     proxyslice.stop = builder.zext(stop, context.get_value_type(numba.intp))
+    # elif tpe.bitwidth == numba.intp.bitwidth:
+    #     proxyslice.start = start
+    #     proxyslice.stop = stop
+    # elif tpe.bitwidth > numba.intp.bitwidth:
+    #     proxyslice.start = builder.trunc(start, context.get_value_type(numba.intp))
+    #     proxyslice.stop = builder.trunc(stop, context.get_value_type(numba.intp))
     proxyslice.step = context.get_constant(numba.intp, 1)
 
     fcn = context.get_function(operator.getitem, rettpe(tpe.contenttpe, numba.types.slice2_type))
@@ -230,15 +232,16 @@ def lower_getitem_tuple(context, builder, sig, args):
     whereval3 = context.call_internal(builder, cres2.fndesc, wheretpe3(wheretpe2), (whereval2,))
 
     length = lower_len(context, builder, numba.intp(arraytpe), (arrayval,))
-    if numba.int64.bitwidth > numba.intp.bitwidth:
-        length = builder.zext(length, context.get_value_type(numba.int64))
+    length = util.cast(context, builder, numba.intp, numba.int64, length)
+    # if numba.int64.bitwidth > numba.intp.bitwidth:
+    #     length = builder.zext(length, context.get_value_type(numba.int64))
 
-    nexttpe = ListArrayType(numba.types.Array(numba.int64, 1, "C"), numba.types.Array(numba.int64, 1, "C"), arraytpe, numba.types.none)
+    nexttpe = ListArrayType(util.index64tpe, util.index64tpe, arraytpe, numba.types.none)
     proxynext = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
-    proxynext.starts = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.intp), (context.get_constant(numba.intp, 1),))
-    proxynext.stops = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.intp), (context.get_constant(numba.intp, 1),))
-    numba.targets.arrayobj.store_item(context, builder, numba.types.Array(numba.int64, 1, "C"), context.get_constant(numba.int64, 0), numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, proxynext.starts).data)
-    numba.targets.arrayobj.store_item(context, builder, numba.types.Array(numba.int64, 1, "C"), length, numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, proxynext.stops).data)
+    proxynext.starts = numba.targets.arrayobj.numpy_empty_nd(context, builder, util.index64tpe(numba.intp), (context.get_constant(numba.intp, 1),))
+    proxynext.stops = numba.targets.arrayobj.numpy_empty_nd(context, builder, util.index64tpe(numba.intp), (context.get_constant(numba.intp, 1),))
+    numba.targets.arrayobj.store_item(context, builder, util.index64tpe, context.get_constant(numba.int64, 0), numba.targets.arrayobj.make_array(util.index64tpe)(context, builder, proxynext.starts).data)
+    numba.targets.arrayobj.store_item(context, builder, util.index64tpe, length, numba.targets.arrayobj.make_array(util.index64tpe)(context, builder, proxynext.stops).data)
     proxynext.content = arrayval
     nextval = proxynext._getvalue()
     if context.enable_nrt:
@@ -261,10 +264,13 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     lenstarts = numba.targets.arrayobj.array_len(context, builder, numba.intp(arraytpe.startstpe), (proxyin.starts,))
     lenstops = numba.targets.arrayobj.array_len(context, builder, numba.intp(arraytpe.stopstpe), (proxyin.stops,))
     lencontent = arraytpe.contenttpe.lower_len(context, builder, numba.intp(arraytpe.contenttpe), (proxyin.content,))
-    if numba.int64.bitwidth > numba.intp.bitwidth:
-        lenstarts = builder.zext(lenstarts, context.get_value_type(numba.int64))
-        lenstops = builder.zext(lenstops, context.get_value_type(numba.int64))
-        lencontent = builder.zext(lencontent, context.get_value_type(numba.int64))
+    lenstarts = util.cast(context, builder, numba.intp, numba.int64, lenstarts)
+    lenstops = util.cast(context, builder, numba.intp, numba.int64, lenstops)
+    lencontent = util.cast(context, builder, numba.intp, numba.int64, lencontent)
+    # if numba.int64.bitwidth > numba.intp.bitwidth:
+    #     lenstarts = builder.zext(lenstarts, context.get_value_type(numba.int64))
+    #     lenstops = builder.zext(lenstops, context.get_value_type(numba.int64))
+    #     lencontent = builder.zext(lencontent, context.get_value_type(numba.int64))
 
     with builder.if_then(builder.icmp_signed("<", lenstops, lenstarts), likely=False):
         context.call_conv.return_user_exc(builder, ValueError, ("len(stops) < len(starts)",))
@@ -290,16 +296,17 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         if headtpe.ndim != 1:
             raise NotImplementedError("array.ndim != 1")
 
-        flathead = numba.targets.arrayobj.array_ravel(context, builder, numba.types.Array(numba.int64, 1, "C")(headtpe), (headval,))
-        lenflathead = numba.targets.arrayobj.array_len(context, builder, numba.intp(numba.types.Array(numba.int64, 1, "C")), (flathead,))
-        if numba.int64.bitwidth > numba.intp.bitwidth:
-            lenflathead = builder.zext(lenflathead, context.get_value_type(numba.int64))
+        flathead = numba.targets.arrayobj.array_ravel(context, builder, util.index64tpe(headtpe), (headval,))
+        lenflathead = numba.targets.arrayobj.array_len(context, builder, numba.intp(util.index64tpe), (flathead,))
+        lenflathead = util.cast(context, builder, numba.intp, numba.int64, lenflathead)
+        # if numba.int64.bitwidth > numba.intp.bitwidth:
+        #     lenflathead = builder.zext(lenflathead, context.get_value_type(numba.int64))
         lencarry = builder.mul(lenstarts, lenflathead)
         lenoffsets = builder.add(lenstarts, context.get_constant(numba.int64, 1))
 
-        nextcarry = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.int64), (lencarry,))
-        nextadvanced = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.int64), (lencarry,))
-        nextoffsets = numba.targets.arrayobj.numpy_empty_nd(context, builder, numba.types.Array(numba.int64, 1, "C")(numba.int64), (lenoffsets,))
+        nextcarry = numba.targets.arrayobj.numpy_empty_nd(context, builder, util.index64tpe(numba.int64), (lencarry,))
+        nextadvanced = numba.targets.arrayobj.numpy_empty_nd(context, builder, util.index64tpe(numba.int64), (lencarry,))
+        nextoffsets = numba.targets.arrayobj.numpy_empty_nd(context, builder, util.index64tpe(numba.int64), (lenoffsets,))
 
         fcn = cpu.kernels.awkward_listarray64_getitem_next_array_64
         fcntpe = context.get_function_pointer_type(fcn.numbatpe)
@@ -307,12 +314,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         fcnptr = builder.bitcast(fcnval, fcntpe)
 
         err = context.call_function_pointer(builder, fcnptr,
-            (numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, nextoffsets).data,
-             numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, nextcarry).data,
-             numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, nextadvanced).data,
+            (numba.targets.arrayobj.make_array(util.index64tpe)(context, builder, nextoffsets).data,
+             numba.targets.arrayobj.make_array(util.index64tpe)(context, builder, nextcarry).data,
+             numba.targets.arrayobj.make_array(util.index64tpe)(context, builder, nextadvanced).data,
              numba.targets.arrayobj.make_array(arraytpe.startstpe)(context, builder, proxyin.starts).data,
              numba.targets.arrayobj.make_array(arraytpe.stopstpe)(context, builder, proxyin.stops).data,
-             numba.targets.arrayobj.make_array(numba.types.Array(numba.int64, 1, "C"))(context, builder, flathead).data,
+             numba.targets.arrayobj.make_array(util.index64tpe)(context, builder, flathead).data,
              context.get_constant(numba.int64, 0),
              context.get_constant(numba.int64, 0),
              lenstarts,
@@ -322,7 +329,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         # FIXME: handle error
 
         nexttpe = arraytpe.contenttpe.carry()
-        nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, numba.types.Array(numba.int64, 1, "C"), proxyin.content, nextcarry)
+        nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
 
         contenttpe = nexttpe.getitem_next(tailtpe, True)
         contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)

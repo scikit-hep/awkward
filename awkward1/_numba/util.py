@@ -5,7 +5,15 @@ import numba
 
 RefType = numba.int64
 
-# index64tpe = numba.types.Array(numba.int64, 1, "C")
+index64tpe = numba.types.Array(numba.int64, 1, "C")
+
+def cast(context, builder, fromtpe, totpe, val):
+    if fromtpe.bitwidth < totpe.bitwidth:
+        return builder.zext(val, context.get_value_type(totpe))
+    elif fromtpe.bitwidth > totpe.bitwidth:
+        return builder.trunc(val, context.get_value_type(totpe))
+    else:
+        return val
 
 @numba.jit(nopython=True)
 def _shapeat(shapeat, array, at, ndim):
