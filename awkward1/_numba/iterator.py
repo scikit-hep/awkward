@@ -10,7 +10,7 @@ from .._numba import cpu, util, content
 class IteratorType(numba.types.common.SimpleIteratorType):
     def __init__(self, arraytpe):
         self.arraytpe = arraytpe
-        super(IteratorType, self).__init__("iter({0})".format(self.arraytpe.name), self.arraytpe.getitem(numba.types.Tuple((numba.int64,))))
+        super(IteratorType, self).__init__("iter({0})".format(self.arraytpe.name), self.arraytpe.getitem_int())
 
 @numba.typing.templates.infer
 class ContentType_type_getiter(numba.typing.templates.AbstractTemplate):
@@ -49,8 +49,7 @@ def lower_iternext(context, builder, sig, args, result):
     proxyin = context.make_helper(builder, tpe, value=val)
     where = builder.load(proxyin.where)
     length = tpe.arraytpe.lower_len(context, builder, numba.intp(tpe.arraytpe), (proxyin.array,))
-    if numba.int64 != numba.intp:
-        length = builder.zext(length, context.get_value_type(numba.int64))
+    length = util.cast(context, builder, numba.intp, numba.int64, length)
 
     is_valid = builder.icmp_signed("<", where, length)
     result.set_valid(is_valid)

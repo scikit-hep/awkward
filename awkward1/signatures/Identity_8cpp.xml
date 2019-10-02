@@ -2,23 +2,65 @@
 <doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
   <compounddef id="Identity_8cpp" kind="file" language="C++">
     <compoundname>Identity.cpp</compoundname>
+    <includes local="no">cassert</includes>
+    <includes local="no">atomic</includes>
+    <includes local="no">iomanip</includes>
+    <includes local="no">sstream</includes>
+    <includes local="no">type_traits</includes>
+    <includes local="yes">awkward/cpu-kernels/identity.h</includes>
+    <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
     <includes local="yes">awkward/Identity.h</includes>
     <incdepgraph>
+      <node id="3">
+        <label>atomic</label>
+      </node>
+      <node id="4">
+        <label>iomanip</label>
+      </node>
       <node id="2">
-        <label>awkward/Identity.h</label>
+        <label>cassert</label>
+      </node>
+      <node id="8">
+        <label>awkward/cpu-kernels/getitem.h</label>
+      </node>
+      <node id="7">
+        <label>awkward/cpu-kernels/identity.h</label>
       </node>
       <node id="1">
         <label>src/libawkward/Identity.cpp</label>
         <link refid="Identity_8cpp"/>
         <childnode refid="2" relation="include">
         </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+      </node>
+      <node id="9">
+        <label>awkward/Identity.h</label>
+      </node>
+      <node id="5">
+        <label>sstream</label>
+      </node>
+      <node id="6">
+        <label>type_traits</label>
       </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>
       <sectiondef kind="var">
-      <memberdef kind="variable" id="Identity_8cpp_1a8723163cb11d85420d4e6f3ab54171e0" prot="public" static="no" mutable="no">
+      <memberdef kind="variable" id="namespaceawkward_1a2614e4dcca2a62c52ecf253838ef28de" prot="public" static="no" mutable="no">
         <type>std::atomic&lt; Identity::Ref &gt;</type>
-        <definition>std::atomic&lt;Identity::Ref&gt; numrefs</definition>
+        <definition>std::atomic&lt;Identity::Ref&gt; awkward::numrefs</definition>
         <argsstring></argsstring>
         <name>numrefs</name>
         <initializer>{0}</initializer>
@@ -28,7 +70,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/Identity.cpp" line="7" column="13" bodyfile="src/libawkward/Identity.cpp" bodystart="7" bodyend="-1"/>
+        <location file="src/libawkward/Identity.cpp" line="15" column="15" bodyfile="src/libawkward/Identity.cpp" bodystart="15" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

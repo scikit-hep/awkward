@@ -212,7 +212,7 @@ namespace awkward {
     assert(!isscalar());
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), shape_[0]);
+    awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), shape_[0]);
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)regular_start);
     std::vector<ssize_t> shape;
     shape.push_back((ssize_t)(regular_stop - regular_start));
@@ -276,7 +276,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::carry(const Index64& carry) const {
-    assert(!isscalar);
+    assert(!isscalar());
 
     std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
     awkward_numpyarray_getitem_next_null_64(
@@ -435,7 +435,7 @@ namespace awkward {
       if (step == Slice::none()) {
         step = 1;
       }
-      awkward_regularize_rangeslice(start, stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
+      awkward_regularize_rangeslice(&start, &stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
 
       int64_t numer = abs(start - stop);
       int64_t denom = abs(step);
@@ -556,7 +556,7 @@ namespace awkward {
       if (step == Slice::none()) {
         step = 1;
       }
-      awkward_regularize_rangeslice(start, stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
+      awkward_regularize_rangeslice(&start, &stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
 
       int64_t numer = abs(start - stop);
       int64_t denom = abs(step);

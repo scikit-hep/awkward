@@ -16,24 +16,42 @@ def typeof(val, c):
 
 class ListOffsetArrayType(content.ContentType):
     def __init__(self, offsetstpe, contenttpe, idtpe):
-        super(ListOffsetArrayType, self).__init__(name="ListOffsetArray{0}Type({1}, id={2})".format(offsetstpe.dtype.bitwidth, contenttpe.name, idtpe.name))
+        super(ListOffsetArrayType, self).__init__(name="ListOffsetArray{}Type({}, id={})".format(offsetstpe.dtype.bitwidth, contenttpe.name, idtpe.name))
         self.offsetstpe = offsetstpe
         self.contenttpe = contenttpe
         self.idtpe = idtpe
 
+    @property
     def bitwidth(self):
         return self.offsetstpe.dtype.bitwidth
 
-    def getitem(self, wheretpe):
+    @property
+    def ndim(self):
+        return 1 + self.contenttpe.ndim
+
+    def getitem_int(self):
+        return self.getitem_tuple(numba.types.Tuple((numba.int64,)))
+
+    def getitem_range(self):
+        return self.getitem_tuple(numba.types.Tuple((numba.types.slice2_type,)))
+
+    def getitem_tuple(self, wheretpe):
+        return self.getitem_next(wheretpe, False)
+
+    def getitem_next(self, wheretpe, isadvanced):
         if len(wheretpe.types) == 0:
             return self
         else:
             headtpe = wheretpe.types[0]
             tailtpe = numba.types.Tuple(wheretpe.types[1:])
             if isinstance(headtpe, numba.types.Integer):
-                return self.contenttpe.getitem(tailtpe)
+                return self.contenttpe.getitem_next(tailtpe, isadvanced)
             else:
-                return self.getitem(tailtpe)
+                return self.getitem_next(tailtpe, isadvanced)
+
+    def carry(self):
+        import awkward1._numba.listarray
+        return awkward1._numba.listarray.ListArrayType(self.offsettpe, self.offsettpe, self.contenttpe, self.idtpe)
 
     @property
     def lower_len(self):
@@ -42,6 +60,18 @@ class ListOffsetArrayType(content.ContentType):
     @property
     def lower_getitem_int(self):
         return lower_getitem_int
+
+    @property
+    def lower_getitem_range(self):
+        return lower_getitem_range
+
+    @property
+    def lower_getitem_next(self):
+        return lower_getitem_next
+
+    @property
+    def lower_carry(self):
+        return lower_carry
 
 @numba.extending.register_model(ListOffsetArrayType)
 class ListOffsetArrayModel(numba.datamodel.models.StructModel):
@@ -74,14 +104,14 @@ def unbox(tpe, obj, c):
 
 @numba.extending.box(ListOffsetArrayType)
 def box(tpe, val, c):
-    if tpe.bitwidth() == 32:
+    if tpe.bitwidth == 32:
         Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Index32))
         ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArray32))
-    elif tpe.bitwidth() == 64:
+    elif tpe.bitwidth == 64:
         Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Index64))
         ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArray64))
     else:
-        assert False, "unrecognized bitwidth"
+        raise AssertionError("unrecognized bitwidth")
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     offsetsarray_obj = c.pyapi.from_native_value(tpe.offsetstpe, proxyin.offsets, c.env_manager)
     content_obj = c.pyapi.from_native_value(tpe.contenttpe, proxyin.content, c.env_manager)
@@ -119,11 +149,11 @@ def lower_getitem_int(context, builder, sig, args):
     else:
         wherevalp1_tpe = wheretpe
 
-    start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, numba.int64(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
-    stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, numba.int64(tpe.offsetstpe, wherevalp1_tpe), (proxyin.offsets, wherevalp1))
+    start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe.dtype(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
+    stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe.dtype(tpe.offsetstpe, wherevalp1_tpe), (proxyin.offsets, wherevalp1))
     proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
-    proxyslice.start = builder.zext(start, context.get_value_type(numba.intp))
-    proxyslice.stop = builder.zext(stop, context.get_value_type(numba.intp))
+    proxyslice.start = util.cast(context, builder, tpe.offsetstpe.dtype, numba.intp, start)
+    proxyslice.stop = util.cast(context, builder, tpe.offsetstpe.dtype, numba.intp, stop)
     proxyslice.step = context.get_constant(numba.intp, 1)
 
     fcn = context.get_function(operator.getitem, rettpe(tpe.contenttpe, numba.types.slice2_type))
@@ -149,6 +179,19 @@ def lower_getitem_slice(context, builder, sig, args):
     if context.enable_nrt:
         context.nrt.incref(builder, rettpe, out)
     return out
+
+# def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
+#     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+#     proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)
+#     proxyout.starts = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.startstpe(arraytpe.startstpe, carrytpe), (proxyin.starts, carryval))
+#     proxyout.stops = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.stopstpe(arraytpe.stopstpe, carrytpe), (proxyin.stops, carryval))
+#     proxyout.content = proxyin.content
+#     if not isinstance(arraytpe.idtpe, numba.types.NoneType):
+#         raise NotImplementedError("array.id is not None")
+#     outval = proxyout._getvalue()
+#     if context.enable_nrt:
+#         context.nrt.incref(builder, arraytpe, outval)
+#     return outval
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):

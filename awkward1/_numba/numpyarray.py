@@ -20,7 +20,20 @@ class NumpyArrayType(content.ContentType):
         self.arraytpe = arraytpe
         self.idtpe = idtpe
 
-    def getitem(self, wheretpe):
+    @property
+    def ndim(self):
+        return self.arraytpe.ndim
+
+    def getitem_int(self):
+        return self.getitem_tuple(numba.types.Tuple((numba.int64,)))
+
+    def getitem_range(self):
+        return self.getitem_tuple(numba.types.Tuple((numba.types.slice2_type,)))
+
+    def getitem_tuple(self, wheretpe):
+        return self.getitem_next(wheretpe, False)
+
+    def getitem_next(self, wheretpe, isadvanced):
         if len(wheretpe.types) > self.arraytpe.ndim:
             raise IndexError("too many indices for array")
         numreduce = sum(1 if isinstance(x, numba.types.Integer) else 0 for x in wheretpe.types)
@@ -31,6 +44,9 @@ class NumpyArrayType(content.ContentType):
         else:
             assert False
 
+    def carry(self):
+        return self
+
     @property
     def lower_len(self):
         return lower_len
@@ -38,6 +54,18 @@ class NumpyArrayType(content.ContentType):
     @property
     def lower_getitem_int(self):
         return lower_getitem
+
+    @property
+    def lower_getitem_range(self):
+        return lower_getitem_range
+
+    @property
+    def lower_getitem_next(self):
+        return lower_getitem_next
+
+    @property
+    def lower_carry(self):
+        return lower_carry
 
 @numba.extending.register_model(NumpyArrayType)
 class NumpyArrayModel(numba.datamodel.models.StructModel):
@@ -112,6 +140,9 @@ def lower_getitem(context, builder, sig, args):
     else:
         return out
 
+def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
+    return numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe(arraytpe, carrytpe), (arrayval, carryval))
+
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):
     key = NumpyArrayType
@@ -132,23 +163,3 @@ def lower_id(context, builder, tpe, val):
         if context.enable_nrt:
             context.nrt.incref(builder, tpe.idtpe, proxyin.id)
         return proxyin.id
-
-#     @numba.typing.templates.bound_function("dummy1")
-#     def resolve_dummy1(self, selftpe, args, kwargs):
-#         if selftpe.arraytpe.dtype == numba.int32:
-#             return numba.int32()
-#
-# dummy1tpe = numba.typing.ctypes_utils.make_function_type(cpu.kernels.dummy1)
-#
-# @numba.extending.lower_builtin("dummy1", NumpyArrayType)
-# def lower_dummy1(context, builder, sig, args):
-#     tpe, = sig.args
-#     val, = args
-#     proxy = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-#     inval = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, numba.int32(tpe.arraytpe, numba.intp), (proxy.array, context.get_constant(numba.intp, 0)))
-#
-#     ptrtpe = context.get_function_pointer_type(dummy1tpe)
-#     ptrval = context.add_dynamic_addr(builder, dummy1tpe.get_pointer(cpu.kernels.dummy1), info="dummy1")
-#     funcptr = builder.bitcast(ptrval, ptrtpe)
-#
-#     return context.call_function_pointer(builder, funcptr, [inval])

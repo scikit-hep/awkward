@@ -2,6 +2,7 @@
 <doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
   <compounddef id="Iterator_8cpp" kind="file" language="C++">
     <compoundname>Iterator.cpp</compoundname>
+    <includes local="no">sstream</includes>
     <includes local="yes">awkward/Iterator.h</includes>
     <incdepgraph>
       <node id="1">
@@ -9,11 +10,17 @@
         <link refid="Iterator_8cpp"/>
         <childnode refid="2" relation="include">
         </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
       </node>
       <node id="2">
+        <label>sstream</label>
+      </node>
+      <node id="3">
         <label>awkward/Iterator.h</label>
       </node>
     </incdepgraph>
+    <innernamespace refid="namespaceawkward">awkward</innernamespace>
     <briefdescription>
     </briefdescription>
     <detaileddescription>

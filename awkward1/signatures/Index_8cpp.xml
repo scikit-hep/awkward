@@ -2,16 +2,40 @@
 <doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
   <compounddef id="Index_8cpp" kind="file" language="C++">
     <compoundname>Index.cpp</compoundname>
+    <includes local="no">iomanip</includes>
+    <includes local="no">sstream</includes>
+    <includes local="no">type_traits</includes>
+    <includes local="yes">awkward/Slice.h</includes>
     <includes local="yes">awkward/Index.h</includes>
     <incdepgraph>
+      <node id="2">
+        <label>iomanip</label>
+      </node>
+      <node id="6">
+        <label>awkward/Index.h</label>
+      </node>
+      <node id="3">
+        <label>sstream</label>
+      </node>
+      <node id="5">
+        <label>awkward/Slice.h</label>
+      </node>
+      <node id="4">
+        <label>type_traits</label>
+      </node>
       <node id="1">
         <label>src/libawkward/Index.cpp</label>
         <link refid="Index_8cpp"/>
         <childnode refid="2" relation="include">
         </childnode>
-      </node>
-      <node id="2">
-        <label>awkward/Index.h</label>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
       </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>

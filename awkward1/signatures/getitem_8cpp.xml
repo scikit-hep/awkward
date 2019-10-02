@@ -1,0 +1,2212 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
+  <compounddef id="getitem_8cpp" kind="file" language="C++">
+    <compoundname>getitem.cpp</compoundname>
+    <includes local="no">cstring</includes>
+    <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
+    <incdepgraph>
+      <node id="3">
+        <label>awkward/cpu-kernels/getitem.h</label>
+      </node>
+      <node id="1">
+        <label>src/cpu-kernels/getitem.cpp</label>
+        <link refid="getitem_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>cstring</label>
+      </node>
+    </incdepgraph>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="getitem_8cpp_1a84bfd8f63d086600280f6d7bd53fe97e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_regularize_rangeslice</definition>
+        <argsstring>(int64_t *start, int64_t *stop, bool posstep, bool hasstart, bool hasstop, int64_t length)</argsstring>
+        <name>awkward_regularize_rangeslice</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>posstep</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>hasstart</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>hasstop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="7" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="7" bodyend="33"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1ae300c47cc2d5fbfeecf3984e3cab2622" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward_regularize_arrayslice</definition>
+        <argsstring>(T *flatheadptr, int64_t lenflathead, int64_t length)</argsstring>
+        <name>awkward_regularize_arrayslice</name>
+        <param>
+          <type>T *</type>
+          <declname>flatheadptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenflathead</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="36" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="36" bodyend="46"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a9f2ca6a7d769d9983d38096abde78904" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_regularize_arrayslice_64</definition>
+        <argsstring>(int64_t *flatheadptr, int64_t lenflathead, int64_t length)</argsstring>
+        <name>awkward_regularize_arrayslice_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>flatheadptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenflathead</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="47" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="47" bodyend="49"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a0543490ffba6feabd0caace5a2097f4f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_slicearray_ravel</definition>
+        <argsstring>(T *toptr, const T *fromptr, int64_t ndim, const int64_t *shape, const int64_t *strides)</argsstring>
+        <name>awkward_slicearray_ravel</name>
+        <param>
+          <type>T *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>ndim</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>shape</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>strides</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="52" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="52" bodyend="63"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a0ad3606889eb5f420192111920db5849" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_slicearray_ravel_64</definition>
+        <argsstring>(int64_t *toptr, const int64_t *fromptr, int64_t ndim, const int64_t *shape, const int64_t *strides)</argsstring>
+        <name>awkward_slicearray_ravel_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>ndim</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>shape</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>strides</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="64" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="64" bodyend="66"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a1f8029bd00c5caa17e1e8da7dc786bb5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_carry_arange</definition>
+        <argsstring>(T *toptr, int64_t length)</argsstring>
+        <name>awkward_carry_arange</name>
+        <param>
+          <type>T *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="69" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="69" bodyend="73"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a1e7f8dcc8c7a908d1c524e5669e7b486" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_carry_arange_64</definition>
+        <argsstring>(int64_t *toptr, int64_t length)</argsstring>
+        <name>awkward_carry_arange_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="74" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="74" bodyend="76"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a1a875fc5440b943acea6f54d6a45c3f5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename ID</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward_identity_getitem_carry</definition>
+        <argsstring>(ID *newidentityptr, const ID *identityptr, const T *carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length)</argsstring>
+        <name>awkward_identity_getitem_carry</name>
+        <param>
+          <type>ID *</type>
+          <declname>newidentityptr</declname>
+        </param>
+        <param>
+          <type>const ID *</type>
+          <declname>identityptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="79" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="79" bodyend="89"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a08dc7949f84425100a92f83bda2ac165" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_identity32_getitem_carry_64</definition>
+        <argsstring>(int32_t *newidentityptr, const int32_t *identityptr, const int64_t *carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length)</argsstring>
+        <name>awkward_identity32_getitem_carry_64</name>
+        <param>
+          <type>int32_t *</type>
+          <declname>newidentityptr</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>identityptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="90" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="90" bodyend="92"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a512f077c8daf5524c84b3804c0cdf6f6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_identity64_getitem_carry_64</definition>
+        <argsstring>(int64_t *newidentityptr, const int64_t *identityptr, const int64_t *carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length)</argsstring>
+        <name>awkward_identity64_getitem_carry_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>newidentityptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>identityptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="93" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="93" bodyend="95"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a77cdfd0113ea50636178166a8c471fe9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_numpyarray_contiguous_init</definition>
+        <argsstring>(T *toptr, int64_t skip, int64_t stride)</argsstring>
+        <name>awkward_numpyarray_contiguous_init</name>
+        <param>
+          <type>T *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stride</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="98" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="98" bodyend="102"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a002769d7fa0acc97324ddb74e03ab431" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_numpyarray_contiguous_init_64</definition>
+        <argsstring>(int64_t *toptr, int64_t skip, int64_t stride)</argsstring>
+        <name>awkward_numpyarray_contiguous_init_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stride</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="103" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="103" bodyend="105"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a7ba6f0a3758dbcf54fc6a5745967f5e1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_numpyarray_contiguous_copy</definition>
+        <argsstring>(uint8_t *toptr, const uint8_t *fromptr, int64_t len, int64_t stride, int64_t offset, const T *pos)</argsstring>
+        <name>awkward_numpyarray_contiguous_copy</name>
+        <param>
+          <type>uint8_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stride</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>pos</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="108" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="108" bodyend="112"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1abcd546b54e77285c00b6f83a500c4449" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_numpyarray_contiguous_copy_64</definition>
+        <argsstring>(uint8_t *toptr, const uint8_t *fromptr, int64_t len, int64_t stride, int64_t offset, const int64_t *pos)</argsstring>
+        <name>awkward_numpyarray_contiguous_copy_64</name>
+        <param>
+          <type>uint8_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stride</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>pos</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="113" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="113" bodyend="115"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a7737a4e4583f2bad9400876ab2ebecd8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_numpyarray_contiguous_next</definition>
+        <argsstring>(T *topos, const T *frompos, int64_t len, int64_t skip, int64_t stride)</argsstring>
+        <name>awkward_numpyarray_contiguous_next</name>
+        <param>
+          <type>T *</type>
+          <declname>topos</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>frompos</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stride</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="118" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="118" bodyend="124"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a8e06201b24495876845ced6430ba6de3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_numpyarray_contiguous_next_64</definition>
+        <argsstring>(int64_t *topos, const int64_t *frompos, int64_t len, int64_t skip, int64_t stride)</argsstring>
+        <name>awkward_numpyarray_contiguous_next_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>topos</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>frompos</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stride</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="125" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="125" bodyend="127"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a097ba7bcd10ab6679a3a11edd9a5ba0a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_null</definition>
+        <argsstring>(uint8_t *toptr, const uint8_t *fromptr, int64_t len, int64_t stride, int64_t offset, const T *pos)</argsstring>
+        <name>awkward_numpyarray_getitem_next_null</name>
+        <param>
+          <type>uint8_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stride</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>pos</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="130" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="130" bodyend="134"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a2b1a38a0ab7a21afe5172143044622a5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_null_64</definition>
+        <argsstring>(uint8_t *toptr, const uint8_t *fromptr, int64_t len, int64_t stride, int64_t offset, const int64_t *pos)</argsstring>
+        <name>awkward_numpyarray_getitem_next_null_64</name>
+        <param>
+          <type>uint8_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stride</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>pos</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="135" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="135" bodyend="137"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a2162666a41b75005a7b75bdf35bfbb56" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_at</definition>
+        <argsstring>(T *nextcarryptr, const T *carryptr, int64_t lencarry, int64_t skip, int64_t at)</argsstring>
+        <name>awkward_numpyarray_getitem_next_at</name>
+        <param>
+          <type>T *</type>
+          <declname>nextcarryptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>at</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="140" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="140" bodyend="144"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a26bba01a61c07dacb877ddeaf078be1d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_at_64</definition>
+        <argsstring>(int64_t *nextcarryptr, const int64_t *carryptr, int64_t lencarry, int64_t skip, int64_t at)</argsstring>
+        <name>awkward_numpyarray_getitem_next_at_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>nextcarryptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>at</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="145" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="145" bodyend="147"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a2d4ff8571eeff929afe278f5ca802531" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_range</definition>
+        <argsstring>(T *nextcarryptr, const T *carryptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step)</argsstring>
+        <name>awkward_numpyarray_getitem_next_range</name>
+        <param>
+          <type>T *</type>
+          <declname>nextcarryptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenhead</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="150" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="150" bodyend="156"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a504208fd7437db4c4629529d072f4bc2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_range_64</definition>
+        <argsstring>(int64_t *nextcarryptr, const int64_t *carryptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step)</argsstring>
+        <name>awkward_numpyarray_getitem_next_range_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>nextcarryptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenhead</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="157" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="157" bodyend="159"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1ac3f809837f21baf62d764c215a842eab" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_range_advanced</definition>
+        <argsstring>(T *nextcarryptr, T *nextadvancedptr, const T *carryptr, const T *advancedptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step)</argsstring>
+        <name>awkward_numpyarray_getitem_next_range_advanced</name>
+        <param>
+          <type>T *</type>
+          <declname>nextcarryptr</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>nextadvancedptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>advancedptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenhead</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="162" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="162" bodyend="169"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1afeecc09580650e70f9717343b9600434" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_range_advanced_64</definition>
+        <argsstring>(int64_t *nextcarryptr, int64_t *nextadvancedptr, const int64_t *carryptr, const int64_t *advancedptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step)</argsstring>
+        <name>awkward_numpyarray_getitem_next_range_advanced_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>nextcarryptr</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>nextadvancedptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>advancedptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenhead</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="170" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="170" bodyend="172"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a72958a175a5efac1428865da39f7b5fe" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_array</definition>
+        <argsstring>(T *nextcarryptr, T *nextadvancedptr, const T *carryptr, const T *flatheadptr, int64_t lencarry, int64_t lenflathead, int64_t skip)</argsstring>
+        <name>awkward_numpyarray_getitem_next_array</name>
+        <param>
+          <type>T *</type>
+          <declname>nextcarryptr</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>nextadvancedptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>flatheadptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenflathead</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="175" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="175" bodyend="182"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a04ce12918d0360adde02cd7dd2a55355" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_array_64</definition>
+        <argsstring>(int64_t *nextcarryptr, int64_t *nextadvancedptr, const int64_t *carryptr, const int64_t *flatheadptr, int64_t lencarry, int64_t lenflathead, int64_t skip)</argsstring>
+        <name>awkward_numpyarray_getitem_next_array_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>nextcarryptr</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>nextadvancedptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>flatheadptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenflathead</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="183" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="183" bodyend="185"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a724883942a4956af5ae17462b3de7fd9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_array_advanced</definition>
+        <argsstring>(T *nextcarryptr, const T *carryptr, const T *advancedptr, const T *flatheadptr, int64_t lencarry, int64_t skip)</argsstring>
+        <name>awkward_numpyarray_getitem_next_array_advanced</name>
+        <param>
+          <type>T *</type>
+          <declname>nextcarryptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>advancedptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>flatheadptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="188" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="188" bodyend="192"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a16140cf26f707e4b71c152f8c6376132" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_numpyarray_getitem_next_array_advanced_64</definition>
+        <argsstring>(int64_t *nextcarryptr, const int64_t *carryptr, const int64_t *advancedptr, const int64_t *flatheadptr, int64_t lencarry, int64_t skip)</argsstring>
+        <name>awkward_numpyarray_getitem_next_array_advanced_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>nextcarryptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>carryptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>advancedptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>flatheadptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>skip</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="193" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="193" bodyend="195"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a41b0955f91277fa11060d64364100d33" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward_listarray_getitem_next_at</definition>
+        <argsstring>(T *tocarry, const C *fromstarts, const C *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at)</argsstring>
+        <name>awkward_listarray_getitem_next_at</name>
+        <param>
+          <type>T *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>at</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="198" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="198" bodyend="211"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a489518e2b93f98620d5bd658630c0c80" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray32_getitem_next_at_64</definition>
+        <argsstring>(int64_t *tocarry, const int32_t *fromstarts, const int32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at)</argsstring>
+        <name>awkward_listarray32_getitem_next_at_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>at</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="212" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="212" bodyend="214"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1abef2dff7eac65f5bef85d72727cc6c65" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray64_getitem_next_at_64</definition>
+        <argsstring>(int64_t *tocarry, const int64_t *fromstarts, const int64_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at)</argsstring>
+        <name>awkward_listarray64_getitem_next_at_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>at</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="215" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="215" bodyend="217"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a7d95905a1236d7f567a49d041273a584" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_listarray_getitem_next_range_carrylength</definition>
+        <argsstring>(int64_t *carrylength, const C *fromstarts, const C *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray_getitem_next_range_carrylength</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>carrylength</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="220" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="220" bodyend="238"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a836fcc02db5b212d17b4f9cd7b6e764d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_listarray32_getitem_next_range_carrylength</definition>
+        <argsstring>(int64_t *carrylength, const int32_t *fromstarts, const int32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray32_getitem_next_range_carrylength</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>carrylength</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="239" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="239" bodyend="241"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a3353b3b098b98a1b6dba1630bfe8c010" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_listarray64_getitem_next_range_carrylength</definition>
+        <argsstring>(int64_t *carrylength, const int64_t *fromstarts, const int64_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray64_getitem_next_range_carrylength</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>carrylength</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="242" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="242" bodyend="244"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1afb2b6726c0ac13277df801e5ab13b630" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_listarray_getitem_next_range</definition>
+        <argsstring>(C *tooffsets, T *tocarry, const C *fromstarts, const C *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray_getitem_next_range</name>
+        <param>
+          <type>C *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="248" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="248" bodyend="270"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1ae1dc1c096db49e69701d85fc9c5c7719" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_listarray32_getitem_next_range_64</definition>
+        <argsstring>(int32_t *tooffsets, int64_t *tocarry, const int32_t *fromstarts, const int32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray32_getitem_next_range_64</name>
+        <param>
+          <type>int32_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="271" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="271" bodyend="273"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a287533cf83746b25293cbd36e7bded96" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_listarray64_getitem_next_range_64</definition>
+        <argsstring>(int64_t *tooffsets, int64_t *tocarry, const int64_t *fromstarts, const int64_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray64_getitem_next_range_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="274" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="274" bodyend="276"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a36fbbba3da97f5c1cbb005c132bf3e23" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_listarray_getitem_next_range_counts</definition>
+        <argsstring>(int64_t *total, const C *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray_getitem_next_range_counts</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>total</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="279" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="279" bodyend="284"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a44a066c4dd464934491a33333a9a9a9f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_listarray32_getitem_next_range_counts_64</definition>
+        <argsstring>(int64_t *total, const int32_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray32_getitem_next_range_counts_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>total</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="285" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="285" bodyend="287"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a5bfb6ae56f3f3f9332671cb1431a67d4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_listarray64_getitem_next_range_counts_64</definition>
+        <argsstring>(int64_t *total, const int64_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray64_getitem_next_range_counts_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>total</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="288" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="288" bodyend="290"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a907f8b42ba605ad6cbad42cffaa7d43d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_listarray_getitem_next_range_spreadadvanced</definition>
+        <argsstring>(T *toadvanced, const T *fromadvanced, const C *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray_getitem_next_range_spreadadvanced</name>
+        <param>
+          <type>T *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="293" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="293" bodyend="300"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a2f5d94f7de10795de3d852630de6d643" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_listarray32_getitem_next_range_spreadadvanced_64</definition>
+        <argsstring>(int64_t *toadvanced, const int64_t *fromadvanced, const int32_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray32_getitem_next_range_spreadadvanced_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="301" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="301" bodyend="303"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a7b1c7eb8cd1abed4cebde7d96882a4b9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_listarray64_getitem_next_range_spreadadvanced_64</definition>
+        <argsstring>(int64_t *toadvanced, const int64_t *fromadvanced, const int64_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray64_getitem_next_range_spreadadvanced_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="304" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="304" bodyend="306"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1acc120c3c4a674e0dfceaf459c4d62252" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward_listarray_getitem_next_array</definition>
+        <argsstring>(C *tooffsets, T *tocarry, T *toadvanced, const C *fromstarts, const C *fromstops, const T *fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray_getitem_next_array</name>
+        <param>
+          <type>C *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="309" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="309" bodyend="333"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a6ec7b77e680981f22bf083bb676ccc01" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray32_getitem_next_array_64</definition>
+        <argsstring>(int32_t *tooffsets, int64_t *tocarry, int64_t *toadvanced, const int32_t *fromstarts, const int32_t *fromstops, const int64_t *fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray32_getitem_next_array_64</name>
+        <param>
+          <type>int32_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="334" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="334" bodyend="336"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1af35abdabe9c39d6fdd6ef1e9890dbd89" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray64_getitem_next_array_64</definition>
+        <argsstring>(int64_t *tooffsets, int64_t *tocarry, int64_t *toadvanced, const int64_t *fromstarts, const int64_t *fromstops, const int64_t *fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray64_getitem_next_array_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="337" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="337" bodyend="339"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a05cedfd06e695d8370b8f9d3883867d7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward_listarray_getitem_next_array_advanced</definition>
+        <argsstring>(T *tocarry, T *toadvanced, const C *fromstarts, const C *fromstops, const T *fromarray, const T *fromadvanced, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray_getitem_next_array_advanced</name>
+        <param>
+          <type>T *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="342" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="342" bodyend="365"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a4e94a81c0bdae571db5f767aef52f1fc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray32_getitem_next_array_advanced_64</definition>
+        <argsstring>(int64_t *tocarry, int64_t *toadvanced, const int32_t *fromstarts, const int32_t *fromstops, const int64_t *fromarray, const int64_t *fromadvanced, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray32_getitem_next_array_advanced_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="366" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="366" bodyend="368"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a9168561c0b444beb08b7bf296e5ac899" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray64_getitem_next_array_advanced_64</definition>
+        <argsstring>(int64_t *tocarry, int64_t *toadvanced, const int64_t *fromstarts, const int64_t *fromstops, const int64_t *fromarray, const int64_t *fromadvanced, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray64_getitem_next_array_advanced_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="369" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="369" bodyend="371"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a774029d664b139602a2283ead4da1197" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward_listarray_getitem_carry</definition>
+        <argsstring>(C *tostarts, C *tostops, const C *fromstarts, const C *fromstops, const T *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lencarry)</argsstring>
+        <name>awkward_listarray_getitem_carry</name>
+        <param>
+          <type>C *</type>
+          <declname>tostarts</declname>
+        </param>
+        <param>
+          <type>C *</type>
+          <declname>tostops</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>fromcarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="374" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="374" bodyend="379"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a3208612f1b49aecbd8607b3fa00253e7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_listarray32_getitem_carry_64</definition>
+        <argsstring>(int32_t *tostarts, int32_t *tostops, const int32_t *fromstarts, const int32_t *fromstops, const int64_t *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lencarry)</argsstring>
+        <name>awkward_listarray32_getitem_carry_64</name>
+        <param>
+          <type>int32_t *</type>
+          <declname>tostarts</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>tostops</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromcarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="380" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="380" bodyend="382"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a19eaa3ef36967eca573835fb3aa28927" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward_listarray64_getitem_carry_64</definition>
+        <argsstring>(int64_t *tostarts, int64_t *tostops, const int64_t *fromstarts, const int64_t *fromstops, const int64_t *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lencarry)</argsstring>
+        <name>awkward_listarray64_getitem_carry_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tostarts</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tostops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromcarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="383" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="383" bodyend="385"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/cpu-kernels/getitem.cpp"/>
+  </compounddef>
+</doxygen>

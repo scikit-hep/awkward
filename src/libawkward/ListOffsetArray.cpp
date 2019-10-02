@@ -168,7 +168,7 @@ namespace awkward {
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), offsets_.length() - 1);
+    awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), offsets_.length() - 1);
 
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
@@ -221,7 +221,7 @@ namespace awkward {
       }
       int64_t carrylength;
       awkward_listarray32_getitem_next_range_carrylength(
-        carrylength,
+        &carrylength,
         starts.ptr().get(),
         stops.ptr().get(),
         lenstarts,
@@ -253,7 +253,7 @@ namespace awkward {
       else {
         int64_t total;
         awkward_listarray32_getitem_next_range_counts_64(
-          total,
+          &total,
           nextoffsets.ptr().get(),
           lenstarts);
         Index64 nextadvanced(total);
@@ -368,7 +368,7 @@ namespace awkward {
       }
       int64_t carrylength;
       awkward_listarray64_getitem_next_range_carrylength(
-        carrylength,
+        &carrylength,
         starts.ptr().get(),
         stops.ptr().get(),
         lenstarts,
@@ -400,7 +400,7 @@ namespace awkward {
       else {
         int64_t total;
         awkward_listarray64_getitem_next_range_counts_64(
-          total,
+          &total,
           nextoffsets.ptr().get(),
           lenstarts);
         Index64 nextadvanced(total);

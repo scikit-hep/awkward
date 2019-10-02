@@ -3,6 +3,8 @@
 #ifndef AWKWARD_UTIL_H_
 #define AWKWARD_UTIL_H_
 
+#include <iostream>
+
 #include "awkward/cpu-kernels/util.h"
 
 namespace awkward {

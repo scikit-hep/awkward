@@ -93,6 +93,4 @@ def lower_content(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     array_proxy = numba.cgutils.create_struct_proxy(tpe.arraytpe)(context, builder, value=proxyin.array)
     out = builder.extract_value(array_proxy.shape, 1)
-    if numba.int64 != numba.intp:
-        out = builder.zext(out, context.get_value_type(numba.int64))
-    return out
+    return util.cast(context, builder, numba.intp, numba.int64, out)
