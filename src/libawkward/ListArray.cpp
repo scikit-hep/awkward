@@ -20,7 +20,7 @@ namespace awkward {
       return "ListArray64";
     }
     else {
-      return "Unrecognized ListArray";
+      return "UnrecognizedListArray";
     }
   }
 
@@ -51,7 +51,7 @@ namespace awkward {
           content_.get()->length(),
           length(),
           rawid->width());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get(), nullptr);
         content_.get()->setid(subid);
       }
       else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
@@ -68,7 +68,7 @@ namespace awkward {
           content_.get()->length(),
           length(),
           rawid->width());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get(), nullptr);
         content_.get()->setid(subid);
       }
       else {
@@ -102,7 +102,7 @@ namespace awkward {
           content_.get()->length(),
           length(),
           rawid->width());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get(), nullptr);
         content_.get()->setid(subid);
       }
       else {
@@ -299,7 +299,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get(), nullptr);
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
         return std::shared_ptr<Content>(new ListOffsetArrayOf<int32_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
@@ -319,7 +319,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get(), nullptr);
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
       }
@@ -442,7 +442,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get(), nullptr);
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
         return std::shared_ptr<Content>(new ListOffsetArrayOf<int64_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
@@ -462,7 +462,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get(), nullptr);
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
       }

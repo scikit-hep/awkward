@@ -654,11 +654,11 @@ namespace awkward {
       Slice nexttail = tail.tail();
 
       Index64 flathead = array->ravel();
-      Error regularize_error = awkward_regularize_arrayslice_64(
+      Error err = awkward_regularize_arrayslice_64(
         flathead.ptr().get(),
         flathead.length(),
         shape_[1]);
-      HANDLE_ERROR(regularize_error)
+      util::handle_error(err, "slice array", nullptr, nullptr);
 
       if (advanced.length() == 0) {
         Index64 nextcarry(carry.length()*flathead.length());

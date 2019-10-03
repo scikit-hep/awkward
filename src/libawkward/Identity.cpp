@@ -19,6 +19,42 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::string IdentityOf<T>::classname() const {
+    if (std::is_same<T, int32_t>::value) {
+      return "Identity32";
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      return "Identity64";
+    }
+    else {
+      return "UnrecognizedIdentity";
+    }
+  }
+
+  template <typename T>
+  const std::string IdentityOf<T>::position(int64_t where) const {
+    std::stringstream out;
+
+    int64_t fieldi = 0;
+    int64_t widthi = 0;
+    for (int64_t bothi = 0;  bothi < (int64_t)fieldloc_.size() + width_;  bothi++) {
+      if (bothi != 0) {
+        out << ", ";
+      }
+      if (fieldi < (int64_t)fieldloc_.size()  &&  fieldloc_[fieldi].first == bothi) {
+        out << "\"" << fieldloc_[fieldi].second << "\"";
+        fieldi++;
+      }
+      else {
+        out << ptr_.get()[offset_ + where*width_ + widthi];
+        widthi++;
+      }
+    }
+
+    return out.str();
+  }
+
+  template <typename T>
   const std::shared_ptr<Identity> IdentityOf<T>::to64() const {
     if (std::is_same<T, int64_t>::value) {
       return shallow_copy();
@@ -74,9 +110,8 @@ namespace awkward {
     IdentityOf<T>* rawout = new IdentityOf<T>(ref_, fieldloc_, width_, carry.length());
     std::shared_ptr<Identity> out(rawout);
 
-    Error assign_err = kNoError;
     if (std::is_same<T, int32_t>::value) {
-      assign_err = awkward_identity32_getitem_carry_64(
+      Error err = awkward_identity32_getitem_carry_64(
         reinterpret_cast<int32_t*>(rawout->ptr().get()),
         reinterpret_cast<int32_t*>(ptr_.get()),
         carry.ptr().get(),
@@ -84,9 +119,10 @@ namespace awkward {
         offset_,
         width_,
         length_);
+      util::handle_error(err, classname(), this, nullptr);
     }
     else if (std::is_same<T, int64_t>::value) {
-      assign_err = awkward_identity64_getitem_carry_64(
+      Error err = awkward_identity64_getitem_carry_64(
         reinterpret_cast<int64_t*>(rawout->ptr().get()),
         reinterpret_cast<int64_t*>(ptr_.get()),
         carry.ptr().get(),
@@ -94,11 +130,11 @@ namespace awkward {
         offset_,
         width_,
         length_);
+      util::handle_error(err, classname(), this, nullptr);
     }
     else {
       throw std::runtime_error("unrecognized Identity specialization");
     }
-    HANDLE_ERROR(assign_err)
 
     return out;
   }

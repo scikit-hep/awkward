@@ -4,13 +4,16 @@
 #define AWKWARD_UTIL_H_
 
 #include <iostream>
+#include <string>
 
 #include "awkward/cpu-kernels/util.h"
 
 namespace awkward {
-  #define HANDLE_ERROR(err) { if (err != kNoError) { throw std::invalid_argument(err); } }
+  class Identity;
 
   namespace util {
+    void handle_error(const Error& err, const std::string classname, const Identity* id1, const Identity* id2);
+
     template<typename T>
     class array_deleter {
     public:

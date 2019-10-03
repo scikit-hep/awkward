@@ -30,7 +30,7 @@ Error awkward_identity_from_listarray(ID* toptr, const ID* fromptr, const T* fro
     int64_t start = fromstarts[startsoffset + i];
     int64_t stop = fromstops[stopsoffset + i];
     if (start != stop  &&  stop > tolength) {
-      return "max(stop) > len(content)";
+      return failure(i, -1, "max(stop) > len(content)");
     }
     for (int64_t j = start;  j < stop;  j++) {
       for (int64_t k = 0;  k < fromwidth;  k++) {
@@ -39,7 +39,7 @@ Error awkward_identity_from_listarray(ID* toptr, const ID* fromptr, const T* fro
       toptr[j*(fromwidth + 1) + fromwidth] = ID(j - start);
     }
   }
-  return kNoError;
+  return success();
 }
 Error awkward_identity32_from_listarray32(int32_t* toptr, const int32_t* fromptr, const int32_t* fromstarts, const int32_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
   return awkward_identity_from_listarray<int32_t, int32_t>(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);

@@ -2,6 +2,7 @@
 
 import numpy
 import numba
+import llvmlite.ir.types
 
 RefType = numba.int64
 
@@ -32,6 +33,12 @@ def call(context, builder, fcn, args):
     fcntpe = context.get_function_pointer_type(fcn.numbatpe)
     fcnval = context.add_dynamic_addr(builder, fcn.numbatpe.get_pointer(fcn), info=fcn.name)
     fcnptr = builder.bitcast(fcnval, fcntpe)
+
+    fcnptr.function_type.return_type = context.get_value_type(numba.types.Record.make_c_struct([
+        ("where1", numba.int64),
+        ("where2", numba.int64),
+        ("strlength", numba.int64),
+        ("str", numba.intp)])).pointee
     err = context.call_function_pointer(builder, fcnptr, args)
     # FIXME: handle error
 
