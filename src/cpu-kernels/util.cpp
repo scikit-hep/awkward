@@ -19,4 +19,5 @@ Error failure(int64_t where1, int64_t where2, const char* str) {
   out.where2 = where2;
   out.strlength = (int64_t)strlen(str);
   out.str = str;
+  return out;
 }
