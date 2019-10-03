@@ -12,12 +12,9 @@ namespace awkward {
       if (err.str != nullptr) {
         std::stringstream out;
         out << "in " << classname;
-        if (err.location != kSliceNone  &&  !fakelocation) {
+        if (err.location != kSliceNone  &&  !fakelocation  &&  id != nullptr  &&  err.location < id->length()) {
           assert(err.location > 0);
-          out << " at index " << err.location;
-          if (id != nullptr  &&  err.location < id->length()) {
-            out << " (id " << id->location(err.location) << ")";
-          }
+          out << " at id[" << id->location(err.location) << "]";
         }
         if (err.attempt != kSliceNone) {
           out << " attempting to get " << err.attempt;

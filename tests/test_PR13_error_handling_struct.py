@@ -114,3 +114,27 @@ def test_listarray_numpyarray():
     assert str(excinfo.value) == "in ListArray64 attempting to get -20, index out of range"
 
     array[-20:20,]
+
+    with pytest.raises(ValueError) as excinfo:
+        array[2, 1, 0]
+    assert str(excinfo.value) == "in NumpyArray, too many dimensions in slice"
+
+    with pytest.raises(ValueError) as excinfo:
+        array[[2, 0, 0, 20, 3]]
+    assert str(excinfo.value) == "in ListArray64 attempting to get 20, index out of range"
+
+    with pytest.raises(ValueError) as excinfo:
+        array[[2, 0, 0, -20, 3]]
+    assert str(excinfo.value) == "in ListArray64 attempting to get -20, index out of range"
+
+def test_current():
+    starts  = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6]))
+    stops   = awkward1.layout.Index64(numpy.array([3, 3, 5, 6, 10]))
+    content = awkward1.layout.NumpyArray(numpy.arange(10)*1.1)
+    array   = awkward1.layout.ListArray64(starts, stops, content)
+
+    array.setid()
+
+    with pytest.raises(ValueError) as excinfo:
+        array[2, 20]
+    assert str(excinfo.value) == "in ListArray64 at id[2] attempting to get 20, index out of range"
