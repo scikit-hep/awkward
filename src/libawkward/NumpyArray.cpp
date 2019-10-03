@@ -42,6 +42,8 @@ namespace awkward {
     return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
   }
 
+  const std::string NumpyArray::classname() const { return "NumpyArray"; }
+
   void NumpyArray::setid(const std::shared_ptr<Identity> id) {
     if (id.get() != nullptr  &&  length() != id.get()->length()) {
       throw std::invalid_argument("content and its id must have the same length");
@@ -95,7 +97,7 @@ namespace awkward {
   const std::string NumpyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     assert(!isscalar());
     std::stringstream out;
-    out << indent << pre << "<NumpyArray format=\"" << format_ << "\" shape=\"";
+    out << indent << pre << "<" << classname() << " format=\"" << format_ << "\" shape=\"";
     for (ssize_t i = 0;  i < ndim();  i++) {
       if (i != 0) {
         out << " ";
@@ -168,7 +170,7 @@ namespace awkward {
     else {
       out << "\">\n";
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
-      out << indent << "</NumpyArray>" << post;
+      out << indent << "</" << classname() << ">" << post;
     }
     return out.str();
   }

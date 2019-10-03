@@ -11,6 +11,19 @@
 #include "awkward/ListArray.h"
 
 namespace awkward {
+  template <typename T>
+  const std::string ListArrayOf<T>::classname() const {
+    if (std::is_same<T, int32_t>::value) {
+      return "ListArray32";
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      return "ListArray64";
+    }
+    else {
+      return "Unrecognized ListArray";
+    }
+  }
+
   template <>
   void ListArrayOf<int32_t>::setid(const std::shared_ptr<Identity> id) {
     if (id.get() == nullptr) {
@@ -118,21 +131,14 @@ namespace awkward {
   template <typename T>
   const std::string ListArrayOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
-    std::string name = "Unrecognized ListArray";
-    if (std::is_same<T, int32_t>::value) {
-      name = "ListArray32";
-    }
-    else if (std::is_same<T, int64_t>::value) {
-      name = "ListArray64";
-    }
-    out << indent << pre << "<" << name << ">\n";
+    out << indent << pre << "<" << classname() << ">\n";
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
     out << starts_.tostring_part(indent + std::string("    "), "<starts>", "</starts>\n");
     out << stops_.tostring_part(indent + std::string("    "), "<stops>", "</stops>\n");
     out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
-    out << indent << "</" << name << ">" << post;
+    out << indent << "</" << classname() << ">" << post;
     return out.str();
   }
 

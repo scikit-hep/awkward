@@ -10,6 +10,7 @@
 namespace awkward {
   class Content {
   public:
+    virtual const std::string classname() const = 0;
     virtual const std::shared_ptr<Identity> id() const = 0;
     virtual void setid() = 0;
     virtual void setid(const std::shared_ptr<Identity> id) = 0;

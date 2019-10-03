@@ -58,6 +58,7 @@ namespace awkward {
     T* borrow() const { return borrow(0); }
     T* borrow(int64_t at) const { return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)itemsize_*(ssize_t)(offset_ + at)); }
 
+    virtual const std::string classname() const { return std::string("RawArrayOf<") + std::string(typeid(T).name()) + std::string(">"); }
     virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid() {
       if (length() <= kMaxInt32) {

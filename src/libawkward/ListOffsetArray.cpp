@@ -10,6 +10,19 @@
 
 namespace awkward {
   template <typename T>
+  const std::string ListOffsetArrayOf<T>::classname() const {
+    if (std::is_same<T, int32_t>::value) {
+      return "ListOffsetArray32";
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      return "ListOffsetArray64";
+    }
+    else {
+      return "Unrecognized ListOffsetArray";
+    }
+  }
+
+  template <typename T>
   IndexOf<T> make_starts(const IndexOf<T>& offsets) {
     return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
   }
@@ -130,20 +143,13 @@ namespace awkward {
   template <typename T>
   const std::string ListOffsetArrayOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
-    std::string name = "Unrecognized ListOffsetArray";
-    if (std::is_same<T, int32_t>::value) {
-      name = "ListOffsetArray32";
-    }
-    else if (std::is_same<T, int64_t>::value) {
-      name = "ListOffsetArray64";
-    }
-    out << indent << pre << "<" << name << ">\n";
+    out << indent << pre << "<" << classname() << ">\n";
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
     out << offsets_.tostring_part(indent + std::string("    "), "<offsets>", "</offsets>\n");
     out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
-    out << indent << "</" << name << ">" << post;
+    out << indent << "</" << classname() << ">" << post;
     return out.str();
   }
 

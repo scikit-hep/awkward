@@ -22,6 +22,7 @@ namespace awkward {
     const IndexOf<T> offsets() const { return offsets_; }
     const std::shared_ptr<Content> content() const { return content_.get()->shallow_copy(); }
 
+    virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
