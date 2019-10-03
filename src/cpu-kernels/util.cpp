@@ -6,17 +6,17 @@
 
 Error success() {
   Error out;
-  out.where1 = -1;
-  out.where2 = -1;
+  out.location = kSliceNone;
+  out.attempt = kSliceNone;
   out.strlength = 0;
   out.str = nullptr;
   return out;
 }
 
-Error failure(int64_t where1, int64_t where2, const char* str) {
+Error failure(int64_t location, int64_t attempt, const char* str) {
   Error out;
-  out.where1 = where1;
-  out.where2 = where2;
+  out.location = location;
+  out.attempt = attempt;
   out.strlength = (int64_t)strlen(str);
   out.str = str;
   return out;

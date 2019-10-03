@@ -22,13 +22,13 @@
 
 extern "C" {
   struct Error {
-    int64_t where1;
-    int64_t where2;
+    int64_t location;
+    int64_t attempt;
     int64_t strlength;
     const char* str;
   };
   Error success();
-  Error failure(int64_t where1, int64_t where2, const char* str);
+  Error failure(int64_t location, int64_t attempt, const char* str);
 
   const int8_t  kMaxInt8   =                 127;   // 2**7  - 1
   const uint8_t kMaxUInt8  =                 255;   // 2**8  - 1

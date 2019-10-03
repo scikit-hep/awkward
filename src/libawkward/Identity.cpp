@@ -32,7 +32,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::string IdentityOf<T>::position(int64_t where) const {
+  const std::string IdentityOf<T>::location(int64_t where) const {
     std::stringstream out;
 
     int64_t fieldi = 0;
@@ -119,7 +119,7 @@ namespace awkward {
         offset_,
         width_,
         length_);
-      util::handle_error(err, classname(), this, nullptr);
+      util::handle_error(err, classname(), nullptr);
     }
     else if (std::is_same<T, int64_t>::value) {
       Error err = awkward_identity64_getitem_carry_64(
@@ -130,7 +130,7 @@ namespace awkward {
         offset_,
         width_,
         length_);
-      util::handle_error(err, classname(), this, nullptr);
+      util::handle_error(err, classname(), nullptr);
     }
     else {
       throw std::runtime_error("unrecognized Identity specialization");

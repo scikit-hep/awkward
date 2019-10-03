@@ -51,7 +51,7 @@ namespace awkward {
           content_.get()->length(),
           length(),
           rawid->width());
-        util::handle_error(err, classname(), id_.get(), nullptr);
+        util::handle_error(err, classname(), id_.get());
         content_.get()->setid(subid);
       }
       else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
@@ -68,7 +68,7 @@ namespace awkward {
           content_.get()->length(),
           length(),
           rawid->width());
-        util::handle_error(err, classname(), id_.get(), nullptr);
+        util::handle_error(err, classname(), id_.get());
         content_.get()->setid(subid);
       }
       else {
@@ -102,7 +102,7 @@ namespace awkward {
           content_.get()->length(),
           length(),
           rawid->width());
-        util::handle_error(err, classname(), id_.get(), nullptr);
+        util::handle_error(err, classname(), id_.get());
         content_.get()->setid(subid);
       }
       else {
@@ -159,10 +159,10 @@ namespace awkward {
       regular_at += starts_.length();
     }
     if (regular_at < 0  ||  regular_at >= starts_.length()) {
-      throw std::invalid_argument("index out of range");
+      util::handle_error(failure(kSliceNone, at, "index out of range"), classname(), id_.get());
     }
     if (regular_at >= stops_.length()) {
-      throw std::invalid_argument("len(stops) < len(starts) in ListArray");
+      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
     }
     return content_.get()->getitem_range(starts_.getitem_at(regular_at), stops_.getitem_at(regular_at));
   }
@@ -173,13 +173,13 @@ namespace awkward {
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), starts_.length());
     if (regular_stop > stops_.length()) {
-      throw std::invalid_argument("len(stops) < len(starts) in ListArray");
+      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
     }
 
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
       if (regular_stop > id_.get()->length()) {
-        throw std::invalid_argument("index out of range for identity");
+        util::handle_error(failure(kSliceNone, stop, "index out of range"), id_.get()->classname(), nullptr);
       }
       id = id_.get()->getitem_range(regular_start, regular_stop);
     }
@@ -191,7 +191,7 @@ namespace awkward {
   const std::shared_ptr<Content> ListArrayOf<int32_t>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
-      throw std::invalid_argument("len(stops) < len(starts)");
+      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
     }
 
     if (head.get() == nullptr) {
@@ -299,7 +299,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        util::handle_error(err, classname(), id_.get(), nullptr);
+        util::handle_error(err, classname(), id_.get());
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
         return std::shared_ptr<Content>(new ListOffsetArrayOf<int32_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
@@ -319,7 +319,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        util::handle_error(err, classname(), id_.get(), nullptr);
+        util::handle_error(err, classname(), id_.get());
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
       }
@@ -334,7 +334,7 @@ namespace awkward {
   const std::shared_ptr<Content> ListArrayOf<int64_t>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
-      throw std::invalid_argument("len(stops) < len(starts)");
+      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
     }
 
     if (head.get() == nullptr) {
@@ -442,7 +442,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        util::handle_error(err, classname(), id_.get(), nullptr);
+        util::handle_error(err, classname(), id_.get());
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
         return std::shared_ptr<Content>(new ListOffsetArrayOf<int64_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
@@ -462,7 +462,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        util::handle_error(err, classname(), id_.get(), nullptr);
+        util::handle_error(err, classname(), id_.get());
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
       }
@@ -475,12 +475,13 @@ namespace awkward {
 
   template <>
   const std::shared_ptr<Content> ListArrayOf<int32_t>::carry(const Index64& carry) const {
-    if (stops_.length() < starts_.length()) {
-      throw std::invalid_argument("len(stops) < len(starts)");
+    int64_t lenstarts = starts_.length();
+    if (stops_.length() < lenstarts) {
+      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
     }
     Index32 nextstarts(carry.length());
     Index32 nextstops(carry.length());
-    awkward_listarray32_getitem_carry_64(
+    Error err = awkward_listarray32_getitem_carry_64(
       nextstarts.ptr().get(),
       nextstops.ptr().get(),
       starts_.ptr().get(),
@@ -488,7 +489,9 @@ namespace awkward {
       carry.ptr().get(),
       starts_.offset(),
       stops_.offset(),
+      lenstarts,
       carry.length());
+    util::handle_error(err, classname(), id_.get());
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
@@ -498,12 +501,13 @@ namespace awkward {
 
   template <>
   const std::shared_ptr<Content> ListArrayOf<int64_t>::carry(const Index64& carry) const {
-    if (stops_.length() < starts_.length()) {
-      throw std::invalid_argument("len(stops) < len(starts)");
+    int64_t lenstarts = starts_.length();
+    if (stops_.length() < lenstarts) {
+      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
     }
     Index64 nextstarts(carry.length());
     Index64 nextstops(carry.length());
-    awkward_listarray64_getitem_carry_64(
+    Error err = awkward_listarray64_getitem_carry_64(
       nextstarts.ptr().get(),
       nextstops.ptr().get(),
       starts_.ptr().get(),
@@ -511,7 +515,9 @@ namespace awkward {
       carry.ptr().get(),
       starts_.offset(),
       stops_.offset(),
+      lenstarts,
       carry.length());
+    util::handle_error(err, classname(), id_.get());
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);

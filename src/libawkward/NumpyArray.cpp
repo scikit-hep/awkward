@@ -195,7 +195,7 @@ namespace awkward {
       regular_at += shape_[0];
     }
     if (regular_at < 0  ||  regular_at >= shape_[0]) {
-      throw std::invalid_argument("index out of range");
+      util::handle_error(failure(kSliceNone, at, "index out of range"), classname(), id_.get());
     }
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)regular_at);
     const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
@@ -203,7 +203,7 @@ namespace awkward {
     std::shared_ptr<Identity> id;
     if (id_.get() != nullptr) {
       if (regular_at >= id_.get()->length()) {
-        throw std::invalid_argument("index out of range for identity");
+        util::handle_error(failure(kSliceNone, at, "index out of range"), id_.get()->classname(), nullptr);
       }
       id = id_.get()->getitem_range(regular_at, regular_at + 1);
     }
@@ -222,7 +222,7 @@ namespace awkward {
     std::shared_ptr<Identity> id;
     if (id_.get() != nullptr) {
       if (regular_stop > id_.get()->length()) {
-        throw std::invalid_argument("index out of range for identity");
+        util::handle_error(failure(kSliceNone, stop, "index out of range"), id_.get()->classname(), nullptr);
       }
       id = id_.get()->getitem_range(regular_start, regular_stop);
     }
@@ -405,13 +405,13 @@ namespace awkward {
 
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
       if (ndim() < 2) {
-        throw std::invalid_argument("too many indexes for array");
+        throw std::invalid_argument("too many indexes in slice");
       }
 
       int64_t i = at->at();
       if (i < 0) i += shape_[1];
       if (i < 0  ||  i >= shape_[1]) {
-        throw std::invalid_argument("index out of range");
+        util::handle_error(failure(kSliceNone, at->at(), "index out of range"), classname(), id_.get());
       }
 
       ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)i)*strides_[1];
@@ -428,7 +428,7 @@ namespace awkward {
 
     else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
       if (ndim() < 2) {
-        throw std::invalid_argument("too many indexes for array");
+        throw std::invalid_argument("too many indexes in slice");
       }
 
       int64_t start = range->start();
@@ -522,7 +522,7 @@ namespace awkward {
 
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
       if (ndim() < 2) {
-        throw std::invalid_argument("too many indexes for array");
+        throw std::invalid_argument("too many indexes in slice");
       }
 
       NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
@@ -549,7 +549,7 @@ namespace awkward {
 
     else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
       if (ndim() < 2) {
-        throw std::invalid_argument("too many indexes for array");
+        throw std::invalid_argument("too many indexes in slice");
       }
 
       int64_t start = range->start();
@@ -646,7 +646,7 @@ namespace awkward {
 
     else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
       if (ndim() < 2) {
-        throw std::invalid_argument("too many indexes for array");
+        throw std::invalid_argument("too many indexes in slice");
       }
 
       NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
@@ -658,7 +658,7 @@ namespace awkward {
         flathead.ptr().get(),
         flathead.length(),
         shape_[1]);
-      util::handle_error(err, "slice array", nullptr, nullptr);
+      util::handle_error(err, classname(), id_.get());
 
       if (advanced.length() == 0) {
         Index64 nextcarry(carry.length()*flathead.length());
