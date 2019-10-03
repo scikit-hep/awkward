@@ -119,7 +119,7 @@ namespace awkward {
         offset_,
         width_,
         length_);
-      util::handle_error(err, classname(), nullptr);
+      util::handle_error(err, classname(), nullptr, false);
     }
     else if (std::is_same<T, int64_t>::value) {
       Error err = awkward_identity64_getitem_carry_64(
@@ -130,7 +130,7 @@ namespace awkward {
         offset_,
         width_,
         length_);
-      util::handle_error(err, classname(), nullptr);
+      util::handle_error(err, classname(), nullptr, false);
     }
     else {
       throw std::runtime_error("unrecognized Identity specialization");

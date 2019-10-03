@@ -139,9 +139,9 @@ namespace awkward {
       std::shared_ptr<SliceItem> nexthead = where.head();
       Slice nexttail = where.tail();
       Index64 nextadvanced(0);
-      return getitem_next(nexthead, nexttail, nextadvanced);
+      return getitem_next(nexthead, nexttail, nextadvanced, false);
     }
-    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
+    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced, bool fake) const {
       if (tail.length() != 0) {
         throw std::invalid_argument("too many indexes for array");
       }
@@ -204,7 +204,7 @@ namespace awkward {
         throw std::runtime_error("unrecognized slice item type");
       }
     }
-    virtual const std::shared_ptr<Content> carry(const Index64& carry) const {
+    virtual const std::shared_ptr<Content> carry(const Index64& carry, bool fake) const {
       throw std::runtime_error("RawArray<T>::carry");
     }
     virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }

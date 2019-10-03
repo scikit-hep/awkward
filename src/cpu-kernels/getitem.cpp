@@ -204,7 +204,7 @@ Error awkward_listarray_getitem_next_at(T* tocarry, const C* fromstarts, const C
       regular_at += length;
     }
     if (!(0 <= regular_at  &&  regular_at < length)) {
-      return failure(i, kSliceNone, "index out of range");
+      return failure(i, at, "index out of range");
     }
     tocarry[i] = fromstarts[startsoffset + i] + regular_at;
   }

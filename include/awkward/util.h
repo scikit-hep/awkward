@@ -12,7 +12,7 @@ namespace awkward {
   class Identity;
 
   namespace util {
-    void handle_error(const Error& err, const std::string classname, const Identity* id);
+    void handle_error(const Error& err, const std::string classname, const Identity* id, bool fakelocation);
 
     template<typename T>
     class array_deleter {
