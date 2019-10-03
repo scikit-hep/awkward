@@ -3,22 +3,24 @@
 #include "awkward/cpu-kernels/identity.h"
 
 template <typename T>
-void awkward_new_identity(T* toptr, int64_t length) {
+Error awkward_new_identity(T* toptr, int64_t length) {
   for (T i = 0;  i < length;  i++) {
     toptr[i] = i;
   }
+  return success();
 }
-void awkward_new_identity32(int32_t* toptr, int64_t length) {
-  awkward_new_identity<int32_t>(toptr, length);
+Error awkward_new_identity32(int32_t* toptr, int64_t length) {
+  return awkward_new_identity<int32_t>(toptr, length);
 }
-void awkward_new_identity64(int64_t* toptr, int64_t length) {
-  awkward_new_identity<int64_t>(toptr, length);
+Error awkward_new_identity64(int64_t* toptr, int64_t length) {
+  return awkward_new_identity<int64_t>(toptr, length);
 }
 
-void awkward_identity32_to_identity64(int64_t* toptr, const int32_t* fromptr, int64_t length) {
+Error awkward_identity32_to_identity64(int64_t* toptr, const int32_t* fromptr, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     toptr[i]= (int64_t)fromptr[i];
   }
+  return success();
 }
 
 template <typename ID, typename T>

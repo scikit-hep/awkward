@@ -56,13 +56,15 @@ namespace awkward {
     if (length() <= kMaxInt32) {
       Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
       std::shared_ptr<Identity> newid(rawid);
-      awkward_new_identity32(rawid->ptr().get(), length());
+      Error err = awkward_new_identity32(rawid->ptr().get(), length());
+      util::handle_error(err, classname(), id_.get(), false);
       setid(newid);
     }
     else {
       Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, length());
       std::shared_ptr<Identity> newid(rawid);
-      awkward_new_identity64(rawid->ptr().get(), length());
+      Error err = awkward_new_identity64(rawid->ptr().get(), length());
+      util::handle_error(err, classname(), id_.get(), false);
       setid(newid);
     }
   }
@@ -273,7 +275,8 @@ namespace awkward {
   const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced, bool fake) const {
     assert(!isscalar());
     Index64 carry(shape_[0]);
-    awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
+    Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
+    util::handle_error(err, classname(), id_.get(), fake);
     return getitem_next(head, tail, carry, advanced, shape_[0], strides_[0], fake).shallow_copy();
   }
 
@@ -281,13 +284,14 @@ namespace awkward {
     assert(!isscalar());
 
     std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
-    awkward_numpyarray_getitem_next_null_64(
+    Error err = awkward_numpyarray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
       carry.length(),
       strides_[0],
       byteoffset_,
       carry.ptr().get());
+    util::handle_error(err, classname(), id_.get(), fake);
 
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
@@ -349,7 +353,8 @@ namespace awkward {
     }
     else {
       Index64 bytepos(shape_[0]);
-      awkward_numpyarray_contiguous_init_64(bytepos.ptr().get(), shape_[0], strides_[0]);
+      Error err = awkward_numpyarray_contiguous_init_64(bytepos.ptr().get(), shape_[0], strides_[0]);
+      util::handle_error(err, classname(), id_.get(), false);
       return contiguous_next(bytepos);
     }
   }
@@ -357,25 +362,27 @@ namespace awkward {
   const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
     if (iscontiguous()) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
-      awkward_numpyarray_contiguous_copy_64(
+      Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         bytepos.length(),
         strides_[0],
         byteoffset_,
         bytepos.ptr().get());
+      util::handle_error(err, classname(), id_.get(), false);
       return NumpyArray(id_, ptr, shape_, strides_, 0, itemsize_, format_);
     }
 
     else if (shape_.size() == 1) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*itemsize_)], awkward::util::array_deleter<uint8_t>());
-      awkward_numpyarray_contiguous_copy_64(
+      Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         bytepos.length(),
         itemsize_,
         byteoffset_,
         bytepos.ptr().get());
+      util::handle_error(err, classname(), id_.get(), false);
       std::vector<ssize_t> strides = { itemsize_ };
       return NumpyArray(id_, ptr, shape_, strides, 0, itemsize_, format_);
     }
@@ -384,12 +391,13 @@ namespace awkward {
       NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
 
       Index64 nextbytepos(bytepos.length()*shape_[1]);
-      awkward_numpyarray_contiguous_next_64(
+      Error err = awkward_numpyarray_contiguous_next_64(
         nextbytepos.ptr().get(),
         bytepos.ptr().get(),
         bytepos.length(),
         (int64_t)shape_[1],
         (int64_t)strides_[1]);
+      util::handle_error(err, classname(), id_.get(), false);
 
       NumpyArray out = next.contiguous_next(nextbytepos);
       std::vector<ssize_t> outstrides = { shape_[1]*out.strides_[0] };
@@ -500,13 +508,14 @@ namespace awkward {
   const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool fake) const {
     if (head.get() == nullptr) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*stride)], awkward::util::array_deleter<uint8_t>());
-      awkward_numpyarray_getitem_next_null_64(
+      Error err = awkward_numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
         stride,
         byteoffset_,
         carry.ptr().get());
+      util::handle_error(err, classname(), id_.get(), fake);
 
       std::shared_ptr<Identity> id(nullptr);
       if (id_.get() != nullptr) {
@@ -541,12 +550,13 @@ namespace awkward {
       }
 
       Index64 nextcarry(carry.length());
-      awkward_numpyarray_getitem_next_at_64(
+      Error err = awkward_numpyarray_getitem_next_at_64(
         nextcarry.ptr().get(),
         carry.ptr().get(),
         carry.length(),
         shape_[1],   // because this is contiguous
         regular_at);
+      util::handle_error(err, classname(), id_.get(), fake);
 
       NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length, next.strides_[0], false);
 
@@ -580,7 +590,7 @@ namespace awkward {
 
       if (advanced.length() == 0) {
         Index64 nextcarry(carry.length()*lenhead);
-        awkward_numpyarray_getitem_next_range_64(
+        Error err = awkward_numpyarray_getitem_next_range_64(
           nextcarry.ptr().get(),
           carry.ptr().get(),
           carry.length(),
@@ -588,6 +598,7 @@ namespace awkward {
           shape_[1],   // because this is contiguous
           start,
           step);
+        util::handle_error(err, classname(), id_.get(), fake);
 
         NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*lenhead, next.strides_[0], false);
         std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
@@ -600,7 +611,7 @@ namespace awkward {
       else {
         Index64 nextcarry(carry.length()*lenhead);
         Index64 nextadvanced(carry.length()*lenhead);
-        awkward_numpyarray_getitem_next_range_advanced_64(
+        Error err = awkward_numpyarray_getitem_next_range_advanced_64(
           nextcarry.ptr().get(),
           nextadvanced.ptr().get(),
           carry.ptr().get(),
@@ -610,6 +621,7 @@ namespace awkward {
           shape_[1],   // because this is contiguous
           start,
           step);
+        util::handle_error(err, classname(), id_.get(), fake);
 
         NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenhead, next.strides_[0], false);
         std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
@@ -671,7 +683,7 @@ namespace awkward {
       if (advanced.length() == 0) {
         Index64 nextcarry(carry.length()*flathead.length());
         Index64 nextadvanced(carry.length()*flathead.length());
-        awkward_numpyarray_getitem_next_array_64(
+        Error err = awkward_numpyarray_getitem_next_array_64(
           nextcarry.ptr().get(),
           nextadvanced.ptr().get(),
           carry.ptr().get(),
@@ -679,6 +691,7 @@ namespace awkward {
           carry.length(),
           flathead.length(),
           shape_[1]);   // because this is contiguous
+        util::handle_error(err, classname(), id_.get(), fake);
 
         NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*flathead.length(), next.strides_[0], false);
 
@@ -699,13 +712,14 @@ namespace awkward {
       else {
         Index64 nextcarry(carry.length());
         Index64 nextadvanced(carry.length());
-        awkward_numpyarray_getitem_next_array_advanced_64(
+        Error err = awkward_numpyarray_getitem_next_array_advanced_64(
           nextcarry.ptr().get(),
           carry.ptr().get(),
           advanced.ptr().get(),
           flathead.ptr().get(),
           carry.length(),
           shape_[1]);   // because this is contiguous
+        util::handle_error(err, classname(), id_.get(), fake);
 
         NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*array->length(), next.strides_[0], false);
 
