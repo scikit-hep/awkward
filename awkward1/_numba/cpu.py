@@ -24,35 +24,20 @@ class ErrorType(numba.types.Type):
         super(ErrorType, self).__init__(name="awkward._numba.cpu.ErrorType")
 
 class Error(ctypes.Structure):
-    _fields_ = [
-        ("location", ctypes.c_int64),
-        ("attempt", ctypes.c_int64),
-        ("strlength", ctypes.c_int64),
-        ("str", ctypes.c_char_p),
-        ]
-
+    _fields_ = [("str", ctypes.c_char_p),
+                ("location", ctypes.c_int64),
+                ("attempt", ctypes.c_int64),
+                ("extra", ctypes.c_int64)]
     numbatpe = ErrorType()
-
-    # numbatpe = numba.types.Record.make_c_struct([
-    #     ("location", numba.int64),
-    #     ("attempt", numba.int64),
-    #     ("strlength", numba.int64),
-    #     ("str", numba.intp)],
-    #     )
 
 @numba.extending.register_model(ErrorType)
 class ErrorModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("location", numba.int64),
+        members = [("str", numba.intp),
+                   ("location", numba.int64),
                    ("attempt", numba.int64),
-                   ("strlength", numba.int64),
-                   ("str", numba.intp)]
+                   ("extra", numba.int64)]
         super(ErrorModel, self).__init__(dmm, fe_type, members)
-
-# numba.extending.make_attribute_wrapper(ErrorType, "location", "location")
-# numba.extending.make_attribute_wrapper(ErrorType, "attempt", "attempt")
-# numba.extending.make_attribute_wrapper(ErrorType, "strlength", "strlength")
-# numba.extending.make_attribute_wrapper(ErrorType, "str", "str")
 
 h2ctypes = {
     "bool": ctypes.c_uint8,

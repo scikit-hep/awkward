@@ -24,10 +24,10 @@
 
 extern "C" {
   struct Error {
+    const char* str;
     int64_t location;
     int64_t attempt;
-    int64_t strlength;
-    const char* str;
+    int64_t extra;
   };
   Error success();
   Error failure(int64_t location, int64_t attempt, const char* str);
