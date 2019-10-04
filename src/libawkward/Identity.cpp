@@ -40,8 +40,8 @@ namespace awkward {
       if (bothi != 0) {
         out << ", ";
       }
-      if (fieldi < (int64_t)fieldloc_.size()  &&  fieldloc_[fieldi].first == bothi) {
-        out << "\"" << fieldloc_[fieldi].second << "\"";
+      if (fieldi < (int64_t)fieldloc_.size()  &&  fieldloc_[(size_t)fieldi].first == bothi) {
+        out << "\"" << fieldloc_[(size_t)fieldi].second << "\"";
         fieldi++;
       }
       else {
