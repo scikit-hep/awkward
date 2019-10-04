@@ -195,7 +195,7 @@ namespace awkward {
       start = stop = 0;
     }
     if (!(0 <= start  &&  start < lencontent)  ||  !(start <= stop  &&  stop <= lencontent)) {
-      util::handle_error(failure("not 0 <= starts[i] < len(content) or not starts[i] <= stops[i] <= len(content)", kSliceNone, at), classname(), id_.get());
+      util::handle_error(failure("not 0 <= offsets[i] < len(content) or not offsets[i] <= offsets[i + 1] <= len(content)", kSliceNone, at), classname(), id_.get());
     }
     return content_.get()->getitem_range_unsafe(start, stop);
   }
