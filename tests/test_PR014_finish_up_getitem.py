@@ -28,6 +28,11 @@ listarrayB64 = awkward1.layout.ListArray64(awkward1.layout.Index64(startsB), awk
 listarrayB32 = awkward1.layout.ListArray32(awkward1.layout.Index32(startsB), awkward1.layout.Index32(stopsB), listarrayA64)
 modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
 
+# listoffsetarrayB64.setid()
+# listoffsetarrayB32.setid()
+# listarrayB64.setid()
+# listarrayB32.setid()
+
 def test_basic():
     assert awkward1.tolist(modelA) == awkward1.tolist(listoffsetarrayA64)
     assert awkward1.tolist(modelA) == awkward1.tolist(listoffsetarrayA32)
@@ -149,3 +154,83 @@ def test_listarrayA32():
             if any(isinstance(x, slice) for x in cuts):
                 continue
             assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(listarrayA32[cuts])
+
+def test_listoffsetarrayB64():
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-1, 0, 1, slice(1, None), slice(None, -1)), depth):
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+
+def test_listoffsetarrayB32():
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-1, 0, 1, slice(1, None), slice(None, -1)), depth):
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listoffsetarrayB64[cuts])
+
+def test_listarrayB64():
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
+
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-1, 0, 1, slice(1, None), slice(None, -1)), depth):
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
+
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
+
+def test_listarrayB32():
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
+
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-1, 0, 1, slice(1, None), slice(None, -1)), depth):
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
+
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(listarrayB64[cuts])
