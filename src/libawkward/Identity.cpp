@@ -93,7 +93,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Identity> IdentityOf<T>::getitem_range(int64_t start, int64_t stop) const {
+  const std::shared_ptr<Identity> IdentityOf<T>::getitem_range_unsafe(int64_t start, int64_t stop) const {
     assert(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop < length_);
     return std::shared_ptr<Identity>(new IdentityOf<T>(ref_, fieldloc_, offset_ + width_*start*(start != stop), width_, (stop - start), ptr_));
   }
@@ -138,8 +138,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::vector<T> IdentityOf<T>::get(int64_t at) const {
-    assert(0 <= at < length_);
+  const std::vector<T> IdentityOf<T>::getitem_at_unsafe(int64_t at) const {
+    assert(0 <= at  &&  at < length_);
     std::vector<T> out;
     for (size_t i = (size_t)(offset() + at);  i < (size_t)(offset() + at + width());  i++) {
       out.push_back(ptr_.get()[i]);

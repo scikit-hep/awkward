@@ -217,7 +217,7 @@ namespace awkward {
       if (at >= id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, at), id_.get()->classname(), nullptr);
       }
-      id = id_.get()->getitem_range(at, at + 1);
+      id = id_.get()->getitem_range_unsafe(at, at + 1);
     }
     return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset, itemsize_, format_));
   }
@@ -240,7 +240,7 @@ namespace awkward {
       if (stop > id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
       }
-      id = id_.get()->getitem_range(start, stop);
+      id = id_.get()->getitem_range_unsafe(start, stop);
     }
     return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
   }

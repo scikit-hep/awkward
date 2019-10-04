@@ -181,8 +181,8 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_at_unsafe(int64_t at) const {
-    int64_t start = (int64_t)starts_.getitem_at(at);
-    int64_t stop = (int64_t)stops_.getitem_at(at);
+    int64_t start = (int64_t)starts_.getitem_at_unsafe(at);
+    int64_t stop = (int64_t)stops_.getitem_at_unsafe(at);
     int64_t lencontent = content_.get()->length();
     if (start == stop) {
       start = stop = 0;
@@ -211,9 +211,9 @@ namespace awkward {
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_range_unsafe(int64_t start, int64_t stop) const {
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
-      id = id_.get()->getitem_range(start, stop);
+      id = id_.get()->getitem_range_unsafe(start, stop);
     }
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id, starts_.getitem_range(start, stop), stops_.getitem_range(start, stop), content_));
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id, starts_.getitem_range_unsafe(start, stop), stops_.getitem_range_unsafe(start, stop), content_));
   }
 
   template <>

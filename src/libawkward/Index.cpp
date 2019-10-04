@@ -33,7 +33,7 @@ namespace awkward {
         if (i != 0) {
           out << " ";
         }
-        out << (int64_t)getitem_at(i);
+        out << (int64_t)getitem_at_unsafe(i);
       }
     }
     else {
@@ -41,14 +41,14 @@ namespace awkward {
         if (i != 0) {
           out << " ";
         }
-        out << (int64_t)getitem_at(i);
+        out << (int64_t)getitem_at_unsafe(i);
       }
       out << " ... ";
       for (int64_t i = length_ - 5;  i < length_;  i++) {
         if (i != length_ - 5) {
           out << " ";
         }
-        out << (int64_t)getitem_at(i);
+        out << (int64_t)getitem_at_unsafe(i);
       }
     }
     out << "]\" offset=\"" << offset_ << "\" at=\"0x";
@@ -57,13 +57,13 @@ namespace awkward {
   }
 
   template <typename T>
-  T IndexOf<T>::getitem_at(int64_t at) const {
+  T IndexOf<T>::getitem_at_unsafe(int64_t at) const {
     assert(0 <= at  &&  at < length_);
     return ptr_.get()[(size_t)(offset_ + at)];
   }
 
   template <typename T>
-  IndexOf<T> IndexOf<T>::getitem_range(int64_t start, int64_t stop) const {
+  IndexOf<T> IndexOf<T>::getitem_range_unsafe(int64_t start, int64_t stop) const {
     assert(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop < length_);
     return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
   }
