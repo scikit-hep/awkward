@@ -20,6 +20,8 @@
   #include <cstdint>
 #endif
 
+#include <iostream>
+
 extern "C" {
   struct Error {
     int64_t location;

@@ -218,7 +218,7 @@ Error awkward_listarray_getitem_next_at(T* tocarry, const C* fromstarts, const C
       regular_at += length;
     }
     if (!(0 <= regular_at  &&  regular_at < length)) {
-      return failure(startsoffset + i, at, "index out of range");
+      return failure(i, at, "index out of range");
     }
     tocarry[i] = fromstarts[startsoffset + i] + regular_at;
   }
@@ -328,10 +328,10 @@ Error awkward_listarray_getitem_next_array(C* tooffsets, T* tocarry, T* toadvanc
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
     if (fromstops[stopsoffset + i] < fromstarts[startsoffset + i]) {
-      return failure(startsoffset + i, kSliceNone, "stops[i] < starts[i]");
+      return failure(i, kSliceNone, "stops[i] < starts[i]");
     }
     if (fromstarts[startsoffset + i] != fromstops[stopsoffset + i]  &&  fromstops[stopsoffset + i] > lencontent) {
-      return failure(startsoffset + i, kSliceNone, "stops[i] > len(content)");
+      return failure(i, kSliceNone, "stops[i] > len(content)");
     }
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
     for (int64_t j = 0;  j < lenarray;  j++) {
@@ -340,7 +340,7 @@ Error awkward_listarray_getitem_next_array(C* tooffsets, T* tocarry, T* toadvanc
         regular_at += length;
       }
       if (!(0 <= regular_at  &&  regular_at < length)) {
-        return failure(startsoffset + i, fromarray[j], "index out of range");
+        return failure(i, fromarray[j], "index out of range");
       }
       tocarry[i*lenarray + j] = fromstarts[startsoffset + i] + regular_at;
       toadvanced[i*lenarray + j] = j;
@@ -360,21 +360,21 @@ template <typename C, typename T>
 Error awkward_listarray_getitem_next_array_advanced(T* tocarry, T* toadvanced, const C* fromstarts, const C* fromstops, const T* fromarray, const T* fromadvanced, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
     if (fromstops[stopsoffset + i] < fromstarts[startsoffset + i]) {
-      return failure(startsoffset + i, kSliceNone, "stops[i] < starts[i]");
+      return failure(i, kSliceNone, "stops[i] < starts[i]");
     }
     if (fromstarts[startsoffset + i] != fromstops[stopsoffset + i]  &&  fromstops[stopsoffset + i] > lencontent) {
-      return failure(startsoffset + i, kSliceNone, "stops[i] > len(content)");
+      return failure(i, kSliceNone, "stops[i] > len(content)");
     }
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
     if (fromadvanced[i] >= lenarray) {
-      return failure(startsoffset + i, kSliceNone, "lengths of advanced indexes must match");
+      return failure(i, kSliceNone, "lengths of advanced indexes must match");
     }
     int64_t regular_at = fromarray[fromadvanced[i]];
     if (regular_at < 0) {
       regular_at += length;
     }
     if (!(0 <= regular_at  &&  regular_at < length)) {
-      return failure(startsoffset + i, fromarray[fromadvanced[i]], "index out of range");
+      return failure(i, fromarray[fromadvanced[i]], "index out of range");
     }
     tocarry[i] = fromstarts[startsoffset + i] + regular_at;
     toadvanced[i] = i;
@@ -392,7 +392,7 @@ template <typename C, typename T>
 Error awkward_listarray_getitem_carry(C* tostarts, C* tostops, const C* fromstarts, const C* fromstops, const T* fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry) {
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (fromcarry[i] >= lenstarts) {
-      return failure(startsoffset + i, fromcarry[i], "index out of range");
+      return failure(i, fromcarry[i], "index out of range");
     }
     tostarts[i] = (C)(fromstarts[startsoffset + fromcarry[i]]);
     tostops[i] = (C)(fromstops[stopsoffset + fromcarry[i]]);

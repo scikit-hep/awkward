@@ -34,7 +34,6 @@ namespace awkward {
   template <typename T>
   const std::string IdentityOf<T>::location(int64_t where) const {
     std::stringstream out;
-
     int64_t fieldi = 0;
     int64_t widthi = 0;
     for (int64_t bothi = 0;  bothi < (int64_t)fieldloc_.size() + width_;  bothi++) {
@@ -50,7 +49,6 @@ namespace awkward {
         widthi++;
       }
     }
-
     return out.str();
   }
 
@@ -77,14 +75,14 @@ namespace awkward {
     else if (std::is_same<T, int64_t>::value) {
       name = "Identity64";
     }
-    out << indent << pre << "<" << name << " ref=\"" << ref() << "\" fieldloc=\"[";
-    for (size_t i = 0;  i < fieldloc().size();  i++) {
+    out << indent << pre << "<" << name << " ref=\"" << ref_ << "\" fieldloc=\"[";
+    for (size_t i = 0;  i < fieldloc_.size();  i++) {
       if (i != 0) {
         out << " ";
       }
-      out << "(" << fieldloc()[i].first << ", '" << fieldloc()[i].second << "')";
+      out << "(" << fieldloc_[i].first << ", '" << fieldloc_[i].second << "')";
     }
-    out << "]\" width=\"" << width() << "\" length=\"" << length() << "\" at=\"0x";
+    out << "]\" width=\"" << width_ << "\" offset=\"" << offset_ << "\" length=\"" << length_ << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
     return out.str();
   }
