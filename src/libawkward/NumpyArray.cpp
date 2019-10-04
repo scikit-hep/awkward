@@ -278,7 +278,7 @@ namespace awkward {
       Index64 nextcarry(1);
       nextcarry.ptr().get()[0] = 0;
       Index64 nextadvanced(0);
-      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, 1, next.strides_[0]);
+      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, 1, next.strides_[0], true);
 
       std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
       std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
@@ -291,7 +291,7 @@ namespace awkward {
     Index64 carry(shape_[0]);
     Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
     util::handle_error(err, classname(), id_.get());
-    return getitem_next(head, tail, carry, advanced, shape_[0], strides_[0]).shallow_copy();
+    return getitem_next(head, tail, carry, advanced, shape_[0], strides_[0], false).shallow_copy();
   }
 
   const std::shared_ptr<Content> NumpyArray::carry(const Index64& carry) const {
@@ -519,7 +519,7 @@ namespace awkward {
     }
   }
 
-  const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride) const {
+  const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
     if (head.get() == nullptr) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*stride)], awkward::util::array_deleter<uint8_t>());
       Error err = awkward_numpyarray_getitem_next_null_64(
@@ -532,7 +532,7 @@ namespace awkward {
       util::handle_error(err, classname(), id_.get());
 
       std::shared_ptr<Identity> id(nullptr);
-      if (id_.get() != nullptr) {
+      if (first  &&  id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
 
@@ -572,7 +572,7 @@ namespace awkward {
         regular_at);
       util::handle_error(err, classname(), id_.get());
 
-      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length, next.strides_[0]);
+      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length, next.strides_[0], false);
 
       std::vector<ssize_t> outshape = { (ssize_t)length };
       outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
@@ -614,7 +614,7 @@ namespace awkward {
           step);
         util::handle_error(err, classname(), id_.get());
 
-        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*lenhead, next.strides_[0]);
+        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*lenhead, next.strides_[0], false);
         std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
         outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
         std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
@@ -637,7 +637,7 @@ namespace awkward {
           step);
         util::handle_error(err, classname(), id_.get());
 
-        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenhead, next.strides_[0]);
+        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenhead, next.strides_[0], false);
         std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
         outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
         std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
@@ -654,7 +654,7 @@ namespace awkward {
       if (tail.length() == 0  ||  mindepth - 1 == tail.dimlength()) {
         std::shared_ptr<SliceItem> nexthead = tail.head();
         Slice nexttail = tail.tail();
-        return getitem_next(nexthead, nexttail, carry, advanced, length, stride);
+        return getitem_next(nexthead, nexttail, carry, advanced, length, stride, false);
       }
       else {
         std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
@@ -662,14 +662,14 @@ namespace awkward {
         items.insert(items.end(), tailitems.begin(), tailitems.end());
         std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
         Slice nexttail(items);
-        return getitem_next(nexthead, nexttail, carry, advanced, length, stride);
+        return getitem_next(nexthead, nexttail, carry, advanced, length, stride, false);
       }
     }
 
     else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
       std::shared_ptr<SliceItem> nexthead = tail.head();
       Slice nexttail = tail.tail();
-      NumpyArray out = getitem_next(nexthead, nexttail, carry, advanced, length, stride);
+      NumpyArray out = getitem_next(nexthead, nexttail, carry, advanced, length, stride, false);
 
       std::vector<ssize_t> outshape = { (ssize_t)length, 1 };
       outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
@@ -707,7 +707,7 @@ namespace awkward {
           shape_[1]);   // because this is contiguous
         util::handle_error(err, classname(), id_.get());
 
-        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*flathead.length(), next.strides_[0]);
+        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*flathead.length(), next.strides_[0], false);
 
         std::vector<ssize_t> outshape = { (ssize_t)length };
         std::vector<int64_t> arrayshape = array->shape();
@@ -735,7 +735,7 @@ namespace awkward {
           shape_[1]);   // because this is contiguous
         util::handle_error(err, classname(), id_.get());
 
-        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*array->length(), next.strides_[0]);
+        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*array->length(), next.strides_[0], false);
 
         std::vector<ssize_t> outshape = { (ssize_t)length };
         outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
