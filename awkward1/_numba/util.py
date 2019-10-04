@@ -35,13 +35,13 @@ def call(context, builder, fcn, args):
     fcntpe = context.get_function_pointer_type(fcn.numbatpe)
     fcnval = context.add_dynamic_addr(builder, fcn.numbatpe.get_pointer(fcn), info=fcn.name)
     fcnptr = builder.bitcast(fcnval, fcntpe)
-    if fcn.restype is cpu.Error:
-        fcnptr.function_type.return_type = context.get_value_type(fcn.restype.numbatpe).pointee
+
     err = context.call_function_pointer(builder, fcnptr, args)
 
-
-
-    # FIXME: handle error
+    if fcn.restype is cpu.Error:
+        proxyerr = numba.cgutils.create_struct_proxy(cpu.Error.numbatpe)(context, builder, value=err)
+        with builder.if_then(builder.icmp_signed("!=", proxyerr.str, context.get_constant(numba.intp, 0)), likely=False):
+            context.call_conv.return_user_exc(builder, ValueError, ("hello",))
 
 def newindex64(context, builder, lentpe, lenval):
     return numba.targets.arrayobj.numpy_empty_nd(context, builder, index64tpe(lentpe), (lenval,))

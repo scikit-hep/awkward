@@ -325,6 +325,8 @@ Error awkward_listarray64_getitem_next_range_spreadadvanced_64(int64_t* toadvanc
 
 template <typename C, typename T>
 Error awkward_listarray_getitem_next_array(C* tooffsets, T* tocarry, T* toadvanced, const C* fromstarts, const C* fromstops, const T* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
+  // return failure(123, 999, "yowzers");
+
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
     if (fromstops[stopsoffset + i] < fromstarts[startsoffset + i]) {
