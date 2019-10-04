@@ -8,13 +8,18 @@
 
 namespace awkward {
   namespace util {
-    void handle_error(const Error& err, const std::string classname, const Identity* id, bool fakelocation) {
+    void handle_error(const Error& err, const std::string classname, const Identity* id) {
       if (err.str != nullptr) {
         std::stringstream out;
         out << "in " << classname;
-        if (err.location != kSliceNone  &&  !fakelocation  &&  id != nullptr  &&  err.location < id->length()) {
+        if (err.location != kSliceNone  &&  id != nullptr) {
           assert(err.location > 0);
-          out << " at id[" << id->location(err.location) << "]";
+          if (0 <= err.location  &&  err.location < id->length()) {
+            out << " at id[" << id->location(err.location) << "]";
+          }
+          else {
+            out << " at id[???]";
+          }
         }
         if (err.attempt != kSliceNone) {
           out << " attempting to get " << err.attempt;
