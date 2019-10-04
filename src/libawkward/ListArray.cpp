@@ -161,7 +161,7 @@ namespace awkward {
       regular_at += starts_.length();
     }
     if (regular_at < 0  ||  regular_at >= starts_.length()) {
-      util::handle_error(failure(kSliceNone, at, "index out of range"), classname(), id_.get());
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     }
     if (regular_at >= stops_.length()) {
       throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
@@ -181,7 +181,7 @@ namespace awkward {
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
       if (regular_stop > id_.get()->length()) {
-        util::handle_error(failure(kSliceNone, stop, "index out of range"), id_.get()->classname(), nullptr);
+        util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
       }
       id = id_.get()->getitem_range(regular_start, regular_stop);
     }

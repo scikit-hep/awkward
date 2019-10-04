@@ -32,7 +32,7 @@ Error awkward_identity_from_listarray(ID* toptr, const ID* fromptr, const T* fro
     int64_t start = fromstarts[startsoffset + i];
     int64_t stop = fromstops[stopsoffset + i];
     if (start != stop  &&  stop > tolength) {
-      return failure(i, -1, "max(stop) > len(content)");
+      return failure("max(stop) > len(content)", i, kSliceNone);
     }
     for (int64_t j = start;  j < stop;  j++) {
       for (int64_t k = 0;  k < fromwidth;  k++) {

@@ -13,7 +13,7 @@ Error success() {
   return out;
 }
 
-Error failure(int64_t location, int64_t attempt, const char* str) {
+Error failure(const char* str, int64_t location, int64_t attempt) {
   Error out;
   out.str = str;
   out.location = location;

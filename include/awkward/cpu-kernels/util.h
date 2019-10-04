@@ -30,7 +30,7 @@ extern "C" {
     int64_t extra;
   };
   Error success();
-  Error failure(int64_t location, int64_t attempt, const char* str);
+  Error failure(const char* str, int64_t location, int64_t attempt);
 
   const int8_t  kMaxInt8   =                 127;   // 2**7  - 1
   const uint8_t kMaxUInt8  =                 255;   // 2**8  - 1

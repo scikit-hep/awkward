@@ -181,7 +181,7 @@ namespace awkward {
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
       if (regular_stop > id_.get()->length()) {
-        util::handle_error(failure(kSliceNone, stop, "index out of range"), id_.get()->classname(), nullptr);
+        util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
       }
       id = id_.get()->getitem_range(regular_start, regular_stop);
     }

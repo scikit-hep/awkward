@@ -46,7 +46,7 @@ namespace awkward {
 
   void NumpyArray::setid(const std::shared_ptr<Identity> id) {
     if (id.get() != nullptr  &&  length() != id.get()->length()) {
-      util::handle_error(failure(kSliceNone, kSliceNone, "content and its id must have the same length"), classname(), id_.get());
+      util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
     }
     id_ = id;
   }
@@ -197,7 +197,7 @@ namespace awkward {
       regular_at += shape_[0];
     }
     if (regular_at < 0  ||  regular_at >= shape_[0]) {
-      util::handle_error(failure(kSliceNone, at, "index out of range"), classname(), id_.get());
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     }
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)regular_at);
     const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
@@ -205,7 +205,7 @@ namespace awkward {
     std::shared_ptr<Identity> id;
     if (id_.get() != nullptr) {
       if (regular_at >= id_.get()->length()) {
-        util::handle_error(failure(kSliceNone, at, "index out of range"), id_.get()->classname(), nullptr);
+        util::handle_error(failure("index out of range", kSliceNone, at), id_.get()->classname(), nullptr);
       }
       id = id_.get()->getitem_range(regular_at, regular_at + 1);
     }
@@ -224,7 +224,7 @@ namespace awkward {
     std::shared_ptr<Identity> id;
     if (id_.get() != nullptr) {
       if (regular_stop > id_.get()->length()) {
-        util::handle_error(failure(kSliceNone, stop, "index out of range"), id_.get()->classname(), nullptr);
+        util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
       }
       id = id_.get()->getitem_range(regular_start, regular_stop);
     }
@@ -413,13 +413,13 @@ namespace awkward {
 
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
       if (ndim() < 2) {
-        util::handle_error(failure(kSliceNone, kSliceNone, "too many dimensions in slice"), classname(), id_.get());
+        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
       int64_t i = at->at();
       if (i < 0) i += shape_[1];
       if (i < 0  ||  i >= shape_[1]) {
-        util::handle_error(failure(kSliceNone, at->at(), "index out of range"), classname(), id_.get());
+        util::handle_error(failure("index out of range", kSliceNone, at->at()), classname(), id_.get());
       }
 
       ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)i)*strides_[1];
@@ -436,7 +436,7 @@ namespace awkward {
 
     else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
       if (ndim() < 2) {
-        util::handle_error(failure(kSliceNone, kSliceNone, "too many dimensions in slice"), classname(), id_.get());
+        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
       int64_t start = range->start();
@@ -531,7 +531,7 @@ namespace awkward {
 
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
       if (ndim() < 2) {
-        util::handle_error(failure(kSliceNone, kSliceNone, "too many dimensions in slice"), classname(), id_.get());
+        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
       NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
@@ -546,7 +546,7 @@ namespace awkward {
         regular_at += shape_[1];
       }
       if (!(0 <= regular_at  &&  regular_at < shape_[1])) {
-        util::handle_error(failure(kSliceNone, at->at(), "index out of range"), classname(), id_.get());
+        util::handle_error(failure("index out of range", kSliceNone, at->at()), classname(), id_.get());
       }
 
       Index64 nextcarry(carry.length());
@@ -567,7 +567,7 @@ namespace awkward {
 
     else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
       if (ndim() < 2) {
-        util::handle_error(failure(kSliceNone, kSliceNone, "too many dimensions in slice"), classname(), id_.get());
+        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
       int64_t start = range->start();
@@ -666,7 +666,7 @@ namespace awkward {
 
     else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
       if (ndim() < 2) {
-        util::handle_error(failure(kSliceNone, kSliceNone, "too many dimensions in slice"), classname(), id_.get());
+        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
       NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
