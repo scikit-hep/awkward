@@ -160,13 +160,18 @@ namespace awkward {
     if (regular_at < 0) {
       regular_at += starts_.length();
     }
-    if (regular_at < 0  ||  regular_at >= starts_.length()) {
+    if (!(0 <= regular_at  &&  regular_at < starts_.length())) {
       util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     }
     if (regular_at >= stops_.length()) {
       throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
     }
-    return content_.get()->getitem_range(starts_.getitem_at(regular_at), stops_.getitem_at(regular_at));
+    return getitem_at_unsafe(at);
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_at_unsafe(int64_t at) const {
+    return content_.get()->getitem_range(starts_.getitem_at(at), stops_.getitem_at(at));
   }
 
   template <typename T>
@@ -177,16 +182,19 @@ namespace awkward {
     if (regular_stop > stops_.length()) {
       throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
     }
+    if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
+      util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
+    }
+    return getitem_range_unsafe(regular_start, regular_stop);
+  }
 
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_range_unsafe(int64_t start, int64_t stop) const {
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
-      if (regular_stop > id_.get()->length()) {
-        util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
-      }
-      id = id_.get()->getitem_range(regular_start, regular_stop);
+      id = id_.get()->getitem_range(start, stop);
     }
-
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id, starts_.getitem_range(regular_start, regular_stop), stops_.getitem_range(regular_start, regular_stop), content_));
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id, starts_.getitem_range(start, stop), stops_.getitem_range(start, stop), content_));
   }
 
   template <>

@@ -199,15 +199,19 @@ namespace awkward {
     if (regular_at < 0  ||  regular_at >= shape_[0]) {
       util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     }
-    ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)regular_at);
+    return getitem_at_unsafe(regular_at);
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_at_unsafe(int64_t at) const {
+    ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
     const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
     const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
     std::shared_ptr<Identity> id;
     if (id_.get() != nullptr) {
-      if (regular_at >= id_.get()->length()) {
+      if (at >= id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, at), id_.get()->classname(), nullptr);
       }
-      id = id_.get()->getitem_range(regular_at, regular_at + 1);
+      id = id_.get()->getitem_range(at, at + 1);
     }
     return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset, itemsize_, format_));
   }
@@ -217,16 +221,20 @@ namespace awkward {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), shape_[0]);
-    ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)regular_start);
+    return getitem_range_unsafe(regular_start, regular_stop);
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_range_unsafe(int64_t start, int64_t stop) const {
+    ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
     std::vector<ssize_t> shape;
-    shape.push_back((ssize_t)(regular_stop - regular_start));
+    shape.push_back((ssize_t)(stop - start));
     shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
     std::shared_ptr<Identity> id;
     if (id_.get() != nullptr) {
-      if (regular_stop > id_.get()->length()) {
+      if (stop > id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
       }
-      id = id_.get()->getitem_range(regular_start, regular_stop);
+      id = id_.get()->getitem_range(start, stop);
     }
     return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
   }

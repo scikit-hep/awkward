@@ -48,7 +48,9 @@ namespace awkward {
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual const std::shared_ptr<Content> getitem_at(int64_t at) const;
+    virtual const std::shared_ptr<Content> getitem_at_unsafe(int64_t at) const;
     virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;
+    virtual const std::shared_ptr<Content> getitem_range_unsafe(int64_t start, int64_t stop) const;
     virtual const std::shared_ptr<Content> getitem(const Slice& where) const;
     virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
