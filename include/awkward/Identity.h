@@ -32,8 +32,6 @@ namespace awkward {
     const int64_t width() const { return width_; }
     const int64_t length() const { return length_; }
 
-    const std::string tostring() const { return tostring_part("", "", ""); }
-
     virtual const std::string classname() const = 0;
     virtual const std::string location(int64_t where) const = 0;
     virtual const std::shared_ptr<Identity> to64() const = 0;
@@ -41,6 +39,8 @@ namespace awkward {
     virtual const std::shared_ptr<Identity> getitem_range_unsafe(int64_t start, int64_t stop) const = 0;
     virtual const std::shared_ptr<Identity> shallow_copy() const = 0;
     virtual const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const = 0;
+
+    const std::string tostring() const;
 
   protected:
     const Ref ref_;
@@ -70,8 +70,9 @@ namespace awkward {
     virtual const std::shared_ptr<Identity> shallow_copy() const;
     virtual const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const;
 
-    const std::string tostring() const;
+    const std::vector<T> getitem_at(int64_t at) const;
     const std::vector<T> getitem_at_unsafe(int64_t at) const;
+    const std::shared_ptr<Identity> getitem_range(int64_t start, int64_t stop) const;
 
   private:
     const std::shared_ptr<T> ptr_;

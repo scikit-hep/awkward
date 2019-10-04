@@ -183,7 +183,7 @@ namespace awkward {
     if (!(0 <= regular_at  &&  regular_at < offsets_.length() - 1)) {
       util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     }
-    return getitem_at_unsafe(at);
+    return getitem_at_unsafe(regular_at);
   }
 
   template <typename T>

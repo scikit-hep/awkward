@@ -8,6 +8,7 @@
 
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/Slice.h"
 
 #include "awkward/Identity.h"
 
@@ -88,11 +89,6 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::string IdentityOf<T>::tostring() const {
-    return tostring_part("", "", "");
-  }
-
-  template <typename T>
   const std::shared_ptr<Identity> IdentityOf<T>::getitem_range_unsafe(int64_t start, int64_t stop) const {
     assert(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop < length_);
     return std::shared_ptr<Identity>(new IdentityOf<T>(ref_, fieldloc_, offset_ + width_*start*(start != stop), width_, (stop - start), ptr_));
@@ -137,14 +133,38 @@ namespace awkward {
     return out;
   }
 
+  const std::string Identity::tostring() const {
+    return tostring_part("", "", "");
+  }
+
+  template <typename T>
+  const std::vector<T> IdentityOf<T>::getitem_at(int64_t at) const {
+    int64_t regular_at = at;
+    if (regular_at < 0) {
+      regular_at += length_;
+    }
+    if (!(0 <= regular_at  &&  regular_at < length_)) {
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), nullptr);
+    }
+    return getitem_at_unsafe(regular_at);
+  }
+
   template <typename T>
   const std::vector<T> IdentityOf<T>::getitem_at_unsafe(int64_t at) const {
     assert(0 <= at  &&  at < length_);
     std::vector<T> out;
-    for (size_t i = (size_t)(offset() + at);  i < (size_t)(offset() + at + width());  i++) {
+    for (size_t i = (size_t)(offset_ + at);  i < (size_t)(offset_ + at + width_);  i++) {
       out.push_back(ptr_.get()[i]);
     }
     return out;
+  }
+
+  template <typename T>
+  const std::shared_ptr<Identity> IdentityOf<T>::getitem_range(int64_t start, int64_t stop) const {
+    int64_t regular_start = start;
+    int64_t regular_stop = stop;
+    awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
+    return getitem_range_unsafe(regular_start, regular_stop);
   }
 
   template class IdentityOf<int32_t>;

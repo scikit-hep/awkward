@@ -159,8 +159,8 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
 
       .def("__repr__", &ak::IndexOf<T>::tostring)
       .def("__len__", &ak::IndexOf<T>::length)
-      .def("__getitem__", &ak::IndexOf<T>::getitem_at_unsafe)
-      .def("__getitem__", &ak::IndexOf<T>::getitem_range_unsafe)
+      .def("__getitem__", &ak::IndexOf<T>::getitem_at)
+      .def("__getitem__", &ak::IndexOf<T>::getitem_range)
 
   );
 }
@@ -215,8 +215,8 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
 
       .def("__repr__", &ak::IdentityOf<T>::tostring)
       .def("__len__", &ak::IdentityOf<T>::length)
-      .def("__getitem__", &ak::IdentityOf<T>::getitem_at_unsafe)
-      .def("__getitem__", &ak::IdentityOf<T>::getitem_range_unsafe)
+      .def("__getitem__", &ak::IdentityOf<T>::getitem_at)
+      .def("__getitem__", &ak::IdentityOf<T>::getitem_range)
 
       .def_property_readonly("ref", &ak::IdentityOf<T>::ref)
       .def_property_readonly("fieldloc", &ak::IdentityOf<T>::fieldloc)

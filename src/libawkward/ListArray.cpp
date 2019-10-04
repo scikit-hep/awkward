@@ -176,7 +176,7 @@ namespace awkward {
     if (regular_at >= stops_.length()) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), id_.get());
     }
-    return getitem_at_unsafe(at);
+    return getitem_at_unsafe(regular_at);
   }
 
   template <typename T>
