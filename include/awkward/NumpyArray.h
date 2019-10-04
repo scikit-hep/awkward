@@ -40,6 +40,7 @@ namespace awkward {
     ssize_t bytelength() const;
     uint8_t getbyte(ssize_t at) const;
 
+    virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);

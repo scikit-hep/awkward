@@ -3,22 +3,24 @@
 #include "awkward/cpu-kernels/identity.h"
 
 template <typename T>
-void awkward_new_identity(T* toptr, int64_t length) {
+Error awkward_new_identity(T* toptr, int64_t length) {
   for (T i = 0;  i < length;  i++) {
     toptr[i] = i;
   }
+  return success();
 }
-void awkward_new_identity32(int32_t* toptr, int64_t length) {
-  awkward_new_identity<int32_t>(toptr, length);
+Error awkward_new_identity32(int32_t* toptr, int64_t length) {
+  return awkward_new_identity<int32_t>(toptr, length);
 }
-void awkward_new_identity64(int64_t* toptr, int64_t length) {
-  awkward_new_identity<int64_t>(toptr, length);
+Error awkward_new_identity64(int64_t* toptr, int64_t length) {
+  return awkward_new_identity<int64_t>(toptr, length);
 }
 
-void awkward_identity32_to_identity64(int64_t* toptr, const int32_t* fromptr, int64_t length) {
+Error awkward_identity32_to_identity64(int64_t* toptr, const int32_t* fromptr, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     toptr[i]= (int64_t)fromptr[i];
   }
+  return success();
 }
 
 template <typename ID, typename T>
@@ -30,7 +32,7 @@ Error awkward_identity_from_listarray(ID* toptr, const ID* fromptr, const T* fro
     int64_t start = fromstarts[startsoffset + i];
     int64_t stop = fromstops[stopsoffset + i];
     if (start != stop  &&  stop > tolength) {
-      return "max(stop) > len(content)";
+      return failure("max(stop) > len(content)", i, kSliceNone);
     }
     for (int64_t j = start;  j < stop;  j++) {
       for (int64_t k = 0;  k < fromwidth;  k++) {
@@ -39,7 +41,7 @@ Error awkward_identity_from_listarray(ID* toptr, const ID* fromptr, const T* fro
       toptr[j*(fromwidth + 1) + fromwidth] = ID(j - start);
     }
   }
-  return kNoError;
+  return success();
 }
 Error awkward_identity32_from_listarray32(int32_t* toptr, const int32_t* fromptr, const int32_t* fromstarts, const int32_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
   return awkward_identity_from_listarray<int32_t, int32_t>(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);

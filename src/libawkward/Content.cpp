@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/ListOffsetArray.h"
+#include "awkward/ListArray.h"
 
 #include "awkward/Content.h"
 
@@ -10,10 +10,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
-    Index64 nextoffsets(2);
-    nextoffsets.ptr().get()[0] = 0;
-    nextoffsets.ptr().get()[1] = length();
-    ListOffsetArrayOf<int64_t> next(std::shared_ptr<Identity>(nullptr), nextoffsets, shallow_copy());
+    Index64 nextstarts(1);
+    Index64 nextstops(1);
+    *nextstarts.ptr().get() = 0;
+    *nextstops.ptr().get() = length();
+    ListArrayOf<int64_t> next(std::shared_ptr<Identity>(nullptr), nextstarts, nextstops, shallow_copy());
 
     std::shared_ptr<SliceItem> nexthead = where.head();
     Slice nexttail = where.tail();
@@ -40,7 +41,7 @@ namespace awkward {
       std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
       items.insert(items.end(), tailitems.begin(), tailitems.end());
       std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
-      Slice nexttail(items, true);
+      Slice nexttail(items);
       return getitem_next(nexthead, nexttail, advanced);
     }
   }

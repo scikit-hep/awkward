@@ -42,9 +42,11 @@ namespace awkward {
     return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
   }
 
+  const std::string NumpyArray::classname() const { return "NumpyArray"; }
+
   void NumpyArray::setid(const std::shared_ptr<Identity> id) {
     if (id.get() != nullptr  &&  length() != id.get()->length()) {
-      throw std::invalid_argument("content and its id must have the same length");
+      util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
     }
     id_ = id;
   }
@@ -54,13 +56,15 @@ namespace awkward {
     if (length() <= kMaxInt32) {
       Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
       std::shared_ptr<Identity> newid(rawid);
-      awkward_new_identity32(rawid->ptr().get(), length());
+      Error err = awkward_new_identity32(rawid->ptr().get(), length());
+      util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
     else {
       Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, length());
       std::shared_ptr<Identity> newid(rawid);
-      awkward_new_identity64(rawid->ptr().get(), length());
+      Error err = awkward_new_identity64(rawid->ptr().get(), length());
+      util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
   }
@@ -95,7 +99,7 @@ namespace awkward {
   const std::string NumpyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     assert(!isscalar());
     std::stringstream out;
-    out << indent << pre << "<NumpyArray format=\"" << format_ << "\" shape=\"";
+    out << indent << pre << "<" << classname() << " format=\"" << format_ << "\" shape=\"";
     for (ssize_t i = 0;  i < ndim();  i++) {
       if (i != 0) {
         out << " ";
@@ -168,7 +172,7 @@ namespace awkward {
     else {
       out << "\">\n";
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
-      out << indent << "</NumpyArray>" << post;
+      out << indent << "</" << classname() << ">" << post;
     }
     return out.str();
   }
@@ -193,7 +197,7 @@ namespace awkward {
       regular_at += shape_[0];
     }
     if (regular_at < 0  ||  regular_at >= shape_[0]) {
-      throw std::invalid_argument("index out of range");
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     }
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)regular_at);
     const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
@@ -201,7 +205,7 @@ namespace awkward {
     std::shared_ptr<Identity> id;
     if (id_.get() != nullptr) {
       if (regular_at >= id_.get()->length()) {
-        throw std::invalid_argument("index out of range for identity");
+        util::handle_error(failure("index out of range", kSliceNone, at), id_.get()->classname(), nullptr);
       }
       id = id_.get()->getitem_range(regular_at, regular_at + 1);
     }
@@ -220,7 +224,7 @@ namespace awkward {
     std::shared_ptr<Identity> id;
     if (id_.get() != nullptr) {
       if (regular_stop > id_.get()->length()) {
-        throw std::invalid_argument("index out of range for identity");
+        util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
       }
       id = id_.get()->getitem_range(regular_start, regular_stop);
     }
@@ -271,7 +275,8 @@ namespace awkward {
   const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
     assert(!isscalar());
     Index64 carry(shape_[0]);
-    awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
+    Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
+    util::handle_error(err, classname(), id_.get());
     return getitem_next(head, tail, carry, advanced, shape_[0], strides_[0]).shallow_copy();
   }
 
@@ -279,13 +284,14 @@ namespace awkward {
     assert(!isscalar());
 
     std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
-    awkward_numpyarray_getitem_next_null_64(
+    Error err = awkward_numpyarray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
       carry.length(),
       strides_[0],
       byteoffset_,
       carry.ptr().get());
+    util::handle_error(err, classname(), id_.get());
 
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
@@ -347,7 +353,8 @@ namespace awkward {
     }
     else {
       Index64 bytepos(shape_[0]);
-      awkward_numpyarray_contiguous_init_64(bytepos.ptr().get(), shape_[0], strides_[0]);
+      Error err = awkward_numpyarray_contiguous_init_64(bytepos.ptr().get(), shape_[0], strides_[0]);
+      util::handle_error(err, classname(), id_.get());
       return contiguous_next(bytepos);
     }
   }
@@ -355,25 +362,27 @@ namespace awkward {
   const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
     if (iscontiguous()) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
-      awkward_numpyarray_contiguous_copy_64(
+      Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         bytepos.length(),
         strides_[0],
         byteoffset_,
         bytepos.ptr().get());
+      util::handle_error(err, classname(), id_.get());
       return NumpyArray(id_, ptr, shape_, strides_, 0, itemsize_, format_);
     }
 
     else if (shape_.size() == 1) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*itemsize_)], awkward::util::array_deleter<uint8_t>());
-      awkward_numpyarray_contiguous_copy_64(
+      Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         bytepos.length(),
         itemsize_,
         byteoffset_,
         bytepos.ptr().get());
+      util::handle_error(err, classname(), id_.get());
       std::vector<ssize_t> strides = { itemsize_ };
       return NumpyArray(id_, ptr, shape_, strides, 0, itemsize_, format_);
     }
@@ -382,12 +391,13 @@ namespace awkward {
       NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
 
       Index64 nextbytepos(bytepos.length()*shape_[1]);
-      awkward_numpyarray_contiguous_next_64(
+      Error err = awkward_numpyarray_contiguous_next_64(
         nextbytepos.ptr().get(),
         bytepos.ptr().get(),
         bytepos.length(),
         (int64_t)shape_[1],
         (int64_t)strides_[1]);
+      util::handle_error(err, classname(), id_.get());
 
       NumpyArray out = next.contiguous_next(nextbytepos);
       std::vector<ssize_t> outstrides = { shape_[1]*out.strides_[0] };
@@ -403,13 +413,13 @@ namespace awkward {
 
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
       if (ndim() < 2) {
-        throw std::invalid_argument("too many indexes for array");
+        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
       int64_t i = at->at();
       if (i < 0) i += shape_[1];
       if (i < 0  ||  i >= shape_[1]) {
-        throw std::invalid_argument("index out of range");
+        util::handle_error(failure("index out of range", kSliceNone, at->at()), classname(), id_.get());
       }
 
       ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)i)*strides_[1];
@@ -426,7 +436,7 @@ namespace awkward {
 
     else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
       if (ndim() < 2) {
-        throw std::invalid_argument("too many indexes for array");
+        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
       int64_t start = range->start();
@@ -473,7 +483,7 @@ namespace awkward {
         items.insert(items.end(), tailitems.begin(), tailitems.end());
 
         std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
-        Slice nexttail(items, true);
+        Slice nexttail(items);
         return getitem_bystrides(nexthead, nexttail, length);
       }
     }
@@ -498,13 +508,14 @@ namespace awkward {
   const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride) const {
     if (head.get() == nullptr) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*stride)], awkward::util::array_deleter<uint8_t>());
-      awkward_numpyarray_getitem_next_null_64(
+      Error err = awkward_numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
         stride,
         byteoffset_,
         carry.ptr().get());
+      util::handle_error(err, classname(), id_.get());
 
       std::shared_ptr<Identity> id(nullptr);
       if (id_.get() != nullptr) {
@@ -520,7 +531,7 @@ namespace awkward {
 
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
       if (ndim() < 2) {
-        throw std::invalid_argument("too many indexes for array");
+        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
       NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
@@ -530,13 +541,22 @@ namespace awkward {
       // if we had any array slices, this int would become an array
       assert(advanced.length() == 0);
 
+      int64_t regular_at = at->at();
+      if (regular_at < 0) {
+        regular_at += shape_[1];
+      }
+      if (!(0 <= regular_at  &&  regular_at < shape_[1])) {
+        util::handle_error(failure("index out of range", kSliceNone, at->at()), classname(), id_.get());
+      }
+
       Index64 nextcarry(carry.length());
-      awkward_numpyarray_getitem_next_at_64(
+      Error err = awkward_numpyarray_getitem_next_at_64(
         nextcarry.ptr().get(),
         carry.ptr().get(),
         carry.length(),
         shape_[1],   // because this is contiguous
-        at->at());
+        regular_at);
+      util::handle_error(err, classname(), id_.get());
 
       NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length, next.strides_[0]);
 
@@ -547,7 +567,7 @@ namespace awkward {
 
     else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
       if (ndim() < 2) {
-        throw std::invalid_argument("too many indexes for array");
+        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
       int64_t start = range->start();
@@ -570,7 +590,7 @@ namespace awkward {
 
       if (advanced.length() == 0) {
         Index64 nextcarry(carry.length()*lenhead);
-        awkward_numpyarray_getitem_next_range_64(
+        Error err = awkward_numpyarray_getitem_next_range_64(
           nextcarry.ptr().get(),
           carry.ptr().get(),
           carry.length(),
@@ -578,6 +598,7 @@ namespace awkward {
           shape_[1],   // because this is contiguous
           start,
           step);
+        util::handle_error(err, classname(), id_.get());
 
         NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*lenhead, next.strides_[0]);
         std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
@@ -590,7 +611,7 @@ namespace awkward {
       else {
         Index64 nextcarry(carry.length()*lenhead);
         Index64 nextadvanced(carry.length()*lenhead);
-        awkward_numpyarray_getitem_next_range_advanced_64(
+        Error err = awkward_numpyarray_getitem_next_range_advanced_64(
           nextcarry.ptr().get(),
           nextadvanced.ptr().get(),
           carry.ptr().get(),
@@ -600,6 +621,7 @@ namespace awkward {
           shape_[1],   // because this is contiguous
           start,
           step);
+        util::handle_error(err, classname(), id_.get());
 
         NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenhead, next.strides_[0]);
         std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
@@ -625,7 +647,7 @@ namespace awkward {
         std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
         items.insert(items.end(), tailitems.begin(), tailitems.end());
         std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
-        Slice nexttail(items, true);
+        Slice nexttail(items);
         return getitem_next(nexthead, nexttail, carry, advanced, length, stride);
       }
     }
@@ -644,7 +666,7 @@ namespace awkward {
 
     else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
       if (ndim() < 2) {
-        throw std::invalid_argument("too many indexes for array");
+        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
       NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
@@ -652,16 +674,16 @@ namespace awkward {
       Slice nexttail = tail.tail();
 
       Index64 flathead = array->ravel();
-      Error regularize_error = awkward_regularize_arrayslice_64(
+      Error err = awkward_regularize_arrayslice_64(
         flathead.ptr().get(),
         flathead.length(),
         shape_[1]);
-      HANDLE_ERROR(regularize_error)
+      util::handle_error(err, classname(), id_.get());
 
       if (advanced.length() == 0) {
         Index64 nextcarry(carry.length()*flathead.length());
         Index64 nextadvanced(carry.length()*flathead.length());
-        awkward_numpyarray_getitem_next_array_64(
+        Error err = awkward_numpyarray_getitem_next_array_64(
           nextcarry.ptr().get(),
           nextadvanced.ptr().get(),
           carry.ptr().get(),
@@ -669,6 +691,7 @@ namespace awkward {
           carry.length(),
           flathead.length(),
           shape_[1]);   // because this is contiguous
+        util::handle_error(err, classname(), id_.get());
 
         NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*flathead.length(), next.strides_[0]);
 
@@ -689,13 +712,14 @@ namespace awkward {
       else {
         Index64 nextcarry(carry.length());
         Index64 nextadvanced(carry.length());
-        awkward_numpyarray_getitem_next_array_advanced_64(
+        Error err = awkward_numpyarray_getitem_next_array_advanced_64(
           nextcarry.ptr().get(),
           carry.ptr().get(),
           advanced.ptr().get(),
           flathead.ptr().get(),
           carry.length(),
           shape_[1]);   // because this is contiguous
+        util::handle_error(err, classname(), id_.get());
 
         NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*array->length(), next.strides_[0]);
 

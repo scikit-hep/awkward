@@ -51,7 +51,7 @@ namespace awkward {
         out << (int64_t)getitem_at(i);
       }
     }
-    out << "]\" at=\"0x";
+    out << "]\" offset=\"" << offset_ << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
     return out.str();
   }

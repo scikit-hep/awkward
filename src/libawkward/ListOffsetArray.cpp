@@ -10,6 +10,19 @@
 
 namespace awkward {
   template <typename T>
+  const std::string ListOffsetArrayOf<T>::classname() const {
+    if (std::is_same<T, int32_t>::value) {
+      return "ListOffsetArray32";
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      return "ListOffsetArray64";
+    }
+    else {
+      return "UnrecognizedListOffsetArray";
+    }
+  }
+
+  template <typename T>
   IndexOf<T> make_starts(const IndexOf<T>& offsets) {
     return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
   }
@@ -48,7 +61,7 @@ namespace awkward {
           content_.get()->length(),
           length(),
           rawid->width());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get());
         content_.get()->setid(subid);
       }
       else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
@@ -65,7 +78,7 @@ namespace awkward {
           content_.get()->length(),
           length(),
           rawid->width());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get());
         content_.get()->setid(subid);
       }
       else {
@@ -101,7 +114,7 @@ namespace awkward {
           content_.get()->length(),
           length(),
           rawid->width());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get());
         content_.get()->setid(subid);
       }
       else {
@@ -116,13 +129,15 @@ namespace awkward {
     if (length() <= kMaxInt32) {
       Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
       std::shared_ptr<Identity> newid(rawid);
-      awkward_new_identity32(rawid->ptr().get(), length());
+      Error err = awkward_new_identity32(rawid->ptr().get(), length());
+      util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
     else {
       Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, length());
       std::shared_ptr<Identity> newid(rawid);
-      awkward_new_identity64(rawid->ptr().get(), length());
+      Error err = awkward_new_identity64(rawid->ptr().get(), length());
+      util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
   }
@@ -130,20 +145,13 @@ namespace awkward {
   template <typename T>
   const std::string ListOffsetArrayOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
-    std::string name = "Unrecognized ListOffsetArray";
-    if (std::is_same<T, int32_t>::value) {
-      name = "ListOffsetArray32";
-    }
-    else if (std::is_same<T, int64_t>::value) {
-      name = "ListOffsetArray64";
-    }
-    out << indent << pre << "<" << name << ">\n";
+    out << indent << pre << "<" << classname() << ">\n";
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
     out << offsets_.tostring_part(indent + std::string("    "), "<offsets>", "</offsets>\n");
     out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
-    out << indent << "</" << name << ">" << post;
+    out << indent << "</" << classname() << ">" << post;
     return out.str();
   }
 
@@ -173,7 +181,7 @@ namespace awkward {
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
       if (regular_stop > id_.get()->length()) {
-        throw std::invalid_argument("index out of range for identity");
+        util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
       }
       id = id_.get()->getitem_range(regular_start, regular_stop);
     }
@@ -204,6 +212,7 @@ namespace awkward {
         starts.offset(),
         stops.offset(),
         at->at());
+      util::handle_error(err, classname(), id_.get());
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
     }
@@ -220,7 +229,7 @@ namespace awkward {
         step = 1;
       }
       int64_t carrylength;
-      awkward_listarray32_getitem_next_range_carrylength(
+      Error err1 = awkward_listarray32_getitem_next_range_carrylength(
         &carrylength,
         starts.ptr().get(),
         stops.ptr().get(),
@@ -230,11 +239,12 @@ namespace awkward {
         start,
         stop,
         step);
+      util::handle_error(err1, classname(), id_.get());
 
       Index32 nextoffsets(lenstarts + 1);
       Index64 nextcarry(carrylength);
 
-      awkward_listarray32_getitem_next_range_64(
+      Error err2 = awkward_listarray32_getitem_next_range_64(
         nextoffsets.ptr().get(),
         nextcarry.ptr().get(),
         starts.ptr().get(),
@@ -245,6 +255,7 @@ namespace awkward {
         start,
         stop,
         step);
+      util::handle_error(err2, classname(), id_.get());
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
       if (advanced.length() == 0) {
@@ -252,16 +263,18 @@ namespace awkward {
       }
       else {
         int64_t total;
-        awkward_listarray32_getitem_next_range_counts_64(
+        Error err1 = awkward_listarray32_getitem_next_range_counts_64(
           &total,
           nextoffsets.ptr().get(),
           lenstarts);
+        util::handle_error(err1, classname(), id_.get());
         Index64 nextadvanced(total);
-        awkward_listarray32_getitem_next_range_spreadadvanced_64(
+        Error err2 = awkward_listarray32_getitem_next_range_spreadadvanced_64(
           nextadvanced.ptr().get(),
           advanced.ptr().get(),
           nextoffsets.ptr().get(),
           lenstarts);
+        util::handle_error(err2, classname(), id_.get());
         return std::shared_ptr<Content>(new ListOffsetArrayOf<int32_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
       }
     }
@@ -297,7 +310,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get());
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
         return std::shared_ptr<Content>(new ListOffsetArrayOf<int32_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
@@ -317,7 +330,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get());
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
       }
@@ -351,6 +364,7 @@ namespace awkward {
         starts.offset(),
         stops.offset(),
         at->at());
+      util::handle_error(err, classname(), id_.get());
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
     }
@@ -367,7 +381,7 @@ namespace awkward {
         step = 1;
       }
       int64_t carrylength;
-      awkward_listarray64_getitem_next_range_carrylength(
+      Error err1 = awkward_listarray64_getitem_next_range_carrylength(
         &carrylength,
         starts.ptr().get(),
         stops.ptr().get(),
@@ -377,11 +391,12 @@ namespace awkward {
         start,
         stop,
         step);
+      util::handle_error(err1, classname(), id_.get());
 
       Index64 nextoffsets(lenstarts + 1);
       Index64 nextcarry(carrylength);
 
-      awkward_listarray64_getitem_next_range_64(
+      Error err2 = awkward_listarray64_getitem_next_range_64(
         nextoffsets.ptr().get(),
         nextcarry.ptr().get(),
         starts.ptr().get(),
@@ -392,6 +407,7 @@ namespace awkward {
         start,
         stop,
         step);
+      util::handle_error(err2, classname(), id_.get());
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
       if (advanced.length() == 0) {
@@ -399,16 +415,18 @@ namespace awkward {
       }
       else {
         int64_t total;
-        awkward_listarray64_getitem_next_range_counts_64(
+        Error err1 = awkward_listarray64_getitem_next_range_counts_64(
           &total,
           nextoffsets.ptr().get(),
           lenstarts);
+        util::handle_error(err1, classname(), id_.get());
         Index64 nextadvanced(total);
-        awkward_listarray64_getitem_next_range_spreadadvanced_64(
+        Error err2 = awkward_listarray64_getitem_next_range_spreadadvanced_64(
           nextadvanced.ptr().get(),
           advanced.ptr().get(),
           nextoffsets.ptr().get(),
           lenstarts);
+        util::handle_error(err2, classname(), id_.get());
         return std::shared_ptr<Content>(new ListOffsetArrayOf<int64_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
       }
     }
@@ -444,7 +462,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get());
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
         return std::shared_ptr<Content>(new ListOffsetArrayOf<int64_t>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
@@ -464,7 +482,7 @@ namespace awkward {
           lenstarts,
           flathead.length(),
           content_.get()->length());
-        HANDLE_ERROR(err)
+        util::handle_error(err, classname(), id_.get());
         std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
         return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
       }
@@ -481,7 +499,7 @@ namespace awkward {
     Index32 stops = make_stops(offsets_);
     Index32 nextstarts(carry.length());
     Index32 nextstops(carry.length());
-    awkward_listarray32_getitem_carry_64(
+    Error err = awkward_listarray32_getitem_carry_64(
       nextstarts.ptr().get(),
       nextstops.ptr().get(),
       starts.ptr().get(),
@@ -489,7 +507,9 @@ namespace awkward {
       carry.ptr().get(),
       starts.offset(),
       stops.offset(),
+      offsets_.length() - 1,
       carry.length());
+    util::handle_error(err, classname(), id_.get());
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
@@ -503,7 +523,7 @@ namespace awkward {
     Index64 stops = make_stops(offsets_);
     Index64 nextstarts(carry.length());
     Index64 nextstops(carry.length());
-    awkward_listarray64_getitem_carry_64(
+    Error err = awkward_listarray64_getitem_carry_64(
       nextstarts.ptr().get(),
       nextstops.ptr().get(),
       starts.ptr().get(),
@@ -511,7 +531,9 @@ namespace awkward {
       carry.ptr().get(),
       starts.offset(),
       stops.offset(),
+      offsets_.length() - 1,
       carry.length());
+    util::handle_error(err, classname(), id_.get());
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);

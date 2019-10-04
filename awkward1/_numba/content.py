@@ -8,7 +8,9 @@ import numba
 from .._numba import cpu, util, identity
 
 class ContentType(numba.types.Type):
-    pass
+    @property
+    def shortname(self):
+        return self.name[:self.name.index("Type")]
 
 @numba.typing.templates.infer_global(len)
 class type_len(numba.typing.templates.AbstractTemplate):

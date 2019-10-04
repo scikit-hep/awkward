@@ -19,6 +19,40 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::string IdentityOf<T>::classname() const {
+    if (std::is_same<T, int32_t>::value) {
+      return "Identity32";
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      return "Identity64";
+    }
+    else {
+      return "UnrecognizedIdentity";
+    }
+  }
+
+  template <typename T>
+  const std::string IdentityOf<T>::location(int64_t where) const {
+    std::stringstream out;
+    int64_t fieldi = 0;
+    int64_t widthi = 0;
+    for (int64_t bothi = 0;  bothi < (int64_t)fieldloc_.size() + width_;  bothi++) {
+      if (bothi != 0) {
+        out << ", ";
+      }
+      if (fieldi < (int64_t)fieldloc_.size()  &&  fieldloc_[fieldi].first == bothi) {
+        out << "\"" << fieldloc_[fieldi].second << "\"";
+        fieldi++;
+      }
+      else {
+        out << ptr_.get()[offset_ + where*width_ + widthi];
+        widthi++;
+      }
+    }
+    return out.str();
+  }
+
+  template <typename T>
   const std::shared_ptr<Identity> IdentityOf<T>::to64() const {
     if (std::is_same<T, int64_t>::value) {
       return shallow_copy();
@@ -41,14 +75,14 @@ namespace awkward {
     else if (std::is_same<T, int64_t>::value) {
       name = "Identity64";
     }
-    out << indent << pre << "<" << name << " ref=\"" << ref() << "\" fieldloc=\"[";
-    for (size_t i = 0;  i < fieldloc().size();  i++) {
+    out << indent << pre << "<" << name << " ref=\"" << ref_ << "\" fieldloc=\"[";
+    for (size_t i = 0;  i < fieldloc_.size();  i++) {
       if (i != 0) {
         out << " ";
       }
-      out << "(" << fieldloc()[i].first << ", '" << fieldloc()[i].second << "')";
+      out << "(" << fieldloc_[i].first << ", '" << fieldloc_[i].second << "')";
     }
-    out << "]\" width=\"" << width() << "\" length=\"" << length() << "\" at=\"0x";
+    out << "]\" width=\"" << width_ << "\" offset=\"" << offset_ << "\" length=\"" << length_ << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
     return out.str();
   }
@@ -74,9 +108,8 @@ namespace awkward {
     IdentityOf<T>* rawout = new IdentityOf<T>(ref_, fieldloc_, width_, carry.length());
     std::shared_ptr<Identity> out(rawout);
 
-    Error assign_err = kNoError;
     if (std::is_same<T, int32_t>::value) {
-      assign_err = awkward_identity32_getitem_carry_64(
+      Error err = awkward_identity32_getitem_carry_64(
         reinterpret_cast<int32_t*>(rawout->ptr().get()),
         reinterpret_cast<int32_t*>(ptr_.get()),
         carry.ptr().get(),
@@ -84,9 +117,10 @@ namespace awkward {
         offset_,
         width_,
         length_);
+      util::handle_error(err, classname(), nullptr);
     }
     else if (std::is_same<T, int64_t>::value) {
-      assign_err = awkward_identity64_getitem_carry_64(
+      Error err = awkward_identity64_getitem_carry_64(
         reinterpret_cast<int64_t*>(rawout->ptr().get()),
         reinterpret_cast<int64_t*>(ptr_.get()),
         carry.ptr().get(),
@@ -94,11 +128,11 @@ namespace awkward {
         offset_,
         width_,
         length_);
+      util::handle_error(err, classname(), nullptr);
     }
     else {
       throw std::runtime_error("unrecognized Identity specialization");
     }
-    HANDLE_ERROR(assign_err)
 
     return out;
   }
