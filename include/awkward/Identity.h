@@ -32,6 +32,8 @@ namespace awkward {
     const int64_t width() const { return width_; }
     const int64_t length() const { return length_; }
 
+    const std::string tostring() const { return tostring_part("", "", ""); }
+
     virtual const std::string classname() const = 0;
     virtual const std::string location(int64_t where) const = 0;
     virtual const std::shared_ptr<Identity> to64() const = 0;

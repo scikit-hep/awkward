@@ -532,7 +532,7 @@ namespace awkward {
       util::handle_error(err, classname(), id_.get());
 
       std::shared_ptr<Identity> id(nullptr);
-      if (first  &&  id_.get() != nullptr) {
+      if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
 
@@ -548,7 +548,7 @@ namespace awkward {
         util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
-      NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+      NumpyArray next(first ? id_ : std::shared_ptr<Identity>(nullptr), ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
       std::shared_ptr<SliceItem> nexthead = tail.head();
       Slice nexttail = tail.tail();
 
@@ -598,7 +598,7 @@ namespace awkward {
       int64_t m = numer % denom;
       int64_t lenhead = d + (m != 0 ? 1 : 0);
 
-      NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+      NumpyArray next(first ? id_ : std::shared_ptr<Identity>(nullptr), ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
       std::shared_ptr<SliceItem> nexthead = tail.head();
       Slice nexttail = tail.tail();
 
@@ -683,7 +683,7 @@ namespace awkward {
         util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
       }
 
-      NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+      NumpyArray next(first ? id_ : std::shared_ptr<Identity>(nullptr), ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
       std::shared_ptr<SliceItem> nexthead = tail.head();
       Slice nexttail = tail.tail();
 
