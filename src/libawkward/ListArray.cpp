@@ -31,7 +31,7 @@ namespace awkward {
     }
     else {
       if (length() != id.get()->length()) {
-        throw std::invalid_argument("content and its id must have the same length");
+        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
       }
       std::shared_ptr<Identity> bigid = id;
       if (content_.get()->length() > kMaxInt32) {
@@ -85,7 +85,7 @@ namespace awkward {
     }
     else {
       if (length() != id.get()->length()) {
-        throw std::invalid_argument("content and its id must have the same length");
+        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
       }
       std::shared_ptr<Identity> bigid = id.get()->to64();
       if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
@@ -155,18 +155,42 @@ namespace awkward {
   }
 
   template <typename T>
+  void ListArrayOf<T>::checksafe() const {
+    if (stops_.length() < starts_.length()) {
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), id_.get());
+    }
+    if (id_.get() != nullptr  &&  id_.get()->length() < starts_.length()) {
+      util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+    }
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     if (regular_at < 0) {
       regular_at += starts_.length();
     }
-    if (regular_at < 0  ||  regular_at >= starts_.length()) {
+    if (!(0 <= regular_at  &&  regular_at < starts_.length())) {
       util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     }
     if (regular_at >= stops_.length()) {
-      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), id_.get());
     }
-    return content_.get()->getitem_range(starts_.getitem_at(regular_at), stops_.getitem_at(regular_at));
+    return getitem_at_unsafe(regular_at);
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_at_unsafe(int64_t at) const {
+    int64_t start = (int64_t)starts_.getitem_at_unsafe(at);
+    int64_t stop = (int64_t)stops_.getitem_at_unsafe(at);
+    int64_t lencontent = content_.get()->length();
+    if (start == stop) {
+      start = stop = 0;
+    }
+    if (!(0 <= start  &&  start < lencontent)  ||  !(start <= stop  &&  stop <= lencontent)) {
+      util::handle_error(failure("not 0 <= starts[i] < len(content) or not starts[i] <= stops[i] <= len(content)", kSliceNone, at), classname(), id_.get());
+    }
+    return content_.get()->getitem_range_unsafe(start, stop);
   }
 
   template <typename T>
@@ -175,25 +199,28 @@ namespace awkward {
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), starts_.length());
     if (regular_stop > stops_.length()) {
-      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), id_.get());
     }
+    if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
+      util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
+    }
+    return getitem_range_unsafe(regular_start, regular_stop);
+  }
 
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_range_unsafe(int64_t start, int64_t stop) const {
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
-      if (regular_stop > id_.get()->length()) {
-        util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
-      }
-      id = id_.get()->getitem_range(regular_start, regular_stop);
+      id = id_.get()->getitem_range_unsafe(start, stop);
     }
-
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id, starts_.getitem_range(regular_start, regular_stop), stops_.getitem_range(regular_start, regular_stop), content_));
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id, starts_.getitem_range_unsafe(start, stop), stops_.getitem_range_unsafe(start, stop), content_));
   }
 
   template <>
   const std::shared_ptr<Content> ListArrayOf<int32_t>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
-      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), id_.get());
     }
 
     if (head.get() == nullptr) {
@@ -341,7 +368,7 @@ namespace awkward {
   const std::shared_ptr<Content> ListArrayOf<int64_t>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
-      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), id_.get());
     }
 
     if (head.get() == nullptr) {
@@ -489,7 +516,7 @@ namespace awkward {
   const std::shared_ptr<Content> ListArrayOf<int32_t>::carry(const Index64& carry) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
-      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), id_.get());
     }
     Index32 nextstarts(carry.length());
     Index32 nextstops(carry.length());
@@ -515,7 +542,7 @@ namespace awkward {
   const std::shared_ptr<Content> ListArrayOf<int64_t>::carry(const Index64& carry) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
-      throw std::invalid_argument(std::string("in ") + classname() + std::string(", len(stops) < len(starts)"));
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), id_.get());
     }
     Index64 nextstarts(carry.length());
     Index64 nextstops(carry.length());

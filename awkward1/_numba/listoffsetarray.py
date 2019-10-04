@@ -167,6 +167,8 @@ def lower_getitem_slice(context, builder, sig, args):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
 
     proxyslicein = numba.cgutils.create_struct_proxy(wheretpe)(context, builder, value=whereval)
+    numba.targets.slicing.fix_slice(builder, proxyslicein, tpe.lower_len(context, builder, numba.intp(tpe), (val,)))
+
     proxysliceout = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
     proxysliceout.start = proxyslicein.start
     proxysliceout.stop = builder.add(proxyslicein.stop, context.get_constant(numba.intp, 1))

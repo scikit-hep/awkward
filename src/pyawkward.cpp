@@ -215,7 +215,7 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
 
       .def("__repr__", &ak::IdentityOf<T>::tostring)
       .def("__len__", &ak::IdentityOf<T>::length)
-      .def("__getitem__", &ak::IdentityOf<T>::get)
+      .def("__getitem__", &ak::IdentityOf<T>::getitem_at)
       .def("__getitem__", &ak::IdentityOf<T>::getitem_range)
 
       .def_property_readonly("ref", &ak::IdentityOf<T>::ref)

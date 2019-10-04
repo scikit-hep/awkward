@@ -4,6 +4,8 @@
 #include <type_traits>
 
 #include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/getitem.h"
+#include "awkward/Slice.h"
 #include "awkward/ListArray.h"
 
 #include "awkward/ListOffsetArray.h"
@@ -39,7 +41,7 @@ namespace awkward {
     }
     else {
       if (length() != id.get()->length()) {
-        throw std::invalid_argument("content and its id must have the same length");
+        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
       }
       Index32 starts = make_starts(offsets_);
       Index32 stops = make_stops(offsets_);
@@ -95,7 +97,7 @@ namespace awkward {
     }
     else {
       if (length() != id.get()->length()) {
-        throw std::invalid_argument("content and its id must have the same length");
+        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
       }
       Index64 starts = make_starts(offsets_);
       Index64 stops = make_stops(offsets_);
@@ -166,10 +168,36 @@ namespace awkward {
   }
 
   template <typename T>
+  void ListOffsetArrayOf<T>::checksafe() const {
+    if (id_.get() != nullptr  &&  id_.get()->length() < offsets_.length() - 1) {
+      util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+    }
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_at(int64_t at) const {
-    int64_t start = (int64_t)offsets_.getitem_at(at);
-    int64_t stop = (int64_t)offsets_.getitem_at(at + 1);
-    return content_.get()->getitem_range(start, stop);
+    int64_t regular_at = at;
+    if (regular_at < 0) {
+      regular_at += offsets_.length() - 1;
+    }
+    if (!(0 <= regular_at  &&  regular_at < offsets_.length() - 1)) {
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+    }
+    return getitem_at_unsafe(regular_at);
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_at_unsafe(int64_t at) const {
+    int64_t start = (int64_t)offsets_.getitem_at_unsafe(at);
+    int64_t stop = (int64_t)offsets_.getitem_at_unsafe(at + 1);
+    int64_t lencontent = content_.get()->length();
+    if (start == stop) {
+      start = stop = 0;
+    }
+    if (!(0 <= start  &&  start < lencontent)  ||  !(start <= stop  &&  stop <= lencontent)) {
+      util::handle_error(failure("not 0 <= offsets[i] < len(content) or not offsets[i] <= offsets[i + 1] <= len(content)", kSliceNone, at), classname(), id_.get());
+    }
+    return content_.get()->getitem_range_unsafe(start, stop);
   }
 
   template <typename T>
@@ -177,16 +205,19 @@ namespace awkward {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), offsets_.length() - 1);
+    if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
+      util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
+    }
+    return getitem_range_unsafe(regular_start, regular_stop);
+  }
 
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_range_unsafe(int64_t start, int64_t stop) const {
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
-      if (regular_stop > id_.get()->length()) {
-        util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
-      }
-      id = id_.get()->getitem_range(regular_start, regular_stop);
+      id = id_.get()->getitem_range_unsafe(start, stop);
     }
-
-    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id, offsets_.getitem_range(regular_start, regular_stop + 1), content_));
+    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id, offsets_.getitem_range_unsafe(start, stop + 1), content_));
   }
 
   template <>

@@ -47,19 +47,29 @@ namespace awkward {
         , itemsize_(sizeof(T)) { }
 
     const std::shared_ptr<T> ptr() const { return ptr_; }
+
     const int64_t offset() const { return offset_; }
+
     const int64_t itemsize() const { return itemsize_; }
 
     bool isempty() const { return length_ == 0; }
+
     ssize_t byteoffset() const { return (ssize_t)itemsize_*(ssize_t)offset_; }
+
     uint8_t* byteptr() const { return reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset()); }
+
     ssize_t bytelength() const { return (ssize_t)itemsize_*(ssize_t)length_; }
+
     uint8_t getbyte(ssize_t at) const { return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)(byteoffset() + at)); }
+
     T* borrow() const { return borrow(0); }
+
     T* borrow(int64_t at) const { return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)itemsize_*(ssize_t)(offset_ + at)); }
 
     virtual const std::string classname() const { return std::string("RawArrayOf<") + std::string(typeid(T).name()) + std::string(">"); }
+
     virtual const std::shared_ptr<Identity> id() const { return id_; }
+
     virtual void setid() {
       if (length() <= kMaxInt32) {
         Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
@@ -74,12 +84,14 @@ namespace awkward {
         setid(newid);
       }
     }
+
     virtual void setid(const std::shared_ptr<Identity> id) {
       if (id.get() != nullptr  &&  length() != id.get()->length()) {
         throw std::invalid_argument("content and its id must have the same length");
       }
       id_ = id;
     }
+
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const {
       std::stringstream out;
       out << indent << pre << "<RawArray of=\"" << typeid(T).name() << "\" length=\"" << length_ << "\" itemsize=\"" << itemsize_ << "\" data=\"";
@@ -119,28 +131,57 @@ namespace awkward {
       }
       return out.str();
     }
+
     virtual int64_t length() const { return length_; }
+
     virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, ptr_, offset_, length_, itemsize_)); }
-    virtual const std::shared_ptr<Content> getitem_at(int64_t at) const { return getitem_range(at, at + 1); }
+
+    virtual void checksafe() const {
+      if (id_.get() != nullptr  &&  id_.get()->length() < length_) {
+        util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+      }
+    }
+
+    virtual const std::shared_ptr<Content> getitem_at(int64_t at) const {
+      int64_t regular_at = at;
+      if (regular_at < 0) {
+        regular_at += length_;
+      }
+      if (!(0 <= regular_at  &&  regular_at < length_)) {
+        util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+      }
+      return getitem_range_unsafe(regular_at, regular_at + 1);
+    }
+
+    virtual const std::shared_ptr<Content> getitem_at_unsafe(int64_t at) const {
+      return getitem_range_unsafe(at, at + 1);
+    }
+
     virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
+      return getitem_range_unsafe(regular_start, regular_stop);
+    }
+
+    virtual const std::shared_ptr<Content> getitem_range_unsafe(int64_t start, int64_t stop) const {
       std::shared_ptr<Identity> id(nullptr);
       if (id_.get() != nullptr) {
         if (regular_stop > id_.get()->length()) {
-          throw std::invalid_argument("index out of range for identity");
+          util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
         }
         id = id_.get()->getitem_range(regular_start, regular_stop);
       }
       return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + regular_start, regular_stop - regular_start, itemsize_));
     }
+
     virtual const std::shared_ptr<Content> getitem(const Slice& where) const {
       std::shared_ptr<SliceItem> nexthead = where.head();
       Slice nexttail = where.tail();
       Index64 nextadvanced(0);
       return getitem_next(nexthead, nexttail, nextadvanced, false);
     }
+
     const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
       if (tail.length() != 0) {
         throw std::invalid_argument("too many indexes for array");
@@ -204,9 +245,11 @@ namespace awkward {
         throw std::runtime_error("unrecognized slice item type");
       }
     }
+
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const {
       throw std::runtime_error("RawArray<T>::carry");
     }
+
     virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
 
   private:

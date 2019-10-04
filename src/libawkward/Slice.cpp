@@ -40,7 +40,7 @@ namespace awkward {
           if (i != 0) {
             out << ", ";
           }
-          out << (T)index_.getitem_at(i*strides_[0]);
+          out << (T)index_.getitem_at_unsafe(i*strides_[0]);
         }
       }
       else {
@@ -48,14 +48,14 @@ namespace awkward {
           if (i != 0) {
             out << ", ";
           }
-          out << (T)index_.getitem_at(i*strides_[0]);
+          out << (T)index_.getitem_at_unsafe(i*strides_[0]);
         }
         out << ", ..., ";
         for (int64_t i = shape_[0] - 3;  i < shape_[0];  i++) {
           if (i != shape_[0] - 3) {
             out << ", ";
           }
-          out << (T)index_.getitem_at(i*strides_[0]);
+          out << (T)index_.getitem_at_unsafe(i*strides_[0]);
         }
       }
     }
