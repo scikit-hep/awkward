@@ -31,7 +31,7 @@ def arraylen(context, builder, tpe, val, totpe=None):
     else:
         return cast(context, builder, numba.intp, totpe, out)
 
-def call(context, builder, fcn, args):
+def call(context, builder, fcn, args, errormessage=None):
     fcntpe = context.get_function_pointer_type(fcn.numbatpe)
     fcnval = context.add_dynamic_addr(builder, fcn.numbatpe.get_pointer(fcn), info=fcn.name)
     fcnptr = builder.bitcast(fcnval, fcntpe)
@@ -39,9 +39,10 @@ def call(context, builder, fcn, args):
     err = context.call_function_pointer(builder, fcnptr, args)
 
     if fcn.restype is cpu.Error:
+        assert errormessage is not None, "this function can return an error"
         proxyerr = numba.cgutils.create_struct_proxy(cpu.Error.numbatpe)(context, builder, value=err)
         with builder.if_then(builder.icmp_signed("!=", proxyerr.str, context.get_constant(numba.intp, 0)), likely=False):
-            context.call_conv.return_user_exc(builder, ValueError, ("hello",))
+            context.call_conv.return_user_exc(builder, ValueError, (errormessage,))
 
 def newindex64(context, builder, lentpe, lenval):
     return numba.targets.arrayobj.numpy_empty_nd(context, builder, index64tpe(lentpe), (lenval,))

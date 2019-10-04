@@ -293,7 +293,8 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              context.get_constant(numba.int64, 0),
              lenstarts,
              lenflathead,
-             lencontent))
+             lencontent),
+            "in {}, indexing error".format(arraytpe.shortname))
 
         nexttpe = arraytpe.contenttpe.carry()
         nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
