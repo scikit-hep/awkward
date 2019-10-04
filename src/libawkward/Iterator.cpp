@@ -5,6 +5,14 @@
 #include "awkward/Iterator.h"
 
 namespace awkward {
+  const bool Iterator::isdone() const {
+    return where_ >= content_.get()->length();
+  }
+
+  const std::shared_ptr<Content> Iterator::next() {
+    return content_.get()->getitem_at_unsafe(where_++);
+  }
+
   const std::string Iterator::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<Iterator where=\"" << where_ << "\">\n";

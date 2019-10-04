@@ -31,6 +31,7 @@ namespace awkward {
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
+    virtual void checksafe() const;
     virtual const std::shared_ptr<Content> getitem_at(int64_t at) const;
     virtual const std::shared_ptr<Content> getitem_at_unsafe(int64_t at) const;
     virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;

@@ -41,7 +41,7 @@ namespace awkward {
     }
     else {
       if (length() != id.get()->length()) {
-        throw std::invalid_argument("content and its id must have the same length");
+        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
       }
       Index32 starts = make_starts(offsets_);
       Index32 stops = make_stops(offsets_);
@@ -97,7 +97,7 @@ namespace awkward {
     }
     else {
       if (length() != id.get()->length()) {
-        throw std::invalid_argument("content and its id must have the same length");
+        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
       }
       Index64 starts = make_starts(offsets_);
       Index64 stops = make_stops(offsets_);
@@ -168,6 +168,13 @@ namespace awkward {
   }
 
   template <typename T>
+  void ListOffsetArrayOf<T>::checksafe() const {
+    if (id_.get() != nullptr  &&  id_.get()->length() < offsets_.length() - 1) {
+      util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+    }
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     if (regular_at < 0) {
@@ -183,7 +190,14 @@ namespace awkward {
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_at_unsafe(int64_t at) const {
     int64_t start = (int64_t)offsets_.getitem_at(at);
     int64_t stop = (int64_t)offsets_.getitem_at(at + 1);
-    return content_.get()->getitem_range(start, stop);
+    int64_t lencontent = content_.get()->length();
+    if (start == stop) {
+      start = stop = 0;
+    }
+    if (!(0 <= start  &&  start < lencontent)  ||  !(start <= stop  &&  stop <= lencontent)) {
+      util::handle_error(failure("not 0 <= starts[i] < len(content) or not starts[i] <= stops[i] <= len(content)", kSliceNone, at), classname(), id_.get());
+    }
+    return content_.get()->getitem_range_unsafe(start, stop);
   }
 
   template <typename T>

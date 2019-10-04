@@ -190,6 +190,12 @@ namespace awkward {
     return std::shared_ptr<Content>(new NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
   }
 
+  void NumpyArray::checksafe() const {
+    if (id_.get() != nullptr  &&  id_.get()->length() < shape_[0]) {
+      util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+    }
+  }
+
   const std::shared_ptr<Content> NumpyArray::getitem_at(int64_t at) const {
     assert(!isscalar());
     int64_t regular_at = at;

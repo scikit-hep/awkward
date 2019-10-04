@@ -136,6 +136,12 @@ namespace awkward {
 
     virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, ptr_, offset_, length_, itemsize_)); }
 
+    virtual void checksafe() const {
+      if (id_.get() != nullptr  &&  id_.get()->length() < length_) {
+        util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+      }
+    }
+
     virtual const std::shared_ptr<Content> getitem_at(int64_t at) const {
       int64_t regular_at = at;
       if (regular_at < 0) {

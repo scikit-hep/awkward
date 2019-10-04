@@ -11,13 +11,15 @@ namespace awkward {
   public:
     Iterator(const std::shared_ptr<Content> content)
         : content_(content)
-        , where_(0) { }
+        , where_(0) {
+      content.get()->checksafe();
+    }
 
     const std::shared_ptr<Content> content() const { return content_; }
     const int64_t where() const { return where_; }
 
-    const bool isdone() const { return where_ >= content_.get()->length(); }
-    const std::shared_ptr<Content> next() { return content_.get()->getitem_at(where_++); }
+    const bool isdone() const;
+    const std::shared_ptr<Content> next();
 
     const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     const std::string tostring() const;
