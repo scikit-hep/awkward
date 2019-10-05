@@ -213,17 +213,7 @@ def lower_getitem_tuple(context, builder, sig, args):
     arrayval, whereval = args
 
     wheretpe, whereval = util.preprocess_slicetuple(context, builder, wheretpe, whereval)
-
-    length = util.arraylen(context, builder, arraytpe, arrayval, totpe=numba.int64)
-
-    nexttpe = ListArrayType(util.index64tpe, util.index64tpe, arraytpe, numba.types.none)
-    proxynext = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
-    proxynext.starts = util.newindex64(context, builder, numba.int64, context.get_constant(numba.int64, 1))
-    proxynext.stops = util.newindex64(context, builder, numba.int64, context.get_constant(numba.int64, 1))
-    numba.targets.arrayobj.store_item(context, builder, util.index64tpe, context.get_constant(numba.int64, 0), util.arrayptr(context, builder, util.index64tpe, proxynext.starts))
-    numba.targets.arrayobj.store_item(context, builder, util.index64tpe, length, util.arrayptr(context, builder, util.index64tpe, proxynext.stops))
-    proxynext.content = arrayval
-    nextval = proxynext._getvalue()
+    nexttpe, nextval = util.wrap_for_slicetuple(context, builder, arraytpe, arrayval)
 
     outtpe = nexttpe.getitem_next(wheretpe, False)
     outval = nexttpe.lower_getitem_next(context, builder, nexttpe, wheretpe, nextval, whereval, None)

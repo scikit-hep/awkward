@@ -161,11 +161,11 @@ def typing_regularize_slice(arrays):
                 out = out + (t,)
         return numba.types.Tuple(out)
 
-def preprocess_slicetuple(context, builder, wheretpe1, whereval1):
-    wheretpe2 = typing_regularize_slice(wheretpe1)
-    regularize_slice.compile(wheretpe2(wheretpe1))
-    cres = regularize_slice.overloads[(wheretpe1,)]
-    whereval2 = context.call_internal(builder, cres.fndesc, wheretpe2(wheretpe1), (whereval1,))
+def preprocess_slicetuple(context, builder, wheretpe, whereval):
+    wheretpe2 = typing_regularize_slice(wheretpe)
+    regularize_slice.compile(wheretpe2(wheretpe))
+    cres = regularize_slice.overloads[(wheretpe,)]
+    whereval2 = context.call_internal(builder, cres.fndesc, wheretpe2(wheretpe), (whereval,))
 
     wheretpe3 = typing_broadcast_arrays(wheretpe2)
     broadcast_arrays.compile(wheretpe3(wheretpe2))
@@ -173,3 +173,18 @@ def preprocess_slicetuple(context, builder, wheretpe1, whereval1):
     whereval3 = context.call_internal(builder, cres2.fndesc, wheretpe3(wheretpe2), (whereval2,))
 
     return wheretpe3, whereval3
+
+def wrap_for_slicetuple(context, builder, arraytpe, arrayval):
+    import awkward1._numba.listarray
+
+    length = arraylen(context, builder, arraytpe, arrayval, totpe=numba.int64)
+    nexttpe = awkward1._numba.listarray.ListArrayType(index64tpe, index64tpe, arraytpe, numba.types.none)
+    proxynext = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
+    proxynext.starts = newindex64(context, builder, numba.int64, context.get_constant(numba.int64, 1))
+    proxynext.stops = newindex64(context, builder, numba.int64, context.get_constant(numba.int64, 1))
+    numba.targets.arrayobj.store_item(context, builder, index64tpe, context.get_constant(numba.int64, 0), arrayptr(context, builder, index64tpe, proxynext.starts))
+    numba.targets.arrayobj.store_item(context, builder, index64tpe, length, arrayptr(context, builder, index64tpe, proxynext.stops))
+    proxynext.content = arrayval
+    nextval = proxynext._getvalue()
+
+    return nexttpe, nextval
