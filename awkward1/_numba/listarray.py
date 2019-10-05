@@ -301,10 +301,63 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
 
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+
     proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)
     proxyout.starts = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.startstpe(arraytpe.startstpe, carrytpe), (proxyin.starts, carryval))
     proxyout.stops = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.stopstpe(arraytpe.stopstpe, carrytpe), (proxyin.stops, carryval))
     proxyout.content = proxyin.content
+
     if not isinstance(arraytpe.idtpe, numba.types.NoneType):
         raise NotImplementedError("array.id is not None")
     return proxyout._getvalue()
+
+@numba.typing.templates.infer_getattr
+class type_methods(numba.typing.templates.AttributeTemplate):
+    key = ListArrayType
+
+    def generic_resolve(self, tpe, attr):
+        if attr == "starts":
+            return tpe.startstpe
+
+        elif attr == "stops":
+            return tpe.stopstpe
+
+        elif attr == "content":
+            return tpe.contenttpe
+
+        elif attr == "id":
+            if tpe.idtpe == numba.none:
+                return numba.optional(identity.IdentityType(numba.int32[:, :]))
+            else:
+                return tpe.idtpe
+
+@numba.extending.lower_getattr(ListArrayType, "starts")
+def lower_starts(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe.startstpe, proxyin.starts)
+    return proxyin.starts
+
+@numba.extending.lower_getattr(ListArrayType, "stops")
+def lower_stops(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe.stopstpe, proxyin.stops)
+    return proxyin.stops
+
+@numba.extending.lower_getattr(ListArrayType, "content")
+def lower_content(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe.contenttpe, proxyin.content)
+    return proxyin.content
+
+@numba.extending.lower_getattr(ListArrayType, "id")
+def lower_id(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if tpe.idtpe == numba.none:
+        return context.make_optional_none(builder, identity.IdentityType(numba.int32[:, :]))
+    else:
+        if context.enable_nrt:
+            context.nrt.incref(builder, tpe.idtpe, proxyin.id)
+        return proxyin.id
