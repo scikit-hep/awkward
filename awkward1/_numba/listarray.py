@@ -209,18 +209,10 @@ def lower_getitem_range(context, builder, sig, args):
 
 @numba.extending.lower_builtin(operator.getitem, ListArrayType, numba.types.BaseTuple)
 def lower_getitem_tuple(context, builder, sig, args):
-    rettpe, (arraytpe, wheretpe1) = sig.return_type, sig.args
-    arrayval, whereval1 = args
+    rettpe, (arraytpe, wheretpe) = sig.return_type, sig.args
+    arrayval, whereval = args
 
-    wheretpe2 = util._typing_regularize_slice(wheretpe1)
-    util._regularize_slice.compile(wheretpe2(wheretpe1))
-    cres = util._regularize_slice.overloads[(wheretpe1,)]
-    whereval2 = context.call_internal(builder, cres.fndesc, wheretpe2(wheretpe1), (whereval1,))
-
-    wheretpe3 = util._typing_broadcast_arrays(wheretpe2)
-    util.broadcast_arrays.compile(wheretpe3(wheretpe2))
-    cres2 = util.broadcast_arrays.overloads[(wheretpe2,)]
-    whereval3 = context.call_internal(builder, cres2.fndesc, wheretpe3(wheretpe2), (whereval2,))
+    wheretpe, whereval = util.preprocess_slicetuple(context, builder, wheretpe, whereval)
 
     length = util.arraylen(context, builder, arraytpe, arrayval, totpe=numba.int64)
 
@@ -233,8 +225,8 @@ def lower_getitem_tuple(context, builder, sig, args):
     proxynext.content = arrayval
     nextval = proxynext._getvalue()
 
-    outtpe = nexttpe.getitem_next(wheretpe3, False)
-    outval = nexttpe.lower_getitem_next(context, builder, nexttpe, wheretpe3, nextval, whereval3, None)
+    outtpe = nexttpe.getitem_next(wheretpe, False)
+    outval = nexttpe.lower_getitem_next(context, builder, nexttpe, wheretpe, nextval, whereval, None)
 
     return outtpe.lower_getitem_int(context, builder, rettpe(outtpe, numba.int64), (outval, context.get_constant(numba.int64, 0)))
 

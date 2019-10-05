@@ -198,6 +198,11 @@ def lower_getitem_slice(context, builder, sig, args):
         context.nrt.incref(builder, rettpe, out)
     return out
 
+@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.BaseTuple)
+def lower_getitem_tuple(context, builder, sig, args):
+    raise NotImplementedError
+
+
 # def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
 #     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
 #     proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)

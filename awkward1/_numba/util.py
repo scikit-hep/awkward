@@ -60,7 +60,7 @@ def newindex64(context, builder, lentpe, lenval):
     return numba.targets.arrayobj.numpy_empty_nd(context, builder, index64tpe(lentpe), (lenval,))
 
 @numba.jit(nopython=True)
-def _shapeat(shapeat, array, at, ndim):
+def shapeat(shapeat, array, at, ndim):
     redat = at - (ndim - array.ndim)
     if redat < 0:
         return 1
@@ -97,10 +97,10 @@ def broadcast_arrays(arrays):
             if i == -1:
                 return "1"
             elif isinstance(arrays.types[i], numba.types.Array):
-                return "_shapeat({}, arrays[{}], {}, {})".format(getshape(i - 1, at), i, at, ndim)
+                return "shapeat({}, arrays[{}], {}, {})".format(getshape(i - 1, at), i, at, ndim)
             else:
                 return getshape(i - 1, at)
-        g = {"_shapeat": _shapeat, "broadcast_to": broadcast_to}
+        g = {"shapeat": shapeat, "broadcast_to": broadcast_to}
         exec("""
 def impl(arrays):
     shape = ({})
@@ -109,14 +109,14 @@ def impl(arrays):
            " ".join("broadcast_to(arrays[{}], shape),".format(at) if isinstance(arrays.types[at], (numba.types.Array, numba.types.Integer)) else "arrays[{}],".format(at) for at in range(len(arrays.types)))), g)
         return g["impl"]
 
-def _typing_broadcast_arrays(arrays):
+def typing_broadcast_arrays(arrays):
     if not isinstance(arrays, numba.types.BaseTuple) or not any(isinstance(x, numba.types.Array) for x in arrays.types):
         return arrays
     else:
         return numba.types.Tuple([numba.types.Array(numba.int64, 1, "C") if isinstance(t, numba.types.Integer) else t for t in arrays.types])
 
 @numba.generated_jit(nopython=True)
-def _regularize_slice(arrays):
+def regularize_slice(arrays):
     if not isinstance(arrays, numba.types.BaseTuple) and isinstance(arrays, (numba.types.ArrayCompatible, numba.types.Sequence)) and isinstance(arrays.dtype, numba.types.Boolean):
         return lambda arrays: numpy.nonzero(arrays)
 
@@ -141,7 +141,7 @@ def _regularize_slice(arrays):
         exec(code, g)
         return g["impl"]
 
-def _typing_regularize_slice(arrays):
+def typing_regularize_slice(arrays):
     out = ()
     if not isinstance(arrays, numba.types.BaseTuple) and isinstance(arrays, (numba.types.ArrayCompatible, numba.types.Sequence)) and isinstance(arrays.dtype, numba.types.Boolean):
         return numba.types.Tuple(arrays.ndims*(numba.types.Array(numba.int64, 1, "C"),))
@@ -160,3 +160,16 @@ def _typing_regularize_slice(arrays):
             else:
                 out = out + (t,)
         return numba.types.Tuple(out)
+
+def preprocess_slicetuple(context, builder, wheretpe1, whereval1):
+    wheretpe2 = typing_regularize_slice(wheretpe1)
+    regularize_slice.compile(wheretpe2(wheretpe1))
+    cres = regularize_slice.overloads[(wheretpe1,)]
+    whereval2 = context.call_internal(builder, cres.fndesc, wheretpe2(wheretpe1), (whereval1,))
+
+    wheretpe3 = typing_broadcast_arrays(wheretpe2)
+    broadcast_arrays.compile(wheretpe3(wheretpe2))
+    cres2 = broadcast_arrays.overloads[(wheretpe2,)]
+    whereval3 = context.call_internal(builder, cres2.fndesc, wheretpe3(wheretpe2), (whereval2,))
+
+    return wheretpe3, whereval3

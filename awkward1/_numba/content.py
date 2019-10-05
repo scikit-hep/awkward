@@ -36,7 +36,7 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
                 if not isinstance(wheretpe, numba.types.BaseTuple):
                     wheretpe = numba.types.Tuple((wheretpe,))
 
-                wheretpe = util._typing_regularize_slice(wheretpe)
+                wheretpe = util.typing_regularize_slice(wheretpe)
 
                 if any(not isinstance(t, (numba.types.Integer, numba.types.SliceType, numba.types.EllipsisType, type(numba.typeof(numpy.newaxis)), numba.types.Array)) for t in wheretpe.types):
                     raise TypeError("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), and integer or boolean arrays (possibly jagged) are valid indices")
