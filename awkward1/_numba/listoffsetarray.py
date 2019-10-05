@@ -30,24 +30,39 @@ class ListOffsetArrayType(content.ContentType):
         return 1 + self.contenttpe.ndim
 
     def getitem_int(self):
-        return self.getitem_tuple(numba.types.Tuple((numba.int64,)))
+        return self.contenttpe
 
     def getitem_range(self):
-        return self.getitem_tuple(numba.types.Tuple((numba.types.slice2_type,)))
+        return self
 
     def getitem_tuple(self, wheretpe):
-        return self.getitem_next(wheretpe, False)
+        import awkward._numba.listarray
+        nexttpe = awkward._numba.listarray.ListArrayType(util.index64tpe, util.index64tpe, self, numba.none)
+        out = nexttpe.getitem_next(wheretpe, False)
+        return out.getitem_int()
 
     def getitem_next(self, wheretpe, isadvanced):
         if len(wheretpe.types) == 0:
             return self
+        headtpe = wheretpe.types[0]
+        tailtpe = numba.types.Tuple(wheretpe.types[1:])
+        if isinstance(headtpe, numba.types.Integer):
+            return self.contenttpe.getitem_next(tailtpe, isadvanced)
+        elif isinstance(headtpe, numba.types.SliceType):
+            return ListOffsetArrayType(self.offsetstpe, self.contenttpe.getitem_next(tailtpe, isadvanced), self.idtpe)
+        elif isinstance(headtpe, numba.types.EllipsisType):
+            raise NotImplementedError("ellipsis")
+        elif isinstance(headtpe, type(numba.typeof(numpy.newaxis))):
+            raise NotImplementedError("newaxis")
+        elif isinstance(headtpe, numba.types.Array) and not advanced:
+            if headtpe.ndim != 1:
+                raise NotImplementedError("array.ndim != 1")
+            contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
+            return ListOffsetArrayType(self.startstpe, contenttpe, self.idtpe)
+        elif isinstance(headtpe, numba.types.Array):
+            return self.contenttpe.getitem_next(tailtpe, True)
         else:
-            headtpe = wheretpe.types[0]
-            tailtpe = numba.types.Tuple(wheretpe.types[1:])
-            if isinstance(headtpe, numba.types.Integer):
-                return self.contenttpe.getitem_next(tailtpe, isadvanced)
-            else:
-                return self.getitem_next(tailtpe, isadvanced)
+            raise AssertionError(headtpe)
 
     def carry(self):
         import awkward1._numba.listarray
@@ -143,11 +158,12 @@ def lower_getitem_int(context, builder, sig, args):
     val, whereval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
 
-    wherevalp1 = builder.add(whereval, context.get_constant(wheretpe, 1))
     if isinstance(wheretpe, numba.types.Literal):
-        wherevalp1_tpe = wheretpe.literal_type
+        wherevalp1_tpe = numba.types.IntegerLiteral(wheretpe.literal_value + 1)
+        wherevalp1 = whereval
     else:
         wherevalp1_tpe = wheretpe
+        wherevalp1 = builder.add(whereval, context.get_constant(wheretpe, 1))
 
     start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe.dtype(tpe.offsetstpe, wheretpe), (proxyin.offsets, whereval))
     stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe.dtype(tpe.offsetstpe, wherevalp1_tpe), (proxyin.offsets, wherevalp1))
