@@ -205,7 +205,7 @@ def lower_getitem_range(context, builder, sig, args):
     proxyout.starts = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.startstpe(tpe.startstpe, wheretpe), (proxyin.starts, whereval))
     proxyout.stops = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.stopstpe(tpe.stopstpe, wheretpe), (proxyin.stops, whereval))
     proxyout.content = proxyin.content
-    if not isinstance(tpe.idtpe, numba.types.NoneType):
+    if tpe.idtpe != numba.none:
         proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
 
     out = proxyout._getvalue()
@@ -313,8 +313,8 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.offsets = nextoffsets
             proxyout.content = contentval
-            if arraytpe.idtpe != numba.none:
-                proxyout.id = proxyin.id
+            if outtpe.idtpe != numba.none:
+                proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, outtpe.idtpe, util.index64tpe, proxyin.id, flathead)
             return proxyout._getvalue()
 
         else:

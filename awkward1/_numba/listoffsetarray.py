@@ -303,15 +303,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         contenttpe = nexttpe.getitem_next(tailtpe, True)
         contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-        if not isinstance(arraytpe.idtpe, numba.types.NoneType):
-            raise NotImplementedError("array.id is not None")
-
         outtpe = ListOffsetArrayType(arraytpe.offsetstpe, contenttpe, arraytpe.idtpe)
         proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
         proxyout.offsets = nextoffsets
         proxyout.content = contentval
         if outtpe.idtpe != numba.none:
-            proxyout.id = proxyin.id
+            proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, outtpe.idtpe, util.index64tpe, proxyin.id, flathead)
         return proxyout._getvalue()
 
     elif isinstance(headtpe, numba.types.Array):
@@ -323,8 +320,6 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     import awkward1._numba.listarray
 
-    raise Exception
-
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
     lenoffsets = util.arraylen(context, builder, arraytpe.offsetstpe, proxyin.offsets, totpe=numba.int64)
     lenstarts = builder.sub(lenoffsets, context.get_constant(numba.int64, 1))
@@ -335,9 +330,8 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     proxyout.starts = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.offsetstpe(arraytpe.offsetstpe, carrytpe), (starts, carryval))
     proxyout.stops = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.offsetstpe(arraytpe.offsetstpe, carrytpe), (stops, carryval))
     proxyout.content = proxyin.content
-
-    if not isinstance(arraytpe.idtpe, numba.types.NoneType):
-        raise NotImplementedError("array.id is not None")
+    if arraytpe.idtpe != numba.none:
+        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
     return proxyout._getvalue()
 
 @numba.typing.templates.infer_getattr

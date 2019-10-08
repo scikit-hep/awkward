@@ -62,6 +62,8 @@ def test_development32():
 
     listarray.setid()
     assert numpy.asarray(f1(listarray).id).tolist() == [[2], [0], [0], [1]]
+    assert numpy.asarray(f2(listarray).id).tolist() == [[2, 1], [0, 1], [0, 1], [4, 1]]
+    assert numpy.asarray(f3(listarray).id).tolist() == [[2, 1], [0, 2], [0, 0], [4, 0]]
 
 content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
 offsetsA = numpy.arange(0, 2*3*5 + 5, 5)
