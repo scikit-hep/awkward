@@ -120,6 +120,7 @@ def lower_len(context, builder, sig, args):
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.SliceType)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.Array)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.List)
+@numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.ArrayCompatible)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.EllipsisType)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, type(numba.typeof(numpy.newaxis)))
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.BaseTuple)
@@ -131,6 +132,9 @@ def lower_getitem(context, builder, sig, args):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
 
     if not isinstance(wheretpe, (numba.types.Integer, numba.types.SliceType)):
+        if not isinstance(wheretpe, numba.types.BaseTuple):
+            wheretpe = numba.types.Tuple((wheretpe,))
+            whereval = context.make_tuple(builder, wheretpe, (whereval,))
         wheretpe, whereval = util.preprocess_slicetuple(context, builder, wheretpe, whereval)
 
     if isinstance(rettpe, NumpyArrayType):
@@ -140,8 +144,6 @@ def lower_getitem(context, builder, sig, args):
 
     if isinstance(wheretpe, numba.types.BaseTuple):
         out = numba.targets.arrayobj.getitem_array_tuple(context, builder, signature, (proxyin.array, whereval))
-    elif isinstance(wheretpe, numba.types.Array):
-        out = numba.targets.arrayobj.fancy_getitem_array(context, builder, signature, (proxyin.array, whereval))
     else:
         out = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, signature, (proxyin.array, whereval))
 

@@ -117,22 +117,22 @@ def typing_broadcast_arrays(arrays):
 
 @numba.generated_jit(nopython=True)
 def regularize_slice(arrays):
-    if not isinstance(arrays, numba.types.BaseTuple) and isinstance(arrays, (numba.types.ArrayCompatible, numba.types.Sequence)) and isinstance(arrays.dtype, numba.types.Boolean):
+    if not isinstance(arrays, numba.types.BaseTuple) and isinstance(arrays, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(arrays.dtype, numba.types.Boolean):
         return lambda arrays: numpy.nonzero(arrays)
 
-    elif not isinstance(arrays, numba.types.BaseTuple) or not any(isinstance(t, (numba.types.ArrayCompatible, numba.types.Sequence)) for t in arrays.types):
+    elif not isinstance(arrays, numba.types.BaseTuple) or not any(isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) for t in arrays.types):
         return lambda arrays: arrays
 
     else:
         code = "def impl(arrays):\n"
         indexes = []
         for i, t in enumerate(arrays.types):
-            if isinstance(t, (numba.types.ArrayCompatible, numba.types.Sequence)) and isinstance(t.dtype, numba.types.Boolean):
+            if isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(t.dtype, numba.types.Boolean):
                 code += "    x{} = numpy.nonzero(arrays[{}])\n".format(i, i)
                 indexes.extend(["x{}[{}],".format(i, j) for j in range(arrays.types[i].ndim)])
-            elif isinstance(t, (numba.types.ArrayCompatible, numba.types.Sequence)) and isinstance(t.dtype, numba.types.Integer):
+            elif isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(t.dtype, numba.types.Integer):
                 indexes.append("numpy.asarray(arrays[{}], numpy.int64),".format(i))
-            elif isinstance(t, (numba.types.ArrayCompatible, numba.types.Sequence)):
+            elif isinstance(t, (numba.types.ArrayCompatible, numba.types.List)):
                 raise TypeError("arrays must have boolean or integer type")
             else:
                 indexes.append("arrays[{}]".format(i))
@@ -143,19 +143,19 @@ def regularize_slice(arrays):
 
 def typing_regularize_slice(arrays):
     out = ()
-    if not isinstance(arrays, numba.types.BaseTuple) and isinstance(arrays, (numba.types.ArrayCompatible, numba.types.Sequence)) and isinstance(arrays.dtype, numba.types.Boolean):
+    if not isinstance(arrays, numba.types.BaseTuple) and isinstance(arrays, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(arrays.dtype, numba.types.Boolean):
         return numba.types.Tuple(arrays.ndims*(numba.types.Array(numba.int64, 1, "C"),))
 
-    elif not isinstance(arrays, numba.types.BaseTuple) or not any(isinstance(t, (numba.types.ArrayCompatible, numba.types.Sequence)) for t in arrays.types):
+    elif not isinstance(arrays, numba.types.BaseTuple) or not any(isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) for t in arrays.types):
         return arrays
 
     else:
         for t in arrays.types:
-            if isinstance(t, (numba.types.ArrayCompatible, numba.types.Sequence)) and isinstance(t.dtype, numba.types.Boolean):
+            if isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(t.dtype, numba.types.Boolean):
                 out = out + t.ndims*(numba.types.Array(numba.int64, 1, "C"),)
-            elif isinstance(t, (numba.types.ArrayCompatible, numba.types.Sequence)) and isinstance(t.dtype, numba.types.Integer):
+            elif isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(t.dtype, numba.types.Integer):
                 out = out + (numba.types.Array(numba.int64, 1, "C"),)
-            elif isinstance(t, (numba.types.ArrayCompatible, numba.types.Sequence)):
+            elif isinstance(t, (numba.types.ArrayCompatible, numba.types.List)):
                 raise TypeError("arrays must have boolean or integer type")
             else:
                 out = out + (t,)

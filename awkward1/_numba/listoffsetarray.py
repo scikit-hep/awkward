@@ -216,6 +216,7 @@ def lower_getitem_tuple(context, builder, sig, args):
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.Array)
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.List)
+@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.ArrayCompatible)
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.EllipsisType)
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, type(numba.typeof(numpy.newaxis)))
 def lower_getitem_other(context, builder, sig, args):
