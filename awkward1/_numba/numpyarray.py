@@ -115,11 +115,18 @@ def lower_len(context, builder, sig, args):
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.Integer)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.SliceType)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.Array)
+@numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.List)
+@numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.EllipsisType)
+@numba.extending.lower_builtin(operator.getitem, NumpyArrayType, type(numba.typeof(numpy.newaxis)))
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.BaseTuple)
 def lower_getitem(context, builder, sig, args):
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+
+    if isinstance(wheretpe, (numba.types.EllipsisType, type(numba.typeof(numpy.newaxis)))):
+        wheretpe = numba.types.Tuple((wheretpe,))
+        whereval = context.make_tuple(builder, wheretpe, (whereval,))
 
     if isinstance(rettpe, NumpyArrayType):
         signature = rettpe.arraytpe(tpe.arraytpe, wheretpe)
@@ -128,7 +135,7 @@ def lower_getitem(context, builder, sig, args):
 
     if isinstance(wheretpe, numba.types.BaseTuple):
         out = numba.targets.arrayobj.getitem_array_tuple(context, builder, signature, (proxyin.array, whereval))
-    elif isinstance(wheretpe, numba.types.Array):
+    elif isinstance(wheretpe, (numba.types.Array, numba.types.List)):
         out = numba.targets.arrayobj.fancy_getitem_array(context, builder, signature, (proxyin.array, whereval))
     else:
         out = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, signature, (proxyin.array, whereval))
@@ -140,8 +147,40 @@ def lower_getitem(context, builder, sig, args):
     else:
         return out
 
+def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval, advanced):
+    if len(wheretpe.types) == 0:
+        return arrayval
+
+    headtpe = wheretpe.types[0]
+    tailtpe = numba.types.Tuple(wheretpe.types[1:])
+    headval = numba.cgutils.unpack_tuple(builder, whereval)[0]
+    tailval = context.make_tuple(builder, tailtpe, numba.cgutils.unpack_tuple(builder, whereval)[1:])
+
+    if isinstance(headtpe, numba.types.Integer):
+        raise NotImplementedError("NumpyArray.getitem_next(int)")
+
+    elif isinstance(headtpe, numba.types.SliceType):
+        raise NotImplementedError("NumpyArray.getitem_next(slice)")
+
+    elif isinstance(headtpe, numba.types.EllipsisType):
+        raise NotImplementedError("NumpyArray.getitem_next(ellipsis)")
+
+    elif isinstance(headtpe, type(numba.typeof(numpy.newaxis))):
+        raise NotImplementedError("NumpyArray.getitem_next(newaxis)")
+
+    elif isinstance(headtpe, numba.types.Array):
+        raise NotImplementedError("NumpyArray.getitem_next(array)")
+
+    else:
+        raise AssertionError(headtpe)
+
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
-    return numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe(arraytpe, carrytpe), (arrayval, carryval))
+    proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+    proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)
+    proxyout.array = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.arraytpe(arraytpe.arraytpe, carrytpe), (proxyin.array, carryval))
+    if arraytpe.idtpe != numba.none:
+        raise NotImplementedError("NumpyArray.id != None")
+    return proxyout._getvalue()
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):

@@ -262,50 +262,67 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     elif isinstance(headtpe, type(numba.typeof(numpy.newaxis))):
         raise NotImplementedError("ListArray.getitem_next(newaxis)")
 
-    elif isinstance(headtpe, numba.types.Array) and advanced is None:
+    elif isinstance(headtpe, numba.types.Array):
         if headtpe.ndim != 1:
             raise NotImplementedError("array.ndim != 1")
 
         flathead = numba.targets.arrayobj.array_ravel(context, builder, util.index64tpe(headtpe), (headval,))
         lenflathead = util.arraylen(context, builder, util.index64tpe, flathead, totpe=numba.int64)
-        lencarry = builder.mul(lenstarts, lenflathead)
-        lenoffsets = builder.add(lenstarts, context.get_constant(numba.int64, 1))
 
-        nextcarry = util.newindex64(context, builder, numba.int64, lencarry)
-        nextadvanced = util.newindex64(context, builder, numba.int64, lencarry)
-        nextoffsets = util.newindex64(context, builder, numba.int64, lenoffsets)
+        if advanced is None:
+            lencarry = builder.mul(lenstarts, lenflathead)
+            lenoffsets = builder.add(lenstarts, context.get_constant(numba.int64, 1))
 
-        util.call(context, builder, cpu.kernels.awkward_listarray64_getitem_next_array_64,
-            (util.arrayptr(context, builder, util.index64tpe, nextoffsets),
-             util.arrayptr(context, builder, util.index64tpe, nextcarry),
-             util.arrayptr(context, builder, util.index64tpe, nextadvanced),
-             util.arrayptr(context, builder, arraytpe.startstpe, proxyin.starts),
-             util.arrayptr(context, builder, arraytpe.stopstpe, proxyin.stops),
-             util.arrayptr(context, builder, util.index64tpe, flathead),
-             context.get_constant(numba.int64, 0),
-             context.get_constant(numba.int64, 0),
-             lenstarts,
-             lenflathead,
-             lencontent),
-            "in {}, indexing error".format(arraytpe.shortname))
+            nextcarry = util.newindex64(context, builder, numba.int64, lencarry)
+            nextadvanced = util.newindex64(context, builder, numba.int64, lencarry)
+            nextoffsets = util.newindex64(context, builder, numba.int64, lenoffsets)
+            util.call(context, builder, cpu.kernels.awkward_listarray64_getitem_next_array_64,
+                (util.arrayptr(context, builder, util.index64tpe, nextoffsets),
+                 util.arrayptr(context, builder, util.index64tpe, nextcarry),
+                 util.arrayptr(context, builder, util.index64tpe, nextadvanced),
+                 util.arrayptr(context, builder, arraytpe.startstpe, proxyin.starts),
+                 util.arrayptr(context, builder, arraytpe.stopstpe, proxyin.stops),
+                 util.arrayptr(context, builder, util.index64tpe, flathead),
+                 context.get_constant(numba.int64, 0),
+                 context.get_constant(numba.int64, 0),
+                 lenstarts,
+                 lenflathead,
+                 lencontent),
+                "in {}, indexing error".format(arraytpe.shortname))
 
-        nexttpe = arraytpe.contenttpe.carry()
-        nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
+            nexttpe = arraytpe.contenttpe.carry()
+            nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
 
-        contenttpe = nexttpe.getitem_next(tailtpe, True)
-        contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
+            contenttpe = nexttpe.getitem_next(tailtpe, True)
+            contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-        if not isinstance(arraytpe.idtpe, numba.types.NoneType):
-            raise NotImplementedError("array.id is not None")
+            outtpe = awkward1._numba.listoffsetarray.ListOffsetArrayType(arraytpe.startstpe, contenttpe, arraytpe.idtpe)
+            proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
+            proxyout.offsets = nextoffsets
+            proxyout.content = contentval
+            return proxyout._getvalue()
 
-        outtpe = awkward1._numba.listoffsetarray.ListOffsetArrayType(arraytpe.startstpe, contenttpe, arraytpe.idtpe)
-        proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
-        proxyout.offsets = nextoffsets
-        proxyout.content = contentval
-        return proxyout._getvalue()
+        else:
+            nextcarry = util.newindex64(context, builder, numba.int64, lenstarts)
+            nextadvanced = util.newindex64(context, builder, numba.int64, lenstarts)
+            util.call(context, builder, cpu.kernels.awkward_listarray64_getitem_next_array_advanced_64,
+                (util.arrayptr(context, builder, util.index64tpe, nextcarry),
+                 util.arrayptr(context, builder, util.index64tpe, nextadvanced),
+                 util.arrayptr(context, builder, arraytpe.startstpe, proxyin.starts),
+                 util.arrayptr(context, builder, arraytpe.stopstpe, proxyin.stops),
+                 util.arrayptr(context, builder, util.index64tpe, flathead),
+                 util.arrayptr(context, builder, util.index64tpe, advanced),
+                 context.get_constant(numba.int64, 0),
+                 context.get_constant(numba.int64, 0),
+                 lenstarts,
+                 lenflathead,
+                 lencontent),
+                "in {}, indexing error".format(arraytpe.shortname))
 
-    elif isinstance(headtpe, numba.types.Array):
-        raise NotImplementedError("ListArray.getitem_next(advanced Array)")
+            nexttpe = arraytpe.contenttpe.carry()
+            nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
+
+            return nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
     else:
         raise AssertionError(headtpe)
