@@ -27,6 +27,17 @@ def test_development64():
 
     assert awkward1.tolist(f2(listarray)) == [4.4, 1.1, 1.1, 7.7]
 
+    @numba.njit
+    def f3(q):
+        return q[[2, 0, 0, -1], [-1, -1, 0, 0]]
+
+    assert awkward1.tolist(f3(listarray)) == [4.4, 2.2, 0.0, 6.6]
+
+    listarray.setid()
+    assert numpy.asarray(f1(listarray).id).tolist() == [[2], [0], [0], [1]]
+    assert numpy.asarray(f2(listarray).id).tolist() == [[2, 1], [0, 1], [0, 1], [4, 1]]
+    assert numpy.asarray(f3(listarray).id).tolist() == [[2, 1], [0, 2], [0, 0], [4, 0]]
+
 def test_development32():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     listarray = awkward1.layout.ListArray32(awkward1.layout.Index32(numpy.array([0, 3, 3, 5, 6], numpy.int32)), awkward1.layout.Index32(numpy.array([3, 3, 5, 6, 10], numpy.int32)), content)
@@ -36,6 +47,21 @@ def test_development32():
         return q[[2, 0, 0, 1]]
 
     assert awkward1.tolist(f1(listarray)) == [[3.3, 4.4], [0.0, 1.1, 2.2], [0.0, 1.1, 2.2], []]
+
+    @numba.njit
+    def f2(q):
+        return q[[2, 0, 0, -1], 1]
+
+    assert awkward1.tolist(f2(listarray)) == [4.4, 1.1, 1.1, 7.7]
+
+    @numba.njit
+    def f3(q):
+        return q[[2, 0, 0, -1], [-1, -1, 0, 0]]
+
+    assert awkward1.tolist(f3(listarray)) == [4.4, 2.2, 0.0, 6.6]
+
+    listarray.setid()
+    assert numpy.asarray(f1(listarray).id).tolist() == [[2], [0], [0], [1]]
 
 content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
 offsetsA = numpy.arange(0, 2*3*5 + 5, 5)

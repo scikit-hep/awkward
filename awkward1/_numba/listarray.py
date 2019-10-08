@@ -177,6 +177,8 @@ def lower_getitem_int(context, builder, sig, args):
         starttpe, stoptpe = numba.int32, numba.int32
     elif tpe.bitwidth == 64:
         starttpe, stoptpe = numba.int64, numba.int64
+    else:
+        raise AssertionError("unrecognized bitwidth")
 
     start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, starttpe(tpe.startstpe, wheretpe), (proxyin.starts, whereval))
     stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, stoptpe(tpe.stopstpe, wheretpe), (proxyin.stops, whereval))
@@ -185,11 +187,15 @@ def lower_getitem_int(context, builder, sig, args):
     proxyslice.stop = util.cast(context, builder, tpe, numba.intp, stop)
     proxyslice.step = context.get_constant(numba.intp, 1)
 
+    raise Exception
+
     fcn = context.get_function(operator.getitem, rettpe(tpe.contenttpe, numba.types.slice2_type))
     return fcn(builder, (proxyin.content, proxyslice._getvalue()))
 
 @numba.extending.lower_builtin(operator.getitem, ListArrayType, numba.types.slice2_type)
 def lower_getitem_range(context, builder, sig, args):
+    import awkward1._numba.identity
+
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
 
@@ -200,7 +206,7 @@ def lower_getitem_range(context, builder, sig, args):
     proxyout.stops = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.stopstpe(tpe.stopstpe, wheretpe), (proxyin.stops, whereval))
     proxyout.content = proxyin.content
     if not isinstance(tpe.idtpe, numba.types.NoneType):
-        raise NotImplementedError("id is not None")
+        proxyout.id = awkward1._numba.identity.lower_range(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
 
     out = proxyout._getvalue()
     if context.enable_nrt:
@@ -270,13 +276,20 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         lenflathead = util.arraylen(context, builder, util.index64tpe, flathead, totpe=numba.int64)
 
         if advanced is None:
+            if arraytpe.bitwidth == 64:
+                kernel = cpu.kernels.awkward_listarray64_getitem_next_array_64
+            elif arraytpe.bitwidth == 32:
+                kernel = cpu.kernels.awkward_listarray32_getitem_next_array_64
+            else:
+                raise AssertionError("unrecognized bitwidth")
+
             lencarry = builder.mul(lenstarts, lenflathead)
             lenoffsets = builder.add(lenstarts, context.get_constant(numba.int64, 1))
 
             nextcarry = util.newindex64(context, builder, numba.int64, lencarry)
             nextadvanced = util.newindex64(context, builder, numba.int64, lencarry)
             nextoffsets = util.newindex64(context, builder, numba.int64, lenoffsets)
-            util.call(context, builder, cpu.kernels.awkward_listarray64_getitem_next_array_64,
+            util.call(context, builder, kernel,
                 (util.arrayptr(context, builder, util.index64tpe, nextoffsets),
                  util.arrayptr(context, builder, util.index64tpe, nextcarry),
                  util.arrayptr(context, builder, util.index64tpe, nextadvanced),
@@ -300,12 +313,21 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.offsets = nextoffsets
             proxyout.content = contentval
+            if arraytpe.idtpe != numba.none:
+                proxyout.id = proxyin.id
             return proxyout._getvalue()
 
         else:
+            if arraytpe.bitwidth == 64:
+                kernel = cpu.kernels.awkward_listarray64_getitem_next_array_advanced_64
+            elif arraytpe.bitwidth == 32:
+                kernel = cpu.kernels.awkward_listarray32_getitem_next_array_advanced_64
+            else:
+                raise AssertionError("unrecognized bitwidth")
+
             nextcarry = util.newindex64(context, builder, numba.int64, lenstarts)
             nextadvanced = util.newindex64(context, builder, numba.int64, lenstarts)
-            util.call(context, builder, cpu.kernels.awkward_listarray64_getitem_next_array_advanced_64,
+            util.call(context, builder, kernel,
                 (util.arrayptr(context, builder, util.index64tpe, nextcarry),
                  util.arrayptr(context, builder, util.index64tpe, nextadvanced),
                  util.arrayptr(context, builder, arraytpe.startstpe, proxyin.starts),
@@ -322,21 +344,23 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             nexttpe = arraytpe.contenttpe.carry()
             nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
 
+            outtpe = nexttpe.getitem_next(tailtpe, True)
             return nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
     else:
         raise AssertionError(headtpe)
 
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
+    import awkward1._numba.identity
+
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
 
     proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)
     proxyout.starts = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.startstpe(arraytpe.startstpe, carrytpe), (proxyin.starts, carryval))
     proxyout.stops = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.stopstpe(arraytpe.stopstpe, carrytpe), (proxyin.stops, carryval))
     proxyout.content = proxyin.content
-
-    if not isinstance(arraytpe.idtpe, numba.types.NoneType):
-        raise NotImplementedError("array.id is not None")
+    if arraytpe.idtpe != numba.none:
+        proxyout.id = awkward1._numba.identity.lower_carry(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
     return proxyout._getvalue()
 
 @numba.typing.templates.infer_getattr

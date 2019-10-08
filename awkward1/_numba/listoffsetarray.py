@@ -172,11 +172,11 @@ def lower_getitem_int(context, builder, sig, args):
     proxyslice.stop = util.cast(context, builder, tpe.offsetstpe.dtype, numba.intp, stop)
     proxyslice.step = context.get_constant(numba.intp, 1)
 
-    fcn = context.get_function(operator.getitem, rettpe(tpe.contenttpe, numba.types.slice2_type))
-    return fcn(builder, (proxyin.content, proxyslice._getvalue()))
+    outtpe = tpe.contenttpe.getitem_range()
+    return tpe.contenttpe.lower_getitem_range(context, builder, outtpe(tpe.contenttpe, numba.types.slice2_type), (proxyin.content, proxyslice._getvalue()))
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.slice2_type)
-def lower_getitem_slice(context, builder, sig, args):
+def lower_getitem_range(context, builder, sig, args):
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
 
@@ -208,6 +208,8 @@ def lower_getitem_tuple(context, builder, sig, args):
 
     outtpe = nexttpe.getitem_next(wheretpe, False)
     outval = nexttpe.lower_getitem_next(context, builder, nexttpe, wheretpe, nextval, whereval, None)
+
+    raise Exception
 
     return outtpe.lower_getitem_int(context, builder, rettpe(outtpe, numba.int64), (outval, conext.get_constant(numba.int64, 0)))
 
@@ -271,6 +273,8 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         if headtpe.ndim != 1:
             raise NotImplementedError("array.ndim != 1")
 
+        raise Exception
+
         flathead = numba.targets.arrayobj.array_ravel(context, builder, util.int64tep(headtpe), (headval,))
         lenflathead = util.arraylen(context, builder, util.int64tpe, flathead, totpe=numba.int64)
         lencarry = builder.mul(lenstarts, lenflathead)
@@ -306,9 +310,9 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
         proxyout.offsets = nextoffsets
         proxyout.content = contentval
+        if outtpe.idtpe != numba.none:
+            proxyout.id = proxyin.id
         return proxyout._getvalue()
-
-        raise NotImplementedError("ListArray.getitem_next(Array)")
 
     elif isinstance(headtpe, numba.types.Array):
         raise NotImplementedError("ListArray.getitem_next(advanced Array)")
@@ -318,6 +322,8 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
 
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     import awkward1._numba.listarray
+
+    raise Exception
 
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
     lenoffsets = util.arraylen(context, builder, arraytpe.offsetstpe, proxyin.offsets, totpe=numba.int64)

@@ -57,7 +57,7 @@ class NumpyArrayType(content.ContentType):
 
     @property
     def lower_getitem_range(self):
-        return lower_getitem_range
+        return lower_getitem
 
     @property
     def lower_getitem_next(self):
@@ -143,7 +143,10 @@ def lower_getitem(context, builder, sig, args):
     if isinstance(rettpe, NumpyArrayType):
         proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
         proxyout.array = out
-        return proxyout._getvalue()
+        if rettpe.idtpe != numba.none:
+            proxyout.id = proxyin.id
+        outval = proxyout._getvalue()
+        return outval
     else:
         return out
 
@@ -175,11 +178,15 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         raise AssertionError(headtpe)
 
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
+    import awkward1._numba.identity
+
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+
     proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)
     proxyout.array = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.arraytpe(arraytpe.arraytpe, carrytpe), (proxyin.array, carryval))
     if arraytpe.idtpe != numba.none:
-        raise NotImplementedError("NumpyArray.id != None")
+        proxyout.id = awkward1._numba.identity.lower_carry(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
+
     return proxyout._getvalue()
 
 @numba.typing.templates.infer_getattr
