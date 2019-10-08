@@ -8,7 +8,7 @@ import numba.typing.arraydecl
 import numba.typing.ctypes_utils
 
 import awkward1.layout
-from .._numba import cpu, identity, content
+from .._numba import cpu, util, identity, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof(val, c):
@@ -130,9 +130,8 @@ def lower_getitem(context, builder, sig, args):
     val, whereval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
 
-    if isinstance(wheretpe, (numba.types.EllipsisType, type(numba.typeof(numpy.newaxis)))):
-        wheretpe = numba.types.Tuple((wheretpe,))
-        whereval = context.make_tuple(builder, wheretpe, (whereval,))
+    if not isinstance(wheretpe, (numba.types.Integer, numba.types.SliceType)):
+        wheretpe, whereval = util.preprocess_slicetuple(context, builder, wheretpe, whereval)
 
     if isinstance(rettpe, NumpyArrayType):
         signature = rettpe.arraytpe(tpe.arraytpe, wheretpe)
