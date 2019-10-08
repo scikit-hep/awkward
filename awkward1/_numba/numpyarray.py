@@ -147,8 +147,7 @@ def lower_getitem(context, builder, sig, args):
         proxyout.array = out
         if rettpe.idtpe != numba.none:
             proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, rettpe.idtpe, wheretpe, proxyin.id, whereval)
-        outval = proxyout._getvalue()
-        return outval
+        return proxyout._getvalue()
     else:
         return out
 
@@ -188,7 +187,6 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     proxyout.array = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.arraytpe(arraytpe.arraytpe, carrytpe), (proxyin.array, carryval))
     if arraytpe.idtpe != numba.none:
         proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
-
     return proxyout._getvalue()
 
 @numba.typing.templates.infer_getattr

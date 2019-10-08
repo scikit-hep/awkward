@@ -193,6 +193,9 @@ def lower_getitem_range(context, builder, sig, args):
     proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
     proxyout.offsets = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe(tpe.offsetstpe, numba.types.slice2_type), (proxyin.offsets, proxysliceout._getvalue()))
     proxyout.content = proxyin.content
+    if tpe.idtpe != numba.none:
+        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
+
     out = proxyout._getvalue()
     if context.enable_nrt:
         context.nrt.incref(builder, rettpe, out)
