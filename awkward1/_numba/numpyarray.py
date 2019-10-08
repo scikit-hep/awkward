@@ -120,6 +120,8 @@ def lower_len(context, builder, sig, args):
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, type(numba.typeof(numpy.newaxis)))
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.BaseTuple)
 def lower_getitem(context, builder, sig, args):
+    import awkward1._numba.identity
+
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
@@ -135,7 +137,7 @@ def lower_getitem(context, builder, sig, args):
 
     if isinstance(wheretpe, numba.types.BaseTuple):
         out = numba.targets.arrayobj.getitem_array_tuple(context, builder, signature, (proxyin.array, whereval))
-    elif isinstance(wheretpe, (numba.types.Array, numba.types.List)):
+    elif isinstance(wheretpe, numba.types.Array):
         out = numba.targets.arrayobj.fancy_getitem_array(context, builder, signature, (proxyin.array, whereval))
     else:
         out = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, signature, (proxyin.array, whereval))
@@ -144,7 +146,7 @@ def lower_getitem(context, builder, sig, args):
         proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
         proxyout.array = out
         if rettpe.idtpe != numba.none:
-            proxyout.id = proxyin.id
+            proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, rettpe.idtpe, wheretpe, proxyin.id, whereval)
         outval = proxyout._getvalue()
         return outval
     else:
@@ -185,7 +187,7 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)
     proxyout.array = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.arraytpe(arraytpe.arraytpe, carrytpe), (proxyin.array, carryval))
     if arraytpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identity.lower_carry(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
+        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
 
     return proxyout._getvalue()
 

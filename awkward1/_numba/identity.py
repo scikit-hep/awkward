@@ -80,35 +80,20 @@ def lower_len(context, builder, sig, args):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     return numba.targets.arrayobj.array_len(context, builder, numba.types.intp(tpe.arraytpe), (proxyin.array,))
 
-def lower_range(context, builder, idtpe, wheretpe, idval, whereval):
+def lower_getitem_any(context, builder, idtpe, wheretpe, idval, whereval):
     proxyin = numba.cgutils.create_struct_proxy(idtpe)(context, builder, value=idval)
 
     proxyout = numba.cgutils.create_struct_proxy(idtpe)(context, builder)
     proxyout.ref = proxyin.ref
     proxyout.fieldloc = proxyin.fieldloc
-    proxyout.array = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, idtpe.arraytpe(idtpe.arraytpe, wheretpe), (proxyin.array, whereval))
-    outval = proxyout._getvalue()
+    if isinstance(wheretpe, numba.types.BaseTuple):
+        proxyout.array = numba.targets.arrayobj.getitem_array_tuple(context, builder, idtpe.arraytpe(idtpe.arraytpe, wheretpe), (proxyin.array, whereval))
+    elif isinstance(wheretpe, numba.types.Array):
+        proxyout.array = numba.targets.arrayobj.fancy_getitem_array(context, builder, idtpe.arraytpe(idtpe.arraytpe, wheretpe), (proxyin.array, whereval))
+    else:
+        proxyout.array = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, idtpe.arraytpe(idtpe.arraytpe, wheretpe), (proxyin.array, whereval))
 
-    if context.enable_nrt:
-        context.nrt.incref(builder, idtpe.fieldloctpe, proxyout.fieldloc)
-        context.nrt.incref(builder, idtpe.arraytpe, proxyout.array)
-        context.nrt.incref(builder, idtpe, outval)
-    return outval
-
-def lower_carry(context, builder, idtpe, carrytpe, idval, carryval):
-    proxyin = numba.cgutils.create_struct_proxy(idtpe)(context, builder, value=idval)
-
-    proxyout = numba.cgutils.create_struct_proxy(idtpe)(context, builder)
-    proxyout.ref = proxyin.ref
-    proxyout.fieldloc = proxyin.fieldloc
-    proxyout.array = numba.targets.arrayobj.fancy_getitem_array(context, builder, idtpe.arraytpe(idtpe.arraytpe, carrytpe), (proxyin.array, carryval))
-    outval = proxyout._getvalue()
-
-    if context.enable_nrt:
-        context.nrt.incref(builder, idtpe.fieldloctpe, proxyout.fieldloc)
-        context.nrt.incref(builder, idtpe.arraytpe, proxyout.array)
-        context.nrt.incref(builder, idtpe, outval)
-    return outval
+    return proxyout._getvalue()
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):

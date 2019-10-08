@@ -206,7 +206,7 @@ def lower_getitem_range(context, builder, sig, args):
     proxyout.stops = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.stopstpe(tpe.stopstpe, wheretpe), (proxyin.stops, whereval))
     proxyout.content = proxyin.content
     if not isinstance(tpe.idtpe, numba.types.NoneType):
-        proxyout.id = awkward1._numba.identity.lower_range(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
+        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
 
     out = proxyout._getvalue()
     if context.enable_nrt:
@@ -360,7 +360,7 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     proxyout.stops = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.stopstpe(arraytpe.stopstpe, carrytpe), (proxyin.stops, carryval))
     proxyout.content = proxyin.content
     if arraytpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identity.lower_carry(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
+        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
     return proxyout._getvalue()
 
 @numba.typing.templates.infer_getattr
