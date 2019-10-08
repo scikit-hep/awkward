@@ -220,6 +220,17 @@ def lower_getitem_tuple(context, builder, sig, args):
 
     return outtpe.lower_getitem_int(context, builder, rettpe(outtpe, numba.int64), (outval, context.get_constant(numba.int64, 0)))
 
+@numba.extending.lower_builtin(operator.getitem, ListArrayType, numba.types.Array)
+@numba.extending.lower_builtin(operator.getitem, ListArrayType, numba.types.List)
+@numba.extending.lower_builtin(operator.getitem, ListArrayType, numba.types.EllipsisType)
+@numba.extending.lower_builtin(operator.getitem, ListArrayType, type(numba.typeof(numpy.newaxis)))
+def lower_getitem_other(context, builder, sig, args):
+    rettpe, (arraytpe, wheretpe) = sig.return_type, sig.args
+    arrayval, whereval = args
+    wrappedtpe = numba.types.Tuple((wheretpe,))
+    wrappedval = context.make_tuple(builder, wrappedtpe, (whereval,))
+    return lower_getitem_tuple(context, builder, rettpe(arraytpe, wrappedtpe), (arrayval, wrappedval))
+
 def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval, advanced):
     import awkward1._numba.listoffsetarray
 

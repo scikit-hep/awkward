@@ -211,6 +211,17 @@ def lower_getitem_tuple(context, builder, sig, args):
 
     return outtpe.lower_getitem_int(context, builder, rettpe(outtpe, numba.int64), (outval, conext.get_constant(numba.int64, 0)))
 
+@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.Array)
+@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.List)
+@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.EllipsisType)
+@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, type(numba.typeof(numpy.newaxis)))
+def lower_getitem_other(context, builder, sig, args):
+    rettpe, (arraytpe, wheretpe) = sig.return_type, sig.args
+    arrayval, whereval = args
+    wrappedtpe = numba.types.Tuple((wheretpe,))
+    wrappedval = context.make_tuple(builder, wrappedtpe, (whereval,))
+    return lower_getitem_tuple(context, builder, rettpe(arraytpe, wrappedtpe), (arrayval, wrappedval))
+
 def starts_stops(context, builder, offsetstpe, offsetsval, lenstarts, lenoffsets):
     proxyslicestarts = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
     proxyslicestarts.start = context.get_constant(numba.intp, 0)
