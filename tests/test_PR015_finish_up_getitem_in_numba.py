@@ -11,7 +11,7 @@ import awkward1
 
 py27 = (sys.version_info[0] < 3)
 
-def test_development64():
+def test_getitem_array_64():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     listarray = awkward1.layout.ListArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6])), awkward1.layout.Index64(numpy.array([3, 3, 5, 6, 10])), content)
 
@@ -38,7 +38,7 @@ def test_development64():
     assert numpy.asarray(f2(listarray).id).tolist() == [[2, 1], [0, 1], [0, 1], [4, 1]]
     assert numpy.asarray(f3(listarray).id).tolist() == [[2, 1], [0, 2], [0, 0], [4, 0]]
 
-def test_development32():
+def test_getitem_array_32():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     listarray = awkward1.layout.ListArray32(awkward1.layout.Index32(numpy.array([0, 3, 3, 5, 6], numpy.int32)), awkward1.layout.Index32(numpy.array([3, 3, 5, 6, 10], numpy.int32)), content)
 
@@ -64,6 +64,20 @@ def test_development32():
     assert numpy.asarray(f1(listarray).id).tolist() == [[2], [0], [0], [1]]
     assert numpy.asarray(f2(listarray).id).tolist() == [[2, 1], [0, 1], [0, 1], [4, 1]]
     assert numpy.asarray(f3(listarray).id).tolist() == [[2, 1], [0, 2], [0, 0], [4, 0]]
+
+def test_deep_numpy():
+    content = awkward1.layout.NumpyArray(numpy.array([[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]))
+    listarray = awkward1.layout.ListArray64(awkward1.layout.Index64(numpy.array([0, 3, 3])), awkward1.layout.Index64(numpy.array([3, 3, 5])), content)
+    assert awkward1.tolist(listarray) == [[[0.0, 1.1], [2.2, 3.3], [4.4, 5.5]], [], [[6.6, 7.7], [8.8, 9.9]]]
+
+    # @numba.njit
+    # def f1(q):
+    #     return q[[2, 0, 0, 1]]
+    #
+    # print(f1(content))
+    #
+    # raise Exception
+
 
 content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
 offsetsA = numpy.arange(0, 2*3*5 + 5, 5)

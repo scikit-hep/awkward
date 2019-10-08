@@ -25,13 +25,17 @@ class NumpyArrayType(content.ContentType):
         return self.arraytpe.ndim
 
     def getitem_int(self):
-        return self.getitem_tuple(numba.types.Tuple((numba.int64,)))
+        return self.getitem_tuple(numba.int64)
 
     def getitem_range(self):
-        return self.getitem_tuple(numba.types.Tuple((numba.types.slice2_type,)))
+        return self.getitem_tuple(numba.types.slice2_type)
 
     def getitem_tuple(self, wheretpe):
-        return self.getitem_next(wheretpe, False)
+        outtpe = numba.typing.arraydecl.get_array_index_type(self.arraytpe, wheretpe).result
+        if isinstance(outtpe, numba.types.Array):
+            return NumpyArrayType(outtpe, self.idtpe)
+        else:
+            return outtpe
 
     def getitem_next(self, wheretpe, isadvanced):
         if len(wheretpe.types) > self.arraytpe.ndim:
