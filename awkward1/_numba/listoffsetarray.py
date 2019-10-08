@@ -209,8 +209,6 @@ def lower_getitem_tuple(context, builder, sig, args):
     outtpe = nexttpe.getitem_next(wheretpe, False)
     outval = nexttpe.lower_getitem_next(context, builder, nexttpe, wheretpe, nextval, whereval, None)
 
-    raise Exception
-
     return outtpe.lower_getitem_int(context, builder, rettpe(outtpe, numba.int64), (outval, conext.get_constant(numba.int64, 0)))
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.Array)
@@ -272,8 +270,6 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     elif isinstance(headtpe, numba.types.Array) and advanced is None:
         if headtpe.ndim != 1:
             raise NotImplementedError("array.ndim != 1")
-
-        raise Exception
 
         flathead = numba.targets.arrayobj.array_ravel(context, builder, util.int64tep(headtpe), (headval,))
         lenflathead = util.arraylen(context, builder, util.int64tpe, flathead, totpe=numba.int64)

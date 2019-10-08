@@ -187,10 +187,8 @@ def lower_getitem_int(context, builder, sig, args):
     proxyslice.stop = util.cast(context, builder, tpe, numba.intp, stop)
     proxyslice.step = context.get_constant(numba.intp, 1)
 
-    raise Exception
-
-    fcn = context.get_function(operator.getitem, rettpe(tpe.contenttpe, numba.types.slice2_type))
-    return fcn(builder, (proxyin.content, proxyslice._getvalue()))
+    outtpe = tpe.contenttpe.getitem_range()
+    return tpe.contenttpe.lower_getitem_range(context, builder, outtpe(tpe.contenttpe, numba.types.slice2_type), (proxyin.content, proxyslice._getvalue()))
 
 @numba.extending.lower_builtin(operator.getitem, ListArrayType, numba.types.slice2_type)
 def lower_getitem_range(context, builder, sig, args):

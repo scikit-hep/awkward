@@ -83,6 +83,14 @@ def lower_len(context, builder, sig, args):
 def lower_getitem_any(context, builder, idtpe, wheretpe, idval, whereval):
     proxyin = numba.cgutils.create_struct_proxy(idtpe)(context, builder, value=idval)
 
+    if isinstance(wheretpe, numba.types.Integer):
+        proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
+        proxyslice.start = util.cast(context, builder, wheretpe, numba.intp, whereval)
+        proxyslice.stop = builder.add(proxyslice.start, context.get_constant(numba.intp, 1))
+        proxyslice.step = context.get_constant(numba.intp, 1)
+        wheretpe = numba.types.slice2_type
+        whereval = proxyslice._getvalue()
+
     proxyout = numba.cgutils.create_struct_proxy(idtpe)(context, builder)
     proxyout.ref = proxyin.ref
     proxyout.fieldloc = proxyin.fieldloc
