@@ -40,7 +40,10 @@ class NumpyArrayType(content.ContentType):
     def getitem_next(self, wheretpe, isadvanced):
         if len(wheretpe.types) > self.arraytpe.ndim:
             raise IndexError("too many dimensions in slice")
-        numreduce = sum(1 if isinstance(x, numba.types.Integer) else 0 for x in wheretpe.types)
+        if isadvanced:
+            numreduce = sum(1 if isinstance(x, (numba.types.Integer, numba.types.Array)) else 0 for x in wheretpe.types)
+        else:
+            numreduce = sum(1 if isinstance(x, numba.types.Integer) else 0 for x in wheretpe.types)
         if numreduce < self.arraytpe.ndim:
             return NumpyArrayType(numba.types.Array(self.arraytpe.dtype, self.arraytpe.ndim - numreduce, self.arraytpe.layout), self.idtpe)
         elif numreduce == self.arraytpe.ndim:
@@ -172,34 +175,45 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             raise TypeError("too many dimensions in slice")
 
         shapeval = numba.targets.arrayobj.make_array(arraytpe.arraytpe)(context, builder, proxyin.array).shape
-        lenself, skip = numba.cgutils.unpack_tuple(builder, shapeval)[:2]
-        lenself = util.cast(context, builder, numba.intp, numba.int64, lenself)
-        skip = util.cast(context, builder, numba.intp, numba.int64, skip)
+        shapeunpacked = numba.cgutils.unpack_tuple(builder, shapeval)
+        lenself, skip = shapeunpacked[:2]
+        lennext = builder.mul(lenself, skip)
 
         carry = numba.targets.arrayobj.numpy_arange_1(context, builder, util.index64tpe(numba.int64), (lenself,))
 
-        flathead = numba.targets.arrayobj.array_ravel(context, builder, util.index64tpe(headtpe), (headval,))
-        lenflathead = util.arraylen(context, builder, util.index64tpe, flathead, totpe=numba.int64)
+        flathead = numba.targets.arrayobj.array_flatten(context, builder, util.index64tpe(headtpe), (headval,))
+        lenflathead = util.arraylen(context, builder, util.index64tpe, flathead)
 
-        nextcarry = util.newindex64(context, builder, numba.int64, lenself)
-        nextadvanced = util.newindex64(context, builder, numba.int64, lenself)
+        util.call(context, builder, cpu.kernels.awkward_regularize_arrayslice_64,
+            (util.arrayptr(context, builder, util.index64tpe, flathead),
+             util.cast(context, builder, numba.intp, numba.int64, lenflathead),
+             util.cast(context, builder, numba.intp, numba.int64, skip)),
+            "in {}, indexing error".format(arraytpe.shortname))
 
+        nextcarry = util.newindex64(context, builder, numba.intp, lenself)
         util.call(context, builder, cpu.kernels.awkward_numpyarray_getitem_next_array_advanced_64,
             (util.arrayptr(context, builder, util.index64tpe, nextcarry),
              util.arrayptr(context, builder, util.index64tpe, carry),
              util.arrayptr(context, builder, util.index64tpe, advanced),
              util.arrayptr(context, builder, util.index64tpe, flathead),
-             lenself,
-             skip),
+             util.cast(context, builder, numba.intp, numba.int64, lenself),
+             util.cast(context, builder, numba.intp, numba.int64, skip)),
             "in {}, indexing error".format(arraytpe.shortname))
 
-        if len(tailtpe.types) != 0:
-            raise NotImplementedError("len(tail) != 0")
+        nextshapetpe = numba.types.UniTuple(numba.intp, arraytpe.arraytpe.ndim - 1)
+        nextshapeval = context.make_tuple(builder, nextshapetpe, [lennext] + shapeunpacked[2:])
 
+        nextarraytpe = numba.types.Array(arraytpe.arraytpe.dtype, arraytpe.arraytpe.ndim - 1, arraytpe.arraytpe.layout)
+        nextarrayval = numba.targets.arrayobj.array_reshape(context, builder, nextarraytpe(arraytpe.arraytpe, nextshapetpe), (proxyin.array, nextshapeval))
 
-        raise Exception("HERE")
+        nexttpe = NumpyArrayType(nextarraytpe, arraytpe.idtpe)
+        proxynext = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
+        proxynext.array = nextarrayval
+        if arraytpe.idtpe != numba.none:
+            proxynext.id = proxyin.id
 
-
+        outval = lower_carry(context, builder, nexttpe, util.index64tpe, proxynext._getvalue(), nextcarry)
+        return lower_getitem_next(context, builder, nexttpe, tailtpe, outval, tailval, advanced)
 
     else:
         proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
@@ -212,14 +226,14 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         outtpe = numba.typing.arraydecl.get_array_index_type(arraytpe.arraytpe, wheretpe).result
         outval = numba.targets.arrayobj.getitem_array_tuple(context, builder, outtpe(arraytpe.arraytpe, wheretpe), (proxyin.array, whereval))
 
-    if isinstance(outtpe, numba.types.Array):
-        proxyout = numba.cgutils.create_struct_proxy(NumpyArrayType(outtpe, arraytpe.idtpe))(context, builder)
-        proxyout.array = outval
-        if arraytpe.idtpe != numba.none:
-            proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, arraytpe.idtpe, wheretpe, proxyin.id, whereval)
-        return proxyout._getvalue()
-    else:
-        return out
+        if isinstance(outtpe, numba.types.Array):
+            proxyout = numba.cgutils.create_struct_proxy(NumpyArrayType(outtpe, arraytpe.idtpe))(context, builder)
+            proxyout.array = outval
+            if arraytpe.idtpe != numba.none:
+                proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, arraytpe.idtpe, wheretpe, proxyin.id, whereval)
+            return proxyout._getvalue()
+        else:
+            return out
 
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     import awkward1._numba.identity

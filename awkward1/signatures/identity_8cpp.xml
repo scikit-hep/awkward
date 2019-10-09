@@ -15,14 +15,14 @@
       </node>
     </incdepgraph>
       <sectiondef kind="func">
-      <memberdef kind="function" id="identity_8cpp_1af01b93c499b2d5236e2c03005e56c9b0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="identity_8cpp_1a7dd39cb44c3126176d60647ee1b1ac07" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_new_identity</definition>
+        <type>Error</type>
+        <definition>Error awkward_new_identity</definition>
         <argsstring>(T *toptr, int64_t length)</argsstring>
         <name>awkward_new_identity</name>
         <param>
@@ -39,11 +39,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/identity.cpp" line="6" column="6" bodyfile="src/cpu-kernels/identity.cpp" bodystart="6" bodyend="10"/>
+        <location file="src/cpu-kernels/identity.cpp" line="6" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="6" bodyend="11"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1a438e808e097ce8bc8b938ca32f9b084b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_new_identity32</definition>
+      <memberdef kind="function" id="identity_8cpp_1a692cff41e21761fe205e172218679306" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_new_identity32</definition>
         <argsstring>(int32_t *toptr, int64_t length)</argsstring>
         <name>awkward_new_identity32</name>
         <param>
@@ -60,11 +60,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/identity.cpp" line="11" column="6" bodyfile="src/cpu-kernels/identity.cpp" bodystart="11" bodyend="13"/>
+        <location file="src/cpu-kernels/identity.cpp" line="12" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="12" bodyend="14"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1a85e2d6255623d349a0e78d456ef49bf4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_new_identity64</definition>
+      <memberdef kind="function" id="identity_8cpp_1ada6b7237845c67c233026820565bf73d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_new_identity64</definition>
         <argsstring>(int64_t *toptr, int64_t length)</argsstring>
         <name>awkward_new_identity64</name>
         <param>
@@ -81,11 +81,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/identity.cpp" line="14" column="6" bodyfile="src/cpu-kernels/identity.cpp" bodystart="14" bodyend="16"/>
+        <location file="src/cpu-kernels/identity.cpp" line="15" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="15" bodyend="17"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1ace1277215355db8acaf41066f399d95e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_identity32_to_identity64</definition>
+      <memberdef kind="function" id="identity_8cpp_1a8bf3c663a05ba8517386251696bd6e33" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_identity32_to_identity64</definition>
         <argsstring>(int64_t *toptr, const int32_t *fromptr, int64_t length)</argsstring>
         <name>awkward_identity32_to_identity64</name>
         <param>
@@ -106,7 +106,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/identity.cpp" line="18" column="6" bodyfile="src/cpu-kernels/identity.cpp" bodystart="18" bodyend="22"/>
+        <location file="src/cpu-kernels/identity.cpp" line="19" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="19" bodyend="24"/>
       </memberdef>
       <memberdef kind="function" id="identity_8cpp_1a7940e8286413a007a413f733f95c3c29" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -167,7 +167,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/identity.cpp" line="25" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="25" bodyend="43"/>
+        <location file="src/cpu-kernels/identity.cpp" line="27" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="27" bodyend="45"/>
       </memberdef>
       <memberdef kind="function" id="identity_8cpp_1a708cbc8cbf2212d7eb81f9e91c1a625c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -220,7 +220,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/identity.cpp" line="44" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="44" bodyend="46"/>
+        <location file="src/cpu-kernels/identity.cpp" line="46" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="46" bodyend="48"/>
       </memberdef>
       <memberdef kind="function" id="identity_8cpp_1afd07f9e094780b2cae299d896b4bf0b8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -273,7 +273,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/identity.cpp" line="47" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="47" bodyend="49"/>
+        <location file="src/cpu-kernels/identity.cpp" line="49" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="49" bodyend="51"/>
       </memberdef>
       <memberdef kind="function" id="identity_8cpp_1a87f3652476301a77cb3d42082664dbc1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -326,7 +326,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/identity.cpp" line="50" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="50" bodyend="52"/>
+        <location file="src/cpu-kernels/identity.cpp" line="52" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="52" bodyend="54"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

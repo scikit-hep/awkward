@@ -86,7 +86,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="36" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="36" bodyend="46"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="36" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="36" bodyend="47"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a9f2ca6a7d769d9983d38096abde78904" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -111,16 +111,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="47" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="47" bodyend="49"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="48" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="48" bodyend="50"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a0543490ffba6feabd0caace5a2097f4f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a0b32f8d4c12ad3479caf26f000d2f4a5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_slicearray_ravel</definition>
+        <type>Error</type>
+        <definition>Error awkward_slicearray_ravel</definition>
         <argsstring>(T *toptr, const T *fromptr, int64_t ndim, const int64_t *shape, const int64_t *strides)</argsstring>
         <name>awkward_slicearray_ravel</name>
         <param>
@@ -149,11 +149,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="52" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="52" bodyend="63"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="53" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="53" bodyend="68"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a0ad3606889eb5f420192111920db5849" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_slicearray_ravel_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1a16cce0ea90cdd11d1fddbd88dd9af3ad" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_slicearray_ravel_64</definition>
         <argsstring>(int64_t *toptr, const int64_t *fromptr, int64_t ndim, const int64_t *shape, const int64_t *strides)</argsstring>
         <name>awkward_slicearray_ravel_64</name>
         <param>
@@ -182,16 +182,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="64" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="64" bodyend="66"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="69" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="69" bodyend="71"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a1f8029bd00c5caa17e1e8da7dc786bb5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a9046531284af0c4074534d38312aae1e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_carry_arange</definition>
+        <type>Error</type>
+        <definition>Error awkward_carry_arange</definition>
         <argsstring>(T *toptr, int64_t length)</argsstring>
         <name>awkward_carry_arange</name>
         <param>
@@ -208,11 +208,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="69" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="69" bodyend="73"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="74" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="74" bodyend="79"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a1e7f8dcc8c7a908d1c524e5669e7b486" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_carry_arange_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1abc33aefb35c2e2ef20c0ec30cbb5c8b4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_carry_arange_64</definition>
         <argsstring>(int64_t *toptr, int64_t length)</argsstring>
         <name>awkward_carry_arange_64</name>
         <param>
@@ -229,7 +229,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="74" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="74" bodyend="76"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="80" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="80" bodyend="82"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a1a875fc5440b943acea6f54d6a45c3f5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -278,7 +278,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="79" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="79" bodyend="89"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="85" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="85" bodyend="95"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a08dc7949f84425100a92f83bda2ac165" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -319,7 +319,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="90" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="90" bodyend="92"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="96" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="96" bodyend="98"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a512f077c8daf5524c84b3804c0cdf6f6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -360,16 +360,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="93" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="93" bodyend="95"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="99" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="99" bodyend="101"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a77cdfd0113ea50636178166a8c471fe9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1ac846ea4e178e519a01668ac062681d70" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_numpyarray_contiguous_init</definition>
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_contiguous_init</definition>
         <argsstring>(T *toptr, int64_t skip, int64_t stride)</argsstring>
         <name>awkward_numpyarray_contiguous_init</name>
         <param>
@@ -390,11 +390,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="98" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="98" bodyend="102"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="104" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="104" bodyend="109"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a002769d7fa0acc97324ddb74e03ab431" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_numpyarray_contiguous_init_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1a7ab8e175f61b26f5c4178a00c4825a24" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_contiguous_init_64</definition>
         <argsstring>(int64_t *toptr, int64_t skip, int64_t stride)</argsstring>
         <name>awkward_numpyarray_contiguous_init_64</name>
         <param>
@@ -415,16 +415,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="103" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="103" bodyend="105"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="110" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="110" bodyend="112"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a7ba6f0a3758dbcf54fc6a5745967f5e1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1aa436e065b3b65e1f56855e30cc9e375e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_numpyarray_contiguous_copy</definition>
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_contiguous_copy</definition>
         <argsstring>(uint8_t *toptr, const uint8_t *fromptr, int64_t len, int64_t stride, int64_t offset, const T *pos)</argsstring>
         <name>awkward_numpyarray_contiguous_copy</name>
         <param>
@@ -457,11 +457,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="108" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="108" bodyend="112"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="115" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="115" bodyend="120"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1abcd546b54e77285c00b6f83a500c4449" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_numpyarray_contiguous_copy_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1a929ca539b1e62b870dda37da35a2c7f0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_contiguous_copy_64</definition>
         <argsstring>(uint8_t *toptr, const uint8_t *fromptr, int64_t len, int64_t stride, int64_t offset, const int64_t *pos)</argsstring>
         <name>awkward_numpyarray_contiguous_copy_64</name>
         <param>
@@ -494,16 +494,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="113" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="113" bodyend="115"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="121" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="121" bodyend="123"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a7737a4e4583f2bad9400876ab2ebecd8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a012d8bca45020ead8b3713ea47dd7dd7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_numpyarray_contiguous_next</definition>
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_contiguous_next</definition>
         <argsstring>(T *topos, const T *frompos, int64_t len, int64_t skip, int64_t stride)</argsstring>
         <name>awkward_numpyarray_contiguous_next</name>
         <param>
@@ -532,11 +532,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="118" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="118" bodyend="124"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="126" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="126" bodyend="133"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a8e06201b24495876845ced6430ba6de3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_numpyarray_contiguous_next_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1af676650b780ff05799fe387a855379b9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_contiguous_next_64</definition>
         <argsstring>(int64_t *topos, const int64_t *frompos, int64_t len, int64_t skip, int64_t stride)</argsstring>
         <name>awkward_numpyarray_contiguous_next_64</name>
         <param>
@@ -565,16 +565,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="125" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="125" bodyend="127"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="134" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="134" bodyend="136"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a097ba7bcd10ab6679a3a11edd9a5ba0a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a9a06d5708b75dedb4efdf2de1975dca8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_null</definition>
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_null</definition>
         <argsstring>(uint8_t *toptr, const uint8_t *fromptr, int64_t len, int64_t stride, int64_t offset, const T *pos)</argsstring>
         <name>awkward_numpyarray_getitem_next_null</name>
         <param>
@@ -607,11 +607,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="130" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="130" bodyend="134"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="139" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="139" bodyend="144"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a2b1a38a0ab7a21afe5172143044622a5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_null_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1a3da09ff1b744ab5442fedc9998266817" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_null_64</definition>
         <argsstring>(uint8_t *toptr, const uint8_t *fromptr, int64_t len, int64_t stride, int64_t offset, const int64_t *pos)</argsstring>
         <name>awkward_numpyarray_getitem_next_null_64</name>
         <param>
@@ -644,16 +644,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="135" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="135" bodyend="137"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="145" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="145" bodyend="147"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a2162666a41b75005a7b75bdf35bfbb56" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1aa9f782df302c351a8307ab974c8e1023" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_at</definition>
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_at</definition>
         <argsstring>(T *nextcarryptr, const T *carryptr, int64_t lencarry, int64_t skip, int64_t at)</argsstring>
         <name>awkward_numpyarray_getitem_next_at</name>
         <param>
@@ -682,11 +682,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="140" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="140" bodyend="144"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="150" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="150" bodyend="155"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a26bba01a61c07dacb877ddeaf078be1d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_at_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1a5f412d4560ffc73bcadb80839b5e997e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_at_64</definition>
         <argsstring>(int64_t *nextcarryptr, const int64_t *carryptr, int64_t lencarry, int64_t skip, int64_t at)</argsstring>
         <name>awkward_numpyarray_getitem_next_at_64</name>
         <param>
@@ -715,16 +715,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="145" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="145" bodyend="147"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="156" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="156" bodyend="158"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a2d4ff8571eeff929afe278f5ca802531" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a178c16e61d6e48593f60e9c8c145fee3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_range</definition>
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_range</definition>
         <argsstring>(T *nextcarryptr, const T *carryptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step)</argsstring>
         <name>awkward_numpyarray_getitem_next_range</name>
         <param>
@@ -761,11 +761,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="150" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="150" bodyend="156"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="161" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="161" bodyend="168"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a504208fd7437db4c4629529d072f4bc2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_range_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1a3adca3c781ec31b45a3c8a9a4f3c8e95" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_range_64</definition>
         <argsstring>(int64_t *nextcarryptr, const int64_t *carryptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step)</argsstring>
         <name>awkward_numpyarray_getitem_next_range_64</name>
         <param>
@@ -802,16 +802,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="157" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="157" bodyend="159"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="169" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="169" bodyend="171"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1ac3f809837f21baf62d764c215a842eab" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a2f3e5eb423881b2aa646dd3847d4dee2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_range_advanced</definition>
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_range_advanced</definition>
         <argsstring>(T *nextcarryptr, T *nextadvancedptr, const T *carryptr, const T *advancedptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step)</argsstring>
         <name>awkward_numpyarray_getitem_next_range_advanced</name>
         <param>
@@ -856,11 +856,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="162" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="162" bodyend="169"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="174" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="174" bodyend="182"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1afeecc09580650e70f9717343b9600434" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_range_advanced_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1a54f803acd949b972446ae55ca48fb81a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_range_advanced_64</definition>
         <argsstring>(int64_t *nextcarryptr, int64_t *nextadvancedptr, const int64_t *carryptr, const int64_t *advancedptr, int64_t lencarry, int64_t lenhead, int64_t skip, int64_t start, int64_t step)</argsstring>
         <name>awkward_numpyarray_getitem_next_range_advanced_64</name>
         <param>
@@ -905,16 +905,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="170" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="170" bodyend="172"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="183" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="183" bodyend="185"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a72958a175a5efac1428865da39f7b5fe" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1ad635d33b2dd302eba2c73f6a2b96132f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_array</definition>
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_array</definition>
         <argsstring>(T *nextcarryptr, T *nextadvancedptr, const T *carryptr, const T *flatheadptr, int64_t lencarry, int64_t lenflathead, int64_t skip)</argsstring>
         <name>awkward_numpyarray_getitem_next_array</name>
         <param>
@@ -951,11 +951,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="175" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="175" bodyend="182"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="188" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="188" bodyend="196"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a04ce12918d0360adde02cd7dd2a55355" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_array_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1af91de98ee4da3fc29d910b532a268a19" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_array_64</definition>
         <argsstring>(int64_t *nextcarryptr, int64_t *nextadvancedptr, const int64_t *carryptr, const int64_t *flatheadptr, int64_t lencarry, int64_t lenflathead, int64_t skip)</argsstring>
         <name>awkward_numpyarray_getitem_next_array_64</name>
         <param>
@@ -992,16 +992,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="183" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="183" bodyend="185"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="197" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="197" bodyend="199"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a724883942a4956af5ae17462b3de7fd9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1aff8d9de200cfd0e8c9c412ab7e3801ec" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_array_advanced</definition>
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_array_advanced</definition>
         <argsstring>(T *nextcarryptr, const T *carryptr, const T *advancedptr, const T *flatheadptr, int64_t lencarry, int64_t skip)</argsstring>
         <name>awkward_numpyarray_getitem_next_array_advanced</name>
         <param>
@@ -1034,11 +1034,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="188" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="188" bodyend="192"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="202" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="202" bodyend="214"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a16140cf26f707e4b71c152f8c6376132" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_numpyarray_getitem_next_array_advanced_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1a2e2cff26f34d5112a8e2a32450d573f3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_numpyarray_getitem_next_array_advanced_64</definition>
         <argsstring>(int64_t *nextcarryptr, const int64_t *carryptr, const int64_t *advancedptr, const int64_t *flatheadptr, int64_t lencarry, int64_t skip)</argsstring>
         <name>awkward_numpyarray_getitem_next_array_advanced_64</name>
         <param>
@@ -1071,7 +1071,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="193" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="193" bodyend="195"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="215" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="215" bodyend="217"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a41b0955f91277fa11060d64364100d33" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1120,7 +1120,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="198" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="198" bodyend="211"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="220" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="220" bodyend="233"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a489518e2b93f98620d5bd658630c0c80" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -1161,7 +1161,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="212" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="212" bodyend="214"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="234" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="234" bodyend="236"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1abef2dff7eac65f5bef85d72727cc6c65" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -1202,16 +1202,16 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="215" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="215" bodyend="217"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="237" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="237" bodyend="239"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a7d95905a1236d7f567a49d041273a584" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a67fcc2466389188bec7a742c565eca67" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename C</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_listarray_getitem_next_range_carrylength</definition>
+        <type>Error</type>
+        <definition>Error awkward_listarray_getitem_next_range_carrylength</definition>
         <argsstring>(int64_t *carrylength, const C *fromstarts, const C *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
         <name>awkward_listarray_getitem_next_range_carrylength</name>
         <param>
@@ -1256,11 +1256,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="220" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="220" bodyend="238"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="242" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="242" bodyend="261"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a836fcc02db5b212d17b4f9cd7b6e764d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_listarray32_getitem_next_range_carrylength</definition>
+      <memberdef kind="function" id="getitem_8cpp_1aa0abc977f8e0c544d255a49783e1d664" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray32_getitem_next_range_carrylength</definition>
         <argsstring>(int64_t *carrylength, const int32_t *fromstarts, const int32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
         <name>awkward_listarray32_getitem_next_range_carrylength</name>
         <param>
@@ -1305,11 +1305,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="239" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="239" bodyend="241"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="262" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="262" bodyend="264"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a3353b3b098b98a1b6dba1630bfe8c010" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_listarray64_getitem_next_range_carrylength</definition>
+      <memberdef kind="function" id="getitem_8cpp_1abaf47bc1a4f120752ad286eec1f1dbee" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray64_getitem_next_range_carrylength</definition>
         <argsstring>(int64_t *carrylength, const int64_t *fromstarts, const int64_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
         <name>awkward_listarray64_getitem_next_range_carrylength</name>
         <param>
@@ -1354,9 +1354,9 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="242" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="242" bodyend="244"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="265" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="265" bodyend="267"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1afb2b6726c0ac13277df801e5ab13b630" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1ac80be75daf4723aeee8aafeb459c3d46" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename C</type>
@@ -1365,8 +1365,8 @@
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_listarray_getitem_next_range</definition>
+        <type>Error</type>
+        <definition>Error awkward_listarray_getitem_next_range</definition>
         <argsstring>(C *tooffsets, T *tocarry, const C *fromstarts, const C *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
         <name>awkward_listarray_getitem_next_range</name>
         <param>
@@ -1415,11 +1415,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="248" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="248" bodyend="270"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="270" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="270" bodyend="293"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1ae1dc1c096db49e69701d85fc9c5c7719" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_listarray32_getitem_next_range_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1a3ef2ac0d6a2162a9ee9a8349dd7438b6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray32_getitem_next_range_64</definition>
         <argsstring>(int32_t *tooffsets, int64_t *tocarry, const int32_t *fromstarts, const int32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
         <name>awkward_listarray32_getitem_next_range_64</name>
         <param>
@@ -1468,11 +1468,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="271" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="271" bodyend="273"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="294" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="294" bodyend="296"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a287533cf83746b25293cbd36e7bded96" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_listarray64_getitem_next_range_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1a3431237f8ec2998fc70329a0bfc5628c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray64_getitem_next_range_64</definition>
         <argsstring>(int64_t *tooffsets, int64_t *tocarry, const int64_t *fromstarts, const int64_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
         <name>awkward_listarray64_getitem_next_range_64</name>
         <param>
@@ -1521,9 +1521,9 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="274" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="274" bodyend="276"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="297" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="297" bodyend="299"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a36fbbba3da97f5c1cbb005c132bf3e23" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1ac4011afba6025e590b6770224cb478cb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename C</type>
@@ -1532,8 +1532,8 @@
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_listarray_getitem_next_range_counts</definition>
+        <type>Error</type>
+        <definition>Error awkward_listarray_getitem_next_range_counts</definition>
         <argsstring>(int64_t *total, const C *fromoffsets, int64_t lenstarts)</argsstring>
         <name>awkward_listarray_getitem_next_range_counts</name>
         <param>
@@ -1554,11 +1554,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="279" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="279" bodyend="284"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="302" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="302" bodyend="308"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a44a066c4dd464934491a33333a9a9a9f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_listarray32_getitem_next_range_counts_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1a3cd565be6eff29458da9cf4574e4aec5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray32_getitem_next_range_counts_64</definition>
         <argsstring>(int64_t *total, const int32_t *fromoffsets, int64_t lenstarts)</argsstring>
         <name>awkward_listarray32_getitem_next_range_counts_64</name>
         <param>
@@ -1579,11 +1579,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="285" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="285" bodyend="287"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="309" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="309" bodyend="311"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a5bfb6ae56f3f3f9332671cb1431a67d4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_listarray64_getitem_next_range_counts_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1af5bb9a4166dfa32d84fe73b8b827954e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray64_getitem_next_range_counts_64</definition>
         <argsstring>(int64_t *total, const int64_t *fromoffsets, int64_t lenstarts)</argsstring>
         <name>awkward_listarray64_getitem_next_range_counts_64</name>
         <param>
@@ -1604,9 +1604,9 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="288" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="288" bodyend="290"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="312" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="312" bodyend="314"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a907f8b42ba605ad6cbad42cffaa7d43d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1abe238e91b03782866d7e5ab10d0f64ad" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename C</type>
@@ -1615,8 +1615,8 @@
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_listarray_getitem_next_range_spreadadvanced</definition>
+        <type>Error</type>
+        <definition>Error awkward_listarray_getitem_next_range_spreadadvanced</definition>
         <argsstring>(T *toadvanced, const T *fromadvanced, const C *fromoffsets, int64_t lenstarts)</argsstring>
         <name>awkward_listarray_getitem_next_range_spreadadvanced</name>
         <param>
@@ -1641,11 +1641,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="293" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="293" bodyend="300"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="317" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="317" bodyend="325"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a2f5d94f7de10795de3d852630de6d643" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_listarray32_getitem_next_range_spreadadvanced_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1adfe3a5abb34822d626ceac8c65f19832" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray32_getitem_next_range_spreadadvanced_64</definition>
         <argsstring>(int64_t *toadvanced, const int64_t *fromadvanced, const int32_t *fromoffsets, int64_t lenstarts)</argsstring>
         <name>awkward_listarray32_getitem_next_range_spreadadvanced_64</name>
         <param>
@@ -1670,11 +1670,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="301" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="301" bodyend="303"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="326" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="326" bodyend="328"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a7b1c7eb8cd1abed4cebde7d96882a4b9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_listarray64_getitem_next_range_spreadadvanced_64</definition>
+      <memberdef kind="function" id="getitem_8cpp_1abe492091dc60f74c3df5a1c5abe50792" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray64_getitem_next_range_spreadadvanced_64</definition>
         <argsstring>(int64_t *toadvanced, const int64_t *fromadvanced, const int64_t *fromoffsets, int64_t lenstarts)</argsstring>
         <name>awkward_listarray64_getitem_next_range_spreadadvanced_64</name>
         <param>
@@ -1699,7 +1699,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="304" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="304" bodyend="306"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="329" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="329" bodyend="331"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1acc120c3c4a674e0dfceaf459c4d62252" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1764,7 +1764,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="309" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="309" bodyend="333"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="334" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="334" bodyend="358"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a6ec7b77e680981f22bf083bb676ccc01" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -1821,7 +1821,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="334" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="334" bodyend="336"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="359" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="359" bodyend="361"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1af35abdabe9c39d6fdd6ef1e9890dbd89" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -1878,7 +1878,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="337" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="337" bodyend="339"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="362" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="362" bodyend="364"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a05cedfd06e695d8370b8f9d3883867d7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1943,7 +1943,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="342" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="342" bodyend="365"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="367" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="367" bodyend="390"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a4e94a81c0bdae571db5f767aef52f1fc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -2000,7 +2000,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="366" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="366" bodyend="368"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="391" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="391" bodyend="393"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a9168561c0b444beb08b7bf296e5ac899" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>Error</type>
@@ -2057,9 +2057,9 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="369" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="369" bodyend="371"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="394" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="394" bodyend="396"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a774029d664b139602a2283ead4da1197" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a4224ccf010d94c447efb8f9bacd6986a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename C</type>
@@ -2068,9 +2068,9 @@
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>void</type>
-        <definition>void awkward_listarray_getitem_carry</definition>
-        <argsstring>(C *tostarts, C *tostops, const C *fromstarts, const C *fromstops, const T *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lencarry)</argsstring>
+        <type>Error</type>
+        <definition>Error awkward_listarray_getitem_carry</definition>
+        <argsstring>(C *tostarts, C *tostops, const C *fromstarts, const C *fromstops, const T *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry)</argsstring>
         <name>awkward_listarray_getitem_carry</name>
         <param>
           <type>C *</type>
@@ -2102,6 +2102,10 @@
         </param>
         <param>
           <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
           <declname>lencarry</declname>
         </param>
         <briefdescription>
@@ -2110,12 +2114,12 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="374" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="374" bodyend="379"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="399" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="399" bodyend="408"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a3208612f1b49aecbd8607b3fa00253e7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_listarray32_getitem_carry_64</definition>
-        <argsstring>(int32_t *tostarts, int32_t *tostops, const int32_t *fromstarts, const int32_t *fromstops, const int64_t *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lencarry)</argsstring>
+      <memberdef kind="function" id="getitem_8cpp_1a8e6426aeb4b36351a5a2acbe0e8909e2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray32_getitem_carry_64</definition>
+        <argsstring>(int32_t *tostarts, int32_t *tostops, const int32_t *fromstarts, const int32_t *fromstops, const int64_t *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry)</argsstring>
         <name>awkward_listarray32_getitem_carry_64</name>
         <param>
           <type>int32_t *</type>
@@ -2147,6 +2151,10 @@
         </param>
         <param>
           <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
           <declname>lencarry</declname>
         </param>
         <briefdescription>
@@ -2155,12 +2163,12 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="380" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="380" bodyend="382"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="409" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="409" bodyend="411"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a19eaa3ef36967eca573835fb3aa28927" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>void</type>
-        <definition>void awkward_listarray64_getitem_carry_64</definition>
-        <argsstring>(int64_t *tostarts, int64_t *tostops, const int64_t *fromstarts, const int64_t *fromstops, const int64_t *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lencarry)</argsstring>
+      <memberdef kind="function" id="getitem_8cpp_1a36e50f491823e64a55c0dae418d60abf" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error awkward_listarray64_getitem_carry_64</definition>
+        <argsstring>(int64_t *tostarts, int64_t *tostops, const int64_t *fromstarts, const int64_t *fromstops, const int64_t *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry)</argsstring>
         <name>awkward_listarray64_getitem_carry_64</name>
         <param>
           <type>int64_t *</type>
@@ -2192,6 +2200,10 @@
         </param>
         <param>
           <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
           <declname>lencarry</declname>
         </param>
         <briefdescription>
@@ -2200,7 +2212,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="383" column="6" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="383" bodyend="385"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="412" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="412" bodyend="414"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

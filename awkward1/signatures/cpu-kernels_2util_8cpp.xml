@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
+  <compounddef id="cpu-kernels_2util_8cpp" kind="file" language="C++">
+    <compoundname>util.cpp</compoundname>
+    <includes local="no">cstring</includes>
+    <includes local="yes">awkward/cpu-kernels/util.h</includes>
+    <incdepgraph>
+      <node id="3">
+        <label>awkward/cpu-kernels/util.h</label>
+      </node>
+      <node id="1">
+        <label>src/cpu-kernels/util.cpp</label>
+        <link refid="cpu-kernels_2util_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>cstring</label>
+      </node>
+    </incdepgraph>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="cpu-kernels_2util_8cpp_1a21deb91e044295ebec4e533139c804ba" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error success</definition>
+        <argsstring>()</argsstring>
+        <name>success</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/util.cpp" line="7" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="7" bodyend="14"/>
+      </memberdef>
+      <memberdef kind="function" id="cpu-kernels_2util_8cpp_1a525c8383a6f1519e9c905538a0def33f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Error</type>
+        <definition>Error failure</definition>
+        <argsstring>(const char *str, int64_t location, int64_t attempt)</argsstring>
+        <name>failure</name>
+        <param>
+          <type>const char *</type>
+          <declname>str</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>location</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>attempt</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/util.cpp" line="16" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="16" bodyend="23"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/cpu-kernels/util.cpp"/>
+  </compounddef>
+</doxygen>

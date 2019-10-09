@@ -90,19 +90,23 @@ def test_deep_numpy():
 
     assert awkward1.tolist(f3(listarray)) == [[8.8, 9.9], [4.4, 5.5], [0.0, 1.1], [6.6, 7.7]]
 
-def test_current():
-    content = awkward1.layout.NumpyArray(numpy.array([[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]))
-    listarray = awkward1.layout.ListArray64(awkward1.layout.Index64(numpy.array([0, 3, 3])), awkward1.layout.Index64(numpy.array([3, 3, 5])), content)
-
     @numba.njit
     def f4(q):
-        return q[[2, 0, 0, -1], [1, -1, 0, 0], [0, 0, 0, 0]]
+        return q[[2, 0, 0, -1], [1, -1, 0, 0], -1]
 
-    # [[8.8, 9.9], [4.4, 5.5], [0.0, 1.1], [6.6, 7.7]]
+    assert awkward1.tolist(f4(listarray)) == [9.9, 5.5, 1.1, 7.7]
 
-    print(awkward1.tolist(f4(listarray)))
+    @numba.njit
+    def f5(q):
+        return q[[2, 0, 0, -1], [1, -1, 0, 0], -1:]
 
-    raise Exception
+    assert awkward1.tolist(f5(listarray)) == [[9.9], [5.5], [1.1], [7.7]]
+
+    @numba.njit
+    def f6(q):
+        return q[[2, 0, 0, -1], [1, -1, 0, 0], [0, 1, 0, 1]]
+
+    assert awkward1.tolist(f6(listarray)) == [8.8, 5.5, 0.0, 7.7]
 
 content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
 offsetsA = numpy.arange(0, 2*3*5 + 5, 5)

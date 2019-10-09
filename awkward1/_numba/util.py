@@ -1,14 +1,26 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+import sys
+
 import numpy
 import numba
 import llvmlite.ir.types
 
 from .._numba import cpu
 
+py27 = (sys.version_info[0] < 3)
+
 RefType = numba.int64
 
 index64tpe = numba.types.Array(numba.int64, 1, "C")
+
+if not py27:
+    exec("""
+def debug(context, builder, *args):
+    assert len(args) % 2 == 0
+    tpes, vals = args[0::2], args[1::2]
+    context.get_function(print, numba.none(*tpes))(builder, tuple(vals))
+""", globals())
 
 def cast(context, builder, fromtpe, totpe, val):
     if fromtpe.bitwidth < totpe.bitwidth:

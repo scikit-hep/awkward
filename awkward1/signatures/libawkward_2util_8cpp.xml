@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
+  <compounddef id="libawkward_2util_8cpp" kind="file" language="C++">
+    <compoundname>util.cpp</compoundname>
+    <includes local="no">cassert</includes>
+    <includes local="no">sstream</includes>
+    <includes local="yes">awkward/util.h</includes>
+    <includes local="yes">awkward/Identity.h</includes>
+    <incdepgraph>
+      <node id="1">
+        <label>src/libawkward/util.cpp</label>
+        <link refid="libawkward_2util_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>awkward/util.h</label>
+      </node>
+      <node id="2">
+        <label>cassert</label>
+      </node>
+      <node id="5">
+        <label>awkward/Identity.h</label>
+      </node>
+      <node id="3">
+        <label>sstream</label>
+      </node>
+    </incdepgraph>
+    <innernamespace refid="namespaceawkward">awkward</innernamespace>
+    <innernamespace refid="namespaceawkward_1_1util">awkward::util</innernamespace>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a6abdb46672c5df0d08d26e373626b9dc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward::util::handle_error</definition>
+        <argsstring>(const Error &amp;err, const std::string classname, const Identity *id)</argsstring>
+        <name>handle_error</name>
+        <param>
+          <type>const Error &amp;</type>
+          <declname>err</declname>
+        </param>
+        <param>
+          <type>const std::string</type>
+          <declname>classname</declname>
+        </param>
+        <param>
+          <type>const Identity *</type>
+          <declname>id</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="11" column="10" bodyfile="src/libawkward/util.cpp" bodystart="11" bodyend="30"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/libawkward/util.cpp"/>
+  </compounddef>
+</doxygen>
