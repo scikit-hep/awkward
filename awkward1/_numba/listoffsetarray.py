@@ -247,17 +247,17 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     if len(wheretpe.types) == 0:
         return arrayval
 
+    headtpe = wheretpe.types[0]
+    tailtpe = numba.types.Tuple(wheretpe.types[1:])
+    headval = numba.cgutils.unpack_tuple(builder, whereval)[0]
+    tailval = context.make_tuple(builder, tailtpe, numba.cgutils.unpack_tuple(builder, whereval)[1:])
+
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
     lenoffsets = util.arraylen(context, builder, arraytpe.offsetstpe, proxyin.offsets, totpe=numba.int64)
     lenstarts = builder.sub(lenoffsets, context.get_constant(numba.int64, 1))
     lencontent = util.arraylen(context, builder, arraytpe.contenttpe, proxyin.content, totpe=numba.int64)
 
     starts, stops = starts_stops(context, builder, tpe.offsetstpe, proxyin.offsets, lenstarts, lenoffsets)
-
-    headtpe = wheretpe.types[0]
-    tailtpe = numba.types.Tuple(wheretpe.types[1:])
-    headval = numba.cgutils.unpack_tuple(builder, whereval)[0]
-    tailval = context.make_tuple(builder, tailtpe, numba.cgutils.unpack_tuple(builder, whereval)[1:])
 
     if isinstance(headtpe, numba.types.Integer):
         raise NotImplementedError("ListArray.getitem_next(int)")

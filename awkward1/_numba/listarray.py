@@ -173,18 +173,11 @@ def lower_getitem_int(context, builder, sig, args):
     val, whereval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
 
-    if tpe.bitwidth == 32:
-        starttpe, stoptpe = numba.int32, numba.int32
-    elif tpe.bitwidth == 64:
-        starttpe, stoptpe = numba.int64, numba.int64
-    else:
-        raise AssertionError("unrecognized bitwidth")
-
-    start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, starttpe(tpe.startstpe, wheretpe), (proxyin.starts, whereval))
-    stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, stoptpe(tpe.stopstpe, wheretpe), (proxyin.stops, whereval))
+    start = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.startstpe.dtype(tpe.startstpe, wheretpe), (proxyin.starts, whereval))
+    stop = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.startstpe.dtype(tpe.stopstpe, wheretpe), (proxyin.stops, whereval))
     proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
-    proxyslice.start = util.cast(context, builder, tpe, numba.intp, start)
-    proxyslice.stop = util.cast(context, builder, tpe, numba.intp, stop)
+    proxyslice.start = util.cast(context, builder, tpe.startstpe.dtype, numba.intp, start)
+    proxyslice.stop = util.cast(context, builder, tpe.stopstpe.dtype, numba.intp, stop)
     proxyslice.step = context.get_constant(numba.intp, 1)
 
     outtpe = tpe.contenttpe.getitem_range()
@@ -242,6 +235,11 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     if len(wheretpe.types) == 0:
         return arrayval
 
+    headtpe = wheretpe.types[0]
+    tailtpe = numba.types.Tuple(wheretpe.types[1:])
+    headval = numba.cgutils.unpack_tuple(builder, whereval)[0]
+    tailval = context.make_tuple(builder, tailtpe, numba.cgutils.unpack_tuple(builder, whereval)[1:])
+
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
     lenstarts = util.arraylen(context, builder, arraytpe.startstpe, proxyin.starts, totpe=numba.int64)
     lenstops = util.arraylen(context, builder, arraytpe.stopstpe, proxyin.stops, totpe=numba.int64)
@@ -250,13 +248,28 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     with builder.if_then(builder.icmp_signed("<", lenstops, lenstarts), likely=False):
         context.call_conv.return_user_exc(builder, ValueError, ("len(stops) < len(starts)",))
 
-    headtpe = wheretpe.types[0]
-    tailtpe = numba.types.Tuple(wheretpe.types[1:])
-    headval = numba.cgutils.unpack_tuple(builder, whereval)[0]
-    tailval = context.make_tuple(builder, tailtpe, numba.cgutils.unpack_tuple(builder, whereval)[1:])
-
     if isinstance(headtpe, numba.types.Integer):
-        raise NotImplementedError("ListArray.getitem_next(int)")
+        assert advanced is None
+        if arraytpe.bitwidth == 64:
+            kernel = cpu.kernels.awkward_listarray64_getitem_next_at_64
+        elif arraytpe.bitwidth == 32:
+            kernel = cpu.kernels.awkward_listarray32_getitem_next_at_64
+        else:
+            raise AssertionError("unrecognized bitwidth")
+
+        nextcarry = util.newindex64(context, builder, numba.int64, lenstarts)
+        util.call(context, builder, kernel,
+            (util.arrayptr(context, builder, util.index64tpe, nextcarry),
+             util.arrayptr(context, builder, arraytpe.startstpe, proxyin.starts),
+             util.arrayptr(context, builder, arraytpe.stopstpe, proxyin.stops),
+             lenstarts,
+             context.get_constant(numba.int64, 0),
+             context.get_constant(numba.int64, 0),
+             util.cast(context, builder, headtpe, numba.int64, headval)),
+            "in {}, indexing error".format(arraytpe.shortname))
+        nextcontenttpe = arraytpe.contenttpe.carry()
+        nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
+        return arraytpe.contenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
 
     elif isinstance(headtpe, numba.types.SliceType):
         raise NotImplementedError("ListArray.getitem_next(slice)")
