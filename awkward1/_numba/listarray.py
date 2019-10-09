@@ -269,7 +269,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             "in {}, indexing error".format(arraytpe.shortname))
         nextcontenttpe = arraytpe.contenttpe.carry()
         nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
-        return arraytpe.contenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
+        return nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
 
     elif isinstance(headtpe, numba.types.SliceType):
         raise NotImplementedError("ListArray.getitem_next(slice)")

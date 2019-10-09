@@ -179,3 +179,25 @@ def test_deep_listoffsetarray64():
 
     listoffsetarrayB64 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(offsetsB), listoffsetarrayA64)
     modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
+
+    @numba.njit
+    def f1(q):
+        return q[1, 1]
+
+    tmp = f1(listoffsetarrayB64)
+    print(tmp)
+    print(awkward1.tolist(tmp))
+    print(awkward1.tolist(f1(modelB)))
+    raise Exception
+
+    # @numba.njit
+    # def f1(q):
+    #     return q[1, -1, 4]
+    #
+    # assert awkward1.tolist(f1(listoffsetarrayB64)) == awkward1.tolist(f1(modelB))
+
+    # @numba.njit
+    # def f2(q):
+    #     return q[1, -1, 4, -2]
+    #
+    # assert f2(listoffsetarrayB64) == f2(modelB)
