@@ -179,7 +179,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         lenself, skip = shapeunpacked[:2]
         lennext = builder.mul(lenself, skip)
 
-        carry = numba.targets.arrayobj.numpy_arange_1(context, builder, util.index64tpe(numba.int64), (lenself,))
+        carry = numba.targets.arrayobj.numpy_arange_1(context, builder, util.index64tpe(numba.intp), (lenself,))
 
         flathead = numba.targets.arrayobj.array_flatten(context, builder, util.index64tpe(headtpe), (headval,))
         lenflathead = util.arraylen(context, builder, util.index64tpe, flathead)
