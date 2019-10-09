@@ -725,7 +725,6 @@ namespace awkward {
 
       else {
         Index64 nextcarry(carry.length());
-        Index64 nextadvanced(carry.length());
         Error err = awkward_numpyarray_getitem_next_array_advanced_64(
           nextcarry.ptr().get(),
           carry.ptr().get(),
