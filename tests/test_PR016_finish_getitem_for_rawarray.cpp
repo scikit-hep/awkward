@@ -69,14 +69,23 @@ int main(int, char**) {
   if (tostring(content) != "[0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]") {
     return -1;
   }
+  if (tostring(content.get()->getitem_range(1, -1)) != "[1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8]") {
+    return -1;
+  }
 
   std::shared_ptr<Content> listA(new ListOffsetArray32(Identity::none(), offsetsA, content));
   if (tostring(listA) != "[[0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]") {
     return -1;
   }
+  if (tostring(listA.get()->getitem_range(1, -1)) != "[[], [3.3, 4.4], [5.5]]") {
+    return -1;
+  }
 
   std::shared_ptr<Content> listB(new ListOffsetArray32(Identity::none(), offsetsB, listA));
   if (tostring(listB) != "[[[0, 1.1, 2.2], [], [3.3, 4.4]], [[5.5]], [], [[6.6, 7.7, 8.8, 9.9]]]") {
+    return -1;
+  }
+  if (tostring(listB.get()->getitem_range(1, -1)) != "[[[5.5]], []]") {
     return -1;
   }
 
