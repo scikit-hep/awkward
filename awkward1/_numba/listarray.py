@@ -249,8 +249,6 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         context.call_conv.return_user_exc(builder, ValueError, ("len(stops) < len(starts)",))
 
     if isinstance(headtpe, numba.types.Integer):
-        print("ListArray.getitem_next(int)")
-
         assert advanced is None
         if arraytpe.bitwidth == 64:
             kernel = cpu.kernels.awkward_listarray64_getitem_next_at_64

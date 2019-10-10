@@ -211,11 +211,6 @@ def lower_getitem_tuple(context, builder, sig, args):
 
     outtpe = nexttpe.getitem_next(wheretpe, False)
     outval = nexttpe.lower_getitem_next(context, builder, nexttpe, wheretpe, nextval, whereval, None)
-
-    print("outtpe", outtpe)
-    print("rettpe", rettpe)
-    print("outtpe.contenttpe", outtpe.contenttpe)
-
     return outtpe.lower_getitem_int(context, builder, rettpe(outtpe, numba.int64), (outval, context.get_constant(numba.int64, 0)))
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.Array)
@@ -233,16 +228,18 @@ def lower_getitem_other(context, builder, sig, args):
 def starts_stops(context, builder, offsetstpe, offsetsval, lenstarts, lenoffsets):
     proxyslicestarts = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
     proxyslicestarts.start = context.get_constant(numba.intp, 0)
-    proxyslicestarts.stop = context.get_constant(numba.intp, lenstarts)
+    proxyslicestarts.stop = lenstarts
     proxyslicestarts.step = context.get_constant(numba.intp, 1)
-    starts = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, offsetstpe(offsetstpe, numba.types.slice2_type), (offsetsval, proxyslicestarts._getvalue()))
+    slicestarts = proxyslicestarts._getvalue()
 
     proxyslicestops = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
     proxyslicestops.start = context.get_constant(numba.intp, 1)
-    proxyslicestops.stop = context.get_constant(numba.intp, lenoffsets)
+    proxyslicestops.stop = lenoffsets
     proxyslicestops.step = context.get_constant(numba.intp, 1)
-    stops = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, offsetstpe(offsetstpe, numba.types.slice2_type), (offsetsval, proxyslicestops._getvalue()))
+    slicestops = proxyslicestops._getvalue()
 
+    starts = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, offsetstpe(offsetstpe, numba.types.slice2_type), (offsetsval, slicestarts))
+    stops = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, offsetstpe(offsetstpe, numba.types.slice2_type), (offsetsval, slicestops))
     return starts, stops
 
 def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval, advanced):
@@ -264,8 +261,6 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     starts, stops = starts_stops(context, builder, tpe.offsetstpe, proxyin.offsets, lenstarts, lenoffsets)
 
     if isinstance(headtpe, numba.types.Integer):
-        print("ListOffsetArray.getitem_next(int)")
-
         assert advanced is None
         if arraytpe.bitwidth == 64:
             kernel = cpu.kernels.awkward_listarray64_getitem_next_at_64
@@ -355,6 +350,7 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     proxyout = numba.cgutils.create_struct_proxy(awkward1._numba.listarray.ListArrayType(arraytpe.offsetstpe, arraytpe.offsetstpe, arraytpe.contenttpe, arraytpe.idtpe))(context, builder)
     proxyout.starts = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.offsetstpe(arraytpe.offsetstpe, carrytpe), (starts, carryval))
     proxyout.stops = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.offsetstpe(arraytpe.offsetstpe, carrytpe), (stops, carryval))
+
     proxyout.content = proxyin.content
     if arraytpe.idtpe != numba.none:
         proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)

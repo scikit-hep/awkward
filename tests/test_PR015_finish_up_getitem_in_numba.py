@@ -144,6 +144,18 @@ def test_deep_listoffsetarray32():
     listoffsetarrayB32 = awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(offsetsB), listoffsetarrayA32)
     modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
 
+    @numba.njit
+    def f1(q):
+        return q[1, -1, 4]
+
+    assert awkward1.tolist(f1(listoffsetarrayB32)) == awkward1.tolist(f1(modelB))
+
+    @numba.njit
+    def f2(q):
+        return q[1, -1, 4, -2]
+
+    assert f2(listoffsetarrayB32) == f2(modelB)
+
 def test_deep_listarray64():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
     offsetsA = numpy.arange(0, 2*3*5 + 5, 5)
@@ -182,22 +194,12 @@ def test_deep_listoffsetarray64():
 
     @numba.njit
     def f1(q):
-        return q[1, 1]
+        return q[1, -1, 4]
 
-    tmp = f1(listoffsetarrayB64)
-    print(tmp)
-    print(awkward1.tolist(tmp))
-    print(awkward1.tolist(f1(modelB)))
-    raise Exception
+    assert awkward1.tolist(f1(listoffsetarrayB64)) == awkward1.tolist(f1(modelB))
 
-    # @numba.njit
-    # def f1(q):
-    #     return q[1, -1, 4]
-    #
-    # assert awkward1.tolist(f1(listoffsetarrayB64)) == awkward1.tolist(f1(modelB))
+    @numba.njit
+    def f2(q):
+        return q[1, -1, 4, -2]
 
-    # @numba.njit
-    # def f2(q):
-    #     return q[1, -1, 4, -2]
-    #
-    # assert f2(listoffsetarrayB64) == f2(modelB)
+    assert f2(listoffsetarrayB64) == f2(modelB)
