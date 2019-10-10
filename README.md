@@ -56,6 +56,46 @@ The main parts, in order of expected implementation, are:
    * ~~Reproduce all of the above as Numba extensions (make `NumpyArray`, `ListArray`, and `ListOffsetArray` usable in Numba-compiled functions).~~
    * ~~Error messages with location-of-failure information if the array has an `Identity` (except in Numba).~~
    * ~~Fully implement `__getitem__` for int/slice/intarray/boolarray/tuple (placeholders for newaxis/ellipsis), with perfect agreement with [Numpy basic/advanced indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html), to all levels of depth.~~
-
-...
-
+   * Appendable arrays (a distinct phase from readable arrays, when the type is still in flux) to implement `awkward.fromiter` in C++.
+   * Full suite of array types:
+      * `RawArray`: flat, 1-dimensional array type for pure C++ (header-only).
+      * ~~`NumpyArray`: rectilinear, N-dimensional array type without Python/pybind11 dependencies, but intended for Numpy.~~
+      * ~~`ListArray`: the new `JaggedArray`, based on `starts` and `stops` (i.e. fully general).~~
+      * ~~`ListOffsetArray`: the `JaggedArray` case with no unreachable data between reachable data (gaps).~~
+      * `RecordArray`: the new `Table` _without_ lazy-slicing.
+      * `RegularArray`: rectilinear, N-dimensional array of arbitrary contents, for putting jagged dimensions inside fixed dimensions (for example).
+      * `ChunkedArray`: same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required. (Maybe `AmorphousChunkedArray` would fill that role.)
+      * `RegularChunkedArray`: like a `ChunkedArray`, but all chunks are known to have the same size.
+      * `MaskedArray`, `BitMaskedArray`, `IndexedMaskedArray`: same as the old versions.
+      * `UnionArray`: same as the old version; `SparseUnionArray`: the additional case found in Apache Arrow.
+      * `SlicedArray`: lazy-slicing (from old `Table`) that can be applied to any type.
+      * `IndexedArray`: same as the old version.
+      * `SparseArray`: same as the old version.
+      * `VirtualArray`: same as the old version, including caching, but taking C++11 lambda functions for materialization, get-cache, and put-cache. The pybind11 layer will connect this to Python callables.
+      * `ObjectArray`: same as the old version, but taking a C++11 lambda function to produce its output. The pybind11 layer will connect this to Python callables.
+   * Describe high-level types using [datashape](https://datashape.readthedocs.io/en/latest/) and possibly also an in-house schema.
+   * Layer 1 interface `Array`:
+      * Pass through to the layout classes in Python and Numba.
+      * Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before).
+      * Pass through other Numpy functions using [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html) (this would be new).
+      * `RecordArray` fields (not called "columns" anymore) through Layer 1 `__getattr__`.
+      * Mechanism for adding user-defined `Methods` like `LorentzVector`, as before, but only on Layer 1.
+      * Inerhit from Pandas so that all Layer 1 arrays can be DataFrame columns.
+   * Full suite of operations:
+      * ~~`awkward.tolist`: invokes iterators to convert arrays to lists and dicts.~~
+      * `awkward.tonumpy`: to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
+      * `awkward.flatten`: same as old with an `axis` parameter.
+      * Reducers, such as `awkward.sum`, `awkward.max`, etc., supporing an `axis` method.
+      * The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std`.
+      * `awkward.argmin`, `awkward.argmax`, `awkward.argsort`, and `awkward.sort`: same as old.
+      * `awkward.concatenate`: same as old, but supporting `axis` at any depth.
+      * `awkward.zip`: makes jagged tables; this is a naive version of `awkward.join` below.
+      * `awkward.pad`: same as old, but without the `clip` option (use slicing instead).
+      * `awkward.fillna`: same as old.
+      * `awkward.cross` (and `awkward.argcross`): to make combinations by cross-joining multiple arrays; option to use `Identity` index.
+      * `awkward.choose` (and `awkward.argchoose`): to make combinations by choosing a fixed number from a single array; option to use `Identity` index and an option to include same-object combinations.
+      * `awkward.join`: performs an inner join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event intersection, zipping all fields.
+      * `awkward.union`: performs an outer join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event union, zipping fields where possible.
+   * Translation to and from Apache Arrow and Parquet in C++.
+   * Persistence to any medium that stores named binary blobs, as before, but accessible via C++ (especially for writing).
+   * Universal `array.get[...]` as a softer form of `array[...]` that skips non-existent indexes, rather than raising errors.
