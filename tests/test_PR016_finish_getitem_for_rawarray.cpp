@@ -96,6 +96,27 @@ int main(int, char**) {
   if (tostring(content.get()->getitem_range(1, -1)) != "[1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8]") {
     return -1;
   }
+  if (tostring(content.get()->getitem(slice(new SliceAt(4)))) != "[4.4]") {
+    return -1;
+  }
+  if (tostring(content.get()->getitem(slice(new SliceRange(6, Slice::none(), -1)))) != "[6.6, 5.5, 4.4, 3.3, 2.2, 1.1, 0]") {
+    return -1;
+  }
+  if (tostring(content.get()->getitem(slice(new SliceRange(Slice::none(), Slice::none(), 2)))) != "[0, 2.2, 4.4, 6.6, 8.8]") {
+    return -1;
+  }
+  if (tostring(content.get()->getitem(slice(new SliceRange(1, 9, 2)))) != "[1.1, 3.3, 5.5, 7.7]") {
+    return -1;
+  }
+
+  Index64 array1(4);
+  array1.ptr().get()[0] = 2;
+  array1.ptr().get()[1] = 0;
+  array1.ptr().get()[2] = 0;
+  array1.ptr().get()[3] = -1;
+  if (tostring(content.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1}))))) != "[2.2, 0, 0, 9.9]") {
+    return -1;
+  }
 
   std::shared_ptr<Content> listA(new ListOffsetArray32(Identity::none(), offsetsA, content));
   if (tostring(listA) != "[[0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]") {
@@ -104,10 +125,20 @@ int main(int, char**) {
   if (tostring(listA.get()->getitem_range(1, -1)) != "[[], [3.3, 4.4], [5.5]]") {
     return -1;
   }
+  if (tostring(listA.get()->getitem(slice(new SliceAt(2)))) != "[3.3, 4.4]") {
+    return -1;
+  }
   if (tostring(listA.get()->getitem(slice(new SliceAt(2), new SliceAt(1)))) != "[4.4]") {
     return -1;
   }
-  // std::cout << tostring(listA.get()->getitem(slice(new SliceAt(2), new SliceAt(1)))) << std::endl;
+  if (tostring(listA.get()->getitem(slice(new SliceRange(2, Slice::none(), Slice::none()), new SliceRange(Slice::none(), -1, Slice::none())))) != "[[3.3], [], [6.6, 7.7, 8.8]]") {
+    return -1;
+  }
+  if (tostring(listA.get()->getitem(slice(new SliceRange(2, Slice::none(), Slice::none()), new SliceRange(Slice::none(), Slice::none(), -1)))) != "[[4.4, 3.3], [5.5], [9.9, 8.8, 7.7, 6.6]]") {
+    return -1;
+  }
+
+  // std::cout << tostring(content.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1}))))) << std::endl;
   // return -1;
 
   std::shared_ptr<Content> listB(new ListOffsetArray32(Identity::none(), offsetsB, listA));

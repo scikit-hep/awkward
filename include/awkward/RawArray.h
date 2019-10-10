@@ -200,23 +200,21 @@ namespace awkward {
           else if (step == 0) {
             throw std::invalid_argument("slice step must not be 0");
           }
-          awkward_regularize_rangeslice(&start, &stop, step > 0, start != Slice::none(), stop != Slice::none(), length_);
+          awkward_regularize_rangeslice(&start, &stop, step > 0, range->hasstart(), range->hasstop(), length_);
 
-          throw std::runtime_error("stop here for now");
+          int64_t numer = abs(start - stop);
+          int64_t denom = abs(step);
+          int64_t d = numer / denom;
+          int64_t m = numer % denom;
+          int64_t lenhead = d + (m != 0 ? 1 : 0);
 
+          Index64 nextcarry(lenhead);
+          int64_t* nextcarryptr = nextcarry.ptr().get();
+          for (int64_t i = 0;  i < lenhead;  i++) {
+            nextcarryptr[i] = start + step*i;
+          }
 
-
-          // int64_t regular_start = start;
-          // int64_t regular_stop = stop;
-          // awkward_regularize_rangeslice(regular_start, regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
-          // std::shared_ptr<Identity> id(nullptr);
-          // if (id_.get() != nullptr) {
-          //   if (regular_stop > id_.get()->length()) {
-          //     throw std::invalid_argument("index out of range for identity");
-          //   }
-          //   id = id_.get()->slice(regular_start, regular_stop);
-          // }
-          // return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + regular_start, regular_stop - regular_start, itemsize_));
+          return carry(nextcarry);
         }
       }
 
@@ -229,7 +227,21 @@ namespace awkward {
       }
 
       else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
-        throw std::runtime_error("array");
+        if (array->shape().size() != 1) {
+          throw std::runtime_error("array.ndim != 1");
+        }
+        if (advanced.length() == 0) {
+          Index64 flathead = array->ravel();
+          Error err = awkward_regularize_arrayslice_64(
+            flathead.ptr().get(),
+            flathead.length(),
+            length_);
+          util::handle_error(err, classname(), id_.get());
+          return carry(flathead);
+        }
+        else {
+          throw std::runtime_error("advanced array");
+        }
       }
 
       else {
