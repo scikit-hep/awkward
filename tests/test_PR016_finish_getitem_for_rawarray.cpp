@@ -44,6 +44,30 @@ std::string tostring(std::shared_ptr<Content> array) {
   return "";
 }
 
+Slice slice(SliceItem* s1) {
+  Slice out;
+  out.append(std::shared_ptr<SliceItem>(s1));
+  out.become_sealed();
+  return out;
+}
+
+Slice slice(SliceItem* s1, SliceItem* s2) {
+  Slice out;
+  out.append(std::shared_ptr<SliceItem>(s1));
+  out.append(std::shared_ptr<SliceItem>(s2));
+  out.become_sealed();
+  return out;
+}
+
+Slice slice(SliceItem* s1, SliceItem* s2, SliceItem* s3) {
+  Slice out;
+  out.append(std::shared_ptr<SliceItem>(s1));
+  out.append(std::shared_ptr<SliceItem>(s2));
+  out.append(std::shared_ptr<SliceItem>(s3));
+  out.become_sealed();
+  return out;
+}
+
 int main(int, char**) {
   RawArrayOf<double> rawdouble(Identity::none(), 10);
   for (int i = 0;  i < 10;  i++) {
@@ -80,6 +104,9 @@ int main(int, char**) {
   if (tostring(listA.get()->getitem_range(1, -1)) != "[[], [3.3, 4.4], [5.5]]") {
     return -1;
   }
+
+  std::cout << tostring(listA.get()->getitem(slice(new SliceAt(2), new SliceAt(1)))) << std::endl;
+  return -1;
 
   std::shared_ptr<Content> listB(new ListOffsetArray32(Identity::none(), offsetsB, listA));
   if (tostring(listB) != "[[[0, 1.1, 2.2], [], [3.3, 4.4]], [[5.5]], [], [[6.6, 7.7, 8.8, 9.9]]]") {

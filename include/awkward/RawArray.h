@@ -179,7 +179,7 @@ namespace awkward {
       }
 
       if (head.get() == nullptr) {
-        throw std::runtime_error("null");
+        return shallow_copy();
       }
 
       else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
@@ -238,7 +238,22 @@ namespace awkward {
     }
 
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const {
-      throw std::runtime_error("RawArray<T>::carry");
+      std::shared_ptr<T> ptr(new T[(size_t)carry.length()], awkward::util::array_deleter<T>());
+      Error err = awkward_numpyarray_getitem_next_null_64(
+        reinterpret_cast<uint8_t*>(ptr.get()),
+        reinterpret_cast<uint8_t*>(ptr_.get()),
+        carry.length(),
+        itemsize_,
+        byteoffset(),
+        carry.ptr().get());
+      util::handle_error(err, classname(), id_.get());
+
+      std::shared_ptr<Identity> id(nullptr);
+      if (id_.get() != nullptr) {
+        id = id_.get()->getitem_carry_64(carry);
+      }
+
+      return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr, 0, carry.length(), itemsize_));
     }
 
     virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
