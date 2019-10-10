@@ -23,6 +23,17 @@ def debug(context, builder, *args):
 """, globals())
 
 def cast(context, builder, fromtpe, totpe, val):
+    if isinstance(fromtpe, llvmlite.ir.types.IntType):
+        if fromtpe.width == 8:
+            fromtpe = numba.int8
+        elif fromtpe.width == 16:
+            fromtpe = numba.int16
+        elif fromtpe.width == 32:
+            fromtpe = numba.int32
+        elif fromtpe.width == 64:
+            fromtpe = numba.int64
+        else:
+            raise AssertionError("unrecognized bitwidth")
     if fromtpe.bitwidth < totpe.bitwidth:
         return builder.zext(val, context.get_value_type(totpe))
     elif fromtpe.bitwidth > totpe.bitwidth:

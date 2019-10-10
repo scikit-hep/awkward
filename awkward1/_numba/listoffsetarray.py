@@ -228,13 +228,13 @@ def lower_getitem_other(context, builder, sig, args):
 def starts_stops(context, builder, offsetstpe, offsetsval, lenstarts, lenoffsets):
     proxyslicestarts = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
     proxyslicestarts.start = context.get_constant(numba.intp, 0)
-    proxyslicestarts.stop = lenstarts
+    proxyslicestarts.stop = util.cast(context, builder, lenstarts.type, numba.intp, lenstarts)
     proxyslicestarts.step = context.get_constant(numba.intp, 1)
     slicestarts = proxyslicestarts._getvalue()
 
     proxyslicestops = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
     proxyslicestops.start = context.get_constant(numba.intp, 1)
-    proxyslicestops.stop = lenoffsets
+    proxyslicestops.stop = util.cast(context, builder, lenoffsets.type, numba.intp, lenoffsets)
     proxyslicestops.step = context.get_constant(numba.intp, 1)
     slicestops = proxyslicestops._getvalue()
 
