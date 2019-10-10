@@ -35,7 +35,7 @@ def cast(context, builder, fromtpe, totpe, val):
         else:
             raise AssertionError("unrecognized bitwidth")
     if fromtpe.bitwidth < totpe.bitwidth:
-        return builder.zext(val, context.get_value_type(totpe))
+        return builder.sext(val, context.get_value_type(totpe))
     elif fromtpe.bitwidth > totpe.bitwidth:
         return builder.trunc(val, context.get_value_type(totpe))
     else:
