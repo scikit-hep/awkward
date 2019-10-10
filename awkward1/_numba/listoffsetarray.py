@@ -46,21 +46,32 @@ class ListOffsetArrayType(content.ContentType):
             return self
         headtpe = wheretpe.types[0]
         tailtpe = numba.types.Tuple(wheretpe.types[1:])
+
         if isinstance(headtpe, numba.types.Integer):
             return self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
+
         elif isinstance(headtpe, numba.types.SliceType):
-            return ListOffsetArrayType(self.offsetstpe, self.contenttpe.getitem_next(tailtpe, isadvanced), self.idtpe)
+            contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
+            if not isadvanced:
+                return ListOffsetArrayType(util.index64tpe, contenttpe, self.idtpe)
+            else:
+                raise NotImplementedError("ListOffsetArray isadvanced")
+
         elif isinstance(headtpe, numba.types.EllipsisType):
             raise NotImplementedError("ellipsis")
+
         elif isinstance(headtpe, type(numba.typeof(numpy.newaxis))):
             raise NotImplementedError("newaxis")
-        elif isinstance(headtpe, numba.types.Array) and not advanced:
+
+        elif isinstance(headtpe, numba.types.Array):
             if headtpe.ndim != 1:
                 raise NotImplementedError("array.ndim != 1")
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
-            return ListOffsetArrayType(self.startstpe, contenttpe, self.idtpe)
-        elif isinstance(headtpe, numba.types.Array):
-            return self.contenttpe.getitem_next(tailtpe, True)
+            if not isadvanced:
+                return ListOffsetArrayType(util.index64tpe, contenttpe, self.idtpe)
+            else:
+                return contenttpe
+
         else:
             raise AssertionError(headtpe)
 

@@ -169,25 +169,23 @@ def test_deep_listarray64():
     listarrayB64 = awkward1.layout.ListArray64(awkward1.layout.Index64(startsB), awkward1.layout.Index64(stopsB), listarrayA64)
     modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
 
-    # @numba.njit
-    # def f1(q):
-    #     return q[1, 2, 4]
-    #
-    # assert awkward1.tolist(f1(listarrayB64)) == awkward1.tolist(f1(modelB))
-    #
-    # @numba.njit
-    # def f2(q):
-    #     return q[1, -1, 4, -2]
-    #
-    # assert f2(listarrayB64) == f2(modelB)
+    @numba.njit
+    def f1(q):
+        return q[1, 2, 4]
+
+    assert awkward1.tolist(f1(listarrayB64)) == awkward1.tolist(f1(modelB))
+
+    @numba.njit
+    def f2(q):
+        return q[1, -1, 4, -2]
+
+    assert f2(listarrayB64) == f2(modelB)
 
     @numba.njit
     def f3(q):
-        # return q[1:, ::2, 1:-1, 5::-1]
-        return q[1:,]
+        return q[1:, ::2, 1:-1, 5::-1]
 
-    print(awkward1.tolist(f3(listarrayB64)))
-    raise Exception
+    assert awkward1.tolist(f3(listarrayB64)) == awkward1.tolist(f3(modelB))
 
 def test_deep_listoffsetarray64():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
