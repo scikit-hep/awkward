@@ -194,7 +194,7 @@ def test_deep_listoffsetarray64():
 
     @numba.njit
     def f1(q):
-        return q[1, -1, 4]
+        return q[1, 2, 4]
 
     assert awkward1.tolist(f1(listoffsetarrayB64)) == awkward1.tolist(f1(modelB))
 
