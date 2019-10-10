@@ -58,8 +58,9 @@ The following features of awkward 0.x will be features of awkward 1.x.
    * 2019-09-21 (PR [#9](../../pull/9)): `Identity` is correctly passed through `NumpyArray` slices and `__getitem__` uses `get`, `slice`, or the full `getitem`, depending on argument complexity.
    * 2019-09-26 (PR [#11](../../pull/11)): fully implemented `ListArray` and `ListOffsetArray`'s `__getitem__`.
    * 2019-10-02 (PR [#12](../../pull/12)): implemented `ListArray.__getitem__(array)` in Numba, setting the pattern for all the other cases.
-   * 2019-10-04 (PR [#13](../../pull13)): turned the `Error` type into a struct and `handle_error` into a function that provides `Identity` (if available) and attempted index information. Numba also handles errors, but with messages that must be known at compile-time.
-   * 2019-10-04 (PR [#14](../../pull14)): brought `NumpyArray`, `ListArray`, and `ListOffsetArray` up-to-date on `getitem` for all cases (except `newaxis`) and tested them all as well. (Not including Numba.)
+   * 2019-10-04 (PR [#13](../../pull/13)): turned the `Error` type into a struct and `handle_error` into a function that provides `Identity` (if available) and attempted index information. Numba also handles errors, but with messages that must be known at compile-time.
+   * 2019-10-04 (PR [#14](../../pull/14)): brought `NumpyArray`, `ListArray`, and `ListOffsetArray` up-to-date on `getitem` for all cases (except `newaxis`) and tested them all as well. (Not including Numba.)
+   * 2019-10-10 (PR [#15](../../pull/15)): brought `NumpyArray`, `ListArray`, and `ListOffsetArray` up-to-date on `getitem` in Numba (except `newaxis` and `Ellipsis`).
 
 ## Roadmap
 
