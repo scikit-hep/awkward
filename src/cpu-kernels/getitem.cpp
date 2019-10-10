@@ -211,17 +211,40 @@ Error awkward_numpyarray_getitem_next_array_advanced_64(int64_t* nextcarryptr, c
 
 template <typename C, typename T>
 Error awkward_listarray_getitem_next_at(T* tocarry, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at) {
+  std::cout << "ENTER " << lenstarts << " " << startsoffset << " " << stopsoffset << " at " << at << std::endl;
+
   for (int64_t i = 0;  i < lenstarts;  i++) {
+    std::cout << "i " << i << " start " << fromstarts[startsoffset + i] << " stop " << fromstops[stopsoffset + i] << std::endl;
+
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+
+    std::cout << "length " << length << std::endl;
+
     int64_t regular_at = at;
+
+    std::cout << "regular_at " << regular_at << std::endl;
+
     if (regular_at < 0) {
       regular_at += length;
     }
+
+    std::cout << "regular_at " << regular_at << std::endl;
+
+    std::cout << "0 <= regular_at " << (0 <= regular_at) << std::endl;
+    std::cout << "regular_at < length " << (regular_at < length) << std::endl;
+    std::cout << "(0 <= regular_at  &&  regular_at < length) " << ((0 <= regular_at  &&  regular_at < length)) << std::endl;
+    std::cout << "!(0 <= regular_at  &&  regular_at < length) " << (!(0 <= regular_at  &&  regular_at < length)) << std::endl;
+
     if (!(0 <= regular_at  &&  regular_at < length)) {
+      std::cout << "FAILURE" << std::endl;
+
       return failure("index out of range", i, at);
     }
     tocarry[i] = fromstarts[startsoffset + i] + regular_at;
+
+    std::cout << "tocarry[i] " << (tocarry[i]) << std::endl;
   }
+  std::cout << "SUCCESS" << std::endl;
   return success();
 }
 Error awkward_listarray32_getitem_next_at_64(int64_t* tocarry, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at) {

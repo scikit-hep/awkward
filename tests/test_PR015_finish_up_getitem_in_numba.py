@@ -180,6 +180,7 @@ def test_deep_listarray64():
         return q[1, -1, 4, -2]
 
     assert f2(listarrayB64) == f2(modelB)
+    raise Exception
 
 def test_deep_listoffsetarray64():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
