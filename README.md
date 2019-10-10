@@ -46,9 +46,11 @@ The following features of awkward 0.x will be features of awkward 1.x.
 
 ## Roadmap
 
-The rough estimate for development time to a minimally usable library for physics was six months, starting in late August (i.e. finishing in late February). Progress is currently **on track** for that deadline.
+The rough estimate for development time to a minimally usable library for physics was six months, starting in late August (i.e. finishing in late February). **Progress is currently on track.**
 
-The main parts, in order of expected implementation, are:
+### Approximate order of implementation
+
+Completed items are ~~crossed out~~.
 
    * ~~Cross-platform, cross-Python version build and deploy process.~~ Regularly deploying [30 wheels](https://pypi.org/project/awkward1/#files), after closing each PR.
    * ~~Basic `NumpyArray`, `ListArray`, and `ListOffsetArray` with `__getitem__` for int/slice and `__iter__` in C++/pybind11 to establish structure and ensure proper reference counting.~~
@@ -103,7 +105,7 @@ The main parts, in order of expected implementation, are:
       * `awkward.union`: performs an outer join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event union, zipping fields where possible.
    * Derived classes section with `StringArray` as its first member. Derived classes have ufunc-defined `Methods` and Numba extensions.
 
-Not included in the six-month timeframe, but soon thereafter:
+### Soon after (possibly within) the six-month timeframe
 
    * Update [hepvector](https://github.com/henryiii/hepvector#readme) to be Derived classes, replacing the `TLorentzVectorArray` in uproot-methods.
    * Update uproot (on a branch) to use Awkward 1.0.
@@ -112,7 +114,7 @@ Not included in the six-month timeframe, but soon thereafter:
    * Persistence to any medium that stores named binary blobs, as before, but accessible via C++ (especially for writing). The persistence format might differ slightly from the existing one (break backward compatibility, if needed).
    * Universal `array.get[...]` as a softer form of `array[...]` that skips non-existent indexes, rather than raising errors.
 
-Not included in the six-month timeframe, but possible in the more distant future:
+### At some point in the future
 
    * Demonstrate Awkward 1.0 as a C++ wrapping library with [FastJet](http://fastjet.fr/).
    * GPU implementations of the cpu-kernels in Layer 4, with the Layer 3 C++ passing a "device" variable at every level of the layout to indicate whether the data pointers refer to main memory or a particular GPU.
