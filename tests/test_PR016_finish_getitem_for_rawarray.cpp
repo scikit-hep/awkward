@@ -104,9 +104,11 @@ int main(int, char**) {
   if (tostring(listA.get()->getitem_range(1, -1)) != "[[], [3.3, 4.4], [5.5]]") {
     return -1;
   }
-
-  std::cout << tostring(listA.get()->getitem(slice(new SliceAt(2), new SliceAt(1)))) << std::endl;
-  return -1;
+  if (tostring(listA.get()->getitem(slice(new SliceAt(2), new SliceAt(1)))) != "[4.4]") {
+    return -1;
+  }
+  // std::cout << tostring(listA.get()->getitem(slice(new SliceAt(2), new SliceAt(1)))) << std::endl;
+  // return -1;
 
   std::shared_ptr<Content> listB(new ListOffsetArray32(Identity::none(), offsetsB, listA));
   if (tostring(listB) != "[[[0, 1.1, 2.2], [], [3.3, 4.4]], [[5.5]], [], [[6.6, 7.7, 8.8, 9.9]]]") {
