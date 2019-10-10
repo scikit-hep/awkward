@@ -272,6 +272,44 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         return nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
 
     elif isinstance(headtpe, numba.types.SliceType):
+        proxyslicein = numba.cgutils.create_struct_proxy(headtpe)(context, builder, value=headval)
+
+        if arraytpe.bitwidth == 64:
+            determine_carrylength = cpu.kernels.awkward_listarray32_getitem_next_range_carrylength
+            fill_carry = cpu.kernels.awkward_listarray32_getitem_next_range_64
+            determine_total = cpu.kernels.awkward_listarray32_getitem_next_range_counts_64
+            fill_nextadvanced = cpu.kernels.awkward_listarray32_getitem_next_range_spreadadvanced_64
+        elif arraytpe.bitwidth == 32:
+            determine_carrylength = cpu.kernels.awkward_listarray32_getitem_next_range_carrylength
+            fill_carry = cpu.kernels.awkward_listarray32_getitem_next_range_64
+            determine_total = cpu.kernels.awkward_listarray32_getitem_next_range_counts_64
+            fill_nextadvanced = cpu.kernels.awkward_listarray32_getitem_next_range_spreadadvanced_64
+        else:
+            raise AssertionError("unrecognized bitwidth")
+
+        carrylength = numba.cgutils.alloca_once(builder, context.get_value_type(numba.int64))
+        builder.store(context.get_constant(numba.int64, 123), carrylength)
+        util.debug(context, builder, numba.int64, builder.load(carrylength))
+
+        util.call(context, builder, determine_carrylength,
+            (carrylength,
+             util.arrayptr(context, builder, arraytpe.startstpe, proxyin.starts),
+             util.arrayptr(context, builder, arraytpe.stopstpe, proxyin.stops),
+             lenstarts,
+             context.get_constant(numba.int64, 0),
+             context.get_constant(numba.int64, 0),
+             util.cast(context, builder, numba.intp, numba.int64, proxyin.start),
+             util.cast(context, builder, numba.intp, numba.int64, proxyin.stop),
+             util.cast(context, builder, numba.intp, numba.int64, proxyin.step)),
+            "in {}, indexing error".format(arraytpe.shortname))
+
+        HERE HERE HERE HERE HERE HERE HERE HERE
+
+        proxyout = numba.cgutils.create_struct_proxy(awkward1._numba.listoffsetarray.ListOffsetArrayType(arraytpe.startstpe, arraytpe.contenttpe, arraytpe.idtpe))(context, builder)
+        proxyout.offsets = proxyin.starts
+        proxyout.content = proxyin.content
+        return proxyout._getvalue()
+
         raise NotImplementedError("ListArray.getitem_next(slice)")
 
     elif isinstance(headtpe, numba.types.EllipsisType):
