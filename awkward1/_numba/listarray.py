@@ -51,6 +51,9 @@ class ListArrayType(content.ContentType):
         if len(wheretpe.types) == 0:
             return self
         headtpe = wheretpe.types[0]
+
+        print("getitem_next", headtpe)
+
         tailtpe = numba.types.Tuple(wheretpe.types[1:])
         if isinstance(headtpe, numba.types.Integer):
             return self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
@@ -209,8 +212,12 @@ def lower_getitem_tuple(context, builder, sig, args):
     rettpe, (arraytpe, wheretpe) = sig.return_type, sig.args
     arrayval, whereval = args
 
+    print("lower_getitem_tuple BEFORE", wheretpe)
+
     wheretpe, whereval = util.preprocess_slicetuple(context, builder, wheretpe, whereval)
     nexttpe, nextval = util.wrap_for_slicetuple(context, builder, arraytpe, arrayval)
+
+    print("lower_getitem_tuple AFTER", wheretpe)
 
     outtpe = nexttpe.getitem_next(wheretpe, False)
     outval = nexttpe.lower_getitem_next(context, builder, nexttpe, wheretpe, nextval, whereval, None)
@@ -257,9 +264,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         else:
             raise AssertionError("unrecognized bitwidth")
 
-        util.debug(context, builder, headtpe, headval)
+        tmp = util.cast(context, builder, headtpe, numba.int64, headval)
+        util.debug(context, builder, headtpe, headval, numba.int64, tmp)
         util.debug(context, builder, arraytpe.startstpe, proxyin.starts)
         util.debug(context, builder, arraytpe.stopstpe, proxyin.stops)
+
+        print("headtpe", headtpe)
 
         nextcarry = util.newindex64(context, builder, numba.int64, lenstarts)
         util.call(context, builder, kernel,
@@ -269,7 +279,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              lenstarts,
              context.get_constant(numba.int64, 0),
              context.get_constant(numba.int64, 0),
-             util.cast(context, builder, headtpe, numba.int64, headval)),
+             tmp),
             "in {}, indexing error".format(arraytpe.shortname))
         nextcontenttpe = arraytpe.contenttpe.carry()
         nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)

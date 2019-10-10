@@ -141,12 +141,15 @@ def typing_broadcast_arrays(arrays):
 @numba.generated_jit(nopython=True)
 def regularize_slice(arrays):
     if not isinstance(arrays, numba.types.BaseTuple) and isinstance(arrays, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(arrays.dtype, numba.types.Boolean):
+        print("regularize_slice A", arrays)
         return lambda arrays: numpy.nonzero(arrays)
 
     elif not isinstance(arrays, numba.types.BaseTuple) or not any(isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) for t in arrays.types):
+        print("regularize_slice B", arrays)
         return lambda arrays: arrays
 
     else:
+        print("regularize_slice C", arrays)
         code = "def impl(arrays):\n"
         indexes = []
         for i, t in enumerate(arrays.types):
@@ -167,12 +170,15 @@ def regularize_slice(arrays):
 def typing_regularize_slice(arrays):
     out = ()
     if not isinstance(arrays, numba.types.BaseTuple) and isinstance(arrays, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(arrays.dtype, numba.types.Boolean):
+        print("typing_regularize_slice A", arrays)
         return numba.types.Tuple(arrays.ndims*(numba.types.Array(numba.int64, 1, "C"),))
 
     elif not isinstance(arrays, numba.types.BaseTuple) or not any(isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) for t in arrays.types):
+        print("typing_regularize_slice B", arrays)
         return arrays
 
     else:
+        print("typing_regularize_slice C", arrays)
         for t in arrays.types:
             if isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(t.dtype, numba.types.Boolean):
                 out = out + t.ndims*(numba.types.Array(numba.int64, 1, "C"),)
@@ -185,15 +191,21 @@ def typing_regularize_slice(arrays):
         return numba.types.Tuple(out)
 
 def preprocess_slicetuple(context, builder, wheretpe, whereval):
+    print("wheretpe1", wheretpe)
+
     wheretpe2 = typing_regularize_slice(wheretpe)
     regularize_slice.compile(wheretpe2(wheretpe))
     cres = regularize_slice.overloads[(wheretpe,)]
     whereval2 = context.call_internal(builder, cres.fndesc, wheretpe2(wheretpe), (whereval,))
 
+    print("wheretpe2", wheretpe2)
+
     wheretpe3 = typing_broadcast_arrays(wheretpe2)
     broadcast_arrays.compile(wheretpe3(wheretpe2))
     cres2 = broadcast_arrays.overloads[(wheretpe2,)]
     whereval3 = context.call_internal(builder, cres2.fndesc, wheretpe3(wheretpe2), (whereval2,))
+
+    print("wheretpe3", wheretpe3)
 
     return wheretpe3, whereval3
 
