@@ -59,7 +59,7 @@ class ListArrayType(content.ContentType):
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
             if not isadvanced:
-                return awkward1._numba.listoffsetarray.ListOffsetArrayType(util.index64tpe, contenttpe, self.idtpe)
+                return awkward1._numba.listoffsetarray.ListOffsetArrayType(util.indextpe(self.bitwidth), contenttpe, self.idtpe)
             else:
                 raise NotImplementedError("ListArray isadvanced")
 
@@ -74,7 +74,7 @@ class ListArrayType(content.ContentType):
                 raise NotImplementedError("array.ndim != 1")
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
             if not isadvanced:
-                return awkward1._numba.listoffsetarray.ListOffsetArrayType(util.index64tpe, contenttpe, self.idtpe)
+                return awkward1._numba.listoffsetarray.ListOffsetArrayType(util.indextpe(self.bitwidth), contenttpe, self.idtpe)
             else:
                 return contenttpe
 
@@ -299,10 +299,6 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             raise AssertionError("unrecognized bitwidth")
 
         carrylength = numba.cgutils.alloca_once(builder, context.get_value_type(numba.int64))
-
-        builder.store(context.get_constant(numba.int64, 123), carrylength)
-        util.debug(context, builder, numba.int64, builder.load(carrylength))
-
         util.call(context, builder, determine_carrylength,
             (carrylength,
              util.arrayptr(context, builder, arraytpe.startstpe, proxyin.starts),
@@ -315,13 +311,10 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              util.cast(context, builder, numba.intp, numba.int64, proxyslicein.step)),
             "in {}, indexing error".format(arraytpe.shortname))
 
-        util.debug(context, builder, numba.int64, builder.load(carrylength))
-
-        nextoffsets = util.newindex64(context, builder, numba.int64, builder.add(lenstarts, context.get_constant(numba.int64, 1)))
+        nextoffsets = util.newindex(arraytpe.bitwidth, context, builder, numba.int64, builder.add(lenstarts, context.get_constant(numba.int64, 1)))
         nextcarry = util.newindex64(context, builder, numba.int64, builder.load(carrylength))
-
         util.call(context, builder, fill_carry,
-            (util.arrayptr(context, builder, util.index64tpe, nextoffsets),
+            (util.arrayptr(context, builder, util.indextpe(arraytpe.bitwidth), nextoffsets),
              util.arrayptr(context, builder, util.index64tpe, nextcarry),
              util.arrayptr(context, builder, arraytpe.startstpe, proxyin.starts),
              util.arrayptr(context, builder, arraytpe.stopstpe, proxyin.stops),
@@ -339,7 +332,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         if advanced is None:
             outcontenttpe = nextcontenttpe.getitem_next(tailtpe, False)
             outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
-            outtpe = awkward1._numba.listoffsetarray.ListOffsetArrayType(util.index64tpe, outcontenttpe, arraytpe.idtpe)
+            outtpe = awkward1._numba.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.bitwidth), outcontenttpe, arraytpe.idtpe)
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.offsets = nextoffsets
             proxyout.content = outcontentval
@@ -350,10 +343,10 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         else:
             raise Exception
 
-        proxyout = numba.cgutils.create_struct_proxy(awkward1._numba.listoffsetarray.ListOffsetArrayType(arraytpe.startstpe, arraytpe.contenttpe, arraytpe.idtpe))(context, builder)
-        proxyout.offsets = proxyin.starts
-        proxyout.content = proxyin.content
-        return proxyout._getvalue()
+        # proxyout = numba.cgutils.create_struct_proxy(awkward1._numba.listoffsetarray.ListOffsetArrayType(arraytpe.startstpe, arraytpe.contenttpe, arraytpe.idtpe))(context, builder)
+        # proxyout.offsets = proxyin.starts
+        # proxyout.content = proxyin.content
+        # return proxyout._getvalue()
 
         raise NotImplementedError("ListArray.getitem_next(slice)")
 
@@ -383,9 +376,9 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
 
             nextcarry = util.newindex64(context, builder, numba.int64, lencarry)
             nextadvanced = util.newindex64(context, builder, numba.int64, lencarry)
-            nextoffsets = util.newindex64(context, builder, numba.int64, lenoffsets)
+            nextoffsets = util.newindex(arraytpe.bitwidth, context, builder, numba.int64, lenoffsets)
             util.call(context, builder, kernel,
-                (util.arrayptr(context, builder, util.index64tpe, nextoffsets),
+                (util.arrayptr(context, builder, util.indextpe(arraytpe.bitwidth), nextoffsets),
                  util.arrayptr(context, builder, util.index64tpe, nextcarry),
                  util.arrayptr(context, builder, util.index64tpe, nextadvanced),
                  util.arrayptr(context, builder, arraytpe.startstpe, proxyin.starts),
@@ -404,7 +397,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             contenttpe = nexttpe.getitem_next(tailtpe, True)
             contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-            outtpe = awkward1._numba.listoffsetarray.ListOffsetArrayType(util.index64tpe, contenttpe, arraytpe.idtpe)
+            outtpe = awkward1._numba.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.bitwidth), contenttpe, arraytpe.idtpe)
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.offsets = nextoffsets
             proxyout.content = contentval

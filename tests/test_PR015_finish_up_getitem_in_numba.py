@@ -133,6 +133,12 @@ def test_deep_listarray32():
 
     assert f2(listarrayB32) == f2(modelB)
 
+    @numba.njit
+    def f3(q):
+        return q[1:, ::2, 1:-1, 5::-1]
+
+    assert awkward1.tolist(f3(listarrayB32)) == awkward1.tolist(f3(modelB))
+
 def test_deep_listoffsetarray32():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
     offsetsA = numpy.arange(0, 2*3*5 + 5, 5)

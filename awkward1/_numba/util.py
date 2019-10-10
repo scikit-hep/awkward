@@ -12,7 +12,18 @@ py27 = (sys.version_info[0] < 3)
 
 RefType = numba.int64
 
+index8tpe = numba.types.Array(numba.int8, 1, "C")
+index32tpe = numba.types.Array(numba.int32, 1, "C")
 index64tpe = numba.types.Array(numba.int64, 1, "C")
+def indextpe(bitwidth):
+    if bitwidth == 8:
+        return index8tpe
+    elif bitwidth == 32:
+        return index32tpe
+    elif bitwidth == 64:
+        return index64tpe
+    else:
+        raise AssertionError(bitwidth)
 
 if not py27:
     exec("""
@@ -79,8 +90,21 @@ def call(context, builder, fcn, args, errormessage=None):
             # else:
             #     raise AssertionError("unrecognized exception calling convention: {}".format(excptr))
 
+def newindex8(context, builder, lentpe, lenval):
+    return numba.targets.arrayobj.numpy_empty_nd(context, builder, index8tpe(lentpe), (lenval,))
+def newindex32(context, builder, lentpe, lenval):
+    return numba.targets.arrayobj.numpy_empty_nd(context, builder, index32tpe(lentpe), (lenval,))
 def newindex64(context, builder, lentpe, lenval):
     return numba.targets.arrayobj.numpy_empty_nd(context, builder, index64tpe(lentpe), (lenval,))
+def newindex(bitwidth, context, builder, lentpe, lenval):
+    if bitwidth == 8:
+        return newindex8(context, builder, lentpe, lenval)
+    elif bitwidth == 32:
+        return newindex32(context, builder, lentpe, lenval)
+    elif bitwidth == 64:
+        return newindex64(context, builder, lentpe, lenval)
+    else:
+        raise AssertionError(bitwidth)
 
 @numba.jit(nopython=True)
 def shapeat(shapeat, array, at, ndim):
