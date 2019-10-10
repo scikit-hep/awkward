@@ -57,6 +57,9 @@ The main parts, in order of expected implementation, are:
    * ~~Error messages with location-of-failure information if the array has an `Identity` (except in Numba).~~
    * ~~Fully implement `__getitem__` for int/slice/intarray/boolarray/tuple (placeholders for newaxis/ellipsis), with perfect agreement with [Numpy basic/advanced indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html), to all levels of depth.~~
    * Appendable arrays (a distinct phase from readable arrays, when the type is still in flux) to implement `awkward.fromiter` in C++.
+   * JSON → Awkward via header-only [simdjson](https://github.com/lemire/simdjson#readme) and `awkward.fromiter`.
+   * Explicit broadcasting functions for jagged and non-jagged arrays and scalars.
+   * Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old).
    * Full suite of array types:
       * `RawArray`: flat, 1-dimensional array type for pure C++ (header-only).
       * ~~`NumpyArray`: rectilinear, N-dimensional array type without Python/pybind11 dependencies, but intended for Numpy.~~
@@ -79,11 +82,13 @@ The main parts, in order of expected implementation, are:
       * Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before).
       * Pass through other Numpy functions using [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html) (this would be new).
       * `RecordArray` fields (not called "columns" anymore) through Layer 1 `__getattr__`.
+      * Special Layer 1 `Record` type for `RecordArray` elements, supporting some methods and a visual representation based on `Identity` if available, all fields if `recordtype == "tuple"`, or the first field otherwise.
       * Mechanism for adding user-defined `Methods` like `LorentzVector`, as before, but only on Layer 1.
       * Inerhit from Pandas so that all Layer 1 arrays can be DataFrame columns.
    * Full suite of operations:
       * ~~`awkward.tolist`: invokes iterators to convert arrays to lists and dicts.~~
       * `awkward.tonumpy`: to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
+      * `awkward.topandas`: flattening jaggedness into `MultiIndex` rows and nested records into `MultiIndex` columns. This is distinct from the arrays' inheritance from Pandas, distinct from the natural ability to use any one of them as DataFrame columns.
       * `awkward.flatten`: same as old with an `axis` parameter.
       * Reducers, such as `awkward.sum`, `awkward.max`, etc., supporing an `axis` method.
       * The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std`.
@@ -96,6 +101,20 @@ The main parts, in order of expected implementation, are:
       * `awkward.choose` (and `awkward.argchoose`): to make combinations by choosing a fixed number from a single array; option to use `Identity` index and an option to include same-object combinations.
       * `awkward.join`: performs an inner join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event intersection, zipping all fields.
       * `awkward.union`: performs an outer join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event union, zipping fields where possible.
+   * Derived classes section with `StringArray` as its first member. Derived classes have ufunc-defined `Methods` and Numba extensions.
+
+Not included in the six-month timeframe, but soon thereafter:
+
+   * Update [hepvector](https://github.com/henryiii/hepvector#readme) to be Derived classes, replacing the `TLorentzVectorArray` in uproot-methods.
+   * Update uproot (on a branch) to use Awkward 1.0.
+   * Start the `awkward → awkward0`, `awkward1 → awkward` transition.
    * Translation to and from Apache Arrow and Parquet in C++.
-   * Persistence to any medium that stores named binary blobs, as before, but accessible via C++ (especially for writing).
+   * Persistence to any medium that stores named binary blobs, as before, but accessible via C++ (especially for writing). The persistence format might differ slightly from the existing one (break backward compatibility, if needed).
    * Universal `array.get[...]` as a softer form of `array[...]` that skips non-existent indexes, rather than raising errors.
+
+Not included in the six-month timeframe, but possible in the more distant future:
+
+   * Demonstrate Awkward 1.0 as a C++ wrapping library with [FastJet](http://fastjet.fr/).
+   * GPU implementations of the cpu-kernels in Layer 4, with the Layer 3 C++ passing a "device" variable at every level of the layout to indicate whether the data pointers refer to main memory or a particular GPU.
+   * CPU-acceleration of the cpu-kernels using vectorization and other tricks.
+   * Explicit interface with [Dask](https://dask.org).
