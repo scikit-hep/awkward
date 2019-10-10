@@ -52,10 +52,7 @@ class ListOffsetArrayType(content.ContentType):
 
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
-            if not isadvanced:
-                return ListOffsetArrayType(util.indextpe(self.bitwidth), contenttpe, self.idtpe)
-            else:
-                raise NotImplementedError("ListOffsetArray isadvanced")
+            return ListOffsetArrayType(util.indextpe(self.bitwidth), contenttpe, self.idtpe)
 
         elif isinstance(headtpe, numba.types.EllipsisType):
             raise NotImplementedError("ellipsis")
@@ -344,16 +341,33 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         if advanced is None:
             outcontenttpe = nextcontenttpe.getitem_next(tailtpe, False)
             outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
-            outtpe = awkward1._numba.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.bitwidth), outcontenttpe, arraytpe.idtpe)
-            proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
-            proxyout.offsets = nextoffsets
-            proxyout.content = outcontentval
-            if arraytpe.idtpe != numba.none:
-                proxyout.id = proxyin.id
-            return proxyout._getvalue()
 
         else:
-            raise Exception
+            total = numba.cgutils.alloca_once(builder, context.get_value_type(numba.int64))
+            util.call(context, builder, determine_total,
+                (total,
+                 util.arrayptr(context, builder, util.indextpe(arraytpe.bitwidth), nextoffsets),
+                 lenstarts),
+                "in {}, indexing error".format(arraytpe.shortname))
+
+            nextadvanced = util.newindex64(context, builder, numba.int64, builder.load(total))
+            util.call(context, builder, fill_nextadvanced,
+                (util.arrayptr(context, builder, util.index64tpe, nextadvanced),
+                 util.arrayptr(context, builder, util.index64tpe, advanced),
+                 util.arrayptr(context, builder, util.indextpe(arraytpe.bitwidth), nextoffsets),
+                 lenstarts),
+                "in {}, indexing error".format(arraytpe.shortname))
+
+            outcontenttpe = nextcontenttpe.getitem_next(tailtpe, True)
+            outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, nextadvanced)
+
+        outtpe = awkward1._numba.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.bitwidth), outcontenttpe, arraytpe.idtpe)
+        proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
+        proxyout.offsets = nextoffsets
+        proxyout.content = outcontentval
+        if arraytpe.idtpe != numba.none:
+            proxyout.id = proxyin.id
+        return proxyout._getvalue()
 
     elif isinstance(headtpe, numba.types.EllipsisType):
         raise NotImplementedError("ListOffsetArray.getitem_next(ellipsis)")

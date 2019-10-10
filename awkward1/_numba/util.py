@@ -172,7 +172,7 @@ def regularize_slice(arrays):
 
     else:
         code = "def impl(arrays):\n"
-        indexes = []
+        indexes = []   # all entries have trailing commas to ensure output is a tuple
         for i, t in enumerate(arrays.types):
             if isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(t.dtype, numba.types.Boolean):
                 code += "    x{} = numpy.nonzero(arrays[{}])\n".format(i, i)
@@ -182,7 +182,7 @@ def regularize_slice(arrays):
             elif isinstance(t, (numba.types.ArrayCompatible, numba.types.List)):
                 raise TypeError("arrays must have boolean or integer type")
             else:
-                indexes.append("arrays[{}]".format(i))
+                indexes.append("arrays[{}],".format(i))
         code += "    return ({})".format(" ".join(indexes))
         g = {"numpy": numpy}
         exec(code, g)

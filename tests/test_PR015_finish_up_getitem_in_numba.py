@@ -139,6 +139,12 @@ def test_deep_listarray32():
 
     assert awkward1.tolist(f3(listarrayB32)) == awkward1.tolist(f3(modelB))
 
+    @numba.njit
+    def f4(q):
+        return q[numpy.array([0, 1, 1, 0]), ::2, 1:-1, 5::-1]
+
+    assert awkward1.tolist(f4(listarrayB32)) == awkward1.tolist(f4(modelB))
+
 def test_deep_listoffsetarray32():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
     offsetsA = numpy.arange(0, 2*3*5 + 5, 5)
@@ -167,6 +173,12 @@ def test_deep_listoffsetarray32():
         return q[1:, ::2, 1:-1, 5::-1]
 
     assert awkward1.tolist(f3(listoffsetarrayB32)) == awkward1.tolist(f3(modelB))
+
+    @numba.njit
+    def f4(q):
+        return q[numpy.array([0, 1, 1, 0]), ::2, 1:-1, 5::-1]
+
+    assert awkward1.tolist(f4(listoffsetarrayB32)) == awkward1.tolist(f4(modelB))
 
 def test_deep_listarray64():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
@@ -199,6 +211,12 @@ def test_deep_listarray64():
 
     assert awkward1.tolist(f3(listarrayB64)) == awkward1.tolist(f3(modelB))
 
+    @numba.njit
+    def f4(q):
+        return q[numpy.array([0, 1, 1, 0]), ::2, 1:-1, 5::-1]
+
+    assert awkward1.tolist(f4(listarrayB64)) == awkward1.tolist(f4(modelB))
+
 def test_deep_listoffsetarray64():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
     offsetsA = numpy.arange(0, 2*3*5 + 5, 5)
@@ -227,3 +245,9 @@ def test_deep_listoffsetarray64():
         return q[1:, ::2, 1:-1, 5::-1]
 
     assert awkward1.tolist(f3(listoffsetarrayB64)) == awkward1.tolist(f3(modelB))
+
+    @numba.njit
+    def f4(q):
+        return q[numpy.array([0, 1, 1, 0]), ::2, 1:-1, 5::-1]
+
+    assert awkward1.tolist(f4(listoffsetarrayB64)) == awkward1.tolist(f4(modelB))
