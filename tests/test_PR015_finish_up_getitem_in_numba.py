@@ -123,7 +123,7 @@ def test_deep_listarray32():
 
     @numba.njit
     def f1(q):
-        return q[1, -1, 4]
+        return q[1, 2, 4]
 
     assert awkward1.tolist(f1(listarrayB32)) == awkward1.tolist(f1(modelB))
 
@@ -146,7 +146,7 @@ def test_deep_listoffsetarray32():
 
     @numba.njit
     def f1(q):
-        return q[1, -1, 4]
+        return q[1, 2, 4]
 
     assert awkward1.tolist(f1(listoffsetarrayB32)) == awkward1.tolist(f1(modelB))
 
@@ -171,7 +171,7 @@ def test_deep_listarray64():
 
     @numba.njit
     def f1(q):
-        return q[1, -1, 4]
+        return q[1, 2, 4]
 
     assert awkward1.tolist(f1(listarrayB64)) == awkward1.tolist(f1(modelB))
 
