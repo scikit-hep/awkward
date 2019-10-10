@@ -58,7 +58,7 @@ for hfile in glob.glob(os.path.join(os.path.join(os.path.dirname(os.path.dirname
     if xfile.find("./compounddef/location").attrib["file"].startswith("src/cpu-kernels"):
         for xfcn in xfile.findall(".//memberdef[@kind='function']"):
             name = xfcn.find("./name").text
-            if hasattr(kernels, name):
+            if hasattr(kernels, name) and name not in ("success", "failure"):
                 rettype = xfcn.find("./type").text
                 params = [(x.find("./declname").text, x.find("./type").text) for x in xfcn.findall("./param")]
                 getattr(kernels, name).name = name

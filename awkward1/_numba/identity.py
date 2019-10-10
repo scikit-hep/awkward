@@ -80,6 +80,29 @@ def lower_len(context, builder, sig, args):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     return numba.targets.arrayobj.array_len(context, builder, numba.types.intp(tpe.arraytpe), (proxyin.array,))
 
+def lower_getitem_any(context, builder, idtpe, wheretpe, idval, whereval):
+    proxyin = numba.cgutils.create_struct_proxy(idtpe)(context, builder, value=idval)
+
+    if isinstance(wheretpe, numba.types.Integer):
+        proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
+        proxyslice.start = util.cast(context, builder, wheretpe, numba.intp, whereval)
+        proxyslice.stop = builder.add(proxyslice.start, context.get_constant(numba.intp, 1))
+        proxyslice.step = context.get_constant(numba.intp, 1)
+        wheretpe = numba.types.slice2_type
+        whereval = proxyslice._getvalue()
+
+    proxyout = numba.cgutils.create_struct_proxy(idtpe)(context, builder)
+    proxyout.ref = proxyin.ref
+    proxyout.fieldloc = proxyin.fieldloc
+    if isinstance(wheretpe, numba.types.BaseTuple):
+        proxyout.array = numba.targets.arrayobj.getitem_array_tuple(context, builder, idtpe.arraytpe(idtpe.arraytpe, wheretpe), (proxyin.array, whereval))
+    elif isinstance(wheretpe, numba.types.Array):
+        proxyout.array = numba.targets.arrayobj.fancy_getitem_array(context, builder, idtpe.arraytpe(idtpe.arraytpe, wheretpe), (proxyin.array, whereval))
+    else:
+        proxyout.array = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, idtpe.arraytpe(idtpe.arraytpe, wheretpe), (proxyin.array, whereval))
+
+    return proxyout._getvalue()
+
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):
     key = IdentityType
