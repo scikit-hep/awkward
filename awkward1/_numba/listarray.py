@@ -257,11 +257,6 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         else:
             raise AssertionError("unrecognized bitwidth")
 
-        tmp = util.cast(context, builder, headtpe, numba.int64, headval)
-        util.debug(context, builder, headtpe, headval, numba.int64, tmp)
-        util.debug(context, builder, arraytpe.startstpe, proxyin.starts)
-        util.debug(context, builder, arraytpe.stopstpe, proxyin.stops)
-
         nextcarry = util.newindex64(context, builder, numba.int64, lenstarts)
         util.call(context, builder, kernel,
             (util.arrayptr(context, builder, util.index64tpe, nextcarry),
@@ -270,7 +265,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              lenstarts,
              context.get_constant(numba.int64, 0),
              context.get_constant(numba.int64, 0),
-             tmp),
+             util.cast(context, builder, headtpe, numba.int64, headval)),
             "in {}, indexing error".format(arraytpe.shortname))
         nextcontenttpe = arraytpe.contenttpe.carry()
         nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)

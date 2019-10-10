@@ -121,15 +121,11 @@ def test_deep_listarray32():
     listarrayB32 = awkward1.layout.ListArray32(awkward1.layout.Index32(startsB), awkward1.layout.Index32(stopsB), listarrayA32)
     modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
 
-    print("============================================")
-
     @numba.njit
     def f1(q):
         return q[1, 2, 4]
 
     assert awkward1.tolist(f1(listarrayB32)) == awkward1.tolist(f1(modelB))
-
-    print("--------------------------------------------")
 
     @numba.njit
     def f2(q):
@@ -148,15 +144,11 @@ def test_deep_listoffsetarray32():
     listoffsetarrayB32 = awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(offsetsB), listoffsetarrayA32)
     modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
 
-    print("============================================")
-
     @numba.njit
     def f1(q):
         return q[1, 2, 4]
 
     assert awkward1.tolist(f1(listoffsetarrayB32)) == awkward1.tolist(f1(modelB))
-
-    print("--------------------------------------------")
 
     @numba.njit
     def f2(q):
@@ -177,15 +169,11 @@ def test_deep_listarray64():
     listarrayB64 = awkward1.layout.ListArray64(awkward1.layout.Index64(startsB), awkward1.layout.Index64(stopsB), listarrayA64)
     modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
 
-    print("============================================")
-
     @numba.njit
     def f1(q):
         return q[1, 2, 4]
 
     assert awkward1.tolist(f1(listarrayB64)) == awkward1.tolist(f1(modelB))
-
-    print("--------------------------------------------")
 
     @numba.njit
     def f2(q):
@@ -204,15 +192,11 @@ def test_deep_listoffsetarray64():
     listoffsetarrayB64 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(offsetsB), listoffsetarrayA64)
     modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
 
-    print("============================================")
-
     @numba.njit
     def f1(q):
         return q[1, 2, 4]
 
     assert awkward1.tolist(f1(listoffsetarrayB64)) == awkward1.tolist(f1(modelB))
-
-    print("--------------------------------------------")
 
     @numba.njit
     def f2(q):

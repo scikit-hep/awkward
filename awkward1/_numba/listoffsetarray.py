@@ -269,9 +269,6 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         else:
             raise AssertionError("unrecognized bitwidth")
 
-        util.debug(context, builder, headtpe, headval)
-        util.debug(context, builder, arraytpe.offsetstpe, proxyin.offsets)
-
         nextcarry = util.newindex64(context, builder, numba.int64, lenstarts)
         util.call(context, builder, kernel,
             (util.arrayptr(context, builder, util.index64tpe, nextcarry),
@@ -349,11 +346,6 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     lenstarts = builder.sub(lenoffsets, context.get_constant(numba.int64, 1))
 
     starts, stops = starts_stops(context, builder, arraytpe.offsetstpe, proxyin.offsets, lenstarts, lenoffsets)
-
-    util.debug(context, builder, numba.int64, lenoffsets, numba.int64, lenstarts)
-    util.debug(context, builder, arraytpe.offsetstpe, proxyin.offsets)
-    util.debug(context, builder, arraytpe.offsetstpe, starts)
-    util.debug(context, builder, arraytpe.offsetstpe, stops)
 
     proxyout = numba.cgutils.create_struct_proxy(awkward1._numba.listarray.ListArrayType(arraytpe.offsetstpe, arraytpe.offsetstpe, arraytpe.contenttpe, arraytpe.idtpe))(context, builder)
     proxyout.starts = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.offsetstpe(arraytpe.offsetstpe, carrytpe), (starts, carryval))
