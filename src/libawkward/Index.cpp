@@ -90,7 +90,7 @@ namespace awkward {
 
   template <typename T>
   IndexOf<T> IndexOf<T>::getitem_range_unsafe(int64_t start, int64_t stop) const {
-    assert(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop < length_);
+    assert(0 <= start  &&  start < length_  &&  start <= stop  &&  stop <= length_);
     return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
   }
 

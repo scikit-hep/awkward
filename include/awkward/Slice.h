@@ -16,6 +16,7 @@ namespace awkward {
   public:
     static int64_t none() { return kSliceNone; }
 
+    virtual const std::shared_ptr<SliceItem> shallow_copy() const = 0;
     virtual const std::string tostring() const = 0;
   };
 
@@ -23,6 +24,9 @@ namespace awkward {
   public:
     SliceAt(int64_t at): at_(at) { }
     int64_t at() const { return at_; }
+    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+      return std::shared_ptr<SliceItem>(new SliceAt(at_));
+    }
     virtual const std::string tostring() const;
   private:
     const int64_t at_;
@@ -38,6 +42,9 @@ namespace awkward {
     int64_t step() const { return step_; }
     bool hasstart() const { return start_ != none(); }
     bool hasstop() const { return stop_ != none(); }
+    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+      return std::shared_ptr<SliceItem>(new SliceRange(start_, stop_, step_));
+    }
     virtual const std::string tostring() const;
   private:
     const int64_t start_;
@@ -48,12 +55,18 @@ namespace awkward {
   class SliceEllipsis: public SliceItem {
   public:
     SliceEllipsis() { }
+    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+      return std::shared_ptr<SliceItem>(new SliceEllipsis());
+    }
     virtual const std::string tostring() const;
   };
 
   class SliceNewAxis: public SliceItem {
   public:
     SliceNewAxis() { }
+    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+      return std::shared_ptr<SliceItem>(new SliceNewAxis());
+    }
     virtual const std::string tostring() const;
   };
 
@@ -69,6 +82,9 @@ namespace awkward {
     const std::vector<int64_t> shape() const { return shape_; }
     const std::vector<int64_t> strides() const { return strides_; }
     int64_t ndim() const { return (int64_t)shape_.size(); }
+    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+      return std::shared_ptr<SliceItem>(new SliceArrayOf<T>(index_, shape_, strides_));
+    }
     virtual const std::string tostring() const;
     const std::string tostring_part() const;
     const IndexOf<T> ravel() const;
