@@ -138,7 +138,16 @@ int main(int, char**) {
     return -1;
   }
 
-  // std::cout << tostring(content.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1}))))) << std::endl;
+  Index64 array2(4);
+  array2.ptr().get()[0] = 1;
+  array2.ptr().get()[1] = -1;
+  array2.ptr().get()[2] = 2;
+  array2.ptr().get()[3] = 0;
+  if (tostring(listA.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1})), new SliceArray64(array2, std::vector<int64_t>({4}), std::vector<int64_t>({1}))))) != "[4.4, 2.2, 2.2, 6.6]") {
+    return -1;
+  }
+
+  // std::cout << tostring(listA.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1})), new SliceArray64(array2, std::vector<int64_t>({4}), std::vector<int64_t>({1}))))) << std::endl;
   // return -1;
 
   std::shared_ptr<Content> listB(new ListOffsetArray32(Identity::none(), offsetsB, listA));

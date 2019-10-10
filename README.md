@@ -63,7 +63,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
    * [ ] Explicit broadcasting functions for jagged and non-jagged arrays and scalars.
    * [ ] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old).
    * [ ] Full suite of array types:
-      * [ ] `RawArray`: flat, 1-dimensional array type for pure C++ (header-only).
+      * [X] `RawArray`: flat, 1-dimensional array type for pure C++ (header-only).
       * [X] `NumpyArray`: rectilinear, N-dimensional array type without Python/pybind11 dependencies, but intended for Numpy.
       * [X] `ListArray`: the new `JaggedArray`, based on `starts` and `stops` (i.e. fully general).
       * [X] `ListOffsetArray`: the `JaggedArray` case with no unreachable data between reachable data (gaps).

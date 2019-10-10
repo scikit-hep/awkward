@@ -227,21 +227,17 @@ namespace awkward {
       }
 
       else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+        assert(advanced.length() == 0);
         if (array->shape().size() != 1) {
           throw std::runtime_error("array.ndim != 1");
         }
-        if (advanced.length() == 0) {
-          Index64 flathead = array->ravel();
-          Error err = awkward_regularize_arrayslice_64(
-            flathead.ptr().get(),
-            flathead.length(),
-            length_);
-          util::handle_error(err, classname(), id_.get());
-          return carry(flathead);
-        }
-        else {
-          throw std::runtime_error("advanced array");
-        }
+        Index64 flathead = array->ravel();
+        Error err = awkward_regularize_arrayslice_64(
+          flathead.ptr().get(),
+          flathead.length(),
+          length_);
+        util::handle_error(err, classname(), id_.get());
+        return carry(flathead);
       }
 
       else {
