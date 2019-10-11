@@ -95,6 +95,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [ ] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporing an `axis` method.
       * [ ] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std`.
       * [ ] `awkward.argmin`, `awkward.argmax`, `awkward.argsort`, and `awkward.sort`: same as old.
+      * [ ] `awkward.where`: like `numpy.where`; old doesn't have this yet, but we'll need it.
       * [ ] `awkward.concatenate`: same as old, but supporting `axis` at any depth.
       * [ ] `awkward.zip`: makes jagged tables; this is a naive version of `awkward.join` below.
       * [ ] `awkward.pad`: same as old, but without the `clip` option (use slicing instead).
