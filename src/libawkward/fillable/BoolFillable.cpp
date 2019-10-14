@@ -20,10 +20,16 @@ namespace awkward {
     return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::boolean));
   }
 
-  const std::shared_ptr<Content> BoolFillable::layout() const {
-    bool* rawptr = new bool[data_.size()];
-    std::shared_ptr<void> ptr(rawptr, awkward::util::array_deleter<bool>());
-    std::copy(data_.begin(), data_.end(), rawptr);
+  const std::shared_ptr<Content> BoolFillable::tolayout() {
+    // std::shared_ptr<void> ptr = vector_to_sharedptr<uint8_t>(data_);
+
+    uint8_t* rawptr = data_.data();
+    std::shared_ptr<void> ptr(reinterpret_cast<void*>(rawptr), vector_deleter<uint8_t>(&data_));
+
+    // bool* rawptr = new bool[data_.size()];
+    // std::shared_ptr<void> ptr(rawptr, awkward::util::array_deleter<bool>());
+    // std::copy(data_.begin(), data_.end(), rawptr);
+
     std::vector<ssize_t> shape = { (ssize_t)data_.size() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(bool) };
     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr, shape, strides, 0, sizeof(bool), "?"));

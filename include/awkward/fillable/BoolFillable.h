@@ -16,13 +16,13 @@ namespace awkward {
     virtual int64_t length() const;
     virtual void clear();
     virtual const std::shared_ptr<Type> type() const;
-    virtual const std::shared_ptr<Content> layout() const;
+    virtual const std::shared_ptr<Content> tolayout();
 
     virtual Fillable* null();
     virtual Fillable* boolean(bool x);
 
   private:
-    std::vector<bool> data_;
+    std::vector<uint8_t> data_;
   };
 }
 

@@ -22,8 +22,9 @@ namespace awkward {
     return std::shared_ptr<Type>(new OptionType(content_.get()->type()));
   }
 
-  const std::shared_ptr<Content> MostlyNullFillable::layout() const {
-    throw std::runtime_error("MostlyNullFillable::layout() needs MaskedArray");
+  const std::shared_ptr<Content> MostlyNullFillable::tolayout() {
+    throw std::runtime_error("MostlyNullFillable::tolayout() needs MaskedArray");
+    // FIXME: clear();
   }
 
   Fillable* MostlyNullFillable::null() {

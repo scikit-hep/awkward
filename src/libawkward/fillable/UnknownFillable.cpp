@@ -21,8 +21,9 @@ namespace awkward {
     return std::shared_ptr<Type>(nullptr);
   }
 
-  const std::shared_ptr<Content> UnknownFillable::layout() const {
-    throw std::runtime_error("UnknownFillable::layout() needs MaskedArray");
+  const std::shared_ptr<Content> UnknownFillable::tolayout() {
+    throw std::runtime_error("UnknownFillable::tolayout() needs MaskedArray");
+    // FIXME: clear();
   }
 
   Fillable* UnknownFillable::null() {
