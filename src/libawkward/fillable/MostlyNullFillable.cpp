@@ -22,18 +22,20 @@ namespace awkward {
     return std::shared_ptr<Type>(new OptionType(content_.get()->type()));
   }
 
-  const std::shared_ptr<Content> MostlyNullFillable::snapshot() {
+  const std::shared_ptr<Content> MostlyNullFillable::snapshot() const {
     throw std::runtime_error("MostlyNullFillable::snapshot() needs MaskedArray");
     // FIXME: clear();
   }
 
   Fillable* MostlyNullFillable::null() {
     length_++;
+    return this;
   }
 
   Fillable* MostlyNullFillable::boolean(bool x) {
     validindex_.push_back(length_);
     content_.get()->boolean(x);
     length_++;
+    return this;
   }
 }

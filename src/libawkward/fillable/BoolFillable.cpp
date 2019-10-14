@@ -20,7 +20,7 @@ namespace awkward {
     return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::boolean));
   }
 
-  const std::shared_ptr<Content> BoolFillable::snapshot() {
+  const std::shared_ptr<Content> BoolFillable::snapshot() const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(bool) };
     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), buffer_.ptr(), shape, strides, 0, sizeof(bool), "?"));

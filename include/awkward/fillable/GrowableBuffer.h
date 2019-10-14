@@ -15,7 +15,7 @@ namespace awkward {
     GrowableBuffer(int64_t initial, double resize): ptr_(new T[initial], awkward::util::array_deleter<T>()), length_(0), reserved_(initial), initial_(initial), resize_(resize) { }
     GrowableBuffer(): GrowableBuffer(1024, 2.0) { }
 
-    const std::shared_ptr<T> ptr() { return ptr_; }
+    const std::shared_ptr<T> ptr() const { return ptr_; }
     int64_t length() const { return length_; }
     int64_t reserved() const { return reserved_; }
     int64_t initial() const { return initial_; }

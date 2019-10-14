@@ -14,11 +14,14 @@ namespace awkward {
   public:
     FillableArray(): fillable_(new BoolFillable()) { }
 
-    std::string tostring() const;
+    const std::string tostring() const;
     int64_t length() const;
     void clear();
     const std::shared_ptr<Type> type() const;
-    const std::shared_ptr<Content> snapshot();
+    const std::shared_ptr<Content> snapshot() const;
+    const std::shared_ptr<Content> getitem_at(int64_t at) const;
+    const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;
+    const std::shared_ptr<Content> getitem(const Slice& where) const;
 
     void null();
     void boolean(bool x);

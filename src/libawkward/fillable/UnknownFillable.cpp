@@ -21,13 +21,14 @@ namespace awkward {
     return std::shared_ptr<Type>(nullptr);
   }
 
-  const std::shared_ptr<Content> UnknownFillable::tolayout() {
-    throw std::runtime_error("UnknownFillable::tolayout() needs MaskedArray");
+  const std::shared_ptr<Content> UnknownFillable::snapshot() {
+    throw std::runtime_error("UnknownFillable::snapshot() needs MaskedArray");
     // FIXME: clear();
   }
 
   Fillable* UnknownFillable::null() {
     nullcount_++;
+    return this;
   }
 
   Fillable* UnknownFillable::boolean(bool x) {
