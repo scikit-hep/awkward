@@ -21,7 +21,7 @@ namespace awkward {
     return std::shared_ptr<Type>(nullptr);
   }
 
-  const std::shared_ptr<Content> UnknownFillable::snapshot() {
+  const std::shared_ptr<Content> UnknownFillable::snapshot() const {
     throw std::runtime_error("UnknownFillable::snapshot() needs MaskedArray");
     // FIXME: clear();
   }

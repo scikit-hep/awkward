@@ -7,12 +7,12 @@
 #include "awkward/Content.h"
 #include "awkward/type/Type.h"
 #include "awkward/fillable/Fillable.h"
-#include "awkward/fillable/BoolFillable.h"
+#include "awkward/fillable/UnknownFillable.h"
 
 namespace awkward {
   class FillableArray {
   public:
-    FillableArray(): fillable_(new BoolFillable()) { }
+    FillableArray(): fillable_(new UnknownFillable()) { }
 
     const std::string tostring() const;
     int64_t length() const;
