@@ -11,9 +11,9 @@
 #include "awkward/Identity.h"
 #include "awkward/Content.h"
 #include "awkward/Iterator.h"
-#include "awkward/NumpyArray.h"
-#include "awkward/ListArray.h"
-#include "awkward/ListOffsetArray.h"
+#include "awkward/array/NumpyArray.h"
+#include "awkward/array/ListArray.h"
+#include "awkward/array/ListOffsetArray.h"
 
 namespace py = pybind11;
 namespace ak = awkward;

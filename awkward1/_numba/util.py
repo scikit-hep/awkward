@@ -222,10 +222,10 @@ def preprocess_slicetuple(context, builder, wheretpe, whereval):
     return wheretpe3, whereval3
 
 def wrap_for_slicetuple(context, builder, arraytpe, arrayval):
-    import awkward1._numba.listarray
+    import awkward1._numba.array.listarray
 
     length = arraylen(context, builder, arraytpe, arrayval, totpe=numba.int64)
-    nexttpe = awkward1._numba.listarray.ListArrayType(index64tpe, index64tpe, arraytpe, numba.types.none)
+    nexttpe = awkward1._numba.array.listarray.ListArrayType(index64tpe, index64tpe, arraytpe, numba.types.none)
     proxynext = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
     proxynext.starts = newindex64(context, builder, numba.int64, context.get_constant(numba.int64, 1))
     proxynext.stops = newindex64(context, builder, numba.int64, context.get_constant(numba.int64, 1))

@@ -2,7 +2,7 @@
 <doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
   <compounddef id="Content_8cpp" kind="file" language="C++">
     <compoundname>Content.cpp</compoundname>
-    <includes local="yes">awkward/ListArray.h</includes>
+    <includes local="yes">awkward/array/ListArray.h</includes>
     <includes local="yes">awkward/Content.h</includes>
     <incdepgraph>
       <node id="1">
@@ -17,7 +17,7 @@
         <label>awkward/Content.h</label>
       </node>
       <node id="2">
-        <label>awkward/ListArray.h</label>
+        <label>awkward/array/ListArray.h</label>
       </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>

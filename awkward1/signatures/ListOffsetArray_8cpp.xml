@@ -7,8 +7,8 @@
     <includes local="yes">awkward/cpu-kernels/identity.h</includes>
     <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
     <includes local="yes">awkward/Slice.h</includes>
-    <includes local="yes">awkward/ListArray.h</includes>
-    <includes local="yes">awkward/ListOffsetArray.h</includes>
+    <includes local="yes">awkward/array/ListArray.h</includes>
+    <includes local="yes">awkward/array/ListOffsetArray.h</includes>
     <incdepgraph>
       <node id="5">
         <label>awkward/cpu-kernels/getitem.h</label>
@@ -16,23 +16,8 @@
       <node id="4">
         <label>awkward/cpu-kernels/identity.h</label>
       </node>
-      <node id="2">
-        <label>sstream</label>
-      </node>
-      <node id="6">
-        <label>awkward/Slice.h</label>
-      </node>
-      <node id="8">
-        <label>awkward/ListOffsetArray.h</label>
-      </node>
-      <node id="3">
-        <label>type_traits</label>
-      </node>
-      <node id="7">
-        <label>awkward/ListArray.h</label>
-      </node>
       <node id="1">
-        <label>src/libawkward/ListOffsetArray.cpp</label>
+        <label>src/libawkward/array/ListOffsetArray.cpp</label>
         <link refid="ListOffsetArray_8cpp"/>
         <childnode refid="2" relation="include">
         </childnode>
@@ -48,6 +33,21 @@
         </childnode>
         <childnode refid="8" relation="include">
         </childnode>
+      </node>
+      <node id="8">
+        <label>awkward/array/ListOffsetArray.h</label>
+      </node>
+      <node id="2">
+        <label>sstream</label>
+      </node>
+      <node id="7">
+        <label>awkward/array/ListArray.h</label>
+      </node>
+      <node id="6">
+        <label>awkward/Slice.h</label>
+      </node>
+      <node id="3">
+        <label>type_traits</label>
       </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>
@@ -72,7 +72,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/ListOffsetArray.cpp" line="28" column="11" bodyfile="src/libawkward/ListOffsetArray.cpp" bodystart="28" bodyend="30"/>
+        <location file="src/libawkward/array/ListOffsetArray.cpp" line="28" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="28" bodyend="30"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1aa3d73a21953e0578aa577329c38dc0ed" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -94,13 +94,13 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/ListOffsetArray.cpp" line="33" column="11" bodyfile="src/libawkward/ListOffsetArray.cpp" bodystart="33" bodyend="35"/>
+        <location file="src/libawkward/array/ListOffsetArray.cpp" line="33" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="33" bodyend="35"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="src/libawkward/ListOffsetArray.cpp"/>
+    <location file="src/libawkward/array/ListOffsetArray.cpp"/>
   </compounddef>
 </doxygen>
