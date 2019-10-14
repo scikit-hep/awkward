@@ -7,7 +7,7 @@
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 
-#include "awkward/NumpyArray.h"
+#include "awkward/array/NumpyArray.h"
 
 namespace awkward {
   ssize_t NumpyArray::ndim() const {

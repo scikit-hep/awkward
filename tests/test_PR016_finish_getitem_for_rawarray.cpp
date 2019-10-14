@@ -3,9 +3,9 @@
 #include <sstream>
 
 #include "awkward/Identity.h"
-#include "awkward/RawArray.h"
-#include "awkward/ListArray.h"
-#include "awkward/ListOffsetArray.h"
+#include "awkward/array/RawArray.h"
+#include "awkward/array/ListArray.h"
+#include "awkward/array/ListOffsetArray.h"
 #include "awkward/Slice.h"
 
 using namespace awkward;

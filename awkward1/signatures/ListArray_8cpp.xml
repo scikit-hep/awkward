@@ -7,17 +7,14 @@
     <includes local="yes">awkward/cpu-kernels/identity.h</includes>
     <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
     <includes local="yes">awkward/Slice.h</includes>
-    <includes local="yes">awkward/ListOffsetArray.h</includes>
-    <includes local="yes">awkward/ListArray.h</includes>
+    <includes local="yes">awkward/array/ListOffsetArray.h</includes>
+    <includes local="yes">awkward/array/ListArray.h</includes>
     <incdepgraph>
       <node id="5">
         <label>awkward/cpu-kernels/getitem.h</label>
       </node>
-      <node id="4">
-        <label>awkward/cpu-kernels/identity.h</label>
-      </node>
       <node id="1">
-        <label>src/libawkward/ListArray.cpp</label>
+        <label>src/libawkward/array/ListArray.cpp</label>
         <link refid="ListArray_8cpp"/>
         <childnode refid="2" relation="include">
         </childnode>
@@ -34,20 +31,23 @@
         <childnode refid="8" relation="include">
         </childnode>
       </node>
+      <node id="4">
+        <label>awkward/cpu-kernels/identity.h</label>
+      </node>
+      <node id="7">
+        <label>awkward/array/ListOffsetArray.h</label>
+      </node>
       <node id="2">
         <label>sstream</label>
+      </node>
+      <node id="8">
+        <label>awkward/array/ListArray.h</label>
       </node>
       <node id="6">
         <label>awkward/Slice.h</label>
       </node>
-      <node id="7">
-        <label>awkward/ListOffsetArray.h</label>
-      </node>
       <node id="3">
         <label>type_traits</label>
-      </node>
-      <node id="8">
-        <label>awkward/ListArray.h</label>
       </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>
@@ -55,6 +55,6 @@
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="src/libawkward/ListArray.cpp"/>
+    <location file="src/libawkward/array/ListArray.cpp"/>
   </compounddef>
 </doxygen>
