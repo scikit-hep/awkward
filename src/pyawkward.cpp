@@ -491,7 +491,7 @@ ak::Iterator iter(T& self) {
 }
 
 template <typename T>
-py::class_<T> content(py::class_<T>& x) {
+py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
   return x.def("__repr__", &repr<T>)
           .def_property("id", [](T& self) -> py::object { return box(self.id()); }, [](T& self, py::object id) -> void { self.setid(unbox_id(id)); })
           .def("setid", [](T& self, py::object id) -> void {
@@ -505,10 +505,14 @@ py::class_<T> content(py::class_<T>& x) {
          .def("__iter__", &iter<T>);
 }
 
+py::class_<ak::Content> make_Content(py::handle m, std::string name) {
+  return py::class_<ak::Content>(m, name.c_str());
+}
+
 /////////////////////////////////////////////////////////////// NumpyArray
 
-py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
-  return content(py::class_<ak::NumpyArray>(m, name.c_str(), py::buffer_protocol())
+py::class_<ak::NumpyArray, ak::Content> make_NumpyArray(py::handle m, std::string name) {
+  return content(py::class_<ak::NumpyArray, ak::Content>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](ak::NumpyArray& self) -> py::buffer_info {
         return py::buffer_info(
           self.byteptr(),
@@ -553,8 +557,8 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
 /////////////////////////////////////////////////////////////// ListArray
 
 template <typename T>
-py::class_<ak::ListArrayOf<T>> make_ListArrayOf(py::handle m, std::string name) {
-  return content(py::class_<ak::ListArrayOf<T>>(m, name.c_str())
+py::class_<ak::ListArrayOf<T>, ak::Content> make_ListArrayOf(py::handle m, std::string name) {
+  return content(py::class_<ak::ListArrayOf<T>, ak::Content>(m, name.c_str())
       .def(py::init([](ak::IndexOf<T>& starts, ak::IndexOf<T>& stops, py::object content, py::object id) -> ak::ListArrayOf<T> {
         return ak::ListArrayOf<T>(unbox_id(id), starts, stops, unbox_content(content));
       }), py::arg("starts"), py::arg("stops"), py::arg("content"), py::arg("id") = py::none())
@@ -570,8 +574,8 @@ py::class_<ak::ListArrayOf<T>> make_ListArrayOf(py::handle m, std::string name) 
 /////////////////////////////////////////////////////////////// ListOffsetArray
 
 template <typename T>
-py::class_<ak::ListOffsetArrayOf<T>> make_ListOffsetArrayOf(py::handle m, std::string name) {
-  return content(py::class_<ak::ListOffsetArrayOf<T>>(m, name.c_str())
+py::class_<ak::ListOffsetArrayOf<T>, ak::Content> make_ListOffsetArrayOf(py::handle m, std::string name) {
+  return content(py::class_<ak::ListOffsetArrayOf<T>, ak::Content>(m, name.c_str())
       .def(py::init([](ak::IndexOf<T>& offsets, py::object content, py::object id) -> ak::ListOffsetArrayOf<T> {
         return ak::ListOffsetArrayOf<T>(unbox_id(id), offsets, std::shared_ptr<ak::Content>(unbox_content(content)));
       }), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
@@ -608,6 +612,8 @@ PYBIND11_MODULE(layout, m) {
   make_Type(m, "Type");
   make_ArrayType(m, "ArrayType");
   make_PrimitiveType(m, "PrimitiveType");
+
+  make_Content(m, "Content");
 
   make_NumpyArray(m, "NumpyArray");
 
