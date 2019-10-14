@@ -25,8 +25,8 @@ namespace awkward {
     return std::shared_ptr<Type>(new ArrayType(fillable_.get()->length(), fillable_.get()->type()));
   }
 
-  const std::shared_ptr<Content> FillableArray::toarray() const {
-    return fillable_.get()->toarray();
+  const std::shared_ptr<Content> FillableArray::layout() const {
+    return fillable_.get()->layout();
   }
 
   void FillableArray::boolean(bool x) {

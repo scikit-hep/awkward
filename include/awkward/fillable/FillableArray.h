@@ -18,7 +18,7 @@ namespace awkward {
     int64_t length() const;
     void clear();
     const std::shared_ptr<Type> type() const;
-    const std::shared_ptr<Content> toarray() const;
+    const std::shared_ptr<Content> layout() const;
 
     void boolean(bool x);
 

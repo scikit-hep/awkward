@@ -15,6 +15,9 @@
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/fillable/FillableArray.h"
+#include "awkward/type/Type.h"
+#include "awkward/type/ArrayType.h"
+#include "awkward/type/PrimitiveType.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
@@ -384,8 +387,72 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("__repr__", &ak::FillableArray::tostring)
       .def("__len__", &ak::FillableArray::length)
       .def("clear", &ak::FillableArray::clear)
-      .def("toarray", &ak::FillableArray::toarray)
+      .def("type", &ak::FillableArray::type)
+      .def("layout", &ak::FillableArray::layout)
       .def("boolean", &ak::FillableArray::boolean)
+  );
+}
+
+/////////////////////////////////////////////////////////////// Type
+
+bool ne(std::shared_ptr<ak::ArrayType> one, std::shared_ptr<ak::ArrayType> two) {
+  return !one.get()->equal(two);
+}
+
+py::class_<ak::ArrayType, ak::Type> make_ArrayType(py::handle m, std::string name) {
+  return (py::class_<ak::ArrayType>(m, name.c_str())
+      .def(py::init<int64_t, std::shared_ptr<ak::Type>>())
+      .def("length", &ak::ArrayType::length)
+      .def("type", &ak::ArrayType::type)
+      .def("__repr__", &ak::ArrayType::tostring)
+      .def("__eq__", &ak::ArrayType::equal)
+      .def("__ne__", &ne)
+  );
+}
+
+py::class_<ak::PrimitiveType, ak::Type> make_PrimitiveType(py::handle m, std::string name) {
+  return (py::class_<ak::PrimitiveType>(m, name.c_str())
+      .def(py::init([](std::string dtype) -> ak::PrimitiveType {
+        if (dtype == std::string("bool")) {
+          return ak::PrimitiveType(ak::PrimitiveType::boolean);
+        }
+        else if (dtype == std::string("int8")) {
+          return ak::PrimitiveType(ak::PrimitiveType::int8);
+        }
+        else if (dtype == std::string("int16")) {
+          return ak::PrimitiveType(ak::PrimitiveType::int16);
+        }
+        else if (dtype == std::string("int32")) {
+          return ak::PrimitiveType(ak::PrimitiveType::int32);
+        }
+        else if (dtype == std::string("int64")) {
+          return ak::PrimitiveType(ak::PrimitiveType::int64);
+        }
+        else if (dtype == std::string("uint8")) {
+          return ak::PrimitiveType(ak::PrimitiveType::uint8);
+        }
+        else if (dtype == std::string("uint16")) {
+          return ak::PrimitiveType(ak::PrimitiveType::uint16);
+        }
+        else if (dtype == std::string("uint32")) {
+          return ak::PrimitiveType(ak::PrimitiveType::uint32);
+        }
+        else if (dtype == std::string("uint64")) {
+          return ak::PrimitiveType(ak::PrimitiveType::uint64);
+        }
+        else if (dtype == std::string("float32")) {
+          return ak::PrimitiveType(ak::PrimitiveType::float32);
+        }
+        else if (dtype == std::string("float64")) {
+          return ak::PrimitiveType(ak::PrimitiveType::float64);
+        }
+        else {
+          throw std::invalid_argument(std::string("unrecognized primitive type: ") + dtype);
+        }
+      }))
+      .def("__repr__", &ak::PrimitiveType::tostring)
+      .def("__eq__", &ak::PrimitiveType::equal)
+      .def("__ne__", &ne)
   );
 }
 
@@ -533,6 +600,12 @@ PYBIND11_MODULE(layout, m) {
   make_Slice(m, "Slice");
 
   make_Iterator(m, "Iterator");
+
+  make_FillableArray(m, "FillableArray");
+
+  py::class_<ak::Type>(m, "Type");
+  make_ArrayType(m, "ArrayType");
+  make_PrimitiveType(m, "PrimitiveType");
 
   make_NumpyArray(m, "NumpyArray");
 

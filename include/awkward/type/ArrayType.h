@@ -10,7 +10,11 @@ namespace awkward {
   public:
     ArrayType(int64_t length, const std::shared_ptr<Type> type): length_(length), type_(type) { }
 
+    int64_t length() const { return length_; }
+    std::shared_ptr<Type> type() const { return type_; }
+
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
+    virtual bool equal(std::shared_ptr<Type> other) const;
 
   private:
     int64_t length_;

@@ -8,4 +8,13 @@ namespace awkward {
   std::string ArrayType::tostring_part(std::string indent, std::string pre, std::string post) const {
     return indent + pre + std::to_string(length_) + " * " + type_.get()->tostring_part(indent, "", "") + post;
   }
+
+  bool ArrayType::equal(std::shared_ptr<Type> other) const {
+    if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
+      return type_.get()->equal(t->type_);   // lengths DO NOT need to be equal (unlike RegularType)
+    }
+    else {
+      return false;
+    }
+  }
 }

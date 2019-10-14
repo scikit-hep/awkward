@@ -21,7 +21,7 @@ namespace awkward {
     return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::boolean));
   }
 
-  const std::shared_ptr<Content> BoolFillable::toarray() const {
+  const std::shared_ptr<Content> BoolFillable::layout() const {
     bool* rawptr = new bool[data_.size()];
     std::shared_ptr<void> ptr(rawptr, awkward::util::array_deleter<bool>());
     std::copy(std::begin(data_), std::end(data_), rawptr);

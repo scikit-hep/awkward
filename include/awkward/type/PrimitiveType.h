@@ -26,6 +26,7 @@ namespace awkward {
     PrimitiveType(DType dtype): dtype_(dtype) { }
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
+    virtual bool equal(std::shared_ptr<Type> other) const;
 
   private:
     DType dtype_;
