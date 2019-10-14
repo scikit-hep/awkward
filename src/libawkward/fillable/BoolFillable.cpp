@@ -27,7 +27,7 @@ namespace awkward {
     std::copy(std::begin(data_), std::end(data_), rawptr);
     std::vector<ssize_t> shape = { (ssize_t)data_.size() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(bool) };
-    std::shared_ptr<Content> out(new NumpyArray(Identity::none(), ptr, shape, strides, 0, sizeof(bool), "?"));
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), ptr, shape, strides, 0, sizeof(bool), "?"));
   }
 
   Fillable* BoolFillable::boolean(bool x) {

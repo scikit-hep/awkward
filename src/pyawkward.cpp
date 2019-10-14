@@ -388,7 +388,9 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("__len__", &ak::FillableArray::length)
       .def("clear", &ak::FillableArray::clear)
       .def("type", &ak::FillableArray::type)
-      .def("layout", &ak::FillableArray::layout)
+      .def("layout", [](ak::FillableArray& self) -> py::object {
+        return box(self.layout());
+      })
       .def("boolean", &ak::FillableArray::boolean)
   );
 }
