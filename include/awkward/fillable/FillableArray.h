@@ -20,10 +20,13 @@ namespace awkward {
     const std::shared_ptr<Type> type() const;
     const std::shared_ptr<Content> layout() const;
 
+    void null();
     void boolean(bool x);
 
   private:
     std::shared_ptr<Fillable> fillable_;
+
+    void maybeupdate(Fillable* tmp);
   };
 }
 

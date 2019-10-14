@@ -15,6 +15,7 @@ namespace awkward {
     virtual const std::shared_ptr<Type> type() const = 0;
     virtual const std::shared_ptr<Content> layout() const = 0;
 
+    virtual Fillable* null() = 0;
     virtual Fillable* boolean(bool x) = 0;
   };
 }

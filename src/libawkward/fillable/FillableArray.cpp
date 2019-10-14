@@ -29,7 +29,17 @@ namespace awkward {
     return fillable_.get()->layout();
   }
 
+  void FillableArray::null() {
+    maybeupdate(fillable_.get()->null());
+  }
+
   void FillableArray::boolean(bool x) {
-    fillable_.get()->boolean(x);
+    maybeupdate(fillable_.get()->boolean(x));
+  }
+
+  void FillableArray::maybeupdate(Fillable* tmp) {
+    if (tmp != fillable_.get()) {
+      fillable_ = std::shared_ptr<Fillable>(tmp);
+    }
   }
 }

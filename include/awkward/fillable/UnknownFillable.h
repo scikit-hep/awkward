@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_BOOLFILLABLE_H_
-#define AWKWARD_BOOLFILLABLE_H_
+#ifndef AWKWARD_UNKNOWNFILLABLE_H_
+#define AWKWARD_UNKNOWNFILLABLE_H_
 
 #include <vector>
 
@@ -9,9 +9,9 @@
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
-  class BoolFillable: public Fillable {
+  class UnknownFillable: public Fillable {
   public:
-    BoolFillable(): data_() { }
+    UnknownFillable(): nullcount_(0) { }
 
     virtual int64_t length() const;
     virtual void clear();
@@ -22,8 +22,8 @@ namespace awkward {
     virtual Fillable* boolean(bool x);
 
   private:
-    std::vector<bool> data_;
+    int64_t nullcount_;
   };
 }
 
-#endif // AWKWARD_BOOLFILLABLE_H_
+#endif // AWKWARD_UNKNOWNFILLABLE_H_

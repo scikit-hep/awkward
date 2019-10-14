@@ -17,4 +17,12 @@ namespace awkward {
       return false;
     }
   }
+
+  int64_t ArrayType::length() const {
+    return length_;
+  }
+
+  std::shared_ptr<Type> ArrayType::type() const {
+    return type_;
+  }
 }
