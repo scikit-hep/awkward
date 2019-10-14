@@ -3,26 +3,25 @@
 #ifndef AWKWARD_BOOLFILLABLE_H_
 #define AWKWARD_BOOLFILLABLE_H_
 
-#include <vector>
-
 #include "awkward/cpu-kernels/util.h"
+#include "awkward/fillable/GrowableBuffer.h"
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
   class BoolFillable: public Fillable {
   public:
-    BoolFillable(): data_() { }
+    BoolFillable(): buffer_() { }
 
     virtual int64_t length() const;
     virtual void clear();
     virtual const std::shared_ptr<Type> type() const;
-    virtual const std::shared_ptr<Content> tolayout();
+    virtual const std::shared_ptr<Content> snapshot();
 
     virtual Fillable* null();
     virtual Fillable* boolean(bool x);
 
   private:
-    std::vector<uint8_t> data_;
+    GrowableBuffer<uint8_t> buffer_;
   };
 }
 

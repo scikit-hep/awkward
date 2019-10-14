@@ -14,4 +14,4 @@ def test_boolean():
     a.boolean(True)
     a.boolean(False)
     a.boolean(True)
-    assert awkward1.tolist(a.layout()) == [True, True, False, True]
+    assert awkward1.tolist(a.snapshot()) == [True, True, False, True]
