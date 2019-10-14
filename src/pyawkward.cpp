@@ -14,6 +14,7 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/fillable/FillableArray.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
@@ -372,6 +373,19 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
       .def("__repr__", &ak::Iterator::tostring)
       .def("__next__", next)
       .def("next", next)
+  );
+}
+
+/////////////////////////////////////////////////////////////// FillableArray
+
+py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name) {
+  return (py::class_<ak::FillableArray>(m, name.c_str())
+      .def(py::init<>())
+      .def("__repr__", &ak::FillableArray::tostring)
+      .def("__len__", &ak::FillableArray::length)
+      .def("clear", &ak::FillableArray::clear)
+      .def("toarray", &ak::FillableArray::toarray)
+      .def("boolean", &ak::FillableArray::boolean)
   );
 }
 

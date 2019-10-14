@@ -13,9 +13,10 @@ namespace awkward {
   public:
     BoolFillable(): data_() { }
 
-    virtual const std::shared_ptr<Content> toarray() const;
     virtual int64_t length() const;
     virtual void clear();
+    virtual const std::shared_ptr<Type> type() const;
+    virtual const std::shared_ptr<Content> toarray() const;
 
     virtual Fillable* boolean(bool x);
 
