@@ -381,6 +381,31 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
 
 /////////////////////////////////////////////////////////////// FillableArray
 
+template <typename T>
+py::object getitem(T& self, py::object obj) {
+  if (py::isinstance<py::int_>(obj)) {
+    return box(self.getitem_at(obj.cast<int64_t>()));
+  }
+  if (py::isinstance<py::slice>(obj)) {
+    py::object pystep = obj.attr("step");
+    if ((py::isinstance<py::int_>(pystep)  &&  pystep.cast<int64_t>() == 1)  ||  pystep.is(py::none())) {
+      int64_t start = ak::Slice::none();
+      int64_t stop = ak::Slice::none();
+      py::object pystart = obj.attr("start");
+      py::object pystop = obj.attr("stop");
+      if (!pystart.is(py::none())) {
+        start = pystart.cast<int64_t>();
+      }
+      if (!pystop.is(py::none())) {
+        stop = pystop.cast<int64_t>();
+      }
+      return box(self.getitem_range(start, stop));
+    }
+    // NOTE: control flow can pass through here; don't make the last line an 'else'!
+  }
+  return box(self.getitem(toslice(obj)));
+}
+
 py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name) {
   return (py::class_<ak::FillableArray>(m, name.c_str())
       .def(py::init<>())
@@ -390,6 +415,10 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("type", &ak::FillableArray::type)
       .def("snapshot", [](ak::FillableArray& self) -> py::object {
         return box(self.snapshot());
+      })
+      .def("__getitem__", &getitem<ak::FillableArray>)
+      .def("__iter__", [](ak::FillableArray& self) -> ak::Iterator {
+        return ak::Iterator(self.snapshot());
       })
       .def("boolean", &ak::FillableArray::boolean)
   );
@@ -461,31 +490,6 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
 }
 
 /////////////////////////////////////////////////////////////// Content
-
-template <typename T>
-py::object getitem(T& self, py::object obj) {
-  if (py::isinstance<py::int_>(obj)) {
-    return box(self.getitem_at(obj.cast<int64_t>()));
-  }
-  if (py::isinstance<py::slice>(obj)) {
-    py::object pystep = obj.attr("step");
-    if ((py::isinstance<py::int_>(pystep)  &&  pystep.cast<int64_t>() == 1)  ||  pystep.is(py::none())) {
-      int64_t start = ak::Slice::none();
-      int64_t stop = ak::Slice::none();
-      py::object pystart = obj.attr("start");
-      py::object pystop = obj.attr("stop");
-      if (!pystart.is(py::none())) {
-        start = pystart.cast<int64_t>();
-      }
-      if (!pystop.is(py::none())) {
-        stop = pystop.cast<int64_t>();
-      }
-      return box(self.getitem_range(start, stop));
-    }
-    // NOTE: control flow can pass through here; don't make the last line an 'else'!
-  }
-  return box(self.getitem(toslice(obj)));
-}
 
 template <typename T>
 ak::Iterator iter(T& self) {

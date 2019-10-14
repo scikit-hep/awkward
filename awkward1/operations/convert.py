@@ -14,6 +14,9 @@ def tolist(array):
     elif isinstance(array, numpy.ndarray):
         return array.tolist()
 
+    elif isinstance(array, awkward1.layout.FillableArray):
+        return [tolist(x) for x in array]
+
     elif isinstance(array, awkward1.layout.NumpyArray):
         return numpy.asarray(array).tolist()
 
