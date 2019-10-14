@@ -395,23 +395,26 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
 
 /////////////////////////////////////////////////////////////// Type
 
-bool ne(std::shared_ptr<ak::ArrayType> one, std::shared_ptr<ak::ArrayType> two) {
-  return !one.get()->equal(two);
+py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::string name) {
+  return (py::class_<ak::Type, std::shared_ptr<ak::Type>>(m, name.c_str())
+      .def("__ne__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
+        return !self.get()->equal(other);
+      })
+  );
 }
 
-py::class_<ak::ArrayType, ak::Type> make_ArrayType(py::handle m, std::string name) {
-  return (py::class_<ak::ArrayType>(m, name.c_str())
+py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayType(py::handle m, std::string name) {
+  return (py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type>(m, name.c_str())
       .def(py::init<int64_t, std::shared_ptr<ak::Type>>())
       .def("length", &ak::ArrayType::length)
       .def("type", &ak::ArrayType::type)
       .def("__repr__", &ak::ArrayType::tostring)
       .def("__eq__", &ak::ArrayType::equal)
-      .def("__ne__", &ne)
   );
 }
 
-py::class_<ak::PrimitiveType, ak::Type> make_PrimitiveType(py::handle m, std::string name) {
-  return (py::class_<ak::PrimitiveType>(m, name.c_str())
+py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make_PrimitiveType(py::handle m, std::string name) {
+  return (py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type>(m, name.c_str())
       .def(py::init([](std::string dtype) -> ak::PrimitiveType {
         if (dtype == std::string("bool")) {
           return ak::PrimitiveType(ak::PrimitiveType::boolean);
@@ -452,7 +455,6 @@ py::class_<ak::PrimitiveType, ak::Type> make_PrimitiveType(py::handle m, std::st
       }))
       .def("__repr__", &ak::PrimitiveType::tostring)
       .def("__eq__", &ak::PrimitiveType::equal)
-      .def("__ne__", &ne)
   );
 }
 
@@ -603,7 +605,7 @@ PYBIND11_MODULE(layout, m) {
 
   make_FillableArray(m, "FillableArray");
 
-  py::class_<ak::Type>(m, "Type");
+  make_Type(m, "Type");
   make_ArrayType(m, "ArrayType");
   make_PrimitiveType(m, "PrimitiveType");
 
