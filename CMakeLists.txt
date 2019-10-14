@@ -19,7 +19,7 @@ add_definitions(-DVERSION_INFO="${VERSION_INFO}")
 set(CMAKE_MACOSX_RPATH 1)
 
 file(GLOB CPU_KERNEL_SOURCES "src/cpu-kernels/*.cpp")
-file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp" "src/libawkward/array/*.cpp")
+file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp" "src/libawkward/array/*.cpp" "src/libawkward/fillable/*.cpp")
 include_directories(include)
 
 add_subdirectory(pybind11)
