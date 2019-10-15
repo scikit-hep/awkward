@@ -27,7 +27,7 @@ namespace awkward {
   }
 
   Fillable* BoolFillable::null() {
-    Fillable* out = new MostlyValidFillable(this);
+    Fillable* out = new MostlyValidFillable(options_, this);
     out->null();
     return out;
   }

@@ -6,13 +6,14 @@
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Content.h"
 #include "awkward/type/Type.h"
+#include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/Fillable.h"
 #include "awkward/fillable/UnknownFillable.h"
 
 namespace awkward {
   class FillableArray {
   public:
-    FillableArray(): fillable_(new UnknownFillable()) { }
+    FillableArray(const FillableOptions& options): fillable_(new UnknownFillable(options)) { }
 
     const std::string tostring() const;
     int64_t length() const;

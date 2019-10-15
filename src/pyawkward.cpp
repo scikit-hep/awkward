@@ -14,6 +14,7 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
 #include "awkward/type/ArrayType.h"
@@ -408,7 +409,9 @@ py::object getitem(T& self, py::object obj) {
 
 py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name) {
   return (py::class_<ak::FillableArray>(m, name.c_str())
-      .def(py::init<>())
+      .def(py::init([](int64_t initial, double resize) -> ak::FillableArray {
+        return ak::FillableArray(ak::FillableOptions(initial, resize));
+      }), py::arg("initial") = 1024, py::arg("resize") = 2.0)
       .def("__repr__", &ak::FillableArray::tostring)
       .def("__len__", &ak::FillableArray::length)
       .def("clear", &ak::FillableArray::clear)

@@ -4,13 +4,14 @@
 #define AWKWARD_BOOLFILLABLE_H_
 
 #include "awkward/cpu-kernels/util.h"
+#include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/GrowableBuffer.h"
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
   class BoolFillable: public Fillable {
   public:
-    BoolFillable(): buffer_() { }
+    BoolFillable(const FillableOptions& options): options_(options), buffer_(options) { }
 
     virtual int64_t length() const;
     virtual void clear();
@@ -21,6 +22,7 @@ namespace awkward {
     virtual Fillable* boolean(bool x);
 
   private:
+    const FillableOptions options_;
     GrowableBuffer<uint8_t> buffer_;
   };
 }

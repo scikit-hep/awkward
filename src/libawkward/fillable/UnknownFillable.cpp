@@ -31,9 +31,9 @@ namespace awkward {
   }
 
   Fillable* UnknownFillable::boolean(bool x) {
-    Fillable* out = new BoolFillable();
+    Fillable* out = new BoolFillable(options_);
     if (nullcount_ != 0) {
-      out = new MostlyNullFillable(out, nullcount_);
+      out = new MostlyNullFillable(options_, out, nullcount_);
     }
     out->boolean(x);
     return out;

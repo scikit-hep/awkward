@@ -7,29 +7,32 @@
 #include <cstring>
 
 #include "awkward/cpu-kernels/util.h"
+#include "awkward/fillable/FillableOptions.h"
 
 namespace awkward {
   template <typename T>
   class GrowableBuffer {
   public:
-    GrowableBuffer(int64_t initial, double resize): ptr_(new T[initial], awkward::util::array_deleter<T>()), length_(0), reserved_(initial), initial_(initial), resize_(resize) { }
-    GrowableBuffer(): GrowableBuffer(1024, 2.0) { }
+    GrowableBuffer(const FillableOptions& options): ptr_(new T[(size_t)options.initial()], awkward::util::array_deleter<T>()), length_(0), reserved_(options.initial()), options_(options) { }
+
+    // static GrowableBuffer<T> constant(T value, int64_t initial, double resize)
 
     const std::shared_ptr<T> ptr() const { return ptr_; }
     int64_t length() const { return length_; }
     int64_t reserved() const { return reserved_; }
-    int64_t initial() const { return initial_; }
-    double resize() const { return resize_; }
 
     void clear() {
       length_ = 0;
-      reserved_ = initial_;
-      ptr_ = std::shared_ptr<T>(new T[initial_], awkward::util::array_deleter<T>());
+      reserved_ = options_.initial();
+      ptr_ = std::shared_ptr<T>(new T[(size_t)options_.initial()], awkward::util::array_deleter<T>());
     }
 
     void append(T datum) {
       if (length_ == reserved_) {
-        size_t newsize = (size_t)(ceil(reserved_ * resize_));
+        size_t newsize = (size_t)(ceil(reserved_ * options_.resize()));
+        if (newsize < (size_t)reserved_) {
+          newsize = (size_t)(reserved_ + 1);
+        }
         std::shared_ptr<T> ptr(new T[newsize], awkward::util::array_deleter<T>());
         memcpy(ptr.get(), ptr_.get(), (size_t)(length_ * sizeof(T)));
         reserved_ = (int64_t)newsize;
@@ -43,8 +46,7 @@ namespace awkward {
     std::shared_ptr<T> ptr_;
     int64_t length_;
     int64_t reserved_;
-    int64_t initial_;
-    double resize_;
+    const FillableOptions options_;
   };
 }
 

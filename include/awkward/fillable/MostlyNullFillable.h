@@ -6,12 +6,13 @@
 #include <vector>
 
 #include "awkward/cpu-kernels/util.h"
+#include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
   class MostlyNullFillable: public Fillable {
   public:
-    MostlyNullFillable(Fillable* content, int64_t nullcount): validindex_(), content_(content), length_(nullcount) { }
+    MostlyNullFillable(const FillableOptions& options, Fillable* content, int64_t nullcount): options_(options), validindex_(), content_(content), length_(nullcount) { }
 
     virtual int64_t length() const;
     virtual void clear();
@@ -22,6 +23,7 @@ namespace awkward {
     virtual Fillable* boolean(bool x);
 
   private:
+    const FillableOptions options_;
     std::vector<int64_t> validindex_;
     std::shared_ptr<Fillable> content_;
     int64_t length_;
