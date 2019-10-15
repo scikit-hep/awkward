@@ -19,7 +19,7 @@ def test_boolean():
     assert awkward1.tolist(a[1:-1]) == [True, False]
 
 def test_big():
-    a = awkward1.layout.FillableArray(90)
+    a = awkward1.layout.FillableArray(initial=90)
     for i in range(2000):
         if i == 200:
             tmp = a.snapshot()

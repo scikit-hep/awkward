@@ -3,8 +3,8 @@
 #include <stdexcept>
 
 #include "awkward/Identity.h"
+#include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
-#include "awkward/fillable/MostlyNullFillable.h"
 
 #include "awkward/fillable/UnknownFillable.h"
 
@@ -33,7 +33,7 @@ namespace awkward {
   Fillable* UnknownFillable::boolean(bool x) {
     Fillable* out = new BoolFillable(options_);
     if (nullcount_ != 0) {
-      out = new MostlyNullFillable(options_, out, nullcount_);
+      out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
     out->boolean(x);
     return out;

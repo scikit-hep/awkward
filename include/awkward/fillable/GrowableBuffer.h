@@ -13,9 +13,34 @@ namespace awkward {
   template <typename T>
   class GrowableBuffer {
   public:
-    GrowableBuffer(const FillableOptions& options): ptr_(new T[(size_t)options.initial()], awkward::util::array_deleter<T>()), length_(0), reserved_(options.initial()), options_(options) { }
+    GrowableBuffer(const FillableOptions& options, std::shared_ptr<T> ptr, int64_t length, int64_t reserved): options_(options), ptr_(ptr), length_(length), reserved_(reserved) { }
+    GrowableBuffer(const FillableOptions& options): GrowableBuffer(options, std::shared_ptr<T>(new T[(size_t)options.initial()], awkward::util::array_deleter<T>()), 0, options.initial()) { }
 
-    // static GrowableBuffer<T> constant(T value, int64_t initial, double resize)
+    static GrowableBuffer<T> full(const FillableOptions& options, T value, int64_t length) {
+      size_t actual = (size_t)options.initial();
+      if (actual < (size_t)length) {
+        actual = (size_t)length;
+      }
+      T* rawptr = new T[(size_t)actual];
+      std::shared_ptr<T> ptr(rawptr, awkward::util::array_deleter<T>());
+      for (int64_t i = 0;  i < length;  i++) {
+        rawptr[i] = value;
+      }
+      return GrowableBuffer(options, ptr, length, (int64_t)actual);
+    }
+
+    static GrowableBuffer<T> arange(const FillableOptions& options, int64_t length) {
+      size_t actual = (size_t)options.initial();
+      if (actual < (size_t)length) {
+        actual = (size_t)length;
+      }
+      T* rawptr = new T[(size_t)actual];
+      std::shared_ptr<T> ptr(rawptr, awkward::util::array_deleter<T>());
+      for (int64_t i = 0;  i < length;  i++) {
+        rawptr[i] = (T)i;
+      }
+      return GrowableBuffer(options, ptr, length, (int64_t)actual);
+    }
 
     const std::shared_ptr<T> ptr() const { return ptr_; }
     int64_t length() const { return length_; }
@@ -43,10 +68,10 @@ namespace awkward {
     }
 
   private:
+    const FillableOptions options_;
     std::shared_ptr<T> ptr_;
     int64_t length_;
     int64_t reserved_;
-    const FillableOptions options_;
   };
 }
 

@@ -3,7 +3,7 @@
 #include "awkward/Identity.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/type/PrimitiveType.h"
-#include "awkward/fillable/MostlyValidFillable.h"
+#include "awkward/fillable/OptionFillable.h"
 
 #include "awkward/fillable/BoolFillable.h"
 
@@ -27,7 +27,7 @@ namespace awkward {
   }
 
   Fillable* BoolFillable::null() {
-    Fillable* out = new MostlyValidFillable(options_, this);
+    Fillable* out = OptionFillable::fromvalids(options_, this);
     out->null();
     return out;
   }
