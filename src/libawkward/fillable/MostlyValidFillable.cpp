@@ -24,7 +24,6 @@ namespace awkward {
 
   const std::shared_ptr<Content> MostlyValidFillable::snapshot() const {
     throw std::runtime_error("MostlyValidFillable::snapshot() needs MaskedArray");
-    // FIXME: clear();
   }
 
   Fillable* MostlyValidFillable::null() {

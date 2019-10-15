@@ -24,7 +24,6 @@ namespace awkward {
 
   const std::shared_ptr<Content> MostlyNullFillable::snapshot() const {
     throw std::runtime_error("MostlyNullFillable::snapshot() needs MaskedArray");
-    // FIXME: clear();
   }
 
   Fillable* MostlyNullFillable::null() {
