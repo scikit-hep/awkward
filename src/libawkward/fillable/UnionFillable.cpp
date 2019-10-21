@@ -7,6 +7,7 @@
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
 #include "awkward/fillable/Int64Fillable.h"
+#include "awkward/fillable/Float64Fillable.h"
 
 #include "awkward/fillable/UnionFillable.h"
 
@@ -56,23 +57,25 @@ namespace awkward {
     int64_t length;
     Fillable* fillable = getfillable<Int64Fillable>(type);
     if (fillable == nullptr) {
-      fillable = getfillable<Float64Fillable>(type);
+      fillable = maybenew<Float64Fillable>(getfillable<Float64Fillable>(type), length);
     }
-    fillable = maybenew(fillable, length);
+    else {
+      fillable = maybenew<Int64Fillable>(dynamic_cast<Int64Fillable*>(fillable), length);
+    }
     fillable->integer(x);
     offsets_.append(length);
     types_.append(type);
     return this;
   }
 
-  Fillable* UnionFillable::real(int64_t x) {
+  Fillable* UnionFillable::real(double x) {
     int8_t type;
     int64_t length;
     Fillable* fillable = getfillable<Float64Fillable>(type);
     if (fillable == nullptr) {
       fillable = getfillable<Int64Fillable>(type);
     }
-    fillable = maybenew(fillable, length);
+    fillable = maybenew<Float64Fillable>(fillable, length);
     fillable->real(x);
     offsets_.append(length);
     types_.append(type);

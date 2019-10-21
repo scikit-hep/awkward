@@ -50,7 +50,7 @@ namespace awkward {
   }
 
   Fillable* Int64Fillable::real(double x) {
-    Float64Fillable* out = Float64Fillable::fromint64(options_, buffer_.ptr());
+    Float64Fillable* out = Float64Fillable::fromint64(options_, buffer_);
     out->real(x);
     return out;
   }
