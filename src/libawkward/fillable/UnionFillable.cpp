@@ -1,0 +1,45 @@
+// // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+//
+// #include <stdexcept>
+//
+// #include "awkward/Identity.h"
+// #include "awkward/type/OptionType.h"
+//
+// #include "awkward/fillable/OptionFillable.h"
+//
+// namespace awkward {
+//   int64_t OptionFillable::length() const {
+//     return index_.length();
+//   }
+//
+//   void OptionFillable::clear() {
+//     index_.clear();
+//     content_.get()->clear();
+//   }
+//
+//   const std::shared_ptr<Type> OptionFillable::type() const {
+//     return std::shared_ptr<Type>(new OptionType(content_.get()->type()));
+//   }
+//
+//   const std::shared_ptr<Content> OptionFillable::snapshot() const {
+//     throw std::runtime_error("OptionFillable::snapshot() needs MaskedArray");
+//   }
+//
+//   Fillable* OptionFillable::null() {
+//     index_.append(-1);
+//     return this;
+//   }
+//
+//   Fillable* OptionFillable::boolean(bool x) {
+//     int64_t length = content_.get()->length();
+//     maybeupdate(content_.get()->boolean(x));
+//     index_.append(length);
+//     return this;
+//   }
+//
+//   void OptionFillable::maybeupdate(Fillable* tmp) {
+//     if (tmp != content_.get()) {
+//       content_ = std::shared_ptr<Fillable>(tmp);
+//     }
+//   }
+// }

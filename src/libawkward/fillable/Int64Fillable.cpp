@@ -5,34 +5,38 @@
 // #include "awkward/type/PrimitiveType.h"
 // #include "awkward/fillable/OptionFillable.h"
 //
-// #include "awkward/fillable/BoolFillable.h"
+// #include "awkward/fillable/Int64Fillable.h"
 //
 // namespace awkward {
-//   int64_t BoolFillable::length() const {
+//   int64_t Int64Fillable::length() const {
 //     return buffer_.length();
 //   }
 //
-//   void BoolFillable::clear() {
+//   void Int64Fillable::clear() {
 //     buffer_.clear();
 //   }
 //
-//   const std::shared_ptr<Type> BoolFillable::type() const {
-//     return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::boolean));
+//   const std::shared_ptr<Type> Int64Fillable::type() const {
+//     return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int64));
 //   }
 //
-//   const std::shared_ptr<Content> BoolFillable::snapshot() const {
+//   const std::shared_ptr<Content> Int64Fillable::snapshot() const {
 //     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
-//     std::vector<ssize_t> strides = { (ssize_t)sizeof(bool) };
-//     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), buffer_.ptr(), shape, strides, 0, sizeof(bool), "?"));
+//     std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
+// #ifdef _MSC_VER
+//     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "q"));
+// #else
+//     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "l"));
+// #endif
 //   }
 //
-//   Fillable* BoolFillable::null() {
+//   Fillable* Int64Fillable::null() {
 //     Fillable* out = OptionFillable::fromvalids(options_, this);
 //     out->null();
 //     return out;
 //   }
 //
-//   Fillable* BoolFillable::boolean(bool x) {
+//   Fillable* Int64Fillable::boolean(bool x) {
 //     buffer_.append(x);
 //     return this;
 //   }
