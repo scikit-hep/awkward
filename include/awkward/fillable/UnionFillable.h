@@ -35,6 +35,9 @@ namespace awkward {
     GrowableBuffer<int8_t> types_;
     GrowableBuffer<int64_t> offsets_;
     std::vector<std::shared_ptr<Fillable>> contents_;
+
+    template <typename F>
+    F* getfillable(int64_t& type, int64_t& length);
   };
 }
 
