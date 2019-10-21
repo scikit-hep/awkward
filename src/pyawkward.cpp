@@ -114,6 +114,10 @@ std::shared_ptr<ak::Type> unbox_type(py::handle obj) {
   }
   catch (py::cast_error err) { }
   try {
+    return obj.cast<ak::ListType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
     return obj.cast<ak::OptionType*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
@@ -534,6 +538,15 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
   );
 }
 
+py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(py::handle m, std::string name) {
+  return (py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type>(m, name.c_str())
+      .def(py::init<std::shared_ptr<ak::Type>>())
+      .def_property_readonly("type", &ak::ListType::type)
+      .def("__repr__", &ak::ListType::tostring)
+      .def("__eq__", &ak::ListType::equal)
+  );
+}
+
 py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_OptionType(py::handle m, std::string name) {
   return (py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type>(m, name.c_str())
       .def(py::init<std::shared_ptr<ak::Type>>())
@@ -695,6 +708,7 @@ PYBIND11_MODULE(layout, m) {
   make_Type(m, "Type");
   make_ArrayType(m, "ArrayType");
   make_PrimitiveType(m, "PrimitiveType");
+  make_ListType(m, "ListType");
   make_OptionType(m, "OptionType");
   make_UnionType(m, "UnionType");
 
