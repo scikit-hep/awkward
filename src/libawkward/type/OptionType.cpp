@@ -18,7 +18,7 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> OptionType::type() const {
+  const std::shared_ptr<Type> OptionType::type() const {
     std::shared_ptr<Type> out = type_;
     while (OptionType* t = dynamic_cast<OptionType*>(out.get())) {
       out = t->type_;

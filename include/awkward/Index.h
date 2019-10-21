@@ -45,7 +45,7 @@ namespace awkward {
     const int64_t length_;
   };
 
-  typedef IndexOf<uint8_t> Index8;
+  typedef IndexOf<int8_t>  Index8;
   typedef IndexOf<int32_t> Index32;
   typedef IndexOf<int64_t> Index64;
 }

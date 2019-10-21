@@ -22,7 +22,7 @@ namespace awkward {
     return length_;
   }
 
-  std::shared_ptr<Type> ArrayType::type() const {
+  const std::shared_ptr<Type> ArrayType::type() const {
     return type_;
   }
 }

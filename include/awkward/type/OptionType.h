@@ -13,11 +13,11 @@ namespace awkward {
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
     virtual bool equal(std::shared_ptr<Type> other) const;
 
-  std::shared_ptr<Type> type() const;
+  const std::shared_ptr<Type> type() const;
 
   private:
     std::shared_ptr<Type> type_;
   };
 }
 
-#endif // AWKWARD_ARRAYTYPE_H_
+#endif // AWKWARD_OPTIONTYPE_H_

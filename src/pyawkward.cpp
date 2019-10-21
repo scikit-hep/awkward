@@ -19,6 +19,8 @@
 #include "awkward/type/Type.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/PrimitiveType.h"
+#include "awkward/type/OptionType.h"
+#include "awkward/type/UnionType.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
@@ -492,6 +494,15 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
   );
 }
 
+py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_OptionType(py::handle m, std::string name) {
+  return (py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type>(m, name.c_str())
+      .def(py::init<std::shared_ptr<ak::Type>>())
+      .def("type", &ak::OptionType::type)
+      .def("__repr__", &ak::OptionType::tostring)
+      .def("__eq__", &ak::OptionType::equal)
+  );
+}
+
 /////////////////////////////////////////////////////////////// Content
 
 template <typename T>
@@ -605,7 +616,7 @@ PYBIND11_MODULE(layout, m) {
   m.attr("__version__") = "dev";
 #endif
 
-  make_IndexOf<uint8_t>(m, "Index8");
+  make_IndexOf<int8_t>(m,  "Index8");
   make_IndexOf<int32_t>(m, "Index32");
   make_IndexOf<int64_t>(m, "Index64");
 

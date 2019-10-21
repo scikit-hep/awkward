@@ -14,7 +14,7 @@ namespace awkward {
     virtual bool equal(std::shared_ptr<Type> other) const;
 
     int64_t length() const;
-    std::shared_ptr<Type> type() const;
+    const std::shared_ptr<Type> type() const;
 
   private:
     std::shared_ptr<Type> type_;
