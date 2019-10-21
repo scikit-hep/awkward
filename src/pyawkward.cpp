@@ -38,6 +38,24 @@ private:
   PyObject* pyobj_;
 };
 
+py::object box(std::shared_ptr<ak::Type> t) {
+  if (ak::ArrayType* raw = dynamic_cast<ak::ArrayType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::PrimitiveType* raw = dynamic_cast<ak::PrimitiveType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::OptionType* raw = dynamic_cast<ak::OptionType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::UnionType* raw = dynamic_cast<ak::UnionType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else {
+    throw std::runtime_error("missing boxer for Type subtype");
+  }
+}
+
 py::object box(std::shared_ptr<ak::Content> content) {
   if (ak::NumpyArray* raw = dynamic_cast<ak::NumpyArray*>(content.get())) {
     if (raw->isscalar()) {
@@ -84,6 +102,26 @@ py::object box(std::shared_ptr<ak::Identity> id) {
   else {
     throw std::runtime_error("missing boxer for Identity subtype");
   }
+}
+
+std::shared_ptr<ak::Type> unbox_type(py::handle obj) {
+  try {
+    return obj.cast<ak::ArrayType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::PrimitiveType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::OptionType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::UnionType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  throw std::invalid_argument("argument must be a Type subtype");
 }
 
 std::shared_ptr<ak::Content> unbox_content(py::object obj) {
@@ -503,6 +541,29 @@ py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_Optio
   );
 }
 
+py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionType(py::handle m, std::string name) {
+  return (py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type>(m, name.c_str())
+      .def(py::init([](py::args args) -> ak::UnionType {
+        std::vector<std::shared_ptr<ak::Type>> types;
+        for (auto x : args) {
+          types.push_back(unbox_type(x));
+        }
+        return ak::UnionType(types);
+      }))
+      .def("numtypes", &ak::UnionType::numtypes)
+      .def("types", [](ak::UnionType& self) -> py::tuple {
+        py::list types;
+        for (auto x : self.types()) {
+          types.append(box(x));
+        }
+        return py::tuple(types);
+      })
+      .def("type", &ak::UnionType::type)
+      .def("__repr__", &ak::UnionType::tostring)
+      .def("__eq__", &ak::UnionType::equal)
+  );
+}
+
 /////////////////////////////////////////////////////////////// Content
 
 template <typename T>
@@ -632,6 +693,8 @@ PYBIND11_MODULE(layout, m) {
   make_Type(m, "Type");
   make_ArrayType(m, "ArrayType");
   make_PrimitiveType(m, "PrimitiveType");
+  make_OptionType(m, "OptionType");
+  make_UnionType(m, "UnionType");
 
   make_Content(m, "Content");
 

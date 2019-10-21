@@ -9,6 +9,10 @@ namespace awkward {
     return indent + pre + "option[" + type().get()->tostring_part(indent, "", "") + "]" + post;
   }
 
+  const std::shared_ptr<Type> OptionType::shallow_copy() const {
+    return std::shared_ptr<Type>(new OptionType(type_));
+  }
+
   bool OptionType::equal(std::shared_ptr<Type> other) const {
     if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
       return type().get()->equal(t->type());

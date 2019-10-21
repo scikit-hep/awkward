@@ -24,6 +24,10 @@ namespace awkward {
     return indent + pre + s + post;
   }
 
+  const std::shared_ptr<Type> PrimitiveType::shallow_copy() const {
+    return std::shared_ptr<Type>(new PrimitiveType(dtype_));
+  }
+
   bool PrimitiveType::equal(std::shared_ptr<Type> other) const {
     if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
       return dtype_ == t->dtype_;

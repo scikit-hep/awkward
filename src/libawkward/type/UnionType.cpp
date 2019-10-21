@@ -19,6 +19,10 @@ namespace awkward {
     return out.str();
   }
 
+  const std::shared_ptr<Type> UnionType::shallow_copy() const {
+    return std::shared_ptr<Type>(new UnionType(types_));
+  }
+
   bool UnionType::equal(std::shared_ptr<Type> other) const {
     if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
       if (numtypes() != t->numtypes()) {
