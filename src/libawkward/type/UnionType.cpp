@@ -49,6 +49,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnionType::type(int64_t i) const {
-    return types_[i];
+    return types_[(size_t)i];
   }
 }

@@ -554,9 +554,9 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
       }))
       .def_property_readonly("numtypes", &ak::UnionType::numtypes)
       .def_property_readonly("types", [](ak::UnionType& self) -> py::tuple {
-        py::tuple types(self.numtypes());
+        py::tuple types((size_t)self.numtypes());
         for (int64_t i = 0;  i < self.numtypes();  i++) {
-          types[i] = box(self.type(i));
+          types[(size_t)i] = box(self.type(i));
         }
         return types;
       })

@@ -99,11 +99,12 @@ namespace awkward {
   template <typename T1, typename T2>
   Fillable* UnionFillable::get2(int8_t& type, int64_t& length) {
     Fillable* fillable = findfillable<T1>(type);
-    if (fillable != nullptr) {
-      fillable = maybenew<T1>(dynamic_cast<T1*>(fillable), length);
+    if (fillable == nullptr) {
+      return maybenew<T2>(findfillable<T2>(type), length);
     }
     else {
-      return maybenew<T2>(findfillable<T2>(type), length);
+      length = fillable->length();
+      return fillable;
     }
   }
 }
