@@ -43,6 +43,12 @@ namespace awkward {
     return out;
   }
 
+  Fillable* UnknownFillable::real(double x) {
+    Fillable* out = prepare<Float64Fillable>();
+    out->real(x);
+    return out;
+  }
+
   template <typename T>
   Fillable* UnknownFillable::prepare() const {
     Fillable* out = new T(options_);

@@ -30,6 +30,7 @@ namespace awkward {
     virtual Fillable* null();
     virtual Fillable* boolean(bool x);
     virtual Fillable* integer(int64_t x);
+    virtual Fillable* real(double x);
 
   private:
     const FillableOptions options_;
@@ -38,7 +39,9 @@ namespace awkward {
     std::vector<std::shared_ptr<Fillable>> contents_;
 
     template <typename T>
-    T* getfillable(int8_t& type, int64_t& length);
+    T* getfillable(int8_t& type);
+    template <typename T>
+    T* maybenew(T* fillable, int64_t& length);
   };
 }
 

@@ -44,7 +44,7 @@ namespace awkward {
   Fillable* UnionFillable::boolean(bool x) {
     int8_t type;
     int64_t length;
-    BoolFillable* fillable = getfillable<BoolFillable>(type, length);
+    BoolFillable* fillable = maybenew<BoolFillable>(getfillable<BoolFillable>(type), length);
     fillable->boolean(x);
     offsets_.append(length);
     types_.append(type);
@@ -54,24 +54,46 @@ namespace awkward {
   Fillable* UnionFillable::integer(int64_t x) {
     int8_t type;
     int64_t length;
-    Int64Fillable* fillable = getfillable<Int64Fillable>(type, length);
+    Fillable* fillable = getfillable<Int64Fillable>(type);
+    if (fillable == nullptr) {
+      fillable = getfillable<Float64Fillable>(type);
+    }
+    fillable = maybenew(fillable, length);
     fillable->integer(x);
     offsets_.append(length);
     types_.append(type);
     return this;
   }
 
+  Fillable* UnionFillable::real(int64_t x) {
+    int8_t type;
+    int64_t length;
+    Fillable* fillable = getfillable<Float64Fillable>(type);
+    if (fillable == nullptr) {
+      fillable = getfillable<Int64Fillable>(type);
+    }
+    fillable = maybenew(fillable, length);
+    fillable->real(x);
+    offsets_.append(length);
+    types_.append(type);
+    return this;
+  }
+
   template <typename T>
-  T* UnionFillable::getfillable(int8_t& type, int64_t& length) {
+  T* UnionFillable::getfillable(int8_t& type) {
     type = 0;
-    T* content = nullptr;
     for (auto x : contents_) {
-      if (T* y = dynamic_cast<T*>(x.get())) {
-        content = y;
-        break;
+      if (T* raw = dynamic_cast<T*>(x.get())) {
+        return raw;
       }
       type++;
     }
+    return nullptr;
+  }
+
+  template <typename T>
+  T* UnionFillable::maybenew(T* fillable, int64_t& length) {
+    T* content = fillable;
     if (content == nullptr) {
       content = new T(options_);
       contents_.push_back(std::shared_ptr<Fillable>(content));

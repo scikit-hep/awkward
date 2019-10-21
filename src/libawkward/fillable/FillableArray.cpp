@@ -53,6 +53,10 @@ namespace awkward {
     maybeupdate(fillable_.get()->integer(x));
   }
 
+  void FillableArray::real(double x) {
+    maybeupdate(fillable_.get()->real(x));
+  }
+
   void FillableArray::maybeupdate(Fillable* tmp) {
     if (tmp != fillable_.get()) {
       fillable_ = std::shared_ptr<Fillable>(tmp);

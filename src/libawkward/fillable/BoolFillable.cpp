@@ -44,4 +44,10 @@ namespace awkward {
     return out;
   }
 
+  Fillable* BoolFillable::real(double x) {
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    out->real(x);
+    return out;
+  }
+
 }

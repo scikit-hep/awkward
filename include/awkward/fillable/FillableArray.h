@@ -27,6 +27,7 @@ namespace awkward {
     void null();
     void boolean(bool x);
     void integer(int64_t x);
+    void real(double x);
 
   private:
     std::shared_ptr<Fillable> fillable_;

@@ -21,6 +21,7 @@ namespace awkward {
     virtual Fillable* null();
     virtual Fillable* boolean(bool x);
     virtual Fillable* integer(int64_t x);
+    virtual Fillable* real(double x);
 
   private:
     const FillableOptions options_;

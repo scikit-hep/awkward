@@ -5,6 +5,7 @@
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/UnionFillable.h"
+#include "awkward/fillable/Float64Fillable.h"
 
 #include "awkward/fillable/Int64Fillable.h"
 
@@ -46,5 +47,11 @@ namespace awkward {
   Fillable* Int64Fillable::integer(int64_t x) {
     buffer_.append(x);
     return this;
+  }
+
+  Fillable* Int64Fillable::real(double x) {
+    Float64Fillable* out = Float64Fillable::fromint64(options_, buffer_.ptr());
+    out->real(x);
+    return out;
   }
 }
