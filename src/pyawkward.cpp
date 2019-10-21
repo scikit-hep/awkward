@@ -535,7 +535,7 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
 py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_OptionType(py::handle m, std::string name) {
   return (py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type>(m, name.c_str())
       .def(py::init<std::shared_ptr<ak::Type>>())
-      .def("type", &ak::OptionType::type)
+      .def_property_readonly("type", &ak::OptionType::type)
       .def("__repr__", &ak::OptionType::tostring)
       .def("__eq__", &ak::OptionType::equal)
   );
@@ -550,13 +550,13 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
         }
         return ak::UnionType(types);
       }))
-      .def("numtypes", &ak::UnionType::numtypes)
-      .def("types", [](ak::UnionType& self) -> py::tuple {
-        py::list types;
-        for (auto x : self.types()) {
-          types.append(box(x));
+      .def_property_readonly("numtypes", &ak::UnionType::numtypes)
+      .def_property_readonly("types", [](ak::UnionType& self) -> py::tuple {
+        py::tuple types(self.numtypes());
+        for (int64_t i = 0;  i < self.numtypes();  i++) {
+          types[i] = box(self.type(i));
         }
-        return py::tuple(types);
+        return types;
       })
       .def("type", &ak::UnionType::type)
       .def("__repr__", &ak::UnionType::tostring)

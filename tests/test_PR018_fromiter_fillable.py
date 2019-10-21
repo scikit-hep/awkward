@@ -8,6 +8,19 @@ import numpy
 
 import awkward1
 
+def test_types():
+    t1 = awkward1.layout.PrimitiveType("int32")
+    t2 = awkward1.layout.OptionType(t1)
+    t3 = awkward1.layout.UnionType(t1, awkward1.layout.PrimitiveType("float64"))
+    assert repr(t1) == "int32"
+    assert repr(t2) == "option[int32]"
+    assert repr(t3) == "union[int32, float64]"
+    assert repr(t2.type) == "int32"
+    assert t3.numtypes == 2
+    assert repr(t3.type(0)) == "int32"
+    assert repr(t3.type(1)) == "float64"
+    assert [repr(x) for x in t3.types] == ["int32", "float64"]
+
 def test_boolean():
     a = awkward1.layout.FillableArray()
     a.boolean(True)
