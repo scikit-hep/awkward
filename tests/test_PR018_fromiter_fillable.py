@@ -50,3 +50,36 @@ def test_integer():
     assert awkward1.tolist(a.snapshot()) == [10, 9, 8, 7, 6]
     assert awkward1.tolist(a) == [10, 9, 8, 7, 6]
     assert awkward1.tolist(a[1:-1]) == [9, 8, 7]
+
+def test_real():
+    a = awkward1.layout.FillableArray()
+    a.real(1.1)
+    a.real(2.2)
+    a.real(3.3)
+    a.real(4.4)
+    a.real(5.5)
+    assert awkward1.tolist(a.snapshot()) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(a) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(a[1:-1]) == [2.2, 3.3, 4.4]
+
+def test_integer_real():
+    a = awkward1.layout.FillableArray()
+    a.integer(1)
+    a.integer(2)
+    a.real(3.3)
+    a.integer(4)
+    a.integer(5)
+    assert awkward1.tolist(a.snapshot()) == [1.0, 2.0, 3.3, 4.0, 5.0]
+    assert awkward1.tolist(a) == [1.0, 2.0, 3.3, 4.0, 5.0]
+    assert awkward1.tolist(a[1:-1]) == [2.0, 3.3, 4.0]
+
+def test_real_integer():
+    a = awkward1.layout.FillableArray()
+    a.real(1.1)
+    a.real(2.2)
+    a.integer(3)
+    a.real(4.4)
+    a.real(5.5)
+    assert awkward1.tolist(a.snapshot()) == [1.1, 2.2, 3.0, 4.4, 5.5]
+    assert awkward1.tolist(a) == [1.1, 2.2, 3.0, 4.4, 5.5]
+    assert awkward1.tolist(a[1:-1]) == [2.2, 3.0, 4.4]

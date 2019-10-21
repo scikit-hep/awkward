@@ -6,6 +6,7 @@
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
 #include "awkward/fillable/Int64Fillable.h"
+#include "awkward/fillable/Float64Fillable.h"
 
 #include "awkward/fillable/UnknownFillable.h"
 

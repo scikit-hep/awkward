@@ -21,6 +21,7 @@ namespace awkward {
       for (int64_t i = 0;  i < old.length();  i++) {
         newraw[i] = (double)oldraw[i];
       }
+      buffer.set_length(old.length());
       return new Float64Fillable(options, buffer);
     }
 

@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <cassert>
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/fillable/FillableOptions.h"
@@ -52,8 +53,24 @@ namespace awkward {
     }
 
     const std::shared_ptr<T> ptr() const { return ptr_; }
+
     int64_t length() const { return length_; }
+    void set_length(int64_t newlength) {
+      if (newlength > reserved_) {
+        set_reserved(newlength);
+      }
+      length_ = newlength;
+    }
+
     int64_t reserved() const { return reserved_; }
+    void set_reserved(int64_t minreserved) {
+      if (minreserved > reserved_) {
+        std::shared_ptr<T> ptr(new T[(size_t)minreserved], awkward::util::array_deleter<T>());
+        memcpy(ptr.get(), ptr_.get(), (size_t)(length_ * sizeof(T)));
+        ptr_ = ptr;
+        reserved_ = minreserved;
+      }
+    }
 
     void clear() {
       length_ = 0;
@@ -62,15 +79,9 @@ namespace awkward {
     }
 
     void append(T datum) {
+      assert(length_ <= reserved_);
       if (length_ == reserved_) {
-        size_t newsize = (size_t)(ceil(reserved_ * options_.resize()));
-        if (newsize < (size_t)reserved_) {
-          newsize = (size_t)(reserved_ + 1);
-        }
-        std::shared_ptr<T> ptr(new T[newsize], awkward::util::array_deleter<T>());
-        memcpy(ptr.get(), ptr_.get(), (size_t)(length_ * sizeof(T)));
-        reserved_ = (int64_t)newsize;
-        ptr_ = ptr;
+        set_reserved((int64_t)ceil(reserved_ * options_.resize()));
       }
       ptr_.get()[length_] = datum;
       length_++;

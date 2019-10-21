@@ -39,9 +39,13 @@ namespace awkward {
     std::vector<std::shared_ptr<Fillable>> contents_;
 
     template <typename T>
-    T* getfillable(int8_t& type);
+    T* findfillable(int8_t& type);
     template <typename T>
     T* maybenew(T* fillable, int64_t& length);
+    template <typename T1>
+    Fillable* get1(int8_t& type, int64_t& length);
+    template <typename T1, typename T2>
+    Fillable* get2(int8_t& type, int64_t& length);
   };
 }
 
