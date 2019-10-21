@@ -49,6 +49,10 @@ namespace awkward {
     maybeupdate(fillable_.get()->boolean(x));
   }
 
+  void FillableArray::integer(int64_t x) {
+    maybeupdate(fillable_.get()->integer(x));
+  }
+
   void FillableArray::maybeupdate(Fillable* tmp) {
     if (tmp != fillable_.get()) {
       fillable_ = std::shared_ptr<Fillable>(tmp);

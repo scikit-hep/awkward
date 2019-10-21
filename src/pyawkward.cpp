@@ -464,6 +464,7 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
         return ak::Iterator(self.snapshot());
       })
       .def("boolean", &ak::FillableArray::boolean)
+      .def("integer", &ak::FillableArray::integer)
   );
 }
 

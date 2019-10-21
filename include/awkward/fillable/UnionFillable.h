@@ -29,6 +29,7 @@ namespace awkward {
 
     virtual Fillable* null();
     virtual Fillable* boolean(bool x);
+    virtual Fillable* integer(int64_t x);
 
   private:
     const FillableOptions options_;
@@ -36,8 +37,8 @@ namespace awkward {
     GrowableBuffer<int64_t> offsets_;
     std::vector<std::shared_ptr<Fillable>> contents_;
 
-    template <typename F>
-    F* getfillable(int64_t& type, int64_t& length);
+    template <typename T>
+    T* getfillable(int8_t& type, int64_t& length);
   };
 }
 

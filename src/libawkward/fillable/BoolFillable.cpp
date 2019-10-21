@@ -4,6 +4,7 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/fillable/OptionFillable.h"
+#include "awkward/fillable/UnionFillable.h"
 
 #include "awkward/fillable/BoolFillable.h"
 
@@ -36,4 +37,11 @@ namespace awkward {
     buffer_.append(x);
     return this;
   }
+
+  Fillable* BoolFillable::integer(int64_t x) {
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    out->integer(x);
+    return out;
+  }
+
 }

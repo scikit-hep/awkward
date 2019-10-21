@@ -37,6 +37,13 @@ namespace awkward {
     return this;
   }
 
+  Fillable* OptionFillable::integer(int64_t x) {
+    int64_t length = content_.get()->length();
+    maybeupdate(content_.get()->integer(x));
+    index_.append(length);
+    return this;
+  }
+
   void OptionFillable::maybeupdate(Fillable* tmp) {
     if (tmp != content_.get()) {
       content_ = std::shared_ptr<Fillable>(tmp);

@@ -39,3 +39,14 @@ def test_big():
         a.boolean(i % 2 == 0)
     assert awkward1.tolist(a) == [True, False] * 1000
     assert awkward1.tolist(tmp) == [True, False] * 100
+
+def test_integer():
+    a = awkward1.layout.FillableArray()
+    a.integer(10)
+    a.integer(9)
+    a.integer(8)
+    a.integer(7)
+    a.integer(6)
+    assert awkward1.tolist(a.snapshot()) == [10, 9, 8, 7, 6]
+    assert awkward1.tolist(a) == [10, 9, 8, 7, 6]
+    assert awkward1.tolist(a[1:-1]) == [9, 8, 7]

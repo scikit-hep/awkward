@@ -21,10 +21,14 @@ namespace awkward {
 
     virtual Fillable* null();
     virtual Fillable* boolean(bool x);
+    virtual Fillable* integer(int64_t x);
 
   private:
     const FillableOptions options_;
     int64_t nullcount_;
+
+    template <typename T>
+    Fillable* prepare() const;
   };
 }
 

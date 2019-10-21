@@ -5,6 +5,7 @@
 #include "awkward/Identity.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
+#include "awkward/fillable/Int64Fillable.h"
 
 #include "awkward/fillable/UnknownFillable.h"
 
@@ -31,11 +32,24 @@ namespace awkward {
   }
 
   Fillable* UnknownFillable::boolean(bool x) {
-    Fillable* out = new BoolFillable(options_);
-    if (nullcount_ != 0) {
-      out = OptionFillable::fromnulls(options_, nullcount_, out);
-    }
+    Fillable* out = prepare<BoolFillable>();
     out->boolean(x);
     return out;
   }
+
+  Fillable* UnknownFillable::integer(int64_t x) {
+    Fillable* out = prepare<Int64Fillable>();
+    out->integer(x);
+    return out;
+  }
+
+  template <typename T>
+  Fillable* UnknownFillable::prepare() const {
+    Fillable* out = new T(options_);
+    if (nullcount_ != 0) {
+      out = OptionFillable::fromnulls(options_, nullcount_, out);
+    }
+    return out;
+  }
+
 }

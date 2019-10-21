@@ -6,6 +6,7 @@
 #include "awkward/type/UnionType.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
+#include "awkward/fillable/Int64Fillable.h"
 
 #include "awkward/fillable/UnionFillable.h"
 
@@ -41,7 +42,8 @@ namespace awkward {
   }
 
   Fillable* UnionFillable::boolean(bool x) {
-    int64_t type, length;
+    int8_t type;
+    int64_t length;
     BoolFillable* fillable = getfillable<BoolFillable>(type, length);
     fillable->boolean(x);
     offsets_.append(length);
@@ -49,19 +51,29 @@ namespace awkward {
     return this;
   }
 
-  template <typename F>
-  F* UnionFillable::getfillable(int64_t& type, int64_t& length) {
+  Fillable* UnionFillable::integer(int64_t x) {
+    int8_t type;
+    int64_t length;
+    Int64Fillable* fillable = getfillable<Int64Fillable>(type, length);
+    fillable->integer(x);
+    offsets_.append(length);
+    types_.append(type);
+    return this;
+  }
+
+  template <typename T>
+  T* UnionFillable::getfillable(int8_t& type, int64_t& length) {
     type = 0;
-    F* content = nullptr;
+    T* content = nullptr;
     for (auto x : contents_) {
-      if (F* y = dynamic_cast<F*>(x.get())) {
+      if (T* y = dynamic_cast<T*>(x.get())) {
         content = y;
         break;
       }
       type++;
     }
     if (content == nullptr) {
-      content = new F(options_);
+      content = new T(options_);
       contents_.push_back(std::shared_ptr<Fillable>(content));
     }
     length = content->length();
