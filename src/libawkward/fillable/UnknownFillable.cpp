@@ -58,8 +58,8 @@ namespace awkward {
     return out;
   }
 
-  Fillable* UnknownFillable::end() {
-    throw std::invalid_argument("closing an unopened list/rec");
+  Fillable* UnknownFillable::endlist() {
+    throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
   }
 
   template <typename T>

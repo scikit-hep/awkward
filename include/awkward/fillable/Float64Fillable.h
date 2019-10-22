@@ -35,7 +35,7 @@ namespace awkward {
     virtual Fillable* integer(int64_t x);
     virtual Fillable* real(double x);
     virtual Fillable* beginlist();
-    virtual Fillable* end();
+    virtual Fillable* endlist();
 
   private:
     const FillableOptions options_;

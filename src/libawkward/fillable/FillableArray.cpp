@@ -61,8 +61,8 @@ namespace awkward {
     maybeupdate(fillable_.get()->beginlist());
   }
 
-  void FillableArray::end() {
-    maybeupdate(fillable_.get()->end());
+  void FillableArray::endlist() {
+    maybeupdate(fillable_.get()->endlist());
   }
 
   void FillableArray::maybeupdate(Fillable* tmp) {

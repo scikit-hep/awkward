@@ -29,7 +29,7 @@ namespace awkward {
     void integer(int64_t x);
     void real(double x);
     void beginlist();
-    void end();
+    void endlist();
 
   private:
     std::shared_ptr<Fillable> fillable_;

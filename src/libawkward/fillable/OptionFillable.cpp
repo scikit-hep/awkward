@@ -58,8 +58,8 @@ namespace awkward {
     return this;
   }
 
-  Fillable* OptionFillable::end() {
-    throw std::invalid_argument("closing an unopened list/rec");
+  Fillable* OptionFillable::endlist() {
+    throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
   }
 
   void OptionFillable::maybeupdate(Fillable* tmp) {

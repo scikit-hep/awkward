@@ -56,8 +56,8 @@ namespace awkward {
     return out;
   }
 
-  Fillable* BoolFillable::end() {
-    throw std::invalid_argument("closing an unopened list/rec");
+  Fillable* BoolFillable::endlist() {
+    throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
   }
 
 }

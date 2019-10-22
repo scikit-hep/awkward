@@ -476,6 +476,8 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("boolean", &ak::FillableArray::boolean)
       .def("integer", &ak::FillableArray::integer)
       .def("real", &ak::FillableArray::real)
+      .def("beginlist", &ak::FillableArray::beginlist)
+      .def("endlist", &ak::FillableArray::endlist)
   );
 }
 

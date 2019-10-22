@@ -108,3 +108,21 @@ def test_real_integer():
     assert awkward1.tolist(a.snapshot()) == [1.1, 2.2, 3.0, 4.4, 5.5]
     assert awkward1.tolist(a) == [1.1, 2.2, 3.0, 4.4, 5.5]
     assert awkward1.tolist(a[1:-1]) == [2.2, 3.0, 4.4]
+
+def test_list_integer():
+    a = awkward1.layout.FillableArray()
+    a.beginlist()
+    a.real(1.1)
+    a.real(2.2)
+    a.real(3.3)
+    a.endlist()
+    a.beginlist()
+    a.endlist()
+    a.beginlist()
+    a.real(4.4)
+    a.real(5.5)
+    a.endlist()
+    assert awkward1.tolist(a.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(a) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(a[1:-1]) == [[]]
+    assert awkward1.tolist(a[1:]) == [[], [4.4, 5.5]]

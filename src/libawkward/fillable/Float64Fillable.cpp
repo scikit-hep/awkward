@@ -55,8 +55,8 @@ namespace awkward {
     return out;
   }
 
-  Fillable* Float64Fillable::end() {
-    throw std::invalid_argument("closing an unopened list/rec");
+  Fillable* Float64Fillable::endlist() {
+    throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
   }
 
 }

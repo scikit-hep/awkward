@@ -80,16 +80,18 @@ namespace awkward {
     }
     else {
       begun_ = true;
+      return this;
     }
   }
 
-  Fillable* ListFillable::end() {
+  Fillable* ListFillable::endlist() {
     if (begun_) {
       offsets_.append(content_.get()->length());
       begun_ = false;
+      return this;
     }
     else {
-      throw std::invalid_argument("closing an unopened list/rec");
+      throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
     }
   }
 

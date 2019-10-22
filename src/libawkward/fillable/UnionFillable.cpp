@@ -79,8 +79,8 @@ namespace awkward {
     return this;
   }
 
-  Fillable* UnionFillable::end() {
-    throw std::invalid_argument("closing an unopened list/rec");
+  Fillable* UnionFillable::endlist() {
+    throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
   }
 
   template <typename T>
