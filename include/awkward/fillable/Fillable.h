@@ -10,6 +10,8 @@
 namespace awkward {
   class Fillable {
   public:
+    virtual ~Fillable() { }
+
     virtual int64_t length() const = 0;
     virtual void clear() = 0;
     virtual const std::shared_ptr<Type> type() const = 0;

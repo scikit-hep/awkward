@@ -63,7 +63,7 @@ namespace awkward {
   }
 
   void OptionFillable::maybeupdate(Fillable* tmp) {
-    if (tmp != content_.get()) {
+    if (tmp != content_.get()  &&  tmp != nullptr) {
       content_ = std::shared_ptr<Fillable>(tmp);
     }
   }

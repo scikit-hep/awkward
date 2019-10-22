@@ -16,6 +16,8 @@ namespace awkward {
   public:
     static int64_t none() { return kSliceNone; }
 
+    virtual ~SliceItem() { }
+
     virtual const std::shared_ptr<SliceItem> shallow_copy() const = 0;
     virtual const std::string tostring() const = 0;
   };

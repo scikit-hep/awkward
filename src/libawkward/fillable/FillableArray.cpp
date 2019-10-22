@@ -70,7 +70,7 @@ namespace awkward {
   }
 
   void FillableArray::maybeupdate(Fillable* tmp) {
-    if (tmp != fillable_.get()) {
+    if (tmp != fillable_.get()  &&  tmp != nullptr) {
       fillable_ = std::shared_ptr<Fillable>(tmp);
     }
   }
