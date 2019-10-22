@@ -3,12 +3,18 @@
 #include <string>
 
 #include "awkward/type/UnknownType.h"
+#include "awkward/type/PrimitiveType.h"
 
 #include "awkward/type/OptionType.h"
 
 namespace awkward {
   std::string OptionType::tostring_part(std::string indent, std::string pre, std::string post) const {
-    return indent + pre + "option[" + type().get()->tostring_part(indent, "", "") + "]" + post;
+    if (dynamic_cast<PrimitiveType*>(type_.get()) != nullptr) {
+      return indent + pre + "?" + type_.get()->tostring_part("", "", "") + post;
+    }
+    else {
+      return indent + pre + "option[" + type().get()->tostring_part(indent, "", "") + "]" + post;
+    }
   }
 
   const std::shared_ptr<Type> OptionType::shallow_copy() const {
