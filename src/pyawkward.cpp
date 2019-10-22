@@ -14,6 +14,15 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/fillable/FillableOptions.h"
+#include "awkward/fillable/FillableArray.h"
+#include "awkward/type/Type.h"
+#include "awkward/type/ArrayType.h"
+#include "awkward/type/UnknownType.h"
+#include "awkward/type/PrimitiveType.h"
+#include "awkward/type/ListType.h"
+#include "awkward/type/OptionType.h"
+#include "awkward/type/UnionType.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
@@ -30,6 +39,24 @@ public:
 private:
   PyObject* pyobj_;
 };
+
+py::object box(std::shared_ptr<ak::Type> t) {
+  if (ak::ArrayType* raw = dynamic_cast<ak::ArrayType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::PrimitiveType* raw = dynamic_cast<ak::PrimitiveType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::OptionType* raw = dynamic_cast<ak::OptionType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::UnionType* raw = dynamic_cast<ak::UnionType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else {
+    throw std::runtime_error("missing boxer for Type subtype");
+  }
+}
 
 py::object box(std::shared_ptr<ak::Content> content) {
   if (ak::NumpyArray* raw = dynamic_cast<ak::NumpyArray*>(content.get())) {
@@ -77,6 +104,34 @@ py::object box(std::shared_ptr<ak::Identity> id) {
   else {
     throw std::runtime_error("missing boxer for Identity subtype");
   }
+}
+
+std::shared_ptr<ak::Type> unbox_type(py::handle obj) {
+  try {
+    return obj.cast<ak::ArrayType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::UnknownType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::PrimitiveType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::ListType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::OptionType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::UnionType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  throw std::invalid_argument("argument must be a Type subtype");
 }
 
 std::shared_ptr<ak::Content> unbox_content(py::object obj) {
@@ -375,7 +430,7 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
   );
 }
 
-/////////////////////////////////////////////////////////////// Content
+/////////////////////////////////////////////////////////////// FillableArray
 
 template <typename T>
 py::object getitem(T& self, py::object obj) {
@@ -402,13 +457,153 @@ py::object getitem(T& self, py::object obj) {
   return box(self.getitem(toslice(obj)));
 }
 
+py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name) {
+  return (py::class_<ak::FillableArray>(m, name.c_str())
+      .def(py::init([](int64_t initial, double resize) -> ak::FillableArray {
+        return ak::FillableArray(ak::FillableOptions(initial, resize));
+      }), py::arg("initial") = 1024, py::arg("resize") = 2.0)
+      .def("__repr__", &ak::FillableArray::tostring)
+      .def("__len__", &ak::FillableArray::length)
+      .def("clear", &ak::FillableArray::clear)
+      .def("type", &ak::FillableArray::type)
+      .def("snapshot", [](ak::FillableArray& self) -> py::object {
+        return box(self.snapshot());
+      })
+      .def("__getitem__", &getitem<ak::FillableArray>)
+      .def("__iter__", [](ak::FillableArray& self) -> ak::Iterator {
+        return ak::Iterator(self.snapshot());
+      })
+      .def("boolean", &ak::FillableArray::boolean)
+      .def("integer", &ak::FillableArray::integer)
+      .def("real", &ak::FillableArray::real)
+      .def("beginlist", &ak::FillableArray::beginlist)
+      .def("endlist", &ak::FillableArray::endlist)
+  );
+}
+
+/////////////////////////////////////////////////////////////// Type
+
+py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::string name) {
+  return (py::class_<ak::Type, std::shared_ptr<ak::Type>>(m, name.c_str())
+      .def("__ne__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
+        return !self.get()->equal(other);
+      })
+  );
+}
+
+py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayType(py::handle m, std::string name) {
+  return (py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type>(m, name.c_str())
+      .def(py::init<int64_t, std::shared_ptr<ak::Type>>())
+      .def("length", &ak::ArrayType::length)
+      .def("type", &ak::ArrayType::type)
+      .def("__repr__", &ak::ArrayType::tostring)
+      .def("__eq__", &ak::ArrayType::equal)
+  );
+}
+
+py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_UnknownType(py::handle m, std::string name) {
+  return (py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type>(m, name.c_str())
+      .def(py::init<>())
+      .def("__repr__", &ak::UnknownType::tostring)
+      .def("__eq__", &ak::UnknownType::equal)
+  );
+}
+
+py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make_PrimitiveType(py::handle m, std::string name) {
+  return (py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type>(m, name.c_str())
+      .def(py::init([](std::string dtype) -> ak::PrimitiveType {
+        if (dtype == std::string("bool")) {
+          return ak::PrimitiveType(ak::PrimitiveType::boolean);
+        }
+        else if (dtype == std::string("int8")) {
+          return ak::PrimitiveType(ak::PrimitiveType::int8);
+        }
+        else if (dtype == std::string("int16")) {
+          return ak::PrimitiveType(ak::PrimitiveType::int16);
+        }
+        else if (dtype == std::string("int32")) {
+          return ak::PrimitiveType(ak::PrimitiveType::int32);
+        }
+        else if (dtype == std::string("int64")) {
+          return ak::PrimitiveType(ak::PrimitiveType::int64);
+        }
+        else if (dtype == std::string("uint8")) {
+          return ak::PrimitiveType(ak::PrimitiveType::uint8);
+        }
+        else if (dtype == std::string("uint16")) {
+          return ak::PrimitiveType(ak::PrimitiveType::uint16);
+        }
+        else if (dtype == std::string("uint32")) {
+          return ak::PrimitiveType(ak::PrimitiveType::uint32);
+        }
+        else if (dtype == std::string("uint64")) {
+          return ak::PrimitiveType(ak::PrimitiveType::uint64);
+        }
+        else if (dtype == std::string("float32")) {
+          return ak::PrimitiveType(ak::PrimitiveType::float32);
+        }
+        else if (dtype == std::string("float64")) {
+          return ak::PrimitiveType(ak::PrimitiveType::float64);
+        }
+        else {
+          throw std::invalid_argument(std::string("unrecognized primitive type: ") + dtype);
+        }
+      }))
+      .def("__repr__", &ak::PrimitiveType::tostring)
+      .def("__eq__", &ak::PrimitiveType::equal)
+  );
+}
+
+py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(py::handle m, std::string name) {
+  return (py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type>(m, name.c_str())
+      .def(py::init<std::shared_ptr<ak::Type>>())
+      .def_property_readonly("type", &ak::ListType::type)
+      .def("__repr__", &ak::ListType::tostring)
+      .def("__eq__", &ak::ListType::equal)
+  );
+}
+
+py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_OptionType(py::handle m, std::string name) {
+  return (py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type>(m, name.c_str())
+      .def(py::init<std::shared_ptr<ak::Type>>())
+      .def_property_readonly("type", &ak::OptionType::type)
+      .def("__repr__", &ak::OptionType::tostring)
+      .def("__eq__", &ak::OptionType::equal)
+  );
+}
+
+py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionType(py::handle m, std::string name) {
+  return (py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type>(m, name.c_str())
+      .def(py::init([](py::args args) -> ak::UnionType {
+        std::vector<std::shared_ptr<ak::Type>> types;
+        for (auto x : args) {
+          types.push_back(unbox_type(x));
+        }
+        return ak::UnionType(types);
+      }))
+      .def_property_readonly("numtypes", &ak::UnionType::numtypes)
+      .def_property_readonly("types", [](ak::UnionType& self) -> py::tuple {
+        py::tuple types((size_t)self.numtypes());
+        for (int64_t i = 0;  i < self.numtypes();  i++) {
+          types[(size_t)i] = box(self.type(i));
+        }
+        return types;
+      })
+      .def("type", &ak::UnionType::type)
+      .def("__repr__", &ak::UnionType::tostring)
+      .def("__eq__", &ak::UnionType::equal)
+  );
+}
+
+/////////////////////////////////////////////////////////////// Content
+
 template <typename T>
 ak::Iterator iter(T& self) {
   return ak::Iterator(self.shallow_copy());
 }
 
 template <typename T>
-py::class_<T> content(py::class_<T>& x) {
+py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
   return x.def("__repr__", &repr<T>)
           .def_property("id", [](T& self) -> py::object { return box(self.id()); }, [](T& self, py::object id) -> void { self.setid(unbox_id(id)); })
           .def("setid", [](T& self, py::object id) -> void {
@@ -422,10 +617,14 @@ py::class_<T> content(py::class_<T>& x) {
          .def("__iter__", &iter<T>);
 }
 
+py::class_<ak::Content> make_Content(py::handle m, std::string name) {
+  return py::class_<ak::Content>(m, name.c_str());
+}
+
 /////////////////////////////////////////////////////////////// NumpyArray
 
-py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
-  return content(py::class_<ak::NumpyArray>(m, name.c_str(), py::buffer_protocol())
+py::class_<ak::NumpyArray, ak::Content> make_NumpyArray(py::handle m, std::string name) {
+  return content(py::class_<ak::NumpyArray, ak::Content>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](ak::NumpyArray& self) -> py::buffer_info {
         return py::buffer_info(
           self.byteptr(),
@@ -470,8 +669,8 @@ py::class_<ak::NumpyArray> make_NumpyArray(py::handle m, std::string name) {
 /////////////////////////////////////////////////////////////// ListArray
 
 template <typename T>
-py::class_<ak::ListArrayOf<T>> make_ListArrayOf(py::handle m, std::string name) {
-  return content(py::class_<ak::ListArrayOf<T>>(m, name.c_str())
+py::class_<ak::ListArrayOf<T>, ak::Content> make_ListArrayOf(py::handle m, std::string name) {
+  return content(py::class_<ak::ListArrayOf<T>, ak::Content>(m, name.c_str())
       .def(py::init([](ak::IndexOf<T>& starts, ak::IndexOf<T>& stops, py::object content, py::object id) -> ak::ListArrayOf<T> {
         return ak::ListArrayOf<T>(unbox_id(id), starts, stops, unbox_content(content));
       }), py::arg("starts"), py::arg("stops"), py::arg("content"), py::arg("id") = py::none())
@@ -487,8 +686,8 @@ py::class_<ak::ListArrayOf<T>> make_ListArrayOf(py::handle m, std::string name) 
 /////////////////////////////////////////////////////////////// ListOffsetArray
 
 template <typename T>
-py::class_<ak::ListOffsetArrayOf<T>> make_ListOffsetArrayOf(py::handle m, std::string name) {
-  return content(py::class_<ak::ListOffsetArrayOf<T>>(m, name.c_str())
+py::class_<ak::ListOffsetArrayOf<T>, ak::Content> make_ListOffsetArrayOf(py::handle m, std::string name) {
+  return content(py::class_<ak::ListOffsetArrayOf<T>, ak::Content>(m, name.c_str())
       .def(py::init([](ak::IndexOf<T>& offsets, py::object content, py::object id) -> ak::ListOffsetArrayOf<T> {
         return ak::ListOffsetArrayOf<T>(unbox_id(id), offsets, std::shared_ptr<ak::Content>(unbox_content(content)));
       }), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none())
@@ -509,7 +708,7 @@ PYBIND11_MODULE(layout, m) {
   m.attr("__version__") = "dev";
 #endif
 
-  make_IndexOf<uint8_t>(m, "Index8");
+  make_IndexOf<int8_t>(m,  "Index8");
   make_IndexOf<int32_t>(m, "Index32");
   make_IndexOf<int64_t>(m, "Index64");
 
@@ -519,6 +718,18 @@ PYBIND11_MODULE(layout, m) {
   make_Slice(m, "Slice");
 
   make_Iterator(m, "Iterator");
+
+  make_FillableArray(m, "FillableArray");
+
+  make_Type(m, "Type");
+  make_ArrayType(m, "ArrayType");
+  make_PrimitiveType(m, "PrimitiveType");
+  make_UnknownType(m, "UnknownType");
+  make_ListType(m, "ListType");
+  make_OptionType(m, "OptionType");
+  make_UnionType(m, "UnionType");
+
+  make_Content(m, "Content");
 
   make_NumpyArray(m, "NumpyArray");
 

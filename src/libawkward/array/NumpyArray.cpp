@@ -118,18 +118,18 @@ namespace awkward {
       out << "\" ";
     }
     out << "data=\"";
-  #ifdef _MSC_VER
+#ifdef _MSC_VER
     if (ndim() == 1  &&  format_.compare("l") == 0) {
-  #else
+#else
     if (ndim() == 1  &&  format_.compare("i") == 0) {
-  #endif
+#endif
       tostring_as<int32_t>(out, reinterpret_cast<int32_t*>(byteptr()), length());
     }
-  #ifdef _MSC_VER
+#ifdef _MSC_VER
     else if (ndim() == 1  &&  format_.compare("q") == 0) {
-  #else
+#else
     else if (ndim() == 1  &&  format_.compare("l") == 0) {
-  #endif
+#endif
       tostring_as<int64_t>(out, reinterpret_cast<int64_t*>(byteptr()), length());
     }
     else if (ndim() == 1  &&  format_.compare("f") == 0) {

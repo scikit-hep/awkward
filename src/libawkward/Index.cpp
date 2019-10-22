@@ -99,7 +99,7 @@ namespace awkward {
     return std::shared_ptr<Index>(new IndexOf<T>(ptr_, offset_, length_));
   }
 
-  template class IndexOf<uint8_t>;
+  template class IndexOf<int8_t>;
   template class IndexOf<int32_t>;
   template class IndexOf<int64_t>;
 }
