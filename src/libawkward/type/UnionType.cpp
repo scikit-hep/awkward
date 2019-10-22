@@ -11,7 +11,7 @@ namespace awkward {
   std::string UnionType::tostring_part(std::string indent, std::string pre, std::string post) const {
     std::stringstream out;
     out << indent << pre << "union[";
-    for (size_t i = 0;  i < numtypes();  i++) {
+    for (int64_t i = 0;  i < numtypes();  i++) {
       if (i != 0) {
         out << ", ";
       }
@@ -33,7 +33,7 @@ namespace awkward {
       if (numtypes() != t->numtypes()) {
         return false;
       }
-      for (size_t i = 0;  i < numtypes();  i++) {
+      for (int64_t i = 0;  i < numtypes();  i++) {
         if (!type(i).get()->equal(t->type(i))) {
           return false;
         }

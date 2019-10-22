@@ -59,10 +59,14 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
    * [X] Error messages with location-of-failure information if the array has an `Identity` (except in Numba).
    * [X] Fully implement `__getitem__` for int/slice/intarray/boolarray/tuple (placeholders for newaxis/ellipsis), with perfect agreement with [Numpy basic/advanced indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html), to all levels of depth.
    * [ ] Appendable arrays (a distinct phase from readable arrays, when the type is still in flux) to implement `awkward.fromiter` in C++.
+      * [X] Implemented all types but records; tested all primitives and lists.
+      * [ ] Implement appendable records.
+      * [ ] Test all (requires array types for all).
    * [ ] JSON → Awkward via header-only [simdjson](https://github.com/lemire/simdjson#readme) and `awkward.fromiter`.
    * [ ] Explicit broadcasting functions for jagged and non-jagged arrays and scalars.
    * [ ] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old).
    * [ ] Full suite of array types:
+      * [ ] `EmptyArray`: 1-dimensional array with length 0 and unknown type (result of `UnknownFillable`, compatible with all types of arrays).
       * [X] `RawArray`: flat, 1-dimensional array type for pure C++ (header-only).
       * [X] `NumpyArray`: rectilinear, N-dimensional array type without Python/pybind11 dependencies, but intended for Numpy.
       * [X] `ListArray`: the new `JaggedArray`, based on `starts` and `stops` (i.e. fully general).
