@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include "awkward/type/UnknownType.h"
+
 #include "awkward/type/PrimitiveType.h"
 
 namespace awkward {
@@ -29,7 +31,10 @@ namespace awkward {
   }
 
   bool PrimitiveType::equal(std::shared_ptr<Type> other) const {
-    if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
+    if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
+      return true;
+    }
+    else if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
       return dtype_ == t->dtype_;
     }
     else {

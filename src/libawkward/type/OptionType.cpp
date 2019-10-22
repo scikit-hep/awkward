@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "awkward/type/UnknownType.h"
+
 #include "awkward/type/OptionType.h"
 
 namespace awkward {
@@ -14,7 +16,10 @@ namespace awkward {
   }
 
   bool OptionType::equal(std::shared_ptr<Type> other) const {
-    if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
+    if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
+      return true;
+    }
+    else if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
       return type().get()->equal(t->type());
     }
     else {

@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 
+#include "awkward/type/UnknownType.h"
+
 #include "awkward/type/UnionType.h"
 
 namespace awkward {
@@ -24,7 +26,10 @@ namespace awkward {
   }
 
   bool UnionType::equal(std::shared_ptr<Type> other) const {
-    if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
+    if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
+      return true;
+    }
+    else if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
       if (numtypes() != t->numtypes()) {
         return false;
       }

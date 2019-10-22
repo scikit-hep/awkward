@@ -18,7 +18,9 @@
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
 #include "awkward/type/ArrayType.h"
+#include "awkward/type/UnknownType.h"
 #include "awkward/type/PrimitiveType.h"
+#include "awkward/type/ListType.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/UnionType.h"
 
@@ -107,6 +109,10 @@ py::object box(std::shared_ptr<ak::Identity> id) {
 std::shared_ptr<ak::Type> unbox_type(py::handle obj) {
   try {
     return obj.cast<ak::ArrayType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::UnknownType*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   try {
@@ -493,6 +499,14 @@ py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayTy
   );
 }
 
+py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_UnknownType(py::handle m, std::string name) {
+  return (py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type>(m, name.c_str())
+      .def(py::init<>())
+      .def("__repr__", &ak::UnknownType::tostring)
+      .def("__eq__", &ak::UnknownType::equal)
+  );
+}
+
 py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make_PrimitiveType(py::handle m, std::string name) {
   return (py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type>(m, name.c_str())
       .def(py::init([](std::string dtype) -> ak::PrimitiveType {
@@ -708,6 +722,7 @@ PYBIND11_MODULE(layout, m) {
   make_Type(m, "Type");
   make_ArrayType(m, "ArrayType");
   make_PrimitiveType(m, "PrimitiveType");
+  make_UnknownType(m, "UnknownType");
   make_ListType(m, "ListType");
   make_OptionType(m, "OptionType");
   make_UnionType(m, "UnionType");
