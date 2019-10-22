@@ -28,6 +28,8 @@ namespace awkward {
     void boolean(bool x);
     void integer(int64_t x);
     void real(double x);
+    void beginlist();
+    void end();
 
   private:
     std::shared_ptr<Fillable> fillable_;

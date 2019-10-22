@@ -54,6 +54,14 @@ namespace awkward {
     return out;
   }
 
+  Fillable* ListFillable::beginlist() {
+    throw std::runtime_error("FIXME");
+  }
+
+  Fillable* ListFillable::end() {
+    throw std::runtime_error("FIXME");
+  }
+
   void ListFillable::maybeupdate(Fillable* tmp) {
     if (tmp != content_.get()) {
       content_ = std::shared_ptr<Fillable>(tmp);

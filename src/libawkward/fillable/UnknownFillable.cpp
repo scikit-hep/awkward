@@ -51,6 +51,14 @@ namespace awkward {
     return out;
   }
 
+  Fillable* UnknownFillable::beginlist() {
+    throw std::runtime_error("FIXME");
+  }
+
+  Fillable* UnknownFillable::end() {
+    throw std::runtime_error("FIXME");
+  }
+
   template <typename T>
   Fillable* UnknownFillable::prepare() const {
     Fillable* out = new T(options_);

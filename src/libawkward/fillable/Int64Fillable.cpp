@@ -54,4 +54,12 @@ namespace awkward {
     out->real(x);
     return out;
   }
+
+  Fillable* Int64Fillable::beginlist() {
+    throw std::runtime_error("FIXME");
+  }
+
+  Fillable* Int64Fillable::end() {
+    throw std::runtime_error("FIXME");
+  }
 }

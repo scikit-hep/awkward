@@ -19,6 +19,8 @@ namespace awkward {
     virtual Fillable* boolean(bool x) = 0;
     virtual Fillable* integer(int64_t x) = 0;
     virtual Fillable* real(double x) = 0;
+    virtual Fillable* beginlist() = 0;
+    virtual Fillable* end() = 0;
   };
 }
 

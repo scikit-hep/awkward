@@ -57,6 +57,14 @@ namespace awkward {
     maybeupdate(fillable_.get()->real(x));
   }
 
+  void FillableArray::beginlist() {
+    maybeupdate(fillable_.get()->beginlist());
+  }
+
+  void FillableArray::end() {
+    maybeupdate(fillable_.get()->end());
+  }
+
   void FillableArray::maybeupdate(Fillable* tmp) {
     if (tmp != fillable_.get()) {
       fillable_ = std::shared_ptr<Fillable>(tmp);

@@ -69,6 +69,14 @@ namespace awkward {
     return this;
   }
 
+  Fillable* UnionFillable::beginlist() {
+    throw std::runtime_error("FIXME");
+  }
+
+  Fillable* UnionFillable::end() {
+    throw std::runtime_error("FIXME");
+  }
+
   template <typename T>
   T* UnionFillable::findfillable(int8_t& type) {
     type = 0;

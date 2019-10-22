@@ -50,4 +50,12 @@ namespace awkward {
     return out;
   }
 
+  Fillable* BoolFillable::beginlist() {
+    throw std::runtime_error("FIXME");
+  }
+
+  Fillable* BoolFillable::end() {
+    throw std::runtime_error("FIXME");
+  }
+
 }

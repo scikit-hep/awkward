@@ -51,6 +51,14 @@ namespace awkward {
     return this;
   }
 
+  Fillable* OptionFillable::beginlist() {
+    throw std::runtime_error("FIXME");
+  }
+
+  Fillable* OptionFillable::end() {
+    throw std::runtime_error("FIXME");
+  }
+
   void OptionFillable::maybeupdate(Fillable* tmp) {
     if (tmp != content_.get()) {
       content_ = std::shared_ptr<Fillable>(tmp);

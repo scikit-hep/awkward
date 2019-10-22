@@ -49,4 +49,12 @@ namespace awkward {
     return this;
   }
 
+  Fillable* Float64Fillable::beginlist() {
+    throw std::runtime_error("FIXME");
+  }
+
+  Fillable* Float64Fillable::end() {
+    throw std::runtime_error("FIXME");
+  }
+
 }
