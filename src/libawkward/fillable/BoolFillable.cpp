@@ -57,7 +57,7 @@ namespace awkward {
   }
 
   Fillable* BoolFillable::endlist() {
-    throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
+    return nullptr;
   }
 
 }

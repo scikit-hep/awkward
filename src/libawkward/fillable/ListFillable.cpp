@@ -86,12 +86,18 @@ namespace awkward {
 
   Fillable* ListFillable::endlist() {
     if (begun_) {
-      offsets_.append(content_.get()->length());
-      begun_ = false;
-      return this;
+      Fillable* tmp = content_.get()->endlist();
+      if (tmp == nullptr) {
+        offsets_.append(content_.get()->length());
+        begun_ = false;
+        return this;
+      }
+      else {
+        return maybeupdate(tmp);
+      }
     }
     else {
-      throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
+      return nullptr;
     }
   }
 

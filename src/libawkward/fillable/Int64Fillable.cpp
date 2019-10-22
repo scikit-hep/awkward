@@ -62,6 +62,6 @@ namespace awkward {
   }
 
   Fillable* Int64Fillable::endlist() {
-    throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
+    return nullptr;
   }
 }

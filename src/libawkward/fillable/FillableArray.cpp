@@ -62,7 +62,11 @@ namespace awkward {
   }
 
   void FillableArray::endlist() {
-    maybeupdate(fillable_.get()->endlist());
+    Fillable* tmp = fillable_.get()->endlist();
+    if (tmp == nullptr) {
+      throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
+    }
+    maybeupdate(tmp);
   }
 
   void FillableArray::maybeupdate(Fillable* tmp) {

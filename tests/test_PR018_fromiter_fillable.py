@@ -109,7 +109,7 @@ def test_real_integer():
     assert awkward1.tolist(a) == [1.1, 2.2, 3.0, 4.4, 5.5]
     assert awkward1.tolist(a[1:-1]) == [2.2, 3.0, 4.4]
 
-def test_list_integer():
+def test_list_real():
     a = awkward1.layout.FillableArray()
     a.beginlist()
     a.real(1.1)
@@ -126,3 +126,73 @@ def test_list_integer():
     assert awkward1.tolist(a) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert awkward1.tolist(a[1:-1]) == [[]]
     assert awkward1.tolist(a[1:]) == [[], [4.4, 5.5]]
+
+def test_list_list_real():
+    a = awkward1.layout.FillableArray()
+    a.beginlist()
+    a.beginlist()
+    a.real(1.1)
+    a.real(2.2)
+    a.real(3.3)
+    a.endlist()
+    a.beginlist()
+    a.endlist()
+    a.beginlist()
+    a.real(4.4)
+    a.real(5.5)
+    a.endlist()
+    a.endlist()
+    a.beginlist()
+    a.endlist()
+    a.beginlist()
+    a.beginlist()
+    a.real(6.6)
+    a.real(7.7)
+    a.endlist()
+    a.beginlist()
+    a.real(8.8)
+    a.real(9.9)
+    a.endlist()
+    a.endlist()
+    assert awkward1.tolist(a.snapshot()) == [[[1.1, 2.2, 3.3], [], [4.4, 5.5]], [], [[6.6, 7.7], [8.8, 9.9]]]
+    assert awkward1.tolist(a) == [[[1.1, 2.2, 3.3], [], [4.4, 5.5]], [], [[6.6, 7.7], [8.8, 9.9]]]
+    assert awkward1.tolist(a[1:]) == [[], [[6.6, 7.7], [8.8, 9.9]]]
+
+def test_list_errors():
+    with pytest.raises(ValueError):
+        a = awkward1.layout.FillableArray()
+        a.endlist()
+
+    with pytest.raises(ValueError):
+        a = awkward1.layout.FillableArray()
+        a.real(3.14)
+        a.endlist()
+
+    with pytest.raises(ValueError):
+        a = awkward1.layout.FillableArray()
+        a.beginlist()
+        a.real(3.14)
+        a.endlist()
+        a.endlist()
+
+    with pytest.raises(ValueError):
+        a = awkward1.layout.FillableArray()
+        a.beginlist()
+        a.beginlist()
+        a.real(3.14)
+        a.endlist()
+        a.endlist()
+        a.endlist()
+
+    a = awkward1.layout.FillableArray()
+    a.beginlist()
+    a.real(1.1)
+    a.real(2.2)
+    a.real(3.3)
+    a.endlist()
+    a.beginlist()
+    a.real(4.4)
+    a.real(5.5)
+    assert awkward1.tolist(a.snapshot()) == [[1.1, 2.2, 3.3]]
+    assert awkward1.tolist(a) == [[1.1, 2.2, 3.3]]
+    assert awkward1.tolist(a[1:]) == []

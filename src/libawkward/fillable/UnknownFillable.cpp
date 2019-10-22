@@ -59,7 +59,7 @@ namespace awkward {
   }
 
   Fillable* UnknownFillable::endlist() {
-    throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
+    return nullptr;
   }
 
   template <typename T>

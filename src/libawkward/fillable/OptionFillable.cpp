@@ -59,7 +59,7 @@ namespace awkward {
   }
 
   Fillable* OptionFillable::endlist() {
-    throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
+    return nullptr;
   }
 
   void OptionFillable::maybeupdate(Fillable* tmp) {
