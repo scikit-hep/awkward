@@ -20,6 +20,7 @@ class CMakeExtension(setuptools.Extension):
 
 class CMakeBuild(setuptools.command.build_ext.build_ext):
     def run(self):
+        print("PATH:", os.environ["PATH"])
         try:
             out = subprocess.check_output(["cmake", "--version"])
         except OSError:

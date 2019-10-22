@@ -8,6 +8,8 @@ export PATH=/opt/_internal/cpython-3.7.4/lib/python3.7/site-packages/cmake/data/
 for PYBIN in /opt/python/*/bin; do
     echo "========================================================="
     echo $PYBIN
+    echo $PATH
+    which cmake
     echo "========================================================="
     "${PYBIN}/python" setup.py bdist_wheel -p $PLAT
 done
