@@ -8,6 +8,7 @@
 #include "awkward/fillable/BoolFillable.h"
 #include "awkward/fillable/Int64Fillable.h"
 #include "awkward/fillable/Float64Fillable.h"
+#include "awkward/fillable/ListFillable.h"
 
 #include "awkward/fillable/UnknownFillable.h"
 
@@ -52,11 +53,13 @@ namespace awkward {
   }
 
   Fillable* UnknownFillable::beginlist() {
-    throw std::runtime_error("FIXME");
+    Fillable* out = prepare<ListFillable>();
+    out->beginlist();
+    return out;
   }
 
   Fillable* UnknownFillable::end() {
-    throw std::runtime_error("FIXME");
+    throw std::invalid_argument("closing an unopened list/rec");
   }
 
   template <typename T>

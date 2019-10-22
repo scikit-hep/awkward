@@ -31,40 +31,72 @@ namespace awkward {
   }
 
   Fillable* ListFillable::null() {
-    Fillable* out = OptionFillable::fromvalids(options_, this);
-    out->null();
-    return out;
+    if (begun_) {
+      return maybeupdate(content_.get()->null());
+    }
+    else {
+      Fillable* out = OptionFillable::fromvalids(options_, this);
+      out->null();
+      return out;
+    }
   }
 
   Fillable* ListFillable::boolean(bool x) {
-    Fillable* out = UnionFillable::fromsingle(options_, this);
-    out->boolean(x);
-    return out;
+    if (begun_) {
+      return maybeupdate(content_.get()->boolean(x));
+    }
+    else {
+      Fillable* out = UnionFillable::fromsingle(options_, this);
+      out->boolean(x);
+      return out;
+    }
   }
 
   Fillable* ListFillable::integer(int64_t x) {
-    Fillable* out = UnionFillable::fromsingle(options_, this);
-    out->integer(x);
-    return out;
+    if (begun_) {
+      return maybeupdate(content_.get()->integer(x));
+    }
+    else {
+      Fillable* out = UnionFillable::fromsingle(options_, this);
+      out->integer(x);
+      return out;
+    }
   }
 
   Fillable* ListFillable::real(double x) {
-    Fillable* out = UnionFillable::fromsingle(options_, this);
-    out->real(x);
-    return out;
+    if (begun_) {
+      return maybeupdate(content_.get()->real(x));
+    }
+    else {
+      Fillable* out = UnionFillable::fromsingle(options_, this);
+      out->real(x);
+      return out;
+    }
   }
 
   Fillable* ListFillable::beginlist() {
-    throw std::runtime_error("FIXME");
+    if (begun_) {
+      return maybeupdate(content_.get()->beginlist());
+    }
+    else {
+      begun_ = true;
+    }
   }
 
   Fillable* ListFillable::end() {
-    throw std::runtime_error("FIXME");
+    if (begun_) {
+      offsets_.append(content_.get()->length());
+      begun_ = false;
+    }
+    else {
+      throw std::invalid_argument("closing an unopened list/rec");
+    }
   }
 
-  void ListFillable::maybeupdate(Fillable* tmp) {
+  Fillable* ListFillable::maybeupdate(Fillable* tmp) {
     if (tmp != content_.get()) {
       content_ = std::shared_ptr<Fillable>(tmp);
     }
+    return this;
   }
 }

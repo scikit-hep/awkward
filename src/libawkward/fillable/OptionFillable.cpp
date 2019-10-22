@@ -52,11 +52,14 @@ namespace awkward {
   }
 
   Fillable* OptionFillable::beginlist() {
-    throw std::runtime_error("FIXME");
+    int64_t length = content_.get()->length();
+    maybeupdate(content_.get()->beginlist());
+    index_.append(length);
+    return this;
   }
 
   Fillable* OptionFillable::end() {
-    throw std::runtime_error("FIXME");
+    throw std::invalid_argument("closing an unopened list/rec");
   }
 
   void OptionFillable::maybeupdate(Fillable* tmp) {

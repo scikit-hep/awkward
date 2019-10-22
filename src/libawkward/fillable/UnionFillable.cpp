@@ -8,6 +8,7 @@
 #include "awkward/fillable/BoolFillable.h"
 #include "awkward/fillable/Int64Fillable.h"
 #include "awkward/fillable/Float64Fillable.h"
+#include "awkward/fillable/ListFillable.h"
 
 #include "awkward/fillable/UnionFillable.h"
 
@@ -70,11 +71,16 @@ namespace awkward {
   }
 
   Fillable* UnionFillable::beginlist() {
-    throw std::runtime_error("FIXME");
+    int8_t type;
+    int64_t length;
+    get1<ListFillable>(type, length)->beginlist();
+    offsets_.append(length);
+    types_.append(type);
+    return this;
   }
 
   Fillable* UnionFillable::end() {
-    throw std::runtime_error("FIXME");
+    throw std::invalid_argument("closing an unopened list/rec");
   }
 
   template <typename T>

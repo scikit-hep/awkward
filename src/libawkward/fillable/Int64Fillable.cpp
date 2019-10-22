@@ -56,10 +56,12 @@ namespace awkward {
   }
 
   Fillable* Int64Fillable::beginlist() {
-    throw std::runtime_error("FIXME");
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    out->beginlist();
+    return out;
   }
 
   Fillable* Int64Fillable::end() {
-    throw std::runtime_error("FIXME");
+    throw std::invalid_argument("closing an unopened list/rec");
   }
 }

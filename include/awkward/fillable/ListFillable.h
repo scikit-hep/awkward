@@ -14,10 +14,10 @@
 namespace awkward {
   class ListFillable: public Fillable {
   public:
-    ListFillable(const FillableOptions& options): options_(options), offsets_(options), content_(new UnknownFillable(options)) {
+    ListFillable(const FillableOptions& options): options_(options), offsets_(options), content_(new UnknownFillable(options)), begun_(false) {
       offsets_.append(0);
     }
-    ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, Fillable* content): options_(options), offsets_(offsets), content_(std::shared_ptr<Fillable>(content)) { }
+    ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, Fillable* content, bool begun): options_(options), offsets_(offsets), content_(std::shared_ptr<Fillable>(content)), begun_(begun) { }
 
     virtual int64_t length() const;
     virtual void clear();
@@ -35,8 +35,9 @@ namespace awkward {
     const FillableOptions options_;
     GrowableBuffer<int64_t> offsets_;
     std::shared_ptr<Fillable> content_;
+    bool begun_;
 
-    void maybeupdate(Fillable* tmp);
+    Fillable* maybeupdate(Fillable* tmp);
   };
 }
 
