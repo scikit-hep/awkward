@@ -58,8 +58,12 @@ namespace awkward {
     Handler handler(options);
     rj::Reader reader;
     rj::StringStream stream(source);
-    reader.Parse(stream, handler);
-    return handler.snapshot();
+    if (reader.Parse(stream, handler)) {
+      return handler.snapshot();
+    }
+    else {
+      throw std::invalid_argument(std::string("JSON error at char ") + std::to_string(reader.GetErrorOffset()) + std::string(": ") + std::string(rj::GetParseError_En(reader.GetParseErrorCode())));
+    }
   }
 
   const std::shared_ptr<Content> FromJsonFile(FILE* source, const FillableOptions& options, int64_t buffersize) {
@@ -67,7 +71,12 @@ namespace awkward {
     rj::Reader reader;
     std::shared_ptr<char> buffer(new char[(size_t)buffersize], awkward::util::array_deleter<char>());
     rj::FileReadStream stream(source, buffer.get(), buffersize*sizeof(char));
-    reader.Parse(stream, handler);
+    if (reader.Parse(stream, handler)) {
+      return handler.snapshot();
+    }
+    else {
+      throw std::invalid_argument(std::string("JSON error at char ") + std::to_string(reader.GetErrorOffset()) + std::string(": ") + std::string(rj::GetParseError_En(reader.GetParseErrorCode())));
+    }
     return handler.snapshot();
   }
 

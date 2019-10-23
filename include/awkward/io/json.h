@@ -11,6 +11,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/filewritestream.h"
+#include "rapidjson/error/en.h"
 
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/cpu-kernels/util.h"
