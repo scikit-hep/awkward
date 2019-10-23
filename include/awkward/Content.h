@@ -34,8 +34,8 @@ namespace awkward {
     virtual const std::pair<int64_t, int64_t> minmax_depth() const = 0;
 
     const std::string tostring() const;
-    const std::string tojson(bool pretty) const;
-    void tojson(FILE* destination, bool pretty, int64_t buffersize) const;
+    const std::string tojson(bool pretty, int64_t maxdecimals) const;
+    void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
     const std::shared_ptr<Content> getitem_ellipsis(const Slice& tail, const Index64& advanced) const;
     const std::shared_ptr<Content> getitem_newaxis(const Slice& tail, const Index64& advanced) const;
   };

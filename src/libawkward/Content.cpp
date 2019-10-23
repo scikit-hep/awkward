@@ -9,16 +9,16 @@ namespace awkward {
     return tostring_part("", "", "");
   }
 
-  const std::string Content::tojson(bool pretty) const {
+  const std::string Content::tojson(bool pretty, int64_t maxdecimals) const {
     if (pretty) {
-      ToJsonPrettyString builder;
+      ToJsonPrettyString builder(maxdecimals);
       builder.beginlist();
       tojson_part(builder);
       builder.endlist();
       return builder.tostring();
     }
     else {
-      ToJsonString builder;
+      ToJsonString builder(maxdecimals);
       builder.beginlist();
       tojson_part(builder);
       builder.endlist();
@@ -26,15 +26,15 @@ namespace awkward {
     }
   }
 
-  void Content::tojson(FILE* destination, bool pretty, int64_t buffersize) const {
+  void Content::tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const {
     if (pretty) {
-      ToJsonPrettyFile builder(destination, buffersize);
+      ToJsonPrettyFile builder(destination, maxdecimals, buffersize);
       builder.beginlist();
       tojson_part(builder);
       builder.endlist();
     }
     else {
-      ToJsonFile builder(destination, buffersize);
+      ToJsonFile builder(destination, maxdecimals, buffersize);
       builder.beginlist();
       tojson_part(builder);
       builder.endlist();

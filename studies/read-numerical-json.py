@@ -20,3 +20,7 @@ array = awkward1.layout.ListOffsetArray64(
                     awkward1.layout.Index64(offsets1),
                     awkward1.layout.NumpyArray(content))))
 
+array.tojson("studies/sample-jagged3.json", maxdecimals=5)
+array.content.tojson("studies/sample-jagged2.json", maxdecimals=5)
+array.content.content.tojson("studies/sample-jagged1.json", maxdecimals=5)
+array.content.content.content.tojson("studies/sample-jagged0.json", maxdecimals=5)

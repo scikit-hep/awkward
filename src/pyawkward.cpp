@@ -604,19 +604,31 @@ ak::Iterator iter(T& self) {
   return ak::Iterator(self.shallow_copy());
 }
 
-template <typename T>
-std::string tojson_string(T& self, bool pretty) {
-  return self.tojson(pretty);
+int64_t check_maxdecimals(py::object maxdecimals) {
+  if (maxdecimals.is(py::none())) {
+    return -1;
+  }
+  try {
+    return maxdecimals.cast<int64_t>();
+  }
+  catch (py::cast_error err) {
+    throw std::invalid_argument("maxdecimals must be None or an integer");
+  }
 }
 
 template <typename T>
-void tojson_file(T& self, std::string destination, bool pretty, int64_t buffersize) {
+std::string tojson_string(T& self, bool pretty, py::object maxdecimals) {
+  return self.tojson(pretty, check_maxdecimals(maxdecimals));
+}
+
+template <typename T>
+void tojson_file(T& self, std::string destination, bool pretty, py::object maxdecimals, int64_t buffersize) {
   FILE* file = fopen(destination.c_str(), "wb");
   if (file == nullptr) {
     throw std::invalid_argument(std::string("could not open file ") + destination);
   }
   try {
-    self.tojson(file, pretty, buffersize);
+    self.tojson(file, pretty, check_maxdecimals(maxdecimals), buffersize);
   }
   catch (...) {
     fclose(file);
@@ -638,8 +650,8 @@ py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
          .def("__len__", &len<T>)
          .def("__getitem__", &getitem<T>)
          .def("__iter__", &iter<T>)
-         .def("tojson", &tojson_string<T>, py::arg("pretty") = true)
-         .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = true, py::arg("buffersize") = 65536);
+         .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
+         .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536);
 }
 
 py::class_<ak::Content> make_Content(py::handle m, std::string name) {

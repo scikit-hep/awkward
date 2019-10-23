@@ -42,7 +42,11 @@ namespace awkward {
 
   class ToJsonString: public ToJson {
   public:
-    ToJsonString(): buffer_(), writer_(buffer_) { }
+    ToJsonString(int64_t maxdecimals): buffer_(), writer_(buffer_) {
+      if (maxdecimals >= 0) {
+        writer_.SetMaxDecimalPlaces(maxdecimals);
+      }
+    }
 
     virtual void null() { writer_.Null(); }
     virtual void boolean(bool x) { writer_.Bool(x); }
@@ -66,7 +70,11 @@ namespace awkward {
 
   class ToJsonPrettyString: public ToJson {
   public:
-    ToJsonPrettyString(): buffer_(), writer_(buffer_) { }
+    ToJsonPrettyString(int64_t maxdecimals): buffer_(), writer_(buffer_) {
+      if (maxdecimals >= 0) {
+        writer_.SetMaxDecimalPlaces(maxdecimals);
+      }
+    }
 
     virtual void null() { writer_.Null(); }
     virtual void boolean(bool x) { writer_.Bool(x); }
@@ -90,7 +98,11 @@ namespace awkward {
 
   class ToJsonFile: public ToJson {
   public:
-    ToJsonFile(FILE* destination, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()), stream_(destination, buffer_.get(), buffersize*sizeof(char)), writer_(stream_) { }
+    ToJsonFile(FILE* destination, int64_t maxdecimals, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()), stream_(destination, buffer_.get(), buffersize*sizeof(char)), writer_(stream_) {
+      if (maxdecimals >= 0) {
+        writer_.SetMaxDecimalPlaces(maxdecimals);
+      }
+    }
 
     virtual void null() { writer_.Null(); }
     virtual void boolean(bool x) { writer_.Bool(x); }
@@ -111,7 +123,11 @@ namespace awkward {
 
   class ToJsonPrettyFile: public ToJson {
   public:
-    ToJsonPrettyFile(FILE* destination, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()), stream_(destination, buffer_.get(), buffersize*sizeof(char)), writer_(stream_) { }
+    ToJsonPrettyFile(FILE* destination, int64_t maxdecimals, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()), stream_(destination, buffer_.get(), buffersize*sizeof(char)), writer_(stream_) {
+      if (maxdecimals >= 0) {
+        writer_.SetMaxDecimalPlaces(maxdecimals);
+      }
+    }
 
     virtual void null() { writer_.Null(); }
     virtual void boolean(bool x) { writer_.Bool(x); }
