@@ -158,6 +158,16 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::string ListOffsetArrayOf<T>::tojson_part() const {
+    throw std::runtime_error("ListOffsetArray::tojson()");
+  }
+
+  template <typename T>
+  void ListOffsetArrayOf<T>::tojson_part(FILE* file) const {
+    throw std::runtime_error("ListOffsetArray::tojson(FILE*)");
+  }
+
+  template <typename T>
   int64_t ListOffsetArrayOf<T>::length() const {
     return offsets_.length() - 1;
   }

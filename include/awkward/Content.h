@@ -3,6 +3,8 @@
 #ifndef AWKWARD_CONTENT_H_
 #define AWKWARD_CONTENT_H_
 
+#include <cstdio>
+
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Identity.h"
 #include "awkward/Slice.h"
@@ -17,6 +19,8 @@ namespace awkward {
     virtual void setid() = 0;
     virtual void setid(const std::shared_ptr<Identity> id) = 0;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
+    virtual const std::string tojson_part() const = 0;
+    virtual void tojson_part(FILE* file) const = 0;
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
     virtual void checksafe() const = 0;
@@ -30,6 +34,8 @@ namespace awkward {
     virtual const std::pair<int64_t, int64_t> minmax_depth() const = 0;
 
     const std::string tostring() const;
+    const std::string tojson(bool pretty) const;
+    void tojson(FILE* file, bool pretty) const;
     const std::shared_ptr<Content> getitem_ellipsis(const Slice& tail, const Index64& advanced) const;
     const std::shared_ptr<Content> getitem_newaxis(const Slice& tail, const Index64& advanced) const;
   };

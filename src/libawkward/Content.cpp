@@ -9,6 +9,14 @@ namespace awkward {
     return tostring_part("", "", "");
   }
 
+  const std::string Content::tojson(bool pretty) const {
+    throw std::runtime_error("Content::tojson()");
+  }
+
+  void Content::tojson(FILE* file, bool pretty) const {
+    throw std::runtime_error("Content::tojson(FILE*)");
+  }
+
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
     Index64 nextstarts(1);
     Index64 nextstops(1);

@@ -605,6 +605,27 @@ ak::Iterator iter(T& self) {
 }
 
 template <typename T>
+std::string tojson_string(T& self, bool pretty) {
+  return self.tojson(pretty);
+}
+
+template <typename T>
+void tojson_file(T& self, std::string destination, bool pretty) {
+  FILE* file = fopen(destination.c_str(), "wb");
+  if (file == nullptr) {
+    throw std::invalid_argument(std::string("could not open file ") + destination);
+  }
+  try {
+    self.tojson(file, pretty);
+  }
+  catch (...) {
+    fclose(file);
+    throw;
+  }
+  fclose(file);
+}
+
+template <typename T>
 py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
   return x.def("__repr__", &repr<T>)
           .def_property("id", [](T& self) -> py::object { return box(self.id()); }, [](T& self, py::object id) -> void { self.setid(unbox_id(id)); })
@@ -616,7 +637,9 @@ py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
          })
          .def("__len__", &len<T>)
          .def("__getitem__", &getitem<T>)
-         .def("__iter__", &iter<T>);
+         .def("__iter__", &iter<T>)
+         .def("tojson", &tojson_string<T>, py::arg("pretty") = false)
+         .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false);
 }
 
 py::class_<ak::Content> make_Content(py::handle m, std::string name) {

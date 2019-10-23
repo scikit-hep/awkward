@@ -177,6 +177,14 @@ namespace awkward {
     return out.str();
   }
 
+  const std::string NumpyArray::tojson_part() const {
+    throw std::runtime_error("NumpyArray::tojson()");
+  }
+
+  void NumpyArray::tojson_part(FILE* file) const {
+    throw std::runtime_error("NumpyArray::tojson(FILE*)");
+  }
+
   int64_t NumpyArray::length() const {
     if (isscalar()) {
       return -1;

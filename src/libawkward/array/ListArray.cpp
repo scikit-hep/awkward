@@ -145,6 +145,16 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::string ListArrayOf<T>::tojson_part() const {
+    throw std::runtime_error("ListArray::tojson()");
+  }
+
+  template <typename T>
+  void ListArrayOf<T>::tojson_part(FILE* file) const {
+    throw std::runtime_error("ListArray::tojson(FILE*)");
+  }
+
+  template <typename T>
   int64_t ListArrayOf<T>::length() const {
     return starts_.length();
   }

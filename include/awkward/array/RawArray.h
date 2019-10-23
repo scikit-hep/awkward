@@ -122,6 +122,12 @@ namespace awkward {
       }
       return out.str();
     }
+    virtual const std::string tojson_part() const {
+      throw std::runtime_error("RawArray::tojson_part()");
+    }
+    virtual void tojson_part(FILE* file) const {
+      throw std::runtime_error("RawArray::tojson_part(FILE*)");
+    }
 
     virtual int64_t length() const { return length_; }
 
