@@ -8,6 +8,7 @@
 
 #include "rapidjson/reader.h"
 #include "rapidjson/writer.h"
+#include "rapidjson/prettywriter.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/filewritestream.h"
@@ -24,10 +25,9 @@ namespace awkward {
   const std::shared_ptr<Content> FromJsonString(const char* source, const FillableOptions& options);
   const std::shared_ptr<Content> FromJsonFile(FILE* source, const FillableOptions& options, int64_t buffersize);
 
-  class ToJsonString {
+  template <typename W>
+  class ToJson {
   public:
-    ToJsonString(): buffer_(), writer_(buffer_) { }
-
     void null();
     void integer(int64_t x);
     void real(double x);
@@ -37,32 +37,40 @@ namespace awkward {
     void beginrec();
     void fieldname(const char* x);
     void endrec();
-    const char* tocharstar();
+
+  protected:
+    std::unique_ptr<W> writer_;
+  };
+
+  class ToJsonString: public ToJson<rj::Writer<rj::StringBuffer>> {
+    ToJsonString(): buffer_() {
+      writer_ = std::unique_ptr<rj::Writer<rj::StringBuffer>>(new rj::Writer<rj::StringBuffer>(buffer_));
+    }
     std::string tostring();
 
   private:
     rj::StringBuffer buffer_;
-    rj::Writer<rj::StringBuffer> writer_;
   };
 
-  class ToJsonFile {
-  public:
-    ToJsonFile(FILE* destination, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()), writer_(destination, buffer_.get(), buffersize*sizeof(char)) { }
+  class ToJsonPrettyString: public ToJson<rj::PrettyWriter<rj::StringBuffer>> {
+    ToJsonPrettyString(): buffer_() {
+      writer_ = std::unique_ptr<rj::PrettyWriter<rj::StringBuffer>>(new rj::PrettyWriter<rj::StringBuffer>(buffer_));
+    }
+    std::string tostring();
 
-    void null();
-    void integer(int64_t x);
-    void real(double x);
-    void string(const char* x);
-    void beginlist();
-    void endlist();
-    void beginrec();
-    void fieldname(const char* x);
-    void endrec();
+  private:
+    rj::StringBuffer buffer_;
+  };
+
+  class ToJsonFile: public ToJson<rj::FileWriteStream> {
+    ToJsonFile(FILE* destination, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()) {
+      writer_ = std::unique_ptr<rj::FileWriteStream>(new rj::FileWriteStream(destination, buffer_.get(), buffersize*sizeof(char)));
+    }
 
   private:
     std::shared_ptr<char> buffer_;
-    rj::FileWriteStream writer_;
   };
+
 }
 
 #endif // AWKWARD_IO_JSON_H_

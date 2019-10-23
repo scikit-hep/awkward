@@ -35,7 +35,7 @@ namespace awkward {
 
     const std::string tostring() const;
     const std::string tojson(bool pretty) const;
-    void tojson(FILE* file, bool pretty) const;
+    void tojson(FILE* file, int64_t buffersize) const;
     const std::shared_ptr<Content> getitem_ellipsis(const Slice& tail, const Index64& advanced) const;
     const std::shared_ptr<Content> getitem_newaxis(const Slice& tail, const Index64& advanced) const;
   };

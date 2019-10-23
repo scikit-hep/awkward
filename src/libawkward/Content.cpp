@@ -13,7 +13,7 @@ namespace awkward {
     throw std::runtime_error("Content::tojson()");
   }
 
-  void Content::tojson(FILE* file, bool pretty) const {
+  void Content::tojson(FILE* file, int64_t buffersize) const {
     throw std::runtime_error("Content::tojson(FILE*)");
   }
 

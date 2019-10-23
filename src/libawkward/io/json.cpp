@@ -80,43 +80,48 @@ namespace awkward {
     return handler.snapshot();
   }
 
-  void ToJsonString::null() {
+  template <typename W>
+  void ToJson<W>::null() {
     throw std::runtime_error("FIXME");
   }
 
-  void ToJsonString::integer(int64_t x) {
+  template <typename W>
+  void ToJson<W>::integer(int64_t x) {
     throw std::runtime_error("FIXME");
   }
 
-  void ToJsonString::real(double x) {
+  template <typename W>
+  void ToJson<W>::real(double x) {
     throw std::runtime_error("FIXME");
   }
 
-  void ToJsonString::string(const char* x) {
+  template <typename W>
+  void ToJson<W>::string(const char* x) {
     throw std::runtime_error("FIXME");
   }
 
-  void ToJsonString::beginlist() {
+  template <typename W>
+  void ToJson<W>::beginlist() {
     throw std::runtime_error("FIXME");
   }
 
-  void ToJsonString::endlist() {
+  template <typename W>
+  void ToJson<W>::endlist() {
     throw std::runtime_error("FIXME");
   }
 
-  void ToJsonString::beginrec() {
+  template <typename W>
+  void ToJson<W>::beginrec() {
     throw std::runtime_error("FIXME");
   }
 
-  void ToJsonString::fieldname(const char* x) {
+  template <typename W>
+  void ToJson<W>::fieldname(const char* x) {
     throw std::runtime_error("FIXME");
   }
 
-  void ToJsonString::endrec() {
-    throw std::runtime_error("FIXME");
-  }
-
-  const char* ToJsonString::tocharstar() {
+  template <typename W>
+  void ToJson<W>::endrec() {
     throw std::runtime_error("FIXME");
   }
 
@@ -124,39 +129,7 @@ namespace awkward {
     throw std::runtime_error("FIXME");
   }
 
-  void ToJsonFile::null() {
-    throw std::runtime_error("FIXME");
-  }
-
-  void ToJsonFile::integer(int64_t x) {
-    throw std::runtime_error("FIXME");
-  }
-
-  void ToJsonFile::real(double x) {
-    throw std::runtime_error("FIXME");
-  }
-
-  void ToJsonFile::string(const char* x) {
-    throw std::runtime_error("FIXME");
-  }
-
-  void ToJsonFile::beginlist() {
-    throw std::runtime_error("FIXME");
-  }
-
-  void ToJsonFile::endlist() {
-    throw std::runtime_error("FIXME");
-  }
-
-  void ToJsonFile::beginrec() {
-    throw std::runtime_error("FIXME");
-  }
-
-  void ToJsonFile::fieldname(const char* x) {
-    throw std::runtime_error("FIXME");
-  }
-
-  void ToJsonFile::endrec() {
+  std::string ToJsonPrettyString::tostring() {
     throw std::runtime_error("FIXME");
   }
 
