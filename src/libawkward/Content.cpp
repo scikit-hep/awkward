@@ -10,11 +10,35 @@ namespace awkward {
   }
 
   const std::string Content::tojson(bool pretty) const {
-    throw std::runtime_error("Content::tojson()");
+    if (pretty) {
+      ToJsonPrettyString builder;
+      builder.beginlist();
+      tojson_part(builder);
+      builder.endlist();
+      return builder.tostring();
+    }
+    else {
+      ToJsonString builder;
+      builder.beginlist();
+      tojson_part(builder);
+      builder.endlist();
+      return builder.tostring();
+    }
   }
 
-  void Content::tojson(FILE* file, int64_t buffersize) const {
-    throw std::runtime_error("Content::tojson(FILE*)");
+  void Content::tojson(FILE* destination, bool pretty, int64_t buffersize) const {
+    if (pretty) {
+      ToJsonPrettyFile builder(destination, buffersize);
+      builder.beginlist();
+      tojson_part(builder);
+      builder.endlist();
+    }
+    else {
+      ToJsonFile builder(destination, buffersize);
+      builder.beginlist();
+      tojson_part(builder);
+      builder.endlist();
+    }
   }
 
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {

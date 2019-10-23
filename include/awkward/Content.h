@@ -20,9 +20,7 @@ namespace awkward {
     virtual void setid() = 0;
     virtual void setid(const std::shared_ptr<Identity> id) = 0;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
-    virtual void tojson_part(ToJsonString& builder) const = 0;
-    virtual void tojson_part(ToJsonPrettyString& builder) const = 0;
-    virtual void tojson_part(ToJsonFile& builder) const = 0;
+    virtual void tojson_part(ToJson& builder) const = 0;
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
     virtual void checksafe() const = 0;
@@ -37,7 +35,7 @@ namespace awkward {
 
     const std::string tostring() const;
     const std::string tojson(bool pretty) const;
-    void tojson(FILE* file, int64_t buffersize) const;
+    void tojson(FILE* destination, bool pretty, int64_t buffersize) const;
     const std::shared_ptr<Content> getitem_ellipsis(const Slice& tail, const Index64& advanced) const;
     const std::shared_ptr<Content> getitem_newaxis(const Slice& tail, const Index64& advanced) const;
   };

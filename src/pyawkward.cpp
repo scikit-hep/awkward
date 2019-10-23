@@ -610,13 +610,13 @@ std::string tojson_string(T& self, bool pretty) {
 }
 
 template <typename T>
-void tojson_file(T& self, std::string destination, int64_t buffersize) {
+void tojson_file(T& self, std::string destination, bool pretty, int64_t buffersize) {
   FILE* file = fopen(destination.c_str(), "wb");
   if (file == nullptr) {
     throw std::invalid_argument(std::string("could not open file ") + destination);
   }
   try {
-    self.tojson(file, buffersize);
+    self.tojson(file, pretty, buffersize);
   }
   catch (...) {
     fclose(file);
@@ -639,7 +639,7 @@ py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
          .def("__getitem__", &getitem<T>)
          .def("__iter__", &iter<T>)
          .def("tojson", &tojson_string<T>, py::arg("pretty") = true)
-         .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("buffersize") = 65536);
+         .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = true, py::arg("buffersize") = 65536);
 }
 
 py::class_<ak::Content> make_Content(py::handle m, std::string name) {

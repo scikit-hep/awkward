@@ -20,6 +20,26 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
+    for (int i = 0;  i < length;  i++) {
+      builder.boolean(array[i]);
+    }
+  }
+
+  template <typename T>
+  void tojson_integer(ToJson& builder, T* array, int64_t length) {
+    for (int i = 0;  i < length;  i++) {
+      builder.integer(array[i]);
+    }
+  }
+
+  template <typename T>
+  void tojson_real(ToJson& builder, T* array, int64_t length) {
+    for (int i = 0;  i < length;  i++) {
+      builder.real(array[i]);
+    }
+  }
+
   template <typename T>
   class RawArrayOf: public Content {
   public:
@@ -123,19 +143,40 @@ namespace awkward {
       return out.str();
     }
 
-    template <typename W>
-    void tojson_part_W(ToJson<W>& builder) const {
-      throw std::runtime_error("RawArray::tojson_part");
-    }
-
-    virtual void tojson_part(ToJsonString& builder) const {
-      tojson_part_W(builder);
-    }
-    virtual void tojson_part(ToJsonPrettyString& builder) const {
-      tojson_part_W(builder);
-    }
-    virtual void tojson_part(ToJsonFile& builder) const {
-      tojson_part_W(builder);
+    virtual void tojson_part(ToJson& builder) const {
+      if (std::is_same<T, double>::value) {
+        tojson_real(builder, reinterpret_cast<double*>(byteptr()), length());
+      }
+      else if (std::is_same<T, float>::value) {
+        tojson_real(builder, reinterpret_cast<float*>(byteptr()), length());
+      }
+      else if (std::is_same<T, int64_t>::value) {
+        tojson_real(builder, reinterpret_cast<int64_t*>(byteptr()), length());
+      }
+      else if (std::is_same<T, uint64_t>::value) {
+        tojson_real(builder, reinterpret_cast<uint64_t*>(byteptr()), length());
+      }
+      else if (std::is_same<T, int32_t>::value) {
+        tojson_real(builder, reinterpret_cast<int32_t*>(byteptr()), length());
+      }
+      else if (std::is_same<T, uint32_t>::value) {
+        tojson_real(builder, reinterpret_cast<uint32_t*>(byteptr()), length());
+      }
+      else if (std::is_same<T, int16_t>::value) {
+        tojson_real(builder, reinterpret_cast<int16_t*>(byteptr()), length());
+      }
+      else if (std::is_same<T, uint16_t>::value) {
+        tojson_real(builder, reinterpret_cast<uint16_t*>(byteptr()), length());
+      }
+      else if (std::is_same<T, int8_t>::value) {
+        tojson_real(builder, reinterpret_cast<int8_t*>(byteptr()), length());
+      }
+      else if (std::is_same<T, uint8_t>::value) {
+        tojson_real(builder, reinterpret_cast<uint8_t*>(byteptr()), length());
+      }
+      else {
+        throw std::invalid_argument(std::string("cannot convert RawArrayOf<") + typeid(T).name() + std::string("> into JSON"));
+      }
     }
 
     virtual int64_t length() const { return length_; }

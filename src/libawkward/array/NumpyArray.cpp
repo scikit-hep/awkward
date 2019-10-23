@@ -177,19 +177,85 @@ namespace awkward {
     return out.str();
   }
 
-  template <typename W>
-  void tojson_part_W(const NumpyArray& self, ToJson<W>& builder) {
-    throw std::runtime_error("NumpyArray::tojson");
+  void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
+    for (int i = 0;  i < length;  i++) {
+      builder.boolean(array[i]);
+    }
   }
 
-  void NumpyArray::tojson_part(ToJsonString& builder) const {
-    tojson_part_W(*this, builder);
+  template <typename T>
+  void tojson_integer(ToJson& builder, T* array, int64_t length) {
+    for (int i = 0;  i < length;  i++) {
+      builder.integer(array[i]);
+    }
   }
-  void NumpyArray::tojson_part(ToJsonPrettyString& builder) const {
-    tojson_part_W(*this, builder);
+
+  template <typename T>
+  void tojson_real(ToJson& builder, T* array, int64_t length) {
+    for (int i = 0;  i < length;  i++) {
+      builder.real(array[i]);
+    }
   }
-  void NumpyArray::tojson_part(ToJsonFile& builder) const {
-    tojson_part_W(*this, builder);
+
+  void NumpyArray::tojson_part(ToJson& builder) const {
+    if (ndim() == 1) {
+      if (format_.compare("d") == 0) {
+        tojson_real(builder, reinterpret_cast<double*>(byteptr()), length());
+      }
+      else if (format_.compare("f") == 0) {
+        tojson_real(builder, reinterpret_cast<float*>(byteptr()), length());
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("q") == 0) {
+#else
+      else if (format_.compare("l") == 0) {
+#endif
+        tojson_integer(builder, reinterpret_cast<int64_t*>(byteptr()), length());
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("Q") == 0) {
+#else
+      else if (format_.compare("L") == 0) {
+#endif
+        tojson_integer(builder, reinterpret_cast<uint64_t*>(byteptr()), length());
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("l") == 0) {
+#else
+      else if (format_.compare("i") == 0) {
+#endif
+        tojson_integer(builder, reinterpret_cast<int32_t*>(byteptr()), length());
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("L") == 0) {
+#else
+      else if (format_.compare("I") == 0) {
+#endif
+        tojson_integer(builder, reinterpret_cast<uint32_t*>(byteptr()), length());
+      }
+      else if (format_.compare("h") == 0) {
+        tojson_real(builder, reinterpret_cast<int16_t*>(byteptr()), length());
+      }
+      else if (format_.compare("H") == 0) {
+        tojson_real(builder, reinterpret_cast<uint16_t*>(byteptr()), length());
+      }
+      else if (format_.compare("b") == 0) {
+        tojson_real(builder, reinterpret_cast<int8_t*>(byteptr()), length());
+      }
+      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+        tojson_real(builder, reinterpret_cast<uint8_t*>(byteptr()), length());
+      }
+      else {
+        throw std::invalid_argument(std::string("cannot convert Numpy format \"") + format_ + std::string("\" into JSON"));
+      }
+    }
+    else {
+      for (int64_t i = 0;  i < length();  i++) {
+        builder.beginlist();
+        getitem_at_unsafe(i).get()->tojson_part(builder);
+        builder.endlist();
+      }
+    }
   }
 
   int64_t NumpyArray::length() const {
