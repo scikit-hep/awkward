@@ -19,8 +19,9 @@ add_definitions(-DVERSION_INFO="${VERSION_INFO}")
 set(CMAKE_MACOSX_RPATH 1)
 
 file(GLOB CPU_KERNEL_SOURCES "src/cpu-kernels/*.cpp")
-file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp" "src/libawkward/array/*.cpp" "src/libawkward/fillable/*.cpp" "src/libawkward/type/*.cpp")
+file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp" "src/libawkward/array/*.cpp" "src/libawkward/fillable/*.cpp" "src/libawkward/type/*.cpp" "src/libawkward/io/*.cpp")
 include_directories(include)
+include_directories(rapidjson/include)
 
 add_subdirectory(pybind11)
 
