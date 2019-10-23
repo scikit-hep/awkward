@@ -2,20 +2,21 @@
 
 import sys
 import os
+import json
 
 import pytest
 import numpy
 
 import awkward1
 
-def test_string():
+def test_fromstring():
     a = awkward1.fromjson("[[1.1, 2.2, 3], [], [4, 5.5]]")
     assert awkward1.tolist(a) == [[1.1, 2.2, 3.0], [], [4.0, 5.5]]
 
     with pytest.raises(ValueError):
         awkward1.fromjson("[[1.1, 2.2, 3], [blah], [4, 5.5]]")
 
-def test_file(tmp_path):
+def test_fromfile(tmp_path):
     with open(os.path.join(str(tmp_path), "tmp1.json"), "w") as f:
         f.write("[[1.1, 2.2, 3], [], [4, 5.5]]")
 
@@ -30,3 +31,29 @@ def test_file(tmp_path):
 
     with pytest.raises(ValueError):
         awkward1.fromjson(os.path.join(str(tmp_path), "tmp2.json"))
+
+def test_tostring():
+    content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
+    offsetsA = numpy.arange(0, 2*3*5 + 5, 5)
+    offsetsB = numpy.arange(0, 2*3 + 3, 3)
+    startsA, stopsA = offsetsA[:-1], offsetsA[1:]
+    startsB, stopsB = offsetsB[:-1], offsetsB[1:]
+
+    listoffsetarrayA32 = awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(offsetsA), content)
+    listarrayA32 = awkward1.layout.ListArray32(awkward1.layout.Index32(startsA), awkward1.layout.Index32(stopsA), content)
+    modelA = numpy.arange(2*3*5*7).reshape(2*3, 5, 7)
+
+    listoffsetarrayB32 = awkward1.layout.ListOffsetArray32(awkward1.layout.Index32(offsetsB), listoffsetarrayA32)
+    listarrayB32 = awkward1.layout.ListArray32(awkward1.layout.Index32(startsB), awkward1.layout.Index32(stopsB), listarrayA32)
+    modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
+
+    assert content.tojson() == json.dumps(awkward1.tolist(content), separators=(",", ":"))
+    assert listoffsetarrayA32.tojson() == json.dumps(modelA.tolist(), separators=(",", ":"))
+    assert listoffsetarrayB32.tojson() == json.dumps(modelB.tolist(), separators=(",", ":"))
+    awkward1.tojson(awkward1.fromjson("[[1.1,2.2,3],[],[4,5.5]]")) == "[[1.1,2.2,3],[],[4,5.5]]"
+
+def test_tofile(tmp_path):
+    awkward1.tojson(awkward1.fromjson("[[1.1,2.2,3],[],[4,5.5]]"), os.path.join(str(tmp_path), "tmp1.json"))
+
+    with open(os.path.join(str(tmp_path), "tmp1.json"), "r") as f:
+        f.read() == "[[1.1,2.2,3],[],[4,5.5]]"
