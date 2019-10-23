@@ -9,8 +9,10 @@
 #include "rapidjson/reader.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
+#include "rapidjson/filereadstream.h"
 #include "rapidjson/filewritestream.h"
 
+#include "awkward/fillable/FillableOptions.h"
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/util.h"
 #include "awkward/Content.h"
@@ -18,9 +20,11 @@
 namespace rj = rapidjson;
 
 namespace awkward {
-  std::shared_ptr<Content> FromJsonString(const char* source);
-  std::shared_ptr<Content> FromJsonString(std::string source);
-  std::shared_ptr<Content> FromJsonFile(FILE* source);
+  const std::shared_ptr<Content> FromJsonString(std::string source, const FillableOptions& options) {
+    return FromJsonString(source.c_str(), options);
+  }
+  const std::shared_ptr<Content> FromJsonString(const char* source, const FillableOptions& options);
+  const std::shared_ptr<Content> FromJsonFile(FILE* source, int64_t buffersize, const FillableOptions& options);
 
   class ToJsonString {
   public:
@@ -29,8 +33,8 @@ namespace awkward {
     void null();
     void integer(int64_t x);
     void real(double x);
-    void string(const char* x);
     void string(std::string x) { string(x.c_str()); }
+    void string(const char* x);
     void beginlist();
     void endlist();
     void beginrec();
@@ -51,8 +55,8 @@ namespace awkward {
     void null();
     void integer(int64_t x);
     void real(double x);
-    void string(const char* x);
     void string(std::string x) { string(x.c_str()); }
+    void string(const char* x);
     void beginlist();
     void endlist();
     void beginrec();

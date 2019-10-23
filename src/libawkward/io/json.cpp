@@ -1,18 +1,57 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include "awkward/fillable/FillableArray.h"
+
 #include "awkward/io/json.h"
 
 namespace awkward {
-  std::shared_ptr<Content> FromJsonString(const char* source) {
-    throw std::runtime_error("FIXME");
+  class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
+  public:
+    Handler(const FillableOptions& options): array_(options) { }
+
+    const std::shared_ptr<Content> snapshot() const;
+
+    bool Null() { array_.null(); }
+    bool Bool(bool x) { array_.boolean(x); }
+    bool Int(int x) { array_.integer((int64_t)x); }
+    bool Uint(unsigned int x) { array_.integer((int64_t)x); }
+    bool Int64(int64_t x) { array_.integer(x); }
+    bool Uint64(uint64_t x) { array_.integer((int64_t)x); }
+    bool Double(double x) { array_.real(x); }
+    bool StartArray() { array_.beginlist(); }
+    bool EndArray(rj::SizeType numfields) { array_.endlist(); }
+    bool StartObject() {
+      throw std::runtime_error("not implemented: Handler::StartObject");
+    }
+    bool EndObject(rj::SizeType numfields) {
+      throw std::runtime_error("not implemented: Handler::EndObject");
+    }
+    bool Key(const char* str, rj::SizeType length, bool copy) {
+      throw std::runtime_error("not implemented: Handler::Key");
+    }
+    bool String(const char* str, rj::SizeType length, bool copy) {
+      throw std::runtime_error("not implemented: Handler::String");
+    }
+
+  private:
+    FillableArray array_;
+  };
+
+  const std::shared_ptr<Content> FromJsonString(const char* source, const FillableOptions& options) {
+    Handler handler(options);
+    rj::Reader reader;
+    rj::StringStream stream(source);
+    reader.Parse(stream, handler);
+    return handler.snapshot();
   }
 
-  std::shared_ptr<Content> FromJsonString(std::string source) {
-    throw std::runtime_error("FIXME");
-  }
-
-  std::shared_ptr<Content> FromJsonFile(FILE* source) {
-    throw std::runtime_error("FIXME");
+  const std::shared_ptr<Content> FromJsonFile(FILE* source, int64_t buffersize, const FillableOptions& options) {
+    Handler handler(options);
+    rj::Reader reader;
+    std::shared_ptr<char> buffer(new char[(size_t)buffersize], awkward::util::array_deleter<char>());
+    rj::FileReadStream stream(source, buffer.get(), buffersize*sizeof(char));
+    reader.Parse(stream, handler);
+    return handler.snapshot();
   }
 
   void ToJsonString::null() {
