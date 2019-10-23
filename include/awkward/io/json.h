@@ -20,11 +20,8 @@
 namespace rj = rapidjson;
 
 namespace awkward {
-  const std::shared_ptr<Content> FromJsonString(std::string source, const FillableOptions& options) {
-    return FromJsonString(source.c_str(), options);
-  }
   const std::shared_ptr<Content> FromJsonString(const char* source, const FillableOptions& options);
-  const std::shared_ptr<Content> FromJsonFile(FILE* source, int64_t buffersize, const FillableOptions& options);
+  const std::shared_ptr<Content> FromJsonFile(FILE* source, const FillableOptions& options, int64_t buffersize);
 
   class ToJsonString {
   public:
@@ -33,7 +30,6 @@ namespace awkward {
     void null();
     void integer(int64_t x);
     void real(double x);
-    void string(std::string x) { string(x.c_str()); }
     void string(const char* x);
     void beginlist();
     void endlist();
@@ -55,7 +51,6 @@ namespace awkward {
     void null();
     void integer(int64_t x);
     void real(double x);
-    void string(std::string x) { string(x.c_str()); }
     void string(const char* x);
     void beginlist();
     void endlist();

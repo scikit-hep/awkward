@@ -1,5 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <cstdio>
 #include <stdexcept>
 
 #include <pybind11/pybind11.h>
@@ -23,6 +24,7 @@
 #include "awkward/type/ListType.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/UnionType.h"
+#include "awkward/io/json.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
@@ -738,4 +740,36 @@ PYBIND11_MODULE(layout, m) {
 
   make_ListOffsetArrayOf<int32_t>(m, "ListOffsetArray32");
   make_ListOffsetArrayOf<int64_t>(m, "ListOffsetArray64");
+
+  m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
+    bool isarray = false;
+    for (char const &x: source) {
+      if (x != 9  &&  x != 10  &&  x != 13  &&  x != 32) {  // whitespace
+        if (x == 91) {       // opening square bracket
+          isarray = true;
+        }
+        break;
+      }
+    }
+    if (isarray) {
+      return box(ak::FromJsonString(source.c_str(), ak::FillableOptions(initial, resize)));
+    }
+    else {
+      FILE* file = fopen(source.c_str(), "rb");
+      if (file == nullptr) {
+        throw std::invalid_argument(std::string("file \"") + source + std::string("\" not found"));
+      }
+      std::shared_ptr<ak::Content> out(nullptr);
+      try {
+        out = FromJsonFile(file, ak::FillableOptions(initial, resize), buffersize);
+      }
+      catch (...) {
+        fclose(file);
+        throw;
+      }
+      fclose(file);
+      return box(out);
+    }
+  }, py::arg("source"), py::arg("initial") = 1024, py::arg("resize") = 2.0, py::arg("buffersize") = 65536);
+
 }

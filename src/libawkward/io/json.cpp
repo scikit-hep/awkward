@@ -7,19 +7,35 @@
 namespace awkward {
   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
   public:
-    Handler(const FillableOptions& options): array_(options) { }
+    Handler(const FillableOptions& options): array_(options), depth_(0) { }
 
-    const std::shared_ptr<Content> snapshot() const;
+    const std::shared_ptr<Content> snapshot() const {
+      return array_.snapshot();
+    }
 
-    bool Null() { array_.null(); }
-    bool Bool(bool x) { array_.boolean(x); }
-    bool Int(int x) { array_.integer((int64_t)x); }
-    bool Uint(unsigned int x) { array_.integer((int64_t)x); }
-    bool Int64(int64_t x) { array_.integer(x); }
-    bool Uint64(uint64_t x) { array_.integer((int64_t)x); }
-    bool Double(double x) { array_.real(x); }
-    bool StartArray() { array_.beginlist(); }
-    bool EndArray(rj::SizeType numfields) { array_.endlist(); }
+    bool Null() { array_.null(); return true; }
+    bool Bool(bool x) { array_.boolean(x); return true; }
+    bool Int(int x) { array_.integer((int64_t)x); return true; }
+    bool Uint(unsigned int x) { array_.integer((int64_t)x); return true; }
+    bool Int64(int64_t x) { array_.integer(x); return true; }
+    bool Uint64(uint64_t x) { array_.integer((int64_t)x); return true; }
+    bool Double(double x) { array_.real(x); return true; }
+
+    bool StartArray() {
+      if (depth_ != 0) {
+        array_.beginlist();
+      }
+      depth_++;
+      return true;
+    }
+    bool EndArray(rj::SizeType numfields) {
+      depth_--;
+      if (depth_ != 0) {
+        array_.endlist();
+      }
+      return true;
+    }
+
     bool StartObject() {
       throw std::runtime_error("not implemented: Handler::StartObject");
     }
@@ -35,6 +51,7 @@ namespace awkward {
 
   private:
     FillableArray array_;
+    int64_t depth_;
   };
 
   const std::shared_ptr<Content> FromJsonString(const char* source, const FillableOptions& options) {
@@ -45,7 +62,7 @@ namespace awkward {
     return handler.snapshot();
   }
 
-  const std::shared_ptr<Content> FromJsonFile(FILE* source, int64_t buffersize, const FillableOptions& options) {
+  const std::shared_ptr<Content> FromJsonFile(FILE* source, const FillableOptions& options, int64_t buffersize) {
     Handler handler(options);
     rj::Reader reader;
     std::shared_ptr<char> buffer(new char[(size_t)buffersize], awkward::util::array_deleter<char>());
