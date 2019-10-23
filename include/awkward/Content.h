@@ -8,6 +8,7 @@
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Identity.h"
 #include "awkward/Slice.h"
+#include "awkward/io/json.h"
 
 namespace awkward {
   class Content {
@@ -19,8 +20,9 @@ namespace awkward {
     virtual void setid() = 0;
     virtual void setid(const std::shared_ptr<Identity> id) = 0;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
-    virtual const std::string tojson_part() const = 0;
-    virtual void tojson_part(FILE* file) const = 0;
+    virtual void tojson_part(ToJsonString& builder) const = 0;
+    virtual void tojson_part(ToJsonPrettyString& builder) const = 0;
+    virtual void tojson_part(ToJsonFile& builder) const = 0;
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
     virtual void checksafe() const = 0;

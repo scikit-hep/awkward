@@ -17,11 +17,12 @@
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/util.h"
-#include "awkward/Content.h"
 
 namespace rj = rapidjson;
 
 namespace awkward {
+  class Content;
+
   const std::shared_ptr<Content> FromJsonString(const char* source, const FillableOptions& options);
   const std::shared_ptr<Content> FromJsonFile(FILE* source, const FillableOptions& options, int64_t buffersize);
 
@@ -29,14 +30,15 @@ namespace awkward {
   class ToJson {
   public:
     void null();
+    void boolean(bool x);
     void integer(int64_t x);
     void real(double x);
-    void string(const char* x);
     void beginlist();
     void endlist();
     void beginrec();
     void fieldname(const char* x);
     void endrec();
+    void string(const char* x);
 
   protected:
     std::unique_ptr<W> writer_;

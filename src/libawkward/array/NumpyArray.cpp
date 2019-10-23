@@ -177,12 +177,19 @@ namespace awkward {
     return out.str();
   }
 
-  const std::string NumpyArray::tojson_part() const {
-    throw std::runtime_error("NumpyArray::tojson()");
+  template <typename W>
+  void tojson_part_W(const NumpyArray& self, ToJson<W>& builder) {
+    throw std::runtime_error("NumpyArray::tojson");
   }
 
-  void NumpyArray::tojson_part(FILE* file) const {
-    throw std::runtime_error("NumpyArray::tojson(FILE*)");
+  void NumpyArray::tojson_part(ToJsonString& builder) const {
+    tojson_part_W(*this, builder);
+  }
+  void NumpyArray::tojson_part(ToJsonPrettyString& builder) const {
+    tojson_part_W(*this, builder);
+  }
+  void NumpyArray::tojson_part(ToJsonFile& builder) const {
+    tojson_part_W(*this, builder);
   }
 
   int64_t NumpyArray::length() const {

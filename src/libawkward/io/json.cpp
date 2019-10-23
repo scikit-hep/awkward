@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include "awkward/fillable/FillableArray.h"
+#include "awkward/Content.h"
 
 #include "awkward/io/json.h"
 
@@ -82,55 +83,60 @@ namespace awkward {
 
   template <typename W>
   void ToJson<W>::null() {
-    throw std::runtime_error("FIXME");
+    writer_.get()->Null();
+  }
+
+  template <typename W>
+  void ToJson<W>::boolean(bool x) {
+    writer_.get()->Bool(x);
   }
 
   template <typename W>
   void ToJson<W>::integer(int64_t x) {
-    throw std::runtime_error("FIXME");
+    writer_.get()->Int64(x);
   }
 
   template <typename W>
   void ToJson<W>::real(double x) {
-    throw std::runtime_error("FIXME");
-  }
-
-  template <typename W>
-  void ToJson<W>::string(const char* x) {
-    throw std::runtime_error("FIXME");
+    writer_.get()->Double(x);
   }
 
   template <typename W>
   void ToJson<W>::beginlist() {
-    throw std::runtime_error("FIXME");
+    writer_.get()->StartArray();
   }
 
   template <typename W>
   void ToJson<W>::endlist() {
-    throw std::runtime_error("FIXME");
+    writer_.get()->EndArray();
   }
 
   template <typename W>
   void ToJson<W>::beginrec() {
-    throw std::runtime_error("FIXME");
+    writer_.get()->StartObject();
   }
 
   template <typename W>
   void ToJson<W>::fieldname(const char* x) {
-    throw std::runtime_error("FIXME");
+    writer_.get()->Key(x);
   }
 
   template <typename W>
   void ToJson<W>::endrec() {
-    throw std::runtime_error("FIXME");
+    writer_.get()->EndObject();
+  }
+
+  template <typename W>
+  void ToJson<W>::string(const char* x) {
+    writer_.get()->String(x);
   }
 
   std::string ToJsonString::tostring() {
-    throw std::runtime_error("FIXME");
+    return std::string(buffer_.GetString());
   }
 
   std::string ToJsonPrettyString::tostring() {
-    throw std::runtime_error("FIXME");
+    return std::string(buffer_.GetString());
   }
 
 }

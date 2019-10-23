@@ -122,11 +122,20 @@ namespace awkward {
       }
       return out.str();
     }
-    virtual const std::string tojson_part() const {
-      throw std::runtime_error("RawArray::tojson_part()");
+
+    template <typename W>
+    void tojson_part_W(ToJson<W>& builder) const {
+      throw std::runtime_error("RawArray::tojson_part");
     }
-    virtual void tojson_part(FILE* file) const {
-      throw std::runtime_error("RawArray::tojson_part(FILE*)");
+
+    virtual void tojson_part(ToJsonString& builder) const {
+      tojson_part_W(builder);
+    }
+    virtual void tojson_part(ToJsonPrettyString& builder) const {
+      tojson_part_W(builder);
+    }
+    virtual void tojson_part(ToJsonFile& builder) const {
+      tojson_part_W(builder);
     }
 
     virtual int64_t length() const { return length_; }

@@ -144,14 +144,22 @@ namespace awkward {
     return out.str();
   }
 
-  template <typename T>
-  const std::string ListArrayOf<T>::tojson_part() const {
-    throw std::runtime_error("ListArray::tojson()");
+  template <typename T, typename W>
+  void tojson_part_W(const ListArrayOf<T>& self, ToJson<W>& builder) {
+    throw std::runtime_error("ListArray::tojson");
   }
 
   template <typename T>
-  void ListArrayOf<T>::tojson_part(FILE* file) const {
-    throw std::runtime_error("ListArray::tojson(FILE*)");
+  void ListArrayOf<T>::tojson_part(ToJsonString& builder) const {
+    tojson_part_W(*this, builder);
+  }
+  template <typename T>
+  void ListArrayOf<T>::tojson_part(ToJsonPrettyString& builder) const {
+    tojson_part_W(*this, builder);
+  }
+  template <typename T>
+  void ListArrayOf<T>::tojson_part(ToJsonFile& builder) const {
+    tojson_part_W(*this, builder);
   }
 
   template <typename T>
