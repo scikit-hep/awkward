@@ -1,6 +1,6 @@
 import numpy
 
-maxbytes = 8*1024**3   # 8 GB
+maxbytes = 4*1024**3   # 4 GB
 
 content = numpy.empty(maxbytes // numpy.dtype(numpy.float32).itemsize, dtype=numpy.float32)
 for i in range(0, len(content), len(content) // 8):
