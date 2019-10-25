@@ -11,12 +11,8 @@
 #define LENOFFSETS2 16777217
 #define LENOFFSETS3 2097153
 
-int main() {
+void getdata(float* content, int64_t* offsets1, int64_t* offsets2, int64_t* offsets3) {
   FILE* f;
-  float* content = new float[LENCONTENT];
-  int64_t* offsets1 = new int64_t[LENOFFSETS1];
-  int64_t* offsets2 = new int64_t[LENOFFSETS2];
-  int64_t* offsets3 = new int64_t[LENOFFSETS3];
 
   f = fopen("sample-content.float32", "rb");
   fread(content, sizeof(float), LENCONTENT, f);
@@ -41,21 +37,13 @@ int main() {
   fclose(f);
 
   std::cout << "offsets3 " << offsets3[0] << " ... " << offsets3[LENOFFSETS3 - 1] << std::endl;
+}
 
-  float jagged0;
-
-  gInterpreter->GenerateDictionary("vector<float>", "vector");
-  std::vector<float> jagged1;
-
-  gInterpreter->GenerateDictionary("vector<vector<float> >", "vector");
-  std::vector<std::vector<float>> jagged2;
-
-  gInterpreter->GenerateDictionary("vector<vector<vector<float> > >", "vector");
-  std::vector<std::vector<std::vector<float>>> jagged3;
-
-  TFile* file = new TFile("samples.root", "RECREATE");
-
+void ttree0(float* content, int64_t* offsets1, int64_t* offsets2, int64_t* offsets3) {
   std::cout << "starting tree0" << std::endl;
+  float jagged0;
+  TFile* file0 = new TFile("sample-jagged0.root", "RECREATE");
+  file0->SetCompressionLevel(0);
   TTree* tree0 = new TTree("jagged0", "");
   tree0->Branch("branch", &jagged0, 10485760);
   for (int64_t i0 = 0;  i0 < LENCONTENT;  i0++) {
@@ -63,8 +51,15 @@ int main() {
     tree0->Fill();
   }
   tree0->Write();
+  file0->Close();
+}
 
+void ttree1(float* content, int64_t* offsets1, int64_t* offsets2, int64_t* offsets3) {
   std::cout << "starting tree1" << std::endl;
+  gInterpreter->GenerateDictionary("vector<float>", "vector");
+  std::vector<float> jagged1;
+  TFile* file1 = new TFile("sample-jagged1.root", "RECREATE");
+  file1->SetCompressionLevel(0);
   TTree* tree1 = new TTree("jagged1", "");
   tree1->Branch("branch", &jagged1, 10485760);
   for (int64_t i1 = 0;  i1 < LENOFFSETS1 - 1;  i1++) {
@@ -77,8 +72,15 @@ int main() {
     tree1->Fill();
   }
   tree1->Write();
+  file1->Close();
+}
 
+void ttree2(float* content, int64_t* offsets1, int64_t* offsets2, int64_t* offsets3) {
   std::cout << "starting tree2" << std::endl;
+  gInterpreter->GenerateDictionary("vector<vector<float> >", "vector");
+  std::vector<std::vector<float>> jagged2;
+  TFile* file2 = new TFile("sample-jagged2.root", "RECREATE");
+  file2->SetCompressionLevel(0);
   TTree* tree2 = new TTree("jagged2", "");
   tree2->Branch("branch", &jagged2, 10485760);
   for (int64_t i2 = 0;  i2 < LENOFFSETS2 - 1;  i2++) {
@@ -97,8 +99,14 @@ int main() {
     tree2->Fill();
   }
   tree2->Write();
+  file2->Close();
+}
 
+void ttree3(float* content, int64_t* offsets1, int64_t* offsets2, int64_t* offsets3) {
   std::cout << "starting tree3" << std::endl;
+  gInterpreter->GenerateDictionary("vector<vector<vector<float> > >", "vector");
+  std::vector<std::vector<std::vector<float>>> jagged3;
+  TFile* file3 = new TFile("sample-jagged3.root", "RECREATE");
   TTree* tree3 = new TTree("jagged3", "");
   tree3->Branch("branch", &jagged3, 10485760);
   for (int64_t i3 = 0;  i3 < LENOFFSETS3 - 1;  i3++) {
@@ -123,13 +131,27 @@ int main() {
     tree3->Fill();
   }
   tree3->Write();
+  file3->Close();
+}
 
-  file->Close();
+
+int main() {
+  float* content = new float[LENCONTENT];
+  int64_t* offsets1 = new int64_t[LENOFFSETS1];
+  int64_t* offsets2 = new int64_t[LENOFFSETS2];
+  int64_t* offsets3 = new int64_t[LENOFFSETS3];
+
+  getdata(content, offsets1, offsets2, offsets3);
+
+  ttree0(content, offsets1, offsets2, offsets3);
+  ttree1(content, offsets1, offsets2, offsets3);
+  ttree2(content, offsets1, offsets2, offsets3);
+  ttree3(content, offsets1, offsets2, offsets3);
 
   return 0;
 }
 
-// python -i -c 'import uproot; from uproot import asgenobj, asdtype, SimpleArray, STLVector; f = uproot.open("samples.root"); t0 = f["jagged0"]; t1 = f["jagged1"]; t2 = f["jagged2"]; t3 = f["jagged3"]'
+// python3 -i -c 'import uproot; from uproot import asgenobj, asdtype, SimpleArray, STLVector; t0 = uproot.open("data/sample-jagged0.root")["jagged0"]; t1 = uproot.open("data/sample-jagged1.root")["jagged1"]; t2 = uproot.open("data/sample-jagged2.root")["jagged2"]; t3 = uproot.open("data/sample-jagged3.root")["jagged3"]'
 // t0["branch"].array(entrystart=-100)
 // t1["branch"].array(entrystart=-100)
 // t2["branch"].array(entrystart=-100)

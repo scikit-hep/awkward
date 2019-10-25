@@ -12,8 +12,8 @@ import numpy
 import awkward1.util
 import awkward1.layout
 
-def fromiter(iterable):
-    out = awkward1.layout.FillableArray()
+def fromiter(iterable, initial=1024, resize=2.0):
+    out = awkward1.layout.FillableArray(initial=1024, resize=2.0)
 
     def recurse(obj):
         if obj is None:
