@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/cpu-kernels/getitem.h"
+#include <cstring>
+
 #include "awkward/Content.h"
 #include "awkward/Identity.h"
 #include "awkward/array/ListOffsetArray.h"
@@ -9,16 +10,24 @@
 #include "awkward/io/root.h"
 
 namespace awkward {
-  void FromROOT_nestedvector_fill(std::vector<GrowableBuffer<int64_t>>& levels, GrowableBuffer<int64_t>& carry, int64_t& bytepos, const NumpyArray& rawdata, int64_t whichlevel, int64_t itemsize) {
+  void FromROOT_nestedvector_fill(std::vector<GrowableBuffer<int64_t>>& levels, GrowableBuffer<int64_t>& bytepos_tocopy, int64_t& bytepos, const NumpyArray& rawdata, int64_t whichlevel, int64_t itemsize) {
     if (whichlevel == levels.size()) {
-      carry.append(bytepos);
+      bytepos_tocopy.append(bytepos);
       bytepos += itemsize;
     }
+
     else {
-      int32_t length = *reinterpret_cast<int32_t*>(rawdata.byteptr(bytepos));
+      uint32_t bigendian = *reinterpret_cast<int32_t*>(rawdata.byteptr(bytepos));
+
+      // FIXME: check native endianness
+      uint32_t length = ((bigendian >> 24) & 0xff)     |  // move byte 3 to byte 0
+                        ((bigendian <<  8) & 0xff0000) |  // move byte 1 to byte 2
+                        ((bigendian >>  8) & 0xff00)   |  // move byte 2 to byte 1
+                        ((bigendian << 24) & 0xff000000); // byte 0 to byte 3
+
       bytepos += sizeof(int32_t);
       for (int32_t i = 0;  i < length;  i++) {
-        FromROOT_nestedvector_fill(levels, carry, bytepos, rawdata, whichlevel + 1, itemsize);
+        FromROOT_nestedvector_fill(levels, bytepos_tocopy, bytepos, rawdata, whichlevel + 1, itemsize);
       }
       int64_t previous = levels[whichlevel].getitem_at_unsafe(levels[whichlevel].length() - 1);
       levels[whichlevel].append(previous + length);
@@ -38,27 +47,27 @@ namespace awkward {
       levels[(size_t)i].append(0);
     }
 
-    GrowableBuffer<int64_t> carry(options);
+    GrowableBuffer<int64_t> bytepos_tocopy(options);
 
-    for (int64_t i = 0;  i < byteoffsets.length();  i++) {
+    for (int64_t i = 0;  i < byteoffsets.length() - 1;  i++) {
       int64_t bytepos = byteoffsets.getitem_at_unsafe(i);
-      FromROOT_nestedvector_fill(levels, carry, bytepos, rawdata, 0, itemsize);
+      FromROOT_nestedvector_fill(levels, bytepos_tocopy, bytepos, rawdata, 0, itemsize);
       level0.setitem_at_unsafe(i + 1, levels[0].length());
     }
 
-    std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*itemsize)], awkward::util::array_deleter<uint8_t>());
-    Error err = awkward_numpyarray_getitem_next_null_64(
-      reinterpret_cast<uint8_t*>(ptr.get()),
-      reinterpret_cast<uint8_t*>(rawdata.ptr().get()),
-      carry.length(),
-      itemsize,
-      rawdata.byteoffset(),
-      carry.ptr().get());
-    util::handle_error(err, rawdata.classname(), rawdata.id().get());
-    std::vector<ssize_t> shape = { (ssize_t)carry.length() };
-    std::vector<ssize_t> strides = { (ssize_t)itemsize };
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos_tocopy.length()*itemsize)], awkward::util::array_deleter<uint8_t>());
+    ssize_t offset = rawdata.byteoffset();
+    uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
+    uint8_t* fromptr = reinterpret_cast<uint8_t*>(rawdata.ptr().get());
+    for (int64_t i = 0;  i < bytepos_tocopy.length();  i++) {
+      ssize_t bytepos = (ssize_t)bytepos_tocopy.getitem_at_unsafe(i);
+      std::memcpy(&toptr[(ssize_t)(i*itemsize)], &fromptr[offset + bytepos], (size_t)itemsize);
+    }
 
+    std::vector<ssize_t> shape = { (ssize_t)bytepos_tocopy.length() };
+    std::vector<ssize_t> strides = { (ssize_t)itemsize };
     std::shared_ptr<Content> out(new NumpyArray(Identity::none(), ptr, shape, strides, 0, itemsize, format));
+
     for (int64_t i = depth - 1;  i >= 0;  i--) {
       out = std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), levels[(size_t)i].toindex(), out));
     }
