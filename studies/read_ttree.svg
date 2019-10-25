@@ -26,6 +26,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Gnuplot</dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -45,8 +46,8 @@
      id="namedview212"
      showgrid="false"
      inkscape:zoom="1.9666667"
-     inkscape:cx="297.13372"
-     inkscape:cy="225.72612"
+     inkscape:cx="298.15067"
+     inkscape:cy="224.70917"
      inkscape:window-x="0"
      inkscape:window-y="26"
      inkscape:window-maximized="1"
@@ -57,6 +58,13 @@
      id="desc4">Produced by GNUPLOT 5.2 patchlevel 2 </desc>
   <g
      id="gnuplot_canvas">
+    <rect
+       style="opacity:1;vector-effect:none;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4557"
+       width="600"
+       height="480"
+       x="0"
+       y="0" />
     <rect
        x="0"
        y="0"
