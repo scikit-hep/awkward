@@ -34,7 +34,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> FromROOT_nestedvector(const Index32& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const FillableOptions& options) {
+  const std::shared_ptr<Content> FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const FillableOptions& options) {
     assert(depth > 0);
     assert(rawdata.ndim() == 1);
 

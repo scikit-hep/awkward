@@ -65,13 +65,13 @@ def test_root_nestedvector():
     # outer offsets: [0, 3, 5]
     # inner offsets: [0, 1, 1, 3, 5, 6]
 
-    byteoffsets = awkward1.layout.Index32(numpy.array([0, 28, 52], dtype=numpy.int32))
+    byteoffsets = awkward1.layout.Index64(numpy.array([0, 28, 52], dtype=numpy.int64))
     rawdata = awkward1.layout.NumpyArray(numpy.array([
         0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 123, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 99, 0, 0, 0, 123,
         0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 99, 0, 0, 0, 123, 0, 0, 0, 1, 0, 0, 0, 123
         ], dtype=numpy.uint8))
 
-    result = awkward1.layout.fromroot_nestedvector(byteoffsets, rawdata, 2, 4, ">i")
+    result = awkward1.layout.fromroot_nestedvector(byteoffsets, rawdata, 2, numpy.dtype(">i").itemsize, ">i")
     assert numpy.asarray(result.offsets).tolist() == [0, 3, 5]
     assert numpy.asarray(result.content.offsets).tolist() == [0, 1, 1, 3, 5, 6]
     assert numpy.asarray(result.content.content).tolist() == [123, 99, 123, 99, 123, 123]
