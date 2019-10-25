@@ -14,8 +14,8 @@
    version="1.1"
    id="svg210"
    sodipodi:docname="read_ttree.svg"
-   inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   inkscape:export-filename="/home/pivarski/irishep/awkward-1.0/studies/read_ttree.png"
+   inkscape:version="0.92.1 r15371"
+   inkscape:export-filename="/home/jpivarski/irishep/awkward-1.0/studies/read_ttree.png"
    inkscape:export-xdpi="140.35001"
    inkscape:export-ydpi="140.35001">
   <metadata
@@ -40,16 +40,16 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1496"
-     inkscape:window-height="787"
+     inkscape:window-width="2256"
+     inkscape:window-height="1452"
      id="namedview212"
      showgrid="false"
-     inkscape:zoom="0.98333333"
-     inkscape:cx="374.93903"
-     inkscape:cy="188.23993"
-     inkscape:window-x="2228"
-     inkscape:window-y="59"
-     inkscape:window-maximized="0"
+     inkscape:zoom="1.9666667"
+     inkscape:cx="297.13372"
+     inkscape:cy="225.72612"
+     inkscape:window-x="0"
+     inkscape:window-y="26"
+     inkscape:window-maximized="1"
      inkscape:current-layer="gnuplot_canvas" />
   <title
      id="title2">Gnuplot</title>
@@ -197,13 +197,13 @@
        id="path38"
        d="m 80.2,422.4 h 9 m 485.8,0 h -9" />
     <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       style="color:#000000;font-size:18.66666667px;font-family:'Nimbus Sans L';text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;-inkscape-font-specification:'Nimbus Sans L';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"
        id="text42"
        x="71.900002"
        y="426.29999">
       <tspan
          id="tspan40"
-         style="font-family:Arial">0.1</tspan>
+         style="font-family:'Nimbus Sans L';-inkscape-font-specification:'Nimbus Sans L';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:18.66666667px;">0.1</tspan>
     </text>
     <path
        style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
@@ -211,13 +211,13 @@
        id="path48"
        d="m 80.2,392 h 4.5 m 490.3,0 h -4.5 M 80.2,374.2 h 4.5 m 490.3,0 h -4.5 M 80.2,361.5 h 4.5 m 490.3,0 h -4.5 M 80.2,351.8 h 4.5 m 490.3,0 h -4.5 M 80.2,343.7 h 4.5 m 490.3,0 h -4.5 M 80.2,337 h 4.5 m 490.3,0 h -4.5 M 80.2,331.1 h 4.5 m 490.3,0 h -4.5 M 80.2,325.9 h 4.5 m 490.3,0 h -4.5 M 80.2,321.3 h 9 m 485.8,0 h -9" />
     <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       style="color:#000000;font-size:18.66666667px;font-family:'Nimbus Sans L';text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;-inkscape-font-specification:'Nimbus Sans L';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"
        id="text52"
        x="71.900002"
        y="325.20001">
       <tspan
          id="tspan50"
-         style="font-family:Arial">1</tspan>
+         style="font-family:'Nimbus Sans L';-inkscape-font-specification:'Nimbus Sans L';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:18.66666667px;">1</tspan>
     </text>
     <path
        style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
@@ -225,13 +225,13 @@
        id="path58"
        d="m 80.2,290.9 h 4.5 m 490.3,0 h -4.5 M 80.2,273.1 h 4.5 m 490.3,0 h -4.5 M 80.2,260.5 h 4.5 m 490.3,0 h -4.5 M 80.2,250.7 h 4.5 m 490.3,0 h -4.5 m -490.3,-8 h 4.5 m 490.3,0 h -4.5 M 80.2,235.9 h 4.5 m 490.3,0 h -4.5 M 80.2,230 h 4.5 m 490.3,0 h -4.5 M 80.2,224.9 h 4.5 m 490.3,0 h -4.5 M 80.2,220.2 h 9 m 485.8,0 h -9" />
     <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       style="color:#000000;font-size:18.66666667px;font-family:'Nimbus Sans L';text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;-inkscape-font-specification:'Nimbus Sans L';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"
        id="text62"
        x="71.900002"
        y="224.10001">
       <tspan
          id="tspan60"
-         style="font-family:Arial">10</tspan>
+         style="font-family:'Nimbus Sans L';-inkscape-font-specification:'Nimbus Sans L';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:18.66666667px;">10</tspan>
     </text>
     <path
        style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
@@ -239,13 +239,13 @@
        id="path68"
        d="m 80.2,189.8 h 4.5 m 490.3,0 h -4.5 M 80.2,172 h 4.5 m 490.3,0 h -4.5 M 80.2,159.4 h 4.5 m 490.3,0 h -4.5 M 80.2,149.6 h 4.5 m 490.3,0 h -4.5 m -490.3,-8 h 4.5 m 490.3,0 h -4.5 M 80.2,134.8 h 4.5 m 490.3,0 h -4.5 M 80.2,129 h 4.5 m 490.3,0 h -4.5 M 80.2,123.8 h 4.5 m 490.3,0 h -4.5 M 80.2,119.2 h 9 m 485.8,0 h -9" />
     <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       style="color:#000000;font-size:18.66666667px;font-family:'Nimbus Sans L';text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;-inkscape-font-specification:'Nimbus Sans L';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"
        id="text72"
        x="71.900002"
        y="123.1">
       <tspan
          id="tspan70"
-         style="font-family:Arial">100</tspan>
+         style="font-family:'Nimbus Sans L';-inkscape-font-specification:'Nimbus Sans L';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:18.66666667px;">100</tspan>
     </text>
     <path
        style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
@@ -253,143 +253,178 @@
        id="path78"
        d="m 80.2,88.7 h 4.5 m 490.3,0 h -4.5 M 80.2,70.9 h 4.5 m 490.3,0 h -4.5 M 80.2,58.3 h 4.5 m 490.3,0 h -4.5 M 80.2,48.5 h 4.5 m 490.3,0 h -4.5 m -490.3,-8 h 4.5 m 490.3,0 h -4.5 M 80.2,33.8 h 4.5 m 490.3,0 h -4.5 M 80.2,27.9 h 4.5 m 490.3,0 h -4.5 M 80.2,22.7 h 4.5 m 490.3,0 h -4.5 M 80.2,18.1 h 9 m 485.8,0 h -9" />
     <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       style="color:#000000;font-size:18.66666667px;font-family:'Nimbus Sans L';text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;-inkscape-font-specification:'Nimbus Sans L';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"
        id="text82"
        x="71.900002"
        y="22">
       <tspan
          id="tspan80"
-         style="font-family:Arial">1000</tspan>
+         style="font-family:'Nimbus Sans L';-inkscape-font-specification:'Nimbus Sans L';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:18.66666667px;">1000</tspan>
     </text>
     <path
        style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
        inkscape:connector-curvature="0"
        id="path88"
        d="m 80.2,422.4 v -9 m 0,-395.3 v 9" />
-    <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
-       id="text92"
-       x="80.199997"
-       y="444.29999">
-      <tspan
-         id="tspan90"
-         style="font-family:Arial">0</tspan>
-    </text>
     <path
        style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
        inkscape:connector-curvature="0"
        id="path98"
-       d="m 245.1,422.4 v -9 m 0,-395.3 v 9" />
-    <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
-       id="text102"
-       x="245.10001"
-       y="444.29999">
-      <tspan
-         id="tspan100"
-         style="font-family:Arial">1</tspan>
-    </text>
+       d="m 265.1,422.4 v -9 m 0,-395.3 v 9"
+       sodipodi:nodetypes="cccc" />
     <path
        style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
        inkscape:connector-curvature="0"
        id="path108"
-       d="m 410.1,422.4 v -9 m 0,-395.3 v 9" />
-    <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
-       id="text112"
-       x="410.10001"
-       y="444.29999">
-      <tspan
-         id="tspan110"
-         style="font-family:Arial">2</tspan>
-    </text>
+       d="m 390.1,422.4 v -9 m 0,-395.3 v 9"
+       sodipodi:nodetypes="cccc" />
     <path
        style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
        inkscape:connector-curvature="0"
        id="path118"
        d="m 575,422.4 v -9 m 0,-395.3 v 9" />
-    <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
-       id="text122"
-       x="575"
-       y="444.29999">
-      <tspan
-         id="tspan120"
-         style="font-family:Arial">3</tspan>
-    </text>
     <path
        style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
        inkscape:connector-curvature="0"
        id="path130"
        d="M 80.2,18.1 V 422.4 H 575 V 18.1 Z" />
     <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.66666603px;font-family:'Nimbus Sans L';-inkscape-font-specification:'Nimbus Sans L';text-anchor:middle;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
        id="text136"
        transform="rotate(-90)"
        x="-220.3"
-       y="16.299999">
+       y="24.299999">
       <tspan
          id="tspan134"
-         style="font-family:Arial">rate in millions of floats/sec (higher is better)</tspan>
-    </text>
-    <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
-       id="text144"
-       x="327.60001"
-       y="471.29999">
-      <tspan
-         id="tspan142"
-         style="font-family:Arial">jaggedness</tspan>
-    </text>
-    <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
-       id="text156"
-       x="550.61188"
-       y="355.25424">
-      <tspan
-         style="font-family:Arial"
-         id="tspan154">uproot + old awkward</tspan>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.66666603px;font-family:'Nimbus Sans L';-inkscape-font-specification:'Nimbus Sans L'">rate in millions of floats/sec (higher is better)</tspan>
     </text>
     <path
-       d="m 80.2,83.2 164.9,97 165,195.2 164.9,-1.5"
+       d="m 140.2,83.2 124.9,97 125,195.2 124.9,-1.5"
        id="path162"
        inkscape:connector-curvature="0"
-       style="color:#000000;fill:none;stroke:#9400d3;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       style="color:#000000;fill:none;stroke:#9400d3;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none"
        sodipodi:nodetypes="cccc" />
-    <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
-       id="text171"
-       x="550.93768"
-       y="133.25424">
-      <tspan
-         style="font-family:Arial"
-         id="tspan169">uproot + new awkward</tspan>
-    </text>
     <path
-       d="m 80.2,83.2 164.9,57.1 165,9.3 164.9,38.9"
+       d="m 140.2,83.2 124.9,57.1 125,9.3 124.9,38.9"
        id="path177"
        inkscape:connector-curvature="0"
-       style="color:#000000;fill:none;stroke:#009e73;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       style="color:#000000;fill:none;stroke:#009e73;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none"
        sodipodi:nodetypes="cccc" />
     <text
-       style="color:#000000;font-size:medium;font-family:Arial;text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.66666603px;font-family:'Nimbus Sans L';-inkscape-font-specification:'Nimbus Sans L';text-anchor:end;fill:#000000;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
        id="text186"
-       x="485.52713"
-       y="209.22034">
+       x="506.63901"
+       y="216.84746">
       <tspan
-         style="font-family:Arial"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.66666603px;font-family:'Nimbus Sans L';-inkscape-font-specification:'Nimbus Sans L'"
          id="tspan184">root-numpy</tspan>
     </text>
     <path
-       d="m 80.2,206 164.9,6.3 165,-5.8"
+       d="m 140.2,206 124.9,6.3 125,-5.8"
        id="path192"
        inkscape:connector-curvature="0"
-       style="color:#000000;fill:none;stroke:#56b4e9;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       style="color:#000000;fill:none;stroke:#bc6215;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        sodipodi:nodetypes="ccc" />
     <path
        style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
        inkscape:connector-curvature="0"
        id="path203"
        d="M 80.2,18.1 V 422.4 H 575 V 18.1 Z" />
+    <path
+       d="m 140.2,422.4 v -9 m 0,-395.3 v 9"
+       id="path4550"
+       inkscape:connector-curvature="0"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       sodipodi:nodetypes="cccc" />
+    <path
+       d="m 515,422.4 v -9 m 0,-395.3 v 9"
+       id="path4552"
+       inkscape:connector-curvature="0"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter"
+       sodipodi:nodetypes="cccc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.66666603px;line-height:normal;font-family:'Nimbus Sans L';-inkscape-font-specification:'Nimbus Sans L';font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:middle;white-space:normal;shape-padding:0;opacity:1;vector-effect:none;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       x="459.92102"
+       y="338.64407"
+       id="text4570"><tspan
+         sodipodi:role="line"
+         id="tspan4568"
+         x="459.92102"
+         y="338.64407">uproot +</tspan><tspan
+         sodipodi:role="line"
+         x="459.92102"
+         y="361.97742"
+         id="tspan4572">Awkward 0.x</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.66666603px;line-height:normal;font-family:'Nimbus Sans L';-inkscape-font-specification:'Nimbus Sans L';font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:center;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:middle;white-space:normal;shape-padding:0;opacity:1;vector-effect:none;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       x="460.13232"
+       y="116.94915"
+       id="text4576"><tspan
+         sodipodi:role="line"
+         id="tspan4574"
+         x="460.13232"
+         y="116.94915">uproot +</tspan><tspan
+         sodipodi:role="line"
+         x="460.13232"
+         y="140.28249"
+         id="tspan4578">Awkward 1.0</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:16px;line-height:1.10000002;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none"
+       x="139.65312"
+       y="446.61017"
+       id="text4612"><tspan
+         sodipodi:role="line"
+         id="tspan4610"
+         x="139.65312"
+         y="446.61017">flat</tspan><tspan
+         sodipodi:role="line"
+         x="139.65312"
+         y="464.21017"
+         id="tspan4614">Numpy</tspan></text>
+    <text
+       id="text4620"
+       y="446.61017"
+       x="264.55313"
+       style="font-style:normal;font-weight:normal;font-size:16px;line-height:1.10000002;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         id="tspan4618"
+         y="446.61017"
+         x="264.55313"
+         sodipodi:role="line">jagged</tspan><tspan
+         y="464.21017"
+         x="264.55313"
+         sodipodi:role="line"
+         id="tspan4636">array</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:16px;line-height:1.10000002;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none"
+       x="389.55313"
+       y="446.61017"
+       id="text4626"><tspan
+         sodipodi:role="line"
+         x="389.55313"
+         y="446.61017"
+         id="tspan4624">doubly</tspan><tspan
+         sodipodi:role="line"
+         x="389.55313"
+         y="464.21017"
+         id="tspan4640">jagged</tspan></text>
+    <text
+       id="text4632"
+       y="446.61017"
+       x="514.45312"
+       style="font-style:normal;font-weight:normal;font-size:16px;line-height:1.10000002;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         id="tspan4630"
+         y="446.61017"
+         x="514.45312"
+         sodipodi:role="line">triply</tspan><tspan
+         y="464.21017"
+         x="514.45312"
+         sodipodi:role="line"
+         id="tspan4644">jagged</tspan></text>
   </g>
 </svg>
