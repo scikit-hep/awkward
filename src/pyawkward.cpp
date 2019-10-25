@@ -25,6 +25,7 @@
 #include "awkward/type/OptionType.h"
 #include "awkward/type/UnionType.h"
 #include "awkward/io/json.h"
+#include "awkward/io/root.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
@@ -806,5 +807,9 @@ PYBIND11_MODULE(layout, m) {
       return box(out);
     }
   }, py::arg("source"), py::arg("initial") = 1024, py::arg("resize") = 2.0, py::arg("buffersize") = 65536);
+
+  m.def("fromroot_nestedvector", [](ak::Index32& byteoffsets, ak::NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, int64_t initial, double resize) -> py::object {
+      return box(FromROOT_nestedvector(byteoffsets, rawdata, depth, itemsize, format, ak::FillableOptions(initial, resize)));
+  }, py::arg("byteoffsets"), py::arg("rawdata"), py::arg("depth"), py::arg("itemsize"), py::arg("format"), py::arg("initial") = 1024, py::arg("resize") = 2.0);
 
 }

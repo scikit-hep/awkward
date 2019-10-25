@@ -9,6 +9,7 @@
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/fillable/FillableOptions.h"
+#include "awkward/Index.h"
 
 namespace awkward {
   template <typename T>
@@ -85,6 +86,14 @@ namespace awkward {
       }
       ptr_.get()[length_] = datum;
       length_++;
+    }
+
+    T getitem_at_unsafe(int64_t at) const {
+      return ptr_.get()[at];
+    }
+
+    IndexOf<T> toindex() const {
+      return IndexOf<T>(ptr_, 0, length_);
     }
 
   private:

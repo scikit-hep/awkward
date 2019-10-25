@@ -81,6 +81,12 @@ namespace awkward {
   }
 
   template <typename T>
+  void IndexOf<T>::setitem_at_unsafe(int64_t at, T value) const {
+    assert(0 <= at  &&  at < length_);
+    ptr_.get()[(size_t)(offset_ + at)] = value;
+  }
+
+  template <typename T>
   IndexOf<T> IndexOf<T>::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;

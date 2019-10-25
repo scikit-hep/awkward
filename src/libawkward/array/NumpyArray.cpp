@@ -29,6 +29,10 @@ namespace awkward {
     return reinterpret_cast<void*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_);
   }
 
+  void* NumpyArray::byteptr(ssize_t at) const {
+    return reinterpret_cast<void*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
+  }
+
   ssize_t NumpyArray::bytelength() const {
     if (isscalar()) {
       return itemsize_;

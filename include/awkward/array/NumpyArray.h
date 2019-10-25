@@ -37,6 +37,7 @@ namespace awkward {
     bool isscalar() const;
     bool isempty() const;
     void* byteptr() const;
+    void* byteptr(ssize_t at) const;
     ssize_t bytelength() const;
     uint8_t getbyte(ssize_t at) const;
 
