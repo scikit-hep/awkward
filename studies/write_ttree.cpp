@@ -151,7 +151,7 @@ int main() {
   return 0;
 }
 
-// python3 -i -c 'import uproot; from uproot import asgenobj, asdtype, SimpleArray, STLVector; t0 = uproot.open("data/sample-jagged0.root")["jagged0"]; t1 = uproot.open("data/sample-jagged1.root")["jagged1"]; t2 = uproot.open("data/sample-jagged2.root")["jagged2"]; t3 = uproot.open("data/sample-jagged3.root")["jagged3"]'
+// python3 -i -c 'import uproot; from uproot import asgenobj, asdtype, STLVector; t0 = uproot.open("data/sample-jagged0.root")["jagged0"]; t1 = uproot.open("data/sample-jagged1.root")["jagged1"]; t2 = uproot.open("data/sample-jagged2.root")["jagged2"]; t3 = uproot.open("data/sample-jagged3.root")["jagged3"]'
 // t0["branch"].array(entrystart=-100)
 // t1["branch"].array(entrystart=-100)
 // t2["branch"].array(entrystart=-100)

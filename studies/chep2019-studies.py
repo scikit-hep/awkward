@@ -298,4 +298,3 @@ for i in range(REPS):
     q = awkward1.fromjson(jobj3, initial=sizejobj3+1)
 walltime = (time.time() - starttime)*FRAC/REPS
 print("awkward1.fromjson(jobj3)\t", walltime, "sec;\t", sizejobj3/walltime/1e6, "million floats/sec")
-
