@@ -76,3 +76,10 @@ def test_root_nestedvector():
     assert numpy.asarray(result.content.offsets).tolist() == [0, 1, 1, 3, 5, 6]
     assert numpy.asarray(result.content.content).tolist() == [123, 99, 123, 99, 123, 123]
     assert awkward1.tolist(result) == [[[123], [], [99, 123]], [[99, 123], [123]]]
+
+def test_fromiter():
+    assert awkward1.tolist(awkward1.fromiter([True, True, False, False, True])) == [True, True, False, False, True]
+    assert awkward1.tolist(awkward1.fromiter([5, 4, 3, 2, 1])) == [5, 4, 3, 2, 1]
+    assert awkward1.tolist(awkward1.fromiter([5, 4, 3.14, 2.22, 1.23])) == [5.0, 4.0, 3.14, 2.22, 1.23]
+    assert awkward1.tolist(awkward1.fromiter([[1.1, 2.2, 3.3], [], [4.4, 5.5]])) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(awkward1.fromiter([[[1.1, 2.2, 3.3], []], [[4.4, 5.5]], [], [[6.6], [7.7, 8.8, 9.9]]])) == [[[1.1, 2.2, 3.3], []], [[4.4, 5.5]], [], [[6.6], [7.7, 8.8, 9.9]]]

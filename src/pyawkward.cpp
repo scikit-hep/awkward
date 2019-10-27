@@ -460,6 +460,31 @@ py::object getitem(T& self, py::object obj) {
   return box(self.getitem(toslice(obj)));
 }
 
+void fillable_fill(ak::FillableArray& self, py::object obj) {
+  if (py::isinstance<py::bool_>(obj)) {
+    self.boolean(obj.cast<bool>());
+  }
+  else if (py::isinstance<py::int_>(obj)) {
+    self.integer(obj.cast<int64_t>());
+  }
+  else if (py::isinstance<py::float_>(obj)) {
+    self.real(obj.cast<double>());
+  }
+  // FIXME: strings, dicts...
+  else if (py::isinstance<py::sequence>(obj)) {
+    py::sequence seq = obj.cast<py::sequence>();
+    self.beginlist();
+    for (auto x : seq) {
+      fillable_fill(self, x);
+    }
+    self.endlist();
+    return;
+  }
+  else {
+    throw std::invalid_argument(std::string("cannot convert ") + obj.attr("__repr__")().cast<std::string>() + std::string(" to an array element"));
+  }
+}
+
 py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name) {
   return (py::class_<ak::FillableArray>(m, name.c_str())
       .def(py::init([](int64_t initial, double resize) -> ak::FillableArray {
@@ -481,6 +506,7 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("real", &ak::FillableArray::real)
       .def("beginlist", &ak::FillableArray::beginlist)
       .def("endlist", &ak::FillableArray::endlist)
+      .def("fill", &fillable_fill)
   );
 }
 
