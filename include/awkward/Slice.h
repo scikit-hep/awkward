@@ -36,7 +36,7 @@ namespace awkward {
 
   class SliceRange: public SliceItem {
   public:
-    SliceRange(int64_t start, int64_t stop, int64_t step): start_(start), stop_(stop), step_(step) {
+    SliceRange(int64_t start, int64_t stop, int64_t step): start_(start), stop_(stop), step_(step == none() ? 1 : step) {
       assert(step_ != 0);
     }
     int64_t start() const { return start_; }
@@ -114,6 +114,12 @@ namespace awkward {
     const Slice tail() const;
     const std::string tostring() const;
     void append(const std::shared_ptr<SliceItem>& item);
+    void append(const SliceAt& item);
+    void append(const SliceRange& item);
+    void append(const SliceEllipsis& item);
+    void append(const SliceNewAxis& item);
+    template <typename T>
+    void append(const SliceArrayOf<T>& item);
     void become_sealed();
     bool isadvanced() const;
 
