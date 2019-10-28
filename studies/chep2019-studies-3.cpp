@@ -2,6 +2,7 @@
 // g++ `root-config --cflags` -Iawkward-1.0/include -Iawkward-1.0/rapidjson/include chep2019-studies-3.cpp -L. -lawkward `root-config --libs` -lROOTNTuple -o chep2019-studies-3 && ./chep2019-studies-3
 
 #include <cstring>
+#include <chrono>
 #include <iostream>
 
 #include "awkward/Identity.h"
@@ -45,7 +46,9 @@ void fillpages(T* array, V& view, int64_t& offset, int64_t length, int64_t shift
   offset += current;
 }
 
-void jagged0() {
+double jagged0() {
+  double total_length = 0.0;
+
   auto model = ROOT::Experimental::RNTupleModel::Create();
   ROOT::Experimental::RNTupleReadOptions options;
   auto ntuple = ROOT::Experimental::RNTupleReader::Open(std::move(model), "jagged0", "data/sample-jagged0.ntuple", options);
@@ -60,10 +63,15 @@ void jagged0() {
     ak::RawArrayOf<float> content(ak::Identity::none(), length);
     float* rawcontent = content.ptr().get();
     fillpages(rawcontent, view0, offset0, length, 0);
+    total_length += length;
   }
+  std::cout << total_length << std::endl;
+  return total_length;
 }
 
-void jagged1() {
+double jagged1() {
+  double total_length = 0.0;
+
   auto model = ROOT::Experimental::RNTupleModel::Create();
   ROOT::Experimental::RNTupleReadOptions options;
   auto ntuple = ROOT::Experimental::RNTupleReader::Open(std::move(model), "jagged1", "data/sample-jagged1.ntuple", options);
@@ -88,10 +96,16 @@ void jagged1() {
     fillpages(rawcontent, view0, offset0, length, 0);
 
     ak::ListOffsetArray32 done(ak::Identity::none(), offsets1, content.shallow_copy());
+    total_length += length;
   }
+
+  std::cout << total_length << std::endl;
+  return total_length;
 }
 
-void jagged2() {
+double jagged2() {
+  double total_length = 0.0;
+
   auto model = ROOT::Experimental::RNTupleModel::Create();
   ROOT::Experimental::RNTupleReadOptions options;
   auto ntuple = ROOT::Experimental::RNTupleReader::Open(std::move(model), "jagged2", "data/sample-jagged2.ntuple", options);
@@ -125,10 +139,16 @@ void jagged2() {
 
     ak::ListOffsetArray32 tmp(ak::Identity::none(), offsets1, content.shallow_copy());
     ak::ListOffsetArray32 done(ak::Identity::none(), offsets2, tmp.shallow_copy());
+    total_length += length;
   }
+
+  std::cout << total_length << std::endl;
+  return total_length;
 }
 
-void jagged3() {
+double jagged3() {
+  double total_length = 0.0;
+
   auto model = ROOT::Experimental::RNTupleModel::Create();
   ROOT::Experimental::RNTupleReadOptions options;
   auto ntuple = ROOT::Experimental::RNTupleReader::Open(std::move(model), "jagged3", "data/sample-jagged3.ntuple", options);
@@ -171,14 +191,41 @@ void jagged3() {
     ak::ListOffsetArray32 tmp1(ak::Identity::none(), offsets1, content.shallow_copy());
     ak::ListOffsetArray32 tmp2(ak::Identity::none(), offsets2, tmp1.shallow_copy());
     ak::ListOffsetArray32 done(ak::Identity::none(), offsets3, tmp2.shallow_copy());
+    total_length += length;
   }
+
+  std::cout << total_length << std::endl;
+  return total_length;
 }
 
 int main() {
-  jagged0();
-  jagged1();
-  jagged2();
-  jagged3();
-
+  {
+    auto start0 = std::chrono::high_resolution_clock::now();
+    double num0 = jagged0();
+    auto stop0 = std::chrono::high_resolution_clock::now();
+    double walltime0 = std::chrono::duration<double>(stop0 - start0).count();
+    std::cout << "jagged0 " << walltime0 << "sec;\t" << num0/walltime0/1e6 << " million floats/sec" << std::endl;
+  }
+  {
+    auto start1 = std::chrono::high_resolution_clock::now();
+    double num1 = jagged1();
+    auto stop1 = std::chrono::high_resolution_clock::now();
+    double walltime1 = std::chrono::duration<double>(stop1 - start1).count();
+    std::cout << "jagged1 " << walltime1 << "sec;\t" << num1/walltime1/1e6 << " million floats/sec" << std::endl;
+  }
+  {
+    auto start2 = std::chrono::high_resolution_clock::now();
+    double num2 = jagged2();
+    auto stop2 = std::chrono::high_resolution_clock::now();
+    double walltime2 = std::chrono::duration<double>(stop2 - start2).count();
+    std::cout << "jagged2 " << walltime2 << "sec;\t" << num2/walltime2/1e6 << " million floats/sec" << std::endl;
+  }
+  {
+    auto start3 = std::chrono::high_resolution_clock::now();
+    double num3 = jagged3();
+    auto stop3 = std::chrono::high_resolution_clock::now();
+    double walltime3 = std::chrono::duration<double>(stop3 - start3).count();
+    std::cout << "jagged3 " << walltime3 << "sec;\t" << num3/walltime3/1e6 << " million floats/sec" << std::endl;
+  }
   return 0;
 }
