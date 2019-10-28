@@ -17,7 +17,7 @@ namespace awkward {
     }
 
     else {
-      uint32_t bigendian = *reinterpret_cast<int32_t*>(rawdata.byteptr(bytepos));
+      uint32_t bigendian = *reinterpret_cast<uint32_t*>(rawdata.byteptr(bytepos));
 
       // FIXME: check native endianness
       uint32_t length = ((bigendian >> 24) & 0xff)     |  // move byte 3 to byte 0
@@ -29,8 +29,8 @@ namespace awkward {
       for (uint32_t i = 0;  i < length;  i++) {
         FromROOT_nestedvector_fill(levels, bytepos_tocopy, bytepos, rawdata, whichlevel + 1, itemsize);
       }
-      int64_t previous = levels[whichlevel].getitem_at_unsafe(levels[whichlevel].length() - 1);
-      levels[whichlevel].append(previous + length);
+      int64_t previous = levels[(unsigned int)whichlevel].getitem_at_unsafe(levels[(unsigned int)whichlevel].length() - 1);
+      levels[(unsigned int)whichlevel].append(previous + length);
     }
   }
 
@@ -66,7 +66,7 @@ namespace awkward {
 
     std::vector<ssize_t> shape = { (ssize_t)bytepos_tocopy.length() };
     std::vector<ssize_t> strides = { (ssize_t)itemsize };
-    std::shared_ptr<Content> out(new NumpyArray(Identity::none(), ptr, shape, strides, 0, itemsize, format));
+    std::shared_ptr<Content> out(new NumpyArray(Identity::none(), ptr, shape, strides, 0, (ssize_t)itemsize, format));
 
     for (int64_t i = depth - 1;  i >= 0;  i--) {
       out = std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), levels[(size_t)i].toindex(), out));

@@ -98,7 +98,7 @@ namespace awkward {
 
   class ToJsonFile: public ToJson {
   public:
-    ToJsonFile(FILE* destination, int64_t maxdecimals, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()), stream_(destination, buffer_.get(), buffersize*sizeof(char)), writer_(stream_) {
+    ToJsonFile(FILE* destination, int64_t maxdecimals, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()), stream_(destination, buffer_.get(), ((size_t)buffersize)*sizeof(char)), writer_(stream_) {
       if (maxdecimals >= 0) {
         writer_.SetMaxDecimalPlaces((int)maxdecimals);
       }
@@ -123,7 +123,7 @@ namespace awkward {
 
   class ToJsonPrettyFile: public ToJson {
   public:
-    ToJsonPrettyFile(FILE* destination, int64_t maxdecimals, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()), stream_(destination, buffer_.get(), buffersize*sizeof(char)), writer_(stream_) {
+    ToJsonPrettyFile(FILE* destination, int64_t maxdecimals, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()), stream_(destination, buffer_.get(), ((size_t)buffersize)*sizeof(char)), writer_(stream_) {
       if (maxdecimals >= 0) {
         writer_.SetMaxDecimalPlaces((int)maxdecimals);
       }
