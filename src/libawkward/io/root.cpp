@@ -26,7 +26,7 @@ namespace awkward {
                         ((bigendian << 24) & 0xff000000); // byte 0 to byte 3
 
       bytepos += sizeof(int32_t);
-      for (int32_t i = 0;  i < length;  i++) {
+      for (uint32_t i = 0;  i < length;  i++) {
         FromROOT_nestedvector_fill(levels, bytepos_tocopy, bytepos, rawdata, whichlevel + 1, itemsize);
       }
       int64_t previous = levels[whichlevel].getitem_at_unsafe(levels[whichlevel].length() - 1);
