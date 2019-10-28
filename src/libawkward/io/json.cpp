@@ -71,7 +71,7 @@ namespace awkward {
     Handler handler(options);
     rj::Reader reader;
     std::shared_ptr<char> buffer(new char[(size_t)buffersize], awkward::util::array_deleter<char>());
-    rj::FileReadStream stream(source, buffer.get(), buffersize*sizeof(char));
+    rj::FileReadStream stream(source, buffer.get(), ((size_t)buffersize)*sizeof(char));
     if (reader.Parse(stream, handler)) {
       return handler.snapshot();
     }

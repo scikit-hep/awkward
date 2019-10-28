@@ -22,21 +22,21 @@
 namespace awkward {
   void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
     for (int i = 0;  i < length;  i++) {
-      builder.boolean(array[i]);
+      builder.boolean((bool)array[i]);
     }
   }
 
   template <typename T>
   void tojson_integer(ToJson& builder, T* array, int64_t length) {
     for (int i = 0;  i < length;  i++) {
-      builder.integer(array[i]);
+      builder.integer((int64_t)array[i]);
     }
   }
 
   template <typename T>
   void tojson_real(ToJson& builder, T* array, int64_t length) {
     for (int i = 0;  i < length;  i++) {
-      builder.real(array[i]);
+      builder.real((double)array[i]);
     }
   }
 

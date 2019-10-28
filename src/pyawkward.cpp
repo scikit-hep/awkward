@@ -650,9 +650,14 @@ std::string tojson_string(T& self, bool pretty, py::object maxdecimals) {
 
 template <typename T>
 void tojson_file(T& self, std::string destination, bool pretty, py::object maxdecimals, int64_t buffersize) {
+#ifdef _MSC_VER
+  FILE* file;
+  if (fopen_s(&file, destination.c_str(), "wb") != 0) {
+#else
   FILE* file = fopen(destination.c_str(), "wb");
   if (file == nullptr) {
-    throw std::invalid_argument(std::string("could not open file ") + destination);
+#endif
+    throw std::invalid_argument(std::string("file \"") + destination + std::string("\" could not be opened for writing"));
   }
   try {
     self.tojson(file, pretty, check_maxdecimals(maxdecimals), buffersize);
@@ -817,9 +822,14 @@ PYBIND11_MODULE(layout, m) {
       return box(ak::FromJsonString(source.c_str(), ak::FillableOptions(initial, resize)));
     }
     else {
+#ifdef _MSC_VER
+      FILE* file;
+      if (fopen_s(&file, source.c_str(), "rb") != 0) {
+#else
       FILE* file = fopen(source.c_str(), "rb");
       if (file == nullptr) {
-        throw std::invalid_argument(std::string("file \"") + source + std::string("\" not found"));
+#endif
+        throw std::invalid_argument(std::string("file \"") + source + std::string("\" could not be opened for reading"));
       }
       std::shared_ptr<ak::Content> out(nullptr);
       try {
