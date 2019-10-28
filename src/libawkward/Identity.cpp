@@ -105,7 +105,7 @@ namespace awkward {
     std::shared_ptr<Identity> out(rawout);
 
     if (std::is_same<T, int32_t>::value) {
-      Error err = awkward_identity32_getitem_carry_64(
+      struct Error err = awkward_identity32_getitem_carry_64(
         reinterpret_cast<int32_t*>(rawout->ptr().get()),
         reinterpret_cast<int32_t*>(ptr_.get()),
         carry.ptr().get(),
@@ -116,7 +116,7 @@ namespace awkward {
       util::handle_error(err, classname(), nullptr);
     }
     else if (std::is_same<T, int64_t>::value) {
-      Error err = awkward_identity64_getitem_carry_64(
+      struct Error err = awkward_identity64_getitem_carry_64(
         reinterpret_cast<int64_t*>(rawout->ptr().get()),
         reinterpret_cast<int64_t*>(ptr_.get()),
         carry.ptr().get(),

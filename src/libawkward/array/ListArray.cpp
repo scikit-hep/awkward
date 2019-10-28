@@ -40,7 +40,7 @@ namespace awkward {
       if (Identity32* rawid = dynamic_cast<Identity32*>(bigid.get())) {
         Identity32* rawsubid = new Identity32(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
         std::shared_ptr<Identity> subid(rawsubid);
-        Error err = awkward_identity32_from_listarray32(
+        struct Error err = awkward_identity32_from_listarray32(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
           starts_.ptr().get(),
@@ -57,7 +57,7 @@ namespace awkward {
       else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
         Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
         std::shared_ptr<Identity> subid(rawsubid);
-        Error err = awkward_identity64_from_listarray32(
+        struct Error err = awkward_identity64_from_listarray32(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
           starts_.ptr().get(),
@@ -91,7 +91,7 @@ namespace awkward {
       if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
         Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
         std::shared_ptr<Identity> subid(rawsubid);
-        Error err = awkward_identity64_from_listarray64(
+        struct Error err = awkward_identity64_from_listarray64(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
           starts_.ptr().get(),
@@ -117,14 +117,14 @@ namespace awkward {
     if (length() <= kMaxInt32) {
       Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
       std::shared_ptr<Identity> newid(rawid);
-      Error err = awkward_new_identity32(rawid->ptr().get(), length());
+      struct Error err = awkward_new_identity32(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
     else {
       Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, length());
       std::shared_ptr<Identity> newid(rawid);
-      Error err = awkward_new_identity64(rawid->ptr().get(), length());
+      struct Error err = awkward_new_identity64(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
@@ -241,7 +241,7 @@ namespace awkward {
       std::shared_ptr<SliceItem> nexthead = tail.head();
       Slice nexttail = tail.tail();
       Index64 nextcarry(lenstarts);
-      Error err = awkward_listarray32_getitem_next_at_64(
+      struct Error err = awkward_listarray32_getitem_next_at_64(
         nextcarry.ptr().get(),
         starts_.ptr().get(),
         stops_.ptr().get(),
@@ -264,7 +264,7 @@ namespace awkward {
         step = 1;
       }
       int64_t carrylength;
-      Error err1 = awkward_listarray32_getitem_next_range_carrylength(
+      struct Error err1 = awkward_listarray32_getitem_next_range_carrylength(
         &carrylength,
         starts_.ptr().get(),
         stops_.ptr().get(),
@@ -279,7 +279,7 @@ namespace awkward {
       Index32 nextoffsets(lenstarts + 1);
       Index64 nextcarry(carrylength);
 
-      Error err2 = awkward_listarray32_getitem_next_range_64(
+      struct Error err2 = awkward_listarray32_getitem_next_range_64(
         nextoffsets.ptr().get(),
         nextcarry.ptr().get(),
         starts_.ptr().get(),
@@ -298,13 +298,13 @@ namespace awkward {
       }
       else {
         int64_t total;
-        Error err1 = awkward_listarray32_getitem_next_range_counts_64(
+        struct Error err1 = awkward_listarray32_getitem_next_range_counts_64(
           &total,
           nextoffsets.ptr().get(),
           lenstarts);
         util::handle_error(err1, classname(), id_.get());
         Index64 nextadvanced(total);
-        Error err2 = awkward_listarray32_getitem_next_range_spreadadvanced_64(
+        struct Error err2 = awkward_listarray32_getitem_next_range_spreadadvanced_64(
           nextadvanced.ptr().get(),
           advanced.ptr().get(),
           nextoffsets.ptr().get(),
@@ -330,7 +330,7 @@ namespace awkward {
         Index64 nextcarry(lenstarts*flathead.length());
         Index64 nextadvanced(lenstarts*flathead.length());
         Index32 nextoffsets(lenstarts + 1);
-        Error err = awkward_listarray32_getitem_next_array_64(
+        struct Error err = awkward_listarray32_getitem_next_array_64(
           nextoffsets.ptr().get(),
           nextcarry.ptr().get(),
           nextadvanced.ptr().get(),
@@ -350,7 +350,7 @@ namespace awkward {
       else {
         Index64 nextcarry(lenstarts);
         Index64 nextadvanced(lenstarts);
-        Error err = awkward_listarray32_getitem_next_array_advanced_64(
+        struct Error err = awkward_listarray32_getitem_next_array_advanced_64(
           nextcarry.ptr().get(),
           nextadvanced.ptr().get(),
           starts_.ptr().get(),
@@ -389,7 +389,7 @@ namespace awkward {
       std::shared_ptr<SliceItem> nexthead = tail.head();
       Slice nexttail = tail.tail();
       Index64 nextcarry(lenstarts);
-      Error err = awkward_listarray64_getitem_next_at_64(
+      struct Error err = awkward_listarray64_getitem_next_at_64(
         nextcarry.ptr().get(),
         starts_.ptr().get(),
         stops_.ptr().get(),
@@ -412,7 +412,7 @@ namespace awkward {
         step = 1;
       }
       int64_t carrylength;
-      Error err1 = awkward_listarray64_getitem_next_range_carrylength(
+      struct Error err1 = awkward_listarray64_getitem_next_range_carrylength(
         &carrylength,
         starts_.ptr().get(),
         stops_.ptr().get(),
@@ -427,7 +427,7 @@ namespace awkward {
       Index64 nextoffsets(lenstarts + 1);
       Index64 nextcarry(carrylength);
 
-      Error err2 = awkward_listarray64_getitem_next_range_64(
+      struct Error err2 = awkward_listarray64_getitem_next_range_64(
         nextoffsets.ptr().get(),
         nextcarry.ptr().get(),
         starts_.ptr().get(),
@@ -446,13 +446,13 @@ namespace awkward {
       }
       else {
         int64_t total;
-        Error err1 = awkward_listarray64_getitem_next_range_counts_64(
+        struct Error err1 = awkward_listarray64_getitem_next_range_counts_64(
           &total,
           nextoffsets.ptr().get(),
           lenstarts);
         util::handle_error(err1, classname(), id_.get());
         Index64 nextadvanced(total);
-        Error err2 = awkward_listarray64_getitem_next_range_spreadadvanced_64(
+        struct Error err2 = awkward_listarray64_getitem_next_range_spreadadvanced_64(
           nextadvanced.ptr().get(),
           advanced.ptr().get(),
           nextoffsets.ptr().get(),
@@ -478,7 +478,7 @@ namespace awkward {
         Index64 nextcarry(lenstarts*flathead.length());
         Index64 nextadvanced(lenstarts*flathead.length());
         Index64 nextoffsets(lenstarts + 1);
-        Error err = awkward_listarray64_getitem_next_array_64(
+        struct Error err = awkward_listarray64_getitem_next_array_64(
           nextoffsets.ptr().get(),
           nextcarry.ptr().get(),
           nextadvanced.ptr().get(),
@@ -498,7 +498,7 @@ namespace awkward {
       else {
         Index64 nextcarry(lenstarts);
         Index64 nextadvanced(lenstarts);
-        Error err = awkward_listarray64_getitem_next_array_advanced_64(
+        struct Error err = awkward_listarray64_getitem_next_array_advanced_64(
           nextcarry.ptr().get(),
           nextadvanced.ptr().get(),
           starts_.ptr().get(),
@@ -529,7 +529,7 @@ namespace awkward {
     }
     Index32 nextstarts(carry.length());
     Index32 nextstops(carry.length());
-    Error err = awkward_listarray32_getitem_carry_64(
+    struct Error err = awkward_listarray32_getitem_carry_64(
       nextstarts.ptr().get(),
       nextstops.ptr().get(),
       starts_.ptr().get(),
@@ -555,7 +555,7 @@ namespace awkward {
     }
     Index64 nextstarts(carry.length());
     Index64 nextstops(carry.length());
-    Error err = awkward_listarray64_getitem_carry_64(
+    struct Error err = awkward_listarray64_getitem_carry_64(
       nextstarts.ptr().get(),
       nextstops.ptr().get(),
       starts_.ptr().get(),

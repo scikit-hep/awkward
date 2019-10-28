@@ -4,8 +4,8 @@
 
 #include "awkward/cpu-kernels/util.h"
 
-Error success() {
-  Error out;
+struct Error success() {
+  struct Error out;
   out.str = nullptr;
   out.location = kSliceNone;
   out.attempt = kSliceNone;
@@ -13,8 +13,8 @@ Error success() {
   return out;
 }
 
-Error failure(const char* str, int64_t location, int64_t attempt) {
-  Error out;
+struct Error failure(const char* str, int64_t location, int64_t attempt) {
+  struct Error out;
   out.str = str;
   out.location = location;
   out.attempt = attempt;

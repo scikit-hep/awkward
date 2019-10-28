@@ -288,7 +288,7 @@ namespace awkward {
           throw std::runtime_error("array.ndim != 1");
         }
         Index64 flathead = array->ravel();
-        Error err = awkward_regularize_arrayslice_64(
+        struct Error err = awkward_regularize_arrayslice_64(
           flathead.ptr().get(),
           flathead.length(),
           length_);
@@ -303,7 +303,7 @@ namespace awkward {
 
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()], awkward::util::array_deleter<T>());
-      Error err = awkward_numpyarray_getitem_next_null_64(
+      struct Error err = awkward_numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
