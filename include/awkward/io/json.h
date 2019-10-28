@@ -44,7 +44,7 @@ namespace awkward {
   public:
     ToJsonString(int64_t maxdecimals): buffer_(), writer_(buffer_) {
       if (maxdecimals >= 0) {
-        writer_.SetMaxDecimalPlaces(maxdecimals);
+        writer_.SetMaxDecimalPlaces((int)maxdecimals);
       }
     }
 
@@ -72,7 +72,7 @@ namespace awkward {
   public:
     ToJsonPrettyString(int64_t maxdecimals): buffer_(), writer_(buffer_) {
       if (maxdecimals >= 0) {
-        writer_.SetMaxDecimalPlaces(maxdecimals);
+        writer_.SetMaxDecimalPlaces((int)maxdecimals);
       }
     }
 
@@ -100,7 +100,7 @@ namespace awkward {
   public:
     ToJsonFile(FILE* destination, int64_t maxdecimals, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()), stream_(destination, buffer_.get(), buffersize*sizeof(char)), writer_(stream_) {
       if (maxdecimals >= 0) {
-        writer_.SetMaxDecimalPlaces(maxdecimals);
+        writer_.SetMaxDecimalPlaces((int)maxdecimals);
       }
     }
 
@@ -125,7 +125,7 @@ namespace awkward {
   public:
     ToJsonPrettyFile(FILE* destination, int64_t maxdecimals, int64_t buffersize): buffer_(new char[(size_t)buffersize], awkward::util::array_deleter<char>()), stream_(destination, buffer_.get(), buffersize*sizeof(char)), writer_(stream_) {
       if (maxdecimals >= 0) {
-        writer_.SetMaxDecimalPlaces(maxdecimals);
+        writer_.SetMaxDecimalPlaces((int)maxdecimals);
       }
     }
 

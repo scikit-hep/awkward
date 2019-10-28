@@ -19,9 +19,11 @@
   typedef   signed   int     int32_t;
   typedef   unsigned __int64 uint64_t;
   typedef   signed   __int64 int64_t;
+  #define ERROR Error
 #else
   #include <cstddef>
   #include <cstdint>
+  #define ERROR struct Error
 #endif
 
 #include <iostream>
