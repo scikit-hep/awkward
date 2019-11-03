@@ -6,4 +6,3 @@ import awkward1._numba
 from awkward1.operations.convert import *
 
 __version__ = awkward1.layout.__version__
-
