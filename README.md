@@ -62,7 +62,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] Implemented all types but records; tested all primitives and lists.
       * [ ] Implement appendable records.
       * [ ] Test all (requires array types for all).
-   * [ ] JSON → Awkward via header-only [simdjson](https://github.com/lemire/simdjson#readme) and `awkward.fromiter`.
+   * [X] JSON → Awkward via header-only [RapidJSON](https://rapidjson.org) and `awkward.fromiter`.
    * [ ] Explicit broadcasting functions for jagged and non-jagged arrays and scalars.
    * [ ] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old).
    * [ ] Full suite of array types:
