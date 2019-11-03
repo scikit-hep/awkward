@@ -9,6 +9,38 @@ namespace awkward {
     return tostring_part("", "", "");
   }
 
+  const std::string Content::tojson(bool pretty, int64_t maxdecimals) const {
+    if (pretty) {
+      ToJsonPrettyString builder(maxdecimals);
+      builder.beginlist();
+      tojson_part(builder);
+      builder.endlist();
+      return builder.tostring();
+    }
+    else {
+      ToJsonString builder(maxdecimals);
+      builder.beginlist();
+      tojson_part(builder);
+      builder.endlist();
+      return builder.tostring();
+    }
+  }
+
+  void Content::tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const {
+    if (pretty) {
+      ToJsonPrettyFile builder(destination, maxdecimals, buffersize);
+      builder.beginlist();
+      tojson_part(builder);
+      builder.endlist();
+    }
+    else {
+      ToJsonFile builder(destination, maxdecimals, buffersize);
+      builder.beginlist();
+      tojson_part(builder);
+      builder.endlist();
+    }
+  }
+
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
     Index64 nextstarts(1);
     Index64 nextstops(1);

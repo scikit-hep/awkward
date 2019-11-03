@@ -171,6 +171,27 @@ namespace awkward {
     items_.push_back(item);
   }
 
+  void Slice::append(const SliceAt& item) {
+    items_.push_back(item.shallow_copy());
+  }
+
+  void Slice::append(const SliceRange& item) {
+    items_.push_back(item.shallow_copy());
+  }
+
+  void Slice::append(const SliceEllipsis& item) {
+    items_.push_back(item.shallow_copy());
+  }
+
+  void Slice::append(const SliceNewAxis& item) {
+    items_.push_back(item.shallow_copy());
+  }
+
+  template <typename T>
+  void Slice::append(const SliceArrayOf<T>& item) {
+    items_.push_back(item.shallow_copy());
+  }
+
   void Slice::become_sealed() {
     assert(!sealed_);
 

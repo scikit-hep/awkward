@@ -23,13 +23,24 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_at(int64_t at) const;
     const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;
     const std::shared_ptr<Content> getitem(const Slice& where) const;
-
+    
     void null();
     void boolean(bool x);
     void integer(int64_t x);
     void real(double x);
     void beginlist();
     void endlist();
+
+    template <typename T>
+    void fill(const std::vector<T>& vector) {
+      beginlist();
+      for (auto x : vector) {
+        fill(x);
+      }
+      endlist();
+    }
+    void fill(int64_t x) { integer(x); }
+    void fill(double x) { real(x); }
 
   private:
     std::shared_ptr<Fillable> fillable_;

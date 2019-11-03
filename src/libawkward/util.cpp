@@ -8,7 +8,7 @@
 
 namespace awkward {
   namespace util {
-    void handle_error(const Error& err, const std::string classname, const Identity* id) {
+    void handle_error(const struct Error& err, const std::string classname, const Identity* id) {
       if (err.str != nullptr) {
         std::stringstream out;
         out << "in " << classname;

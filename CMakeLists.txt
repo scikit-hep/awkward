@@ -19,8 +19,9 @@ add_definitions(-DVERSION_INFO="${VERSION_INFO}")
 set(CMAKE_MACOSX_RPATH 1)
 
 file(GLOB CPU_KERNEL_SOURCES "src/cpu-kernels/*.cpp")
-file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp" "src/libawkward/array/*.cpp" "src/libawkward/fillable/*.cpp" "src/libawkward/type/*.cpp")
+file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp" "src/libawkward/array/*.cpp" "src/libawkward/fillable/*.cpp" "src/libawkward/type/*.cpp" "src/libawkward/io/*.cpp")
 include_directories(include)
+include_directories(rapidjson/include)
 
 add_subdirectory(pybind11)
 
@@ -44,6 +45,7 @@ add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects>)
 target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static)
 target_link_libraries(awkward        PRIVATE awkward-cpu-kernels-static)
 addtest(PR016 tests/test_PR016_finish_getitem_for_rawarray.cpp)
+addtest(PR019 tests/test_PR019_use_json_library.cpp)
 
 pybind11_add_module(layout src/pyawkward.cpp)
 set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET default)

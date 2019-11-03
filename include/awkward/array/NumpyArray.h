@@ -37,6 +37,7 @@ namespace awkward {
     bool isscalar() const;
     bool isempty() const;
     void* byteptr() const;
+    void* byteptr(ssize_t at) const;
     ssize_t bytelength() const;
     uint8_t getbyte(ssize_t at) const;
 
@@ -45,6 +46,7 @@ namespace awkward {
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
+    virtual void tojson_part(ToJson& builder) const;
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void checksafe() const;

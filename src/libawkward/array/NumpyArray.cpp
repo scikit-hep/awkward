@@ -29,6 +29,10 @@ namespace awkward {
     return reinterpret_cast<void*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_);
   }
 
+  void* NumpyArray::byteptr(ssize_t at) const {
+    return reinterpret_cast<void*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
+  }
+
   ssize_t NumpyArray::bytelength() const {
     if (isscalar()) {
       return itemsize_;
@@ -56,14 +60,14 @@ namespace awkward {
     if (length() <= kMaxInt32) {
       Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
       std::shared_ptr<Identity> newid(rawid);
-      Error err = awkward_new_identity32(rawid->ptr().get(), length());
+      struct Error err = awkward_new_identity32(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
     else {
       Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, length());
       std::shared_ptr<Identity> newid(rawid);
-      Error err = awkward_new_identity64(rawid->ptr().get(), length());
+      struct Error err = awkward_new_identity64(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
@@ -175,6 +179,87 @@ namespace awkward {
       out << indent << "</" << classname() << ">" << post;
     }
     return out.str();
+  }
+
+  void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
+    for (int i = 0;  i < length;  i++) {
+      builder.boolean(array[i]);
+    }
+  }
+
+  template <typename T>
+  void tojson_integer(ToJson& builder, T* array, int64_t length) {
+    for (int i = 0;  i < length;  i++) {
+      builder.integer(array[i]);
+    }
+  }
+
+  template <typename T>
+  void tojson_real(ToJson& builder, T* array, int64_t length) {
+    for (int i = 0;  i < length;  i++) {
+      builder.real(array[i]);
+    }
+  }
+
+  void NumpyArray::tojson_part(ToJson& builder) const {
+    if (ndim() == 1) {
+      if (format_.compare("d") == 0) {
+        tojson_real(builder, reinterpret_cast<double*>(byteptr()), length());
+      }
+      else if (format_.compare("f") == 0) {
+        tojson_real(builder, reinterpret_cast<float*>(byteptr()), length());
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("q") == 0) {
+#else
+      else if (format_.compare("l") == 0) {
+#endif
+        tojson_integer(builder, reinterpret_cast<int64_t*>(byteptr()), length());
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("Q") == 0) {
+#else
+      else if (format_.compare("L") == 0) {
+#endif
+        tojson_integer(builder, reinterpret_cast<uint64_t*>(byteptr()), length());
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("l") == 0) {
+#else
+      else if (format_.compare("i") == 0) {
+#endif
+        tojson_integer(builder, reinterpret_cast<int32_t*>(byteptr()), length());
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("L") == 0) {
+#else
+      else if (format_.compare("I") == 0) {
+#endif
+        tojson_integer(builder, reinterpret_cast<uint32_t*>(byteptr()), length());
+      }
+      else if (format_.compare("h") == 0) {
+        tojson_real(builder, reinterpret_cast<int16_t*>(byteptr()), length());
+      }
+      else if (format_.compare("H") == 0) {
+        tojson_real(builder, reinterpret_cast<uint16_t*>(byteptr()), length());
+      }
+      else if (format_.compare("b") == 0) {
+        tojson_real(builder, reinterpret_cast<int8_t*>(byteptr()), length());
+      }
+      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+        tojson_real(builder, reinterpret_cast<uint8_t*>(byteptr()), length());
+      }
+      else {
+        throw std::invalid_argument(std::string("cannot convert Numpy format \"") + format_ + std::string("\" into JSON"));
+      }
+    }
+    else {
+      for (int64_t i = 0;  i < length();  i++) {
+        builder.beginlist();
+        getitem_at_unsafe(i).get()->tojson_part(builder);
+        builder.endlist();
+      }
+    }
   }
 
   int64_t NumpyArray::length() const {
@@ -289,7 +374,7 @@ namespace awkward {
   const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
     assert(!isscalar());
     Index64 carry(shape_[0]);
-    Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
+    struct Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
     util::handle_error(err, classname(), id_.get());
     return getitem_next(head, tail, carry, advanced, shape_[0], strides_[0], false).shallow_copy();
   }
@@ -298,7 +383,7 @@ namespace awkward {
     assert(!isscalar());
 
     std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
-    Error err = awkward_numpyarray_getitem_next_null_64(
+    struct Error err = awkward_numpyarray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
       carry.length(),
@@ -367,7 +452,7 @@ namespace awkward {
     }
     else {
       Index64 bytepos(shape_[0]);
-      Error err = awkward_numpyarray_contiguous_init_64(bytepos.ptr().get(), shape_[0], strides_[0]);
+      struct Error err = awkward_numpyarray_contiguous_init_64(bytepos.ptr().get(), shape_[0], strides_[0]);
       util::handle_error(err, classname(), id_.get());
       return contiguous_next(bytepos);
     }
@@ -376,7 +461,7 @@ namespace awkward {
   const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
     if (iscontiguous()) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
-      Error err = awkward_numpyarray_contiguous_copy_64(
+      struct Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         bytepos.length(),
@@ -389,7 +474,7 @@ namespace awkward {
 
     else if (shape_.size() == 1) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*itemsize_)], awkward::util::array_deleter<uint8_t>());
-      Error err = awkward_numpyarray_contiguous_copy_64(
+      struct Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         bytepos.length(),
@@ -405,7 +490,7 @@ namespace awkward {
       NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
 
       Index64 nextbytepos(bytepos.length()*shape_[1]);
-      Error err = awkward_numpyarray_contiguous_next_64(
+      struct Error err = awkward_numpyarray_contiguous_next_64(
         nextbytepos.ptr().get(),
         bytepos.ptr().get(),
         bytepos.length(),
@@ -522,7 +607,7 @@ namespace awkward {
   const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
     if (head.get() == nullptr) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*stride)], awkward::util::array_deleter<uint8_t>());
-      Error err = awkward_numpyarray_getitem_next_null_64(
+      struct Error err = awkward_numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
@@ -564,7 +649,7 @@ namespace awkward {
       }
 
       Index64 nextcarry(carry.length());
-      Error err = awkward_numpyarray_getitem_next_at_64(
+      struct Error err = awkward_numpyarray_getitem_next_at_64(
         nextcarry.ptr().get(),
         carry.ptr().get(),
         carry.length(),
@@ -604,7 +689,7 @@ namespace awkward {
 
       if (advanced.length() == 0) {
         Index64 nextcarry(carry.length()*lenhead);
-        Error err = awkward_numpyarray_getitem_next_range_64(
+        struct Error err = awkward_numpyarray_getitem_next_range_64(
           nextcarry.ptr().get(),
           carry.ptr().get(),
           carry.length(),
@@ -625,7 +710,7 @@ namespace awkward {
       else {
         Index64 nextcarry(carry.length()*lenhead);
         Index64 nextadvanced(carry.length()*lenhead);
-        Error err = awkward_numpyarray_getitem_next_range_advanced_64(
+        struct Error err = awkward_numpyarray_getitem_next_range_advanced_64(
           nextcarry.ptr().get(),
           nextadvanced.ptr().get(),
           carry.ptr().get(),
@@ -688,7 +773,7 @@ namespace awkward {
       Slice nexttail = tail.tail();
 
       Index64 flathead = array->ravel();
-      Error err = awkward_regularize_arrayslice_64(
+      struct Error err = awkward_regularize_arrayslice_64(
         flathead.ptr().get(),
         flathead.length(),
         shape_[1]);
@@ -697,7 +782,7 @@ namespace awkward {
       if (advanced.length() == 0) {
         Index64 nextcarry(carry.length()*flathead.length());
         Index64 nextadvanced(carry.length()*flathead.length());
-        Error err = awkward_numpyarray_getitem_next_array_64(
+        struct Error err = awkward_numpyarray_getitem_next_array_64(
           nextcarry.ptr().get(),
           nextadvanced.ptr().get(),
           carry.ptr().get(),
@@ -725,7 +810,7 @@ namespace awkward {
 
       else {
         Index64 nextcarry(carry.length());
-        Error err = awkward_numpyarray_getitem_next_array_advanced_64(
+        struct Error err = awkward_numpyarray_getitem_next_array_advanced_64(
           nextcarry.ptr().get(),
           carry.ptr().get(),
           advanced.ptr().get(),

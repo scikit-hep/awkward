@@ -10,6 +10,7 @@ trigger:
       - .ci/azure-deploy-awkward.yml
       - .ci/linux-build.sh
       - docs/*
+      - studies/*
 
 pr:
   branches:

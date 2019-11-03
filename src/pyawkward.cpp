@@ -1,5 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <cstdio>
 #include <stdexcept>
 
 #include <pybind11/pybind11.h>
@@ -23,6 +24,8 @@
 #include "awkward/type/ListType.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/UnionType.h"
+#include "awkward/io/json.h"
+#include "awkward/io/root.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
@@ -457,6 +460,31 @@ py::object getitem(T& self, py::object obj) {
   return box(self.getitem(toslice(obj)));
 }
 
+void fillable_fill(ak::FillableArray& self, py::object obj) {
+  if (py::isinstance<py::bool_>(obj)) {
+    self.boolean(obj.cast<bool>());
+  }
+  else if (py::isinstance<py::int_>(obj)) {
+    self.integer(obj.cast<int64_t>());
+  }
+  else if (py::isinstance<py::float_>(obj)) {
+    self.real(obj.cast<double>());
+  }
+  // FIXME: strings, dicts...
+  else if (py::isinstance<py::sequence>(obj)) {
+    py::sequence seq = obj.cast<py::sequence>();
+    self.beginlist();
+    for (auto x : seq) {
+      fillable_fill(self, x);
+    }
+    self.endlist();
+    return;
+  }
+  else {
+    throw std::invalid_argument(std::string("cannot convert ") + obj.attr("__repr__")().cast<std::string>() + std::string(" to an array element"));
+  }
+}
+
 py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name) {
   return (py::class_<ak::FillableArray>(m, name.c_str())
       .def(py::init([](int64_t initial, double resize) -> ak::FillableArray {
@@ -478,6 +506,7 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("real", &ak::FillableArray::real)
       .def("beginlist", &ak::FillableArray::beginlist)
       .def("endlist", &ak::FillableArray::endlist)
+      .def("fill", &fillable_fill)
   );
 }
 
@@ -602,6 +631,44 @@ ak::Iterator iter(T& self) {
   return ak::Iterator(self.shallow_copy());
 }
 
+int64_t check_maxdecimals(py::object maxdecimals) {
+  if (maxdecimals.is(py::none())) {
+    return -1;
+  }
+  try {
+    return maxdecimals.cast<int64_t>();
+  }
+  catch (py::cast_error err) {
+    throw std::invalid_argument("maxdecimals must be None or an integer");
+  }
+}
+
+template <typename T>
+std::string tojson_string(T& self, bool pretty, py::object maxdecimals) {
+  return self.tojson(pretty, check_maxdecimals(maxdecimals));
+}
+
+template <typename T>
+void tojson_file(T& self, std::string destination, bool pretty, py::object maxdecimals, int64_t buffersize) {
+#ifdef _MSC_VER
+  FILE* file;
+  if (fopen_s(&file, destination.c_str(), "wb") != 0) {
+#else
+  FILE* file = fopen(destination.c_str(), "wb");
+  if (file == nullptr) {
+#endif
+    throw std::invalid_argument(std::string("file \"") + destination + std::string("\" could not be opened for writing"));
+  }
+  try {
+    self.tojson(file, pretty, check_maxdecimals(maxdecimals), buffersize);
+  }
+  catch (...) {
+    fclose(file);
+    throw;
+  }
+  fclose(file);
+}
+
 template <typename T>
 py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
   return x.def("__repr__", &repr<T>)
@@ -614,7 +681,9 @@ py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
          })
          .def("__len__", &len<T>)
          .def("__getitem__", &getitem<T>)
-         .def("__iter__", &iter<T>);
+         .def("__iter__", &iter<T>)
+         .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
+         .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536);
 }
 
 py::class_<ak::Content> make_Content(py::handle m, std::string name) {
@@ -738,4 +807,45 @@ PYBIND11_MODULE(layout, m) {
 
   make_ListOffsetArrayOf<int32_t>(m, "ListOffsetArray32");
   make_ListOffsetArrayOf<int64_t>(m, "ListOffsetArray64");
+
+  m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
+    bool isarray = false;
+    for (char const &x: source) {
+      if (x != 9  &&  x != 10  &&  x != 13  &&  x != 32) {  // whitespace
+        if (x == 91) {       // opening square bracket
+          isarray = true;
+        }
+        break;
+      }
+    }
+    if (isarray) {
+      return box(ak::FromJsonString(source.c_str(), ak::FillableOptions(initial, resize)));
+    }
+    else {
+#ifdef _MSC_VER
+      FILE* file;
+      if (fopen_s(&file, source.c_str(), "rb") != 0) {
+#else
+      FILE* file = fopen(source.c_str(), "rb");
+      if (file == nullptr) {
+#endif
+        throw std::invalid_argument(std::string("file \"") + source + std::string("\" could not be opened for reading"));
+      }
+      std::shared_ptr<ak::Content> out(nullptr);
+      try {
+        out = FromJsonFile(file, ak::FillableOptions(initial, resize), buffersize);
+      }
+      catch (...) {
+        fclose(file);
+        throw;
+      }
+      fclose(file);
+      return box(out);
+    }
+  }, py::arg("source"), py::arg("initial") = 1024, py::arg("resize") = 2.0, py::arg("buffersize") = 65536);
+
+  m.def("fromroot_nestedvector", [](ak::Index64& byteoffsets, ak::NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, int64_t initial, double resize) -> py::object {
+      return box(FromROOT_nestedvector(byteoffsets, rawdata, depth, itemsize, format, ak::FillableOptions(initial, resize)));
+  }, py::arg("byteoffsets"), py::arg("rawdata"), py::arg("depth"), py::arg("itemsize"), py::arg("format"), py::arg("initial") = 1024, py::arg("resize") = 2.0);
+
 }

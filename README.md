@@ -119,6 +119,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
    * [ ] Translation to and from Apache Arrow and Parquet in C++.
    * [ ] Persistence to any medium that stores named binary blobs, as before, but accessible via C++ (especially for writing). The persistence format might differ slightly from the existing one (break backward compatibility, if needed).
    * [ ] Universal `array.get[...]` as a softer form of `array[...]` that skips non-existent indexes, rather than raising errors.
+   * [ ] Explicit interface with [NumExpr](https://numexpr.readthedocs.io/en/latest/index.html).
 
 ### At some point in the future
 
