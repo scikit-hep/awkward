@@ -83,7 +83,8 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [ ] `VirtualArray`: same as the old version, including caching, but taking C++11 lambda functions for materialization, get-cache, and put-cache. The pybind11 layer will connect this to Python callables.
       * [ ] `ObjectArray`: same as the old version, but taking a C++11 lambda function to produce its output. The pybind11 layer will connect this to Python callables.
    * [ ] Describe high-level types using [datashape](https://datashape.readthedocs.io/en/latest/) and possibly also an in-house schema. (Emit datashape _strings_ from C++.)
-   * [ ] Describe low-level layouts independently of filled arrays.
+   * [ ] Describe mid-level "persistence types" with no lengths, somewhat minimal JSON, optional dtypes/compression.
+   * [ ] Describe low-level layouts independently of filled arrays?
    * [ ] Layer 1 interface `Array`:
       * [ ] Pass through to the layout classes in Python and Numba.
       * [ ] Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before).
