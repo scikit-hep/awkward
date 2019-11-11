@@ -20,6 +20,18 @@ namespace awkward {
 
   void EmptyArray::setid() { }
 
+  const std::string EmptyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+    std::stringstream out;
+    out << indent << pre << "<" << classname();
+    if (id_.get() != nullptr) {
+      out << ">\n" << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
+    }
+    else {
+      out << "/>" << post;
+    }
+    return out.str();
+  }
+
   void EmptyArray::tojson_part(ToJson& builder) const {
     builder.beginlist();
     builder.endlist();
