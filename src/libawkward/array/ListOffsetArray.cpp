@@ -16,6 +16,9 @@ namespace awkward {
     if (std::is_same<T, int32_t>::value) {
       return "ListOffsetArray32";
     }
+    else if (std::is_same<T, uint32_t>::value) {
+      return "ListOffsetArrayU32";
+    }
     else if (std::is_same<T, int64_t>::value) {
       return "ListOffsetArray64";
     }
@@ -90,8 +93,8 @@ namespace awkward {
     id_ = id;
   }
 
-  template <>
-  void ListOffsetArrayOf<int64_t>::setid(const std::shared_ptr<Identity> id) {
+  template <typename T>
+  void ListOffsetArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
     if (id.get() == nullptr) {
       content_.get()->setid(id);
     }
@@ -105,7 +108,7 @@ namespace awkward {
       if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
         Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
         std::shared_ptr<Identity> subid(rawsubid);
-        struct Error err = awkward_identity64_from_listarray64(
+        struct Error err = util::awkward_identity64_from_listarray<T>(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
           starts.ptr().get(),
