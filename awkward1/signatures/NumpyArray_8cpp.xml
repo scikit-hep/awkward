@@ -74,7 +74,92 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="73" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="73" bodyend="97"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="77" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="77" bodyend="101"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1aee7ebf77ca27982c93a28eb452a2728f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void awkward::tojson_boolean</definition>
+        <argsstring>(ToJson &amp;builder, bool *array, int64_t length)</argsstring>
+        <name>tojson_boolean</name>
+        <param>
+          <type>ToJson &amp;</type>
+          <declname>builder</declname>
+        </param>
+        <param>
+          <type>bool *</type>
+          <declname>array</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="184" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="184" bodyend="188"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1a30008d57ae076e81a759b7314fea35bc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward::tojson_integer</definition>
+        <argsstring>(ToJson &amp;builder, T *array, int64_t length)</argsstring>
+        <name>tojson_integer</name>
+        <param>
+          <type>ToJson &amp;</type>
+          <declname>builder</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>array</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="191" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="191" bodyend="195"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1a481afc11c18742f08ad0935f0252c41d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void awkward::tojson_real</definition>
+        <argsstring>(ToJson &amp;builder, T *array, int64_t length)</argsstring>
+        <name>tojson_real</name>
+        <param>
+          <type>ToJson &amp;</type>
+          <declname>builder</declname>
+        </param>
+        <param>
+          <type>T *</type>
+          <declname>array</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="198" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="198" bodyend="202"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1adf8a5960d7cc8e8447e7357e7416a1dd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>const std::vector&lt; ssize_t &gt;</type>
@@ -91,7 +176,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="324" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="324" bodyend="333"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="409" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="409" bodyend="418"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1aadc1072e0733b797c5e796c493958e92" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>const std::vector&lt; ssize_t &gt;</type>
@@ -108,7 +193,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="335" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="335" bodyend="342"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="420" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="420" bodyend="427"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

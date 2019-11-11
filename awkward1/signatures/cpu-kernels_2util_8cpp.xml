@@ -21,9 +21,9 @@
       </node>
     </incdepgraph>
       <sectiondef kind="func">
-      <memberdef kind="function" id="cpu-kernels_2util_8cpp_1a21deb91e044295ebec4e533139c804ba" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>Error</type>
-        <definition>Error success</definition>
+      <memberdef kind="function" id="cpu-kernels_2util_8cpp_1aa97e28bbb2153e79581b030cd1b7c9ad" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>struct Error</type>
+        <definition>struct Error success</definition>
         <argsstring>()</argsstring>
         <name>success</name>
         <briefdescription>
@@ -32,11 +32,11 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/util.cpp" line="7" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="7" bodyend="14"/>
+        <location file="src/cpu-kernels/util.cpp" line="55" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="7" bodyend="14"/>
       </memberdef>
-      <memberdef kind="function" id="cpu-kernels_2util_8cpp_1a525c8383a6f1519e9c905538a0def33f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>Error</type>
-        <definition>Error failure</definition>
+      <memberdef kind="function" id="cpu-kernels_2util_8cpp_1a06d96ca5e0b2c7c68b2cc2ee9971d208" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>struct Error</type>
+        <definition>struct Error failure</definition>
         <argsstring>(const char *str, int64_t location, int64_t attempt)</argsstring>
         <name>failure</name>
         <param>
@@ -57,7 +57,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/util.cpp" line="16" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="16" bodyend="23"/>
+        <location file="src/cpu-kernels/util.cpp" line="55" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="16" bodyend="23"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

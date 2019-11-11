@@ -11,11 +11,17 @@
 namespace awkward {
   template <typename T>
   const std::string IndexOf<T>::classname() const {
-    if (std::is_same<T, uint8_t>::value) {
+    if (std::is_same<T, int8_t>::value) {
       return "Index8";
+    }
+    else if (std::is_same<T, uint8_t>::value) {
+      return "IndexU8";
     }
     else if (std::is_same<T, int32_t>::value) {
       return "Index32";
+    }
+    else if (std::is_same<T, uint32_t>::value) {
+      return "IndexU32";
     }
     else if (std::is_same<T, int64_t>::value) {
       return "Index64";
@@ -106,6 +112,8 @@ namespace awkward {
   }
 
   template class IndexOf<int8_t>;
+  template class IndexOf<uint8_t>;
   template class IndexOf<int32_t>;
+  template class IndexOf<uint32_t>;
   template class IndexOf<int64_t>;
 }

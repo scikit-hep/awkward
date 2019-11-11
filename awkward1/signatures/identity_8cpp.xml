@@ -15,14 +15,14 @@
       </node>
     </incdepgraph>
       <sectiondef kind="func">
-      <memberdef kind="function" id="identity_8cpp_1a7dd39cb44c3126176d60647ee1b1ac07" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="identity_8cpp_1aa436913b7f9184b42539c93fbf9d1821" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>Error</type>
-        <definition>Error awkward_new_identity</definition>
+        <type>ERROR</type>
+        <definition>ERROR awkward_new_identity</definition>
         <argsstring>(T *toptr, int64_t length)</argsstring>
         <name>awkward_new_identity</name>
         <param>
@@ -41,9 +41,9 @@
         </inbodydescription>
         <location file="src/cpu-kernels/identity.cpp" line="6" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="6" bodyend="11"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1a692cff41e21761fe205e172218679306" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>Error</type>
-        <definition>Error awkward_new_identity32</definition>
+      <memberdef kind="function" id="identity_8cpp_1a974150042f8694b3a24ff623c2d3832c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_new_identity32</definition>
         <argsstring>(int32_t *toptr, int64_t length)</argsstring>
         <name>awkward_new_identity32</name>
         <param>
@@ -62,9 +62,9 @@
         </inbodydescription>
         <location file="src/cpu-kernels/identity.cpp" line="12" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="12" bodyend="14"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1ada6b7237845c67c233026820565bf73d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>Error</type>
-        <definition>Error awkward_new_identity64</definition>
+      <memberdef kind="function" id="identity_8cpp_1aef93142b307b31ee691d6cccb8e22c77" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_new_identity64</definition>
         <argsstring>(int64_t *toptr, int64_t length)</argsstring>
         <name>awkward_new_identity64</name>
         <param>
@@ -83,9 +83,9 @@
         </inbodydescription>
         <location file="src/cpu-kernels/identity.cpp" line="15" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="15" bodyend="17"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1a8bf3c663a05ba8517386251696bd6e33" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>Error</type>
-        <definition>Error awkward_identity32_to_identity64</definition>
+      <memberdef kind="function" id="identity_8cpp_1a57aff60803a08066d4d7b257fcc36726" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identity32_to_identity64</definition>
         <argsstring>(int64_t *toptr, const int32_t *fromptr, int64_t length)</argsstring>
         <name>awkward_identity32_to_identity64</name>
         <param>
@@ -108,7 +108,7 @@
         </inbodydescription>
         <location file="src/cpu-kernels/identity.cpp" line="19" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="19" bodyend="24"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1a7940e8286413a007a413f733f95c3c29" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="identity_8cpp_1ae93ca85c3f8915f576a26e7d2853a57e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename ID</type>
@@ -117,8 +117,8 @@
             <type>typename T</type>
           </param>
         </templateparamlist>
-        <type>Error</type>
-        <definition>Error awkward_identity_from_listarray</definition>
+        <type>ERROR</type>
+        <definition>ERROR awkward_identity_from_listarray</definition>
         <argsstring>(ID *toptr, const ID *fromptr, const T *fromstarts, const T *fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
         <name>awkward_identity_from_listarray</name>
         <param>
@@ -169,9 +169,9 @@
         </inbodydescription>
         <location file="src/cpu-kernels/identity.cpp" line="27" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="27" bodyend="45"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1a708cbc8cbf2212d7eb81f9e91c1a625c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>Error</type>
-        <definition>Error awkward_identity32_from_listarray32</definition>
+      <memberdef kind="function" id="identity_8cpp_1acd5da5a40673ec54b9c598f9c863f5a5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identity32_from_listarray32</definition>
         <argsstring>(int32_t *toptr, const int32_t *fromptr, const int32_t *fromstarts, const int32_t *fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
         <name>awkward_identity32_from_listarray32</name>
         <param>
@@ -222,9 +222,9 @@
         </inbodydescription>
         <location file="src/cpu-kernels/identity.cpp" line="46" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="46" bodyend="48"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1afd07f9e094780b2cae299d896b4bf0b8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>Error</type>
-        <definition>Error awkward_identity64_from_listarray32</definition>
+      <memberdef kind="function" id="identity_8cpp_1ac985473cbcec28806ec563a55fbe2fc4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identity64_from_listarray32</definition>
         <argsstring>(int64_t *toptr, const int64_t *fromptr, const int32_t *fromstarts, const int32_t *fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
         <name>awkward_identity64_from_listarray32</name>
         <param>
@@ -275,9 +275,62 @@
         </inbodydescription>
         <location file="src/cpu-kernels/identity.cpp" line="49" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="49" bodyend="51"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1a87f3652476301a77cb3d42082664dbc1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type>Error</type>
-        <definition>Error awkward_identity64_from_listarray64</definition>
+      <memberdef kind="function" id="identity_8cpp_1a3e2d912b77fbceff090cd2022d7e8255" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identity64_from_listarrayU32</definition>
+        <argsstring>(int64_t *toptr, const int64_t *fromptr, const uint32_t *fromstarts, const uint32_t *fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
+        <name>awkward_identity64_from_listarrayU32</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identity.cpp" line="52" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="52" bodyend="54"/>
+      </memberdef>
+      <memberdef kind="function" id="identity_8cpp_1afc1d24571ea0d2a0b31ba58e626f5f4a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identity64_from_listarray64</definition>
         <argsstring>(int64_t *toptr, const int64_t *fromptr, const int64_t *fromstarts, const int64_t *fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
         <name>awkward_identity64_from_listarray64</name>
         <param>
@@ -326,7 +379,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/identity.cpp" line="52" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="52" bodyend="54"/>
+        <location file="src/cpu-kernels/identity.cpp" line="55" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="55" bodyend="57"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

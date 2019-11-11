@@ -48,8 +48,9 @@ namespace awkward {
     const std::shared_ptr<Content> content_;
   };
 
-  typedef ListArrayOf<int32_t> ListArray32;
-  typedef ListArrayOf<int64_t> ListArray64;
+  typedef ListArrayOf<int32_t>  ListArray32;
+  typedef ListArrayOf<uint32_t> ListArrayU32;
+  typedef ListArrayOf<int64_t>  ListArray64;
 }
 
 #endif // AWKWARD_LISTARRAY_H_

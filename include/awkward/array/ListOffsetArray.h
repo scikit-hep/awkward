@@ -45,8 +45,9 @@ namespace awkward {
     const std::shared_ptr<Content> content_;
   };
 
-  typedef ListOffsetArrayOf<int32_t> ListOffsetArray32;
-  typedef ListOffsetArrayOf<int64_t> ListOffsetArray64;
+  typedef ListOffsetArrayOf<int32_t>  ListOffsetArray32;
+  typedef ListOffsetArrayOf<uint32_t> ListOffsetArrayU32;
+  typedef ListOffsetArrayOf<int64_t>  ListOffsetArray64;
 }
 
 #endif // AWKWARD_LISTOFFSETARRAY_H_
