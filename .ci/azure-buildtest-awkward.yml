@@ -28,11 +28,11 @@ jobs:
         "py27-32bit":
           python.version: "2.7"
           python.architecture: "x86"
-          numpy.version: "latest"
+          numpy.version: "1.16.5"
         "py27-64bit":
           python.version: "2.7"
           python.architecture: "x64"
-          numpy.version: "latest"
+          numpy.version: "1.16.5"
         "py35-32bit":
           python.version: "3.5"
           python.architecture: "x86"
@@ -55,6 +55,14 @@ jobs:
           numpy.version: "latest"
         "py37-64bit":
           python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38-32bit":
+          python.version: "3.8"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py38-64bit":
+          python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
 
@@ -90,11 +98,7 @@ jobs:
         "py27":
           python.version: "2.7"
           python.architecture: "x64"
-          numpy.version: "latest"
-        "py34":
-          python.version: "3.4"
-          python.architecture: "x64"
-          numpy.version: "latest"
+          numpy.version: "1.16.5"
         "py35":
           python.version: "3.5"
           python.architecture: "x64"
@@ -105,6 +109,10 @@ jobs:
           numpy.version: "latest"
         "py37":
           python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38":
+          python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
 
@@ -144,7 +152,7 @@ jobs:
         "py27-np*":
           python.version: "2.7"
           python.architecture: "x64"
-          numpy.version: "latest"
+          numpy.version: "1.16.5"
         "py34-np13":
           python.version: "3.4"
           python.architecture: "x64"
@@ -152,7 +160,7 @@ jobs:
         "py34-np*":
           python.version: "3.4"
           python.architecture: "x64"
-          numpy.version: "latest"
+          numpy.version: "1.16.5"
         "py35-np13":
           python.version: "3.5"
           python.architecture: "x64"
@@ -175,6 +183,10 @@ jobs:
           numpy.version: "1.14.5"
         "py37-np*":
           python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38-np*":
+          python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
 
