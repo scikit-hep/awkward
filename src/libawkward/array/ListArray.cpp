@@ -16,6 +16,9 @@ namespace awkward {
     if (std::is_same<T, int32_t>::value) {
       return "ListArray32";
     }
+    else if (std::is_same<T, uint32_t>::value) {
+      return "ListArrayU32";
+    }
     else if (std::is_same<T, int64_t>::value) {
       return "ListArray64";
     }
@@ -78,8 +81,19 @@ namespace awkward {
     id_ = id;
   }
 
+  template <typename T>
+  struct Error awkward_identity64_from_listarray(int64_t* toptr, const int64_t* fromptr, const T* fromstarts, const T* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
   template <>
-  void ListArrayOf<int64_t>::setid(const std::shared_ptr<Identity> id) {
+  struct Error awkward_identity64_from_listarray<uint32_t>(int64_t* toptr, const int64_t* fromptr, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+    return awkward_identity64_from_listarrayU32(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
+  }
+  template <>
+  struct Error awkward_identity64_from_listarray<int64_t>(int64_t* toptr, const int64_t* fromptr, const int64_t* fromstarts, const int64_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+    return awkward_identity64_from_listarray64(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
+  }
+
+  template <typename T>
+  void ListArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
     if (id.get() == nullptr) {
       content_.get()->setid(id);
     }
@@ -91,7 +105,7 @@ namespace awkward {
       if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
         Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
         std::shared_ptr<Identity> subid(rawsubid);
-        struct Error err = awkward_identity64_from_listarray64(
+        struct Error err = awkward_identity64_from_listarray<T>(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
           starts_.ptr().get(),

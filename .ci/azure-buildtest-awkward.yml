@@ -149,7 +149,7 @@ jobs:
           python.version: "2.7"
           python.architecture: "x64"
           numpy.version: "1.13.1"
-        "py27-np*":
+        "py27-np16":
           python.version: "2.7"
           python.architecture: "x64"
           numpy.version: "1.16.5"
@@ -157,7 +157,7 @@ jobs:
           python.version: "3.4"
           python.architecture: "x64"
           numpy.version: "1.13.1"
-        "py34-np*":
+        "py34-np16":
           python.version: "3.4"
           python.architecture: "x64"
           numpy.version: "1.16.5"

@@ -72,11 +72,11 @@ jobs:
         "py27-32bit":
           python.version: "2.7"
           python.architecture: "x86"
-          numpy.version: "latest"
+          numpy.version: "1.16.5"
         "py27-64bit":
           python.version: "2.7"
           python.architecture: "x64"
-          numpy.version: "latest"
+          numpy.version: "1.16.5"
         "py35-32bit":
           python.version: "3.5"
           python.architecture: "x86"
@@ -99,6 +99,14 @@ jobs:
           numpy.version: "latest"
         "py37-64bit":
           python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38-32bit":
+          python.version: "3.8"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py38-64bit":
+          python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
 
@@ -150,6 +158,10 @@ jobs:
           python.version: "3.7"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py38":
+          python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
     steps:
       - checkout: self
@@ -164,13 +176,16 @@ jobs:
       - script: |
           case $(python.version) in
           2.7)
-            FULL_VERSION=2.7.16
+            FULL_VERSION=2.7.17
             ;;
           3.6)
-            FULL_VERSION=3.6.8
+            FULL_VERSION=3.6.9
             ;;
           3.7)
-            FULL_VERSION=3.7.3
+            FULL_VERSION=3.7.5
+            ;;
+          3.8)
+            FULL_VERSION=3.8.0
             ;;
           esac
 

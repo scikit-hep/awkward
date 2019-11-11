@@ -51,7 +51,6 @@ namespace awkward {
   typedef IndexOf<int32_t>  Index32;
   typedef IndexOf<uint32_t> IndexU32;
   typedef IndexOf<int64_t>  Index64;
-  typedef IndexOf<uint64_t> IndexU64;
 }
 
 #endif // AWKWARD_INDEX_H_
