@@ -80,10 +80,16 @@ py::object box(std::shared_ptr<ak::Content> content) {
   else if (ak::ListArray32* raw = dynamic_cast<ak::ListArray32*>(content.get())) {
     return py::cast(*raw);
   }
+  else if (ak::ListArrayU32* raw = dynamic_cast<ak::ListArrayU32*>(content.get())) {
+    return py::cast(*raw);
+  }
   else if (ak::ListArray64* raw = dynamic_cast<ak::ListArray64*>(content.get())) {
     return py::cast(*raw);
   }
   else if (ak::ListOffsetArray32* raw = dynamic_cast<ak::ListOffsetArray32*>(content.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::ListOffsetArrayU32* raw = dynamic_cast<ak::ListOffsetArrayU32*>(content.get())) {
     return py::cast(*raw);
   }
   else if (ak::ListOffsetArray64* raw = dynamic_cast<ak::ListOffsetArray64*>(content.get())) {
@@ -147,11 +153,19 @@ std::shared_ptr<ak::Content> unbox_content(py::object obj) {
   }
   catch (py::cast_error err) { }
   try {
+    return obj.cast<ak::ListArrayU32*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
     return obj.cast<ak::ListArray64*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::ListOffsetArray32*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::ListOffsetArrayU32*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   try {
@@ -777,9 +791,11 @@ PYBIND11_MODULE(layout, m) {
   m.attr("__version__") = "dev";
 #endif
 
-  make_IndexOf<int8_t>(m,  "Index8");
-  make_IndexOf<int32_t>(m, "Index32");
-  make_IndexOf<int64_t>(m, "Index64");
+  make_IndexOf<int8_t>(m,   "Index8");
+  make_IndexOf<uint8_t>(m,  "IndexU8");
+  make_IndexOf<int32_t>(m,  "Index32");
+  make_IndexOf<uint32_t>(m, "IndexU32");
+  make_IndexOf<int64_t>(m,  "Index64");
 
   make_IdentityOf<int32_t>(m, "Identity32");
   make_IdentityOf<int64_t>(m, "Identity64");
@@ -802,11 +818,13 @@ PYBIND11_MODULE(layout, m) {
 
   make_NumpyArray(m, "NumpyArray");
 
-  make_ListArrayOf<int32_t>(m, "ListArray32");
-  make_ListArrayOf<int64_t>(m, "ListArray64");
+  make_ListArrayOf<int32_t>(m,  "ListArray32");
+  make_ListArrayOf<uint32_t>(m, "ListArrayU32");
+  make_ListArrayOf<int64_t>(m,  "ListArray64");
 
-  make_ListOffsetArrayOf<int32_t>(m, "ListOffsetArray32");
-  make_ListOffsetArrayOf<int64_t>(m, "ListOffsetArray64");
+  make_ListOffsetArrayOf<int32_t>(m,  "ListOffsetArray32");
+  make_ListOffsetArrayOf<uint32_t>(m, "ListOffsetArrayU32");
+  make_ListOffsetArrayOf<int64_t>(m,  "ListOffsetArray64");
 
   m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;
