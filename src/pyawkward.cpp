@@ -15,6 +15,7 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/array/EmptyArray.h"
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
@@ -782,6 +783,16 @@ py::class_<ak::ListOffsetArrayOf<T>, ak::Content> make_ListOffsetArrayOf(py::han
   );
 }
 
+/////////////////////////////////////////////////////////////// EmptyArray
+
+py::class_<ak::EmptyArray, ak::Content> make_EmptyArray(py::handle m, std::string name) {
+  return content(py::class_<ak::EmptyArray, ak::Content>(m, name.c_str())
+      .def(py::init([](py::object id) -> ak::EmptyArray {
+        return ak::EmptyArray(unbox_id(id));
+      }), py::arg("id") = py::none())
+  );
+}
+
 /////////////////////////////////////////////////////////////// module
 
 PYBIND11_MODULE(layout, m) {
@@ -825,6 +836,8 @@ PYBIND11_MODULE(layout, m) {
   make_ListOffsetArrayOf<int32_t>(m,  "ListOffsetArray32");
   make_ListOffsetArrayOf<uint32_t>(m, "ListOffsetArrayU32");
   make_ListOffsetArrayOf<int64_t>(m,  "ListOffsetArray64");
+
+  make_EmptyArray(m, "EmptyArray");
 
   m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;
