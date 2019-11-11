@@ -49,10 +49,12 @@ namespace awkward {
 
   const std::shared_ptr<Content> EmptyArray::getitem_at(int64_t at) const {
     util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+    return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_at_unsafe(int64_t at) const {
     util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+    return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_range(int64_t start, int64_t stop) const {
