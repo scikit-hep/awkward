@@ -46,6 +46,10 @@ namespace awkward {
       return awkward_listarray32_getitem_next_at_64(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, at);
     }
     template <>
+    Error awkward_listarray_getitem_next_at_64<uint32_t>(int64_t* tocarry, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at) {
+      return awkward_listarrayU32_getitem_next_at_64(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, at);
+    }
+    template <>
     Error awkward_listarray_getitem_next_at_64<int64_t>(int64_t* tocarry, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at) {
       return awkward_listarray64_getitem_next_at_64(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, at);
     }
@@ -53,6 +57,10 @@ namespace awkward {
     template <>
     Error awkward_listarray_getitem_next_range_carrylength<int32_t>(int64_t* carrylength, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
       return awkward_listarray32_getitem_next_range_carrylength(carrylength, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, start, stop, step);
+    }
+    template <>
+    Error awkward_listarray_getitem_next_range_carrylength<uint32_t>(int64_t* carrylength, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
+      return awkward_listarrayU32_getitem_next_range_carrylength(carrylength, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, start, stop, step);
     }
     template <>
     Error awkward_listarray_getitem_next_range_carrylength<int64_t>(int64_t* carrylength, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
@@ -64,6 +72,10 @@ namespace awkward {
       return awkward_listarray32_getitem_next_range_64(tooffsets, tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, start, stop, step);
     }
     template <>
+    Error awkward_listarray_getitem_next_range_64<uint32_t>(uint32_t* tooffsets, int64_t* tocarry, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
+      return awkward_listarrayU32_getitem_next_range_64(tooffsets, tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, start, stop, step);
+    }
+    template <>
     Error awkward_listarray_getitem_next_range_64<int64_t>(int64_t* tooffsets, int64_t* tocarry, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
       return awkward_listarray64_getitem_next_range_64(tooffsets, tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, start, stop, step);
     }
@@ -71,6 +83,10 @@ namespace awkward {
     template <>
     Error awkward_listarray_getitem_next_range_counts_64<int32_t>(int64_t* total, const int32_t* fromoffsets, int64_t lenstarts) {
       return awkward_listarray32_getitem_next_range_counts_64(total, fromoffsets, lenstarts);
+    }
+    template <>
+    Error awkward_listarray_getitem_next_range_counts_64<uint32_t>(int64_t* total, const uint32_t* fromoffsets, int64_t lenstarts) {
+      return awkward_listarrayU32_getitem_next_range_counts_64(total, fromoffsets, lenstarts);
     }
     template <>
     Error awkward_listarray_getitem_next_range_counts_64<int64_t>(int64_t* total, const int64_t* fromoffsets, int64_t lenstarts) {
@@ -82,6 +98,10 @@ namespace awkward {
       return awkward_listarray32_getitem_next_range_spreadadvanced_64(toadvanced, fromadvanced, fromoffsets, lenstarts);
     }
     template <>
+    Error awkward_listarray_getitem_next_range_spreadadvanced_64<uint32_t>(int64_t* toadvanced, const int64_t* fromadvanced, const uint32_t* fromoffsets, int64_t lenstarts) {
+      return awkward_listarrayU32_getitem_next_range_spreadadvanced_64(toadvanced, fromadvanced, fromoffsets, lenstarts);
+    }
+    template <>
     Error awkward_listarray_getitem_next_range_spreadadvanced_64<int64_t>(int64_t* toadvanced, const int64_t* fromadvanced, const int64_t* fromoffsets, int64_t lenstarts) {
       return awkward_listarray64_getitem_next_range_spreadadvanced_64(toadvanced, fromadvanced, fromoffsets, lenstarts);
     }
@@ -89,6 +109,10 @@ namespace awkward {
     template <>
     Error awkward_listarray_getitem_next_array_64<int32_t>(int32_t* tooffsets, int64_t* tocarry, int64_t* toadvanced, const int32_t* fromstarts, const int32_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
       return awkward_listarray32_getitem_next_array_64(tooffsets, tocarry, toadvanced, fromstarts, fromstops, fromarray, startsoffset, stopsoffset, lenstarts, lenarray, lencontent);
+    }
+    template <>
+    Error awkward_listarray_getitem_next_array_64<uint32_t>(uint32_t* tooffsets, int64_t* tocarry, int64_t* toadvanced, const uint32_t* fromstarts, const uint32_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
+      return awkward_listarrayU32_getitem_next_array_64(tooffsets, tocarry, toadvanced, fromstarts, fromstops, fromarray, startsoffset, stopsoffset, lenstarts, lenarray, lencontent);
     }
     template <>
     Error awkward_listarray_getitem_next_array_64<int64_t>(int64_t* tooffsets, int64_t* tocarry, int64_t* toadvanced, const int64_t* fromstarts, const int64_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
@@ -100,6 +124,10 @@ namespace awkward {
       return awkward_listarray32_getitem_next_array_advanced_64(tocarry, toadvanced, fromstarts, fromstops, fromarray, fromadvanced, startsoffset, stopsoffset, lenstarts, lenarray, lencontent);
     }
     template <>
+    Error awkward_listarray_getitem_next_array_advanced_64<uint32_t>(int64_t* tocarry, int64_t* toadvanced, const uint32_t* fromstarts, const uint32_t* fromstops, const int64_t* fromarray, const int64_t* fromadvanced, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
+      return awkward_listarrayU32_getitem_next_array_advanced_64(tocarry, toadvanced, fromstarts, fromstops, fromarray, fromadvanced, startsoffset, stopsoffset, lenstarts, lenarray, lencontent);
+    }
+    template <>
     Error awkward_listarray_getitem_next_array_advanced_64<int64_t>(int64_t* tocarry, int64_t* toadvanced, const int64_t* fromstarts, const int64_t* fromstops, const int64_t* fromarray, const int64_t* fromadvanced, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
       return awkward_listarray64_getitem_next_array_advanced_64(tocarry, toadvanced, fromstarts, fromstops, fromarray, fromadvanced, startsoffset, stopsoffset, lenstarts, lenarray, lencontent);
     }
@@ -107,6 +135,10 @@ namespace awkward {
     template <>
     Error awkward_listarray_getitem_carry_64<int32_t>(int32_t* tostarts, int32_t* tostops, const int32_t* fromstarts, const int32_t* fromstops, const int64_t* fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry) {
       return awkward_listarray32_getitem_carry_64(tostarts, tostops, fromstarts, fromstops, fromcarry, startsoffset, stopsoffset, lenstarts, lencarry);
+    }
+    template <>
+    Error awkward_listarray_getitem_carry_64<uint32_t>(uint32_t* tostarts, uint32_t* tostops, const uint32_t* fromstarts, const uint32_t* fromstops, const int64_t* fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry) {
+      return awkward_listarrayU32_getitem_carry_64(tostarts, tostops, fromstarts, fromstops, fromcarry, startsoffset, stopsoffset, lenstarts, lencarry);
     }
     template <>
     Error awkward_listarray_getitem_carry_64<int64_t>(int64_t* tostarts, int64_t* tostops, const int64_t* fromstarts, const int64_t* fromstops, const int64_t* fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry) {

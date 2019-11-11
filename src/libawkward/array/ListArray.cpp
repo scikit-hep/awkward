@@ -409,5 +409,6 @@ namespace awkward {
   }
 
   template class ListArrayOf<int32_t>;
+  template class ListArrayOf<uint32_t>;
   template class ListArrayOf<int64_t>;
 }
