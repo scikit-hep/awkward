@@ -10,13 +10,14 @@ import awkward1.layout
 from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray32)
+@numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray64)
 def typeof(val, c):
     return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets)), numba.typeof(val.content), numba.typeof(val.id))
 
 class ListOffsetArrayType(content.ContentType):
     def __init__(self, offsetstpe, contenttpe, idtpe):
-        super(ListOffsetArrayType, self).__init__(name="ListOffsetArray{}Type({}, id={})".format(offsetstpe.dtype.bitwidth, contenttpe.name, idtpe.name))
+        super(ListOffsetArrayType, self).__init__(name="ListOffsetArray{}{}Type({}, id={})".format("" if offsetstpe.dtype.signed else "U", offsetstpe.dtype.bitwidth, contenttpe.name, idtpe.name))
         self.offsetstpe = offsetstpe
         self.contenttpe = contenttpe
         self.idtpe = idtpe
@@ -24,6 +25,10 @@ class ListOffsetArrayType(content.ContentType):
     @property
     def bitwidth(self):
         return self.offsetstpe.dtype.bitwidth
+
+    @property
+    def indexname(self):
+        return ("" if self.offsetstpe.dtype.signed else "U") + str(self.offsetstpe.dtype.bitwidth)
 
     @property
     def ndim(self):
@@ -52,7 +57,7 @@ class ListOffsetArrayType(content.ContentType):
 
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
-            return ListOffsetArrayType(util.indextpe(self.bitwidth), contenttpe, self.idtpe)
+            return ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.idtpe)
 
         elif isinstance(headtpe, numba.types.EllipsisType):
             raise NotImplementedError("ellipsis")
@@ -65,7 +70,7 @@ class ListOffsetArrayType(content.ContentType):
                 raise NotImplementedError("array.ndim != 1")
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
             if not isadvanced:
-                return ListOffsetArrayType(util.indextpe(self.bitwidth), contenttpe, self.idtpe)
+                return ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.idtpe)
             else:
                 return contenttpe
 
@@ -127,14 +132,17 @@ def unbox(tpe, obj, c):
 
 @numba.extending.box(ListOffsetArrayType)
 def box(tpe, val, c):
-    if tpe.bitwidth == 32:
-        Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Index32))
-        ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArray32))
-    elif tpe.bitwidth == 64:
+    if tpe.indexname == "64":
         Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Index64))
         ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArray64))
+    elif tpe.indexname == "32":
+        Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Index32))
+        ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArray32))
+    elif tpe.indexname == "U32":
+        Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.IndexU32))
+        ListOffsetArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListOffsetArrayU32))
     else:
-        raise AssertionError("unrecognized bitwidth")
+        raise AssertionError("unrecognized index type: {}".format(tpe.indexname))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     offsetsarray_obj = c.pyapi.from_native_value(tpe.offsetstpe, proxyin.offsets, c.env_manager)
     content_obj = c.pyapi.from_native_value(tpe.contenttpe, proxyin.content, c.env_manager)
@@ -270,12 +278,14 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
 
     if isinstance(headtpe, numba.types.Integer):
         assert advanced is None
-        if arraytpe.bitwidth == 64:
+        if arraytpe.indexname == "64":
             kernel = cpu.kernels.awkward_listarray64_getitem_next_at_64
-        elif arraytpe.bitwidth == 32:
+        elif arraytpe.indexname == "32":
             kernel = cpu.kernels.awkward_listarray32_getitem_next_at_64
+        elif arraytpe.indexname == "U32":
+            kernel = cpu.kernels.awkward_listarrayU32_getitem_next_at_64
         else:
-            raise AssertionError("unrecognized bitwidth")
+            raise AssertionError("unrecognized index type: {}".format(arraytpe.indexname))
 
         nextcarry = util.newindex64(context, builder, numba.int64, lenstarts)
         util.call(context, builder, kernel,
@@ -294,18 +304,23 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     elif isinstance(headtpe, numba.types.SliceType):
         proxyslicein = numba.cgutils.create_struct_proxy(headtpe)(context, builder, value=headval)
 
-        if arraytpe.bitwidth == 64:
+        if arraytpe.indexname == "64":
             determine_carrylength = cpu.kernels.awkward_listarray64_getitem_next_range_carrylength
             fill_carry = cpu.kernels.awkward_listarray64_getitem_next_range_64
             determine_total = cpu.kernels.awkward_listarray64_getitem_next_range_counts_64
             fill_nextadvanced = cpu.kernels.awkward_listarray64_getitem_next_range_spreadadvanced_64
-        elif arraytpe.bitwidth == 32:
+        elif arraytpe.indexname == "32":
             determine_carrylength = cpu.kernels.awkward_listarray32_getitem_next_range_carrylength
             fill_carry = cpu.kernels.awkward_listarray32_getitem_next_range_64
             determine_total = cpu.kernels.awkward_listarray32_getitem_next_range_counts_64
             fill_nextadvanced = cpu.kernels.awkward_listarray32_getitem_next_range_spreadadvanced_64
+        elif arraytpe.indexname == "U32":
+            determine_carrylength = cpu.kernels.awkward_listarrayU32_getitem_next_range_carrylength
+            fill_carry = cpu.kernels.awkward_listarrayU32_getitem_next_range_64
+            determine_total = cpu.kernels.awkward_listarrayU32_getitem_next_range_counts_64
+            fill_nextadvanced = cpu.kernels.awkward_listarrayU32_getitem_next_range_spreadadvanced_64
         else:
-            raise AssertionError("unrecognized bitwidth")
+            raise AssertionError("unrecognized index type: {}".format(arraytpe.indexname))
 
         carrylength = numba.cgutils.alloca_once(builder, context.get_value_type(numba.int64))
         util.call(context, builder, determine_carrylength,
@@ -320,10 +335,10 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              util.cast(context, builder, numba.intp, numba.int64, proxyslicein.step)),
             "in {}, indexing error".format(arraytpe.shortname))
 
-        nextoffsets = util.newindex(arraytpe.bitwidth, context, builder, numba.int64, builder.add(lenstarts, context.get_constant(numba.int64, 1)))
+        nextoffsets = util.newindex(arraytpe.indexname, context, builder, numba.int64, builder.add(lenstarts, context.get_constant(numba.int64, 1)))
         nextcarry = util.newindex64(context, builder, numba.int64, builder.load(carrylength))
         util.call(context, builder, fill_carry,
-            (util.arrayptr(context, builder, util.indextpe(arraytpe.bitwidth), nextoffsets),
+            (util.arrayptr(context, builder, util.indextpe(arraytpe.indexname), nextoffsets),
              util.arrayptr(context, builder, util.index64tpe, nextcarry),
              util.arrayptr(context, builder, arraytpe.offsetstpe, starts),
              util.arrayptr(context, builder, arraytpe.offsetstpe, stops),
@@ -346,7 +361,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             total = numba.cgutils.alloca_once(builder, context.get_value_type(numba.int64))
             util.call(context, builder, determine_total,
                 (total,
-                 util.arrayptr(context, builder, util.indextpe(arraytpe.bitwidth), nextoffsets),
+                 util.arrayptr(context, builder, util.indextpe(arraytpe.indexname), nextoffsets),
                  lenstarts),
                 "in {}, indexing error".format(arraytpe.shortname))
 
@@ -354,14 +369,14 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             util.call(context, builder, fill_nextadvanced,
                 (util.arrayptr(context, builder, util.index64tpe, nextadvanced),
                  util.arrayptr(context, builder, util.index64tpe, advanced),
-                 util.arrayptr(context, builder, util.indextpe(arraytpe.bitwidth), nextoffsets),
+                 util.arrayptr(context, builder, util.indextpe(arraytpe.indexname), nextoffsets),
                  lenstarts),
                 "in {}, indexing error".format(arraytpe.shortname))
 
             outcontenttpe = nextcontenttpe.getitem_next(tailtpe, True)
             outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, nextadvanced)
 
-        outtpe = awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.bitwidth), outcontenttpe, arraytpe.idtpe)
+        outtpe = awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.indexname), outcontenttpe, arraytpe.idtpe)
         proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
         proxyout.offsets = nextoffsets
         proxyout.content = outcontentval
@@ -383,20 +398,22 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         lenflathead = util.arraylen(context, builder, util.int64tpe, flathead, totpe=numba.int64)
 
         if advanced is None:
-            if arraytpe.bitwidth == 64:
+            if arraytpe.indexname == "64":
                 kernel = cpu.kernels.awkward_listarray64_getitem_next_array_64
-            elif arraytpe.bitwidth == 32:
+            elif arraytpe.indexname == "32":
                 kernel = cpu.kernels.awkward_listarray32_getitem_next_array_64
+            elif arraytpe.indexname == "U32":
+                kernel = cpu.kernels.awkward_listarrayU32_getitem_next_array_64
             else:
-                raise AssertionError("unrecognized bitwidth")
+                raise AssertionError("unrecognized index type: {}".format(arraytpe.indexname))
 
             lencarry = builder.mul(lenstarts, lenflathead)
 
             nextcarry = util.newindex64(context, builder, numba.int64, lencarry)
             nextadvanced = util.newindex64(context, builder, numba.int64, lencarry)
-            nextoffsets = util.newindex(arraytpe.bitwidth, context, builder, numba.int64, lenoffsets)
+            nextoffsets = util.newindex(arraytpe.indexname, context, builder, numba.int64, lenoffsets)
             util.call(context, builder, kernel,
-                (util.arrayptr(context, builder, util.indextpe(arraytpe.bitwidth), nextoffsets),
+                (util.arrayptr(context, builder, util.indextpe(arraytpe.indexname), nextoffsets),
                  util.arrayptr(context, builder, util.index64tpe, nextcarry),
                  util.arrayptr(context, builder, util.index64tpe, nextadvanced),
                  util.arrayptr(context, builder, arraytpe.offsetstpe, starts),
@@ -415,7 +432,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             contenttpe = nexttpe.getitem_next(tailtpe, True)
             contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-            outtpe = ListOffsetArrayType(util.indextpe(arraytpe.bitwidth), contenttpe, arraytpe.idtpe)
+            outtpe = ListOffsetArrayType(util.indextpe(arraytpe.indexname), contenttpe, arraytpe.idtpe)
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.offsets = nextoffsets
             proxyout.content = contentval
@@ -424,12 +441,14 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             return proxyout._getvalue()
 
         else:
-            if arraytpe.bitwidth == 64:
+            if arraytpe.indexname == "64":
                 kernel = cpu.kernels.awkward_listarray64_getitem_next_array_advanced_64
-            elif arraytpe.bitwidth == 32:
+            elif arraytpe.indexname == "32":
                 kernel = cpu.kernels.awkward_listarray32_getitem_next_array_advanced_64
+            elif arraytpe.indexname == "U32":
+                kernel = cpu.kernels.awkward_listarrayU32_getitem_next_array_advanced_64
             else:
-                raise AssertionError("unrecognized bitwidth")
+                raise AssertionError("unrecognized index type: {}".format(arraytpe.indexname))
 
             nextcarry = util.newindex64(context, builder, numba.int64, lenstarts)
             nextadvanced = util.newindex64(context, builder, numba.int64, lenstarts)

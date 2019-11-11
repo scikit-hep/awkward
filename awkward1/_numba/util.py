@@ -13,17 +13,23 @@ py27 = (sys.version_info[0] < 3)
 RefType = numba.int64
 
 index8tpe = numba.types.Array(numba.int8, 1, "C")
+indexU8tpe = numba.types.Array(numba.uint8, 1, "C")
 index32tpe = numba.types.Array(numba.int32, 1, "C")
+indexU32tpe = numba.types.Array(numba.uint32, 1, "C")
 index64tpe = numba.types.Array(numba.int64, 1, "C")
-def indextpe(bitwidth):
-    if bitwidth == 8:
-        return index8tpe
-    elif bitwidth == 32:
-        return index32tpe
-    elif bitwidth == 64:
+def indextpe(indexname):
+    if indexname == "64":
         return index64tpe
+    elif indexname == "32":
+        return index32tpe
+    elif indexname == "U32":
+        return indexU32tpe
+    elif indexname == "8":
+        return index8tpe
+    elif indexname == "U8":
+        return indexU8tpe
     else:
-        raise AssertionError(bitwidth)
+        raise AssertionError("unrecognized index type: {}".format(indexname))
 
 if not py27:
     exec("""
@@ -92,19 +98,27 @@ def call(context, builder, fcn, args, errormessage=None):
 
 def newindex8(context, builder, lentpe, lenval):
     return numba.targets.arrayobj.numpy_empty_nd(context, builder, index8tpe(lentpe), (lenval,))
+def newindexU8(context, builder, lentpe, lenval):
+    return numba.targets.arrayobj.numpy_empty_nd(context, builder, indexU8tpe(lentpe), (lenval,))
 def newindex32(context, builder, lentpe, lenval):
     return numba.targets.arrayobj.numpy_empty_nd(context, builder, index32tpe(lentpe), (lenval,))
+def newindexU32(context, builder, lentpe, lenval):
+    return numba.targets.arrayobj.numpy_empty_nd(context, builder, indexU32tpe(lentpe), (lenval,))
 def newindex64(context, builder, lentpe, lenval):
     return numba.targets.arrayobj.numpy_empty_nd(context, builder, index64tpe(lentpe), (lenval,))
-def newindex(bitwidth, context, builder, lentpe, lenval):
-    if bitwidth == 8:
-        return newindex8(context, builder, lentpe, lenval)
-    elif bitwidth == 32:
-        return newindex32(context, builder, lentpe, lenval)
-    elif bitwidth == 64:
+def newindex(indexname, context, builder, lentpe, lenval):
+    if indexname == "64":
         return newindex64(context, builder, lentpe, lenval)
+    elif indexname == "32":
+        return newindex32(context, builder, lentpe, lenval)
+    elif indexname == "U32":
+        return newindexU32(context, builder, lentpe, lenval)
+    elif indexname == "8":
+        return newindex8(context, builder, lentpe, lenval)
+    elif indexname == "U8":
+        return newindexU8(context, builder, lentpe, lenval)
     else:
-        raise AssertionError(bitwidth)
+        raise AssertionError("unrecognized index type: {}".format(indexname))
 
 @numba.jit(nopython=True)
 def shapeat(shapeat, array, at, ndim):
