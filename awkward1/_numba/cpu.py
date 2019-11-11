@@ -46,10 +46,14 @@ h2ctypes = {
     "int32_t": ctypes.c_int32,
     "int32_t *": ctypes.POINTER(ctypes.c_int32),
     "const int32_t *": ctypes.POINTER(ctypes.c_int32),
+    "uint32_t": ctypes.c_uint32,
+    "uint32_t *": ctypes.POINTER(ctypes.c_uint32),
+    "const uint32_t *": ctypes.POINTER(ctypes.c_uint32),
     "int64_t": ctypes.c_int64,
     "int64_t *": ctypes.POINTER(ctypes.c_int64),
     "const int64_t *": ctypes.POINTER(ctypes.c_int64),
     "Error": Error,
+    "ERROR": Error,
     "void": None,
     }
 
@@ -63,7 +67,7 @@ for hfile in glob.glob(os.path.join(os.path.join(os.path.dirname(os.path.dirname
                 params = [(x.find("./declname").text, x.find("./type").text) for x in xfcn.findall("./param")]
                 getattr(kernels, name).name = name
                 getattr(kernels, name).argtypes = [h2ctypes[t] for n, t in params]
-                if rettype == "Error":
+                if rettype == "Error" or rettype == "ERROR":
                     getattr(kernels, name).restype = None
                     tmp = numba.typing.ctypes_utils.make_function_type(getattr(kernels, name))
                     getattr(kernels, name).numbatpe = numba.types.functions.ExternalFunctionPointer(Error.numbatpe(*tmp.sig.args), tmp.get_pointer, cconv=tmp.cconv)

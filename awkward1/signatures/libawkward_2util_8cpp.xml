@@ -4,6 +4,8 @@
     <compoundname>util.cpp</compoundname>
     <includes local="no">cassert</includes>
     <includes local="no">sstream</includes>
+    <includes local="yes">awkward/cpu-kernels/identity.h</includes>
+    <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
     <includes local="yes">awkward/util.h</includes>
     <includes local="yes">awkward/Identity.h</includes>
     <incdepgraph>
@@ -18,14 +20,24 @@
         </childnode>
         <childnode refid="5" relation="include">
         </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
       </node>
-      <node id="4">
+      <node id="6">
         <label>awkward/util.h</label>
       </node>
       <node id="2">
         <label>cassert</label>
       </node>
       <node id="5">
+        <label>awkward/cpu-kernels/getitem.h</label>
+      </node>
+      <node id="4">
+        <label>awkward/cpu-kernels/identity.h</label>
+      </node>
+      <node id="7">
         <label>awkward/Identity.h</label>
       </node>
       <node id="3">
@@ -35,13 +47,13 @@
     <innernamespace refid="namespaceawkward">awkward</innernamespace>
     <innernamespace refid="namespaceawkward_1_1util">awkward::util</innernamespace>
       <sectiondef kind="func">
-      <memberdef kind="function" id="namespaceawkward_1_1util_1a6abdb46672c5df0d08d26e373626b9dc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a5cf65ec676d09c60c51f50794ab88153" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>void</type>
         <definition>void awkward::util::handle_error</definition>
-        <argsstring>(const Error &amp;err, const std::string classname, const Identity *id)</argsstring>
+        <argsstring>(const struct Error &amp;err, const std::string classname, const Identity *id)</argsstring>
         <name>handle_error</name>
         <param>
-          <type>const Error &amp;</type>
+          <type>const struct Error &amp;</type>
           <declname>err</declname>
         </param>
         <param>
@@ -58,7 +70,1245 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="11" column="10" bodyfile="src/libawkward/util.cpp" bodystart="11" bodyend="30"/>
+        <location file="src/libawkward/util.cpp" line="14" column="10" bodyfile="src/libawkward/util.cpp" bodystart="14" bodyend="33"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a16520ab2a50710adc4155e188d7bd450" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_identity64_from_listarray&lt; uint32_t &gt;</definition>
+        <argsstring>(int64_t *toptr, const int64_t *fromptr, const uint32_t *fromstarts, const uint32_t *fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
+        <name>awkward_identity64_from_listarray&lt; uint32_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="36" column="5" bodyfile="src/libawkward/util.cpp" bodystart="36" bodyend="38"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a1bd30b78640996660a7ed6083ac8ef27" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_identity64_from_listarray&lt; int64_t &gt;</definition>
+        <argsstring>(int64_t *toptr, const int64_t *fromptr, const int64_t *fromstarts, const int64_t *fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
+        <name>awkward_identity64_from_listarray&lt; int64_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="40" column="5" bodyfile="src/libawkward/util.cpp" bodystart="40" bodyend="42"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a35cdf735524b577a33696b6dfbe507c7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_at_64&lt; int32_t &gt;</definition>
+        <argsstring>(int64_t *tocarry, const int32_t *fromstarts, const int32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at)</argsstring>
+        <name>awkward_listarray_getitem_next_at_64&lt; int32_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>at</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="45" column="5" bodyfile="src/libawkward/util.cpp" bodystart="45" bodyend="47"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a332e036036f0a2a7b6ae1ccbd5fb9328" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_at_64&lt; uint32_t &gt;</definition>
+        <argsstring>(int64_t *tocarry, const uint32_t *fromstarts, const uint32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at)</argsstring>
+        <name>awkward_listarray_getitem_next_at_64&lt; uint32_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>at</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="49" column="5" bodyfile="src/libawkward/util.cpp" bodystart="49" bodyend="51"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a6669b4753da68138261314266664870f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_at_64&lt; int64_t &gt;</definition>
+        <argsstring>(int64_t *tocarry, const int64_t *fromstarts, const int64_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at)</argsstring>
+        <name>awkward_listarray_getitem_next_at_64&lt; int64_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>at</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="53" column="5" bodyfile="src/libawkward/util.cpp" bodystart="53" bodyend="55"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1af6d5697f061dd5b2bc6d6371fab63406" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_carrylength&lt; int32_t &gt;</definition>
+        <argsstring>(int64_t *carrylength, const int32_t *fromstarts, const int32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray_getitem_next_range_carrylength&lt; int32_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>carrylength</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="58" column="5" bodyfile="src/libawkward/util.cpp" bodystart="58" bodyend="60"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a5994a80cfed68d5ca9a74ec77532eec6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_carrylength&lt; uint32_t &gt;</definition>
+        <argsstring>(int64_t *carrylength, const uint32_t *fromstarts, const uint32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray_getitem_next_range_carrylength&lt; uint32_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>carrylength</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="62" column="5" bodyfile="src/libawkward/util.cpp" bodystart="62" bodyend="64"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1ab91ff6d314c26700c4e4130b6ab4e6b8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_carrylength&lt; int64_t &gt;</definition>
+        <argsstring>(int64_t *carrylength, const int64_t *fromstarts, const int64_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray_getitem_next_range_carrylength&lt; int64_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>carrylength</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="66" column="5" bodyfile="src/libawkward/util.cpp" bodystart="66" bodyend="68"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1ace2f8fb19c1c5895a11057e5f06ba44a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_64&lt; int32_t &gt;</definition>
+        <argsstring>(int32_t *tooffsets, int64_t *tocarry, const int32_t *fromstarts, const int32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray_getitem_next_range_64&lt; int32_t &gt;</name>
+        <param>
+          <type>int32_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="71" column="5" bodyfile="src/libawkward/util.cpp" bodystart="71" bodyend="73"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a35f040e2474502f3ebcd72814d81697d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_64&lt; uint32_t &gt;</definition>
+        <argsstring>(uint32_t *tooffsets, int64_t *tocarry, const uint32_t *fromstarts, const uint32_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray_getitem_next_range_64&lt; uint32_t &gt;</name>
+        <param>
+          <type>uint32_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="75" column="5" bodyfile="src/libawkward/util.cpp" bodystart="75" bodyend="77"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a27301acf05d62d2cddc63402f113186d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_64&lt; int64_t &gt;</definition>
+        <argsstring>(int64_t *tooffsets, int64_t *tocarry, const int64_t *fromstarts, const int64_t *fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step)</argsstring>
+        <name>awkward_listarray_getitem_next_range_64&lt; int64_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stop</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>step</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="79" column="5" bodyfile="src/libawkward/util.cpp" bodystart="79" bodyend="81"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a821d22c5eb2612a50ccd25fad385d50c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_counts_64&lt; int32_t &gt;</definition>
+        <argsstring>(int64_t *total, const int32_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray_getitem_next_range_counts_64&lt; int32_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>total</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="84" column="5" bodyfile="src/libawkward/util.cpp" bodystart="84" bodyend="86"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1ab7818ea817b037e54c287c5e6209e8a4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_counts_64&lt; uint32_t &gt;</definition>
+        <argsstring>(int64_t *total, const uint32_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray_getitem_next_range_counts_64&lt; uint32_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>total</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="88" column="5" bodyfile="src/libawkward/util.cpp" bodystart="88" bodyend="90"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1ad129226cfdbe60197ecfef8bb310799d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_counts_64&lt; int64_t &gt;</definition>
+        <argsstring>(int64_t *total, const int64_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray_getitem_next_range_counts_64&lt; int64_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>total</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="92" column="5" bodyfile="src/libawkward/util.cpp" bodystart="92" bodyend="94"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a24d53416cb24aeef4b57ca3b206006f0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_spreadadvanced_64&lt; int32_t &gt;</definition>
+        <argsstring>(int64_t *toadvanced, const int64_t *fromadvanced, const int32_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray_getitem_next_range_spreadadvanced_64&lt; int32_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="97" column="5" bodyfile="src/libawkward/util.cpp" bodystart="97" bodyend="99"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1ab0ff064b87b541a65ddcba92a1b2292e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_spreadadvanced_64&lt; uint32_t &gt;</definition>
+        <argsstring>(int64_t *toadvanced, const int64_t *fromadvanced, const uint32_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray_getitem_next_range_spreadadvanced_64&lt; uint32_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="101" column="5" bodyfile="src/libawkward/util.cpp" bodystart="101" bodyend="103"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a55f52d86ee9c4cc0959c9d5123830143" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_range_spreadadvanced_64&lt; int64_t &gt;</definition>
+        <argsstring>(int64_t *toadvanced, const int64_t *fromadvanced, const int64_t *fromoffsets, int64_t lenstarts)</argsstring>
+        <name>awkward_listarray_getitem_next_range_spreadadvanced_64&lt; int64_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="105" column="5" bodyfile="src/libawkward/util.cpp" bodystart="105" bodyend="107"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a1b76c1c2e7b0b528979193a823518933" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_array_64&lt; int32_t &gt;</definition>
+        <argsstring>(int32_t *tooffsets, int64_t *tocarry, int64_t *toadvanced, const int32_t *fromstarts, const int32_t *fromstops, const int64_t *fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray_getitem_next_array_64&lt; int32_t &gt;</name>
+        <param>
+          <type>int32_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="110" column="5" bodyfile="src/libawkward/util.cpp" bodystart="110" bodyend="112"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a2ebb870b9819f577b067ffc8e0243002" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_array_64&lt; uint32_t &gt;</definition>
+        <argsstring>(uint32_t *tooffsets, int64_t *tocarry, int64_t *toadvanced, const uint32_t *fromstarts, const uint32_t *fromstops, const int64_t *fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray_getitem_next_array_64&lt; uint32_t &gt;</name>
+        <param>
+          <type>uint32_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="114" column="5" bodyfile="src/libawkward/util.cpp" bodystart="114" bodyend="116"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a775ff379d676ac0283d26998bf20e13b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_array_64&lt; int64_t &gt;</definition>
+        <argsstring>(int64_t *tooffsets, int64_t *tocarry, int64_t *toadvanced, const int64_t *fromstarts, const int64_t *fromstops, const int64_t *fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray_getitem_next_array_64&lt; int64_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="118" column="5" bodyfile="src/libawkward/util.cpp" bodystart="118" bodyend="120"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a3c9079e2d6d2eff270b7df911801b07e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_array_advanced_64&lt; int32_t &gt;</definition>
+        <argsstring>(int64_t *tocarry, int64_t *toadvanced, const int32_t *fromstarts, const int32_t *fromstops, const int64_t *fromarray, const int64_t *fromadvanced, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray_getitem_next_array_advanced_64&lt; int32_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="123" column="5" bodyfile="src/libawkward/util.cpp" bodystart="123" bodyend="125"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a0a5ce7851259ae74844da07ed068ab7e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_array_advanced_64&lt; uint32_t &gt;</definition>
+        <argsstring>(int64_t *tocarry, int64_t *toadvanced, const uint32_t *fromstarts, const uint32_t *fromstops, const int64_t *fromarray, const int64_t *fromadvanced, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray_getitem_next_array_advanced_64&lt; uint32_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="127" column="5" bodyfile="src/libawkward/util.cpp" bodystart="127" bodyend="129"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a3853c79e8dfd566edb8c1c2affc70934" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_next_array_advanced_64&lt; int64_t &gt;</definition>
+        <argsstring>(int64_t *tocarry, int64_t *toadvanced, const int64_t *fromstarts, const int64_t *fromstops, const int64_t *fromarray, const int64_t *fromadvanced, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent)</argsstring>
+        <name>awkward_listarray_getitem_next_array_advanced_64&lt; int64_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toadvanced</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromarray</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromadvanced</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenarray</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="131" column="5" bodyfile="src/libawkward/util.cpp" bodystart="131" bodyend="133"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a56c8f0daa473f11d34e367c7f6d7100e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_carry_64&lt; int32_t &gt;</definition>
+        <argsstring>(int32_t *tostarts, int32_t *tostops, const int32_t *fromstarts, const int32_t *fromstops, const int64_t *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry)</argsstring>
+        <name>awkward_listarray_getitem_carry_64&lt; int32_t &gt;</name>
+        <param>
+          <type>int32_t *</type>
+          <declname>tostarts</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>tostops</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromcarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="136" column="5" bodyfile="src/libawkward/util.cpp" bodystart="136" bodyend="138"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1ab998cec0a24c51454bdf93e04ee173a3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_carry_64&lt; uint32_t &gt;</definition>
+        <argsstring>(uint32_t *tostarts, uint32_t *tostops, const uint32_t *fromstarts, const uint32_t *fromstops, const int64_t *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry)</argsstring>
+        <name>awkward_listarray_getitem_carry_64&lt; uint32_t &gt;</name>
+        <param>
+          <type>uint32_t *</type>
+          <declname>tostarts</declname>
+        </param>
+        <param>
+          <type>uint32_t *</type>
+          <declname>tostops</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromcarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="140" column="5" bodyfile="src/libawkward/util.cpp" bodystart="140" bodyend="142"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a02e137f16fe72a0671a42b43cc5bb543" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+        </templateparamlist>
+        <type>Error</type>
+        <definition>Error awkward::util::awkward_listarray_getitem_carry_64&lt; int64_t &gt;</definition>
+        <argsstring>(int64_t *tostarts, int64_t *tostops, const int64_t *fromstarts, const int64_t *fromstops, const int64_t *fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry)</argsstring>
+        <name>awkward_listarray_getitem_carry_64&lt; int64_t &gt;</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tostarts</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>tostops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromcarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="144" column="5" bodyfile="src/libawkward/util.cpp" bodystart="144" bodyend="146"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
