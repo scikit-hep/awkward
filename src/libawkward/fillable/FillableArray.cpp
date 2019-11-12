@@ -75,3 +75,91 @@ namespace awkward {
     }
   }
 }
+
+bool awkward_FillableArray_length(void* fillablearray, int64_t& result) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    result = obj->length();
+  }
+  catch (...) {
+    return false;
+  }
+  return true;
+}
+
+bool awkward_FillableArray_clear(void* fillablearray) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->clear();
+  }
+  catch (...) {
+    return false;
+  }
+  return true;
+}
+
+bool awkward_FillableArray_null(void* fillablearray) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->null();
+  }
+  catch (...) {
+    return false;
+  }
+  return true;
+}
+
+bool awkward_FillableArray_boolean(void* fillablearray, bool x) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->boolean(x);
+  }
+  catch (...) {
+    return false;
+  }
+  return true;
+}
+
+bool awkward_FillableArray_integer(void* fillablearray, int64_t x) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->integer(x);
+  }
+  catch (...) {
+    return false;
+  }
+  return true;
+}
+
+bool awkward_FillableArray_real(void* fillablearray, double x) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->real(x);
+  }
+  catch (...) {
+    return false;
+  }
+  return true;
+}
+
+bool awkward_FillableArray_beginlist(void* fillablearray) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->beginlist();
+  }
+  catch (...) {
+    return false;
+  }
+  return true;
+}
+
+bool awkward_FillableArray_endlist(void* fillablearray) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->endlist();
+  }
+  catch (...) {
+    return false;
+  }
+  return true;
+}
