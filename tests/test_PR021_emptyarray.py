@@ -42,3 +42,26 @@ def test_unknown():
     assert awkward1.typeof(a) == awkward1.layout.ArrayType(3, awkward1.layout.ListType(awkward1.layout.UnknownType()))
     assert awkward1.typeof(a) == awkward1.layout.ArrayType(3, awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")))
     assert awkward1.typeof(a) != awkward1.layout.ArrayType(3, awkward1.layout.PrimitiveType("float64"))
+
+def test_getitem():
+    a = awkward1.fromjson("[[], [[], []], [[], [], []]]")
+    assert awkward1.tolist(a[2]) == [[], [], []]
+    assert awkward1.tolist(a[2, 1]) == []
+    with pytest.raises(ValueError) as excinfo:
+        a[2, 1, 0]
+    assert str(excinfo.value) == "in ListArray64 attempting to get 0, index out of range"
+
+    assert awkward1.tolist(a[1:, 1:]) == [[[]], [[], []]]
+    with pytest.raises(ValueError) as excinfo:
+        a[1:, 1:, 0]
+    assert str(excinfo.value) == "in ListArray64 attempting to get 0, index out of range"
+    with pytest.raises(ValueError) as excinfo:
+        a[1:, 1:, 1:]
+    assert str(excinfo.value) == "in EmptyArray, too many dimensions in slice"
+
+    with pytest.raises(ValueError) as excinfo:
+        a[1:, 1:, numpy.array([], dtype=int)]
+    assert str(excinfo.value) == "in EmptyArray, too many dimensions in slice"
+    with pytest.raises(ValueError) as excinfo:
+        a[1:, numpy.array([], dtype=int), numpy.array([], dtype=int)]
+    assert str(excinfo.value) == "in EmptyArray, too many dimensions in slice"

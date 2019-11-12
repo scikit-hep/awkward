@@ -72,42 +72,12 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
-    if (head.get() == nullptr) {
-      throw std::runtime_error("FIXME null");
-    }
-
-    else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
-      throw std::runtime_error("FIXME at");
-    }
-
-    else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
-      throw std::runtime_error("FIXME range");
-    }
-
-    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
-      return getitem_ellipsis(tail, advanced);
-    }
-
-    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
-      return getitem_newaxis(tail, advanced);
-    }
-
-    else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
-      if (advanced.length() == 0) {
-        throw std::runtime_error("FIXME array");
-      }
-      else {
-        throw std::runtime_error("FIXME array advanced");
-      }
-    }
-
-    else {
-      throw std::runtime_error("unrecognized slice item type");
-    }
+    throw std::runtime_error("unreachable because of EmptyArray::carry");
   }
 
   const std::shared_ptr<Content> EmptyArray::carry(const Index64& carry) const {
-    throw std::runtime_error("FIXME carry");
+    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
   const std::pair<int64_t, int64_t> EmptyArray::minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
