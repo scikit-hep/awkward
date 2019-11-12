@@ -14,3 +14,4 @@ else:
     import awkward1._numba.array.numpyarray
     import awkward1._numba.array.listarray
     import awkward1._numba.array.listoffsetarray
+    import awkward1._numba.array.empty

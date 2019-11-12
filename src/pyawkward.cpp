@@ -190,6 +190,10 @@ std::shared_ptr<ak::Content> unbox_content(py::object obj) {
     return obj.cast<ak::ListOffsetArray64*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::EmptyArray*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
   throw std::invalid_argument("content argument must be a Content subtype");
 }
 
