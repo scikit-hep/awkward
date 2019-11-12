@@ -22,6 +22,7 @@
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/PrimitiveType.h"
+#include "awkward/type/RegularType.h"
 #include "awkward/type/ListType.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/UnionType.h"
@@ -48,13 +49,22 @@ py::object box(std::shared_ptr<ak::Type> t) {
   if (ak::ArrayType* raw = dynamic_cast<ak::ArrayType*>(t.get())) {
     return py::cast(*raw);
   }
-  else if (ak::PrimitiveType* raw = dynamic_cast<ak::PrimitiveType*>(t.get())) {
+  else if (ak::ListType* raw = dynamic_cast<ak::ListType*>(t.get())) {
     return py::cast(*raw);
   }
   else if (ak::OptionType* raw = dynamic_cast<ak::OptionType*>(t.get())) {
     return py::cast(*raw);
   }
+  else if (ak::PrimitiveType* raw = dynamic_cast<ak::PrimitiveType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::RegularType* raw = dynamic_cast<ak::RegularType*>(t.get())) {
+    return py::cast(*raw);
+  }
   else if (ak::UnionType* raw = dynamic_cast<ak::UnionType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::UnknownType* raw = dynamic_cast<ak::UnknownType*>(t.get())) {
     return py::cast(*raw);
   }
   else {
@@ -96,6 +106,9 @@ py::object box(std::shared_ptr<ak::Content> content) {
   else if (ak::ListOffsetArray64* raw = dynamic_cast<ak::ListOffsetArray64*>(content.get())) {
     return py::cast(*raw);
   }
+  else if (ak::EmptyArray* raw = dynamic_cast<ak::EmptyArray*>(content.get())) {
+    return py::cast(*raw);
+  }
   else {
     throw std::runtime_error("missing boxer for Content subtype");
   }
@@ -127,6 +140,10 @@ std::shared_ptr<ak::Type> unbox_type(py::handle obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::PrimitiveType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::RegularType*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   try {
@@ -598,6 +615,16 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
   );
 }
 
+py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_RegularType(py::handle m, std::string name) {
+  return (py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type>(m, name.c_str())
+      .def(py::init<std::vector<int64_t>, std::shared_ptr<ak::Type>>())
+      .def_property_readonly("shape", &ak::RegularType::shape)
+      .def_property_readonly("type", &ak::RegularType::type)
+      .def("__repr__", &ak::RegularType::tostring)
+      .def("__eq__", &ak::RegularType::equal)
+  );
+}
+
 py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(py::handle m, std::string name) {
   return (py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type>(m, name.c_str())
       .def(py::init<std::shared_ptr<ak::Type>>())
@@ -820,6 +847,7 @@ PYBIND11_MODULE(layout, m) {
   make_Type(m, "Type");
   make_ArrayType(m, "ArrayType");
   make_PrimitiveType(m, "PrimitiveType");
+  make_RegularType(m, "RegularType");
   make_UnknownType(m, "UnknownType");
   make_ListType(m, "ListType");
   make_OptionType(m, "OptionType");

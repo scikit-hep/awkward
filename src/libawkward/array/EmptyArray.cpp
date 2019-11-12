@@ -4,6 +4,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "awkward/type/UnknownType.h"
+
 #include "awkward/array/EmptyArray.h"
 
 namespace awkward {
@@ -35,6 +37,10 @@ namespace awkward {
   void EmptyArray::tojson_part(ToJson& builder) const {
     builder.beginlist();
     builder.endlist();
+  }
+
+  std::shared_ptr<Type> EmptyArray::type_part() const {
+    return std::shared_ptr<Type>(new UnknownType());
   }
 
   int64_t EmptyArray::length() const {

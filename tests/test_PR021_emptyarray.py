@@ -10,5 +10,12 @@ numba = pytest.importorskip("numba")
 
 import awkward1
 
-def test_nothing():
-    pass
+def test_fromjson():
+    a = awkward1.fromjson("[[], [], []]")
+    assert awkward1.tolist(a) == [[], [], []]
+
+    # print(a)
+    # print(awkward1.tolist(a))
+    # print(a.type)
+    #
+    # raise Exception

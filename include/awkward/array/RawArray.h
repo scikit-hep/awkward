@@ -15,6 +15,7 @@
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/type/PrimitiveType.h"
 #include "awkward/util.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
@@ -176,6 +177,42 @@ namespace awkward {
       }
       else {
         throw std::invalid_argument(std::string("cannot convert RawArrayOf<") + typeid(T).name() + std::string("> into JSON"));
+      }
+    }
+
+    virtual std::shared_ptr<Type> type_part() const {
+      if (std::is_same<T, double>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
+      }
+      else if (std::is_same<T, float>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float32));
+      }
+      else if (std::is_same<T, int64_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int64));
+      }
+      else if (std::is_same<T, uint64_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint64));
+      }
+      else if (std::is_same<T, int32_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int32));
+      }
+      else if (std::is_same<T, uint32_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint32));
+      }
+      else if (std::is_same<T, int16_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int16));
+      }
+      else if (std::is_same<T, uint16_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint16));
+      }
+      else if (std::is_same<T, int8_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int8));
+      }
+      else if (std::is_same<T, uint8_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint8));
+      }
+      else {
+        throw std::invalid_argument(std::string("RawArrayOf<") + typeid(T).name() + std::string("> cannot be expressed as a PrimitiveType"));
       }
     }
 

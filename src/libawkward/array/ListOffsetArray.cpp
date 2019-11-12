@@ -5,6 +5,7 @@
 
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/type/ListType.h"
 #include "awkward/Slice.h"
 #include "awkward/array/ListArray.h"
 
@@ -170,6 +171,11 @@ namespace awkward {
   }
 
   template <typename T>
+  std::shared_ptr<Type> ListOffsetArrayOf<T>::type_part() const {
+    return std::shared_ptr<Type>(new ListType(content_.get()->type_part()));
+  }
+
+  template <typename T>
   int64_t ListOffsetArrayOf<T>::length() const {
     return offsets_.length() - 1;
   }
@@ -206,8 +212,14 @@ namespace awkward {
     if (start == stop) {
       start = stop = 0;
     }
-    if (!(0 <= start  &&  start < lencontent)  ||  !(start <= stop  &&  stop <= lencontent)) {
-      util::handle_error(failure("not 0 <= offsets[i] < len(content) or not offsets[i] <= offsets[i + 1] <= len(content)", kSliceNone, at), classname(), id_.get());
+    if (start < 0) {
+      util::handle_error(failure("offsets[i] < 0", kSliceNone, at), classname(), id_.get());
+    }
+    if (start > stop) {
+      util::handle_error(failure("offsets[i] > offsets[i + 1]", kSliceNone, at), classname(), id_.get());
+    }
+    if (stop > lencontent) {
+      util::handle_error(failure("offsets[i] != offsets[i + 1] and offsets[i + 1] > len(content)", kSliceNone, at), classname(), id_.get());
     }
     return content_.get()->getitem_range_unsafe(start, stop);
   }

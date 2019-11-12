@@ -17,7 +17,7 @@ namespace awkward {
   const std::shared_ptr<Type> type() const;
 
   private:
-    std::shared_ptr<Type> type_;
+    const std::shared_ptr<Type> type_;
   };
 }
 

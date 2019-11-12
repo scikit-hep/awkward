@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "awkward/Identity.h"
+#include "awkward/array/EmptyArray.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
@@ -26,7 +27,12 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> UnknownFillable::snapshot() const {
-    throw std::runtime_error("UnknownFillable::snapshot() needs EmptyArray");
+    if (nullcount_ == 0) {
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
+    }
+    else {
+      throw std::runtime_error("UnknownFillable::snapshot() needs MaskedArray");
+    }
   }
 
   Fillable* UnknownFillable::null() {
