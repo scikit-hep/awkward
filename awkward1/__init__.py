@@ -4,5 +4,6 @@ import awkward1.layout
 import awkward1._numba
 
 from awkward1.operations.convert import *
+from awkward1.operations.describe import *
 
 __version__ = awkward1.layout.__version__

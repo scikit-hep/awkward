@@ -525,7 +525,7 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("__repr__", &ak::FillableArray::tostring)
       .def("__len__", &ak::FillableArray::length)
       .def("clear", &ak::FillableArray::clear)
-      .def("type", &ak::FillableArray::type)
+      .def_property_readonly("type", &ak::FillableArray::type)
       .def("snapshot", [](ak::FillableArray& self) -> py::object {
         return box(self.snapshot());
       })
@@ -725,7 +725,8 @@ py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
          .def("__getitem__", &getitem<T>)
          .def("__iter__", &iter<T>)
          .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
-         .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536);
+         .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
+         .def_property_readonly("type", &ak::Content::type);
 }
 
 py::class_<ak::Content> make_Content(py::handle m, std::string name) {
