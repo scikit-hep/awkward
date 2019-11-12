@@ -30,7 +30,7 @@ namespace awkward {
     virtual bool equal(std::shared_ptr<Type> other) const;
 
   private:
-    DType dtype_;
+    const DType dtype_;
   };
 }
 

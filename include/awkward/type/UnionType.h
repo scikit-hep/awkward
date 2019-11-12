@@ -21,7 +21,7 @@ namespace awkward {
     const std::shared_ptr<Type> type(int64_t i) const;
 
   private:
-    std::vector<std::shared_ptr<Type>> types_;
+    const std::vector<std::shared_ptr<Type>> types_;
   };
 }
 

@@ -1,10 +1,15 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include "awkward/array/ListArray.h"
+#include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
 
 namespace awkward {
+  const ArrayType Content::type() const {
+    return ArrayType(length(), type_part());
+  }
+
   const std::string Content::tostring() const {
     return tostring_part("", "", "");
   }

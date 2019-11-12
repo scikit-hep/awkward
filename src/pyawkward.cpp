@@ -15,12 +15,14 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/array/EmptyArray.h"
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/PrimitiveType.h"
+#include "awkward/type/RegularType.h"
 #include "awkward/type/ListType.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/UnionType.h"
@@ -47,13 +49,22 @@ py::object box(std::shared_ptr<ak::Type> t) {
   if (ak::ArrayType* raw = dynamic_cast<ak::ArrayType*>(t.get())) {
     return py::cast(*raw);
   }
-  else if (ak::PrimitiveType* raw = dynamic_cast<ak::PrimitiveType*>(t.get())) {
+  else if (ak::ListType* raw = dynamic_cast<ak::ListType*>(t.get())) {
     return py::cast(*raw);
   }
   else if (ak::OptionType* raw = dynamic_cast<ak::OptionType*>(t.get())) {
     return py::cast(*raw);
   }
+  else if (ak::PrimitiveType* raw = dynamic_cast<ak::PrimitiveType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::RegularType* raw = dynamic_cast<ak::RegularType*>(t.get())) {
+    return py::cast(*raw);
+  }
   else if (ak::UnionType* raw = dynamic_cast<ak::UnionType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::UnknownType* raw = dynamic_cast<ak::UnknownType*>(t.get())) {
     return py::cast(*raw);
   }
   else {
@@ -95,6 +106,9 @@ py::object box(std::shared_ptr<ak::Content> content) {
   else if (ak::ListOffsetArray64* raw = dynamic_cast<ak::ListOffsetArray64*>(content.get())) {
     return py::cast(*raw);
   }
+  else if (ak::EmptyArray* raw = dynamic_cast<ak::EmptyArray*>(content.get())) {
+    return py::cast(*raw);
+  }
   else {
     throw std::runtime_error("missing boxer for Content subtype");
   }
@@ -126,6 +140,10 @@ std::shared_ptr<ak::Type> unbox_type(py::handle obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::PrimitiveType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::RegularType*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   try {
@@ -170,6 +188,10 @@ std::shared_ptr<ak::Content> unbox_content(py::object obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::ListOffsetArray64*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::EmptyArray*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   throw std::invalid_argument("content argument must be a Content subtype");
@@ -507,7 +529,7 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("__repr__", &ak::FillableArray::tostring)
       .def("__len__", &ak::FillableArray::length)
       .def("clear", &ak::FillableArray::clear)
-      .def("type", &ak::FillableArray::type)
+      .def_property_readonly("type", &ak::FillableArray::type)
       .def("snapshot", [](ak::FillableArray& self) -> py::object {
         return box(self.snapshot());
       })
@@ -594,6 +616,16 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
       }))
       .def("__repr__", &ak::PrimitiveType::tostring)
       .def("__eq__", &ak::PrimitiveType::equal)
+  );
+}
+
+py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_RegularType(py::handle m, std::string name) {
+  return (py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type>(m, name.c_str())
+      .def(py::init<std::vector<int64_t>, std::shared_ptr<ak::Type>>())
+      .def_property_readonly("shape", &ak::RegularType::shape)
+      .def_property_readonly("type", &ak::RegularType::type)
+      .def("__repr__", &ak::RegularType::tostring)
+      .def("__eq__", &ak::RegularType::equal)
   );
 }
 
@@ -697,7 +729,8 @@ py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
          .def("__getitem__", &getitem<T>)
          .def("__iter__", &iter<T>)
          .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
-         .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536);
+         .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
+         .def_property_readonly("type", &ak::Content::type);
 }
 
 py::class_<ak::Content> make_Content(py::handle m, std::string name) {
@@ -782,6 +815,16 @@ py::class_<ak::ListOffsetArrayOf<T>, ak::Content> make_ListOffsetArrayOf(py::han
   );
 }
 
+/////////////////////////////////////////////////////////////// EmptyArray
+
+py::class_<ak::EmptyArray, ak::Content> make_EmptyArray(py::handle m, std::string name) {
+  return content(py::class_<ak::EmptyArray, ak::Content>(m, name.c_str())
+      .def(py::init([](py::object id) -> ak::EmptyArray {
+        return ak::EmptyArray(unbox_id(id));
+      }), py::arg("id") = py::none())
+  );
+}
+
 /////////////////////////////////////////////////////////////// module
 
 PYBIND11_MODULE(layout, m) {
@@ -809,6 +852,7 @@ PYBIND11_MODULE(layout, m) {
   make_Type(m, "Type");
   make_ArrayType(m, "ArrayType");
   make_PrimitiveType(m, "PrimitiveType");
+  make_RegularType(m, "RegularType");
   make_UnknownType(m, "UnknownType");
   make_ListType(m, "ListType");
   make_OptionType(m, "OptionType");
@@ -825,6 +869,8 @@ PYBIND11_MODULE(layout, m) {
   make_ListOffsetArrayOf<int32_t>(m,  "ListOffsetArray32");
   make_ListOffsetArrayOf<uint32_t>(m, "ListOffsetArrayU32");
   make_ListOffsetArrayOf<int64_t>(m,  "ListOffsetArray64");
+
+  make_EmptyArray(m, "EmptyArray");
 
   m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;
