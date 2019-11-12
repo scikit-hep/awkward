@@ -11,6 +11,7 @@ else:
     import awkward1._numba.identity
     import awkward1._numba.content
     import awkward1._numba.iterator
+    import awkward1._numba.fillable
     import awkward1._numba.array.numpyarray
     import awkward1._numba.array.listarray
     import awkward1._numba.array.listoffsetarray
