@@ -54,12 +54,40 @@ class type_methods(numba.typing.templates.AttributeTemplate):
         else:
             raise TypeError("wrong number of arguments for FillableArray.null")
 
+    @numba.typing.templates.bound_function("boolean")
+    def resolve_boolean(self, arraytpe, args, kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.Boolean):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError("wrong number or types of arguments for FillableArray.boolean")
+
     @numba.typing.templates.bound_function("integer")
     def resolve_integer(self, arraytpe, args, kwargs):
         if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.Integer):
             return numba.types.none(args[0])
         else:
-            raise TypeError("wrong number of arguments for FillableArray.integer")
+            raise TypeError("wrong number or types of arguments for FillableArray.integer")
+
+    @numba.typing.templates.bound_function("real")
+    def resolve_real(self, arraytpe, args, kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], (numba.types.Integer, numba.types.Float)):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError("wrong number or types of arguments for FillableArray.real")
+
+    @numba.typing.templates.bound_function("beginlist")
+    def resolve_beginlist(self, arraytpe, args, kwargs):
+        if len(args) == 0 and len(kwargs) == 0:
+            return numba.types.none()
+        else:
+            raise TypeError("wrong number of arguments for FillableArray.beginlist")
+
+    @numba.typing.templates.bound_function("endlist")
+    def resolve_endlist(self, arraytpe, args, kwargs):
+        if len(args) == 0 and len(kwargs) == 0:
+            return numba.types.none()
+        else:
+            raise TypeError("wrong number of arguments for FillableArray.endlist")
 
 def call(context, builder, fcn, args):
     fcntpe = context.get_function_pointer_type(fcn.numbatpe)
@@ -85,11 +113,55 @@ def lower_null(context, builder, sig, args):
     call(context, builder, libawkward.FillableArray_null, (proxyin.rawptr,))
     return context.get_dummy_value()
 
-@numba.extending.lower_builtin("integer", FillableArrayType)
+@numba.extending.lower_builtin("boolean", FillableArrayType, numba.types.Boolean)
+def lower_integer(context, builder, sig, args):
+    tpe, xtpe = sig.args
+    val, xval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    x = builder.zext(xval, context.get_value_type(numba.types.uint8))
+    call(context, builder, libawkward.FillableArray_boolean, (proxyin.rawptr, x))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("integer", FillableArrayType, numba.types.Integer)
 def lower_integer(context, builder, sig, args):
     tpe, xtpe = sig.args
     val, xval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     x = util.cast(context, builder, xtpe, numba.types.int64, xval)
-    call(context, builder, libawkward.FillableArray_null, (proxyin.rawptr, x))
+    call(context, builder, libawkward.FillableArray_integer, (proxyin.rawptr, x))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("real", FillableArrayType, numba.types.Integer)
+@numba.extending.lower_builtin("real", FillableArrayType, numba.types.Float)
+def lower_real(context, builder, sig, args):
+    tpe, xtpe = sig.args
+    val, xval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if isinstance(xtpe, numba.types.Integer) and xtpe.signed:
+        x = builder.sitofp(xval, context.get_value_type(numba.types.float64))
+    elif isinstance(xtpe, numba.types.Integer):
+        x = builder.uitofp(xval, context.get_value_type(numba.types.float64))
+    elif xtpe.bitwidth < 64:
+        x = builder.fpext(xval, context.get_value_type(numba.types.float64))
+    elif xtpe.bitwidth > 64:
+        x = builder.fptrunc(xval, context.get_value_type(numba.types.float64))
+    else:
+        x = xval
+    call(context, builder, libawkward.FillableArray_real, (proxyin.rawptr, x))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("beginlist", FillableArrayType)
+def lower_beginlist(context, builder, sig, args):
+    tpe, = sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    call(context, builder, libawkward.FillableArray_beginlist, (proxyin.rawptr,))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("endlist", FillableArrayType)
+def lower_endlist(context, builder, sig, args):
+    tpe, = sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    call(context, builder, libawkward.FillableArray_endlist, (proxyin.rawptr,))
     return context.get_dummy_value()
