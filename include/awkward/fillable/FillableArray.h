@@ -23,7 +23,7 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_at(int64_t at) const;
     const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;
     const std::shared_ptr<Content> getitem(const Slice& where) const;
-    
+
     void null();
     void boolean(bool x);
     void integer(int64_t x);
@@ -47,6 +47,18 @@ namespace awkward {
 
     void maybeupdate(Fillable* tmp);
   };
+}
+
+extern "C" {
+  uint8_t awkward_FillableArray_length(void* fillablearray, int64_t* result);
+  uint8_t awkward_FillableArray_clear(void* fillablearray);
+
+  uint8_t awkward_FillableArray_null(void* fillablearray);
+  uint8_t awkward_FillableArray_boolean(void* fillablearray, bool x);
+  uint8_t awkward_FillableArray_integer(void* fillablearray, int64_t x);
+  uint8_t awkward_FillableArray_real(void* fillablearray, double x);
+  uint8_t awkward_FillableArray_beginlist(void* fillablearray);
+  uint8_t awkward_FillableArray_endlist(void* fillablearray);
 }
 
 #endif // AWKWARD_FILLABLE_H_
