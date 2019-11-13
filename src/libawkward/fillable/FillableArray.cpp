@@ -76,10 +76,10 @@ namespace awkward {
   }
 }
 
-bool awkward_FillableArray_length(void* fillablearray, int64_t& result) {
+bool awkward_FillableArray_length(void* fillablearray, int64_t* result) {
   awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
   try {
-    result = obj->length();
+    *result = obj->length();
   }
   catch (...) {
     return false;

@@ -526,6 +526,7 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def(py::init([](int64_t initial, double resize) -> ak::FillableArray {
         return ak::FillableArray(ak::FillableOptions(initial, resize));
       }), py::arg("initial") = 1024, py::arg("resize") = 2.0)
+      .def_property_readonly("_ptr", [](ak::FillableArray* self) -> size_t { return reinterpret_cast<size_t>(self); })
       .def("__repr__", &ak::FillableArray::tostring)
       .def("__len__", &ak::FillableArray::length)
       .def("clear", &ak::FillableArray::clear)

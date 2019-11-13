@@ -50,7 +50,7 @@ namespace awkward {
 }
 
 extern "C" {
-  bool awkward_FillableArray_length(void* fillablearray, int64_t& result);
+  bool awkward_FillableArray_length(void* fillablearray, int64_t* result);
   bool awkward_FillableArray_clear(void* fillablearray);
 
   bool awkward_FillableArray_null(void* fillablearray);
