@@ -45,20 +45,51 @@ class type_methods(numba.typing.templates.AttributeTemplate):
         if len(args) == 0 and len(kwargs) == 0:
             return numba.types.none()
         else:
-            raise TypeError("too many arguments for FillableArray.clear")
+            raise TypeError("wrong number of arguments for FillableArray.clear")
 
-def call(context, builder, fcn, args, errormessage):
+    @numba.typing.templates.bound_function("null")
+    def resolve_null(self, arraytpe, args, kwargs):
+        if len(args) == 0 and len(kwargs) == 0:
+            return numba.types.none()
+        else:
+            raise TypeError("wrong number of arguments for FillableArray.null")
+
+    @numba.typing.templates.bound_function("integer")
+    def resolve_integer(self, arraytpe, args, kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.Integer):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError("wrong number of arguments for FillableArray.integer")
+
+def call(context, builder, fcn, args):
     fcntpe = context.get_function_pointer_type(fcn.numbatpe)
     fcnval = context.add_dynamic_addr(builder, fcn.numbatpe.get_pointer(fcn), info=fcn.name)
     fcnptr = builder.bitcast(fcnval, fcntpe)
     err = context.call_function_pointer(builder, fcnptr, args)
-    with builder.if_then(builder.icmp_unsigned("!=", err, context.get_constant(numba.uint8, 0)), likely=False):
-        context.call_conv.return_user_exc(builder, ValueError, (errormessage,))
+    with builder.if_then(builder.icmp_unsigned("!=", err, context.get_constant(numba.types.uint8, 0)), likely=False):
+        context.call_conv.return_user_exc(builder, ValueError, (fcn.name + " failed",))
 
 @numba.extending.lower_builtin("clear", FillableArrayType)
 def lower_clear(context, builder, sig, args):
     tpe, = sig.args
     val, = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    call(context, builder, libawkward.FillableArray_clear, (proxyin.rawptr,), "could not clear FillableArray")
+    call(context, builder, libawkward.FillableArray_clear, (proxyin.rawptr,))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("null", FillableArrayType)
+def lower_null(context, builder, sig, args):
+    tpe, = sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    call(context, builder, libawkward.FillableArray_null, (proxyin.rawptr,))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("integer", FillableArrayType)
+def lower_integer(context, builder, sig, args):
+    tpe, xtpe = sig.args
+    val, xval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    x = util.cast(context, builder, xtpe, numba.types.int64, xval)
+    call(context, builder, libawkward.FillableArray_null, (proxyin.rawptr, x))
     return context.get_dummy_value()
