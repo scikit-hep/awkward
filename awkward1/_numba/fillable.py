@@ -13,6 +13,14 @@ class FillableArrayType(numba.types.Type):
     def __init__(self):
         super(FillableArrayType, self).__init__("FillableArrayType")
 
+@numba.typing.templates.infer_global(len)
+class type_len(numba.typing.templates.AbstractTemplate):
+    def generic(self, args, kwargs):
+        if len(args) == 1 and len(kwargs) == 0:
+            arraytpe, = args
+            if isinstance(arraytpe, FillableArrayType):
+                return numba.typing.templates.signature(numba.types.intp, arraytpe)
+
 @numba.datamodel.registry.register_default(FillableArrayType)
 class FillableArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
@@ -35,6 +43,23 @@ def box(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     c.pyapi.incref(proxyin.pyptr)
     return proxyin.pyptr
+
+def call(context, builder, fcn, args):
+    fcntpe = context.get_function_pointer_type(fcn.numbatpe)
+    fcnval = context.add_dynamic_addr(builder, fcn.numbatpe.get_pointer(fcn), info=fcn.name)
+    fcnptr = builder.bitcast(fcnval, fcntpe)
+    err = context.call_function_pointer(builder, fcnptr, args)
+    with builder.if_then(builder.icmp_unsigned("!=", err, context.get_constant(numba.uint8, 0)), likely=False):
+        context.call_conv.return_user_exc(builder, ValueError, (fcn.name + " failed",))
+
+@numba.extending.lower_builtin(len, FillableArrayType)
+def lower_len(context, builder, sig, args):
+    tpe, = sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    result = numba.cgutils.alloca_once(builder, context.get_value_type(numba.int64))
+    call(context, builder, libawkward.FillableArray_length, (proxyin.rawptr, result))
+    return builder.load(result)
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):
@@ -89,14 +114,6 @@ class type_methods(numba.typing.templates.AttributeTemplate):
         else:
             raise TypeError("wrong number of arguments for FillableArray.endlist")
 
-def call(context, builder, fcn, args):
-    fcntpe = context.get_function_pointer_type(fcn.numbatpe)
-    fcnval = context.add_dynamic_addr(builder, fcn.numbatpe.get_pointer(fcn), info=fcn.name)
-    fcnptr = builder.bitcast(fcnval, fcntpe)
-    err = context.call_function_pointer(builder, fcnptr, args)
-    with builder.if_then(builder.icmp_unsigned("!=", err, context.get_constant(numba.types.uint8, 0)), likely=False):
-        context.call_conv.return_user_exc(builder, ValueError, (fcn.name + " failed",))
-
 @numba.extending.lower_builtin("clear", FillableArrayType)
 def lower_clear(context, builder, sig, args):
     tpe, = sig.args
@@ -118,7 +135,7 @@ def lower_integer(context, builder, sig, args):
     tpe, xtpe = sig.args
     val, xval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    x = builder.zext(xval, context.get_value_type(numba.types.uint8))
+    x = builder.zext(xval, context.get_value_type(numba.uint8))
     call(context, builder, libawkward.FillableArray_boolean, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
@@ -127,7 +144,7 @@ def lower_integer(context, builder, sig, args):
     tpe, xtpe = sig.args
     val, xval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    x = util.cast(context, builder, xtpe, numba.types.int64, xval)
+    x = util.cast(context, builder, xtpe, numba.int64, xval)
     call(context, builder, libawkward.FillableArray_integer, (proxyin.rawptr, x))
     return context.get_dummy_value()
 

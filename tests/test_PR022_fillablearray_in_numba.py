@@ -107,10 +107,17 @@ def test_list():
 
     @numba.njit
     def f2(q):
+        return len(q)
+
+    assert f2(a) == 3
+    assert f2(b) == 3
+
+    @numba.njit
+    def f3(q):
         q.clear()
         return q
 
-    c = f2(b)
+    c = f3(b)
     assert awkward1.tolist(a.snapshot()) == []
     assert awkward1.tolist(b.snapshot()) == []
     assert awkward1.tolist(c.snapshot()) == []

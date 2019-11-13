@@ -60,7 +60,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
    * [X] Fully implement `__getitem__` for int/slice/intarray/boolarray/tuple (placeholders for newaxis/ellipsis), with perfect agreement with [Numpy basic/advanced indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html), to all levels of depth.
    * [ ] Appendable arrays (a distinct phase from readable arrays, when the type is still in flux) to implement `awkward.fromiter` in C++.
       * [X] Implemented all types but records; tested all primitives and lists.
-      * [ ] Expose appendable arrays to Numba.
+      * [X] Expose appendable arrays to Numba.
       * [ ] Implement appendable records.
       * [ ] Test all (requires array types for all).
    * [X] JSON → Awkward via header-only [RapidJSON](https://rapidjson.org) and `awkward.fromiter`.
@@ -106,7 +106,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [ ] `awkward.tonumpy`: to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
       * [ ] `awkward.topandas`: flattening jaggedness into `MultiIndex` rows and nested records into `MultiIndex` columns. This is distinct from the arrays' inheritance from Pandas, distinct from the natural ability to use any one of them as DataFrame columns.
       * [ ] `awkward.flatten`: same as old with an `axis` parameter.
-      * [ ] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporing an `axis` method.
+      * [ ] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporting an `axis` method.
       * [ ] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std`.
       * [ ] `awkward.argmin`, `awkward.argmax`, `awkward.argsort`, and `awkward.sort`: same as old.
       * [ ] `awkward.where`: like `numpy.where`; old doesn't have this yet, but we'll need it.
