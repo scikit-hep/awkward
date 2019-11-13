@@ -29,3 +29,9 @@ def unbox(tpe, obj, c):
     c.pyapi.decref(rawptr_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
+
+@numba.extending.box(FillableArrayType)
+def box(tpe, val, c):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
+    c.pyapi.incref(proxyin.pyptr)
+    return proxyin.pyptr
