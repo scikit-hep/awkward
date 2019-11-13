@@ -13,9 +13,9 @@ namespace awkward {
     return std::shared_ptr<Type>(new ArrayType(length_, type_));
   }
 
-  bool ArrayType::equal(std::shared_ptr<Type> other) const {
+  bool ArrayType::compatible(std::shared_ptr<Type> other) const {
     if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
-      return type_.get()->equal(t->type_);   // lengths DO NOT need to be equal (unlike RegularType)
+      return type_.get()->compatible(t->type_);   // lengths DO NOT need to be equal (unlike RegularType)
     }
     else {
       return false;

@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "awkward/type/UnknownType.h"
+#include "awkward/type/OptionType.h"
 
 #include "awkward/type/PrimitiveType.h"
 
@@ -30,12 +31,55 @@ namespace awkward {
     return std::shared_ptr<Type>(new PrimitiveType(dtype_));
   }
 
-  bool PrimitiveType::equal(std::shared_ptr<Type> other) const {
+  bool PrimitiveType::compatible(std::shared_ptr<Type> other) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
       return true;
     }
+    else if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
+      return compatible(t->type());
+    }
     else if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
-      return dtype_ == t->dtype_;
+      switch (dtype_) {
+        case boolean:
+        switch (t->dtype_) {
+          case boolean:
+          return true;
+          default:
+          return false;
+        }
+        case int8:
+        case int16:
+        case int32:
+        case int64:
+        case uint8:
+        case uint16:
+        case uint32:
+        case uint64:
+        switch (t->dtype_) {
+          case int8:
+          case int16:
+          case int32:
+          case int64:
+          case uint8:
+          case uint16:
+          case uint32:
+          case uint64:
+          return true;
+          default:
+          return false;
+        }
+        case float32:
+        case float64:
+        switch (t->dtype_) {
+          case float32:
+          case float64:
+          return true;
+          default:
+          return false;
+        }
+        default:
+        return false;
+      }
     }
     else {
       return false;

@@ -13,7 +13,7 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnknownType());
   }
 
-  bool UnknownType::equal(std::shared_ptr<Type> other) const {
+  bool UnknownType::compatible(std::shared_ptr<Type> other) const {
     return true;
   }
 }

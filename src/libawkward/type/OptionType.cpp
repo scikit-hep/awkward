@@ -21,15 +21,12 @@ namespace awkward {
     return std::shared_ptr<Type>(new OptionType(type_));
   }
 
-  bool OptionType::equal(std::shared_ptr<Type> other) const {
+  bool OptionType::compatible(std::shared_ptr<Type> other) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
       return true;
     }
-    else if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
-      return type().get()->equal(t->type());
-    }
     else {
-      return false;
+      return type_.get()->compatible(other);
     }
   }
 

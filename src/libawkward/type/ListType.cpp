@@ -15,12 +15,12 @@ namespace awkward {
     return std::shared_ptr<Type>(new ListType(type_));
   }
 
-  bool ListType::equal(std::shared_ptr<Type> other) const {
+  bool ListType::compatible(std::shared_ptr<Type> other) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
       return true;
     }
     else if (ListType* t = dynamic_cast<ListType*>(other.get())) {
-      return type().get()->equal(t->type());
+      return type().get()->compatible(t->type());
     }
     else {
       return false;

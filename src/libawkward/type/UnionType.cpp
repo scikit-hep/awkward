@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "awkward/type/UnknownType.h"
+#include "awkward/type/OptionType.h"
 
 #include "awkward/type/UnionType.h"
 
@@ -25,23 +26,47 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnionType(types_));
   }
 
-  bool UnionType::equal(std::shared_ptr<Type> other) const {
+  bool UnionType::compatible(std::shared_ptr<Type> other) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
       return true;
     }
+    else if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
+      return compatible(t->type());
+    }
     else if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
-      if (numtypes() != t->numtypes()) {
-        return false;
+      for (auto me : types_) {
+        bool any = false;
+        for (auto you : t->types_) {
+          if (me.get()->compatible(you)) {
+            any = true;
+            break;
+          }
+        }
+        if (!any) {
+          return false;
+        }
       }
-      for (int64_t i = 0;  i < numtypes();  i++) {
-        if (!type(i).get()->equal(t->type(i))) {
+      for (auto you : t->types_) {
+        bool any = false;
+        for (auto me : types_) {
+          if (you.get()->compatible(me)) {
+            any = true;
+            break;
+          }
+        }
+        if (!any) {
           return false;
         }
       }
       return true;
     }
     else {
-      return false;
+      for (auto me : types_) {
+        if (!me.get()->compatible(other)) {
+          return false;
+        }
+      }
+      return true;
     }
   }
 
