@@ -50,15 +50,15 @@ namespace awkward {
 }
 
 extern "C" {
-  bool awkward_FillableArray_length(void* fillablearray, int64_t* result);
-  bool awkward_FillableArray_clear(void* fillablearray);
+  uint8_t awkward_FillableArray_length(void* fillablearray, int64_t* result);
+  uint8_t awkward_FillableArray_clear(void* fillablearray);
 
-  bool awkward_FillableArray_null(void* fillablearray);
-  bool awkward_FillableArray_boolean(void* fillablearray, bool x);
-  bool awkward_FillableArray_integer(void* fillablearray, int64_t x);
-  bool awkward_FillableArray_real(void* fillablearray, double x);
-  bool awkward_FillableArray_beginlist(void* fillablearray);
-  bool awkward_FillableArray_endlist(void* fillablearray);
+  uint8_t awkward_FillableArray_null(void* fillablearray);
+  uint8_t awkward_FillableArray_boolean(void* fillablearray, bool x);
+  uint8_t awkward_FillableArray_integer(void* fillablearray, int64_t x);
+  uint8_t awkward_FillableArray_real(void* fillablearray, double x);
+  uint8_t awkward_FillableArray_beginlist(void* fillablearray);
+  uint8_t awkward_FillableArray_endlist(void* fillablearray);
 }
 
 #endif // AWKWARD_FILLABLE_H_

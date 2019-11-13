@@ -35,3 +35,30 @@ def box(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     c.pyapi.incref(proxyin.pyptr)
     return proxyin.pyptr
+
+@numba.typing.templates.infer_getattr
+class type_methods(numba.typing.templates.AttributeTemplate):
+    key = FillableArrayType
+
+    @numba.typing.templates.bound_function("clear")
+    def resolve_clear(self, arraytpe, args, kwargs):
+        if len(args) == 0 and len(kwargs) == 0:
+            return numba.types.none()
+        else:
+            raise TypeError("too many arguments for FillableArray.clear")
+
+def call(context, builder, fcn, args, errormessage):
+    fcntpe = context.get_function_pointer_type(fcn.numbatpe)
+    fcnval = context.add_dynamic_addr(builder, fcn.numbatpe.get_pointer(fcn), info=fcn.name)
+    fcnptr = builder.bitcast(fcnval, fcntpe)
+    err = context.call_function_pointer(builder, fcnptr, args)
+    with builder.if_then(builder.icmp_unsigned("!=", err, context.get_constant(numba.uint8, 0)), likely=False):
+        context.call_conv.return_user_exc(builder, ValueError, (errormessage,))
+
+@numba.extending.lower_builtin("clear", FillableArrayType)
+def lower_clear(context, builder, sig, args):
+    tpe, = sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    call(context, builder, libawkward.FillableArray_clear, (proxyin.rawptr,), "could not clear FillableArray")
+    return context.get_dummy_value()

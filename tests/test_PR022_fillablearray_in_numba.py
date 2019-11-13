@@ -14,7 +14,7 @@ numba = pytest.importorskip("numba")
 def test_boxing():
     @numba.njit
     def f1(q):
-        b = q
+        z = q
         return 3.14
 
     a = awkward1.layout.FillableArray()
@@ -24,6 +24,7 @@ def test_boxing():
 
     @numba.njit
     def f2(q):
+        z = q
         return q
 
     a = awkward1.layout.FillableArray()
@@ -34,3 +35,12 @@ def test_boxing():
     assert sys.getrefcount(a) == 3
 
     assert str(b.snapshot()) == "<EmptyArray/>"
+
+def test_simple():
+    @numba.njit
+    def f1(q):
+        q.clear()
+        return 3.14
+
+    a = awkward1.layout.FillableArray()
+    f1(a)
