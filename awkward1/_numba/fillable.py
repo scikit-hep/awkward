@@ -59,7 +59,7 @@ def lower_len(context, builder, sig, args):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     result = numba.cgutils.alloca_once(builder, context.get_value_type(numba.int64))
     call(context, builder, libawkward.FillableArray_length, (proxyin.rawptr, result))
-    return builder.load(result)
+    return util.cast(context, builder, numba.int64, numba.intp, builder.load(result))
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):
