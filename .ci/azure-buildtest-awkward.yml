@@ -33,25 +33,13 @@ jobs:
           python.version: "2.7"
           python.architecture: "x64"
           numpy.version: "1.16.5"
-        "py35-32bit":
-          python.version: "3.5"
-          python.architecture: "x86"
-          numpy.version: "latest"
         "py35-64bit":
           python.version: "3.5"
           python.architecture: "x64"
           numpy.version: "latest"
-        "py36-32bit":
-          python.version: "3.6"
-          python.architecture: "x86"
-          numpy.version: "latest"
         "py36-64bit":
           python.version: "3.6"
           python.architecture: "x64"
-          numpy.version: "latest"
-        "py37-32bit":
-          python.version: "3.7"
-          python.architecture: "x86"
           numpy.version: "latest"
         "py37-64bit":
           python.version: "3.7"
@@ -79,7 +67,7 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-          python -m pip install -r test-requirements.txt
+          python -m pip install -r requirements-test.txt
           python -c "import numpy; print(numpy.__version__)"
         displayName: "Install"
 
@@ -129,7 +117,7 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-          python -m pip install -r test-requirements.txt
+          python -m pip install -r requirements-test.txt
           python -c "import numpy; print(numpy.__version__)"
         displayName: "Install"
 
@@ -157,34 +145,18 @@ jobs:
           python.version: "3.4"
           python.architecture: "x64"
           numpy.version: "1.13.1"
-        "py34-np16":
-          python.version: "3.4"
-          python.architecture: "x64"
-          numpy.version: "1.16.5"
         "py35-np13":
           python.version: "3.5"
           python.architecture: "x64"
           numpy.version: "1.13.1"
-        "py35-np*":
-          python.version: "3.5"
-          python.architecture: "x64"
-          numpy.version: "latest"
         "py36-np14":
           python.version: "3.6"
           python.architecture: "x64"
           numpy.version: "1.14.5"
-        "py36-np*":
-          python.version: "3.6"
-          python.architecture: "x64"
-          numpy.version: "latest"
         "py37-np14":
           python.version: "3.7"
           python.architecture: "x64"
           numpy.version: "1.14.5"
-        "py37-np*":
-          python.version: "3.7"
-          python.architecture: "x64"
-          numpy.version: "latest"
         "py38-np*":
           python.version: "3.8"
           python.architecture: "x64"
@@ -208,7 +180,7 @@ jobs:
             sed 's/numpy>=1.13.1/numpy==$(numpy.version)/' requirements.txt > requirements2.txt;
             python -m pip install -r requirements2.txt;
           fi
-          python -m pip install -r test-requirements.txt
+          python -m pip install -r requirements-test.txt
           python -c "import numpy; print(numpy.__version__)"
         displayName: "Install"
 
