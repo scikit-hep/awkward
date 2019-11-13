@@ -26,18 +26,35 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnionType(types_));
   }
 
-  bool UnionType::compatible(std::shared_ptr<Type> other) const {
-    if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
+  bool UnionType::equal(std::shared_ptr<Type> other) const {
+    if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
+      if (types_.size() != t->types_.size()) {
+        return false;
+      }
+      for (size_t i = 0;  i < types_.size();  i++) {
+        if (!types_[i].get()->equal(t->types_[i])) {
+          return false;
+        }
+      }
       return true;
     }
-    else if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
-      return compatible(t->type());
+    else {
+      return false;
+    }
+  }
+
+  bool UnionType::compatible(std::shared_ptr<Type> other, bool bool_is_int, bool int_is_float, bool ignore_null, bool unknown_is_anything) const {
+    if (unknown_is_anything  &&  dynamic_cast<UnknownType*>(other.get())) {
+      return true;
+    }
+    else if (ignore_null  &&  dynamic_cast<OptionType*>(other.get())) {
+      return compatible(dynamic_cast<OptionType*>(other.get())->type(), bool_is_int, int_is_float, ignore_null, unknown_is_anything);
     }
     else if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
       for (auto me : types_) {
         bool any = false;
-        for (auto you : t->types_) {
-          if (me.get()->compatible(you)) {
+        for (auto you : t->types()) {
+          if (me.get()->compatible(you, bool_is_int, int_is_float, ignore_null, unknown_is_anything)) {
             any = true;
             break;
           }
@@ -46,10 +63,10 @@ namespace awkward {
           return false;
         }
       }
-      for (auto you : t->types_) {
+      for (auto you : t->types()) {
         bool any = false;
         for (auto me : types_) {
-          if (you.get()->compatible(me)) {
+          if (you.get()->compatible(me, bool_is_int, int_is_float, ignore_null, unknown_is_anything)) {
             any = true;
             break;
           }
@@ -62,7 +79,7 @@ namespace awkward {
     }
     else {
       for (auto me : types_) {
-        if (!me.get()->compatible(other)) {
+        if (!me.get()->compatible(other, bool_is_int, int_is_float, ignore_null, unknown_is_anything)) {
           return false;
         }
       }

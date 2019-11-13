@@ -13,9 +13,18 @@ namespace awkward {
     return std::shared_ptr<Type>(new ArrayType(length_, type_));
   }
 
-  bool ArrayType::compatible(std::shared_ptr<Type> other) const {
+  bool ArrayType::equal(std::shared_ptr<Type> other) const {
     if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
-      return type_.get()->compatible(t->type_);   // lengths DO NOT need to be equal (unlike RegularType)
+      return length_ == t->length_  &&  type_.get()->equal(t->type_);
+    }
+    else {
+      return false;
+    }
+  }
+
+  bool ArrayType::compatible(std::shared_ptr<Type> other, bool bool_is_int, bool int_is_float, bool ignore_null, bool unknown_is_anything) const {
+    if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
+      return type_.get()->compatible(t->type_, bool_is_int, int_is_float, ignore_null, unknown_is_anything);   // lengths DO NOT need to be equal (unlike RegularType)
     }
     else {
       return false;

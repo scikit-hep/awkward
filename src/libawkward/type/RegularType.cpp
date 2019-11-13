@@ -23,15 +23,24 @@ namespace awkward {
     return std::shared_ptr<Type>(new RegularType(shape_, type_));
   }
 
-  bool RegularType::compatible(std::shared_ptr<Type> other) const {
-    if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
+  bool RegularType::equal(std::shared_ptr<Type> other) const {
+    if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
+      return shape() == t->shape()  &&  type().get()->equal(t->type());
+    }
+    else {
+      return false;
+    }
+  }
+
+  bool RegularType::compatible(std::shared_ptr<Type> other, bool bool_is_int, bool int_is_float, bool ignore_null, bool unknown_is_anything) const {
+    if (unknown_is_anything  &&  dynamic_cast<UnknownType*>(other.get())) {
       return true;
     }
-    else if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
-      return compatible(t->type());
+    else if (ignore_null  &&  dynamic_cast<OptionType*>(other.get())) {
+      return compatible(dynamic_cast<OptionType*>(other.get())->type(), bool_is_int, int_is_float, ignore_null, unknown_is_anything);
     }
     else if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
-      return shape() == t->shape()  &&  type().get()->compatible(t->type());
+      return shape_ == t->shape()  &&  type_.get()->compatible(t->type(), bool_is_int, int_is_float, ignore_null, unknown_is_anything);
     }
     else {
       return false;

@@ -13,7 +13,21 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnknownType());
   }
 
-  bool UnknownType::compatible(std::shared_ptr<Type> other) const {
-    return true;
+  bool UnknownType::equal(std::shared_ptr<Type> other) const {
+    if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  bool UnknownType::compatible(std::shared_ptr<Type> other, bool bool_is_int, bool int_is_float, bool ignore_null, bool unknown_is_anything) const {
+    if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
+      return true;
+    }
+    else {
+      return unknown_is_anything;
+    }
   }
 }
