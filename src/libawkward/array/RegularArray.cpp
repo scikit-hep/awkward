@@ -93,6 +93,7 @@ namespace awkward {
     }
 
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+      assert(advanced.length() == 0);
       std::shared_ptr<SliceItem> nexthead = tail.head();
       Slice nexttail = tail.tail();
       Index64 nextcarry(len);
@@ -114,7 +115,41 @@ namespace awkward {
     }
 
     else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
-      throw std::runtime_error("RegularArray::getitem_next(range)");
+      std::shared_ptr<SliceItem> nexthead = tail.head();
+      Slice nexttail = tail.tail();
+
+      int64_t regular_start = range->start();
+      int64_t regular_stop = range->stop();
+      awkward_regularize_rangeslice(&regular_start, &regular_stop, range->step() > 0, range->start() != Slice::none(), range->stop() != Slice::none(), size_);
+
+      int64_t nextsize = regular_stop - regular_start;
+      Index64 nextcarry(len*nextsize);
+
+      int64_t* tocarry = nextcarry.ptr().get();
+      for (int64_t i = 0;  i < len;  i++) {
+        for (int64_t j = 0;  j < nextsize;  j++) {
+          tocarry[i*nextsize + j] = i*size_ + regular_start + j;
+        }
+      }
+
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+
+      if (advanced.length() == 0) {
+        return std::shared_ptr<Content>(new RegularArray(id_, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize));
+      }
+      else {
+        Index64 nextadvanced(len*nextsize);
+
+        int64_t* toadvanced = nextadvanced.ptr().get();
+        int64_t* fromadvanced = advanced.ptr().get();
+        for (int64_t i = 0;  i < len;  i++) {
+          for (int64_t j = 0;  j < nextsize;  j++) {
+            toadvanced[i*nextsize + j] = fromadvanced[i];
+          }
+        }
+
+        return std::shared_ptr<Content>(new RegularArray(id_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize));
+      }
     }
 
     else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {

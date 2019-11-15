@@ -50,3 +50,15 @@ def test_getitem_deeper():
     assert awkward1.tolist(listarray[1, 0, 1]) == [5.5]
     assert awkward1.tolist(listarray[1, 1, 0]) == [6.6, 7.7, 8.8, 9.9]
     assert awkward1.tolist(listarray[1, 1, 1]) == []
+
+    assert awkward1.tolist(listarray[0, 0, 0:]) == [[0.0, 1.1, 2.2], []]
+    assert awkward1.tolist(listarray[0, 0, 1:]) == [[]]
+    assert awkward1.tolist(listarray[0, 1, 0:]) == [[3.3, 4.4], [5.5]]
+    assert awkward1.tolist(listarray[0, 1, 1:]) == [[5.5]]
+    assert awkward1.tolist(listarray[1, 0, 0:]) == [[3.3, 4.4], [5.5]]
+    assert awkward1.tolist(listarray[1, 0, 1:]) == [[5.5]]
+    assert awkward1.tolist(listarray[1, 1, 0:]) == [[6.6, 7.7, 8.8, 9.9], []]
+    assert awkward1.tolist(listarray[1, 1, 1:]) == [[]]
+
+    assert awkward1.tolist(listarray[[1], 0, 0:]) == [[[3.3, 4.4], [5.5]]]
+    assert awkward1.tolist(listarray[[1, 0], 0, 0:]) == [[[3.3, 4.4], [5.5]], [[0.0, 1.1, 2.2], []]]

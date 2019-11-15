@@ -274,7 +274,7 @@ ERROR awkward_listarray_getitem_next_range(C* tooffsets, T* tocarry, const C* fr
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length);
-    if (step > 0) {
+    if (step > 0) {   // FIXME: put this test outside the for loop
       for (int64_t j = regular_start;  j < regular_stop;  j += step) {
         tocarry[k] = fromstarts[startsoffset + i] + j;
         k++;
