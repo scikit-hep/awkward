@@ -158,7 +158,7 @@ namespace awkward {
   }
 
   template <typename T>
-  std::shared_ptr<Type> ListArrayOf<T>::type_part() const {
+  const std::shared_ptr<Type> ListArrayOf<T>::type_part() const {
     return std::shared_ptr<Type>(new ListType(content_.get()->type_part()));
   }
 

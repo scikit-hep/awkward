@@ -22,7 +22,9 @@ namespace awkward {
 
   bool NumpyArray::isempty() const {
     for (auto x : shape_) {
-      if (x == 0) return true;
+      if (x == 0) {
+        return true;
+      }
     }
     return false;  // false for isscalar(), too
   }
@@ -48,7 +50,9 @@ namespace awkward {
     return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
   }
 
-  const std::string NumpyArray::classname() const { return "NumpyArray"; }
+  const std::string NumpyArray::classname() const {
+    return "NumpyArray";
+  }
 
   void NumpyArray::setid(const std::shared_ptr<Identity> id) {
     if (id.get() != nullptr  &&  length() != id.get()->length()) {
@@ -265,7 +269,7 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> NumpyArray::type_part() const {
+  const std::shared_ptr<Type> NumpyArray::type_part() const {
     if (ndim() == 1) {
       if (format_.compare("d") == 0) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));

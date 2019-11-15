@@ -39,7 +39,7 @@ namespace awkward {
     builder.endlist();
   }
 
-  std::shared_ptr<Type> EmptyArray::type_part() const {
+  const std::shared_ptr<Type> EmptyArray::type_part() const {
     return std::shared_ptr<Type>(new UnknownType());
   }
 

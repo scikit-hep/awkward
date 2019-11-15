@@ -16,6 +16,7 @@
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/EmptyArray.h"
+#include "awkward/array/RegularArray.h"
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
@@ -109,6 +110,9 @@ py::object box(std::shared_ptr<ak::Content> content) {
   else if (ak::EmptyArray* raw = dynamic_cast<ak::EmptyArray*>(content.get())) {
     return py::cast(*raw);
   }
+  else if (ak::RegularArray* raw = dynamic_cast<ak::RegularArray*>(content.get())) {
+    return py::cast(*raw);
+  }
   else {
     throw std::runtime_error("missing boxer for Content subtype");
   }
@@ -192,6 +196,10 @@ std::shared_ptr<ak::Content> unbox_content(py::object obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::EmptyArray*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::RegularArray*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   throw std::invalid_argument("content argument must be a Content subtype");
@@ -833,6 +841,16 @@ py::class_<ak::EmptyArray, ak::Content> make_EmptyArray(py::handle m, std::strin
   );
 }
 
+/////////////////////////////////////////////////////////////// RegularArray
+
+py::class_<ak::RegularArray, ak::Content> make_RegularArray(py::handle m, std::string name) {
+  return content(py::class_<ak::RegularArray, ak::Content>(m, name.c_str())
+      .def(py::init([](std::vector<int64_t> shape, py::object content, py::object id) -> ak::RegularArray {
+        return ak::RegularArray(unbox_id(id), shape, std::shared_ptr<ak::Content>(unbox_content(content)));
+      }), py::arg("shape"), py::arg("content"), py::arg("id") = py::none())
+  );
+}
+
 /////////////////////////////////////////////////////////////// module
 
 PYBIND11_MODULE(layout, m) {
@@ -879,6 +897,8 @@ PYBIND11_MODULE(layout, m) {
   make_ListOffsetArrayOf<int64_t>(m,  "ListOffsetArray64");
 
   make_EmptyArray(m, "EmptyArray");
+
+  make_RegularArray(m, "RegularArray");
 
   m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;

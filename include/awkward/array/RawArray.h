@@ -180,7 +180,7 @@ namespace awkward {
       }
     }
 
-    virtual std::shared_ptr<Type> type_part() const {
+    virtual const std::shared_ptr<Type> type_part() const {
       if (std::is_same<T, double>::value) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
       }
