@@ -68,11 +68,21 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_range(int64_t start, int64_t stop) const {
-    throw std::runtime_error("getitem_range");
+    int64_t regular_start = start;
+    int64_t regular_stop = stop;
+    awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
+    if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
+      util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
+    }
+    return getitem_range_nowrap(regular_start, regular_stop);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    throw std::runtime_error("RegularArray::getitem_range_nowrap");
+    std::shared_ptr<Identity> id(nullptr);
+    if (id_.get() != nullptr) {
+      id = id_.get()->getitem_range_nowrap(start, stop);
+    }
+    return std::shared_ptr<Content>(new RegularArray(id_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_));
   }
 
   const std::shared_ptr<Content> RegularArray::getitem(const Slice& where) const {
