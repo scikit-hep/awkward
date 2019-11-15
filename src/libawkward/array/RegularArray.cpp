@@ -42,7 +42,7 @@ namespace awkward {
   }
 
   int64_t RegularArray::length() const {
-    return content_.get()->length() / size_;
+    return content_.get()->length() / size_;   // floor of length / size
   }
 
   const std::shared_ptr<Content> RegularArray::shallow_copy() const {
@@ -53,18 +53,18 @@ namespace awkward {
 
   const std::shared_ptr<Content> RegularArray::getitem_at(int64_t at) const {
     int64_t regular_at = at;
+    int64_t len = length();
     if (regular_at < 0) {
-      regular_at += length();
+      regular_at += len;
     }
-    if (!(0 <= regular_at  &&  regular_at < length())) {
+    if (!(0 <= regular_at  &&  regular_at < len)) {
       util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     }
     return getitem_at_unsafe(regular_at);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_at_unsafe(int64_t at) const {
-    assert(shape_.size() != 0);
-    throw std::runtime_error("getitem_at_unsafe");
+    return content_.get()->getitem_range_unsafe(at*size_, (at + 1)*size_);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_range(int64_t start, int64_t stop) const {
