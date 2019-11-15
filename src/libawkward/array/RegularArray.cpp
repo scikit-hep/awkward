@@ -75,11 +75,29 @@ namespace awkward {
   void RegularArray::checksafe() const { }
 
   const std::shared_ptr<Content> RegularArray::getitem_at(int64_t at) const {
-    throw std::runtime_error("getitem_at");
+    int64_t regular_at = at;
+    if (regular_at < 0) {
+      regular_at += length();
+    }
+    if (!(0 <= regular_at  &&  regular_at < length())) {
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+    }
+    return getitem_at_unsafe(regular_at);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_at_unsafe(int64_t at) const {
-    throw std::runtime_error("getitem_at_unsafe");
+    assert(shape_.size() != 0);
+    if (shape_.size() == 1) {
+      throw std::runtime_error("getitem_at_unsafe");
+    }
+    else {
+      int64_t outersize = shape_[0];
+      int64_t innersize = shape_[1];
+      std::vector<int64_t> shape({ outersize*innersize });
+      shape.insert(shape.end(), shape_.begin() + 2, shape_.end());
+      RegularArray content(id_, shape, content_);
+      return content.shallow_copy();
+    }
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_range(int64_t start, int64_t stop) const {
