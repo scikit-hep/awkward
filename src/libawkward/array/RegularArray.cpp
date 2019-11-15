@@ -11,19 +11,6 @@
 #include "awkward/array/RegularArray.h"
 
 namespace awkward {
-  int64_t RegularArray::ndim() const {
-    return (int64_t)shape_.size();
-  }
-
-  bool RegularArray::isempty() const {
-    for (auto x : shape_) {
-      if (x == 0) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   const std::string RegularArray::classname() const {
     return "RegularArray";
   }
@@ -37,14 +24,7 @@ namespace awkward {
 
   const std::string RegularArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
-    out << indent << pre << "<" << classname() << " shape=\"";
-    for (int64_t i = 0;  i < ndim();  i++) {
-      if (i != 0) {
-        out << " ";
-      }
-      out << shape_[i];
-    }
-    out << "\">\n";
+    out << indent << pre << "<" << classname() << " size=\"" << size_ << "\">\n";
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
@@ -58,19 +38,15 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RegularArray::type_part() const {
-    throw std::runtime_error("RegularArray::type_part");
-    // assert(shape_.size() != 0);
-    // std::vector<int64_t> shape(shape_.begin() + 1, shape_.end());
-    // return std::shared_ptr<Type>(new RegularType(shape, content_.get()->type_part()));
+    return std::shared_ptr<Type>(new RegularType(content_.get()->type_part(), size_));
   }
 
   int64_t RegularArray::length() const {
-    assert(shape_.size() != 0);
-    return shape_[0];
+    return content_.get()->length() / size_;
   }
 
   const std::shared_ptr<Content> RegularArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new RegularArray(id_, shape_, content_));
+    return std::shared_ptr<Content>(new RegularArray(id_, content_, size_));
   }
 
   void RegularArray::checksafe() const { }
@@ -88,17 +64,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> RegularArray::getitem_at_unsafe(int64_t at) const {
     assert(shape_.size() != 0);
-    if (shape_.size() == 1) {
-      throw std::runtime_error("getitem_at_unsafe");
-    }
-    else {
-      int64_t outersize = shape_[0];
-      int64_t innersize = shape_[1];
-      std::vector<int64_t> shape({ outersize*innersize });
-      shape.insert(shape.end(), shape_.begin() + 2, shape_.end());
-      RegularArray content(id_, shape, content_);
-      return content.shallow_copy();
-    }
+    throw std::runtime_error("getitem_at_unsafe");
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_range(int64_t start, int64_t stop) const {
@@ -123,6 +89,6 @@ namespace awkward {
 
   const std::pair<int64_t, int64_t> RegularArray::minmax_depth() const {
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
-    return std::pair<int64_t, int64_t>(content_depth.first + ndim(), content_depth.second + ndim());
+    return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);
   }
 }

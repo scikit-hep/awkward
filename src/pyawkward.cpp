@@ -845,9 +845,9 @@ py::class_<ak::EmptyArray, ak::Content> make_EmptyArray(py::handle m, std::strin
 
 py::class_<ak::RegularArray, ak::Content> make_RegularArray(py::handle m, std::string name) {
   return content(py::class_<ak::RegularArray, ak::Content>(m, name.c_str())
-      .def(py::init([](std::vector<int64_t> shape, py::object content, py::object id) -> ak::RegularArray {
-        return ak::RegularArray(unbox_id(id), shape, std::shared_ptr<ak::Content>(unbox_content(content)));
-      }), py::arg("shape"), py::arg("content"), py::arg("id") = py::none())
+      .def(py::init([](py::object content, int64_t size, py::object id) -> ak::RegularArray {
+        return ak::RegularArray(unbox_id(id), std::shared_ptr<ak::Content>(unbox_content(content)), size);
+      }), py::arg("content"), py::arg("size"), py::arg("id") = py::none())
   );
 }
 

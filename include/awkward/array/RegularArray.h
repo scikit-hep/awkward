@@ -15,18 +15,13 @@
 namespace awkward {
   class RegularArray: public Content {
   public:
-    RegularArray(const std::shared_ptr<Identity> id, const std::vector<int64_t> shape, const std::shared_ptr<Content> content)
+    RegularArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Content> content, int64_t size)
         : id_(id)
-        , shape_(shape)
-        , content_(content) {
-      assert(shape.size() != 0);
-    }
+        , content_(content)
+        , size_(size) { }
 
-    const std::vector<int64_t> shape() const { return shape_; }
     const std::shared_ptr<Content> content() const { return content_; }
-
-    int64_t ndim() const;
-    bool isempty() const;
+    int64_t size() const { return size_; }
 
     virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const { return id_; }
@@ -49,8 +44,8 @@ namespace awkward {
 
   private:
     std::shared_ptr<Identity> id_;
-    const std::vector<int64_t> shape_;
     const std::shared_ptr<Content> content_;
+    int64_t size_;
   };
 }
 
