@@ -66,3 +66,15 @@ def test_getitem_deeper():
     assert awkward1.tolist(listarray[:, :, [0, 1]]) == [[[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]], [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]]
     assert awkward1.tolist(listarray[:, :, [1, 0]]) == [[[[], [0.0, 1.1, 2.2]], [[5.5], [3.3, 4.4]]], [[[5.5], [3.3, 4.4]], [[], [6.6, 7.7, 8.8, 9.9]]]]
     assert awkward1.tolist(listarray[:, :, [1, 0, 1]]) == [[[[], [0.0, 1.1, 2.2], []], [[5.5], [3.3, 4.4], [5.5]]], [[[5.5], [3.3, 4.4], [5.5]], [[], [6.6, 7.7, 8.8, 9.9], []]]]
+    assert awkward1.tolist(listarray[:, :2, [0, 1]]) == [[[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]], [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]]
+
+    assert awkward1.tolist(listarray[:1, [0, 0, 1, 1], [0, 1, 0, 1]]) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5]]]
+    assert awkward1.tolist(listarray[:1, [1, 1, 0, 0], [1, 0, 1, 0]]) == [[[5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]]
+
+    # TODO: redo PR014 with RegularArrays to verify NumPy compliance.
+    # TODO: move loops into getitem.cpp.
+    # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
+    # TODO: ListArray's and ListOffsetArray's non-advanced getitem array should now output a RegularArray.
+    # TODO: all getitem arrays should handle non-flat SliceArray by wrapping in RegularArrays.
+    # TODO: replace dynamic_cast SliceItem checks with virtual dispatch in Content.
+    # TODO: check the FIXME in awkward_listarray_getitem_next_array_advanced.

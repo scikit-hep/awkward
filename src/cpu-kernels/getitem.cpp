@@ -385,6 +385,9 @@ ERROR awkward_listarray_getitem_next_array_advanced(T* tocarry, T* toadvanced, c
     }
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
     if (fromadvanced[i] >= lenarray) {
+      // FIXME: this might be weaker than it should be: the length of each advanced array should
+      // be exactly the same, and I think it was already checked when creating the Slice.
+      // If so, this check would be redundant. If not, it's not strong enough.
       return failure("lengths of advanced indexes must match", i, kSliceNone);
     }
     int64_t regular_at = fromarray[fromadvanced[i]];
