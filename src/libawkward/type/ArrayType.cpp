@@ -10,7 +10,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> ArrayType::shallow_copy() const {
-    return std::shared_ptr<Type>(new ArrayType(length_, type_));
+    return std::shared_ptr<Type>(new ArrayType(type_, length_));
   }
 
   bool ArrayType::equal(std::shared_ptr<Type> other) const {

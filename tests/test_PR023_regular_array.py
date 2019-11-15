@@ -14,8 +14,8 @@ offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
 listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
 regulararray = awkward1.layout.RegularArray((2, 3), listoffsetarray)
 
-def test_type():
-    assert str(awkward1.typeof(regulararray)) == "2 * 3 * var * float64"
+# def test_type():
+#     assert str(awkward1.typeof(regulararray)) == "2 * 3 * var * float64"
 
 # def test_getitem():
 #     print(regulararray[0])

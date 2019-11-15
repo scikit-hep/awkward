@@ -58,9 +58,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RegularArray::type_part() const {
-    assert(shape_.size() != 0);
-    std::vector<int64_t> shape(shape_.begin() + 1, shape_.end());
-    return std::shared_ptr<Type>(new RegularType(shape, content_.get()->type_part()));
+    throw std::runtime_error("RegularArray::type_part");
+    // assert(shape_.size() != 0);
+    // std::vector<int64_t> shape(shape_.begin() + 1, shape_.end());
+    // return std::shared_ptr<Type>(new RegularType(shape, content_.get()->type_part()));
   }
 
   int64_t RegularArray::length() const {

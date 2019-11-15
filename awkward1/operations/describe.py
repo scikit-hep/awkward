@@ -28,10 +28,11 @@ def typeof(array):
     elif isinstance(array, numpy.ndarray):
         if len(array.shape) == 0:
             return typeof(array.reshape((1,))[0])
-        elif len(array.shape) == 1:
-            return awkward1.layout.ArrayType(array.shape[0], awkward1.layout.PrimitiveType(typeof.dtype2primitive[array.dtype.type]))
         else:
-            return awkward1.layout.ArrayType(array.shape[0], awkward1.layout.RegularType(array.shape[1:], awkward1.layout.PrimitiveType(typeof.dtype2primitive[array.dtype.type])))
+            out = awkward1.layout.PrimitiveType(typeof.dtype2primitive[array.dtype.type])
+            for x in array.shape[-1:0:-1]:
+                out = awkward1.layout.RegularType(out, x)
+            return awkward1.layout.ArrayType(out, array.shape[0])
 
     elif isinstance(array, awkward1.layout.FillableArray):
         return array.type

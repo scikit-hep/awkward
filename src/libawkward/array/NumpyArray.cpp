@@ -323,8 +323,11 @@ namespace awkward {
     }
     else {
       NumpyArray tmp(id_, ptr_, std::vector<ssize_t>({ 1 }), std::vector<ssize_t>({ itemsize_ }), byteoffset_, itemsize_, format_);
-      std::vector<int64_t> shape(shape_.begin() + 1, shape_.end());
-      return std::shared_ptr<Type>(new RegularType(shape, tmp.type_part()));
+      std::shared_ptr<Type> out = tmp.type_part();
+      for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
+        out = std::shared_ptr<Type>(new RegularType(out, (int64_t)shape_[i]));
+      }
+      return out;
     }
   }
 

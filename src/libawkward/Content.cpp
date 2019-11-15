@@ -7,7 +7,7 @@
 
 namespace awkward {
   const ArrayType Content::type() const {
-    return ArrayType(length(), type_part());
+    return ArrayType(type_part(), length());
   }
 
   const std::string Content::tostring() const {
