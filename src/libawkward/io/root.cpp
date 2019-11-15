@@ -29,7 +29,7 @@ namespace awkward {
       for (uint32_t i = 0;  i < length;  i++) {
         FromROOT_nestedvector_fill(levels, bytepos_tocopy, bytepos, rawdata, whichlevel + 1, itemsize);
       }
-      int64_t previous = levels[(unsigned int)whichlevel].getitem_at_unsafe(levels[(unsigned int)whichlevel].length() - 1);
+      int64_t previous = levels[(unsigned int)whichlevel].getitem_at_nowrap(levels[(unsigned int)whichlevel].length() - 1);
       levels[(unsigned int)whichlevel].append(previous + length);
     }
   }
@@ -39,7 +39,7 @@ namespace awkward {
     assert(rawdata.ndim() == 1);
 
     Index64 level0(byteoffsets.length());
-    level0.setitem_at_unsafe(0, 0);
+    level0.setitem_at_nowrap(0, 0);
 
     std::vector<GrowableBuffer<int64_t>> levels;
     for (int64_t i = 0;  i < depth;  i++) {
@@ -50,9 +50,9 @@ namespace awkward {
     GrowableBuffer<int64_t> bytepos_tocopy(options);
 
     for (int64_t i = 0;  i < byteoffsets.length() - 1;  i++) {
-      int64_t bytepos = byteoffsets.getitem_at_unsafe(i);
+      int64_t bytepos = byteoffsets.getitem_at_nowrap(i);
       FromROOT_nestedvector_fill(levels, bytepos_tocopy, bytepos, rawdata, 0, itemsize);
-      level0.setitem_at_unsafe(i + 1, levels[0].length());
+      level0.setitem_at_nowrap(i + 1, levels[0].length());
     }
 
     std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos_tocopy.length()*itemsize)], awkward::util::array_deleter<uint8_t>());
@@ -60,7 +60,7 @@ namespace awkward {
     uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
     uint8_t* fromptr = reinterpret_cast<uint8_t*>(rawdata.ptr().get());
     for (int64_t i = 0;  i < bytepos_tocopy.length();  i++) {
-      ssize_t bytepos = (ssize_t)bytepos_tocopy.getitem_at_unsafe(i);
+      ssize_t bytepos = (ssize_t)bytepos_tocopy.getitem_at_nowrap(i);
       std::memcpy(&toptr[(ssize_t)(i*itemsize)], &fromptr[offset + bytepos], (size_t)itemsize);
     }
 

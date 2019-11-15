@@ -25,11 +25,11 @@ namespace awkward {
     virtual const std::shared_ptr<Type> type_part() const = 0;
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
-    virtual void checksafe() const = 0;
+    virtual void check_for_iteration() const = 0;
     virtual const std::shared_ptr<Content> getitem_at(int64_t at) const = 0;
-    virtual const std::shared_ptr<Content> getitem_at_unsafe(int64_t at) const = 0;
+    virtual const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const = 0;
     virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const = 0;
-    virtual const std::shared_ptr<Content> getitem_range_unsafe(int64_t start, int64_t stop) const = 0;
+    virtual const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const = 0;
     virtual const std::shared_ptr<Content> getitem(const Slice& where) const;
     virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const = 0;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const = 0;

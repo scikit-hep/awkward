@@ -220,7 +220,7 @@ namespace awkward {
 
     virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, ptr_, offset_, length_, itemsize_)); }
 
-    virtual void checksafe() const {
+    virtual void check_for_iteration() const {
       if (id_.get() != nullptr  &&  id_.get()->length() < length_) {
         util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
       }
@@ -234,11 +234,11 @@ namespace awkward {
       if (!(0 <= regular_at  &&  regular_at < length_)) {
         util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
       }
-      return getitem_at_unsafe(regular_at);
+      return getitem_at_nowrap(regular_at);
     }
 
-    virtual const std::shared_ptr<Content> getitem_at_unsafe(int64_t at) const {
-      return getitem_range_unsafe(at, at + 1);
+    virtual const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const {
+      return getitem_range_nowrap(at, at + 1);
     }
 
     virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const {
@@ -248,13 +248,13 @@ namespace awkward {
       if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
       }
-      return getitem_range_unsafe(regular_start, regular_stop);
+      return getitem_range_nowrap(regular_start, regular_stop);
     }
 
-    virtual const std::shared_ptr<Content> getitem_range_unsafe(int64_t start, int64_t stop) const {
+    virtual const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const {
       std::shared_ptr<Identity> id(nullptr);
       if (id_.get() != nullptr) {
-        id = id_.get()->getitem_range_unsafe(start, stop);
+        id = id_.get()->getitem_range_nowrap(start, stop);
       }
       return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + start, stop - start, itemsize_));
     }

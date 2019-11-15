@@ -49,7 +49,7 @@ namespace awkward {
     return std::shared_ptr<Content>(new RegularArray(id_, content_, size_));
   }
 
-  void RegularArray::checksafe() const { }
+  void RegularArray::check_for_iteration() const { }
 
   const std::shared_ptr<Content> RegularArray::getitem_at(int64_t at) const {
     int64_t regular_at = at;
@@ -60,19 +60,19 @@ namespace awkward {
     if (!(0 <= regular_at  &&  regular_at < len)) {
       util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     }
-    return getitem_at_unsafe(regular_at);
+    return getitem_at_nowrap(regular_at);
   }
 
-  const std::shared_ptr<Content> RegularArray::getitem_at_unsafe(int64_t at) const {
-    return content_.get()->getitem_range_unsafe(at*size_, (at + 1)*size_);
+  const std::shared_ptr<Content> RegularArray::getitem_at_nowrap(int64_t at) const {
+    return content_.get()->getitem_range_nowrap(at*size_, (at + 1)*size_);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_range(int64_t start, int64_t stop) const {
     throw std::runtime_error("getitem_range");
   }
 
-  const std::shared_ptr<Content> RegularArray::getitem_range_unsafe(int64_t start, int64_t stop) const {
-    throw std::runtime_error("RegularArray::getitem_range_unsafe");
+  const std::shared_ptr<Content> RegularArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
+    throw std::runtime_error("RegularArray::getitem_range_nowrap");
   }
 
   const std::shared_ptr<Content> RegularArray::getitem(const Slice& where) const {

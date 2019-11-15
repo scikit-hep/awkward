@@ -165,7 +165,7 @@ namespace awkward {
   void ListOffsetArrayOf<T>::tojson_part(ToJson& builder) const {
     for (int64_t i = 0;  i < length();  i++) {
       builder.beginlist();
-      getitem_at_unsafe(i).get()->tojson_part(builder);
+      getitem_at_nowrap(i).get()->tojson_part(builder);
       builder.endlist();
     }
   }
@@ -186,7 +186,7 @@ namespace awkward {
   }
 
   template <typename T>
-  void ListOffsetArrayOf<T>::checksafe() const {
+  void ListOffsetArrayOf<T>::check_for_iteration() const {
     if (id_.get() != nullptr  &&  id_.get()->length() < offsets_.length() - 1) {
       util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
     }
@@ -201,13 +201,13 @@ namespace awkward {
     if (!(0 <= regular_at  &&  regular_at < offsets_.length() - 1)) {
       util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     }
-    return getitem_at_unsafe(regular_at);
+    return getitem_at_nowrap(regular_at);
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_at_unsafe(int64_t at) const {
-    int64_t start = (int64_t)offsets_.getitem_at_unsafe(at);
-    int64_t stop = (int64_t)offsets_.getitem_at_unsafe(at + 1);
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_at_nowrap(int64_t at) const {
+    int64_t start = (int64_t)offsets_.getitem_at_nowrap(at);
+    int64_t stop = (int64_t)offsets_.getitem_at_nowrap(at + 1);
     int64_t lencontent = content_.get()->length();
     if (start == stop) {
       start = stop = 0;
@@ -221,7 +221,7 @@ namespace awkward {
     if (stop > lencontent) {
       util::handle_error(failure("offsets[i] != offsets[i + 1] and offsets[i + 1] > len(content)", kSliceNone, at), classname(), id_.get());
     }
-    return content_.get()->getitem_range_unsafe(start, stop);
+    return content_.get()->getitem_range_nowrap(start, stop);
   }
 
   template <typename T>
@@ -232,16 +232,16 @@ namespace awkward {
     if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
       util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
     }
-    return getitem_range_unsafe(regular_start, regular_stop);
+    return getitem_range_nowrap(regular_start, regular_stop);
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_range_unsafe(int64_t start, int64_t stop) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
-      id = id_.get()->getitem_range_unsafe(start, stop);
+      id = id_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id, offsets_.getitem_range_unsafe(start, stop + 1), content_));
+    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id, offsets_.getitem_range_nowrap(start, stop + 1), content_));
   }
 
   template <typename T>

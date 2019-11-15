@@ -51,14 +51,14 @@ namespace awkward {
     return std::shared_ptr<Content>(new EmptyArray(id_));
   }
 
-  void EmptyArray::checksafe() const { }
+  void EmptyArray::check_for_iteration() const { }
 
   const std::shared_ptr<Content> EmptyArray::getitem_at(int64_t at) const {
     util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_at_unsafe(int64_t at) const {
+  const std::shared_ptr<Content> EmptyArray::getitem_at_nowrap(int64_t at) const {
     util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
@@ -67,7 +67,7 @@ namespace awkward {
     return shallow_copy();
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_range_unsafe(int64_t start, int64_t stop) const {
+  const std::shared_ptr<Content> EmptyArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     return shallow_copy();
   }
 
