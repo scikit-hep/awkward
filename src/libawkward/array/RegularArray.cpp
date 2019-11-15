@@ -85,16 +85,73 @@ namespace awkward {
     return std::shared_ptr<Content>(new RegularArray(id_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_));
   }
 
-  const std::shared_ptr<Content> RegularArray::getitem(const Slice& where) const {
-    throw std::runtime_error("RegularArray::getitem");
-  }
-
   const std::shared_ptr<Content> RegularArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("RegularArray::getitem_next");
+    int64_t len = length();
+
+    if (head.get() == nullptr) {
+      return shallow_copy();
+    }
+
+    else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+      std::shared_ptr<SliceItem> nexthead = tail.head();
+      Slice nexttail = tail.tail();
+      Index64 nextcarry(len);
+
+      int64_t* tocarry = nextcarry.ptr().get();
+      int64_t regular_at = at->at();
+      if (regular_at < 0) {
+        regular_at += size_;
+      }
+      if (!(0 <= regular_at  &&  regular_at < size_)) {
+        failure("index out of range", Slice::none(), at->at());
+      }
+      for (int64_t i = 0;  i < len;  i++) {
+        tocarry[i] = i*size_ + regular_at;
+      }
+
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+      return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
+    }
+
+    else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+      throw std::runtime_error("RegularArray::getitem_next(range)");
+    }
+
+    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+      return getitem_ellipsis(tail, advanced);
+    }
+
+    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+      return getitem_newaxis(tail, advanced);
+    }
+
+    else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+      throw std::runtime_error("RegularArray::getitem_next(array)");
+    }
+
+    else {
+      throw std::runtime_error("unrecognized slice item type");
+    }
   }
 
   const std::shared_ptr<Content> RegularArray::carry(const Index64& carry) const {
-    throw std::runtime_error("RegularArray::carry");
+    Index64 nextcarry(carry.length()*size_);
+
+    int64_t* tocarry = nextcarry.ptr().get();
+    int64_t* fromcarry = carry.ptr().get();
+    int64_t lencarry = carry.length();
+    int64_t size = size_;
+    for (int64_t i = 0;  i < lencarry;  i++) {
+      for (int64_t j = 0;  j < size;  j++) {
+        tocarry[i*size + j] = fromcarry[i]*size + j;
+      }
+    }
+
+    std::shared_ptr<Identity> id(nullptr);
+    if (id_.get() != nullptr) {
+      id = id_.get()->getitem_carry_64(carry);
+    }
+    return std::shared_ptr<Content>(new RegularArray(id, content_.get()->carry(nextcarry), size_));
   }
 
   const std::pair<int64_t, int64_t> RegularArray::minmax_depth() const {
