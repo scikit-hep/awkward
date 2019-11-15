@@ -161,7 +161,48 @@ namespace awkward {
     }
 
     else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
-      throw std::runtime_error("RegularArray::getitem_next(array)");
+      std::shared_ptr<SliceItem> nexthead = tail.head();
+      Slice nexttail = tail.tail();
+      Index64 flathead = array->ravel();
+      if (advanced.length() == 0) {
+        Index64 regular_flathead(flathead.length());
+        {
+          int64_t* toarray = regular_flathead.ptr().get();
+          int64_t* fromarray = flathead.ptr().get();
+          int64_t lenarray = flathead.length();
+          int64_t size = size_;
+          for (int64_t j = 0;  j < lenarray;  j++) {
+            toarray[j] = fromarray[j];
+            if (toarray[j] < 0) {
+              toarray[j] += size;
+            }
+            if (!(0 <= toarray[j]  &&  toarray[j] < size)) {
+              failure("index out of range", Slice::none(), fromarray[j]);
+            }
+          }
+        }
+
+        Index64 nextcarry(len*flathead.length());
+        Index64 nextadvanced(len*flathead.length());
+
+        int64_t* tocarry = nextcarry.ptr().get();
+        int64_t* toadvanced = nextadvanced.ptr().get();
+        int64_t* fromarray = regular_flathead.ptr().get();
+        int64_t lenarray = regular_flathead.length();
+        int64_t size = size_;
+        for (int64_t i = 0;  i < len;  i++) {
+          for (int64_t j = 0;  j < lenarray;  j++) {
+            tocarry[i*lenarray + j] = i*size + fromarray[j];
+            toadvanced[i*lenarray + j] = j;
+          }
+        }
+
+        std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+        return std::shared_ptr<Content>(new RegularArray(id_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), flathead.length()));
+      }
+      else {
+        throw std::runtime_error("RegularArray::getitem_next(array advanced)");
+      }
     }
 
     else {

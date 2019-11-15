@@ -351,7 +351,7 @@ namespace awkward {
       if (advanced.length() == 0) {
         Index64 nextcarry(lenstarts*flathead.length());
         Index64 nextadvanced(lenstarts*flathead.length());
-        IndexOf<T> nextoffsets(lenstarts + 1);
+        IndexOf<T> nextoffsets(lenstarts + 1);   // FIXME: offsets are regular; don't generate them and replace ListOffsetArray output with a RegularArray
         IndexOf<T> nextstops(lenstarts);
         struct Error err = util::awkward_listarray_getitem_next_array_64<T>(
           nextoffsets.ptr().get(),
