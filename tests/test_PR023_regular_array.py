@@ -71,6 +71,7 @@ def test_getitem_deeper():
     assert awkward1.tolist(listarray[:1, [0, 0, 1, 1], [0, 1, 0, 1]]) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5]]]
     assert awkward1.tolist(listarray[:1, [1, 1, 0, 0], [1, 0, 1, 0]]) == [[[5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]]
 
+    # TODO: RegularArray::setid (both)
     # TODO: redo PR014 with RegularArrays to verify NumPy compliance.
     # TODO: move loops into getitem.cpp.
     # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
