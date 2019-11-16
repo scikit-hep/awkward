@@ -76,19 +76,9 @@ regulararrayB = awkward1.layout.RegularArray(regulararrayA, 3)
 modelA = numpy.arange(2*3*5*7).reshape(2*3, 5, 7)
 modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
 
-# TODO: redo PR014 with RegularArrays to verify NumPy compliance.
 def test_numpy():
     assert awkward1.tolist(regulararrayA) == awkward1.tolist(modelA)
     assert awkward1.tolist(regulararrayB) == awkward1.tolist(modelB)
-
-    return
-
-    # cuts = (slice(None, None, None), slice(None, None, -2))
-    # print(awkward1.tolist(modelA[cuts]))
-    # print(awkward1.tolist(regulararrayA[cuts]))
-    #
-    # assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
-    # raise Exception
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((0, 1, 4, -5), depth):
@@ -104,7 +94,7 @@ def test_numpy():
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth):
-            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararryA[cuts])
+            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth):
@@ -136,12 +126,9 @@ def test_numpy():
                 continue
             assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(regulararrayB[cuts])
 
-
-
-
-# TODO: RegularArray::setid (both)
 # TODO: move loops into getitem.cpp.
 # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
+# TODO: RegularArray::setid (both)
 # TODO: ListArray's and ListOffsetArray's non-advanced getitem array should now output a RegularArray.
 # TODO: all getitem arrays should handle non-flat SliceArray by wrapping in RegularArrays.
 # TODO: check the FIXME in awkward_listarray_getitem_next_array_advanced.
