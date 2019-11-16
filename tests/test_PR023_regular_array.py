@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 import sys
-import os
-import json
+import itertools
 
 import pytest
 import numpy
@@ -71,10 +70,78 @@ def test_getitem_deeper():
     assert awkward1.tolist(listarray[:1, [0, 0, 1, 1], [0, 1, 0, 1]]) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5]]]
     assert awkward1.tolist(listarray[:1, [1, 1, 0, 0], [1, 0, 1, 0]]) == [[[5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]]
 
-    # TODO: RegularArray::setid (both)
-    # TODO: redo PR014 with RegularArrays to verify NumPy compliance.
-    # TODO: move loops into getitem.cpp.
-    # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
-    # TODO: ListArray's and ListOffsetArray's non-advanced getitem array should now output a RegularArray.
-    # TODO: all getitem arrays should handle non-flat SliceArray by wrapping in RegularArrays.
-    # TODO: check the FIXME in awkward_listarray_getitem_next_array_advanced.
+content2 = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
+regulararrayA = awkward1.layout.RegularArray(content2, 5)
+regulararrayB = awkward1.layout.RegularArray(regulararrayA, 3)
+modelA = numpy.arange(2*3*5*7).reshape(2*3, 5, 7)
+modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
+
+# TODO: redo PR014 with RegularArrays to verify NumPy compliance.
+def test_numpy():
+    assert awkward1.tolist(regulararrayA) == awkward1.tolist(modelA)
+    assert awkward1.tolist(regulararrayB) == awkward1.tolist(modelB)
+
+    return
+
+    # cuts = (slice(None, None, None), slice(None, None, -2))
+    # print(awkward1.tolist(modelA[cuts]))
+    # print(awkward1.tolist(regulararrayA[cuts]))
+    #
+    # assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
+    # raise Exception
+
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations((0, 1, 4, -5), depth):
+            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
+
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations((slice(None), slice(1, None), slice(None, -1), slice(None, None, 2)), depth):
+            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
+
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations((slice(1, None), slice(None, -1), 2, -2), depth):
+            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
+
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth):
+            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararryA[cuts])
+
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert awkward1.tolist(modelA[cuts]) == awkward1.tolist(regulararrayA[cuts])
+
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(regulararrayB[cuts])
+
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-1, 0, 1, slice(1, None), slice(None, -1)), depth):
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(regulararrayB[cuts])
+
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations((-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(regulararrayB[cuts])
+
+
+
+
+# TODO: RegularArray::setid (both)
+# TODO: move loops into getitem.cpp.
+# TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
+# TODO: ListArray's and ListOffsetArray's non-advanced getitem array should now output a RegularArray.
+# TODO: all getitem arrays should handle non-flat SliceArray by wrapping in RegularArrays.
+# TODO: check the FIXME in awkward_listarray_getitem_next_array_advanced.

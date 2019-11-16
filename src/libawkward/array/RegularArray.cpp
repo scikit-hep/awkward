@@ -139,17 +139,34 @@ namespace awkward {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
+    assert(range.step() != 0);
     int64_t regular_start = range.start();
     int64_t regular_stop = range.stop();
+    int64_t regular_step = abs(range.step());
     awkward_regularize_rangeslice(&regular_start, &regular_stop, range.step() > 0, range.start() != Slice::none(), range.stop() != Slice::none(), size_);
+    int64_t nextsize = 0;
+    if (range.step() > 0  &&  regular_stop - regular_start > 0) {
+      int64_t diff = regular_stop - regular_start;
+      nextsize = diff / regular_step;
+      if (diff % regular_step != 0) {
+        nextsize++;
+      }
+    }
+    else if (range.step() < 0  &&  regular_stop - regular_start < 0) {
+      int64_t diff = regular_start - regular_stop;
+      nextsize = diff / regular_step;
+      if (diff % regular_step != 0) {
+        nextsize++;
+      }
+    }
 
-    int64_t nextsize = regular_stop - regular_start;
     Index64 nextcarry(len*nextsize);
 
     int64_t* tocarry = nextcarry.ptr().get();
+    int64_t step = range.step();
     for (int64_t i = 0;  i < len;  i++) {
       for (int64_t j = 0;  j < nextsize;  j++) {
-        tocarry[i*nextsize + j] = i*size_ + regular_start + j;
+        tocarry[i*nextsize + j] = i*size_ + regular_start + j*step;
       }
     }
 
