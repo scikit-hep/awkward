@@ -51,16 +51,40 @@ namespace awkward {
     Index64 nextstops(1);
     *nextstarts.ptr().get() = 0;
     *nextstops.ptr().get() = length();
-    ListArrayOf<int64_t> next(std::shared_ptr<Identity>(nullptr), nextstarts, nextstops, shallow_copy());
+    std::shared_ptr<Content> next(new ListArrayOf<int64_t>(std::shared_ptr<Identity>(nullptr), nextstarts, nextstops, shallow_copy()));
 
     std::shared_ptr<SliceItem> nexthead = where.head();
     Slice nexttail = where.tail();
     Index64 nextadvanced(0);
-    std::shared_ptr<Content> out = next.getitem_next(nexthead, nexttail, nextadvanced);
+    std::shared_ptr<Content> out = next.get()->getitem_next(nexthead, nexttail, nextadvanced);
     return out.get()->getitem_at(0);
   }
 
-  const std::shared_ptr<Content> Content::getitem_ellipsis(const Slice& tail, const Index64& advanced) const {
+  const std::shared_ptr<Content> Content::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
+    if (head.get() == nullptr) {
+      return shallow_copy();
+    }
+    else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
+      return getitem_next(*at, tail, advanced);
+    }
+    else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+      return getitem_next(*range, tail, advanced);
+    }
+    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+      return getitem_next(*ellipsis, tail, advanced);
+    }
+    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+      return getitem_next(*newaxis, tail, advanced);
+    }
+    else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+      return getitem_next(*array, tail, advanced);
+    }
+    else {
+      throw std::runtime_error("unrecognized slice type");
+    }
+  }
+
+  const std::shared_ptr<Content> Content::getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& advanced) const {
     std::pair<int64_t, int64_t> minmax = minmax_depth();
     int64_t mindepth = minmax.first;
     int64_t maxdepth = minmax.second;
@@ -83,7 +107,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_newaxis(const Slice& tail, const Index64& advanced) const {
+  const std::shared_ptr<Content> Content::getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("FIXME: insert a RegularArray of 1 here");
   }
 }

@@ -245,158 +245,6 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
-    int64_t lenstarts = offsets_.length() - 1;
-
-    if (head.get() == nullptr) {
-      return shallow_copy();
-    }
-
-    else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
-      assert(advanced.length() == 0);
-      IndexOf<T> starts = make_starts(offsets_);
-      IndexOf<T> stops = make_stops(offsets_);
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
-      Index64 nextcarry(lenstarts);
-      struct Error err = util::awkward_listarray_getitem_next_at_64<T>(
-        nextcarry.ptr().get(),
-        starts.ptr().get(),
-        stops.ptr().get(),
-        lenstarts,
-        starts.offset(),
-        stops.offset(),
-        at->at());
-      util::handle_error(err, classname(), id_.get());
-      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-      return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
-    }
-
-    else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
-      IndexOf<T> starts = make_starts(offsets_);
-      IndexOf<T> stops = make_stops(offsets_);
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
-      int64_t start = range->start();
-      int64_t stop = range->stop();
-      int64_t step = range->step();
-      if (step == Slice::none()) {
-        step = 1;
-      }
-      int64_t carrylength;
-      struct Error err1 = util::awkward_listarray_getitem_next_range_carrylength<T>(
-        &carrylength,
-        starts.ptr().get(),
-        stops.ptr().get(),
-        lenstarts,
-        starts.offset(),
-        stops.offset(),
-        start,
-        stop,
-        step);
-      util::handle_error(err1, classname(), id_.get());
-
-      IndexOf<T> nextoffsets(lenstarts + 1);
-      Index64 nextcarry(carrylength);
-
-      struct Error err2 = util::awkward_listarray_getitem_next_range_64<T>(
-        nextoffsets.ptr().get(),
-        nextcarry.ptr().get(),
-        starts.ptr().get(),
-        stops.ptr().get(),
-        lenstarts,
-        starts.offset(),
-        stops.offset(),
-        start,
-        stop,
-        step);
-      util::handle_error(err2, classname(), id_.get());
-      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-
-      if (advanced.length() == 0) {
-        return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));
-      }
-      else {
-        int64_t total;
-        struct Error err1 = util::awkward_listarray_getitem_next_range_counts_64<T>(
-          &total,
-          nextoffsets.ptr().get(),
-          lenstarts);
-        util::handle_error(err1, classname(), id_.get());
-        Index64 nextadvanced(total);
-        struct Error err2 = util::awkward_listarray_getitem_next_range_spreadadvanced_64<T>(
-          nextadvanced.ptr().get(),
-          advanced.ptr().get(),
-          nextoffsets.ptr().get(),
-          lenstarts);
-        util::handle_error(err2, classname(), id_.get());
-        return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
-      }
-    }
-
-    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
-      return getitem_ellipsis(tail, advanced);
-    }
-
-    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
-      return getitem_newaxis(tail, advanced);
-    }
-
-    else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
-      IndexOf<T> starts = make_starts(offsets_);
-      IndexOf<T> stops = make_stops(offsets_);
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
-      Index64 flathead = array->ravel();
-      if (advanced.length() == 0) {
-        Index64 nextcarry(lenstarts*flathead.length());
-        Index64 nextadvanced(lenstarts*flathead.length());
-        IndexOf<T> nextoffsets(lenstarts + 1);   // FIXME: offsets are regular; don't generate them and replace ListOffsetArray output with a RegularArray
-        IndexOf<T> nextstops(lenstarts);
-        struct Error err = util::awkward_listarray_getitem_next_array_64<T>(
-          nextoffsets.ptr().get(),
-          nextcarry.ptr().get(),
-          nextadvanced.ptr().get(),
-          starts.ptr().get(),
-          stops.ptr().get(),
-          flathead.ptr().get(),
-          starts.offset(),
-          stops.offset(),
-          lenstarts,
-          flathead.length(),
-          content_.get()->length());
-        util::handle_error(err, classname(), id_.get());
-        std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-        // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
-        return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
-      }
-      else {
-        Index64 nextcarry(lenstarts);
-        Index64 nextadvanced(lenstarts);
-        struct Error err = util::awkward_listarray_getitem_next_array_advanced_64<T>(
-          nextcarry.ptr().get(),
-          nextadvanced.ptr().get(),
-          starts.ptr().get(),
-          stops.ptr().get(),
-          flathead.ptr().get(),
-          advanced.ptr().get(),
-          starts.offset(),
-          stops.offset(),
-          lenstarts,
-          flathead.length(),
-          content_.get()->length());
-        util::handle_error(err, classname(), id_.get());
-        std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-        return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
-      }
-    }
-
-    else {
-      throw std::runtime_error("unrecognized slice item type");
-    }
-  }
-
-  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::carry(const Index64& carry) const {
     IndexOf<T> starts = make_starts(offsets_);
     IndexOf<T> stops = make_stops(offsets_);
@@ -424,6 +272,143 @@ namespace awkward {
   const std::pair<int64_t, int64_t> ListOffsetArrayOf<T>::minmax_depth() const {
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+    assert(advanced.length() == 0);
+    int64_t lenstarts = offsets_.length() - 1;
+    IndexOf<T> starts = make_starts(offsets_);
+    IndexOf<T> stops = make_stops(offsets_);
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    Index64 nextcarry(lenstarts);
+    struct Error err = util::awkward_listarray_getitem_next_at_64<T>(
+      nextcarry.ptr().get(),
+      starts.ptr().get(),
+      stops.ptr().get(),
+      lenstarts,
+      starts.offset(),
+      stops.offset(),
+      at.at());
+    util::handle_error(err, classname(), id_.get());
+    std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+    return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+    int64_t lenstarts = offsets_.length() - 1;
+    IndexOf<T> starts = make_starts(offsets_);
+    IndexOf<T> stops = make_stops(offsets_);
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    int64_t start = range.start();
+    int64_t stop = range.stop();
+    int64_t step = range.step();
+    if (step == Slice::none()) {
+      step = 1;
+    }
+    int64_t carrylength;
+    struct Error err1 = util::awkward_listarray_getitem_next_range_carrylength<T>(
+      &carrylength,
+      starts.ptr().get(),
+      stops.ptr().get(),
+      lenstarts,
+      starts.offset(),
+      stops.offset(),
+      start,
+      stop,
+      step);
+    util::handle_error(err1, classname(), id_.get());
+
+    IndexOf<T> nextoffsets(lenstarts + 1);
+    Index64 nextcarry(carrylength);
+
+    struct Error err2 = util::awkward_listarray_getitem_next_range_64<T>(
+      nextoffsets.ptr().get(),
+      nextcarry.ptr().get(),
+      starts.ptr().get(),
+      stops.ptr().get(),
+      lenstarts,
+      starts.offset(),
+      stops.offset(),
+      start,
+      stop,
+      step);
+    util::handle_error(err2, classname(), id_.get());
+    std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+
+    if (advanced.length() == 0) {
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));
+    }
+    else {
+      int64_t total;
+      struct Error err1 = util::awkward_listarray_getitem_next_range_counts_64<T>(
+        &total,
+        nextoffsets.ptr().get(),
+        lenstarts);
+      util::handle_error(err1, classname(), id_.get());
+      Index64 nextadvanced(total);
+      struct Error err2 = util::awkward_listarray_getitem_next_range_spreadadvanced_64<T>(
+        nextadvanced.ptr().get(),
+        advanced.ptr().get(),
+        nextoffsets.ptr().get(),
+        lenstarts);
+      util::handle_error(err2, classname(), id_.get());
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+    }
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+    int64_t lenstarts = offsets_.length() - 1;
+    IndexOf<T> starts = make_starts(offsets_);
+    IndexOf<T> stops = make_stops(offsets_);
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    Index64 flathead = array.ravel();
+    if (advanced.length() == 0) {
+      Index64 nextcarry(lenstarts*flathead.length());
+      Index64 nextadvanced(lenstarts*flathead.length());
+      IndexOf<T> nextoffsets(lenstarts + 1);   // FIXME: offsets are regular; don't generate them and replace ListOffsetArray output with a RegularArray
+      IndexOf<T> nextstops(lenstarts);
+      struct Error err = util::awkward_listarray_getitem_next_array_64<T>(
+        nextoffsets.ptr().get(),
+        nextcarry.ptr().get(),
+        nextadvanced.ptr().get(),
+        starts.ptr().get(),
+        stops.ptr().get(),
+        flathead.ptr().get(),
+        starts.offset(),
+        stops.offset(),
+        lenstarts,
+        flathead.length(),
+        content_.get()->length());
+      util::handle_error(err, classname(), id_.get());
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+      // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+    }
+    else {
+      Index64 nextcarry(lenstarts);
+      Index64 nextadvanced(lenstarts);
+      struct Error err = util::awkward_listarray_getitem_next_array_advanced_64<T>(
+        nextcarry.ptr().get(),
+        nextadvanced.ptr().get(),
+        starts.ptr().get(),
+        stops.ptr().get(),
+        flathead.ptr().get(),
+        advanced.ptr().get(),
+        starts.offset(),
+        stops.offset(),
+        lenstarts,
+        flathead.length(),
+        content_.get()->length());
+      util::handle_error(err, classname(), id_.get());
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+      return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
+    }
   }
 
   template class ListOffsetArrayOf<int32_t>;

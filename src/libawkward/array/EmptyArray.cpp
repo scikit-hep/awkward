@@ -71,44 +71,28 @@ namespace awkward {
     return shallow_copy();
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
-    if (head.get() == nullptr) {
-      return shallow_copy();
-    }
-
-    else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
-      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
-      return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
-    }
-
-    else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
-      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
-      return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
-    }
-
-    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
-      return getitem_ellipsis(tail, advanced);
-    }
-
-    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
-      return getitem_newaxis(tail, advanced);
-    }
-
-    else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
-      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
-      return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
-    }
-
-    else {
-      throw std::runtime_error("unrecognized slice item type");
-    }
-
-    throw std::runtime_error("unreachable because of EmptyArray::carry");
-  }
 
   const std::shared_ptr<Content> EmptyArray::carry(const Index64& carry) const {
     return shallow_copy();
   }
 
-  const std::pair<int64_t, int64_t> EmptyArray::minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
+  const std::pair<int64_t, int64_t> EmptyArray::minmax_depth() const {
+    return std::pair<int64_t, int64_t>(1, 1);
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
+  }
+
 }
