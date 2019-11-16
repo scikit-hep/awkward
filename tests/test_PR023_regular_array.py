@@ -126,9 +126,9 @@ def test_numpy():
                 continue
             assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(regulararrayB[cuts])
 
-# TODO: move loops into getitem.cpp.
 # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
 # TODO: RegularArray::setid (both)
+# TODO: RegularArray in Numba
 # TODO: ListArray's and ListOffsetArray's non-advanced getitem array should now output a RegularArray.
 # TODO: all getitem arrays should handle non-flat SliceArray by wrapping in RegularArrays.
 # TODO: check the FIXME in awkward_listarray_getitem_next_array_advanced.

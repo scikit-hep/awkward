@@ -192,35 +192,25 @@ namespace awkward {
     Index64 flathead = array.ravel();
     Index64 regular_flathead(flathead.length());
 
-    int64_t* toarray = regular_flathead.ptr().get();
-    int64_t* fromarray = flathead.ptr().get();
-    int64_t lenarray = flathead.length();
-    int64_t size = size_;
-    for (int64_t j = 0;  j < lenarray;  j++) {
-      toarray[j] = fromarray[j];
-      if (toarray[j] < 0) {
-        toarray[j] += size;
-      }
-      if (!(0 <= toarray[j]  &&  toarray[j] < size)) {
-        failure("index out of range", Slice::none(), fromarray[j]);
-      }
-    }
+    struct Error err = awkward_regulararray_getitem_next_array_regularize_64(
+      regular_flathead.ptr().get(),
+      flathead.ptr().get(),
+      flathead.length(),
+      size_);
+    util::handle_error(err, classname(), id_.get());
 
     if (advanced.length() == 0) {
       Index64 nextcarry(len*flathead.length());
       Index64 nextadvanced(len*flathead.length());
 
-      int64_t* tocarry = nextcarry.ptr().get();
-      int64_t* toadvanced = nextadvanced.ptr().get();
-      int64_t* fromarray = regular_flathead.ptr().get();
-      int64_t lenarray = regular_flathead.length();
-      int64_t size = size_;
-      for (int64_t i = 0;  i < len;  i++) {
-        for (int64_t j = 0;  j < lenarray;  j++) {
-          tocarry[i*lenarray + j] = i*size + fromarray[j];
-          toadvanced[i*lenarray + j] = j;
-        }
-      }
+      struct Error err = awkward_regulararray_getitem_next_array_64(
+        nextcarry.ptr().get(),
+        nextadvanced.ptr().get(),
+        regular_flathead.ptr().get(),
+        len,
+        regular_flathead.length(),
+        size_);
+      util::handle_error(err, classname(), id_.get());
 
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       return std::shared_ptr<Content>(new RegularArray(id_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), flathead.length()));
@@ -229,15 +219,15 @@ namespace awkward {
       Index64 nextcarry(len);
       Index64 nextadvanced(len);
 
-      int64_t* tocarry = nextcarry.ptr().get();
-      int64_t* toadvanced = nextadvanced.ptr().get();
-      int64_t* fromadvanced = advanced.ptr().get();
-      int64_t* fromarray = regular_flathead.ptr().get();
-      int64_t lenarray = regular_flathead.length();
-      for (int64_t i = 0;  i < len;  i++) {
-        tocarry[i] = i*size + fromarray[fromadvanced[i]];
-        toadvanced[i] = i;
-      }
+      struct Error err = awkward_regulararray_getitem_next_array_advanced_64(
+        nextcarry.ptr().get(),
+        nextadvanced.ptr().get(),
+        advanced.ptr().get(),
+        regular_flathead.ptr().get(),
+        len,
+        regular_flathead.length(),
+        size_);
+      util::handle_error(err, classname(), id_.get());
 
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);

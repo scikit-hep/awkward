@@ -476,3 +476,46 @@ ERROR awkward_regulararray_getitem_next_range_spreadadvanced(T* toadvanced, cons
 ERROR awkward_regulararray_getitem_next_range_spreadadvanced_64(int64_t* toadvanced, const int64_t* fromadvanced, int64_t len, int64_t nextsize) {
   return awkward_regulararray_getitem_next_range_spreadadvanced<int64_t>(toadvanced, fromadvanced, len, nextsize);
 }
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_array_regularize(T* toarray, const T* fromarray, int64_t lenarray, int64_t size) {
+  for (int64_t j = 0;  j < lenarray;  j++) {
+    toarray[j] = fromarray[j];
+    if (toarray[j] < 0) {
+      toarray[j] += size;
+    }
+    if (!(0 <= toarray[j]  &&  toarray[j] < size)) {
+      return failure("index out of range", kSliceNone, fromarray[j]);
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_array_regularize_64(int64_t* toarray, const int64_t* fromarray, int64_t lenarray, int64_t size) {
+  return awkward_regulararray_getitem_next_array_regularize<int64_t>(toarray, fromarray, lenarray, size);
+}
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_array(T* tocarry, T* toadvanced, const T* fromarray, int64_t len, int64_t lenarray, int64_t size) {
+  for (int64_t i = 0;  i < len;  i++) {
+    for (int64_t j = 0;  j < lenarray;  j++) {
+      tocarry[i*lenarray + j] = i*size + fromarray[j];
+      toadvanced[i*lenarray + j] = j;
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_array_64(int64_t* tocarry, int64_t* toadvanced, const int64_t* fromarray, int64_t len, int64_t lenarray, int64_t size) {
+  return awkward_regulararray_getitem_next_array<int64_t>(tocarry, toadvanced, fromarray, len, lenarray, size);
+}
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_array_advanced(T* tocarry, T* toadvanced, const T* fromadvanced, const T* fromarray, int64_t len, int64_t lenarray, int64_t size) {
+  for (int64_t i = 0;  i < len;  i++) {
+    tocarry[i] = i*size + fromarray[fromadvanced[i]];
+    toadvanced[i] = i;
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_array_advanced_64(int64_t* tocarry, int64_t* toadvanced, const int64_t* fromadvanced, const int64_t* fromarray, int64_t len, int64_t lenarray, int64_t size) {
+  return awkward_regulararray_getitem_next_array_advanced<int64_t>(tocarry, toadvanced, fromadvanced, fromarray, len, lenarray, size);
+}
