@@ -118,17 +118,12 @@ namespace awkward {
     Slice nexttail = tail.tail();
     Index64 nextcarry(len);
 
-    int64_t* tocarry = nextcarry.ptr().get();
-    int64_t regular_at = at.at();
-    if (regular_at < 0) {
-      regular_at += size_;
-    }
-    if (!(0 <= regular_at  &&  regular_at < size_)) {
-      failure("index out of range", Slice::none(), at.at());
-    }
-    for (int64_t i = 0;  i < len;  i++) {
-      tocarry[i] = i*size_ + regular_at;
-    }
+    struct Error err = awkward_regulararray_getitem_next_at_64(
+      nextcarry.ptr().get(),
+      at.at(),
+      len,
+      size_);
+    util::handle_error(err, classname(), id_.get());
 
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
     return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);

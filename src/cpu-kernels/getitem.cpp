@@ -432,3 +432,23 @@ ERROR awkward_listarrayU32_getitem_carry_64(uint32_t* tostarts, uint32_t* tostop
 ERROR awkward_listarray64_getitem_carry_64(int64_t* tostarts, int64_t* tostops, const int64_t* fromstarts, const int64_t* fromstops, const int64_t* fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry) {
   return awkward_listarray_getitem_carry<int64_t, int64_t>(tostarts, tostops, fromstarts, fromstops, fromcarry, startsoffset, stopsoffset, lenstarts, lencarry);
 }
+
+//////////////////////////////////////////////////////
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_at(T* tocarry, int64_t at, int64_t len, int64_t size) {
+  int64_t regular_at = at;
+  if (regular_at < 0) {
+    regular_at += size;
+  }
+  if (!(0 <= regular_at  &&  regular_at < size)) {
+    return failure("index out of range", kSliceNone, at);
+  }
+  for (int64_t i = 0;  i < len;  i++) {
+    tocarry[i] = i*size + regular_at;
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_at_64(int64_t* tocarry, int64_t at, int64_t len, int64_t size) {
+  return awkward_regulararray_getitem_next_at<int64_t>(tocarry, at, len, size);
+}
