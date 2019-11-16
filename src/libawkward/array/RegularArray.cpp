@@ -157,13 +157,14 @@ namespace awkward {
 
     Index64 nextcarry(len*nextsize);
 
-    int64_t* tocarry = nextcarry.ptr().get();
-    int64_t step = range.step();
-    for (int64_t i = 0;  i < len;  i++) {
-      for (int64_t j = 0;  j < nextsize;  j++) {
-        tocarry[i*nextsize + j] = i*size_ + regular_start + j*step;
-      }
-    }
+    struct Error err = awkward_regulararray_getitem_next_range_64(
+      nextcarry.ptr().get(),
+      regular_start,
+      range.step(),
+      len,
+      size_,
+      nextsize);
+    util::handle_error(err, classname(), id_.get());
 
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
@@ -173,13 +174,12 @@ namespace awkward {
     else {
       Index64 nextadvanced(len*nextsize);
 
-      int64_t* toadvanced = nextadvanced.ptr().get();
-      int64_t* fromadvanced = advanced.ptr().get();
-      for (int64_t i = 0;  i < len;  i++) {
-        for (int64_t j = 0;  j < nextsize;  j++) {
-          toadvanced[i*nextsize + j] = fromadvanced[i];
-        }
-      }
+      struct Error err = awkward_regulararray_getitem_next_range_spreadadvanced_64(
+        nextadvanced.ptr().get(),
+        advanced.ptr().get(),
+        len,
+        nextsize);
+      util::handle_error(err, classname(), id_.get());
 
       return std::shared_ptr<Content>(new RegularArray(id_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize));
     }

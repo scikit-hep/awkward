@@ -433,8 +433,6 @@ ERROR awkward_listarray64_getitem_carry_64(int64_t* tostarts, int64_t* tostops, 
   return awkward_listarray_getitem_carry<int64_t, int64_t>(tostarts, tostops, fromstarts, fromstops, fromcarry, startsoffset, stopsoffset, lenstarts, lencarry);
 }
 
-//////////////////////////////////////////////////////
-
 template <typename T>
 ERROR awkward_regulararray_getitem_next_at(T* tocarry, int64_t at, int64_t len, int64_t size) {
   int64_t regular_at = at;
@@ -451,4 +449,30 @@ ERROR awkward_regulararray_getitem_next_at(T* tocarry, int64_t at, int64_t len, 
 }
 ERROR awkward_regulararray_getitem_next_at_64(int64_t* tocarry, int64_t at, int64_t len, int64_t size) {
   return awkward_regulararray_getitem_next_at<int64_t>(tocarry, at, len, size);
+}
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_range(T* tocarry, int64_t regular_start, int64_t step, int64_t len, int64_t size, int64_t nextsize) {
+  for (int64_t i = 0;  i < len;  i++) {
+    for (int64_t j = 0;  j < nextsize;  j++) {
+      tocarry[i*nextsize + j] = i*size + regular_start + j*step;
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_range_64(int64_t* tocarry, int64_t regular_start, int64_t step, int64_t len, int64_t size, int64_t nextsize) {
+  return awkward_regulararray_getitem_next_range<int64_t>(tocarry, regular_start, step, len, size, nextsize);
+}
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_range_spreadadvanced(T* toadvanced, const T* fromadvanced, int64_t len, int64_t nextsize) {
+  for (int64_t i = 0;  i < len;  i++) {
+    for (int64_t j = 0;  j < nextsize;  j++) {
+      toadvanced[i*nextsize + j] = fromadvanced[i];
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_range_spreadadvanced_64(int64_t* toadvanced, const int64_t* fromadvanced, int64_t len, int64_t nextsize) {
+  return awkward_regulararray_getitem_next_range_spreadadvanced<int64_t>(toadvanced, fromadvanced, len, nextsize);
 }
