@@ -155,3 +155,33 @@ def lower_getitem_int(context, builder, sig, args):
 
     outtpe = tpe.contenttpe.getitem_range()
     return tpe.contenttpe.lower_getitem_range(context, builder, outtpe(tpe.contenttpe, numba.types.slice2_type), (proxyin.content, proxyslice._getvalue()))
+
+@numba.extending.lower_builtin(operator.getitem, RegularArrayType, numba.types.slice2_type)
+def lower_getitem_range(context, builder, sig, args):
+    import awkward1._numba.identity
+
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    size = util.cast(context, builder, numba.intp, numba.int64, proxyin.size)
+
+    proxyslicein = context.make_helper(builder, wheretpe, value=whereval)
+    numba.targets.slicing.guard_invalid_slice(context, builder, wheretpe, proxyslicein)
+    numba.targets.slicing.fix_slice(builder, proxyslicein, lower_len(context, builder, numba.intp(tpe), (val,)))
+
+    proxysliceout = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
+    proxysliceout.start = builder.mul(proxyslicein.start, size)
+    proxysliceout.stop = builder.mul(proxyslicein.stop, size)
+    proxysliceout.step = builder.mul(proxyslicein.step, size)
+
+    proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
+    proxyout.content = tpe.contenttpe.lower_getitem_range(context, builder, rettpe.contenttpe(tpe.contenttpe, numba.types.slice2_type), (proxyin.content, proxysliceout._getvalue()))
+    proxyout.size = proxyin.size
+    if tpe.idtpe != numba.none:
+        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
+
+    out = proxyout._getvalue()
+    if context.enable_nrt:
+        context.nrt.incref(builder, rettpe, out)
+    return out

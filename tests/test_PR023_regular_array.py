@@ -214,6 +214,13 @@ def test_numba():
 
     assert awkward1.tolist(f5(regulararray, 1)) == [[3.3, 4.4], [5.5]]
 
+    @numba.njit
+    def f6(q, i):
+        return q[i]
+
+    assert awkward1.tolist(f6(regulararray, slice(1, None))) == awkward1.tolist(regulararray[slice(1, None)]) == [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
+    assert awkward1.tolist(f6(regulararray, slice(None, -1))) == awkward1.tolist(regulararray[slice(None, -1)]) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]]
+
 
 
 
