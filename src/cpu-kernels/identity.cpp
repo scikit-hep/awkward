@@ -16,8 +16,8 @@ ERROR awkward_new_identity64(int64_t* toptr, int64_t length) {
   return awkward_new_identity<int64_t>(toptr, length);
 }
 
-ERROR awkward_identity32_to_identity64(int64_t* toptr, const int32_t* fromptr, int64_t length) {
-  for (int64_t i = 0;  i < length;  i++) {
+ERROR awkward_identity32_to_identity64(int64_t* toptr, const int32_t* fromptr, int64_t length, int64_t width) {
+  for (int64_t i = 0;  i < length*width;  i++) {
     toptr[i]= (int64_t)fromptr[i];
   }
   return success();
@@ -25,39 +25,19 @@ ERROR awkward_identity32_to_identity64(int64_t* toptr, const int32_t* fromptr, i
 
 template <typename ID, typename T>
 ERROR awkward_identity_from_listarray(ID* toptr, const ID* fromptr, const T* fromstarts, const T* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
-  std::cout << "fromptroffset " << fromptroffset << std::endl;
-  for (int64_t i = 0;  i < fromlength;  i++) {
-    std::cout << "    ";
-    for (int64_t k = 0;  k < fromwidth;  k++) {
-      std::cout << fromptr[fromptroffset + i*fromwidth + k] << " ";
-    }
-    std::cout << std::endl;
-  }
-
   for (int64_t k = 0;  k < tolength*(fromwidth + 1);  k++) {
     toptr[k] = -1;
   }
   for (int64_t i = 0;  i < fromlength;  i++) {
     int64_t start = fromstarts[startsoffset + i];
     int64_t stop = fromstops[stopsoffset + i];
-
-    std::cout << "i " << i << " start " << start << " stop " << stop << std::endl;
-
     if (start != stop  &&  stop > tolength) {
       return failure("max(stop) > len(content)", i, kSliceNone);
     }
     for (int64_t j = start;  j < stop;  j++) {
-      std::cout << "    ";
-
       for (int64_t k = 0;  k < fromwidth;  k++) {
         toptr[j*(fromwidth + 1) + k] = fromptr[fromptroffset + i*(fromwidth) + k];
-
-        std::cout << fromptr[fromptroffset + i*(fromwidth) + k] << " ";
-
       }
-
-      std::cout << " and " << (j - start) << std::endl;
-
       toptr[j*(fromwidth + 1) + fromwidth] = ID(j - start);
     }
   }
@@ -89,16 +69,6 @@ ERROR awkward_identity_from_regulararray(ID* toptr, const ID* fromptr, int64_t f
   for (int64_t k = (fromlength + 1)*size*(fromwidth + 1);  k < tolength*(fromwidth + 1);  k++) {
     toptr[k] = -1;
   }
-
-  std::cout << "DONE" << std::endl;
-  for (int64_t i = 0;  i < tolength;  i++) {
-    std::cout << "    ";
-    for (int64_t k = 0;  k < fromwidth + 1;  k++) {
-      std::cout << toptr[i*(fromwidth + 1) + k] << " ";
-    }
-    std::cout << std::endl;
-  }
-
   return success();
 }
 ERROR awkward_identity32_from_regulararray(int32_t* toptr, const int32_t* fromptr, int64_t fromptroffset, int64_t size, int64_t tolength, int64_t fromlength, int64_t fromwidth) {

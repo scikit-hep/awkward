@@ -126,19 +126,44 @@ def test_numpy():
                 continue
             assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(regulararrayB[cuts])
 
-# def test_setid():
-#     regulararray.setid();
-#     print(numpy.asarray(regulararray.id))
-#     print(numpy.asarray(regulararray.content.id))
-#     print(numpy.asarray(regulararray.content.content.id))
-#
-#     print(awkward1.tolist(regulararray))
-#
-#
-#     raise Exception
+def test_setid():
+    regulararray.setid()
+    assert numpy.asarray(regulararray.id).tolist() == [
+        [0],
+        [1],
+        [2]]
+    assert numpy.asarray(regulararray.content.id).tolist() == [
+        [0, 0],
+        [0, 1],
+        [1, 0],
+        [1, 1],
+        [2, 0],
+        [2, 1]]
+    assert numpy.asarray(regulararray.content.content.id).tolist() == [
+        [0, 0, 0],   # 0.0
+        [0, 0, 1],   # 1.1
+        [0, 0, 2],   # 2.2
+      # [0, 1,  ],   # (empty list)
+        [1, 0, 0],   # 3.3
+        [1, 0, 1],   # 4.4
+        [1, 1, 0],   # 5.5
+        [2, 0, 0],   # 6.6
+        [2, 0, 1],   # 7.7
+        [2, 0, 2],   # 8.8
+        [2, 0, 3]]   # 9.9
+      # [2, 1,  ],   # (empty list)
 
-
-
+    regulararrayB.setid()
+    assert numpy.asarray(regulararrayB.id).tolist() == [
+        [0],
+        [1]]
+    assert numpy.asarray(regulararrayB.content.id).tolist() == [
+        [0, 0],
+        [0, 1],
+        [0, 2],
+        [1, 0],
+        [1, 1],
+        [1, 2]]
 
 # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
 # TODO: RegularArray in Numba

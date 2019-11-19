@@ -61,7 +61,7 @@ namespace awkward {
     else if (std::is_same<T, int32_t>::value) {
       Identity64* raw = new Identity64(ref_, fieldloc_, width_, length_);
       std::shared_ptr<Identity> out(raw);
-      awkward_identity32_to_identity64(raw->ptr().get(), reinterpret_cast<int32_t*>(ptr_.get()), length_);
+      awkward_identity32_to_identity64(raw->ptr().get(), reinterpret_cast<int32_t*>(ptr_.get()), length_, width_);
       return out;
     }
   }

@@ -39,10 +39,6 @@ namespace awkward {
           length(),
           rawid->width());
         util::handle_error(err, classname(), id_.get());
-
-        std::cout << "passing down length " << subid.get()->length() << " " << content_.get()->length() << std::endl;
-        std::cout << subid.get()->tostring() << std::endl;
-
         content_.get()->setid(subid);
       }
       else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
