@@ -224,7 +224,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     leng = util.arraylen(context, builder, arraytpe, arrayval, totpe=numba.int64)
 
     if isinstance(headtpe, numba.types.Integer):
-        assert isadvanced is None
+        assert advanced is None
         nextcarry = util.newindex64(context, builder, numba.int64, leng)
         util.call(context, builder, cpu.kernels.awkward_regulararray_getitem_next_at_64,
             (util.arrayptr(context, builder, util.index64tpe, nextcarry),
