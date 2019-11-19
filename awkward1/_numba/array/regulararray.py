@@ -129,3 +129,12 @@ def box(tpe, val, c):
     c.pyapi.decref(content_obj)
     c.pyapi.decref(size_obj)
     return out
+
+@numba.extending.lower_builtin(len, RegularArrayType)
+def lower_len(context, builder, sig, args):
+    rettpe, (tpe,) = sig.return_type, sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    innerlen = tpe.contenttpe.lower_len(context, builder, rettpe(tpe.contenttpe), (proxyin.content,))
+    size = util.cast(context, builder, numba.int64, numba.intp, proxyin.size)
+    return builder.sdiv(innerlen, size)

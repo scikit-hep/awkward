@@ -172,9 +172,8 @@ def test_numba():
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
     regulararray = awkward1.layout.RegularArray(listoffsetarray, 2)
-    starts = awkward1.layout.Index64(numpy.array([0, 1]))
-    stops = awkward1.layout.Index64(numpy.array([2, 3]))
-    listarray = awkward1.layout.ListArray64(starts, stops, regulararray)
+    regulararray_m1 = awkward1.layout.RegularArray(listoffsetarray[:-1], 2)
+    regulararray_m2 = awkward1.layout.RegularArray(listoffsetarray[:-2], 2)
 
     @numba.njit
     def f1(q):
@@ -192,6 +191,13 @@ def test_numba():
     assert awkward1.tolist(f2(regulararray)) == awkward1.tolist(regulararray)
     assert sys.getrefcount(regulararray) == 2
 
+    @numba.njit
+    def f3(q):
+        return len(q)
+
+    assert f3(regulararray) == 3
+    assert f3(regulararray_m1) == 2
+    assert f3(regulararray_m2) == 2
 
 
 # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
