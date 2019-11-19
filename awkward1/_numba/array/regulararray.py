@@ -260,7 +260,16 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
 
         else:
-            raise NotImplementedError
+            nextadvanced = util.newindex64(context, builder, numba.int64, builder.mul(leng, nextsize))
+            util.call(context, builder, cpu.kernels.awkward_regulararray_getitem_next_range_spreadadvanced_64,
+                (util.arrayptr(context, builder, util.index64tpe, nextadvanced),
+                 util.arrayptr(context, builder, util.index64tpe, advanced),
+                 leng,
+                 util.cast(context, builder, numba.intp, numba.int64, nextsize)),
+                "in {}, indexing error".format(arraytpe.shortname))
+
+            outcontenttpe = nextcontenttpe.getitem_next(tailtpe, True)
+            outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, nextadvanced)
 
         outtpe = RegularArrayType(outcontenttpe, arraytpe.idtpe)
         proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
