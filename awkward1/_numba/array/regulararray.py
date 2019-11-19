@@ -329,13 +329,27 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             return proxyout._getvalue()
 
         else:
-            raise NotImplementedError
+            nextcarry = util.newindex64(context, builder, numba.int64, leng)
+            nextadvanced = util.newindex64(context, builder, numba.int64, leng)
 
+            util.call(context, builder, cpu.kernels.awkward_regulararray_getitem_next_array_advanced_64,
+                (util.arrayptr(context, builder, util.index64tpe, nextcarry),
+                 util.arrayptr(context, builder, util.index64tpe, nextadvanced),
+                 util.arrayptr(context, builder, util.index64tpe, advanced),
+                 util.arrayptr(context, builder, util.index64tpe, regular_flathead),
+                 leng,
+                 lenflathead,
+                 proxyin.size),
+                "in {}, indexing error".format(arraytpe.shortname))
 
+            nexttpe = arraytpe.contenttpe.carry()
+            nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
 
+            outtpe = nexttpe.getitem_next(tailtpe, True)
+            return nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
     else:
-        raise NotImplementedError
+        raise AssertionError(headtpe)
 
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     import awkward1._numba.identity
@@ -360,3 +374,37 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
         proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, rettpe.idtpe, carrytpe, proxyin.id, carryval)
 
     return proxyout._getvalue()
+
+@numba.typing.templates.infer_getattr
+class type_methods(numba.typing.templates.AttributeTemplate):
+    key = RegularArrayType
+
+    def generic_resolve(self, tpe, attr):
+        if attr == "content":
+            return tpe.contenttpe
+
+        elif attr == "size":
+            return numba.int64
+
+        elif attr == "id":
+            if tpe.idtpe == numba.none:
+                return numba.optional(identity.IdentityType(numba.int32[:, :]))
+            else:
+                return tpe.idtpe
+
+# @numba.extending.lower_getattr(ListArrayType, "content")
+# def lower_content(context, builder, tpe, val):
+#     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+#     if context.enable_nrt:
+#         context.nrt.incref(builder, tpe.contenttpe, proxyin.content)
+#     return proxyin.content
+#
+# @numba.extending.lower_getattr(ListArrayType, "id")
+# def lower_id(context, builder, tpe, val):
+#     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+#     if tpe.idtpe == numba.none:
+#         return context.make_optional_none(builder, identity.IdentityType(numba.int32[:, :]))
+#     else:
+#         if context.enable_nrt:
+#             context.nrt.incref(builder, tpe.idtpe, proxyin.id)
+#         return proxyin.id
