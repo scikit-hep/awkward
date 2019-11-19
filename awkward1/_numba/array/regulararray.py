@@ -236,6 +236,40 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
         return nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
 
+    elif isinstance(headtpe, numba.types.SliceType):
+        proxyslicein = context.make_helper(builder, headtpe, value=headval)
+        numba.targets.slicing.guard_invalid_slice(context, builder, headtpe, proxyslicein)
+        numba.targets.slicing.fix_slice(builder, proxyslicein, proxyin.size)
+        nextsize = numba.targets.slicing.get_slice_length(builder, proxyslicein)
+
+        nextcarry = util.newindex64(context, builder, numba.int64, builder.mul(leng, nextsize))
+        util.call(context, builder, cpu.kernels.awkward_regulararray_getitem_next_range_64,
+            (util.arrayptr(context, builder, util.index64tpe, nextcarry),
+             util.cast(context, builder, numba.intp, numba.int64, proxyslicein.start),
+             util.cast(context, builder, numba.intp, numba.int64, proxyslicein.step),
+             leng,
+             proxyin.size,
+             util.cast(context, builder, numba.intp, numba.int64, nextsize)),
+            "in {}, indexing error".format(arraytpe.shortname))
+
+        nextcontenttpe = arraytpe.contenttpe.carry()
+        nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
+
+        if advanced is None:
+            outcontenttpe = nextcontenttpe.getitem_next(tailtpe, False)
+            outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
+
+        else:
+            raise NotImplementedError
+
+        outtpe = RegularArrayType(outcontenttpe, arraytpe.idtpe)
+        proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
+        proxyout.content = outcontentval
+        proxyout.size = nextsize
+        if arraytpe.idtpe != numba.none:
+            proxyout.id = proxyin.id
+        return proxyout._getvalue()
+
     else:
         raise NotImplementedError
 
