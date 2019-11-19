@@ -45,7 +45,7 @@ class RegularArrayType(content.ContentType):
 
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
-            return RegularArrayType(contenttpe, self.idtype)
+            return RegularArrayType(contenttpe, self.idtpe)
 
         elif isinstance(headtpe, numba.types.EllipsisType):
             raise NotImplementedError("ellipsis")
@@ -66,7 +66,7 @@ class RegularArrayType(content.ContentType):
             raise AssertionError(headtpe)
 
     def carry(self):
-        return RegularArrayType(self.contenttpe, self.idtpe)
+        return RegularArrayType(self.contenttpe.carry(), self.idtpe)
 
     @property
     def lower_len(self):
@@ -173,7 +173,7 @@ def lower_getitem_range(context, builder, sig, args):
     proxysliceout = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
     proxysliceout.start = builder.mul(proxyslicein.start, size)
     proxysliceout.stop = builder.mul(proxyslicein.stop, size)
-    proxysliceout.step = builder.mul(proxyslicein.step, size)
+    proxysliceout.step = context.get_constant(numba.intp, 1)
 
     proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
     proxyout.content = tpe.contenttpe.lower_getitem_range(context, builder, rettpe.contenttpe(tpe.contenttpe, numba.types.slice2_type), (proxyin.content, proxysliceout._getvalue()))
@@ -215,8 +215,6 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     if len(wheretpe.types) == 0:
         return arrayval
 
-    print("HERE")
-
     headtpe = wheretpe.types[0]
     tailtpe = numba.types.Tuple(wheretpe.types[1:])
     headval = numba.cgutils.unpack_tuple(builder, whereval)[0]
@@ -244,4 +242,23 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     import awkward1._numba.identity
 
-    
+    proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+
+    lencarry = util.arraylen(context, builder, carrytpe, carryval, totpe=numba.int64)
+    nextcarry = util.newindex64(context, builder, numba.int64, builder.mul(lencarry, proxyin.size))
+    util.call(context, builder, cpu.kernels.awkward_regulararray_getitem_carry_64,
+        (util.arrayptr(context, builder, util.index64tpe, nextcarry),
+         util.arrayptr(context, builder, carrytpe, carryval),
+         lencarry,
+         proxyin.size),
+        "in {}, indexing error".format(arraytpe.shortname))
+    nextcontent = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
+
+    rettpe = arraytpe.carry()
+    proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
+    proxyout.content = nextcontent
+    proxyout.size = proxyin.size
+    if rettpe.idtpe != numba.none:
+        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, rettpe.idtpe, carrytpe, proxyin.id, carryval)
+
+    return proxyout._getvalue()

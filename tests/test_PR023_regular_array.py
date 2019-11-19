@@ -174,6 +174,9 @@ def test_numba():
     regulararray = awkward1.layout.RegularArray(listoffsetarray, 2)
     regulararray_m1 = awkward1.layout.RegularArray(listoffsetarray[:-1], 2)
     regulararray_m2 = awkward1.layout.RegularArray(listoffsetarray[:-2], 2)
+    starts = awkward1.layout.Index64(numpy.array([0, 1]))
+    stops = awkward1.layout.Index64(numpy.array([2, 3]))
+    listarray = awkward1.layout.ListArray64(starts, stops, regulararray)
 
     @numba.njit
     def f1(q):
@@ -221,13 +224,17 @@ def test_numba():
     assert awkward1.tolist(f6(regulararray, slice(1, None))) == awkward1.tolist(regulararray[slice(1, None)]) == [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
     assert awkward1.tolist(f6(regulararray, slice(None, -1))) == awkward1.tolist(regulararray[slice(None, -1)]) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]]
 
-    # @numba.njit
-    # def f7(q, i):
-    #     return q[(i,)]
-    #
-    # print(awkward1.tolist(f7(regulararray, 1)))
-    #
-    # raise Exception
+    @numba.njit
+    def f7(q, i):
+        return q[(i,)]
+
+    assert awkward1.tolist(f7(regulararray, 1)) == [[3.3, 4.4], [5.5]]
+
+    @numba.njit
+    def f8(q, i):
+        return q[:, i]
+
+    assert awkward1.tolist(f8(listarray, 1)) == awkward1.tolist(listarray[:, 1]) == [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
 
 
 

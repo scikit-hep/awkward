@@ -3008,6 +3008,69 @@
         </inbodydescription>
         <location file="src/cpu-kernels/getitem.cpp" line="519" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="519" bodyend="521"/>
       </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1ae1979194de2c4493ae6566c28e7b9dd1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>ERROR</type>
+        <definition>ERROR awkward_regulararray_getitem_carry</definition>
+        <argsstring>(T *tocarry, const T *fromcarry, int64_t lencarry, int64_t size)</argsstring>
+        <name>awkward_regulararray_getitem_carry</name>
+        <param>
+          <type>T *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>fromcarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>size</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="524" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="524" bodyend="531"/>
+      </memberdef>
+      <memberdef kind="function" id="getitem_8cpp_1a0b7a04e726a10b08b1b459602d530586" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_regulararray_getitem_carry_64</definition>
+        <argsstring>(int64_t *tocarry, const int64_t *fromcarry, int64_t lencarry, int64_t size)</argsstring>
+        <name>awkward_regulararray_getitem_carry_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromcarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencarry</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>size</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/getitem.cpp" line="532" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="532" bodyend="534"/>
+      </memberdef>
       </sectiondef>
     <briefdescription>
     </briefdescription>
