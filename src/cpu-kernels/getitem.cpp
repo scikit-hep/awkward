@@ -519,3 +519,16 @@ ERROR awkward_regulararray_getitem_next_array_advanced(T* tocarry, T* toadvanced
 ERROR awkward_regulararray_getitem_next_array_advanced_64(int64_t* tocarry, int64_t* toadvanced, const int64_t* fromadvanced, const int64_t* fromarray, int64_t len, int64_t lenarray, int64_t size) {
   return awkward_regulararray_getitem_next_array_advanced<int64_t>(tocarry, toadvanced, fromadvanced, fromarray, len, lenarray, size);
 }
+
+template <typename T>
+ERROR awkward_regulararray_getitem_carry(T* tocarry, const T* fromcarry, int64_t lencarry, int64_t size) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    for (int64_t j = 0;  j < size;  j++) {
+      tocarry[i*size + j] = fromcarry[i]*size + j;
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_carry_64(int64_t* tocarry, const int64_t* fromcarry, int64_t lencarry, int64_t size) {
+  return awkward_regulararray_getitem_carry<int64_t>(tocarry, fromcarry, lencarry, size);
+}

@@ -168,7 +168,7 @@ def lower_getitem_range(context, builder, sig, args):
 
     proxyslicein = context.make_helper(builder, wheretpe, value=whereval)
     numba.targets.slicing.guard_invalid_slice(context, builder, wheretpe, proxyslicein)
-    numba.targets.slicing.fix_slice(builder, proxyslicein, lower_len(context, builder, numba.intp(tpe), (val,)))
+    numba.targets.slicing.fix_slice(builder, proxyslicein, util.arraylen(context, builder, tpe, val))
 
     proxysliceout = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
     proxysliceout.start = builder.mul(proxyslicein.start, size)
@@ -215,9 +215,33 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     if len(wheretpe.types) == 0:
         return arrayval
 
+    print("HERE")
+
     headtpe = wheretpe.types[0]
     tailtpe = numba.types.Tuple(wheretpe.types[1:])
     headval = numba.cgutils.unpack_tuple(builder, whereval)[0]
     tailval = context.make_tuple(builder, tailtpe, numba.cgutils.unpack_tuple(builder, whereval)[1:])
 
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+    leng = util.arraylen(context, builder, arraytpe, arrayval, totpe=numba.int64)
+
+    if isinstance(headtpe, numba.types.Integer):
+        assert isadvanced is None
+        nextcarry = util.newindex64(context, builder, numba.int64, leng)
+        util.call(context, builder, cpu.kernels.awkward_regulararray_getitem_next_at_64,
+            (util.arrayptr(context, builder, util.index64tpe, nextcarry),
+             util.cast(context, builder, headtpe, numba.int64, headval),
+             leng,
+             proxyin.size),
+            "in {}, indexing error".format(arraytpe.shortname))
+        nextcontenttpe = arraytpe.contenttpe.carry()
+        nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
+        return nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
+
+    else:
+        raise NotImplementedError
+
+def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
+    import awkward1._numba.identity
+
+    

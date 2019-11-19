@@ -145,15 +145,12 @@ namespace awkward {
   const std::shared_ptr<Content> RegularArray::carry(const Index64& carry) const {
     Index64 nextcarry(carry.length()*size_);
 
-    int64_t* tocarry = nextcarry.ptr().get();
-    int64_t* fromcarry = carry.ptr().get();
-    int64_t lencarry = carry.length();
-    int64_t size = size_;
-    for (int64_t i = 0;  i < lencarry;  i++) {
-      for (int64_t j = 0;  j < size;  j++) {
-        tocarry[i*size + j] = fromcarry[i]*size + j;
-      }
-    }
+    struct Error err = awkward_regulararray_getitem_carry_64(
+      nextcarry.ptr().get(),
+      carry.ptr().get(),
+      carry.length(),
+      size_);
+    util::handle_error(err, classname(), id_.get());
 
     std::shared_ptr<Identity> id(nullptr);
     if (id_.get() != nullptr) {
