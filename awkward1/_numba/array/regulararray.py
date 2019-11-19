@@ -164,7 +164,7 @@ def lower_getitem_range(context, builder, sig, args):
     val, whereval = args
 
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    size = util.cast(context, builder, numba.intp, numba.int64, proxyin.size)
+    size = util.cast(context, builder, numba.int64, numba.intp, proxyin.size)
 
     proxyslicein = context.make_helper(builder, wheretpe, value=whereval)
     numba.targets.slicing.guard_invalid_slice(context, builder, wheretpe, proxyslicein)
@@ -185,3 +185,39 @@ def lower_getitem_range(context, builder, sig, args):
     if context.enable_nrt:
         context.nrt.incref(builder, rettpe, out)
     return out
+
+@numba.extending.lower_builtin(operator.getitem, RegularArrayType, numba.types.BaseTuple)
+def lower_getitem_tuple(context, builder, sig, args):
+    rettpe, (arraytpe, wheretpe) = sig.return_type, sig.args
+    arrayval, whereval = args
+
+    wheretpe, whereval = util.preprocess_slicetuple(context, builder, wheretpe, whereval)
+    nexttpe, nextval = util.wrap_for_slicetuple(context, builder, arraytpe, arrayval)
+
+    outtpe = nexttpe.getitem_next(wheretpe, False)
+    outval = nexttpe.lower_getitem_next(context, builder, nexttpe, wheretpe, nextval, whereval, None)
+
+    return outtpe.lower_getitem_int(context, builder, rettpe(outtpe, numba.int64), (outval, context.get_constant(numba.int64, 0)))
+
+@numba.extending.lower_builtin(operator.getitem, RegularArrayType, numba.types.Array)
+@numba.extending.lower_builtin(operator.getitem, RegularArrayType, numba.types.List)
+@numba.extending.lower_builtin(operator.getitem, RegularArrayType, numba.types.ArrayCompatible)
+@numba.extending.lower_builtin(operator.getitem, RegularArrayType, numba.types.EllipsisType)
+@numba.extending.lower_builtin(operator.getitem, RegularArrayType, type(numba.typeof(numpy.newaxis)))
+def lower_getitem_other(context, builder, sig, args):
+    rettpe, (arraytpe, wheretpe) = sig.return_type, sig.args
+    arrayval, whereval = args
+    wrappedtpe = numba.types.Tuple((wheretpe,))
+    wrappedval = context.make_tuple(builder, wrappedtpe, (whereval,))
+    return lower_getitem_tuple(context, builder, rettpe(arraytpe, wrappedtpe), (arrayval, wrappedval))
+
+def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval, advanced):
+    if len(wheretpe.types) == 0:
+        return arrayval
+
+    headtpe = wheretpe.types[0]
+    tailtpe = numba.types.Tuple(wheretpe.types[1:])
+    headval = numba.cgutils.unpack_tuple(builder, whereval)[0]
+    tailval = context.make_tuple(builder, tailtpe, numba.cgutils.unpack_tuple(builder, whereval)[1:])
+
+    proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
