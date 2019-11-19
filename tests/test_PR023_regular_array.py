@@ -126,8 +126,21 @@ def test_numpy():
                 continue
             assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(regulararrayB[cuts])
 
+# def test_setid():
+#     regulararray.setid();
+#     print(numpy.asarray(regulararray.id))
+#     print(numpy.asarray(regulararray.content.id))
+#     print(numpy.asarray(regulararray.content.content.id))
+#
+#     print(awkward1.tolist(regulararray))
+#
+#
+#     raise Exception
+
+
+
+
 # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
-# TODO: RegularArray::setid (both)
 # TODO: RegularArray in Numba
 # TODO: ListArray's and ListOffsetArray's non-advanced getitem array should now output a RegularArray.
 # TODO: all getitem arrays should handle non-flat SliceArray by wrapping in RegularArrays.

@@ -848,6 +848,11 @@ py::class_<ak::RegularArray, ak::Content> make_RegularArray(py::handle m, std::s
       .def(py::init([](py::object content, int64_t size, py::object id) -> ak::RegularArray {
         return ak::RegularArray(unbox_id(id), std::shared_ptr<ak::Content>(unbox_content(content)), size);
       }), py::arg("content"), py::arg("size"), py::arg("id") = py::none())
+
+      .def_property_readonly("size", &ak::RegularArray::size)
+      .def_property_readonly("content", [](ak::RegularArray& self) -> py::object {
+        return box(self.content());
+      })
   );
 }
 

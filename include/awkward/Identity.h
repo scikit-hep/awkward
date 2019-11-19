@@ -55,7 +55,7 @@ namespace awkward {
   public:
     IdentityOf<T>(const Ref ref, const FieldLoc fieldloc, int64_t width, int64_t length)
         : Identity(ref, fieldloc, 0, width, length)
-        , ptr_(std::shared_ptr<T>(new T[(size_t)(length*width)])) { }
+        , ptr_(std::shared_ptr<T>(length == 0 ? nullptr : new T[(size_t)(length*width)], awkward::util::array_deleter<T>())) { }
     IdentityOf<T>(const Ref ref, const FieldLoc fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr)
         : Identity(ref, fieldloc, offset, width, length)
         , ptr_(ptr) { }
