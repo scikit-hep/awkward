@@ -138,3 +138,20 @@ def lower_len(context, builder, sig, args):
     innerlen = tpe.contenttpe.lower_len(context, builder, rettpe(tpe.contenttpe), (proxyin.content,))
     size = util.cast(context, builder, numba.int64, numba.intp, proxyin.size)
     return builder.sdiv(innerlen, size)
+
+@numba.extending.lower_builtin(operator.getitem, RegularArrayType, numba.types.Integer)
+def lower_getitem_int(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+    whereval, wheretpe = util.cast(context, builder, wheretpe, numba.int64, whereval), numba.int64
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+
+    start = builder.mul(whereval, proxyin.size)
+    stop = builder.mul(builder.add(whereval, context.get_constant(numba.int64, 1)), proxyin.size)
+    proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
+    proxyslice.start = util.cast(context, builder, numba.int64, numba.intp, start)
+    proxyslice.stop = util.cast(context, builder, numba.int64, numba.intp, stop)
+    proxyslice.step = context.get_constant(numba.intp, 1)
+
+    outtpe = tpe.contenttpe.getitem_range()
+    return tpe.contenttpe.lower_getitem_range(context, builder, outtpe(tpe.contenttpe, numba.types.slice2_type), (proxyin.content, proxyslice._getvalue()))

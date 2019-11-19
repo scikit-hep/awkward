@@ -198,6 +198,25 @@ def test_numba():
     assert f3(regulararray) == 3
     assert f3(regulararray_m1) == 2
     assert f3(regulararray_m2) == 2
+    assert len(regulararray) == 3
+    assert len(regulararray_m1) == 2
+    assert len(regulararray_m2) == 2
+
+    @numba.njit
+    def f4(q):
+        return q[1]
+
+    assert awkward1.tolist(f4(regulararray)) == [[3.3, 4.4], [5.5]]
+
+    @numba.njit
+    def f5(q, i):
+        return q[i]
+
+    assert awkward1.tolist(f5(regulararray, 1)) == [[3.3, 4.4], [5.5]]
+
+
+
+
 
 
 # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
