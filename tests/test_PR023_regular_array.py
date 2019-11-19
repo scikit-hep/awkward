@@ -165,8 +165,11 @@ def test_setid():
         [1, 1],
         [1, 2]]
 
-# TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
 # TODO: RegularArray in Numba
+def test_numba():
+    pass
+
+# TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
 # TODO: ListArray's and ListOffsetArray's non-advanced getitem array should now output a RegularArray.
 # TODO: all getitem arrays should handle non-flat SliceArray by wrapping in RegularArrays.
 # TODO: check the FIXME in awkward_listarray_getitem_next_array_advanced.
