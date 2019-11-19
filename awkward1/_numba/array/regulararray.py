@@ -240,7 +240,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         proxyslicein = context.make_helper(builder, headtpe, value=headval)
         numba.targets.slicing.guard_invalid_slice(context, builder, headtpe, proxyslicein)
         numba.targets.slicing.fix_slice(builder, proxyslicein, proxyin.size)
-        nextsize = numba.targets.slicing.get_slice_length(builder, proxyslicein)
+        nextsize = util.cast(context, builder, numba.intp, numba.int64, numba.targets.slicing.get_slice_length(builder, proxyslicein))
 
         nextcarry = util.newindex64(context, builder, numba.int64, builder.mul(leng, nextsize))
         util.call(context, builder, cpu.kernels.awkward_regulararray_getitem_next_range_64,
@@ -249,7 +249,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              util.cast(context, builder, numba.intp, numba.int64, proxyslicein.step),
              leng,
              proxyin.size,
-             util.cast(context, builder, numba.intp, numba.int64, nextsize)),
+             nextsize),
             "in {}, indexing error".format(arraytpe.shortname))
 
         nextcontenttpe = arraytpe.contenttpe.carry()
@@ -265,7 +265,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
                 (util.arrayptr(context, builder, util.index64tpe, nextadvanced),
                  util.arrayptr(context, builder, util.index64tpe, advanced),
                  leng,
-                 util.cast(context, builder, numba.intp, numba.int64, nextsize)),
+                 nextsize),
                 "in {}, indexing error".format(arraytpe.shortname))
 
             outcontenttpe = nextcontenttpe.getitem_next(tailtpe, True)
@@ -278,6 +278,61 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         if arraytpe.idtpe != numba.none:
             proxyout.id = proxyin.id
         return proxyout._getvalue()
+
+    elif isinstance(headtpe, numba.types.EllipsisType):
+        raise NotImplementedError("RegularArray.getitem_next(ellipsis)")
+
+    elif isinstance(headtpe, type(numba.typeof(numpy.newaxis))):
+        raise NotImplementedError("RegularArray.getitem_next(newaxis)")
+
+    elif isinstance(headtpe, numba.types.Array):
+        if headtpe.ndim != 1:
+            raise NotImplementedError("array.ndim != 1")
+
+        flathead = numba.targets.arrayobj.array_ravel(context, builder, util.index64tpe(headtpe), (headval,))
+        lenflathead = util.arraylen(context, builder, util.index64tpe, flathead, totpe=numba.int64)
+        regular_flathead = util.newindex64(context, builder, numba.int64, lenflathead)
+
+        util.call(context, builder, cpu.kernels.awkward_regulararray_getitem_next_array_regularize_64,
+            (util.arrayptr(context, builder, util.index64tpe, regular_flathead),
+             util.arrayptr(context, builder, util.index64tpe, flathead),
+             lenflathead,
+             proxyin.size),
+            "in {}, indexing error".format(arraytpe.shortname))
+
+        if advanced is None:
+            lencarry = builder.mul(leng, lenflathead)
+            nextcarry = util.newindex64(context, builder, numba.int64, lencarry)
+            nextadvanced = util.newindex64(context, builder, numba.int64, lencarry)
+
+            util.call(context, builder, cpu.kernels.awkward_regulararray_getitem_next_array_64,
+                (util.arrayptr(context, builder, util.index64tpe, nextcarry),
+                 util.arrayptr(context, builder, util.index64tpe, nextadvanced),
+                 util.arrayptr(context, builder, util.index64tpe, regular_flathead),
+                 leng,
+                 lenflathead,
+                 proxyin.size),
+                "in {}, indexing error".format(arraytpe.shortname))
+
+            nexttpe = arraytpe.contenttpe.carry()
+            nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
+
+            contenttpe = nexttpe.getitem_next(tailtpe, True)
+            contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
+
+            outtpe = RegularArrayType(contenttpe, arraytpe.idtpe)
+            proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
+            proxyout.content = contentval
+            proxyout.size = lenflathead
+            if outtpe.idtpe != numba.none:
+                proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, outtpe.idtpe, util.index64tpe, proxyin.id, flathead)
+            return proxyout._getvalue()
+
+        else:
+            raise NotImplementedError
+
+
+
 
     else:
         raise NotImplementedError

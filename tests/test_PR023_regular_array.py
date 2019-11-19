@@ -256,6 +256,12 @@ def test_numba():
 
     assert awkward1.tolist(f11(listarray, slice(None, 1))) == awkward1.tolist(listarray[[0, 1], 1, slice(None, 1)]) == [[[3.3, 4.4]], [[6.6, 7.7, 8.8, 9.9]]]
 
+    @numba.njit
+    def f12(q):
+        return q[:, 1:, [1, 0, 1]]
+
+    assert awkward1.tolist(f12(listarray)) == awkward1.tolist(listarray[:, 1:, [1, 0, 1]]) == [[[[5.5], [3.3, 4.4], [5.5]]], [[[], [6.6, 7.7, 8.8, 9.9], []]]]
+
 # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
 # TODO: ListArray's and ListOffsetArray's non-advanced getitem array should now output a RegularArray.
 # TODO: all getitem arrays should handle non-flat SliceArray by wrapping in RegularArrays.
