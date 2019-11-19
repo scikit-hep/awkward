@@ -165,9 +165,34 @@ def test_setid():
         [1, 1],
         [1, 2]]
 
-# TODO: RegularArray in Numba
+numba = pytest.importorskip("numba")
+
 def test_numba():
-    pass
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]));
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+    regulararray = awkward1.layout.RegularArray(listoffsetarray, 2)
+    starts = awkward1.layout.Index64(numpy.array([0, 1]))
+    stops = awkward1.layout.Index64(numpy.array([2, 3]))
+    listarray = awkward1.layout.ListArray64(starts, stops, regulararray)
+
+    @numba.njit
+    def f1(q):
+        return 3.14
+
+    assert sys.getrefcount(regulararray) == 2
+    f1(regulararray)
+    assert sys.getrefcount(regulararray) == 2
+
+    @numba.njit
+    def f2(q):
+        return q
+
+    assert sys.getrefcount(regulararray) == 2
+    assert awkward1.tolist(f2(regulararray)) == awkward1.tolist(regulararray)
+    assert sys.getrefcount(regulararray) == 2
+
+
 
 # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
 # TODO: ListArray's and ListOffsetArray's non-advanced getitem array should now output a RegularArray.
