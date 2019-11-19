@@ -55,3 +55,25 @@ ERROR awkward_identity64_from_listarrayU32(int64_t* toptr, const int64_t* frompt
 ERROR awkward_identity64_from_listarray64(int64_t* toptr, const int64_t* fromptr, const int64_t* fromstarts, const int64_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
   return awkward_identity_from_listarray<int64_t, int64_t>(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
 }
+
+template <typename ID>
+ERROR awkward_identity_from_regulararray(ID* toptr, const ID* fromptr, int64_t fromptroffset, int64_t size, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+  for (int64_t i = 0;  i < fromlength;  i++) {
+    for (int64_t j = 0;  j < size;  j++) {
+      for (int64_t k = 0;  k < fromwidth;  k++) {
+        toptr[(i*size + j)*(fromwidth + 1) + k] = fromptr[fromptroffset + i*fromwidth + k];
+      }
+      toptr[(i*size + j)*(fromwidth + 1) + fromwidth] = ID(j);
+    }
+  }
+  for (int64_t k = (fromlength + 1)*size;  k < tolength*(fromwidth + 1);  k++) {
+    toptr[k] = -1;
+  }
+  return success();
+}
+ERROR awkward_identity32_from_regulararray(int32_t* toptr, const int32_t* fromptr, int64_t fromptroffset, int64_t size, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+  return awkward_identity_from_regulararray<int32_t>(toptr, fromptr, fromptroffset, size, tolength, fromlength, fromwidth);
+}
+ERROR awkward_identity64_from_regulararray(int64_t* toptr, const int64_t* fromptr, int64_t fromptroffset, int64_t size, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+  return awkward_identity_from_regulararray<int64_t>(toptr, fromptr, fromptroffset, size, tolength, fromlength, fromwidth);
+}

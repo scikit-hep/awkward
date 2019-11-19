@@ -15,11 +15,68 @@ namespace awkward {
     return "RegularArray";
   }
 
-  void RegularArray::setid() {
-    throw std::runtime_error("setid");
-  }
   void RegularArray::setid(const std::shared_ptr<Identity> id) {
-    throw std::runtime_error("setid(const std::shared_ptr<Identity> id)");
+    if (id.get() == nullptr) {
+      content_.get()->setid(id);
+    }
+    else {
+      if (length() != id.get()->length()) {
+        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
+      }
+      std::shared_ptr<Identity> bigid = id;
+      if (content_.get()->length() > kMaxInt32) {
+        bigid = id.get()->to64();
+      }
+      if (Identity32* rawid = dynamic_cast<Identity32*>(bigid.get())) {
+        Identity32* rawsubid = new Identity32(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        std::shared_ptr<Identity> subid(rawsubid);
+        struct Error err = awkward_identity32_from_regulararray(
+          rawsubid->ptr().get(),
+          rawid->ptr().get(),
+          rawid->offset(),
+          size_,
+          content_.get()->length(),
+          length(),
+          rawid->width());
+        util::handle_error(err, classname(), id_.get());
+        content_.get()->setid(subid);
+      }
+      else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
+        Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        std::shared_ptr<Identity> subid(rawsubid);
+        struct Error err = awkward_identity64_from_regulararray(
+          rawsubid->ptr().get(),
+          rawid->ptr().get(),
+          rawid->offset(),
+          size_,
+          content_.get()->length(),
+          length(),
+          rawid->width());
+        util::handle_error(err, classname(), id_.get());
+        content_.get()->setid(subid);
+      }
+      else {
+        throw std::runtime_error("unrecognized Identity specialization");
+      }
+    }
+    id_ = id;
+  }
+
+  void RegularArray::setid() {
+    if (length() < kMaxInt32) {
+      Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
+      std::shared_ptr<Identity> newid(rawid);
+      struct Error err = awkward_new_identity32(rawid->ptr().get(), length());
+      util::handle_error(err, classname(), id_.get());
+      setid(newid);
+    }
+    else {
+      Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, length());
+      std::shared_ptr<Identity> newid(rawid);
+      struct Error err = awkward_new_identity64(rawid->ptr().get(), length());
+      util::handle_error(err, classname(), id_.get());
+      setid(newid);
+    }
   }
 
   const std::string RegularArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
