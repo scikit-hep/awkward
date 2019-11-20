@@ -1,6 +1,8 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/ListArray.h"
+#include "awkward/array/EmptyArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -47,13 +49,29 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
-    std::shared_ptr<Content> next(new RegularArray(Identity::none(), shallow_copy(), length()));
+    std::shared_ptr<Content> next(nullptr);
+    if (length() == 0) {
+      Index64 nextstarts(1);
+      Index64 nextstops(1);
+      *nextstarts.ptr().get() = 0;
+      *nextstops.ptr().get() = 0;
+      std::shared_ptr<Content> next(new ListArrayOf<int64_t>(std::shared_ptr<Identity>(nullptr), nextstarts, nextstops, shallow_copy()));
+    }
+    else {
+      std::shared_ptr<Content> next(new RegularArray(Identity::none(), shallow_copy(), length()));
+    }
 
     std::shared_ptr<SliceItem> nexthead = where.head();
     Slice nexttail = where.tail();
     Index64 nextadvanced(0);
     std::shared_ptr<Content> out = next.get()->getitem_next(nexthead, nexttail, nextadvanced);
-    return out.get()->getitem_at(0);
+
+    if (out.get()->length() == 0) {
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
+    }
+    else {
+      return out.get()->getitem_at(0);
+    }
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
