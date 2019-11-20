@@ -57,6 +57,19 @@ def test_nonflat_slice():
         [0, 0, 1]]
     assert two.id is None
 
+def test_newaxis():
+    array = numpy.arange(2*3*5).reshape(2, 3, 5)
+    numpyarray = awkward1.layout.NumpyArray(array)
+
+    content = awkward1.layout.NumpyArray(array.reshape(-1))
+    inneroffsets = awkward1.layout.Index64(numpy.array([0, 5, 10, 15, 20, 25, 30]))
+    outeroffsets = awkward1.layout.Index64(numpy.array([0, 3, 6]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(outeroffsets, awkward1.layout.ListOffsetArray64(inneroffsets, content))
+
+    assert awkward1.tolist(array[:, numpy.newaxis]) == [[[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]]], [[[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]]
+
+    assert awkward1.tolist(listoffsetarray[:, numpy.newaxis]) == [[[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]]], [[[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]]
+
 numba = pytest.importorskip("numba")
 
 def test_empty_array_slice_numba():
@@ -73,6 +86,5 @@ def test_empty_array_slice_numba():
 
 # Independent:
 ##############
-# TODO: newaxis should use RegularArray.
 # TODO: check the FIXME in awkward_listarray_getitem_next_array_advanced.
 # TODO: setid should not be allowed on data that can be reached by multiple paths (which will break the ListArray ids above, unfortunately).

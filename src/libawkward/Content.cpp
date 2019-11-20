@@ -112,7 +112,9 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: insert a RegularArray of 1 here");
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    return std::shared_ptr<Content>(new RegularArray(Identity::none(), getitem_next(nexthead, nexttail, advanced), 1));
   }
 
   const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content> outcontent, const std::vector<int64_t>& shape) const {
