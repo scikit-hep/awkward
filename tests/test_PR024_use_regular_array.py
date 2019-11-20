@@ -83,7 +83,3 @@ def test_empty_array_slice_numba():
 
     assert awkward1.tolist(f1(listarray, numpy.array([1], dtype=int), numpy.array([], dtype=int))) == []
     assert awkward1.tolist(f1(listarray, numpy.array([], dtype=int), numpy.array([], dtype=int))) == []
-
-# Independent:
-##############
-# TODO: check the FIXME in awkward_listarray_getitem_next_array_advanced.
