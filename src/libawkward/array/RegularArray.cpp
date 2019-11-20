@@ -99,7 +99,7 @@ namespace awkward {
   }
 
   int64_t RegularArray::length() const {
-    return content_.get()->length() / size_;   // floor of length / size
+    return size_ == 0 ? 0 : content_.get()->length() / size_;   // floor of length / size
   }
 
   const std::shared_ptr<Content> RegularArray::shallow_copy() const {

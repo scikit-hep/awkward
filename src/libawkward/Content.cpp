@@ -55,10 +55,10 @@ namespace awkward {
       Index64 nextstops(1);
       *nextstarts.ptr().get() = 0;
       *nextstops.ptr().get() = 0;
-      std::shared_ptr<Content> next(new ListArrayOf<int64_t>(std::shared_ptr<Identity>(nullptr), nextstarts, nextstops, shallow_copy()));
+      next = std::shared_ptr<Content>(new ListArrayOf<int64_t>(std::shared_ptr<Identity>(nullptr), nextstarts, nextstops, shallow_copy()));
     }
     else {
-      std::shared_ptr<Content> next(new RegularArray(Identity::none(), shallow_copy(), length()));
+      next = std::shared_ptr<Content>(new RegularArray(Identity::none(), shallow_copy(), length()));
     }
 
     std::shared_ptr<SliceItem> nexthead = where.head();
@@ -70,7 +70,7 @@ namespace awkward {
       return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
     }
     else {
-      return out.get()->getitem_at(0);
+      return out.get()->getitem_at_nowrap(0);
     }
   }
 

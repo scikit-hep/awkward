@@ -125,6 +125,8 @@ def shapeat(shapeat, array, at, ndim):
     redat = at - (ndim - array.ndim)
     if redat < 0:
         return 1
+    elif shapeat == 0:
+        return 0
     elif shapeat == 1:
         return array.shape[redat]
     elif shapeat == array.shape[redat] or array.shape[redat] == 1:
