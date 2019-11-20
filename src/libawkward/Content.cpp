@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/array/ListArray.h"
+#include "awkward/array/RegularArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -47,11 +47,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
-    Index64 nextstarts(1);
-    Index64 nextstops(1);
-    *nextstarts.ptr().get() = 0;
-    *nextstops.ptr().get() = length();
-    std::shared_ptr<Content> next(new ListArrayOf<int64_t>(std::shared_ptr<Identity>(nullptr), nextstarts, nextstops, shallow_copy()));
+    std::shared_ptr<Content> next(new RegularArray(Identity::none(), shallow_copy(), length()));
 
     std::shared_ptr<SliceItem> nexthead = where.head();
     Slice nexttail = where.tail();
