@@ -8,6 +8,7 @@
 #include "awkward/type/ListType.h"
 #include "awkward/Slice.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/array/RegularArray.h"
 
 #include "awkward/array/ListArray.h"
 
@@ -150,7 +151,8 @@ namespace awkward {
 
   template <typename T>
   void ListArrayOf<T>::tojson_part(ToJson& builder) const {
-    for (int64_t i = 0;  i < length();  i++) {
+    int64_t len = length();
+    for (int64_t i = 0;  i < len;  i++) {
       builder.beginlist();
       getitem_at_nowrap(i).get()->tojson_part(builder);
       builder.endlist();
@@ -180,6 +182,11 @@ namespace awkward {
     if (id_.get() != nullptr  &&  id_.get()->length() < starts_.length()) {
       util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
     }
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_nothing() const {
+    return content_.get()->getitem_range_nowrap(0, 0);
   }
 
   template <typename T>
@@ -375,9 +382,7 @@ namespace awkward {
     if (advanced.length() == 0) {
       Index64 nextcarry(lenstarts*flathead.length());
       Index64 nextadvanced(lenstarts*flathead.length());
-      IndexOf<T> nextoffsets(lenstarts + 1);   // FIXME: offsets are regular; don't generate them and replace ListOffsetArray output with a RegularArray
       struct Error err = util::awkward_listarray_getitem_next_array_64<T>(
-        nextoffsets.ptr().get(),
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         starts_.ptr().get(),
@@ -390,8 +395,7 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), id_.get());
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-      // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
-      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      return getitem_next_array_wrap(nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), array.shape());
     }
     else {
       Index64 nextcarry(lenstarts);

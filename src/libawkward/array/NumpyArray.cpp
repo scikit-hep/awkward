@@ -187,6 +187,10 @@ namespace awkward {
     return out.str();
   }
 
+  // FIXME: turn each of these three functions into (builder, array, offset, length)
+  // so that the can be called once per multidimensional array (no getitem_at_nowrap;
+  // do it internally in tojson_boolean/integer/real).
+
   void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
     for (int i = 0;  i < length;  i++) {
       builder.boolean(array[i]);
@@ -261,7 +265,8 @@ namespace awkward {
       }
     }
     else {
-      for (int64_t i = 0;  i < length();  i++) {
+      int64_t len = length();
+      for (int64_t i = 0;  i < len;  i++) {
         builder.beginlist();
         getitem_at_nowrap(i).get()->tojson_part(builder);
         builder.endlist();
@@ -348,6 +353,16 @@ namespace awkward {
     if (id_.get() != nullptr  &&  id_.get()->length() < shape_[0]) {
       util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
     }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_nothing() const {
+    const std::vector<ssize_t> shape({ 0 });
+    const std::vector<ssize_t> strides({ itemsize_ });
+    std::shared_ptr<Identity> id;
+    if (id_.get() != nullptr) {
+      id = id_.get()->getitem_range_nowrap(0, 0);
+    }
+    return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset_, itemsize_, format_));
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_at(int64_t at) const {
@@ -905,7 +920,7 @@ namespace awkward {
       for (auto x = arrayshape.rbegin();  x != arrayshape.rend();  ++x) {
         outstrides.insert(outstrides.begin(), ((ssize_t)(*x))*outstrides[0]);
       }
-      return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+      return NumpyArray(arrayshape.size() == 1 ? out.id_ : Identity::none(), out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
 
     else {

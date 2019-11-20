@@ -207,7 +207,10 @@ namespace awkward {
         else {
           std::vector<int64_t> arrayshape = array->shape();
           for (size_t j = 0;  j < shape.size();  j++) {
-            if (arrayshape[j] > shape[j]) {
+            if (arrayshape[j] == 0) {
+              shape[j] = 0;
+            }
+            else if (arrayshape[j] > shape[j]) {
               shape[j] = arrayshape[j];
             }
           }

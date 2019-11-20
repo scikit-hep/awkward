@@ -24,6 +24,44 @@ ERROR awkward_identity32_to_identity64(int64_t* toptr, const int32_t* fromptr, i
 }
 
 template <typename ID, typename T>
+ERROR awkward_identity_from_listoffsetarray(ID* toptr, const ID* fromptr, const T* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+  int64_t globalstart = fromoffsets[offsetsoffset];
+  int64_t globalstop = fromoffsets[offsetsoffset + fromlength];
+  for (int64_t k = 0;  k < globalstart*(fromwidth + 1);  k++) {
+    toptr[k] = -1;
+  }
+  for (int64_t k = globalstop*(fromwidth + 1);  k < tolength*(fromwidth + 1);  k++) {
+    toptr[k] = -1;
+  }
+  for (int64_t i = 0;  i < fromlength;  i++) {
+    int64_t start = fromoffsets[offsetsoffset + i];
+    int64_t stop = fromoffsets[offsetsoffset + i + 1];
+    if (start != stop  &&  stop > tolength) {
+      return failure("max(stop) > len(content)", i, kSliceNone);
+    }
+    for (int64_t j = start;  j < stop;  j++) {
+      for (int64_t k = 0;  k < fromwidth;  k++) {
+        toptr[j*(fromwidth + 1) + k] = fromptr[fromptroffset + i*(fromwidth) + k];
+      }
+      toptr[j*(fromwidth + 1) + fromwidth] = ID(j - start);
+    }
+  }
+  return success();
+}
+ERROR awkward_identity32_from_listoffsetarray32(int32_t* toptr, const int32_t* fromptr, const int32_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+  return awkward_identity_from_listoffsetarray<int32_t, int32_t>(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);
+}
+ERROR awkward_identity64_from_listoffsetarray32(int64_t* toptr, const int64_t* fromptr, const int32_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+  return awkward_identity_from_listoffsetarray<int64_t, int32_t>(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);
+}
+ERROR awkward_identity64_from_listoffsetarrayU32(int64_t* toptr, const int64_t* fromptr, const uint32_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+  return awkward_identity_from_listoffsetarray<int64_t, uint32_t>(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);
+}
+ERROR awkward_identity64_from_listoffsetarray64(int64_t* toptr, const int64_t* fromptr, const int64_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+  return awkward_identity_from_listoffsetarray<int64_t, int64_t>(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);
+}
+
+template <typename ID, typename T>
 ERROR awkward_identity_from_listarray(ID* toptr, const ID* fromptr, const T* fromstarts, const T* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
   for (int64_t k = 0;  k < tolength*(fromwidth + 1);  k++) {
     toptr[k] = -1;
@@ -35,6 +73,9 @@ ERROR awkward_identity_from_listarray(ID* toptr, const ID* fromptr, const T* fro
       return failure("max(stop) > len(content)", i, kSliceNone);
     }
     for (int64_t j = start;  j < stop;  j++) {
+      if (toptr[j*(fromwidth + 1) + fromwidth] != -1) {
+        return failure("item has ambiguous identity", i, kSliceNone);
+      }
       for (int64_t k = 0;  k < fromwidth;  k++) {
         toptr[j*(fromwidth + 1) + k] = fromptr[fromptroffset + i*(fromwidth) + k];
       }

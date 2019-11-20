@@ -147,9 +147,6 @@ int main(int, char**) {
     return -1;
   }
 
-  // std::cout << tostring(listA.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1})), new SliceArray64(array2, std::vector<int64_t>({4}), std::vector<int64_t>({1}))))) << std::endl;
-  // return -1;
-
   std::shared_ptr<Content> listB(new ListOffsetArray32(Identity::none(), offsetsB, listA));
   if (tostring(listB) != "[[[0, 1.1, 2.2], [], [3.3, 4.4]], [[5.5]], [], [[6.6, 7.7, 8.8, 9.9]]]") {
     return -1;

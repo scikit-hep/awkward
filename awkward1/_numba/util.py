@@ -84,18 +84,6 @@ def call(context, builder, fcn, args, errormessage=None):
         with builder.if_then(builder.icmp_signed("!=", proxyerr.str, context.get_constant(numba.intp, 0)), likely=False):
             context.call_conv.return_user_exc(builder, ValueError, (errormessage,))
 
-            # pyapi = context.get_python_api(builder)
-            # exc = pyapi.serialize_object(ValueError(errormessage))
-            # excptr = context.call_conv._get_excinfo_argument(builder.function)
-            # if excptr.name == "excinfo" and excptr.type == llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.struct([llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(8)), llvmlite.llvmpy.core.Type.int(32)]))):
-            #     builder.store(exc, excptr)
-            #     builder.ret(numba.targets.callconv.RETCODE_USEREXC)
-            # elif excptr.name == "py_args" and excptr.type == llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(8)):
-            #     pyapi.raise_object(exc)
-            #     builder.ret(llvmlite.llvmpy.core.Constant.null(context.get_value_type(numba.types.pyobject)))
-            # else:
-            #     raise AssertionError("unrecognized exception calling convention: {}".format(excptr))
-
 def newindex8(context, builder, lentpe, lenval):
     return numba.targets.arrayobj.numpy_empty_nd(context, builder, index8tpe(lentpe), (lenval,))
 def newindexU8(context, builder, lentpe, lenval):
@@ -125,6 +113,8 @@ def shapeat(shapeat, array, at, ndim):
     redat = at - (ndim - array.ndim)
     if redat < 0:
         return 1
+    elif shapeat == 0:
+        return 0
     elif shapeat == 1:
         return array.shape[redat]
     elif shapeat == array.shape[redat] or array.shape[redat] == 1:
@@ -234,18 +224,3 @@ def preprocess_slicetuple(context, builder, wheretpe, whereval):
     whereval3 = context.call_internal(builder, cres2.fndesc, wheretpe3(wheretpe2), (whereval2,))
 
     return wheretpe3, whereval3
-
-def wrap_for_slicetuple(context, builder, arraytpe, arrayval):
-    import awkward1._numba.array.listarray
-
-    length = arraylen(context, builder, arraytpe, arrayval, totpe=numba.int64)
-    nexttpe = awkward1._numba.array.listarray.ListArrayType(index64tpe, index64tpe, arraytpe, numba.types.none)
-    proxynext = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
-    proxynext.starts = newindex64(context, builder, numba.int64, context.get_constant(numba.int64, 1))
-    proxynext.stops = newindex64(context, builder, numba.int64, context.get_constant(numba.int64, 1))
-    numba.targets.arrayobj.store_item(context, builder, index64tpe, context.get_constant(numba.int64, 0), arrayptr(context, builder, index64tpe, proxynext.starts))
-    numba.targets.arrayobj.store_item(context, builder, index64tpe, length, arrayptr(context, builder, index64tpe, proxynext.stops))
-    proxynext.content = arrayval
-    nextval = proxynext._getvalue()
-
-    return nexttpe, nextval

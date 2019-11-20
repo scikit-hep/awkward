@@ -107,11 +107,11 @@ def test_listarray_numpyarray():
 
     with pytest.raises(ValueError) as excinfo:
         array[20,]
-    assert str(excinfo.value) == "in ListArray64 attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in RegularArray attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array[-20,]
-    assert str(excinfo.value) == "in ListArray64 attempting to get -20, index out of range"
+    assert str(excinfo.value) == "in RegularArray attempting to get -20, index out of range"
 
     array[-20:20,]
 
@@ -121,11 +121,11 @@ def test_listarray_numpyarray():
 
     with pytest.raises(ValueError) as excinfo:
         array[[2, 0, 0, 20, 3]]
-    assert str(excinfo.value) == "in ListArray64 attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in RegularArray attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array[[2, 0, 0, -20, 3]]
-    assert str(excinfo.value) == "in ListArray64 attempting to get -20, index out of range"
+    assert str(excinfo.value) == "in RegularArray attempting to get -20, index out of range"
 
     starts  = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6]))
     stops   = awkward1.layout.Index64(numpy.array([3, 3, 5, 6, 10]))
@@ -184,7 +184,7 @@ def test_listarray_listarray_numpyarray():
 
     with pytest.raises(ValueError) as excinfo:
         array2[20,]
-    assert str(excinfo.value) == "in ListArray64 attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in RegularArray attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array2[2, 20]
@@ -196,7 +196,7 @@ def test_listarray_listarray_numpyarray():
 
     with pytest.raises(ValueError) as excinfo:
         array2[-20,]
-    assert str(excinfo.value) == "in ListArray64 attempting to get -20, index out of range"
+    assert str(excinfo.value) == "in RegularArray attempting to get -20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array2[2, -20]
@@ -214,7 +214,7 @@ def test_listarray_listarray_numpyarray():
 
     with pytest.raises(ValueError) as excinfo:
         array2[20,]
-    assert str(excinfo.value) == "in ListArray64 attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in RegularArray attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array2[2, 20]
@@ -230,7 +230,7 @@ def test_listarray_listarray_numpyarray():
 
     with pytest.raises(ValueError) as excinfo:
         array2[-20,]
-    assert str(excinfo.value) == "in ListArray64 attempting to get -20, index out of range"
+    assert str(excinfo.value) == "in RegularArray attempting to get -20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array2[2, -20]
@@ -266,4 +266,4 @@ def test_array():
 
     with pytest.raises(ValueError) as excinfo:
         f1(array)
-    assert str(excinfo.value) == "in ListArray64, indexing error"
+    assert str(excinfo.value) == "in RegularArray, indexing error"

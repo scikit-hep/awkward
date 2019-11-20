@@ -269,24 +269,31 @@ template <typename C, typename T>
 ERROR awkward_listarray_getitem_next_range(C* tooffsets, T* tocarry, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step) {
   int64_t k = 0;
   tooffsets[0] = 0;
-  for (int64_t i = 0;  i < lenstarts;  i++) {
-    int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
-    int64_t regular_start = start;
-    int64_t regular_stop = stop;
-    awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length);
-    if (step > 0) {   // FIXME: put this test outside the for loop
+  if (step > 0) {
+    for (int64_t i = 0;  i < lenstarts;  i++) {
+      int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+      int64_t regular_start = start;
+      int64_t regular_stop = stop;
+      awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length);
       for (int64_t j = regular_start;  j < regular_stop;  j += step) {
         tocarry[k] = fromstarts[startsoffset + i] + j;
         k++;
       }
+      tooffsets[i + 1] = (C)k;
     }
-    else {
+  }
+  else {
+    for (int64_t i = 0;  i < lenstarts;  i++) {
+      int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+      int64_t regular_start = start;
+      int64_t regular_stop = stop;
+      awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length);
       for (int64_t j = regular_start;  j > regular_stop;  j += step) {
         tocarry[k] = fromstarts[startsoffset + i] + j;
         k++;
       }
+      tooffsets[i + 1] = (C)k;
     }
-    tooffsets[i + 1] = (C)k;
   }
   return success();
 }
@@ -339,8 +346,7 @@ ERROR awkward_listarray64_getitem_next_range_spreadadvanced_64(int64_t* toadvanc
 }
 
 template <typename C, typename T>
-ERROR awkward_listarray_getitem_next_array(C* tooffsets, T* tocarry, T* toadvanced, const C* fromstarts, const C* fromstops, const T* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
-  tooffsets[0] = 0;
+ERROR awkward_listarray_getitem_next_array(T* tocarry, T* toadvanced, const C* fromstarts, const C* fromstops, const T* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
     if (fromstops[stopsoffset + i] < fromstarts[startsoffset + i]) {
       return failure("stops[i] < starts[i]", i, kSliceNone);
@@ -360,18 +366,17 @@ ERROR awkward_listarray_getitem_next_array(C* tooffsets, T* tocarry, T* toadvanc
       tocarry[i*lenarray + j] = fromstarts[startsoffset + i] + regular_at;
       toadvanced[i*lenarray + j] = j;
     }
-    tooffsets[i + 1] = (C)((i + 1)*lenarray);
   }
   return success();
 }
-ERROR awkward_listarray32_getitem_next_array_64(int32_t* tooffsets, int64_t* tocarry, int64_t* toadvanced, const int32_t* fromstarts, const int32_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
-  return awkward_listarray_getitem_next_array<int32_t, int64_t>(tooffsets, tocarry, toadvanced, fromstarts, fromstops, fromarray, startsoffset, stopsoffset, lenstarts, lenarray, lencontent);
+ERROR awkward_listarray32_getitem_next_array_64(int64_t* tocarry, int64_t* toadvanced, const int32_t* fromstarts, const int32_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
+  return awkward_listarray_getitem_next_array<int32_t, int64_t>(tocarry, toadvanced, fromstarts, fromstops, fromarray, startsoffset, stopsoffset, lenstarts, lenarray, lencontent);
 }
-ERROR awkward_listarrayU32_getitem_next_array_64(uint32_t* tooffsets, int64_t* tocarry, int64_t* toadvanced, const uint32_t* fromstarts, const uint32_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
-  return awkward_listarray_getitem_next_array<uint32_t, int64_t>(tooffsets, tocarry, toadvanced, fromstarts, fromstops, fromarray, startsoffset, stopsoffset, lenstarts, lenarray, lencontent);
+ERROR awkward_listarrayU32_getitem_next_array_64(int64_t* tocarry, int64_t* toadvanced, const uint32_t* fromstarts, const uint32_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
+  return awkward_listarray_getitem_next_array<uint32_t, int64_t>(tocarry, toadvanced, fromstarts, fromstops, fromarray, startsoffset, stopsoffset, lenstarts, lenarray, lencontent);
 }
-ERROR awkward_listarray64_getitem_next_array_64(int64_t* tooffsets, int64_t* tocarry, int64_t* toadvanced, const int64_t* fromstarts, const int64_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
-  return awkward_listarray_getitem_next_array<int64_t, int64_t>(tooffsets, tocarry, toadvanced, fromstarts, fromstops, fromarray, startsoffset, stopsoffset, lenstarts, lenarray, lencontent);
+ERROR awkward_listarray64_getitem_next_array_64(int64_t* tocarry, int64_t* toadvanced, const int64_t* fromstarts, const int64_t* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent) {
+  return awkward_listarray_getitem_next_array<int64_t, int64_t>(tocarry, toadvanced, fromstarts, fromstops, fromarray, startsoffset, stopsoffset, lenstarts, lenarray, lencontent);
 }
 
 template <typename C, typename T>
@@ -384,12 +389,6 @@ ERROR awkward_listarray_getitem_next_array_advanced(T* tocarry, T* toadvanced, c
       return failure("stops[i] > len(content)", i, kSliceNone);
     }
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
-    if (fromadvanced[i] >= lenarray) {
-      // FIXME: this might be weaker than it should be: the length of each advanced array should
-      // be exactly the same, and I think it was already checked when creating the Slice.
-      // If so, this check would be redundant. If not, it's not strong enough.
-      return failure("lengths of advanced indexes must match", i, kSliceNone);
-    }
     int64_t regular_at = fromarray[fromadvanced[i]];
     if (regular_at < 0) {
       regular_at += length;

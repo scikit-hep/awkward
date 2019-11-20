@@ -51,6 +51,7 @@ namespace awkward {
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;
+    virtual const std::shared_ptr<Content> getitem_nothing() const;
     virtual const std::shared_ptr<Content> getitem_at(int64_t at) const;
     virtual const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const;
     virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;

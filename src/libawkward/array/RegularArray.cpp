@@ -91,7 +91,12 @@ namespace awkward {
   }
 
   void RegularArray::tojson_part(ToJson& builder) const {
-    throw std::runtime_error("tojson_part");
+    int64_t len = length();
+    for (int64_t i = 0;  i < len;  i++) {
+      builder.beginlist();
+      getitem_at_nowrap(i).get()->tojson_part(builder);
+      builder.endlist();
+    }
   }
 
   const std::shared_ptr<Type> RegularArray::type_part() const {
@@ -99,7 +104,7 @@ namespace awkward {
   }
 
   int64_t RegularArray::length() const {
-    return content_.get()->length() / size_;   // floor of length / size
+    return size_ == 0 ? 0 : content_.get()->length() / size_;   // floor of length / size
   }
 
   const std::shared_ptr<Content> RegularArray::shallow_copy() const {
@@ -107,6 +112,10 @@ namespace awkward {
   }
 
   void RegularArray::check_for_iteration() const { }
+
+  const std::shared_ptr<Content> RegularArray::getitem_nothing() const {
+    return content_.get()->getitem_range_nowrap(0, 0);
+  }
 
   const std::shared_ptr<Content> RegularArray::getitem_at(int64_t at) const {
     int64_t regular_at = at;
@@ -267,7 +276,8 @@ namespace awkward {
       util::handle_error(err, classname(), id_.get());
 
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-      return std::shared_ptr<Content>(new RegularArray(id_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), flathead.length()));
+
+      return getitem_next_array_wrap(nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), array.shape());
     }
     else {
       Index64 nextcarry(len);

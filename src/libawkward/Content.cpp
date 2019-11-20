@@ -1,6 +1,8 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include "awkward/array/RegularArray.h"
 #include "awkward/array/ListArray.h"
+#include "awkward/array/EmptyArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -47,17 +49,19 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
-    Index64 nextstarts(1);
-    Index64 nextstops(1);
-    *nextstarts.ptr().get() = 0;
-    *nextstops.ptr().get() = length();
-    std::shared_ptr<Content> next(new ListArrayOf<int64_t>(std::shared_ptr<Identity>(nullptr), nextstarts, nextstops, shallow_copy()));
+    std::shared_ptr<Content> next(new RegularArray(Identity::none(), shallow_copy(), length()));
 
     std::shared_ptr<SliceItem> nexthead = where.head();
     Slice nexttail = where.tail();
     Index64 nextadvanced(0);
     std::shared_ptr<Content> out = next.get()->getitem_next(nexthead, nexttail, nextadvanced);
-    return out.get()->getitem_at(0);
+
+    if (out.get()->length() == 0) {
+      return out.get()->getitem_nothing();
+    }
+    else {
+      return out.get()->getitem_at_nowrap(0);
+    }
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
@@ -108,6 +112,17 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: insert a RegularArray of 1 here");
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    return std::shared_ptr<Content>(new RegularArray(Identity::none(), getitem_next(nexthead, nexttail, advanced), 1));
   }
+
+  const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content> outcontent, const std::vector<int64_t>& shape) const {
+    std::shared_ptr<Content> out(new RegularArray(Identity::none(), outcontent, (int64_t)shape[shape.size() - 1]));
+    for (int64_t i = (int64_t)shape.size() - 2;  i >= 0;  i--) {
+      out = std::shared_ptr<Content>(new RegularArray(Identity::none(), out, (int64_t)shape[i]));
+    }
+    return out;
+  }
+
 }

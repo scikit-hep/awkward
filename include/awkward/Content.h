@@ -26,6 +26,7 @@ namespace awkward {
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
     virtual void check_for_iteration() const = 0;
+    virtual const std::shared_ptr<Content> getitem_nothing() const = 0;
     virtual const std::shared_ptr<Content> getitem_at(int64_t at) const = 0;
     virtual const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const = 0;
     virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const = 0;
@@ -46,6 +47,8 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const = 0;
+
+    const std::shared_ptr<Content> getitem_next_array_wrap(const std::shared_ptr<Content> outcontent, const std::vector<int64_t>& shape) const;
 
   };
 }

@@ -35,8 +35,7 @@ namespace awkward {
   }
 
   void EmptyArray::tojson_part(ToJson& builder) const {
-    builder.beginlist();
-    builder.endlist();
+    // Do nothing (builder.beginlist() and builder.endlist() are called outside of tojson_part).
   }
 
   const std::shared_ptr<Type> EmptyArray::type_part() const {
@@ -52,6 +51,10 @@ namespace awkward {
   }
 
   void EmptyArray::check_for_iteration() const { }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_nothing() const {
+    return shallow_copy();
+  }
 
   const std::shared_ptr<Content> EmptyArray::getitem_at(int64_t at) const {
     util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
