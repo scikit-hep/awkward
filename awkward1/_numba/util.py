@@ -84,18 +84,6 @@ def call(context, builder, fcn, args, errormessage=None):
         with builder.if_then(builder.icmp_signed("!=", proxyerr.str, context.get_constant(numba.intp, 0)), likely=False):
             context.call_conv.return_user_exc(builder, ValueError, (errormessage,))
 
-            # pyapi = context.get_python_api(builder)
-            # exc = pyapi.serialize_object(ValueError(errormessage))
-            # excptr = context.call_conv._get_excinfo_argument(builder.function)
-            # if excptr.name == "excinfo" and excptr.type == llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.struct([llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(8)), llvmlite.llvmpy.core.Type.int(32)]))):
-            #     builder.store(exc, excptr)
-            #     builder.ret(numba.targets.callconv.RETCODE_USEREXC)
-            # elif excptr.name == "py_args" and excptr.type == llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(8)):
-            #     pyapi.raise_object(exc)
-            #     builder.ret(llvmlite.llvmpy.core.Constant.null(context.get_value_type(numba.types.pyobject)))
-            # else:
-            #     raise AssertionError("unrecognized exception calling convention: {}".format(excptr))
-
 def newindex8(context, builder, lentpe, lenval):
     return numba.targets.arrayobj.numpy_empty_nd(context, builder, index8tpe(lentpe), (lenval,))
 def newindexU8(context, builder, lentpe, lenval):
