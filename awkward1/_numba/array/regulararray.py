@@ -239,7 +239,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     elif isinstance(headtpe, numba.types.SliceType):
         proxyslicein = context.make_helper(builder, headtpe, value=headval)
         numba.targets.slicing.guard_invalid_slice(context, builder, headtpe, proxyslicein)
-        numba.targets.slicing.fix_slice(builder, proxyslicein, proxyin.size)
+        numba.targets.slicing.fix_slice(builder, proxyslicein, util.cast(context, builder, numba.int64, numba.intp, proxyin.size))
         nextsize = util.cast(context, builder, numba.intp, numba.int64, numba.targets.slicing.get_slice_length(builder, proxyslicein))
 
         nextcarry = util.newindex64(context, builder, numba.int64, builder.mul(leng, nextsize))

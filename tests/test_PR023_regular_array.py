@@ -263,10 +263,10 @@ def test_numba():
     assert awkward1.tolist(f12(listarray)) == awkward1.tolist(listarray[:, 1:, [1, 0, 1]]) == [[[[5.5], [3.3, 4.4], [5.5]]], [[[], [6.6, 7.7, 8.8, 9.9], []]]]
 
     @numba.njit
-    def f12(q):
+    def f13(q):
         return q[:, [1], [1, 0, 1]]
 
-    assert awkward1.tolist(f12(listarray)) == awkward1.tolist(listarray[:, [1], [1, 0, 1]]) == [[[5.5], [3.3, 4.4], [5.5]], [[], [6.6, 7.7, 8.8, 9.9], []]]
+    assert awkward1.tolist(f13(listarray)) == awkward1.tolist(listarray[:, [1], [1, 0, 1]]) == [[[5.5], [3.3, 4.4], [5.5]], [[], [6.6, 7.7, 8.8, 9.9], []]]
 
 # TODO: replace Content::getitem's promotion to ListArray with a promotion to RegularArray.
 # TODO: ListArray's and ListOffsetArray's non-advanced getitem array should now output a RegularArray.
