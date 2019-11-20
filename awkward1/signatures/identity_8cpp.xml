@@ -83,10 +83,10 @@
         </inbodydescription>
         <location file="src/cpu-kernels/identity.cpp" line="15" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="15" bodyend="17"/>
       </memberdef>
-      <memberdef kind="function" id="identity_8cpp_1a57aff60803a08066d4d7b257fcc36726" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="identity_8cpp_1a1de3316b4f368115ea18f9c342f62a04" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
         <definition>ERROR awkward_identity32_to_identity64</definition>
-        <argsstring>(int64_t *toptr, const int32_t *fromptr, int64_t length)</argsstring>
+        <argsstring>(int64_t *toptr, const int32_t *fromptr, int64_t length, int64_t width)</argsstring>
         <name>awkward_identity32_to_identity64</name>
         <param>
           <type>int64_t *</type>
@@ -99,6 +99,10 @@
         <param>
           <type>int64_t</type>
           <declname>length</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>width</declname>
         </param>
         <briefdescription>
         </briefdescription>
@@ -380,6 +384,134 @@
         <inbodydescription>
         </inbodydescription>
         <location file="src/cpu-kernels/identity.cpp" line="55" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="55" bodyend="57"/>
+      </memberdef>
+      <memberdef kind="function" id="identity_8cpp_1ad9133f0609b09fa23488101ad343cfd3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename ID</type>
+          </param>
+        </templateparamlist>
+        <type>ERROR</type>
+        <definition>ERROR awkward_identity_from_regulararray</definition>
+        <argsstring>(ID *toptr, const ID *fromptr, int64_t fromptroffset, int64_t size, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
+        <name>awkward_identity_from_regulararray</name>
+        <param>
+          <type>ID *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const ID *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>size</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identity.cpp" line="60" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="60" bodyend="73"/>
+      </memberdef>
+      <memberdef kind="function" id="identity_8cpp_1a9c86223433ee95d740a7c14c32956ca0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identity32_from_regulararray</definition>
+        <argsstring>(int32_t *toptr, const int32_t *fromptr, int64_t fromptroffset, int64_t size, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
+        <name>awkward_identity32_from_regulararray</name>
+        <param>
+          <type>int32_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>size</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identity.cpp" line="74" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="74" bodyend="76"/>
+      </memberdef>
+      <memberdef kind="function" id="identity_8cpp_1a05bc1fe526b5d4df4699b4f0d11ad4d5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identity64_from_regulararray</definition>
+        <argsstring>(int64_t *toptr, const int64_t *fromptr, int64_t fromptroffset, int64_t size, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
+        <name>awkward_identity64_from_regulararray</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>size</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identity.cpp" line="77" column="7" bodyfile="src/cpu-kernels/identity.cpp" bodystart="77" bodyend="79"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

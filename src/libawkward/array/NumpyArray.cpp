@@ -22,7 +22,9 @@ namespace awkward {
 
   bool NumpyArray::isempty() const {
     for (auto x : shape_) {
-      if (x == 0) return true;
+      if (x == 0) {
+        return true;
+      }
     }
     return false;  // false for isscalar(), too
   }
@@ -48,7 +50,9 @@ namespace awkward {
     return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
   }
 
-  const std::string NumpyArray::classname() const { return "NumpyArray"; }
+  const std::string NumpyArray::classname() const {
+    return "NumpyArray";
+  }
 
   void NumpyArray::setid(const std::shared_ptr<Identity> id) {
     if (id.get() != nullptr  &&  length() != id.get()->length()) {
@@ -259,13 +263,13 @@ namespace awkward {
     else {
       for (int64_t i = 0;  i < length();  i++) {
         builder.beginlist();
-        getitem_at_unsafe(i).get()->tojson_part(builder);
+        getitem_at_nowrap(i).get()->tojson_part(builder);
         builder.endlist();
       }
     }
   }
 
-  std::shared_ptr<Type> NumpyArray::type_part() const {
+  const std::shared_ptr<Type> NumpyArray::type_part() const {
     if (ndim() == 1) {
       if (format_.compare("d") == 0) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
@@ -319,8 +323,11 @@ namespace awkward {
     }
     else {
       NumpyArray tmp(id_, ptr_, std::vector<ssize_t>({ 1 }), std::vector<ssize_t>({ itemsize_ }), byteoffset_, itemsize_, format_);
-      std::vector<int64_t> shape(shape_.begin() + 1, shape_.end());
-      return std::shared_ptr<Type>(new RegularType(shape, tmp.type_part()));
+      std::shared_ptr<Type> out = tmp.type_part();
+      for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
+        out = std::shared_ptr<Type>(new RegularType(out, (int64_t)shape_[i]));
+      }
+      return out;
     }
   }
 
@@ -337,7 +344,7 @@ namespace awkward {
     return std::shared_ptr<Content>(new NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
   }
 
-  void NumpyArray::checksafe() const {
+  void NumpyArray::check_for_iteration() const {
     if (id_.get() != nullptr  &&  id_.get()->length() < shape_[0]) {
       util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
     }
@@ -352,10 +359,10 @@ namespace awkward {
     if (regular_at < 0  ||  regular_at >= shape_[0]) {
       util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     }
-    return getitem_at_unsafe(regular_at);
+    return getitem_at_nowrap(regular_at);
   }
 
-  const std::shared_ptr<Content> NumpyArray::getitem_at_unsafe(int64_t at) const {
+  const std::shared_ptr<Content> NumpyArray::getitem_at_nowrap(int64_t at) const {
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
     const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
     const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
@@ -364,7 +371,7 @@ namespace awkward {
       if (at >= id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, at), id_.get()->classname(), nullptr);
       }
-      id = id_.get()->getitem_range_unsafe(at, at + 1);
+      id = id_.get()->getitem_range_nowrap(at, at + 1);
     }
     return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset, itemsize_, format_));
   }
@@ -374,10 +381,10 @@ namespace awkward {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), shape_[0]);
-    return getitem_range_unsafe(regular_start, regular_stop);
+    return getitem_range_nowrap(regular_start, regular_stop);
   }
 
-  const std::shared_ptr<Content> NumpyArray::getitem_range_unsafe(int64_t start, int64_t stop) const {
+  const std::shared_ptr<Content> NumpyArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
     std::vector<ssize_t> shape;
     shape.push_back((ssize_t)(stop - start));
@@ -387,7 +394,7 @@ namespace awkward {
       if (stop > id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
       }
-      id = id_.get()->getitem_range_unsafe(start, stop);
+      id = id_.get()->getitem_range_nowrap(start, stop);
     }
     return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
   }
@@ -571,99 +578,110 @@ namespace awkward {
     if (head.get() == nullptr) {
       return NumpyArray(id_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
     }
-
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
-      if (ndim() < 2) {
-        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
-      }
-
-      int64_t i = at->at();
-      if (i < 0) i += shape_[1];
-      if (i < 0  ||  i >= shape_[1]) {
-        util::handle_error(failure("index out of range", kSliceNone, at->at()), classname(), id_.get());
-      }
-
-      ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)i)*strides_[1];
-      NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
-
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
-      NumpyArray out = next.getitem_bystrides(nexthead, nexttail, length);
-
-      std::vector<ssize_t> outshape = { (ssize_t)length };
-      outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-      return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+      return getitem_bystrides(*at, tail, length);
     }
-
     else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
-      if (ndim() < 2) {
-        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
-      }
-
-      int64_t start = range->start();
-      int64_t stop = range->stop();
-      int64_t step = range->step();
-      if (step == Slice::none()) {
-        step = 1;
-      }
-      awkward_regularize_rangeslice(&start, &stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
-
-      int64_t numer = abs(start - stop);
-      int64_t denom = abs(step);
-      int64_t d = numer / denom;
-      int64_t m = numer % denom;
-      int64_t lenhead = d + (m != 0 ? 1 : 0);
-
-      ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)start)*strides_[1];
-      NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
-
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
-      NumpyArray out = next.getitem_bystrides(nexthead, nexttail, length*lenhead);
-
-      std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
-      outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-      std::vector<ssize_t> outstrides = { strides_[0], strides_[1]*((ssize_t)step) };
-      outstrides.insert(outstrides.end(), out.strides_.begin() + 1, out.strides_.end());
-      return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+      return getitem_bystrides(*range, tail, length);
     }
-
     else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
-      std::pair<int64_t, int64_t> minmax = minmax_depth();
-      assert(minmax.first == minmax.second);
-      int64_t mindepth = minmax.first;
-
-      if (tail.length() == 0  ||  mindepth - 1 == tail.dimlength()) {
-        std::shared_ptr<SliceItem> nexthead = tail.head();
-        Slice nexttail = tail.tail();
-        return getitem_bystrides(nexthead, nexttail, length);
-      }
-      else {
-        std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
-        std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
-        items.insert(items.end(), tailitems.begin(), tailitems.end());
-
-        std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
-        Slice nexttail(items);
-        return getitem_bystrides(nexthead, nexttail, length);
-      }
+      return getitem_bystrides(*ellipsis, tail, length);
     }
-
     else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
-      NumpyArray out = getitem_bystrides(nexthead, nexttail, length);
-
-      std::vector<ssize_t> outshape = { (ssize_t)length, 1 };
-      outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-      std::vector<ssize_t> outstrides = { out.strides_[0] };
-      outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
-      return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+      return getitem_bystrides(*newaxis, tail, length);
     }
-
     else {
       throw std::runtime_error("unrecognized slice item type");
     }
+  }
+
+  const NumpyArray NumpyArray::getitem_bystrides(const SliceAt& at, const Slice& tail, int64_t length) const {
+    if (ndim() < 2) {
+      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    }
+
+    int64_t i = at.at();
+    if (i < 0) i += shape_[1];
+    if (i < 0  ||  i >= shape_[1]) {
+      util::handle_error(failure("index out of range", kSliceNone, at.at()), classname(), id_.get());
+    }
+
+    ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)i)*strides_[1];
+    NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
+
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    NumpyArray out = next.getitem_bystrides(nexthead, nexttail, length);
+
+    std::vector<ssize_t> outshape = { (ssize_t)length };
+    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+  }
+
+  const NumpyArray NumpyArray::getitem_bystrides(const SliceRange& range, const Slice& tail, int64_t length) const {
+    if (ndim() < 2) {
+      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    }
+
+    int64_t start = range.start();
+    int64_t stop = range.stop();
+    int64_t step = range.step();
+    if (step == Slice::none()) {
+      step = 1;
+    }
+    awkward_regularize_rangeslice(&start, &stop, step > 0, range.hasstart(), range.hasstop(), (int64_t)shape_[1]);
+
+    int64_t numer = abs(start - stop);
+    int64_t denom = abs(step);
+    int64_t d = numer / denom;
+    int64_t m = numer % denom;
+    int64_t lenhead = d + (m != 0 ? 1 : 0);
+
+    ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)start)*strides_[1];
+    NumpyArray next(id_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
+
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    NumpyArray out = next.getitem_bystrides(nexthead, nexttail, length*lenhead);
+
+    std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
+    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    std::vector<ssize_t> outstrides = { strides_[0], strides_[1]*((ssize_t)step) };
+    outstrides.insert(outstrides.end(), out.strides_.begin() + 1, out.strides_.end());
+    return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+  }
+
+  const NumpyArray NumpyArray::getitem_bystrides(const SliceEllipsis& ellipsis, const Slice& tail, int64_t length) const {
+    std::pair<int64_t, int64_t> minmax = minmax_depth();
+    assert(minmax.first == minmax.second);
+    int64_t mindepth = minmax.first;
+
+    if (tail.length() == 0  ||  mindepth - 1 == tail.dimlength()) {
+      std::shared_ptr<SliceItem> nexthead = tail.head();
+      Slice nexttail = tail.tail();
+      return getitem_bystrides(nexthead, nexttail, length);
+    }
+    else {
+      std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
+      std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
+      items.insert(items.end(), tailitems.begin(), tailitems.end());
+
+      std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
+      Slice nexttail(items);
+      return getitem_bystrides(nexthead, nexttail, length);
+    }
+  }
+
+  const NumpyArray NumpyArray::getitem_bystrides(const SliceNewAxis& newaxis, const Slice& tail, int64_t length) const {
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    NumpyArray out = getitem_bystrides(nexthead, nexttail, length);
+
+    std::vector<ssize_t> outshape = { (ssize_t)length, 1 };
+    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    std::vector<ssize_t> outstrides = { out.strides_[0] };
+    outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
+    return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
   }
 
   const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
@@ -691,206 +709,222 @@ namespace awkward {
     }
 
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
-      if (ndim() < 2) {
-        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
-      }
+      return getitem_next(*at, tail, carry, advanced, length, stride, first);
+    }
+    else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
+      return getitem_next(*range, tail, carry, advanced, length, stride, first);
+    }
+    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+      return getitem_next(*ellipsis, tail, carry, advanced, length, stride, first);
+    }
+    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+      return getitem_next(*newaxis, tail, carry, advanced, length, stride, first);
+    }
+    else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
+      return getitem_next(*array, tail, carry, advanced, length, stride, first);
+    }
+    else {
+      throw std::runtime_error("unrecognized slice item type");
+    }
+  }
 
-      NumpyArray next(first ? id_ : std::shared_ptr<Identity>(nullptr), ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
+  const NumpyArray NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
+    if (ndim() < 2) {
+      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    }
 
-      // if we had any array slices, this int would become an array
-      assert(advanced.length() == 0);
+    NumpyArray next(first ? id_ : std::shared_ptr<Identity>(nullptr), ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
 
-      int64_t regular_at = at->at();
-      if (regular_at < 0) {
-        regular_at += shape_[1];
-      }
-      if (!(0 <= regular_at  &&  regular_at < shape_[1])) {
-        util::handle_error(failure("index out of range", kSliceNone, at->at()), classname(), id_.get());
-      }
+    // if we had any array slices, this int would become an array
+    assert(advanced.length() == 0);
 
-      Index64 nextcarry(carry.length());
-      struct Error err = awkward_numpyarray_getitem_next_at_64(
+    int64_t regular_at = at.at();
+    if (regular_at < 0) {
+      regular_at += shape_[1];
+    }
+    if (!(0 <= regular_at  &&  regular_at < shape_[1])) {
+      util::handle_error(failure("index out of range", kSliceNone, at.at()), classname(), id_.get());
+    }
+
+    Index64 nextcarry(carry.length());
+    struct Error err = awkward_numpyarray_getitem_next_at_64(
+      nextcarry.ptr().get(),
+      carry.ptr().get(),
+      carry.length(),
+      shape_[1],   // because this is contiguous
+      regular_at);
+    util::handle_error(err, classname(), id_.get());
+
+    NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length, next.strides_[0], false);
+
+    std::vector<ssize_t> outshape = { (ssize_t)length };
+    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+  }
+
+  const NumpyArray NumpyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
+    if (ndim() < 2) {
+      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    }
+
+    int64_t start = range.start();
+    int64_t stop = range.stop();
+    int64_t step = range.step();
+    if (step == Slice::none()) {
+      step = 1;
+    }
+    awkward_regularize_rangeslice(&start, &stop, step > 0, range.hasstart(), range.hasstop(), (int64_t)shape_[1]);
+
+    int64_t numer = abs(start - stop);
+    int64_t denom = abs(step);
+    int64_t d = numer / denom;
+    int64_t m = numer % denom;
+    int64_t lenhead = d + (m != 0 ? 1 : 0);
+
+    NumpyArray next(first ? id_ : std::shared_ptr<Identity>(nullptr), ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+
+    if (advanced.length() == 0) {
+      Index64 nextcarry(carry.length()*lenhead);
+      struct Error err = awkward_numpyarray_getitem_next_range_64(
         nextcarry.ptr().get(),
         carry.ptr().get(),
         carry.length(),
+        lenhead,
         shape_[1],   // because this is contiguous
-        regular_at);
+        start,
+        step);
       util::handle_error(err, classname(), id_.get());
 
-      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length, next.strides_[0], false);
+      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*lenhead, next.strides_[0], false);
+      std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
+      outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+      std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
+      outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
+      return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    }
+
+    else {
+      Index64 nextcarry(carry.length()*lenhead);
+      Index64 nextadvanced(carry.length()*lenhead);
+      struct Error err = awkward_numpyarray_getitem_next_range_advanced_64(
+        nextcarry.ptr().get(),
+        nextadvanced.ptr().get(),
+        carry.ptr().get(),
+        advanced.ptr().get(),
+        carry.length(),
+        lenhead,
+        shape_[1],   // because this is contiguous
+        start,
+        step);
+      util::handle_error(err, classname(), id_.get());
+
+      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenhead, next.strides_[0], false);
+      std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
+      outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+      std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
+      outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
+      return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    }
+  }
+
+  const NumpyArray NumpyArray::getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
+    std::pair<int64_t, int64_t> minmax = minmax_depth();
+    assert(minmax.first == minmax.second);
+    int64_t mindepth = minmax.first;
+
+    if (tail.length() == 0  ||  mindepth - 1 == tail.dimlength()) {
+      std::shared_ptr<SliceItem> nexthead = tail.head();
+      Slice nexttail = tail.tail();
+      return getitem_next(nexthead, nexttail, carry, advanced, length, stride, false);
+    }
+    else {
+      std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
+      std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
+      items.insert(items.end(), tailitems.begin(), tailitems.end());
+      std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
+      Slice nexttail(items);
+      return getitem_next(nexthead, nexttail, carry, advanced, length, stride, false);
+    }
+  }
+
+  const NumpyArray NumpyArray::getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    NumpyArray out = getitem_next(nexthead, nexttail, carry, advanced, length, stride, false);
+
+    std::vector<ssize_t> outshape = { (ssize_t)length, 1 };
+    outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+    std::vector<ssize_t> outstrides = { out.strides_[0] };
+    outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
+    return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+  }
+
+  const NumpyArray NumpyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
+    if (ndim() < 2) {
+      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    }
+
+    NumpyArray next(first ? id_ : std::shared_ptr<Identity>(nullptr), ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+
+    Index64 flathead = array.ravel();
+    struct Error err = awkward_regularize_arrayslice_64(
+      flathead.ptr().get(),
+      flathead.length(),
+      shape_[1]);
+    util::handle_error(err, classname(), id_.get());
+
+    if (advanced.length() == 0) {
+      Index64 nextcarry(carry.length()*flathead.length());
+      Index64 nextadvanced(carry.length()*flathead.length());
+      struct Error err = awkward_numpyarray_getitem_next_array_64(
+        nextcarry.ptr().get(),
+        nextadvanced.ptr().get(),
+        carry.ptr().get(),
+        flathead.ptr().get(),
+        carry.length(),
+        flathead.length(),
+        shape_[1]);   // because this is contiguous
+      util::handle_error(err, classname(), id_.get());
+
+      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*flathead.length(), next.strides_[0], false);
+
+      std::vector<ssize_t> outshape = { (ssize_t)length };
+      std::vector<int64_t> arrayshape = array.shape();
+      for (auto x = arrayshape.begin();  x != arrayshape.end();  ++x) {
+        outshape.push_back((ssize_t)(*x));
+      }
+      outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
+
+      std::vector<ssize_t> outstrides(out.strides_.begin(), out.strides_.end());
+      for (auto x = arrayshape.rbegin();  x != arrayshape.rend();  ++x) {
+        outstrides.insert(outstrides.begin(), ((ssize_t)(*x))*outstrides[0]);
+      }
+      return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    }
+
+    else {
+      Index64 nextcarry(carry.length());
+      struct Error err = awkward_numpyarray_getitem_next_array_advanced_64(
+        nextcarry.ptr().get(),
+        carry.ptr().get(),
+        advanced.ptr().get(),
+        flathead.ptr().get(),
+        carry.length(),
+        shape_[1]);   // because this is contiguous
+      util::handle_error(err, classname(), id_.get());
+
+      NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*array.length(), next.strides_[0], false);
 
       std::vector<ssize_t> outshape = { (ssize_t)length };
       outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
       return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
     }
-
-    else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
-      if (ndim() < 2) {
-        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
-      }
-
-      int64_t start = range->start();
-      int64_t stop = range->stop();
-      int64_t step = range->step();
-      if (step == Slice::none()) {
-        step = 1;
-      }
-      awkward_regularize_rangeslice(&start, &stop, step > 0, range->hasstart(), range->hasstop(), (int64_t)shape_[1]);
-
-      int64_t numer = abs(start - stop);
-      int64_t denom = abs(step);
-      int64_t d = numer / denom;
-      int64_t m = numer % denom;
-      int64_t lenhead = d + (m != 0 ? 1 : 0);
-
-      NumpyArray next(first ? id_ : std::shared_ptr<Identity>(nullptr), ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
-
-      if (advanced.length() == 0) {
-        Index64 nextcarry(carry.length()*lenhead);
-        struct Error err = awkward_numpyarray_getitem_next_range_64(
-          nextcarry.ptr().get(),
-          carry.ptr().get(),
-          carry.length(),
-          lenhead,
-          shape_[1],   // because this is contiguous
-          start,
-          step);
-        util::handle_error(err, classname(), id_.get());
-
-        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*lenhead, next.strides_[0], false);
-        std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
-        outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-        std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
-        outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
-        return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
-      }
-
-      else {
-        Index64 nextcarry(carry.length()*lenhead);
-        Index64 nextadvanced(carry.length()*lenhead);
-        struct Error err = awkward_numpyarray_getitem_next_range_advanced_64(
-          nextcarry.ptr().get(),
-          nextadvanced.ptr().get(),
-          carry.ptr().get(),
-          advanced.ptr().get(),
-          carry.length(),
-          lenhead,
-          shape_[1],   // because this is contiguous
-          start,
-          step);
-        util::handle_error(err, classname(), id_.get());
-
-        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenhead, next.strides_[0], false);
-        std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
-        outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-        std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
-        outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
-        return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
-      }
-    }
-
-    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
-      std::pair<int64_t, int64_t> minmax = minmax_depth();
-      assert(minmax.first == minmax.second);
-      int64_t mindepth = minmax.first;
-
-      if (tail.length() == 0  ||  mindepth - 1 == tail.dimlength()) {
-        std::shared_ptr<SliceItem> nexthead = tail.head();
-        Slice nexttail = tail.tail();
-        return getitem_next(nexthead, nexttail, carry, advanced, length, stride, false);
-      }
-      else {
-        std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
-        std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
-        items.insert(items.end(), tailitems.begin(), tailitems.end());
-        std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
-        Slice nexttail(items);
-        return getitem_next(nexthead, nexttail, carry, advanced, length, stride, false);
-      }
-    }
-
-    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
-      NumpyArray out = getitem_next(nexthead, nexttail, carry, advanced, length, stride, false);
-
-      std::vector<ssize_t> outshape = { (ssize_t)length, 1 };
-      outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-      std::vector<ssize_t> outstrides = { out.strides_[0] };
-      outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
-      return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
-    }
-
-    else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
-      if (ndim() < 2) {
-        util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
-      }
-
-      NumpyArray next(first ? id_ : std::shared_ptr<Identity>(nullptr), ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
-      std::shared_ptr<SliceItem> nexthead = tail.head();
-      Slice nexttail = tail.tail();
-
-      Index64 flathead = array->ravel();
-      struct Error err = awkward_regularize_arrayslice_64(
-        flathead.ptr().get(),
-        flathead.length(),
-        shape_[1]);
-      util::handle_error(err, classname(), id_.get());
-
-      if (advanced.length() == 0) {
-        Index64 nextcarry(carry.length()*flathead.length());
-        Index64 nextadvanced(carry.length()*flathead.length());
-        struct Error err = awkward_numpyarray_getitem_next_array_64(
-          nextcarry.ptr().get(),
-          nextadvanced.ptr().get(),
-          carry.ptr().get(),
-          flathead.ptr().get(),
-          carry.length(),
-          flathead.length(),
-          shape_[1]);   // because this is contiguous
-        util::handle_error(err, classname(), id_.get());
-
-        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*flathead.length(), next.strides_[0], false);
-
-        std::vector<ssize_t> outshape = { (ssize_t)length };
-        std::vector<int64_t> arrayshape = array->shape();
-        for (auto x = arrayshape.begin();  x != arrayshape.end();  ++x) {
-          outshape.push_back((ssize_t)(*x));
-        }
-        outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-
-        std::vector<ssize_t> outstrides(out.strides_.begin(), out.strides_.end());
-        for (auto x = arrayshape.rbegin();  x != arrayshape.rend();  ++x) {
-          outstrides.insert(outstrides.begin(), ((ssize_t)(*x))*outstrides[0]);
-        }
-        return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
-      }
-
-      else {
-        Index64 nextcarry(carry.length());
-        struct Error err = awkward_numpyarray_getitem_next_array_advanced_64(
-          nextcarry.ptr().get(),
-          carry.ptr().get(),
-          advanced.ptr().get(),
-          flathead.ptr().get(),
-          carry.length(),
-          shape_[1]);   // because this is contiguous
-        util::handle_error(err, classname(), id_.get());
-
-        NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*array->length(), next.strides_[0], false);
-
-        std::vector<ssize_t> outshape = { (ssize_t)length };
-        outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-        return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
-      }
-    }
-
-    else {
-      throw std::runtime_error("unrecognized slice item type");
-    }
   }
+
 }

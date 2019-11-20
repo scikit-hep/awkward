@@ -10,7 +10,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Iterator::next() {
-    return content_.get()->getitem_at_unsafe(where_++);
+    return content_.get()->getitem_at_nowrap(where_++);
   }
 
   const std::string Iterator::tostring_part(const std::string indent, const std::string pre, const std::string post) const {

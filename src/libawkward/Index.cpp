@@ -45,7 +45,7 @@ namespace awkward {
         if (i != 0) {
           out << " ";
         }
-        out << (int64_t)getitem_at_unsafe(i);
+        out << (int64_t)getitem_at_nowrap(i);
       }
     }
     else {
@@ -53,14 +53,14 @@ namespace awkward {
         if (i != 0) {
           out << " ";
         }
-        out << (int64_t)getitem_at_unsafe(i);
+        out << (int64_t)getitem_at_nowrap(i);
       }
       out << " ... ";
       for (int64_t i = length_ - 5;  i < length_;  i++) {
         if (i != length_ - 5) {
           out << " ";
         }
-        out << (int64_t)getitem_at_unsafe(i);
+        out << (int64_t)getitem_at_nowrap(i);
       }
     }
     out << "]\" offset=\"" << offset_ << "\" at=\"0x";
@@ -77,17 +77,17 @@ namespace awkward {
     if (!(0 <= regular_at  &&  regular_at < length_)) {
       util::handle_error(failure("index out of range", kSliceNone, at), classname(), nullptr);
     }
-    return getitem_at_unsafe(regular_at);
+    return getitem_at_nowrap(regular_at);
   }
 
   template <typename T>
-  T IndexOf<T>::getitem_at_unsafe(int64_t at) const {
+  T IndexOf<T>::getitem_at_nowrap(int64_t at) const {
     assert(0 <= at  &&  at < length_);
     return ptr_.get()[(size_t)(offset_ + at)];
   }
 
   template <typename T>
-  void IndexOf<T>::setitem_at_unsafe(int64_t at, T value) const {
+  void IndexOf<T>::setitem_at_nowrap(int64_t at, T value) const {
     assert(0 <= at  &&  at < length_);
     ptr_.get()[(size_t)(offset_ + at)] = value;
   }
@@ -97,11 +97,11 @@ namespace awkward {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
-    return getitem_range_unsafe(regular_start, regular_stop);
+    return getitem_range_nowrap(regular_start, regular_stop);
   }
 
   template <typename T>
-  IndexOf<T> IndexOf<T>::getitem_range_unsafe(int64_t start, int64_t stop) const {
+  IndexOf<T> IndexOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
     assert(0 <= start  &&  start < length_  &&  start <= stop  &&  stop <= length_);
     return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
   }

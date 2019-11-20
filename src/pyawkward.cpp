@@ -16,6 +16,7 @@
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/EmptyArray.h"
+#include "awkward/array/RegularArray.h"
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
@@ -109,6 +110,9 @@ py::object box(std::shared_ptr<ak::Content> content) {
   else if (ak::EmptyArray* raw = dynamic_cast<ak::EmptyArray*>(content.get())) {
     return py::cast(*raw);
   }
+  else if (ak::RegularArray* raw = dynamic_cast<ak::RegularArray*>(content.get())) {
+    return py::cast(*raw);
+  }
   else {
     throw std::runtime_error("missing boxer for Content subtype");
   }
@@ -192,6 +196,10 @@ std::shared_ptr<ak::Content> unbox_content(py::object obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::EmptyArray*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::RegularArray*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   throw std::invalid_argument("content argument must be a Content subtype");
@@ -559,9 +567,9 @@ py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::str
 
 py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayType(py::handle m, std::string name) {
   return (py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type>(m, name.c_str())
-      .def(py::init<int64_t, std::shared_ptr<ak::Type>>())
-      .def("length", &ak::ArrayType::length)
+      .def(py::init<std::shared_ptr<ak::Type>, int64_t>())
       .def("type", &ak::ArrayType::type)
+      .def("length", &ak::ArrayType::length)
       .def("__repr__", &ak::ArrayType::tostring)
       .def("__eq__", &ak::ArrayType::equal)
       .def("compatible", &ak::ArrayType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
@@ -625,9 +633,9 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
 
 py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_RegularType(py::handle m, std::string name) {
   return (py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type>(m, name.c_str())
-      .def(py::init<std::vector<int64_t>, std::shared_ptr<ak::Type>>())
-      .def_property_readonly("shape", &ak::RegularType::shape)
+      .def(py::init<std::shared_ptr<ak::Type>, int64_t>())
       .def_property_readonly("type", &ak::RegularType::type)
+      .def_property_readonly("size", &ak::RegularType::size)
       .def("__repr__", &ak::RegularType::tostring)
       .def("__eq__", &ak::RegularType::equal)
       .def("compatible", &ak::RegularType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
@@ -833,6 +841,21 @@ py::class_<ak::EmptyArray, ak::Content> make_EmptyArray(py::handle m, std::strin
   );
 }
 
+/////////////////////////////////////////////////////////////// RegularArray
+
+py::class_<ak::RegularArray, ak::Content> make_RegularArray(py::handle m, std::string name) {
+  return content(py::class_<ak::RegularArray, ak::Content>(m, name.c_str())
+      .def(py::init([](py::object content, int64_t size, py::object id) -> ak::RegularArray {
+        return ak::RegularArray(unbox_id(id), std::shared_ptr<ak::Content>(unbox_content(content)), size);
+      }), py::arg("content"), py::arg("size"), py::arg("id") = py::none())
+
+      .def_property_readonly("size", &ak::RegularArray::size)
+      .def_property_readonly("content", [](ak::RegularArray& self) -> py::object {
+        return box(self.content());
+      })
+  );
+}
+
 /////////////////////////////////////////////////////////////// module
 
 PYBIND11_MODULE(layout, m) {
@@ -879,6 +902,8 @@ PYBIND11_MODULE(layout, m) {
   make_ListOffsetArrayOf<int64_t>(m,  "ListOffsetArray64");
 
   make_EmptyArray(m, "EmptyArray");
+
+  make_RegularArray(m, "RegularArray");
 
   m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;

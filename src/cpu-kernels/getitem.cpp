@@ -274,7 +274,7 @@ ERROR awkward_listarray_getitem_next_range(C* tooffsets, T* tocarry, const C* fr
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length);
-    if (step > 0) {
+    if (step > 0) {   // FIXME: put this test outside the for loop
       for (int64_t j = regular_start;  j < regular_stop;  j += step) {
         tocarry[k] = fromstarts[startsoffset + i] + j;
         k++;
@@ -385,6 +385,9 @@ ERROR awkward_listarray_getitem_next_array_advanced(T* tocarry, T* toadvanced, c
     }
     int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
     if (fromadvanced[i] >= lenarray) {
+      // FIXME: this might be weaker than it should be: the length of each advanced array should
+      // be exactly the same, and I think it was already checked when creating the Slice.
+      // If so, this check would be redundant. If not, it's not strong enough.
       return failure("lengths of advanced indexes must match", i, kSliceNone);
     }
     int64_t regular_at = fromarray[fromadvanced[i]];
@@ -428,4 +431,104 @@ ERROR awkward_listarrayU32_getitem_carry_64(uint32_t* tostarts, uint32_t* tostop
 }
 ERROR awkward_listarray64_getitem_carry_64(int64_t* tostarts, int64_t* tostops, const int64_t* fromstarts, const int64_t* fromstops, const int64_t* fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry) {
   return awkward_listarray_getitem_carry<int64_t, int64_t>(tostarts, tostops, fromstarts, fromstops, fromcarry, startsoffset, stopsoffset, lenstarts, lencarry);
+}
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_at(T* tocarry, int64_t at, int64_t len, int64_t size) {
+  int64_t regular_at = at;
+  if (regular_at < 0) {
+    regular_at += size;
+  }
+  if (!(0 <= regular_at  &&  regular_at < size)) {
+    return failure("index out of range", kSliceNone, at);
+  }
+  for (int64_t i = 0;  i < len;  i++) {
+    tocarry[i] = i*size + regular_at;
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_at_64(int64_t* tocarry, int64_t at, int64_t len, int64_t size) {
+  return awkward_regulararray_getitem_next_at<int64_t>(tocarry, at, len, size);
+}
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_range(T* tocarry, int64_t regular_start, int64_t step, int64_t len, int64_t size, int64_t nextsize) {
+  for (int64_t i = 0;  i < len;  i++) {
+    for (int64_t j = 0;  j < nextsize;  j++) {
+      tocarry[i*nextsize + j] = i*size + regular_start + j*step;
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_range_64(int64_t* tocarry, int64_t regular_start, int64_t step, int64_t len, int64_t size, int64_t nextsize) {
+  return awkward_regulararray_getitem_next_range<int64_t>(tocarry, regular_start, step, len, size, nextsize);
+}
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_range_spreadadvanced(T* toadvanced, const T* fromadvanced, int64_t len, int64_t nextsize) {
+  for (int64_t i = 0;  i < len;  i++) {
+    for (int64_t j = 0;  j < nextsize;  j++) {
+      toadvanced[i*nextsize + j] = fromadvanced[i];
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_range_spreadadvanced_64(int64_t* toadvanced, const int64_t* fromadvanced, int64_t len, int64_t nextsize) {
+  return awkward_regulararray_getitem_next_range_spreadadvanced<int64_t>(toadvanced, fromadvanced, len, nextsize);
+}
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_array_regularize(T* toarray, const T* fromarray, int64_t lenarray, int64_t size) {
+  for (int64_t j = 0;  j < lenarray;  j++) {
+    toarray[j] = fromarray[j];
+    if (toarray[j] < 0) {
+      toarray[j] += size;
+    }
+    if (!(0 <= toarray[j]  &&  toarray[j] < size)) {
+      return failure("index out of range", kSliceNone, fromarray[j]);
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_array_regularize_64(int64_t* toarray, const int64_t* fromarray, int64_t lenarray, int64_t size) {
+  return awkward_regulararray_getitem_next_array_regularize<int64_t>(toarray, fromarray, lenarray, size);
+}
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_array(T* tocarry, T* toadvanced, const T* fromarray, int64_t len, int64_t lenarray, int64_t size) {
+  for (int64_t i = 0;  i < len;  i++) {
+    for (int64_t j = 0;  j < lenarray;  j++) {
+      tocarry[i*lenarray + j] = i*size + fromarray[j];
+      toadvanced[i*lenarray + j] = j;
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_array_64(int64_t* tocarry, int64_t* toadvanced, const int64_t* fromarray, int64_t len, int64_t lenarray, int64_t size) {
+  return awkward_regulararray_getitem_next_array<int64_t>(tocarry, toadvanced, fromarray, len, lenarray, size);
+}
+
+template <typename T>
+ERROR awkward_regulararray_getitem_next_array_advanced(T* tocarry, T* toadvanced, const T* fromadvanced, const T* fromarray, int64_t len, int64_t lenarray, int64_t size) {
+  for (int64_t i = 0;  i < len;  i++) {
+    tocarry[i] = i*size + fromarray[fromadvanced[i]];
+    toadvanced[i] = i;
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_next_array_advanced_64(int64_t* tocarry, int64_t* toadvanced, const int64_t* fromadvanced, const int64_t* fromarray, int64_t len, int64_t lenarray, int64_t size) {
+  return awkward_regulararray_getitem_next_array_advanced<int64_t>(tocarry, toadvanced, fromadvanced, fromarray, len, lenarray, size);
+}
+
+template <typename T>
+ERROR awkward_regulararray_getitem_carry(T* tocarry, const T* fromcarry, int64_t lencarry, int64_t size) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    for (int64_t j = 0;  j < size;  j++) {
+      tocarry[i*size + j] = fromcarry[i]*size + j;
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_carry_64(int64_t* tocarry, const int64_t* fromcarry, int64_t lencarry, int64_t size) {
+  return awkward_regulararray_getitem_carry<int64_t>(tocarry, fromcarry, lencarry, size);
 }

@@ -36,7 +36,7 @@ namespace awkward {
     virtual const std::string location(int64_t where) const = 0;
     virtual const std::shared_ptr<Identity> to64() const = 0;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
-    virtual const std::shared_ptr<Identity> getitem_range_unsafe(int64_t start, int64_t stop) const = 0;
+    virtual const std::shared_ptr<Identity> getitem_range_nowrap(int64_t start, int64_t stop) const = 0;
     virtual const std::shared_ptr<Identity> shallow_copy() const = 0;
     virtual const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const = 0;
 
@@ -55,7 +55,7 @@ namespace awkward {
   public:
     IdentityOf<T>(const Ref ref, const FieldLoc fieldloc, int64_t width, int64_t length)
         : Identity(ref, fieldloc, 0, width, length)
-        , ptr_(std::shared_ptr<T>(new T[(size_t)(length*width)])) { }
+        , ptr_(std::shared_ptr<T>(length*width == 0 ? nullptr : new T[(size_t)(length*width)], awkward::util::array_deleter<T>())) { }
     IdentityOf<T>(const Ref ref, const FieldLoc fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr)
         : Identity(ref, fieldloc, offset, width, length)
         , ptr_(ptr) { }
@@ -66,12 +66,12 @@ namespace awkward {
     virtual const std::string location(int64_t where) const;
     virtual const std::shared_ptr<Identity> to64() const;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
-    virtual const std::shared_ptr<Identity> getitem_range_unsafe(int64_t start, int64_t stop) const;
+    virtual const std::shared_ptr<Identity> getitem_range_nowrap(int64_t start, int64_t stop) const;
     virtual const std::shared_ptr<Identity> shallow_copy() const;
     virtual const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const;
 
     const std::vector<T> getitem_at(int64_t at) const;
-    const std::vector<T> getitem_at_unsafe(int64_t at) const;
+    const std::vector<T> getitem_at_nowrap(int64_t at) const;
     const std::shared_ptr<Identity> getitem_range(int64_t start, int64_t stop) const;
 
   private:

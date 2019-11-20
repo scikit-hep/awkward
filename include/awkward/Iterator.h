@@ -12,7 +12,7 @@ namespace awkward {
     Iterator(const std::shared_ptr<Content> content)
         : content_(content)
         , where_(0) {
-      content.get()->checksafe();
+      content.get()->check_for_iteration();
     }
 
     const std::shared_ptr<Content> content() const { return content_; }

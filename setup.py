@@ -94,7 +94,7 @@ setup(name = "awkward1",
       test_suite = "tests",
       python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
       install_requires = open("requirements.txt").read().strip().split(),
-      tests_require = open("test-requirements.txt").read().strip().split(),
+      tests_require = open("requirements-test.txt").read().strip().split(),
       zip_safe = False,
       classifiers = [
 #         "Development Status :: 1 - Planning",

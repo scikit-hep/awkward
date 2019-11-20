@@ -26,7 +26,7 @@ std::string tostring(std::shared_ptr<Content> array) {
     out << "[";
     for (int i = 0;  i < listoffset->length();  i++) {
       if (i != 0) out << ", ";
-      out << tostring(listoffset->getitem_at_unsafe(i));
+      out << tostring(listoffset->getitem_at_nowrap(i));
     }
     out << "]";
     return out.str();
@@ -36,7 +36,7 @@ std::string tostring(std::shared_ptr<Content> array) {
     out << "[";
     for (int i = 0;  i < list->length();  i++) {
       if (i != 0) out << ", ";
-      out << tostring(list->getitem_at_unsafe(i));
+      out << tostring(list->getitem_at_nowrap(i));
     }
     out << "]";
     return out.str();

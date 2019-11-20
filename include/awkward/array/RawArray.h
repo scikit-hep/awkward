@@ -180,7 +180,7 @@ namespace awkward {
       }
     }
 
-    virtual std::shared_ptr<Type> type_part() const {
+    virtual const std::shared_ptr<Type> type_part() const {
       if (std::is_same<T, double>::value) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
       }
@@ -220,7 +220,7 @@ namespace awkward {
 
     virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, ptr_, offset_, length_, itemsize_)); }
 
-    virtual void checksafe() const {
+    virtual void check_for_iteration() const {
       if (id_.get() != nullptr  &&  id_.get()->length() < length_) {
         util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
       }
@@ -234,11 +234,11 @@ namespace awkward {
       if (!(0 <= regular_at  &&  regular_at < length_)) {
         util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
       }
-      return getitem_at_unsafe(regular_at);
+      return getitem_at_nowrap(regular_at);
     }
 
-    virtual const std::shared_ptr<Content> getitem_at_unsafe(int64_t at) const {
-      return getitem_range_unsafe(at, at + 1);
+    virtual const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const {
+      return getitem_range_nowrap(at, at + 1);
     }
 
     virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const {
@@ -248,13 +248,13 @@ namespace awkward {
       if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
       }
-      return getitem_range_unsafe(regular_start, regular_stop);
+      return getitem_range_nowrap(regular_start, regular_stop);
     }
 
-    virtual const std::shared_ptr<Content> getitem_range_unsafe(int64_t start, int64_t stop) const {
+    virtual const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const {
       std::shared_ptr<Identity> id(nullptr);
       if (id_.get() != nullptr) {
-        id = id_.get()->getitem_range_unsafe(start, stop);
+        id = id_.get()->getitem_range_nowrap(start, stop);
       }
       return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + start, stop - start, itemsize_));
     }
@@ -266,76 +266,11 @@ namespace awkward {
       return getitem_next(nexthead, nexttail, nextadvanced);
     }
 
-    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
+    virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
       if (tail.length() != 0) {
         throw std::invalid_argument("too many indexes for array");
       }
-
-      if (head.get() == nullptr) {
-        return shallow_copy();
-      }
-
-      else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
-        return getitem_at(at->at());
-      }
-
-      else if (SliceRange* range = dynamic_cast<SliceRange*>(head.get())) {
-        if (range->step() == Slice::none()  ||  range->step() == 1) {
-          return getitem_range(range->start(), range->stop());
-        }
-        else {
-          int64_t start = range->start();
-          int64_t stop = range->stop();
-          int64_t step = range->step();
-          if (step == Slice::none()) {
-            step = 1;
-          }
-          else if (step == 0) {
-            throw std::invalid_argument("slice step must not be 0");
-          }
-          awkward_regularize_rangeslice(&start, &stop, step > 0, range->hasstart(), range->hasstop(), length_);
-
-          int64_t numer = abs(start - stop);
-          int64_t denom = abs(step);
-          int64_t d = numer / denom;
-          int64_t m = numer % denom;
-          int64_t lenhead = d + (m != 0 ? 1 : 0);
-
-          Index64 nextcarry(lenhead);
-          int64_t* nextcarryptr = nextcarry.ptr().get();
-          for (int64_t i = 0;  i < lenhead;  i++) {
-            nextcarryptr[i] = start + step*i;
-          }
-
-          return carry(nextcarry);
-        }
-      }
-
-      else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
-        throw std::runtime_error("ellipsis");
-      }
-
-      else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
-        throw std::runtime_error("newaxis");
-      }
-
-      else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
-        assert(advanced.length() == 0);
-        if (array->shape().size() != 1) {
-          throw std::runtime_error("array.ndim != 1");
-        }
-        Index64 flathead = array->ravel();
-        struct Error err = awkward_regularize_arrayslice_64(
-          flathead.ptr().get(),
-          flathead.length(),
-          length_);
-        util::handle_error(err, classname(), id_.get());
-        return carry(flathead);
-      }
-
-      else {
-        throw std::runtime_error("unrecognized slice item type");
-      }
+      return Content::getitem_next(head, tail, advanced);
     }
 
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const {
@@ -358,6 +293,57 @@ namespace awkward {
     }
 
     virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
+
+  protected:
+    virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+      return getitem_at(at.at());
+    }
+
+    virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+      if (range.step() == Slice::none()  ||  range.step() == 1) {
+        return getitem_range(range.start(), range.stop());
+      }
+      else {
+        int64_t start = range.start();
+        int64_t stop = range.stop();
+        int64_t step = range.step();
+        if (step == Slice::none()) {
+          step = 1;
+        }
+        else if (step == 0) {
+          throw std::invalid_argument("slice step must not be 0");
+        }
+        awkward_regularize_rangeslice(&start, &stop, step > 0, range.hasstart(), range.hasstop(), length_);
+
+        int64_t numer = abs(start - stop);
+        int64_t denom = abs(step);
+        int64_t d = numer / denom;
+        int64_t m = numer % denom;
+        int64_t lenhead = d + (m != 0 ? 1 : 0);
+
+        Index64 nextcarry(lenhead);
+        int64_t* nextcarryptr = nextcarry.ptr().get();
+        for (int64_t i = 0;  i < lenhead;  i++) {
+          nextcarryptr[i] = start + step*i;
+        }
+
+        return carry(nextcarry);
+      }
+    }
+
+    virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+      assert(advanced.length() == 0);
+      if (array.shape().size() != 1) {
+        throw std::runtime_error("array.ndim != 1");
+      }
+      Index64 flathead = array.ravel();
+      struct Error err = awkward_regularize_arrayslice_64(
+        flathead.ptr().get(),
+        flathead.length(),
+        length_);
+      util::handle_error(err, classname(), id_.get());
+      return carry(flathead);
+    }
 
   private:
     std::shared_ptr<Identity> id_;

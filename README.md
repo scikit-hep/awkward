@@ -73,7 +73,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `NumpyArray`: rectilinear, N-dimensional array type without Python/pybind11 dependencies, but intended for Numpy.
       * [X] `ListArray`: the new `JaggedArray`, based on `starts` and `stops` (i.e. fully general).
       * [X] `ListOffsetArray`: the `JaggedArray` case with no unreachable data between reachable data (gaps).
-      * [ ] `RegularArray`: rectilinear, N-dimensional array of arbitrary contents, for putting jagged dimensions inside fixed dimensions (for example).
+      * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
       * [ ] `RecordArray`: the new `Table` _without_ lazy-slicing.
       * [ ] `MaskedArray`, `BitMaskedArray`, `IndexedMaskedArray`: same as the old versions.
       * [ ] `UnionArray`: same as the old version; `SparseUnionArray`: the additional case found in Apache Arrow.

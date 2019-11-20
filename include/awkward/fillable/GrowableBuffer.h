@@ -88,7 +88,7 @@ namespace awkward {
       length_++;
     }
 
-    T getitem_at_unsafe(int64_t at) const {
+    T getitem_at_nowrap(int64_t at) const {
       return ptr_.get()[at];
     }
 

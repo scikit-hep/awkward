@@ -22,7 +22,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> FillableArray::type() const {
-    return std::shared_ptr<Type>(new ArrayType(fillable_.get()->length(), fillable_.get()->type()));
+    return std::shared_ptr<Type>(new ArrayType(fillable_.get()->type(), fillable_.get()->length()));
   }
 
   const std::shared_ptr<Content> FillableArray::snapshot() const {

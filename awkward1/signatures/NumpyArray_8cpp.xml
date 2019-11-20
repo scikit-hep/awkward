@@ -7,6 +7,8 @@
     <includes local="no">stdexcept</includes>
     <includes local="yes">awkward/cpu-kernels/identity.h</includes>
     <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
+    <includes local="yes">awkward/type/PrimitiveType.h</includes>
+    <includes local="yes">awkward/type/RegularType.h</includes>
     <includes local="yes">awkward/array/NumpyArray.h</includes>
     <incdepgraph>
       <node id="2">
@@ -27,6 +29,10 @@
         </childnode>
         <childnode refid="7" relation="include">
         </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
       </node>
       <node id="4">
         <label>stdexcept</label>
@@ -37,8 +43,14 @@
       <node id="5">
         <label>awkward/cpu-kernels/identity.h</label>
       </node>
-      <node id="7">
+      <node id="9">
         <label>awkward/array/NumpyArray.h</label>
+      </node>
+      <node id="8">
+        <label>awkward/type/RegularType.h</label>
+      </node>
+      <node id="7">
+        <label>awkward/type/PrimitiveType.h</label>
       </node>
       <node id="3">
         <label>sstream</label>
@@ -74,7 +86,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="77" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="77" bodyend="101"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="83" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="83" bodyend="107"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1aee7ebf77ca27982c93a28eb452a2728f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>void</type>
@@ -99,7 +111,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="184" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="184" bodyend="188"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="190" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="190" bodyend="194"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1a30008d57ae076e81a759b7314fea35bc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -129,7 +141,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="191" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="191" bodyend="195"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="197" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="197" bodyend="201"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1a481afc11c18742f08ad0935f0252c41d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -159,7 +171,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="198" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="198" bodyend="202"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="204" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="204" bodyend="208"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1adf8a5960d7cc8e8447e7357e7416a1dd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>const std::vector&lt; ssize_t &gt;</type>
@@ -176,7 +188,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="409" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="409" bodyend="418"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="478" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="478" bodyend="487"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1aadc1072e0733b797c5e796c493958e92" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>const std::vector&lt; ssize_t &gt;</type>
@@ -193,7 +205,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="420" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="420" bodyend="427"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="489" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="489" bodyend="496"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

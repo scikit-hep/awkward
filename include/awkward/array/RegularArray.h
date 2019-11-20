@@ -1,26 +1,27 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_LISTOFFSETARRAY_H_
-#define AWKWARD_LISTOFFSETARRAY_H_
+#ifndef AWKWARD_REGULARARRAY_H_
+#define AWKWARD_REGULARARRAY_H_
 
+#include <cassert>
+#include <string>
 #include <memory>
+#include <vector>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/Index.h"
-#include "awkward/Identity.h"
+#include "awkward/Slice.h"
 #include "awkward/Content.h"
 
 namespace awkward {
-  template <typename T>
-  class ListOffsetArrayOf: public Content {
+  class RegularArray: public Content {
   public:
-    ListOffsetArrayOf<T>(const std::shared_ptr<Identity> id, const IndexOf<T> offsets, const std::shared_ptr<Content> content)
+    RegularArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Content> content, int64_t size)
         : id_(id)
-        , offsets_(offsets)
-        , content_(content) { }
+        , content_(content)
+        , size_(size) { }
 
-    const IndexOf<T> offsets() const { return offsets_; }
-    const std::shared_ptr<Content> content() const { return content_.get()->shallow_copy(); }
+    const std::shared_ptr<Content> content() const { return content_; }
+    int64_t size() const { return size_; }
 
     virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const { return id_; }
@@ -46,13 +47,9 @@ namespace awkward {
 
   private:
     std::shared_ptr<Identity> id_;
-    const IndexOf<T> offsets_;
     const std::shared_ptr<Content> content_;
+    int64_t size_;
   };
-
-  typedef ListOffsetArrayOf<int32_t>  ListOffsetArray32;
-  typedef ListOffsetArrayOf<uint32_t> ListOffsetArrayU32;
-  typedef ListOffsetArrayOf<int64_t>  ListOffsetArray64;
 }
 
-#endif // AWKWARD_LISTOFFSETARRAY_H_
+#endif // AWKWARD_REGULARARRAY_H_
