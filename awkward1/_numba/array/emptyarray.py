@@ -49,6 +49,10 @@ class EmptyArrayType(content.ContentType):
         return lower_len
 
     @property
+    def lower_getitem_nothing(self):
+        return lower_getitem_nothing
+
+    @property
     def lower_getitem_range(self):
         return lower_getitem_range
 
@@ -94,6 +98,9 @@ def box(tpe, val, c):
 @numba.extending.lower_builtin(len, EmptyArrayType)
 def lower_len(context, builder, sig, args):
     return context.get_constant(numba.intp, 0)
+
+def lower_getitem_nothing(context, builder, tpe, val):
+    return val
 
 @numba.extending.lower_builtin(operator.getitem, EmptyArrayType, numba.types.slice2_type)
 def lower_getitem_range(context, builder, sig, args):

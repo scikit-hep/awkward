@@ -128,11 +128,9 @@ int main(int, char**) {
   if (tostring(listA.get()->getitem(slice(new SliceAt(2)))) != "[3.3, 4.4]") {
     return -1;
   }
-
   if (tostring(listA.get()->getitem(slice(new SliceAt(2), new SliceAt(1)))) != "[4.4]") {
     return -1;
   }
-
   if (tostring(listA.get()->getitem(slice(new SliceRange(2, Slice::none(), Slice::none()), new SliceRange(Slice::none(), -1, Slice::none())))) != "[[3.3], [], [6.6, 7.7, 8.8]]") {
     return -1;
   }

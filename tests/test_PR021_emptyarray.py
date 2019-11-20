@@ -58,7 +58,6 @@ def test_getitem():
     assert awkward1.tolist(a[2, 1, 100:200]) == []
     assert awkward1.tolist(a[2, 1][numpy.array([], dtype=int)]) == []
     assert awkward1.tolist(a[2, 1, numpy.array([], dtype=int)]) == []
-    assert awkward1.tolist(a[2, numpy.array([1], dtype=int), numpy.array([], dtype=int)]) == []
     with pytest.raises(ValueError) as excinfo:
         a[2, 1, numpy.array([0], dtype=int)]
     assert str(excinfo.value) == "in ListArray64 attempting to get 0, index out of range"

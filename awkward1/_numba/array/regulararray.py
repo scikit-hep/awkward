@@ -73,6 +73,10 @@ class RegularArrayType(content.ContentType):
         return lower_len
 
     @property
+    def lower_getitem_nothing(self):
+        return content.lower_getitem_nothing
+
+    @property
     def lower_getitem_int(self):
         return lower_getitem_int
 
