@@ -52,7 +52,7 @@ class ListArrayType(content.ContentType):
         return outtpe.getitem_int()
 
     def getitem_next(self, wheretpe, isadvanced):
-        import awkward1._numba.array.listoffsetarray
+        import awkward1._numba.array.regulararray
         if len(wheretpe.types) == 0:
             return self
         headtpe = wheretpe.types[0]
@@ -76,7 +76,7 @@ class ListArrayType(content.ContentType):
                 raise NotImplementedError("array.ndim != 1")
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
             if not isadvanced:
-                return awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.idtpe)
+                return awkward1._numba.array.regulararray.RegularArrayType(contenttpe, self.idtpe)
             else:
                 return contenttpe
 
@@ -238,6 +238,7 @@ def lower_getitem_other(context, builder, sig, args):
 
 def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval, advanced):
     import awkward1._numba.array.listoffsetarray
+    import awkward1._numba.array.regulararray
 
     if len(wheretpe.types) == 0:
         return arrayval
@@ -391,10 +392,8 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
 
             nextcarry = util.newindex64(context, builder, numba.int64, lencarry)
             nextadvanced = util.newindex64(context, builder, numba.int64, lencarry)
-            nextoffsets = util.newindex(arraytpe.indexname, context, builder, numba.int64, lenoffsets)
             util.call(context, builder, kernel,
-                (util.arrayptr(context, builder, util.indextpe(arraytpe.indexname), nextoffsets),
-                 util.arrayptr(context, builder, util.index64tpe, nextcarry),
+                (util.arrayptr(context, builder, util.index64tpe, nextcarry),
                  util.arrayptr(context, builder, util.index64tpe, nextadvanced),
                  util.arrayptr(context, builder, arraytpe.startstpe, proxyin.starts),
                  util.arrayptr(context, builder, arraytpe.stopstpe, proxyin.stops),
@@ -412,10 +411,10 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             contenttpe = nexttpe.getitem_next(tailtpe, True)
             contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-            outtpe = awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.indexname), contenttpe, arraytpe.idtpe)
+            outtpe = awkward1._numba.array.regulararray.RegularArrayType(contenttpe, arraytpe.idtpe)
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
-            proxyout.offsets = nextoffsets
             proxyout.content = contentval
+            proxyout.size = lenflathead
             if outtpe.idtpe != numba.none:
                 proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, outtpe.idtpe, util.index64tpe, proxyin.id, flathead)
             return proxyout._getvalue()

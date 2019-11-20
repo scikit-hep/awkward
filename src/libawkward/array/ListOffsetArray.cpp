@@ -8,6 +8,7 @@
 #include "awkward/type/ListType.h"
 #include "awkward/Slice.h"
 #include "awkward/array/ListArray.h"
+#include "awkward/array/RegularArray.h"
 
 #include "awkward/array/ListOffsetArray.h"
 
@@ -194,7 +195,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_nothing() const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_nothing() const {
     return content_.get()->getitem_range_nowrap(0, 0);
   }
 
@@ -377,10 +378,7 @@ namespace awkward {
     if (advanced.length() == 0) {
       Index64 nextcarry(lenstarts*flathead.length());
       Index64 nextadvanced(lenstarts*flathead.length());
-      IndexOf<T> nextoffsets(lenstarts + 1);   // FIXME: offsets are regular; don't generate them and replace ListOffsetArray output with a RegularArray
-      IndexOf<T> nextstops(lenstarts);
       struct Error err = util::awkward_listarray_getitem_next_array_64<T>(
-        nextoffsets.ptr().get(),
         nextcarry.ptr().get(),
         nextadvanced.ptr().get(),
         starts.ptr().get(),
@@ -394,7 +392,7 @@ namespace awkward {
       util::handle_error(err, classname(), id_.get());
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       // FIXME: if the head is not flat, you'll need to wrap the ListArray output in a RegularArray
-      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      return std::shared_ptr<Content>(new RegularArray(id_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), flathead.length()));
     }
     else {
       Index64 nextcarry(lenstarts);

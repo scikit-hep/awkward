@@ -40,7 +40,7 @@ namespace awkward {
     template <typename T>
     Error awkward_listarray_getitem_next_range_spreadadvanced_64(int64_t* toadvanced, const int64_t* fromadvanced, const T* fromoffsets, int64_t lenstarts);
     template <typename T>
-    Error awkward_listarray_getitem_next_array_64(T* tooffsets, int64_t* tocarry, int64_t* toadvanced, const T* fromstarts, const T* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent);
+    Error awkward_listarray_getitem_next_array_64(int64_t* tocarry, int64_t* toadvanced, const T* fromstarts, const T* fromstops, const int64_t* fromarray, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent);
     template <typename T>
     Error awkward_listarray_getitem_next_array_advanced_64(int64_t* tocarry, int64_t* toadvanced, const T* fromstarts, const T* fromstops, const int64_t* fromarray, const int64_t* fromadvanced, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent);
     template <typename T>

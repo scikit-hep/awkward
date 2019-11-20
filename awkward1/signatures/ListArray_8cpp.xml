@@ -9,6 +9,7 @@
     <includes local="yes">awkward/type/ListType.h</includes>
     <includes local="yes">awkward/Slice.h</includes>
     <includes local="yes">awkward/array/ListOffsetArray.h</includes>
+    <includes local="yes">awkward/array/RegularArray.h</includes>
     <includes local="yes">awkward/array/ListArray.h</includes>
     <incdepgraph>
       <node id="6">
@@ -36,9 +37,14 @@
         </childnode>
         <childnode refid="9" relation="include">
         </childnode>
+        <childnode refid="10" relation="include">
+        </childnode>
       </node>
       <node id="4">
         <label>awkward/cpu-kernels/identity.h</label>
+      </node>
+      <node id="9">
+        <label>awkward/array/RegularArray.h</label>
       </node>
       <node id="8">
         <label>awkward/array/ListOffsetArray.h</label>
@@ -46,7 +52,7 @@
       <node id="2">
         <label>sstream</label>
       </node>
-      <node id="9">
+      <node id="10">
         <label>awkward/array/ListArray.h</label>
       </node>
       <node id="7">
