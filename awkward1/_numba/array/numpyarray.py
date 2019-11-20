@@ -123,40 +123,6 @@ def lower_len(context, builder, sig, args):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     return numba.targets.arrayobj.array_len(context, builder, numba.intp(tpe.arraytpe), (proxyin.array,))
 
-# def lower_getitem_nothing(context, builder, tpe, val):
-#     import awkward1._numba.identity
-#
-#     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-#
-#     proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
-#     proxyslice.start = context.get_constant(numba.intp, 0)
-#     proxyslice.stop = context.get_constant(numba.intp, 0)
-#     proxyslice.step = context.get_constant(numba.intp, 1)
-#     emptyslice = proxyslice._getvalue()
-#     emptyarray = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.arraytpe(tpe.arraytpe, numba.types.slice2_type), (proxyin.array, emptyslice))
-#
-#     if tpe.arraytpe.ndim > 1:
-#         shapetpe = numba.types.Tuple((numba.intp,) * tpe.arraytpe.ndim)
-#         shapeval = numba.targets.arrayobj.make_array(tpe.arraytpe)(context, builder, proxyin.array).shape
-#
-#         newshapetpe = numba.types.Tuple((numba.intp,) * (tpe.arraytpe.ndim - 1))
-#         newshapeval = context.make_tuple(builder, newshapetpe, tuple(builder.extract_value(shapeval, i) for i in range(tpe.arraytpe.ndim - 1)))
-#
-#         arraytpe = numba.types.Array(tpe.arraytpe.dtype, tpe.arraytpe.ndim - 1, tpe.arraytpe.layout)
-#         arrayval = numba.targets.arrayobj.array_reshape(context, builder, arraytpe(tpe.arraytpe, newshapetpe), (proxyin.array, newshapeval))
-#
-#     else:
-#         arraytpe = tpe.arraytpe
-#         arrayval = emptyarray
-#
-#     outtpe = NumpyArrayType(arraytpe, tpe.idtpe)
-#     proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
-#     proxyout.array = arrayval
-#     if tpe.idtpe != numba.none:
-#         proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, tpe.idtpe, numba.types.slice2_type, proxyin.id, emptyslice)
-#
-#     return proxyout._getvalue()
-
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.Integer)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.SliceType)
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.Array)
