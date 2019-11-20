@@ -33,6 +33,15 @@ namespace awkward {
     }
 
     template <>
+    Error awkward_identity64_from_listoffsetarray<uint32_t>(int64_t* toptr, const int64_t* fromptr, const uint32_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identity64_from_listoffsetarrayU32(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);
+    }
+    template <>
+    Error awkward_identity64_from_listoffsetarray<int64_t>(int64_t* toptr, const int64_t* fromptr, const int64_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identity64_from_listoffsetarray64(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);
+    }
+
+    template <>
     Error awkward_identity64_from_listarray<uint32_t>(int64_t* toptr, const int64_t* fromptr, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
       return awkward_identity64_from_listarrayU32(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
     }

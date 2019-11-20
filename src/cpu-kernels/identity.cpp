@@ -26,7 +26,7 @@ ERROR awkward_identity32_to_identity64(int64_t* toptr, const int32_t* fromptr, i
 template <typename ID, typename T>
 ERROR awkward_identity_from_listoffsetarray(ID* toptr, const ID* fromptr, const T* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
   int64_t globalstart = fromoffsets[offsetsoffset];
-  int64_t globalstop = fromoffsets[offsetoffset + fromlength];
+  int64_t globalstop = fromoffsets[offsetsoffset + fromlength];
   for (int64_t k = 0;  k < globalstart*(fromwidth + 1);  k++) {
     toptr[k] = -1;
   }

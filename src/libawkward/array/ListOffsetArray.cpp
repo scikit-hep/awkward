@@ -48,8 +48,6 @@ namespace awkward {
       if (length() != id.get()->length()) {
         util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
       }
-      Index32 starts = make_starts(offsets_);
-      Index32 stops = make_stops(offsets_);
       std::shared_ptr<Identity> bigid = id;
       if (content_.get()->length() > kMaxInt32) {
         bigid = id.get()->to64();
@@ -57,14 +55,12 @@ namespace awkward {
       if (Identity32* rawid = dynamic_cast<Identity32*>(bigid.get())) {
         Identity32* rawsubid = new Identity32(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
         std::shared_ptr<Identity> subid(rawsubid);
-        struct Error err = awkward_identity32_from_listarray32(
+        struct Error err = awkward_identity32_from_listoffsetarray32(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
-          starts.ptr().get(),
-          stops.ptr().get(),
+          offsets_.ptr().get(),
           rawid->offset(),
-          starts.offset(),
-          stops.offset(),
+          offsets_.offset(),
           content_.get()->length(),
           length(),
           rawid->width());
@@ -74,14 +70,12 @@ namespace awkward {
       else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
         Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
         std::shared_ptr<Identity> subid(rawsubid);
-        struct Error err = awkward_identity64_from_listarray32(
+        struct Error err = awkward_identity64_from_listoffsetarray32(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
-          starts.ptr().get(),
-          stops.ptr().get(),
+          offsets_.ptr().get(),
           rawid->offset(),
-          starts.offset(),
-          stops.offset(),
+          offsets_.offset(),
           content_.get()->length(),
           length(),
           rawid->width());
@@ -104,20 +98,16 @@ namespace awkward {
       if (length() != id.get()->length()) {
         util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
       }
-      IndexOf<T> starts = make_starts(offsets_);
-      IndexOf<T> stops = make_stops(offsets_);
       std::shared_ptr<Identity> bigid = id.get()->to64();
       if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
         Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
         std::shared_ptr<Identity> subid(rawsubid);
-        struct Error err = util::awkward_identity64_from_listarray<T>(
+        struct Error err = util::awkward_identity64_from_listoffsetarray<T>(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
-          starts.ptr().get(),
-          stops.ptr().get(),
+          offsets_.ptr().get(),
           rawid->offset(),
-          starts.offset(),
-          stops.offset(),
+          offsets_.offset(),
           content_.get()->length(),
           length(),
           rawid->width());

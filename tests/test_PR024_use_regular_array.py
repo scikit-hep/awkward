@@ -87,4 +87,3 @@ def test_empty_array_slice_numba():
 # Independent:
 ##############
 # TODO: check the FIXME in awkward_listarray_getitem_next_array_advanced.
-# TODO: setid should not be allowed on data that can be reached by multiple paths (which will break the ListArray ids above, unfortunately).
