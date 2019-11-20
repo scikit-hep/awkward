@@ -276,7 +276,8 @@ namespace awkward {
       util::handle_error(err, classname(), id_.get());
 
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-      return std::shared_ptr<Content>(new RegularArray(id_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), flathead.length()));
+
+      return getitem_next_array_wrap(nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), array.shape());
     }
     else {
       Index64 nextcarry(len);

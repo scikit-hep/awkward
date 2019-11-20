@@ -23,6 +23,40 @@ def test_empty_array_slice():
     assert awkward1.tolist(listarray[2, [1], []]) == []
     assert awkward1.tolist(listarray[2, [], []]) == []
 
+def test_nonflat_slice():
+    array = numpy.arange(2*3*5).reshape(2, 3, 5)
+    numpyarray = awkward1.layout.NumpyArray(array)
+
+    content = awkward1.layout.NumpyArray(array.reshape(-1))
+    inneroffsets = awkward1.layout.Index64(numpy.array([0, 5, 10, 15, 20, 25, 30]))
+    outeroffsets = awkward1.layout.Index64(numpy.array([0, 3, 6]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(outeroffsets, awkward1.layout.ListOffsetArray64(inneroffsets, content))
+    listoffsetarray.setid()
+
+    assert awkward1.tolist(array[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]) == [27, 4, 22, 24, 25, 1]
+    assert awkward1.tolist(array[[[1, 0], [1, 1], [1, 0]], [[2, 0], [1, 1], [2, 0]], [[2, 4], [2, 4], [0, 1]]]) == [[27, 4], [22, 24], [25, 1]]
+
+    one = listoffsetarray[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]
+    assert awkward1.tolist(one) == [27, 4, 22, 24, 25, 1]
+    assert numpy.asarray(one.id).tolist() == [
+        [1, 2, 2],
+        [0, 0, 4],
+        [1, 1, 2],
+        [1, 1, 4],
+        [1, 2, 0],
+        [0, 0, 1]]
+
+    two = listoffsetarray[[[1, 0], [1, 1], [1, 0]], [[2, 0], [1, 1], [2, 0]], [[2, 4], [2, 4], [0, 1]]]
+    assert awkward1.tolist(two) == [[27, 4], [22, 24], [25, 1]]
+    assert numpy.asarray(two.content.id).tolist() == [
+        [1, 2, 2],
+        [0, 0, 4],
+        [1, 1, 2],
+        [1, 1, 4],
+        [1, 2, 0],
+        [0, 0, 1]]
+    assert two.id is None
+
 numba = pytest.importorskip("numba")
 
 def test_empty_array_slice_numba():
@@ -37,12 +71,8 @@ def test_empty_array_slice_numba():
     assert awkward1.tolist(f1(listarray, numpy.array([1], dtype=int), numpy.array([], dtype=int))) == []
     assert awkward1.tolist(f1(listarray, numpy.array([], dtype=int), numpy.array([], dtype=int))) == []
 
-# Sequential:
-#############
-# TODO: all getitem arrays should handle non-flat SliceArray by wrapping in RegularArrays.
-# TODO: all of the above should happen in Numba, too.
-
 # Independent:
 ##############
+# TODO: newaxis should use RegularArray.
 # TODO: check the FIXME in awkward_listarray_getitem_next_array_advanced.
 # TODO: setid should not be allowed on data that can be reached by multiple paths (which will break the ListArray ids above, unfortunately).

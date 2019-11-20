@@ -920,7 +920,7 @@ namespace awkward {
       for (auto x = arrayshape.rbegin();  x != arrayshape.rend();  ++x) {
         outstrides.insert(outstrides.begin(), ((ssize_t)(*x))*outstrides[0]);
       }
-      return NumpyArray(out.id_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+      return NumpyArray(arrayshape.size() == 1 ? out.id_ : Identity::none(), out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
 
     else {
