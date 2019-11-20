@@ -35,6 +35,9 @@ ERROR awkward_identity_from_listarray(ID* toptr, const ID* fromptr, const T* fro
       return failure("max(stop) > len(content)", i, kSliceNone);
     }
     for (int64_t j = start;  j < stop;  j++) {
+      if (toptr[j*(fromwidth + 1) + fromwidth] != -1) {
+        return failure("item has ambiguous identity", i, kSliceNone);
+      }
       for (int64_t k = 0;  k < fromwidth;  k++) {
         toptr[j*(fromwidth + 1) + k] = fromptr[fromptroffset + i*(fromwidth) + k];
       }
