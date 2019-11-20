@@ -150,7 +150,8 @@ namespace awkward {
 
   template <typename T>
   void ListArrayOf<T>::tojson_part(ToJson& builder) const {
-    for (int64_t i = 0;  i < length();  i++) {
+    int64_t len = length();
+    for (int64_t i = 0;  i < len;  i++) {
       builder.beginlist();
       getitem_at_nowrap(i).get()->tojson_part(builder);
       builder.endlist();

@@ -187,6 +187,10 @@ namespace awkward {
     return out.str();
   }
 
+  // FIXME: turn each of these three functions into (builder, array, offset, length)
+  // so that the can be called once per multidimensional array (no getitem_at_nowrap;
+  // do it internally in tojson_boolean/integer/real).
+
   void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
     for (int i = 0;  i < length;  i++) {
       builder.boolean(array[i]);
@@ -261,7 +265,8 @@ namespace awkward {
       }
     }
     else {
-      for (int64_t i = 0;  i < length();  i++) {
+      int64_t len = length();
+      for (int64_t i = 0;  i < len;  i++) {
         builder.beginlist();
         getitem_at_nowrap(i).get()->tojson_part(builder);
         builder.endlist();

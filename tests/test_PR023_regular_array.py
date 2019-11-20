@@ -22,6 +22,9 @@ def test_type():
 def test_iteration():
     assert awkward1.tolist(regulararray) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
 
+def test_tojson():
+    assert awkward1.tojson(regulararray) == "[[[0.0,1.1,2.2],[]],[[3.3,4.4],[5.5]],[[6.6,7.7,8.8,9.9],[]]]"
+
 def test_getitem_at():
     assert awkward1.tolist(regulararray[0]) == [[0.0, 1.1, 2.2], []]
     assert awkward1.tolist(regulararray[1]) == [[3.3, 4.4], [5.5]]

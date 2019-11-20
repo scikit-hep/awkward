@@ -91,7 +91,12 @@ namespace awkward {
   }
 
   void RegularArray::tojson_part(ToJson& builder) const {
-    throw std::runtime_error("tojson_part");
+    int64_t len = length();
+    for (int64_t i = 0;  i < len;  i++) {
+      builder.beginlist();
+      getitem_at_nowrap(i).get()->tojson_part(builder);
+      builder.endlist();
+    }
   }
 
   const std::shared_ptr<Type> RegularArray::type_part() const {
