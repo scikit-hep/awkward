@@ -122,7 +122,7 @@ def box(tpe, val, c):
     if tpe.idtpe != numba.none:
         id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
         out = c.pyapi.call_function_objargs(RegularArray_obj, (content_obj, size_obj, id_obj))
-        c.pyapi.decreef(id_obj)
+        c.pyapi.decref(id_obj)
     else:
         out = c.pyapi.call_function_objargs(RegularArray_obj, (content_obj, size_obj))
     c.pyapi.decref(RegularArray_obj)
@@ -392,19 +392,24 @@ class type_methods(numba.typing.templates.AttributeTemplate):
             else:
                 return tpe.idtpe
 
-# @numba.extending.lower_getattr(ListArrayType, "content")
-# def lower_content(context, builder, tpe, val):
-#     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-#     if context.enable_nrt:
-#         context.nrt.incref(builder, tpe.contenttpe, proxyin.content)
-#     return proxyin.content
-#
-# @numba.extending.lower_getattr(ListArrayType, "id")
-# def lower_id(context, builder, tpe, val):
-#     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-#     if tpe.idtpe == numba.none:
-#         return context.make_optional_none(builder, identity.IdentityType(numba.int32[:, :]))
-#     else:
-#         if context.enable_nrt:
-#             context.nrt.incref(builder, tpe.idtpe, proxyin.id)
-#         return proxyin.id
+@numba.extending.lower_getattr(RegularArrayType, "content")
+def lower_content(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe.contenttpe, proxyin.content)
+    return proxyin.content
+
+@numba.extending.lower_getattr(RegularArrayType, "size")
+def lower_size(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    return proxyin.size
+
+@numba.extending.lower_getattr(RegularArrayType, "id")
+def lower_id(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if tpe.idtpe == numba.none:
+        return context.make_optional_none(builder, identity.IdentityType(numba.int32[:, :]))
+    else:
+        if context.enable_nrt:
+            context.nrt.incref(builder, tpe.idtpe, proxyin.id)
+        return proxyin.id
