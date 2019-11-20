@@ -52,6 +52,10 @@ namespace awkward {
 
   void EmptyArray::check_for_iteration() const { }
 
+  const std::shared_ptr<Content> EmptyArray::getitem_nothing() const {
+    return shallow_copy();
+  }
+
   const std::shared_ptr<Content> EmptyArray::getitem_at(int64_t at) const {
     util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy

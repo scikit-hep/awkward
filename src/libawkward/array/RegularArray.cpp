@@ -113,6 +113,10 @@ namespace awkward {
 
   void RegularArray::check_for_iteration() const { }
 
+  const std::shared_ptr<Content> RegularArray::getitem_nothing() const {
+    return content_.get()->getitem_range_nowrap(0, 0);
+  }
+
   const std::shared_ptr<Content> RegularArray::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     int64_t len = length();

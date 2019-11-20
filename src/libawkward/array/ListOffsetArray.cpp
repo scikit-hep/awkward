@@ -194,6 +194,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_nothing() const {
+    return content_.get()->getitem_range_nowrap(0, 0);
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     if (regular_at < 0) {

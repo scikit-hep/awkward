@@ -49,17 +49,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
-    std::shared_ptr<Content> next(nullptr);
-    if (length() == 0) {
-      Index64 nextstarts(1);
-      Index64 nextstops(1);
-      *nextstarts.ptr().get() = 0;
-      *nextstops.ptr().get() = 0;
-      next = std::shared_ptr<Content>(new ListArrayOf<int64_t>(std::shared_ptr<Identity>(nullptr), nextstarts, nextstops, shallow_copy()));
-    }
-    else {
-      next = std::shared_ptr<Content>(new RegularArray(Identity::none(), shallow_copy(), length()));
-    }
+    std::shared_ptr<Content> next(new RegularArray(Identity::none(), shallow_copy(), length()));
 
     std::shared_ptr<SliceItem> nexthead = where.head();
     Slice nexttail = where.tail();
@@ -67,7 +57,7 @@ namespace awkward {
     std::shared_ptr<Content> out = next.get()->getitem_next(nexthead, nexttail, nextadvanced);
 
     if (out.get()->length() == 0) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
+      return out.get()->getitem_nothing();
     }
     else {
       return out.get()->getitem_at_nowrap(0);

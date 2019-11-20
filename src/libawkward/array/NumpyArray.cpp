@@ -355,6 +355,16 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> NumpyArray::getitem_nothing() const {
+    const std::vector<ssize_t> shape({ 0 });
+    const std::vector<ssize_t> strides({ itemsize_ });
+    std::shared_ptr<Identity> id;
+    if (id_.get() != nullptr) {
+      id = id_.get()->getitem_range_nowrap(0, 0);
+    }
+    return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides, byteoffset_, itemsize_, format_));
+  }
+
   const std::shared_ptr<Content> NumpyArray::getitem_at(int64_t at) const {
     assert(!isscalar());
     int64_t regular_at = at;
