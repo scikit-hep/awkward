@@ -4,6 +4,7 @@
 #define AWKWARD_RECORDARRAY_H_
 
 #include <memory>
+#include <string>
 #include <unordered_map>
 
 #include "awkward/cpu-kernels/util.h"
@@ -48,6 +49,13 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
+
+    int64_t numfields() const;
+    const std::shared_ptr<Content> content(int64_t i) const;
+    const std::shared_ptr<Content> content(const std::string& fieldname) const;
+    void append(const std::shared_ptr<Content>& content, const std::string& fieldname);
+    void append(const std::shared_ptr<Content>& content);
+    void alias(int64_t i, const std::string& fieldname);
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;

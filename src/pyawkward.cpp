@@ -872,6 +872,24 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
       .def(py::init([](py::object id) -> ak::RecordArray {
         return ak::RecordArray(unbox_id(id));
       }), py::arg("id") = py::none())
+
+      .def_property_readonly("numfields", &ak::RecordArray::numfields)
+      .def("content", [](ak::RecordArray& self, int64_t i) -> py::object {
+        return box(self.content(i));
+      })
+      .def("content", [](ak::RecordArray& self, std::string fieldname) -> py::object {
+        return box(self.content(fieldname));
+      })
+      .def("append", [](ak::RecordArray& self, py::object content, py::object fieldname) -> void {
+        if (fieldname.is(py::none())) {
+          self.append(unbox_content(content));
+        }
+        else {
+          self.append(unbox_content(content), fieldname.cast<std::string>());
+        }
+      }, py::arg("content"), py::arg("fieldname") = py::none())
+      .def("alias", &ak::RecordArray::alias)
+
   );
 }
 

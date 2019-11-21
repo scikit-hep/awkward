@@ -82,4 +82,50 @@ namespace awkward {
     const std::shared_ptr<Content> RecordArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
       throw std::runtime_error("RecordArray::getitem_next");
     }
+
+    int64_t RecordArray::numfields() const {
+      return (int64_t)contents_.size();
+    }
+
+    const std::shared_ptr<Content> RecordArray::content(int64_t i) const {
+      if (i >= numfields()) {
+        throw std::invalid_argument(std::string("content ") + std::to_string(i) + std::string(" requested from RecordArray with only ") + std::to_string(numfields()) + std::string(" fields"));
+      }
+      return contents_[(size_t)i];
+    }
+
+    const std::shared_ptr<Content> RecordArray::content(const std::string& fieldname) const {
+      if (lookup_.get() == nullptr) {
+        throw std::invalid_argument("content requested by name from RecordArray without named fields");
+      }
+      size_t i;
+      try {
+        i = lookup_.get()->at(fieldname);
+      }
+      catch (std::out_of_range err) {
+        throw std::invalid_argument(std::string("fieldname \"") + fieldname + std::string("\" is not in RecordArray"));
+      }
+      if (i >= contents_.size()) {
+        throw std::invalid_argument(std::string("fieldname \"") + fieldname + std::string("\" points to tuple index ") + std::to_string(i) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
+      }
+      return contents_[i];
+    }
+
+    void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& fieldname) {
+      size_t i = contents_.size();
+      append(content);
+      alias(i, fieldname);
+    }
+
+    void RecordArray::append(const std::shared_ptr<Content>& content) {
+      contents_.push_back(content);
+    }
+
+    void RecordArray::alias(int64_t i, const std::string& fieldname) {
+      if (lookup_.get() == nullptr) {
+        lookup_ = std::shared_ptr<Lookup>(new Lookup());
+      }
+      (*lookup_.get())[fieldname] = i;
+    }
+
 }
