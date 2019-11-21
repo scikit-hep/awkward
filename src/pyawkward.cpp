@@ -17,6 +17,7 @@
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/RecordArray.h"
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
@@ -113,6 +114,9 @@ py::object box(std::shared_ptr<ak::Content> content) {
   else if (ak::RegularArray* raw = dynamic_cast<ak::RegularArray*>(content.get())) {
     return py::cast(*raw);
   }
+  else if (ak::RecordArray* raw = dynamic_cast<ak::RecordArray*>(content.get())) {
+    return py::cast(*raw);
+  }
   else {
     throw std::runtime_error("missing boxer for Content subtype");
   }
@@ -200,6 +204,10 @@ std::shared_ptr<ak::Content> unbox_content(py::object obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::RegularArray*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::RecordArray*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   throw std::invalid_argument("content argument must be a Content subtype");
@@ -857,6 +865,16 @@ py::class_<ak::RegularArray, ak::Content> make_RegularArray(py::handle m, std::s
   );
 }
 
+/////////////////////////////////////////////////////////////// RecordArray
+
+py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::string name) {
+  return content(py::class_<ak::RecordArray, ak::Content>(m, name.c_str())
+      .def(py::init([](py::object id) -> ak::RecordArray {
+        return ak::RecordArray(unbox_id(id));
+      }), py::arg("id") = py::none())
+  );
+}
+
 /////////////////////////////////////////////////////////////// module
 
 PYBIND11_MODULE(layout, m) {
@@ -905,6 +923,8 @@ PYBIND11_MODULE(layout, m) {
   make_EmptyArray(m, "EmptyArray");
 
   make_RegularArray(m, "RegularArray");
+
+  make_RecordArray(m, "RecordArray");
 
   m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;
