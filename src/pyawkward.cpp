@@ -18,6 +18,7 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/RecordArray.h"
+#include "awkward/array/Record.h"
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
@@ -114,6 +115,9 @@ py::object box(std::shared_ptr<ak::Content> content) {
   else if (ak::RegularArray* raw = dynamic_cast<ak::RegularArray*>(content.get())) {
     return py::cast(*raw);
   }
+  else if (ak::Record* raw = dynamic_cast<ak::Record*>(content.get())) {
+    return py::cast(*raw);
+  }
   else if (ak::RecordArray* raw = dynamic_cast<ak::RecordArray*>(content.get())) {
     return py::cast(*raw);
   }
@@ -204,6 +208,11 @@ std::shared_ptr<ak::Content> unbox_content(py::object obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::RegularArray*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    obj.cast<ak::Record*>();
+    throw std::invalid_argument("content argument must be a Content subtype (excluding Record)");
   }
   catch (py::cast_error err) { }
   try {
@@ -902,6 +911,28 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
   );
 }
 
+py::class_<ak::Record> make_Record(py::handle m, std::string name) {
+  return py::class_<ak::Record>(m, name.c_str())
+      .def_property_readonly("numfields", &ak::Record::numfields)
+      .def("index", &ak::Record::index)
+      .def("key", &ak::Record::key)
+      .def("has", &ak::Record::has)
+      .def("aliases", [](ak::Record& self, int64_t index) -> std::vector<std::string> {
+        return self.aliases(index);
+      })
+      .def("aliases", [](ak::Record& self, std::string key) -> std::vector<std::string> {
+        return self.aliases(key);
+      })
+      .def("field", [](ak::Record& self, int64_t index) -> py::object {
+        return box(self.field(index));
+      })
+      .def("field", [](ak::Record& self, std::string key) -> py::object {
+        return box(self.field(key));
+      })
+
+  ;
+}
+
 /////////////////////////////////////////////////////////////// module
 
 PYBIND11_MODULE(layout, m) {
@@ -952,6 +983,7 @@ PYBIND11_MODULE(layout, m) {
   make_RegularArray(m, "RegularArray");
 
   make_RecordArray(m, "RecordArray");
+  make_Record(m, "Record");
 
   m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;
