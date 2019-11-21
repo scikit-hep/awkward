@@ -888,7 +888,7 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
           self.append(unbox_content(content), fieldname.cast<std::string>());
         }
       }, py::arg("content"), py::arg("fieldname") = py::none())
-      .def("alias", &ak::RecordArray::alias)
+      .def("addkey", &ak::RecordArray::addkey)
 
   );
 }

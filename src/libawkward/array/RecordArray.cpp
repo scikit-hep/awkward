@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <sstream>
+
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 // #include "awkward/type/RecordType.h"
@@ -8,7 +10,7 @@
 
 namespace awkward {
     const std::string RecordArray::classname() const {
-      throw std::runtime_error("RecordArray::classname");
+      return "RecordArray";
     }
 
     void RecordArray::setid() {
@@ -20,7 +22,26 @@ namespace awkward {
     }
 
     const std::string RecordArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
-      throw std::runtime_error("RecordArray::tostring_part");
+      std::stringstream out;
+      out << indent << pre << "<" << classname() << ">\n";
+      if (id_.get() != nullptr) {
+        out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
+      }
+      for (size_t i = 0;  i < contents_.size();  i++) {
+        out << indent << "    <field i=\"" << i << "\">";
+        if (lookup_.get() != nullptr) {
+          for (auto pair : *lookup_.get()) {
+            if (pair.second == i) {
+              out << "<key>" << pair.first << "</key>";
+            }
+          }
+        }
+        out << "\n" << indent;
+        out << contents_[i].get()->tostring_part(indent + std::string("        "), "", "\n");
+        out << indent << "    </field>\n";
+      }
+      out << indent << "</" << classname() << ">" << post;
+      return out.str();
     }
 
     void RecordArray::tojson_part(ToJson& builder) const {
@@ -114,14 +135,14 @@ namespace awkward {
     void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& fieldname) {
       size_t i = contents_.size();
       append(content);
-      alias(i, fieldname);
+      addkey(i, fieldname);
     }
 
     void RecordArray::append(const std::shared_ptr<Content>& content) {
       contents_.push_back(content);
     }
 
-    void RecordArray::alias(int64_t i, const std::string& fieldname) {
+    void RecordArray::addkey(int64_t i, const std::string& fieldname) {
       if (lookup_.get() == nullptr) {
         lookup_ = std::shared_ptr<Lookup>(new Lookup());
       }

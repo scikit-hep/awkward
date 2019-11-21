@@ -55,7 +55,7 @@ namespace awkward {
     const std::shared_ptr<Content> content(const std::string& fieldname) const;
     void append(const std::shared_ptr<Content>& content, const std::string& fieldname);
     void append(const std::shared_ptr<Content>& content);
-    void alias(int64_t i, const std::string& fieldname);
+    void addkey(int64_t i, const std::string& fieldname);
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;
