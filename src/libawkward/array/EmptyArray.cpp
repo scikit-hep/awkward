@@ -35,7 +35,8 @@ namespace awkward {
   }
 
   void EmptyArray::tojson_part(ToJson& builder) const {
-    // Do nothing (builder.beginlist() and builder.endlist() are called outside of tojson_part).
+    builder.beginlist();
+    builder.endlist();
   }
 
   const std::shared_ptr<Type> EmptyArray::type_part() const {

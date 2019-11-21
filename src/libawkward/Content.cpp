@@ -19,16 +19,12 @@ namespace awkward {
   const std::string Content::tojson(bool pretty, int64_t maxdecimals) const {
     if (pretty) {
       ToJsonPrettyString builder(maxdecimals);
-      builder.beginlist();
       tojson_part(builder);
-      builder.endlist();
       return builder.tostring();
     }
     else {
       ToJsonString builder(maxdecimals);
-      builder.beginlist();
       tojson_part(builder);
-      builder.endlist();
       return builder.tostring();
     }
   }

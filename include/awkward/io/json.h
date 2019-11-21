@@ -36,7 +36,7 @@ namespace awkward {
     virtual void endlist() = 0;
     virtual void beginrec() = 0;
     virtual void endrec() = 0;
-    virtual void fieldname(const char* x) = 0;
+    virtual void fieldkey(const char* x) = 0;
     virtual void string(const char* x) = 0;
   };
 
@@ -56,7 +56,7 @@ namespace awkward {
     virtual void endlist() { writer_.EndArray(); }
     virtual void beginrec() { writer_.StartObject(); }
     virtual void endrec() { writer_.EndObject(); }
-    virtual void fieldname(const char* x) { writer_.Key(x); }
+    virtual void fieldkey(const char* x) { writer_.Key(x); }
     virtual void string(const char* x) { writer_.String(x); }
 
     std::string tostring() {
@@ -84,7 +84,7 @@ namespace awkward {
     virtual void endlist() { writer_.EndArray(); }
     virtual void beginrec() { writer_.StartObject(); }
     virtual void endrec() { writer_.EndObject(); }
-    virtual void fieldname(const char* x) { writer_.Key(x); }
+    virtual void fieldkey(const char* x) { writer_.Key(x); }
     virtual void string(const char* x) { writer_.String(x); }
 
     std::string tostring() {
@@ -112,7 +112,7 @@ namespace awkward {
     virtual void endlist() { writer_.EndArray(); }
     virtual void beginrec() { writer_.StartObject(); }
     virtual void endrec() { writer_.EndObject(); }
-    virtual void fieldname(const char* x) { writer_.Key(x); }
+    virtual void fieldkey(const char* x) { writer_.Key(x); }
     virtual void string(const char* x) { writer_.String(x); }
 
   private:
@@ -137,7 +137,7 @@ namespace awkward {
     virtual void endlist() { writer_.EndArray(); }
     virtual void beginrec() { writer_.StartObject(); }
     virtual void endrec() { writer_.EndObject(); }
-    virtual void fieldname(const char* x) { writer_.Key(x); }
+    virtual void fieldkey(const char* x) { writer_.Key(x); }
     virtual void string(const char* x) { writer_.String(x); }
 
   private:

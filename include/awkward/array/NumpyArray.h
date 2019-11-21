@@ -89,6 +89,12 @@ namespace awkward {
     const NumpyArray getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
     const NumpyArray getitem_next(const SliceArray64& array, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
 
+  void tojson_boolean(ToJson& builder) const;
+  template <typename T>
+  void tojson_integer(ToJson& builder) const;
+  template <typename T>
+  void tojson_real(ToJson& builder) const;
+
   private:
     std::shared_ptr<Identity> id_;
     std::shared_ptr<void> ptr_;

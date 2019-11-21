@@ -49,16 +49,25 @@ namespace awkward {
     }
 
     void RecordArray::tojson_part(ToJson& builder) const {
-      int64_t len = length();
-      for (int64_t i = 0;  i < len;  i++) {
+      int64_t rows = length();
+      int64_t cols = numfields();
+      std::shared_ptr<ReverseLookup> keys = reverselookup_;
+      if (keys.get() == nullptr) {
+        keys = std::shared_ptr<ReverseLookup>(new ReverseLookup);
+        for (size_t j = 0;  j < cols;  j++) {
+          keys.get()->push_back(std::to_string(j));
+        }
+      }
+      builder.beginlist();
+      for (int64_t i = 0;  i < rows;  i++) {
         builder.beginrec();
-
-
-
-
-
+        for (int64_t j = 0;  j < cols;  j++) {
+          builder.fieldkey(keys.get()->at(j).c_str());
+          contents_[j].get()->getitem_at_nowrap(i).get()->tojson_part(builder);
+        }
         builder.endrec();
       }
+      builder.endlist();
     }
 
     const std::shared_ptr<Type> RecordArray::type_part() const {
@@ -66,7 +75,14 @@ namespace awkward {
     }
 
     int64_t RecordArray::length() const {
-      throw std::runtime_error("RecordArray::length");
+      int64_t out = -1;
+      for (auto x : contents_) {
+        int64_t len = x.get()->length();
+        if (out < 0  ||  out > len) {
+          out = len;
+        }
+      }
+      return out;
     }
 
     const std::shared_ptr<Content> RecordArray::shallow_copy() const {
