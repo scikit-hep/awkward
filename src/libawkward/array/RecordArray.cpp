@@ -86,7 +86,7 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> RecordArray::shallow_copy() const {
-      throw std::runtime_error("RecordArray::shallow_copy");
+      return std::shared_ptr<Content>(new RecordArray(id_, contents_, lookup_, reverselookup_));
     }
 
     void RecordArray::check_for_iteration() const {
@@ -125,28 +125,75 @@ namespace awkward {
       return (int64_t)contents_.size();
     }
 
-    const std::shared_ptr<Content> RecordArray::field(int64_t i) const {
-      if (i >= numfields()) {
-        throw std::invalid_argument(std::string("field ") + std::to_string(i) + std::string(" requested from RecordArray with only ") + std::to_string(numfields()) + std::string(" fields"));
+    int64_t RecordArray::index(const std::string& key) const {
+      if (lookup_.get() == nullptr) {
+        int64_t out;
+        try {
+          out = (int64_t)std::stoi(key);
+        }
+        catch (std::invalid_argument err) {
+          throw std::invalid_argument(std::string("key \"") + key + std::string("\" is not in RecordArray"));
+        }
+        if (out >= numfields()) {
+          throw std::invalid_argument(std::string("key \"") + key + std::string("\" is not in RecordArray"));
+        }
+        return out;
       }
-      return contents_[(size_t)i];
+      else {
+        int64_t out;
+        try {
+          out = (int64_t)lookup_.get()->at(key);
+        }
+        catch (std::out_of_range err) {
+          throw std::invalid_argument(std::string("key \"") + key + std::string("\" is not in RecordArray"));
+        }
+        if (out >= contents_.size()) {
+          throw std::invalid_argument(std::string("key \"") + key + std::string("\" points to tuple index ") + std::to_string(out) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
+        }
+        return out;
+      }
     }
 
-    const std::shared_ptr<Content> RecordArray::field(const std::string& fieldname) const {
-      if (lookup_.get() == nullptr) {
-        throw std::invalid_argument("field requested by name from RecordArray without named fields");
+    const std::string RecordArray::key(int64_t index) const {
+      if (index >= numfields()) {
+        throw std::invalid_argument(std::string("index \"") + std::to_string(index) + std::string("\" is not in RecordArray"));
       }
-      size_t i;
-      try {
-        i = lookup_.get()->at(fieldname);
+      if (reverselookup_.get() != nullptr) {
+        return reverselookup_.get()->at(index);
       }
-      catch (std::out_of_range err) {
-        throw std::invalid_argument(std::string("fieldname \"") + fieldname + std::string("\" is not in RecordArray"));
+      else {
+        return std::to_string(index);
       }
-      if (i >= contents_.size()) {
-        throw std::invalid_argument(std::string("fieldname \"") + fieldname + std::string("\" points to tuple index ") + std::to_string(i) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
+    }
+
+    const std::shared_ptr<Content> RecordArray::field(int64_t index) const {
+      if (index >= numfields()) {
+        throw std::invalid_argument(std::string("index \"") + std::to_string(index) + std::string("\" is not in RecordArray"));
       }
-      return contents_[i];
+      return contents_[(size_t)index];
+    }
+
+    const std::shared_ptr<Content> RecordArray::field(const std::string& key) const {
+      return contents_[index(key)];
+    }
+
+    const std::vector<std::string> RecordArray::aliases(int64_t index) const {
+      std::vector<std::string> out;
+      if (lookup_.get() != nullptr) {
+        for (auto pair : *lookup_.get()) {
+          if (pair.second == index) {
+            out.push_back(pair.first);
+          }
+        }
+      }
+      else {
+        out.push_back(std::to_string(index));
+      }
+      return out;
+    }
+
+    const std::vector<std::string> RecordArray::aliases(const std::string& key) const {
+      return aliases(index(key));
     }
 
     void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {

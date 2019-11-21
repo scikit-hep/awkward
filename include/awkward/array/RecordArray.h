@@ -56,11 +56,15 @@ namespace awkward {
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
 
     int64_t numfields() const;
-    const std::shared_ptr<Content> field(int64_t i) const;
-    const std::shared_ptr<Content> field(const std::string& fieldname) const;
+    int64_t index(const std::string& key) const;
+    const std::string key(int64_t index) const;
+    const std::vector<std::string> aliases(int64_t index) const;
+    const std::vector<std::string> aliases(const std::string& key) const;
+    const std::shared_ptr<Content> field(int64_t index) const;
+    const std::shared_ptr<Content> field(const std::string& key) const;
     void append(const std::shared_ptr<Content>& content, const std::string& key);
     void append(const std::shared_ptr<Content>& content);
-    void setkey(int64_t i, const std::string& key);
+    void setkey(int64_t index, const std::string& key);
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;

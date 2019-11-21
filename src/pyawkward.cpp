@@ -874,8 +874,16 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
       }), py::arg("id") = py::none())
 
       .def_property_readonly("numfields", &ak::RecordArray::numfields)
-      .def("field", [](ak::RecordArray& self, int64_t i) -> py::object {
-        return box(self.field(i));
+      .def("index", &ak::RecordArray::index)
+      .def("key", &ak::RecordArray::key)
+      .def("aliases", [](ak::RecordArray& self, int64_t index) -> std::vector<std::string> {
+        return self.aliases(index);
+      })
+      .def("aliases", [](ak::RecordArray& self, std::string key) -> std::vector<std::string> {
+        return self.aliases(key);
+      })
+      .def("field", [](ak::RecordArray& self, int64_t index) -> py::object {
+        return box(self.field(index));
       })
       .def("field", [](ak::RecordArray& self, std::string key) -> py::object {
         return box(self.field(key));
