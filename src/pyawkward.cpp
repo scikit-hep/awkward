@@ -874,21 +874,21 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
       }), py::arg("id") = py::none())
 
       .def_property_readonly("numfields", &ak::RecordArray::numfields)
-      .def("content", [](ak::RecordArray& self, int64_t i) -> py::object {
-        return box(self.content(i));
+      .def("field", [](ak::RecordArray& self, int64_t i) -> py::object {
+        return box(self.field(i));
       })
-      .def("content", [](ak::RecordArray& self, std::string fieldname) -> py::object {
-        return box(self.content(fieldname));
+      .def("field", [](ak::RecordArray& self, std::string key) -> py::object {
+        return box(self.field(key));
       })
-      .def("append", [](ak::RecordArray& self, py::object content, py::object fieldname) -> void {
-        if (fieldname.is(py::none())) {
+      .def("append", [](ak::RecordArray& self, py::object content, py::object key) -> void {
+        if (key.is(py::none())) {
           self.append(unbox_content(content));
         }
         else {
-          self.append(unbox_content(content), fieldname.cast<std::string>());
+          self.append(unbox_content(content), key.cast<std::string>());
         }
-      }, py::arg("content"), py::arg("fieldname") = py::none())
-      .def("addkey", &ak::RecordArray::addkey)
+      }, py::arg("content"), py::arg("key") = py::none())
+      .def("setkey", &ak::RecordArray::setkey)
 
   );
 }

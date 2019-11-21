@@ -28,13 +28,17 @@ namespace awkward {
         out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
       }
       for (size_t i = 0;  i < contents_.size();  i++) {
-        out << indent << "    <field i=\"" << i << "\">";
-        if (lookup_.get() != nullptr) {
+        out << indent << "    <field i=\"" << i << "\"";
+        if (reverselookup_.get() != nullptr) {
+          out << " key=\"" << reverselookup_.get()->at(i) << "\">";
           for (auto pair : *lookup_.get()) {
-            if (pair.second == i) {
-              out << "<key>" << pair.first << "</key>";
+            if (pair.second == i  &&  pair.first != reverselookup_.get()->at(i)) {
+              out << "<alias>" << pair.first << "</alias>";
             }
           }
+        }
+        else {
+          out << ">";
         }
         out << "\n" << indent;
         out << contents_[i].get()->tostring_part(indent + std::string("        "), "", "\n");
@@ -45,7 +49,16 @@ namespace awkward {
     }
 
     void RecordArray::tojson_part(ToJson& builder) const {
-      throw std::runtime_error("RecordArray::tojson_part");
+      int64_t len = length();
+      for (int64_t i = 0;  i < len;  i++) {
+        builder.beginrec();
+
+
+
+
+
+        builder.endrec();
+      }
     }
 
     const std::shared_ptr<Type> RecordArray::type_part() const {
@@ -92,32 +105,20 @@ namespace awkward {
       throw std::runtime_error("RecordArray::minmax_depth");
     }
 
-    const std::shared_ptr<Content> RecordArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-      throw std::runtime_error("RecordArray::getitem_next");
-    }
-
-    const std::shared_ptr<Content> RecordArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-      throw std::runtime_error("RecordArray::getitem_next");
-    }
-
-    const std::shared_ptr<Content> RecordArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-      throw std::runtime_error("RecordArray::getitem_next");
-    }
-
     int64_t RecordArray::numfields() const {
       return (int64_t)contents_.size();
     }
 
-    const std::shared_ptr<Content> RecordArray::content(int64_t i) const {
+    const std::shared_ptr<Content> RecordArray::field(int64_t i) const {
       if (i >= numfields()) {
-        throw std::invalid_argument(std::string("content ") + std::to_string(i) + std::string(" requested from RecordArray with only ") + std::to_string(numfields()) + std::string(" fields"));
+        throw std::invalid_argument(std::string("field ") + std::to_string(i) + std::string(" requested from RecordArray with only ") + std::to_string(numfields()) + std::string(" fields"));
       }
       return contents_[(size_t)i];
     }
 
-    const std::shared_ptr<Content> RecordArray::content(const std::string& fieldname) const {
+    const std::shared_ptr<Content> RecordArray::field(const std::string& fieldname) const {
       if (lookup_.get() == nullptr) {
-        throw std::invalid_argument("content requested by name from RecordArray without named fields");
+        throw std::invalid_argument("field requested by name from RecordArray without named fields");
       }
       size_t i;
       try {
@@ -132,21 +133,41 @@ namespace awkward {
       return contents_[i];
     }
 
-    void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& fieldname) {
+    void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {
       size_t i = contents_.size();
       append(content);
-      addkey(i, fieldname);
+      setkey(i, key);
     }
 
     void RecordArray::append(const std::shared_ptr<Content>& content) {
+      if (reverselookup_.get() != nullptr) {
+        reverselookup_.get()->push_back(std::to_string(contents_.size()));
+      }
       contents_.push_back(content);
     }
 
-    void RecordArray::addkey(int64_t i, const std::string& fieldname) {
+    void RecordArray::setkey(int64_t i, const std::string& fieldname) {
       if (lookup_.get() == nullptr) {
-        lookup_ = std::shared_ptr<Lookup>(new Lookup());
+        lookup_ = std::shared_ptr<Lookup>(new Lookup);
+        reverselookup_ = std::shared_ptr<ReverseLookup>(new ReverseLookup);
+        for (size_t i = 0;  i < contents_.size();  i++) {
+          reverselookup_.get()->push_back(std::to_string(i));
+        }
       }
       (*lookup_.get())[fieldname] = i;
+      (*reverselookup_.get())[i] = fieldname;
+    }
+
+    const std::shared_ptr<Content> RecordArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+      throw std::runtime_error("RecordArray::getitem_next");
+    }
+
+    const std::shared_ptr<Content> RecordArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+      throw std::runtime_error("RecordArray::getitem_next");
+    }
+
+    const std::shared_ptr<Content> RecordArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+      throw std::runtime_error("RecordArray::getitem_next");
     }
 
 }

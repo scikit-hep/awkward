@@ -15,22 +15,27 @@ namespace awkward {
   class RecordArray: public Content {
   public:
     typedef std::unordered_map<std::string, size_t> Lookup;
+    typedef std::vector<std::string> ReverseLookup;
 
-    RecordArray(const std::shared_ptr<Identity> id, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup> lookup)
+    RecordArray(const std::shared_ptr<Identity> id, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
         : id_(id)
         , contents_(contents)
-        , lookup_(lookup) { }
+        , lookup_(lookup)
+        , reverselookup_(reverselookup) { }
     RecordArray(const std::shared_ptr<Identity> id, const std::vector<std::shared_ptr<Content>>& contents)
         : id_(id)
         , contents_(contents)
-        , lookup_(nullptr) { }
+        , lookup_(nullptr)
+        , reverselookup_(nullptr) { }
     RecordArray(const std::shared_ptr<Identity> id)
         : id_(id)
         , contents_()
-        , lookup_(nullptr) { }
+        , lookup_(nullptr)
+        , reverselookup_(nullptr) { }
 
     const std::vector<std::shared_ptr<Content>> contents() const { return contents_; }
     const std::shared_ptr<Lookup> lookup() const { return lookup_; }
+    const std::shared_ptr<ReverseLookup> reverselookup() const { return reverselookup_; }
 
     virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const { return id_; }
@@ -51,11 +56,11 @@ namespace awkward {
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
 
     int64_t numfields() const;
-    const std::shared_ptr<Content> content(int64_t i) const;
-    const std::shared_ptr<Content> content(const std::string& fieldname) const;
-    void append(const std::shared_ptr<Content>& content, const std::string& fieldname);
+    const std::shared_ptr<Content> field(int64_t i) const;
+    const std::shared_ptr<Content> field(const std::string& fieldname) const;
+    void append(const std::shared_ptr<Content>& content, const std::string& key);
     void append(const std::shared_ptr<Content>& content);
-    void addkey(int64_t i, const std::string& fieldname);
+    void setkey(int64_t i, const std::string& key);
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;
@@ -66,6 +71,7 @@ namespace awkward {
     std::shared_ptr<Identity> id_;
     std::vector<std::shared_ptr<Content>> contents_;
     std::shared_ptr<Lookup> lookup_;
+    std::shared_ptr<ReverseLookup> reverselookup_;
   };
 }
 
