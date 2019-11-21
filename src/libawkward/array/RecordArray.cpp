@@ -126,8 +126,17 @@ namespace awkward {
     }
 
     int64_t RecordArray::index(const std::string& key) const {
-      if (lookup_.get() == nullptr) {
-        int64_t out;
+      int64_t out = -1;
+      if (lookup_.get() != nullptr) {
+        try {
+          out = (int64_t)lookup_.get()->at(key);
+        }
+        catch (std::out_of_range err) { }
+        if (out != -1  &&  out >= numfields()) {
+          throw std::invalid_argument(std::string("key \"") + key + std::string("\" points to tuple index ") + std::to_string(out) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
+        }
+      }
+      if (out == -1) {
         try {
           out = (int64_t)std::stoi(key);
         }
@@ -135,28 +144,15 @@ namespace awkward {
           throw std::invalid_argument(std::string("key \"") + key + std::string("\" is not in RecordArray"));
         }
         if (out >= numfields()) {
-          throw std::invalid_argument(std::string("key \"") + key + std::string("\" is not in RecordArray"));
+          throw std::invalid_argument(std::string("key interpreted as index ") + key + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
         }
-        return out;
       }
-      else {
-        int64_t out;
-        try {
-          out = (int64_t)lookup_.get()->at(key);
-        }
-        catch (std::out_of_range err) {
-          throw std::invalid_argument(std::string("key \"") + key + std::string("\" is not in RecordArray"));
-        }
-        if (out >= contents_.size()) {
-          throw std::invalid_argument(std::string("key \"") + key + std::string("\" points to tuple index ") + std::to_string(out) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
-        }
-        return out;
-      }
+      return out;
     }
 
     const std::string RecordArray::key(int64_t index) const {
       if (index >= numfields()) {
-        throw std::invalid_argument(std::string("index \"") + std::to_string(index) + std::string("\" is not in RecordArray"));
+        throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
       }
       if (reverselookup_.get() != nullptr) {
         return reverselookup_.get()->at(index);
@@ -166,34 +162,49 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<Content> RecordArray::field(int64_t index) const {
-      if (index >= numfields()) {
-        throw std::invalid_argument(std::string("index \"") + std::to_string(index) + std::string("\" is not in RecordArray"));
+    bool RecordArray::has(const std::string& key) const {
+      try {
+        index(key);
       }
-      return contents_[(size_t)index];
-    }
-
-    const std::shared_ptr<Content> RecordArray::field(const std::string& key) const {
-      return contents_[index(key)];
+      catch (std::invalid_argument err) {
+        return false;
+      }
+      return true;
     }
 
     const std::vector<std::string> RecordArray::aliases(int64_t index) const {
       std::vector<std::string> out;
+      std::string _default = std::to_string(index);
+      bool has_default = false;
       if (lookup_.get() != nullptr) {
         for (auto pair : *lookup_.get()) {
           if (pair.second == index) {
             out.push_back(pair.first);
+            if (pair.first == _default) {
+              has_default = true;
+            }
           }
         }
       }
-      else {
-        out.push_back(std::to_string(index));
+      if (!has_default) {
+        out.push_back(_default);
       }
       return out;
     }
 
     const std::vector<std::string> RecordArray::aliases(const std::string& key) const {
       return aliases(index(key));
+    }
+
+    const std::shared_ptr<Content> RecordArray::field(int64_t index) const {
+      if (index >= numfields()) {
+        throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
+      }
+      return contents_[(size_t)index];
+    }
+
+    const std::shared_ptr<Content> RecordArray::field(const std::string& key) const {
+      return contents_[index(key)];
     }
 
     void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {

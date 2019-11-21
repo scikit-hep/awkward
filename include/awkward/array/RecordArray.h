@@ -58,6 +58,7 @@ namespace awkward {
     int64_t numfields() const;
     int64_t index(const std::string& key) const;
     const std::string key(int64_t index) const;
+    bool has(const std::string& key) const;
     const std::vector<std::string> aliases(int64_t index) const;
     const std::vector<std::string> aliases(const std::string& key) const;
     const std::shared_ptr<Content> field(int64_t index) const;

@@ -876,6 +876,7 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
       .def_property_readonly("numfields", &ak::RecordArray::numfields)
       .def("index", &ak::RecordArray::index)
       .def("key", &ak::RecordArray::key)
+      .def("has", &ak::RecordArray::has)
       .def("aliases", [](ak::RecordArray& self, int64_t index) -> std::vector<std::string> {
         return self.aliases(index);
       })
