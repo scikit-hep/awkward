@@ -248,6 +248,16 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_field(const std::string& field) const {
+    throw std::runtime_error("FIXME: ListArray::getitem_field");
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_fields(const std::vector<std::string>& fields) const {
+    throw std::runtime_error("FIXME: ListArray::getitem_fields");
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::carry(const Index64& carry) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {

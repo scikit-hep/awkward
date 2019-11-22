@@ -242,6 +242,16 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_field(const std::string& field) const {
+    throw std::runtime_error("FIXME: ListOffsetArray::getitem_field");
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_fields(const std::vector<std::string>& fields) const {
+    throw std::runtime_error("FIXME: ListOffsetArray::getitem_fields");
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::carry(const Index64& carry) const {
     IndexOf<T> starts = make_starts(offsets_);
     IndexOf<T> stops = make_stops(offsets_);

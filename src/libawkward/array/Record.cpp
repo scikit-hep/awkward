@@ -97,6 +97,14 @@ namespace awkward {
     throw std::runtime_error("FIXME: Record::getitem_range_nowrap");
   }
 
+  const std::shared_ptr<Content> Record::getitem_field(const std::string& field) const {
+    throw std::runtime_error("FIXME: Record::getitem_field");
+  }
+
+  const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& fields) const {
+    throw std::runtime_error("FIXME: Record::getitem_fields");
+  }
+
   const std::shared_ptr<Content> Record::getitem(const Slice& where) const {
     throw std::runtime_error("FIXME: Record::getitem");
   }

@@ -383,6 +383,14 @@ namespace awkward {
     return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
   }
 
+  const std::shared_ptr<Content> NumpyArray::getitem_field(const std::string& field) const {
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_fields(const std::vector<std::string>& fields) const {
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
+  }
+
   const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
     assert(!isscalar());
 

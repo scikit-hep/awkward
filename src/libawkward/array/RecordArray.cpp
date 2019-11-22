@@ -126,6 +126,14 @@ namespace awkward {
     throw std::runtime_error("RecordArray::getitem_range_nowrap");
   }
 
+  const std::shared_ptr<Content> RecordArray::getitem_field(const std::string& field) const {
+    throw std::runtime_error("FIXME: RecordArray::getitem_field");
+  }
+
+  const std::shared_ptr<Content> RecordArray::getitem_fields(const std::vector<std::string>& fields) const {
+    throw std::runtime_error("FIXME: RecordArray::getitem_fields");
+  }
+
   const std::shared_ptr<Content> RecordArray::carry(const Index64& carry) const {
     throw std::runtime_error("RecordArray::carry");
   }

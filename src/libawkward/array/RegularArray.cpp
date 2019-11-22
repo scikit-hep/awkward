@@ -151,6 +151,14 @@ namespace awkward {
     return std::shared_ptr<Content>(new RegularArray(id_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_));
   }
 
+  const std::shared_ptr<Content> RegularArray::getitem_field(const std::string& field) const {
+    throw std::runtime_error("FIXME: RegularArray::getitem_field");
+  }
+
+  const std::shared_ptr<Content> RegularArray::getitem_fields(const std::vector<std::string>& fields) const {
+    throw std::runtime_error("FIXME: RegularArray::getitem_fields");
+  }
+
   const std::shared_ptr<Content> RegularArray::carry(const Index64& carry) const {
     Index64 nextcarry(carry.length()*size_);
 

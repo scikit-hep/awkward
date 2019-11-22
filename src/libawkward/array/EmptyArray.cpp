@@ -75,6 +75,13 @@ namespace awkward {
     return shallow_copy();
   }
 
+  const std::shared_ptr<Content> EmptyArray::getitem_field(const std::string& field) const {
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_fields(const std::vector<std::string>& fields) const {
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
+  }
 
   const std::shared_ptr<Content> EmptyArray::carry(const Index64& carry) const {
     return shallow_copy();
