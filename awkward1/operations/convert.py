@@ -22,6 +22,9 @@ def tolist(array):
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return array
 
+    elif isinstance(array, awkward1.layout.Record):
+        return {n: x for n, x in array.items()}
+
     elif isinstance(array, numpy.ndarray):
         return array.tolist()
 
@@ -42,6 +45,9 @@ fromjson = awkward1.layout.fromjson
 def tojson(array, *args, **kwargs):
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return json.dumps(array)
+
+    elif isinstance(array, awkward1.layout.Record):
+        return array.tojson(*args, **kwargs)
 
     elif isinstance(array, numpy.ndarray):
         return awkward1.layout.NumpyArray(array).tojson(*args, **kwargs)

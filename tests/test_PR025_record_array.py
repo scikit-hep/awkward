@@ -62,3 +62,4 @@ def test_scalar_record():
 
     str(recordarray)
     str(recordarray[2])
+    assert awkward1.tojson(recordarray[2]) == '{"one":3,"two":[4.4,5.5]}'

@@ -40,7 +40,21 @@ namespace awkward {
   }
 
   void Record::tojson_part(ToJson& builder) const {
-    throw std::runtime_error("FIXME: Record::tojson_part");
+    int64_t cols = numfields();
+    std::shared_ptr<RecordArray::ReverseLookup> keys = recordarray_.reverselookup();
+    if (keys.get() == nullptr) {
+      keys = std::shared_ptr<RecordArray::ReverseLookup>(new RecordArray::ReverseLookup);
+      for (size_t j = 0;  j < cols;  j++) {
+        keys.get()->push_back(std::to_string(j));
+      }
+    }
+    std::vector<std::shared_ptr<Content>> contents = recordarray_.contents();
+    builder.beginrec();
+    for (int64_t j = 0;  j < cols;  j++) {
+      builder.fieldkey(keys.get()->at(j).c_str());
+      contents[j].get()->getitem_at_nowrap(at_).get()->tojson_part(builder);
+    }
+    builder.endrec();
   }
 
   const std::shared_ptr<Type> Record::type_part() const {
@@ -92,37 +106,36 @@ namespace awkward {
   }
 
   int64_t Record::numfields() const {
-    throw std::runtime_error("FIXME: Record::numfields");
+    return recordarray_.numfields();
   }
 
   int64_t Record::index(const std::string& key) const {
-    throw std::runtime_error("FIXME: Record::index");
+    return recordarray_.index(key);
   }
 
   const std::string Record::key(int64_t index) const {
-    throw std::runtime_error("FIXME: Record::key");
+    return recordarray_.key(index);
   }
 
   bool Record::has(const std::string& key) const {
-    throw std::runtime_error("FIXME: Record::has");
+    return recordarray_.has(key);
   }
 
   const std::vector<std::string> Record::aliases(int64_t index) const {
-    throw std::runtime_error("FIXME: Record::aliases");
+    return recordarray_.aliases(index);
   }
 
   const std::vector<std::string> Record::aliases(const std::string& key) const {
-    throw std::runtime_error("FIXME: Record::aliases");
+    return recordarray_.aliases(key);
   }
 
   const std::shared_ptr<Content> Record::field(int64_t index) const {
-    throw std::runtime_error("FIXME: Record::field");
+    return recordarray_.field(index);
   }
 
   const std::shared_ptr<Content> Record::field(const std::string& key) const {
-    throw std::runtime_error("FIXME: Record::field");
+    return recordarray_.field(key);
   }
-
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("FIXME: Record::getitem_next");
