@@ -5,6 +5,7 @@
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 // #include "awkward/type/RecordType.h"
+#include "awkward/array/Record.h"
 
 #include "awkward/array/RecordArray.h"
 
@@ -40,7 +41,7 @@ namespace awkward {
         else {
           out << ">";
         }
-        out << "\n" << indent;
+        out << "\n";
         out << contents_[i].get()->tostring_part(indent + std::string("        "), "", "\n");
         out << indent << "    </field>\n";
       }
@@ -98,11 +99,19 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> RecordArray::getitem_at(int64_t at) const {
-      throw std::runtime_error("RecordArray::getitem_at");
+      int64_t regular_at = at;
+      int64_t len = length();
+      if (regular_at < 0) {
+        regular_at += len;
+      }
+      if (!(0 <= regular_at  &&  regular_at < len)) {
+        util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+      }
+      return getitem_at_nowrap(regular_at);
     }
 
     const std::shared_ptr<Content> RecordArray::getitem_at_nowrap(int64_t at) const {
-      throw std::runtime_error("RecordArray::getitem_at_nowrap");
+      return std::shared_ptr<Content>(new Record(*this, at));
     }
 
     const std::shared_ptr<Content> RecordArray::getitem_range(int64_t start, int64_t stop) const {

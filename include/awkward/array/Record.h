@@ -8,12 +8,12 @@
 namespace awkward {
   class Record: public Content {
   public:
-    Record(const RecordArray& recordarray, int64_t where)
+    Record(const RecordArray& recordarray, int64_t at)
         : recordarray_(recordarray)
-        , where_(where) { }
+        , at_(at) { }
 
     const std::shared_ptr<Content> recordarray() const { return recordarray_.shallow_copy(); }
-    int64_t where() const { return where_; }
+    int64_t at() const { return at_; }
 
     virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const;
@@ -50,7 +50,7 @@ namespace awkward {
 
   private:
     const RecordArray recordarray_;
-    int64_t where_;
+    int64_t at_;
   };
 }
 

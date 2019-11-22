@@ -913,6 +913,13 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
 
 py::class_<ak::Record> make_Record(py::handle m, std::string name) {
   return py::class_<ak::Record>(m, name.c_str())
+      .def("__repr__", &repr<ak::Record>)
+      .def_property_readonly("id", [](ak::Record& self) -> py::object { return box(self.id()); })
+      .def("__getitem__", &getitem<ak::Record>)
+      .def("tojson", &tojson_string<ak::Record>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
+      .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
+      .def_property_readonly("type", &ak::Content::type)
+
       .def_property_readonly("numfields", &ak::Record::numfields)
       .def("index", &ak::Record::index)
       .def("key", &ak::Record::key)
