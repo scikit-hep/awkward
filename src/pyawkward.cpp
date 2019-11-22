@@ -553,6 +553,26 @@ py::object getitem(T& self, py::object obj) {
     }
     // NOTE: control flow can pass through here; don't make the last line an 'else'!
   }
+  if (py::isinstance<py::str>(obj)) {
+    return box(self.getitem_field(obj.cast<std::string>()));
+  }
+  if (py::isinstance<py::iterable>(obj)) {
+    std::vector<std::string> strings;
+    bool all_strings = true;
+    for (auto x : obj) {
+      if (py::isinstance<py::str>(x)) {
+        strings.push_back(x.cast<std::string>());
+      }
+      else {
+        all_strings = false;
+        break;
+      }
+    }
+    if (all_strings  &&  strings.size() != 0) {
+      return box(self.getitem_fields(strings));
+    }
+    // NOTE: control flow can pass through here; don't make the last line an 'else'!
+  }
   return box(self.getitem(toslice(obj)));
 }
 

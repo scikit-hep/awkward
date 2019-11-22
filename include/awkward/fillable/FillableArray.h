@@ -22,6 +22,8 @@ namespace awkward {
     const std::shared_ptr<Content> snapshot() const;
     const std::shared_ptr<Content> getitem_at(int64_t at) const;
     const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;
+    const std::shared_ptr<Content> getitem_field(const std::string& key) const;
+    const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const;
     const std::shared_ptr<Content> getitem(const Slice& where) const;
 
     void null();

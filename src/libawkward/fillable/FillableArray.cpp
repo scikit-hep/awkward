@@ -37,6 +37,14 @@ namespace awkward {
     return snapshot().get()->getitem_range(start, stop);
   }
 
+  const std::shared_ptr<Content> FillableArray::getitem_field(const std::string& key) const {
+    return snapshot().get()->getitem_field(key);
+  }
+
+  const std::shared_ptr<Content> FillableArray::getitem_fields(const std::vector<std::string>& keys) const {
+    return snapshot().get()->getitem_fields(keys);
+  }
+
   const std::shared_ptr<Content> FillableArray::getitem(const Slice& where) const {
     return snapshot().get()->getitem(where);
   }

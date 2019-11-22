@@ -133,3 +133,14 @@ def test_type():
 
 def test_slices():
     assert str(awkward1.layout.Slice((1, 2, [3], "four", ["five", "six"], slice(7, 8, 9)))) == '[array([1]), array([2]), array([3]), "four", ["five", "six"], 7:8:9]'
+
+    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64))
+    content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=numpy.float64))
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
+    recordarray = awkward1.layout.RecordArray()
+    recordarray.append(content1, "one")
+    recordarray.append(listoffsetarray, "two")
+
+    # print(recordarray["one"])
+    # raise Exception
