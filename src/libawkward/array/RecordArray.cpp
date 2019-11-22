@@ -51,7 +51,7 @@ namespace awkward {
 
     void RecordArray::tojson_part(ToJson& builder) const {
       int64_t rows = length();
-      int64_t cols = numfields();
+      size_t cols = contents_.size();
       std::shared_ptr<ReverseLookup> keys = reverselookup_;
       if (keys.get() == nullptr) {
         keys = std::shared_ptr<ReverseLookup>(new ReverseLookup);
@@ -62,7 +62,7 @@ namespace awkward {
       builder.beginlist();
       for (int64_t i = 0;  i < rows;  i++) {
         builder.beginrec();
-        for (int64_t j = 0;  j < cols;  j++) {
+        for (size_t j = 0;  j < cols;  j++) {
           builder.fieldkey(keys.get()->at(j).c_str());
           contents_[j].get()->getitem_at_nowrap(i).get()->tojson_part(builder);
         }
@@ -168,7 +168,7 @@ namespace awkward {
         throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
       }
       if (reverselookup_.get() != nullptr) {
-        return reverselookup_.get()->at(index);
+        return reverselookup_.get()->at((size_t)index);
       }
       else {
         return std::to_string(index);
@@ -217,7 +217,7 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> RecordArray::field(const std::string& key) const {
-      return contents_[index(key)];
+      return contents_[(size_t)index(key)];
     }
 
     const std::vector<std::string> RecordArray::keys() const {
@@ -276,8 +276,8 @@ namespace awkward {
           reverselookup_.get()->push_back(std::to_string(j));
         }
       }
-      (*lookup_.get())[fieldname] = index;
-      (*reverselookup_.get())[index] = fieldname;
+      (*lookup_.get())[fieldname] = (size_t)index;
+      (*reverselookup_.get())[(size_t)index] = fieldname;
     }
 
     const std::shared_ptr<Content> RecordArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

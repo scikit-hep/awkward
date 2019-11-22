@@ -29,6 +29,7 @@
 #include "awkward/type/ListType.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/UnionType.h"
+#include "awkward/type/RecordType.h"
 #include "awkward/io/json.h"
 #include "awkward/io/root.h"
 
@@ -65,6 +66,9 @@ py::object box(std::shared_ptr<ak::Type> t) {
     return py::cast(*raw);
   }
   else if (ak::UnionType* raw = dynamic_cast<ak::UnionType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::RecordType* raw = dynamic_cast<ak::RecordType*>(t.get())) {
     return py::cast(*raw);
   }
   else if (ak::UnknownType* raw = dynamic_cast<ak::UnknownType*>(t.get())) {
@@ -168,6 +172,10 @@ std::shared_ptr<ak::Type> unbox_type(py::handle obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::UnionType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::RecordType*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   throw std::invalid_argument("argument must be a Type subtype");
@@ -703,6 +711,34 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
       .def("compatible", &ak::UnionType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
   );
 }
+
+// py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_RecordType(py::handle m, std::string name) {
+//   return (py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type>(m, name.c_str())
+//       .def(py::init([](py::args args) -> ak::RecordType {
+//         std::vector<std::shared_ptr<ak::Type>> types;
+//         for (auto x : args) {
+//           types.push_back(unbox_type(x));
+//         }
+//         return ak::RecordType(types, std::shared_ptr<ak::RecordType::Lookup>(nullptr), std::shared_ptr<ak::RecordType::ReverseLookup>(nullptr));
+//       }))
+//
+//
+// 
+//
+//       .def_property_readonly("numtypes", &ak::UnionType::numtypes)
+//       .def_property_readonly("types", [](ak::UnionType& self) -> py::tuple {
+//         py::tuple types((size_t)self.numtypes());
+//         for (int64_t i = 0;  i < self.numtypes();  i++) {
+//           types[(size_t)i] = box(self.type(i));
+//         }
+//         return types;
+//       })
+//       .def("type", &ak::UnionType::type)
+//       .def("__repr__", &ak::UnionType::tostring)
+//       .def("__eq__", &ak::UnionType::equal)
+//       .def("compatible", &ak::UnionType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
+//   );
+// }
 
 /////////////////////////////////////////////////////////////// Content
 
