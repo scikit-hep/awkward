@@ -62,11 +62,11 @@ namespace awkward {
   }
 
   int64_t Record::length() const {
-    throw std::runtime_error("FIXME: Record::length");
+    return -1;   // just like NumpyArray with ndim == 0, which is also a scalar
   }
 
   const std::shared_ptr<Content> Record::shallow_copy() const {
-    throw std::runtime_error("FIXME: Record::shallow_copy");
+    return std::shared_ptr<Content>(new Record(recordarray_, at_));
   }
 
   void Record::check_for_iteration() const {

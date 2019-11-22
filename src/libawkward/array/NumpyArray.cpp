@@ -306,7 +306,7 @@ namespace awkward {
 
   int64_t NumpyArray::length() const {
     if (isscalar()) {
-      return -1;
+      return -1;   // just like Record, which is also a scalar
     }
     else {
       return (int64_t)shape_[0];
