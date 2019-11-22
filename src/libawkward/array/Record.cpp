@@ -173,15 +173,23 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: Record::getitem_next");
+    throw std::runtime_error("FIXME: Record::getitem_next(at)");
   }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: Record::getitem_next");
+    throw std::runtime_error("FIXME: Record::getitem_next(range)");
   }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: Record::getitem_next");
+    throw std::runtime_error("FIXME: Record::getitem_next(array)");
+  }
+
+  const std::shared_ptr<Content> Record::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("FIXME: Record::getitem_next(field)");
+  }
+
+  const std::shared_ptr<Content> Record::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("FIXME: Record::getitem_next(fields)");
   }
 
 }

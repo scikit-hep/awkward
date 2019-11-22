@@ -418,6 +418,16 @@ namespace awkward {
     }
   }
 
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("FIXME: ListArray::getitem_next(field)");
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("FIXME: ListArray::getitem_next(fields)");
+  }
+
   template class ListArrayOf<int32_t>;
   template class ListArrayOf<uint32_t>;
   template class ListArrayOf<int64_t>;

@@ -298,4 +298,12 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> RegularArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("FIXME: RegularArray::getitem_next(field)");
+  }
+
+  const std::shared_ptr<Content> RegularArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("FIXME: RegularArray::getitem_next(fields)");
+  }
+
 }

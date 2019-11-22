@@ -88,6 +88,12 @@ namespace awkward {
     else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
       return getitem_next(*array, tail, advanced);
     }
+    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+      return getitem_next(*field, tail, advanced);
+    }
+    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+      return getitem_next(*fields, tail, advanced);
+    }
     else {
       throw std::runtime_error("unrecognized slice type");
     }

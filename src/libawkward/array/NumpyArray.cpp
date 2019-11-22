@@ -574,6 +574,12 @@ namespace awkward {
     else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
       return getitem_bystrides(*newaxis, tail, length);
     }
+    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+      throw std::invalid_argument(field->tostring() + std::string(" is not a valid slice type for ") + classname());
+    }
+    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+      throw std::invalid_argument(fields->tostring() + std::string(" is not a valid slice type for ") + classname());
+    }
     else {
       throw std::runtime_error("unrecognized slice item type");
     }
@@ -706,6 +712,12 @@ namespace awkward {
     }
     else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
       return getitem_next(*array, tail, carry, advanced, length, stride, first);
+    }
+    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+      throw std::invalid_argument(field->tostring() + std::string(" is not a valid slice type for ") + classname());
+    }
+    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+      throw std::invalid_argument(fields->tostring() + std::string(" is not a valid slice type for ") + classname());
     }
     else {
       throw std::runtime_error("unrecognized slice item type");

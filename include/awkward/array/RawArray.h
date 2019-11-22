@@ -349,6 +349,14 @@ namespace awkward {
       return carry(flathead);
     }
 
+    virtual const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+      throw std::invalid_argument(field.tostring() + std::string(" is not a valid slice type for ") + classname());
+    }
+
+    virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+      throw std::invalid_argument(fields.tostring() + std::string(" is not a valid slice type for ") + classname());
+    }
+
   private:
     std::shared_ptr<Identity> id_;
     const std::shared_ptr<T> ptr_;

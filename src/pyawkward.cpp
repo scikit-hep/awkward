@@ -413,7 +413,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
       }
     }
 
-    if (all_strings) {
+    if (all_strings  &&  strings.size() != 0) {
       slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceFields(strings)));
     }
     else {
