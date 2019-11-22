@@ -12,9 +12,18 @@ namespace awkward {
   }
 
   const std::string SliceRange::tostring() const {
-    return (hasstart() ? std::to_string(start_) : std::string("")) + std::string(":") +
-           (hasstop() ? std::to_string(stop_) : std::string("")) + std::string(":") +
-           (step_ != 1 ? std::to_string(step_) : std::string(""));
+    std::stringstream out;
+    if (hasstart()) {
+      out << start_;
+    }
+    out << ":";
+    if (hasstop()) {
+      out << stop_;
+    }
+    if (step_ != 1) {
+      out << ":" << step_;
+    }
+    return out.str();
   }
 
   const std::string SliceEllipsis::tostring() const {
@@ -115,6 +124,23 @@ namespace awkward {
   }
 
   template class SliceArrayOf<int64_t>;
+
+  const std::string SliceField::tostring() const {
+    return util::quote(key_, true);
+  }
+
+  const std::string SliceFields::tostring() const {
+    std::stringstream out;
+    out << "[";
+    for (size_t i = 0;  i < keys_.size();  i++) {
+      if (i != 0) {
+        out << ", ";
+      }
+      out << util::quote(keys_[i], true);
+    }
+    out << "]";
+    return out.str();
+  }
 
   int64_t Slice::length() const {
     return (int64_t)items_.size();
@@ -264,6 +290,12 @@ namespace awkward {
         }
         else if (dynamic_cast<SliceArray64*>(items_[i].get()) != nullptr) {
           types.push_back('A');
+        }
+        else if (dynamic_cast<SliceField*>(items_[i].get()) != nullptr) {
+          types.push_back('"');
+        }
+        else if (dynamic_cast<SliceFields*>(items_[i].get()) != nullptr) {
+          types.push_back('[');
         }
       }
 
