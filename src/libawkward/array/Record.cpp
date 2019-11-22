@@ -130,11 +130,42 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::field(int64_t index) const {
-    return recordarray_.field(index);
+    return recordarray_.field(index).get()->getitem_at_nowrap(at_);
   }
 
   const std::shared_ptr<Content> Record::field(const std::string& key) const {
-    return recordarray_.field(key);
+    return recordarray_.field(key).get()->getitem_at_nowrap(at_);
+  }
+
+  const std::vector<std::string> Record::keys() const {
+    return recordarray_.keys();
+  }
+
+  const std::vector<std::shared_ptr<Content>> Record::values() const {
+    std::vector<std::shared_ptr<Content>> out;
+    int64_t cols = numfields();
+    for (int64_t j = 0;  j < cols;  j++) {
+      out.push_back(recordarray_.field(j).get()->getitem_at_nowrap(at_));
+    }
+    return out;
+  }
+
+  const std::vector<std::pair<std::string, std::shared_ptr<Content>>> Record::items() const {
+    std::vector<std::pair<std::string, std::shared_ptr<Content>>> out;
+    std::shared_ptr<RecordArray::ReverseLookup> keys = recordarray_.reverselookup();
+    if (keys.get() == nullptr) {
+      int64_t cols = numfields();
+      for (int64_t j = 0;  j < cols;  j++) {
+        out.push_back(std::pair<std::string, std::shared_ptr<Content>>(std::to_string(j), recordarray_.field(j).get()->getitem_at_nowrap(at_)));
+      }
+    }
+    else {
+      int64_t cols = numfields();
+      for (int64_t j = 0;  j < cols;  j++) {
+        out.push_back(std::pair<std::string, std::shared_ptr<Content>>(keys.get()->at((size_t)j), recordarray_.field(j).get()->getitem_at_nowrap(at_)));
+      }
+    }
+    return out;
   }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

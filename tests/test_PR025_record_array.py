@@ -51,6 +51,16 @@ def test_basic():
     assert set(recordarray.aliases(2)) == set(["2"])
     assert set(recordarray.aliases("2")) == set(["2"])
 
+    assert recordarray.keys() == ["wonky", "two", "2"]
+    assert [awkward1.tolist(x) for x in recordarray.values()] == [[1, 2, 3, 4, 5], [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]]
+    pairs = recordarray.items()
+    assert pairs[0][0] == "wonky"
+    assert pairs[1][0] == "two"
+    assert pairs[2][0] == "2"
+    assert awkward1.tolist(pairs[0][1]) == [1, 2, 3, 4, 5]
+    assert awkward1.tolist(pairs[1][1]) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert awkward1.tolist(pairs[2][1]) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+
 def test_scalar_record():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -63,3 +73,12 @@ def test_scalar_record():
     str(recordarray)
     str(recordarray[2])
     assert awkward1.tojson(recordarray[2]) == '{"one":3,"two":[4.4,5.5]}'
+
+    assert recordarray[2].keys() == ["one", "two"]
+    assert [awkward1.tolist(x) for x in recordarray[2].values()] == [3, [4.4, 5.5]]
+    pairs = recordarray[2].items()
+    assert pairs[0][0] == "one"
+    assert pairs[1][0] == "two"
+    assert pairs[0][1] == 3
+    assert awkward1.tolist(pairs[1][1]) == [4.4, 5.5]
+    assert awkward1.tolist(recordarray[2]) == {"one": 3, "two": [4.4, 5.5]}

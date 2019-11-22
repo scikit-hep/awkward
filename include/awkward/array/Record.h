@@ -42,6 +42,9 @@ namespace awkward {
     const std::vector<std::string> aliases(const std::string& key) const;
     const std::shared_ptr<Content> field(int64_t index) const;
     const std::shared_ptr<Content> field(const std::string& key) const;
+    const std::vector<std::string> keys() const;
+    const std::vector<std::shared_ptr<Content>> values() const;
+    const std::vector<std::pair<std::string, std::shared_ptr<Content>>> items() const;
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;

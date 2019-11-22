@@ -28,12 +28,12 @@ namespace awkward {
       if (id_.get() != nullptr) {
         out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
       }
-      for (size_t i = 0;  i < contents_.size();  i++) {
-        out << indent << "    <field i=\"" << i << "\"";
+      for (size_t j = 0;  j < contents_.size();  j++) {
+        out << indent << "    <field index=\"" << j << "\"";
         if (reverselookup_.get() != nullptr) {
-          out << " key=\"" << reverselookup_.get()->at(i) << "\">";
+          out << " key=\"" << reverselookup_.get()->at(j) << "\">";
           for (auto pair : *lookup_.get()) {
-            if (pair.second == i  &&  pair.first != reverselookup_.get()->at(i)) {
+            if (pair.second == j  &&  pair.first != reverselookup_.get()->at(j)) {
               out << "<alias>" << pair.first << "</alias>";
             }
           }
@@ -42,7 +42,7 @@ namespace awkward {
           out << ">";
         }
         out << "\n";
-        out << contents_[i].get()->tostring_part(indent + std::string("        "), "", "\n");
+        out << contents_[j].get()->tostring_part(indent + std::string("        "), "", "\n");
         out << indent << "    </field>\n";
       }
       out << indent << "</" << classname() << ">" << post;
@@ -216,10 +216,45 @@ namespace awkward {
       return contents_[index(key)];
     }
 
+    const std::vector<std::string> RecordArray::keys() const {
+      std::vector<std::string> out;
+      if (reverselookup_.get() == nullptr) {
+        int64_t cols = numfields();
+        for (size_t j = 0;  j < cols;  j++) {
+          out.push_back(std::to_string(j));
+        }
+      }
+      else {
+        out.insert(out.end(), reverselookup_.get()->begin(), reverselookup_.get()->end());
+      }
+      return out;
+    }
+
+    const std::vector<std::shared_ptr<Content>> RecordArray::values() const {
+      return std::vector<std::shared_ptr<Content>>(contents_);
+    }
+
+    const std::vector<std::pair<std::string, std::shared_ptr<Content>>> RecordArray::items() const {
+      std::vector<std::pair<std::string, std::shared_ptr<Content>>> out;
+      if (reverselookup_.get() == nullptr) {
+        size_t cols = contents_.size();
+        for (size_t j = 0;  j < cols;  j++) {
+          out.push_back(std::pair<std::string, std::shared_ptr<Content>>(std::to_string(j), contents_[j]));
+        }
+      }
+      else {
+        size_t cols = contents_.size();
+        for (size_t j = 0;  j < cols;  j++) {
+          out.push_back(std::pair<std::string, std::shared_ptr<Content>>(reverselookup_.get()->at(j), contents_[j]));
+        }
+      }
+      return out;
+    }
+
     void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {
-      size_t i = contents_.size();
+      size_t j = contents_.size();
       append(content);
-      setkey(i, key);
+      setkey(j, key);
     }
 
     void RecordArray::append(const std::shared_ptr<Content>& content) {
@@ -229,16 +264,16 @@ namespace awkward {
       contents_.push_back(content);
     }
 
-    void RecordArray::setkey(int64_t i, const std::string& fieldname) {
+    void RecordArray::setkey(int64_t index, const std::string& fieldname) {
       if (lookup_.get() == nullptr) {
         lookup_ = std::shared_ptr<Lookup>(new Lookup);
         reverselookup_ = std::shared_ptr<ReverseLookup>(new ReverseLookup);
-        for (size_t i = 0;  i < contents_.size();  i++) {
-          reverselookup_.get()->push_back(std::to_string(i));
+        for (size_t j = 0;  j < contents_.size();  j++) {
+          reverselookup_.get()->push_back(std::to_string(j));
         }
       }
-      (*lookup_.get())[fieldname] = i;
-      (*reverselookup_.get())[i] = fieldname;
+      (*lookup_.get())[fieldname] = index;
+      (*reverselookup_.get())[index] = fieldname;
     }
 
     const std::shared_ptr<Content> RecordArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

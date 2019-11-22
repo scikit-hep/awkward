@@ -23,7 +23,7 @@ def tolist(array):
         return array
 
     elif isinstance(array, awkward1.layout.Record):
-        return {n: x for n, x in array.items()}
+        return {n: tolist(x) for n, x in array.items()}
 
     elif isinstance(array, numpy.ndarray):
         return array.tolist()

@@ -898,6 +898,27 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
       .def("field", [](ak::RecordArray& self, std::string key) -> py::object {
         return box(self.field(key));
       })
+      .def("keys", &ak::RecordArray::keys)
+      .def("values", [](ak::RecordArray& self) -> py::object {
+        py::list out;
+        for (auto item : self.values()) {
+          out.append(box(item));
+        }
+        return out;
+      })
+      .def("items", [](ak::RecordArray& self) -> py::object {
+        py::list out;
+        for (auto item : self.items()) {
+          py::str key(item.first);
+          py::object val(box(item.second));
+          py::tuple pair(2);
+          pair[0] = key;
+          pair[1] = val;
+          out.append(pair);
+        }
+        return out;
+      })
+
       .def("append", [](ak::RecordArray& self, py::object content, py::object key) -> void {
         if (key.is(py::none())) {
           self.append(unbox_content(content));
@@ -935,6 +956,26 @@ py::class_<ak::Record> make_Record(py::handle m, std::string name) {
       })
       .def("field", [](ak::Record& self, std::string key) -> py::object {
         return box(self.field(key));
+      })
+      .def("keys", &ak::Record::keys)
+      .def("values", [](ak::Record& self) -> py::object {
+        py::list out;
+        for (auto item : self.values()) {
+          out.append(box(item));
+        }
+        return out;
+      })
+      .def("items", [](ak::Record& self) -> py::object {
+        py::list out;
+        for (auto item : self.items()) {
+          py::str key(item.first);
+          py::object val(box(item.second));
+          py::tuple pair(2);
+          pair[0] = key;
+          pair[1] = val;
+          out.append(pair);
+        }
+        return out;
       })
 
   ;
