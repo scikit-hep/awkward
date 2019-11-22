@@ -224,7 +224,7 @@ namespace awkward {
       std::vector<std::string> out;
       if (reverselookup_.get() == nullptr) {
         int64_t cols = numfields();
-        for (size_t j = 0;  j < cols;  j++) {
+        for (int64_t j = 0;  j < cols;  j++) {
           out.push_back(std::to_string(j));
         }
       }

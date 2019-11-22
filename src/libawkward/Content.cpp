@@ -12,8 +12,13 @@ namespace awkward {
     return false;
   }
 
-  const ArrayType Content::type() const {
-    return ArrayType(type_part(), length());
+  const std::shared_ptr<Type> Content::type() const {
+    if (isscalar()) {
+      return type_part();
+    }
+    else {
+      return std::shared_ptr<Type>(new ArrayType(type_part(), length()));
+    }
   }
 
   const std::string Content::tostring() const {

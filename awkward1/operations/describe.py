@@ -25,6 +25,9 @@ def typeof(array):
     elif isinstance(array, numpy.generic):
         raise ValueError("cannot describe {0} as a PrimitiveType".format(type(array)))
 
+    elif isinstance(array, awkward1.layout.Record):
+        return array.type
+
     elif isinstance(array, numpy.ndarray):
         if len(array.shape) == 0:
             return typeof(array.reshape((1,))[0])

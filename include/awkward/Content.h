@@ -9,7 +9,7 @@
 #include "awkward/Identity.h"
 #include "awkward/Slice.h"
 #include "awkward/io/json.h"
-#include "awkward/type/ArrayType.h"
+#include "awkward/type/Type.h"
 
 namespace awkward {
   class Content {
@@ -37,7 +37,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const = 0;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const = 0;
 
-    const ArrayType type() const;
+    const std::shared_ptr<Type> type() const;
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
     void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
