@@ -84,7 +84,52 @@ namespace awkward {
     }
 
     bool RecordType::compatible(std::shared_ptr<Type> other, bool bool_is_int, bool int_is_float, bool ignore_null, bool unknown_is_anything) const {
-      throw std::runtime_error("FIXME: RecordType::compatible");
+      if (unknown_is_anything  &&  dynamic_cast<UnknownType*>(other.get())) {
+        return true;
+      }
+      else if (ignore_null  &&  dynamic_cast<OptionType*>(other.get())) {
+        return compatible(dynamic_cast<OptionType*>(other.get())->type(), bool_is_int, int_is_float, ignore_null, unknown_is_anything);
+      }
+      else if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
+        if (numfields() != t->numfields()) {
+          return false;
+        }
+        if (reverselookup_.get() == nullptr) {
+          if (t->reverselookup().get() != nullptr) {
+            return false;
+          }
+          for (int64_t j = 0;  j < numfields();  j++) {
+            if (!field(j).get()->compatible(t->field(j), bool_is_int, int_is_float, ignore_null, unknown_is_anything)) {
+              return false;
+            }
+          }
+          return true;
+        }
+        else {
+          if (t->reverselookup().get() == nullptr) {
+            return false;
+          }
+          if (lookup_.get()->size() != t->lookup().get()->size()) {
+            return false;
+          }
+          for (auto pair : *lookup_.get()) {
+            int64_t otherindex;
+            try {
+              otherindex = (int64_t)t->lookup().get()->at(pair.first);
+            }
+            catch (std::out_of_range err) {
+              return false;
+            }
+            if (!field((int64_t)pair.second).get()->compatible(t->field(otherindex), bool_is_int, int_is_float, ignore_null, unknown_is_anything)) {
+              return false;
+            }
+          }
+          return true;
+        }
+      }
+      else {
+        return false;
+      }
     }
 
     int64_t RecordType::numfields() const {

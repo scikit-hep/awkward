@@ -96,10 +96,13 @@ def test_type():
     assert awkward1.typeof(recordarray) == awkward1.layout.ArrayType(awkward1.layout.RecordType(
         awkward1.layout.PrimitiveType("int64"),
         awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))), 5)
+    assert awkward1.typeof(recordarray).compatible(awkward1.layout.ArrayType(awkward1.layout.RecordType(
+        awkward1.layout.PrimitiveType("int64"),
+        awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))), 5))
 
     recordarray.setkey(0, "one")
     recordarray.setkey(1, "two")
-    assert str(awkward1.typeof(recordarray)) == '5 * {"one": int64, "two": var * float64}'
+    assert str(awkward1.typeof(recordarray)) in ('5 * {"one": int64, "two": var * float64}', '5 * {"two": var * float64, "one": int64}')
 
     assert str(awkward1.layout.RecordType(
         awkward1.layout.PrimitiveType("int32"),
@@ -107,8 +110,11 @@ def test_type():
 
     assert str(awkward1.layout.RecordType(
         one=awkward1.layout.PrimitiveType("int32"),
-        two=awkward1.layout.PrimitiveType("float64"))) == '{"one": int32, "two": float64}'
+        two=awkward1.layout.PrimitiveType("float64"))) in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
 
     assert awkward1.typeof(recordarray) == awkward1.layout.ArrayType(awkward1.layout.RecordType(
         one=awkward1.layout.PrimitiveType("int64"),
         two=awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))), 5)
+    assert awkward1.typeof(recordarray).compatible(awkward1.layout.ArrayType(awkward1.layout.RecordType(
+        one=awkward1.layout.PrimitiveType("int64"),
+        two=awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))), 5))
