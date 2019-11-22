@@ -44,7 +44,7 @@ namespace awkward {
   }
 
   void Record::tojson_part(ToJson& builder) const {
-    size_t cols = contents_.size();
+    size_t cols = (size_t)numfields();
     std::shared_ptr<RecordArray::ReverseLookup> keys = recordarray_.reverselookup();
     if (keys.get() == nullptr) {
       keys = std::shared_ptr<RecordArray::ReverseLookup>(new RecordArray::ReverseLookup);

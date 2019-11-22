@@ -712,33 +712,39 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
   );
 }
 
-// py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_RecordType(py::handle m, std::string name) {
-//   return (py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type>(m, name.c_str())
-//       .def(py::init([](py::args args) -> ak::RecordType {
-//         std::vector<std::shared_ptr<ak::Type>> types;
-//         for (auto x : args) {
-//           types.push_back(unbox_type(x));
-//         }
-//         return ak::RecordType(types, std::shared_ptr<ak::RecordType::Lookup>(nullptr), std::shared_ptr<ak::RecordType::ReverseLookup>(nullptr));
-//       }))
-//
-//
-// 
-//
-//       .def_property_readonly("numtypes", &ak::UnionType::numtypes)
-//       .def_property_readonly("types", [](ak::UnionType& self) -> py::tuple {
-//         py::tuple types((size_t)self.numtypes());
-//         for (int64_t i = 0;  i < self.numtypes();  i++) {
-//           types[(size_t)i] = box(self.type(i));
-//         }
-//         return types;
-//       })
-//       .def("type", &ak::UnionType::type)
-//       .def("__repr__", &ak::UnionType::tostring)
-//       .def("__eq__", &ak::UnionType::equal)
-//       .def("compatible", &ak::UnionType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
-//   );
-// }
+py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_RecordType(py::handle m, std::string name) {
+  return (py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type>(m, name.c_str())
+      .def(py::init([](py::args args) -> ak::RecordType {
+        std::vector<std::shared_ptr<ak::Type>> types;
+        for (auto x : args) {
+          types.push_back(unbox_type(x));
+        }
+        return ak::RecordType(types, std::shared_ptr<ak::RecordType::Lookup>(nullptr), std::shared_ptr<ak::RecordType::ReverseLookup>(nullptr));
+      }))
+      .def(py::init([](py::kwargs kwargs) -> ak::RecordType {
+        std::vector<std::shared_ptr<ak::Type>> types;
+        std::shared_ptr<ak::RecordType::Lookup> lookup;
+        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup;
+
+        return ak::RecordType(types, lookup, reverselookup);
+      }))
+
+
+
+      // .def_property_readonly("numtypes", &ak::UnionType::numtypes)
+      // .def_property_readonly("types", [](ak::UnionType& self) -> py::tuple {
+      //   py::tuple types((size_t)self.numtypes());
+      //   for (int64_t i = 0;  i < self.numtypes();  i++) {
+      //     types[(size_t)i] = box(self.type(i));
+      //   }
+      //   return types;
+      // })
+      // .def("type", &ak::UnionType::type)
+      // .def("__repr__", &ak::UnionType::tostring)
+      // .def("__eq__", &ak::UnionType::equal)
+      // .def("compatible", &ak::UnionType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
+  );
+}
 
 /////////////////////////////////////////////////////////////// Content
 
