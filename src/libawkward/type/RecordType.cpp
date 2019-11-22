@@ -5,12 +5,35 @@
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
+#include "awkward/util.h"
 
 #include "awkward/type/RecordType.h"
 
 namespace awkward {
     std::string RecordType::tostring_part(std::string indent, std::string pre, std::string post) const {
-      throw std::runtime_error("FIXME: RecordType::tostring_part");
+      std::stringstream out;
+      if (reverselookup_.get() == nullptr) {
+        out << "(";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << types_[j].get()->tostring_part("", "", "");
+        }
+        out << ")";
+      }
+      else {
+        out << "{";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << util::quote(reverselookup_.get()->at(j), true) << ": ";
+          out << types_[j].get()->tostring_part("", "", "");
+        }
+        out << "}";
+      }
+      return out.str();
     }
 
     const std::shared_ptr<Type> RecordType::shallow_copy() const {

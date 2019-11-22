@@ -4,7 +4,7 @@
 
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
-// #include "awkward/type/RecordType.h"
+#include "awkward/type/RecordType.h"
 #include "awkward/array/Record.h"
 
 #include "awkward/array/RecordArray.h"
@@ -72,7 +72,11 @@ namespace awkward {
     }
 
     const std::shared_ptr<Type> RecordArray::type_part() const {
-      throw std::runtime_error("RecordArray::type_part");
+      std::vector<std::shared_ptr<Type>> types;
+      for (auto item : contents_) {
+        types.push_back(item.get()->type_part());
+      }
+      return std::shared_ptr<Type>(new RecordType(types, lookup_, reverselookup_));
     }
 
     int64_t RecordArray::length() const {

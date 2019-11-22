@@ -8,6 +8,10 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  bool Content::isscalar() const {
+    return false;
+  }
+
   const ArrayType Content::type() const {
     return ArrayType(type_part(), length());
   }

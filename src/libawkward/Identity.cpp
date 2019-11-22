@@ -81,7 +81,7 @@ namespace awkward {
       if (i != 0) {
         out << " ";
       }
-      out << "(" << fieldloc_[i].first << ", '" << fieldloc_[i].second << "')";
+      out << "(" << fieldloc_[i].first << ", " << util::quote(fieldloc_[i].second, false) << ")";
     }
     out << "]\" width=\"" << width_ << "\" offset=\"" << offset_ << "\" length=\"" << length_ << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;

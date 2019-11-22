@@ -34,13 +34,13 @@ namespace awkward {
     const std::string format() const { return format_; }
 
     ssize_t ndim() const;
-    bool isscalar() const;
     bool isempty() const;
     void* byteptr() const;
     void* byteptr(ssize_t at) const;
     ssize_t bytelength() const;
     uint8_t getbyte(ssize_t at) const;
 
+    virtual bool isscalar() const;
     virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();

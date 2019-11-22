@@ -15,6 +15,7 @@ namespace awkward {
     const std::shared_ptr<Content> recordarray() const { return recordarray_.shallow_copy(); }
     int64_t at() const { return at_; }
 
+    virtual bool isscalar() const;
     virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const;
     virtual void setid();

@@ -12,14 +12,14 @@ import awkward1
 def test_unknown():
     a = awkward1.fromjson("[[], [], []]")
     assert awkward1.tolist(a) == [[], [], []]
-    assert str(awkward1.typeof(a)) == "3 * var * ???"
+    assert str(awkward1.typeof(a)) == "3 * var * unknown"
     assert awkward1.typeof(a).compatible(awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.UnknownType()), 3))
     assert awkward1.typeof(a).compatible(awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")), 3))
     assert not awkward1.typeof(a).compatible(awkward1.layout.ArrayType(awkward1.layout.PrimitiveType("float64"), 3))
 
     a = awkward1.fromjson("[[], [[], []], [[], [], []]]")
     assert awkward1.tolist(a) == [[], [[], []], [[], [], []]]
-    assert str(awkward1.typeof(a)) == "3 * var * var * ???"
+    assert str(awkward1.typeof(a)) == "3 * var * var * unknown"
     assert awkward1.typeof(a).compatible(awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.ListType(awkward1.layout.UnknownType())), 3))
 
     a = awkward1.layout.FillableArray()
@@ -30,14 +30,14 @@ def test_unknown():
     a.beginlist()
     a.endlist()
     assert awkward1.tolist(a) == [[], [], []]
-    assert str(awkward1.typeof(a)) == "3 * var * ???"
+    assert str(awkward1.typeof(a)) == "3 * var * unknown"
     assert awkward1.typeof(a).compatible(awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.UnknownType()), 3))
     assert awkward1.typeof(a).compatible(awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")), 3))
     assert not awkward1.typeof(a).compatible(awkward1.layout.ArrayType(awkward1.layout.PrimitiveType("float64"), 3))
 
     a = a.snapshot()
     assert awkward1.tolist(a) == [[], [], []]
-    assert str(awkward1.typeof(a)) == "3 * var * ???"
+    assert str(awkward1.typeof(a)) == "3 * var * unknown"
     assert awkward1.typeof(a).compatible(awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.UnknownType()), 3))
     assert awkward1.typeof(a).compatible(awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")), 3))
     assert not awkward1.typeof(a).compatible(awkward1.layout.ArrayType(awkward1.layout.PrimitiveType("float64"), 3))

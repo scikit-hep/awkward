@@ -16,6 +16,7 @@ namespace awkward {
   public:
     virtual ~Content() { }
 
+    virtual bool isscalar() const;
     virtual const std::string classname() const = 0;
     virtual const std::shared_ptr<Identity> id() const = 0;
     virtual void setid() = 0;

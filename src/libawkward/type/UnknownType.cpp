@@ -6,7 +6,7 @@
 
 namespace awkward {
   std::string UnknownType::tostring_part(std::string indent, std::string pre, std::string post) const {
-    return indent + pre + "???" + post;
+    return indent + pre + "unknown" + post;
   }
 
   const std::shared_ptr<Type> UnknownType::shallow_copy() const {

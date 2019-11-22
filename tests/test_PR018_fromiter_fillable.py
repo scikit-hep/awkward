@@ -17,7 +17,7 @@ def test_types():
     t4b = awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32"))
     t5 = awkward1.layout.ListType(t4)
     t6 = awkward1.layout.OptionType(t4)
-    assert repr(t0) == "???"
+    assert repr(t0) == "unknown"
     assert repr(t1) == "int32"
     assert repr(t2) == "?int32"
     assert repr(t3) == "union[int32, float64]"

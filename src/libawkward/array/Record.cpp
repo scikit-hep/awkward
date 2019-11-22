@@ -4,11 +4,15 @@
 
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
-// #include "awkward/type/RecordType.h"
+#include "awkward/type/RecordType.h"
 
 #include "awkward/array/Record.h"
 
 namespace awkward {
+  bool Record::isscalar() const {
+    return true;
+  }
+
   const std::string Record::classname() const {
     return "Record";
   }
@@ -58,7 +62,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> Record::type_part() const {
-    throw std::runtime_error("FIXME: Record::type_part");
+    return recordarray_.type_part();
   }
 
   int64_t Record::length() const {

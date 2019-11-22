@@ -8,16 +8,13 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
+#include "awkward/util.h"
 
 #include "awkward/array/NumpyArray.h"
 
 namespace awkward {
   ssize_t NumpyArray::ndim() const {
     return shape_.size();
-  }
-
-  bool NumpyArray::isscalar() const {
-    return ndim() == 0;
   }
 
   bool NumpyArray::isempty() const {
@@ -48,6 +45,10 @@ namespace awkward {
 
   uint8_t NumpyArray::getbyte(ssize_t at) const {
     return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
+  }
+
+  bool NumpyArray::isscalar() const {
+    return ndim() == 0;
   }
 
   const std::string NumpyArray::classname() const {
@@ -109,7 +110,7 @@ namespace awkward {
   const std::string NumpyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     assert(!isscalar());
     std::stringstream out;
-    out << indent << pre << "<" << classname() << " format=\"" << format_ << "\" shape=\"";
+    out << indent << pre << "<" << classname() << " format=" << util::quote(format_, true) << " shape=\"";
     for (ssize_t i = 0;  i < ndim();  i++) {
       if (i != 0) {
         out << " ";
