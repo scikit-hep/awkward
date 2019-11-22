@@ -120,7 +120,7 @@ namespace awkward {
   const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content> outcontent, const std::vector<int64_t>& shape) const {
     std::shared_ptr<Content> out(new RegularArray(Identity::none(), outcontent, (int64_t)shape[shape.size() - 1]));
     for (int64_t i = (int64_t)shape.size() - 2;  i >= 0;  i--) {
-      out = std::shared_ptr<Content>(new RegularArray(Identity::none(), out, (int64_t)shape[i]));
+      out = std::shared_ptr<Content>(new RegularArray(Identity::none(), out, (int64_t)shape[(size_t)i]));
     }
     return out;
   }

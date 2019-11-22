@@ -20,6 +20,10 @@ namespace awkward {
         , lookup_(lookup)
         , reverselookup_(reverselookup) { }
 
+    const std::vector<std::shared_ptr<Type>> types() const { return types_; };
+    const std::shared_ptr<Lookup> lookup() const { return lookup_; }
+    const std::shared_ptr<ReverseLookup> reverselookup() const { return reverselookup_; }
+
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
     virtual const std::shared_ptr<Type> shallow_copy() const;
     virtual bool equal(std::shared_ptr<Type> other) const;

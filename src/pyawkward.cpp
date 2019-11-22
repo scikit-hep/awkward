@@ -697,6 +697,10 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
         }
         return ak::UnionType(types);
       }))
+      .def("__repr__", &ak::UnionType::tostring)
+      .def("__eq__", &ak::UnionType::equal)
+      .def("compatible", &ak::UnionType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
+
       .def_property_readonly("numtypes", &ak::UnionType::numtypes)
       .def_property_readonly("types", [](ak::UnionType& self) -> py::tuple {
         py::tuple types((size_t)self.numtypes());
@@ -706,9 +710,7 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
         return types;
       })
       .def("type", &ak::UnionType::type)
-      .def("__repr__", &ak::UnionType::tostring)
-      .def("__eq__", &ak::UnionType::equal)
-      .def("compatible", &ak::UnionType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
+
   );
 }
 
@@ -722,27 +724,58 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         return ak::RecordType(types, std::shared_ptr<ak::RecordType::Lookup>(nullptr), std::shared_ptr<ak::RecordType::ReverseLookup>(nullptr));
       }))
       .def(py::init([](py::kwargs kwargs) -> ak::RecordType {
+        std::shared_ptr<ak::RecordType::Lookup> lookup(new ak::RecordType::Lookup);
+        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup(new ak::RecordType::ReverseLookup);
         std::vector<std::shared_ptr<ak::Type>> types;
-        std::shared_ptr<ak::RecordType::Lookup> lookup;
-        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup;
-
+        for (auto x : kwargs) {
+          std::string key = x.first.cast<std::string>();
+          (*lookup.get())[key] = types.size();
+          reverselookup.get()->push_back(key);
+          types.push_back(unbox_type(x.second));
+        }
         return ak::RecordType(types, lookup, reverselookup);
       }))
+      .def("__repr__", &ak::RecordType::tostring)
+      .def("__eq__", &ak::RecordType::equal)
+      .def("compatible", &ak::RecordType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
 
+      .def_property_readonly("numfields", &ak::RecordType::numfields)
+      .def("index", &ak::RecordType::index)
+      .def("key", &ak::RecordType::key)
+      .def("__contains__", &ak::RecordType::has)
+      .def("aliases", [](ak::RecordType& self, int64_t index) -> std::vector<std::string> {
+        return self.aliases(index);
+      })
+      .def("aliases", [](ak::RecordType& self, std::string key) -> std::vector<std::string> {
+        return self.aliases(key);
+      })
+      .def("__getitem__", [](ak::RecordType& self, int64_t index) -> py::object {
+        return box(self.field(index));
+      })
+      .def("__getitem__", [](ak::RecordType& self, std::string key) -> py::object {
+        return box(self.field(key));
+      })
+      .def("keys", &ak::RecordType::keys)
+      .def("values", [](ak::RecordType& self) -> py::object {
+        py::list out;
+        for (auto item : self.values()) {
+          out.append(box(item));
+        }
+        return out;
+      })
+      .def("items", [](ak::RecordType& self) -> py::object {
+        py::list out;
+        for (auto item : self.items()) {
+          py::str key(item.first);
+          py::object val(box(item.second));
+          py::tuple pair(2);
+          pair[0] = key;
+          pair[1] = val;
+          out.append(pair);
+        }
+        return out;
+      })
 
-
-      // .def_property_readonly("numtypes", &ak::UnionType::numtypes)
-      // .def_property_readonly("types", [](ak::UnionType& self) -> py::tuple {
-      //   py::tuple types((size_t)self.numtypes());
-      //   for (int64_t i = 0;  i < self.numtypes();  i++) {
-      //     types[(size_t)i] = box(self.type(i));
-      //   }
-      //   return types;
-      // })
-      // .def("type", &ak::UnionType::type)
-      // .def("__repr__", &ak::UnionType::tostring)
-      // .def("__eq__", &ak::UnionType::equal)
-      // .def("compatible", &ak::UnionType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
   );
 }
 
@@ -1055,6 +1088,7 @@ PYBIND11_MODULE(layout, m) {
   make_ListType(m, "ListType");
   make_OptionType(m, "OptionType");
   make_UnionType(m, "UnionType");
+  make_RecordType(m, "RecordType");
 
   make_Content(m, "Content");
 
