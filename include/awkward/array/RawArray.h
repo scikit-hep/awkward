@@ -263,11 +263,11 @@ namespace awkward {
       return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + start, stop - start, itemsize_));
     }
 
-    virtual const std::shared_ptr<Content> getitem_field(const std::string& field) const {
+    virtual const std::shared_ptr<Content> getitem_field(const std::string& key) const {
       throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
     }
 
-    virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& fields) const {
+    virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const {
       throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
     }
 

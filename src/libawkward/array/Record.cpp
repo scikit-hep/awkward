@@ -46,7 +46,7 @@ namespace awkward {
   void Record::tojson_part(ToJson& builder) const {
     size_t cols = (size_t)numfields();
     std::shared_ptr<RecordArray::ReverseLookup> keys = recordarray_.reverselookup();
-    if (keys.get() == nullptr) {
+    if (istuple()) {
       keys = std::shared_ptr<RecordArray::ReverseLookup>(new RecordArray::ReverseLookup);
       for (size_t j = 0;  j < cols;  j++) {
         keys.get()->push_back(std::to_string(j));
@@ -74,39 +74,48 @@ namespace awkward {
   }
 
   void Record::check_for_iteration() const {
-    throw std::runtime_error("FIXME: Record::check_for_iteration");
+    if (recordarray_.id().get() != nullptr  &&  recordarray_.id().get()->length() != 1) {
+      util::handle_error(failure("len(id) != 1 for scalar Record", kSliceNone, kSliceNone), recordarray_.id().get()->classname(), nullptr);
+    }
   }
 
   const std::shared_ptr<Content> Record::getitem_nothing() const {
-    throw std::runtime_error("FIXME: Record::getitem_nothing");
+    throw std::runtime_error("Record::getitem_nothing() should never be called (length != 0)");
   }
 
   const std::shared_ptr<Content> Record::getitem_at(int64_t at) const {
-    throw std::runtime_error("FIXME: Record::getitem_at");
+    throw std::invalid_argument(std::string("scalar Record can only be sliced by field name (string); try ") + util::quote(std::to_string(at), true));
   }
 
   const std::shared_ptr<Content> Record::getitem_at_nowrap(int64_t at) const {
-    throw std::runtime_error("FIXME: Record::getitem_at_nowrap");
+    throw std::invalid_argument(std::string("scalar Record can only be sliced by field name (string); try ") + util::quote(std::to_string(at), true));
   }
 
   const std::shared_ptr<Content> Record::getitem_range(int64_t start, int64_t stop) const {
-    throw std::runtime_error("FIXME: Record::getitem_range");
+    throw std::invalid_argument("scalar Record can only be sliced by field name (string)");
   }
 
   const std::shared_ptr<Content> Record::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    throw std::runtime_error("FIXME: Record::getitem_range_nowrap");
+    throw std::invalid_argument("scalar Record can only be sliced by field name (string)");
   }
 
-  const std::shared_ptr<Content> Record::getitem_field(const std::string& field) const {
-    throw std::runtime_error("FIXME: Record::getitem_field");
+  const std::shared_ptr<Content> Record::getitem_field(const std::string& key) const {
+    return recordarray_.field(key).get()->getitem_at_nowrap(at_);
   }
 
-  const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& fields) const {
-    throw std::runtime_error("FIXME: Record::getitem_fields");
-  }
-
-  const std::shared_ptr<Content> Record::getitem(const Slice& where) const {
-    throw std::runtime_error("FIXME: Record::getitem");
+  const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& keys) const {
+    RecordArray out(recordarray_.id());
+    if (istuple()) {
+      for (auto key : keys) {
+        out.append(recordarray_.field(key));
+      }
+    }
+    else {
+      for (auto key : keys) {
+        out.append(recordarray_.field(key), key);
+      }
+    }
+    return out.getitem_at_nowrap(at_);
   }
 
   const std::shared_ptr<Content> Record::carry(const Index64& carry) const {
@@ -114,7 +123,7 @@ namespace awkward {
   }
 
   const std::pair<int64_t, int64_t> Record::minmax_depth() const {
-    throw std::runtime_error("FIXME: Record::minmax_depth");
+    return recordarray_.minmax_depth();
   }
 
   int64_t Record::numfields() const {
@@ -165,7 +174,7 @@ namespace awkward {
   const std::vector<std::pair<std::string, std::shared_ptr<Content>>> Record::items() const {
     std::vector<std::pair<std::string, std::shared_ptr<Content>>> out;
     std::shared_ptr<RecordArray::ReverseLookup> keys = recordarray_.reverselookup();
-    if (keys.get() == nullptr) {
+    if (istuple()) {
       int64_t cols = numfields();
       for (int64_t j = 0;  j < cols;  j++) {
         out.push_back(std::pair<std::string, std::shared_ptr<Content>>(std::to_string(j), recordarray_.field(j).get()->getitem_at_nowrap(at_)));

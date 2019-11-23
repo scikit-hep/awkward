@@ -111,7 +111,11 @@ namespace awkward {
     return std::shared_ptr<Content>(new RegularArray(id_, content_, size_));
   }
 
-  void RegularArray::check_for_iteration() const { }
+  void RegularArray::check_for_iteration() const {
+    if (id_.get() != nullptr  && id_.get()->length() < length()) {
+      util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+    }
+  }
 
   const std::shared_ptr<Content> RegularArray::getitem_nothing() const {
     return content_.get()->getitem_range_nowrap(0, 0);
@@ -151,11 +155,11 @@ namespace awkward {
     return std::shared_ptr<Content>(new RegularArray(id_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_));
   }
 
-  const std::shared_ptr<Content> RegularArray::getitem_field(const std::string& field) const {
+  const std::shared_ptr<Content> RegularArray::getitem_field(const std::string& key) const {
     throw std::runtime_error("FIXME: RegularArray::getitem_field");
   }
 
-  const std::shared_ptr<Content> RegularArray::getitem_fields(const std::vector<std::string>& fields) const {
+  const std::shared_ptr<Content> RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
     throw std::runtime_error("FIXME: RegularArray::getitem_fields");
   }
 

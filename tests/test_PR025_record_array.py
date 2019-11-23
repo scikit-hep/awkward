@@ -139,8 +139,28 @@ def test_slices():
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
     recordarray = awkward1.layout.RecordArray()
-    recordarray.append(content1, "one")
-    recordarray.append(listoffsetarray, "two")
+    recordarray.append(content1)
+    recordarray.append(listoffsetarray)
+    recordarray.append(content2)
 
-    # print(recordarray["one"])
-    # raise Exception
+    assert awkward1.tolist(recordarray["2"]) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(recordarray[["0", "1"]]) == [{"0": 1, "1": [1.1, 2.2, 3.3]}, {"0": 2, "1": []}, {"0": 3, "1": [4.4, 5.5]}, {"0": 4, "1": [6.6]}, {"0": 5, "1": [7.7, 8.8, 9.9]}]
+    assert awkward1.tolist(recordarray[["1", "0"]]) == [{"1": 1, "0": [1.1, 2.2, 3.3]}, {"1": 2, "0": []}, {"1": 3, "0": [4.4, 5.5]}, {"1": 4, "0": [6.6]}, {"1": 5, "0": [7.7, 8.8, 9.9]}]
+    assert awkward1.tolist(recordarray[1:-1]) == [{"0": 2, "1": [], "2": 2.2}, {"0": 3, "1": [4.4, 5.5], "2": 3.3}, {"0": 4, "1": [6.6], "2": 4.4}]
+    assert awkward1.tolist(recordarray[2]) == {"0": 3, "1": [4.4, 5.5], "2": 3.3}
+    assert awkward1.tolist(recordarray[2]["1"]) == [4.4, 5.5]
+    assert awkward1.tolist(recordarray[2][["0", "1"]]) == {"0": 3, "1": [4.4, 5.5]}
+    assert awkward1.tolist(recordarray[2][["1", "0"]]) == {"1": 3, "0": [4.4, 5.5]}
+
+    recordarray.setkey(0, "one")
+    recordarray.setkey(1, "two")
+    recordarray.setkey(2, "three")
+
+    assert awkward1.tolist(recordarray["three"]) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(recordarray[["one", "two"]]) == [{"one": 1, "two": [1.1, 2.2, 3.3]}, {"one": 2, "two": []}, {"one": 3, "two": [4.4, 5.5]}, {"one": 4, "two": [6.6]}, {"one": 5, "two": [7.7, 8.8, 9.9]}]
+    assert awkward1.tolist(recordarray[["two", "one"]]) == [{"one": 1, "two": [1.1, 2.2, 3.3]}, {"one": 2, "two": []}, {"one": 3, "two": [4.4, 5.5]}, {"one": 4, "two": [6.6]}, {"one": 5, "two": [7.7, 8.8, 9.9]}]
+    assert awkward1.tolist(recordarray[1:-1]) == [{"one": 2, "two": [], "three": 2.2}, {"one": 3, "two": [4.4, 5.5], "three": 3.3}, {"one": 4, "two": [6.6], "three": 4.4}]
+    assert awkward1.tolist(recordarray[2]) == {"one": 3, "two": [4.4, 5.5], "three": 3.3}
+    assert awkward1.tolist(recordarray[2]["two"]) == [4.4, 5.5]
+    assert awkward1.tolist(recordarray[2][["one", "two"]]) == {"one": 3, "two": [4.4, 5.5]}
+    assert awkward1.tolist(recordarray[2][["two", "one"]]) == {"one": 3, "two": [4.4, 5.5]}
