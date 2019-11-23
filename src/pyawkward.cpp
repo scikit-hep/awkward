@@ -181,7 +181,7 @@ std::shared_ptr<ak::Type> unbox_type(py::handle obj) {
   throw std::invalid_argument("argument must be a Type subtype");
 }
 
-std::shared_ptr<ak::Content> unbox_content(py::object obj) {
+std::shared_ptr<ak::Content> unbox_content(py::handle obj) {
   try {
     return obj.cast<ak::NumpyArray*>()->shallow_copy();
   }
@@ -230,9 +230,9 @@ std::shared_ptr<ak::Content> unbox_content(py::object obj) {
   throw std::invalid_argument("content argument must be a Content subtype");
 }
 
-std::shared_ptr<ak::Identity> unbox_id(py::object id) {
+std::shared_ptr<ak::Identity> unbox_id(py::handle id) {
   if (id.is(py::none())) {
-    return std::shared_ptr<ak::Identity>(nullptr);
+    return ak::Identity::none();
   }
   try {
     return id.cast<ak::Identity32*>()->shallow_copy();
@@ -999,6 +999,25 @@ py::class_<ak::RegularArray, ak::Content> make_RegularArray(py::handle m, std::s
 
 py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::string name) {
   return content(py::class_<ak::RecordArray, ak::Content>(m, name.c_str())
+      .def(py::init([](py::dict contents, py::object id) -> ak::RecordArray {
+        std::shared_ptr<ak::RecordArray::Lookup> lookup(new ak::RecordArray::Lookup);
+        std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup(new ak::RecordArray::ReverseLookup);
+        std::vector<std::shared_ptr<ak::Content>> out;
+        for (auto x : contents) {
+          std::string key = x.first.cast<std::string>();
+          (*lookup.get())[key] = out.size();
+          reverselookup.get()->push_back(key);
+          out.push_back(unbox_content(x.second));
+        }
+        return ak::RecordArray(unbox_id(id), out, lookup, reverselookup);
+      }), py::arg("contents"), py::arg("id") = py::none())
+      .def(py::init([](py::iterable contents, py::object id) -> ak::RecordArray {
+        std::vector<std::shared_ptr<ak::Content>> out;
+        for (auto x : contents) {
+          out.push_back(unbox_content(x));
+        }
+        return ak::RecordArray(unbox_id(id), out, std::shared_ptr<ak::RecordArray::Lookup>(nullptr), std::shared_ptr<ak::RecordArray::ReverseLookup>(nullptr));
+      }), py::arg("contents"), py::arg("id") = py::none())
       .def(py::init([](py::object id) -> ak::RecordArray {
         return ak::RecordArray(unbox_id(id));
       }), py::arg("id") = py::none())

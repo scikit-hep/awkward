@@ -131,17 +131,14 @@ def test_type():
         one=awkward1.layout.PrimitiveType("int64"),
         two=awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))))
 
-def test_slices():
+def test_getitem():
     assert str(awkward1.layout.Slice((1, 2, [3], "four", ["five", "six"], slice(7, 8, 9)))) == '[array([1]), array([2]), array([3]), "four", ["five", "six"], 7:8:9]'
 
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64))
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=numpy.float64))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
-    recordarray = awkward1.layout.RecordArray()
-    recordarray.append(content1)
-    recordarray.append(listoffsetarray)
-    recordarray.append(content2)
+    recordarray = awkward1.layout.RecordArray([content1, listoffsetarray, content2])
 
     assert awkward1.tolist(recordarray["2"]) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert awkward1.tolist(recordarray[["0", "1"]]) == [{"0": 1, "1": [1.1, 2.2, 3.3]}, {"0": 2, "1": []}, {"0": 3, "1": [4.4, 5.5]}, {"0": 4, "1": [6.6]}, {"0": 5, "1": [7.7, 8.8, 9.9]}]
@@ -152,9 +149,7 @@ def test_slices():
     assert awkward1.tolist(recordarray[2][["0", "1"]]) == {"0": 3, "1": [4.4, 5.5]}
     assert awkward1.tolist(recordarray[2][["1", "0"]]) == {"1": 3, "0": [4.4, 5.5]}
 
-    recordarray.setkey(0, "one")
-    recordarray.setkey(1, "two")
-    recordarray.setkey(2, "three")
+    recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray, "three": content2})
 
     assert awkward1.tolist(recordarray["three"]) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert awkward1.tolist(recordarray[["one", "two"]]) == [{"one": 1, "two": [1.1, 2.2, 3.3]}, {"one": 2, "two": []}, {"one": 3, "two": [4.4, 5.5]}, {"one": 4, "two": [6.6]}, {"one": 5, "two": [7.7, 8.8, 9.9]}]
@@ -164,3 +159,14 @@ def test_slices():
     assert awkward1.tolist(recordarray[2]["two"]) == [4.4, 5.5]
     assert awkward1.tolist(recordarray[2][["one", "two"]]) == {"one": 3, "two": [4.4, 5.5]}
     assert awkward1.tolist(recordarray[2][["two", "one"]]) == {"one": 3, "two": [4.4, 5.5]}
+
+def test_getitem_next():
+    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64))
+    content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=numpy.float64))
+    offsets1 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
+    listoffsetarray1 = awkward1.layout.ListOffsetArray64(offsets1, content2)
+    recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray1, "three": content2})
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5]))
+    listoffsetarray2 = awkward1.layout.ListOffsetArray64(offsets2, recordarray)
+
+    assert awkward1.tolist(listoffsetarray2) == [[{"one": 1, "two": [1.1, 2.2, 3.3], "three": 1.1}, {"one": 2, "two": [], "three": 2.2}, {"one": 3, "two": [4.4, 5.5], "three": 3.3}], [], [{"one": 4, "two": [6.6], "three": 4.4}, {"one": 5, "two": [7.7, 8.8, 9.9], "three": 5.5}]]
