@@ -139,6 +139,7 @@ def test_getitem():
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
     recordarray = awkward1.layout.RecordArray([content1, listoffsetarray, content2])
+    assert recordarray.istuple
 
     assert awkward1.tolist(recordarray["2"]) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert awkward1.tolist(recordarray[["0", "1"]]) == [{"0": 1, "1": [1.1, 2.2, 3.3]}, {"0": 2, "1": []}, {"0": 3, "1": [4.4, 5.5]}, {"0": 4, "1": [6.6]}, {"0": 5, "1": [7.7, 8.8, 9.9]}]
@@ -150,6 +151,7 @@ def test_getitem():
     assert awkward1.tolist(recordarray[2][["1", "0"]]) == {"1": 3, "0": [4.4, 5.5]}
 
     recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray, "three": content2})
+    assert not recordarray.istuple
 
     assert awkward1.tolist(recordarray["three"]) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert awkward1.tolist(recordarray[["one", "two"]]) == [{"one": 1, "two": [1.1, 2.2, 3.3]}, {"one": 2, "two": []}, {"one": 3, "two": [4.4, 5.5]}, {"one": 4, "two": [6.6]}, {"one": 5, "two": [7.7, 8.8, 9.9]}]
@@ -170,3 +172,7 @@ def test_getitem_next():
     listoffsetarray2 = awkward1.layout.ListOffsetArray64(offsets2, recordarray)
 
     assert awkward1.tolist(listoffsetarray2) == [[{"one": 1, "two": [1.1, 2.2, 3.3], "three": 1.1}, {"one": 2, "two": [], "three": 2.2}, {"one": 3, "two": [4.4, 5.5], "three": 3.3}], [], [{"one": 4, "two": [6.6], "three": 4.4}, {"one": 5, "two": [7.7, 8.8, 9.9], "three": 5.5}]]
+
+    # HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE
+    # print(awkward1.tolist(listoffsetarray2[2, "two"]))
+    # raise Exception

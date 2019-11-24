@@ -1022,6 +1022,7 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
         return ak::RecordArray(unbox_id(id));
       }), py::arg("id") = py::none())
 
+      .def_property_readonly("istuple", &ak::RecordArray::istuple)
       .def_property_readonly("numfields", &ak::RecordArray::numfields)
       .def("index", &ak::RecordArray::index)
       .def("key", &ak::RecordArray::key)
@@ -1081,6 +1082,7 @@ py::class_<ak::Record> make_Record(py::handle m, std::string name) {
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
       .def_property_readonly("type", &ak::Content::type)
 
+      .def_property_readonly("istuple", &ak::Record::istuple)
       .def_property_readonly("numfields", &ak::Record::numfields)
       .def("index", &ak::Record::index)
       .def("key", &ak::Record::key)
