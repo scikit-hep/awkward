@@ -101,12 +101,8 @@ namespace awkward {
     }
   }
 
-  Fillable* ListFillable::beginrec() {
+  Fillable* ListFillable::beginrec(const std::vector<std::string>& keys) {
     throw std::runtime_error("FIXME: ListFillable::beginrec");
-  }
-
-  Fillable* ListFillable::reckey(const char* key) {
-    throw std::runtime_error("FIXME: ListFillable::reckey(string)");
   }
 
   Fillable* ListFillable::reckey(int64_t index) {

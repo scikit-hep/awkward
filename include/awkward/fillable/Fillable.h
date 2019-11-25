@@ -23,8 +23,7 @@ namespace awkward {
     virtual Fillable* real(double x) = 0;
     virtual Fillable* beginlist() = 0;
     virtual Fillable* endlist() = 0;
-    virtual Fillable* beginrec() = 0;
-    virtual Fillable* reckey(const char* key) = 0;
+    virtual Fillable* beginrec(const std::vector<std::string>& keys) = 0;
     virtual Fillable* reckey(int64_t index) = 0;
     virtual Fillable* endrec() = 0;
   };

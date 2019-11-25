@@ -60,12 +60,8 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* BoolFillable::beginrec() {
+  Fillable* BoolFillable::beginrec(const std::vector<std::string>& keys) {
     throw std::runtime_error("FIXME: BoolFillable::beginrec");
-  }
-
-  Fillable* BoolFillable::reckey(const char* key) {
-    throw std::runtime_error("FIXME: BoolFillable::reckey(string)");
   }
 
   Fillable* BoolFillable::reckey(int64_t index) {

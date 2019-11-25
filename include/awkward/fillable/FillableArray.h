@@ -32,8 +32,7 @@ namespace awkward {
     void real(double x);
     void beginlist();
     void endlist();
-    void beginrec();
-    void reckey(const char* key);
+    void beginrec(const std::vector<std::string>& keys);
     void reckey(int64_t index);
     void endrec();
 

@@ -83,12 +83,8 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* UnionFillable::beginrec() {
+  Fillable* UnionFillable::beginrec(const std::vector<std::string>& keys) {
     throw std::runtime_error("FIXME: UnionFillable::beginrec");
-  }
-
-  Fillable* UnionFillable::reckey(const char* key) {
-    throw std::runtime_error("FIXME: UnionFillable::reckey(string)");
   }
 
   Fillable* UnionFillable::reckey(int64_t index) {

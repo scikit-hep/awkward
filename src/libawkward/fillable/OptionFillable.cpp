@@ -62,12 +62,8 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* OptionFillable::beginrec() {
+  Fillable* OptionFillable::beginrec(const std::vector<std::string>& keys) {
     throw std::runtime_error("FIXME: OptionFillable::beginrec");
-  }
-
-  Fillable* OptionFillable::reckey(const char* key) {
-    throw std::runtime_error("FIXME: OptionFillable::reckey(string)");
   }
 
   Fillable* OptionFillable::reckey(int64_t index) {
