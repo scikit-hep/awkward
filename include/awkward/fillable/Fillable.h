@@ -3,11 +3,26 @@
 #ifndef AWKWARD_FILLABLE_H_
 #define AWKWARD_FILLABLE_H_
 
+#include <string>
+#include <vector>
+
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Content.h"
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  class Slots {
+  public:
+    Slots(const std::vector<std::string>& slots): slots_(slots) { }
+
+    int64_t numslots() const { return (int64_t)slots_.size(); }
+    const std::vector<std::string> slots() const { return slots_; }
+    const std::string slot(int64_t index) const { return slots_[(size_t)index]; }
+
+  private:
+    const std::vector<std::string> slots_;
+  };
+
   class Fillable {
   public:
     virtual ~Fillable() { }
@@ -23,7 +38,7 @@ namespace awkward {
     virtual Fillable* real(double x) = 0;
     virtual Fillable* beginlist() = 0;
     virtual Fillable* endlist() = 0;
-    virtual Fillable* beginrec(const std::vector<std::string>& keys) = 0;
+    virtual Fillable* beginrec(const Slots* slots) = 0;
     virtual Fillable* reckey(int64_t index) = 0;
     virtual Fillable* endrec() = 0;
   };

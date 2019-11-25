@@ -101,7 +101,7 @@ namespace awkward {
     }
   }
 
-  Fillable* ListFillable::beginrec(const std::vector<std::string>& keys) {
+  Fillable* ListFillable::beginrec(const Slots* slots) {
     throw std::runtime_error("FIXME: ListFillable::beginrec");
   }
 

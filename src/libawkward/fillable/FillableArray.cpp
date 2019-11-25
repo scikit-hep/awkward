@@ -77,8 +77,12 @@ namespace awkward {
     maybeupdate(tmp);
   }
 
-  void FillableArray::beginrec(const std::vector<std::string>& keys) {
-    throw std::runtime_error("FIXME: FillableArray::beginrec");
+  void FillableArray::beginrec(const Slots& slots) {
+    throw std::runtime_error("FIXME: FillableArray::beginrec(slots)");
+  }
+
+  void FillableArray::beginrec(int64_t key) {
+    throw std::runtime_error("FIXME: FillableArray::beginrec(key)");
   }
 
   void FillableArray::reckey(int64_t index) {

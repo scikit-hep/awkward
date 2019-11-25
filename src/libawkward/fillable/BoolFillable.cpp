@@ -60,7 +60,7 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* BoolFillable::beginrec(const std::vector<std::string>& keys) {
+  Fillable* BoolFillable::beginrec(const Slots* slots) {
     throw std::runtime_error("FIXME: BoolFillable::beginrec");
   }
 

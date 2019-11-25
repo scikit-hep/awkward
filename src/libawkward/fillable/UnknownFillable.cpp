@@ -68,7 +68,7 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* UnknownFillable::beginrec(const std::vector<std::string>& keys) {
+  Fillable* UnknownFillable::beginrec(const Slots* slots) {
     throw std::runtime_error("FIXME: UnknownFillable::beginrec");
   }
 

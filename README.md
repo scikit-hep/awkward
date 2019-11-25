@@ -89,6 +89,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [ ] `PyVirtualArray`: takes a Python lambda (which gets carried into `VirtualArray`).
       * [ ] `PyObjectArray`: same as the old version.
    * [X] Describe high-level types using [datashape](https://datashape.readthedocs.io/en/latest/) and possibly also an in-house schema. (Emit datashape _strings_ from C++.)
+      * [ ] Type compatibility: option to treat nonexistent record fields as nullable data.
    * [ ] Describe mid-level "persistence types" with no lengths, somewhat minimal JSON, optional dtypes/compression.
    * [ ] Describe low-level layouts independently of filled arrays (JSON or something)?
    * [ ] Layer 1 interface `Array`:

@@ -52,7 +52,7 @@ namespace awkward {
     throw std::runtime_error("FIXME: RecordFillable::endlist");
   }
 
-  Fillable* RecordFillable::beginrec(const std::vector<std::string>& keys) {
+  Fillable* RecordFillable::beginrec(const Slots* slots) {
     throw std::runtime_error("FIXME: RecordFillable::beginrec");
   }
 

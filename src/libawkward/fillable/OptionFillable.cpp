@@ -62,7 +62,7 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* OptionFillable::beginrec(const std::vector<std::string>& keys) {
+  Fillable* OptionFillable::beginrec(const Slots* slots) {
     throw std::runtime_error("FIXME: OptionFillable::beginrec");
   }
 

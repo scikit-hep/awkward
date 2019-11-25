@@ -83,7 +83,7 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* UnionFillable::beginrec(const std::vector<std::string>& keys) {
+  Fillable* UnionFillable::beginrec(const Slots* slots) {
     throw std::runtime_error("FIXME: UnionFillable::beginrec");
   }
 

@@ -65,7 +65,7 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* Int64Fillable::beginrec(const std::vector<std::string>& keys) {
+  Fillable* Int64Fillable::beginrec(const Slots* slots) {
     throw std::runtime_error("FIXME: Int64Fillable::beginrec");
   }
 

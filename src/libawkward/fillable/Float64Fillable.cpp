@@ -59,7 +59,7 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* Float64Fillable::beginrec(const std::vector<std::string>& keys) {
+  Fillable* Float64Fillable::beginrec(const Slots* slots) {
     throw std::runtime_error("FIXME: Float64Fillable::beginrec");
   }
 
