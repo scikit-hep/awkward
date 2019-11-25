@@ -45,7 +45,7 @@ namespace awkward {
       if (istuple()) {
         for (size_t j = 0;  j < contents_.size();  j++) {
           Identity::FieldLoc fieldloc(id.get()->fieldloc().begin(), id.get()->fieldloc().end());
-          fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width(), std::to_string(j)));
+          fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width() - 1, std::to_string(j)));
           contents_[j].get()->setid(id.get()->withfieldloc(fieldloc));
         }
       }
@@ -53,7 +53,7 @@ namespace awkward {
         Identity::FieldLoc original = id.get()->fieldloc();
         for (size_t j = 0;  j < contents_.size();  j++) {
           Identity::FieldLoc fieldloc(original.begin(), original.end());
-          fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width(), reverselookup_.get()->at(j)));
+          fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width() - 1, reverselookup_.get()->at(j)));
           contents_[j].get()->setid(id.get()->withfieldloc(fieldloc));
         }
       }
@@ -199,7 +199,11 @@ namespace awkward {
     for (auto content : contents_) {
       contents.push_back(content.get()->carry(carry));
     }
-    return std::shared_ptr<Content>(new RecordArray(id_, contents, lookup_, reverselookup_));
+    std::shared_ptr<Identity> id(nullptr);
+    if (id_.get() != nullptr) {
+      id = id_.get()->getitem_carry_64(carry);
+    }
+    return std::shared_ptr<Content>(new RecordArray(id, contents, lookup_, reverselookup_));
   }
 
   const std::pair<int64_t, int64_t> RecordArray::minmax_depth() const {

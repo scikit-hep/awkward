@@ -33,21 +33,17 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::string IdentityOf<T>::location(int64_t where) const {
+  const std::string IdentityOf<T>::location_at(int64_t at) const {
     std::stringstream out;
-    int64_t fieldi = 0;
-    int64_t widthi = 0;
-    for (int64_t bothi = 0;  bothi < (int64_t)fieldloc_.size() + width_;  bothi++) {
-      if (bothi != 0) {
+    for (int64_t i = 0;  i < width_;  i++) {
+      if (i != 0) {
         out << ", ";
       }
-      if (fieldi < (int64_t)fieldloc_.size()  &&  fieldloc_[(size_t)fieldi].first == bothi) {
-        out << "\"" << fieldloc_[(size_t)fieldi].second << "\"";
-        fieldi++;
-      }
-      else {
-        out << ptr_.get()[offset_ + where*width_ + widthi];
-        widthi++;
+      out << ptr_.get()[offset_ + at*width_ + i];
+      for (auto pair : fieldloc_) {
+        if (pair.first == i) {
+          out << ", " << util::quote(pair.second, true);
+        }
       }
     }
     return out.str();
@@ -140,6 +136,11 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Identity> IdentityOf<T>::withfieldloc(const FieldLoc& fieldloc) const {
     return std::shared_ptr<Identity>(new IdentityOf<T>(ref_, fieldloc, offset_, width_, length_, ptr_));
+  }
+
+  template <typename T>
+  int64_t IdentityOf<T>::value(int64_t row, int64_t col) const {
+    return (int64_t)ptr_.get()[offset_ + row*width_ + col];
   }
 
   template <typename T>

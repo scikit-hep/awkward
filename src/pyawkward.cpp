@@ -295,6 +295,46 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
 /////////////////////////////////////////////////////////////// Identity
 
 template <typename T>
+py::tuple location(const T& self) {
+  if (self.id().get() == nullptr) {
+    throw std::invalid_argument(self.classname() + std::string(" instance has no associated id (use 'setid' to assign one to the array it is in)"));
+  }
+  ak::Identity::FieldLoc fieldloc = self.id().get()->fieldloc();
+  if (self.isscalar()) {
+    py::tuple out(self.id().get()->width() + fieldloc.size());
+    int64_t j = 0;
+    for (int64_t i = 0;  i < self.id().get()->width();  i++) {
+      out[j] = py::cast(self.id().get()->value(0, i));
+      j++;
+      for (auto pair : fieldloc) {
+        if (pair.first == i) {
+          out[j] = py::cast(pair.second);
+          j++;
+        }
+      }
+    }
+    return out;
+  }
+  else {
+    py::tuple out(self.id().get()->width() - 1 + fieldloc.size());
+    int64_t j = 0;
+    for (int64_t i = 0;  i < self.id().get()->width();  i++) {
+      if (i < self.id().get()->width() - 1) {
+        out[j] = py::cast(self.id().get()->value(0, i));
+        j++;
+      }
+      for (auto pair : fieldloc) {
+        if (pair.first == i) {
+          out[j] = py::cast(pair.second);
+          j++;
+        }
+      }
+    }
+    return out;
+  }
+}
+
+template <typename T>
 py::object getid(T& self) {
   return box(self.id());
 }
@@ -351,6 +391,23 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
       .def_property_readonly("length", &ak::IdentityOf<T>::length)
       .def_property_readonly("array", [](py::buffer& self) -> py::array {
         return py::array(self);
+      })
+      .def("location_at_str", &ak::IdentityOf<T>::location_at)
+      .def("location_at", [](const ak::Identity& self, int64_t at) -> py::tuple {
+        ak::Identity::FieldLoc fieldloc = self.fieldloc();
+        py::tuple out(self.width() + fieldloc.size());
+        int64_t j = 0;
+        for (int64_t i = 0;  i < self.width();  i++) {
+          out[j] = py::cast(self.value(at, i));
+          j++;
+          for (auto pair : fieldloc) {
+            if (pair.first == i) {
+              out[j] = py::cast(pair.second);
+              j++;
+            }
+          }
+        }
+        return out;
       })
 
   );
@@ -885,7 +942,10 @@ py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
          .def("__iter__", &iter<T>)
          .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
          .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
-         .def_property_readonly("type", &ak::Content::type);
+         .def_property_readonly("type", &ak::Content::type)
+         .def_property_readonly("location", &location<T>)
+
+  ;
 }
 
 py::class_<ak::Content> make_Content(py::handle m, std::string name) {
@@ -1119,6 +1179,7 @@ py::class_<ak::Record> make_Record(py::handle m, std::string name) {
         }
         return out;
       })
+     .def_property_readonly("location", &location<ak::Record>)
 
   ;
 }

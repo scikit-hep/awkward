@@ -18,7 +18,7 @@ namespace awkward {
         if (err.location != kSliceNone  &&  id != nullptr) {
           assert(err.location > 0);
           if (0 <= err.location  &&  err.location < id->length()) {
-            out << " at id[" << id->location(err.location) << "]";
+            out << " at id[" << id->location_at(err.location) << "]";
           }
           else {
             out << " at id[???]";
