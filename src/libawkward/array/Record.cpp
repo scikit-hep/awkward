@@ -189,6 +189,10 @@ namespace awkward {
     return out;
   }
 
+  const Record Record::withoutkeys() const {
+    return Record(recordarray_.withoutkeys(), at_);
+  }
+
   const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(at)");
   }

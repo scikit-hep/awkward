@@ -345,6 +345,10 @@ namespace awkward {
     return out;
   }
 
+  const RecordArray RecordArray::withoutkeys() const {
+    return RecordArray(id_, contents_);
+  }
+
   void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {
     size_t j = contents_.size();
     append(content);

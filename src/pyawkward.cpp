@@ -301,8 +301,8 @@ py::tuple location(const T& self) {
   }
   ak::Identity::FieldLoc fieldloc = self.id().get()->fieldloc();
   if (self.isscalar()) {
-    py::tuple out(self.id().get()->width() + fieldloc.size());
-    int64_t j = 0;
+    py::tuple out((size_t)(self.id().get()->width()) + fieldloc.size());
+    size_t j = 0;
     for (int64_t i = 0;  i < self.id().get()->width();  i++) {
       out[j] = py::cast(self.id().get()->value(0, i));
       j++;
@@ -316,8 +316,8 @@ py::tuple location(const T& self) {
     return out;
   }
   else {
-    py::tuple out(self.id().get()->width() - 1 + fieldloc.size());
-    int64_t j = 0;
+    py::tuple out((size_t)(self.id().get()->width() - 1) + fieldloc.size());
+    size_t j = 0;
     for (int64_t i = 0;  i < self.id().get()->width();  i++) {
       if (i < self.id().get()->width() - 1) {
         out[j] = py::cast(self.id().get()->value(0, i));
@@ -395,8 +395,8 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
       .def("location_at_str", &ak::IdentityOf<T>::location_at)
       .def("location_at", [](const ak::Identity& self, int64_t at) -> py::tuple {
         ak::Identity::FieldLoc fieldloc = self.fieldloc();
-        py::tuple out(self.width() + fieldloc.size());
-        int64_t j = 0;
+        py::tuple out((size_t)self.width() + fieldloc.size());
+        size_t j = 0;
         for (int64_t i = 0;  i < self.width();  i++) {
           out[j] = py::cast(self.value(at, i));
           j++;
@@ -1119,6 +1119,9 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
         }
         return out;
       })
+      .def_property_readonly("withoutkeys", [](ak::RecordArray& self) -> py::object {
+        return box(self.withoutkeys().shallow_copy());
+      })
 
       .def("append", [](ak::RecordArray& self, py::object content, py::object key) -> void {
         if (key.is(py::none())) {
@@ -1178,6 +1181,9 @@ py::class_<ak::Record> make_Record(py::handle m, std::string name) {
           out.append(pair);
         }
         return out;
+      })
+      .def_property_readonly("withoutkeys", [](ak::RecordArray& self) -> py::object {
+        return box(self.withoutkeys().shallow_copy());
       })
      .def_property_readonly("location", &location<ak::Record>)
 

@@ -61,6 +61,8 @@ def test_basic():
     assert awkward1.tolist(pairs[1][1]) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert awkward1.tolist(pairs[2][1]) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
 
+    assert awkward1.tojson(recordarray.withoutkeys) == '[{"0":1,"1":[1.1,2.2,3.3],"2":1.1},{"0":2,"1":[],"2":2.2},{"0":3,"1":[4.4,5.5],"2":3.3},{"0":4,"1":[6.6],"2":4.4},{"0":5,"1":[7.7,8.8,9.9],"2":5.5}]'
+
 def test_scalar_record():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
