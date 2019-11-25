@@ -62,6 +62,22 @@ namespace awkward {
     return nullptr;
   }
 
+  Fillable* OptionFillable::beginrec() {
+    throw std::runtime_error("FIXME: OptionFillable::beginrec");
+  }
+
+  Fillable* OptionFillable::reckey(const char* key) {
+    throw std::runtime_error("FIXME: OptionFillable::reckey(string)");
+  }
+
+  Fillable* OptionFillable::reckey(int64_t index) {
+    throw std::runtime_error("FIXME: OptionFillable::reckey(int)");
+  }
+
+  Fillable* OptionFillable::endrec() {
+    throw std::runtime_error("FIXME: OptionFillable::endrec");
+  }
+
   void OptionFillable::maybeupdate(Fillable* tmp) {
     if (tmp != content_.get()  &&  tmp != nullptr) {
       content_ = std::shared_ptr<Fillable>(tmp);

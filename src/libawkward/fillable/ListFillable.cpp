@@ -101,6 +101,22 @@ namespace awkward {
     }
   }
 
+  Fillable* ListFillable::beginrec() {
+    throw std::runtime_error("FIXME: ListFillable::beginrec");
+  }
+
+  Fillable* ListFillable::reckey(const char* key) {
+    throw std::runtime_error("FIXME: ListFillable::reckey(string)");
+  }
+
+  Fillable* ListFillable::reckey(int64_t index) {
+    throw std::runtime_error("FIXME: ListFillable::reckey(int)");
+  }
+
+  Fillable* ListFillable::endrec() {
+    throw std::runtime_error("FIXME: ListFillable::endrec");
+  }
+
   Fillable* ListFillable::maybeupdate(Fillable* tmp) {
     if (tmp != content_.get()  &&  tmp != nullptr) {
       content_ = std::shared_ptr<Fillable>(tmp);

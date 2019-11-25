@@ -64,4 +64,21 @@ namespace awkward {
   Fillable* Int64Fillable::endlist() {
     return nullptr;
   }
+
+  Fillable* Int64Fillable::beginrec() {
+    throw std::runtime_error("FIXME: Int64Fillable::beginrec");
+  }
+
+  Fillable* Int64Fillable::reckey(const char* key) {
+    throw std::runtime_error("FIXME: Int64Fillable::reckey(string)");
+  }
+
+  Fillable* Int64Fillable::reckey(int64_t index) {
+    throw std::runtime_error("FIXME: Int64Fillable::reckey(int)");
+  }
+
+  Fillable* Int64Fillable::endrec() {
+    throw std::runtime_error("FIXME: Int64Fillable::endrec");
+  }
+
 }

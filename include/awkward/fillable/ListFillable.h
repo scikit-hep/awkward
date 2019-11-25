@@ -30,6 +30,10 @@ namespace awkward {
     virtual Fillable* real(double x);
     virtual Fillable* beginlist();
     virtual Fillable* endlist();
+    virtual Fillable* beginrec();
+    virtual Fillable* reckey(const char* key);
+    virtual Fillable* reckey(int64_t index);
+    virtual Fillable* endrec();
 
   private:
     const FillableOptions options_;

@@ -77,6 +77,22 @@ namespace awkward {
     maybeupdate(tmp);
   }
 
+  void FillableArray::beginrec() {
+    throw std::runtime_error("FIXME: FillableArray::beginrec");
+  }
+
+  void FillableArray::reckey(const char* key) {
+    throw std::runtime_error("FIXME: FillableArray::reckey(string)");
+  }
+
+  void FillableArray::reckey(int64_t index) {
+    throw std::runtime_error("FIXME: FillableArray::reckey(int)");
+  }
+
+  void FillableArray::endrec() {
+    throw std::runtime_error("FIXME: FillableArray::endrec");
+  }
+
   void FillableArray::maybeupdate(Fillable* tmp) {
     if (tmp != fillable_.get()  &&  tmp != nullptr) {
       fillable_ = std::shared_ptr<Fillable>(tmp);

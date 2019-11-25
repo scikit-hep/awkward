@@ -60,4 +60,20 @@ namespace awkward {
     return nullptr;
   }
 
+  Fillable* BoolFillable::beginrec() {
+    throw std::runtime_error("FIXME: BoolFillable::beginrec");
+  }
+
+  Fillable* BoolFillable::reckey(const char* key) {
+    throw std::runtime_error("FIXME: BoolFillable::reckey(string)");
+  }
+
+  Fillable* BoolFillable::reckey(int64_t index) {
+    throw std::runtime_error("FIXME: BoolFillable::reckey(int)");
+  }
+
+  Fillable* BoolFillable::endrec() {
+    throw std::runtime_error("FIXME: BoolFillable::endrec");
+  }
+
 }

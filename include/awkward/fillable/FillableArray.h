@@ -32,6 +32,10 @@ namespace awkward {
     void real(double x);
     void beginlist();
     void endlist();
+    void beginrec();
+    void reckey(const char* key);
+    void reckey(int64_t index);
+    void endrec();
 
     template <typename T>
     void fill(const std::vector<T>& vector) {

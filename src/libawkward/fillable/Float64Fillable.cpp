@@ -59,4 +59,20 @@ namespace awkward {
     return nullptr;
   }
 
+  Fillable* Float64Fillable::beginrec() {
+    throw std::runtime_error("FIXME: Float64Fillable::beginrec");
+  }
+
+  Fillable* Float64Fillable::reckey(const char* key) {
+    throw std::runtime_error("FIXME: Float64Fillable::reckey(string)");
+  }
+
+  Fillable* Float64Fillable::reckey(int64_t index) {
+    throw std::runtime_error("FIXME: Float64Fillable::reckey(int)");
+  }
+
+  Fillable* Float64Fillable::endrec() {
+    throw std::runtime_error("FIXME: Float64Fillable::endrec");
+  }
+
 }
