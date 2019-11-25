@@ -201,6 +201,7 @@ def test_getitem_next():
 
     assert awkward1.tolist(listoffsetarray2) == [[{"one": 1, "two": [1.1, 2.2, 3.3], "three": 1.1}, {"one": 2, "two": [], "three": 2.2}, {"one": 3, "two": [4.4, 5.5], "three": 3.3}], [], [{"one": 4, "two": [6.6], "three": 4.4}, {"one": 5, "two": [7.7, 8.8, 9.9], "three": 5.5}]]
 
-    # HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE
-    # print(awkward1.tolist(listoffsetarray2[2, "two"]))
-    # raise Exception
+    assert awkward1.tolist(listoffsetarray2[2, "one"]) == [4, 5]
+    assert awkward1.tolist(listoffsetarray2[2, "two"]) == [[6.6], [7.7, 8.8, 9.9]]
+    assert awkward1.tolist(listoffsetarray2[2, "three"]) == [4.4, 5.5]
+    assert awkward1.tolist(listoffsetarray2[2, ["two", "three"]]) == [{"two": [6.6], "three": 4.4}, {"two": [7.7, 8.8, 9.9], "three": 5.5}]

@@ -107,13 +107,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
-    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
-    return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
+    throw std::invalid_argument(field.tostring() + std::string(" is not a valid slice type for ") + classname());
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
-    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
-    return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
+    throw std::invalid_argument(fields.tostring() + std::string(" is not a valid slice type for ") + classname());
   }
 
 }
