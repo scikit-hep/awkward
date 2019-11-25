@@ -205,3 +205,11 @@ def test_getitem_next():
     assert awkward1.tolist(listoffsetarray2[2, "two"]) == [[6.6], [7.7, 8.8, 9.9]]
     assert awkward1.tolist(listoffsetarray2[2, "three"]) == [4.4, 5.5]
     assert awkward1.tolist(listoffsetarray2[2, ["two", "three"]]) == [{"two": [6.6], "three": 4.4}, {"two": [7.7, 8.8, 9.9], "three": 5.5}]
+
+    assert awkward1.tolist(listoffsetarray2[2, 1]) == {"one": 5, "two": [7.7, 8.8, 9.9], "three": 5.5}
+    with pytest.raises(ValueError):
+        listoffsetarray2[2, 1, 0]
+    assert listoffsetarray2[2, 1, "0"] == 5
+    assert listoffsetarray2[2, 1, "one"] == 5
+    assert awkward1.tolist(listoffsetarray2[2, 1, "two"]) == [7.7, 8.8, 9.9]
+    assert listoffsetarray2[2, 1, "two", 1] == 8.8

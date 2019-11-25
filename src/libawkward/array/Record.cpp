@@ -80,7 +80,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::getitem_nothing() const {
-    throw std::runtime_error("Record::getitem_nothing() should never be called (length != 0)");
+    throw std::runtime_error("undefined operation: Record::getitem_nothing");
   }
 
   const std::shared_ptr<Content> Record::getitem_at(int64_t at) const {
@@ -119,7 +119,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::carry(const Index64& carry) const {
-    throw std::runtime_error("FIXME: Record::carry");
+    throw std::runtime_error("undefined operation: Record::carry");
   }
 
   const std::pair<int64_t, int64_t> Record::minmax_depth() const {
@@ -190,23 +190,23 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: Record::getitem_next(at)");
+    throw std::runtime_error("undefined operation: Record::getitem_next(at)");
   }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: Record::getitem_next(range)");
+    throw std::runtime_error("undefined operation: Record::getitem_next(range)");
   }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: Record::getitem_next(array)");
+    throw std::runtime_error("undefined operation: Record::getitem_next(array)");
   }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: Record::getitem_next(field)");
+    throw std::runtime_error("undefined operation: Record::getitem_next(field)");
   }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: Record::getitem_next(fields)");
+    throw std::runtime_error("undefined operation: Record::getitem_next(fields)");
   }
 
 }

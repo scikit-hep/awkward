@@ -328,23 +328,27 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: RecordArray::getitem_next(at)");
+    throw std::invalid_argument(std::string("scalar Record can only be sliced by field name (string); try ") + util::quote(std::to_string(at.at()), true));
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: RecordArray::getitem_next(range)");
+    throw std::invalid_argument(std::string("scalar Record can only be sliced by field name (string)"));
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: RecordArray::getitem_next(array)");
+    throw std::invalid_argument(std::string("scalar Record can only be sliced by field name (string)"));
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: RecordArray::getitem_next(field)");
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    return getitem_field(field.key()).get()->getitem_next(nexthead, nexttail, advanced);
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: RecordArray::getitem_next(fields)");
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
   }
 
 }
