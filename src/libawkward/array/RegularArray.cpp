@@ -156,11 +156,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_field(const std::string& key) const {
-    throw std::runtime_error("FIXME: RegularArray::getitem_field");
+    return std::shared_ptr<Content>(new RegularArray(id_, content_.get()->getitem_field(key), size_));
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
-    throw std::runtime_error("FIXME: RegularArray::getitem_fields");
+    return std::shared_ptr<Content>(new RegularArray(id_, content_.get()->getitem_fields(keys), size_));
   }
 
   const std::shared_ptr<Content> RegularArray::carry(const Index64& carry) const {

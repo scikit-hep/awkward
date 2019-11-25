@@ -162,6 +162,34 @@ def test_getitem():
     assert awkward1.tolist(recordarray[2][["one", "two"]]) == {"one": 3, "two": [4.4, 5.5]}
     assert awkward1.tolist(recordarray[2][["two", "one"]]) == {"one": 3, "two": [4.4, 5.5]}
 
+def test_getitem_other_types():
+    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64))
+    content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=numpy.float64))
+    offsets1 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
+    listoffsetarray1 = awkward1.layout.ListOffsetArray64(offsets1, content2)
+    recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray1, "three": content2})
+
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5]))
+    listoffsetarray2 = awkward1.layout.ListOffsetArray64(offsets2, recordarray)
+    assert awkward1.tolist(listoffsetarray2["one"]) == [[1, 2, 3], [], [4, 5]]
+    assert awkward1.tolist(listoffsetarray2["two"]) == [[[1.1, 2.2, 3.3], [], [4.4, 5.5]], [], [[6.6], [7.7, 8.8, 9.9]]]
+    assert awkward1.tolist(listoffsetarray2["three"]) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(listoffsetarray2[["two", "three"]]) == [[{"two": [1.1, 2.2, 3.3], "three": 1.1}, {"two": [], "three": 2.2}, {"two": [4.4, 5.5], "three": 3.3}], [], [{"two": [6.6], "three": 4.4}, {"two": [7.7, 8.8, 9.9], "three": 5.5}]]
+
+    starts2 = awkward1.layout.Index64(numpy.array([0, 3, 3]))
+    stops2 = awkward1.layout.Index64(numpy.array([3, 3, 5]))
+    listarray2 = awkward1.layout.ListArray64(starts2, stops2, recordarray)
+    assert awkward1.tolist(listarray2["one"]) == [[1, 2, 3], [], [4, 5]]
+    assert awkward1.tolist(listarray2["two"]) == [[[1.1, 2.2, 3.3], [], [4.4, 5.5]], [], [[6.6], [7.7, 8.8, 9.9]]]
+    assert awkward1.tolist(listarray2["three"]) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(listarray2[["two", "three"]]) == [[{"two": [1.1, 2.2, 3.3], "three": 1.1}, {"two": [], "three": 2.2}, {"two": [4.4, 5.5], "three": 3.3}], [], [{"two": [6.6], "three": 4.4}, {"two": [7.7, 8.8, 9.9], "three": 5.5}]]
+
+    regulararray2 = awkward1.layout.RegularArray(recordarray, 1)
+    assert awkward1.tolist(regulararray2["one"]) == [[1], [2], [3], [4], [5]]
+    assert awkward1.tolist(regulararray2["two"]) == [[[1.1, 2.2, 3.3]], [[]], [[4.4, 5.5]], [[6.6]], [[7.7, 8.8, 9.9]]]
+    assert awkward1.tolist(regulararray2["three"]) == [[1.1], [2.2], [3.3], [4.4], [5.5]]
+    assert awkward1.tolist(regulararray2[["two", "three"]]) == [[{"two": [1.1, 2.2, 3.3], "three": 1.1}], [{"two": [], "three": 2.2}], [{"two": [4.4, 5.5], "three": 3.3}], [{"two": [6.6], "three": 4.4}], [{"two": [7.7, 8.8, 9.9], "three": 5.5}]]
+
 def test_getitem_next():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64))
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=numpy.float64))

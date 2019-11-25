@@ -243,12 +243,12 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_field(const std::string& key) const {
-    throw std::runtime_error("FIXME: ListOffsetArray::getitem_field");
+    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, offsets_, content_.get()->getitem_field(key)));
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_fields(const std::vector<std::string>& keys) const {
-    throw std::runtime_error("FIXME: ListOffsetArray::getitem_fields");
+    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, offsets_, content_.get()->getitem_fields(keys)));
   }
 
   template <typename T>
