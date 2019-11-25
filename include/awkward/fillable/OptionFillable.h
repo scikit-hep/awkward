@@ -11,18 +11,20 @@
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
+  class FillableArray;
+
   class OptionFillable: public Fillable {
   public:
-    OptionFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, Fillable* content): options_(options), index_(index), content_(content) { }
+    OptionFillable(FillableArray* fillablearray, const FillableOptions& options, const GrowableBuffer<int64_t>& index, Fillable* content): fillablearray_(fillablearray), options_(options), index_(index), content_(content) { }
 
-    static OptionFillable* fromnulls(const FillableOptions& options, int64_t nullcount, Fillable* content) {
+    static OptionFillable* fromnulls(FillableArray* fillablearray, const FillableOptions& options, int64_t nullcount, Fillable* content) {
       GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::full(options, -1, nullcount);
-      return new OptionFillable(options, index, content);
+      return new OptionFillable(fillablearray, options, index, content);
     }
 
-    static OptionFillable* fromvalids(const FillableOptions& options, Fillable* content) {
+    static OptionFillable* fromvalids(FillableArray* fillablearray, const FillableOptions& options, Fillable* content) {
       GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::arange(options, content->length());
-      return new OptionFillable(options, index, content);
+      return new OptionFillable(fillablearray, options, index, content);
     }
 
     virtual int64_t length() const;
@@ -36,11 +38,12 @@ namespace awkward {
     virtual Fillable* real(double x);
     virtual Fillable* beginlist();
     virtual Fillable* endlist();
-    virtual Fillable* beginrec(const Slots* slots);
-    virtual Fillable* reckey(int64_t index);
+    virtual Fillable* beginrec(int64_t slotsid);
+    virtual Fillable* indexrec(int64_t index);
     virtual Fillable* endrec();
 
   private:
+    FillableArray* fillablearray_;
     const FillableOptions options_;
     GrowableBuffer<int64_t> index_;
     std::shared_ptr<Fillable> content_;

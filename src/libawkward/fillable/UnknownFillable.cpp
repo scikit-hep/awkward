@@ -5,6 +5,7 @@
 #include "awkward/Identity.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/type/UnknownType.h"
+#include "awkward/fillable/FillableArray.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
 #include "awkward/fillable/Int64Fillable.h"
@@ -68,12 +69,12 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* UnknownFillable::beginrec(const Slots* slots) {
+  Fillable* UnknownFillable::beginrec(int64_t slotsid) {
     throw std::runtime_error("FIXME: UnknownFillable::beginrec");
   }
 
-  Fillable* UnknownFillable::reckey(int64_t index) {
-    throw std::runtime_error("FIXME: UnknownFillable::reckey(int)");
+  Fillable* UnknownFillable::indexrec(int64_t index) {
+    throw std::runtime_error("FIXME: UnknownFillable::indexrec(int)");
   }
 
   Fillable* UnknownFillable::endrec() {
@@ -82,9 +83,9 @@ namespace awkward {
 
   template <typename T>
   Fillable* UnknownFillable::prepare() const {
-    Fillable* out = new T(options_);
+    Fillable* out = new T(fillablearray_, options_);
     if (nullcount_ != 0) {
-      out = OptionFillable::fromnulls(options_, nullcount_, out);
+      out = OptionFillable::fromnulls(fillablearray_, options_, nullcount_, out);
     }
     return out;
   }

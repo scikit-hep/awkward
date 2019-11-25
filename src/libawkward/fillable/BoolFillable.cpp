@@ -3,6 +3,7 @@
 #include "awkward/Identity.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/type/PrimitiveType.h"
+#include "awkward/fillable/FillableArray.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/UnionFillable.h"
 
@@ -28,7 +29,7 @@ namespace awkward {
   }
 
   Fillable* BoolFillable::null() {
-    Fillable* out = OptionFillable::fromvalids(options_, this);
+    Fillable* out = OptionFillable::fromvalids(fillablearray_, options_, this);
     out->null();
     return out;
   }
@@ -39,19 +40,19 @@ namespace awkward {
   }
 
   Fillable* BoolFillable::integer(int64_t x) {
-    Fillable* out = UnionFillable::fromsingle(options_, this);
+    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
     out->integer(x);
     return out;
   }
 
   Fillable* BoolFillable::real(double x) {
-    Fillable* out = UnionFillable::fromsingle(options_, this);
+    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
     out->real(x);
     return out;
   }
 
   Fillable* BoolFillable::beginlist() {
-    Fillable* out = UnionFillable::fromsingle(options_, this);
+    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
     out->beginlist();
     return out;
   }
@@ -60,12 +61,12 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* BoolFillable::beginrec(const Slots* slots) {
+  Fillable* BoolFillable::beginrec(int64_t slotsid) {
     throw std::runtime_error("FIXME: BoolFillable::beginrec");
   }
 
-  Fillable* BoolFillable::reckey(int64_t index) {
-    throw std::runtime_error("FIXME: BoolFillable::reckey(int)");
+  Fillable* BoolFillable::indexrec(int64_t index) {
+    throw std::runtime_error("FIXME: BoolFillable::indexrec(int)");
   }
 
   Fillable* BoolFillable::endrec() {

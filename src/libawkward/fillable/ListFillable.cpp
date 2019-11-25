@@ -6,6 +6,7 @@
 #include "awkward/Index.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/type/ListType.h"
+#include "awkward/fillable/FillableArray.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/UnionFillable.h"
 
@@ -35,7 +36,7 @@ namespace awkward {
       return maybeupdate(content_.get()->null());
     }
     else {
-      Fillable* out = OptionFillable::fromvalids(options_, this);
+      Fillable* out = OptionFillable::fromvalids(fillablearray_, options_, this);
       out->null();
       return out;
     }
@@ -46,7 +47,7 @@ namespace awkward {
       return maybeupdate(content_.get()->boolean(x));
     }
     else {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
+      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
       out->boolean(x);
       return out;
     }
@@ -57,7 +58,7 @@ namespace awkward {
       return maybeupdate(content_.get()->integer(x));
     }
     else {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
+      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
       out->integer(x);
       return out;
     }
@@ -68,7 +69,7 @@ namespace awkward {
       return maybeupdate(content_.get()->real(x));
     }
     else {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
+      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
       out->real(x);
       return out;
     }
@@ -101,12 +102,12 @@ namespace awkward {
     }
   }
 
-  Fillable* ListFillable::beginrec(const Slots* slots) {
+  Fillable* ListFillable::beginrec(int64_t slotsid) {
     throw std::runtime_error("FIXME: ListFillable::beginrec");
   }
 
-  Fillable* ListFillable::reckey(int64_t index) {
-    throw std::runtime_error("FIXME: ListFillable::reckey(int)");
+  Fillable* ListFillable::indexrec(int64_t index) {
+    throw std::runtime_error("FIXME: ListFillable::indexrec(int)");
   }
 
   Fillable* ListFillable::endrec() {

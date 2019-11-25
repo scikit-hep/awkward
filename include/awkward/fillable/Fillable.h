@@ -38,8 +38,8 @@ namespace awkward {
     virtual Fillable* real(double x) = 0;
     virtual Fillable* beginlist() = 0;
     virtual Fillable* endlist() = 0;
-    virtual Fillable* beginrec(const Slots* slots) = 0;
-    virtual Fillable* reckey(int64_t index) = 0;
+    virtual Fillable* beginrec(int64_t slotsid) = 0;
+    virtual Fillable* indexrec(int64_t index) = 0;
     virtual Fillable* endrec() = 0;
   };
 }

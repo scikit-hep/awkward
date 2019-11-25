@@ -77,20 +77,20 @@ namespace awkward {
     maybeupdate(tmp);
   }
 
-  void FillableArray::beginrec(const Slots& slots) {
-    throw std::runtime_error("FIXME: FillableArray::beginrec(slots)");
+  void FillableArray::beginrec(int64_t slotsid, const Slots& slots) {
+    auto slotiter = slotsbyid_.find(slotsid);   // hash of int64_t
+    if (slotiter == slotsbyid_.end()) {
+      slotsbyid_.insert(std::pair<int64_t, Slots>(slotsid, slots));
+    }
+    maybeupdate(fillable_.get()->beginrec(slotsid));
   }
 
-  void FillableArray::beginrec(int64_t key) {
-    throw std::runtime_error("FIXME: FillableArray::beginrec(key)");
-  }
-
-  void FillableArray::reckey(int64_t index) {
-    throw std::runtime_error("FIXME: FillableArray::reckey(int)");
+  void FillableArray::indexrec(int64_t index) {
+    maybeupdate(fillable_.get()->indexrec(index));
   }
 
   void FillableArray::endrec() {
-    throw std::runtime_error("FIXME: FillableArray::endrec");
+    maybeupdate(fillable_.get()->endrec());
   }
 
   void FillableArray::maybeupdate(Fillable* tmp) {

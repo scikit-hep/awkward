@@ -12,12 +12,14 @@
 #include "awkward/fillable/UnknownFillable.h"
 
 namespace awkward {
+  class FillableArray;
+
   class ListFillable: public Fillable {
   public:
-    ListFillable(const FillableOptions& options): options_(options), offsets_(options), content_(new UnknownFillable(options)), begun_(false) {
+    ListFillable(FillableArray* fillablearray, const FillableOptions& options): fillablearray_(fillablearray), options_(options), offsets_(options), content_(new UnknownFillable(fillablearray, options)), begun_(false) {
       offsets_.append(0);
     }
-    ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, Fillable* content, bool begun): options_(options), offsets_(offsets), content_(std::shared_ptr<Fillable>(content)), begun_(begun) { }
+    ListFillable(FillableArray* fillablearray, const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, Fillable* content, bool begun): fillablearray_(fillablearray), options_(options), offsets_(offsets), content_(std::shared_ptr<Fillable>(content)), begun_(begun) { }
 
     virtual int64_t length() const;
     virtual void clear();
@@ -30,11 +32,12 @@ namespace awkward {
     virtual Fillable* real(double x);
     virtual Fillable* beginlist();
     virtual Fillable* endlist();
-    virtual Fillable* beginrec(const Slots* slots);
-    virtual Fillable* reckey(int64_t index);
+    virtual Fillable* beginrec(int64_t slotsid);
+    virtual Fillable* indexrec(int64_t index);
     virtual Fillable* endrec();
 
   private:
+    FillableArray* fillablearray_;
     const FillableOptions options_;
     GrowableBuffer<int64_t> offsets_;
     std::shared_ptr<Fillable> content_;

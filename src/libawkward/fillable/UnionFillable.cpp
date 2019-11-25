@@ -4,6 +4,7 @@
 
 #include "awkward/Identity.h"
 #include "awkward/type/UnionType.h"
+#include "awkward/fillable/FillableArray.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
 #include "awkward/fillable/Int64Fillable.h"
@@ -38,7 +39,7 @@ namespace awkward {
   }
 
   Fillable* UnionFillable::null() {
-    Fillable* out = OptionFillable::fromvalids(options_, this);
+    Fillable* out = OptionFillable::fromvalids(fillablearray_, options_, this);
     out->null();
     return out;
   }
@@ -83,12 +84,12 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* UnionFillable::beginrec(const Slots* slots) {
+  Fillable* UnionFillable::beginrec(int64_t slotsid) {
     throw std::runtime_error("FIXME: UnionFillable::beginrec");
   }
 
-  Fillable* UnionFillable::reckey(int64_t index) {
-    throw std::runtime_error("FIXME: UnionFillable::reckey(int)");
+  Fillable* UnionFillable::indexrec(int64_t index) {
+    throw std::runtime_error("FIXME: UnionFillable::indexrec(int)");
   }
 
   Fillable* UnionFillable::endrec() {
@@ -110,7 +111,7 @@ namespace awkward {
   template <typename T>
   T* UnionFillable::maybenew(T* fillable, int64_t& length) {
     if (fillable == nullptr) {
-      fillable = new T(options_);
+      fillable = new T(fillablearray_, options_);
       contents_.push_back(std::shared_ptr<Fillable>(fillable));
     }
     length = fillable->length();

@@ -4,6 +4,7 @@
 
 #include "awkward/Identity.h"
 #include "awkward/type/OptionType.h"
+#include "awkward/fillable/FillableArray.h"
 
 #include "awkward/fillable/OptionFillable.h"
 
@@ -62,12 +63,12 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* OptionFillable::beginrec(const Slots* slots) {
+  Fillable* OptionFillable::beginrec(int64_t slotsid) {
     throw std::runtime_error("FIXME: OptionFillable::beginrec");
   }
 
-  Fillable* OptionFillable::reckey(int64_t index) {
-    throw std::runtime_error("FIXME: OptionFillable::reckey(int)");
+  Fillable* OptionFillable::indexrec(int64_t index) {
+    throw std::runtime_error("FIXME: OptionFillable::indexrec(int)");
   }
 
   Fillable* OptionFillable::endrec() {

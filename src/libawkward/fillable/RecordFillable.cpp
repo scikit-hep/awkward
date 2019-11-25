@@ -6,6 +6,7 @@
 #include "awkward/Index.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/type/ListType.h"
+#include "awkward/fillable/FillableArray.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/UnionFillable.h"
 
@@ -52,12 +53,12 @@ namespace awkward {
     throw std::runtime_error("FIXME: RecordFillable::endlist");
   }
 
-  Fillable* RecordFillable::beginrec(const Slots* slots) {
+  Fillable* RecordFillable::beginrec(int64_t slotsid) {
     throw std::runtime_error("FIXME: RecordFillable::beginrec");
   }
 
-  Fillable* RecordFillable::reckey(int64_t index) {
-    throw std::runtime_error("FIXME: RecordFillable::reckey(int)");
+  Fillable* RecordFillable::indexrec(int64_t index) {
+    throw std::runtime_error("FIXME: RecordFillable::indexrec(int)");
   }
 
   Fillable* RecordFillable::endrec() {

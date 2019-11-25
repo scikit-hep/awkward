@@ -9,12 +9,14 @@
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
+  class FillableArray;
+
   class Float64Fillable: public Fillable {
   public:
-    Float64Fillable(const FillableOptions& options): options_(options), buffer_(options) { }
-    Float64Fillable(const FillableOptions& options, const GrowableBuffer<double>& buffer): options_(options), buffer_(buffer) { }
+    Float64Fillable(FillableArray* fillablearray, const FillableOptions& options): fillablearray_(fillablearray), options_(options), buffer_(options) { }
+    Float64Fillable(FillableArray* fillablearray, const FillableOptions& options, const GrowableBuffer<double>& buffer): fillablearray_(fillablearray), options_(options), buffer_(buffer) { }
 
-    static Float64Fillable* fromint64(const FillableOptions& options, GrowableBuffer<int64_t> old) {
+    static Float64Fillable* fromint64(FillableArray* fillablearray, const FillableOptions& options, GrowableBuffer<int64_t> old) {
       GrowableBuffer<double> buffer = GrowableBuffer<double>::empty(options, old.reserved());
       int64_t* oldraw = old.ptr().get();
       double* newraw = buffer.ptr().get();
@@ -22,7 +24,7 @@ namespace awkward {
         newraw[i] = (double)oldraw[i];
       }
       buffer.set_length(old.length());
-      return new Float64Fillable(options, buffer);
+      return new Float64Fillable(fillablearray, options, buffer);
     }
 
     virtual int64_t length() const;
@@ -36,11 +38,12 @@ namespace awkward {
     virtual Fillable* real(double x);
     virtual Fillable* beginlist();
     virtual Fillable* endlist();
-    virtual Fillable* beginrec(const Slots* slots);
-    virtual Fillable* reckey(int64_t index);
+    virtual Fillable* beginrec(int64_t slotsid);
+    virtual Fillable* indexrec(int64_t index);
     virtual Fillable* endrec();
 
   private:
+    FillableArray* fillablearray_;
     const FillableOptions options_;
     GrowableBuffer<double> buffer_;
   };
