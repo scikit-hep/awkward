@@ -15,11 +15,50 @@ namespace awkward {
   }
 
   void RecordArray::setid() {
-    throw std::runtime_error("FIXME: RecordArray::setid");
+    int64_t len = length();
+    if (len <= kMaxInt32) {
+      Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, len);
+      std::shared_ptr<Identity> newid(rawid);
+      struct Error err = awkward_new_identity32(rawid->ptr().get(), len);
+      util::handle_error(err, classname(), id_.get());
+      setid(newid);
+    }
+    else {
+      Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, len);
+      std::shared_ptr<Identity> newid(rawid);
+      struct Error err = awkward_new_identity64(rawid->ptr().get(), len);
+      util::handle_error(err, classname(), id_.get());
+      setid(newid);
+    }
   }
 
   void RecordArray::setid(const std::shared_ptr<Identity> id) {
-    throw std::runtime_error("FIXME: RecordArray::setid");
+    if (id.get() == nullptr) {
+      for (auto content : contents_) {
+        content.get()->setid(id);
+      }
+    }
+    else {
+      if (length() != id.get()->length()) {
+        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
+      }
+      if (istuple()) {
+        for (size_t j = 0;  j < contents_.size();  j++) {
+          Identity::FieldLoc fieldloc(id.get()->fieldloc().begin(), id.get()->fieldloc().end());
+          fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width(), std::to_string(j)));
+          contents_[j].get()->setid(id.get()->withfieldloc(fieldloc));
+        }
+      }
+      else {
+        Identity::FieldLoc original = id.get()->fieldloc();
+        for (size_t j = 0;  j < contents_.size();  j++) {
+          Identity::FieldLoc fieldloc(original.begin(), original.end());
+          fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width(), reverselookup_.get()->at(j)));
+          contents_[j].get()->setid(id.get()->withfieldloc(fieldloc));
+        }
+      }
+    }
+    id_ = id;
   }
 
   const std::string RecordArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
@@ -186,6 +225,10 @@ namespace awkward {
   }
 
   int64_t RecordArray::index(const std::string& key) const {
+    std::cout << std::endl;
+    std::cout << "RecordArray::index " << key << std::endl;
+    std::cout << tostring() << std::endl;
+
     int64_t out = -1;
     if (!istuple()) {
       try {
@@ -328,18 +371,32 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
+    std::cout << std::endl;
+    std::cout << "RecordArray::getitem_next " << (head.get() == nullptr ? "" : head.get()->tostring()) << " " << tail.tostring() << std::endl;
+    std::cout << tostring() << std::endl;
+
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    Slice emptytail;
+    emptytail.become_sealed();
+
+    throw std::runtime_error("STOP");
+
     if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
-      return getitem_next(*field, tail, advanced);
+      std::shared_ptr<Content> out = getitem_next(*field, emptytail, advanced);
+      return out.get()->getitem_next(nexthead, nexttail, advanced);
     }
     else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
-      return getitem_next(*fields, tail, advanced);
+      std::shared_ptr<Content> out = getitem_next(*fields, emptytail, advanced);
+      return out.get()->getitem_next(nexthead, nexttail, advanced);
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->getitem_next(head, tail, advanced));
+        contents.push_back(content.get()->getitem_next(head, emptytail, advanced));
       }
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), contents, lookup_, reverselookup_));
+      RecordArray out(Identity::none(), contents, lookup_, reverselookup_);
+      return out.getitem_next(nexthead, nexttail, advanced);
     }
   }
 

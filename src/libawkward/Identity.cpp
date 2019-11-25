@@ -138,6 +138,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Identity> IdentityOf<T>::withfieldloc(const FieldLoc& fieldloc) const {
+    return std::shared_ptr<Identity>(new IdentityOf<T>(ref_, fieldloc, offset_, width_, length_, ptr_));
+  }
+
+  template <typename T>
   const std::vector<T> IdentityOf<T>::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     if (regular_at < 0) {

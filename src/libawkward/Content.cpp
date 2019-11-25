@@ -70,6 +70,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
+    std::cout << std::endl;
+    std::cout << "Content::getitem_next " << (head.get() == nullptr ? "" : head.get()->tostring()) << " " << tail.tostring() << std::endl;
+    std::cout << tostring() << std::endl;
+
     if (head.get() == nullptr) {
       return shallow_copy();
     }

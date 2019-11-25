@@ -556,7 +556,7 @@ py::object getitem(T& self, py::object obj) {
   if (py::isinstance<py::str>(obj)) {
     return box(self.getitem_field(obj.cast<std::string>()));
   }
-  if (py::isinstance<py::iterable>(obj)) {
+  if (!py::isinstance<py::tuple>  &&  py::isinstance<py::iterable>(obj)) {
     std::vector<std::string> strings;
     bool all_strings = true;
     for (auto x : obj) {
