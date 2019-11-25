@@ -55,6 +55,12 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const;
     virtual const std::shared_ptr<Content> getitem_field(const std::string& key) const;
     virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const;
+    virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const;
+    virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;
+    virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const;
+    virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const;
+    virtual const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const;
+    virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
 
@@ -73,13 +79,6 @@ namespace awkward {
     void append(const std::shared_ptr<Content>& content, const std::string& key);
     void append(const std::shared_ptr<Content>& content);
     void setkey(int64_t index, const std::string& key);
-
-  protected:
-    virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;
-    virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const;
-    virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const;
-    virtual const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const;
-    virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
 
   private:
     std::shared_ptr<Identity> id_;

@@ -327,16 +327,32 @@ namespace awkward {
     (*reverselookup_.get())[(size_t)index] = fieldname;
   }
 
+  const std::shared_ptr<Content> RecordArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
+    if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+      return getitem_next(*field, tail, advanced);
+    }
+    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+      return getitem_next(*fields, tail, advanced);
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->getitem_next(head, tail, advanced));
+      }
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), contents, lookup_, reverselookup_));
+    }
+  }
+
   const std::shared_ptr<Content> RecordArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::invalid_argument(std::string("scalar Record can only be sliced by field name (string); try ") + util::quote(std::to_string(at.at()), true));
+    throw std::invalid_argument(std::string("undefined operation: RecordArray::getitem_next(at)"));
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::invalid_argument(std::string("scalar Record can only be sliced by field name (string)"));
+    throw std::invalid_argument(std::string("undefined operation: RecordArray::getitem_next(range)"));
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::invalid_argument(std::string("scalar Record can only be sliced by field name (string)"));
+    throw std::invalid_argument(std::string("undefined operation: RecordArray::getitem_next(array)"));
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
