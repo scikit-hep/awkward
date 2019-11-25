@@ -221,44 +221,42 @@ def test_getitem_setid():
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
 
-    # recordarray = awkward1.layout.RecordArray([content1, listoffsetarray])
-    # recordarray.setid()
-    #
-    # recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
-    # recordarray.setid()
-    # assert recordarray["one"].id.fieldloc == [(1, "one")]
-    # assert recordarray["two"].id.fieldloc == [(1, "two")]
-    # assert recordarray["one", 1] == 2
-    # assert recordarray[1, "one"] == 2
-    # assert recordarray["two", 2, 1] == 5.5
-    # assert recordarray[2, "two", 1] == 5.5
-    #
-    # recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
-    # recordarray2 = awkward1.layout.RecordArray({"outer": recordarray})
-    # recordarray2.setid()
-    # assert recordarray2["outer"].id.fieldloc == [(1, "outer")]
-    # assert recordarray2["outer", "one"].id.fieldloc == [(1, "outer"), (1, "one")]
-    # assert recordarray2["outer", "two"].id.fieldloc == [(1, "outer"), (1, "two")]
-    # assert recordarray2["outer", "one", 1] == 2
-    # assert recordarray2["outer", 1, "one"] == 2
-    # assert recordarray2[1, "outer", "one"] == 2
-    # assert recordarray2["outer", "two", 2, 1] == 5.5
-    # assert recordarray2["outer", 2, "two", 1] == 5.5
-    # assert recordarray2[2, "outer", "two", 1] == 5.5
+    recordarray = awkward1.layout.RecordArray([content1, listoffsetarray])
+    recordarray.setid()
+
+    recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
+    recordarray.setid()
+    assert recordarray["one"].id.fieldloc == [(1, "one")]
+    assert recordarray["two"].id.fieldloc == [(1, "two")]
+    assert recordarray["one", 1] == 2
+    assert recordarray[1, "one"] == 2
+    assert recordarray["two", 2, 1] == 5.5
+    assert recordarray[2, "two", 1] == 5.5
+
+    recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
+    recordarray2 = awkward1.layout.RecordArray({"outer": recordarray})
+    recordarray2.setid()
+    assert recordarray2["outer"].id.fieldloc == [(1, "outer")]
+    assert recordarray2["outer", "one"].id.fieldloc == [(1, "outer"), (1, "one")]
+    assert recordarray2["outer", "two"].id.fieldloc == [(1, "outer"), (1, "two")]
+    assert recordarray2["outer", "one", 1] == 2
+    assert recordarray2["outer", 1, "one"] == 2
+    assert recordarray2[1, "outer", "one"] == 2
+    assert recordarray2["outer", "two", 2, 1] == 5.5
+    assert recordarray2["outer", 2, "two", 1] == 5.5
+    assert recordarray2[2, "outer", "two", 1] == 5.5
 
     recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
     recordarray2 = awkward1.layout.RecordArray({"outer": awkward1.layout.RegularArray(recordarray, 1)})
-    # recordarray2.setid()
-    # assert recordarray2["outer"].id.fieldloc == [(1, "outer")]
-    # assert recordarray2["outer", 0, "one"].id.fieldloc == [(1, "outer"), (2, "one")]
-    # assert recordarray2["outer", 0, "two"].id.fieldloc == [(1, "outer"), (2, "two")]
-    # assert recordarray2["outer", "one", 0].id.fieldloc == [(1, "outer"), (2, "one")]
-    # assert recordarray2["outer", "two", 0].id.fieldloc == [(1, "outer"), (2, "two")]
-    # assert awkward1.tolist(recordarray2["outer", "one", 1, 0]) == 2
-    # assert awkward1.tolist(recordarray2["outer", 1, "one", 0]) == 2
-    # assert awkward1.tolist(recordarray2["outer", 1, 0, "one"]) == 2
-    # assert awkward1.tolist(recordarray2[1, "outer", "one", 0]) == 2
-    # assert awkward1.tolist(recordarray2[1, "outer", 0, "one"]) == 2
-    # print(awkward1.tolist(recordarray2[1]))
-    print(awkward1.tolist(recordarray2[1, 0, "outer"]))
-    raise Exception
+    recordarray2.setid()
+    assert recordarray2["outer"].id.fieldloc == [(1, "outer")]
+    assert recordarray2["outer", 0, "one"].id.fieldloc == [(1, "outer"), (2, "one")]
+    assert recordarray2["outer", 0, "two"].id.fieldloc == [(1, "outer"), (2, "two")]
+    assert recordarray2["outer", "one", 0].id.fieldloc == [(1, "outer"), (2, "one")]
+    assert recordarray2["outer", "two", 0].id.fieldloc == [(1, "outer"), (2, "two")]
+    assert recordarray2["outer", "one", 1, 0] == 2
+    assert recordarray2["outer", 1, "one", 0] == 2
+    assert recordarray2["outer", 1, 0, "one"] == 2
+    assert recordarray2[1, "outer", "one", 0] == 2
+    assert recordarray2[1, "outer", 0, "one"] == 2
+    assert recordarray2[1, 0, "outer", "one"] == 2

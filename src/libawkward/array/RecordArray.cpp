@@ -225,10 +225,6 @@ namespace awkward {
   }
 
   int64_t RecordArray::index(const std::string& key) const {
-    std::cout << std::endl;
-    std::cout << "RecordArray::index " << key << std::endl;
-    std::cout << tostring() << std::endl;
-
     int64_t out = -1;
     if (!istuple()) {
       try {
@@ -371,18 +367,15 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
-    std::cout << std::endl;
-    std::cout << "RecordArray::getitem_next " << (head.get() == nullptr ? "" : head.get()->tostring()) << " " << tail.tostring() << std::endl;
-    std::cout << tostring() << std::endl;
-
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     Slice emptytail;
     emptytail.become_sealed();
 
-    throw std::runtime_error("STOP");
-
-    if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+    if (head.get() == nullptr) {
+      return shallow_copy();
+    }
+    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
       std::shared_ptr<Content> out = getitem_next(*field, emptytail, advanced);
       return out.get()->getitem_next(nexthead, nexttail, advanced);
     }
