@@ -33,15 +33,17 @@ namespace awkward {
     virtual Fillable* index(int64_t index);
     virtual Fillable* endtuple();
 
+    int64_t numfields() const { return (int64_t)contents_.size(); }
+
   private:
     FillableArray* fillablearray_;
     const FillableOptions options_;
     std::vector<std::shared_ptr<Fillable>> contents_;
     int64_t length_;
-    size_t index_;
+    int64_t index_;    // -1 means not begun; greater than contents_.size() means uninitialized
 
-    void check();
-    void maybeupdate(size_t i, Fillable* tmp);
+    void checklength();
+    void maybeupdate(int64_t i, Fillable* tmp);
   };
 }
 

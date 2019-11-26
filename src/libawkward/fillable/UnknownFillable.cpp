@@ -78,11 +78,11 @@ namespace awkward {
   }
 
   Fillable* UnknownFillable::index(int64_t index) {
-    throw std::invalid_argument("'index' should only be called in a tuple");
+    throw std::invalid_argument("'index' should only be called in a tuple (did you forget to call 'begintuple'?)");
   }
 
   Fillable* UnknownFillable::endtuple() {
-    throw std::invalid_argument("'endtuple' should only be called in a tuple");
+    throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
   }
 
   template <typename T>

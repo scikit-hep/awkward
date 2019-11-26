@@ -12,10 +12,11 @@
 
 namespace awkward {
   class FillableArray;
+  class TupleFillable;
 
   class UnionFillable: public Fillable {
   public:
-    UnionFillable(FillableArray* fillablearray, const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>> contents): fillablearray_(fillablearray), options_(options), types_(types), offsets_(offsets), contents_(contents) { }
+    UnionFillable(FillableArray* fillablearray, const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>> contents): fillablearray_(fillablearray), options_(options), types_(types), offsets_(offsets), contents_(contents), activetuple_(-1) { }
 
     static UnionFillable* fromsingle(FillableArray* fillablearray, const FillableOptions& options, Fillable* firstcontent) {
       GrowableBuffer<int8_t> types = GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
@@ -45,9 +46,11 @@ namespace awkward {
     GrowableBuffer<int8_t> types_;
     GrowableBuffer<int64_t> offsets_;
     std::vector<std::shared_ptr<Fillable>> contents_;
+    int64_t activetuple_;   // numfields of the active tuple
 
     template <typename T>
     T* findfillable(int8_t& type);
+    TupleFillable* findtuple(int8_t& type, int64_t numfields);
     template <typename T>
     T* maybenew(T* fillable, int64_t& length);
     template <typename T1>

@@ -28,7 +28,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> TupleFillable::type() const {
-    if (index_ > contents_.size()) {
+    if (index_ > (int64_t)contents_.size()) {
       return std::shared_ptr<Type>(new UnknownType);
     }
     else {
@@ -41,7 +41,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> TupleFillable::snapshot() const {
-    if (index_ > contents_.size()) {
+    if (index_ > (int64_t)contents_.size()) {
       return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
     }
     else {
@@ -54,44 +54,84 @@ namespace awkward {
   }
 
   Fillable* TupleFillable::null() {
-    // FIXME: null() outside of an index means the whole tuple is null
-    check();
-    maybeupdate(index_, contents_[index_].get()->null());
-    return this;
+    if (index_ != -1) {
+      checklength();
+      maybeupdate(index_, contents_[(size_t)index_].get()->null());
+      return this;
+    }
+    else {
+      Fillable* out = OptionFillable::fromvalids(fillablearray_, options_, this);
+      out->null();
+      return out;
+    }
   }
 
   Fillable* TupleFillable::boolean(bool x) {
-    check();
-    maybeupdate(index_, contents_[index_].get()->boolean(x));
-    return this;
+    if (index_ != -1) {
+      checklength();
+      maybeupdate(index_, contents_[(size_t)index_].get()->boolean(x));
+      return this;
+    }
+    else {
+      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
+      out->boolean(x);
+      return out;
+    }
   }
 
   Fillable* TupleFillable::integer(int64_t x) {
-    check();
-    maybeupdate(index_, contents_[index_].get()->integer(x));
-    return this;
+    if (index_ != -1) {
+      checklength();
+      maybeupdate(index_, contents_[(size_t)index_].get()->integer(x));
+      return this;
+    }
+    else {
+      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
+      out->integer(x);
+      return out;
+    }
   }
 
   Fillable* TupleFillable::real(double x) {
-    check();
-    maybeupdate(index_, contents_[index_].get()->real(x));
-    return this;
+    if (index_ != -1) {
+      checklength();
+      maybeupdate(index_, contents_[(size_t)index_].get()->real(x));
+      return this;
+    }
+    else {
+      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
+      out->real(x);
+      return out;
+    }
   }
 
   Fillable* TupleFillable::beginlist() {
-    check();
-    maybeupdate(index_, contents_[index_].get()->beginlist());
-    return this;
+    if (index_ != -1) {
+      checklength();
+      maybeupdate(index_, contents_[(size_t)index_].get()->beginlist());
+      return this;
+    }
+    else {
+      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
+      out->beginlist();
+      return out;
+    }
   }
 
   Fillable* TupleFillable::endlist() {
-    check();
-    maybeupdate(index_, contents_[index_].get()->endlist());
-    return this;
+    if (index_ != -1) {
+      checklength();
+      maybeupdate(index_, contents_[(size_t)index_].get()->endlist());
+      return this;
+    }
+    else {
+      return nullptr;
+    }
   }
 
   Fillable* TupleFillable::begintuple(int64_t numfields) {
-    if (index_ > contents_.size()) {
+    if (index_ > (int64_t)contents_.size()) {
+      // first-time initialization
       for (int64_t i = 0;  i < numfields;  i++) {
         contents_.push_back(std::shared_ptr<Fillable>(new UnknownFillable(fillablearray_, options_)));
       }
@@ -101,7 +141,9 @@ namespace awkward {
       index_ = -1;
     }
     else {
-      throw std::runtime_error("FIXME: turn this into a union");
+      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
+      out->begintuple(numfields);
+      return out;
     }
 
     return this;
@@ -111,7 +153,7 @@ namespace awkward {
     if (!(0 <= index  &&  index < contents_.size())) {
       throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" for tuple of length ") + std::to_string(contents_.size()));
     }
-    index_ = (size_t)index;
+    index_ = index;
     return this;
   }
 
@@ -123,21 +165,19 @@ namespace awkward {
       }
     }
     length_ = length;
+    index_ = -1;
     return this;
   }
 
-  void TupleFillable::check() {
-    if (index_ == -1) {
-      throw std::invalid_argument("call 'index' before setting each tuple element");
-    }
-    if (contents_[index_].get()->length() > length_) {
+  void TupleFillable::checklength() {
+    if (contents_[(size_t)index_].get()->length() > length_) {
       throw std::invalid_argument(std::string("tuple index ") + std::to_string(index_) + std::string(" filled more than once (missing call to 'index'?)"));
     }
   }
 
-  void TupleFillable::maybeupdate(size_t i, Fillable* tmp) {
-    if (tmp != contents_[i].get()  &&  tmp != nullptr) {
-      contents_[i] = std::shared_ptr<Fillable>(tmp);
+  void TupleFillable::maybeupdate(int64_t i, Fillable* tmp) {
+    if (tmp != contents_[(size_t)i].get()  &&  tmp != nullptr) {
+      contents_[(size_t)i] = std::shared_ptr<Fillable>(tmp);
     }
   }
 }

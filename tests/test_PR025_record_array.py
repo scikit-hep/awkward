@@ -279,7 +279,7 @@ def test_setid():
     assert recordarray2[2, "outer", 0].location == (2, "outer", 0)
     assert recordarray2[2, "outer", 0, "two"].location == (2, "outer", 0, "two")
 
-def test_fillable():
+def test_fillable_tuple():
     fillable = awkward1.layout.FillableArray()
 
     fillable.begintuple(3)

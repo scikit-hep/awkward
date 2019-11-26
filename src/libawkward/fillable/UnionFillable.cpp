@@ -10,6 +10,7 @@
 #include "awkward/fillable/Int64Fillable.h"
 #include "awkward/fillable/Float64Fillable.h"
 #include "awkward/fillable/ListFillable.h"
+#include "awkward/fillable/TupleFillable.h"
 
 #include "awkward/fillable/UnionFillable.h"
 
@@ -85,15 +86,34 @@ namespace awkward {
   }
 
   Fillable* UnionFillable::begintuple(int64_t numfields) {
-    throw std::runtime_error("FIXME: UnionFillable::begintuple");
+    int8_t type;
+    int64_t length;
+    maybenew<TupleFillable>(findtuple(type, numfields), length);
+    offsets_.append(length);
+    types_.append(type);
+    activetuple_ = -1;
+    return this;
   }
 
   Fillable* UnionFillable::index(int64_t index) {
-    throw std::invalid_argument("'index' should only be called in a tuple");
+    int8_t type;
+    TupleFillable* fillable = findtuple(type, activetuple_);
+    if (fillable == nullptr) {
+      throw std::invalid_argument("'index' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    }
+    fillable->index(index);
+    return this;
   }
 
   Fillable* UnionFillable::endtuple() {
-    throw std::runtime_error("FIXME: UnionFillable::endtuple");
+    int8_t type;
+    TupleFillable* fillable = findtuple(type, activetuple_);
+    if (fillable == nullptr) {
+      throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    }
+    fillable->endtuple();
+    activetuple_ = -1;
+    return this;
   }
 
   template <typename T>
@@ -104,6 +124,19 @@ namespace awkward {
         return raw;
       }
       type++;
+    }
+    return nullptr;
+  }
+
+  TupleFillable* UnionFillable::findtuple(int8_t& type, int64_t numfields) {
+    type = 0;
+    for (auto x : contents_) {
+      if (TupleFillable* raw = dynamic_cast<TupleFillable*>(x.get())) {
+        if (raw->numfields() == numfields) {
+          return raw;
+        }
+        type++;
+      }
     }
     return nullptr;
   }

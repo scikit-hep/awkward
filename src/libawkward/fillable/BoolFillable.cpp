@@ -62,15 +62,17 @@ namespace awkward {
   }
 
   Fillable* BoolFillable::begintuple(int64_t numfields) {
-    throw std::runtime_error("FIXME: BoolFillable::begintuple");
+    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
+    out->begintuple(numfields);
+    return out;
   }
 
   Fillable* BoolFillable::index(int64_t index) {
-    throw std::invalid_argument("'index' should only be called in a tuple");
+    throw std::invalid_argument("'index' should only be called in a tuple (did you forget to call 'begintuple'?)");
   }
 
   Fillable* BoolFillable::endtuple() {
-    throw std::runtime_error("FIXME: BoolFillable::endtuple");
+    throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
   }
 
 }
