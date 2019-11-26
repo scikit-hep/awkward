@@ -13,6 +13,9 @@ class Content:
         for i in range(len(self)):
             yield convert(self[i])
 
+    def __repr__(self):
+        return self.tostring_part("", "", "").rstrip()
+
 class FloatArray(Content):
     def __init__(self, data):
         assert isinstance(data, list)
@@ -20,12 +23,18 @@ class FloatArray(Content):
 
     def __len__(self):
         return len(self.data)
-
+        
     def __getitem__(self, where):
         if isinstance(where, int):
             return self.data[where]
         else:
             return FloatArray(self.data[where])
+
+    def tostring_part(self, indent, pre, post):
+        out = indent + pre + "<FloatArray>\n"
+        out += indent + "    " + " ".join(repr(x) for x in self.data) + "\n"
+        out += indent + "</FloatArray>" + post
+        return out
 
 class ListArray(Content):
     def __init__(self, offsets, content):
@@ -45,6 +54,13 @@ class ListArray(Content):
             stop = where.stop + 1
             return ListArray(self.offsets[start:stop], self.content)
 
+    def tostring_part(self, indent, pre, post):
+        out = indent + pre + "<ListArray>\n"
+        out += indent + "    <offsets>" + " ".join(repr(x) for x in self.offsets) + "</offsets>\n"
+        out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
+        out += indent + "</ListArray>" + post
+        return out
+
 class UnionArray(Content):
     def __init__(self, tags, offsets, contents):
         assert isinstance(tags, list)
@@ -62,6 +78,15 @@ class UnionArray(Content):
             return self.contents[self.tags[where]][self.offsets[where]]
         else:
             return UnionArray(self.tags[where], self.offsets[where], self.contents)
+
+    def tostring_part(self, indent, pre, post):
+        out = indent + pre + "<UnionArray>\n"
+        out += indent + "    <tags>" + " ".join(repr(x) for x in self.tags) + "</tags>\n"
+        out += indent + "    <offsets>" + " ".join(repr(x) for x in self.offsets) + "</offsets>\n"
+        for i, content in enumerate(self.contents):
+            out += content.tostring_part(indent + "    ", "<content i=\"{}\">".format(i), "</content>\n")
+        out += indent + "</UnionArray>" + post
+        return out
 
 class OptionArray(Content):
     def __init__(self, offsets, content):
@@ -82,6 +107,13 @@ class OptionArray(Content):
         else:
             return OptionArray(self.offsets[where], self.content)
 
+    def tostring_part(self, indent, pre, post):
+        out = indent + pre + "<OptionArray>\n"
+        out += indent + "    <offsets>" + " ".join(repr(x) for x in self.offsets) + "</offsets>\n"
+        out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
+        out += indent + "</OptionArray>" + post
+        return out
+
 class EmptyArray(Content):
     def __init__(self):
         pass
@@ -94,6 +126,8 @@ class EmptyArray(Content):
             [][where]
         else:
             return EmptyArray()
+    def tostring_part(self, indent, pre, post):
+        return indent + pre + "<EmptyArray/>\n" + post
 
 class TupleArray(Content):
     def __init__(self, contents):
@@ -114,13 +148,61 @@ class TupleArray(Content):
         else:
             return TupleArray([x[where] for x in self.contents])
 
+    def tostring_part(self, indent, pre, post):
+        out = indent + pre + "<TupleArray>\n"
+        for i, content in enumerate(self.contents):
+            out += content.tostring_part(indent + "    ", "<content i=\"{}\">".format(i), "</content>\n")
+        out += indent + "</TupleArray>" + post
+        return out
+
 ################################################################ Content tests
 
-assert list(OptionArray([0, -1, 1, -1, 2, -1, 3, -1, 4, -1, 5, -1, 6], UnionArray([1, 0, 1, 0, 1, 0, 1], [0, 0, 1, 1, 2, 2, 3], [FloatArray([100, 200, 300]), ListArray([0, 1, 4, 4, 5], ListArray([0, 3, 3, 5, 6, 9], FloatArray([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])))]))) == [[[1.1, 2.2, 3.3]], None, 100, None, [[], [4.4, 5.5], [6.6]], None, 200, None, [], None, 300, None, [[7.7, 8.8, 9.9]]]
+one = OptionArray([0, -1, 1, -1, 2, -1, 3, -1, 4, -1, 5, -1, 6], UnionArray([1, 0, 1, 0, 1, 0, 1], [0, 0, 1, 1, 2, 2, 3], [FloatArray([100, 200, 300]), ListArray([0, 1, 4, 4, 5], ListArray([0, 3, 3, 5, 6, 9], FloatArray([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])))]))
+# print(one)
+# print(list(one))
+assert list(one) == [[[1.1, 2.2, 3.3]], None, 100, None, [[], [4.4, 5.5], [6.6]], None, 200, None, [], None, 300, None, [[7.7, 8.8, 9.9]]]
+# print()
 
-assert list(ListArray([0, 2, 2, 2, 3], TupleArray([FloatArray([1, 2, 3]), ListArray([0, 3, 3, 5], FloatArray([1.1, 2.2, 3.3, 4.4, 5.5]))]))) == [[(1, [1.1, 2.2, 3.3]), (2, [])], [], [], [(3, [4.4, 5.5])]]
+two = ListArray([0, 2, 2, 2, 3], TupleArray([FloatArray([1, 2, 3]), ListArray([0, 3, 3, 5], FloatArray([1.1, 2.2, 3.3, 4.4, 5.5]))]))
+# print(two)
+# print(list(two))
+assert list(two) == [[(1, [1.1, 2.2, 3.3]), (2, [])], [], [], [(3, [4.4, 5.5])]]
+# print()
 
 ################################################################ Fillables
+
+class FillableArray:
+    def __init__(self):
+        self.fillable = UnknownFillable.fromempty()
+
+    def fill(self, x):
+        if x is None:
+            self._maybeupdate(self.fillable.null())
+        elif isinstance(x, (int, float)):
+            self._maybeupdate(self.fillable.real(x))
+        elif isinstance(x, list):
+            self._maybeupdate(self.fillable.beginlist())
+            for y in x:
+                self.fill(y)
+            self._maybeupdate(self.fillable.endlist())
+        elif isinstance(x, tuple):
+            self._maybeupdate(self.fillable.begintuple(len(x)))
+            for i, y in enumerate(x):
+                self.index(i)
+                self.fill(y)
+            self._maybeupdate(self.fillable.endtuple())
+        else:
+            raise AssertionError(x)
+
+    def _maybeupdate(self, fillable):
+        if fillable is not None and fillable is not self.fillable:
+            self.fillable = fillable
+
+    def snapshot(self):
+        return self.fillable.snapshot()
+
+    def __iter__(self):
+        return iter(self.snapshot())
 
 class Fillable:
     pass
@@ -128,19 +210,29 @@ class Fillable:
 class UnknownFillable(Fillable):
     def __init__(self, nullcount):
         assert isinstance(nullcount, int)
+        self.nullcount = nullcount
 
     @classmethod
     def fromempty(cls):
         return UnknownFillable(0)
 
+    def snapshot(self):
+        return EmptyArray()
+
     def __len__(self):
         return self.nullcount
 
     def null(self):
-        raise NotImplementedError
+        self.nullcount += 1
+        return self
 
     def real(self, x):
-        raise NotImplementedError
+        if self.nullcount == 0:
+            out = FloatFillable.fromempty()
+        else:
+            out = OptionFillable.fromnulls(self.nullcount, FloatFillable.fromempty())
+        out.real(x)
+        return out
 
     def beginlist(self):
         raise NotImplementedError
@@ -172,14 +264,21 @@ class OptionFillable(Fillable):
     def fromvalids(cls, content):
         return cls(list(range(len(content))), content)
 
+    def snapshot(self):
+        return OptionArray(list(self.offsets), self.content.snapshot())
+
     def __len__(self):
         return len(self.offsets)
 
     def null(self):
-        raise NotImplementedError
+        self.offsets.append(-1)
+        return self
 
     def real(self, x):
-        raise NotImplementedError
+        length = len(self.content)
+        self._maybeupdate(self.content.real(x))
+        self.offsets.append(length)
+        return self
 
     def beginlist(self):
         raise NotImplementedError
@@ -196,6 +295,10 @@ class OptionFillable(Fillable):
     def endtuple(self):
         raise NotImplementedError
 
+    def _maybeupdate(self, fillable):
+        if fillable is not None and fillable is not self.fillable:
+            self.fillable = fillable
+
 class UnionFillable(Fillable):
     def __init__(self, tags, offsets, contents):
         assert isinstance(tags, list)
@@ -210,6 +313,9 @@ class UnionFillable(Fillable):
         return UnionFillable([0] * len(firstcontent),
                              list(range(len(firstcontent))),
                              [firstcontent])
+
+    def snapshot(self):
+        raise NotImplementedError
 
     def __len__(self):
         return len(self.tags)
@@ -246,6 +352,9 @@ class ListFillable(Fillable):
     def fromempty(cls):
         return ListFillable([0], UnknownFillable.fromempty())
 
+    def snapshot(self):
+        raise NotImplementedError
+
     def __len__(self):
         return len(self.offsets) - 1
 
@@ -278,6 +387,9 @@ class TupleFillable(Fillable):
     @classmethod
     def fromempty(cls):
         return TupleFillable([])
+
+    def snapshot(self):
+        raise NotImplementedError
 
     def __len__(self):
         if len(self.contents) == 0:
@@ -315,14 +427,19 @@ class FloatFillable(Fillable):
     def fromempty(cls):
         return FloatFillable([])
 
+    def snapshot(self):
+        return FloatArray(list(self.data))
+
     def __len__(self):
         return len(self.data)
 
     def null(self):
-        raise NotImplementedError
+        out = OptionFillable.fromvalids(self)
+        out.null()
+        return out
 
     def real(self, x):
-        raise NotImplementedError
+        self.data.append(x)
 
     def beginlist(self):
         raise NotImplementedError
@@ -340,3 +457,24 @@ class FloatFillable(Fillable):
         raise NotImplementedError
 
 ################################################################ Fillable tests
+
+datasets = [
+    [1.1, 2.2, 3.3],
+    [None, 1.1, 2.2, 3.3],
+    [1.1, None, 2.2, 3.3],
+    [None, 1.1, None, 2.2, 3.3],
+
+    ]
+
+for dataset in datasets:
+    fillable = FillableArray()
+    for x in dataset:
+        fillable.fill(x)
+    assert list(fillable) == dataset
+
+fillable = FillableArray()
+fillable.fill((1, 1.1))
+fillable.fill((2, 2.2))
+fillable.fill((3, 3.3))
+print(fillable.snapshot())
+print(list(fillable))
