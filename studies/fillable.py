@@ -127,7 +127,7 @@ class EmptyArray(Content):
         else:
             return EmptyArray()
     def tostring_part(self, indent, pre, post):
-        return indent + pre + "<EmptyArray/>\n" + post
+        return indent + pre + "<EmptyArray/>" + post
 
 class TupleArray(Content):
     def __init__(self, contents):
@@ -194,6 +194,27 @@ class FillableArray:
         else:
             raise AssertionError(x)
 
+    def null(self):
+        self._maybeupdate(self.fillable.null())
+
+    def real(self, x):
+        self._maybeupdate(self.fillable.real(x))
+
+    def beginlist(self):
+        self._maybeupdate(self.fillable.beginlist())
+
+    def endlist(self):
+        self._maybeupdate(self.fillable.endlist())
+
+    def begintuple(self, numfields):
+        self._maybeupdate(self.fillable.begintuple(numfields))
+
+    def index(self, i):
+        self._maybeupdate(self.fillable.index(i))
+
+    def endtuple(self):
+        self._maybeupdate(self.fillable.endtuple())
+
     def _maybeupdate(self, fillable):
         if fillable is not None and fillable is not self.fillable:
             self.fillable = fillable
@@ -217,7 +238,10 @@ class UnknownFillable(Fillable):
         return UnknownFillable(0)
 
     def snapshot(self):
-        return EmptyArray()
+        if self.nullcount == 0:
+            return EmptyArray()
+        else:
+            return OptionArray([-1] * self.nullcount, EmptyArray())
 
     def __len__(self):
         return self.nullcount
@@ -382,22 +406,12 @@ class ListFillable(Fillable):
         raise NotImplementedError
 
 class TupleFillable(Fillable):
-    def __init__(self, contents, exists, length, nextindex, nested):
-        assert all(isinstance(x, Fillable) for x in contents)
-        assert isinstance(exists, bool)
-        assert isinstance(length, int)
-        assert isinstance(nextindex, int)
-        assert isinstance(nested, bool)
-        self.contents = contents
-        self.exists = exists
-        self.length = length
-        self.nextindex = nextindex
-        self.nested = nested
+    def __init__(self):
+        self.length = -1
 
     @classmethod
     def fromempty(cls):
-        print("TupleFillable.fromempty")
-        return TupleFillable([], False, 0, -1, False)
+        return TupleFillable()
 
     def snapshot(self):
         return TupleArray([x.snapshot() for x in self.contents])
@@ -410,7 +424,6 @@ class TupleFillable(Fillable):
 
     def real(self, x):
         assert self.nextindex != -1
-        print("TupleFillable.real", x, "nextindex", self.nextindex, "len(...)", len(self.contents[self.nextindex]), "len(self)", self.length)
         assert len(self.contents[self.nextindex]) == self.length
         self._maybeupdate(self.nextindex, self.contents[self.nextindex].real(x))
         return self
@@ -422,57 +435,53 @@ class TupleFillable(Fillable):
         raise NotImplementedError
 
     def begintuple(self, numfields):
-        if not self.exists:
-            print("begintuple not exists", numfields)
+        if self.length == -1:
             self.contents = [UnknownFillable.fromempty() for i in range(numfields)]
-            self.exists = True
             self.length = 0
             self.nextindex = -1
-            self.nested = False
+            self.nextnested = False
             return self
 
-        elif self.nested:
-            print("begintuple nested", self.nextindex)
+        elif self.nextnested:
             assert self.nextindex != -1
             self._maybeupdate(self.nextindex, self.contents[self.nextindex].begintuple(numfields))
             return self
 
         elif self.nextindex != -1:
-            print("begintuple nextindex != -1")
             assert len(self.contents[self.nextindex]) == self.length
             self._maybeupdate(self.nextindex, self.contents[self.nextindex].begintuple(numfields))
-            self.nested = True
+            self.nextnested = True
             return self
 
         elif len(self.contents) == numfields:
-            print("begintuple len(contents) == numfields", numfields)
             return self
 
         else:
             raise NotImplementedError
 
     def index(self, i):
-        if self.nested:
-            print("index", i, "nested")
+        if self.nextnested:
             assert self.nextindex != -1
             self._maybeupdate(self.nextindex, self.contents[self.nextindex].index(i))
             return self
+
         else:
-            print("index", i)
             self.nextindex = i
             return self
 
     def endtuple(self):
-        print("endtuple", [len(x) for x in self.contents])
-        if self.nested:
+        if self.nextnested:
             assert self.nextindex != -1
             self._maybeupdate(self.nextindex, self.contents[self.nextindex].endtuple())
             if len(self.contents[self.nextindex]) == self.length + 1:
-                self.nested = False
+                self.nextnested = False
             return self
+
         else:
-            for x in self.contents:
-                assert len(x) == self.length + 1
+            for i in range(len(self.contents)):
+                if len(self.contents[i]) == self.length:
+                    self._maybeupdate(i, self.contents[i].null())
+                assert len(self.contents[i]) == self.length + 1
             self.length += 1
             self.nextindex = -1
             return self
@@ -522,10 +531,16 @@ class FloatFillable(Fillable):
 ################################################################ Fillable tests
 
 datasets = [
+    [],
+    [None],
+    [None, None, None],
     [1.1, 2.2, 3.3],
     [None, 1.1, 2.2, 3.3],
     [1.1, None, 2.2, 3.3],
     [None, 1.1, None, 2.2, 3.3],
+    [1.1, 2.2, 3.3, None],
+    [1.1, 2.2, None, 3.3, None],
+    [None, 1.1, 2.2, 3.3, None],
     [(1, 1.1), (2, 2.2), (3, 3.3)],
     [(1, (2, 3)), (10, (20, 30)), (100, (200, 300))],
     [(1, (2, 3, 4)), (10, (20, 30, 40)), (100, (200, 300, 400))],
@@ -537,15 +552,26 @@ datasets = [
 
     ]
 
-for dataset in datasets:
-    fillable = FillableArray()
-    for x in dataset:
-        fillable.fill(x)
-    assert list(fillable) == dataset
+# for dataset in datasets:
+#     fillable = FillableArray()
+#     for x in dataset:
+#         fillable.fill(x)
+#     assert list(fillable) == dataset
 
 fillable = FillableArray()
-fillable.fill((  1, ((  2,   3), (  4,   5))))
-fillable.fill(( 10, (( 20,  30), ( 40,  50))))
-fillable.fill((100, ((200, 300), (400, 500))))
-print(fillable.snapshot())
-print(list(fillable))
+assert list(fillable) == []
+fillable.begintuple(2)
+fillable.index(0)
+fillable.real(1.1)
+fillable.endtuple()
+assert list(fillable) == [(1.1, None)]
+fillable.begintuple(2)
+fillable.index(0)
+fillable.real(2.2)
+fillable.endtuple()
+assert list(fillable) == [(1.1, None), (2.2, None)]
+fillable.begintuple(2)
+fillable.index(1)
+fillable.real(3.3)
+fillable.endtuple()
+assert list(fillable) == [(1.1, None), (2.2, None), (None, 3.3)]
