@@ -53,16 +53,16 @@ namespace awkward {
     throw std::runtime_error("FIXME: RecordFillable::endlist");
   }
 
-  Fillable* RecordFillable::beginrec(int64_t slotsid) {
-    throw std::runtime_error("FIXME: RecordFillable::beginrec");
+  Fillable* RecordFillable::begintuple(int64_t numfields) {
+    throw std::runtime_error("FIXME: RecordFillable::begintuple");
   }
 
-  Fillable* RecordFillable::indexrec(int64_t index) {
-    throw std::runtime_error("FIXME: RecordFillable::indexrec(int)");
+  Fillable* RecordFillable::index(int64_t index) {
+    throw std::runtime_error("FIXME: RecordFillable::index(int)");
   }
 
-  Fillable* RecordFillable::endrec() {
-    throw std::runtime_error("FIXME: RecordFillable::endrec");
+  Fillable* RecordFillable::endtuple() {
+    throw std::runtime_error("FIXME: RecordFillable::endtuple");
   }
 
 }

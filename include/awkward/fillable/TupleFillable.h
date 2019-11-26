@@ -1,20 +1,26 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_UNKNOWNFILLABLE_H_
-#define AWKWARD_UNKNOWNFILLABLE_H_
+#ifndef AWKWARD_TUPLEFILLABLE_H_
+#define AWKWARD_TUPLEFILLABLE_H_
 
 #include <vector>
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/fillable/FillableOptions.h"
+#include "awkward/fillable/GrowableBuffer.h"
 #include "awkward/fillable/Fillable.h"
+#include "awkward/fillable/UnknownFillable.h"
 
 namespace awkward {
   class FillableArray;
 
-  class UnknownFillable: public Fillable {
+  class TupleFillable: public Fillable {
   public:
-    UnknownFillable(FillableArray* fillablearray, const FillableOptions& options): fillablearray_(fillablearray), options_(options), nullcount_(0) { }
+    TupleFillable(FillableArray* fillablearray, const FillableOptions& options, int64_t numfields): fillablearray_(fillablearray), options_(options), contents_(), index_(-1) {
+      for (int64_t i = 0;  i < numfields;  i++) {
+        contents_.push_back(std::shared_ptr<Fillable>(new UnknownFillable(fillablearray, options)));
+      }
+    }
 
     virtual int64_t length() const;
     virtual void clear();
@@ -34,11 +40,11 @@ namespace awkward {
   private:
     FillableArray* fillablearray_;
     const FillableOptions options_;
-    int64_t nullcount_;
+    std::vector<std::shared_ptr<Fillable>> contents_;
+    size_t index_;
 
-    template <typename T>
-    Fillable* prepare() const;
+    void maybeupdate(Fillable* tmp);
   };
 }
 
-#endif // AWKWARD_UNKNOWNFILLABLE_H_
+#endif // AWKWARD_TUPLEFILLABLE_H_

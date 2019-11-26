@@ -26,9 +26,9 @@ namespace awkward {
     virtual Fillable* real(double x);
     virtual Fillable* beginlist();
     virtual Fillable* endlist();
-    virtual Fillable* beginrec(int64_t slotsid);
-    virtual Fillable* indexrec(int64_t index);
-    virtual Fillable* endrec();
+    virtual Fillable* begintuple(int64_t numfields);
+    virtual Fillable* index(int64_t index);
+    virtual Fillable* endtuple();
 
   private:
     FillableArray* fillablearray_;

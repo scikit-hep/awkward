@@ -3,8 +3,6 @@
 #ifndef AWKWARD_FILLABLEARRAY_H_
 #define AWKWARD_FILLABLEARRAY_H_
 
-#include <unordered_map>
-
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Content.h"
 #include "awkward/type/Type.h"
@@ -15,7 +13,7 @@
 namespace awkward {
   class FillableArray {
   public:
-    FillableArray(const FillableOptions& options): fillable_(new UnknownFillable(this, options)), slotsbyid_() { }
+    FillableArray(const FillableOptions& options): fillable_(new UnknownFillable(this, options)) { }
 
     const std::string tostring() const;
     int64_t length() const;
@@ -34,9 +32,13 @@ namespace awkward {
     void real(double x);
     void beginlist();
     void endlist();
-    void beginrec(int64_t slotsid, const Slots& slots);
-    void indexrec(int64_t index);
-    void endrec();
+    void begintuple(int64_t numfields);
+    void index(int64_t index);
+    void endtuple();
+    // void beginrecord(int64_t id);
+    // void field_bypointer(const char* key);
+    // void field_byvalue(std::string key);
+    // void endrecord();
 
     template <typename T>
     void fill(const std::vector<T>& vector) {
@@ -51,7 +53,6 @@ namespace awkward {
 
   private:
     std::shared_ptr<Fillable> fillable_;
-    std::unordered_map<int64_t, Slots> slotsbyid_;
 
     void maybeupdate(Fillable* tmp);
   };

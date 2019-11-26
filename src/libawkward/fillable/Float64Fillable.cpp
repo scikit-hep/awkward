@@ -60,16 +60,16 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* Float64Fillable::beginrec(int64_t slotsid) {
-    throw std::runtime_error("FIXME: Float64Fillable::beginrec");
+  Fillable* Float64Fillable::begintuple(int64_t numfields) {
+    throw std::runtime_error("FIXME: Float64Fillable::begintuple");
   }
 
-  Fillable* Float64Fillable::indexrec(int64_t index) {
-    throw std::runtime_error("FIXME: Float64Fillable::indexrec(int)");
+  Fillable* Float64Fillable::index(int64_t index) {
+    throw std::invalid_argument("'index' should only be called in a tuple");
   }
 
-  Fillable* Float64Fillable::endrec() {
-    throw std::runtime_error("FIXME: Float64Fillable::endrec");
+  Fillable* Float64Fillable::endtuple() {
+    throw std::runtime_error("FIXME: Float64Fillable::endtuple");
   }
 
 }

@@ -102,16 +102,16 @@ namespace awkward {
     }
   }
 
-  Fillable* ListFillable::beginrec(int64_t slotsid) {
-    throw std::runtime_error("FIXME: ListFillable::beginrec");
+  Fillable* ListFillable::begintuple(int64_t numfields) {
+    throw std::runtime_error("FIXME: ListFillable::begintuple");
   }
 
-  Fillable* ListFillable::indexrec(int64_t index) {
-    throw std::runtime_error("FIXME: ListFillable::indexrec(int)");
+  Fillable* ListFillable::index(int64_t index) {
+    throw std::invalid_argument("'index' should only be called in a tuple");
   }
 
-  Fillable* ListFillable::endrec() {
-    throw std::runtime_error("FIXME: ListFillable::endrec");
+  Fillable* ListFillable::endtuple() {
+    throw std::runtime_error("FIXME: ListFillable::endtuple");
   }
 
   Fillable* ListFillable::maybeupdate(Fillable* tmp) {

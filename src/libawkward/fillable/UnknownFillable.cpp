@@ -11,6 +11,8 @@
 #include "awkward/fillable/Int64Fillable.h"
 #include "awkward/fillable/Float64Fillable.h"
 #include "awkward/fillable/ListFillable.h"
+#include "awkward/fillable/TupleFillable.h"
+#include "awkward/fillable/RecordFillable.h"
 
 #include "awkward/fillable/UnknownFillable.h"
 
@@ -69,16 +71,20 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* UnknownFillable::beginrec(int64_t slotsid) {
-    throw std::runtime_error("FIXME: UnknownFillable::beginrec");
+  Fillable* UnknownFillable::begintuple(int64_t numfields) {
+    Fillable* out = new TupleFillable(fillablearray_, options_, numfields);
+    if (nullcount_ != 0) {
+      out = OptionFillable::fromnulls(fillablearray_, options_, nullcount_, out);
+    }
+    return out;
   }
 
-  Fillable* UnknownFillable::indexrec(int64_t index) {
-    throw std::runtime_error("FIXME: UnknownFillable::indexrec(int)");
+  Fillable* UnknownFillable::index(int64_t index) {
+    throw std::invalid_argument("'index' should only be called in a tuple");
   }
 
-  Fillable* UnknownFillable::endrec() {
-    throw std::runtime_error("FIXME: UnknownFillable::endrec");
+  Fillable* UnknownFillable::endtuple() {
+    throw std::invalid_argument("'endtuple' should only be called in a tuple");
   }
 
   template <typename T>

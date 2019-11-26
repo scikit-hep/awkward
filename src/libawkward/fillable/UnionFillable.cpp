@@ -84,16 +84,16 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* UnionFillable::beginrec(int64_t slotsid) {
-    throw std::runtime_error("FIXME: UnionFillable::beginrec");
+  Fillable* UnionFillable::begintuple(int64_t numfields) {
+    throw std::runtime_error("FIXME: UnionFillable::begintuple");
   }
 
-  Fillable* UnionFillable::indexrec(int64_t index) {
-    throw std::runtime_error("FIXME: UnionFillable::indexrec(int)");
+  Fillable* UnionFillable::index(int64_t index) {
+    throw std::invalid_argument("'index' should only be called in a tuple");
   }
 
-  Fillable* UnionFillable::endrec() {
-    throw std::runtime_error("FIXME: UnionFillable::endrec");
+  Fillable* UnionFillable::endtuple() {
+    throw std::runtime_error("FIXME: UnionFillable::endtuple");
   }
 
   template <typename T>

@@ -63,16 +63,21 @@ namespace awkward {
     return nullptr;
   }
 
-  Fillable* OptionFillable::beginrec(int64_t slotsid) {
-    throw std::runtime_error("FIXME: OptionFillable::beginrec");
+  Fillable* OptionFillable::begintuple(int64_t numfields) {
+    int64_t length = content_.get()->length();
+    maybeupdate(content_.get()->begintuple(numfields));
+    index_.append(length);
+    return this;
   }
 
-  Fillable* OptionFillable::indexrec(int64_t index) {
-    throw std::runtime_error("FIXME: OptionFillable::indexrec(int)");
+  Fillable* OptionFillable::index(int64_t index) {
+    content_.get()->index(index);
+    return this;
   }
 
-  Fillable* OptionFillable::endrec() {
-    throw std::runtime_error("FIXME: OptionFillable::endrec");
+  Fillable* OptionFillable::endtuple() {
+    content_.get()->endtuple();
+    return this;
   }
 
   void OptionFillable::maybeupdate(Fillable* tmp) {

@@ -11,18 +11,6 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
-  class Slots {
-  public:
-    Slots(const std::vector<std::string>& slots): slots_(slots) { }
-
-    int64_t numslots() const { return (int64_t)slots_.size(); }
-    const std::vector<std::string> slots() const { return slots_; }
-    const std::string slot(int64_t index) const { return slots_[(size_t)index]; }
-
-  private:
-    const std::vector<std::string> slots_;
-  };
-
   class Fillable {
   public:
     virtual ~Fillable() { }
@@ -38,9 +26,9 @@ namespace awkward {
     virtual Fillable* real(double x) = 0;
     virtual Fillable* beginlist() = 0;
     virtual Fillable* endlist() = 0;
-    virtual Fillable* beginrec(int64_t slotsid) = 0;
-    virtual Fillable* indexrec(int64_t index) = 0;
-    virtual Fillable* endrec() = 0;
+    virtual Fillable* begintuple(int64_t numfields) = 0;
+    virtual Fillable* index(int64_t index) = 0;
+    virtual Fillable* endtuple() = 0;
   };
 }
 

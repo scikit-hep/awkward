@@ -680,6 +680,9 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("real", &ak::FillableArray::real)
       .def("beginlist", &ak::FillableArray::beginlist)
       .def("endlist", &ak::FillableArray::endlist)
+      .def("begintuple", &ak::FillableArray::begintuple)
+      .def("index", &ak::FillableArray::index)
+      .def("endtuple", &ak::FillableArray::endtuple)
       .def("fill", &fillable_fill)
   );
 }

@@ -77,21 +77,33 @@ namespace awkward {
     maybeupdate(tmp);
   }
 
-  void FillableArray::beginrec(int64_t slotsid, const Slots& slots) {
-    auto slotiter = slotsbyid_.find(slotsid);   // hash of int64_t
-    if (slotiter == slotsbyid_.end()) {
-      slotsbyid_.insert(std::pair<int64_t, Slots>(slotsid, slots));
-    }
-    maybeupdate(fillable_.get()->beginrec(slotsid));
+  void FillableArray::begintuple(int64_t numfields) {
+    maybeupdate(fillable_.get()->begintuple(numfields));
   }
 
-  void FillableArray::indexrec(int64_t index) {
-    maybeupdate(fillable_.get()->indexrec(index));
+  void FillableArray::index(int64_t index) {
+    maybeupdate(fillable_.get()->index(index));
   }
 
-  void FillableArray::endrec() {
-    maybeupdate(fillable_.get()->endrec());
+  void FillableArray::endtuple() {
+    maybeupdate(fillable_.get()->endtuple());
   }
+
+  // void FillableArray::beginrecord(int64_t id) {
+  //   maybeupdate(fillable_.get()->beginrecord());
+  // }
+  //
+  // void FillableArray::field_bypointer(const char* key) {
+  //   maybeupdate(fillable_.get()->field_bypointer(key));
+  // }
+  //
+  // void FillableArray::field_byvalue(std::string key) {
+  //   maybeupdate(fillable_.get()->field_byvalue(key));
+  // }
+  //
+  // void FillableArray::endrecord() {
+  //   maybeupdate(fillable_.get()->endrecord());
+  // }
 
   void FillableArray::maybeupdate(Fillable* tmp) {
     if (tmp != fillable_.get()  &&  tmp != nullptr) {
