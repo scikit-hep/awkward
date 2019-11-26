@@ -460,7 +460,7 @@ class UnionFillable(Fillable):
             
     def endlist(self):
         if self.current == -1:
-            raise ValueError("'endlist' without corresponding 'beginlist'")
+            raise ValueError("'endlist' called without corresponding 'beginlist'")
 
         else:
             length = len(self.contents[self.current])
@@ -472,13 +472,41 @@ class UnionFillable(Fillable):
             return self
 
     def begintuple(self, numfields):
-        raise NotImplementedError
+        if self.current == -1:
+            for i in range(len(self.contents)):
+                if isinstance(self.contents[i], TupleFillable):
+                    break
+            else:
+                i = len(self.contents)
+                self.contents.append(TupleFillable.fromempty())
+            self.contents[i].begintuple(numfields)
+            self.current = i
+            return self
+
+        else:
+            self.contents[self.current].begintuple(numfields)
+            return self
 
     def index(self, i):
-        raise NotImplementedError
+        if self.current == -1:
+            raise ValueError("'index' called without corresponding 'begintuple'")
+
+        else:
+            self.contents[self.current].index(i)
+            return self
 
     def endtuple(self):
-        raise NotImplementedError
+        if self.current == -1:
+            raise ValueError("'endtuple' called without corresponding 'begintuple'")
+
+        else:
+            length = len(self.contents[self.current])
+            self.contents[self.current].endtuple()
+            if length != len(self.contents[self.current]):
+                self.tags.append(self.current)
+                self.offsets.append(length)
+                self.current = -1
+            return self
 
     def _maybeupdate(self, index, fillable):
         assert fillable is not None
@@ -754,16 +782,18 @@ class FloatFillable(Fillable):
         return out
 
     def endlist(self):
-        raise NotImplementedError
+        raise ValueError("'endlist' called without corresponding 'beginlist'")
 
     def begintuple(self, numfields):
-        raise NotImplementedError
+        out = UnionFillable.fromsingle(self)
+        out.begintuple(numfields)
+        return out
 
     def index(self, i):
-        raise NotImplementedError
+        raise ValueError("'index' called without corresponding 'begintuple'")
 
     def endtuple(self):
-        raise NotImplementedError
+        raise ValueError("'endtuple' called without corresponding 'begintuple'")
 
 ################################################################ Fillable tests
 
@@ -872,6 +902,14 @@ datasets = [
     [1.1, [None, 2.2], None, 3.3],
     [None, 1.1, [2.2, None], None, 3.3],
     [None, 1.1, [None, 2.2], None, 3.3],
+    [1.1, (2, 2.2), 3.3],
+    [None, 1.1, (2, 2.2), 3.3],
+    [1.1, None, (2, 2.2), 3.3],
+    [1.1, (2, 2.2), None, 3.3],
+    [1.1, (2, None), 3.3],
+    [None, 1.1, (2, None), 3.3],
+    [1.1, None, (2, None), 3.3],
+    [1.1, (2, None), None, 3.3],
     ]
 
 for dataset in datasets:
@@ -885,7 +923,13 @@ for dataset in datasets:
 
 # fillable = FillableArray()
 # fillable.fill(1.1)
-# fillable.fill([2.2])
+# fillable.fill((2, 2.2))
 # fillable.fill(3.3)
 # print(fillable.snapshot())
 # print(list(fillable.snapshot()))
+
+# Need: list becomes a tuple
+#       list becomes a real
+#       tuple becomes a real
+#       tuple becomes a list
+#       tuple becomes a tuple of another length
