@@ -188,7 +188,7 @@ class FillableArray:
         elif isinstance(x, tuple):
             self._maybeupdate(self.fillable.begintuple(len(x)))
             for i, y in enumerate(x):
-                self.index(i)
+                self.fillable.index(i)
                 self.fill(y)
             self._maybeupdate(self.fillable.endtuple())
         else:
@@ -241,7 +241,9 @@ class UnknownFillable(Fillable):
         raise NotImplementedError
 
     def begintuple(self, numfields):
-        raise NotImplementedError
+        out = TupleFillable.fromempty()
+        out.begintuple(numfields)
+        return out
 
     def index(self, i):
         raise NotImplementedError
@@ -296,8 +298,8 @@ class OptionFillable(Fillable):
         raise NotImplementedError
 
     def _maybeupdate(self, fillable):
-        if fillable is not None and fillable is not self.fillable:
-            self.fillable = fillable
+        if fillable is not None and fillable is not self.content:
+            self.content = content
 
 class UnionFillable(Fillable):
     def __init__(self, tags, offsets, contents):
@@ -380,28 +382,34 @@ class ListFillable(Fillable):
         raise NotImplementedError
 
 class TupleFillable(Fillable):
-    def __init__(self, contents):
+    def __init__(self, contents, exists, length, nextindex):
         assert all(isinstance(x, Fillable) for x in contents)
+        assert isinstance(exists, bool)
+        assert isinstance(length, int)
+        assert isinstance(nextindex, int)
         self.contents = contents
+        self.exists = exists
+        self.length = length
+        self.nextindex = nextindex
 
     @classmethod
     def fromempty(cls):
-        return TupleFillable([])
+        return TupleFillable([], False, 0, -1)
 
     def snapshot(self):
-        raise NotImplementedError
+        return TupleArray([x.snapshot() for x in self.contents])
 
     def __len__(self):
-        if len(self.contents) == 0:
-            return 0
-        else:
-            return len(self.contents[0])
+        return self.length
 
     def null(self):
         raise NotImplementedError
 
     def real(self, x):
-        raise NotImplementedError
+        assert self.nextindex != -1
+        assert len(self.contents[self.nextindex]) == len(self)
+        self._maybeupdate(self.nextindex, self.contents[self.nextindex].real(x))
+        return self
 
     def beginlist(self):
         raise NotImplementedError
@@ -410,13 +418,28 @@ class TupleFillable(Fillable):
         raise NotImplementedError
 
     def begintuple(self, numfields):
-        raise NotImplementedError
+        if not self.exists:
+            self.contents = [UnknownFillable.fromempty() for i in range(numfields)]
+            self.exists = True
+            self.nextindex = -1
+        elif len(self.contents) == numfields:
+            self.nextindex = -1
+        else:
+            raise NotImplementedError
 
     def index(self, i):
-        raise NotImplementedError
+        self.nextindex = i
+        return self
 
     def endtuple(self):
-        raise NotImplementedError
+        for x in self.contents:
+            assert len(x) == len(self) + 1
+        self.length += 1
+        self.nextindex = -1
+
+    def _maybeupdate(self, index, fillable):
+        if fillable is not None and fillable is not self.contents[index]:
+            self.contents[index] = fillable
 
 class FloatFillable(Fillable):
     def __init__(self, data):
@@ -463,6 +486,7 @@ datasets = [
     [None, 1.1, 2.2, 3.3],
     [1.1, None, 2.2, 3.3],
     [None, 1.1, None, 2.2, 3.3],
+    [(1, 1.1), (2, 2.2), (3, 3.3)]
 
     ]
 
