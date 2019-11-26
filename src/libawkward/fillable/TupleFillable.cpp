@@ -169,6 +169,32 @@ namespace awkward {
     return this;
   }
 
+  Fillable* TupleFillable::beginrecord(int64_t disambiguator) {
+    throw std::runtime_error("FIXME: TupleFillable::beginrecord");
+    // if (index_ != -1) {
+    //   checklength();
+    //   maybeupdate(index_, contents_[(size_t)index_].get()->beginrecord(disambiguator));
+    //   return this;
+    // }
+    // else {
+    //   Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
+    //   out->beginrecord(disambiguator);
+    //   return out;
+    // }
+  }
+
+  Fillable* TupleFillable::field_fast(const char* key) {
+    throw std::runtime_error("FIXME: TupleFillable::field_fast");
+  }
+
+  Fillable* TupleFillable::field_check(const char* key) {
+    throw std::runtime_error("FIXME: TupleFillable::field_check");
+  }
+
+  Fillable* TupleFillable::endrecord() {
+    throw std::runtime_error("FIXME: TupleFillable::endrecord");
+  }
+
   void TupleFillable::checklength() {
     if (contents_[(size_t)index_].get()->length() > length_) {
       throw std::invalid_argument(std::string("tuple index ") + std::to_string(index_) + std::string(" filled more than once (missing call to 'index'?)"));

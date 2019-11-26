@@ -11,6 +11,7 @@
 #include "awkward/fillable/Float64Fillable.h"
 #include "awkward/fillable/ListFillable.h"
 #include "awkward/fillable/TupleFillable.h"
+#include "awkward/fillable/RecordFillable.h"
 
 #include "awkward/fillable/UnionFillable.h"
 
@@ -88,31 +89,76 @@ namespace awkward {
   Fillable* UnionFillable::begintuple(int64_t numfields) {
     int8_t type;
     int64_t length;
-    maybenew<TupleFillable>(findtuple(type, numfields), length);
-    offsets_.append(length);
-    types_.append(type);
-    activetuple_ = -1;
+    activerec_ = maybenew<TupleFillable>(findtuple(type, numfields), length);
     return this;
   }
 
   Fillable* UnionFillable::index(int64_t index) {
-    int8_t type;
-    TupleFillable* fillable = findtuple(type, activetuple_);
-    if (fillable == nullptr) {
+    if (dynamic_cast<TupleFillable*>(activerec_) == nullptr) {
       throw std::invalid_argument("'index' should only be called in a tuple (did you forget to call 'begintuple'?)");
     }
-    fillable->index(index);
+    activerec_->index(index);
     return this;
   }
 
   Fillable* UnionFillable::endtuple() {
-    int8_t type;
-    TupleFillable* fillable = findtuple(type, activetuple_);
-    if (fillable == nullptr) {
+    if (dynamic_cast<TupleFillable*>(activerec_) == nullptr) {
       throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
     }
-    fillable->endtuple();
-    activetuple_ = -1;
+    int8_t type = 0;
+    int64_t length = activerec_->length();
+    activerec_->endtuple();
+    for (auto x : contents_) {
+      if (x.get() == activerec_) {
+        break;
+      }
+      type++;
+    }
+    offsets_.append(length);
+    types_.append(type);
+    activerec_ = nullptr;
+    return this;
+  }
+
+  Fillable* UnionFillable::beginrecord(int64_t disambiguator) {
+    int8_t type;
+    int64_t length;
+    activerec_ = maybenew<RecordFillable>(findrecord(type, disambiguator), length);
+    return this;
+  }
+
+  Fillable* UnionFillable::field_fast(const char* key) {
+    if (dynamic_cast<RecordFillable*>(activerec_) == nullptr) {
+      throw std::invalid_argument("'field_fast' should only be called in a record (did you forget to call 'beginrecord'?)");
+    }
+    activerec_->field_fast(key);
+    return this;
+  }
+
+  Fillable* UnionFillable::field_check(const char* key) {
+    if (dynamic_cast<RecordFillable*>(activerec_) == nullptr) {
+      throw std::invalid_argument("'field_check' should only be called in a record (did you forget to call 'beginrecord'?)");
+    }
+    activerec_->field_check(key);
+    return this;
+  }
+
+  Fillable* UnionFillable::endrecord() {
+    if (dynamic_cast<RecordFillable*>(activerec_) == nullptr) {
+      throw std::invalid_argument("'endrecord' should only be called in a record (did you forget to call 'beginrecord'?)");
+    }
+    int8_t type = 0;
+    int64_t length = activerec_->length();
+    activerec_->endrecord();
+    for (auto x : contents_) {
+      if (x.get() == activerec_) {
+        break;
+      }
+      type++;
+    }
+    offsets_.append(length);
+    types_.append(type);
+    activerec_ = nullptr;
     return this;
   }
 
@@ -133,6 +179,19 @@ namespace awkward {
     for (auto x : contents_) {
       if (TupleFillable* raw = dynamic_cast<TupleFillable*>(x.get())) {
         if (raw->numfields() == numfields) {
+          return raw;
+        }
+        type++;
+      }
+    }
+    return nullptr;
+  }
+
+  RecordFillable* UnionFillable::findrecord(int8_t& type, int64_t disambiguator) {
+    type = 0;
+    for (auto x : contents_) {
+      if (RecordFillable* raw = dynamic_cast<RecordFillable*>(x.get())) {
+        if (raw->disambiguator() == disambiguator) {
           return raw;
         }
         type++;

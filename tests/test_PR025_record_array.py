@@ -320,3 +320,6 @@ def test_fillable_tuple():
 
     assert str(fillable.type) == "3 * (bool, var * int64, float64)"
     assert awkward1.tolist(fillable.snapshot()) == [(True, [1], 1.1), (False, [2, 2], 2.2), (True, [3, 3, 3], 3.3)]
+
+def test_fillable_record():
+    pass

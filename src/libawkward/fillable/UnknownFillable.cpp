@@ -85,6 +85,24 @@ namespace awkward {
     throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
   }
 
+  Fillable* UnknownFillable::beginrecord(int64_t disambiguator) {
+    Fillable* out = prepare<RecordFillable>();
+    out->beginrecord(disambiguator);
+    return out;
+  }
+
+  Fillable* UnknownFillable::field_fast(const char* key) {
+    throw std::invalid_argument("'field_fast' should only be called in a record (did you forget to call 'beginrecord'?)");
+  }
+
+  Fillable* UnknownFillable::field_check(const char* key) {
+    throw std::invalid_argument("'field_check' should only be called in a record (did you forget to call 'beginrecord'?)");
+  }
+
+  Fillable* UnknownFillable::endrecord() {
+    throw std::invalid_argument("'endrecord' should only be called in a record (did you forget to call 'beginrecord'?)");
+  }
+
   template <typename T>
   Fillable* UnknownFillable::prepare() const {
     Fillable* out = new T(fillablearray_, options_);

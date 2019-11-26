@@ -35,10 +35,11 @@ namespace awkward {
     void begintuple(int64_t numfields);
     void index(int64_t index);
     void endtuple();
-    // void beginrecord(int64_t id);
-    // void field_bypointer(const char* key);
-    // void field_byvalue(std::string key);
-    // void endrecord();
+    void beginrecord();
+    void beginrecord(int64_t disambiguator);
+    void field_fast(const char* key);
+    void field_check(const char* key);
+    void endrecord();
 
     template <typename T>
     void fill(const std::vector<T>& vector) {

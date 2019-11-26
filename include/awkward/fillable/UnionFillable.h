@@ -13,10 +13,11 @@
 namespace awkward {
   class FillableArray;
   class TupleFillable;
+  class RecordFillable;
 
   class UnionFillable: public Fillable {
   public:
-    UnionFillable(FillableArray* fillablearray, const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>> contents): fillablearray_(fillablearray), options_(options), types_(types), offsets_(offsets), contents_(contents), activetuple_(-1) { }
+    UnionFillable(FillableArray* fillablearray, const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>> contents): fillablearray_(fillablearray), options_(options), types_(types), offsets_(offsets), contents_(contents), activerec_(nullptr) { }
 
     static UnionFillable* fromsingle(FillableArray* fillablearray, const FillableOptions& options, Fillable* firstcontent) {
       GrowableBuffer<int8_t> types = GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
@@ -39,6 +40,10 @@ namespace awkward {
     virtual Fillable* begintuple(int64_t numfields);
     virtual Fillable* index(int64_t index);
     virtual Fillable* endtuple();
+    virtual Fillable* beginrecord(int64_t disambiguator);
+    virtual Fillable* field_fast(const char* key);
+    virtual Fillable* field_check(const char* key);
+    virtual Fillable* endrecord();
 
   private:
     FillableArray* fillablearray_;
@@ -46,11 +51,12 @@ namespace awkward {
     GrowableBuffer<int8_t> types_;
     GrowableBuffer<int64_t> offsets_;
     std::vector<std::shared_ptr<Fillable>> contents_;
-    int64_t activetuple_;   // numfields of the active tuple
+    Fillable* activerec_;
 
     template <typename T>
     T* findfillable(int8_t& type);
     TupleFillable* findtuple(int8_t& type, int64_t numfields);
+    RecordFillable* findrecord(int8_t& type, int64_t disambiguator);
     template <typename T>
     T* maybenew(T* fillable, int64_t& length);
     template <typename T1>

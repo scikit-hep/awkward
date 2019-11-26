@@ -116,6 +116,24 @@ namespace awkward {
     throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
   }
 
+  Fillable* ListFillable::beginrecord(int64_t disambiguator) {
+    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
+    out->beginrecord(disambiguator);
+    return out;
+  }
+
+  Fillable* ListFillable::field_fast(const char* key) {
+    throw std::invalid_argument("'field_fast' should only be called in a record (did you forget to call 'beginrecord'?)");
+  }
+
+  Fillable* ListFillable::field_check(const char* key) {
+    throw std::invalid_argument("'field_check' should only be called in a record (did you forget to call 'beginrecord'?)");
+  }
+
+  Fillable* ListFillable::endrecord() {
+    throw std::invalid_argument("'endrecord' should only be called in a record (did you forget to call 'beginrecord'?)");
+  }
+
   Fillable* ListFillable::maybeupdate(Fillable* tmp) {
     if (tmp != content_.get()  &&  tmp != nullptr) {
       content_ = std::shared_ptr<Fillable>(tmp);

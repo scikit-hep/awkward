@@ -65,4 +65,20 @@ namespace awkward {
     throw std::runtime_error("FIXME: RecordFillable::endtuple");
   }
 
+  Fillable* RecordFillable::beginrecord(int64_t disambiguator) {
+    throw std::runtime_error("FIXME: RecordFillable::beginrecord");
+  }
+
+  Fillable* RecordFillable::field_fast(const char* key) {
+    throw std::runtime_error("FIXME: RecordFillable::field_fast");
+  }
+
+  Fillable* RecordFillable::field_check(const char* key) {
+    throw std::runtime_error("FIXME: RecordFillable::field_check");
+  }
+
+  Fillable* RecordFillable::endrecord() {
+    throw std::runtime_error("FIXME: RecordFillable::endrecord");
+  }
+
 }

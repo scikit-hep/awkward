@@ -30,6 +30,10 @@ namespace awkward {
     virtual Fillable* begintuple(int64_t numfields);
     virtual Fillable* index(int64_t index);
     virtual Fillable* endtuple();
+    virtual Fillable* beginrecord(int64_t disambiguator);
+    virtual Fillable* field_fast(const char* key);
+    virtual Fillable* field_check(const char* key);
+    virtual Fillable* endrecord();
 
   private:
     FillableArray* fillablearray_;

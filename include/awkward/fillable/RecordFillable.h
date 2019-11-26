@@ -32,11 +32,25 @@ namespace awkward {
     virtual Fillable* begintuple(int64_t numfields);
     virtual Fillable* index(int64_t index);
     virtual Fillable* endtuple();
+    virtual Fillable* beginrecord(int64_t disambiguator);
+    virtual Fillable* field_fast(const char* key);
+    virtual Fillable* field_check(const char* key);
+    virtual Fillable* endrecord();
+
+    int64_t disambiguator() const { return disambiguator_; }
 
   private:
     FillableArray* fillablearray_;
     const FillableOptions options_;
+    std::vector<std::shared_ptr<Fillable>> contents_;
+    std::vector<std::string> keys_;
+    int64_t disambiguator_;
+    int64_t length_;
+    int64_t index_;
+    int64_t nextindex_;
 
+    void checklength();
+    void maybeupdate(int64_t i, Fillable* tmp);
   };
 }
 

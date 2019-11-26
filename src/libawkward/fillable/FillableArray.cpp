@@ -89,21 +89,25 @@ namespace awkward {
     maybeupdate(fillable_.get()->endtuple());
   }
 
-  // void FillableArray::beginrecord(int64_t id) {
-  //   maybeupdate(fillable_.get()->beginrecord());
-  // }
-  //
-  // void FillableArray::field_bypointer(const char* key) {
-  //   maybeupdate(fillable_.get()->field_bypointer(key));
-  // }
-  //
-  // void FillableArray::field_byvalue(std::string key) {
-  //   maybeupdate(fillable_.get()->field_byvalue(key));
-  // }
-  //
-  // void FillableArray::endrecord() {
-  //   maybeupdate(fillable_.get()->endrecord());
-  // }
+  void FillableArray::beginrecord() {
+    beginrecord(0);
+  }
+
+  void FillableArray::beginrecord(int64_t disambiguator) {
+    maybeupdate(fillable_.get()->beginrecord(disambiguator));
+  }
+
+  void FillableArray::field_fast(const char* key) {
+    maybeupdate(fillable_.get()->field_fast(key));
+  }
+
+  void FillableArray::field_check(const char* key) {
+    maybeupdate(fillable_.get()->field_check(key));
+  }
+
+  void FillableArray::endrecord() {
+    maybeupdate(fillable_.get()->endrecord());
+  }
 
   void FillableArray::maybeupdate(Fillable* tmp) {
     if (tmp != fillable_.get()  &&  tmp != nullptr) {

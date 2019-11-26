@@ -80,6 +80,28 @@ namespace awkward {
     return this;
   }
 
+  Fillable* OptionFillable::beginrecord(int64_t disambiguator) {
+    int64_t length = content_.get()->length();
+    maybeupdate(content_.get()->beginrecord(disambiguator));
+    index_.append(length);
+    return this;
+  }
+
+  Fillable* OptionFillable::field_fast(const char* key) {
+    content_.get()->field_fast(key);
+    return this;
+  }
+
+  Fillable* OptionFillable::field_check(const char* key) {
+    content_.get()->field_check(key);
+    return this;
+  }
+
+  Fillable* OptionFillable::endrecord() {
+    content_.get()->endrecord();
+    return this;
+  }
+
   void OptionFillable::maybeupdate(Fillable* tmp) {
     if (tmp != content_.get()  &&  tmp != nullptr) {
       content_ = std::shared_ptr<Fillable>(tmp);

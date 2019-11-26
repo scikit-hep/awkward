@@ -29,6 +29,11 @@ namespace awkward {
     virtual Fillable* begintuple(int64_t numfields) = 0;
     virtual Fillable* index(int64_t index) = 0;
     virtual Fillable* endtuple() = 0;
+    virtual Fillable* beginrecord(int64_t disambiguator) = 0;
+    virtual Fillable* field_fast(const char* key) = 0;
+    virtual Fillable* field_check(const char* key) = 0;
+    virtual Fillable* endrecord() = 0;
+
   };
 }
 

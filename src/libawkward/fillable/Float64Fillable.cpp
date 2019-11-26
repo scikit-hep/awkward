@@ -74,4 +74,22 @@ namespace awkward {
     throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
   }
 
+  Fillable* Float64Fillable::beginrecord(int64_t disambiguator) {
+    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
+    out->beginrecord(disambiguator);
+    return out;
+  }
+
+  Fillable* Float64Fillable::field_fast(const char* key) {
+    throw std::invalid_argument("'field_fast' should only be called in a record (did you forget to call 'beginrecord'?)");
+  }
+
+  Fillable* Float64Fillable::field_check(const char* key) {
+    throw std::invalid_argument("'field_check' should only be called in a record (did you forget to call 'beginrecord'?)");
+  }
+
+  Fillable* Float64Fillable::endrecord() {
+    throw std::invalid_argument("'endrecord' should only be called in a record (did you forget to call 'beginrecord'?)");
+  }
+
 }
