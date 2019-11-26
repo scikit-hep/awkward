@@ -343,10 +343,20 @@ class OptionFillable(Fillable):
         return self
 
     def beginlist(self):
-        raise NotImplementedError
+        if self.content.active():
+            self.content.beginlist()
+        else:
+            self._maybeupdate(self.content.beginlist())
+        return self
 
     def endlist(self):
-        raise NotImplementedError
+        if not self.content.active():
+            raise ValueError("'endlist' without corresponding 'beginlist'")
+        else:
+            length = len(self.content)
+            self.content.endlist()
+            self.offsets.append(length)
+        return self
 
     def begintuple(self, numfields):
         raise NotImplementedError
@@ -433,15 +443,21 @@ class ListFillable(Fillable):
         return self.begun
 
     def null(self):
-        raise NotImplementedError
+        if self.begun:
+            self._maybeupdate(self.content.null())
+            return self
+        else:
+            out = OptionFillable.fromvalids(self)
+            out.null()
+            return out
 
     def real(self, x):
         if self.begun:
             self._maybeupdate(self.content.real(x))
+            return self
         else:
             # make a union
             raise NotImplementedError
-        return self
 
     def beginlist(self):
         if self.begun:
@@ -573,7 +589,7 @@ class TupleFillable(Fillable):
         else:
             for i in range(len(self.contents)):
                 if len(self.contents[i]) == self.length:
-                    self.contents[i].null()
+                    self._maybeupdate(i, self.contents[i].null())
                 assert len(self.contents[i]) == self.length + 1
             self.length += 1
             self.begun = False
@@ -630,8 +646,65 @@ class FloatFillable(Fillable):
 ################################################################ Fillable tests
 
 fillable = FillableArray()
-fillable.fill((1, (), 1.1))
-fillable.fill((2, (), 2.2))
-fillable.fill((3, (), 3.3))
-print(fillable.snapshot())
-print(list(fillable.snapshot()))
+assert list(fillable.snapshot()) == []
+fillable.begintuple(2)
+fillable.index(0)
+fillable.real(1.1)
+fillable.endtuple()
+assert list(fillable.snapshot()) == [(1.1, None)]
+fillable.begintuple(2)
+fillable.index(0)
+fillable.real(2.2)
+fillable.endtuple()
+assert list(fillable.snapshot()) == [(1.1, None), (2.2, None)]
+fillable.begintuple(2)
+fillable.index(1)
+fillable.real(3.3)
+fillable.endtuple()
+assert list(fillable.snapshot()) == [(1.1, None), (2.2, None), (None, 3.3)]
+
+datasets = [
+    [],
+    [None],
+    [None, None, None],
+    [1.1, 2.2, 3.3],
+    [None, 1.1, 2.2, 3.3],
+    [1.1, None, 2.2, 3.3],
+    [None, 1.1, None, 2.2, 3.3],
+    [1.1, 2.2, 3.3, None],
+    [1.1, 2.2, None, 3.3, None],
+    [None, 1.1, 2.2, 3.3, None],
+    [(1, 1.1), (2, 2.2), (3, 3.3)],
+    [(1, (2, 3)), (10, (20, 30)), (100, (200, 300))],
+    [(1, (2, 3, 4)), (10, (20, 30, 40)), (100, (200, 300, 400))],
+    [((1, 2), (3, 4)), ((10, 20), (30, 40)), ((100, 200), (300, 400))],
+    [((1, 2, 3), (4, 5)), ((10, 20, 30), (40, 50)), ((100, 200, 300), (400, 500))],
+    [((1, 2, 3), (4, 5, 6)), ((10, 20, 30), (40, 50, 60)), ((100, 200, 300), (400, 500, 600))],
+    [(1, (2, (3, 4))), (10, (20, (30, 40))), (100, (200, (300, 400)))],
+    [(1, ((2, 3), 4)), (10, ((20, 30), 40)), (100, ((200, 300), 400))],
+    [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3]],
+    [None, [1.1], [1.1, 2.2], [1.1, 2.2, 3.3]],
+    [[1.1], None, [1.1, 2.2], [1.1, 2.2, 3.3]],
+    [None, [1.1], None, [1.1, 2.2], [1.1, 2.2, 3.3]],
+    [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], None],
+    [[1.1], None, [1.1, 2.2], [1.1, 2.2, 3.3], None],
+    [None, [1.1], [1.1, 2.2], [1.1, 2.2, 3.3], None],
+    [[1.1], [1.1, 2.2], [1.1, None, 3.3]],
+    [None, [1.1], [1.1, 2.2], [1.1, None, 3.3]],
+    ]
+
+for dataset in datasets:
+    fillable = FillableArray()
+    for x in dataset:
+        fillable.fill(x)
+    if list(fillable.snapshot()) != dataset:
+        print(dataset)
+        print(list(fillable.snapshot()))
+        raise AssertionError
+
+# fillable = FillableArray()
+# fillable.fill(None)
+# fillable.fill([1.1])
+# fillable.fill([2.2, 3.3, 4.4])
+# print(fillable.snapshot())
+# print(list(fillable.snapshot()))
