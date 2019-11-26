@@ -327,26 +327,26 @@ class OptionFillable(Fillable):
         return self.content.active()
 
     def null(self):
-        if self.content.active():
-            self.content.null()
-        else:
+        if not self.content.active():
             self.offsets.append(-1)
+        else:
+            self.content.null()
         return self
 
     def real(self, x):
-        if self.content.active():
-            self.content.real(x)
-        else:
+        if not self.content.active():
             length = len(self.content)
             self._maybeupdate(self.content.real(x))
             self.offsets.append(length)
+        else:
+            self.content.real(x)
         return self
 
     def beginlist(self):
-        if self.content.active():
-            self.content.beginlist()
-        else:
+        if not self.content.active():
             self._maybeupdate(self.content.beginlist())
+        else:
+            self.content.beginlist()
         return self
 
     def endlist(self):
@@ -355,17 +355,33 @@ class OptionFillable(Fillable):
         else:
             length = len(self.content)
             self.content.endlist()
-            self.offsets.append(length)
+            if length != len(self.content):
+                self.offsets.append(length)
         return self
 
     def begintuple(self, numfields):
-        raise NotImplementedError
+        if not self.content.active():
+            self._maybeupdate(self.content.begintuple(numfields))
+        else:
+            self.content.begintuple(numfields)
+        return self
 
     def index(self, i):
-        raise NotImplementedError
+        if not self.content.active():
+            raise ValueError("'index' without corresponding 'begintuple'")
+        else:
+            self.content.index(i)
+        return self
 
     def endtuple(self):
-        raise NotImplementedError
+        if not self.content.active():
+            raise ValueError("'endtuple' without corresponding 'begintuple'")
+        else:
+            length = len(self.content)
+            self.content.endtuple()
+            if length != len(self.content):
+                self.offsets.append(length)
+        return self
 
     def _maybeupdate(self, fillable):
         assert fillable is not None
@@ -443,47 +459,60 @@ class ListFillable(Fillable):
         return self.begun
 
     def null(self):
-        if self.begun:
-            self._maybeupdate(self.content.null())
-            return self
-        else:
+        if not self.begun:
             out = OptionFillable.fromvalids(self)
             out.null()
             return out
+        else:
+            self._maybeupdate(self.content.null())
+            return self
 
     def real(self, x):
-        if self.begun:
-            self._maybeupdate(self.content.real(x))
-            return self
-        else:
+        if not self.begun:
             # make a union
             raise NotImplementedError
+        else:
+            self._maybeupdate(self.content.real(x))
+            return self
 
     def beginlist(self):
-        if self.begun:
-            self._maybeupdate(self.content.beginlist())
-        else:
+        if not self.begun:
             self.begun = True
+        else:
+            self._maybeupdate(self.content.beginlist())
         return self
 
     def endlist(self):
-        if self.begun and self.content.active():
-            self._maybeupdate(self.content.endlist())
-        elif self.begun:
+        if not self.begun:
+            raise ValueError("called 'endlist' without corresponding 'beginlist'")
+        elif not self.content.active():
             self.offsets.append(len(self.content))
             self.begun = False
         else:
-            raise ValueError("called 'endlist' without corresponding 'beginlist'")
+            self._maybeupdate(self.content.endlist())
         return self
 
     def begintuple(self, numfields):
-        raise NotImplementedError
+        if not self.begun:
+            # make a union
+            raise NotImplementedError
+        else:
+            self._maybeupdate(self.content.begintuple(numfields))
+            return self
 
     def index(self, i):
-        raise NotImplementedError
+        if not self.begun:
+            raise ValueError("called 'index' without corresponding 'begintuple'")
+        else:
+            self.content.index(i)
+            return self
 
     def endtuple(self):
-        raise NotImplementedError
+        if not self.begun:
+            raise ValueError("called 'endtuple' without corresponding 'begintuple'")
+        else:
+            self.content.endtuple()
+            return self
 
     def _maybeupdate(self, fillable):
         assert fillable is not None
@@ -513,7 +542,22 @@ class TupleFillable(Fillable):
         return self.begun
 
     def null(self):
-        raise NotImplementedError
+        assert self.length != -1
+
+        if not self.begun:
+            # make a union
+            raise NotImplementedError
+
+        elif self.nextindex == -1:
+            raise ValueError("'null' called immediately after 'begintuple'; needs 'index' or 'endtuple'")
+
+        elif not self.contents[self.nextindex].active():
+            self._maybeupdate(self.nextindex, self.contents[self.nextindex].null())
+
+        else:
+            self.contents[self.nextindex].null()
+
+        return self
 
     def real(self, x):
         assert self.length != -1
@@ -525,11 +569,11 @@ class TupleFillable(Fillable):
         elif self.nextindex == -1:
             raise ValueError("'real' called immediately after 'begintuple'; needs 'index' or 'endtuple'")
 
-        elif self.contents[self.nextindex].active():
-            self.contents[self.nextindex].real(x)
+        elif not self.contents[self.nextindex].active():
+            self._maybeupdate(self.nextindex, self.contents[self.nextindex].real(x))
 
         else:
-            self._maybeupdate(self.nextindex, self.contents[self.nextindex].real(x))
+            self.contents[self.nextindex].real(x)
 
         return self
 
@@ -549,17 +593,17 @@ class TupleFillable(Fillable):
             self.nextindex = -1
 
         elif not self.begun:
-            # make a union
+            # make a union (different number of fields)
             raise NotImplementedError
 
         elif self.nextindex == -1:
             raise ValueError("'begintuple' called immediately after 'begintuple'; needs 'index' or 'endtuple'")
 
-        elif self.contents[self.nextindex].active():
-            self.contents[self.nextindex].begintuple(numfields)
+        elif not self.contents[self.nextindex].active():
+            self._maybeupdate(self.nextindex, self.contents[self.nextindex].begintuple(numfields))
 
         else:
-            self._maybeupdate(self.nextindex, self.contents[self.nextindex].begintuple(numfields))
+            self.contents[self.nextindex].begintuple(numfields)
 
         return self
             
@@ -569,11 +613,11 @@ class TupleFillable(Fillable):
         if not self.begun:
             raise ValueError("'index' called without corresponding 'begintuple'")
 
-        elif self.nextindex != -1 and self.contents[self.nextindex].active():
-            self.contents[self.nextindex].index(i)
+        elif self.nextindex == -1 or not self.contents[self.nextindex].active():
+            self.nextindex = i
 
         else:
-            self.nextindex = i
+            self.contents[self.nextindex].index(i)
 
         return self
 
@@ -583,17 +627,17 @@ class TupleFillable(Fillable):
         if not self.begun:
             raise ValueError("'endtuple' called without corresponding 'begintuple'")
 
-        elif self.nextindex != -1 and self.contents[self.nextindex].active():
-            self.contents[self.nextindex].endtuple()
-
-        else:
+        elif self.nextindex == -1 or not self.contents[self.nextindex].active():
             for i in range(len(self.contents)):
                 if len(self.contents[i]) == self.length:
                     self._maybeupdate(i, self.contents[i].null())
                 assert len(self.contents[i]) == self.length + 1
             self.length += 1
             self.begun = False
-            
+
+        else:
+            self.contents[self.nextindex].endtuple()
+
         return self
 
     def _maybeupdate(self, index, fillable):
@@ -691,6 +735,26 @@ datasets = [
     [None, [1.1], [1.1, 2.2], [1.1, 2.2, 3.3], None],
     [[1.1], [1.1, 2.2], [1.1, None, 3.3]],
     [None, [1.1], [1.1, 2.2], [1.1, None, 3.3]],
+    [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
+    [None, [1.1, 2.2, 3.3], [], [4.4, 5.5]],
+    [[1.1, 2.2, 3.3], None, [], [4.4, 5.5]],
+    [None, [1.1, 2.2, 3.3], None, [], [4.4, 5.5]],
+    [[1.1, 2.2, 3.3], [], [4.4, 5.5], None],
+    [[1.1, None, 3.3], [], [4.4, 5.5]],
+    [[1.1, 2.2, 3.3], [], [None, 5.5]],
+    [None, [1.1, None, 3.3], [], [4.4, 5.5]],
+    [None, [1.1, 2.2, 3.3], [], [None, 5.5]],
+    [[1.1, None, 3.3], None, [], [4.4, 5.5]],
+    [[1.1, 2.2, 3.3], None, [], [None, 5.5]],
+    [None, [1.1, None, 3.3], [], [4.4, 5.5]],
+    [None, [1.1, 2.2, 3.3], [], [None, 5.5]],
+    [[(1, 1.1)], [], [(2, 2.2), (3, 3.3)]],
+    [None, [(1, 1.1)], [], [(2, 2.2), (3, 3.3)]],
+    [[(1, 1.1)], None, [], [(2, 2.2), (3, 3.3)]],
+    [None, [(1, 1.1)], None, [], [(2, 2.2), (3, 3.3)]],
+    [[(1, 1.1)], [], [(2, None), (3, 3.3)]],
+    [[(None, 1.1)], [], [(2, 2.2), (3, 3.3)]],
+    [None, [(None, 1.1)], [], [(2, 2.2), (3, 3.3)]],
     ]
 
 for dataset in datasets:
@@ -703,8 +767,8 @@ for dataset in datasets:
         raise AssertionError
 
 # fillable = FillableArray()
-# fillable.fill(None)
-# fillable.fill([1.1])
-# fillable.fill([2.2, 3.3, 4.4])
+# fillable.fill([(1, 1.1)])
+# fillable.fill([])
+# fillable.fill([(2, 2.2), (3, 3.3)])
 # print(fillable.snapshot())
 # print(list(fillable.snapshot()))
