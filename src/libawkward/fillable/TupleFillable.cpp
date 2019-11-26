@@ -108,7 +108,7 @@ namespace awkward {
   }
 
   Fillable* TupleFillable::index(int64_t index) {
-    if (!(0 <= index < contents_.size())) {
+    if (!(0 <= index  &&  index < contents_.size())) {
       throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" for tuple of length ") + std::to_string(contents_.size()));
     }
     index_ = (size_t)index;
@@ -129,6 +129,9 @@ namespace awkward {
   void TupleFillable::check() {
     if (index_ == -1) {
       throw std::invalid_argument("call 'index' before setting each tuple element");
+    }
+    if (contents_[index_].get()->length() > length_) {
+      throw std::invalid_argument(std::string("tuple index ") + std::to_string(index_) + std::string(" filled more than once (missing call to 'index'?)"));
     }
   }
 
