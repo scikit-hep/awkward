@@ -23,7 +23,7 @@ class FloatArray(Content):
 
     def __len__(self):
         return len(self.data)
-        
+
     def __getitem__(self, where):
         if isinstance(where, int):
             return self.data[where]
@@ -305,14 +305,21 @@ class OptionFillable(Fillable):
     def real(self, x):
         length = len(self.content)
         self._maybeupdate(self.content.real(x))
-        self.offsets.append(length)
+        if length != len(self.content):
+            self.offsets.append(length)
         return self
 
     def beginlist(self):
-        raise NotImplementedError
+        self._maybeupdate(self.content.beginlist())
+        return self
 
     def endlist(self):
-        raise NotImplementedError
+        length = len(self.content)
+        if self.content.endlist() is None:
+            return None
+        else:
+            self.offsets.append(length)
+            return self
 
     def begintuple(self, numfields):
         raise NotImplementedError
@@ -388,7 +395,13 @@ class ListFillable(Fillable):
         return len(self.offsets) - 1
 
     def null(self):
-        raise NotImplementedError
+        if self.nextnested:
+            self._maybeupdate(self.content.null())
+            return self
+        else:
+            out = OptionFillable.fromvalids(self)
+            out.null()
+            return out
 
     def real(self, x):
         if self.nextnested:
@@ -413,8 +426,8 @@ class ListFillable(Fillable):
             return self
 
         else:
-            return None
-        
+            return self
+
     def begintuple(self, numfields):
         raise NotImplementedError
 
@@ -591,7 +604,14 @@ datasets = [
     [(1, (2, (3, 4))), (10, (20, (30, 40))), (100, (200, (300, 400)))],
     [(1, ((2, 3), 4)), (10, ((20, 30), 40)), (100, ((200, 300), 400))],
     [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3]],
-    [[[]], [[1.1], [2.2]], [[1, 2, 3], [10, 20, 30], [100, 200, 300]]],
+    [None, [1.1], [1.1, 2.2], [1.1, 2.2, 3.3]],
+    [[1.1], None, [1.1, 2.2], [1.1, 2.2, 3.3]],
+    [None, [1.1], None, [1.1, 2.2], [1.1, 2.2, 3.3]],
+    [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], None],
+    [[1.1], None, [1.1, 2.2], [1.1, 2.2, 3.3], None],
+    [None, [1.1], [1.1, 2.2], [1.1, 2.2, 3.3], None],
+    [[1.1], [1.1, 2.2], [1.1, None, 3.3]],
+    [None, [1.1], [1.1, 2.2], [1.1, None, 3.3]],
 
     ]
 
@@ -599,11 +619,14 @@ for dataset in datasets:
     fillable = FillableArray()
     for x in dataset:
         fillable.fill(x)
-    assert list(fillable.snapshot()) == dataset
+    if list(fillable.snapshot()) != dataset:
+        print(dataset)
+        print(list(fillable.snapshot()))
+        raise AssertionError
 
 # fillable = FillableArray()
-# fillable.fill()
-# fillable.fill()
-# fillable.fill()
+# fillable.fill([1.1])
+# fillable.fill([1.1, 2.2])
+# fillable.fill([1.1, None, 3.3])
 # print(fillable.snapshot())
 # print(list(fillable.snapshot()))
