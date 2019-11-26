@@ -634,7 +634,10 @@ py::object getitem(T& self, py::object obj) {
 }
 
 void fillable_fill(ak::FillableArray& self, py::object obj) {
-  if (py::isinstance<py::bool_>(obj)) {
+  if (obj.is(py::none())) {
+    self.null();
+  }
+  else if (py::isinstance<py::bool_>(obj)) {
     self.boolean(obj.cast<bool>());
   }
   else if (py::isinstance<py::int_>(obj)) {
@@ -675,6 +678,7 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("__iter__", [](ak::FillableArray& self) -> ak::Iterator {
         return ak::Iterator(self.snapshot());
       })
+      .def("null", &ak::FillableArray::null)
       .def("boolean", &ak::FillableArray::boolean)
       .def("integer", &ak::FillableArray::integer)
       .def("real", &ak::FillableArray::real)

@@ -22,6 +22,9 @@ def tolist(array):
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return array
 
+    elif isinstance(array, awkward1.layout.Record) and array.istuple:
+        return tuple(tolist(x) for x in array.values())
+
     elif isinstance(array, awkward1.layout.Record):
         return {n: tolist(x) for n, x in array.items()}
 

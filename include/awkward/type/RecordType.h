@@ -19,6 +19,10 @@ namespace awkward {
         : types_(types)
         , lookup_(lookup)
         , reverselookup_(reverselookup) { }
+    RecordType(const std::vector<std::shared_ptr<Type>>& types)
+        : types_(types)
+        , lookup_(nullptr)
+        , reverselookup_(nullptr) { }
 
     const std::vector<std::shared_ptr<Type>> types() const { return types_; };
     const std::shared_ptr<Lookup> lookup() const { return lookup_; }

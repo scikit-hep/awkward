@@ -144,13 +144,13 @@ def test_getitem():
     assert recordarray.istuple
 
     assert awkward1.tolist(recordarray["2"]) == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert awkward1.tolist(recordarray[["0", "1"]]) == [{"0": 1, "1": [1.1, 2.2, 3.3]}, {"0": 2, "1": []}, {"0": 3, "1": [4.4, 5.5]}, {"0": 4, "1": [6.6]}, {"0": 5, "1": [7.7, 8.8, 9.9]}]
-    assert awkward1.tolist(recordarray[["1", "0"]]) == [{"1": 1, "0": [1.1, 2.2, 3.3]}, {"1": 2, "0": []}, {"1": 3, "0": [4.4, 5.5]}, {"1": 4, "0": [6.6]}, {"1": 5, "0": [7.7, 8.8, 9.9]}]
-    assert awkward1.tolist(recordarray[1:-1]) == [{"0": 2, "1": [], "2": 2.2}, {"0": 3, "1": [4.4, 5.5], "2": 3.3}, {"0": 4, "1": [6.6], "2": 4.4}]
-    assert awkward1.tolist(recordarray[2]) == {"0": 3, "1": [4.4, 5.5], "2": 3.3}
+    assert awkward1.tolist(recordarray[["0", "1"]]) == [(1, [1.1, 2.2, 3.3]), (2, []), (3, [4.4, 5.5]), (4, [6.6]), (5, [7.7, 8.8, 9.9])]
+    assert awkward1.tolist(recordarray[["1", "0"]]) == [([1.1, 2.2, 3.3], 1), ([], 2), ([4.4, 5.5], 3), ([6.6], 4), ([7.7, 8.8, 9.9], 5)]
+    assert awkward1.tolist(recordarray[1:-1]) == [(2, [], 2.2), (3, [4.4, 5.5], 3.3), (4, [6.6], 4.4)]
+    assert awkward1.tolist(recordarray[2]) == (3, [4.4, 5.5], 3.3)
     assert awkward1.tolist(recordarray[2]["1"]) == [4.4, 5.5]
-    assert awkward1.tolist(recordarray[2][["0", "1"]]) == {"0": 3, "1": [4.4, 5.5]}
-    assert awkward1.tolist(recordarray[2][["1", "0"]]) == {"1": 3, "0": [4.4, 5.5]}
+    assert awkward1.tolist(recordarray[2][["0", "1"]]) == (3, [4.4, 5.5])
+    assert awkward1.tolist(recordarray[2][["1", "0"]]) == ([4.4, 5.5], 3)
 
     recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray, "three": content2})
     assert not recordarray.istuple
@@ -278,3 +278,45 @@ def test_setid():
     assert recordarray2[2, "outer"].location == (2, "outer")
     assert recordarray2[2, "outer", 0].location == (2, "outer", 0)
     assert recordarray2[2, "outer", 0, "two"].location == (2, "outer", 0, "two")
+
+def test_fillable():
+    fillable = awkward1.layout.FillableArray()
+
+    fillable.begintuple(3)
+    fillable.index(0)
+    fillable.boolean(True)
+    fillable.index(1)
+    fillable.beginlist()
+    fillable.integer(1)
+    fillable.endlist()
+    fillable.index(2)
+    fillable.real(1.1)
+    fillable.endtuple()
+
+    fillable.begintuple(3)
+    fillable.index(1)
+    fillable.beginlist()
+    fillable.integer(2)
+    fillable.integer(2)
+    fillable.endlist()
+    fillable.index(2)
+    fillable.real(2.2)
+    fillable.index(0)
+    fillable.boolean(False)
+    fillable.endtuple()
+
+    fillable.begintuple(3)
+    fillable.index(2)
+    fillable.real(3.3)
+    fillable.index(1)
+    fillable.beginlist()
+    fillable.integer(3)
+    fillable.integer(3)
+    fillable.integer(3)
+    fillable.endlist()
+    fillable.index(0)
+    fillable.boolean(True)
+    fillable.endtuple()
+
+    assert str(fillable.type) == "3 * (bool, var * int64, float64)"
+    assert awkward1.tolist(fillable.snapshot()) == [(True, [1], 1.1), (False, [2, 2], 2.2), (True, [3, 3, 3], 3.3)]

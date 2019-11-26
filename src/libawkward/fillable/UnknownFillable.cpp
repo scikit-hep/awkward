@@ -72,10 +72,8 @@ namespace awkward {
   }
 
   Fillable* UnknownFillable::begintuple(int64_t numfields) {
-    Fillable* out = new TupleFillable(fillablearray_, options_, numfields);
-    if (nullcount_ != 0) {
-      out = OptionFillable::fromnulls(fillablearray_, options_, nullcount_, out);
-    }
+    Fillable* out = prepare<TupleFillable>();
+    out->begintuple(numfields);
     return out;
   }
 

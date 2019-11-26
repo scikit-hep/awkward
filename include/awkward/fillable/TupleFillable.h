@@ -16,11 +16,7 @@ namespace awkward {
 
   class TupleFillable: public Fillable {
   public:
-    TupleFillable(FillableArray* fillablearray, const FillableOptions& options, int64_t numfields): fillablearray_(fillablearray), options_(options), contents_(), index_(-1) {
-      for (int64_t i = 0;  i < numfields;  i++) {
-        contents_.push_back(std::shared_ptr<Fillable>(new UnknownFillable(fillablearray, options)));
-      }
-    }
+    TupleFillable(FillableArray* fillablearray, const FillableOptions& options): fillablearray_(fillablearray), options_(options), length_(0), index_(1) { }
 
     virtual int64_t length() const;
     virtual void clear();
@@ -41,9 +37,11 @@ namespace awkward {
     FillableArray* fillablearray_;
     const FillableOptions options_;
     std::vector<std::shared_ptr<Fillable>> contents_;
+    int64_t length_;
     size_t index_;
 
-    void maybeupdate(Fillable* tmp);
+    void check();
+    void maybeupdate(size_t i, Fillable* tmp);
   };
 }
 
