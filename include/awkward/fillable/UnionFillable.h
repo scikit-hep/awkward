@@ -50,18 +50,18 @@ namespace awkward {
     GrowableBuffer<int8_t> types_;
     GrowableBuffer<int64_t> offsets_;
     std::vector<std::shared_ptr<Fillable>> contents_;
-    size_t current_;
+    int64_t current_;
 
-    template <typename T>
-    T* findfillable(int8_t& type);
-    TupleFillable* findtuple(int8_t& type, int64_t numfields);
-    RecordFillable* findrecord(int8_t& type, int64_t disambiguator);
-    template <typename T>
-    T* maybenew(T* fillable, int64_t& length);
-    template <typename T1>
-    Fillable* get1(int8_t& type, int64_t& length);
-    template <typename T1, typename T2>
-    Fillable* get2(int8_t& type, int64_t& length);
+    // template <typename T>
+    // T* findfillable(int8_t& type);
+    // TupleFillable* findtuple(int8_t& type, int64_t numfields);
+    // RecordFillable* findrecord(int8_t& type, int64_t disambiguator);
+    // template <typename T>
+    // T* maybenew(T* fillable, int64_t& length);
+    // template <typename T1>
+    // Fillable* get1(int8_t& type, int64_t& length);
+    // template <typename T1, typename T2>
+    // Fillable* get2(int8_t& type, int64_t& length);
   };
 }
 

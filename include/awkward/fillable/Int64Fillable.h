@@ -37,6 +37,8 @@ namespace awkward {
     virtual Fillable* field_check(const char* key);
     virtual Fillable* endrecord();
 
+    const GrowableBuffer<int64_t> buffer() const { return buffer_; }
+
   private:
     const FillableOptions options_;
     GrowableBuffer<int64_t> buffer_;
