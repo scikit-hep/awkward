@@ -633,7 +633,7 @@ py::object getitem(T& self, py::object obj) {
   return box(self.getitem(toslice(obj)));
 }
 
-void fillable_fill(ak::FillableArray& self, py::object obj) {
+void fillable_fill(ak::FillableArray& self, py::handle obj) {
   if (obj.is(py::none())) {
     self.null();
   }
@@ -646,7 +646,29 @@ void fillable_fill(ak::FillableArray& self, py::object obj) {
   else if (py::isinstance<py::float_>(obj)) {
     self.real(obj.cast<double>());
   }
-  // FIXME: strings, dicts...
+  else if (py::isinstance<py::tuple>(obj)) {
+    py::tuple tup = obj.cast<py::tuple>();
+    self.begintuple(tup.size());
+    for (size_t i = 0;  i < tup.size();  i++) {
+      self.index((int64_t)i);
+      fillable_fill(self, tup[i]);
+    }
+    self.endtuple();
+  }
+  else if (py::isinstance<py::dict>(obj)) {
+    py::dict dict = obj.cast<py::dict>();
+    self.beginrecord(dict.size());
+    for (auto pair : dict) {
+      if (!py::isinstance<py::str>(pair.first)) {
+        throw std::invalid_argument("keys of dicts in 'fromiter' must all be strings");
+      }
+      std::string key = pair.first.cast<std::string>();
+      self.field_check(key.c_str());
+      fillable_fill(self, pair.second);
+    }
+    self.endrecord();
+  }
+  // FIXME: strings
   else if (py::isinstance<py::sequence>(obj)) {
     py::sequence seq = obj.cast<py::sequence>();
     self.beginlist();
@@ -654,7 +676,6 @@ void fillable_fill(ak::FillableArray& self, py::object obj) {
       fillable_fill(self, x);
     }
     self.endlist();
-    return;
   }
   else {
     throw std::invalid_argument(std::string("cannot convert ") + obj.attr("__repr__")().cast<std::string>() + std::string(" to an array element"));
