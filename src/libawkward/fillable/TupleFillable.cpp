@@ -53,66 +53,282 @@ namespace awkward {
   }
 
   bool TupleFillable::active() const {
-    throw std::runtime_error("FIXME: TupleFillable::active");
+    return begun_;
   }
 
   Fillable* TupleFillable::null() {
-    throw std::runtime_error("FIXME: TupleFillable::null");
+    if (!begun_) {
+      Fillable* out = OptionFillable::fromvalids(options_, this);
+      try {
+        out->null();
+      }
+      catch (...) {
+        delete out;
+        throw;
+      }
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'null' immediately after 'begintuple'; needs 'index' or 'endtuple'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->null());
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->null();
+    }
+    return this;
   }
 
   Fillable* TupleFillable::boolean(bool x) {
-    throw std::runtime_error("FIXME: TupleFillable::boolean");
+    if (!begun_) {
+      Fillable* out = UnionFillable::fromsingle(options_, this);
+      try {
+        out->boolean(x);
+      }
+      catch (...) {
+        delete out;
+        throw;
+      }
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'boolean' immediately after 'begintuple'; needs 'index' or 'endtuple'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->boolean(x));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->boolean(x);
+    }
+    return this;
   }
 
   Fillable* TupleFillable::integer(int64_t x) {
-    throw std::runtime_error("FIXME: TupleFillable::integer");
+    if (!begun_) {
+      Fillable* out = UnionFillable::fromsingle(options_, this);
+      try {
+        out->integer(x);
+      }
+      catch (...) {
+        delete out;
+        throw;
+      }
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'integer' immediately after 'begintuple'; needs 'index' or 'endtuple'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->integer(x));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->integer(x);
+    }
+    return this;
   }
 
   Fillable* TupleFillable::real(double x) {
-    throw std::runtime_error("FIXME: TupleFillable::real");
+    if (!begun_) {
+      Fillable* out = UnionFillable::fromsingle(options_, this);
+      try {
+        out->real(x);
+      }
+      catch (...) {
+        delete out;
+        throw;
+      }
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'real' immediately after 'begintuple'; needs 'index' or 'endtuple'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->real(x));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->real(x);
+    }
+    return this;
   }
 
   Fillable* TupleFillable::beginlist() {
-    throw std::runtime_error("FIXME: TupleFillable::beginlist");
+    if (!begun_) {
+      Fillable* out = UnionFillable::fromsingle(options_, this);
+      try {
+        out->beginlist();
+      }
+      catch (...) {
+        delete out;
+        throw;
+      }
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'beginlist' immediately after 'begintuple'; needs 'index' or 'endtuple'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->beginlist());
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->beginlist();
+    }
+    return this;
   }
 
   Fillable* TupleFillable::endlist() {
-    throw std::runtime_error("FIXME: TupleFillable::endlist");
+    if (!begun_) {
+      throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'endlist' immediately after 'begintuple'; needs 'index' or 'endtuple' and then 'beginlist'");
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->endlist();
+    }
+    return this;
   }
 
   Fillable* TupleFillable::begintuple(int64_t numfields) {
-    throw std::runtime_error("FIXME: TupleFillable::begintuple");
+    if (length_ == -1) {
+      for (int64_t i = 0;  i < numfields;  i++) {
+        contents_.push_back(std::shared_ptr<Fillable>(UnknownFillable::fromempty(options_)));
+      }
+      length_ = 0;
+    }
+
+    if (!begun_  &&  numfields == (int64_t)contents_.size()) {
+      begun_ = true;
+      nextindex_ = -1;
+    }
+    else if (!begun_) {
+      Fillable* out = UnionFillable::fromsingle(options_, this);
+      try {
+        out->begintuple(numfields);
+      }
+      catch (...) {
+        delete out;
+        throw;
+      }
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'begintuple' immediately after 'begintuple'; needs 'index' or 'endtuple'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->begintuple(numfields));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->begintuple(numfields);
+    }
+    return this;
   }
 
   Fillable* TupleFillable::index(int64_t index) {
-    throw std::runtime_error("FIXME: TupleFillable::index");
+    if (!begun_) {
+      throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
+    }
+    else if (nextindex_ == -1  ||  !contents_[(size_t)nextindex_].get()->active()) {
+      nextindex_ = index;
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->index(index);
+    }
+    return this;
   }
 
   Fillable* TupleFillable::endtuple() {
-    throw std::runtime_error("FIXME: TupleFillable::endtuple");
+    if (!begun_) {
+      throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
+    }
+    else if (nextindex_ == -1  ||  !contents_[(size_t)nextindex_].get()->active()) {
+      int64_t i = 0;
+      for (auto content : contents_) {
+        if (content.get()->length() == length_) {
+          maybeupdate(i, content.get()->null());
+        }
+        if (content.get()->length() != length_ + 1) {
+          throw std::invalid_argument(std::string("tuple index ") + std::to_string(i) + std::string(" filled more than once"));
+        }
+        i++;
+      }
+      length_++;
+      begun_ = false;
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->endtuple();
+    }
+    return this;
   }
 
   Fillable* TupleFillable::beginrecord(int64_t disambiguator) {
-    throw std::runtime_error("FIXME: TupleFillable::beginrecord");
+    if (!begun_) {
+      Fillable* out = UnionFillable::fromsingle(options_, this);
+      try {
+        out->beginrecord(disambiguator);
+      }
+      catch (...) {
+        delete out;
+        throw;
+      }
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'beginrecord' immediately after 'begintuple'; needs 'index' or 'endtuple'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->beginrecord(disambiguator));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->beginrecord(disambiguator);
+    }
+    return this;
   }
 
   Fillable* TupleFillable::field_fast(const char* key) {
-    throw std::runtime_error("FIXME: TupleFillable::field_fast");
+    if (!begun_) {
+      throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'field_fast' immediately after 'begintuple'; needs 'index' or 'endtuple' and then 'beginrecord'");
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->field_fast(key);
+    }
+    return this;
   }
 
   Fillable* TupleFillable::field_check(const char* key) {
-    throw std::runtime_error("FIXME: TupleFillable::field_check");
+    if (!begun_) {
+      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'field_check' immediately after 'begintuple'; needs 'index' or 'endtuple' and then 'beginrecord'");
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->field_check(key);
+    }
+    return this;
   }
 
   Fillable* TupleFillable::endrecord() {
-    throw std::runtime_error("FIXME: TupleFillable::endrecord");
+    if (!begun_) {
+      throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'endrecord' immediately after 'begintuple'; needs 'index' or 'endtuple' and then 'beginrecord'");
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->endrecord();
+    }
+    return this;
   }
 
-  void TupleFillable::checklength() {
-    if (contents_[(size_t)nextindex_].get()->length() > length_) {
-      throw std::invalid_argument(std::string("tuple index ") + std::to_string(nextindex_) + std::string(" filled more than once (missing call to 'index'?)"));
-    }
-  }
+  // void TupleFillable::checklength() {
+  //   if (contents_[(size_t)nextindex_].get()->length() > length_) {
+  //     throw std::invalid_argument(std::string("tuple index ") + std::to_string(nextindex_) + std::string(" filled more than once (missing call to 'index'?)"));
+  //   }
+  // }
 
   void TupleFillable::maybeupdate(int64_t i, Fillable* tmp) {
     if (tmp != contents_[(size_t)i].get()  &&  tmp != nullptr) {
