@@ -41,9 +41,6 @@ namespace awkward {
   private:
     const FillableOptions options_;
     int64_t nullcount_;
-
-    template <typename T>
-    Fillable* prepare() const;
   };
 }
 

@@ -22,67 +22,162 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> OptionFillable::snapshot() const {
-    throw std::runtime_error("OptionFillable::snapshot() needs MaskedArray");
+    throw std::runtime_error("OptionFillable::snapshot() needs OptionArray");
   }
 
   bool OptionFillable::active() const {
-    throw std::runtime_error("FIXME: OptionFillable::active");
+    return content_.get()->active();
   }
 
   Fillable* OptionFillable::null() {
-    throw std::runtime_error("FIXME: OptionFillable::null");
+    if (!content_.get()->active()) {
+      offsets_.append(-1);
+    }
+    else {
+      content_.get()->null();
+    }
+    return this;
   }
 
   Fillable* OptionFillable::boolean(bool x) {
-    throw std::runtime_error("FIXME: OptionFillable::boolean");
+    if (!content_.get()->active()) {
+      int64_t length = content_.get()->length();
+      maybeupdate(content_.get()->boolean(x));
+      offsets_.append(length);
+    }
+    else {
+      content_.get()->boolean(x);
+    }
+    return this;
   }
 
   Fillable* OptionFillable::integer(int64_t x) {
-    throw std::runtime_error("FIXME: OptionFillable::integer");
+    if (!content_.get()->active()) {
+      int64_t length = content_.get()->length();
+      maybeupdate(content_.get()->integer(x));
+      offsets_.append(length);
+    }
+    else {
+      content_.get()->integer(x);
+    }
+    return this;
   }
 
   Fillable* OptionFillable::real(double x) {
-    throw std::runtime_error("FIXME: OptionFillable::real");
+    if (!content_.get()->active()) {
+      int64_t length = content_.get()->length();
+      maybeupdate(content_.get()->real(x));
+      offsets_.append(length);
+    }
+    else {
+      content_.get()->real(x);
+    }
+    return this;
   }
 
   Fillable* OptionFillable::beginlist() {
-    throw std::runtime_error("FIXME: OptionFillable::beginlist");
+    if (!content_.get()->active()) {
+      maybeupdate(content_.get()->beginlist());
+    }
+    else {
+      content_.get()->beginlist();
+    }
+    return this;
   }
 
   Fillable* OptionFillable::endlist() {
-    throw std::runtime_error("FIXME: OptionFillable::endlist");
+    if (!content_.get()->active()) {
+      throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
+    }
+    else {
+      int64_t length = content_.get()->length();
+      content_.get()->endlist();
+      if (length != content_.get()->length()) {
+        offsets_.append(length);
+      }
+    }
+    return this;
   }
 
   Fillable* OptionFillable::begintuple(int64_t numfields) {
-    throw std::runtime_error("FIXME: OptionFillable::begintuple");
+    if (!content_.get()->active()) {
+      maybeupdate(content_.get()->begintuple(numfields));
+    }
+    else {
+      content_.get()->begintuple(numfields);
+    }
+    return this;
   }
 
   Fillable* OptionFillable::index(int64_t index) {
-    throw std::runtime_error("FIXME: OptionFillable::index");
+    if (!content_.get()->active()) {
+      throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
+    }
+    else {
+      content_.get()->index(index);
+    }
+    return this;
   }
 
   Fillable* OptionFillable::endtuple() {
-    throw std::runtime_error("FIXME: OptionFillable::endtuple");
+    if (!content_.get()->active()) {
+      throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
+    }
+    else {
+      int64_t length = content_.get()->length();
+      content_.get()->endtuple();
+      if (length != content_.get()->length()) {
+        offsets_.append(length);
+      }
+    }
+    return this;
   }
 
   Fillable* OptionFillable::beginrecord(int64_t disambiguator) {
-    throw std::runtime_error("FIXME: OptionFillable::beginrecord");
+    if (!content_.get()->active()) {
+      maybeupdate(content_.get()->beginrecord(disambiguator));
+    }
+    else {
+      content_.get()->beginrecord(disambiguator);
+    }
+    return this;
   }
 
   Fillable* OptionFillable::field_fast(const char* key) {
-    throw std::runtime_error("FIXME: OptionFillable::field_fast");
+    if (!content_.get()->active()) {
+      throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+    }
+    else {
+      content_.get()->field_fast(key);
+    }
+    return this;
   }
 
   Fillable* OptionFillable::field_check(const char* key) {
-    throw std::runtime_error("FIXME: OptionFillable::field_check");
+    if (!content_.get()->active()) {
+      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+    }
+    else {
+      content_.get()->field_check(key);
+    }
   }
 
   Fillable* OptionFillable::endrecord() {
-    throw std::runtime_error("FIXME: OptionFillable::endrecord");
+    if (!content_.get()->active()) {
+      throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
+    }
+    else {
+      int64_t length = content_.get()->length();
+      content_.get()->endrecord();
+      if (length != content_.get()->length()) {
+        offsets_.append(length);
+      }
+    }
+    return this;
   }
 
   void OptionFillable::maybeupdate(Fillable* tmp) {
-    if (tmp != content_.get()  &&  tmp != nullptr) {
+    if (tmp != content_.get()) {
       content_ = std::shared_ptr<Fillable>(tmp);
     }
   }

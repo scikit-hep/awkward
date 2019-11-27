@@ -33,73 +33,131 @@ namespace awkward {
       return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
     }
     else {
-      throw std::runtime_error("UnknownFillable::snapshot() needs MaskedArray");
+      throw std::runtime_error("UnknownFillable::snapshot() needs OptionArray");
     }
   }
 
   bool UnknownFillable::active() const {
-    throw std::runtime_error("FIXME: UnknownFillable::active");
+    return false;
   }
 
   Fillable* UnknownFillable::null() {
-    throw std::runtime_error("FIXME: UnknownFillable::null");
+    nullcount_++;
+    return this;
   }
 
   Fillable* UnknownFillable::boolean(bool x) {
-    throw std::runtime_error("FIXME: UnknownFillable::boolean");
-  }
-
-  Fillable* UnknownFillable::integer(int64_t x) {
-    throw std::runtime_error("FIXME: UnknownFillable::integer");
-  }
-
-  Fillable* UnknownFillable::real(double x) {
-    throw std::runtime_error("FIXME: UnknownFillable::real");
-  }
-
-  Fillable* UnknownFillable::beginlist() {
-    throw std::runtime_error("FIXME: UnknownFillable::beginlist");
-  }
-
-  Fillable* UnknownFillable::endlist() {
-    throw std::runtime_error("FIXME: UnknownFillable::endlist");
-  }
-
-  Fillable* UnknownFillable::begintuple(int64_t numfields) {
-    throw std::runtime_error("FIXME: UnknownFillable::begintuple");
-  }
-
-  Fillable* UnknownFillable::index(int64_t index) {
-    throw std::runtime_error("FIXME: UnknownFillable::index");
-  }
-
-  Fillable* UnknownFillable::endtuple() {
-    throw std::runtime_error("FIXME: UnknownFillable::endtuple");
-  }
-
-  Fillable* UnknownFillable::beginrecord(int64_t disambiguator) {
-    throw std::runtime_error("FIXME: UnknownFillable::beginrecord");
-  }
-
-  Fillable* UnknownFillable::field_fast(const char* key) {
-    throw std::runtime_error("FIXME: UnknownFillable::field_fast");
-  }
-
-  Fillable* UnknownFillable::field_check(const char* key) {
-    throw std::runtime_error("FIXME: UnknownFillable::field_check");
-  }
-
-  Fillable* UnknownFillable::endrecord() {
-    throw std::runtime_error("FIXME: UnknownFillable::endrecord");
-  }
-
-  template <typename T>
-  Fillable* UnknownFillable::prepare() const {
-    Fillable* out = new T(options_);
+    Fillable* out = BoolFillable::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
+    try {
+      out->boolean(x);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
+  }
+
+  Fillable* UnknownFillable::integer(int64_t x) {
+    Fillable* out = Int64Fillable::fromempty(options_);
+    if (nullcount_ != 0) {
+      out = OptionFillable::fromnulls(options_, nullcount_, out);
+    }
+    try {
+      out->integer(x);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
+  }
+
+  Fillable* UnknownFillable::real(double x) {
+    Fillable* out = Float64Fillable::fromempty(options_);
+    if (nullcount_ != 0) {
+      out = OptionFillable::fromnulls(options_, nullcount_, out);
+    }
+    try {
+      out->real(x);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
+  }
+
+  Fillable* UnknownFillable::beginlist() {
+    Fillable* out = ListFillable::fromempty(options_);
+    if (nullcount_ != 0) {
+      out = OptionFillable::fromnulls(options_, nullcount_, out);
+    }
+    try {
+      out->beginlist();
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
+  }
+
+  Fillable* UnknownFillable::endlist() {
+    throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
+  }
+
+  Fillable* UnknownFillable::begintuple(int64_t numfields) {
+    Fillable* out = TupleFillable::fromempty(options_);
+    if (nullcount_ != 0) {
+      out = OptionFillable::fromnulls(options_, nullcount_, out);
+    }
+    try {
+      out->begintuple(numfields);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
+  }
+
+  Fillable* UnknownFillable::index(int64_t index) {
+    throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
+  }
+
+  Fillable* UnknownFillable::endtuple() {
+    throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
+  }
+
+  Fillable* UnknownFillable::beginrecord(int64_t disambiguator) {
+    Fillable* out = RecordFillable::fromempty(options_);
+    if (nullcount_ != 0) {
+      out = OptionFillable::fromnulls(options_, nullcount_, out);
+    }
+    try {
+      out->beginrecord(disambiguator);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
+  }
+
+  Fillable* UnknownFillable::field_fast(const char* key) {
+    throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+  }
+
+  Fillable* UnknownFillable::field_check(const char* key) {
+    throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+  }
+
+  Fillable* UnknownFillable::endrecord() {
+    throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
 }
