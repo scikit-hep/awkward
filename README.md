@@ -58,11 +58,11 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
    * [X] Reproduce all of the above as Numba extensions (make `NumpyArray`, `ListArray`, and `ListOffsetArray` usable in Numba-compiled functions).
    * [X] Error messages with location-of-failure information if the array has an `Identity` (except in Numba).
    * [X] Fully implement `__getitem__` for int/slice/intarray/boolarray/tuple (placeholders for newaxis/ellipsis), with perfect agreement with [Numpy basic/advanced indexing](https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html), to all levels of depth.
-   * [ ] Appendable arrays (a distinct phase from readable arrays, when the type is still in flux) to implement `awkward.fromiter` in C++.
+   * [X] Appendable arrays (a distinct phase from readable arrays, when the type is still in flux) to implement `awkward.fromiter` in C++.
       * [X] Implemented all types but records; tested all primitives and lists.
       * [X] Expose appendable arrays to Numba.
-      * [ ] Implement appendable records.
-      * [ ] Test all (requires array types for all).
+      * [X] Implement appendable records.
+      * [X] Test all (tested in mock [studies/fillable.py](tree/master/studies/fillable.py)).
    * [X] JSON → Awkward via header-only [RapidJSON](https://rapidjson.org) and `awkward.fromiter`.
    * [ ] Explicit broadcasting functions for jagged and non-jagged arrays and scalars.
    * [ ] Structure-preserving ufunc-like operation on the C++ side that applies a lambda function to inner data. The Python `__array_ufunc__` implementation will _call_ this to preserve structure.
@@ -74,7 +74,9 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `ListArray`: the new `JaggedArray`, based on `starts` and `stops` (i.e. fully general).
       * [X] `ListOffsetArray`: the `JaggedArray` case with no unreachable data between reachable data (gaps).
       * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
-      * [ ] `RecordArray`: the new `Table` _without_ lazy-slicing. (FIXME: remember to add optional length for non-empty arrays of empty tuple/records.)
+      * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
+         * [ ] FIXME: remember to add optional length for non-empty arrays of empty tuple/records.
+         * [ ] Implement it in Numba as well.
       * [ ] `MaskedArray`, `BitMaskedArray`, `IndexedMaskedArray`: same as the old versions.
       * [ ] `UnionArray`: same as the old version; `SparseUnionArray`: the additional case found in Apache Arrow.
       * [ ] `IndexedArray`: same as the old version.

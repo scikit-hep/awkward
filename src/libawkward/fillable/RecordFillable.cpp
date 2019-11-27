@@ -363,7 +363,7 @@ namespace awkward {
       return this;
     }
     else {
-      contents_[(size_t)nextindex_].get()->field_fast(key);
+      contents_[(size_t)nextindex_].get()->field_check(key);
       return this;
     }
   }
