@@ -4,8 +4,13 @@
 
 #include "awkward/Identity.h"
 #include "awkward/Index.h"
-#include "awkward/array/ListOffsetArray.h"
-#include "awkward/type/ListType.h"
+
+#include "awkward/Identity.h"
+#include "awkward/Index.h"
+#include "awkward/array/RecordArray.h"
+#include "awkward/array/EmptyArray.h"
+#include "awkward/type/RecordType.h"
+#include "awkward/type/UnknownType.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/UnionFillable.h"
 
@@ -13,19 +18,53 @@
 
 namespace awkward {
   int64_t RecordFillable::length() const {
-    throw std::runtime_error("FIXME: RecordFillable::length");
+    return length_;
   }
 
   void RecordFillable::clear() {
-    throw std::runtime_error("FIXME: RecordFillable::clear");
+    for (auto x : contents_) {
+      x.get()->clear();
+    }
+    keys_.clear();
+    pointers_.clear();
+    disambiguator_ = 0;
+    length_ = -1;
+    begun_ = false;
+    nextindex_ = -1;
   }
 
   const std::shared_ptr<Type> RecordFillable::type() const {
-    throw std::runtime_error("FIXME: RecordFillable::type");
+    if (length_ == -1) {
+      return std::shared_ptr<Type>(new UnknownType);
+    }
+    else {
+      std::vector<std::shared_ptr<Type>> types;
+      std::shared_ptr<RecordType::Lookup> lookup;
+      std::shared_ptr<RecordType::ReverseLookup> reverselookup;
+      for (size_t i = 0;  i < contents_.size();  i++) {
+        types.push_back(contents_[i].get()->type());
+        (*lookup.get())[keys_[i]] = i;
+        reverselookup.get()->push_back(keys_[i]);
+      }
+      return std::shared_ptr<Type>(new RecordType(types, lookup, reverselookup));
+    }
   }
 
   const std::shared_ptr<Content> RecordFillable::snapshot() const {
-    throw std::runtime_error("FIXME: RecordFillable::snapshot");
+    if (length_ == -1) {
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      std::shared_ptr<RecordArray::Lookup> lookup;
+      std::shared_ptr<RecordArray::ReverseLookup> reverselookup;
+      for (size_t i = 0;  i < contents_.size();  i++) {
+        contents.push_back(contents_[i].get()->snapshot());
+        (*lookup.get())[keys_[i]] = i;
+        reverselookup.get()->push_back(keys_[i]);
+      }
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), contents, lookup, reverselookup));
+    }
   }
 
   bool RecordFillable::active() const {

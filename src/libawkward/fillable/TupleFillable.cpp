@@ -22,12 +22,13 @@ namespace awkward {
     for (auto x : contents_) {
       x.get()->clear();
     }
-    length_ = 0;
+    length_ = -1;
+    begun_ = false;
     nextindex_ = -1;
   }
 
   const std::shared_ptr<Type> TupleFillable::type() const {
-    if (nextindex_ > (int64_t)contents_.size()) {
+    if (length_ == -1) {
       return std::shared_ptr<Type>(new UnknownType);
     }
     else {
@@ -40,7 +41,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> TupleFillable::snapshot() const {
-    if (nextindex_ > (int64_t)contents_.size()) {
+    if (length_ == -1) {
       return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
     }
     else {
