@@ -395,3 +395,13 @@ def test_fromiter():
     ]
     for datum in dataset:
         assert awkward1.tolist(awkward1.fromiter(datum)) == datum
+
+def test_json():
+    dataset = [
+        '[{"one":1,"two":1.1},{"one":2,"two":2.2},{"one":3,"two":3.3}]',
+        '[{"one":1,"two":[1.1,2.2,3.3]},{"one":2,"two":[]},{"one":3,"two":[4.4,5.5]}]',
+        '[[{"one":1,"two":1.1},{"one":2,"two":2.2},{"one":3,"two":3.3}],[],[{"one":4,"two":4.4},{"one":5,"two":5.5}]]',
+        '[{"one":{"x":1,"y":1},"two":1.1},{"one":{"x":2,"y":2},"two":2.2},{"one":{"x":3,"y":3},"two":3.3}]',
+    ]
+    for datum in dataset:
+        assert awkward1.tojson(awkward1.fromjson(datum)) == datum

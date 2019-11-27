@@ -14,13 +14,13 @@ namespace awkward {
       return array_.snapshot();
     }
 
-    bool Null() { array_.null(); return true; }
-    bool Bool(bool x) { array_.boolean(x); return true; }
-    bool Int(int x) { array_.integer((int64_t)x); return true; }
+    bool Null()               { array_.null();              return true; }
+    bool Bool(bool x)         { array_.boolean(x);          return true; }
+    bool Int(int x)           { array_.integer((int64_t)x); return true; }
     bool Uint(unsigned int x) { array_.integer((int64_t)x); return true; }
-    bool Int64(int64_t x) { array_.integer(x); return true; }
-    bool Uint64(uint64_t x) { array_.integer((int64_t)x); return true; }
-    bool Double(double x) { array_.real(x); return true; }
+    bool Int64(int64_t x)     { array_.integer(x);          return true; }
+    bool Uint64(uint64_t x)   { array_.integer((int64_t)x); return true; }
+    bool Double(double x)     { array_.real(x);             return true; }
 
     bool StartArray() {
       if (depth_ != 0) {
@@ -38,14 +38,18 @@ namespace awkward {
     }
 
     bool StartObject() {
-      throw std::runtime_error("not implemented: Handler::StartObject");
+      array_.beginrecord();
+      return true;
     }
     bool EndObject(rj::SizeType numfields) {
-      throw std::runtime_error("not implemented: Handler::EndObject");
+      array_.endrecord();
+      return true;
     }
     bool Key(const char* str, rj::SizeType length, bool copy) {
-      throw std::runtime_error("not implemented: Handler::Key");
+      array_.field_check(str);
+      return true;
     }
+
     bool String(const char* str, rj::SizeType length, bool copy) {
       throw std::runtime_error("not implemented: Handler::String");
     }

@@ -75,7 +75,6 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `ListOffsetArray`: the `JaggedArray` case with no unreachable data between reachable data (gaps).
       * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
-         * [ ] FIXME: remember to add optional length for non-empty arrays of empty tuple/records.
          * [ ] Implement it in Numba as well.
       * [ ] `MaskedArray`, `BitMaskedArray`, `IndexedMaskedArray`: same as the old versions.
       * [ ] `UnionArray`: same as the old version; `SparseUnionArray`: the additional case found in Apache Arrow.
