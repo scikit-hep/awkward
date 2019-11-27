@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "awkward/Identity.h"
+#include "awkward/Index.h"
 #include "awkward/type/UnionType.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
@@ -36,6 +37,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> UnionFillable::snapshot() const {
+    Index8 types(types_.ptr(), 0, types_.length());
+    Index64 offsets(offsets_.ptr(), 0, offsets_.length());
     throw std::runtime_error("UnionFillable::snapshot() needs UnionArray");
   }
 

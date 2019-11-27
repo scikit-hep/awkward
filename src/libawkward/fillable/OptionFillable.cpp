@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "awkward/Identity.h"
+#include "awkward/Index.h"
 #include "awkward/type/OptionType.h"
 
 #include "awkward/fillable/OptionFillable.h"
@@ -18,6 +19,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> OptionFillable::type() const {
+    Index64 offsets(offsets_.ptr(), 0, offsets_.length());
     return std::shared_ptr<Type>(new OptionType(content_.get()->type()));
   }
 

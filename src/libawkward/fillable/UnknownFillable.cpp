@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "awkward/Identity.h"
+#include "awkward/Index.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/fillable/OptionFillable.h"
