@@ -14,18 +14,19 @@
 namespace awkward {
   class RecordFillable: public Fillable {
   public:
-    RecordFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, const std::vector<std::string>& keys, const std::vector<const char*>& pointers, int64_t disambiguator, int64_t length, bool begun, size_t nextindex):
-        options_(options),
-        contents_(contents),
-        keys_(keys),
-        pointers_(pointers),
-        disambiguator_(disambiguator),
-        length_(length),
-        begun_(begun),
-        nextindex_(nextindex) { }
+    RecordFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, const std::vector<std::string>& keys, const std::vector<const char*>& pointers, int64_t disambiguator, int64_t length, bool begun, int64_t nextindex, int64_t nexttotry)
+        : options_(options)
+        , contents_(contents)
+        , keys_(keys)
+        , pointers_(pointers)
+        , disambiguator_(disambiguator)
+        , length_(length)
+        , begun_(begun)
+        , nextindex_(nextindex)
+        , nexttotry_(nexttotry) { }
 
     static RecordFillable* fromempty(const FillableOptions& options) {
-      return new RecordFillable(options, std::vector<std::shared_ptr<Fillable>>(), std::vector<std::string>(), std::vector<const char*>(), 0, -1, false, -1);
+      return new RecordFillable(options, std::vector<std::shared_ptr<Fillable>>(), std::vector<std::string>(), std::vector<const char*>(), 0, -1, false, -1, -1);
     }
 
 
@@ -60,6 +61,7 @@ namespace awkward {
     int64_t length_;
     bool begun_;
     int64_t nextindex_;
+    int64_t nexttotry_;
 
     void maybeupdate(int64_t i, Fillable* tmp);
   };

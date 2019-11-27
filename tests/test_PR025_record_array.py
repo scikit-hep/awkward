@@ -318,17 +318,44 @@ def test_fillable_tuple():
     fillable.boolean(True)
     fillable.endtuple()
 
-    assert str(fillable.type) == "3 * (bool, var * int64, float64)"
+    assert str(fillable.type) == '3 * (bool, var * int64, float64)'
     assert awkward1.tolist(fillable.snapshot()) == [(True, [1], 1.1), (False, [2, 2], 2.2), (True, [3, 3, 3], 3.3)]
 
 def test_fillable_record():
-    pass
+    fillable = awkward1.layout.FillableArray()
+
+    fillable.beginrecord()
+    fillable.field("one")
+    fillable.integer(1)
+    fillable.field("two")
+    fillable.real(1.1)
+    fillable.endrecord()
+
+    fillable.beginrecord()
+    fillable.field("two")
+    fillable.real(2.2)
+    fillable.field("one")
+    fillable.integer(2)
+    fillable.endrecord()
+
+    fillable.beginrecord()
+    fillable.field("one")
+    fillable.integer(3)
+    fillable.field("two")
+    fillable.real(3.3)
+    fillable.endrecord()
+
+    assert str(fillable.type) == '3 * {"one": int64, "two": float64}'
+    assert awkward1.tolist(fillable.snapshot()) == [{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}]
 
 def test_fromiter():
     dataset = [
         [(1, 1.1), (2, 2.2), (3, 3.3)],
         [(1, [1.1, 2.2, 3.3]), (2, []), (3, [4.4, 5.5])],
         [[(1, 1.1), (2, 2.2), (3, 3.3)], [], [(4, 4.4), (5, 5.5)]],
+        [{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}],
+        [{"one": 1, "two": [1.1, 2.2, 3.3]}, {"one": 2, "two": []}, {"one": 3, "two": [4.4, 5.5]}],
+        [[{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}], [], [{"one": 4, "two": 4.4}, {"one": 5, "two": 5.5}]],
     ]
     for datum in dataset:
         assert awkward1.tolist(awkward1.fromiter(datum)) == datum

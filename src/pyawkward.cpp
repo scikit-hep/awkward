@@ -708,6 +708,11 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("begintuple", &ak::FillableArray::begintuple)
       .def("index", &ak::FillableArray::index)
       .def("endtuple", &ak::FillableArray::endtuple)
+      .def("beginrecord", [](ak::FillableArray& self, int64_t disambiguator) -> void {
+        self.beginrecord(disambiguator);
+      }, py::arg("disambiguator") = 0)
+      .def("field", &ak::FillableArray::field_check)
+      .def("endrecord", &ak::FillableArray::endrecord)
       .def("fill", &fillable_fill)
   );
 }

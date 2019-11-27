@@ -31,6 +31,7 @@ namespace awkward {
     length_ = -1;
     begun_ = false;
     nextindex_ = -1;
+    nexttotry_ = 0;
   }
 
   const std::shared_ptr<Type> RecordFillable::type() const {
@@ -39,14 +40,15 @@ namespace awkward {
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
-      std::shared_ptr<RecordType::Lookup> lookup;
-      std::shared_ptr<RecordType::ReverseLookup> reverselookup;
+      std::shared_ptr<RecordType::Lookup> lookup(new RecordType::Lookup);
+      std::shared_ptr<RecordType::ReverseLookup> reverselookup(new RecordType::ReverseLookup);
       for (size_t i = 0;  i < contents_.size();  i++) {
         types.push_back(contents_[i].get()->type());
         (*lookup.get())[keys_[i]] = i;
         reverselookup.get()->push_back(keys_[i]);
       }
       return std::shared_ptr<Type>(new RecordType(types, lookup, reverselookup));
+      return std::shared_ptr<Type>(new RecordType(types));
     }
   }
 
@@ -56,8 +58,8 @@ namespace awkward {
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
-      std::shared_ptr<RecordArray::Lookup> lookup;
-      std::shared_ptr<RecordArray::ReverseLookup> reverselookup;
+      std::shared_ptr<RecordArray::Lookup> lookup(new RecordArray::Lookup);
+      std::shared_ptr<RecordArray::ReverseLookup> reverselookup(new RecordArray::ReverseLookup);
       for (size_t i = 0;  i < contents_.size();  i++) {
         contents.push_back(contents_[i].get()->snapshot());
         (*lookup.get())[keys_[i]] = i;
@@ -263,6 +265,7 @@ namespace awkward {
     if (!begun_  &&  disambiguator == disambiguator_) {
       begun_ = true;
       nextindex_ = -1;
+      nexttotry_ = 0;
     }
     else if (!begun_) {
       Fillable* out = UnionFillable::fromsingle(options_, this);
@@ -292,12 +295,38 @@ namespace awkward {
       throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
     }
     else if (nextindex_ == -1  ||  !contents_[(size_t)nextindex_].get()->active()) {
-      throw std::runtime_error("FIXME: RecordFillable::field_fast: do a search");
+      int64_t wrap_around = (int64_t)pointers_.size();
+      int64_t i = nexttotry_;
+      do {
+        if (i >= wrap_around) {
+          i = 0;
+          if (i == nexttotry_) {
+            break;
+          }
+        }
+        if (pointers_[(size_t)i] == key) {
+          nextindex_ = i;
+          nexttotry_ = i + 1;
+          return this;
+        }
+        i++;
+      } while (i != nexttotry_);
+      nextindex_ = wrap_around;
+      nexttotry_ = 0;
+      if (length_ == 0) {
+        contents_.push_back(std::shared_ptr<Fillable>(UnknownFillable::fromempty(options_)));
+      }
+      else {
+        contents_.push_back(std::shared_ptr<Fillable>(OptionFillable::fromnulls(options_, length_, UnknownFillable::fromempty(options_))));
+      }
+      keys_.push_back(std::string(key));
+      pointers_.push_back(key);
+      return this;
     }
     else {
       contents_[(size_t)nextindex_].get()->field_fast(key);
+      return this;
     }
-    return this;
   }
 
   Fillable* RecordFillable::field_check(const char* key) {
@@ -305,12 +334,38 @@ namespace awkward {
       throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
     }
     else if (nextindex_ == -1  ||  !contents_[(size_t)nextindex_].get()->active()) {
-      throw std::runtime_error("FIXME: RecordFillable::field_check: do a search");
+      int64_t wrap_around = (int64_t)keys_.size();
+      int64_t i = nexttotry_;
+      do {
+        if (i >= wrap_around) {
+          i = 0;
+          if (i == nexttotry_) {
+            break;
+          }
+        }
+        if (keys_[(size_t)i].compare(key) == 0) {
+          nextindex_ = i;
+          nexttotry_ = i + 1;
+          return this;
+        }
+        i++;
+      } while (i != nexttotry_);
+      nextindex_ = wrap_around;
+      nexttotry_ = 0;
+      if (length_ == 0) {
+        contents_.push_back(std::shared_ptr<Fillable>(UnknownFillable::fromempty(options_)));
+      }
+      else {
+        contents_.push_back(std::shared_ptr<Fillable>(OptionFillable::fromnulls(options_, length_, UnknownFillable::fromempty(options_))));
+      }
+      keys_.push_back(std::string(key));
+      pointers_.push_back(nullptr);
+      return this;
     }
     else {
       contents_[(size_t)nextindex_].get()->field_fast(key);
+      return this;
     }
-    return this;
   }
 
   Fillable* RecordFillable::endrecord() {

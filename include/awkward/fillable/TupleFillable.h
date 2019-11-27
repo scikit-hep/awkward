@@ -14,12 +14,12 @@
 namespace awkward {
   class TupleFillable: public Fillable {
   public:
-    TupleFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, int64_t length, bool begun, size_t nextindex):
-        options_(options),
-        contents_(contents),
-        length_(length),
-        begun_(begun),
-        nextindex_(nextindex) { }
+    TupleFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, int64_t length, bool begun, size_t nextindex)
+        : options_(options)
+        , contents_(contents)
+        , length_(length)
+        , begun_(begun)
+        , nextindex_(nextindex) { }
 
     static TupleFillable* fromempty(const FillableOptions& options) {
       return new TupleFillable(options, std::vector<std::shared_ptr<Fillable>>(), -1, false, -1);
