@@ -37,8 +37,20 @@ namespace awkward {
     return snapshot().get()->getitem_range(start, stop);
   }
 
+  const std::shared_ptr<Content> FillableArray::getitem_field(const std::string& key) const {
+    return snapshot().get()->getitem_field(key);
+  }
+
+  const std::shared_ptr<Content> FillableArray::getitem_fields(const std::vector<std::string>& keys) const {
+    return snapshot().get()->getitem_fields(keys);
+  }
+
   const std::shared_ptr<Content> FillableArray::getitem(const Slice& where) const {
     return snapshot().get()->getitem(where);
+  }
+
+  bool FillableArray::active() const {
+    return fillable_.get()->active();
   }
 
   void FillableArray::null() {
@@ -67,6 +79,38 @@ namespace awkward {
       throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
     }
     maybeupdate(tmp);
+  }
+
+  void FillableArray::begintuple(int64_t numfields) {
+    maybeupdate(fillable_.get()->begintuple(numfields));
+  }
+
+  void FillableArray::index(int64_t index) {
+    maybeupdate(fillable_.get()->index(index));
+  }
+
+  void FillableArray::endtuple() {
+    maybeupdate(fillable_.get()->endtuple());
+  }
+
+  void FillableArray::beginrecord() {
+    beginrecord(0);
+  }
+
+  void FillableArray::beginrecord(int64_t disambiguator) {
+    maybeupdate(fillable_.get()->beginrecord(disambiguator));
+  }
+
+  void FillableArray::field_fast(const char* key) {
+    maybeupdate(fillable_.get()->field_fast(key));
+  }
+
+  void FillableArray::field_check(const char* key) {
+    maybeupdate(fillable_.get()->field_check(key));
+  }
+
+  void FillableArray::endrecord() {
+    maybeupdate(fillable_.get()->endrecord());
   }
 
   void FillableArray::maybeupdate(Fillable* tmp) {

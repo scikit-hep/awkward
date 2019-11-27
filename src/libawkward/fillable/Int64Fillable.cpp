@@ -32,15 +32,31 @@ namespace awkward {
 #endif
   }
 
+  bool Int64Fillable::active() const {
+    return false;
+  }
+
   Fillable* Int64Fillable::null() {
     Fillable* out = OptionFillable::fromvalids(options_, this);
-    out->null();
+    try {
+      out->null();
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
   }
 
   Fillable* Int64Fillable::boolean(bool x) {
     Fillable* out = UnionFillable::fromsingle(options_, this);
-    out->boolean(x);
+    try {
+      out->boolean(x);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
   }
 
@@ -51,17 +67,74 @@ namespace awkward {
 
   Fillable* Int64Fillable::real(double x) {
     Float64Fillable* out = Float64Fillable::fromint64(options_, buffer_);
-    out->real(x);
+    try {
+      out->real(x);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
   }
 
   Fillable* Int64Fillable::beginlist() {
     Fillable* out = UnionFillable::fromsingle(options_, this);
-    out->beginlist();
+    try {
+      out->beginlist();
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
   }
 
   Fillable* Int64Fillable::endlist() {
-    return nullptr;
+    throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
   }
+
+  Fillable* Int64Fillable::begintuple(int64_t numfields) {
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    try {
+      out->begintuple(numfields);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
+  }
+
+  Fillable* Int64Fillable::index(int64_t index) {
+    throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
+  }
+
+  Fillable* Int64Fillable::endtuple() {
+    throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
+  }
+
+  Fillable* Int64Fillable::beginrecord(int64_t disambiguator) {
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    try {
+      out->beginrecord(disambiguator);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
+  }
+
+  Fillable* Int64Fillable::field_fast(const char* key) {
+    throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+  }
+
+  Fillable* Int64Fillable::field_check(const char* key) {
+    throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+  }
+
+  Fillable* Int64Fillable::endrecord() {
+    throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
+  }
+
 }

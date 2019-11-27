@@ -10,7 +10,7 @@
 namespace awkward {
   class UnionType: public Type {
   public:
-    UnionType(const std::vector<std::shared_ptr<Type>> types): types_(types) { }
+    UnionType(const std::vector<std::shared_ptr<Type>>& types): types_(types) { }
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
     virtual const std::shared_ptr<Type> shallow_copy() const;
@@ -19,7 +19,7 @@ namespace awkward {
 
     int64_t numtypes() const;
     const std::vector<std::shared_ptr<Type>> types() const;
-    const std::shared_ptr<Type> type(int64_t i) const;
+    const std::shared_ptr<Type> type(int64_t index) const;
 
   private:
     const std::vector<std::shared_ptr<Type>> types_;

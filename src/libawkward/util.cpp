@@ -18,7 +18,7 @@ namespace awkward {
         if (err.location != kSliceNone  &&  id != nullptr) {
           assert(err.location > 0);
           if (0 <= err.location  &&  err.location < id->length()) {
-            out << " at id[" << id->location(err.location) << "]";
+            out << " at id[" << id->location_at(err.location) << "]";
           }
           else {
             out << " at id[???]";
@@ -29,6 +29,16 @@ namespace awkward {
         }
         out << ", " << err.str;
         throw std::invalid_argument(out.str());
+      }
+    }
+
+    std::string quote(std::string x, bool doublequote) {
+      // TODO: escape characters, possibly using RapidJSON.
+      if (doublequote) {
+        return std::string("\"") + x + std::string("\"");
+      }
+      else {
+        return std::string("'") + x + std::string("'");
       }
     }
 

@@ -83,3 +83,14 @@ def test_fromiter():
     assert awkward1.tolist(awkward1.fromiter([5, 4, 3.14, 2.22, 1.23])) == [5.0, 4.0, 3.14, 2.22, 1.23]
     assert awkward1.tolist(awkward1.fromiter([[1.1, 2.2, 3.3], [], [4.4, 5.5]])) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert awkward1.tolist(awkward1.fromiter([[[1.1, 2.2, 3.3], []], [[4.4, 5.5]], [], [[6.6], [7.7, 8.8, 9.9]]])) == [[[1.1, 2.2, 3.3], []], [[4.4, 5.5]], [], [[6.6], [7.7, 8.8, 9.9]]]
+
+def test_numpy():
+    a = awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(2, 3, 5))
+    assert awkward1.tolist(a) == [[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]], [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]
+    assert awkward1.tojson(a) == "[[[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14]],[[15,16,17,18,19],[20,21,22,23,24],[25,26,27,28,29]]]"
+
+    b = awkward1.layout.NumpyArray(numpy.array([[[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]], [[10.1, 20.2, 30.3], [40.4, 50.5, 60.6]]]))
+    assert awkward1.tojson(b) == "[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,30.3],[40.4,50.5,60.6]]]"
+
+    c = awkward1.layout.NumpyArray(numpy.array([[True, False, True], [False, False, True]]))
+    assert awkward1.tojson(c) == "[[true,false,true],[false,false,true]]"

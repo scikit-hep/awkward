@@ -13,7 +13,7 @@
 namespace awkward {
   class FillableArray {
   public:
-    FillableArray(const FillableOptions& options): fillable_(new UnknownFillable(options)) { }
+    FillableArray(const FillableOptions& options): fillable_(UnknownFillable::fromempty(options)) { }
 
     const std::string tostring() const;
     int64_t length() const;
@@ -22,14 +22,25 @@ namespace awkward {
     const std::shared_ptr<Content> snapshot() const;
     const std::shared_ptr<Content> getitem_at(int64_t at) const;
     const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;
+    const std::shared_ptr<Content> getitem_field(const std::string& key) const;
+    const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const;
     const std::shared_ptr<Content> getitem(const Slice& where) const;
 
+    bool active() const;
     void null();
     void boolean(bool x);
     void integer(int64_t x);
     void real(double x);
     void beginlist();
     void endlist();
+    void begintuple(int64_t numfields);
+    void index(int64_t index);
+    void endtuple();
+    void beginrecord();
+    void beginrecord(int64_t disambiguator);
+    void field_fast(const char* key);
+    void field_check(const char* key);
+    void endrecord();
 
     template <typename T>
     void fill(const std::vector<T>& vector) {

@@ -34,13 +34,13 @@ namespace awkward {
     const std::string format() const { return format_; }
 
     ssize_t ndim() const;
-    bool isscalar() const;
     bool isempty() const;
     void* byteptr() const;
     void* byteptr(ssize_t at) const;
     ssize_t bytelength() const;
     uint8_t getbyte(ssize_t at) const;
 
+    virtual bool isscalar() const;
     virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();
@@ -56,6 +56,8 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const;
     virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;
     virtual const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const;
+    virtual const std::shared_ptr<Content> getitem_field(const std::string& key) const;
+    virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const;
     virtual const std::shared_ptr<Content> getitem(const Slice& where) const;
     virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
@@ -75,6 +77,12 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
       throw std::runtime_error("NumpyArray has its own getitem_next system");
     }
+    virtual const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+      throw std::runtime_error("NumpyArray has its own getitem_next system");
+    }
+    virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+      throw std::runtime_error("NumpyArray has its own getitem_next system");
+    }
 
     const NumpyArray contiguous_next(Index64 bytepos) const;
     const NumpyArray getitem_bystrides(const std::shared_ptr<SliceItem>& head, const Slice& tail, int64_t length) const;
@@ -88,6 +96,12 @@ namespace awkward {
     const NumpyArray getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
     const NumpyArray getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
     const NumpyArray getitem_next(const SliceArray64& array, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
+
+  void tojson_boolean(ToJson& builder) const;
+  template <typename T>
+  void tojson_integer(ToJson& builder) const;
+  template <typename T>
+  void tojson_real(ToJson& builder) const;
 
   private:
     std::shared_ptr<Identity> id_;

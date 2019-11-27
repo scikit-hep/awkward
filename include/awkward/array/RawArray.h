@@ -263,6 +263,14 @@ namespace awkward {
       return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + start, stop - start, itemsize_));
     }
 
+    virtual const std::shared_ptr<Content> getitem_field(const std::string& key) const {
+      throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
+    }
+
+    virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const {
+      throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
+    }
+
     virtual const std::shared_ptr<Content> getitem(const Slice& where) const {
       std::shared_ptr<SliceItem> nexthead = where.head();
       Slice nexttail = where.tail();
@@ -347,6 +355,14 @@ namespace awkward {
         length_);
       util::handle_error(err, classname(), id_.get());
       return carry(flathead);
+    }
+
+    virtual const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+      throw std::invalid_argument(field.tostring() + std::string(" is not a valid slice type for ") + classname());
+    }
+
+    virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+      throw std::invalid_argument(fields.tostring() + std::string(" is not a valid slice type for ") + classname());
     }
 
   private:

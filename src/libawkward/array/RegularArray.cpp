@@ -92,11 +92,11 @@ namespace awkward {
 
   void RegularArray::tojson_part(ToJson& builder) const {
     int64_t len = length();
+    builder.beginlist();
     for (int64_t i = 0;  i < len;  i++) {
-      builder.beginlist();
       getitem_at_nowrap(i).get()->tojson_part(builder);
-      builder.endlist();
     }
+    builder.endlist();
   }
 
   const std::shared_ptr<Type> RegularArray::type_part() const {
@@ -111,7 +111,11 @@ namespace awkward {
     return std::shared_ptr<Content>(new RegularArray(id_, content_, size_));
   }
 
-  void RegularArray::check_for_iteration() const { }
+  void RegularArray::check_for_iteration() const {
+    if (id_.get() != nullptr  && id_.get()->length() < length()) {
+      util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+    }
+  }
 
   const std::shared_ptr<Content> RegularArray::getitem_nothing() const {
     return content_.get()->getitem_range_nowrap(0, 0);
@@ -149,6 +153,14 @@ namespace awkward {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
     return std::shared_ptr<Content>(new RegularArray(id_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_));
+  }
+
+  const std::shared_ptr<Content> RegularArray::getitem_field(const std::string& key) const {
+    return std::shared_ptr<Content>(new RegularArray(id_, content_.get()->getitem_field(key), size_));
+  }
+
+  const std::shared_ptr<Content> RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::shared_ptr<Content>(new RegularArray(id_, content_.get()->getitem_fields(keys), size_));
   }
 
   const std::shared_ptr<Content> RegularArray::carry(const Index64& carry) const {

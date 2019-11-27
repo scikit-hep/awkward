@@ -35,7 +35,8 @@ namespace awkward {
   }
 
   void EmptyArray::tojson_part(ToJson& builder) const {
-    // Do nothing (builder.beginlist() and builder.endlist() are called outside of tojson_part).
+    builder.beginlist();
+    builder.endlist();
   }
 
   const std::shared_ptr<Type> EmptyArray::type_part() const {
@@ -74,6 +75,13 @@ namespace awkward {
     return shallow_copy();
   }
 
+  const std::shared_ptr<Content> EmptyArray::getitem_field(const std::string& key) const {
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_fields(const std::vector<std::string>& keys) const {
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
+  }
 
   const std::shared_ptr<Content> EmptyArray::carry(const Index64& carry) const {
     return shallow_copy();
@@ -96,6 +104,14 @@ namespace awkward {
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+    throw std::invalid_argument(field.tostring() + std::string(" is not a valid slice type for ") + classname());
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+    throw std::invalid_argument(fields.tostring() + std::string(" is not a valid slice type for ") + classname());
   }
 
 }

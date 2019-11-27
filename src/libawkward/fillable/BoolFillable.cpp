@@ -27,9 +27,19 @@ namespace awkward {
     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), buffer_.ptr(), shape, strides, 0, sizeof(bool), "?"));
   }
 
+  bool BoolFillable::active() const {
+    return false;
+  }
+
   Fillable* BoolFillable::null() {
     Fillable* out = OptionFillable::fromvalids(options_, this);
-    out->null();
+    try {
+      out->null();
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
   }
 
@@ -40,24 +50,86 @@ namespace awkward {
 
   Fillable* BoolFillable::integer(int64_t x) {
     Fillable* out = UnionFillable::fromsingle(options_, this);
-    out->integer(x);
+    try {
+      out->integer(x);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
   }
 
   Fillable* BoolFillable::real(double x) {
     Fillable* out = UnionFillable::fromsingle(options_, this);
-    out->real(x);
+    try {
+      out->real(x);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
   }
 
   Fillable* BoolFillable::beginlist() {
     Fillable* out = UnionFillable::fromsingle(options_, this);
-    out->beginlist();
+    try {
+      out->beginlist();
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
   }
 
   Fillable* BoolFillable::endlist() {
-    return nullptr;
+    throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
+  }
+
+  Fillable* BoolFillable::begintuple(int64_t numfields) {
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    try {
+      out->begintuple(numfields);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
+  }
+
+  Fillable* BoolFillable::index(int64_t index) {
+    throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
+  }
+
+  Fillable* BoolFillable::endtuple() {
+    throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
+  }
+
+  Fillable* BoolFillable::beginrecord(int64_t disambiguator) {
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    try {
+      out->beginrecord(disambiguator);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
+  }
+
+  Fillable* BoolFillable::field_fast(const char* key) {
+    throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+  }
+
+  Fillable* BoolFillable::field_check(const char* key) {
+    throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+  }
+
+  Fillable* BoolFillable::endrecord() {
+    throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
 }

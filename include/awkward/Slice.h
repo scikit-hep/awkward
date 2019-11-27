@@ -98,6 +98,30 @@ namespace awkward {
 
   typedef SliceArrayOf<int64_t> SliceArray64;
 
+  class SliceField: public SliceItem {
+  public:
+    SliceField(const std::string& key): key_(key) { }
+    const std::string key() const { return key_; }
+    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+      return std::shared_ptr<SliceItem>(new SliceField(key_));
+    }
+    virtual const std::string tostring() const;
+  private:
+    const std::string key_;
+  };
+
+  class SliceFields: public SliceItem {
+  public:
+    SliceFields(const std::vector<std::string>& keys): keys_(keys) { }
+    const std::vector<std::string> keys() const { return keys_; }
+    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+      return std::shared_ptr<SliceItem>(new SliceFields(keys_));
+    }
+    virtual const std::string tostring() const;
+  private:
+    const std::vector<std::string> keys_;
+  };
+
   class Slice {
   public:
     static int64_t none() { return SliceItem::none(); }

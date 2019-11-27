@@ -12,10 +12,10 @@ py27 = (sys.version_info[0] < 3)
 
 def test_slice():
     assert repr(awkward1.layout.Slice(3)) == "[3]"
-    assert repr(awkward1.layout.Slice(slice(None))) == "[::]"
-    assert repr(awkward1.layout.Slice(slice(10))) == "[:10:]"
-    assert repr(awkward1.layout.Slice(slice(1, 2))) == "[1:2:]"
-    assert repr(awkward1.layout.Slice(slice(1, None))) == "[1::]"
+    assert repr(awkward1.layout.Slice(slice(None))) == "[:]"
+    assert repr(awkward1.layout.Slice(slice(10))) == "[:10]"
+    assert repr(awkward1.layout.Slice(slice(1, 2))) == "[1:2]"
+    assert repr(awkward1.layout.Slice(slice(1, None))) == "[1:]"
     assert repr(awkward1.layout.Slice(slice(None, None, 2))) == "[::2]"
     assert repr(awkward1.layout.Slice(slice(1, 2, 3))) == "[1:2:3]"
     if not py27:
@@ -34,16 +34,15 @@ def test_slice():
     assert repr(awkward1.layout.Slice(())) == "[]"
     assert repr(awkward1.layout.Slice((3,))) == "[3]"
     assert repr(awkward1.layout.Slice((3, slice(1, 2, 3)))) == "[3, 1:2:3]"
-    assert repr(awkward1.layout.Slice((slice(None), [1, 2, 3]))) == "[::, array([1, 2, 3])]"
-    assert repr(awkward1.layout.Slice(([1, 2, 3], slice(None)))) == "[array([1, 2, 3]), ::]"
-    assert repr(awkward1.layout.Slice((slice(None), [True, True, False, False, True]))) == "[::, array([0, 1, 4])]"
-    assert repr(awkward1.layout.Slice((slice(None), [[True, True], [False, False], [True, False]]))) == "[::, array([0, 0, 2]), array([0, 1, 0])]"
-    assert repr(awkward1.layout.Slice(([[True, True], [False, False], [True, False]], slice(None)))) == "[array([0, 0, 2]), array([0, 1, 0]), ::]"
+    assert repr(awkward1.layout.Slice((slice(None), [1, 2, 3]))) == "[:, array([1, 2, 3])]"
+    assert repr(awkward1.layout.Slice(([1, 2, 3], slice(None)))) == "[array([1, 2, 3]), :]"
+    assert repr(awkward1.layout.Slice((slice(None), [True, True, False, False, True]))) == "[:, array([0, 1, 4])]"
+    assert repr(awkward1.layout.Slice((slice(None), [[True, True], [False, False], [True, False]]))) == "[:, array([0, 0, 2]), array([0, 1, 0])]"
+    assert repr(awkward1.layout.Slice(([[True, True], [False, False], [True, False]], slice(None)))) == "[array([0, 0, 2]), array([0, 1, 0]), :]"
 
     with pytest.raises(ValueError):
         awkward1.layout.Slice(numpy.array([1.1, 2.2, 3.3]))
-    with pytest.raises(ValueError):
-        awkward1.layout.Slice(numpy.array(["one", "two", "three"]))
+    assert repr(awkward1.layout.Slice(numpy.array(["one", "two", "three"]))) == '[["one", "two", "three"]]'
     with pytest.raises(ValueError):
         awkward1.layout.Slice(numpy.array([1, 2, 3, None, 4, 5]))
 
@@ -60,8 +59,8 @@ def test_slice():
         awkward1.layout.Slice((slice(None), 3, slice(None), [[1], [2], [3]], slice(None)))
     with pytest.raises(ValueError):
         awkward1.layout.Slice((slice(None), [[1, 2, 3, 4]], slice(None), [[1], [2], [3]], slice(None)))
-    assert repr(awkward1.layout.Slice((slice(None), 3, [[1], [2], [3]], slice(None)))) == "[::, array([[3], [3], [3]]), array([[1], [2], [3]]), ::]"
-    assert repr(awkward1.layout.Slice((slice(None), [[1, 2, 3, 4]], [[1], [2], [3]], slice(None)))) == "[::, array([[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]), array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]), ::]"
+    assert repr(awkward1.layout.Slice((slice(None), 3, [[1], [2], [3]], slice(None)))) == "[:, array([[3], [3], [3]]), array([[1], [2], [3]]), :]"
+    assert repr(awkward1.layout.Slice((slice(None), [[1, 2, 3, 4]], [[1], [2], [3]], slice(None)))) == "[:, array([[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]), array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]), :]"
 
 def test_numpyarray_getitem_bystrides():
     a = numpy.arange(10)

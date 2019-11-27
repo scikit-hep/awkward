@@ -11,12 +11,12 @@ namespace awkward {
   public:
     Iterator(const std::shared_ptr<Content> content)
         : content_(content)
-        , where_(0) {
+        , at_(0) {
       content.get()->check_for_iteration();
     }
 
     const std::shared_ptr<Content> content() const { return content_; }
-    const int64_t where() const { return where_; }
+    const int64_t at() const { return at_; }
 
     const bool isdone() const;
     const std::shared_ptr<Content> next();
@@ -26,7 +26,7 @@ namespace awkward {
 
   private:
     const std::shared_ptr<Content> content_;
-    int64_t where_;
+    int64_t at_;
   };
 }
 

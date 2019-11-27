@@ -27,15 +27,31 @@ namespace awkward {
     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), buffer_.ptr(), shape, strides, 0, sizeof(double), "d"));
   }
 
+  bool Float64Fillable::active() const {
+    return false;
+  }
+
   Fillable* Float64Fillable::null() {
     Fillable* out = OptionFillable::fromvalids(options_, this);
-    out->null();
+    try {
+      out->null();
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
   }
 
   Fillable* Float64Fillable::boolean(bool x) {
     Fillable* out = UnionFillable::fromsingle(options_, this);
-    out->boolean(x);
+    try {
+      out->boolean(x);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
   }
 
@@ -51,12 +67,62 @@ namespace awkward {
 
   Fillable* Float64Fillable::beginlist() {
     Fillable* out = UnionFillable::fromsingle(options_, this);
-    out->beginlist();
+    try {
+      out->beginlist();
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
     return out;
   }
 
   Fillable* Float64Fillable::endlist() {
-    return nullptr;
+    throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
+  }
+
+  Fillable* Float64Fillable::begintuple(int64_t numfields) {
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    try {
+      out->begintuple(numfields);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
+  }
+
+  Fillable* Float64Fillable::index(int64_t index) {
+    throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
+  }
+
+  Fillable* Float64Fillable::endtuple() {
+    throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
+  }
+
+  Fillable* Float64Fillable::beginrecord(int64_t disambiguator) {
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    try {
+      out->beginrecord(disambiguator);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
+  }
+
+  Fillable* Float64Fillable::field_fast(const char* key) {
+    throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+  }
+
+  Fillable* Float64Fillable::field_check(const char* key) {
+    throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+  }
+
+  Fillable* Float64Fillable::endrecord() {
+    throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
 }

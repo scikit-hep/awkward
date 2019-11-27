@@ -8,8 +8,17 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  const ArrayType Content::type() const {
-    return ArrayType(type_part(), length());
+  bool Content::isscalar() const {
+    return false;
+  }
+
+  const std::shared_ptr<Type> Content::type() const {
+    if (isscalar()) {
+      return type_part();
+    }
+    else {
+      return std::shared_ptr<Type>(new ArrayType(type_part(), length()));
+    }
   }
 
   const std::string Content::tostring() const {
@@ -19,16 +28,12 @@ namespace awkward {
   const std::string Content::tojson(bool pretty, int64_t maxdecimals) const {
     if (pretty) {
       ToJsonPrettyString builder(maxdecimals);
-      builder.beginlist();
       tojson_part(builder);
-      builder.endlist();
       return builder.tostring();
     }
     else {
       ToJsonString builder(maxdecimals);
-      builder.beginlist();
       tojson_part(builder);
-      builder.endlist();
       return builder.tostring();
     }
   }
@@ -83,6 +88,12 @@ namespace awkward {
     else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
       return getitem_next(*array, tail, advanced);
     }
+    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+      return getitem_next(*field, tail, advanced);
+    }
+    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+      return getitem_next(*fields, tail, advanced);
+    }
     else {
       throw std::runtime_error("unrecognized slice type");
     }
@@ -117,10 +128,22 @@ namespace awkward {
     return std::shared_ptr<Content>(new RegularArray(Identity::none(), getitem_next(nexthead, nexttail, advanced), 1));
   }
 
+  const std::shared_ptr<Content> Content::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    return getitem_field(field.key()).get()->getitem_next(nexthead, nexttail, advanced);
+  }
+
+  const std::shared_ptr<Content> Content::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
+  }
+
   const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content> outcontent, const std::vector<int64_t>& shape) const {
     std::shared_ptr<Content> out(new RegularArray(Identity::none(), outcontent, (int64_t)shape[shape.size() - 1]));
     for (int64_t i = (int64_t)shape.size() - 2;  i >= 0;  i--) {
-      out = std::shared_ptr<Content>(new RegularArray(Identity::none(), out, (int64_t)shape[i]));
+      out = std::shared_ptr<Content>(new RegularArray(Identity::none(), out, (int64_t)shape[(size_t)i]));
     }
     return out;
   }

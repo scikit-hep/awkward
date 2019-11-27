@@ -11,9 +11,12 @@
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
+  class TupleFillable;
+  class RecordFillable;
+
   class UnionFillable: public Fillable {
   public:
-    UnionFillable(const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>> contents): options_(options), types_(types), offsets_(offsets), contents_(contents) { }
+    UnionFillable(const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>> contents): options_(options), types_(types), offsets_(offsets), contents_(contents), current_(-1) { }
 
     static UnionFillable* fromsingle(const FillableOptions& options, Fillable* firstcontent) {
       GrowableBuffer<int8_t> types = GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
@@ -27,27 +30,27 @@ namespace awkward {
     virtual const std::shared_ptr<Type> type() const;
     virtual const std::shared_ptr<Content> snapshot() const;
 
+    virtual bool active() const;
     virtual Fillable* null();
     virtual Fillable* boolean(bool x);
     virtual Fillable* integer(int64_t x);
     virtual Fillable* real(double x);
     virtual Fillable* beginlist();
     virtual Fillable* endlist();
+    virtual Fillable* begintuple(int64_t numfields);
+    virtual Fillable* index(int64_t index);
+    virtual Fillable* endtuple();
+    virtual Fillable* beginrecord(int64_t disambiguator);
+    virtual Fillable* field_fast(const char* key);
+    virtual Fillable* field_check(const char* key);
+    virtual Fillable* endrecord();
 
   private:
     const FillableOptions options_;
     GrowableBuffer<int8_t> types_;
     GrowableBuffer<int64_t> offsets_;
     std::vector<std::shared_ptr<Fillable>> contents_;
-
-    template <typename T>
-    T* findfillable(int8_t& type);
-    template <typename T>
-    T* maybenew(T* fillable, int64_t& length);
-    template <typename T1>
-    Fillable* get1(int8_t& type, int64_t& length);
-    template <typename T1, typename T2>
-    Fillable* get2(int8_t& type, int64_t& length);
+    int8_t current_;
   };
 }
 

@@ -155,11 +155,11 @@ namespace awkward {
   template <typename T>
   void ListOffsetArrayOf<T>::tojson_part(ToJson& builder) const {
     int64_t len = length();
+    builder.beginlist();
     for (int64_t i = 0;  i < len;  i++) {
-      builder.beginlist();
       getitem_at_nowrap(i).get()->tojson_part(builder);
-      builder.endlist();
     }
+    builder.endlist();
   }
 
   template <typename T>
@@ -239,6 +239,16 @@ namespace awkward {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
     return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id, offsets_.getitem_range_nowrap(start, stop + 1), content_));
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_field(const std::string& key) const {
+    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, offsets_, content_.get()->getitem_field(key)));
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, offsets_, content_.get()->getitem_fields(keys)));
   }
 
   template <typename T>

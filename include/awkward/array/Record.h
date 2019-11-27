@@ -1,29 +1,24 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_LISTOFFSETARRAY_H_
-#define AWKWARD_LISTOFFSETARRAY_H_
+#ifndef AWKWARD_RECORD_H_
+#define AWKWARD_RECORD_H_
 
-#include <memory>
-
-#include "awkward/cpu-kernels/util.h"
-#include "awkward/Index.h"
-#include "awkward/Identity.h"
-#include "awkward/Content.h"
+#include "awkward/array/RecordArray.h"
 
 namespace awkward {
-  template <typename T>
-  class ListOffsetArrayOf: public Content {
+  class Record: public Content {
   public:
-    ListOffsetArrayOf<T>(const std::shared_ptr<Identity> id, const IndexOf<T> offsets, const std::shared_ptr<Content> content)
-        : id_(id)
-        , offsets_(offsets)
-        , content_(content) { }
+    Record(const RecordArray& recordarray, int64_t at)
+        : recordarray_(recordarray)
+        , at_(at) { }
 
-    const IndexOf<T> offsets() const { return offsets_; }
-    const std::shared_ptr<Content> content() const { return content_.get()->shallow_copy(); }
+    const std::shared_ptr<Content> recordarray() const { return recordarray_.shallow_copy(); }
+    int64_t at() const { return at_; }
+    bool istuple() const { return recordarray_.istuple(); }
 
+    virtual bool isscalar() const;
     virtual const std::string classname() const;
-    virtual const std::shared_ptr<Identity> id() const { return id_; }
+    virtual const std::shared_ptr<Identity> id() const;
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
@@ -42,20 +37,30 @@ namespace awkward {
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
 
+    int64_t numfields() const;
+    int64_t index(const std::string& key) const;
+    const std::string key(int64_t index) const;
+    bool has(const std::string& key) const;
+    const std::vector<std::string> aliases(int64_t index) const;
+    const std::vector<std::string> aliases(const std::string& key) const;
+    const std::shared_ptr<Content> field(int64_t index) const;
+    const std::shared_ptr<Content> field(const std::string& key) const;
+    const std::vector<std::string> keys() const;
+    const std::vector<std::shared_ptr<Content>> values() const;
+    const std::vector<std::pair<std::string, std::shared_ptr<Content>>> items() const;
+    const Record withoutkeys() const;
+
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const;
+    virtual const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const;
+    virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
 
   private:
-    std::shared_ptr<Identity> id_;
-    const IndexOf<T> offsets_;
-    const std::shared_ptr<Content> content_;
+    const RecordArray recordarray_;
+    int64_t at_;
   };
-
-  typedef ListOffsetArrayOf<int32_t>  ListOffsetArray32;
-  typedef ListOffsetArrayOf<uint32_t> ListOffsetArrayU32;
-  typedef ListOffsetArrayOf<int64_t>  ListOffsetArray64;
 }
 
-#endif // AWKWARD_LISTOFFSETARRAY_H_
+#endif // AWKWARD_RECORD_H_

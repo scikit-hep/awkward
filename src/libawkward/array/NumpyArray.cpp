@@ -8,16 +8,13 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
+#include "awkward/util.h"
 
 #include "awkward/array/NumpyArray.h"
 
 namespace awkward {
   ssize_t NumpyArray::ndim() const {
     return shape_.size();
-  }
-
-  bool NumpyArray::isscalar() const {
-    return ndim() == 0;
   }
 
   bool NumpyArray::isempty() const {
@@ -48,6 +45,10 @@ namespace awkward {
 
   uint8_t NumpyArray::getbyte(ssize_t at) const {
     return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
+  }
+
+  bool NumpyArray::isscalar() const {
+    return ndim() == 0;
   }
 
   const std::string NumpyArray::classname() const {
@@ -109,7 +110,7 @@ namespace awkward {
   const std::string NumpyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     assert(!isscalar());
     std::stringstream out;
-    out << indent << pre << "<" << classname() << " format=\"" << format_ << "\" shape=\"";
+    out << indent << pre << "<" << classname() << " format=" << util::quote(format_, true) << " shape=\"";
     for (ssize_t i = 0;  i < ndim();  i++) {
       if (i != 0) {
         out << " ";
@@ -187,90 +188,58 @@ namespace awkward {
     return out.str();
   }
 
-  // FIXME: turn each of these three functions into (builder, array, offset, length)
-  // so that the can be called once per multidimensional array (no getitem_at_nowrap;
-  // do it internally in tojson_boolean/integer/real).
-
-  void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
-    for (int i = 0;  i < length;  i++) {
-      builder.boolean(array[i]);
-    }
-  }
-
-  template <typename T>
-  void tojson_integer(ToJson& builder, T* array, int64_t length) {
-    for (int i = 0;  i < length;  i++) {
-      builder.integer(array[i]);
-    }
-  }
-
-  template <typename T>
-  void tojson_real(ToJson& builder, T* array, int64_t length) {
-    for (int i = 0;  i < length;  i++) {
-      builder.real(array[i]);
-    }
-  }
-
   void NumpyArray::tojson_part(ToJson& builder) const {
-    assert(!isscalar());
-    if (ndim() == 1) {
-      if (format_.compare("d") == 0) {
-        tojson_real(builder, reinterpret_cast<double*>(byteptr()), length());
-      }
-      else if (format_.compare("f") == 0) {
-        tojson_real(builder, reinterpret_cast<float*>(byteptr()), length());
-      }
+    if (format_.compare("d") == 0) {
+      tojson_real<double>(builder);
+    }
+    else if (format_.compare("f") == 0) {
+      tojson_real<float>(builder);
+    }
 #ifdef _MSC_VER
-      else if (format_.compare("q") == 0) {
+    else if (format_.compare("q") == 0) {
 #else
-      else if (format_.compare("l") == 0) {
+    else if (format_.compare("l") == 0) {
 #endif
-        tojson_integer(builder, reinterpret_cast<int64_t*>(byteptr()), length());
-      }
+      tojson_integer<int64_t>(builder);
+    }
 #ifdef _MSC_VER
-      else if (format_.compare("Q") == 0) {
+    else if (format_.compare("Q") == 0) {
 #else
-      else if (format_.compare("L") == 0) {
+    else if (format_.compare("L") == 0) {
 #endif
-        tojson_integer(builder, reinterpret_cast<uint64_t*>(byteptr()), length());
-      }
+      tojson_integer<uint64_t>(builder);
+    }
 #ifdef _MSC_VER
       else if (format_.compare("l") == 0) {
 #else
       else if (format_.compare("i") == 0) {
 #endif
-        tojson_integer(builder, reinterpret_cast<int32_t*>(byteptr()), length());
-      }
+      tojson_integer<int32_t>(builder);
+    }
 #ifdef _MSC_VER
-      else if (format_.compare("L") == 0) {
+    else if (format_.compare("L") == 0) {
 #else
-      else if (format_.compare("I") == 0) {
+    else if (format_.compare("I") == 0) {
 #endif
-        tojson_integer(builder, reinterpret_cast<uint32_t*>(byteptr()), length());
-      }
-      else if (format_.compare("h") == 0) {
-        tojson_real(builder, reinterpret_cast<int16_t*>(byteptr()), length());
-      }
-      else if (format_.compare("H") == 0) {
-        tojson_real(builder, reinterpret_cast<uint16_t*>(byteptr()), length());
-      }
-      else if (format_.compare("b") == 0) {
-        tojson_real(builder, reinterpret_cast<int8_t*>(byteptr()), length());
-      }
-      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-        tojson_real(builder, reinterpret_cast<uint8_t*>(byteptr()), length());
-      }
-      else {
-        throw std::invalid_argument(std::string("cannot convert Numpy format \"") + format_ + std::string("\" into JSON"));
-      }
+      tojson_integer<uint32_t>(builder);
+    }
+    else if (format_.compare("h") == 0) {
+      tojson_real<int16_t>(builder);
+    }
+    else if (format_.compare("H") == 0) {
+      tojson_real<uint16_t>(builder);
+    }
+    else if (format_.compare("b") == 0) {
+      tojson_real<int8_t>(builder);
+    }
+    else if (format_.compare("B") == 0) {
+      tojson_real<uint8_t>(builder);
+    }
+    else if (format_.compare("?") == 0) {
+      tojson_boolean(builder);
     }
     else {
-      int64_t len = length();
-      for (int64_t i = 0;  i < len;  i++) {
-        builder.beginlist();
-        getitem_at_nowrap(i).get()->tojson_part(builder);
-        builder.endlist();
-      }
+      throw std::invalid_argument(std::string("cannot convert Numpy format \"") + format_ + std::string("\" into JSON"));
     }
   }
 
@@ -338,7 +307,7 @@ namespace awkward {
 
   int64_t NumpyArray::length() const {
     if (isscalar()) {
-      return -1;
+      return -1;   // just like Record, which is also a scalar
     }
     else {
       return (int64_t)shape_[0];
@@ -412,6 +381,14 @@ namespace awkward {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
     return std::shared_ptr<Content>(new NumpyArray(id, ptr_, shape, strides_, byteoffset, itemsize_, format_));
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_field(const std::string& key) const {
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_fields(const std::vector<std::string>& keys) const {
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
@@ -605,6 +582,12 @@ namespace awkward {
     else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
       return getitem_bystrides(*newaxis, tail, length);
     }
+    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+      throw std::invalid_argument(field->tostring() + std::string(" is not a valid slice type for ") + classname());
+    }
+    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+      throw std::invalid_argument(fields->tostring() + std::string(" is not a valid slice type for ") + classname());
+    }
     else {
       throw std::runtime_error("unrecognized slice item type");
     }
@@ -737,6 +720,12 @@ namespace awkward {
     }
     else if (SliceArray64* array = dynamic_cast<SliceArray64*>(head.get())) {
       return getitem_next(*array, tail, carry, advanced, length, stride, first);
+    }
+    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+      throw std::invalid_argument(field->tostring() + std::string(" is not a valid slice type for ") + classname());
+    }
+    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+      throw std::invalid_argument(fields->tostring() + std::string(" is not a valid slice type for ") + classname());
     }
     else {
       throw std::runtime_error("unrecognized slice item type");
@@ -939,6 +928,86 @@ namespace awkward {
       std::vector<ssize_t> outshape = { (ssize_t)length };
       outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
       return NumpyArray(out.id_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+    }
+  }
+
+  void NumpyArray::tojson_boolean(ToJson& builder) const {
+    if (ndim() == 0) {
+      bool* array = reinterpret_cast<bool*>(byteptr());
+      builder.boolean(array[0]);
+    }
+    else if (ndim() == 1) {
+      bool* array = reinterpret_cast<bool*>(byteptr());
+      builder.beginlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        builder.boolean(array[i]);
+      }
+      builder.endlist();
+    }
+    else {
+      const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+      const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+      builder.beginlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
+        NumpyArray numpy(Identity::none(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        numpy.tojson_boolean(builder);
+      }
+      builder.endlist();
+    }
+  }
+
+  template <typename T>
+  void NumpyArray::tojson_integer(ToJson& builder) const {
+    if (ndim() == 0) {
+      T* array = reinterpret_cast<T*>(byteptr());
+      builder.integer(array[0]);
+    }
+    else if (ndim() == 1) {
+      T* array = reinterpret_cast<T*>(byteptr());
+      builder.beginlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        builder.integer(array[i]);
+      }
+      builder.endlist();
+    }
+    else {
+      const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+      const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+      builder.beginlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
+        NumpyArray numpy(Identity::none(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        numpy.tojson_integer<T>(builder);
+      }
+      builder.endlist();
+    }
+  }
+
+  template <typename T>
+  void NumpyArray::tojson_real(ToJson& builder) const {
+    if (ndim() == 0) {
+      T* array = reinterpret_cast<T*>(byteptr());
+      builder.real(array[0]);
+    }
+    else if (ndim() == 1) {
+      T* array = reinterpret_cast<T*>(byteptr());
+      builder.beginlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        builder.real(array[i]);
+      }
+      builder.endlist();
+    }
+    else {
+      const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+      const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+      builder.beginlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
+        NumpyArray numpy(Identity::none(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        numpy.tojson_real<T>(builder);
+      }
+      builder.endlist();
     }
   }
 

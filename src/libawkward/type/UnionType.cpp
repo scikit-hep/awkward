@@ -95,7 +95,7 @@ namespace awkward {
     return types_;
   }
 
-  const std::shared_ptr<Type> UnionType::type(int64_t i) const {
-    return types_[(size_t)i];
+  const std::shared_ptr<Type> UnionType::type(int64_t index) const {
+    return types_[(size_t)index];
   }
 }

@@ -27,6 +27,8 @@ namespace awkward {
       void operator()(T const *p) { }
     };
 
+    std::string quote(std::string x, bool doublequote);
+
     template <typename T>
     Error awkward_identity64_from_listoffsetarray(int64_t* toptr, const int64_t* fromptr, const T* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
     template <typename T>
