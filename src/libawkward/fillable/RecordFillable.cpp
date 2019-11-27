@@ -6,7 +6,6 @@
 #include "awkward/Index.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/type/ListType.h"
-#include "awkward/fillable/FillableArray.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/UnionFillable.h"
 

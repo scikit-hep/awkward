@@ -5,7 +5,6 @@
 #include "awkward/Identity.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/type/UnknownType.h"
-#include "awkward/fillable/FillableArray.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
 #include "awkward/fillable/Int64Fillable.h"
@@ -96,9 +95,9 @@ namespace awkward {
 
   template <typename T>
   Fillable* UnknownFillable::prepare() const {
-    Fillable* out = new T(fillablearray_, options_);
+    Fillable* out = new T(options_);
     if (nullcount_ != 0) {
-      out = OptionFillable::fromnulls(fillablearray_, options_, nullcount_, out);
+      out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
     return out;
   }

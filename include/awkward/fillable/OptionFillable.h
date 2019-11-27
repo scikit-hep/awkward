@@ -11,20 +11,18 @@
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
-  class FillableArray;
-
   class OptionFillable: public Fillable {
   public:
-    OptionFillable(FillableArray* fillablearray, const FillableOptions& options, const GrowableBuffer<int64_t>& index, Fillable* content): fillablearray_(fillablearray), options_(options), index_(index), content_(content) { }
+    OptionFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, Fillable* content): options_(options), index_(index), content_(content) { }
 
-    static OptionFillable* fromnulls(FillableArray* fillablearray, const FillableOptions& options, int64_t nullcount, Fillable* content) {
+    static OptionFillable* fromnulls(const FillableOptions& options, int64_t nullcount, Fillable* content) {
       GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::full(options, -1, nullcount);
-      return new OptionFillable(fillablearray, options, index, content);
+      return new OptionFillable(options, index, content);
     }
 
-    static OptionFillable* fromvalids(FillableArray* fillablearray, const FillableOptions& options, Fillable* content) {
+    static OptionFillable* fromvalids(const FillableOptions& options, Fillable* content) {
       GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::arange(options, content->length());
-      return new OptionFillable(fillablearray, options, index, content);
+      return new OptionFillable(options, index, content);
     }
 
     virtual int64_t length() const;
@@ -48,7 +46,6 @@ namespace awkward {
     virtual Fillable* endrecord();
 
   private:
-    FillableArray* fillablearray_;
     const FillableOptions options_;
     GrowableBuffer<int64_t> index_;
     std::shared_ptr<Fillable> content_;

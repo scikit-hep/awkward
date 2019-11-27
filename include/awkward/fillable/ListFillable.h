@@ -12,14 +12,12 @@
 #include "awkward/fillable/UnknownFillable.h"
 
 namespace awkward {
-  class FillableArray;
-
   class ListFillable: public Fillable {
   public:
-    ListFillable(FillableArray* fillablearray, const FillableOptions& options): fillablearray_(fillablearray), options_(options), offsets_(options), content_(new UnknownFillable(fillablearray, options)), begun_(false) {
+    ListFillable(const FillableOptions& options): options_(options), offsets_(options), content_(new UnknownFillable(options)), begun_(false) {
       offsets_.append(0);
     }
-    ListFillable(FillableArray* fillablearray, const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, Fillable* content, bool begun): fillablearray_(fillablearray), options_(options), offsets_(offsets), content_(std::shared_ptr<Fillable>(content)), begun_(begun) { }
+    ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, Fillable* content, bool begun): options_(options), offsets_(offsets), content_(std::shared_ptr<Fillable>(content)), begun_(begun) { }
 
     virtual int64_t length() const;
     virtual void clear();
@@ -42,7 +40,6 @@ namespace awkward {
     virtual Fillable* endrecord();
 
   private:
-    FillableArray* fillablearray_;
     const FillableOptions options_;
     GrowableBuffer<int64_t> offsets_;
     std::shared_ptr<Fillable> content_;

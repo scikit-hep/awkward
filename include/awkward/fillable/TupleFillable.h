@@ -12,11 +12,9 @@
 #include "awkward/fillable/UnknownFillable.h"
 
 namespace awkward {
-  class FillableArray;
-
   class TupleFillable: public Fillable {
   public:
-    TupleFillable(FillableArray* fillablearray, const FillableOptions& options): fillablearray_(fillablearray), options_(options), length_(0), index_(1) { }
+    TupleFillable(const FillableOptions& options): options_(options), length_(0), index_(1) { }
 
     virtual int64_t length() const;
     virtual void clear();
@@ -41,7 +39,6 @@ namespace awkward {
     int64_t numfields() const { return (int64_t)contents_.size(); }
 
   private:
-    FillableArray* fillablearray_;
     const FillableOptions options_;
     std::vector<std::shared_ptr<Fillable>> contents_;
     int64_t length_;

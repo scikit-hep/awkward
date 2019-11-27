@@ -11,19 +11,18 @@
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
-  class FillableArray;
   class TupleFillable;
   class RecordFillable;
 
   class UnionFillable: public Fillable {
   public:
-    UnionFillable(FillableArray* fillablearray, const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>> contents): fillablearray_(fillablearray), options_(options), types_(types), offsets_(offsets), contents_(contents), activerec_(nullptr) { }
+    UnionFillable(const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>> contents): options_(options), types_(types), offsets_(offsets), contents_(contents), activerec_(nullptr) { }
 
-    static UnionFillable* fromsingle(FillableArray* fillablearray, const FillableOptions& options, Fillable* firstcontent) {
+    static UnionFillable* fromsingle(const FillableOptions& options, Fillable* firstcontent) {
       GrowableBuffer<int8_t> types = GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
       GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::arange(options, firstcontent->length());
       std::vector<std::shared_ptr<Fillable>> contents({ std::shared_ptr<Fillable>(firstcontent) });
-      return new UnionFillable(fillablearray, options, types, offsets, contents);
+      return new UnionFillable(options, types, offsets, contents);
     }
 
     virtual int64_t length() const;
@@ -47,7 +46,6 @@ namespace awkward {
     virtual Fillable* endrecord();
 
   private:
-    FillableArray* fillablearray_;
     const FillableOptions options_;
     GrowableBuffer<int8_t> types_;
     GrowableBuffer<int64_t> offsets_;

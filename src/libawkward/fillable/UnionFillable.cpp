@@ -4,7 +4,6 @@
 
 #include "awkward/Identity.h"
 #include "awkward/type/UnionType.h"
-#include "awkward/fillable/FillableArray.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
 #include "awkward/fillable/Int64Fillable.h"
@@ -41,7 +40,7 @@ namespace awkward {
   }
 
   Fillable* UnionFillable::null() {
-    Fillable* out = OptionFillable::fromvalids(fillablearray_, options_, this);
+    Fillable* out = OptionFillable::fromvalids(options_, this);
     out->null();
     return out;
   }
@@ -139,7 +138,7 @@ namespace awkward {
   template <typename T>
   T* UnionFillable::maybenew(T* fillable, int64_t& length) {
     if (fillable == nullptr) {
-      fillable = new T(fillablearray_, options_);
+      fillable = new T(options_);
       contents_.push_back(std::shared_ptr<Fillable>(fillable));
     }
     length = fillable->length();

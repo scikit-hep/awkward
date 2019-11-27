@@ -4,7 +4,6 @@
 
 #include "awkward/Identity.h"
 #include "awkward/type/OptionType.h"
-#include "awkward/fillable/FillableArray.h"
 
 #include "awkward/fillable/OptionFillable.h"
 

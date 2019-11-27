@@ -3,7 +3,6 @@
 #include "awkward/Identity.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/type/PrimitiveType.h"
-#include "awkward/fillable/FillableArray.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/UnionFillable.h"
 #include "awkward/fillable/Float64Fillable.h"

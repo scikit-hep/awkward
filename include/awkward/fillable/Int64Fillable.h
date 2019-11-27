@@ -9,11 +9,9 @@
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
-  class FillableArray;
-
   class Int64Fillable: public Fillable {
   public:
-    Int64Fillable(FillableArray* fillablearray, const FillableOptions& options): fillablearray_(fillablearray), options_(options), buffer_(options) { }
+    Int64Fillable(const FillableOptions& options): options_(options), buffer_(options) { }
 
     virtual int64_t length() const;
     virtual void clear();
@@ -36,7 +34,6 @@ namespace awkward {
     virtual Fillable* endrecord();
 
   private:
-    FillableArray* fillablearray_;
     const FillableOptions options_;
     GrowableBuffer<int64_t> buffer_;
   };

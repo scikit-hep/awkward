@@ -8,7 +8,6 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/UnknownType.h"
-#include "awkward/fillable/FillableArray.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/UnionFillable.h"
 
