@@ -457,7 +457,7 @@ class UnionFillable(Fillable):
         else:
             self.contents[self.current].beginlist()
             return self
-            
+
     def endlist(self):
         if self.current == -1:
             raise ValueError("'endlist' called without corresponding 'beginlist'")
@@ -474,7 +474,7 @@ class UnionFillable(Fillable):
     def begintuple(self, numfields):
         if self.current == -1:
             for i in range(len(self.contents)):
-                if isinstance(self.contents[i], TupleFillable):
+                if isinstance(self.contents[i], TupleFillable) and (self.contents[i].length == -1 or len(self.contents[i].contents) == numfields):
                     break
             else:
                 i = len(self.contents)
@@ -508,11 +508,6 @@ class UnionFillable(Fillable):
                 self.current = -1
             return self
 
-    def _maybeupdate(self, index, fillable):
-        assert fillable is not None
-        if fillable is not self.contents[index]:
-            self.contents[index] = fillable
-
 class ListFillable(Fillable):
     def __init__(self, offsets, content):
         assert isinstance(offsets, list)
@@ -545,8 +540,9 @@ class ListFillable(Fillable):
 
     def real(self, x):
         if not self.begun:
-            # make a union
-            raise NotImplementedError
+            out = UnionFillable.fromsingle(self)
+            out.real(x)
+            return out
         else:
             self._maybeupdate(self.content.real(x))
             return self
@@ -570,8 +566,9 @@ class ListFillable(Fillable):
 
     def begintuple(self, numfields):
         if not self.begun:
-            # make a union
-            raise NotImplementedError
+            out = UnionFillable.fromsingle(self)
+            out.begintuple(numfields)
+            return out
         else:
             self._maybeupdate(self.content.begintuple(numfields))
             return self
@@ -640,8 +637,9 @@ class TupleFillable(Fillable):
         assert self.length != -1
 
         if not self.begun:
-            # make a union
-            raise NotImplementedError
+            out = UnionFillable.fromsingle(self)
+            out.real(x)
+            return out
 
         elif self.nextindex == -1:
             raise ValueError("'real' called immediately after 'begintuple'; needs 'index' or 'endtuple'")
@@ -658,8 +656,9 @@ class TupleFillable(Fillable):
         assert self.length != -1
 
         if not self.begun:
-            # make a union
-            raise NotImplementedError
+            out = UnionFillable.fromsingle(self)
+            out.beginlist()
+            return out
 
         elif self.nextindex == -1:
             raise ValueError("'beginlist' called immediately after 'begintuple'; needs 'index' or 'endtuple'")
@@ -685,7 +684,7 @@ class TupleFillable(Fillable):
             self.contents[self.nextindex].endlist()
 
         return self
-            
+
     def begintuple(self, numfields):
         if self.length == -1:
             self.contents = [UnknownFillable.fromempty() for i in range(numfields)]
@@ -696,8 +695,9 @@ class TupleFillable(Fillable):
             self.nextindex = -1
 
         elif not self.begun:
-            # make a union (different number of fields)
-            raise NotImplementedError
+            out = UnionFillable.fromsingle(self)
+            out.begintuple(numfields)
+            return out
 
         elif self.nextindex == -1:
             raise ValueError("'begintuple' called immediately after 'begintuple'; needs 'index' or 'endtuple'")
@@ -709,7 +709,7 @@ class TupleFillable(Fillable):
             self.contents[self.nextindex].begintuple(numfields)
 
         return self
-            
+
     def index(self, i):
         assert self.length != -1
 
@@ -910,6 +910,24 @@ datasets = [
     [None, 1.1, (2, None), 3.3],
     [1.1, None, (2, None), 3.3],
     [1.1, (2, None), None, 3.3],
+    [[1.1, 2.2], (3.3, 4.4), [5.5]],
+    [None, [1.1, 2.2], (3.3, 4.4), [5.5]],
+    [[1.1, 2.2], None, (3.3, 4.4), [5.5]],
+    [[1.1, 2.2], 3.3, [4.4]],
+    [None, [1.1, 2.2], 3.3, [4.4]],
+    [[1.1, 2.2], None, 3.3, [4.4]],
+    [(1, 2.2), 3.3, [5.5]],
+    [None, (1, 2.2), 3.3, [5.5]],
+    [(1, 2.2), None, 3.3, [5.5]],
+    [(1, 2.2), [3.3], 5.5],
+    [None, (1, 2.2), [3.3], 5.5],
+    [(1, 2.2), [3.3], 5.5],
+    [(1, 1.1), (2, 2.2, 200), (3, 3.3)],
+    [None, (1, 1.1), (2, 2.2, 200), (3, 3.3)],
+    [(1, 1.1), None, (2, 2.2, 200), (3, 3.3)],
+    [1.1, [2.2, 3.3], [[4.4], [5.5, 6.6]]],
+    [1.1, (2.2, 3.3), ((4.4,), (5.5, 6.6))],
+    [(1.1, [2.2, 3.3]), (100, [200, 300])],
     ]
 
 for dataset in datasets:
@@ -920,16 +938,3 @@ for dataset in datasets:
         print(dataset)
         print(list(fillable.snapshot()))
         raise AssertionError
-
-# fillable = FillableArray()
-# fillable.fill(1.1)
-# fillable.fill((2, 2.2))
-# fillable.fill(3.3)
-# print(fillable.snapshot())
-# print(list(fillable.snapshot()))
-
-# Need: list becomes a tuple
-#       list becomes a real
-#       tuple becomes a real
-#       tuple becomes a list
-#       tuple becomes a tuple of another length
