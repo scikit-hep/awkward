@@ -56,6 +56,9 @@ namespace awkward {
     if (length_ == -1) {
       return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
     }
+    else if (contents_.size() == 0) {
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), length_, false));
+    }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       std::shared_ptr<RecordArray::Lookup> lookup(new RecordArray::Lookup);

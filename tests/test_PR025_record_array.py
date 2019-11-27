@@ -13,7 +13,7 @@ def test_basic():
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
-    recordarray = awkward1.layout.RecordArray()
+    recordarray = awkward1.layout.RecordArray(0)
     recordarray.append(content1, "one")
     recordarray.append(listoffsetarray, "two")
     recordarray.append(content2)
@@ -68,7 +68,7 @@ def test_scalar_record():
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
-    recordarray = awkward1.layout.RecordArray()
+    recordarray = awkward1.layout.RecordArray(0)
     recordarray.append(content1, "one")
     recordarray.append(listoffsetarray, "two")
 
@@ -90,7 +90,7 @@ def test_type():
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=numpy.float64))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
-    recordarray = awkward1.layout.RecordArray()
+    recordarray = awkward1.layout.RecordArray(0, True)
     recordarray.append(content1)
     recordarray.append(listoffsetarray)
     assert str(awkward1.typeof(recordarray)) == '5 * (int64, var * float64)'
@@ -281,6 +281,22 @@ def test_setid():
 
 def test_fillable_tuple():
     fillable = awkward1.layout.FillableArray()
+    assert str(fillable.type) == '0 * unknown'
+    assert awkward1.tolist(fillable.snapshot()) == []
+
+    fillable.begintuple(0)
+    fillable.endtuple()
+
+    fillable.begintuple(0)
+    fillable.endtuple()
+
+    fillable.begintuple(0)
+    fillable.endtuple()
+
+    assert str(fillable.type) == '3 * ()'
+    assert awkward1.tolist(fillable.snapshot()) == [(), (), ()]
+
+    fillable = awkward1.layout.FillableArray()
 
     fillable.begintuple(3)
     fillable.index(0)
@@ -322,6 +338,22 @@ def test_fillable_tuple():
     assert awkward1.tolist(fillable.snapshot()) == [(True, [1], 1.1), (False, [2, 2], 2.2), (True, [3, 3, 3], 3.3)]
 
 def test_fillable_record():
+    fillable = awkward1.layout.FillableArray()
+    assert str(fillable.type) == '0 * unknown'
+    assert awkward1.tolist(fillable.snapshot()) == []
+
+    fillable.beginrecord()
+    fillable.endrecord()
+
+    fillable.beginrecord()
+    fillable.endrecord()
+
+    fillable.beginrecord()
+    fillable.endrecord()
+
+    assert str(fillable.type) == '3 * {}'
+    assert awkward1.tolist(fillable.snapshot()) == [{}, {}, {}]
+
     fillable = awkward1.layout.FillableArray()
 
     fillable.beginrecord()

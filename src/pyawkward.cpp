@@ -1111,9 +1111,9 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
         }
         return ak::RecordArray(unbox_id(id), out, std::shared_ptr<ak::RecordArray::Lookup>(nullptr), std::shared_ptr<ak::RecordArray::ReverseLookup>(nullptr));
       }), py::arg("contents"), py::arg("id") = py::none())
-      .def(py::init([](py::object id) -> ak::RecordArray {
-        return ak::RecordArray(unbox_id(id));
-      }), py::arg("id") = py::none())
+      .def(py::init([](int64_t length, bool istuple, py::object id) -> ak::RecordArray {
+        return ak::RecordArray(unbox_id(id), length, istuple);
+      }), py::arg("length"), py::arg("istuple") = false, py::arg("id") = py::none())
 
       .def_property_readonly("istuple", &ak::RecordArray::istuple)
       .def_property_readonly("numfields", &ak::RecordArray::numfields)

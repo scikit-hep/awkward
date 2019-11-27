@@ -63,7 +63,11 @@ namespace awkward {
 
   const std::string RecordArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
-    out << indent << pre << "<" << classname() << ">\n";
+    out << indent << pre << "<" << classname();
+    if (contents_.size() == 0) {
+      out << " length=\"" << length_ << "\"";
+    }
+    out << ">\n";
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
@@ -119,18 +123,28 @@ namespace awkward {
   }
 
   int64_t RecordArray::length() const {
-    int64_t out = -1;
-    for (auto x : contents_) {
-      int64_t len = x.get()->length();
-      if (out < 0  ||  out > len) {
-        out = len;
-      }
+    if (contents_.size() == 0) {
+      return length_;
     }
-    return out;
+    else {
+      int64_t out = -1;
+      for (auto x : contents_) {
+        int64_t len = x.get()->length();
+        if (out < 0  ||  out > len) {
+          out = len;
+        }
+      }
+      return out;
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new RecordArray(id_, contents_, lookup_, reverselookup_));
+    if (contents_.size() == 0) {
+      return std::shared_ptr<Content>(new RecordArray(id_, length(), istuple()));
+    }
+    else {
+      return std::shared_ptr<Content>(new RecordArray(id_, contents_, lookup_, reverselookup_));
+    }
   }
 
   void RecordArray::check_for_iteration() const {
@@ -160,19 +174,32 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range(int64_t start, int64_t stop) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->getitem_range(start, stop));
+    if (contents_.size() == 0) {
+      int64_t regular_start = start;
+      int64_t regular_stop = stop;
+      awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
+      return std::shared_ptr<Content>(new RecordArray(id_, regular_stop - regular_start, istuple()));
     }
-    return std::shared_ptr<Content>(new RecordArray(id_, contents, lookup_, reverselookup_));
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->getitem_range(start, stop));
+      }
+      return std::shared_ptr<Content>(new RecordArray(id_, contents, lookup_, reverselookup_));
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->getitem_range_nowrap(start, stop));
+    if (contents_.size() == 0) {
+      return std::shared_ptr<Content>(new RecordArray(id_, stop - start, istuple()));
     }
-    return std::shared_ptr<Content>(new RecordArray(id_, contents, lookup_, reverselookup_));
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->getitem_range_nowrap(start, stop));
+      }
+      return std::shared_ptr<Content>(new RecordArray(id_, contents, lookup_, reverselookup_));
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_field(const std::string& key) const {
@@ -180,7 +207,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(id_);
+    RecordArray out(id_, length(), istuple());
     if (istuple()) {
       for (auto key : keys) {
         out.append(field(key).get()->getitem_range_nowrap(0, length()));
@@ -195,15 +222,24 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::carry(const Index64& carry) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->carry(carry));
+    if (contents_.size() == 0) {
+      std::shared_ptr<Identity> id(nullptr);
+      if (id_.get() != nullptr) {
+        id = id_.get()->getitem_carry_64(carry);
+      }
+      return std::shared_ptr<Content>(new RecordArray(id, carry.length(), istuple()));
     }
-    std::shared_ptr<Identity> id(nullptr);
-    if (id_.get() != nullptr) {
-      id = id_.get()->getitem_carry_64(carry);
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->carry(carry));
+      }
+      std::shared_ptr<Identity> id(nullptr);
+      if (id_.get() != nullptr) {
+        id = id_.get()->getitem_carry_64(carry);
+      }
+      return std::shared_ptr<Content>(new RecordArray(id, contents, lookup_, reverselookup_));
     }
-    return std::shared_ptr<Content>(new RecordArray(id, contents, lookup_, reverselookup_));
   }
 
   const std::pair<int64_t, int64_t> RecordArray::minmax_depth() const {
@@ -390,6 +426,10 @@ namespace awkward {
     else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
       std::shared_ptr<Content> out = getitem_next(*fields, emptytail, advanced);
       return out.get()->getitem_next(nexthead, nexttail, advanced);
+    }
+    else if (contents_.size() == 0) {
+      RecordArray out(Identity::none(), length(), istuple());
+      return out.getitem_next(nexthead, nexttail, advanced);
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;

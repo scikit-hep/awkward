@@ -21,17 +21,24 @@ namespace awkward {
         : id_(id)
         , contents_(contents)
         , lookup_(lookup)
-        , reverselookup_(reverselookup) { }
+        , reverselookup_(reverselookup)
+        , length_(0) {
+      assert(contents.size() != 0);
+    }
     RecordArray(const std::shared_ptr<Identity> id, const std::vector<std::shared_ptr<Content>>& contents)
         : id_(id)
         , contents_(contents)
         , lookup_(nullptr)
-        , reverselookup_(nullptr) { }
-    RecordArray(const std::shared_ptr<Identity> id)
+        , reverselookup_(nullptr)
+        , length_(0) {
+      assert(contents.size() != 0);
+    }
+    RecordArray(const std::shared_ptr<Identity> id, int64_t length, bool istuple)
         : id_(id)
         , contents_()
-        , lookup_(nullptr)
-        , reverselookup_(nullptr) { }
+        , lookup_(istuple ? nullptr : new Lookup)
+        , reverselookup_(istuple ? nullptr : new ReverseLookup)
+        , length_(length) { }
 
     const std::vector<std::shared_ptr<Content>> contents() const { return contents_; }
     const std::shared_ptr<Lookup> lookup() const { return lookup_; }
@@ -88,6 +95,7 @@ namespace awkward {
     std::vector<std::shared_ptr<Content>> contents_;
     std::shared_ptr<Lookup> lookup_;
     std::shared_ptr<ReverseLookup> reverselookup_;
+    int64_t length_;
   };
 }
 

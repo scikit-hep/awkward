@@ -104,7 +104,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(recordarray_.id());
+    RecordArray out(recordarray_.id(), length(), istuple());
     if (istuple()) {
       for (auto key : keys) {
         out.append(recordarray_.field(key));
