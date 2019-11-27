@@ -28,68 +28,60 @@ namespace awkward {
     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), buffer_.ptr(), shape, strides, 0, sizeof(double), "d"));
   }
 
+  bool Float64Fillable::active() const {
+    throw std::runtime_error("FIXME: Float64Fillable::active");
+  }
+
   Fillable* Float64Fillable::null() {
-    Fillable* out = OptionFillable::fromvalids(fillablearray_, options_, this);
-    out->null();
-    return out;
+    throw std::runtime_error("FIXME: Float64Fillable::null");
   }
 
   Fillable* Float64Fillable::boolean(bool x) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->boolean(x);
-    return out;
+    throw std::runtime_error("FIXME: Float64Fillable::boolean");
   }
 
   Fillable* Float64Fillable::integer(int64_t x) {
-    buffer_.append((double)x);
-    return this;
+    throw std::runtime_error("FIXME: Float64Fillable::integer");
   }
 
   Fillable* Float64Fillable::real(double x) {
-    buffer_.append(x);
-    return this;
+    throw std::runtime_error("FIXME: Float64Fillable::real");
   }
 
   Fillable* Float64Fillable::beginlist() {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->beginlist();
-    return out;
+    throw std::runtime_error("FIXME: Float64Fillable::beginlist");
   }
 
   Fillable* Float64Fillable::endlist() {
-    return nullptr;
+    throw std::runtime_error("FIXME: Float64Fillable::endlist");
   }
 
   Fillable* Float64Fillable::begintuple(int64_t numfields) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->begintuple(numfields);
-    return out;
+    throw std::runtime_error("FIXME: Float64Fillable::begintuple");
   }
 
   Fillable* Float64Fillable::index(int64_t index) {
-    throw std::invalid_argument("'index' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    throw std::runtime_error("FIXME: Float64Fillable::index");
   }
 
   Fillable* Float64Fillable::endtuple() {
-    throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    throw std::runtime_error("FIXME: Float64Fillable::endtuple");
   }
 
   Fillable* Float64Fillable::beginrecord(int64_t disambiguator) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->beginrecord(disambiguator);
-    return out;
+    throw std::runtime_error("FIXME: Float64Fillable::beginrecord");
   }
 
   Fillable* Float64Fillable::field_fast(const char* key) {
-    throw std::invalid_argument("'field_fast' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: Float64Fillable::field_fast");
   }
 
   Fillable* Float64Fillable::field_check(const char* key) {
-    throw std::invalid_argument("'field_check' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: Float64Fillable::field_check");
   }
 
   Fillable* Float64Fillable::endrecord() {
-    throw std::invalid_argument("'endrecord' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: Float64Fillable::endrecord");
   }
 
 }

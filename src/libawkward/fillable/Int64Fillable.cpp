@@ -33,69 +33,60 @@ namespace awkward {
 #endif
   }
 
+  bool Int64Fillable::active() const {
+    throw std::runtime_error("FIXME: Int64Fillable::active");
+  }
+
   Fillable* Int64Fillable::null() {
-    Fillable* out = OptionFillable::fromvalids(fillablearray_, options_, this);
-    out->null();
-    return out;
+    throw std::runtime_error("FIXME: Int64Fillable::null");
   }
 
   Fillable* Int64Fillable::boolean(bool x) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->boolean(x);
-    return out;
+    throw std::runtime_error("FIXME: Int64Fillable::boolean");
   }
 
   Fillable* Int64Fillable::integer(int64_t x) {
-    buffer_.append(x);
-    return this;
+    throw std::runtime_error("FIXME: Int64Fillable::integer");
   }
 
   Fillable* Int64Fillable::real(double x) {
-    Float64Fillable* out = Float64Fillable::fromint64(fillablearray_, options_, buffer_);
-    out->real(x);
-    return out;
+    throw std::runtime_error("FIXME: Int64Fillable::real");
   }
 
   Fillable* Int64Fillable::beginlist() {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->beginlist();
-    return out;
+    throw std::runtime_error("FIXME: Int64Fillable::beginlist");
   }
 
   Fillable* Int64Fillable::endlist() {
-    return nullptr;
+    throw std::runtime_error("FIXME: Int64Fillable::endlist");
   }
 
   Fillable* Int64Fillable::begintuple(int64_t numfields) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->begintuple(numfields);
-    return out;
+    throw std::runtime_error("FIXME: Int64Fillable::begintuple");
   }
 
   Fillable* Int64Fillable::index(int64_t index) {
-    throw std::invalid_argument("'index' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    throw std::runtime_error("FIXME: Int64Fillable::index");
   }
 
   Fillable* Int64Fillable::endtuple() {
-    throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    throw std::runtime_error("FIXME: Int64Fillable::endtuple");
   }
 
   Fillable* Int64Fillable::beginrecord(int64_t disambiguator) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->beginrecord(disambiguator);
-    return out;
+    throw std::runtime_error("FIXME: Int64Fillable::beginrecord");
   }
 
   Fillable* Int64Fillable::field_fast(const char* key) {
-    throw std::invalid_argument("'field_fast' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: Int64Fillable::field_fast");
   }
 
   Fillable* Int64Fillable::field_check(const char* key) {
-    throw std::invalid_argument("'field_check' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: Int64Fillable::field_check");
   }
 
   Fillable* Int64Fillable::endrecord() {
-    throw std::invalid_argument("'endrecord' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: Int64Fillable::endrecord");
   }
 
 }

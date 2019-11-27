@@ -29,6 +29,10 @@ namespace awkward {
     throw std::runtime_error("FIXME: RecordFillable::snapshot");
   }
 
+  bool RecordFillable::active() const {
+    throw std::runtime_error("FIXME: RecordFillable::active");
+  }
+
   Fillable* RecordFillable::null() {
     throw std::runtime_error("FIXME: RecordFillable::null");
   }
@@ -58,7 +62,7 @@ namespace awkward {
   }
 
   Fillable* RecordFillable::index(int64_t index) {
-    throw std::runtime_error("FIXME: RecordFillable::index(int)");
+    throw std::runtime_error("FIXME: RecordFillable::index");
   }
 
   Fillable* RecordFillable::endtuple() {

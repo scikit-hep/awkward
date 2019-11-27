@@ -28,69 +28,60 @@ namespace awkward {
     return std::shared_ptr<Content>(new NumpyArray(Identity::none(), buffer_.ptr(), shape, strides, 0, sizeof(bool), "?"));
   }
 
+  bool BoolFillable::active() const {
+    throw std::runtime_error("FIXME: BoolFillable::active");
+  }
+
   Fillable* BoolFillable::null() {
-    Fillable* out = OptionFillable::fromvalids(fillablearray_, options_, this);
-    out->null();
-    return out;
+    throw std::runtime_error("FIXME: BoolFillable::null");
   }
 
   Fillable* BoolFillable::boolean(bool x) {
-    buffer_.append(x);
-    return this;
+    throw std::runtime_error("FIXME: BoolFillable::boolean");
   }
 
   Fillable* BoolFillable::integer(int64_t x) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->integer(x);
-    return out;
+    throw std::runtime_error("FIXME: BoolFillable::integer");
   }
 
   Fillable* BoolFillable::real(double x) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->real(x);
-    return out;
+    throw std::runtime_error("FIXME: BoolFillable::real");
   }
 
   Fillable* BoolFillable::beginlist() {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->beginlist();
-    return out;
+    throw std::runtime_error("FIXME: BoolFillable::beginlist");
   }
 
   Fillable* BoolFillable::endlist() {
-    return nullptr;
+    throw std::runtime_error("FIXME: BoolFillable::endlist");
   }
 
   Fillable* BoolFillable::begintuple(int64_t numfields) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->begintuple(numfields);
-    return out;
+    throw std::runtime_error("FIXME: BoolFillable::begintuple");
   }
 
   Fillable* BoolFillable::index(int64_t index) {
-    throw std::invalid_argument("'index' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    throw std::runtime_error("FIXME: BoolFillable::index");
   }
 
   Fillable* BoolFillable::endtuple() {
-    throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    throw std::runtime_error("FIXME: BoolFillable::endtuple");
   }
 
   Fillable* BoolFillable::beginrecord(int64_t disambiguator) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->beginrecord(disambiguator);
-    return out;
+    throw std::runtime_error("FIXME: BoolFillable::beginrecord");
   }
 
   Fillable* BoolFillable::field_fast(const char* key) {
-    throw std::invalid_argument("'field_fast' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: BoolFillable::field_fast");
   }
 
   Fillable* BoolFillable::field_check(const char* key) {
-    throw std::invalid_argument("'field_check' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: BoolFillable::field_check");
   }
 
   Fillable* BoolFillable::endrecord() {
-    throw std::invalid_argument("'endrecord' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: BoolFillable::endrecord");
   }
 
 }

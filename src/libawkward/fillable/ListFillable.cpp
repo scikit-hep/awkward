@@ -31,107 +31,60 @@ namespace awkward {
     return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), offsets, content_.get()->snapshot()));
   }
 
+  bool ListFillable::active() const {
+    throw std::runtime_error("FIXME: ListFillable::active");
+  }
+
   Fillable* ListFillable::null() {
-    if (begun_) {
-      return maybeupdate(content_.get()->null());
-    }
-    else {
-      Fillable* out = OptionFillable::fromvalids(fillablearray_, options_, this);
-      out->null();
-      return out;
-    }
+    throw std::runtime_error("FIXME: ListFillable::null");
   }
 
   Fillable* ListFillable::boolean(bool x) {
-    if (begun_) {
-      return maybeupdate(content_.get()->boolean(x));
-    }
-    else {
-      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-      out->boolean(x);
-      return out;
-    }
+    throw std::runtime_error("FIXME: ListFillable::boolean");
   }
 
   Fillable* ListFillable::integer(int64_t x) {
-    if (begun_) {
-      return maybeupdate(content_.get()->integer(x));
-    }
-    else {
-      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-      out->integer(x);
-      return out;
-    }
+    throw std::runtime_error("FIXME: ListFillable::integer");
   }
 
   Fillable* ListFillable::real(double x) {
-    if (begun_) {
-      return maybeupdate(content_.get()->real(x));
-    }
-    else {
-      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-      out->real(x);
-      return out;
-    }
+    throw std::runtime_error("FIXME: ListFillable::real");
   }
 
   Fillable* ListFillable::beginlist() {
-    if (begun_) {
-      return maybeupdate(content_.get()->beginlist());
-    }
-    else {
-      begun_ = true;
-      return this;
-    }
+    throw std::runtime_error("FIXME: ListFillable::beginlist");
   }
 
   Fillable* ListFillable::endlist() {
-    if (begun_) {
-      Fillable* tmp = content_.get()->endlist();
-      if (tmp == nullptr) {
-        offsets_.append(content_.get()->length());
-        begun_ = false;
-        return this;
-      }
-      else {
-        return maybeupdate(tmp);
-      }
-    }
-    else {
-      return nullptr;
-    }
+    throw std::runtime_error("FIXME: ListFillable::endlist");
   }
 
   Fillable* ListFillable::begintuple(int64_t numfields) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->begintuple(numfields);
-    return out;
+    throw std::runtime_error("FIXME: ListFillable::begintuple");
   }
 
   Fillable* ListFillable::index(int64_t index) {
-    throw std::invalid_argument("'index' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    throw std::runtime_error("FIXME: ListFillable::index");
   }
 
   Fillable* ListFillable::endtuple() {
-    throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    throw std::runtime_error("FIXME: ListFillable::endtuple");
   }
 
   Fillable* ListFillable::beginrecord(int64_t disambiguator) {
-    Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    out->beginrecord(disambiguator);
-    return out;
+    throw std::runtime_error("FIXME: ListFillable::beginrecord");
   }
 
   Fillable* ListFillable::field_fast(const char* key) {
-    throw std::invalid_argument("'field_fast' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: ListFillable::field_fast");
   }
 
   Fillable* ListFillable::field_check(const char* key) {
-    throw std::invalid_argument("'field_check' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: ListFillable::field_check");
   }
 
   Fillable* ListFillable::endrecord() {
-    throw std::invalid_argument("'endrecord' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: ListFillable::endrecord");
   }
 
   Fillable* ListFillable::maybeupdate(Fillable* tmp) {

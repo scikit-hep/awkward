@@ -46,120 +46,56 @@ namespace awkward {
     return out;
   }
 
+  bool UnionFillable::active() const {
+    throw std::runtime_error("FIXME: UnionFillable::active");
+  }
+
   Fillable* UnionFillable::boolean(bool x) {
-    int8_t type;
-    int64_t length;
-    get1<BoolFillable>(type, length)->boolean(x);
-    offsets_.append(length);
-    types_.append(type);
-    return this;
+    throw std::runtime_error("FIXME: UnionFillable::boolean");
   }
 
   Fillable* UnionFillable::integer(int64_t x) {
-    int8_t type;
-    int64_t length;
-    get2<Int64Fillable, Float64Fillable>(type, length)->integer(x);
-    offsets_.append(length);
-    types_.append(type);
-    return this;
+    throw std::runtime_error("FIXME: UnionFillable::integer");
   }
 
   Fillable* UnionFillable::real(double x) {
-    int8_t type;
-    int64_t length;
-    get2<Int64Fillable, Float64Fillable>(type, length)->real(x);
-    offsets_.append(length);
-    types_.append(type);
-    return this;
+    throw std::runtime_error("FIXME: UnionFillable::real");
   }
 
   Fillable* UnionFillable::beginlist() {
-    int8_t type;
-    int64_t length;
-    get1<ListFillable>(type, length)->beginlist();
-    offsets_.append(length);
-    types_.append(type);
-    return this;
+    throw std::runtime_error("FIXME: UnionFillable::beginlist");
   }
 
   Fillable* UnionFillable::endlist() {
-    return nullptr;
+    throw std::runtime_error("FIXME: UnionFillable::endlist");
   }
 
   Fillable* UnionFillable::begintuple(int64_t numfields) {
-    int8_t type;
-    int64_t length;
-    activerec_ = maybenew<TupleFillable>(findtuple(type, numfields), length);
-    return this;
+    throw std::runtime_error("FIXME: UnionFillable::begintuple");
   }
 
   Fillable* UnionFillable::index(int64_t index) {
-    if (dynamic_cast<TupleFillable*>(activerec_) == nullptr) {
-      throw std::invalid_argument("'index' should only be called in a tuple (did you forget to call 'begintuple'?)");
-    }
-    activerec_->index(index);
-    return this;
+    throw std::runtime_error("FIXME: UnionFillable::index");
   }
 
   Fillable* UnionFillable::endtuple() {
-    if (dynamic_cast<TupleFillable*>(activerec_) == nullptr) {
-      throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
-    }
-    int8_t type = 0;
-    int64_t length = activerec_->length();
-    activerec_->endtuple();
-    for (auto x : contents_) {
-      if (x.get() == activerec_) {
-        break;
-      }
-      type++;
-    }
-    offsets_.append(length);
-    types_.append(type);
-    activerec_ = nullptr;
-    return this;
+    throw std::runtime_error("FIXME: UnionFillable::endtuple");
   }
 
   Fillable* UnionFillable::beginrecord(int64_t disambiguator) {
-    int8_t type;
-    int64_t length;
-    activerec_ = maybenew<RecordFillable>(findrecord(type, disambiguator), length);
-    return this;
+    throw std::runtime_error("FIXME: UnionFillable::beginrecord");
   }
 
   Fillable* UnionFillable::field_fast(const char* key) {
-    if (dynamic_cast<RecordFillable*>(activerec_) == nullptr) {
-      throw std::invalid_argument("'field_fast' should only be called in a record (did you forget to call 'beginrecord'?)");
-    }
-    activerec_->field_fast(key);
-    return this;
+    throw std::runtime_error("FIXME: UnionFillable::field_fast");
   }
 
   Fillable* UnionFillable::field_check(const char* key) {
-    if (dynamic_cast<RecordFillable*>(activerec_) == nullptr) {
-      throw std::invalid_argument("'field_check' should only be called in a record (did you forget to call 'beginrecord'?)");
-    }
-    activerec_->field_check(key);
-    return this;
+    throw std::runtime_error("FIXME: UnionFillable::field_check");
   }
 
   Fillable* UnionFillable::endrecord() {
-    if (dynamic_cast<RecordFillable*>(activerec_) == nullptr) {
-      throw std::invalid_argument("'endrecord' should only be called in a record (did you forget to call 'beginrecord'?)");
-    }
-    int8_t type = 0;
-    int64_t length = activerec_->length();
-    activerec_->endrecord();
-    for (auto x : contents_) {
-      if (x.get() == activerec_) {
-        break;
-      }
-      type++;
-    }
-    offsets_.append(length);
-    types_.append(type);
-    activerec_ = nullptr;
-    return this;
+    throw std::runtime_error("FIXME: UnionFillable::endrecord");
   }
 
   template <typename T>

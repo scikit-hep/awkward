@@ -26,6 +26,7 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const;
     const std::shared_ptr<Content> getitem(const Slice& where) const;
 
+    bool active() const;
     void null();
     void boolean(bool x);
     void integer(int64_t x);

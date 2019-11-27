@@ -38,69 +38,60 @@ namespace awkward {
     }
   }
 
+  bool UnknownFillable::active() const {
+    throw std::runtime_error("FIXME: UnknownFillable::active");
+  }
+
   Fillable* UnknownFillable::null() {
-    nullcount_++;
-    return this;
+    throw std::runtime_error("FIXME: UnknownFillable::null");
   }
 
   Fillable* UnknownFillable::boolean(bool x) {
-    Fillable* out = prepare<BoolFillable>();
-    out->boolean(x);
-    return out;
+    throw std::runtime_error("FIXME: UnknownFillable::boolean");
   }
 
   Fillable* UnknownFillable::integer(int64_t x) {
-    Fillable* out = prepare<Int64Fillable>();
-    out->integer(x);
-    return out;
+    throw std::runtime_error("FIXME: UnknownFillable::integer");
   }
 
   Fillable* UnknownFillable::real(double x) {
-    Fillable* out = prepare<Float64Fillable>();
-    out->real(x);
-    return out;
+    throw std::runtime_error("FIXME: UnknownFillable::real");
   }
 
   Fillable* UnknownFillable::beginlist() {
-    Fillable* out = prepare<ListFillable>();
-    out->beginlist();
-    return out;
+    throw std::runtime_error("FIXME: UnknownFillable::beginlist");
   }
 
   Fillable* UnknownFillable::endlist() {
-    return nullptr;
+    throw std::runtime_error("FIXME: UnknownFillable::endlist");
   }
 
   Fillable* UnknownFillable::begintuple(int64_t numfields) {
-    Fillable* out = prepare<TupleFillable>();
-    out->begintuple(numfields);
-    return out;
+    throw std::runtime_error("FIXME: UnknownFillable::begintuple");
   }
 
   Fillable* UnknownFillable::index(int64_t index) {
-    throw std::invalid_argument("'index' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    throw std::runtime_error("FIXME: UnknownFillable::index");
   }
 
   Fillable* UnknownFillable::endtuple() {
-    throw std::invalid_argument("'endtuple' should only be called in a tuple (did you forget to call 'begintuple'?)");
+    throw std::runtime_error("FIXME: UnknownFillable::endtuple");
   }
 
   Fillable* UnknownFillable::beginrecord(int64_t disambiguator) {
-    Fillable* out = prepare<RecordFillable>();
-    out->beginrecord(disambiguator);
-    return out;
+    throw std::runtime_error("FIXME: UnknownFillable::beginrecord");
   }
 
   Fillable* UnknownFillable::field_fast(const char* key) {
-    throw std::invalid_argument("'field_fast' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: UnknownFillable::field_fast");
   }
 
   Fillable* UnknownFillable::field_check(const char* key) {
-    throw std::invalid_argument("'field_check' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: UnknownFillable::field_check");
   }
 
   Fillable* UnknownFillable::endrecord() {
-    throw std::invalid_argument("'endrecord' should only be called in a record (did you forget to call 'beginrecord'?)");
+    throw std::runtime_error("FIXME: UnknownFillable::endrecord");
   }
 
   template <typename T>

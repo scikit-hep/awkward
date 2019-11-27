@@ -49,6 +49,10 @@ namespace awkward {
     return snapshot().get()->getitem(where);
   }
 
+  bool FillableArray::active() const {
+    return fillable_.get()->active();
+  }
+
   void FillableArray::null() {
     maybeupdate(fillable_.get()->null());
   }

@@ -53,134 +53,48 @@ namespace awkward {
     }
   }
 
+  bool TupleFillable::active() const {
+    throw std::runtime_error("FIXME: TupleFillable::active");
+  }
+
   Fillable* TupleFillable::null() {
-    if (index_ != -1) {
-      checklength();
-      maybeupdate(index_, contents_[(size_t)index_].get()->null());
-      return this;
-    }
-    else {
-      Fillable* out = OptionFillable::fromvalids(fillablearray_, options_, this);
-      out->null();
-      return out;
-    }
+    throw std::runtime_error("FIXME: TupleFillable::null");
   }
 
   Fillable* TupleFillable::boolean(bool x) {
-    if (index_ != -1) {
-      checklength();
-      maybeupdate(index_, contents_[(size_t)index_].get()->boolean(x));
-      return this;
-    }
-    else {
-      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-      out->boolean(x);
-      return out;
-    }
+    throw std::runtime_error("FIXME: TupleFillable::boolean");
   }
 
   Fillable* TupleFillable::integer(int64_t x) {
-    if (index_ != -1) {
-      checklength();
-      maybeupdate(index_, contents_[(size_t)index_].get()->integer(x));
-      return this;
-    }
-    else {
-      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-      out->integer(x);
-      return out;
-    }
+    throw std::runtime_error("FIXME: TupleFillable::integer");
   }
 
   Fillable* TupleFillable::real(double x) {
-    if (index_ != -1) {
-      checklength();
-      maybeupdate(index_, contents_[(size_t)index_].get()->real(x));
-      return this;
-    }
-    else {
-      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-      out->real(x);
-      return out;
-    }
+    throw std::runtime_error("FIXME: TupleFillable::real");
   }
 
   Fillable* TupleFillable::beginlist() {
-    if (index_ != -1) {
-      checklength();
-      maybeupdate(index_, contents_[(size_t)index_].get()->beginlist());
-      return this;
-    }
-    else {
-      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-      out->beginlist();
-      return out;
-    }
+    throw std::runtime_error("FIXME: TupleFillable::beginlist");
   }
 
   Fillable* TupleFillable::endlist() {
-    if (index_ != -1) {
-      checklength();
-      maybeupdate(index_, contents_[(size_t)index_].get()->endlist());
-      return this;
-    }
-    else {
-      return nullptr;
-    }
+    throw std::runtime_error("FIXME: TupleFillable::endlist");
   }
 
   Fillable* TupleFillable::begintuple(int64_t numfields) {
-    if (index_ > (int64_t)contents_.size()) {
-      // first-time initialization
-      for (int64_t i = 0;  i < numfields;  i++) {
-        contents_.push_back(std::shared_ptr<Fillable>(new UnknownFillable(fillablearray_, options_)));
-      }
-    }
-
-    if (contents_.size() == (size_t)numfields) {
-      index_ = -1;
-    }
-    else {
-      Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-      out->begintuple(numfields);
-      return out;
-    }
-
-    return this;
+    throw std::runtime_error("FIXME: TupleFillable::begintuple");
   }
 
   Fillable* TupleFillable::index(int64_t index) {
-    if (!(0 <= index  &&  index < contents_.size())) {
-      throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" for tuple of length ") + std::to_string(contents_.size()));
-    }
-    index_ = index;
-    return this;
+    throw std::runtime_error("FIXME: TupleFillable::index");
   }
 
   Fillable* TupleFillable::endtuple() {
-    int64_t length = length_ + 1;
-    for (size_t i = 0;  i < contents_.size();  i++) {
-      while (contents_[i].get()->length() < length) {
-        maybeupdate(i, contents_[i].get()->null());
-      }
-    }
-    length_ = length;
-    index_ = -1;
-    return this;
+    throw std::runtime_error("FIXME: TupleFillable::endtuple");
   }
 
   Fillable* TupleFillable::beginrecord(int64_t disambiguator) {
     throw std::runtime_error("FIXME: TupleFillable::beginrecord");
-    // if (index_ != -1) {
-    //   checklength();
-    //   maybeupdate(index_, contents_[(size_t)index_].get()->beginrecord(disambiguator));
-    //   return this;
-    // }
-    // else {
-    //   Fillable* out = UnionFillable::fromsingle(fillablearray_, options_, this);
-    //   out->beginrecord(disambiguator);
-    //   return out;
-    // }
   }
 
   Fillable* TupleFillable::field_fast(const char* key) {
