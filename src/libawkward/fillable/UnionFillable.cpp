@@ -67,7 +67,7 @@ namespace awkward {
   Fillable* UnionFillable::boolean(bool x) {
     if (current_ == -1) {
       Fillable* tofill = nullptr;
-      int64_t i = 0;
+      int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<BoolFillable*>(content.get()) != nullptr) {
           tofill = content.get();
@@ -93,7 +93,7 @@ namespace awkward {
   Fillable* UnionFillable::integer(int64_t x) {
     if (current_ == -1) {
       Fillable* tofill = nullptr;
-      int64_t i = 0;
+      int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<Int64Fillable*>(content.get()) != nullptr) {
           tofill = content.get();
@@ -119,7 +119,7 @@ namespace awkward {
   Fillable* UnionFillable::real(double x) {
     if (current_ == -1) {
       Fillable* tofill = nullptr;
-      int64_t i = 0;
+      int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<Float64Fillable*>(content.get()) != nullptr) {
           tofill = content.get();
@@ -159,7 +159,7 @@ namespace awkward {
   Fillable* UnionFillable::beginlist() {
     if (current_ == -1) {
       Fillable* tofill = nullptr;
-      int64_t i = 0;
+      int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<ListFillable*>(content.get()) != nullptr) {
           tofill = content.get();
@@ -198,7 +198,7 @@ namespace awkward {
   Fillable* UnionFillable::begintuple(int64_t numfields) {
     if (current_ == -1) {
       Fillable* tofill = nullptr;
-      int64_t i = 0;
+      int8_t i = 0;
       for (auto content : contents_) {
         if (TupleFillable* raw = dynamic_cast<TupleFillable*>(content.get())) {
           if (raw->length() == -1  ||  raw->numfields() == numfields) {
@@ -250,7 +250,7 @@ namespace awkward {
   Fillable* UnionFillable::beginrecord(int64_t disambiguator) {
     if (current_ == -1) {
       Fillable* tofill = nullptr;
-      int64_t i = 0;
+      int8_t i = 0;
       for (auto content : contents_) {
         if (RecordFillable* raw = dynamic_cast<RecordFillable*>(content.get())) {
           if (raw->length() == -1  ||  raw->disambiguator() == disambiguator) {

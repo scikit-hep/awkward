@@ -50,7 +50,7 @@ namespace awkward {
     GrowableBuffer<int8_t> types_;
     GrowableBuffer<int64_t> offsets_;
     std::vector<std::shared_ptr<Fillable>> contents_;
-    int64_t current_;
+    int8_t current_;
   };
 }
 

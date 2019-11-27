@@ -162,6 +162,7 @@ namespace awkward {
     else {
       content_.get()->field_check(key);
     }
+    return this;
   }
 
   Fillable* OptionFillable::endrecord() {

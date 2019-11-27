@@ -326,7 +326,7 @@ namespace awkward {
   }
 
   void TupleFillable::maybeupdate(int64_t i, Fillable* tmp) {
-    if (tmp != contents_[(size_t)i].get()  &&  tmp != nullptr) {
+    if (tmp != contents_[(size_t)i].get()) {
       contents_[(size_t)i] = std::shared_ptr<Fillable>(tmp);
     }
   }
