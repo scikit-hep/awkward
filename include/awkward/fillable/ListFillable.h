@@ -14,10 +14,13 @@
 namespace awkward {
   class ListFillable: public Fillable {
   public:
-    ListFillable(const FillableOptions& options): options_(options), offsets_(options), content_(new UnknownFillable(options)), begun_(false) {
-      offsets_.append(0);
-    }
     ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, Fillable* content, bool begun): options_(options), offsets_(offsets), content_(std::shared_ptr<Fillable>(content)), begun_(begun) { }
+
+    static ListFillable* fromempty(const FillableOptions& options) {
+      GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
+      offsets.append(0);
+      return new ListFillable(options, offsets, UnknownFillable::fromempty(options), false);
+    }
 
     virtual int64_t length() const;
     virtual void clear();

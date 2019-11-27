@@ -13,16 +13,16 @@
 namespace awkward {
   class OptionFillable: public Fillable {
   public:
-    OptionFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, Fillable* content): options_(options), index_(index), content_(content) { }
+    OptionFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, Fillable* content): options_(options), offsets_(offsets), content_(content) { }
 
     static OptionFillable* fromnulls(const FillableOptions& options, int64_t nullcount, Fillable* content) {
-      GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::full(options, -1, nullcount);
-      return new OptionFillable(options, index, content);
+      GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::full(options, -1, nullcount);
+      return new OptionFillable(options, offsets, content);
     }
 
     static OptionFillable* fromvalids(const FillableOptions& options, Fillable* content) {
-      GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::arange(options, content->length());
-      return new OptionFillable(options, index, content);
+      GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::arange(options, content->length());
+      return new OptionFillable(options, offsets, content);
     }
 
     virtual int64_t length() const;
@@ -47,7 +47,7 @@ namespace awkward {
 
   private:
     const FillableOptions options_;
-    GrowableBuffer<int64_t> index_;
+    GrowableBuffer<int64_t> offsets_;
     std::shared_ptr<Fillable> content_;
 
     void maybeupdate(Fillable* tmp);

@@ -13,7 +13,7 @@
 namespace awkward {
   class FillableArray {
   public:
-    FillableArray(const FillableOptions& options): fillable_(new UnknownFillable(options)) { }
+    FillableArray(const FillableOptions& options): fillable_(UnknownFillable::fromempty(options)) { }
 
     const std::string tostring() const;
     int64_t length() const;

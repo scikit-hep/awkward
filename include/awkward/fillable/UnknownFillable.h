@@ -12,7 +12,11 @@
 namespace awkward {
   class UnknownFillable: public Fillable {
   public:
-    UnknownFillable(const FillableOptions& options): options_(options), nullcount_(0) { }
+    UnknownFillable(const FillableOptions& options, int64_t nullcount): options_(options), nullcount_(nullcount) { }
+
+    static UnknownFillable* fromempty(const FillableOptions& options) {
+      return new UnknownFillable(options, 0);
+    }
 
     virtual int64_t length() const;
     virtual void clear();

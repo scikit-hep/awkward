@@ -23,11 +23,11 @@ namespace awkward {
       x.get()->clear();
     }
     length_ = 0;
-    index_ = -1;
+    nextindex_ = -1;
   }
 
   const std::shared_ptr<Type> TupleFillable::type() const {
-    if (index_ > (int64_t)contents_.size()) {
+    if (nextindex_ > (int64_t)contents_.size()) {
       return std::shared_ptr<Type>(new UnknownType);
     }
     else {
@@ -40,7 +40,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> TupleFillable::snapshot() const {
-    if (index_ > (int64_t)contents_.size()) {
+    if (nextindex_ > (int64_t)contents_.size()) {
       return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
     }
     else {
@@ -109,8 +109,8 @@ namespace awkward {
   }
 
   void TupleFillable::checklength() {
-    if (contents_[(size_t)index_].get()->length() > length_) {
-      throw std::invalid_argument(std::string("tuple index ") + std::to_string(index_) + std::string(" filled more than once (missing call to 'index'?)"));
+    if (contents_[(size_t)nextindex_].get()->length() > length_) {
+      throw std::invalid_argument(std::string("tuple index ") + std::to_string(nextindex_) + std::string(" filled more than once (missing call to 'index'?)"));
     }
   }
 

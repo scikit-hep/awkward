@@ -14,7 +14,11 @@
 namespace awkward {
   class TupleFillable: public Fillable {
   public:
-    TupleFillable(const FillableOptions& options): options_(options), length_(0), index_(1) { }
+    TupleFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, int64_t length, bool begun, size_t nextindex): options_(options), contents_(contents), length_(length), begun_(begun), nextindex_(nextindex) { }
+
+    static TupleFillable* fromempty(const FillableOptions& options) {
+      return new TupleFillable(options, std::vector<std::shared_ptr<Fillable>>(), -1, false, -1);
+    }
 
     virtual int64_t length() const;
     virtual void clear();
@@ -42,7 +46,8 @@ namespace awkward {
     const FillableOptions options_;
     std::vector<std::shared_ptr<Fillable>> contents_;
     int64_t length_;
-    int64_t index_;    // -1 means not begun; greater than contents_.size() means uninitialized
+    bool begun_;
+    size_t nextindex_;
 
     void checklength();
     void maybeupdate(int64_t i, Fillable* tmp);

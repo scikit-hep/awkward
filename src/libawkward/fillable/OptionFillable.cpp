@@ -9,11 +9,11 @@
 
 namespace awkward {
   int64_t OptionFillable::length() const {
-    return index_.length();
+    return offsets_.length();
   }
 
   void OptionFillable::clear() {
-    index_.clear();
+    offsets_.clear();
     content_.get()->clear();
   }
 

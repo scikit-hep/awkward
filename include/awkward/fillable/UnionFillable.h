@@ -16,7 +16,7 @@ namespace awkward {
 
   class UnionFillable: public Fillable {
   public:
-    UnionFillable(const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>> contents): options_(options), types_(types), offsets_(offsets), contents_(contents), activerec_(nullptr) { }
+    UnionFillable(const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>> contents): options_(options), types_(types), offsets_(offsets), contents_(contents), current_(-1) { }
 
     static UnionFillable* fromsingle(const FillableOptions& options, Fillable* firstcontent) {
       GrowableBuffer<int8_t> types = GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
@@ -50,7 +50,7 @@ namespace awkward {
     GrowableBuffer<int8_t> types_;
     GrowableBuffer<int64_t> offsets_;
     std::vector<std::shared_ptr<Fillable>> contents_;
-    Fillable* activerec_;
+    size_t current_;
 
     template <typename T>
     T* findfillable(int8_t& type);

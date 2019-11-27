@@ -11,7 +11,11 @@
 namespace awkward {
   class BoolFillable: public Fillable {
   public:
-    BoolFillable(const FillableOptions& options): options_(options), buffer_(options) { }
+    BoolFillable(const FillableOptions& options, const GrowableBuffer<uint8_t>& buffer): options_(options), buffer_(buffer) { }
+
+    static BoolFillable* fromempty(const FillableOptions& options) {
+      return new BoolFillable(options, GrowableBuffer<uint8_t>::empty(options));
+    }
 
     virtual int64_t length() const;
     virtual void clear();

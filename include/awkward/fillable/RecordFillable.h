@@ -14,7 +14,12 @@
 namespace awkward {
   class RecordFillable: public Fillable {
   public:
-    RecordFillable(const FillableOptions& options): options_(options) { }
+    RecordFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, const std::vector<std::string>& keys, int64_t disambiguator, int64_t length, bool begun, size_t nextindex): options_(options), contents_(contents), keys_(keys), disambiguator_(disambiguator), length_(length), begun_(begun), nextindex_(nextindex) { }
+
+    static RecordFillable* fromempty(const FillableOptions& options) {
+      return new RecordFillable(options, std::vector<std::shared_ptr<Fillable>>(), std::vector<std::string>(), 0, -1, false, -1);
+    }
+
 
     virtual int64_t length() const;
     virtual void clear();
@@ -44,8 +49,8 @@ namespace awkward {
     std::vector<std::string> keys_;
     int64_t disambiguator_;
     int64_t length_;
-    int64_t index_;
-    int64_t nextindex_;
+    bool begun_;
+    size_t nextindex_;
 
     void checklength();
     void maybeupdate(int64_t i, Fillable* tmp);

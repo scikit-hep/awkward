@@ -11,8 +11,11 @@
 namespace awkward {
   class Float64Fillable: public Fillable {
   public:
-    Float64Fillable(const FillableOptions& options): options_(options), buffer_(options) { }
     Float64Fillable(const FillableOptions& options, const GrowableBuffer<double>& buffer): options_(options), buffer_(buffer) { }
+
+    static Float64Fillable* fromempty(const FillableOptions& options) {
+      return new Float64Fillable(options, GrowableBuffer<double>::empty(options));
+    }
 
     static Float64Fillable* fromint64(const FillableOptions& options, GrowableBuffer<int64_t> old) {
       GrowableBuffer<double> buffer = GrowableBuffer<double>::empty(options, old.reserved());
