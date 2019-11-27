@@ -324,12 +324,6 @@ namespace awkward {
     return this;
   }
 
-  // void TupleFillable::checklength() {
-  //   if (contents_[(size_t)nextindex_].get()->length() > length_) {
-  //     throw std::invalid_argument(std::string("tuple index ") + std::to_string(nextindex_) + std::string(" filled more than once (missing call to 'index'?)"));
-  //   }
-  // }
-
   void TupleFillable::maybeupdate(int64_t i, Fillable* tmp) {
     if (tmp != contents_[(size_t)i].get()  &&  tmp != nullptr) {
       contents_[(size_t)i] = std::shared_ptr<Fillable>(tmp);

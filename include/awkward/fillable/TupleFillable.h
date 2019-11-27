@@ -49,7 +49,6 @@ namespace awkward {
     bool begun_;
     size_t nextindex_;
 
-    // void checklength();
     void maybeupdate(int64_t i, Fillable* tmp);
   };
 }

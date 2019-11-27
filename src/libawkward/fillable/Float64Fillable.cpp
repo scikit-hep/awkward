@@ -28,59 +28,101 @@ namespace awkward {
   }
 
   bool Float64Fillable::active() const {
-    throw std::runtime_error("FIXME: Float64Fillable::active");
+    return false;
   }
 
   Fillable* Float64Fillable::null() {
-    throw std::runtime_error("FIXME: Float64Fillable::null");
+    Fillable* out = OptionFillable::fromvalids(options_, this);
+    try {
+      out->null();
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
   }
 
   Fillable* Float64Fillable::boolean(bool x) {
-    throw std::runtime_error("FIXME: Float64Fillable::boolean");
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    try {
+      out->boolean(x);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
   }
 
   Fillable* Float64Fillable::integer(int64_t x) {
-    throw std::runtime_error("FIXME: Float64Fillable::integer");
+    buffer_.append((double)x);
+    return this;
   }
 
   Fillable* Float64Fillable::real(double x) {
-    throw std::runtime_error("FIXME: Float64Fillable::real");
+    buffer_.append(x);
+    return this;
   }
 
   Fillable* Float64Fillable::beginlist() {
-    throw std::runtime_error("FIXME: Float64Fillable::beginlist");
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    try {
+      out->beginlist();
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
   }
 
   Fillable* Float64Fillable::endlist() {
-    throw std::runtime_error("FIXME: Float64Fillable::endlist");
+    throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
   }
 
   Fillable* Float64Fillable::begintuple(int64_t numfields) {
-    throw std::runtime_error("FIXME: Float64Fillable::begintuple");
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    try {
+      out->begintuple(numfields);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
   }
 
   Fillable* Float64Fillable::index(int64_t index) {
-    throw std::runtime_error("FIXME: Float64Fillable::index");
+    throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
   }
 
   Fillable* Float64Fillable::endtuple() {
-    throw std::runtime_error("FIXME: Float64Fillable::endtuple");
+    throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
   Fillable* Float64Fillable::beginrecord(int64_t disambiguator) {
-    throw std::runtime_error("FIXME: Float64Fillable::beginrecord");
+    Fillable* out = UnionFillable::fromsingle(options_, this);
+    try {
+      out->beginrecord(disambiguator);
+    }
+    catch (...) {
+      delete out;
+      throw;
+    }
+    return out;
   }
 
   Fillable* Float64Fillable::field_fast(const char* key) {
-    throw std::runtime_error("FIXME: Float64Fillable::field_fast");
+    throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
   }
 
   Fillable* Float64Fillable::field_check(const char* key) {
-    throw std::runtime_error("FIXME: Float64Fillable::field_check");
+    throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
   }
 
   Fillable* Float64Fillable::endrecord() {
-    throw std::runtime_error("FIXME: Float64Fillable::endrecord");
+    throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
 }
