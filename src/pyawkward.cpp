@@ -1102,12 +1102,18 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
           reverselookup.get()->push_back(key);
           out.push_back(unbox_content(x.second));
         }
+        if (out.size() == 0) {
+          throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
+        }
         return ak::RecordArray(unbox_id(id), out, lookup, reverselookup);
       }), py::arg("contents"), py::arg("id") = py::none())
       .def(py::init([](py::iterable contents, py::object id) -> ak::RecordArray {
         std::vector<std::shared_ptr<ak::Content>> out;
         for (auto x : contents) {
           out.push_back(unbox_content(x));
+        }
+        if (out.size() == 0) {
+          throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
         }
         return ak::RecordArray(unbox_id(id), out, std::shared_ptr<ak::RecordArray::Lookup>(nullptr), std::shared_ptr<ak::RecordArray::ReverseLookup>(nullptr));
       }), py::arg("contents"), py::arg("id") = py::none())
@@ -1186,6 +1192,7 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
 
 py::class_<ak::Record> make_Record(py::handle m, std::string name) {
   return py::class_<ak::Record>(m, name.c_str())
+      .def(py::init<ak::RecordArray, int64_t>())
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("id", [](ak::Record& self) -> py::object { return box(self.id()); })
       .def("__getitem__", &getitem<ak::Record>)
@@ -1193,6 +1200,8 @@ py::class_<ak::Record> make_Record(py::handle m, std::string name) {
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
       .def_property_readonly("type", &ak::Content::type)
 
+      .def_property_readonly("recordarray", &ak::Record::recordarray)
+      .def_property_readonly("at", &ak::Record::at)
       .def_property_readonly("istuple", &ak::Record::istuple)
       .def_property_readonly("numfields", &ak::Record::numfields)
       .def("index", &ak::Record::index)

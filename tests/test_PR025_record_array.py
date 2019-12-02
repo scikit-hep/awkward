@@ -88,6 +88,8 @@ def test_scalar_record():
     assert awkward1.tolist(pairs[1][1]) == [4.4, 5.5]
     assert awkward1.tolist(recordarray[2]) == {"one": 3, "two": [4.4, 5.5]}
 
+    assert awkward1.tolist(awkward1.layout.Record(recordarray, 2)) == {"one": 3, "two": [4.4, 5.5]}
+
 def test_type():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64))
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=numpy.float64))

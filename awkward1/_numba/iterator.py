@@ -8,7 +8,7 @@ from .._numba import cpu, util, content
 class IteratorType(numba.types.common.SimpleIteratorType):
     def __init__(self, arraytpe):
         self.arraytpe = arraytpe
-        super(IteratorType, self).__init__("iter({0})".format(self.arraytpe.name), self.arraytpe.getitem_int())
+        super(IteratorType, self).__init__("iter({})".format(self.arraytpe.name), self.arraytpe.getitem_int())
 
 @numba.typing.templates.infer
 class ContentType_type_getiter(numba.typing.templates.AbstractTemplate):
@@ -24,7 +24,7 @@ class ContentType_type_getiter(numba.typing.templates.AbstractTemplate):
 class IteratorModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("array", fe_type.arraytpe),
-                   ("where", numba.types.EphemeralPointer(numba.int64))]
+                   ("at", numba.types.EphemeralPointer(numba.int64))]
         super(IteratorModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.lower_builtin("getiter", content.ContentType)
@@ -33,7 +33,7 @@ def lower_getiter(context, builder, sig, args):
     val, = args
     proxyout = context.make_helper(builder, rettpe)
     proxyout.array = val
-    proxyout.where = numba.cgutils.alloca_once_value(builder, context.get_constant(numba.int64, 0))
+    proxyout.at = numba.cgutils.alloca_once_value(builder, context.get_constant(numba.int64, 0))
     if context.enable_nrt:
         context.nrt.incref(builder, tpe, val)
     return numba.targets.imputils.impl_ret_new_ref(context, builder, rettpe, proxyout._getvalue())
@@ -45,14 +45,14 @@ def lower_iternext(context, builder, sig, args, result):
     val, = args
 
     proxyin = context.make_helper(builder, tpe, value=val)
-    where = builder.load(proxyin.where)
+    at = builder.load(proxyin.at)
     length = tpe.arraytpe.lower_len(context, builder, numba.intp(tpe.arraytpe), (proxyin.array,))
     length = util.cast(context, builder, numba.intp, numba.int64, length)
 
-    is_valid = builder.icmp_signed("<", where, length)
+    is_valid = builder.icmp_signed("<", at, length)
     result.set_valid(is_valid)
 
     with builder.if_then(is_valid, likely=True):
-        result.yield_(tpe.arraytpe.lower_getitem_int(context, builder, tpe.yield_type(tpe.arraytpe, numba.int64), (proxyin.array, where)))
-        nextwhere = numba.cgutils.increment_index(builder, where)
-        builder.store(nextwhere, proxyin.where)
+        result.yield_(tpe.arraytpe.lower_getitem_int(context, builder, tpe.yield_type(tpe.arraytpe, numba.int64), (proxyin.array, at)))
+        nextat = numba.cgutils.increment_index(builder, at)
+        builder.store(nextat, proxyin.at)
