@@ -33,7 +33,7 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
                 if isinstance(wheretpe, numba.types.SliceType) and not wheretpe.has_step:
                     return numba.typing.templates.signature(arraytpe.getitem_range(), arraytpe, original_wheretpe)
                 if isinstance(wheretpe, numba.types.StringLiteral):
-                    return numba.typing.templates.signature(arraytpe.getitem_str(), arraytpe, original_wheretpe)
+                    return numba.typing.templates.signature(arraytpe.getitem_str(wheretpe.literal_value), arraytpe, original_wheretpe)
 
                 if not isinstance(wheretpe, numba.types.BaseTuple):
                     wheretpe = numba.types.Tuple((wheretpe,))

@@ -43,6 +43,9 @@ class NumpyArrayType(content.ContentType):
     def getitem_next(self, wheretpe, isadvanced):
         if len(wheretpe.types) > self.arraytpe.ndim:
             raise IndexError("too many dimensions in slice")
+        if any(isinstance(x, numba.types.StringLiteral) for x in wheretpe):
+            raise IndexError("cannot slice NumpyArray with str (Record field name)")
+
         if isadvanced:
             numreduce = sum(1 if isinstance(x, (numba.types.Integer, numba.types.Array)) else 0 for x in wheretpe.types)
         else:

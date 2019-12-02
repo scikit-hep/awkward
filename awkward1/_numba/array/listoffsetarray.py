@@ -40,8 +40,8 @@ class ListOffsetArrayType(content.ContentType):
     def getitem_range(self):
         return self
 
-    def getitem_str(self):
-        return ListOffsetArrayType(self.offsetstpe, self.contenttpe.getitem_str(), self.idtpe)
+    def getitem_str(self, key):
+        return ListOffsetArrayType(self.offsetstpe, self.contenttpe.getitem_str(key), self.idtpe)
 
     def getitem_tuple(self, wheretpe):
         import awkward1._numba.array.listarray
@@ -62,6 +62,9 @@ class ListOffsetArrayType(content.ContentType):
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
             return ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.idtpe)
+
+        elif isinstance(headtpe, numba.types.StringLiteral):
+            raise NotImplementedError("string-literal")
 
         elif isinstance(headtpe, numba.types.EllipsisType):
             raise NotImplementedError("ellipsis")
@@ -231,7 +234,20 @@ def lower_getitem_range(context, builder, sig, args):
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.StringLiteral)
 def lower_getitem_str(context, builder, sig, args):
-    raise NotImplementedError("ListOffsetArray.getitem_str(StringLiteral)")
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
+    proxyout.offsets = proxyin.offsets
+    proxyout.content = tpe.contenttpe.lower_getitem_str(context, builder, rettpe.contenttpe(tpe.contenttpe, wheretpe), (proxyin.content, whereval))
+    if tpe.idtpe != numba.none:
+        proxyout.id = proxyin.id
+
+    out = proxyout._getvalue()
+    if context.enable_nrt:
+        context.nrt.incref(builder, rettpe, out)
+    return out
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.BaseTuple)
 def lower_getitem_tuple(context, builder, sig, args):

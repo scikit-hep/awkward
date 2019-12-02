@@ -65,3 +65,27 @@ def test_getitem_range():
         return q[1:4]
 
     assert awkward1.tolist(f1(recordarray)) == [{'one': 2, 'two': []}, {'one': 3, 'two': [4.4, 5.5]}, {'one': 4, 'two': [6.6]}]
+
+def test_getitem_str():
+    outer_starts = numpy.array([0, 3, 3], dtype=numpy.int64)
+    outer_stops = numpy.array([3, 3, 5], dtype=numpy.int64)
+    outer_offsets = numpy.array([0, 3, 3, 5], dtype=numpy.int64)
+    outer_listarray = awkward1.layout.ListArray64(awkward1.layout.Index64(outer_starts), awkward1.layout.Index64(outer_stops), recordarray)
+    outer_listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(outer_offsets), recordarray)
+    outer_regulararray = awkward1.layout.RegularArray(recordarray, 2)
+
+    @numba.njit
+    def f1(q):
+        return q["one"]
+
+    assert awkward1.tolist(f1(recordarray)) == [1, 2, 3, 4, 5]
+
+    assert sys.getrefcount(outer_starts), sys.getrefcount(outer_stops) == (3, 3)
+    assert awkward1.tolist(f1(outer_listarray)) == [[1, 2, 3], [], [4, 5]]
+    assert sys.getrefcount(outer_starts), sys.getrefcount(outer_stops) == (3, 3)
+
+    assert sys.getrefcount(outer_offsets) == 3
+    assert awkward1.tolist(f1(outer_listoffsetarray)) == [[1, 2, 3], [], [4, 5]]
+    assert sys.getrefcount(outer_offsets) == 3
+
+    assert awkward1.tolist(f1(outer_regulararray)) == [[1, 2], [3, 4]]

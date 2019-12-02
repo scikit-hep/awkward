@@ -30,6 +30,10 @@ class RecordArrayType(content.ContentType):
         return self.lookup is None
 
     @property
+    def numfields(self):
+        return len(self.contenttpes)
+
+    @property
     def ndim(self):
         return 1
 
@@ -38,6 +42,9 @@ class RecordArrayType(content.ContentType):
 
     def getitem_range(self):
         return self
+
+    def getitem_str(self, key):
+        return self.contenttpes[awkward1.util.field2index(self.lookup, self.numfields, key)]
 
     def getitem_tuple(self, wheretpe):
         nexttpe = RegularArrayType(self, numba.none)
@@ -70,6 +77,10 @@ class RecordArrayType(content.ContentType):
     @property
     def lower_getitem_range(self):
         return lower_getitem_range
+
+    @property
+    def lower_getitem_str(self):
+        return lower_getitem_str
 
     @property
     def lower_getitem_next(self):
@@ -230,6 +241,19 @@ def lower_getitem_range(context, builder, sig, args):
         proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
 
     out = proxyout._getvalue()
+    if context.enable_nrt:
+        context.nrt.incref(builder, rettpe, out)
+    return out
+
+@numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.StringLiteral)
+def lower_getitem_str(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+    index = awkward1.util.field2index(tpe.lookup, tpe.numfields, wheretpe.literal_value)
+
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+
+    out = getattr(proxyin, field(index))
     if context.enable_nrt:
         context.nrt.incref(builder, rettpe, out)
     return out
