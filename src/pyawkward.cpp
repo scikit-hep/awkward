@@ -1200,7 +1200,7 @@ py::class_<ak::Record> make_Record(py::handle m, std::string name) {
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
       .def_property_readonly("type", &ak::Content::type)
 
-      .def_property_readonly("recordarray", &ak::Record::recordarray)
+      .def_property_readonly("array", &ak::Record::array)
       .def_property_readonly("at", &ak::Record::at)
       .def_property_readonly("istuple", &ak::Record::istuple)
       .def_property_readonly("numfields", &ak::Record::numfields)
@@ -1254,7 +1254,7 @@ py::class_<ak::Record> make_Record(py::handle m, std::string name) {
           return out;
         }
       })
-      .def_property_readonly("astuple", [](ak::RecordArray& self) -> py::object {
+      .def_property_readonly("astuple", [](ak::Record& self) -> py::object {
         return box(self.astuple().shallow_copy());
       })
      .def_property_readonly("location", &location<ak::Record>)
