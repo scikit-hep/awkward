@@ -184,3 +184,22 @@ def box(tpe, val, c):
     c.pyapi.decref(array_obj)
     c.pyapi.decref(at_obj)
     return out
+
+@numba.extending.lower_builtin(len, RecordArrayType)
+def lower_len(context, builder, sig, args):
+    rettpe, (tpe,) = sig.return_type, sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    return util.cast(context, builder, numba.int64, numba.intp, proxyin.length)
+
+@numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.Integer)
+def lower_getitem_int(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
+    proxyout.array = val
+    proxyout.at = util.cast(context, builder, wheretpe, numba.int64, whereval)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe, val)
+    return numba.targets.imputils.impl_ret_new_ref(context, builder, rettpe, proxyout._getvalue())

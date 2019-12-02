@@ -30,3 +30,31 @@ def test_boxing():
 
     assert awkward1.tolist(f2(recordarray)) == [{'one': 1, 'two': [1.1, 2.2, 3.3]}, {'one': 2, 'two': []}, {'one': 3, 'two': [4.4, 5.5]}, {'one': 4, 'two': [6.6]}, {'one': 5, 'two': [7.7, 8.8, 9.9]}]
     assert awkward1.tolist(f2(recordarray[2])) == {'one': 3, 'two': [4.4, 5.5]}
+
+def test_len():
+    @numba.njit
+    def f1(q):
+        return len(q)
+
+    assert f1(recordarray) == 5
+    with pytest.raises(numba.TypingError):
+        f1(recordarray[2])
+
+def test_getitem_int():
+    @numba.njit
+    def f1(q):
+        return q[2]
+
+    assert awkward1.tolist(f1(recordarray)) == {'one': 3, 'two': [4.4, 5.5]}
+    with pytest.raises(numba.TypingError):
+        f1(recordarray[2])
+
+def test_getitem_iter():
+    @numba.njit
+    def f1(q):
+        out = 0
+        for x in q:
+            out += 1
+        return out
+
+    assert f1(recordarray) == 5

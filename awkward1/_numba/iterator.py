@@ -24,6 +24,7 @@ class ContentType_type_getiter(numba.typing.templates.AbstractTemplate):
 class IteratorModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("array", fe_type.arraytpe),
+                   ("length", numba.int64),
                    ("at", numba.types.EphemeralPointer(numba.int64))]
         super(IteratorModel, self).__init__(dmm, fe_type, members)
 
@@ -33,6 +34,7 @@ def lower_getiter(context, builder, sig, args):
     val, = args
     proxyout = context.make_helper(builder, rettpe)
     proxyout.array = val
+    proxyout.length = util.cast(context, builder, numba.intp, numba.int64, tpe.lower_len(context, builder, numba.intp(tpe), (val,)))
     proxyout.at = numba.cgutils.alloca_once_value(builder, context.get_constant(numba.int64, 0))
     if context.enable_nrt:
         context.nrt.incref(builder, tpe, val)
@@ -46,10 +48,8 @@ def lower_iternext(context, builder, sig, args, result):
 
     proxyin = context.make_helper(builder, tpe, value=val)
     at = builder.load(proxyin.at)
-    length = tpe.arraytpe.lower_len(context, builder, numba.intp(tpe.arraytpe), (proxyin.array,))
-    length = util.cast(context, builder, numba.intp, numba.int64, length)
 
-    is_valid = builder.icmp_signed("<", at, length)
+    is_valid = builder.icmp_signed("<", at, proxyin.length)
     result.set_valid(is_valid)
 
     with builder.if_then(is_valid, likely=True):
