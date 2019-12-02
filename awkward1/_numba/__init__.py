@@ -18,3 +18,4 @@ else:
     import awkward1._numba.array.listoffsetarray
     import awkward1._numba.array.emptyarray
     import awkward1._numba.array.regulararray
+    import awkward1._numba.array.recordarray
