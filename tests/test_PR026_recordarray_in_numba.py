@@ -100,3 +100,20 @@ def test_getitem_str():
 
     assert awkward1.tolist(f1(recordarray[2])) == 3
     assert awkward1.tolist(f2(recordarray[2])) == [4.4, 5.5]
+
+def test_getitem_tuple():
+    content3 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+    regulararray = awkward1.layout.RegularArray(content3, 2)
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 4, 5, 8, 9]))
+    listoffsetarray2 = awkward1.layout.ListOffsetArray64(offsets2, content2)
+    recordarray2 = awkward1.layout.RecordArray({"one": regulararray, "two": listoffsetarray2})
+
+    assert awkward1.tolist(recordarray2) == [{'one': [1, 2], 'two': [1.1, 2.2, 3.3]}, {'one': [3, 4], 'two': [4.4]}, {'one': [5, 6], 'two': [5.5]}, {'one': [7, 8], 'two': [6.6, 7.7, 8.8]}, {'one': [9, 10], 'two': [9.9]}]
+
+    # @numba.njit
+    # def f1(q):
+    #     return q[:, 0]
+    #
+    # print(awkward1.tolist(f1(recordarray2)))
+    #
+    # raise Exception

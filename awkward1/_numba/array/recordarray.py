@@ -47,7 +47,8 @@ class RecordArrayType(content.ContentType):
         return self.contenttpes[awkward1.util.field2index(self.lookup, self.numfields, key)]
 
     def getitem_tuple(self, wheretpe):
-        nexttpe = RegularArrayType(self, numba.none)
+        import awkward1._numba.array.regulararray
+        nexttpe = awkward1._numba.array.regulararray.RegularArrayType(self, numba.none)
         out = nexttpe.getitem_next(wheretpe, False)
         return out.getitem_int()
 
@@ -57,10 +58,43 @@ class RecordArrayType(content.ContentType):
         headtpe = wheretpe.types[0]
         tailtpe = numba.types.Tuple(wheretpe.types[1:])
 
-        raise NotImplementedError
+        if isinstance(headtpe, numba.types.StringLiteral):
+            raise NotImplementedError
+
+        else:
+            contenttpes = []
+            for t in self.contenttpes:
+                contenttpes.append(t.getitem_next(wheretpe, isadvanced))
+            return RecordArrayType(contenttpes, self.lookup, self.reverselookup, self.idtpe)
+
+        # elif isinstance(headtpe, numba.types.Integer):
+        #     raise NotImplementedError
+        #
+        # elif isinstance(headtpe, numba.types.SliceType):
+        #     raise NotImplementedError
+        #
+        # elif isinstance(headtpe, numba.types.StringLiteral):
+        #     raise NotImplementedError
+        #
+        # elif isinstance(headtpe, numba.types.EllipsisType):
+        #     raise NotImplementedError("ellipsis")
+        #
+        # elif isinstance(headtpe, type(numba.typeof(numpy.newaxis))):
+        #     raise NotImplementedError("newaxis")
+        #
+        # elif isinstance(headtpe, numba.types.Array):
+        #     if headtpe.ndim != 1:
+        #         raise raise NotImplementedError("array.ndim != 1")
+        #     if not isadvanced:
+        #         raise NotImplementedError
+        #     else:
+        #         raise NotImplementedError
+        #
+        # else:
+        #     raise AssertionError(headtpe)
 
     def carry(self):
-        return RecordArrayType([x.carry() for x in self.contenttpes], self.lookup, self.idtpe)
+        return RecordArrayType([x.carry() for x in self.contenttpes], self.lookup, self.reverselookup, self.idtpe)
 
     @property
     def lower_len(self):
@@ -320,3 +354,6 @@ def lower_getitem_tuple_record(context, builder, sig, args):
 @numba.extending.lower_builtin(operator.getitem, RecordArrayType, type(numba.typeof(numpy.newaxis)))
 def lower_getitem_other(context, builder, sig, args):
     return content.lower_getitem_other(context, builder, sig, args)
+
+def lower_getitem_next(context, builder, arraytpe, wheretpe):
+    raise Exception("WOWIE")
