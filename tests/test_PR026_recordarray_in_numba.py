@@ -21,5 +21,12 @@ def test_boxing():
     def f1(q):
         return 3.14
 
-    print(f1(recordarray))
-    # raise Exception
+    assert f1(recordarray) == 3.14
+    assert f1(recordarray[2]) == 3.14
+
+    @numba.njit
+    def f2(q):
+        return q
+
+    assert awkward1.tolist(f2(recordarray)) == [{'one': 1, 'two': [1.1, 2.2, 3.3]}, {'one': 2, 'two': []}, {'one': 3, 'two': [4.4, 5.5]}, {'one': 4, 'two': [6.6]}, {'one': 5, 'two': [7.7, 8.8, 9.9]}]
+    assert awkward1.tolist(f2(recordarray[2])) == {'one': 3, 'two': [4.4, 5.5]}

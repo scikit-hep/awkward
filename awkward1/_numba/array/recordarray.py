@@ -11,18 +11,23 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(val, c):
-    return RecordArrayType([numba.typeof(x) for x in val.values()], val.lookup, numba.typeof(val.id))
+    return RecordArrayType([numba.typeof(x) for x in val.values()], val.lookup, val.reverselookup, numba.typeof(val.id))
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
 def typeof(val, c):
-    return RecordType(RecordArrayType(val.recordarray))
+    return RecordType(numba.typeof(val.array))
 
 class RecordArrayType(content.ContentType):
-    def __init__(self, contenttpes, lookup, idtpe):
+    def __init__(self, contenttpes, lookup, reverselookup, idtpe):
         super(RecordArrayType, self).__init__(name="RecordArrayType([{}], {}, id={})".format(", ".join(x.name for x in contenttpes), lookup, idtpe.name))
         self.contenttpes = contenttpes
         self.lookup = lookup
+        self.reverselookup = reverselookup
         self.idtpe = idtpe
+
+    @property
+    def istuple(self):
+        return self.lookup is None
 
     @property
     def ndim(self):
@@ -79,12 +84,19 @@ class RecordType(numba.types.Type):
         self.arraytpe = arraytpe
         super(RecordType, self).__init__("Record({})".format(self.arraytpe.name))
 
+    @property
+    def istuple(self):
+        return self.arraytpe.istuple
+
+def field(i):
+    return "f" + str(i)
+
 @numba.extending.register_model(RecordArrayType)
 class RecordArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("length", numba.int64)]
         for i, x in enumerate(fe_type.contenttpes):
-            members.append(("_" + str(i), x))
+            members.append((field(i), x))
         if fe_type.idtpe != numba.none:
             members.append(("id", fe_type.idtpe))
         super(RecordArrayModel, self).__init__(dmm, fe_type, members)
@@ -108,7 +120,7 @@ def unbox(tpe, obj, c):
     for i, t in enumerate(tpe.contenttpes):
         i_obj = c.pyapi.long_from_longlong(c.context.get_constant(numba.int64, i))
         x_obj = c.pyapi.call_function_objargs(field_obj, (i_obj,))
-        setattr(proxyout, "_" + str(i), x_obj)
+        setattr(proxyout, field(i), c.pyapi.to_native_value(t, x_obj).value)
         c.pyapi.decref(i_obj)
         c.pyapi.decref(x_obj)
     c.pyapi.decref(field_obj)
@@ -121,7 +133,54 @@ def unbox(tpe, obj, c):
 
 @numba.extending.unbox(RecordType)
 def unbox_record(tpe, obj, c):
-    recordarray_obj = c.pyapi.object_getattr_string(obj, "recordarray")
+    array_obj = c.pyapi.object_getattr_string(obj, "array")
     at_obj = c.pyapi.object_getattr_string(obj, "at")
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
-    proxyout.array
+    proxyout.array = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
+    proxyout.at = c.pyapi.to_native_value(numba.int64, at_obj).value
+    if c.context.enable_nrt:
+        c.context.nrt.incref(c.builder, tpe.arraytpe, proxyout.array)
+    c.pyapi.decref(array_obj)
+    c.pyapi.decref(at_obj)
+    is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    return numba.extending.NativeValue(proxyout._getvalue(), is_error)
+
+@numba.extending.box(RecordArrayType)
+def box(tpe, val, c):
+    RecordArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.RecordArray))
+    istuple_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.istuple))
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
+    length_obj = c.pyapi.long_from_longlong(proxyin.length)
+    if tpe.idtpe != numba.none:
+        id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
+        out = c.pyapi.call_function_objargs(RecordArray_obj, (length_obj, istuple_obj, id_obj))
+        c.pyapi.decref(id_obj)
+    else:
+        out = c.pyapi.call_function_objargs(RecordArray_obj, (length_obj, istuple_obj))
+    append_obj = c.pyapi.object_getattr_string(out, "append")
+    for i, t in enumerate(tpe.contenttpes):
+        x_obj = c.pyapi.from_native_value(t, getattr(proxyin, field(i)), c.env_manager)
+        if tpe.reverselookup is None or len(tpe.reverselookup) <= i:
+            c.pyapi.call_function_objargs(append_obj, (x_obj,))
+        else:
+            key_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.reverselookup[i]))
+            c.pyapi.call_function_objargs(append_obj, (x_obj, key_obj))
+            c.pyapi.decref(key_obj)
+        c.pyapi.decref(x_obj)
+    c.pyapi.decref(RecordArray_obj)
+    c.pyapi.decref(istuple_obj)
+    c.pyapi.decref(length_obj)
+    c.pyapi.decref(append_obj)
+    return out
+
+@numba.extending.box(RecordType)
+def box(tpe, val, c):
+    Record_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Record))
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
+    array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
+    at_obj = c.pyapi.from_native_value(numba.int64, proxyin.at, c.env_manager)
+    out = c.pyapi.call_function_objargs(Record_obj, (array_obj, at_obj))
+    c.pyapi.decref(Record_obj)
+    c.pyapi.decref(array_obj)
+    c.pyapi.decref(at_obj)
+    return out
