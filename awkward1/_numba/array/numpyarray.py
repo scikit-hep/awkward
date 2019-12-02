@@ -30,6 +30,9 @@ class NumpyArrayType(content.ContentType):
     def getitem_range(self):
         return self.getitem_tuple(numba.types.slice2_type)
 
+    def getitem_str(self):
+        raise IndexError("cannot slice NumpyArray with str (Record field name)")
+
     def getitem_tuple(self, wheretpe):
         outtpe = numba.typing.arraydecl.get_array_index_type(self.arraytpe, wheretpe).result
         if isinstance(outtpe, numba.types.Array):

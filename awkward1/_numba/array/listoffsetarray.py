@@ -40,6 +40,9 @@ class ListOffsetArrayType(content.ContentType):
     def getitem_range(self):
         return self
 
+    def getitem_str(self):
+        return ListOffsetArrayType(self.offsetstpe, self.contenttpe.getitem_str(), self.idtpe)
+
     def getitem_tuple(self, wheretpe):
         import awkward1._numba.array.listarray
         nexttpe = awkward1._numba.array.listarray.ListArrayType(util.index64tpe, util.index64tpe, self, numba.none)
@@ -97,6 +100,10 @@ class ListOffsetArrayType(content.ContentType):
     @property
     def lower_getitem_range(self):
         return lower_getitem_range
+
+    @property
+    def lower_getitem_str(self):
+        return lower_getitem_str
 
     @property
     def lower_getitem_next(self):
@@ -221,6 +228,10 @@ def lower_getitem_range(context, builder, sig, args):
     if context.enable_nrt:
         context.nrt.incref(builder, rettpe, out)
     return out
+
+@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.StringLiteral)
+def lower_getitem_str(context, builder, sig, args):
+    raise NotImplementedError("ListOffsetArray.getitem_str(StringLiteral)")
 
 @numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.BaseTuple)
 def lower_getitem_tuple(context, builder, sig, args):
@@ -376,6 +387,9 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         if arraytpe.idtpe != numba.none:
             proxyout.id = proxyin.id
         return proxyout._getvalue()
+
+    elif isinstance(headtpe, numba.types.StringLiteral):
+        raise NotImplementedError("ListOffsetArray.getitem_next(StringLiteral)")
 
     elif isinstance(headtpe, numba.types.EllipsisType):
         raise NotImplementedError("ListOffsetArray.getitem_next(ellipsis)")

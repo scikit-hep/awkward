@@ -39,6 +39,9 @@ class RecordArrayType(content.ContentType):
     def getitem_range(self):
         return self
 
+    def getitem_str(self):
+        raise NotImplementedError
+
     def getitem_tuple(self, wheretpe):
         nexttpe = RegularArrayType(self, numba.none)
         out = nexttpe.getitem_next(wheretpe, False)
@@ -70,6 +73,10 @@ class RecordArrayType(content.ContentType):
     @property
     def lower_getitem_range(self):
         return lower_getitem_range
+
+    @property
+    def lower_getitem_str(self):
+        return lower_getitem_str
 
     @property
     def lower_getitem_next(self):

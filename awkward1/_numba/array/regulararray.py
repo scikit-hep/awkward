@@ -29,6 +29,9 @@ class RegularArrayType(content.ContentType):
     def getitem_range(self):
         return self
 
+    def getitem_str(self):
+        return RegularArrayType(self.contenttpe.getitem_str(), self.idtpe)
+
     def getitem_tuple(self, wheretpe):
         nexttpe = RegularArrayType(self, numba.none)
         out = nexttpe.getitem_next(wheretpe, False)
@@ -83,6 +86,10 @@ class RegularArrayType(content.ContentType):
     @property
     def lower_getitem_range(self):
         return lower_getitem_range
+
+    @property
+    def lower_getitem_str(self):
+        return lower_getitem_str
 
     @property
     def lower_getitem_next(self):
@@ -190,6 +197,10 @@ def lower_getitem_range(context, builder, sig, args):
         context.nrt.incref(builder, rettpe, out)
     return out
 
+@numba.extending.lower_builtin(operator.getitem, RegularArrayType, numba.types.StringLiteral)
+def lower_getitem_str(context, builder, sig, args):
+    raise NotImplementedError("RegularArray.getitem_str(StringLiteral)")
+
 @numba.extending.lower_builtin(operator.getitem, RegularArrayType, numba.types.BaseTuple)
 def lower_getitem_tuple(context, builder, sig, args):
     return content.lower_getitem_tuple(context, builder, sig, args)
@@ -269,6 +280,9 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         if arraytpe.idtpe != numba.none:
             proxyout.id = proxyin.id
         return proxyout._getvalue()
+
+    elif isinstance(headtpe, numba.types.StringLiteral):
+        raise NotImplementedError("RegularArray.getitem_next(StringLiteral)")
 
     elif isinstance(headtpe, numba.types.EllipsisType):
         raise NotImplementedError("RegularArray.getitem_next(ellipsis)")
