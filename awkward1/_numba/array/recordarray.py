@@ -100,29 +100,32 @@ class RecordType(numba.types.Type):
     def istuple(self):
         return self.arraytpe.istuple
 
-    def getitem_int(self):
-        raise TypeError("Record cannot be sliced by an integer")
-
-    def getitem_range(self):
-        raise TypeError("Record cannot be sliced by a range")
-
     def getitem_str(self, key):
         outtpe = self.arraytpe.getitem_str(key)
         return outtpe.getitem_int()
 
     def getitem_tuple(self, wheretpe):
-        raise NotImplementedError
-
-    def getitem_next(self, wheretpe, isadvanced):
-        raise NotImplementedError
-
-    def carry(self):
-        raise NotImplementedError
+        nextwheretpe = numba.types.Tuple((numba.int64,) + wheretpe.types)
+        return self.arraytpe.getitem_tuple(nextwheretpe)
 
 @numba.typing.templates.infer_global(operator.getitem)
 class type_getitem_record(numba.typing.templates.AbstractTemplate):
     def generic(self, args, kwargs):
-        return content.type_getitem.generic(None, args, kwargs)
+        if len(args) == 2 and len(kwargs) == 0:
+            tpe, wheretpe = args
+
+            if isinstance(tpe, RecordType):
+                original_wheretpe = wheretpe
+                if isinstance(wheretpe, numba.types.StringLiteral):
+                    return numba.typing.templates.signature(tpe.getitem_str(wheretpe.literal_value), tpe, original_wheretpe)
+
+                if not isinstance(wheretpe, numba.types.BaseTuple):
+                    wheretpe = numba.types.Tuple((wheretpe,))
+
+                wheretpe = util.typing_regularize_slice(wheretpe)
+                content.type_getitem.check_slice_types(wheretpe)
+
+                return numba.typing.templates.signature(tpe.getitem_tuple(wheretpe), tpe, original_wheretpe)
 
 def field(i):
     return "f" + str(i)
@@ -297,6 +300,18 @@ def lower_getitem_str_record(context, builder, sig, args):
 @numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.BaseTuple)
 def lower_getitem_tuple(context, builder, sig, args):
     return content.lower_getitem_tuple(context, builder, sig, args)
+
+@numba.extending.lower_builtin(operator.getitem, RecordType, numba.types.BaseTuple)
+def lower_getitem_tuple_record(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+
+    nextwheretpe = numba.types.Tuple((numba.int64,) + wheretpe.types)
+    nextwhereval = context.make_tuple(builder, nextwheretpe, (proxyin.at,) + numba.cgutils.unpack_tuple(builder, whereval))
+
+    return lower_getitem_tuple(context, builder, rettpe(tpe.arraytpe, nextwheretpe), (proxyin.array, nextwhereval))
 
 @numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.Array)
 @numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.List)

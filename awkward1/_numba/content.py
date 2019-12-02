@@ -23,12 +23,10 @@ class type_len(numba.typing.templates.AbstractTemplate):
 @numba.typing.templates.infer_global(operator.getitem)
 class type_getitem(numba.typing.templates.AbstractTemplate):
     def generic(self, args, kwargs):
-        import awkward1._numba.array.recordarray
-
         if len(args) == 2 and len(kwargs) == 0:
             arraytpe, wheretpe = args
 
-            if isinstance(arraytpe, (ContentType, awkward1._numba.array.recordarray.RecordType)):
+            if isinstance(arraytpe, ContentType):
                 original_wheretpe = wheretpe
                 if isinstance(wheretpe, numba.types.Integer):
                     return numba.typing.templates.signature(arraytpe.getitem_int(), arraytpe, original_wheretpe)
@@ -41,11 +39,15 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
                     wheretpe = numba.types.Tuple((wheretpe,))
 
                 wheretpe = util.typing_regularize_slice(wheretpe)
-
-                if any(not isinstance(t, (numba.types.Integer, numba.types.SliceType, numba.types.EllipsisType, type(numba.typeof(numpy.newaxis)), numba.types.StringLiteral)) and not (isinstance(t, numba.types.Array) and isinstance(t.dtype, (numba.types.Boolean, numba.types.Integer))) for t in wheretpe.types):
-                    raise TypeError("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), integer or boolean arrays (possibly jagged), and constant strings (known at compile-time) are valid indices")
+                self.check_slice_types(wheretpe)
 
                 return numba.typing.templates.signature(arraytpe.getitem_tuple(wheretpe), arraytpe, original_wheretpe)
+
+    @staticmethod
+    def check_slice_types(wheretpe):
+        if any(not isinstance(t, (numba.types.Integer, numba.types.SliceType, numba.types.EllipsisType, type(numba.typeof(numpy.newaxis)), numba.types.StringLiteral)) and not (isinstance(t, numba.types.Array) and isinstance(t.dtype, (numba.types.Boolean, numba.types.Integer))) for t in wheretpe.types):
+            raise TypeError("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), integer or boolean arrays (possibly jagged), and constant strings (known at compile-time) are valid indices")
+
 
 def lower_getitem_nothing(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
