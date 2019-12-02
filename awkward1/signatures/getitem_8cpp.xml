@@ -1505,7 +1505,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="269" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="269" bodyend="292"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="269" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="269" bodyend="299"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a5620b1acf314ed2222bdb33a75f25b3d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -1558,7 +1558,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="293" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="293" bodyend="295"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="300" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="300" bodyend="302"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a317e8ea50a0ef306c058897206f84ce0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -1611,7 +1611,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="296" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="296" bodyend="298"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="303" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="303" bodyend="305"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1acc85ad77e728f5f41434170be48e35aa" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -1664,7 +1664,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="299" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="299" bodyend="301"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="306" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="306" bodyend="308"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a0b825f888faa9660a4209dd85580f1c6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1697,7 +1697,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="304" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="304" bodyend="310"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="311" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="311" bodyend="317"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1ac0c53f6001ef53e64739ca6f883de30c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -1722,7 +1722,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="311" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="311" bodyend="313"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="318" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="318" bodyend="320"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a63b6c8499b6c8c8aaeb006c13dcf565f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -1747,7 +1747,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="314" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="314" bodyend="316"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="321" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="321" bodyend="323"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1ac8b96d8cb065474d82046d205a97ef5c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -1772,7 +1772,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="317" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="317" bodyend="319"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="324" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="324" bodyend="326"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a9725a7526fa7f70dae6095d24810ad7a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1809,7 +1809,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="322" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="322" bodyend="330"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="329" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="329" bodyend="337"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1aa32646c54492a4d05df12c4e217b39fd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -1838,7 +1838,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="331" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="331" bodyend="333"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="338" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="338" bodyend="340"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a259429917ed2a685a68323ec82df58b2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -1867,7 +1867,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="334" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="334" bodyend="336"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="341" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="341" bodyend="343"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a32485c323b0e80a07471597cf2d4706c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -1896,7 +1896,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="337" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="337" bodyend="339"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="344" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="344" bodyend="346"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a7f7814ee2798b1d3b6b764f9f9860eb3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1957,7 +1957,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="342" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="342" bodyend="364"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="349" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="349" bodyend="371"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a20c46a0b2a3ddddb0012b039d9013900" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2010,7 +2010,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="365" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="365" bodyend="367"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="372" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="372" bodyend="374"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1ad2f3ee4a8fc1c2f82552e9884c8aac01" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2063,7 +2063,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="368" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="368" bodyend="370"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="375" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="375" bodyend="377"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1ab1d1268493c829aae3115bd027b6544b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2116,7 +2116,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="371" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="371" bodyend="373"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="378" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="378" bodyend="380"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a240137941c709b11deac3ffb5e88e851" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -2181,7 +2181,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="376" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="376" bodyend="402"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="383" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="383" bodyend="403"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a7a49b6a84413de2b3ff29eb8c6d03e3e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2238,7 +2238,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="403" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="403" bodyend="405"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="404" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="404" bodyend="406"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a0331c02c4d4c3326c2effefbac16a1d1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2295,7 +2295,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="406" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="406" bodyend="408"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="407" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="407" bodyend="409"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a1ed681c204a7a1841fb9f969c817b0ff" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2352,7 +2352,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="409" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="409" bodyend="411"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="410" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="410" bodyend="412"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a46a4fa541871744b859a90c17fd66b8b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -2409,7 +2409,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="414" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="414" bodyend="423"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="415" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="415" bodyend="424"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a1be4a059959dfb86ebf3b03bb8ff158f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2458,7 +2458,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="424" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="424" bodyend="426"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="425" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="425" bodyend="427"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a477e4f491c7aa1130d6609505a23ec5f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2507,7 +2507,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="427" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="427" bodyend="429"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="428" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="428" bodyend="430"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1ac27f4fad0770a9335d5410d9dce31582" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2556,7 +2556,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="430" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="430" bodyend="432"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="431" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="431" bodyend="433"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1ae25be75fa023f5447eb8a72e95a6586e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -2590,7 +2590,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="435" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="435" bodyend="447"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="436" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="436" bodyend="448"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a7e083918d17892d8e130c2a246bc7f42" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2619,7 +2619,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="448" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="448" bodyend="450"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="449" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="449" bodyend="451"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1af20c695276eb90e2ff6820b2e4e4b625" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -2661,7 +2661,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="453" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="453" bodyend="460"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="454" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="454" bodyend="461"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a237ce805827ae1e58f65f4e781483d00" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2698,7 +2698,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="461" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="461" bodyend="463"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="462" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="462" bodyend="464"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1ac0f77a0a4a2721398a0dbcfea66a334b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -2732,7 +2732,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="466" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="466" bodyend="473"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="467" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="467" bodyend="474"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a4bbbc5f44f890f6eba64c1424f7abf54" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2761,7 +2761,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="474" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="474" bodyend="476"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="475" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="475" bodyend="477"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1aa97ddf47e1866ba2bd65b9e3c2a87784" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -2795,7 +2795,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="479" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="479" bodyend="490"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="480" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="480" bodyend="491"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a9b6d366cd46e9c4fda8f86042a74d222" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2824,7 +2824,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="491" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="491" bodyend="493"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="492" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="492" bodyend="494"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1af536eca498227cbeaba77c276aee8b0f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -2866,7 +2866,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="496" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="496" bodyend="504"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="497" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="497" bodyend="505"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a58d10f3c62a9edb32381ecd43581f9f3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2903,7 +2903,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="505" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="505" bodyend="507"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="506" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="506" bodyend="508"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1af103551648d3dcfe613dfd2d7db956aa" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -2949,7 +2949,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="510" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="510" bodyend="516"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="511" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="511" bodyend="517"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a149d6bdb69bbdfc1dfe1adb12735727e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -2990,7 +2990,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="517" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="517" bodyend="519"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="518" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="518" bodyend="520"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1ae1979194de2c4493ae6566c28e7b9dd1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -3024,7 +3024,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="522" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="522" bodyend="529"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="523" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="523" bodyend="530"/>
       </memberdef>
       <memberdef kind="function" id="getitem_8cpp_1a0b7a04e726a10b08b1b459602d530586" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
@@ -3053,7 +3053,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/getitem.cpp" line="530" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="530" bodyend="532"/>
+        <location file="src/cpu-kernels/getitem.cpp" line="531" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="531" bodyend="533"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
