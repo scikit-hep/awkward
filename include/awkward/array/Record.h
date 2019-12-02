@@ -14,7 +14,16 @@ namespace awkward {
 
     const std::shared_ptr<Content> recordarray() const { return recordarray_.shallow_copy(); }
     int64_t at() const { return at_; }
-    bool istuple() const { return recordarray_.istuple(); }
+    const std::vector<std::shared_ptr<Content>> contents() const {
+      std::vector<std::shared_ptr<Content>> out;
+      for (auto item : recordarray_.contents()) {
+        out.push_back(item.get()->getitem_at_nowrap(at_));
+      }
+      return out;
+    }
+    const std::shared_ptr<RecordArray::Lookup> lookup() const { return recordarray_.lookup(); }
+    const std::shared_ptr<RecordArray::ReverseLookup> reverselookup() const { return recordarray_.reverselookup(); }
+    bool istuple() const { return lookup().get() == nullptr; }
 
     virtual bool isscalar() const;
     virtual const std::string classname() const;
@@ -48,7 +57,7 @@ namespace awkward {
     const std::vector<std::string> keys() const;
     const std::vector<std::shared_ptr<Content>> values() const;
     const std::vector<std::pair<std::string, std::shared_ptr<Content>>> items() const;
-    const Record withoutkeys() const;
+    const Record astuple() const;
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;

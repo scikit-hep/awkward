@@ -61,7 +61,10 @@ def test_basic():
     assert awkward1.tolist(pairs[1][1]) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert awkward1.tolist(pairs[2][1]) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
 
-    assert awkward1.tojson(recordarray.withoutkeys) == '[{"0":1,"1":[1.1,2.2,3.3],"2":1.1},{"0":2,"1":[],"2":2.2},{"0":3,"1":[4.4,5.5],"2":3.3},{"0":4,"1":[6.6],"2":4.4},{"0":5,"1":[7.7,8.8,9.9],"2":5.5}]'
+    assert awkward1.tojson(recordarray.astuple) == '[{"0":1,"1":[1.1,2.2,3.3],"2":1.1},{"0":2,"1":[],"2":2.2},{"0":3,"1":[4.4,5.5],"2":3.3},{"0":4,"1":[6.6],"2":4.4},{"0":5,"1":[7.7,8.8,9.9],"2":5.5}]'
+
+    assert recordarray.lookup == {"one": 0, "two": 1, "wonky": 0}
+    assert recordarray.astuple.lookup is None
 
 def test_scalar_record():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
@@ -94,6 +97,7 @@ def test_type():
     recordarray.append(content1)
     recordarray.append(listoffsetarray)
     assert str(awkward1.typeof(recordarray)) == '5 * (int64, var * float64)'
+    assert recordarray.lookup is None
 
     assert awkward1.typeof(recordarray) == awkward1.layout.ArrayType(awkward1.layout.RecordType(
         awkward1.layout.PrimitiveType("int64"),
@@ -111,6 +115,7 @@ def test_type():
     recordarray.setkey(0, "one")
     recordarray.setkey(1, "two")
     assert str(awkward1.typeof(recordarray)) in ('5 * {"one": int64, "two": var * float64}', '5 * {"two": var * float64, "one": int64}')
+    assert recordarray.lookup == {"one": 0, "two": 1}
 
     assert str(awkward1.layout.RecordType(
         awkward1.layout.PrimitiveType("int32"),

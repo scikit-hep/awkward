@@ -189,8 +189,8 @@ namespace awkward {
     return out;
   }
 
-  const Record Record::withoutkeys() const {
-    return Record(recordarray_.withoutkeys(), at_);
+  const Record Record::astuple() const {
+    return Record(recordarray_.astuple(), at_);
   }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

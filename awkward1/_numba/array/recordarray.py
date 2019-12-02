@@ -8,3 +8,7 @@ import numba.typing.arraydecl
 
 import awkward1.layout
 from ..._numba import cpu, util, content
+
+@numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
+def typeof(val, c):
+    return RecordArrayType()

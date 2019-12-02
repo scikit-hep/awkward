@@ -1152,8 +1152,23 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
         }
         return out;
       })
-      .def_property_readonly("withoutkeys", [](ak::RecordArray& self) -> py::object {
-        return box(self.withoutkeys().shallow_copy());
+      .def_property_readonly("lookup", [](ak::RecordArray& self) -> py::object {
+        std::shared_ptr<ak::RecordArray::Lookup> lookup = self.lookup();
+        if (lookup.get() == nullptr) {
+          return py::none();
+        }
+        else {
+          py::dict out;
+          for (auto pair : *lookup.get()) {
+            std::string cppkey = pair.first;
+            py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(), cppkey.length(), "surrogateescape"));
+            out[pykey] = py::cast(pair.second);
+          }
+          return out;
+        }
+      })
+      .def_property_readonly("astuple", [](ak::RecordArray& self) -> py::object {
+        return box(self.astuple().shallow_copy());
       })
 
       .def("append", [](ak::RecordArray& self, py::object content, py::object key) -> void {
@@ -1215,8 +1230,23 @@ py::class_<ak::Record> make_Record(py::handle m, std::string name) {
         }
         return out;
       })
-      .def_property_readonly("withoutkeys", [](ak::RecordArray& self) -> py::object {
-        return box(self.withoutkeys().shallow_copy());
+      .def_property_readonly("lookup", [](ak::Record& self) -> py::object {
+        std::shared_ptr<ak::RecordArray::Lookup> lookup = self.lookup();
+        if (lookup.get() == nullptr) {
+          return py::none();
+        }
+        else {
+          py::dict out;
+          for (auto pair : *lookup.get()) {
+            std::string cppkey = pair.first;
+            py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(), cppkey.length(), "surrogateescape"));
+            out[pykey] = py::cast(pair.second);
+          }
+          return out;
+        }
+      })
+      .def_property_readonly("astuple", [](ak::RecordArray& self) -> py::object {
+        return box(self.astuple().shallow_copy());
       })
      .def_property_readonly("location", &location<ak::Record>)
 
