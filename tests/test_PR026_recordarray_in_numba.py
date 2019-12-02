@@ -58,6 +58,8 @@ def test_getitem_iter():
         return out
 
     assert f1(recordarray) == 5
+    with pytest.raises(numba.TypingError):
+        f1(recordarray[2])
 
 def test_getitem_range():
     @numba.njit
@@ -65,6 +67,8 @@ def test_getitem_range():
         return q[1:4]
 
     assert awkward1.tolist(f1(recordarray)) == [{'one': 2, 'two': []}, {'one': 3, 'two': [4.4, 5.5]}, {'one': 4, 'two': [6.6]}]
+    with pytest.raises(numba.TypingError):
+        f1(recordarray[2])
 
 def test_getitem_str():
     outer_starts = numpy.array([0, 3, 3], dtype=numpy.int64)
@@ -89,3 +93,10 @@ def test_getitem_str():
     assert sys.getrefcount(outer_offsets) == 3
 
     assert awkward1.tolist(f1(outer_regulararray)) == [[1, 2], [3, 4]]
+
+    @numba.njit
+    def f2(q):
+        return q["two"]
+
+    assert awkward1.tolist(f1(recordarray[2])) == 3
+    assert awkward1.tolist(f2(recordarray[2])) == [4.4, 5.5]

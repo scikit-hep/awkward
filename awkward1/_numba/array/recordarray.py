@@ -19,7 +19,7 @@ def typeof(val, c):
 
 class RecordArrayType(content.ContentType):
     def __init__(self, contenttpes, lookup, reverselookup, idtpe):
-        super(RecordArrayType, self).__init__(name="RecordArrayType([{}], {}, id={})".format(", ".join(x.name for x in contenttpes), lookup, idtpe.name))
+        super(RecordArrayType, self).__init__(name="RecordArrayType([{}], {}, {}, id={})".format(", ".join(x.name for x in contenttpes), lookup, reverselookup, idtpe.name))
         self.contenttpes = contenttpes
         self.lookup = lookup
         self.reverselookup = reverselookup
@@ -94,10 +94,35 @@ class RecordType(numba.types.Type):
     def __init__(self, arraytpe):
         self.arraytpe = arraytpe
         super(RecordType, self).__init__("Record({})".format(self.arraytpe.name))
+        assert isinstance(arraytpe, RecordArrayType)
 
     @property
     def istuple(self):
         return self.arraytpe.istuple
+
+    def getitem_int(self):
+        raise TypeError("Record cannot be sliced by an integer")
+
+    def getitem_range(self):
+        raise TypeError("Record cannot be sliced by a range")
+
+    def getitem_str(self, key):
+        outtpe = self.arraytpe.getitem_str(key)
+        return outtpe.getitem_int()
+
+    def getitem_tuple(self, wheretpe):
+        raise NotImplementedError
+
+    def getitem_next(self, wheretpe, isadvanced):
+        raise NotImplementedError
+
+    def carry(self):
+        raise NotImplementedError
+
+@numba.typing.templates.infer_global(operator.getitem)
+class type_getitem_record(numba.typing.templates.AbstractTemplate):
+    def generic(self, args, kwargs):
+        return content.type_getitem.generic(None, args, kwargs)
 
 def field(i):
     return "f" + str(i)
@@ -257,3 +282,26 @@ def lower_getitem_str(context, builder, sig, args):
     if context.enable_nrt:
         context.nrt.incref(builder, rettpe, out)
     return out
+
+@numba.extending.lower_builtin(operator.getitem, RecordType, numba.types.StringLiteral)
+def lower_getitem_str_record(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+
+    outtpe = tpe.arraytpe.getitem_str(wheretpe.literal_value)
+    outval = lower_getitem_str(context, builder, outtpe(tpe.arraytpe, wheretpe), (proxyin.array, whereval))
+    return outtpe.lower_getitem_int(context, builder, rettpe(outtpe, numba.int64), (outval, proxyin.at))
+
+@numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.BaseTuple)
+def lower_getitem_tuple(context, builder, sig, args):
+    return content.lower_getitem_tuple(context, builder, sig, args)
+
+@numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.Array)
+@numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.List)
+@numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.ArrayCompatible)
+@numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.EllipsisType)
+@numba.extending.lower_builtin(operator.getitem, RecordArrayType, type(numba.typeof(numpy.newaxis)))
+def lower_getitem_other(context, builder, sig, args):
+    return content.lower_getitem_other(context, builder, sig, args)

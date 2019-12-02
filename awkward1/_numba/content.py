@@ -23,10 +23,12 @@ class type_len(numba.typing.templates.AbstractTemplate):
 @numba.typing.templates.infer_global(operator.getitem)
 class type_getitem(numba.typing.templates.AbstractTemplate):
     def generic(self, args, kwargs):
+        import awkward1._numba.array.recordarray
+
         if len(args) == 2 and len(kwargs) == 0:
             arraytpe, wheretpe = args
 
-            if isinstance(arraytpe, ContentType):
+            if isinstance(arraytpe, (ContentType, awkward1._numba.array.recordarray.RecordType)):
                 original_wheretpe = wheretpe
                 if isinstance(wheretpe, numba.types.Integer):
                     return numba.typing.templates.signature(arraytpe.getitem_int(), arraytpe, original_wheretpe)
