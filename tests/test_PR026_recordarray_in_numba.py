@@ -58,3 +58,10 @@ def test_getitem_iter():
         return out
 
     assert f1(recordarray) == 5
+
+def test_getitem_range():
+    @numba.njit
+    def f1(q):
+        return q[1:4]
+
+    assert awkward1.tolist(f1(recordarray)) == [{'one': 2, 'two': []}, {'one': 3, 'two': [4.4, 5.5]}, {'one': 4, 'two': [6.6]}]

@@ -39,9 +39,6 @@ class RecordArrayType(content.ContentType):
     def getitem_range(self):
         return self
 
-    def getitem_str(self):
-        raise NotImplementedError
-
     def getitem_tuple(self, wheretpe):
         nexttpe = RegularArrayType(self, numba.none)
         out = nexttpe.getitem_next(wheretpe, False)
@@ -73,10 +70,6 @@ class RecordArrayType(content.ContentType):
     @property
     def lower_getitem_range(self):
         return lower_getitem_range
-
-    @property
-    def lower_getitem_str(self):
-        return lower_getitem_str
 
     @property
     def lower_getitem_next(self):
@@ -210,3 +203,33 @@ def lower_getitem_int(context, builder, sig, args):
     if context.enable_nrt:
         context.nrt.incref(builder, tpe, val)
     return numba.targets.imputils.impl_ret_new_ref(context, builder, rettpe, proxyout._getvalue())
+
+@numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.slice2_type)
+def lower_getitem_range(context, builder, sig, args):
+    import awkward1._numba.identity
+
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+
+    proxyslicein = context.make_helper(builder, wheretpe, value=whereval)
+    numba.targets.slicing.guard_invalid_slice(context, builder, wheretpe, proxyslicein)
+    numba.targets.slicing.fix_slice(builder, proxyslicein, util.cast(context, builder, numba.int64, numba.intp, proxyin.length))
+    proxysliceout = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
+    proxysliceout.start = proxyslicein.start
+    proxysliceout.stop = proxyslicein.stop
+    proxysliceout.step = proxyslicein.step
+    sliceout = proxysliceout._getvalue()
+
+    proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
+    proxyout.length = util.cast(context, builder, numba.intp, numba.int64, builder.sub(proxyslicein.stop, proxyslicein.start))
+    for i, t in enumerate(tpe.contenttpes):
+        setattr(proxyout, field(i), t.lower_getitem_range(context, builder, t.getitem_range()(t, numba.types.slice2_type), (getattr(proxyin, field(i)), sliceout)))
+    if tpe.idtpe != numba.none:
+        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
+
+    out = proxyout._getvalue()
+    if context.enable_nrt:
+        context.nrt.incref(builder, rettpe, out)
+    return out
