@@ -14,7 +14,7 @@ namespace awkward {
   template <typename T>
   class ListArrayOf: public Content {
   public:
-    ListArrayOf<T>(const std::shared_ptr<Identity> id, const IndexOf<T> starts, const IndexOf<T> stops, const std::shared_ptr<Content> content)
+    ListArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const IndexOf<T> starts, const IndexOf<T> stops, const std::shared_ptr<Content> content)
         : id_(id)
         , starts_(starts)
         , stops_(stops)
@@ -51,6 +51,7 @@ namespace awkward {
 
   private:
     std::shared_ptr<Identity> id_;
+    std::shared_ptr<Type> type_;
     const IndexOf<T> starts_;
     const IndexOf<T> stops_;
     const std::shared_ptr<Content> content_;

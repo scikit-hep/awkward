@@ -140,10 +140,10 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::shallow_copy() const {
     if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(id_, length(), istuple()));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), length(), istuple()));
     }
     else {
-      return std::shared_ptr<Content>(new RecordArray(id_, contents_, lookup_, reverselookup_));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents_, lookup_, reverselookup_));
     }
   }
 
@@ -178,27 +178,27 @@ namespace awkward {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
-      return std::shared_ptr<Content>(new RecordArray(id_, regular_stop - regular_start, istuple()));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), regular_stop - regular_start, istuple()));
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range(start, stop));
       }
-      return std::shared_ptr<Content>(new RecordArray(id_, contents, lookup_, reverselookup_));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents, lookup_, reverselookup_));
     }
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(id_, stop - start, istuple()));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), stop - start, istuple()));
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range_nowrap(start, stop));
       }
-      return std::shared_ptr<Content>(new RecordArray(id_, contents, lookup_, reverselookup_));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents, lookup_, reverselookup_));
     }
   }
 
@@ -207,7 +207,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(id_, length(), istuple());
+    RecordArray out(id_, Type::none(), length(), istuple());
     if (istuple()) {
       for (auto key : keys) {
         out.append(field(key).get()->getitem_range_nowrap(0, length()));
@@ -227,7 +227,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
-      return std::shared_ptr<Content>(new RecordArray(id, carry.length(), istuple()));
+      return std::shared_ptr<Content>(new RecordArray(id, Type::none(), carry.length(), istuple()));
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
@@ -238,7 +238,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
-      return std::shared_ptr<Content>(new RecordArray(id, contents, lookup_, reverselookup_));
+      return std::shared_ptr<Content>(new RecordArray(id, Type::none(), contents, lookup_, reverselookup_));
     }
   }
 
@@ -382,7 +382,7 @@ namespace awkward {
   }
 
   const RecordArray RecordArray::astuple() const {
-    return RecordArray(id_, contents_);
+    return RecordArray(id_, Type::none(), contents_);
   }
 
   void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {
@@ -428,7 +428,7 @@ namespace awkward {
       return out.get()->getitem_next(nexthead, nexttail, advanced);
     }
     else if (contents_.size() == 0) {
-      RecordArray out(Identity::none(), length(), istuple());
+      RecordArray out(Identity::none(), Type::none(), length(), istuple());
       return out.getitem_next(nexthead, nexttail, advanced);
     }
     else {
@@ -436,7 +436,7 @@ namespace awkward {
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_next(head, emptytail, advanced));
       }
-      RecordArray out(Identity::none(), contents, lookup_, reverselookup_);
+      RecordArray out(Identity::none(), Type::none(), contents, lookup_, reverselookup_);
       return out.getitem_next(nexthead, nexttail, advanced);
     }
   }

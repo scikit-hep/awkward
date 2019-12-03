@@ -12,6 +12,8 @@ namespace awkward {
   public:
     virtual ~Type() { }
 
+    static std::shared_ptr<Type> none() { return std::shared_ptr<Type>(nullptr); }
+
     std::string tostring() const { return tostring_part("", "", ""); };
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const = 0;
     virtual const std::shared_ptr<Type> shallow_copy() const = 0;

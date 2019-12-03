@@ -15,7 +15,7 @@
 namespace awkward {
   class RegularArray: public Content {
   public:
-    RegularArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Content> content, int64_t size)
+    RegularArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<Content> content, int64_t size)
         : id_(id)
         , content_(content)
         , size_(size) { }
@@ -50,6 +50,7 @@ namespace awkward {
 
   private:
     std::shared_ptr<Identity> id_;
+    std::shared_ptr<Type> type_;
     const std::shared_ptr<Content> content_;
     int64_t size_;
   };

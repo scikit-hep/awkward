@@ -15,7 +15,7 @@
 namespace awkward {
   class NumpyArray: public Content {
   public:
-    NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<void> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
+    NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<void> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
         : id_(id)
         , ptr_(ptr)
         , shape_(shape)
@@ -105,6 +105,7 @@ namespace awkward {
 
   private:
     std::shared_ptr<Identity> id_;
+    std::shared_ptr<Type> type_;
     std::shared_ptr<void> ptr_;
     std::vector<ssize_t> shape_;
     std::vector<ssize_t> strides_;

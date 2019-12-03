@@ -15,7 +15,7 @@
 namespace awkward {
   class EmptyArray: public Content {
   public:
-    EmptyArray(const std::shared_ptr<Identity> id): id_(id) { }
+    EmptyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type): id_(id) { }
 
     virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const { return id_; }
@@ -46,6 +46,7 @@ namespace awkward {
 
   private:
     std::shared_ptr<Identity> id_;
+    std::shared_ptr<Type> type_;
   };
 }
 

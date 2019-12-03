@@ -17,7 +17,7 @@ namespace awkward {
     typedef std::unordered_map<std::string, size_t> Lookup;
     typedef std::vector<std::string> ReverseLookup;
 
-    RecordArray(const std::shared_ptr<Identity> id, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
+    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
         : id_(id)
         , contents_(contents)
         , lookup_(lookup)
@@ -25,7 +25,7 @@ namespace awkward {
         , length_(0) {
       assert(contents.size() != 0);
     }
-    RecordArray(const std::shared_ptr<Identity> id, const std::vector<std::shared_ptr<Content>>& contents)
+    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::vector<std::shared_ptr<Content>>& contents)
         : id_(id)
         , contents_(contents)
         , lookup_(nullptr)
@@ -33,7 +33,7 @@ namespace awkward {
         , length_(0) {
       assert(contents.size() != 0);
     }
-    RecordArray(const std::shared_ptr<Identity> id, int64_t length, bool istuple)
+    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, int64_t length, bool istuple)
         : id_(id)
         , contents_()
         , lookup_(istuple ? nullptr : new Lookup)
@@ -92,6 +92,7 @@ namespace awkward {
 
   private:
     std::shared_ptr<Identity> id_;
+    std::shared_ptr<Type> type_;
     std::vector<std::shared_ptr<Content>> contents_;
     std::shared_ptr<Lookup> lookup_;
     std::shared_ptr<ReverseLookup> reverselookup_;

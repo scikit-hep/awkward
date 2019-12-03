@@ -44,7 +44,7 @@ namespace awkward {
   template <typename T>
   class RawArrayOf: public Content {
   public:
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<T> ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
+    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<T> ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
         : id_(id)
         , ptr_(ptr)
         , offset_(offset)
@@ -53,14 +53,14 @@ namespace awkward {
           assert(sizeof(T) == itemsize);
         }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<T> ptr, const int64_t length)
+    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<T> ptr, const int64_t length)
         : id_(id)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const int64_t length)
+    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const int64_t length)
         : id_(id)
         , ptr_(std::shared_ptr<T>(new T[(size_t)length], awkward::util::array_deleter<T>()))
         , offset_(0)
@@ -218,7 +218,7 @@ namespace awkward {
 
     virtual int64_t length() const { return length_; }
 
-    virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, ptr_, offset_, length_, itemsize_)); }
+    virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, Type::none(), ptr_, offset_, length_, itemsize_)); }
 
     virtual void check_for_iteration() const {
       if (id_.get() != nullptr  &&  id_.get()->length() < length_) {
@@ -260,7 +260,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_range_nowrap(start, stop);
       }
-      return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + start, stop - start, itemsize_));
+      return std::shared_ptr<Content>(new RawArrayOf<T>(id, Type::none(), ptr_, offset_ + start, stop - start, itemsize_));
     }
 
     virtual const std::shared_ptr<Content> getitem_field(const std::string& key) const {
@@ -301,7 +301,7 @@ namespace awkward {
         id = id_.get()->getitem_carry_64(carry);
       }
 
-      return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr, 0, carry.length(), itemsize_));
+      return std::shared_ptr<Content>(new RawArrayOf<T>(id, Type::none(), ptr, 0, carry.length(), itemsize_));
     }
 
     virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
@@ -367,6 +367,7 @@ namespace awkward {
 
   private:
     std::shared_ptr<Identity> id_;
+    std::shared_ptr<Type> type_;
     const std::shared_ptr<T> ptr_;
     const int64_t offset_;
     const int64_t length_;
