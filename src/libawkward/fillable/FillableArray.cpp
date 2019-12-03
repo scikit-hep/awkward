@@ -142,6 +142,17 @@ uint8_t awkward_FillableArray_clear(void* fillablearray) {
   return 0;
 }
 
+uint8_t awkward_FillableArray_active(void* fillablearray, bool* result) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    *result = obj->active();
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
 uint8_t awkward_FillableArray_null(void* fillablearray) {
   awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
   try {
@@ -201,6 +212,83 @@ uint8_t awkward_FillableArray_endlist(void* fillablearray) {
   awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
   try {
     obj->endlist();
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_begintuple(void* fillablearray, int64_t numfields) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->begintuple(numfields);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_index(void* fillablearray, int64_t index) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->index(index);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_endtuple(void* fillablearray) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->endtuple();
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_beginrecord(void* fillablearray, int64_t disambiguator) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->beginrecord(disambiguator);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_field_fast(void* fillablearray, const char* key) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->field_fast(key);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_field_check(void* fillablearray, const char* key) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->field_check(key);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_endrecord(void* fillablearray) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->endrecord();
   }
   catch (...) {
     return 1;

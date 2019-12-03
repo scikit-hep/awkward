@@ -64,12 +64,20 @@ extern "C" {
   uint8_t awkward_FillableArray_length(void* fillablearray, int64_t* result);
   uint8_t awkward_FillableArray_clear(void* fillablearray);
 
+  uint8_t awkward_FillableArray_active(void* fillablearray, bool* result);
   uint8_t awkward_FillableArray_null(void* fillablearray);
   uint8_t awkward_FillableArray_boolean(void* fillablearray, bool x);
   uint8_t awkward_FillableArray_integer(void* fillablearray, int64_t x);
   uint8_t awkward_FillableArray_real(void* fillablearray, double x);
   uint8_t awkward_FillableArray_beginlist(void* fillablearray);
   uint8_t awkward_FillableArray_endlist(void* fillablearray);
+  uint8_t awkward_FillableArray_begintuple(void* fillablearray, int64_t numfields);
+  uint8_t awkward_FillableArray_index(void* fillablearray, int64_t index);
+  uint8_t awkward_FillableArray_endtuple(void* fillablearray);
+  uint8_t awkward_FillableArray_beginrecord(void* fillablearray, int64_t disambiguator);
+  uint8_t awkward_FillableArray_field_fast(void* fillablearray, const char* key);
+  uint8_t awkward_FillableArray_field_check(void* fillablearray, const char* key);
+  uint8_t awkward_FillableArray_endrecord(void* fillablearray);
 }
 
 #endif // AWKWARD_FILLABLE_H_

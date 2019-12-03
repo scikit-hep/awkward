@@ -69,7 +69,7 @@ class ListArrayType(content.ContentType):
             return awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.idtpe)
 
         elif isinstance(headtpe, numba.types.StringLiteral):
-            raise NotImplementedError("string-literal")
+            return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
 
         elif isinstance(headtpe, numba.types.EllipsisType):
             raise NotImplementedError("ellipsis")
@@ -393,7 +393,9 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         return proxyout._getvalue()
 
     elif isinstance(headtpe, numba.types.StringLiteral):
-        raise NotImplementedError("ListArray.getitem_next(StringLiteral)")
+        nexttpe = arraytpe.getitem_str(headtpe.literal_value)
+        nextval = lower_getitem_str(context, builder, nexttpe(arraytpe, headtpe), (arrayval, headval))
+        return lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, advanced)
 
     elif isinstance(headtpe, numba.types.EllipsisType):
         raise NotImplementedError("ListArray.getitem_next(ellipsis)")
