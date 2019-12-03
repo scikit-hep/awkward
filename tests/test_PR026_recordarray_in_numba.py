@@ -133,3 +133,33 @@ def test_getitem_tuple():
         return q["two", 1:-1]
 
     assert awkward1.tolist(f4(recordarray2)) == [[4.4], [5.5], [6.6, 7.7, 8.8]]
+
+def test_fillablearray():
+    fillablearray = awkward1.layout.FillableArray()
+
+    @numba.njit
+    def f1(q):
+        q.begintuple(3)
+        q.index(0); q.boolean(True)
+        q.index(1); q.integer(1)
+        q.index(2); q.real(1.1)
+        q.endtuple()
+
+        q.begintuple(3)
+        q.index(0); q.boolean(False)
+        q.index(1); q.integer(1)
+        q.index(2); q.real(1.1)
+        q.endtuple()
+
+        q.begintuple(3)
+        q.index(0); q.boolean(True)
+        q.index(1); q.integer(1)
+        q.index(2); q.real(1.1)
+        q.endtuple()
+
+        return q
+
+    fillablearray2 = f1(fillablearray)
+
+    assert awkward1.tolist(fillablearray.snapshot()) == [(True, 1, 1.1), (False, 1, 1.1), (True, 1, 1.1)]
+    assert awkward1.tolist(fillablearray2.snapshot()) == [(True, 1, 1.1), (False, 1, 1.1), (True, 1, 1.1)]

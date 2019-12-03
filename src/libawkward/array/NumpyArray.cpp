@@ -87,7 +87,12 @@ namespace awkward {
         if (i != 0) {
           out << " ";
         }
-        out << ptr[i];
+        if (std::is_same<T, bool>::value) {
+          out << (ptr[i] ? "true" : "false");
+        }
+        else {
+          out << ptr[i];
+        }
       }
     }
     else {
@@ -95,14 +100,24 @@ namespace awkward {
         if (i != 0) {
           out << " ";
         }
-        out << ptr[i];
+        if (std::is_same<T, bool>::value) {
+          out << (ptr[i] ? "true" : "false");
+        }
+        else {
+          out << ptr[i];
+        }
       }
       out << " ... ";
       for (int64_t i = length - 5;  i < length;  i++) {
         if (i != length - 5) {
           out << " ";
         }
-        out << ptr[i];
+        if (std::is_same<T, bool>::value) {
+          out << (ptr[i] ? "true" : "false");
+        }
+        else {
+          out << ptr[i];
+        }
       }
     }
   }
@@ -148,6 +163,9 @@ namespace awkward {
     }
     else if (ndim() == 1  &&  format_.compare("d") == 0) {
       tostring_as<double>(out, reinterpret_cast<double*>(byteptr()), length());
+    }
+    else if (ndim() == 1  &&  format_.compare("?") == 0) {
+      tostring_as<bool>(out, reinterpret_cast<bool*>(byteptr()), length());
     }
     else {
       ssize_t len = bytelength();

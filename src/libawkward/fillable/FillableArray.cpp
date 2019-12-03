@@ -49,10 +49,6 @@ namespace awkward {
     return snapshot().get()->getitem(where);
   }
 
-  bool FillableArray::active() const {
-    return fillable_.get()->active();
-  }
-
   void FillableArray::null() {
     maybeupdate(fillable_.get()->null());
   }
@@ -135,17 +131,6 @@ uint8_t awkward_FillableArray_clear(void* fillablearray) {
   awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
   try {
     obj->clear();
-  }
-  catch (...) {
-    return 1;
-  }
-  return 0;
-}
-
-uint8_t awkward_FillableArray_active(void* fillablearray, bool* result) {
-  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
-  try {
-    *result = obj->active();
   }
   catch (...) {
     return 1;
