@@ -99,8 +99,32 @@ namespace awkward {
     builder.endlist();
   }
 
+  const std::shared_ptr<Type> RegularArray::baretype_part() const {
+    return std::shared_ptr<Type>(new RegularType(content_.get()->baretype_part(), size_));
+  }
+
   const std::shared_ptr<Type> RegularArray::type_part() const {
-    return std::shared_ptr<Type>(new RegularType(content_.get()->type_part(), size_));
+    if (type_.get() == nullptr) {
+      return std::shared_ptr<Type>(new RegularType(content_.get()->type_part(), size_));
+    }
+    else {
+      return type_;
+    }
+  }
+
+  void RegularArray::settype(const std::shared_ptr<Type> type) {
+    if (accepts(type)) {
+      // FIXME: apply to descendants
+      type_ = type;
+    }
+    else {
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype_part()));
+    }
+  }
+
+  bool RegularArray::accepts(const std::shared_ptr<Type> type) {
+    // FIXME: actually check
+    return true;
   }
 
   int64_t RegularArray::length() const {

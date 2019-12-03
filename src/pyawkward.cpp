@@ -976,16 +976,30 @@ py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
           .def("setid", [](T& self, py::object id) -> void {
            self.setid(unbox_id_none(id));
           })
-         .def("setid", [](T& self) -> void {
-           self.setid();
-         })
-         .def("__len__", &len<T>)
-         .def("__getitem__", &getitem<T>)
-         .def("__iter__", &iter<T>)
-         .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
-         .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
-         .def_property_readonly("type", &ak::Content::type)
-         .def_property_readonly("location", &location<T>)
+          .def("setid", [](T& self) -> void {
+            self.setid();
+          })
+          .def_property_readonly("baretype", &ak::Content::baretype)
+          .def_property("type", &ak::Content::type, [](T& self, py::object type) -> void {
+            std::shared_ptr<ak::Type> unboxed = unbox_type(type);
+            if (ak::ArrayType* arraytype = dynamic_cast<ak::ArrayType*>(unboxed.get())) {
+              unboxed = arraytype->type();
+            }
+            self.settype(unboxed);
+          })
+          .def("accepts", [](T& self, py::object type) -> bool {
+            std::shared_ptr<ak::Type> unboxed = unbox_type(type);
+            if (ak::ArrayType* arraytype = dynamic_cast<ak::ArrayType*>(unboxed.get())) {
+              unboxed = arraytype->type();
+            }
+            return self.accepts(unboxed);
+          })
+          .def("__len__", &len<T>)
+          .def("__getitem__", &getitem<T>)
+          .def("__iter__", &iter<T>)
+          .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
+          .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
+          .def_property_readonly("location", &location<T>)
 
   ;
 }

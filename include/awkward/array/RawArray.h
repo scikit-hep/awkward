@@ -180,7 +180,7 @@ namespace awkward {
       }
     }
 
-    virtual const std::shared_ptr<Type> type_part() const {
+    virtual const std::shared_ptr<Type> baretype_part() const {
       if (std::is_same<T, double>::value) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
       }
@@ -214,6 +214,29 @@ namespace awkward {
       else {
         throw std::invalid_argument(std::string("RawArrayOf<") + typeid(T).name() + std::string("> cannot be expressed as a PrimitiveType"));
       }
+    }
+
+    virtual const std::shared_ptr<Type> type_part() const {
+      if (type_.get() == nullptr) {
+        return baretype_part();
+      }
+      else {
+        return type_;
+      }
+    }
+
+    virtual void settype(const std::shared_ptr<Type> type) {
+      if (accepts(type)) {
+        type_ = type;
+      }
+      else {
+        throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype_part()));
+      }
+    }
+
+    virtual bool accepts(const std::shared_ptr<Type> type) {
+      // FIXME: actually check
+      return true;
     }
 
     virtual int64_t length() const { return length_; }

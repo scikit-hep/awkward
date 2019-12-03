@@ -114,12 +114,40 @@ namespace awkward {
     builder.endlist();
   }
 
-  const std::shared_ptr<Type> RecordArray::type_part() const {
+  const std::shared_ptr<Type> RecordArray::baretype_part() const {
     std::vector<std::shared_ptr<Type>> types;
     for (auto item : contents_) {
-      types.push_back(item.get()->type_part());
+      types.push_back(item.get()->baretype_part());
     }
     return std::shared_ptr<Type>(new RecordType(types, lookup_, reverselookup_));
+  }
+
+  const std::shared_ptr<Type> RecordArray::type_part() const {
+    if (type_.get() == nullptr) {
+      std::vector<std::shared_ptr<Type>> types;
+      for (auto item : contents_) {
+        types.push_back(item.get()->type_part());
+      }
+      return std::shared_ptr<Type>(new RecordType(types, lookup_, reverselookup_));
+    }
+    else {
+      return type_;
+    }
+  }
+
+  void RecordArray::settype(const std::shared_ptr<Type> type) {
+    if (accepts(type)) {
+      // FIXME: apply to descendants
+      type_ = type;
+    }
+    else {
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype_part()));
+    }
+  }
+
+  bool RecordArray::accepts(const std::shared_ptr<Type> type) {
+    // FIXME: actually check
+    return true;
   }
 
   int64_t RecordArray::length() const {

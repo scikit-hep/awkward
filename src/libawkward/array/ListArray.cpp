@@ -160,8 +160,35 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Type> ListArrayOf<T>::baretype_part() const {
+    return std::shared_ptr<Type>(new ListType(content_.get()->baretype_part()));
+  }
+
+  template <typename T>
   const std::shared_ptr<Type> ListArrayOf<T>::type_part() const {
-    return std::shared_ptr<Type>(new ListType(content_.get()->type_part()));
+    if (type_.get() == nullptr) {
+      return std::shared_ptr<Type>(new ListType(content_.get()->type_part()));
+    }
+    else {
+      return type_;
+    }
+  }
+
+  template <typename T>
+  void ListArrayOf<T>::settype(const std::shared_ptr<Type> type) {
+    if (accepts(type)) {
+      // FIXME: apply to descendants
+      type_ = type;
+    }
+    else {
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype_part()));
+    }
+  }
+
+  template <typename T>
+  bool ListArrayOf<T>::accepts(const std::shared_ptr<Type> type) {
+    // FIXME: actually check
+    return true;
   }
 
   template <typename T>

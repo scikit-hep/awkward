@@ -261,7 +261,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> NumpyArray::type_part() const {
+  const std::shared_ptr<Type> NumpyArray::baretype_part() const {
     if (ndim() == 1) {
       if (format_.compare("d") == 0) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
@@ -315,12 +315,36 @@ namespace awkward {
     }
     else {
       NumpyArray tmp(id_, Type::none(), ptr_, std::vector<ssize_t>({ 1 }), std::vector<ssize_t>({ itemsize_ }), byteoffset_, itemsize_, format_);
-      std::shared_ptr<Type> out = tmp.type_part();
+      std::shared_ptr<Type> out = tmp.baretype_part();
       for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
         out = std::shared_ptr<Type>(new RegularType(out, (int64_t)shape_[i]));
       }
       return out;
     }
+  }
+
+  const std::shared_ptr<Type> NumpyArray::type_part() const {
+    if (type_.get() == nullptr) {
+      return baretype_part();
+    }
+    else {
+      return type_;
+    }
+  }
+
+  void NumpyArray::settype(const std::shared_ptr<Type> type) {
+    if (accepts(type)) {
+      // FIXME: apply to descendants
+      type_ = type;
+    }
+    else {
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype_part()));
+    }
+  }
+
+  bool NumpyArray::accepts(const std::shared_ptr<Type> type) {
+    // FIXME: actually check
+    return true;
   }
 
   int64_t NumpyArray::length() const {

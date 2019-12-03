@@ -23,7 +23,10 @@ namespace awkward {
     virtual void setid(const std::shared_ptr<Identity> id) = 0;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
     virtual void tojson_part(ToJson& builder) const = 0;
+    virtual const std::shared_ptr<Type> baretype_part() const = 0;
     virtual const std::shared_ptr<Type> type_part() const = 0;
+    virtual void settype(const std::shared_ptr<Type> type) = 0;
+    virtual bool accepts(const std::shared_ptr<Type> type) = 0;
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
     virtual void check_for_iteration() const = 0;
@@ -39,6 +42,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const = 0;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const = 0;
 
+    const std::shared_ptr<Type> baretype() const;
     const std::shared_ptr<Type> type() const;
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;

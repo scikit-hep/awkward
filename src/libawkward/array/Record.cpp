@@ -61,8 +61,20 @@ namespace awkward {
     builder.endrec();
   }
 
+  const std::shared_ptr<Type> Record::baretype_part() const {
+    return array_.baretype_part();
+  }
+
   const std::shared_ptr<Type> Record::type_part() const {
     return array_.type_part();
+  }
+
+  void Record::settype(const std::shared_ptr<Type> type) {
+    array_.settype(type);
+  }
+
+  bool Record::accepts(const std::shared_ptr<Type> type) {
+    return array_.accepts(type);
   }
 
   int64_t Record::length() const {
