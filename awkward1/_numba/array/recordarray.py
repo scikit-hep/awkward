@@ -64,8 +64,9 @@ class RecordArrayType(content.ContentType):
         else:
             contenttpes = []
             for t in self.contenttpes:
-                contenttpes.append(t.getitem_next(wheretpe, isadvanced))
-            return RecordArrayType(contenttpes, self.lookup, self.reverselookup, self.idtpe)
+                contenttpes.append(t.getitem_next(numba.types.Tuple((headtpe,)), isadvanced))
+            nexttpe = RecordArrayType(contenttpes, self.lookup, self.reverselookup, numba.none)
+            return nexttpe.getitem_next(tailtpe, isadvanced)
 
         # elif isinstance(headtpe, numba.types.Integer):
         #     raise NotImplementedError
@@ -150,6 +151,10 @@ class type_getitem_record(numba.typing.templates.AbstractTemplate):
 
             if isinstance(tpe, RecordType):
                 original_wheretpe = wheretpe
+                if isinstance(wheretpe, numba.types.Integer):
+                    raise TypeError("Record[int]")
+                if isinstance(wheretpe, numba.types.SliceType):
+                    raise TypeError("Record[slice]")
                 if isinstance(wheretpe, numba.types.StringLiteral):
                     return numba.typing.templates.signature(tpe.getitem_str(wheretpe.literal_value), tpe, original_wheretpe)
 
@@ -355,5 +360,68 @@ def lower_getitem_tuple_record(context, builder, sig, args):
 def lower_getitem_other(context, builder, sig, args):
     return content.lower_getitem_other(context, builder, sig, args)
 
-def lower_getitem_next(context, builder, arraytpe, wheretpe):
-    raise Exception("WOWIE")
+def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval, advanced):
+    if len(wheretpe.types) == 0:
+        return arrayval
+
+    headtpe = wheretpe.types[0]
+    tailtpe = numba.types.Tuple(wheretpe.types[1:])
+    headval = numba.cgutils.unpack_tuple(builder, whereval)[0]
+    tailval = context.make_tuple(builder, tailtpe, numba.cgutils.unpack_tuple(builder, whereval)[1:])
+
+    proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+
+    if isinstance(headtpe, numba.types.StringLiteral):
+        raise NotImplementedError("RecordArray.getitem_next(StringLiteral)")
+
+    else:
+        nexttpe = RecordArrayType([t.getitem_next(numba.types.Tuple((headtpe,)), advanced is not None) for t in arraytpe.contenttpes], arraytpe.lookup, arraytpe.reverselookup, numba.none)
+        proxyout = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
+        proxyout.length = proxyin.length
+        wrappedheadtpe = numba.types.Tuple((headtpe,))
+        wrappedheadval = context.make_tuple(builder, wrappedheadtpe, (headval,))
+
+        for i, t in enumerate(arraytpe.contenttpes):
+            setattr(proxyout, field(i), t.lower_getitem_next(context, builder, t, wrappedheadtpe, getattr(proxyin, field(i)), wrappedheadval, advanced))
+        nextval = proxyout._getvalue()
+
+        rettpe = nexttpe.getitem_next(tailtpe, advanced is not None)
+        return rettpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, advanced)
+
+    # if isinstance(headtpe, numba.types.Integer):
+    #     raise NotImplementedError("RecordArray.getitem_next(at)")
+    #
+    # elif isinstance(headtpe, numba.types.SliceType):
+    #     raise NotImplementedError("RecordArray.getitem_next(range)")
+    #
+    # elif isinstance(headtpe, numba.types.StringLiteral):
+    #     raise NotImplementedError("RecordArray.getitem_next(StringLiteral)")
+    #
+    # elif isinstance(headtpe, numba.types.EllipsisType):
+    #     raise NotImplementedError("RecordArray.getitem_next(ellipsis)")
+    #
+    # elif isinstance(headtpe, type(numba.typeof(numpy.newaxis))):
+    #     raise NotImplementedError("RecordArray.getitem_next(newaxis)")
+    #
+    # elif isinstance(headtpe, numba.types.Array):
+    #     if headtpe.ndim != 1:
+    #         raise NotImplementedError("array.ndim != 1")
+    #     if advanced is None:
+    #         raise NotImplementedError("RecordArray.getitem_next(array, not advanced)")
+    #     else:
+    #         raise NotImplementedError("RecordArray.getitem_next(array, advanced)")
+    #
+    # else:
+    #     raise AssertionError(headtpe)
+
+def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
+    import awkward1._numba.identity
+    rettpe = arraytpe.carry()
+    proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+    proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
+    proxyout.length = util.arraylen(context, builder, carrytpe, carryval, totpe=numba.int64)
+    for i, t in enumerate(arraytpe.contenttpes):
+        setattr(proxyout, field(i), t.lower_carry(context, builder, t, carrytpe, getattr(proxyin, field(i)), carryval))
+    if rettpe.idtpe != numba.none:
+        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, rettpe.idtpe, carrytpe, proxyin.id, carryval)
+    return proxyout._getvalue()

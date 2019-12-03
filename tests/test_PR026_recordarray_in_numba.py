@@ -28,8 +28,8 @@ def test_boxing():
     def f2(q):
         return q
 
-    assert awkward1.tolist(f2(recordarray)) == [{'one': 1, 'two': [1.1, 2.2, 3.3]}, {'one': 2, 'two': []}, {'one': 3, 'two': [4.4, 5.5]}, {'one': 4, 'two': [6.6]}, {'one': 5, 'two': [7.7, 8.8, 9.9]}]
-    assert awkward1.tolist(f2(recordarray[2])) == {'one': 3, 'two': [4.4, 5.5]}
+    assert awkward1.tolist(f2(recordarray)) == [{"one": 1, "two": [1.1, 2.2, 3.3]}, {"one": 2, "two": []}, {"one": 3, "two": [4.4, 5.5]}, {"one": 4, "two": [6.6]}, {"one": 5, "two": [7.7, 8.8, 9.9]}]
+    assert awkward1.tolist(f2(recordarray[2])) == {"one": 3, "two": [4.4, 5.5]}
 
 def test_len():
     @numba.njit
@@ -45,7 +45,7 @@ def test_getitem_int():
     def f1(q):
         return q[2]
 
-    assert awkward1.tolist(f1(recordarray)) == {'one': 3, 'two': [4.4, 5.5]}
+    assert awkward1.tolist(f1(recordarray)) == {"one": 3, "two": [4.4, 5.5]}
     with pytest.raises(numba.TypingError):
         f1(recordarray[2])
 
@@ -66,7 +66,7 @@ def test_getitem_range():
     def f1(q):
         return q[1:4]
 
-    assert awkward1.tolist(f1(recordarray)) == [{'one': 2, 'two': []}, {'one': 3, 'two': [4.4, 5.5]}, {'one': 4, 'two': [6.6]}]
+    assert awkward1.tolist(f1(recordarray)) == [{"one": 2, "two": []}, {"one": 3, "two": [4.4, 5.5]}, {"one": 4, "two": [6.6]}]
     with pytest.raises(numba.TypingError):
         f1(recordarray[2])
 
@@ -108,12 +108,16 @@ def test_getitem_tuple():
     listoffsetarray2 = awkward1.layout.ListOffsetArray64(offsets2, content2)
     recordarray2 = awkward1.layout.RecordArray({"one": regulararray, "two": listoffsetarray2})
 
-    assert awkward1.tolist(recordarray2) == [{'one': [1, 2], 'two': [1.1, 2.2, 3.3]}, {'one': [3, 4], 'two': [4.4]}, {'one': [5, 6], 'two': [5.5]}, {'one': [7, 8], 'two': [6.6, 7.7, 8.8]}, {'one': [9, 10], 'two': [9.9]}]
+    assert awkward1.tolist(recordarray2) == [{"one": [1, 2], "two": [1.1, 2.2, 3.3]}, {"one": [3, 4], "two": [4.4]}, {"one": [5, 6], "two": [5.5]}, {"one": [7, 8], "two": [6.6, 7.7, 8.8]}, {"one": [9, 10], "two": [9.9]}]
 
-    # @numba.njit
-    # def f1(q):
-    #     return q[:, 0]
-    #
-    # print(awkward1.tolist(f1(recordarray2)))
-    #
-    # raise Exception
+    @numba.njit
+    def f1(q):
+        return q[:, -1]
+
+    assert awkward1.tolist(f1(recordarray2)) == [{"one": 2, "two": 3.3}, {"one": 4, "two": 4.4}, {"one": 6, "two": 5.5}, {"one": 8, "two": 8.8}, {"one": 10, "two": 9.9}]
+
+    @numba.njit
+    def f2(q):
+        return q[:, -2:]
+
+    assert awkward1.tolist(f2(recordarray2)) == [{"one": [1, 2], "two": [2.2, 3.3]}, {"one": [3, 4], "two": [4.4]}, {"one": [5, 6], "two": [5.5]}, {"one": [7, 8], "two": [7.7, 8.8]}, {"one": [9, 10], "two": [9.9]}]
