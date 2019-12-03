@@ -168,10 +168,10 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::shallow_copy() const {
     if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), length(), istuple()));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), length(), istuple()));   // FIXME: Type::none()
     }
     else {
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents_, lookup_, reverselookup_));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents_, lookup_, reverselookup_));   // FIXME: Type::none()
     }
   }
 
@@ -206,27 +206,27 @@ namespace awkward {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), regular_stop - regular_start, istuple()));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), regular_stop - regular_start, istuple()));   // FIXME: Type::none()
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range(start, stop));
       }
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents, lookup_, reverselookup_));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents, lookup_, reverselookup_));   // FIXME: Type::none()
     }
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), stop - start, istuple()));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), stop - start, istuple()));   // FIXME: Type::none()
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range_nowrap(start, stop));
       }
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents, lookup_, reverselookup_));
+      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents, lookup_, reverselookup_));   // FIXME: Type::none()
     }
   }
 
@@ -235,7 +235,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(id_, Type::none(), length(), istuple());
+    RecordArray out(id_, Type::none(), length(), istuple());   // FIXME: Type::none()
     if (istuple()) {
       for (auto key : keys) {
         out.append(field(key).get()->getitem_range_nowrap(0, length()));
@@ -255,7 +255,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
-      return std::shared_ptr<Content>(new RecordArray(id, Type::none(), carry.length(), istuple()));
+      return std::shared_ptr<Content>(new RecordArray(id, Type::none(), carry.length(), istuple()));   // FIXME: Type::none()
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
@@ -266,7 +266,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
-      return std::shared_ptr<Content>(new RecordArray(id, Type::none(), contents, lookup_, reverselookup_));
+      return std::shared_ptr<Content>(new RecordArray(id, Type::none(), contents, lookup_, reverselookup_));   // FIXME: Type::none()
     }
   }
 
@@ -410,7 +410,7 @@ namespace awkward {
   }
 
   const RecordArray RecordArray::astuple() const {
-    return RecordArray(id_, Type::none(), contents_);
+    return RecordArray(id_, Type::none(), contents_);   // FIXME: Type::none()
   }
 
   void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {
@@ -456,7 +456,7 @@ namespace awkward {
       return out.get()->getitem_next(nexthead, nexttail, advanced);
     }
     else if (contents_.size() == 0) {
-      RecordArray out(Identity::none(), Type::none(), length(), istuple());
+      RecordArray out(Identity::none(), Type::none(), length(), istuple());   // FIXME: Type::none()
       return out.getitem_next(nexthead, nexttail, advanced);
     }
     else {
@@ -464,7 +464,7 @@ namespace awkward {
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_next(head, emptytail, advanced));
       }
-      RecordArray out(Identity::none(), Type::none(), contents, lookup_, reverselookup_);
+      RecordArray out(Identity::none(), Type::none(), contents, lookup_, reverselookup_);   // FIXME: Type::none()
       return out.getitem_next(nexthead, nexttail, advanced);
     }
   }

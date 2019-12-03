@@ -42,17 +42,17 @@ namespace awkward {
 
   const std::shared_ptr<Content> TupleFillable::snapshot() const {
     if (length_ == -1) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));   // FIXME: Type::none()
     }
     else if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, true));
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, true));   // FIXME: Type::none()
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->snapshot());
       }
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), contents));
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), contents));   // FIXME: Type::none()
     }
   }
 

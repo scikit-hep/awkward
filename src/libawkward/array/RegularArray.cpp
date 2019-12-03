@@ -132,7 +132,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_, size_));
+    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_, size_));   // FIXME: Type::none()
   }
 
   void RegularArray::check_for_iteration() const {
@@ -176,15 +176,15 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_));
+    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_));   // FIXME: Type::none()
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_field(const std::string& key) const {
-    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_.get()->getitem_field(key), size_));
+    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_.get()->getitem_field(key), size_));   // FIXME: Type::none()
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_.get()->getitem_fields(keys), size_));
+    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_.get()->getitem_fields(keys), size_));   // FIXME: Type::none()
   }
 
   const std::shared_ptr<Content> RegularArray::carry(const Index64& carry) const {
@@ -201,7 +201,7 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }
-    return std::shared_ptr<Content>(new RegularArray(id, Type::none(), content_.get()->carry(nextcarry), size_));
+    return std::shared_ptr<Content>(new RegularArray(id, Type::none(), content_.get()->carry(nextcarry), size_));   // FIXME: Type::none()
   }
 
   const std::pair<int64_t, int64_t> RegularArray::minmax_depth() const {
@@ -268,7 +268,7 @@ namespace awkward {
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
     if (advanced.length() == 0) {
-      return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize));
+      return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize));   // FIXME: Type::none()
     }
     else {
       Index64 nextadvanced(len*nextsize);
@@ -280,7 +280,7 @@ namespace awkward {
         nextsize);
       util::handle_error(err, classname(), id_.get());
 
-      return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize));
+      return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize));   // FIXME: Type::none()
     }
   }
 
