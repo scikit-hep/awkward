@@ -743,7 +743,6 @@ py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayTy
       .def("length", &ak::ArrayType::length)
       .def("__repr__", &ak::ArrayType::tostring)
       .def("__eq__", &ak::ArrayType::equal)
-      .def("compatible", &ak::ArrayType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
   );
 }
 
@@ -752,7 +751,6 @@ py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_Unk
       .def(py::init<>())
       .def("__repr__", &ak::UnknownType::tostring)
       .def("__eq__", &ak::UnknownType::equal)
-      .def("compatible", &ak::UnknownType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
   );
 }
 
@@ -798,7 +796,6 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
       }))
       .def("__repr__", &ak::PrimitiveType::tostring)
       .def("__eq__", &ak::PrimitiveType::equal)
-      .def("compatible", &ak::PrimitiveType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
   );
 }
 
@@ -809,7 +806,6 @@ py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_Reg
       .def_property_readonly("size", &ak::RegularType::size)
       .def("__repr__", &ak::RegularType::tostring)
       .def("__eq__", &ak::RegularType::equal)
-      .def("compatible", &ak::RegularType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
   );
 }
 
@@ -819,7 +815,6 @@ py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(
       .def_property_readonly("type", &ak::ListType::type)
       .def("__repr__", &ak::ListType::tostring)
       .def("__eq__", &ak::ListType::equal)
-      .def("compatible", &ak::ListType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
   );
 }
 
@@ -829,7 +824,6 @@ py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_Optio
       .def_property_readonly("type", &ak::OptionType::type)
       .def("__repr__", &ak::OptionType::tostring)
       .def("__eq__", &ak::OptionType::equal)
-      .def("compatible", &ak::OptionType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
   );
 }
 
@@ -844,7 +838,6 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
       }))
       .def("__repr__", &ak::UnionType::tostring)
       .def("__eq__", &ak::UnionType::equal)
-      .def("compatible", &ak::UnionType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
 
       .def_property_readonly("numtypes", &ak::UnionType::numtypes)
       .def_property_readonly("types", [](ak::UnionType& self) -> py::tuple {
@@ -882,7 +875,6 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
       }))
       .def("__repr__", &ak::RecordType::tostring)
       .def("__eq__", &ak::RecordType::equal)
-      .def("compatible", &ak::RecordType::compatible, py::arg("other"), py::arg("bool_is_int") = false, py::arg("int_is_float") = false, py::arg("ignore_null") = true, py::arg("unknown_is_anything") = true)
 
       .def_property_readonly("numfields", &ak::RecordType::numfields)
       .def("index", &ak::RecordType::index)

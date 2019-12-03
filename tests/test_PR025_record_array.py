@@ -104,15 +104,9 @@ def test_type():
     assert awkward1.typeof(recordarray) == awkward1.layout.ArrayType(awkward1.layout.RecordType(
         awkward1.layout.PrimitiveType("int64"),
         awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))), 5)
-    assert awkward1.typeof(recordarray).compatible(awkward1.layout.ArrayType(awkward1.layout.RecordType(
-        awkward1.layout.PrimitiveType("int64"),
-        awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))), 5))
     assert awkward1.typeof(recordarray[2]) == awkward1.layout.RecordType(
         awkward1.layout.PrimitiveType("int64"),
         awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")))
-    assert awkward1.typeof(recordarray[2]).compatible(awkward1.layout.RecordType(
-        awkward1.layout.PrimitiveType("int64"),
-        awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))))
 
     recordarray.setkey(0, "one")
     recordarray.setkey(1, "two")
@@ -130,15 +124,9 @@ def test_type():
     assert awkward1.typeof(recordarray) == awkward1.layout.ArrayType(awkward1.layout.RecordType(
         one=awkward1.layout.PrimitiveType("int64"),
         two=awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))), 5)
-    assert awkward1.typeof(recordarray).compatible(awkward1.layout.ArrayType(awkward1.layout.RecordType(
-        one=awkward1.layout.PrimitiveType("int64"),
-        two=awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))), 5))
     assert awkward1.typeof(recordarray[2]) == awkward1.layout.RecordType(
         one=awkward1.layout.PrimitiveType("int64"),
         two=awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")))
-    assert awkward1.typeof(recordarray[2]).compatible(awkward1.layout.RecordType(
-        one=awkward1.layout.PrimitiveType("int64"),
-        two=awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))))
 
 def test_getitem():
     assert str(awkward1.layout.Slice((1, 2, [3], "four", ["five", "six"], slice(7, 8, 9)))) == '[array([1]), array([2]), array([3]), "four", ["five", "six"], 7:8:9]'

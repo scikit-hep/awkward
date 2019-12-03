@@ -17,7 +17,6 @@ namespace awkward {
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const = 0;
     virtual const std::shared_ptr<Type> shallow_copy() const = 0;
     virtual bool equal(std::shared_ptr<Type> other) const = 0;
-    virtual bool compatible(std::shared_ptr<Type> other, bool bool_is_int, bool int_is_float, bool ignore_null, bool unknown_is_anything) const = 0;
 
     std::string tostring() const { return tostring_part("", "", ""); };
     const std::string compare(std::shared_ptr<Type> supertype);
