@@ -26,7 +26,6 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const;
     const std::shared_ptr<Content> getitem(const Slice& where) const;
 
-    bool active() const;
     void null();
     void boolean(bool x);
     void integer(int64_t x);
@@ -70,6 +69,13 @@ extern "C" {
   uint8_t awkward_FillableArray_real(void* fillablearray, double x);
   uint8_t awkward_FillableArray_beginlist(void* fillablearray);
   uint8_t awkward_FillableArray_endlist(void* fillablearray);
+  uint8_t awkward_FillableArray_begintuple(void* fillablearray, int64_t numfields);
+  uint8_t awkward_FillableArray_index(void* fillablearray, int64_t index);
+  uint8_t awkward_FillableArray_endtuple(void* fillablearray);
+  uint8_t awkward_FillableArray_beginrecord(void* fillablearray, int64_t disambiguator);
+  uint8_t awkward_FillableArray_field_fast(void* fillablearray, const char* key);
+  uint8_t awkward_FillableArray_field_check(void* fillablearray, const char* key);
+  uint8_t awkward_FillableArray_endrecord(void* fillablearray);
 }
 
 #endif // AWKWARD_FILLABLE_H_

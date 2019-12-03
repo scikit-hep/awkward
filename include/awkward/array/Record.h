@@ -8,13 +8,22 @@
 namespace awkward {
   class Record: public Content {
   public:
-    Record(const RecordArray& recordarray, int64_t at)
-        : recordarray_(recordarray)
+    Record(const RecordArray& array, int64_t at)
+        : array_(array)
         , at_(at) { }
 
-    const std::shared_ptr<Content> recordarray() const { return recordarray_.shallow_copy(); }
+    const std::shared_ptr<Content> array() const { return array_.shallow_copy(); }
     int64_t at() const { return at_; }
-    bool istuple() const { return recordarray_.istuple(); }
+    const std::vector<std::shared_ptr<Content>> contents() const {
+      std::vector<std::shared_ptr<Content>> out;
+      for (auto item : array_.contents()) {
+        out.push_back(item.get()->getitem_at_nowrap(at_));
+      }
+      return out;
+    }
+    const std::shared_ptr<RecordArray::Lookup> lookup() const { return array_.lookup(); }
+    const std::shared_ptr<RecordArray::ReverseLookup> reverselookup() const { return array_.reverselookup(); }
+    bool istuple() const { return lookup().get() == nullptr; }
 
     virtual bool isscalar() const;
     virtual const std::string classname() const;
@@ -48,7 +57,7 @@ namespace awkward {
     const std::vector<std::string> keys() const;
     const std::vector<std::shared_ptr<Content>> values() const;
     const std::vector<std::pair<std::string, std::shared_ptr<Content>>> items() const;
-    const Record withoutkeys() const;
+    const Record astuple() const;
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;
@@ -58,7 +67,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
 
   private:
-    const RecordArray recordarray_;
+    const RecordArray array_;
     int64_t at_;
   };
 }

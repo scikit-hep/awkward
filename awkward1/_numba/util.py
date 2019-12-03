@@ -5,10 +5,30 @@ import sys
 import numpy
 import numba
 import llvmlite.ir.types
+import llvmlite.llvmpy.core
 
 from .._numba import cpu
 
 py27 = (sys.version_info[0] < 3)
+
+if not py27:
+    exec("""
+def debug(context, builder, *args):
+    assert len(args) % 2 == 0
+    tpes, vals = args[0::2], args[1::2]
+    context.get_function(print, numba.none(*tpes))(builder, tuple(vals))
+""", globals())
+
+dynamic_addrs = {}
+def globalstring(context, builder, pyvalue, inttype=None):
+    if pyvalue not in dynamic_addrs:
+        buf = dynamic_addrs[pyvalue] = numpy.array(pyvalue.encode("utf-8") + b"\x00")
+        context.add_dynamic_addr(builder, buf.ctypes.data, info="str({})".format(repr(pyvalue)))
+    if inttype is None:
+        ptr = context.get_constant(numba.types.uintp, dynamic_addrs[pyvalue].ctypes.data)
+        return builder.inttoptr(ptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(8)))
+    else:
+        return context.get_constant(inttype, dynamic_addrs[pyvalue].ctypes.data)
 
 RefType = numba.int64
 
@@ -30,14 +50,6 @@ def indextpe(indexname):
         return indexU8tpe
     else:
         raise AssertionError("unrecognized index type: {}".format(indexname))
-
-if not py27:
-    exec("""
-def debug(context, builder, *args):
-    assert len(args) % 2 == 0
-    tpes, vals = args[0::2], args[1::2]
-    context.get_function(print, numba.none(*tpes))(builder, tuple(vals))
-""", globals())
 
 def cast(context, builder, fromtpe, totpe, val):
     if isinstance(fromtpe, llvmlite.ir.types.IntType):

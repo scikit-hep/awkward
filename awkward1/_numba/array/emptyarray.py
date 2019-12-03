@@ -27,6 +27,9 @@ class EmptyArrayType(content.ContentType):
     def getitem_range(self):
         return self
 
+    def getitem_str(self):
+        raise IndexError("cannot slice EmptyArray with str (Record field name)")
+
     def getitem_tuple(self, wheretpe):
         if len(wheretpe.types) == 0:
             return self

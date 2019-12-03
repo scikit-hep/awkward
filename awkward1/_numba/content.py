@@ -32,16 +32,22 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
                     return numba.typing.templates.signature(arraytpe.getitem_int(), arraytpe, original_wheretpe)
                 if isinstance(wheretpe, numba.types.SliceType) and not wheretpe.has_step:
                     return numba.typing.templates.signature(arraytpe.getitem_range(), arraytpe, original_wheretpe)
+                if isinstance(wheretpe, numba.types.StringLiteral):
+                    return numba.typing.templates.signature(arraytpe.getitem_str(wheretpe.literal_value), arraytpe, original_wheretpe)
 
                 if not isinstance(wheretpe, numba.types.BaseTuple):
                     wheretpe = numba.types.Tuple((wheretpe,))
 
                 wheretpe = util.typing_regularize_slice(wheretpe)
-
-                if any(not isinstance(t, (numba.types.Integer, numba.types.SliceType, numba.types.EllipsisType, type(numba.typeof(numpy.newaxis)), numba.types.Array)) for t in wheretpe.types):
-                    raise TypeError("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), and integer or boolean arrays (possibly jagged) are valid indices")
+                self.check_slice_types(wheretpe)
 
                 return numba.typing.templates.signature(arraytpe.getitem_tuple(wheretpe), arraytpe, original_wheretpe)
+
+    @staticmethod
+    def check_slice_types(wheretpe):
+        if any(not isinstance(t, (numba.types.Integer, numba.types.SliceType, numba.types.EllipsisType, type(numba.typeof(numpy.newaxis)), numba.types.StringLiteral)) and not (isinstance(t, numba.types.Array) and isinstance(t.dtype, (numba.types.Boolean, numba.types.Integer))) for t in wheretpe.types):
+            raise TypeError("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), integer or boolean arrays (possibly jagged), and constant strings (known at compile-time) are valid indices")
+
 
 def lower_getitem_nothing(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)

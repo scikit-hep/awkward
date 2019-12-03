@@ -114,6 +114,50 @@ class type_methods(numba.typing.templates.AttributeTemplate):
         else:
             raise TypeError("wrong number of arguments for FillableArray.endlist")
 
+    @numba.typing.templates.bound_function("begintuple")
+    def resolve_begintuple(self, arraytpe, args, kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.Integer):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError("wrong number of arguments for FillableArray.begintuple")
+
+    @numba.typing.templates.bound_function("index")
+    def resolve_index(self, arraytpe, args, kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.Integer):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError("wrong number of arguments for FillableArray.index")
+
+    @numba.typing.templates.bound_function("endtuple")
+    def resolve_endtuple(self, arraytpe, args, kwargs):
+        if len(args) == 0 and len(kwargs) == 0:
+            return numba.types.none()
+        else:
+            raise TypeError("wrong number of arguments for FillableArray.endtuple")
+
+    @numba.typing.templates.bound_function("beginrecord")
+    def resolve_beginrecord(self, arraytpe, args, kwargs):
+        if len(args) == 0 and len(kwargs) == 0:
+            return numba.types.none()
+        elif len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.StringLiteral):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError("wrong number of arguments for FillableArray.beginrecord")
+
+    @numba.typing.templates.bound_function("field")
+    def resolve_field(self, arraytpe, args, kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.StringLiteral):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError("wrong number of arguments for FillableArray.field")
+
+    @numba.typing.templates.bound_function("endrecord")
+    def resolve_endrecord(self, arraytpe, args, kwargs):
+        if len(args) == 0 and len(kwargs) == 0:
+            return numba.types.none()
+        else:
+            raise TypeError("wrong number of arguments for FillableArray.endrecord")
+
 @numba.extending.lower_builtin("clear", FillableArrayType)
 def lower_clear(context, builder, sig, args):
     tpe, = sig.args
@@ -181,4 +225,64 @@ def lower_endlist(context, builder, sig, args):
     val, = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     call(context, builder, libawkward.FillableArray_endlist, (proxyin.rawptr,))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("begintuple", FillableArrayType, numba.types.Integer)
+def lower_begintuple(context, builder, sig, args):
+    tpe, numfieldstpe = sig.args
+    val, numfieldsval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    numfields = util.cast(context, builder, numfieldstpe, numba.int64, numfieldsval)
+    call(context, builder, libawkward.FillableArray_begintuple, (proxyin.rawptr, numfields))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("index", FillableArrayType, numba.types.Integer)
+def lower_index(context, builder, sig, args):
+    tpe, indextpe = sig.args
+    val, indexval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    index = util.cast(context, builder, indextpe, numba.int64, indexval)
+    call(context, builder, libawkward.FillableArray_index, (proxyin.rawptr, index))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("endtuple", FillableArrayType)
+def lower_endtuple(context, builder, sig, args):
+    tpe, = sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    call(context, builder, libawkward.FillableArray_endtuple, (proxyin.rawptr,))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("beginrecord", FillableArrayType)
+def lower_beginrecord(context, builder, sig, args):
+    tpe, = sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    call(context, builder, libawkward.FillableArray_beginrecord, (proxyin.rawptr, context.get_constant(numba.int64, 0)))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("beginrecord", FillableArrayType, numba.types.StringLiteral)
+def lower_beginrecord(context, builder, sig, args):
+    tpe, nametpe = sig.args
+    val, nameval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    name = util.globalstring(context, builder, nametpe.literal_value, inttype=numba.int64)
+    call(context, builder, libawkward.FillableArray_beginrecord, (proxyin.rawptr, name))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("field", FillableArrayType, numba.types.StringLiteral)
+def lower_field(context, builder, sig, args):
+    tpe, keytpe = sig.args
+    val, keyval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    key = util.globalstring(context, builder, keytpe.literal_value)
+    call(context, builder, libawkward.FillableArray_field_fast, (proxyin.rawptr, key))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("endrecord", FillableArrayType)
+def lower_endrecord(context, builder, sig, args):
+    tpe, = sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    call(context, builder, libawkward.FillableArray_endrecord, (proxyin.rawptr,))
     return context.get_dummy_value()

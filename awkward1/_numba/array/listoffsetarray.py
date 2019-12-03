@@ -40,6 +40,9 @@ class ListOffsetArrayType(content.ContentType):
     def getitem_range(self):
         return self
 
+    def getitem_str(self, key):
+        return ListOffsetArrayType(self.offsetstpe, self.contenttpe.getitem_str(key), self.idtpe)
+
     def getitem_tuple(self, wheretpe):
         import awkward1._numba.array.listarray
         nexttpe = awkward1._numba.array.listarray.ListArrayType(util.index64tpe, util.index64tpe, self, numba.none)
@@ -59,6 +62,9 @@ class ListOffsetArrayType(content.ContentType):
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
             return ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.idtpe)
+
+        elif isinstance(headtpe, numba.types.StringLiteral):
+            return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
 
         elif isinstance(headtpe, numba.types.EllipsisType):
             raise NotImplementedError("ellipsis")
@@ -97,6 +103,10 @@ class ListOffsetArrayType(content.ContentType):
     @property
     def lower_getitem_range(self):
         return lower_getitem_range
+
+    @property
+    def lower_getitem_str(self):
+        return lower_getitem_str
 
     @property
     def lower_getitem_next(self):
@@ -216,6 +226,23 @@ def lower_getitem_range(context, builder, sig, args):
     proxyout.content = proxyin.content
     if tpe.idtpe != numba.none:
         proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
+
+    out = proxyout._getvalue()
+    if context.enable_nrt:
+        context.nrt.incref(builder, rettpe, out)
+    return out
+
+@numba.extending.lower_builtin(operator.getitem, ListOffsetArrayType, numba.types.StringLiteral)
+def lower_getitem_str(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
+    proxyout.offsets = proxyin.offsets
+    proxyout.content = tpe.contenttpe.lower_getitem_str(context, builder, rettpe.contenttpe(tpe.contenttpe, wheretpe), (proxyin.content, whereval))
+    if tpe.idtpe != numba.none:
+        proxyout.id = proxyin.id
 
     out = proxyout._getvalue()
     if context.enable_nrt:
@@ -376,6 +403,11 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         if arraytpe.idtpe != numba.none:
             proxyout.id = proxyin.id
         return proxyout._getvalue()
+
+    elif isinstance(headtpe, numba.types.StringLiteral):
+        nexttpe = arraytpe.getitem_str(headtpe.literal_value)
+        nextval = lower_getitem_str(context, builder, nexttpe(arraytpe, headtpe), (arrayval, headval))
+        return lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, advanced)
 
     elif isinstance(headtpe, numba.types.EllipsisType):
         raise NotImplementedError("ListOffsetArray.getitem_next(ellipsis)")

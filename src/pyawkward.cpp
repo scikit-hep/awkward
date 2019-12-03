@@ -1090,6 +1090,40 @@ py::class_<ak::RegularArray, ak::Content> make_RegularArray(py::handle m, std::s
 
 /////////////////////////////////////////////////////////////// RecordArray
 
+template <typename T>
+py::object lookup(const T& self) {
+  std::shared_ptr<ak::RecordArray::Lookup> lookup = self.lookup();
+  if (lookup.get() == nullptr) {
+    return py::none();
+  }
+  else {
+    py::dict out;
+    for (auto pair : *lookup.get()) {
+      std::string cppkey = pair.first;
+      py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(), cppkey.length(), "surrogateescape"));
+      out[pykey] = py::cast(pair.second);
+    }
+    return out;
+  }
+}
+
+template <typename T>
+py::object reverselookup(const T& self) {
+  std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup = self.reverselookup();
+  if (reverselookup.get() == nullptr) {
+    return py::none();
+  }
+  else {
+    py::list out;
+    for (auto item : *reverselookup.get()) {
+      std::string cppkey = item;
+      py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(), cppkey.length(), "surrogateescape"));
+      out.append(pykey);
+    }
+    return out;
+  }
+}
+
 py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::string name) {
   return content(py::class_<ak::RecordArray, ak::Content>(m, name.c_str())
       .def(py::init([](py::dict contents, py::object id) -> ak::RecordArray {
@@ -1102,12 +1136,18 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
           reverselookup.get()->push_back(key);
           out.push_back(unbox_content(x.second));
         }
+        if (out.size() == 0) {
+          throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
+        }
         return ak::RecordArray(unbox_id(id), out, lookup, reverselookup);
       }), py::arg("contents"), py::arg("id") = py::none())
       .def(py::init([](py::iterable contents, py::object id) -> ak::RecordArray {
         std::vector<std::shared_ptr<ak::Content>> out;
         for (auto x : contents) {
           out.push_back(unbox_content(x));
+        }
+        if (out.size() == 0) {
+          throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
         }
         return ak::RecordArray(unbox_id(id), out, std::shared_ptr<ak::RecordArray::Lookup>(nullptr), std::shared_ptr<ak::RecordArray::ReverseLookup>(nullptr));
       }), py::arg("contents"), py::arg("id") = py::none())
@@ -1152,8 +1192,10 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
         }
         return out;
       })
-      .def_property_readonly("withoutkeys", [](ak::RecordArray& self) -> py::object {
-        return box(self.withoutkeys().shallow_copy());
+      .def_property_readonly("lookup", &lookup<ak::RecordArray>)
+      .def_property_readonly("reverselookup", &reverselookup<ak::RecordArray>)
+      .def_property_readonly("astuple", [](ak::RecordArray& self) -> py::object {
+        return box(self.astuple().shallow_copy());
       })
 
       .def("append", [](ak::RecordArray& self, py::object content, py::object key) -> void {
@@ -1171,6 +1213,7 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
 
 py::class_<ak::Record> make_Record(py::handle m, std::string name) {
   return py::class_<ak::Record>(m, name.c_str())
+      .def(py::init<ak::RecordArray, int64_t>())
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("id", [](ak::Record& self) -> py::object { return box(self.id()); })
       .def("__getitem__", &getitem<ak::Record>)
@@ -1178,6 +1221,8 @@ py::class_<ak::Record> make_Record(py::handle m, std::string name) {
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
       .def_property_readonly("type", &ak::Content::type)
 
+      .def_property_readonly("array", [](ak::Record& self) -> py::object { return box(self.array()); })
+      .def_property_readonly("at", &ak::Record::at)
       .def_property_readonly("istuple", &ak::Record::istuple)
       .def_property_readonly("numfields", &ak::Record::numfields)
       .def("index", &ak::Record::index)
@@ -1215,8 +1260,10 @@ py::class_<ak::Record> make_Record(py::handle m, std::string name) {
         }
         return out;
       })
-      .def_property_readonly("withoutkeys", [](ak::RecordArray& self) -> py::object {
-        return box(self.withoutkeys().shallow_copy());
+      .def_property_readonly("lookup", &lookup<ak::Record>)
+      .def_property_readonly("reverselookup", &reverselookup<ak::Record>)
+      .def_property_readonly("astuple", [](ak::Record& self) -> py::object {
+        return box(self.astuple().shallow_copy());
       })
      .def_property_readonly("location", &location<ak::Record>)
 

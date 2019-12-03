@@ -32,7 +32,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/util.cpp" line="77" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="7" bodyend="14"/>
+        <location file="src/cpu-kernels/util.cpp" line="118" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="7" bodyend="14"/>
       </memberdef>
       <memberdef kind="function" id="cpu-kernels_2util_8cpp_1a06d96ca5e0b2c7c68b2cc2ee9971d208" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>struct Error</type>
@@ -57,7 +57,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/util.cpp" line="77" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="16" bodyend="23"/>
+        <location file="src/cpu-kernels/util.cpp" line="118" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="16" bodyend="23"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

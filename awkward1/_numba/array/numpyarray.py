@@ -30,6 +30,9 @@ class NumpyArrayType(content.ContentType):
     def getitem_range(self):
         return self.getitem_tuple(numba.types.slice2_type)
 
+    def getitem_str(self):
+        raise IndexError("cannot slice NumpyArray with str (Record field name)")
+
     def getitem_tuple(self, wheretpe):
         outtpe = numba.typing.arraydecl.get_array_index_type(self.arraytpe, wheretpe).result
         if isinstance(outtpe, numba.types.Array):
@@ -40,6 +43,9 @@ class NumpyArrayType(content.ContentType):
     def getitem_next(self, wheretpe, isadvanced):
         if len(wheretpe.types) > self.arraytpe.ndim:
             raise IndexError("too many dimensions in slice")
+        if any(isinstance(x, numba.types.StringLiteral) for x in wheretpe):
+            raise IndexError("cannot slice NumpyArray with str (Record field name)")
+
         if isadvanced:
             numreduce = sum(1 if isinstance(x, (numba.types.Integer, numba.types.Array)) else 0 for x in wheretpe.types)
         else:

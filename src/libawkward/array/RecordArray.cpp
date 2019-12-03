@@ -381,7 +381,7 @@ namespace awkward {
     return out;
   }
 
-  const RecordArray RecordArray::withoutkeys() const {
+  const RecordArray RecordArray::astuple() const {
     return RecordArray(id_, contents_);
   }
 
