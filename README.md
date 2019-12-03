@@ -65,7 +65,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] Test all (tested in mock [studies/fillable.py](tree/master/studies/fillable.py)).
    * [X] JSON → Awkward via header-only [RapidJSON](https://rapidjson.org) and `awkward.fromiter`.
    * [ ] Explicit broadcasting functions for jagged and non-jagged arrays and scalars.
-   * [ ] Structure-preserving ufunc-like operation on the C++ side that applies a lambda function to inner data. The Python `__array_ufunc__` implementation will _call_ this to preserve structure.
+   * [ ] ~~Structure-preserving ufunc-like operation on the C++ side that applies a lambda function to inner data. The Python `__array_ufunc__` implementation will _call_ this to preserve structure.~~
    * [ ] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old).
    * [ ] Full suite of array types:
       * [X] `EmptyArray`: 1-dimensional array with length 0 and unknown type (result of `UnknownFillable`, compatible with all types of arrays).
@@ -75,7 +75,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `ListOffsetArray`: the `JaggedArray` case with no unreachable data between reachable data (gaps).
       * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
-         * [ ] Implement it in Numba as well.
+         * [X] Implement it in Numba as well.
       * [ ] `MaskedArray`, `BitMaskedArray`, `IndexedMaskedArray`: same as the old versions.
       * [ ] `UnionArray`: same as the old version; `SparseUnionArray`: the additional case found in Apache Arrow.
       * [ ] `IndexedArray`: same as the old version.

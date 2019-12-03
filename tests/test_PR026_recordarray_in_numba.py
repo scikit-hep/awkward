@@ -134,7 +134,7 @@ def test_getitem_tuple():
 
     assert awkward1.tolist(f4(recordarray2)) == [[4.4], [5.5], [6.6, 7.7, 8.8]]
 
-def test_fillablearray():
+def test_fillablearray_tuple():
     fillablearray = awkward1.layout.FillableArray()
 
     @numba.njit
@@ -163,3 +163,63 @@ def test_fillablearray():
 
     assert awkward1.tolist(fillablearray.snapshot()) == [(True, 1, 1.1), (False, 1, 1.1), (True, 1, 1.1)]
     assert awkward1.tolist(fillablearray2.snapshot()) == [(True, 1, 1.1), (False, 1, 1.1), (True, 1, 1.1)]
+
+def test_fillablearray_record_1():
+    fillablearray = awkward1.layout.FillableArray()
+
+    @numba.njit
+    def f1(q):
+        q.beginrecord()
+        q.field("one"); q.boolean(True)
+        q.field("two"); q.integer(1)
+        q.field("three"); q.real(1.1)
+        q.endrecord()
+
+        q.beginrecord()
+        q.field("one"); q.boolean(False)
+        q.field("two"); q.integer(2)
+        q.field("three"); q.real(2.2)
+        q.endrecord()
+
+        q.beginrecord()
+        q.field("one"); q.boolean(True)
+        q.field("two"); q.integer(3)
+        q.field("three"); q.real(3.3)
+        q.endrecord()
+
+        return q
+
+    fillablearray2 = f1(fillablearray)
+
+    assert awkward1.tolist(fillablearray.snapshot()) == [{'one': True, 'two': 1, 'three': 1.1}, {'one': False, 'two': 2, 'three': 2.2}, {'one': True, 'two': 3, 'three': 3.3}]
+    assert awkward1.tolist(fillablearray2.snapshot()) == [{'one': True, 'two': 1, 'three': 1.1}, {'one': False, 'two': 2, 'three': 2.2}, {'one': True, 'two': 3, 'three': 3.3}]
+
+def test_fillablearray_record_2():
+    fillablearray = awkward1.layout.FillableArray()
+
+    @numba.njit
+    def f1(q):
+        q.beginrecord("wowie")
+        q.field("one"); q.boolean(True)
+        q.field("two"); q.integer(1)
+        q.field("three"); q.real(1.1)
+        q.endrecord()
+
+        q.beginrecord("wowie")
+        q.field("one"); q.boolean(False)
+        q.field("two"); q.integer(2)
+        q.field("three"); q.real(2.2)
+        q.endrecord()
+
+        q.beginrecord("wowie")
+        q.field("one"); q.boolean(True)
+        q.field("two"); q.integer(3)
+        q.field("three"); q.real(3.3)
+        q.endrecord()
+
+        return q
+
+    fillablearray2 = f1(fillablearray)
+
+    assert awkward1.tolist(fillablearray.snapshot()) == [{'one': True, 'two': 1, 'three': 1.1}, {'one': False, 'two': 2, 'three': 2.2}, {'one': True, 'two': 3, 'three': 3.3}]
+    assert awkward1.tolist(fillablearray2.snapshot()) == [{'one': True, 'two': 1, 'three': 1.1}, {'one': False, 'two': 2, 'three': 2.2}, {'one': True, 'two': 3, 'three': 3.3}]
