@@ -8,5 +8,12 @@ import numpy
 
 import awkward1
 
-def test_nothing():
-    pass
+def test_fromnumpy():
+    a = numpy.arange(2*3*5).reshape((2, 3, 5))
+    b = awkward1.fromnumpy(a)
+    assert awkward1.tolist(a) == awkward1.tolist(b)
+
+# def test_highlevel():
+#     a = awkward1.Array(numpy.array([1, 2, 3]))
+#     print(a)
+#     raise Exception

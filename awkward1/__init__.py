@@ -2,8 +2,15 @@
 
 import awkward1.layout
 import awkward1._numba
+import awkward1.highlevel
 
 from awkward1.operations.convert import *
 from awkward1.operations.describe import *
+
+class Array(highlevel.Array):
+    pass
+
+class Record(highlevel.Record):
+    pass
 
 __version__ = awkward1.layout.__version__
