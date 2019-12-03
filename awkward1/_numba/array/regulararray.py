@@ -51,6 +51,8 @@ class RegularArrayType(content.ContentType):
             return RegularArrayType(contenttpe, self.idtpe)
 
         elif isinstance(headtpe, numba.types.StringLiteral):
+            ### FIXME: this is the next one
+
             raise NotImplementedError("string-literal")
 
         elif isinstance(headtpe, numba.types.EllipsisType):
