@@ -775,7 +775,7 @@ public:
     return get(key).attr("__repr__")().cast<std::string>();
   }
 
-  virtual bool equal(const ak::DressParameters<py::object>& other) {
+  virtual bool equal(const ak::DressParameters<py::object>& other) const {
     if (const PyDressParameters* raw = dynamic_cast<const PyDressParameters*>(&other)) {
       return pydict_.attr("__eq__")(raw->pydict()).cast<bool>();
     }
@@ -801,10 +801,33 @@ py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::str
   );
 }
 
+typedef ak::DressedType<PyDress, PyDressParameters> PyDressedType;
+
+py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type> make_DressedType(py::handle m, std::string name) {
+  return (py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type>(m, name.c_str())
+      .def(py::init([](std::shared_ptr<ak::Type> type, py::object dress, py::object parameters) -> PyDressedType {
+        if (parameters.is(py::none())) {
+          parameters = py::dict();
+        }
+        return PyDressedType(type, PyDress(dress), PyDressParameters(parameters));
+      }), py::arg("type"), py::arg("dress"), py::arg("parameters") = py::none())
+      .def_property_readonly("type", &PyDressedType::type)
+      .def("__repr__", [](PyDressedType& self) -> std::string { return self.tostring(); })
+      .def("__eq__", &PyDressedType::equal)
+      .def_property_readonly("dress", [](PyDressedType& self) -> py::object {
+        return self.dress().pyclass();
+      })
+      .def_property_readonly("parameters", [](PyDressedType& self) -> py::dict {
+        return self.parameters().pydict();
+      })
+  );
+}
+
+
 py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayType(py::handle m, std::string name) {
   return (py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type>(m, name.c_str())
       .def(py::init<std::shared_ptr<ak::Type>, int64_t>())
-      .def("type", &ak::ArrayType::type)
+      .def_property_readonly("type", &ak::ArrayType::type)
       .def("length", &ak::ArrayType::length)
       .def("__repr__", &ak::ArrayType::tostring)
       .def("__eq__", &ak::ArrayType::equal)
@@ -1383,6 +1406,7 @@ PYBIND11_MODULE(layout, m) {
   make_FillableArray(m, "FillableArray");
 
   make_Type(m, "Type");
+  make_DressedType(m, "DressedType");
   make_ArrayType(m, "ArrayType");
   make_PrimitiveType(m, "PrimitiveType");
   make_RegularType(m, "RegularType");

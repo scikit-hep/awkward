@@ -32,3 +32,12 @@ def test_string():
     a.__class__ = awkward1.dressing.string.String
     assert str(a) == str(b"hey there")
     assert repr(a) == repr(b"hey there")
+
+def test_dress():
+    pyclass = awkward1.dressing.string.String
+    parameters = {"encoding": "utf-8"}
+    inner = awkward1.layout.PrimitiveType("uint8")
+    dressed = awkward1.layout.DressedType(inner, pyclass, parameters)
+
+    # print(dressed.__repr__())
+    # raise Exception

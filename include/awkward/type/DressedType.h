@@ -30,7 +30,7 @@ namespace awkward {
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const {
       std::stringstream out;
-      out << indent << pre << "dress[" << util::quote(dress_.name) << ", " << type_.get()->tostring_part(indent, "", "");
+      out << indent << pre << "dress[" << util::quote(dress_.name(), true) << ", " << type_.get()->tostring_part(indent, "", "");
       for (auto key : parameters_.keys()) {
         out << ", " << key << "=" << parameters_.get_string(key);
       }
