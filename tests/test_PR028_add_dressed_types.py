@@ -24,30 +24,56 @@ def test_highlevel():
     assert str(b) == "[0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 ... 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99]"
 
     c = awkward1.Array('[{"one": 3.14, "two": [1.1, 2.2]}, {"one": 99.9, "two": [-3.1415926]}]')
-    assert repr(c) == "<Array [{one: 3.14, two: [1.1 ... -3.14]}] type='2 * {\"one\": float64, \"two\": var...'>"
+    assert repr(c) == "<Array [{one: 3.14, two: [1.1 ... -3.14]}] type=\"2 * {'one': float64, 'two': var...\">"
     assert str(c) == "[{one: 3.14, two: [1.1 2.2]} {one: 99.9, two: [-3.14]}]"
 
 class Dummy(awkward1.highlevel.Array):
     pass
 
 def test_dress():
-    dressed0 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), Dummy, {"one": 1, "two": 2})
+    dressed0 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), Dummy, one=1, two=2)
     assert repr(dressed0) == "dress[float64, 'tests.test_PR028_add_dressed_types.Dummy', one=1, two=2]"
 
     pyclass = awkward1.dressing.string.String
-    parameters = {"encoding": "utf-8"}
     inner = awkward1.layout.ListType(awkward1.layout.PrimitiveType("uint8"))
-    dressed1 = awkward1.layout.DressedType(inner, pyclass, parameters)
-    dressed2 = awkward1.layout.DressedType(inner, pyclass, parameters)
+
+    baseline = sys.getrefcount(pyclass)
+    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline, 2)
+    dressed1 = awkward1.layout.DressedType(inner, pyclass, encoding="utf-8")
+    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 1, 2)
+    dressed2 = awkward1.layout.DressedType(inner, pyclass, encoding="utf-8")
+    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 2, 2)
     dressed3 = awkward1.layout.DressedType(inner, pyclass)
+    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 3, 2)
 
     assert repr(dressed1) == "string"
     assert repr(dressed3) == "bytes"
     assert dressed1 == dressed2
     assert dressed1 != dressed3
 
-def test_string():
+    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 3, 2)
+    del dressed1
+    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 2, 2)
+    del dressed2
+    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 1, 2)
+    del dressed3
+    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline, 2)
+
+def test_string1():
     a = awkward1.Array(numpy.array([ord(x) for x in "hey there"], dtype=numpy.uint8))
     a.__class__ = awkward1.dressing.string.String
     assert str(a) == str(b"hey there")
     assert repr(a) == repr(b"hey there")
+
+def test_string2():
+    string = awkward1.layout.DressedType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("uint8")), awkward1.dressing.string.String, encoding="utf-8")
+
+    content = awkward1.layout.NumpyArray(numpy.array([ord(x) for x in "heythere"], dtype=numpy.uint8))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 8])), content)
+
+    a = awkward1.Array(listoffsetarray)
+    a.layout.content.type = string
+
+    # print(a.type)
+    # print(a.baretype)
+    # raise Exception

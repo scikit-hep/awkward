@@ -159,7 +159,7 @@ class Array(object):
         limit_type = limit_total - len(value) - len("<Array  type=>")
         type = repr(str(self.layout.type))
         if len(type) > limit_type:
-            type = type[:(limit_type - 4)] + "...'"
+            type = type[:(limit_type - 4)] + "..." + type[-1]
 
         return "<Array {0} type={1}>".format(value, type)
 
