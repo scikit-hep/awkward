@@ -23,36 +23,36 @@ class Array(object):
 
     def __repr__(self, limit_value=40):
         def forward(array):
-            yield "["
             space = ""
             for i in range(len(array)):
                 x = array[i]
                 if isinstance(x, awkward1.layout.Content):
                     yield space
+                    yield "["
                     for y in forward(x):
                         yield y
+                    yield "]"
                 elif isinstance(x, (float, numpy.floating)):
                     yield space + "{0:3g}".format(x)
                 else:
                     yield space + repr(x)
                 space = " "
-            yield "]"
 
         def backward(array):
-            yield "]"
             space = ""
             for i in range(len(array) - 1, -1, -1):
                 x = array[i]
                 if isinstance(x, awkward1.layout.Content):
                     yield space
+                    yield "]"
                     for y in backward(x):
                         yield y
+                    yield "["
                 elif isinstance(x, (float, numpy.floating)):
                     yield "{0:3g}".format(x) + space
                 else:
                     yield repr(x) + space
                 space = " "
-            yield "["
 
         def forever(iterator):
             for x in iterator:
@@ -61,7 +61,7 @@ class Array(object):
                 yield None
 
         halfway = len(self.layout) // 2
-        left, right = [], []
+        left, right = ["["], ["]"]
         leftlen, rightlen = 0, 0
         leftgen = forever(forward(self.layout[:halfway]))
         rightgen = forever(backward(self.layout[halfway:]))

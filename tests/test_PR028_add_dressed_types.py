@@ -15,4 +15,4 @@ def test_fromnumpy():
 
 def test_highlevel():
     a = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]])
-    assert repr(a) == "<Array [[1.1 2.2 3.3] []] ... [6.6] [7.7 8.8 9.9]] type='5 * var * float64'>"
+    assert repr(a) == "<Array [[1.1 2.2 3.3] [] ... 5.5] [6.6] [7.7 8.8 9.9]] type='5 * var * float64'>"
