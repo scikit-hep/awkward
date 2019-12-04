@@ -15,7 +15,7 @@
 namespace awkward {
   class EmptyArray: public Content {
   public:
-    EmptyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type): id_(id) { }
+    EmptyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype): id_(id), innertype_(innertype) { }
 
     virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const { return id_; }
@@ -24,10 +24,10 @@ namespace awkward {
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
     virtual bool isbare() const { return type_.get() == nullptr; }
-    virtual const std::shared_ptr<Type> baretype_part() const;
-    virtual const std::shared_ptr<Type> type_part() const;
-    virtual void settype(const std::shared_ptr<Type> type);
-    virtual bool accepts(const std::shared_ptr<Type> type);
+    virtual const std::shared_ptr<Type> bareinnertype() const;
+    virtual const std::shared_ptr<Type> innertype() const;
+    virtual void setinnertype(const std::shared_ptr<Type> innertype);
+    virtual bool accepts(const std::shared_ptr<Type> innertype);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;
@@ -50,7 +50,7 @@ namespace awkward {
 
   private:
     std::shared_ptr<Identity> id_;
-    std::shared_ptr<Type> type_;
+    std::shared_ptr<Type> innertype_;
   };
 }
 

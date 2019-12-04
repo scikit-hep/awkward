@@ -14,19 +14,19 @@ namespace awkward {
 
   const std::shared_ptr<Type> Content::baretype() const {
     if (isscalar()) {
-      return baretype_part();
+      return bareinnertype();
     }
     else {
-      return std::shared_ptr<Type>(new ArrayType(baretype_part(), length()));
+      return std::shared_ptr<Type>(new ArrayType(bareinnertype(), length()));
     }
   }
 
   const std::shared_ptr<Type> Content::type() const {
     if (isscalar()) {
-      return type_part();
+      return innertype();
     }
     else {
-      return std::shared_ptr<Type>(new ArrayType(type_part(), length()));
+      return std::shared_ptr<Type>(new ArrayType(innertype(), length()));
     }
   }
 

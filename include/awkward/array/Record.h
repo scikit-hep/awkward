@@ -33,10 +33,10 @@ namespace awkward {
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
     virtual bool isbare() const { return array_.isbare(); }
-    virtual const std::shared_ptr<Type> baretype_part() const;
-    virtual const std::shared_ptr<Type> type_part() const;
-    virtual void settype(const std::shared_ptr<Type> type);
-    virtual bool accepts(const std::shared_ptr<Type> type);
+    virtual const std::shared_ptr<Type> bareinnertype() const;
+    virtual const std::shared_ptr<Type> innertype() const;
+    virtual void setinnertype(const std::shared_ptr<Type> innertype);
+    virtual bool accepts(const std::shared_ptr<Type> innertype);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;
