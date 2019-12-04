@@ -72,9 +72,10 @@ class Array(object):
                 yield space + "{"
                 sp = ""
                 for k in x.keys():
-                    yield sp + k + ": "
+                    key = sp + k + ": "
                     for token in forward(x[k], ""):
-                        yield token
+                        yield key + token
+                        key = ""
                     sp = ", "
                 yield "}"
             elif isinstance(x, (float, numpy.floating)):
@@ -95,17 +96,17 @@ class Array(object):
                     yield "["
             elif isinstance(x, awkward1.layout.Record):
                 yield "}" + space
-                sp = ""
-                for k in reversed(x.keys()):
+                keys = x.keys()
+                for i in range(len(keys) - 1, -1, -1):
                     last = None
-                    for token in backward(x[k], ""):
+                    for token in backward(x[keys[i]], ""):
                         if last is not None:
                             yield last
                         last = token
                     if last is not None:
-                        yield last + sp
-                    yield k + ": "
-                    sp = ", "
+                        yield keys[i] + ": " + last
+                    if i != 0:
+                        yield ", "
                 yield "{"
             elif isinstance(x, (float, numpy.floating)):
                 yield "{0:.3g}".format(x) + space
@@ -141,10 +142,10 @@ class Array(object):
             if l is None and r is None:
                 break
 
-        while len(left) > 1 and (left[-1] == "[" or left[-1] == " [" or left[-1] == "{" or left[-1] == " {"):
+        while len(left) > 1 and (left[-1] == "[" or left[-1] == " [" or left[-1] == "{" or left[-1] == " {" or left[-1] == ", " or left[-1] == " "):
             left.pop()
             l = ""
-        while len(right) > 1 and (right[-1] == "]" or right[-1] == "] " or right[-1] == "}" or right[-1] == "} "):
+        while len(right) > 1 and (right[-1] == "]" or right[-1] == "] " or right[-1] == "}" or right[-1] == "} " or right[-1] == ", " or right[-1] == " "):
             right.pop()
             r = ""
         if l is None and r is None:
