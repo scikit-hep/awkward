@@ -222,7 +222,7 @@ namespace awkward {
     }
 
     virtual const std::shared_ptr<Type> innertype() const {
-      if (type_.get() == nullptr) {
+      if (innertype_.get() == nullptr) {
         return bareinnertype();
       }
       else {
@@ -235,7 +235,7 @@ namespace awkward {
         innertype_ = innertype;
       }
       else {
-        throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype_part()));
+        throw std::invalid_argument(std::string("provided type is incompatible with array: ") + innertype.get()->compare(bareinnertype()));
       }
     }
 
@@ -246,7 +246,7 @@ namespace awkward {
 
     virtual int64_t length() const { return length_; }
 
-    virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, type_, ptr_, offset_, length_, itemsize_)); }
+    virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, innertype_, ptr_, offset_, length_, itemsize_)); }
 
     virtual void check_for_iteration() const {
       if (id_.get() != nullptr  &&  id_.get()->length() < length_) {
