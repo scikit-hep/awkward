@@ -78,8 +78,8 @@ class Array(object):
                 yield repr(x) + space
 
         def forever(iterator):
-            for x in iterator:
-                yield x
+            for token in iterator:
+                yield token
             while True:
                 yield None
 
@@ -106,10 +106,16 @@ class Array(object):
             if l is None and r is None:
                 break
 
+        while len(left) > 1 and (left[-1] == "[" or left[-1] == " [" or left[-1] == "{" or left[-1] == " {"):
+            left.pop()
+            l = ""
+        while len(right) > 1 and (right[-1] == "]" or right[-1] == "] " or right[-1] == "}" or right[-1] == "} "):
+            right.pop()
+            r = ""
         if l is None and r is None:
-            return "".join(left).rstrip("[").rstrip("{").rstrip(" ") + " " + "".join(reversed(right)).lstrip("]").lstrip("}").lstrip(" ")
+            return "".join(left).rstrip(" ") + " " + "".join(reversed(right)).lstrip(" ")
         else:
-            return "".join(left).rstrip("[").rstrip("{").rstrip(" ") + " ... " + "".join(reversed(right)).lstrip("]").lstrip("}").lstrip(" ")
+            return "".join(left).rstrip(" ") + " ... " + "".join(reversed(right)).lstrip(" ")
 
     def __repr__(self, limit_value=40, limit_total=85):
         value = self.__str__(limit_value=limit_value)
