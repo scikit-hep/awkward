@@ -27,12 +27,6 @@ def test_highlevel():
     assert repr(c) == "<Array [{one: 3.14, two: [1.1 ... -3.14]}] type='2 * {\"one\": float64, \"two\": var...'>"
     assert str(c) == "[{one: 3.14, two: [1.1 2.2]} {one: 99.9, two: [-3.14]}]"
 
-def test_string():
-    a = awkward1.Array(numpy.array([ord(x) for x in "hey there"], dtype=numpy.uint8))
-    a.__class__ = awkward1.dressing.string.String
-    assert str(a) == str(b"hey there")
-    assert repr(a) == repr(b"hey there")
-
 def test_dress():
     pyclass = awkward1.dressing.string.String
     parameters = {"encoding": "utf-8"}
@@ -44,3 +38,9 @@ def test_dress():
     assert repr(dressed1) == "dress['awkward1.dressing.string.String', var * uint8, encoding='utf-8']"
     assert dressed1 == dressed2
     assert dressed1 != dressed3
+
+def test_string():
+    a = awkward1.Array(numpy.array([ord(x) for x in "hey there"], dtype=numpy.uint8))
+    a.__class__ = awkward1.dressing.string.String
+    assert str(a) == str(b"hey there")
+    assert repr(a) == repr(b"hey there")

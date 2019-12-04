@@ -729,42 +729,6 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
 
 /////////////////////////////////////////////////////////////// Type
 
-class PyDress: public ak::Dress {
-public:
-  PyDress(const py::object& pyclass): pyclass_(pyclass) { }
-
-  py::object pyclass() const { return pyclass_; }
-
-  virtual const std::string name() const {
-    std::string out;
-    if (py::hasattr(pyclass_, "__module__")) {
-      out = pyclass_.attr("__module__").cast<std::string>() + std::string(".");
-    }
-    if (py::hasattr(pyclass_, "__qualname__")) {
-      out = out + pyclass_.attr("__qualname__").cast<std::string>();
-    }
-    else if (py::hasattr(pyclass_, "__name__")) {
-      out = out + pyclass_.attr("__name__").cast<std::string>();
-    }
-    else {
-      out = out + std::string("<unknown name>");
-    }
-    return out;
-  }
-
-  virtual bool equal(const ak::Dress& other) const {
-    if (const PyDress* raw = dynamic_cast<const PyDress*>(&other)) {
-      return pyclass_.is(raw->pyclass());
-    }
-    else {
-      return false;
-    }
-  }
-
-private:
-  py::object pyclass_;
-};
-
 class PyDressParameters: public ak::DressParameters<py::object> {
 public:
   PyDressParameters(const py::dict& pydict): pydict_(pydict) { }
@@ -799,6 +763,51 @@ public:
 
 private:
   py::dict pydict_;
+};
+
+class PyDress: public ak::Dress<py::object> {
+public:
+  PyDress(const py::object& pyclass): pyclass_(pyclass) { }
+
+  py::object pyclass() const { return pyclass_; }
+
+  virtual const std::string name() const {
+    std::string out;
+    if (py::hasattr(pyclass_, "__module__")) {
+      out = pyclass_.attr("__module__").cast<std::string>() + std::string(".");
+    }
+    if (py::hasattr(pyclass_, "__qualname__")) {
+      out = out + pyclass_.attr("__qualname__").cast<std::string>();
+    }
+    else if (py::hasattr(pyclass_, "__name__")) {
+      out = out + pyclass_.attr("__name__").cast<std::string>();
+    }
+    else {
+      out = out + std::string("<unknown name>");
+    }
+    return out;
+  }
+
+  virtual const std::string typestr(const ak::DressParameters<py::object>& parameters) const {
+    if (const PyDressParameters* raw = dynamic_cast<const PyDressParameters*>(&parameters)) {
+      if (py::hasattr(pyclass_, "typestr")) {
+        return pyclass_.attr("typestr")(raw->pydict()).cast<std::string>();
+      }
+    }
+    return std::string();
+  }
+
+  virtual bool equal(const ak::Dress<py::object>& other) const {
+    if (const PyDress* raw = dynamic_cast<const PyDress*>(&other)) {
+      return pyclass_.is(raw->pyclass());
+    }
+    else {
+      return false;
+    }
+  }
+
+private:
+  py::object pyclass_;
 };
 
 template <typename T>

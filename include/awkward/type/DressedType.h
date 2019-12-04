@@ -8,12 +8,6 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
-  class Dress {
-  public:
-    virtual const std::string name() const = 0;
-    virtual bool equal(const Dress& other) const = 0;
-  };
-
   template <typename T>
   class DressParameters {
   public:
@@ -23,19 +17,33 @@ namespace awkward {
     virtual bool equal(const DressParameters<T>& other) const = 0;
   };
 
+  template <typename T>
+  class Dress {
+  public:
+    virtual const std::string name() const = 0;
+    virtual const std::string typestr(const DressParameters<T>& parameters) const = 0;
+    virtual bool equal(const Dress& other) const = 0;
+  };
+
   template <typename D, typename P>
   class DressedType: public Type {
   public:
     DressedType(const std::shared_ptr<Type> type, const D& dress, const P& parameters): type_(type), dress_(dress), parameters_(parameters) { }
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const {
-      std::stringstream out;
-      out << indent << pre << "dress[" << util::quote(dress_.name(), false) << ", " << type_.get()->tostring_part(indent, "", "");
-      for (auto key : parameters_.keys()) {
-        out << ", " << key << "=" << parameters_.get_string(key);
+      std::string outstr = dress_.typestr(parameters_);
+      if (outstr.size() != 0) {
+        return outstr;
       }
-      out << "]";
-      return out.str();
+      else {
+        std::stringstream out;
+        out << indent << pre << "dress[" << util::quote(dress_.name(), false) << ", " << type_.get()->tostring_part(indent, "", "");
+        for (auto key : parameters_.keys()) {
+          out << ", " << key << "=" << parameters_.get_string(key);
+        }
+        out << "]";
+        return out.str();
+      }
     }
     virtual const std::shared_ptr<Type> shallow_copy() const {
       return std::shared_ptr<Type>(new DressedType(type_, dress_, parameters_));
