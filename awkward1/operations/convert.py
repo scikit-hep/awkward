@@ -62,29 +62,31 @@ def tolist(array):
     else:
         raise TypeError("unrecognized array type: {0}".format(repr(array)))
 
-def tojson(array, *args, **kwargs):
+def tojson(array, destination=None, pretty=False, maxdecimals=None, buffersize=65536):
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return json.dumps(array)
 
     elif isinstance(array, awkward1.Array):
-        return tojson(array.layout, *args, **kwargs)
+        return tojson(array.layout, destination=destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize)
 
     elif isinstance(array, awkward1.Record):
-        return tojson(array.layout, *args, **kwargs)
+        return tojson(array.layout, destination=destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize)
 
     elif isinstance(array, awkward1.layout.Record):
-        return array.tojson(*args, **kwargs)
-
+        out = array
     elif isinstance(array, numpy.ndarray):
-        return awkward1.layout.NumpyArray(array).tojson(*args, **kwargs)
-
+        out = awkward1.layout.NumpyArray(array)
     elif isinstance(array, awkward1.layout.FillableArray):
-        return array.snapshot().tojson(*args, **kwargs)
-
+        out = array.snapshot()
     elif isinstance(array, awkward1.layout.Content):
-        return array.tojson(*args, **kwargs)
+        out = array
 
     else:
         raise TypeError("unrecognized array type: {0}".format(repr(array)))
+
+    if destination is None:
+        return out.tojson(pretty=pretty, maxdecimals=maxdecimals)
+    else:
+        return out.tojson(destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize)
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "json", "Iterable", "numpy", "awkward1")]

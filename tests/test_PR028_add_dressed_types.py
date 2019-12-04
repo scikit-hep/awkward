@@ -13,7 +13,6 @@ def test_fromnumpy():
     b = awkward1.fromnumpy(a)
     assert awkward1.tolist(a) == awkward1.tolist(b)
 
-# def test_highlevel():
-#     a = awkward1.Array(numpy.array([1, 2, 3]))
-#     print(a)
-#     raise Exception
+def test_highlevel():
+    a = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]])
+    assert repr(a) == "<Array [[1.1 2.2 3.3] []] ... [6.6] [7.7 8.8 9.9]] type='5 * var * float64'>"
