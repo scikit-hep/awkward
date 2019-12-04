@@ -27,6 +27,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Type> Record::type() const {
+    return array_.type();
+  }
+
   void Record::setid() {
     throw std::runtime_error("undefined operation: Record::setid");
   }
@@ -61,20 +65,16 @@ namespace awkward {
     builder.endrec();
   }
 
-  const std::shared_ptr<Type> Record::bareinnertype() const {
-    return array_.bareinnertype();
+  const std::shared_ptr<Type> Record::bare_innertype() const {
+    return array_.bare_innertype();
   }
 
-  const std::shared_ptr<Type> Record::innertype() const {
-    return array_.innertype();
+  void Record::settype(const std::shared_ptr<Type> type) {
+    array_.settype(type);
   }
 
-  void Record::setinnertype(const std::shared_ptr<Type> innertype) {
-    array_.setinnertype(innertype);
-  }
-
-  bool Record::accepts(const std::shared_ptr<Type> innertype) {
-    return array_.accepts(innertype);
+  bool Record::accepts(const std::shared_ptr<Type> type) {
+    return array_.accepts(type);
   }
 
   int64_t Record::length() const {

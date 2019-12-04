@@ -44,8 +44,8 @@ namespace awkward {
   template <typename T>
   class RawArrayOf: public Content {
   public:
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const std::shared_ptr<T> ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
-        : Content(id, innertype)
+    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<T> ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
+        : Content(id, type)
         , ptr_(ptr)
         , offset_(offset)
         , length_(length)
@@ -53,15 +53,15 @@ namespace awkward {
           assert(sizeof(T) == itemsize);
         }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const std::shared_ptr<T> ptr, const int64_t length)
-        : Content(id, innertype)
+    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<T> ptr, const int64_t length)
+        : Content(id, type)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const int64_t length)
-        : Content(id, innertype)
+    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const int64_t length)
+        : Content(id, type)
         , ptr_(std::shared_ptr<T>(new T[(size_t)length], awkward::util::array_deleter<T>()))
         , offset_(0)
         , length_(length)
@@ -81,7 +81,6 @@ namespace awkward {
 
     virtual const std::string classname() const { return std::string("RawArrayOf<") + std::string(typeid(T).name()) + std::string(">"); }
 
-    virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid() {
       if (length() <= kMaxInt32) {
         Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
@@ -180,9 +179,7 @@ namespace awkward {
       }
     }
 
-    virtual bool isbare() const { return innertype_.get() == nullptr; }
-
-    virtual const std::shared_ptr<Type> bareinnertype() const {
+    virtual const std::shared_ptr<Type> bare_innertype() const {
       if (std::is_same<T, double>::value) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
       }
@@ -218,21 +215,12 @@ namespace awkward {
       }
     }
 
-    virtual const std::shared_ptr<Type> innertype() const {
-      if (innertype_.get() == nullptr) {
-        return bareinnertype();
+    virtual void settype(const std::shared_ptr<Type> type) {
+      if (accepts(type)) {
+        type_ = type;
       }
       else {
-        return innertype_;
-      }
-    }
-
-    virtual void setinnertype(const std::shared_ptr<Type> innertype) {
-      if (accepts(innertype)) {
-        innertype_ = innertype;
-      }
-      else {
-        throw std::invalid_argument(std::string("provided type is incompatible with array: ") + innertype.get()->compare(bareinnertype()));
+        throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(bare_innertype()));
       }
     }
 

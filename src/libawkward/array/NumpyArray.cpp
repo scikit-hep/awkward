@@ -262,7 +262,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> NumpyArray::bareinnertype() const {
+  const std::shared_ptr<Type> NumpyArray::bare_innertype() const {
     if (ndim() == 1) {
       if (format_.compare("d") == 0) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
@@ -319,7 +319,7 @@ namespace awkward {
     }
     else {
       NumpyArray tmp(id_, Type::none(), ptr_, std::vector<ssize_t>({ 1 }), std::vector<ssize_t>({ itemsize_ }), byteoffset_, itemsize_, format_);   // FIXME: Type::none()
-      std::shared_ptr<Type> out = tmp.bareinnertype();
+      std::shared_ptr<Type> out = tmp.bare_innertype();
       for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
         out = std::shared_ptr<Type>(new RegularType(out, (int64_t)shape_[i]));
       }
@@ -327,26 +327,17 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> NumpyArray::innertype() const {
-    if (innertype_.get() == nullptr) {
-      return bareinnertype();
-    }
-    else {
-      return innertype_;
-    }
-  }
-
-  void NumpyArray::setinnertype(const std::shared_ptr<Type> innertype) {
-    if (accepts(innertype)) {
+  void NumpyArray::settype(const std::shared_ptr<Type> type) {
+    if (accepts(type)) {
       // FIXME: apply to descendants
-      innertype_ = innertype;
+      type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + innertype.get()->compare(bareinnertype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
     }
   }
 
-  bool NumpyArray::accepts(const std::shared_ptr<Type> innertype) {
+  bool NumpyArray::accepts(const std::shared_ptr<Type> type) {
     // FIXME: actually check
     return true;
   }
@@ -361,7 +352,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new NumpyArray(id_, innertype_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
+    return std::shared_ptr<Content>(new NumpyArray(id_, type_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
   }
 
   void NumpyArray::check_for_iteration() const {

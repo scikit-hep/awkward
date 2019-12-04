@@ -163,33 +163,23 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListOffsetArrayOf<T>::bareinnertype() const {
-    return std::shared_ptr<Type>(new ListType(content_.get()->bareinnertype()));
+  const std::shared_ptr<Type> ListOffsetArrayOf<T>::bare_innertype() const {
+    return std::shared_ptr<Type>(new ListType(content_.get()->bare_innertype()));
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListOffsetArrayOf<T>::innertype() const {
-    if (innertype_.get() == nullptr) {
-      return std::shared_ptr<Type>(new ListType(content_.get()->innertype()));
-    }
-    else {
-      return innertype_;
-    }
-  }
-
-  template <typename T>
-  void ListOffsetArrayOf<T>::setinnertype(const std::shared_ptr<Type> innertype) {
-    if (accepts(innertype)) {
+  void ListOffsetArrayOf<T>::settype(const std::shared_ptr<Type> type) {
+    if (accepts(type)) {
       // FIXME: apply to descendants
-      innertype_ = innertype;
+      type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + innertype.get()->compare(bareinnertype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
     }
   }
 
   template <typename T>
-  bool ListOffsetArrayOf<T>::accepts(const std::shared_ptr<Type> innertype) {
+  bool ListOffsetArrayOf<T>::accepts(const std::shared_ptr<Type> type) {
     // FIXME: actually check
     return true;
   }
@@ -201,7 +191,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::shallow_copy() const {
-    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, innertype_, offsets_, content_));
+    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, type_, offsets_, content_));
   }
 
   template <typename T>

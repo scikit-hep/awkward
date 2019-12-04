@@ -14,21 +14,20 @@
 namespace awkward {
   class Content {
   public:
-    Content(std::shared_ptr<Identity> id, std::shared_ptr<Type> innertype): id_(id), innertype_(innertype) { }
+    Content(std::shared_ptr<Identity> id, std::shared_ptr<Type> type): id_(id), type_(type) { }
     virtual ~Content() { }
 
     virtual bool isscalar() const;
     virtual const std::string classname() const = 0;
-    virtual const std::shared_ptr<Identity> id() const = 0;
+    virtual const std::shared_ptr<Identity> id() const;
     virtual void setid() = 0;
     virtual void setid(const std::shared_ptr<Identity> id) = 0;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
     virtual void tojson_part(ToJson& builder) const = 0;
-    virtual bool isbare() const = 0;
-    virtual const std::shared_ptr<Type> bareinnertype() const = 0;
-    virtual const std::shared_ptr<Type> innertype() const = 0;
-    virtual void setinnertype(const std::shared_ptr<Type> innertype) = 0;
-    virtual bool accepts(const std::shared_ptr<Type> innertype) = 0;
+    virtual const std::shared_ptr<Type> bare_innertype() const = 0;
+    virtual const std::shared_ptr<Type> type() const;
+    virtual void settype(const std::shared_ptr<Type> type) = 0;
+    virtual bool accepts(const std::shared_ptr<Type> type) = 0;
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
     virtual void check_for_iteration() const = 0;
@@ -44,8 +43,8 @@ namespace awkward {
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const = 0;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const = 0;
 
+    bool isbare() const;
     const std::shared_ptr<Type> baretype() const;
-    const std::shared_ptr<Type> type() const;
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
     void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
@@ -63,7 +62,7 @@ namespace awkward {
 
   protected:
     std::shared_ptr<Identity> id_;
-    std::shared_ptr<Type> innertype_;
+    std::shared_ptr<Type> type_;
   };
 }
 

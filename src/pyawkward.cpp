@@ -1094,14 +1094,13 @@ py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
             self.setid();
           })
           .def_property_readonly("baretype", &ak::Content::baretype)
-          .def_property_readonly("type", &ak::Content::type)
-          .def_property("innertype", [](T& self) -> py::object {
-            return box(self.innertype());
+          .def_property("type", [](T& self) -> py::object {
+            return box(self.type());
           }, [](T& self, py::object type) -> void {
-            self.setinnertype(unbox_type(type));
+            self.settype(unbox_type(type));
           })
-          .def("accepts", [](T& self, py::object innertype) -> bool {
-            return self.accepts(unbox_type(innertype));
+          .def("accepts", [](T& self, py::object type) -> bool {
+            return self.accepts(unbox_type(type));
           })
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)

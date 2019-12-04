@@ -15,8 +15,8 @@
 namespace awkward {
   class NumpyArray: public Content {
   public:
-    NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const std::shared_ptr<void> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
-        : Content(id, innertype)
+    NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<void> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
+        : Content(id, type)
         , ptr_(ptr)
         , shape_(shape)
         , strides_(strides)
@@ -42,16 +42,13 @@ namespace awkward {
 
     virtual bool isscalar() const;
     virtual const std::string classname() const;
-    virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
-    virtual bool isbare() const { return innertype_.get() == nullptr; }
-    virtual const std::shared_ptr<Type> bareinnertype() const;
-    virtual const std::shared_ptr<Type> innertype() const;
-    virtual void setinnertype(const std::shared_ptr<Type> innertype);
-    virtual bool accepts(const std::shared_ptr<Type> innertype);
+    virtual const std::shared_ptr<Type> bare_innertype() const;
+    virtual void settype(const std::shared_ptr<Type> type);
+    virtual bool accepts(const std::shared_ptr<Type> type);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;

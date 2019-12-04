@@ -160,33 +160,23 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListArrayOf<T>::bareinnertype() const {
-    return std::shared_ptr<Type>(new ListType(content_.get()->bareinnertype()));
+  const std::shared_ptr<Type> ListArrayOf<T>::bare_innertype() const {
+    return std::shared_ptr<Type>(new ListType(content_.get()->bare_innertype()));
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListArrayOf<T>::innertype() const {
-    if (innertype_.get() == nullptr) {
-      return std::shared_ptr<Type>(new ListType(content_.get()->innertype()));
-    }
-    else {
-      return innertype_;
-    }
-  }
-
-  template <typename T>
-  void ListArrayOf<T>::setinnertype(const std::shared_ptr<Type> innertype) {
-    if (accepts(innertype)) {
+  void ListArrayOf<T>::settype(const std::shared_ptr<Type> type) {
+    if (accepts(type)) {
       // FIXME: apply to descendants
-      innertype_ = innertype;
+      type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + innertype.get()->compare(bareinnertype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
     }
   }
 
   template <typename T>
-  bool ListArrayOf<T>::accepts(const std::shared_ptr<Type> innertype) {
+  bool ListArrayOf<T>::accepts(const std::shared_ptr<Type> type) {
     // FIXME: actually check
     return true;
   }
@@ -198,7 +188,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::shallow_copy() const {
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, innertype_, starts_, stops_, content_));
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, type_, starts_, stops_, content_));
   }
 
   template <typename T>

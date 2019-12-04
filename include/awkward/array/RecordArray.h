@@ -17,24 +17,24 @@ namespace awkward {
     typedef std::unordered_map<std::string, size_t> Lookup;
     typedef std::vector<std::string> ReverseLookup;
 
-    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
-        : Content(id, innertype)
+    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
+        : Content(id, type)
         , contents_(contents)
         , lookup_(lookup)
         , reverselookup_(reverselookup)
         , length_(0) {
       assert(contents.size() != 0);
     }
-    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const std::vector<std::shared_ptr<Content>>& contents)
-        : Content(id, innertype)
+    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::vector<std::shared_ptr<Content>>& contents)
+        : Content(id, type)
         , contents_(contents)
         , lookup_(nullptr)
         , reverselookup_(nullptr)
         , length_(0) {
       assert(contents.size() != 0);
     }
-    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, int64_t length, bool istuple)
-        : Content(id, innertype)
+    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, int64_t length, bool istuple)
+        : Content(id, type)
         , contents_()
         , lookup_(istuple ? nullptr : new Lookup)
         , reverselookup_(istuple ? nullptr : new ReverseLookup)
@@ -46,16 +46,13 @@ namespace awkward {
     bool istuple() const { return lookup_.get() == nullptr; }
 
     virtual const std::string classname() const;
-    virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
-    virtual bool isbare() const { return innertype_.get() == nullptr; }
-    virtual const std::shared_ptr<Type> bareinnertype() const;
-    virtual const std::shared_ptr<Type> innertype() const;
-    virtual void setinnertype(const std::shared_ptr<Type> innertype);
-    virtual bool accepts(const std::shared_ptr<Type> innertype);
+    virtual const std::shared_ptr<Type> bare_innertype() const;
+    virtual void settype(const std::shared_ptr<Type> type);
+    virtual bool accepts(const std::shared_ptr<Type> type);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;

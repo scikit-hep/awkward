@@ -12,21 +12,29 @@ namespace awkward {
     return false;
   }
 
-  const std::shared_ptr<Type> Content::baretype() const {
-    if (isscalar()) {
-      return bareinnertype();
-    }
-    else {
-      return std::shared_ptr<Type>(new ArrayType(bareinnertype(), length()));
-    }
+  const std::shared_ptr<Identity> Content::id() const {
+    return id_;
   }
 
   const std::shared_ptr<Type> Content::type() const {
-    if (isscalar()) {
-      return innertype();
+    if (type_.get() == nullptr) {
+      return baretype();
     }
     else {
-      return std::shared_ptr<Type>(new ArrayType(innertype(), length()));
+      return type_;
+    }
+  }
+
+  bool Content::isbare() const {
+    return type_.get() == nullptr;
+  }
+
+  const std::shared_ptr<Type> Content::baretype() const {
+    if (isscalar()) {
+      return bare_innertype();
+    }
+    else {
+      return std::shared_ptr<Type>(new ArrayType(bare_innertype(), length()));
     }
   }
 

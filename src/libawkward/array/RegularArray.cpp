@@ -99,30 +99,21 @@ namespace awkward {
     builder.endlist();
   }
 
-  const std::shared_ptr<Type> RegularArray::bareinnertype() const {
-    return std::shared_ptr<Type>(new RegularType(content_.get()->bareinnertype(), size_));
+  const std::shared_ptr<Type> RegularArray::bare_innertype() const {
+    return std::shared_ptr<Type>(new RegularType(content_.get()->bare_innertype(), size_));
   }
 
-  const std::shared_ptr<Type> RegularArray::innertype() const {
-    if (innertype_.get() == nullptr) {
-      return std::shared_ptr<Type>(new RegularType(content_.get()->innertype(), size_));
-    }
-    else {
-      return innertype_;
-    }
-  }
-
-  void RegularArray::setinnertype(const std::shared_ptr<Type> innertype) {
-    if (accepts(innertype)) {
+  void RegularArray::settype(const std::shared_ptr<Type> type) {
+    if (accepts(type)) {
       // FIXME: apply to descendants
-      innertype_ = innertype;
+      type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + innertype.get()->compare(bareinnertype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
     }
   }
 
-  bool RegularArray::accepts(const std::shared_ptr<Type> innertype) {
+  bool RegularArray::accepts(const std::shared_ptr<Type> type) {
     // FIXME: actually check
     return true;
   }
@@ -132,7 +123,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new RegularArray(id_, innertype_, content_, size_));
+    return std::shared_ptr<Content>(new RegularArray(id_, type_, content_, size_));
   }
 
   void RegularArray::check_for_iteration() const {
