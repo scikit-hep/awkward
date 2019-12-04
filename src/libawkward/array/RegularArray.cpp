@@ -132,7 +132,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_, size_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new RegularArray(id_, type_, content_, size_));
   }
 
   void RegularArray::check_for_iteration() const {

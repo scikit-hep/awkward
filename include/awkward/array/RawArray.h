@@ -241,7 +241,7 @@ namespace awkward {
 
     virtual int64_t length() const { return length_; }
 
-    virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, Type::none(), ptr_, offset_, length_, itemsize_)); }   // FIXME: Type::none()
+    virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, type_, ptr_, offset_, length_, itemsize_)); }
 
     virtual void check_for_iteration() const {
       if (id_.get() != nullptr  &&  id_.get()->length() < length_) {

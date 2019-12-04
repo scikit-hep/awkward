@@ -168,10 +168,10 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::shallow_copy() const {
     if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), length(), istuple()));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RecordArray(id_, type_, length(), istuple()));
     }
     else {
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents_, lookup_, reverselookup_));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RecordArray(id_, type_, contents_, lookup_, reverselookup_));
     }
   }
 

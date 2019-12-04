@@ -198,7 +198,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::shallow_copy() const {
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, Type::none(), starts_, stops_, content_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, type_, starts_, stops_, content_));
   }
 
   template <typename T>

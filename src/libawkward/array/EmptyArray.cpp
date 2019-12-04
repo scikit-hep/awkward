@@ -72,7 +72,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new EmptyArray(id_, Type::none()));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new EmptyArray(id_, type_));
   }
 
   void EmptyArray::check_for_iteration() const { }

@@ -358,7 +358,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new NumpyArray(id_, Type::none(), ptr_, shape_, strides_, byteoffset_, itemsize_, format_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new NumpyArray(id_, type_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
   }
 
   void NumpyArray::check_for_iteration() const {

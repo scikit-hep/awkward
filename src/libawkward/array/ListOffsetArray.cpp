@@ -201,7 +201,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::shallow_copy() const {
-    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, Type::none(), offsets_, content_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, type_, offsets_, content_));
   }
 
   template <typename T>

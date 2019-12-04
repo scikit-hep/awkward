@@ -74,6 +74,6 @@ def test_string2():
     a = awkward1.Array(listoffsetarray)
     a.layout.content.type = string
 
-    # print(a.type)
-    # print(a.baretype)
+    # print(a.layout.content.type)
+    # print(a.layout.content.baretype)
     # raise Exception
