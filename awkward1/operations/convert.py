@@ -20,22 +20,24 @@ def fromnumpy(array):
             return awkward1.layout.NumpyArray(array)
         else:
             return awkward1.layout.RegularArray(recurse(array.reshape((-1,) + array.shape[2:])), array.shape[1])
-    return awkward1.Array(recurse(array))
+    return awkward1.util.wrap(recurse(array))
 
 def fromiter(iterable, initial=1024, resize=2.0):
     out = awkward1.layout.FillableArray(initial=initial, resize=resize)
     for x in iterable:
         out.fill(x)
-    return awkward1.Array(out.snapshot())
+    return awkward1.util.wrap(out.snapshot())
 
 def fromjson(source, initial=1024, resize=2.0, buffersize=65536):
-    return awkward1.Array(awkward1.layout.fromjson(source, initial=initial, resize=resize, buffersize=buffersize))
+    return awkward1.util.wrap(awkward1.layout.fromjson(source, initial=initial, resize=resize, buffersize=buffersize))
 
 def tolist(array):
+    import awkward1.highlevel
+
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return array
 
-    elif isinstance(array, awkward1.Array):
+    elif isinstance(array, awkward1.highlevel.Array):
         return tolist(array.layout)
 
     elif isinstance(array, awkward1.Record):
@@ -63,13 +65,15 @@ def tolist(array):
         raise TypeError("unrecognized array type: {0}".format(repr(array)))
 
 def tojson(array, destination=None, pretty=False, maxdecimals=None, buffersize=65536):
+    import awkward1.highlevel
+
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return json.dumps(array)
 
-    elif isinstance(array, awkward1.Array):
+    elif isinstance(array, awkward1.highlevel.Array):
         return tojson(array.layout, destination=destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize)
 
-    elif isinstance(array, awkward1.Record):
+    elif isinstance(array, awkward1.highlevel.Record):
         return tojson(array.layout, destination=destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize)
 
     elif isinstance(array, awkward1.layout.Record):

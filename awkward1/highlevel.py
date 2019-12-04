@@ -167,13 +167,7 @@ class Array(object):
         return len(self.layout)
 
     def __getitem__(self, where):
-        layout = self.layout[where]
-        if isinstance(layout, awkward1.layout.Content):
-            return awkward1.Array(layout)
-        elif isinstance(layout, awkward1.layout.Record):
-            return awkward1.Record(layout)
-        else:
-            return layout
+        return awkward1.util.wrap(self.layout[where], self.type.type)
 
 class Record(object):
     pass

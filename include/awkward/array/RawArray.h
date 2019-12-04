@@ -180,6 +180,8 @@ namespace awkward {
       }
     }
 
+    virtual bool isbare() const { return type_.get() == nullptr; }
+
     virtual const std::shared_ptr<Type> baretype_part() const {
       if (std::is_same<T, double>::value) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));

@@ -32,7 +32,7 @@ class Dummy(awkward1.highlevel.Array):
 
 def test_dress():
     dressed0 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), Dummy, one=1, two=2)
-    assert repr(dressed0) == "dress[float64, 'tests.test_PR028_add_dressed_types.Dummy', one=1, two=2]"
+    assert repr(dressed0) in ("dress[float64, 'tests.test_PR028_add_dressed_types.Dummy', one=1, two=2]", "dress[float64, 'tests.test_PR028_add_dressed_types.Dummy', two=2, one=1]")
 
     pyclass = awkward1.dressing.string.String
     inner = awkward1.layout.ListType(awkward1.layout.PrimitiveType("uint8"))
@@ -70,10 +70,18 @@ def test_string2():
 
     content = awkward1.layout.NumpyArray(numpy.array([ord(x) for x in "heythere"], dtype=numpy.uint8))
     listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 8])), content)
+    listoffsetarray.type = string
+    assert repr(listoffsetarray.type) == "3 * string"
+    assert repr(listoffsetarray.baretype) == "3 * var * uint8"
 
-    a = awkward1.Array(listoffsetarray)
-    a.layout.content.type = string
+    a = awkward1.util.wrap(listoffsetarray)
+    assert repr(a.type) == "3 * string"
+    assert repr(a.baretype) == "3 * var * uint8"
 
-    # print(a.layout.content.type)
-    # print(a.layout.content.baretype)
+    # print(a)
+    # print(a[0])
+    # print(a[0].type)
+    # print(a[1])
+    # print(a[2])
+    #
     # raise Exception
