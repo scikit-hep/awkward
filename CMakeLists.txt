@@ -48,5 +48,6 @@ addtest(PR016 tests/test_PR016_finish_getitem_for_rawarray.cpp)
 addtest(PR019 tests/test_PR019_use_json_library.cpp)
 
 pybind11_add_module(layout src/pyawkward.cpp)
-set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET default)
+# set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET default)
+set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
 target_link_libraries(layout PRIVATE awkward-static)

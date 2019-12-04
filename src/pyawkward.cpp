@@ -22,6 +22,7 @@
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
+#include "awkward/type/DressedType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/PrimitiveType.h"
@@ -727,6 +728,34 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
 }
 
 /////////////////////////////////////////////////////////////// Type
+
+class PyClassDress: public ak::Dress {
+public:
+  PyClassDress(const py::object& pyclass): pyclass_(pyclass) { }
+
+  py::object pyclass() const { return pyclass_; }
+
+  virtual const std::string name() const {
+    return pyclass_.attr("__repr__")().cast<std::string>();
+  }
+
+  virtual bool equal(const ak::Dress& other) const {
+    if (const PyClassDress* raw = dynamic_cast<const PyClassDress*>(&other)) {
+      return pyclass_.attr("__eq__")(raw->pyclass()).cast<bool>();
+    }
+    else {
+      return false;
+    }
+  }
+
+private:
+  py::object pyclass_;
+};
+
+
+
+
+
 
 template <typename T>
 py::dict emptydict(T& self) {
