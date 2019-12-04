@@ -728,6 +728,11 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
 
 /////////////////////////////////////////////////////////////// Type
 
+template <typename T>
+py::dict emptydict(T& self) {
+  return py::dict();
+}
+
 py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::string name) {
   return (py::class_<ak::Type, std::shared_ptr<ak::Type>>(m, name.c_str())
       .def("__ne__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
@@ -743,6 +748,7 @@ py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayTy
       .def("length", &ak::ArrayType::length)
       .def("__repr__", &ak::ArrayType::tostring)
       .def("__eq__", &ak::ArrayType::equal)
+      .def_property_readonly("parameters", &emptydict<ak::ArrayType>)
   );
 }
 
@@ -751,6 +757,7 @@ py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_Unk
       .def(py::init<>())
       .def("__repr__", &ak::UnknownType::tostring)
       .def("__eq__", &ak::UnknownType::equal)
+      .def_property_readonly("parameters", &emptydict<ak::UnknownType>)
   );
 }
 
@@ -796,6 +803,7 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
       }))
       .def("__repr__", &ak::PrimitiveType::tostring)
       .def("__eq__", &ak::PrimitiveType::equal)
+      .def_property_readonly("parameters", &emptydict<ak::PrimitiveType>)
   );
 }
 
@@ -806,6 +814,7 @@ py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_Reg
       .def_property_readonly("size", &ak::RegularType::size)
       .def("__repr__", &ak::RegularType::tostring)
       .def("__eq__", &ak::RegularType::equal)
+      .def_property_readonly("parameters", &emptydict<ak::RegularType>)
   );
 }
 
@@ -815,6 +824,7 @@ py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(
       .def_property_readonly("type", &ak::ListType::type)
       .def("__repr__", &ak::ListType::tostring)
       .def("__eq__", &ak::ListType::equal)
+      .def_property_readonly("parameters", &emptydict<ak::ListType>)
   );
 }
 
@@ -824,6 +834,7 @@ py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_Optio
       .def_property_readonly("type", &ak::OptionType::type)
       .def("__repr__", &ak::OptionType::tostring)
       .def("__eq__", &ak::OptionType::equal)
+      .def_property_readonly("parameters", &emptydict<ak::OptionType>)
   );
 }
 
@@ -838,6 +849,7 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
       }))
       .def("__repr__", &ak::UnionType::tostring)
       .def("__eq__", &ak::UnionType::equal)
+      .def_property_readonly("parameters", &emptydict<ak::UnionType>)
 
       .def_property_readonly("numtypes", &ak::UnionType::numtypes)
       .def_property_readonly("types", [](ak::UnionType& self) -> py::tuple {
@@ -875,6 +887,7 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
       }))
       .def("__repr__", &ak::RecordType::tostring)
       .def("__eq__", &ak::RecordType::equal)
+      .def_property_readonly("parameters", &emptydict<ak::RecordType>)
 
       .def_property_readonly("numfields", &ak::RecordType::numfields)
       .def("index", &ak::RecordType::index)

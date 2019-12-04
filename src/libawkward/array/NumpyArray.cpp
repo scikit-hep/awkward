@@ -168,6 +168,7 @@ namespace awkward {
       tostring_as<bool>(out, reinterpret_cast<bool*>(byteptr()), length());
     }
     else {
+      out << "0x ";
       ssize_t len = bytelength();
       if (len <= 32) {
         for (ssize_t i = 0;  i < len;  i++) {

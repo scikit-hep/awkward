@@ -28,6 +28,7 @@ def test_highlevel():
     assert str(c) == "[{one: 1, two: [1.1 2.2]} {one: 999, two: [-3.14]}]"
 
 def test_string():
-    a = awkward1.Array([ord(x) for x in "hey there"])
+    a = awkward1.Array(numpy.array([ord(x) for x in "hey there"], dtype=numpy.uint8))
     a.__class__ = awkward1.dressing.string.String
-    assert repr(a) == "'hey there'"
+    assert str(a) == str(b"hey there")
+    assert repr(a) == repr(b"hey there")
