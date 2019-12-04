@@ -1094,19 +1094,14 @@ py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
             self.setid();
           })
           .def_property_readonly("baretype", &ak::Content::baretype)
-          .def_property("type", &ak::Content::type, [](T& self, py::object type) -> void {
-            std::shared_ptr<ak::Type> unboxed = unbox_type(type);
-            if (ak::ArrayType* arraytype = dynamic_cast<ak::ArrayType*>(unboxed.get())) {
-              unboxed = arraytype->type();
-            }
-            self.settype(unboxed);
+          .def_property_readonly("type", &ak::Content::type)
+          .def_property("innertype", [](T& self) -> py::object {
+            return box(self.innertype());
+          }, [](T& self, py::object type) -> void {
+            self.setinnertype(unbox_type(type));
           })
-          .def("accepts", [](T& self, py::object type) -> bool {
-            std::shared_ptr<ak::Type> unboxed = unbox_type(type);
-            if (ak::ArrayType* arraytype = dynamic_cast<ak::ArrayType*>(unboxed.get())) {
-              unboxed = arraytype->type();
-            }
-            return self.accepts(unboxed);
+          .def("accepts", [](T& self, py::object innertype) -> bool {
+            return self.accepts(unbox_type(innertype));
           })
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
