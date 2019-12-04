@@ -15,12 +15,12 @@ namespace awkward {
   };
 
   template <typename T>
-  class Parameters {
+  class DressParameters {
   public:
     virtual const std::vector<std::string> keys() const = 0;
     virtual const T get(const std::string& key) const = 0;
     virtual const std::string get_string(const std::string& key) const = 0;
-    virtual bool equal(const Parameters<T>& other) const = 0;
+    virtual bool equal(const DressParameters<T>& other) const = 0;
   };
 
   template <typename D, typename P>

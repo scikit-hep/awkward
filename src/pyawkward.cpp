@@ -729,9 +729,9 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
 
 /////////////////////////////////////////////////////////////// Type
 
-class PyClassDress: public ak::Dress {
+class PyDress: public ak::Dress {
 public:
-  PyClassDress(const py::object& pyclass): pyclass_(pyclass) { }
+  PyDress(const py::object& pyclass): pyclass_(pyclass) { }
 
   py::object pyclass() const { return pyclass_; }
 
@@ -740,7 +740,7 @@ public:
   }
 
   virtual bool equal(const ak::Dress& other) const {
-    if (const PyClassDress* raw = dynamic_cast<const PyClassDress*>(&other)) {
+    if (const PyDress* raw = dynamic_cast<const PyDress*>(&other)) {
       return pyclass_.attr("__eq__")(raw->pyclass()).cast<bool>();
     }
     else {
@@ -752,10 +752,41 @@ private:
   py::object pyclass_;
 };
 
+class PyDressParameters: public ak::DressParameters<py::object> {
+public:
+  PyDressParameters(const py::dict& pydict): pydict_(pydict) { }
 
+  py::dict pydict() const { return pydict_; }
 
+  virtual const std::vector<std::string> keys() const {
+    std::vector<std::string> out;
+    for (auto pair : pydict_) {
+      out.push_back(pair.first.cast<std::string>());
+    }
+    return out;
+  }
 
+  virtual const py::object get(const std::string& key) const {
+    py::str pykey(PyUnicode_DecodeUTF8(key.data(), key.length(), "surrogateescape"));
+    return pydict_[pykey];
+  }
 
+  virtual const std::string get_string(const std::string& key) const {
+    return get(key).attr("__repr__")().cast<std::string>();
+  }
+
+  virtual bool equal(const ak::DressParameters<py::object>& other) {
+    if (const PyDressParameters* raw = dynamic_cast<const PyDressParameters*>(&other)) {
+      return pydict_.attr("__eq__")(raw->pydict()).cast<bool>();
+    }
+    else {
+      return false;
+    }
+  }
+
+private:
+  py::dict pydict_;
+};
 
 template <typename T>
 py::dict emptydict(T& self) {
