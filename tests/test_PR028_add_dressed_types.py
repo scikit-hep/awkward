@@ -36,8 +36,11 @@ def test_string():
 def test_dress():
     pyclass = awkward1.dressing.string.String
     parameters = {"encoding": "utf-8"}
-    inner = awkward1.layout.PrimitiveType("uint8")
-    dressed = awkward1.layout.DressedType(inner, pyclass, parameters)
+    inner = awkward1.layout.ListType(awkward1.layout.PrimitiveType("uint8"))
+    dressed1 = awkward1.layout.DressedType(inner, pyclass, parameters)
+    dressed2 = awkward1.layout.DressedType(inner, pyclass, parameters)
+    dressed3 = awkward1.layout.DressedType(inner, pyclass)
 
-    # print(dressed.__repr__())
-    # raise Exception
+    assert repr(dressed1) == "dress['awkward1.dressing.string.String', var * uint8, encoding='utf-8']"
+    assert dressed1 == dressed2
+    assert dressed1 != dressed3

@@ -28,7 +28,7 @@ namespace awkward {
           if (j != 0) {
             out << ", ";
           }
-          out << util::quote(reverselookup_.get()->at(j), true) << ": ";
+          out << util::quote(reverselookup_.get()->at(j), false) << ": ";
           out << types_[j].get()->tostring_part("", "", "");
         }
         out << "}";

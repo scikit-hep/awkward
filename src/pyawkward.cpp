@@ -736,12 +736,25 @@ public:
   py::object pyclass() const { return pyclass_; }
 
   virtual const std::string name() const {
-    return pyclass_.attr("__repr__")().cast<std::string>();
+    std::string out;
+    if (py::hasattr(pyclass_, "__module__")) {
+      out = pyclass_.attr("__module__").cast<std::string>() + std::string(".");
+    }
+    if (py::hasattr(pyclass_, "__qualname__")) {
+      out = out + pyclass_.attr("__qualname__").cast<std::string>();
+    }
+    else if (py::hasattr(pyclass_, "__name__")) {
+      out = out + pyclass_.attr("__name__").cast<std::string>();
+    }
+    else {
+      out = out + std::string("<unknown name>");
+    }
+    return out;
   }
 
   virtual bool equal(const ak::Dress& other) const {
     if (const PyDress* raw = dynamic_cast<const PyDress*>(&other)) {
-      return pyclass_.attr("__eq__")(raw->pyclass()).cast<bool>();
+      return pyclass_.is(raw->pyclass());
     }
     else {
       return false;
@@ -812,7 +825,7 @@ py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type> make_Dressed
         return PyDressedType(type, PyDress(dress), PyDressParameters(parameters));
       }), py::arg("type"), py::arg("dress"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &PyDressedType::type)
-      .def("__repr__", [](PyDressedType& self) -> std::string { return self.tostring(); })
+      .def("__repr__", &PyDressedType::tostring)
       .def("__eq__", &PyDressedType::equal)
       .def_property_readonly("dress", [](PyDressedType& self) -> py::object {
         return self.dress().pyclass();
