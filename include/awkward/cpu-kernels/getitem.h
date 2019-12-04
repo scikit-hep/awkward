@@ -7,7 +7,7 @@
 
 extern "C" {
   EXPORT_SYMBOL void awkward_regularize_rangeslice(int64_t* start, int64_t* stop, bool posstep, bool hasstart, bool hasstop, int64_t length);
-  EXPORT_SYMBOL EXPORT_SYMBOL struct Error awkward_regularize_arrayslice_64(int64_t* flatheadptr, int64_t lenflathead, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_regularize_arrayslice_64(int64_t* flatheadptr, int64_t lenflathead, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_t ndim, const int64_t* shape, const int64_t* strides);
 

@@ -564,8 +564,8 @@ ak::Slice toslice(py::object obj) {
   return out;
 }
 
-py::class_<ak::Slice> make_Slice(py::handle m, std::string name) {
-  return (py::class_<ak::Slice>(m, name.c_str())
+py::class_<ak::Slice, std::shared_ptr<ak::Slice>> make_Slice(py::handle m, std::string name) {
+  return (py::class_<ak::Slice, std::shared_ptr<ak::Slice>>(m, name.c_str())
       .def(py::init([](py::object obj) {
         return toslice(obj);
       }))
@@ -578,7 +578,7 @@ py::class_<ak::Slice> make_Slice(py::handle m, std::string name) {
 
 /////////////////////////////////////////////////////////////// Iterator
 
-py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
+py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(py::handle m, std::string name) {
   auto next = [](ak::Iterator& iterator) -> py::object {
     if (iterator.isdone()) {
       throw py::stop_iteration();
@@ -586,7 +586,7 @@ py::class_<ak::Iterator> make_Iterator(py::handle m, std::string name) {
     return box(iterator.next());
   };
 
-  return (py::class_<ak::Iterator>(m, name.c_str())
+  return (py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>>(m, name.c_str())
       .def(py::init([](py::object content) -> ak::Iterator {
         return ak::Iterator(unbox_content(content));
       }))
