@@ -27,7 +27,13 @@ def test_highlevel():
     assert repr(c) == "<Array [{one: 3.14, two: [1.1 ... -3.14]}] type='2 * {\"one\": float64, \"two\": var...'>"
     assert str(c) == "[{one: 3.14, two: [1.1 2.2]} {one: 99.9, two: [-3.14]}]"
 
+class Dummy(awkward1.highlevel.Array):
+    pass
+
 def test_dress():
+    dressed0 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), Dummy, {"one": 1, "two": 2})
+    assert repr(dressed0) == "dress[float64, 'tests.test_PR028_add_dressed_types.Dummy', one=1, two=2]"
+
     pyclass = awkward1.dressing.string.String
     parameters = {"encoding": "utf-8"}
     inner = awkward1.layout.ListType(awkward1.layout.PrimitiveType("uint8"))
@@ -35,7 +41,8 @@ def test_dress():
     dressed2 = awkward1.layout.DressedType(inner, pyclass, parameters)
     dressed3 = awkward1.layout.DressedType(inner, pyclass)
 
-    assert repr(dressed1) == "dress['awkward1.dressing.string.String', var * uint8, encoding='utf-8']"
+    assert repr(dressed1) == "string"
+    assert repr(dressed3) == "bytes"
     assert dressed1 == dressed2
     assert dressed1 != dressed3
 

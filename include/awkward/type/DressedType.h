@@ -37,7 +37,7 @@ namespace awkward {
       }
       else {
         std::stringstream out;
-        out << indent << pre << "dress[" << util::quote(dress_.name(), false) << ", " << type_.get()->tostring_part(indent, "", "");
+        out << indent << pre << "dress[" << type_.get()->tostring_part(indent, "", "") << ", " << util::quote(dress_.name(), false);
         for (auto key : parameters_.keys()) {
           out << ", " << key << "=" << parameters_.get_string(key);
         }
