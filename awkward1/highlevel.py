@@ -19,7 +19,42 @@ class Array(object):
             layout = awkward1.operations.convert.fromiter(data).layout
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
+        if copy:
+            layout = layout.deep_copy()
         self.layout = layout
+        if type is not None:
+            self.type = type
+
+    @property
+    def layout(self):
+        return self._layout
+
+    @layout.setter
+    def layout(self, layout):
+        if not isinstance(layout, awkward1.layout.Content):
+            raise TypeError("layout must be a subclass of awkward1.layout.Content")
+        self._layout = layout
+
+    @property
+    def type(self):
+        return self._layout.type
+
+    @type.setter
+    def type(self, type):
+        if not isinstance(type, awkward1.layout.Type):
+            raise TypeError("type must be a subclass of awkward1.layout.Type")
+        self._layout.type = type
+
+    @property
+    def baretype(self):
+        return self._layout.baretype
+
+    def __iter__(self):
+        for x in self.layout:
+            if isinstance(x, awkward1.layout.Content):
+                yield awkward1.Array(x)
+            else:
+                yield x
 
     def __str__(self, limit_value=85):
         def forward(x, space, brackets=True):

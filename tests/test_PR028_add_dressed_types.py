@@ -7,6 +7,7 @@ import pytest
 import numpy
 
 import awkward1
+import awkward1.dressing.string
 
 def test_fromnumpy():
     a = numpy.arange(2*3*5).reshape((2, 3, 5))
@@ -25,3 +26,8 @@ def test_highlevel():
     c = awkward1.Array([{"one": 1, "two": [1.1, 2.2]}, {"one": 999, "two": [-3.1415926]}])
     assert repr(c) == "<Array [{one: 1, two: [1.1 ... two: [-3.14]}] type='2 * {\"one\": int64, \"two\": va...'>"
     assert str(c) == "[{one: 1, two: [1.1 2.2]} {one: 999, two: [-3.14]}]"
+
+def test_string():
+    a = awkward1.Array([ord(x) for x in "hey there"])
+    a.__class__ = awkward1.dressing.string.String
+    assert repr(a) == "'hey there'"

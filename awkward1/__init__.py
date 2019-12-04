@@ -7,10 +7,10 @@ import awkward1.highlevel
 from awkward1.operations.convert import *
 from awkward1.operations.describe import *
 
-class Array(highlevel.Array):
+class Array(awkward1.highlevel.Array):
     pass
 
-class Record(highlevel.Record):
+class Record(awkward1.highlevel.Record):
     pass
 
 __version__ = awkward1.layout.__version__
