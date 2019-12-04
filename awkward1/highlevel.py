@@ -21,38 +21,61 @@ class Array(object):
             raise TypeError("could not convert data into an awkward1.Array")
         self.layout = layout
 
-    def __repr__(self, limit_value=40):
-        def forward(array):
-            space = ""
-            for i in range(len(array)):
-                x = array[i]
-                if isinstance(x, awkward1.layout.Content):
-                    yield space
-                    yield "["
-                    for y in forward(x):
-                        yield y
+    def __str__(self, limit_value=85):
+        def forward(x, space, brackets=True):
+            if isinstance(x, awkward1.layout.Content):
+                if brackets:
+                    yield space + "["
+                sp = ""
+                for i in range(len(x)):
+                    for token in forward(x[i], sp):
+                        yield token
+                    sp = " "
+                if brackets:
                     yield "]"
-                elif isinstance(x, (float, numpy.floating)):
-                    yield space + "{0:3g}".format(x)
-                else:
-                    yield space + repr(x)
-                space = " "
+            elif isinstance(x, awkward1.layout.Record):
+                yield space + "{"
+                sp = ""
+                for k in x.keys():
+                    yield sp + k + ": "
+                    for token in forward(x[k], ""):
+                        yield token
+                    sp = ", "
+                yield "}"
+            elif isinstance(x, (float, numpy.floating)):
+                yield space + "{0:.3g}".format(x)
+            else:
+                yield space + repr(x)
 
-        def backward(array):
-            space = ""
-            for i in range(len(array) - 1, -1, -1):
-                x = array[i]
-                if isinstance(x, awkward1.layout.Content):
-                    yield space
-                    yield "]"
-                    for y in backward(x):
-                        yield y
+        def backward(x, space, brackets=True):
+            if isinstance(x, awkward1.layout.Content):
+                if brackets:
+                    yield "]" + space
+                sp = ""
+                for i in range(len(x) - 1, -1, -1):
+                    for token in backward(x[i], sp):
+                        yield token
+                    sp = " "
+                if brackets:
                     yield "["
-                elif isinstance(x, (float, numpy.floating)):
-                    yield "{0:3g}".format(x) + space
-                else:
-                    yield repr(x) + space
-                space = " "
+            elif isinstance(x, awkward1.layout.Record):
+                yield "}" + space
+                sp = ""
+                for k in reversed(x.keys()):
+                    last = None
+                    for token in backward(x[k], ""):
+                        if last is not None:
+                            yield last
+                        last = token
+                    if last is not None:
+                        yield last + sp
+                    yield k + ": "
+                    sp = ", "
+                yield "{"
+            elif isinstance(x, (float, numpy.floating)):
+                yield "{0:.3g}".format(x) + space
+            else:
+                yield repr(x) + space
 
         def forever(iterator):
             for x in iterator:
@@ -62,20 +85,20 @@ class Array(object):
 
         halfway = len(self.layout) // 2
         left, right = ["["], ["]"]
-        leftlen, rightlen = 0, 0
-        leftgen = forever(forward(self.layout[:halfway]))
-        rightgen = forever(backward(self.layout[halfway:]))
+        leftlen, rightlen = 1, 1
+        leftgen = forever(forward(self.layout[:halfway], "", brackets=False))
+        rightgen = forever(backward(self.layout[halfway:], "", brackets=False))
         while True:
             l = next(leftgen)
             if l is not None:
-                if leftlen + rightlen + len(l) > limit_value:
+                if leftlen + rightlen + len(l) + (1 if l is None and r is None else 5) > limit_value:
                     break
                 left.append(l)
                 leftlen += len(l)
 
             r = next(rightgen)
             if r is not None:
-                if leftlen + rightlen + len(r) > limit_value:
+                if leftlen + rightlen + len(r) + (1 if l is None and r is None else 5) > limit_value:
                     break
                 right.append(r)
                 rightlen += len(r)
@@ -84,11 +107,19 @@ class Array(object):
                 break
 
         if l is None and r is None:
-            value = "".join(left).rstrip("[").rstrip("{").rstrip(" ") + " " + "".join(reversed(right)).lstrip("]").lstrip("}").lstrip(" ")
+            return "".join(left).rstrip("[").rstrip("{").rstrip(" ") + " " + "".join(reversed(right)).lstrip("]").lstrip("}").lstrip(" ")
         else:
-            value = "".join(left).rstrip("[").rstrip("{").rstrip(" ") + " ... " + "".join(reversed(right)).lstrip("]").lstrip("}").lstrip(" ")
+            return "".join(left).rstrip("[").rstrip("{").rstrip(" ") + " ... " + "".join(reversed(right)).lstrip("]").lstrip("}").lstrip(" ")
 
-        return "<Array {0} type={1}>".format(value, repr(str(self.layout.type)))
+    def __repr__(self, limit_value=40, limit_total=85):
+        value = self.__str__(limit_value=limit_value)
+
+        limit_type = limit_total - len(value) - len("<Array  type=>")
+        type = repr(str(self.layout.type))
+        if len(type) > limit_type:
+            type = type[:(limit_type - 4)] + "...'"
+
+        return "<Array {0} type={1}>".format(value, type)
 
     def __len__(self):
         return len(self.layout)
