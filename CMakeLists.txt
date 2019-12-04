@@ -2,6 +2,7 @@
 
 cmake_minimum_required(VERSION 2.8.12.2)
 project (awkward)
+cmake_policy(SET CMP0063 NEW)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
