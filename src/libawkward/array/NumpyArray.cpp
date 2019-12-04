@@ -310,6 +310,9 @@ namespace awkward {
       else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint8));
       }
+      else if (format_.compare("?") == 0) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::boolean));
+      }
       else {
         throw std::invalid_argument(std::string("Numpy format \"") + format_ + std::string("\" cannot be expressed as a PrimitiveType"));
       }

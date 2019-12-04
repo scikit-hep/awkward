@@ -45,8 +45,7 @@ namespace awkward {
   class RawArrayOf: public Content {
   public:
     RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const std::shared_ptr<T> ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
-        : id_(id)
-        , innertype_(innertype)
+        : Content(id, innertype)
         , ptr_(ptr)
         , offset_(offset)
         , length_(length)
@@ -55,16 +54,14 @@ namespace awkward {
         }
 
     RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const std::shared_ptr<T> ptr, const int64_t length)
-        : id_(id)
-        , innertype_(innertype)
+        : Content(id, innertype)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
     RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const int64_t length)
-        : id_(id)
-        , innertype_(innertype)
+        : Content(id, innertype)
         , ptr_(std::shared_ptr<T>(new T[(size_t)length], awkward::util::array_deleter<T>()))
         , offset_(0)
         , length_(length)
@@ -394,8 +391,6 @@ namespace awkward {
     }
 
   private:
-    std::shared_ptr<Identity> id_;
-    std::shared_ptr<Type> innertype_;
     const std::shared_ptr<T> ptr_;
     const int64_t offset_;
     const int64_t length_;

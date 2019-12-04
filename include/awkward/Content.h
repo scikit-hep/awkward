@@ -14,6 +14,7 @@
 namespace awkward {
   class Content {
   public:
+    Content(std::shared_ptr<Identity> id, std::shared_ptr<Type> innertype): id_(id), innertype_(innertype) { }
     virtual ~Content() { }
 
     virtual bool isscalar() const;
@@ -60,6 +61,9 @@ namespace awkward {
 
     const std::shared_ptr<Content> getitem_next_array_wrap(const std::shared_ptr<Content> outcontent, const std::vector<int64_t>& shape) const;
 
+  protected:
+    std::shared_ptr<Identity> id_;
+    std::shared_ptr<Type> innertype_;
   };
 }
 

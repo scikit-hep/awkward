@@ -15,8 +15,7 @@ namespace awkward {
   class ListOffsetArrayOf: public Content {
   public:
     ListOffsetArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const IndexOf<T> offsets, const std::shared_ptr<Content> content)
-        : id_(id)
-        , innertype_(innertype)
+        : Content(id, innertype)
         , offsets_(offsets)
         , content_(content) { }
 
@@ -53,8 +52,6 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const;
 
   private:
-    std::shared_ptr<Identity> id_;
-    std::shared_ptr<Type> innertype_;
     const IndexOf<T> offsets_;
     const std::shared_ptr<Content> content_;
   };

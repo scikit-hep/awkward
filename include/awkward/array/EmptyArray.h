@@ -15,7 +15,8 @@
 namespace awkward {
   class EmptyArray: public Content {
   public:
-    EmptyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype): id_(id), innertype_(innertype) { }
+    EmptyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype)
+        : Content(id, innertype) { }
 
     virtual const std::string classname() const;
     virtual const std::shared_ptr<Identity> id() const { return id_; }
@@ -47,10 +48,6 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
-
-  private:
-    std::shared_ptr<Identity> id_;
-    std::shared_ptr<Type> innertype_;
   };
 }
 

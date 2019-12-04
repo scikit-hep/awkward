@@ -18,8 +18,7 @@ namespace awkward {
     typedef std::vector<std::string> ReverseLookup;
 
     RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
-        : id_(id)
-        , innertype_(innertype)
+        : Content(id, innertype)
         , contents_(contents)
         , lookup_(lookup)
         , reverselookup_(reverselookup)
@@ -27,8 +26,7 @@ namespace awkward {
       assert(contents.size() != 0);
     }
     RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const std::vector<std::shared_ptr<Content>>& contents)
-        : id_(id)
-        , innertype_(innertype)
+        : Content(id, innertype)
         , contents_(contents)
         , lookup_(nullptr)
         , reverselookup_(nullptr)
@@ -36,8 +34,7 @@ namespace awkward {
       assert(contents.size() != 0);
     }
     RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, int64_t length, bool istuple)
-        : id_(id)
-        , innertype_(innertype)
+        : Content(id, innertype)
         , contents_()
         , lookup_(istuple ? nullptr : new Lookup)
         , reverselookup_(istuple ? nullptr : new ReverseLookup)
@@ -98,8 +95,6 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
 
   private:
-    std::shared_ptr<Identity> id_;
-    std::shared_ptr<Type> innertype_;
     std::vector<std::shared_ptr<Content>> contents_;
     std::shared_ptr<Lookup> lookup_;
     std::shared_ptr<ReverseLookup> reverselookup_;

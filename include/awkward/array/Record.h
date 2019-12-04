@@ -9,7 +9,8 @@ namespace awkward {
   class Record: public Content {
   public:
     Record(const RecordArray& array, int64_t at)
-        : array_(array)
+        : Content(array.id(), array.innertype())
+        , array_(array)
         , at_(at) { }
 
     const std::shared_ptr<Content> array() const { return array_.shallow_copy(); }

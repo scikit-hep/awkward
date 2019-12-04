@@ -16,8 +16,7 @@ namespace awkward {
   class NumpyArray: public Content {
   public:
     NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const std::shared_ptr<void> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
-        : id_(id)
-        , innertype_(innertype)
+        : Content(id, innertype)
         , ptr_(ptr)
         , shape_(shape)
         , strides_(strides)
@@ -109,8 +108,6 @@ namespace awkward {
   void tojson_real(ToJson& builder) const;
 
   private:
-    std::shared_ptr<Identity> id_;
-    std::shared_ptr<Type> innertype_;
     std::shared_ptr<void> ptr_;
     std::vector<ssize_t> shape_;
     std::vector<ssize_t> strides_;

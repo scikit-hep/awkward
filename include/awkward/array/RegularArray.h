@@ -16,8 +16,7 @@ namespace awkward {
   class RegularArray: public Content {
   public:
     RegularArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const std::shared_ptr<Content> content, int64_t size)
-        : id_(id)
-        , innertype_(innertype)
+        : Content(id, innertype)
         , content_(content)
         , size_(size) { }
 
@@ -54,8 +53,6 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const;
 
   private:
-    std::shared_ptr<Identity> id_;
-    std::shared_ptr<Type> innertype_;
     const std::shared_ptr<Content> content_;
     int64_t size_;
   };

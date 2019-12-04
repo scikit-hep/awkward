@@ -15,8 +15,7 @@ namespace awkward {
   class ListArrayOf: public Content {
   public:
     ListArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> innertype, const IndexOf<T> starts, const IndexOf<T> stops, const std::shared_ptr<Content> content)
-        : id_(id)
-        , innertype_(innertype)
+        : Content(id, innertype)
         , starts_(starts)
         , stops_(stops)
         , content_(content) { }
@@ -55,8 +54,6 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const;
 
   private:
-    std::shared_ptr<Identity> id_;
-    std::shared_ptr<Type> innertype_;
     const IndexOf<T> starts_;
     const IndexOf<T> stops_;
     const std::shared_ptr<Content> content_;
