@@ -183,7 +183,7 @@ namespace awkward {
       }
     }
 
-    virtual bool isbare() const { return type_.get() == nullptr; }
+    virtual bool isbare() const { return innertype_.get() == nullptr; }
 
     virtual const std::shared_ptr<Type> bareinnertype() const {
       if (std::is_same<T, double>::value) {
@@ -231,8 +231,8 @@ namespace awkward {
     }
 
     virtual void setinnertype(const std::shared_ptr<Type> innertype) {
-      if (accepts(type)) {
-        type_ = type;
+      if (accepts(innertype)) {
+        innertype_ = innertype;
       }
       else {
         throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype_part()));

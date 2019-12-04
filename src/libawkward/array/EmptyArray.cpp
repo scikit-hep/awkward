@@ -39,30 +39,30 @@ namespace awkward {
     builder.endlist();
   }
 
-  const std::shared_ptr<Type> EmptyArray::baretype_part() const {
+  const std::shared_ptr<Type> EmptyArray::bareinnertype() const {
     return std::shared_ptr<Type>(new UnknownType());
   }
 
-  const std::shared_ptr<Type> EmptyArray::type_part() const {
-    if (type_.get() == nullptr) {
+  const std::shared_ptr<Type> EmptyArray::innertype() const {
+    if (innertype_.get() == nullptr) {
       return std::shared_ptr<Type>(new UnknownType());
     }
     else {
-      return type_;
+      return innertype_;
     }
   }
 
-  void EmptyArray::settype(const std::shared_ptr<Type> type) {
-    if (accepts(type)) {
+  void EmptyArray::setinnertype(const std::shared_ptr<Type> innertype) {
+    if (accepts(innertype)) {
       // FIXME: apply to descendants
-      type_ = type;
+      innertype_ = innertype;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype_part()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + innertype.get()->compare(bareinnertype()));
     }
   }
 
-  bool EmptyArray::accepts(const std::shared_ptr<Type> type) {
+  bool EmptyArray::accepts(const std::shared_ptr<Type> innertype) {
     // FIXME: actually check
     return true;
   }
@@ -72,7 +72,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new EmptyArray(id_, type_));
+    return std::shared_ptr<Content>(new EmptyArray(id_, innertype_));
   }
 
   void EmptyArray::check_for_iteration() const { }

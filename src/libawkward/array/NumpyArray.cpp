@@ -262,7 +262,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> NumpyArray::baretype_part() const {
+  const std::shared_ptr<Type> NumpyArray::bareinnertype() const {
     if (ndim() == 1) {
       if (format_.compare("d") == 0) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
@@ -316,7 +316,7 @@ namespace awkward {
     }
     else {
       NumpyArray tmp(id_, Type::none(), ptr_, std::vector<ssize_t>({ 1 }), std::vector<ssize_t>({ itemsize_ }), byteoffset_, itemsize_, format_);   // FIXME: Type::none()
-      std::shared_ptr<Type> out = tmp.baretype_part();
+      std::shared_ptr<Type> out = tmp.bareinnertype();
       for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
         out = std::shared_ptr<Type>(new RegularType(out, (int64_t)shape_[i]));
       }
@@ -324,26 +324,26 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> NumpyArray::type_part() const {
-    if (type_.get() == nullptr) {
-      return baretype_part();
+  const std::shared_ptr<Type> NumpyArray::innertype() const {
+    if (innertype_.get() == nullptr) {
+      return bareinnertype();
     }
     else {
-      return type_;
+      return innertype_;
     }
   }
 
-  void NumpyArray::settype(const std::shared_ptr<Type> type) {
-    if (accepts(type)) {
+  void NumpyArray::setinnertype(const std::shared_ptr<Type> innertype) {
+    if (accepts(innertype)) {
       // FIXME: apply to descendants
-      type_ = type;
+      innertype_ = innertype;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype_part()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + innertype.get()->compare(bareinnertype()));
     }
   }
 
-  bool NumpyArray::accepts(const std::shared_ptr<Type> type) {
+  bool NumpyArray::accepts(const std::shared_ptr<Type> innertype) {
     // FIXME: actually check
     return true;
   }
@@ -358,7 +358,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new NumpyArray(id_, type_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
+    return std::shared_ptr<Content>(new NumpyArray(id_, innertype_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
   }
 
   void NumpyArray::check_for_iteration() const {

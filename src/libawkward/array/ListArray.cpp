@@ -160,33 +160,33 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListArrayOf<T>::baretype_part() const {
-    return std::shared_ptr<Type>(new ListType(content_.get()->baretype_part()));
+  const std::shared_ptr<Type> ListArrayOf<T>::bareinnertype() const {
+    return std::shared_ptr<Type>(new ListType(content_.get()->bareinnertype()));
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListArrayOf<T>::type_part() const {
-    if (type_.get() == nullptr) {
-      return std::shared_ptr<Type>(new ListType(content_.get()->type_part()));
+  const std::shared_ptr<Type> ListArrayOf<T>::innertype() const {
+    if (innertype_.get() == nullptr) {
+      return std::shared_ptr<Type>(new ListType(content_.get()->innertype()));
     }
     else {
-      return type_;
+      return innertype_;
     }
   }
 
   template <typename T>
-  void ListArrayOf<T>::settype(const std::shared_ptr<Type> type) {
-    if (accepts(type)) {
+  void ListArrayOf<T>::setinnertype(const std::shared_ptr<Type> innertype) {
+    if (accepts(innertype)) {
       // FIXME: apply to descendants
-      type_ = type;
+      innertype_ = innertype;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype_part()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + innertype.get()->compare(bareinnertype()));
     }
   }
 
   template <typename T>
-  bool ListArrayOf<T>::accepts(const std::shared_ptr<Type> type) {
+  bool ListArrayOf<T>::accepts(const std::shared_ptr<Type> innertype) {
     // FIXME: actually check
     return true;
   }
@@ -198,7 +198,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::shallow_copy() const {
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, type_, starts_, stops_, content_));
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, innertype_, starts_, stops_, content_));
   }
 
   template <typename T>

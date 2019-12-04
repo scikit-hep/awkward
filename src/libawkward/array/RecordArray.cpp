@@ -114,38 +114,38 @@ namespace awkward {
     builder.endlist();
   }
 
-  const std::shared_ptr<Type> RecordArray::baretype_part() const {
+  const std::shared_ptr<Type> RecordArray::bareinnertype() const {
     std::vector<std::shared_ptr<Type>> types;
     for (auto item : contents_) {
-      types.push_back(item.get()->baretype_part());
+      types.push_back(item.get()->bareinnertype());
     }
     return std::shared_ptr<Type>(new RecordType(types, lookup_, reverselookup_));
   }
 
-  const std::shared_ptr<Type> RecordArray::type_part() const {
-    if (type_.get() == nullptr) {
+  const std::shared_ptr<Type> RecordArray::innertype() const {
+    if (innertype_.get() == nullptr) {
       std::vector<std::shared_ptr<Type>> types;
       for (auto item : contents_) {
-        types.push_back(item.get()->type_part());
+        types.push_back(item.get()->innertype());
       }
       return std::shared_ptr<Type>(new RecordType(types, lookup_, reverselookup_));
     }
     else {
-      return type_;
+      return innertype_;
     }
   }
 
-  void RecordArray::settype(const std::shared_ptr<Type> type) {
-    if (accepts(type)) {
+  void RecordArray::setinnertype(const std::shared_ptr<Type> innertype) {
+    if (accepts(innertype)) {
       // FIXME: apply to descendants
-      type_ = type;
+      innertype_ = innertype;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype_part()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + innertype.get()->compare(bareinnertype()));
     }
   }
 
-  bool RecordArray::accepts(const std::shared_ptr<Type> type) {
+  bool RecordArray::accepts(const std::shared_ptr<Type> innertype) {
     // FIXME: actually check
     return true;
   }
@@ -168,10 +168,10 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::shallow_copy() const {
     if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(id_, type_, length(), istuple()));
+      return std::shared_ptr<Content>(new RecordArray(id_, innertype_, length(), istuple()));
     }
     else {
-      return std::shared_ptr<Content>(new RecordArray(id_, type_, contents_, lookup_, reverselookup_));
+      return std::shared_ptr<Content>(new RecordArray(id_, innertype_, contents_, lookup_, reverselookup_));
     }
   }
 
