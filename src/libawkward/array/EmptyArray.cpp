@@ -106,6 +106,32 @@ namespace awkward {
     return std::pair<int64_t, int64_t>(1, 1);
   }
 
+  int64_t EmptyArray::numfields() const { return -1; }
+
+  int64_t EmptyArray::fieldindex(const std::string& key) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::string EmptyArray::key(int64_t fieldindex) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  bool EmptyArray::haskey(const std::string& key) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::vector<std::string> EmptyArray::keyaliases(int64_t fieldindex) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::vector<std::string> EmptyArray::keyaliases(const std::string& key) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::vector<std::string> EmptyArray::keys() const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy

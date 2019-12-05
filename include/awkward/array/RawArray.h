@@ -317,7 +317,35 @@ namespace awkward {
       return std::shared_ptr<Content>(new RawArrayOf<T>(id, type_, ptr, 0, carry.length(), itemsize_));
     }
 
-    virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
+    virtual const std::pair<int64_t, int64_t> minmax_depth() const {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
+
+    virtual int64_t numfields() const { return -1; }
+
+    virtual int64_t fieldindex(const std::string& key) const {
+      throw std::invalid_argument("array contains no Records");
+    }
+
+    virtual const std::string key(int64_t fieldindex) const {
+      throw std::invalid_argument("array contains no Records");
+    }
+
+    virtual bool haskey(const std::string& key) const {
+      throw std::invalid_argument("array contains no Records");
+    }
+
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const {
+      throw std::invalid_argument("array contains no Records");
+    }
+
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const {
+      throw std::invalid_argument("array contains no Records");
+    }
+
+    virtual const std::vector<std::string> keys() const {
+      throw std::invalid_argument("array contains no Records");
+    }
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

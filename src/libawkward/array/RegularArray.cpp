@@ -205,6 +205,34 @@ namespace awkward {
     return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);
   }
 
+  int64_t RegularArray::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  int64_t RegularArray::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  const std::string RegularArray::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  bool RegularArray::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  const std::vector<std::string> RegularArray::keyaliases(int64_t fieldindex) const {
+    return content_.get()->keyaliases(fieldindex);
+  }
+
+  const std::vector<std::string> RegularArray::keyaliases(const std::string& key) const {
+    return content_.get()->keyaliases(key);
+  }
+
+  const std::vector<std::string> RegularArray::keys() const {
+    return content_.get()->keys();
+  }
+
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     assert(advanced.length() == 0);
 

@@ -312,6 +312,41 @@ namespace awkward {
   }
 
   template <typename T>
+  int64_t ListArrayOf<T>::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  template <typename T>
+  int64_t ListArrayOf<T>::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  template <typename T>
+  const std::string ListArrayOf<T>::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  template <typename T>
+  bool ListArrayOf<T>::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  template <typename T>
+  const std::vector<std::string> ListArrayOf<T>::keyaliases(int64_t fieldindex) const {
+    return content_.get()->keyaliases(fieldindex);
+  }
+
+  template <typename T>
+  const std::vector<std::string> ListArrayOf<T>::keyaliases(const std::string& key) const {
+    return content_.get()->keyaliases(key);
+  }
+
+  template <typename T>
+  const std::vector<std::string> ListArrayOf<T>::keys() const {
+    return content_.get()->keys();
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {

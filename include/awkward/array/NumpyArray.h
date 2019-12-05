@@ -63,6 +63,13 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
+    virtual int64_t numfields() const;
+    virtual int64_t fieldindex(const std::string& key) const;
+    virtual const std::string key(int64_t fieldindex) const;
+    virtual bool haskey(const std::string& key) const;
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const;
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const;
+    virtual const std::vector<std::string> keys() const;
 
     bool iscontiguous() const;
     void become_contiguous();

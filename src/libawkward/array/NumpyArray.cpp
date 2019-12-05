@@ -504,6 +504,32 @@ namespace awkward {
     return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
   }
 
+  int64_t NumpyArray::numfields() const { return -1; }
+
+  int64_t NumpyArray::fieldindex(const std::string& key) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::string NumpyArray::key(int64_t fieldindex) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  bool NumpyArray::haskey(const std::string& key) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::vector<std::string> NumpyArray::keyaliases(int64_t fieldindex) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::vector<std::string> NumpyArray::keyaliases(const std::string& key) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::vector<std::string> NumpyArray::keys() const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
   const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
     if (shape.size() == 1) {
       return std::vector<ssize_t>();

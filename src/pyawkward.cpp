@@ -1142,7 +1142,17 @@ py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
           .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
           .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
           .def_property_readonly("location", &location<T>)
-
+          .def_property_readonly("numfields", &T::numfields)
+          .def("fieldindex", &T::fieldindex)
+          .def("key", &T::key)
+          .def("haskey", &T::haskey)
+          .def("keyaliases", [](T& self, int64_t fieldindex) -> std::vector<std::string> {
+            return self.keyaliases(fieldindex);
+          })
+          .def("keyaliases", [](T& self, std::string key) -> std::vector<std::string> {
+            return self.keyaliases(key);
+          })
+          .def("keys", &T::keys)
   ;
 }
 
@@ -1321,17 +1331,6 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
       }), py::arg("length"), py::arg("istuple") = false, py::arg("id") = py::none(), py::arg("type") = py::none())
 
       .def_property_readonly("istuple", &ak::RecordArray::istuple)
-      .def_property_readonly("numfields", &ak::RecordArray::numfields)
-      .def("fieldindex", &ak::RecordArray::fieldindex)
-      .def("key", &ak::RecordArray::key)
-      .def("haskey", &ak::RecordArray::haskey)
-      .def("keyaliases", [](ak::RecordArray& self, int64_t fieldindex) -> std::vector<std::string> {
-        return self.keyaliases(fieldindex);
-      })
-      .def("keyaliases", [](ak::RecordArray& self, std::string key) -> std::vector<std::string> {
-        return self.keyaliases(key);
-      })
-      .def("keys", &ak::RecordArray::keys)
       .def("field", [](ak::RecordArray& self, int64_t fieldindex) -> py::object {
         return box(self.field(fieldindex));
       })

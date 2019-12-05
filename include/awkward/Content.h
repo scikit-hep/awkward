@@ -42,6 +42,13 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const = 0;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const = 0;
+    virtual int64_t numfields() const = 0;
+    virtual int64_t fieldindex(const std::string& key) const = 0;
+    virtual const std::string key(int64_t fieldindex) const = 0;
+    virtual bool haskey(const std::string& key) const = 0;
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const = 0;
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const = 0;
+    virtual const std::vector<std::string> keys() const = 0;
 
     bool isbare() const;
     const std::shared_ptr<Type> baretype() const;

@@ -49,14 +49,13 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
-
-    int64_t numfields() const;
-    int64_t fieldindex(const std::string& key) const;
-    const std::string key(int64_t fieldindex) const;
-    bool haskey(const std::string& key) const;
-    const std::vector<std::string> keyaliases(int64_t fieldindex) const;
-    const std::vector<std::string> keyaliases(const std::string& key) const;
-    const std::vector<std::string> keys() const;
+    virtual int64_t numfields() const;
+    virtual int64_t fieldindex(const std::string& key) const;
+    virtual const std::string key(int64_t fieldindex) const;
+    virtual bool haskey(const std::string& key) const;
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const;
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const;
+    virtual const std::vector<std::string> keys() const;
 
     const std::shared_ptr<Content> field(int64_t fieldindex) const;
     const std::shared_ptr<Content> field(const std::string& key) const;
