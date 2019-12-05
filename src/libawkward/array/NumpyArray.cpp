@@ -338,8 +338,60 @@ namespace awkward {
   }
 
   bool NumpyArray::accepts(const std::shared_ptr<Type> type) {
-    // FIXME: actually check
-    return true;
+    std::shared_ptr<Type> check = type.get()->level();
+
+    if (format_.compare("d") == 0) {
+      return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64)));
+    }
+    else if (format_.compare("f") == 0) {
+      return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float32)));
+    }
+#ifdef _MSC_VER
+    else if (format_.compare("q") == 0) {
+#else
+    else if (format_.compare("l") == 0) {
+#endif
+      return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int64)));
+    }
+#ifdef _MSC_VER
+    else if (format_.compare("Q") == 0) {
+#else
+    else if (format_.compare("L") == 0) {
+#endif
+      return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint64)));
+    }
+#ifdef _MSC_VER
+    else if (format_.compare("l") == 0) {
+#else
+    else if (format_.compare("i") == 0) {
+#endif
+      return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int32)));
+    }
+#ifdef _MSC_VER
+    else if (format_.compare("L") == 0) {
+#else
+    else if (format_.compare("I") == 0) {
+#endif
+      return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint32)));
+    }
+    else if (format_.compare("h") == 0) {
+      return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int16)));
+    }
+    else if (format_.compare("H") == 0) {
+      return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint16)));
+    }
+    else if (format_.compare("b") == 0) {
+      return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int8)));
+    }
+    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+      return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint8)));
+    }
+    else if (format_.compare("?") == 0) {
+      return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::boolean)));
+    }
+    else {
+      return false;
+    }
   }
 
   int64_t NumpyArray::length() const {

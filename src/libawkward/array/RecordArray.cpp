@@ -133,8 +133,40 @@ namespace awkward {
   }
 
   bool RecordArray::accepts(const std::shared_ptr<Type> type) {
-    // FIXME: actually check
-    return true;
+    std::shared_ptr<Type> check = type.get()->level();
+    if (RecordType* raw = dynamic_cast<RecordType*>(check.get())) {
+      // if (numfields() != t->numfields()) {
+      //   return false;
+      // }
+      // if (reverselookup_.get() == nullptr) {
+      //   if (t->reverselookup().get() != nullptr) {
+      //     return false;
+      //   }
+      //   return true;
+      // }
+      // else {
+      //   if (t->reverselookup().get() == nullptr) {
+      //     return false;
+      //   }
+      //   if (lookup_.get()->size() != t->lookup().get()->size()) {
+      //     return false;
+      //   }
+      //   for (auto pair : *lookup_.get()) {
+      //     int64_t otherindex;
+      //     try {
+      //       otherindex = (int64_t)t->lookup().get()->at(pair.first);
+      //     }
+      //     catch (std::out_of_range err) {
+      //       return false;
+      //     }
+      //   }
+      //   return true;
+      // }
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   int64_t RecordArray::length() const {

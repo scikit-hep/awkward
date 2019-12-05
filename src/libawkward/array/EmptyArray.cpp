@@ -54,8 +54,8 @@ namespace awkward {
   }
 
   bool EmptyArray::accepts(const std::shared_ptr<Type> type) {
-    // FIXME: actually check
-    return true;
+    const std::shared_ptr<Type> model(new UnknownType());
+    return type.get()->level().get()->shallow_equal(model);
   }
 
   int64_t EmptyArray::length() const {
