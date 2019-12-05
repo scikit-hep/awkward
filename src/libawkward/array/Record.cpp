@@ -65,8 +65,8 @@ namespace awkward {
     builder.endrec();
   }
 
-  const std::shared_ptr<Type> Record::bare_innertype() const {
-    return array_.bare_innertype();
+  const std::shared_ptr<Type> Record::innertype(bool bare) const {
+    return array_.innertype(bare);
   }
 
   void Record::settype(const std::shared_ptr<Type> type) {

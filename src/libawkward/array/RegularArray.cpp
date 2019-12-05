@@ -99,8 +99,13 @@ namespace awkward {
     builder.endlist();
   }
 
-  const std::shared_ptr<Type> RegularArray::bare_innertype() const {
-    return std::shared_ptr<Type>(new RegularType(content_.get()->bare_innertype(), size_));
+  const std::shared_ptr<Type> RegularArray::innertype(bool bare) const {
+    if (bare  ||  content_.get()->isbare()) {
+      return std::shared_ptr<Type>(new RegularType(content_.get()->innertype(bare), size_));
+    }
+    else {
+      return content_.get()->type();
+    }
   }
 
   void RegularArray::settype(const std::shared_ptr<Type> type) {

@@ -24,7 +24,7 @@ namespace awkward {
     virtual void setid(const std::shared_ptr<Identity> id) = 0;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
     virtual void tojson_part(ToJson& builder) const = 0;
-    virtual const std::shared_ptr<Type> bare_innertype() const = 0;
+    virtual const std::shared_ptr<Type> innertype(bool bare) const = 0;
     virtual const std::shared_ptr<Type> type() const;
     virtual void settype(const std::shared_ptr<Type> type) = 0;
     virtual bool accepts(const std::shared_ptr<Type> type) = 0;

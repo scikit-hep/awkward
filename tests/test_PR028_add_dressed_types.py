@@ -69,7 +69,13 @@ def test_string2():
     string = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("uint8"), awkward1.dressing.string.String, encoding="utf-8")
 
     content = awkward1.layout.NumpyArray(numpy.array([ord(x) for x in "heythere"], dtype=numpy.uint8))
+    content.type = string
     listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 8])), content)
+    a = awkward1.util.wrap(listoffsetarray)
+
+    assert repr(a.layout.content.type) == "string"
+    assert repr(a.layout.type) == "3 * string"
+
     # listoffsetarray.type = string
     # assert repr(listoffsetarray.type) == "3 * string"
     # assert repr(listoffsetarray.baretype) == "3 * var * uint8"

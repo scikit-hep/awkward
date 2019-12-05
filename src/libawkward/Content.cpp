@@ -18,7 +18,12 @@ namespace awkward {
 
   const std::shared_ptr<Type> Content::type() const {
     if (type_.get() == nullptr) {
-      return baretype();
+      if (isscalar()) {
+        return innertype(false);
+      }
+      else {
+        return std::shared_ptr<Type>(new ArrayType(innertype(false), length()));
+      }
     }
     else {
       return type_;
@@ -31,10 +36,10 @@ namespace awkward {
 
   const std::shared_ptr<Type> Content::baretype() const {
     if (isscalar()) {
-      return bare_innertype();
+      return innertype(true);
     }
     else {
-      return std::shared_ptr<Type>(new ArrayType(bare_innertype(), length()));
+      return std::shared_ptr<Type>(new ArrayType(innertype(true), length()));
     }
   }
 

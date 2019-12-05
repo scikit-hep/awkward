@@ -262,7 +262,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> NumpyArray::bare_innertype() const {
+  const std::shared_ptr<Type> NumpyArray::innertype(bool bare) const {
     if (ndim() == 1) {
       if (format_.compare("d") == 0) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
@@ -319,7 +319,7 @@ namespace awkward {
     }
     else {
       NumpyArray tmp(id_, Type::none(), ptr_, std::vector<ssize_t>({ 1 }), std::vector<ssize_t>({ itemsize_ }), byteoffset_, itemsize_, format_);   // FIXME: Type::none()
-      std::shared_ptr<Type> out = tmp.bare_innertype();
+      std::shared_ptr<Type> out = tmp.innertype(bare);
       for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
         out = std::shared_ptr<Type>(new RegularType(out, (int64_t)shape_[i]));
       }

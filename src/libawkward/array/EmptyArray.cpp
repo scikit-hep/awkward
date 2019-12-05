@@ -39,7 +39,7 @@ namespace awkward {
     builder.endlist();
   }
 
-  const std::shared_ptr<Type> EmptyArray::bare_innertype() const {
+  const std::shared_ptr<Type> EmptyArray::innertype(bool bare) const {
     return std::shared_ptr<Type>(new UnknownType());
   }
 

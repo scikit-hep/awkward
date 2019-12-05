@@ -179,7 +179,7 @@ namespace awkward {
       }
     }
 
-    virtual const std::shared_ptr<Type> bare_innertype() const {
+    virtual const std::shared_ptr<Type> innertype(bool bare) const {
       if (std::is_same<T, double>::value) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
       }
@@ -220,7 +220,7 @@ namespace awkward {
         type_ = type;
       }
       else {
-        throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(bare_innertype()));
+        throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
       }
     }
 

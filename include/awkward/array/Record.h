@@ -33,7 +33,7 @@ namespace awkward {
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
-    virtual const std::shared_ptr<Type> bare_innertype() const;
+    virtual const std::shared_ptr<Type> innertype(bool bare) const;
     virtual const std::shared_ptr<Type> type() const;
     virtual void settype(const std::shared_ptr<Type> type);
     virtual bool accepts(const std::shared_ptr<Type> type);

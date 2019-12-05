@@ -160,8 +160,13 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListArrayOf<T>::bare_innertype() const {
-    return std::shared_ptr<Type>(new ListType(content_.get()->bare_innertype()));
+  const std::shared_ptr<Type> ListArrayOf<T>::innertype(bool bare) const {
+    if (bare  ||  content_.get()->isbare()) {
+      return std::shared_ptr<Type>(new ListType(content_.get()->innertype(bare)));
+    }
+    else {
+      return content_.get()->type();
+    }
   }
 
   template <typename T>

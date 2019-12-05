@@ -114,10 +114,10 @@ namespace awkward {
     builder.endlist();
   }
 
-  const std::shared_ptr<Type> RecordArray::bare_innertype() const {
+  const std::shared_ptr<Type> RecordArray::innertype(bool bare) const {
     std::vector<std::shared_ptr<Type>> types;
     for (auto item : contents_) {
-      types.push_back(item.get()->bare_innertype());
+      types.push_back(item.get()->innertype(bare));
     }
     return std::shared_ptr<Type>(new RecordType(types, lookup_, reverselookup_));
   }
