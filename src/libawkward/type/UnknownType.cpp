@@ -29,4 +29,32 @@ namespace awkward {
   std::shared_ptr<Type> UnknownType::inner(std::string key) const {
     return shallow_copy();
   }
+
+  int64_t UnknownType::numfields() const {
+    return -1;
+  }
+
+  int64_t UnknownType::fieldindex(const std::string& key) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::string UnknownType::key(int64_t fieldindex) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  bool UnknownType::haskey(const std::string& key) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::vector<std::string> UnknownType::keyaliases(int64_t fieldindex) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::vector<std::string> UnknownType::keyaliases(const std::string& key) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::vector<std::string> UnknownType::keys() const {
+    throw std::invalid_argument("type contains no Records");
+  }
 }

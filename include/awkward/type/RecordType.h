@@ -33,14 +33,14 @@ namespace awkward {
     virtual bool equal(std::shared_ptr<Type> other) const;
     virtual std::shared_ptr<Type> inner() const;
     virtual std::shared_ptr<Type> inner(std::string key) const;
+    virtual int64_t numfields() const;
+    virtual int64_t fieldindex(const std::string& key) const;
+    virtual const std::string key(int64_t fieldindex) const;
+    virtual bool haskey(const std::string& key) const;
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const;
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const;
+    virtual const std::vector<std::string> keys() const;
 
-    int64_t numfields() const;
-    int64_t fieldindex(const std::string& key) const;
-    const std::string key(int64_t fieldindex) const;
-    bool haskey(const std::string& key) const;
-    const std::vector<std::string> keyaliases(int64_t fieldindex) const;
-    const std::vector<std::string> keyaliases(const std::string& key) const;
-    const std::vector<std::string> keys() const;
     const std::shared_ptr<Type> field(int64_t fieldindex) const;
     const std::shared_ptr<Type> field(const std::string& key) const;
     const std::vector<std::shared_ptr<Type>> fields() const;

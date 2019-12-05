@@ -4,6 +4,7 @@
 #define AWKWARD_UTIL_H_
 
 #include <string>
+#include <vector>
 
 #include "awkward/cpu-kernels/util.h"
 
@@ -28,6 +29,7 @@ namespace awkward {
     };
 
     std::string quote(std::string x, bool doublequote);
+    bool subset(const std::vector<std::string>& super, const std::vector<std::string>& sub);
 
     template <typename T>
     Error awkward_identity64_from_listoffsetarray(int64_t* toptr, const int64_t* fromptr, const T* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);

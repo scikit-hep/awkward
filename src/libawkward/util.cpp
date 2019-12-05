@@ -42,6 +42,25 @@ namespace awkward {
       }
     }
 
+    bool subset(const std::vector<std::string>& super, const std::vector<std::string>& sub) {
+      if (super.size() < sub.size()) {
+        return false;
+      }
+      for (auto x : sub) {
+        bool found = false;
+        for (auto y : super) {
+          if (x == y) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          return false;
+        }
+      }
+      return true;
+    }
+
     template <>
     Error awkward_identity64_from_listoffsetarray<uint32_t>(int64_t* toptr, const int64_t* fromptr, const uint32_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
       return awkward_identity64_from_listoffsetarrayU32(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);

@@ -131,11 +131,6 @@ private:
   py::object pyclass_;
 };
 
-template <typename T>
-py::dict emptydict(T& self) {
-  return py::dict();
-}
-
 py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::string name) {
   return (py::class_<ak::Type, std::shared_ptr<ak::Type>>(m, name.c_str())
       .def("__ne__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
@@ -842,17 +837,38 @@ std::shared_ptr<ak::Type> inner_key(T& self, std::string key) {
   return self.inner(key);
 }
 
+template <typename T>
+py::dict emptydict(T& self) {
+  return py::dict();
+}
+
+template <typename T>
+py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>& x) {
+  return x.def("__repr__", &T::tostring)
+          .def("__eq__", &T::equal)
+          .def("inner", &inner<T>)
+          .def("inner", &inner_key<T>)
+          .def_property_readonly("numfields", &T::numfields)
+          .def("fieldindex", &T::fieldindex)
+          .def("key", &T::key)
+          .def("haskey", &T::haskey)
+          .def("keyaliases", [](T& self, int64_t fieldindex) -> std::vector<std::string> {
+            return self.keyaliases(fieldindex);
+          })
+          .def("keyaliases", [](T& self, std::string key) -> std::vector<std::string> {
+            return self.keyaliases(key);
+          })
+          .def("keys", &T::keys)
+  ;
+}
+
 py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type> make_DressedType(py::handle m, std::string name) {
-  return (py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type>(m, name.c_str())
+  return type_methods(py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type>(m, name.c_str())
       .def(py::init([](std::shared_ptr<ak::Type> type, py::object dress, py::kwargs kwargs) -> PyDressedType {
         kwargs = py::module::import("copy").attr("deepcopy")(kwargs);
         return PyDressedType(type, PyDress(dress), PyDressParameters(kwargs));
       }))
       .def_property_readonly("type", &PyDressedType::type)
-      .def("__repr__", &PyDressedType::tostring)
-      .def("__eq__", &PyDressedType::equal)
-      .def("inner", &inner<PyDressedType>)
-      .def("inner", &inner_key<PyDressedType>)
       .def_property_readonly("dress", [](PyDressedType& self) -> py::object {
         return self.dress().pyclass();
       })
@@ -863,31 +879,23 @@ py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type> make_Dressed
 }
 
 py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayType(py::handle m, std::string name) {
-  return (py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type>(m, name.c_str())
+  return type_methods(py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type>(m, name.c_str())
       .def(py::init<std::shared_ptr<ak::Type>, int64_t>())
       .def_property_readonly("type", &ak::ArrayType::type)
       .def("length", &ak::ArrayType::length)
-      .def("__repr__", &ak::ArrayType::tostring)
-      .def("__eq__", &ak::ArrayType::equal)
-      .def("inner", &inner<ak::ArrayType>)
-      .def("inner", &inner_key<ak::ArrayType>)
       .def_property_readonly("parameters", &emptydict<ak::ArrayType>)
   );
 }
 
 py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_UnknownType(py::handle m, std::string name) {
-  return (py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type>(m, name.c_str())
+  return type_methods(py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type>(m, name.c_str())
       .def(py::init<>())
-      .def("__repr__", &ak::UnknownType::tostring)
-      .def("__eq__", &ak::UnknownType::equal)
-      .def("inner", &inner<ak::UnknownType>)
-      .def("inner", &inner_key<ak::UnknownType>)
       .def_property_readonly("parameters", &emptydict<ak::UnknownType>)
   );
 }
 
 py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make_PrimitiveType(py::handle m, std::string name) {
-  return (py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type>(m, name.c_str())
+  return type_methods(py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type>(m, name.c_str())
       .def(py::init([](std::string dtype) -> ak::PrimitiveType {
         if (dtype == std::string("bool")) {
           return ak::PrimitiveType(ak::PrimitiveType::boolean);
@@ -926,53 +934,37 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
           throw std::invalid_argument(std::string("unrecognized primitive type: ") + dtype);
         }
       }))
-      .def("__repr__", &ak::PrimitiveType::tostring)
-      .def("__eq__", &ak::PrimitiveType::equal)
-      .def("inner", &inner<ak::PrimitiveType>)
-      .def("inner", &inner_key<ak::PrimitiveType>)
       .def_property_readonly("parameters", &emptydict<ak::PrimitiveType>)
   );
 }
 
 py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_RegularType(py::handle m, std::string name) {
-  return (py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type>(m, name.c_str())
+  return type_methods(py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type>(m, name.c_str())
       .def(py::init<std::shared_ptr<ak::Type>, int64_t>())
       .def_property_readonly("type", &ak::RegularType::type)
       .def_property_readonly("size", &ak::RegularType::size)
-      .def("__repr__", &ak::RegularType::tostring)
-      .def("__eq__", &ak::RegularType::equal)
-      .def("inner", &inner<ak::RegularType>)
-      .def("inner", &inner_key<ak::RegularType>)
       .def_property_readonly("parameters", &emptydict<ak::RegularType>)
   );
 }
 
 py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(py::handle m, std::string name) {
-  return (py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type>(m, name.c_str())
+  return type_methods(py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type>(m, name.c_str())
       .def(py::init<std::shared_ptr<ak::Type>>())
       .def_property_readonly("type", &ak::ListType::type)
-      .def("__repr__", &ak::ListType::tostring)
-      .def("__eq__", &ak::ListType::equal)
-      .def("inner", &inner<ak::ListType>)
-      .def("inner", &inner_key<ak::ListType>)
       .def_property_readonly("parameters", &emptydict<ak::ListType>)
   );
 }
 
 py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_OptionType(py::handle m, std::string name) {
-  return (py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type>(m, name.c_str())
+  return type_methods(py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type>(m, name.c_str())
       .def(py::init<std::shared_ptr<ak::Type>>())
       .def_property_readonly("type", &ak::OptionType::type)
-      .def("__repr__", &ak::OptionType::tostring)
-      .def("__eq__", &ak::OptionType::equal)
-      .def("inner", &inner<ak::OptionType>)
-      .def("inner", &inner_key<ak::OptionType>)
       .def_property_readonly("parameters", &emptydict<ak::OptionType>)
   );
 }
 
 py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionType(py::handle m, std::string name) {
-  return (py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type>(m, name.c_str())
+  return type_methods(py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type>(m, name.c_str())
       .def(py::init([](py::args args) -> ak::UnionType {
         std::vector<std::shared_ptr<ak::Type>> types;
         for (auto x : args) {
@@ -980,12 +972,6 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
         }
         return ak::UnionType(types);
       }))
-      .def("__repr__", &ak::UnionType::tostring)
-      .def("__eq__", &ak::UnionType::equal)
-      .def("inner", &inner<ak::UnionType>)
-      .def("inner", &inner_key<ak::UnionType>)
-      .def_property_readonly("parameters", &emptydict<ak::UnionType>)
-
       .def_property_readonly("numtypes", &ak::UnionType::numtypes)
       .def_property_readonly("types", [](ak::UnionType& self) -> py::tuple {
         py::tuple types((size_t)self.numtypes());
@@ -995,12 +981,12 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
         return types;
       })
       .def("type", &ak::UnionType::type)
-
+      .def_property_readonly("parameters", &emptydict<ak::UnionType>)
   );
 }
 
 py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_RecordType(py::handle m, std::string name) {
-  return (py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type>(m, name.c_str())
+  return type_methods(py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type>(m, name.c_str())
       .def(py::init([](py::args args) -> ak::RecordType {
         std::vector<std::shared_ptr<ak::Type>> types;
         for (auto x : args) {
@@ -1020,22 +1006,6 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         }
         return ak::RecordType(types, lookup, reverselookup);
       }))
-      .def("__repr__", &ak::RecordType::tostring)
-      .def("__eq__", &ak::RecordType::equal)
-      .def("inner", &inner<ak::RecordType>)
-      .def("inner", &inner_key<ak::RecordType>)
-      .def_property_readonly("parameters", &emptydict<ak::RecordType>)
-
-      .def_property_readonly("numfields", &ak::RecordType::numfields)
-      .def("fieldindex", &ak::RecordType::fieldindex)
-      .def("key", &ak::RecordType::key)
-      .def("haskey", &ak::RecordType::haskey)
-      .def("keyaliases", [](ak::RecordType& self, int64_t fieldindex) -> std::vector<std::string> {
-        return self.keyaliases(fieldindex);
-      })
-      .def("keyaliases", [](ak::RecordType& self, std::string key) -> std::vector<std::string> {
-        return self.keyaliases(key);
-      })
       .def("__getitem__", [](ak::RecordType& self, int64_t fieldindex) -> py::object {
         return box(self.field(fieldindex));
       })
@@ -1048,7 +1018,6 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
       .def("field", [](ak::RecordType& self, std::string key) -> py::object {
         return box(self.field(key));
       })
-      .def("keys", &ak::RecordType::keys)
       .def("fields", [](ak::RecordType& self) -> py::object {
         py::list out;
         for (auto item : self.fields()) {
@@ -1068,7 +1037,7 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         }
         return out;
       })
-
+      .def_property_readonly("parameters", &emptydict<ak::UnionType>)
   );
 }
 
@@ -1118,7 +1087,7 @@ void tojson_file(T& self, std::string destination, bool pretty, py::object maxde
 }
 
 template <typename T>
-py::class_<T, ak::Content> content(py::class_<T, ak::Content>& x) {
+py::class_<T, ak::Content> content_methods(py::class_<T, ak::Content>& x) {
   return x.def("__repr__", &repr<T>)
           .def_property("id", [](T& self) -> py::object { return box(self.id()); }, [](T& self, py::object id) -> void { self.setid(unbox_id_none(id)); })
           .def("setid", [](T& self, py::object id) -> void {
@@ -1163,7 +1132,7 @@ py::class_<ak::Content> make_Content(py::handle m, std::string name) {
 /////////////////////////////////////////////////////////////// NumpyArray
 
 py::class_<ak::NumpyArray, ak::Content> make_NumpyArray(py::handle m, std::string name) {
-  return content(py::class_<ak::NumpyArray, ak::Content>(m, name.c_str(), py::buffer_protocol())
+  return content_methods(py::class_<ak::NumpyArray, ak::Content>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](ak::NumpyArray& self) -> py::buffer_info {
         return py::buffer_info(
           self.byteptr(),
@@ -1209,7 +1178,7 @@ py::class_<ak::NumpyArray, ak::Content> make_NumpyArray(py::handle m, std::strin
 
 template <typename T>
 py::class_<ak::ListArrayOf<T>, ak::Content> make_ListArrayOf(py::handle m, std::string name) {
-  return content(py::class_<ak::ListArrayOf<T>, ak::Content>(m, name.c_str())
+  return content_methods(py::class_<ak::ListArrayOf<T>, ak::Content>(m, name.c_str())
       .def(py::init([](ak::IndexOf<T>& starts, ak::IndexOf<T>& stops, py::object content, py::object id, py::object type) -> ak::ListArrayOf<T> {
         return ak::ListArrayOf<T>(unbox_id_none(id), unbox_type_none(type), starts, stops, unbox_content(content));
       }), py::arg("starts"), py::arg("stops"), py::arg("content"), py::arg("id") = py::none(), py::arg("type") = py::none())
@@ -1226,7 +1195,7 @@ py::class_<ak::ListArrayOf<T>, ak::Content> make_ListArrayOf(py::handle m, std::
 
 template <typename T>
 py::class_<ak::ListOffsetArrayOf<T>, ak::Content> make_ListOffsetArrayOf(py::handle m, std::string name) {
-  return content(py::class_<ak::ListOffsetArrayOf<T>, ak::Content>(m, name.c_str())
+  return content_methods(py::class_<ak::ListOffsetArrayOf<T>, ak::Content>(m, name.c_str())
       .def(py::init([](ak::IndexOf<T>& offsets, py::object content, py::object id, py::object type) -> ak::ListOffsetArrayOf<T> {
         return ak::ListOffsetArrayOf<T>(unbox_id_none(id), unbox_type_none(type), offsets, std::shared_ptr<ak::Content>(unbox_content(content)));
       }), py::arg("offsets"), py::arg("content"), py::arg("id") = py::none(), py::arg("type") = py::none())
@@ -1241,7 +1210,7 @@ py::class_<ak::ListOffsetArrayOf<T>, ak::Content> make_ListOffsetArrayOf(py::han
 /////////////////////////////////////////////////////////////// EmptyArray
 
 py::class_<ak::EmptyArray, ak::Content> make_EmptyArray(py::handle m, std::string name) {
-  return content(py::class_<ak::EmptyArray, ak::Content>(m, name.c_str())
+  return content_methods(py::class_<ak::EmptyArray, ak::Content>(m, name.c_str())
       .def(py::init([](py::object id, py::object type) -> ak::EmptyArray {
         return ak::EmptyArray(unbox_id_none(id), unbox_type_none(type));
       }), py::arg("id") = py::none(), py::arg("type") = py::none())
@@ -1251,7 +1220,7 @@ py::class_<ak::EmptyArray, ak::Content> make_EmptyArray(py::handle m, std::strin
 /////////////////////////////////////////////////////////////// RegularArray
 
 py::class_<ak::RegularArray, ak::Content> make_RegularArray(py::handle m, std::string name) {
-  return content(py::class_<ak::RegularArray, ak::Content>(m, name.c_str())
+  return content_methods(py::class_<ak::RegularArray, ak::Content>(m, name.c_str())
       .def(py::init([](py::object content, int64_t size, py::object id, py::object type) -> ak::RegularArray {
         return ak::RegularArray(unbox_id_none(id), unbox_type_none(type), std::shared_ptr<ak::Content>(unbox_content(content)), size);
       }), py::arg("content"), py::arg("size"), py::arg("id") = py::none(), py::arg("type") = py::none())
@@ -1300,7 +1269,7 @@ py::object reverselookup(const T& self) {
 }
 
 py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::string name) {
-  return content(py::class_<ak::RecordArray, ak::Content>(m, name.c_str())
+  return content_methods(py::class_<ak::RecordArray, ak::Content>(m, name.c_str())
       .def(py::init([](py::dict contents, py::object id, py::object type) -> ak::RecordArray {
         std::shared_ptr<ak::RecordArray::Lookup> lookup(new ak::RecordArray::Lookup);
         std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup(new ak::RecordArray::ReverseLookup);

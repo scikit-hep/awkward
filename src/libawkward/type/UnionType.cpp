@@ -55,6 +55,34 @@ namespace awkward {
     throw std::runtime_error("FIXME: UnionType::inner(key)");
   }
 
+  int64_t UnionType::numfields() const {
+    throw std::runtime_error("FIXME: UnionType::numfields");
+  }
+
+  int64_t UnionType::fieldindex(const std::string& key) const {
+    throw std::runtime_error("FIXME: UnionType::fieldindex(key)");
+  }
+
+  const std::string UnionType::key(int64_t fieldindex) const {
+    throw std::runtime_error("FIXME: UnionType::key(fieldindex)");
+  }
+
+  bool UnionType::haskey(const std::string& key) const {
+    throw std::runtime_error("FIXME: UnionType::haskey(key)");
+  }
+
+  const std::vector<std::string> UnionType::keyaliases(int64_t fieldindex) const {
+    throw std::runtime_error("FIXME: UnionType::keyaliases(fieldindex)");
+  }
+
+  const std::vector<std::string> UnionType::keyaliases(const std::string& key) const {
+    throw std::runtime_error("FIXME: UnionType::keyaliases(key)");
+  }
+
+  const std::vector<std::string> UnionType::keys() const {
+    throw std::runtime_error("FIXME: UnionType::keys");
+  }
+
   const std::vector<std::shared_ptr<Type>> UnionType::types() const {
     return types_;
   }

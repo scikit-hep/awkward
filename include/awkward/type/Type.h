@@ -4,6 +4,7 @@
 #define AWKWARD_TYPE_H_
 
 #include <memory>
+#include <vector>
 
 #include "awkward/cpu-kernels/util.h"
 
@@ -19,6 +20,13 @@ namespace awkward {
     virtual bool equal(std::shared_ptr<Type> other) const = 0;
     virtual std::shared_ptr<Type> inner() const = 0;
     virtual std::shared_ptr<Type> inner(std::string key) const = 0;
+    virtual int64_t numfields() const = 0;
+    virtual int64_t fieldindex(const std::string& key) const = 0;
+    virtual const std::string key(int64_t fieldindex) const = 0;
+    virtual bool haskey(const std::string& key) const = 0;
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const = 0;
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const = 0;
+    virtual const std::vector<std::string> keys() const = 0;
 
     std::string tostring() const { return tostring_part("", "", ""); };
     const std::string compare(std::shared_ptr<Type> supertype);

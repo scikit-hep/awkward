@@ -33,6 +33,34 @@ namespace awkward {
     throw std::runtime_error("FIXME: ListType::inner(key)");
   }
 
+  int64_t ListType::numfields() const {
+    return type_.get()->numfields();
+  }
+
+  int64_t ListType::fieldindex(const std::string& key) const {
+    return type_.get()->fieldindex(key);
+  }
+
+  const std::string ListType::key(int64_t fieldindex) const {
+    return type_.get()->key(fieldindex);
+  }
+
+  bool ListType::haskey(const std::string& key) const {
+    return type_.get()->haskey(key);
+  }
+
+  const std::vector<std::string> ListType::keyaliases(int64_t fieldindex) const {
+    return type_.get()->keyaliases(fieldindex);
+  }
+
+  const std::vector<std::string> ListType::keyaliases(const std::string& key) const {
+    return type_.get()->keyaliases(key);
+  }
+
+  const std::vector<std::string> ListType::keys() const {
+    return type_.get()->keys();
+  }
+
   const std::shared_ptr<Type> ListType::type() const {
     return type_;
   }

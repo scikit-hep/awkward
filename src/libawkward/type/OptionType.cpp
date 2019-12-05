@@ -40,6 +40,34 @@ namespace awkward {
     throw std::runtime_error("FIXME: OptionType::inner(key)");
   }
 
+  int64_t OptionType::numfields() const {
+    return type_.get()->numfields();
+  }
+
+  int64_t OptionType::fieldindex(const std::string& key) const {
+    return type_.get()->fieldindex(key);
+  }
+
+  const std::string OptionType::key(int64_t fieldindex) const {
+    return type_.get()->key(fieldindex);
+  }
+
+  bool OptionType::haskey(const std::string& key) const {
+    return type_.get()->haskey(key);
+  }
+
+  const std::vector<std::string> OptionType::keyaliases(int64_t fieldindex) const {
+    return type_.get()->keyaliases(fieldindex);
+  }
+
+  const std::vector<std::string> OptionType::keyaliases(const std::string& key) const {
+    return type_.get()->keyaliases(key);
+  }
+
+  const std::vector<std::string> OptionType::keys() const {
+    return type_.get()->keys();
+  }
+
   const std::shared_ptr<Type> OptionType::type() const {
     std::shared_ptr<Type> out = type_;
     while (OptionType* t = dynamic_cast<OptionType*>(out.get())) {

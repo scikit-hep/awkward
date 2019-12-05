@@ -33,6 +33,34 @@ namespace awkward {
     throw std::runtime_error("FIXME: RegularType::inner(key)");
   }
 
+  int64_t RegularType::numfields() const {
+    return type_.get()->numfields();
+  }
+
+  int64_t RegularType::fieldindex(const std::string& key) const {
+    return type_.get()->fieldindex(key);
+  }
+
+  const std::string RegularType::key(int64_t fieldindex) const {
+    return type_.get()->key(fieldindex);
+  }
+
+  bool RegularType::haskey(const std::string& key) const {
+    return type_.get()->haskey(key);
+  }
+
+  const std::vector<std::string> RegularType::keyaliases(int64_t fieldindex) const {
+    return type_.get()->keyaliases(fieldindex);
+  }
+
+  const std::vector<std::string> RegularType::keyaliases(const std::string& key) const {
+    return type_.get()->keyaliases(key);
+  }
+
+  const std::vector<std::string> RegularType::keys() const {
+    return type_.get()->keys();
+  }
+
   const std::shared_ptr<Type> RegularType::type() const {
     return type_;
   }

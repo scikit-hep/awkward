@@ -70,6 +70,27 @@ namespace awkward {
     virtual std::shared_ptr<Type> inner(std::string key) const {
       return type_.get()->inner(key);
     }
+    virtual int64_t numfields() const {
+      return type_.get()->numfields();
+    }
+    virtual int64_t fieldindex(const std::string& key) const {
+      return type_.get()->fieldindex(key);
+    }
+    virtual const std::string key(int64_t fieldindex) const {
+      return type_.get()->key(fieldindex);
+    }
+    virtual bool haskey(const std::string& key) const {
+      return type_.get()->haskey(key);
+    }
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const {
+      return type_.get()->keyaliases(fieldindex);
+    }
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const {
+      return type_.get()->keyaliases(key);
+    }
+    virtual const std::vector<std::string> keys() const {
+      return type_.get()->keys();
+    }
 
     const std::shared_ptr<Type> type() const { return type_; };
     const D dress() const { return dress_; };

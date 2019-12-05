@@ -30,6 +30,34 @@ namespace awkward {
     throw std::runtime_error("FIXME: ArrayType::inner(key)");
   }
 
+  int64_t ArrayType::numfields() const {
+    return type_.get()->numfields();
+  }
+
+  int64_t ArrayType::fieldindex(const std::string& key) const {
+    return type_.get()->fieldindex(key);
+  }
+
+  const std::string ArrayType::key(int64_t fieldindex) const {
+    return type_.get()->key(fieldindex);
+  }
+
+  bool ArrayType::haskey(const std::string& key) const {
+    return type_.get()->haskey(key);
+  }
+
+  const std::vector<std::string> ArrayType::keyaliases(int64_t fieldindex) const {
+    return type_.get()->keyaliases(fieldindex);
+  }
+
+  const std::vector<std::string> ArrayType::keyaliases(const std::string& key) const {
+    return type_.get()->keyaliases(key);
+  }
+
+  const std::vector<std::string> ArrayType::keys() const {
+    return type_.get()->keys();
+  }
+
   int64_t ArrayType::length() const {
     return length_;
   }

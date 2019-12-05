@@ -48,6 +48,34 @@ namespace awkward {
     throw std::invalid_argument("PrimitiveType has no inner type");
   }
 
+  int64_t PrimitiveType::numfields() const {
+    return -1;
+  }
+
+  int64_t PrimitiveType::fieldindex(const std::string& key) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::string PrimitiveType::key(int64_t fieldindex) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  bool PrimitiveType::haskey(const std::string& key) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::vector<std::string> PrimitiveType::keyaliases(int64_t fieldindex) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::vector<std::string> PrimitiveType::keyaliases(const std::string& key) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::vector<std::string> PrimitiveType::keys() const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
   const PrimitiveType::DType PrimitiveType::dtype() const {
     return dtype_;
   }
