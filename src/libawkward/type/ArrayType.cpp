@@ -13,6 +13,10 @@ namespace awkward {
     return std::shared_ptr<Type>(new ArrayType(type_, length_));
   }
 
+  bool ArrayType::shallow_equal(std::shared_ptr<Type> other) const {
+    return (dynamic_cast<ArrayType*>(other.get()) != nullptr);
+  }
+
   bool ArrayType::equal(std::shared_ptr<Type> other) const {
     if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
       return length_ == t->length_  &&  type_.get()->equal(t->type_);

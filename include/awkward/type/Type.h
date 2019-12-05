@@ -17,6 +17,7 @@ namespace awkward {
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const = 0;
     virtual const std::shared_ptr<Type> shallow_copy() const = 0;
+    virtual bool shallow_equal(std::shared_ptr<Type> other) const = 0;
     virtual bool equal(std::shared_ptr<Type> other) const = 0;
     virtual std::shared_ptr<Type> level() const = 0;
     virtual std::shared_ptr<Type> inner() const = 0;

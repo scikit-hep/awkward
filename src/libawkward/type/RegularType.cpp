@@ -16,6 +16,15 @@ namespace awkward {
     return std::shared_ptr<Type>(new RegularType(type_, size_));
   }
 
+  bool RegularType::shallow_equal(std::shared_ptr<Type> other) const {
+    if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
+      return size() == t->size();
+    }
+    else {
+      return false;
+    }
+  }
+
   bool RegularType::equal(std::shared_ptr<Type> other) const {
     if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
       return size() == t->size()  &&  type().get()->equal(t->type());

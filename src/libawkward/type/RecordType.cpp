@@ -40,6 +40,41 @@ namespace awkward {
     return std::shared_ptr<Type>(new RecordType(types_, lookup_, reverselookup_));
   }
 
+  bool RecordType::shallow_equal(std::shared_ptr<Type> other) const {
+    if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
+      if (numfields() != t->numfields()) {
+        return false;
+      }
+      if (reverselookup_.get() == nullptr) {
+        if (t->reverselookup().get() != nullptr) {
+          return false;
+        }
+        return true;
+      }
+      else {
+        if (t->reverselookup().get() == nullptr) {
+          return false;
+        }
+        if (lookup_.get()->size() != t->lookup().get()->size()) {
+          return false;
+        }
+        for (auto pair : *lookup_.get()) {
+          int64_t otherindex;
+          try {
+            otherindex = (int64_t)t->lookup().get()->at(pair.first);
+          }
+          catch (std::out_of_range err) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+    else {
+      return false;
+    }
+  }
+
   bool RecordType::equal(std::shared_ptr<Type> other) const {
     if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
       if (numfields() != t->numfields()) {

@@ -26,6 +26,23 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnionType(types_));
   }
 
+  bool UnionType::shallow_equal(std::shared_ptr<Type> other) const {
+    if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
+      if (types_.size() != t->types_.size()) {
+        return false;
+      }
+      for (size_t i = 0;  i < types_.size();  i++) {
+        if (!types_[i].get()->shallow_equal(t->types_[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
   bool UnionType::equal(std::shared_ptr<Type> other) const {
     if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
       if (types_.size() != t->types_.size()) {

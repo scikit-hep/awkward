@@ -16,6 +16,10 @@ namespace awkward {
     return std::shared_ptr<Type>(new ListType(type_));
   }
 
+  bool ListType::shallow_equal(std::shared_ptr<Type> other) const {
+    return (dynamic_cast<ListType*>(other.get()) != nullptr);
+  }
+
   bool ListType::equal(std::shared_ptr<Type> other) const {
     if (ListType* t = dynamic_cast<ListType*>(other.get())) {
       return type().get()->equal(t->type());
