@@ -25,6 +25,14 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> RegularType::descend() const {
+    return type_;
+  }
+
+  std::shared_ptr<Type> RegularType::descend(std::string key) const {
+    throw std::runtime_error("FIXME: RegularType::descend(key)");
+  }
+
   const std::shared_ptr<Type> RegularType::type() const {
     return type_;
   }

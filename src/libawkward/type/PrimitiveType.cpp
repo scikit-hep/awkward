@@ -40,6 +40,14 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> PrimitiveType::descend() const {
+    throw std::invalid_argument("cannot descend from a PrimitiveType");
+  }
+
+  std::shared_ptr<Type> PrimitiveType::descend(std::string key) const {
+    throw std::invalid_argument("cannot descend from a PrimitiveType");
+  }
+
   const PrimitiveType::DType PrimitiveType::dtype() const {
     return dtype_;
   }

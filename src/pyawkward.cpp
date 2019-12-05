@@ -832,6 +832,16 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
 
 /////////////////////////////////////////////////////////////// Type
 
+template <typename T>
+std::shared_ptr<ak::Type> descend(T& self) {
+  return self.descend();
+}
+
+template <typename T>
+std::shared_ptr<ak::Type> descend_key(T& self, std::string key) {
+  return self.descend(key);
+}
+
 py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type> make_DressedType(py::handle m, std::string name) {
   return (py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type>(m, name.c_str())
       .def(py::init([](std::shared_ptr<ak::Type> type, py::object dress, py::kwargs kwargs) -> PyDressedType {
@@ -841,6 +851,8 @@ py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type> make_Dressed
       .def_property_readonly("type", &PyDressedType::type)
       .def("__repr__", &PyDressedType::tostring)
       .def("__eq__", &PyDressedType::equal)
+      .def("descend", &descend<PyDressedType>)
+      .def("descend", &descend_key<PyDressedType>)
       .def_property_readonly("dress", [](PyDressedType& self) -> py::object {
         return self.dress().pyclass();
       })
@@ -857,6 +869,8 @@ py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayTy
       .def("length", &ak::ArrayType::length)
       .def("__repr__", &ak::ArrayType::tostring)
       .def("__eq__", &ak::ArrayType::equal)
+      .def("descend", &descend<ak::ArrayType>)
+      .def("descend", &descend_key<ak::ArrayType>)
       .def_property_readonly("parameters", &emptydict<ak::ArrayType>)
   );
 }
@@ -866,6 +880,8 @@ py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_Unk
       .def(py::init<>())
       .def("__repr__", &ak::UnknownType::tostring)
       .def("__eq__", &ak::UnknownType::equal)
+      .def("descend", &descend<ak::UnknownType>)
+      .def("descend", &descend_key<ak::UnknownType>)
       .def_property_readonly("parameters", &emptydict<ak::UnknownType>)
   );
 }
@@ -912,6 +928,8 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
       }))
       .def("__repr__", &ak::PrimitiveType::tostring)
       .def("__eq__", &ak::PrimitiveType::equal)
+      .def("descend", &descend<ak::PrimitiveType>)
+      .def("descend", &descend_key<ak::PrimitiveType>)
       .def_property_readonly("parameters", &emptydict<ak::PrimitiveType>)
   );
 }
@@ -923,6 +941,8 @@ py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_Reg
       .def_property_readonly("size", &ak::RegularType::size)
       .def("__repr__", &ak::RegularType::tostring)
       .def("__eq__", &ak::RegularType::equal)
+      .def("descend", &descend<ak::RegularType>)
+      .def("descend", &descend_key<ak::RegularType>)
       .def_property_readonly("parameters", &emptydict<ak::RegularType>)
   );
 }
@@ -933,6 +953,8 @@ py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(
       .def_property_readonly("type", &ak::ListType::type)
       .def("__repr__", &ak::ListType::tostring)
       .def("__eq__", &ak::ListType::equal)
+      .def("descend", &descend<ak::ListType>)
+      .def("descend", &descend_key<ak::ListType>)
       .def_property_readonly("parameters", &emptydict<ak::ListType>)
   );
 }
@@ -943,6 +965,8 @@ py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_Optio
       .def_property_readonly("type", &ak::OptionType::type)
       .def("__repr__", &ak::OptionType::tostring)
       .def("__eq__", &ak::OptionType::equal)
+      .def("descend", &descend<ak::OptionType>)
+      .def("descend", &descend_key<ak::OptionType>)
       .def_property_readonly("parameters", &emptydict<ak::OptionType>)
   );
 }
@@ -958,6 +982,8 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
       }))
       .def("__repr__", &ak::UnionType::tostring)
       .def("__eq__", &ak::UnionType::equal)
+      .def("descend", &descend<ak::UnionType>)
+      .def("descend", &descend_key<ak::UnionType>)
       .def_property_readonly("parameters", &emptydict<ak::UnionType>)
 
       .def_property_readonly("numtypes", &ak::UnionType::numtypes)
@@ -996,6 +1022,8 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
       }))
       .def("__repr__", &ak::RecordType::tostring)
       .def("__eq__", &ak::RecordType::equal)
+      .def("descend", &descend<ak::RecordType>)
+      .def("descend", &descend_key<ak::RecordType>)
       .def_property_readonly("parameters", &emptydict<ak::RecordType>)
 
       .def_property_readonly("numfields", &ak::RecordType::numfields)

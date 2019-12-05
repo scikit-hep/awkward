@@ -25,6 +25,14 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> ListType::descend() const {
+    return type_;
+  }
+
+  std::shared_ptr<Type> ListType::descend(std::string key) const {
+    throw std::runtime_error("FIXME: ListType::descend(key)");
+  }
+
   const std::shared_ptr<Type> ListType::type() const {
     return type_;
   }

@@ -21,4 +21,12 @@ namespace awkward {
       return false;
     }
   }
+
+  std::shared_ptr<Type> UnknownType::descend() const {
+    return shallow_copy();
+  }
+
+  std::shared_ptr<Type> UnknownType::descend(std::string key) const {
+    return shallow_copy();
+  }
 }

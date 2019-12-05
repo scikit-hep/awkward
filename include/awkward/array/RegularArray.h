@@ -24,7 +24,6 @@ namespace awkward {
     int64_t size() const { return size_; }
 
     virtual const std::string classname() const;
-    virtual const std::shared_ptr<Identity> id() const;
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;

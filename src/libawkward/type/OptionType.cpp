@@ -32,6 +32,14 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> OptionType::descend() const {
+    return type_.get()->descend();
+  }
+
+  std::shared_ptr<Type> OptionType::descend(std::string key) const {
+    throw std::runtime_error("FIXME: OptionType::descend(key)");
+  }
+
   const std::shared_ptr<Type> OptionType::type() const {
     std::shared_ptr<Type> out = type_;
     while (OptionType* t = dynamic_cast<OptionType*>(out.get())) {

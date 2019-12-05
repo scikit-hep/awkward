@@ -64,6 +64,12 @@ namespace awkward {
         return false;
       }
     }
+    virtual std::shared_ptr<Type> descend() const {
+      return type_.get()->descend();
+    }
+    virtual std::shared_ptr<Type> descend(std::string key) const {
+      return type_.get()->descend(key);
+    }
 
     const std::shared_ptr<Type> type() const { return type_; };
     const D dress() const { return dress_; };

@@ -47,6 +47,14 @@ namespace awkward {
     return (int64_t)types_.size();
   }
 
+  std::shared_ptr<Type> UnionType::descend() const {
+    throw std::runtime_error("FIXME: UnionType::descend()");
+  }
+
+  std::shared_ptr<Type> UnionType::descend(std::string key) const {
+    throw std::runtime_error("FIXME: UnionType::descend(key)");
+  }
+
   const std::vector<std::shared_ptr<Type>> UnionType::types() const {
     return types_;
   }

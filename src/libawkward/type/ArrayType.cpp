@@ -22,6 +22,14 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> ArrayType::descend() const {
+    return type_;
+  }
+
+  std::shared_ptr<Type> ArrayType::descend(std::string key) const {
+    throw std::runtime_error("FIXME: ArrayType::descend(key)");
+  }
+
   int64_t ArrayType::length() const {
     return length_;
   }
