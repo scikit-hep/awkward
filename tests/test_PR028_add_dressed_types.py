@@ -9,6 +9,8 @@ import numpy
 import awkward1
 import awkward1.dressing.string
 
+py27 = (sys.version_info[0] < 3)
+
 def test_fromnumpy():
     a = numpy.arange(2*3*5).reshape((2, 3, 5))
     b = awkward1.fromnumpy(a)
@@ -76,7 +78,10 @@ def test_string2():
     assert repr(a.layout.content.type) == "string"
     assert repr(a.layout.type) == "3 * string"
 
-    assert repr(a) == "<Array ['hey', '', 'there'] type='3 * string'>"
+    if py27:
+        assert repr(a) == "<Array [u'hey', u'', u'there'] type='3 * string'>"
+    else:
+        assert repr(a) == "<Array ['hey', '', 'there'] type='3 * string'>"
     assert repr(a[0]) == "'hey'"
     assert repr(a[1]) == "''"
     assert repr(a[2]) == "'there'"
