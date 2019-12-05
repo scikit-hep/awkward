@@ -16,11 +16,11 @@ namespace awkward {
     return std::shared_ptr<Type>(new ListType(type_));
   }
 
-  bool ListType::shallow_equal(std::shared_ptr<Type> other) const {
+  bool ListType::shallow_equal(const std::shared_ptr<Type> other) const {
     return (dynamic_cast<ListType*>(other.get()) != nullptr);
   }
 
-  bool ListType::equal(std::shared_ptr<Type> other) const {
+  bool ListType::equal(const std::shared_ptr<Type> other) const {
     if (ListType* t = dynamic_cast<ListType*>(other.get())) {
       return type().get()->equal(t->type());
     }
@@ -37,7 +37,7 @@ namespace awkward {
     return type_;
   }
 
-  std::shared_ptr<Type> ListType::inner(std::string key) const {
+  std::shared_ptr<Type> ListType::inner(const std::string& key) const {
     throw std::runtime_error("FIXME: ListType::inner(key)");
   }
 

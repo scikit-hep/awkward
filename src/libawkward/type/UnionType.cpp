@@ -26,7 +26,7 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnionType(types_));
   }
 
-  bool UnionType::shallow_equal(std::shared_ptr<Type> other) const {
+  bool UnionType::shallow_equal(const std::shared_ptr<Type> other) const {
     if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
       if (types_.size() != t->types_.size()) {
         return false;
@@ -43,7 +43,7 @@ namespace awkward {
     }
   }
 
-  bool UnionType::equal(std::shared_ptr<Type> other) const {
+  bool UnionType::equal(const std::shared_ptr<Type> other) const {
     if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
       if (types_.size() != t->types_.size()) {
         return false;
@@ -76,7 +76,7 @@ namespace awkward {
     throw std::runtime_error("FIXME: UnionType::inner()");
   }
 
-  std::shared_ptr<Type> UnionType::inner(std::string key) const {
+  std::shared_ptr<Type> UnionType::inner(const std::string& key) const {
     throw std::runtime_error("FIXME: UnionType::inner(key)");
   }
 

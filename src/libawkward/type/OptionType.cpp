@@ -23,11 +23,11 @@ namespace awkward {
     return std::shared_ptr<Type>(new OptionType(type_));
   }
 
-  bool OptionType::shallow_equal(std::shared_ptr<Type> other) const {
+  bool OptionType::shallow_equal(const std::shared_ptr<Type> other) const {
     return (dynamic_cast<OptionType*>(other.get()) != nullptr);
   }
 
-  bool OptionType::equal(std::shared_ptr<Type> other) const {
+  bool OptionType::equal(const std::shared_ptr<Type> other) const {
     if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
       return type().get()->equal(t->type());
     }
@@ -44,7 +44,7 @@ namespace awkward {
     return type_.get()->inner();
   }
 
-  std::shared_ptr<Type> OptionType::inner(std::string key) const {
+  std::shared_ptr<Type> OptionType::inner(const std::string& key) const {
     throw std::runtime_error("FIXME: OptionType::inner(key)");
   }
 

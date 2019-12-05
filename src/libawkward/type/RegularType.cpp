@@ -16,7 +16,7 @@ namespace awkward {
     return std::shared_ptr<Type>(new RegularType(type_, size_));
   }
 
-  bool RegularType::shallow_equal(std::shared_ptr<Type> other) const {
+  bool RegularType::shallow_equal(const std::shared_ptr<Type> other) const {
     if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
       return size() == t->size();
     }
@@ -25,7 +25,7 @@ namespace awkward {
     }
   }
 
-  bool RegularType::equal(std::shared_ptr<Type> other) const {
+  bool RegularType::equal(const std::shared_ptr<Type> other) const {
     if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
       return size() == t->size()  &&  type().get()->equal(t->type());
     }
@@ -42,7 +42,7 @@ namespace awkward {
     return type_;
   }
 
-  std::shared_ptr<Type> RegularType::inner(std::string key) const {
+  std::shared_ptr<Type> RegularType::inner(const std::string& key) const {
     throw std::runtime_error("FIXME: RegularType::inner(key)");
   }
 

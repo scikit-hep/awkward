@@ -7,6 +7,7 @@
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/RegularType.h"
+#include "awkward/type/UnknownType.h"
 
 #include "awkward/array/RegularArray.h"
 
@@ -119,8 +120,8 @@ namespace awkward {
   }
 
   bool RegularArray::accepts(const std::shared_ptr<Type> type) {
-    // FIXME: actually check
-    return true;
+    const std::shared_ptr<Type> model(new RegularType(std::shared_ptr<Type>(new UnknownType()), size_));
+    return type.get()->level().get()->shallow_equal(model);
   }
 
   int64_t RegularArray::length() const {

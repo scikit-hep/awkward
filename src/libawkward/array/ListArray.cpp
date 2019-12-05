@@ -6,6 +6,7 @@
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/ListType.h"
+#include "awkward/type/UnknownType.h"
 #include "awkward/Slice.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/RegularArray.h"
@@ -182,8 +183,8 @@ namespace awkward {
 
   template <typename T>
   bool ListArrayOf<T>::accepts(const std::shared_ptr<Type> type) {
-    // FIXME: actually check
-    return true;
+    const std::shared_ptr<Type> model(new ListType(std::shared_ptr<Type>(new UnknownType())));
+    return type.get()->level().get()->shallow_equal(model);
   }
 
   template <typename T>

@@ -6,6 +6,7 @@
 
 namespace awkward {
   const std::string Type::compare(std::shared_ptr<Type> supertype) {
-    return tostring() + std::string(" vs ") + supertype.get()->tostring();
+    // FIXME: better side-by-side comparison
+    return tostring() + std::string(" versus ") + supertype.get()->tostring();
   }
 }

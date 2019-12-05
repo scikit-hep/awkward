@@ -40,7 +40,7 @@ namespace awkward {
     return std::shared_ptr<Type>(new RecordType(types_, lookup_, reverselookup_));
   }
 
-  bool RecordType::shallow_equal(std::shared_ptr<Type> other) const {
+  bool RecordType::shallow_equal(const std::shared_ptr<Type> other) const {
     if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
       if (numfields() != t->numfields()) {
         return false;
@@ -75,7 +75,7 @@ namespace awkward {
     }
   }
 
-  bool RecordType::equal(std::shared_ptr<Type> other) const {
+  bool RecordType::equal(const std::shared_ptr<Type> other) const {
     if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
       if (numfields() != t->numfields()) {
         return false;
@@ -126,7 +126,7 @@ namespace awkward {
     throw std::invalid_argument("RecordType has no inner type without a key");
   }
 
-  std::shared_ptr<Type> RecordType::inner(std::string key) const {
+  std::shared_ptr<Type> RecordType::inner(const std::string& key) const {
     return field(key);
   }
 

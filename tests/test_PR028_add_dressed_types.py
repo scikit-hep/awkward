@@ -88,3 +88,14 @@ def test_string2():
         assert repr(a[0]) == "'hey'"
         assert repr(a[1]) == "''"
         assert repr(a[2]) == "'there'"
+
+def test_accepts():
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5])), content)
+
+    dressed1 = awkward1.layout.DressedType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")), Dummy)
+    listoffsetarray.type = dressed1
+
+    dressed2 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), Dummy)
+    with pytest.raises(ValueError):
+        listoffsetarray.type = dressed2

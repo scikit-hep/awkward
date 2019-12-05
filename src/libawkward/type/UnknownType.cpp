@@ -13,11 +13,11 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnknownType());
   }
 
-  bool UnknownType::shallow_equal(std::shared_ptr<Type> other) const {
+  bool UnknownType::shallow_equal(const std::shared_ptr<Type> other) const {
     return equal(other);
   }
 
-  bool UnknownType::equal(std::shared_ptr<Type> other) const {
+  bool UnknownType::equal(const std::shared_ptr<Type> other) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
       return true;
     }
@@ -34,7 +34,7 @@ namespace awkward {
     return shallow_copy();
   }
 
-  std::shared_ptr<Type> UnknownType::inner(std::string key) const {
+  std::shared_ptr<Type> UnknownType::inner(const std::string& key) const {
     return shallow_copy();
   }
 

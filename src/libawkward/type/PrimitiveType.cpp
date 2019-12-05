@@ -31,11 +31,11 @@ namespace awkward {
     return std::shared_ptr<Type>(new PrimitiveType(dtype_));
   }
 
-  bool PrimitiveType::shallow_equal(std::shared_ptr<Type> other) const {
+  bool PrimitiveType::shallow_equal(const std::shared_ptr<Type> other) const {
     return equal(other);
   }
 
-  bool PrimitiveType::equal(std::shared_ptr<Type> other) const {
+  bool PrimitiveType::equal(const std::shared_ptr<Type> other) const {
     if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
       return dtype_ == t->dtype_;
     }
@@ -52,7 +52,7 @@ namespace awkward {
     throw std::invalid_argument("PrimitiveType has no inner type");
   }
 
-  std::shared_ptr<Type> PrimitiveType::inner(std::string key) const {
+  std::shared_ptr<Type> PrimitiveType::inner(const std::string& key) const {
     throw std::invalid_argument("PrimitiveType has no inner type");
   }
 
