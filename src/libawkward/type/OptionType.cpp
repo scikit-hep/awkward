@@ -32,12 +32,12 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> OptionType::descend() const {
-    return type_.get()->descend();
+  std::shared_ptr<Type> OptionType::inner() const {
+    return type_.get()->inner();
   }
 
-  std::shared_ptr<Type> OptionType::descend(std::string key) const {
-    throw std::runtime_error("FIXME: OptionType::descend(key)");
+  std::shared_ptr<Type> OptionType::inner(std::string key) const {
+    throw std::runtime_error("FIXME: OptionType::inner(key)");
   }
 
   const std::shared_ptr<Type> OptionType::type() const {

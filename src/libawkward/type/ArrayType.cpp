@@ -22,12 +22,12 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> ArrayType::descend() const {
+  std::shared_ptr<Type> ArrayType::inner() const {
     return type_;
   }
 
-  std::shared_ptr<Type> ArrayType::descend(std::string key) const {
-    throw std::runtime_error("FIXME: ArrayType::descend(key)");
+  std::shared_ptr<Type> ArrayType::inner(std::string key) const {
+    throw std::runtime_error("FIXME: ArrayType::inner(key)");
   }
 
   int64_t ArrayType::length() const {

@@ -28,7 +28,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> Record::type() const {
-    return array_.type().get()->descend();
+    return array_.type().get()->inner();
   }
 
   void Record::setid() {

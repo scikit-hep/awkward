@@ -417,7 +417,7 @@ namespace awkward {
       }
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::shared_ptr<Content>(new NumpyArray(id, Type::none(), ptr_, shape, strides_, byteoffset, itemsize_, format_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new NumpyArray(id, type_, ptr_, shape, strides_, byteoffset, itemsize_, format_));
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_field(const std::string& key) const {

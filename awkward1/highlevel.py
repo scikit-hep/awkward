@@ -58,60 +58,86 @@ class Array(object):
 
     def __str__(self, limit_value=85):
         def forward(x, space, brackets=True):
-            if isinstance(x, awkward1.layout.Content):
-                if brackets:
-                    yield space + "["
-                sp = ""
-                for i in range(len(x)):
-                    for token in forward(x[i], sp):
-                        yield token
-                    sp = " "
-                if brackets:
-                    yield "]"
-            elif isinstance(x, awkward1.layout.Record):
-                yield space + "{"
-                sp = ""
-                for k in x.keys():
-                    key = sp + k + ": "
-                    for token in forward(x[k], ""):
-                        yield key + token
-                        key = ""
-                    sp = ", "
-                yield "}"
-            elif isinstance(x, (float, numpy.floating)):
-                yield space + "{0:.3g}".format(x)
-            else:
-                yield space + repr(x)
+            done = False
+            if isinstance(x, awkward1.layout.Content) and isinstance(x.type, awkward1.layout.DressedType):
+                y = x.type.dress(x)
+                if y.__repr__ is not Array.__repr__:
+                    yield space + repr(y)
+                    done = True
+            elif isinstance(x, awkward1.layout.Record) and isinstance(x.type, awkward1.layout.DressedType):
+                y = x.type.dress(x)
+                if y.__repr__ is not Record.__repr__:
+                    yield space + repr(y)
+                    done = True
+
+            if not done:
+                if isinstance(x, awkward1.layout.Content):
+                    if brackets:
+                        yield space + "["
+                    sp = ""
+                    for i in range(len(x)):
+                        for token in forward(x[i], sp):
+                            yield token
+                        sp = ", "
+                    if brackets:
+                        yield "]"
+                elif isinstance(x, awkward1.layout.Record):
+                    yield space + "{"
+                    sp = ""
+                    for k in x.keys():
+                        key = sp + k + ": "
+                        for token in forward(x[k], ""):
+                            yield key + token
+                            key = ""
+                        sp = ", "
+                    yield "}"
+                elif isinstance(x, (float, numpy.floating)):
+                    yield space + "{0:.3g}".format(x)
+                else:
+                    yield space + repr(x)
 
         def backward(x, space, brackets=True):
-            if isinstance(x, awkward1.layout.Content):
-                if brackets:
-                    yield "]" + space
-                sp = ""
-                for i in range(len(x) - 1, -1, -1):
-                    for token in backward(x[i], sp):
-                        yield token
-                    sp = " "
-                if brackets:
-                    yield "["
-            elif isinstance(x, awkward1.layout.Record):
-                yield "}" + space
-                keys = x.keys()
-                for i in range(len(keys) - 1, -1, -1):
-                    last = None
-                    for token in backward(x[keys[i]], ""):
+            done = False
+            if isinstance(x, awkward1.layout.Content) and isinstance(x.type, awkward1.layout.DressedType):
+                y = x.type.dress(x)
+                if y.__repr__ is not Array.__repr__:
+                    yield repr(y) + space
+                    done = True
+            elif isinstance(x, awkward1.layout.Record) and isinstance(x.type, awkward1.layout.DressedType):
+                y = x.type.dress(x)
+                if y.__repr__ is not Record.__repr__:
+                    yield repr(y) + space
+                    done = True
+
+            if not done:
+                if isinstance(x, awkward1.layout.Content):
+                    if brackets:
+                        yield "]" + space
+                    sp = ""
+                    for i in range(len(x) - 1, -1, -1):
+                        for token in backward(x[i], sp):
+                            yield token
+                        sp = ", "
+                    if brackets:
+                        yield "["
+                elif isinstance(x, awkward1.layout.Record):
+                    yield "}" + space
+                    keys = x.keys()
+                    for i in range(len(keys) - 1, -1, -1):
+                        last = None
+                        for token in backward(x[keys[i]], ""):
+                            if last is not None:
+                                yield last
+                            last = token
                         if last is not None:
-                            yield last
-                        last = token
-                    if last is not None:
-                        yield keys[i] + ": " + last
-                    if i != 0:
-                        yield ", "
-                yield "{"
-            elif isinstance(x, (float, numpy.floating)):
-                yield "{0:.3g}".format(x) + space
-            else:
-                yield repr(x) + space
+                            yield keys[i] + ": " + last
+                        if i != 0:
+                            yield ", "
+                    yield "{"
+                elif isinstance(x, (float, numpy.floating)):
+                    yield "{0:.3g}".format(x) + space
+                else:
+                    yield repr(x) + space
 
         def forever(iterator):
             for token in iterator:
@@ -127,14 +153,14 @@ class Array(object):
         while True:
             l = next(leftgen)
             if l is not None:
-                if leftlen + rightlen + len(l) + (1 if l is None and r is None else 5) > limit_value:
+                if leftlen + rightlen + len(l) + (2 if l is None and r is None else 6) > limit_value:
                     break
                 left.append(l)
                 leftlen += len(l)
 
             r = next(rightgen)
             if r is not None:
-                if leftlen + rightlen + len(r) + (1 if l is None and r is None else 5) > limit_value:
+                if leftlen + rightlen + len(r) + (2 if l is None and r is None else 6) > limit_value:
                     break
                 right.append(r)
                 rightlen += len(r)
@@ -142,16 +168,24 @@ class Array(object):
             if l is None and r is None:
                 break
 
-        while len(left) > 1 and (left[-1] == "[" or left[-1] == " [" or left[-1] == "{" or left[-1] == " {" or left[-1] == ", " or left[-1] == " "):
+        while len(left) > 1 and (left[-1] == "[" or left[-1] == ", [" or left[-1] == "{" or left[-1] == ", {" or left[-1] == ", "):
             left.pop()
             l = ""
-        while len(right) > 1 and (right[-1] == "]" or right[-1] == "] " or right[-1] == "}" or right[-1] == "} " or right[-1] == ", " or right[-1] == " "):
+        while len(right) > 1 and (right[-1] == "]" or right[-1] == "], " or right[-1] == "}" or right[-1] == "}, " or right[-1] == ", "):
             right.pop()
             r = ""
         if l is None and r is None:
-            return "".join(left).rstrip(" ") + " " + "".join(reversed(right)).lstrip(" ")
+            if len(left) == 0:
+                return "".join(reversed(right)).lstrip(" ")
+            else:
+                return "".join(left).rstrip(" ") + ", " + "".join(reversed(right)).lstrip(" ")
         else:
-            return "".join(left).rstrip(" ") + " ... " + "".join(reversed(right)).lstrip(" ")
+            if len(left) == 0 and len(right) == 0:
+                return "..."
+            elif len(left) == 0:
+                return "... " + "".join(reversed(right)).lstrip(" ")
+            else:
+                return "".join(left).rstrip(" ") + ", ... " + "".join(reversed(right)).lstrip(" ")
 
     def __repr__(self, limit_value=40, limit_total=85):
         value = self.__str__(limit_value=limit_value)
@@ -167,7 +201,7 @@ class Array(object):
         return len(self.layout)
 
     def __getitem__(self, where):
-        return awkward1.util.wrap(self.layout[where], self.type.type)
+        return awkward1.util.wrap(self.layout[where])
 
 class Record(object):
     pass

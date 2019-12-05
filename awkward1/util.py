@@ -5,18 +5,19 @@ import re
 
 import numpy
 
-def wrap(content, type=None):
+def wrap(content):
     import awkward1.layout
     if isinstance(content, awkward1.layout.Content):
-        if isinstance(type, awkward1.layout.DressedType):
-            out = type.dress(content)
-            out.type = type
-            return out
+        if isinstance(content.type, awkward1.layout.DressedType):
+            return content.type.dress(content)
         else:
             return awkward1.Array(content)
 
     elif isinstance(content, awkward1.layout.Record):
-        raise NotImplementedError
+        if isinstance(content.type, awkward1.layout.DressedType):
+            return type.dress(content)
+        else:
+            return awkward1.Record(content)
 
     else:
         return content

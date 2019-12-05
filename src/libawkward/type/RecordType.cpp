@@ -83,11 +83,11 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> RecordType::descend() const {
-    throw std::runtime_error("FIXME: RecordType::descend()");
+  std::shared_ptr<Type> RecordType::inner() const {
+    throw std::runtime_error("FIXME: RecordType::inner()");
   }
 
-  std::shared_ptr<Type> RecordType::descend(std::string key) const {
+  std::shared_ptr<Type> RecordType::inner(std::string key) const {
     return field(key);
   }
 

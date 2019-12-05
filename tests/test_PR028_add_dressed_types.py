@@ -16,16 +16,16 @@ def test_fromnumpy():
 
 def test_highlevel():
     a = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]])
-    assert repr(a) == "<Array [[1.1 2.2 3.3] [] ... [7.7 8.8 9.9]] type='5 * var * float64'>"
-    assert str(a) == "[[1.1 2.2 3.3] [] [4.4 5.5] [6.6] [7.7 8.8 9.9]]"
+    assert repr(a) == "<Array [[1.1, 2.2, 3.3], ... [7.7, 8.8, 9.9]] type='5 * var * float64'>"
+    assert str(a) == "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]"
 
     b = awkward1.Array(numpy.arange(100, dtype=numpy.int32))
-    assert repr(b) == "<Array [0 1 2 3 4 5 6 ... 93 94 95 96 97 98 99] type='100 * int32'>"
-    assert str(b) == "[0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 ... 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99]"
+    assert repr(b) == "<Array [0, 1, 2, 3, 4, ... 95, 96, 97, 98, 99] type='100 * int32'>"
+    assert str(b) == "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ... 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]"
 
     c = awkward1.Array('[{"one": 3.14, "two": [1.1, 2.2]}, {"one": 99.9, "two": [-3.1415926]}]')
-    assert repr(c) == "<Array [{one: 3.14, two: [1.1 ... -3.14]}] type=\"2 * {'one': float64, 'two': var...\">"
-    assert str(c) == "[{one: 3.14, two: [1.1 2.2]} {one: 99.9, two: [-3.14]}]"
+    assert repr(c) == "<Array [{one: 3.14, two: [1.1, ... -3.14]}] type=\"2 * {'one': float64, 'two': va...\">"
+    assert str(c) == "[{one: 3.14, two: [1.1, 2.2]}, {one: 99.9, two: [-3.14]}]"
 
 class Dummy(awkward1.highlevel.Array):
     pass
@@ -76,18 +76,7 @@ def test_string2():
     assert repr(a.layout.content.type) == "string"
     assert repr(a.layout.type) == "3 * string"
 
-    # listoffsetarray.type = string
-    # assert repr(listoffsetarray.type) == "3 * string"
-    # assert repr(listoffsetarray.baretype) == "3 * var * uint8"
-    #
-    # a = awkward1.util.wrap(listoffsetarray)
-    # assert repr(a.type) == "3 * string"
-    # assert repr(a.baretype) == "3 * var * uint8"
-    #
-    # print(a)
-    # print(a[0])
-    # print(a[0].type)
-    # print(a[1])
-    # print(a[2])
-    #
-    # raise Exception
+    assert repr(a) == "<Array ['hey', '', 'there'] type='3 * string'>"
+    assert repr(a[0]) == "'hey'"
+    assert repr(a[1]) == "''"
+    assert repr(a[2]) == "'there'"

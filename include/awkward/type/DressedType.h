@@ -64,11 +64,11 @@ namespace awkward {
         return false;
       }
     }
-    virtual std::shared_ptr<Type> descend() const {
-      return type_.get()->descend();
+    virtual std::shared_ptr<Type> inner() const {
+      return type_.get()->inner();
     }
-    virtual std::shared_ptr<Type> descend(std::string key) const {
-      return type_.get()->descend(key);
+    virtual std::shared_ptr<Type> inner(std::string key) const {
+      return type_.get()->inner(key);
     }
 
     const std::shared_ptr<Type> type() const { return type_; };

@@ -40,12 +40,12 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> PrimitiveType::descend() const {
-    throw std::invalid_argument("cannot descend from a PrimitiveType");
+  std::shared_ptr<Type> PrimitiveType::inner() const {
+    throw std::invalid_argument("PrimitiveType has no inner type");
   }
 
-  std::shared_ptr<Type> PrimitiveType::descend(std::string key) const {
-    throw std::invalid_argument("cannot descend from a PrimitiveType");
+  std::shared_ptr<Type> PrimitiveType::inner(std::string key) const {
+    throw std::invalid_argument("PrimitiveType has no inner type");
   }
 
   const PrimitiveType::DType PrimitiveType::dtype() const {
