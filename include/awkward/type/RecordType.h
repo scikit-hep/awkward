@@ -35,16 +35,16 @@ namespace awkward {
     virtual std::shared_ptr<Type> inner(std::string key) const;
 
     int64_t numfields() const;
-    int64_t index(const std::string& key) const;
-    const std::string key(int64_t index) const;
-    bool has(const std::string& key) const;
-    const std::vector<std::string> aliases(int64_t index) const;
-    const std::vector<std::string> aliases(const std::string& key) const;
-    const std::shared_ptr<Type> field(int64_t index) const;
-    const std::shared_ptr<Type> field(const std::string& key) const;
+    int64_t fieldindex(const std::string& key) const;
+    const std::string key(int64_t fieldindex) const;
+    bool haskey(const std::string& key) const;
+    const std::vector<std::string> keyaliases(int64_t fieldindex) const;
+    const std::vector<std::string> keyaliases(const std::string& key) const;
     const std::vector<std::string> keys() const;
-    const std::vector<std::shared_ptr<Type>> values() const;
-    const std::vector<std::pair<std::string, std::shared_ptr<Type>>> items() const;
+    const std::shared_ptr<Type> field(int64_t fieldindex) const;
+    const std::shared_ptr<Type> field(const std::string& key) const;
+    const std::vector<std::shared_ptr<Type>> fields() const;
+    const std::vector<std::pair<std::string, std::shared_ptr<Type>>> fielditems() const;
 
   private:
     const std::vector<std::shared_ptr<Type>> types_;

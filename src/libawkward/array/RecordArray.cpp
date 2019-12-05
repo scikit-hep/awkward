@@ -279,7 +279,7 @@ namespace awkward {
     return (int64_t)contents_.size();
   }
 
-  int64_t RecordArray::index(const std::string& key) const {
+  int64_t RecordArray::fieldindex(const std::string& key) const {
     int64_t out = -1;
     if (!istuple()) {
       try {
@@ -287,7 +287,7 @@ namespace awkward {
       }
       catch (std::out_of_range err) { }
       if (out != -1  &&  out >= numfields()) {
-        throw std::invalid_argument(std::string("key \"") + key + std::string("\" points to tuple index ") + std::to_string(out) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
+        throw std::invalid_argument(std::string("key \"") + key + std::string("\" points to fieldindex ") + std::to_string(out) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
       }
     }
     if (out == -1) {
@@ -298,27 +298,27 @@ namespace awkward {
         throw std::invalid_argument(std::string("key \"") + key + std::string("\" is not in RecordArray"));
       }
       if (out >= numfields()) {
-        throw std::invalid_argument(std::string("key interpreted as index ") + key + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
+        throw std::invalid_argument(std::string("key interpreted as fieldindex ") + key + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
       }
     }
     return out;
   }
 
-  const std::string RecordArray::key(int64_t index) const {
-    if (index >= numfields()) {
-      throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
+  const std::string RecordArray::key(int64_t fieldindex) const {
+    if (fieldindex >= numfields()) {
+      throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
     }
     if (!istuple()) {
-      return reverselookup_.get()->at((size_t)index);
+      return reverselookup_.get()->at((size_t)fieldindex);
     }
     else {
-      return std::to_string(index);
+      return std::to_string(fieldindex);
     }
   }
 
-  bool RecordArray::has(const std::string& key) const {
+  bool RecordArray::haskey(const std::string& key) const {
     try {
-      index(key);
+      fieldindex(key);
     }
     catch (std::invalid_argument err) {
       return false;
@@ -326,13 +326,13 @@ namespace awkward {
     return true;
   }
 
-  const std::vector<std::string> RecordArray::aliases(int64_t index) const {
+  const std::vector<std::string> RecordArray::keyaliases(int64_t fieldindex) const {
     std::vector<std::string> out;
-    std::string _default = std::to_string(index);
+    std::string _default = std::to_string(fieldindex);
     bool has_default = false;
     if (!istuple()) {
       for (auto pair : *lookup_.get()) {
-        if (pair.second == index) {
+        if (pair.second == fieldindex) {
           out.push_back(pair.first);
           if (pair.first == _default) {
             has_default = true;
@@ -346,19 +346,8 @@ namespace awkward {
     return out;
   }
 
-  const std::vector<std::string> RecordArray::aliases(const std::string& key) const {
-    return aliases(index(key));
-  }
-
-  const std::shared_ptr<Content> RecordArray::field(int64_t index) const {
-    if (index >= numfields()) {
-      throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
-    }
-    return contents_[(size_t)index];
-  }
-
-  const std::shared_ptr<Content> RecordArray::field(const std::string& key) const {
-    return contents_[(size_t)index(key)];
+  const std::vector<std::string> RecordArray::keyaliases(const std::string& key) const {
+    return keyaliases(fieldindex(key));
   }
 
   const std::vector<std::string> RecordArray::keys() const {
@@ -375,11 +364,22 @@ namespace awkward {
     return out;
   }
 
-  const std::vector<std::shared_ptr<Content>> RecordArray::values() const {
+  const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
+    if (fieldindex >= numfields()) {
+      throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
+    }
+    return contents_[(size_t)fieldindex];
+  }
+
+  const std::shared_ptr<Content> RecordArray::field(const std::string& key) const {
+    return contents_[(size_t)fieldindex(key)];
+  }
+
+  const std::vector<std::shared_ptr<Content>> RecordArray::fields() const {
     return std::vector<std::shared_ptr<Content>>(contents_);
   }
 
-  const std::vector<std::pair<std::string, std::shared_ptr<Content>>> RecordArray::items() const {
+  const std::vector<std::pair<std::string, std::shared_ptr<Content>>> RecordArray::fielditems() const {
     std::vector<std::pair<std::string, std::shared_ptr<Content>>> out;
     if (istuple()) {
       size_t cols = contents_.size();
@@ -413,7 +413,7 @@ namespace awkward {
     contents_.push_back(content);
   }
 
-  void RecordArray::setkey(int64_t index, const std::string& fieldname) {
+  void RecordArray::setkey(int64_t fieldindex, const std::string& fieldname) {
     if (istuple()) {
       lookup_ = std::shared_ptr<Lookup>(new Lookup);
       reverselookup_ = std::shared_ptr<ReverseLookup>(new ReverseLookup);
@@ -421,8 +421,8 @@ namespace awkward {
         reverselookup_.get()->push_back(std::to_string(j));
       }
     }
-    (*lookup_.get())[fieldname] = (size_t)index;
-    (*reverselookup_.get())[(size_t)index] = fieldname;
+    (*lookup_.get())[fieldname] = (size_t)fieldindex;
+    (*reverselookup_.get())[(size_t)fieldindex] = fieldname;
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {

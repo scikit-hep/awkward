@@ -95,7 +95,7 @@ namespace awkward {
     return (int64_t)types_.size();
   }
 
-  int64_t RecordType::index(const std::string& key) const {
+  int64_t RecordType::fieldindex(const std::string& key) const {
     int64_t out = -1;
     if (lookup_.get() != nullptr) {
       try {
@@ -103,7 +103,7 @@ namespace awkward {
       }
       catch (std::out_of_range err) { }
       if (out != -1  &&  out >= numfields()) {
-        throw std::invalid_argument(std::string("key \"") + key + std::string("\" points to tuple index ") + std::to_string(out) + std::string(" for RecordType with only " + std::to_string(numfields()) + std::string(" fields")));
+        throw std::invalid_argument(std::string("key \"") + key + std::string("\" points to fieldindex ") + std::to_string(out) + std::string(" for RecordType with only " + std::to_string(numfields()) + std::string(" fields")));
       }
     }
     if (out == -1) {
@@ -114,27 +114,27 @@ namespace awkward {
         throw std::invalid_argument(std::string("key \"") + key + std::string("\" is not in RecordType"));
       }
       if (out >= numfields()) {
-        throw std::invalid_argument(std::string("key interpreted as index ") + key + std::string(" for RecordType with only " + std::to_string(numfields()) + std::string(" fields")));
+        throw std::invalid_argument(std::string("key interpreted as fieldindex ") + key + std::string(" for RecordType with only " + std::to_string(numfields()) + std::string(" fields")));
       }
     }
     return out;
   }
 
-  const std::string RecordType::key(int64_t index) const {
-    if (index >= numfields()) {
-      throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" for RecordType with only " + std::to_string(numfields()) + std::string(" fields")));
+  const std::string RecordType::key(int64_t fieldindex) const {
+    if (fieldindex >= numfields()) {
+      throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for RecordType with only " + std::to_string(numfields()) + std::string(" fields")));
     }
     if (reverselookup_.get() != nullptr) {
-      return reverselookup_.get()->at((size_t)index);
+      return reverselookup_.get()->at((size_t)fieldindex);
     }
     else {
-      return std::to_string(index);
+      return std::to_string(fieldindex);
     }
   }
 
-  bool RecordType::has(const std::string& key) const {
+  bool RecordType::haskey(const std::string& key) const {
     try {
-      index(key);
+      fieldindex(key);
     }
     catch (std::invalid_argument err) {
       return false;
@@ -142,13 +142,13 @@ namespace awkward {
     return true;
   }
 
-  const std::vector<std::string> RecordType::aliases(int64_t index) const {
+  const std::vector<std::string> RecordType::keyaliases(int64_t fieldindex) const {
     std::vector<std::string> out;
-    std::string _default = std::to_string(index);
+    std::string _default = std::to_string(fieldindex);
     bool has_default = false;
     if (lookup_.get() != nullptr) {
       for (auto pair : *lookup_.get()) {
-        if (pair.second == index) {
+        if (pair.second == fieldindex) {
           out.push_back(pair.first);
           if (pair.first == _default) {
             has_default = true;
@@ -162,19 +162,8 @@ namespace awkward {
     return out;
   }
 
-  const std::vector<std::string> RecordType::aliases(const std::string& key) const {
-    return aliases(index(key));
-  }
-
-  const std::shared_ptr<Type> RecordType::field(int64_t index) const {
-    if (index >= numfields()) {
-      throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" for RecordType with only " + std::to_string(numfields()) + std::string(" fields")));
-    }
-    return types_[(size_t)index];
-  }
-
-  const std::shared_ptr<Type> RecordType::field(const std::string& key) const {
-    return types_[(size_t)index(key)];
+  const std::vector<std::string> RecordType::keyaliases(const std::string& key) const {
+    return keyaliases(fieldindex(key));
   }
 
   const std::vector<std::string> RecordType::keys() const {
@@ -191,11 +180,22 @@ namespace awkward {
     return out;
   }
 
-  const std::vector<std::shared_ptr<Type>> RecordType::values() const {
+  const std::shared_ptr<Type> RecordType::field(int64_t fieldindex) const {
+    if (fieldindex >= numfields()) {
+      throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for RecordType with only " + std::to_string(numfields()) + std::string(" fields")));
+    }
+    return types_[(size_t)fieldindex];
+  }
+
+  const std::shared_ptr<Type> RecordType::field(const std::string& key) const {
+    return types_[(size_t)fieldindex(key)];
+  }
+
+  const std::vector<std::shared_ptr<Type>> RecordType::fields() const {
     return std::vector<std::shared_ptr<Type>>(types_);
   }
 
-  const std::vector<std::pair<std::string, std::shared_ptr<Type>>> RecordType::items() const {
+  const std::vector<std::pair<std::string, std::shared_ptr<Type>>> RecordType::fielditems() const {
     std::vector<std::pair<std::string, std::shared_ptr<Type>>> out;
     if (reverselookup_.get() == nullptr) {
       size_t cols = types_.size();

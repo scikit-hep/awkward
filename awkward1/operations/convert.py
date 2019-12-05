@@ -44,10 +44,10 @@ def tolist(array):
         return tolist(array.layout)
 
     elif isinstance(array, awkward1.layout.Record) and array.istuple:
-        return tuple(tolist(x) for x in array.values())
+        return tuple(tolist(x) for x in array.fields())
 
     elif isinstance(array, awkward1.layout.Record):
-        return {n: tolist(x) for n, x in array.items()}
+        return {n: tolist(x) for n, x in array.fielditems()}
 
     elif isinstance(array, numpy.ndarray):
         return array.tolist()

@@ -1027,32 +1027,38 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
       .def_property_readonly("parameters", &emptydict<ak::RecordType>)
 
       .def_property_readonly("numfields", &ak::RecordType::numfields)
-      .def("index", &ak::RecordType::index)
+      .def("fieldindex", &ak::RecordType::fieldindex)
       .def("key", &ak::RecordType::key)
-      .def("__contains__", &ak::RecordType::has)
-      .def("aliases", [](ak::RecordType& self, int64_t index) -> std::vector<std::string> {
-        return self.aliases(index);
+      .def("haskey", &ak::RecordType::haskey)
+      .def("keyaliases", [](ak::RecordType& self, int64_t fieldindex) -> std::vector<std::string> {
+        return self.keyaliases(fieldindex);
       })
-      .def("aliases", [](ak::RecordType& self, std::string key) -> std::vector<std::string> {
-        return self.aliases(key);
+      .def("keyaliases", [](ak::RecordType& self, std::string key) -> std::vector<std::string> {
+        return self.keyaliases(key);
       })
-      .def("__getitem__", [](ak::RecordType& self, int64_t index) -> py::object {
-        return box(self.field(index));
+      .def("__getitem__", [](ak::RecordType& self, int64_t fieldindex) -> py::object {
+        return box(self.field(fieldindex));
       })
       .def("__getitem__", [](ak::RecordType& self, std::string key) -> py::object {
         return box(self.field(key));
       })
+      .def("field", [](ak::RecordType& self, int64_t fieldindex) -> py::object {
+        return box(self.field(fieldindex));
+      })
+      .def("field", [](ak::RecordType& self, std::string key) -> py::object {
+        return box(self.field(key));
+      })
       .def("keys", &ak::RecordType::keys)
-      .def("values", [](ak::RecordType& self) -> py::object {
+      .def("fields", [](ak::RecordType& self) -> py::object {
         py::list out;
-        for (auto item : self.values()) {
+        for (auto item : self.fields()) {
           out.append(box(item));
         }
         return out;
       })
-      .def("items", [](ak::RecordType& self) -> py::object {
+      .def("fielditems", [](ak::RecordType& self) -> py::object {
         py::list out;
-        for (auto item : self.items()) {
+        for (auto item : self.fielditems()) {
           py::str key(item.first);
           py::object val(box(item.second));
           py::tuple pair(2);
@@ -1316,32 +1322,32 @@ py::class_<ak::RecordArray, ak::Content> make_RecordArray(py::handle m, std::str
 
       .def_property_readonly("istuple", &ak::RecordArray::istuple)
       .def_property_readonly("numfields", &ak::RecordArray::numfields)
-      .def("index", &ak::RecordArray::index)
+      .def("fieldindex", &ak::RecordArray::fieldindex)
       .def("key", &ak::RecordArray::key)
-      .def("has", &ak::RecordArray::has)
-      .def("aliases", [](ak::RecordArray& self, int64_t index) -> std::vector<std::string> {
-        return self.aliases(index);
+      .def("haskey", &ak::RecordArray::haskey)
+      .def("keyaliases", [](ak::RecordArray& self, int64_t fieldindex) -> std::vector<std::string> {
+        return self.keyaliases(fieldindex);
       })
-      .def("aliases", [](ak::RecordArray& self, std::string key) -> std::vector<std::string> {
-        return self.aliases(key);
+      .def("keyaliases", [](ak::RecordArray& self, std::string key) -> std::vector<std::string> {
+        return self.keyaliases(key);
       })
-      .def("field", [](ak::RecordArray& self, int64_t index) -> py::object {
-        return box(self.field(index));
+      .def("keys", &ak::RecordArray::keys)
+      .def("field", [](ak::RecordArray& self, int64_t fieldindex) -> py::object {
+        return box(self.field(fieldindex));
       })
       .def("field", [](ak::RecordArray& self, std::string key) -> py::object {
         return box(self.field(key));
       })
-      .def("keys", &ak::RecordArray::keys)
-      .def("values", [](ak::RecordArray& self) -> py::object {
+      .def("fields", [](ak::RecordArray& self) -> py::object {
         py::list out;
-        for (auto item : self.values()) {
+        for (auto item : self.fields()) {
           out.append(box(item));
         }
         return out;
       })
-      .def("items", [](ak::RecordArray& self) -> py::object {
+      .def("fielditems", [](ak::RecordArray& self) -> py::object {
         py::list out;
-        for (auto item : self.items()) {
+        for (auto item : self.fielditems()) {
           py::str key(item.first);
           py::object val(box(item.second));
           py::tuple pair(2);
@@ -1384,32 +1390,32 @@ py::class_<ak::Record> make_Record(py::handle m, std::string name) {
       .def_property_readonly("at", &ak::Record::at)
       .def_property_readonly("istuple", &ak::Record::istuple)
       .def_property_readonly("numfields", &ak::Record::numfields)
-      .def("index", &ak::Record::index)
+      .def("fieldindex", &ak::Record::fieldindex)
       .def("key", &ak::Record::key)
-      .def("has", &ak::Record::has)
-      .def("aliases", [](ak::Record& self, int64_t index) -> std::vector<std::string> {
-        return self.aliases(index);
+      .def("haskey", &ak::Record::haskey)
+      .def("keyaliases", [](ak::Record& self, int64_t fieldindex) -> std::vector<std::string> {
+        return self.keyaliases(fieldindex);
       })
-      .def("aliases", [](ak::Record& self, std::string key) -> std::vector<std::string> {
-        return self.aliases(key);
+      .def("keyaliases", [](ak::Record& self, std::string key) -> std::vector<std::string> {
+        return self.keyaliases(key);
       })
-      .def("field", [](ak::Record& self, int64_t index) -> py::object {
-        return box(self.field(index));
+      .def("keys", &ak::Record::keys)
+      .def("field", [](ak::Record& self, int64_t fieldindex) -> py::object {
+        return box(self.field(fieldindex));
       })
       .def("field", [](ak::Record& self, std::string key) -> py::object {
         return box(self.field(key));
       })
-      .def("keys", &ak::Record::keys)
-      .def("values", [](ak::Record& self) -> py::object {
+      .def("fields", [](ak::Record& self) -> py::object {
         py::list out;
-        for (auto item : self.values()) {
+        for (auto item : self.fields()) {
           out.append(box(item));
         }
         return out;
       })
-      .def("items", [](ak::Record& self) -> py::object {
+      .def("fielditems", [](ak::Record& self) -> py::object {
         py::list out;
-        for (auto item : self.items()) {
+        for (auto item : self.fielditems()) {
           py::str key(item.first);
           py::object val(box(item.second));
           py::tuple pair(2);

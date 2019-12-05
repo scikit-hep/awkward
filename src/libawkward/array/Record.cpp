@@ -142,39 +142,39 @@ namespace awkward {
     return array_.numfields();
   }
 
-  int64_t Record::index(const std::string& key) const {
-    return array_.index(key);
+  int64_t Record::fieldindex(const std::string& key) const {
+    return array_.fieldindex(key);
   }
 
-  const std::string Record::key(int64_t index) const {
-    return array_.key(index);
+  const std::string Record::key(int64_t fieldindex) const {
+    return array_.key(fieldindex);
   }
 
-  bool Record::has(const std::string& key) const {
-    return array_.has(key);
+  bool Record::haskey(const std::string& key) const {
+    return array_.haskey(key);
   }
 
-  const std::vector<std::string> Record::aliases(int64_t index) const {
-    return array_.aliases(index);
+  const std::vector<std::string> Record::keyaliases(int64_t fieldindex) const {
+    return array_.keyaliases(fieldindex);
   }
 
-  const std::vector<std::string> Record::aliases(const std::string& key) const {
-    return array_.aliases(key);
-  }
-
-  const std::shared_ptr<Content> Record::field(int64_t index) const {
-    return array_.field(index).get()->getitem_at_nowrap(at_);
-  }
-
-  const std::shared_ptr<Content> Record::field(const std::string& key) const {
-    return array_.field(key).get()->getitem_at_nowrap(at_);
+  const std::vector<std::string> Record::keyaliases(const std::string& key) const {
+    return array_.keyaliases(key);
   }
 
   const std::vector<std::string> Record::keys() const {
     return array_.keys();
   }
 
-  const std::vector<std::shared_ptr<Content>> Record::values() const {
+  const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
+    return array_.field(fieldindex).get()->getitem_at_nowrap(at_);
+  }
+
+  const std::shared_ptr<Content> Record::field(const std::string& key) const {
+    return array_.field(key).get()->getitem_at_nowrap(at_);
+  }
+
+  const std::vector<std::shared_ptr<Content>> Record::fields() const {
     std::vector<std::shared_ptr<Content>> out;
     int64_t cols = numfields();
     for (int64_t j = 0;  j < cols;  j++) {
@@ -183,7 +183,7 @@ namespace awkward {
     return out;
   }
 
-  const std::vector<std::pair<std::string, std::shared_ptr<Content>>> Record::items() const {
+  const std::vector<std::pair<std::string, std::shared_ptr<Content>>> Record::fielditems() const {
     std::vector<std::pair<std::string, std::shared_ptr<Content>>> out;
     std::shared_ptr<RecordArray::ReverseLookup> keys = array_.reverselookup();
     if (istuple()) {

@@ -51,16 +51,17 @@ namespace awkward {
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
 
     int64_t numfields() const;
-    int64_t index(const std::string& key) const;
-    const std::string key(int64_t index) const;
-    bool has(const std::string& key) const;
-    const std::vector<std::string> aliases(int64_t index) const;
-    const std::vector<std::string> aliases(const std::string& key) const;
-    const std::shared_ptr<Content> field(int64_t index) const;
-    const std::shared_ptr<Content> field(const std::string& key) const;
+    int64_t fieldindex(const std::string& key) const;
+    const std::string key(int64_t fieldindex) const;
+    bool haskey(const std::string& key) const;
+    const std::vector<std::string> keyaliases(int64_t fieldindex) const;
+    const std::vector<std::string> keyaliases(const std::string& key) const;
     const std::vector<std::string> keys() const;
-    const std::vector<std::shared_ptr<Content>> values() const;
-    const std::vector<std::pair<std::string, std::shared_ptr<Content>>> items() const;
+
+    const std::shared_ptr<Content> field(int64_t fieldindex) const;
+    const std::shared_ptr<Content> field(const std::string& key) const;
+    const std::vector<std::shared_ptr<Content>> fields() const;
+    const std::vector<std::pair<std::string, std::shared_ptr<Content>>> fielditems() const;
     const Record astuple() const;
 
   protected:
