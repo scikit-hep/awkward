@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/type/Type.h"
 #include "awkward/Index.h"
 
 namespace awkward {
@@ -20,6 +21,7 @@ namespace awkward {
 
     virtual const std::shared_ptr<SliceItem> shallow_copy() const = 0;
     virtual const std::string tostring() const = 0;
+    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const = 0;
   };
 
   class SliceAt: public SliceItem {
@@ -30,6 +32,9 @@ namespace awkward {
       return std::shared_ptr<SliceItem>(new SliceAt(at_));
     }
     virtual const std::string tostring() const;
+    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+      return false;
+    }
   private:
     const int64_t at_;
   };
@@ -48,6 +53,9 @@ namespace awkward {
       return std::shared_ptr<SliceItem>(new SliceRange(start_, stop_, step_));
     }
     virtual const std::string tostring() const;
+    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+      return true;
+    }
   private:
     const int64_t start_;
     const int64_t stop_;
@@ -61,6 +69,9 @@ namespace awkward {
       return std::shared_ptr<SliceItem>(new SliceEllipsis());
     }
     virtual const std::string tostring() const;
+    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+      return true;
+    }
   };
 
   class SliceNewAxis: public SliceItem {
@@ -70,6 +81,9 @@ namespace awkward {
       return std::shared_ptr<SliceItem>(new SliceNewAxis());
     }
     virtual const std::string tostring() const;
+    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+      return false;
+    }
   };
 
   template <typename T>
@@ -88,6 +102,9 @@ namespace awkward {
       return std::shared_ptr<SliceItem>(new SliceArrayOf<T>(index_, shape_, strides_));
     }
     virtual const std::string tostring() const;
+    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+      return advanced.length() == 0;
+    }
     const std::string tostring_part() const;
     const IndexOf<T> ravel() const;
   private:
@@ -106,6 +123,9 @@ namespace awkward {
       return std::shared_ptr<SliceItem>(new SliceField(key_));
     }
     virtual const std::string tostring() const;
+    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+      return false;
+    }
   private:
     const std::string key_;
   };
@@ -118,6 +138,9 @@ namespace awkward {
       return std::shared_ptr<SliceItem>(new SliceFields(keys_));
     }
     virtual const std::string tostring() const;
+    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+      return type.get() != nullptr  &&  type.get()->numfields() != -1  &&  util::subset(keys_, type.get()->keys());
+    }
   private:
     const std::vector<std::string> keys_;
   };

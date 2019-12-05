@@ -271,7 +271,7 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_fields(const std::vector<std::string>& keys) const {
     std::shared_ptr<Type> type = Type::none();
-    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
+    if (SliceFields(keys).preserves_type(type_, Index64(0))) {
       type = type_;
     }
     return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, type, offsets_, content_.get()->getitem_fields(keys)));
@@ -408,7 +408,7 @@ namespace awkward {
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
     if (advanced.length() == 0) {
-      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, Type::none(), nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, type_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));
     }
     else {
       int64_t total;
@@ -424,7 +424,7 @@ namespace awkward {
         nextoffsets.ptr().get(),
         lenstarts);
       util::handle_error(err2, classname(), id_.get());
-      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, Type::none(), nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, type_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
     }
   }
 

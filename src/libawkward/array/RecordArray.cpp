@@ -401,7 +401,11 @@ namespace awkward {
   }
 
   const RecordArray RecordArray::astuple() const {
-    return RecordArray(id_, Type::none(), contents_);   // FIXME: Type::none()
+    RecordArray out(id_, Type::none(), contents_);
+    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(out.keys(), type_.get()->keys())) {
+      out.type_ = type_;
+    }
+    return out;
   }
 
   void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {
@@ -447,7 +451,7 @@ namespace awkward {
       return out.get()->getitem_next(nexthead, nexttail, advanced);
     }
     else if (contents_.size() == 0) {
-      RecordArray out(Identity::none(), Type::none(), length(), istuple());   // FIXME: Type::none()
+      RecordArray out(Identity::none(), type_, length(), istuple());
       return out.getitem_next(nexthead, nexttail, advanced);
     }
     else {
@@ -455,7 +459,11 @@ namespace awkward {
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_next(head, emptytail, advanced));
       }
-      RecordArray out(Identity::none(), Type::none(), contents, lookup_, reverselookup_);   // FIXME: Type::none()
+      std::shared_ptr<Type> type = Type::none();
+      if (head.get()->preserves_type(type_, advanced)) {
+        type = type_;
+      }
+      RecordArray out(Identity::none(), type, contents, lookup_, reverselookup_);
       return out.getitem_next(nexthead, nexttail, advanced);
     }
   }

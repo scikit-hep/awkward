@@ -84,7 +84,7 @@ namespace awkward {
   }
 
   std::shared_ptr<Type> RecordType::inner() const {
-    throw std::runtime_error("FIXME: RecordType::inner()");
+    throw std::invalid_argument("RecordType has no inner type without a key");
   }
 
   std::shared_ptr<Type> RecordType::inner(std::string key) const {

@@ -181,7 +181,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
     std::shared_ptr<Type> type = Type::none();
-    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
+    if (SliceFields(keys).preserves_type(type_, Index64(0))) {
       type = type_;
     }
     return std::shared_ptr<Content>(new RegularArray(id_, type, content_.get()->getitem_fields(keys), size_));
@@ -296,7 +296,7 @@ namespace awkward {
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
     if (advanced.length() == 0) {
-      return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RegularArray(id_, type_, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize));
     }
     else {
       Index64 nextadvanced(len*nextsize);
@@ -308,7 +308,7 @@ namespace awkward {
         nextsize);
       util::handle_error(err, classname(), id_.get());
 
-      return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RegularArray(id_, type_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize));
     }
   }
 
