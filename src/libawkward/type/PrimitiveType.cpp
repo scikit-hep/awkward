@@ -40,6 +40,10 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> PrimitiveType::level() const {
+    return shallow_copy();
+  }
+
   std::shared_ptr<Type> PrimitiveType::inner() const {
     throw std::invalid_argument("PrimitiveType has no inner type");
   }

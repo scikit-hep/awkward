@@ -22,6 +22,10 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> UnknownType::level() const {
+    return shallow_copy();
+  }
+
   std::shared_ptr<Type> UnknownType::inner() const {
     return shallow_copy();
   }

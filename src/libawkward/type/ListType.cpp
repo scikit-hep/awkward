@@ -25,6 +25,10 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> ListType::level() const {
+    return shallow_copy();
+  }
+
   std::shared_ptr<Type> ListType::inner() const {
     return type_;
   }

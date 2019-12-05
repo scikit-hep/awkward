@@ -64,6 +64,9 @@ namespace awkward {
         return false;
       }
     }
+    virtual std::shared_ptr<Type> level() const {
+      return type_.get()->level();
+    }
     virtual std::shared_ptr<Type> inner() const {
       return type_.get()->inner();
     }

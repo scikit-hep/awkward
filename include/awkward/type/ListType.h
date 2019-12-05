@@ -13,6 +13,7 @@ namespace awkward {
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
     virtual const std::shared_ptr<Type> shallow_copy() const;
     virtual bool equal(std::shared_ptr<Type> other) const;
+    virtual std::shared_ptr<Type> level() const;
     virtual std::shared_ptr<Type> inner() const;
     virtual std::shared_ptr<Type> inner(std::string key) const;
     virtual int64_t numfields() const;

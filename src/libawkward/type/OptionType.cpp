@@ -32,6 +32,10 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> OptionType::level() const {
+    return type_.get()->level();
+  }
+
   std::shared_ptr<Type> OptionType::inner() const {
     return type_.get()->inner();
   }

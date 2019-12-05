@@ -25,6 +25,10 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> RegularType::level() const {
+    return shallow_copy();
+  }
+
   std::shared_ptr<Type> RegularType::inner() const {
     return type_;
   }

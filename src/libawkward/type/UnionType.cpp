@@ -47,6 +47,14 @@ namespace awkward {
     return (int64_t)types_.size();
   }
 
+  std::shared_ptr<Type> UnionType::level() const {
+    std::vector<std::shared_ptr<Type>> types;
+    for (auto t : types_) {
+      types.push_back(t.get()->level());
+    }
+    return std::shared_ptr<Type>(new UnionType(types));
+  }
+
   std::shared_ptr<Type> UnionType::inner() const {
     throw std::runtime_error("FIXME: UnionType::inner()");
   }

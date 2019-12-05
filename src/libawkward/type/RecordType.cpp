@@ -83,6 +83,10 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> RecordType::level() const {
+    return shallow_copy();
+  }
+
   std::shared_ptr<Type> RecordType::inner() const {
     throw std::invalid_argument("RecordType has no inner type without a key");
   }
