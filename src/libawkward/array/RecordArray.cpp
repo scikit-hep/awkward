@@ -222,7 +222,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(id_, Type::none(), length(), istuple());   // FIXME: Type::none()
+    std::shared_ptr<Type> type = Type::none();
+    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
+      type = type_;
+    }
+    RecordArray out(id_, type, length(), istuple());
     if (istuple()) {
       for (auto key : keys) {
         out.append(field(key).get()->getitem_range_nowrap(0, length()));

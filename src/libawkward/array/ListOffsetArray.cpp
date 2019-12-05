@@ -265,12 +265,16 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_field(const std::string& key) const {
-    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, Type::none(), offsets_, content_.get()->getitem_field(key)));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, Type::none(), offsets_, content_.get()->getitem_field(key)));
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, Type::none(), offsets_, content_.get()->getitem_fields(keys)));   // FIXME: Type::none()
+    std::shared_ptr<Type> type = Type::none();
+    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
+      type = type_;
+    }
+    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, type, offsets_, content_.get()->getitem_fields(keys)));
   }
 
   template <typename T>

@@ -116,7 +116,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(array_.id(), Type::none(), length(), istuple());   // FIXME: Type::none()
+    std::shared_ptr<Type> type = Type::none();
+    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
+      type = type_;
+    }
+    RecordArray out(array_.id(), type, length(), istuple());
     if (istuple()) {
       for (auto key : keys) {
         out.append(array_.field(key));

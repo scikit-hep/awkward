@@ -176,11 +176,15 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_field(const std::string& key) const {
-    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_.get()->getitem_field(key), size_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_.get()->getitem_field(key), size_));
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_.get()->getitem_fields(keys), size_));   // FIXME: Type::none()
+    std::shared_ptr<Type> type = Type::none();
+    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
+      type = type_;
+    }
+    return std::shared_ptr<Content>(new RegularArray(id_, type, content_.get()->getitem_fields(keys), size_));
   }
 
   const std::shared_ptr<Content> RegularArray::carry(const Index64& carry) const {
