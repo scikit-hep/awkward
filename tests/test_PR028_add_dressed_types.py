@@ -82,6 +82,6 @@ def test_string2():
         assert repr(a) == "<Array [u'hey', u'', u'there'] type='3 * string'>"
     else:
         assert repr(a) == "<Array ['hey', '', 'there'] type='3 * string'>"
-    assert repr(a[0]) == "'hey'"
-    assert repr(a[1]) == "''"
-    assert repr(a[2]) == "'there'"
+    assert repr(a[0]) == "u'hey'"
+    assert repr(a[1]) == "u''"
+    assert repr(a[2]) == "u'there'"
