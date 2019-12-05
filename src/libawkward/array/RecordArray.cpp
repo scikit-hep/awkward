@@ -193,27 +193,27 @@ namespace awkward {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), regular_stop - regular_start, istuple()));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RecordArray(id_, type_, regular_stop - regular_start, istuple()));
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range(start, stop));
       }
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents, lookup_, reverselookup_));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RecordArray(id_, type_, contents, lookup_, reverselookup_));
     }
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), stop - start, istuple()));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RecordArray(id_, type_, stop - start, istuple()));
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range_nowrap(start, stop));
       }
-      return std::shared_ptr<Content>(new RecordArray(id_, Type::none(), contents, lookup_, reverselookup_));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RecordArray(id_, type_, contents, lookup_, reverselookup_));
     }
   }
 
@@ -242,7 +242,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
-      return std::shared_ptr<Content>(new RecordArray(id, Type::none(), carry.length(), istuple()));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RecordArray(id, type_, carry.length(), istuple()));
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
@@ -253,7 +253,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
-      return std::shared_ptr<Content>(new RecordArray(id, Type::none(), contents, lookup_, reverselookup_));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RecordArray(id, type_, contents, lookup_, reverselookup_));
     }
   }
 

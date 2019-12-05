@@ -266,7 +266,7 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id, Type::none(), starts_.getitem_range_nowrap(start, stop), stops_.getitem_range_nowrap(start, stop), content_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id, type_, starts_.getitem_range_nowrap(start, stop), stops_.getitem_range_nowrap(start, stop), content_));
   }
 
   template <typename T>
@@ -302,7 +302,7 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id, Type::none(), nextstarts, nextstops, content_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id, type_, nextstarts, nextstops, content_));
   }
 
   template <typename T>

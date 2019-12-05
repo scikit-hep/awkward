@@ -172,7 +172,7 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new RegularArray(id_, type_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_));
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_field(const std::string& key) const {
@@ -197,7 +197,7 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }
-    return std::shared_ptr<Content>(new RegularArray(id, Type::none(), content_.get()->carry(nextcarry), size_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new RegularArray(id, type_, content_.get()->carry(nextcarry), size_));
   }
 
   const std::pair<int64_t, int64_t> RegularArray::minmax_depth() const {

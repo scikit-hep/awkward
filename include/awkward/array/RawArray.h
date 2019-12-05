@@ -273,7 +273,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_range_nowrap(start, stop);
       }
-      return std::shared_ptr<Content>(new RawArrayOf<T>(id, Type::none(), ptr_, offset_ + start, stop - start, itemsize_));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RawArrayOf<T>(id, type_, ptr_, offset_ + start, stop - start, itemsize_));
     }
 
     virtual const std::shared_ptr<Content> getitem_field(const std::string& key) const {
@@ -314,7 +314,7 @@ namespace awkward {
         id = id_.get()->getitem_carry_64(carry);
       }
 
-      return std::shared_ptr<Content>(new RawArrayOf<T>(id, Type::none(), ptr, 0, carry.length(), itemsize_));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RawArrayOf<T>(id, type_, ptr, 0, carry.length(), itemsize_));
     }
 
     virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }

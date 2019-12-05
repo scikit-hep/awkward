@@ -368,7 +368,7 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_range_nowrap(0, 0);
     }
-    return std::shared_ptr<Content>(new NumpyArray(id, Type::none(), ptr_, shape, strides, byteoffset_, itemsize_, format_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new NumpyArray(id, type_, ptr_, shape, strides, byteoffset_, itemsize_, format_));
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_at(int64_t at) const {
@@ -497,7 +497,7 @@ namespace awkward {
 
     std::vector<ssize_t> shape = { (ssize_t)carry.length() };
     shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-    return std::shared_ptr<Content>(new NumpyArray(id, Type::none(), ptr, shape, strides_, 0, itemsize_, format_));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new NumpyArray(id, type_, ptr, shape, strides_, 0, itemsize_, format_));
   }
 
   const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
@@ -546,7 +546,7 @@ namespace awkward {
 
   const NumpyArray NumpyArray::contiguous() const {
     if (iscontiguous()) {
-      return NumpyArray(id_, Type::none(), ptr_, shape_, strides_, byteoffset_, itemsize_, format_);   // FIXME: Type::none()
+      return NumpyArray(id_, type_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
     }
     else {
       Index64 bytepos(shape_[0]);
@@ -567,7 +567,7 @@ namespace awkward {
         byteoffset_,
         bytepos.ptr().get());
       util::handle_error(err, classname(), id_.get());
-      return NumpyArray(id_, Type::none(), ptr, shape_, strides_, 0, itemsize_, format_);   // FIXME: Type::none()
+      return NumpyArray(id_, type_, ptr, shape_, strides_, 0, itemsize_, format_);
     }
 
     else if (shape_.size() == 1) {
@@ -581,11 +581,11 @@ namespace awkward {
         bytepos.ptr().get());
       util::handle_error(err, classname(), id_.get());
       std::vector<ssize_t> strides = { itemsize_ };
-      return NumpyArray(id_, Type::none(), ptr, shape_, strides, 0, itemsize_, format_);   // FIXME: Type::none()
+      return NumpyArray(id_, type_, ptr, shape_, strides, 0, itemsize_, format_);
     }
 
     else {
-      NumpyArray next(id_, Type::none(), ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);   // FIXME: Type::none()
+      NumpyArray next(id_, type_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
 
       Index64 nextbytepos(bytepos.length()*shape_[1]);
       struct Error err = awkward_numpyarray_contiguous_next_64(
@@ -599,7 +599,7 @@ namespace awkward {
       NumpyArray out = next.contiguous_next(nextbytepos);
       std::vector<ssize_t> outstrides = { shape_[1]*out.strides_[0] };
       outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
-      return NumpyArray(out.id_, Type::none(), out.ptr_, shape_, outstrides, out.byteoffset_, itemsize_, format_);   // FIXME: Type::none()
+      return NumpyArray(out.id_, out.type_, out.ptr_, shape_, outstrides, out.byteoffset_, itemsize_, format_);
     }
   }
 
