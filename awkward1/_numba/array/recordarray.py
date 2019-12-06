@@ -44,7 +44,7 @@ class RecordArrayType(content.ContentType):
         return self
 
     def getitem_str(self, key):
-        return self.contenttpes[awkward1.util.field2index(self.lookup, self.numfields, key)]
+        return self.contenttpes[awkward1._util.field2index(self.lookup, self.numfields, key)]
 
     def getitem_tuple(self, wheretpe):
         import awkward1._numba.array.regulararray
@@ -59,7 +59,7 @@ class RecordArrayType(content.ContentType):
         tailtpe = numba.types.Tuple(wheretpe.types[1:])
 
         if isinstance(headtpe, numba.types.StringLiteral):
-            index = awkward1.util.field2index(self.lookup, self.numfields, headtpe.literal_value)
+            index = awkward1._util.field2index(self.lookup, self.numfields, headtpe.literal_value)
             nexttpe = self.contenttpes[index]
 
         else:
@@ -292,7 +292,7 @@ def lower_getitem_range(context, builder, sig, args):
 def lower_getitem_str(context, builder, sig, args):
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
-    index = awkward1.util.field2index(tpe.lookup, tpe.numfields, wheretpe.literal_value)
+    index = awkward1._util.field2index(tpe.lookup, tpe.numfields, wheretpe.literal_value)
 
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
 
@@ -348,7 +348,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
 
     if isinstance(headtpe, numba.types.StringLiteral):
-        index = awkward1.util.field2index(arraytpe.lookup, arraytpe.numfields, headtpe.literal_value)
+        index = awkward1._util.field2index(arraytpe.lookup, arraytpe.numfields, headtpe.literal_value)
         nexttpe = arraytpe.contenttpes[index]
         nextval = getattr(proxyin, field(index))
 

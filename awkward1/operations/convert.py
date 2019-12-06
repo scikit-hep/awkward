@@ -10,7 +10,7 @@ except ImportError:
 
 import numpy
 
-import awkward1.util
+import awkward1._util
 import awkward1.layout
 
 def fromnumpy(array):
@@ -21,16 +21,16 @@ def fromnumpy(array):
             return awkward1.layout.NumpyArray(array)
         else:
             return awkward1.layout.RegularArray(recurse(array.reshape((-1,) + array.shape[2:])), array.shape[1])
-    return awkward1.util.wrap(recurse(array))
+    return awkward1._util.wrap(recurse(array))
 
 def fromiter(iterable, initial=1024, resize=2.0):
     out = awkward1.layout.FillableArray(initial=initial, resize=resize)
     for x in iterable:
         out.fill(x)
-    return awkward1.util.wrap(out.snapshot())
+    return awkward1._util.wrap(out.snapshot())
 
 def fromjson(source, initial=1024, resize=2.0, buffersize=65536):
-    return awkward1.util.wrap(awkward1.layout.fromjson(source, initial=initial, resize=resize, buffersize=buffersize))
+    return awkward1._util.wrap(awkward1.layout.fromjson(source, initial=initial, resize=resize, buffersize=buffersize))
 
 def tolist(array):
     import awkward1.highlevel
