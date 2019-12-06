@@ -50,10 +50,11 @@ class StringBehavior(awkward1.highlevel.Array):
             return "string[{0}]".format(repr(encoding))
 
     def __iter__(self):
-        for x in super(StringBehavior, self).__iter__():
-            if x.type.nolength().parameters.get("encoding") is None:
+        if self.type.nolength().inner().parameters.get("encoding") is None:
+            for x in super(StringBehavior, self).__iter__():
                 yield x.__bytes__()
-            else:
+        else:
+            for x in super(StringBehavior, self).__iter__():
                 yield x.__str__()
 
     def __eq__(self, other):

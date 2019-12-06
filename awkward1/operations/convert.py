@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+import sys
 import numbers
 import json
 try:
@@ -35,6 +36,9 @@ def tolist(array):
     import awkward1.highlevel
 
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
+        return array
+
+    elif sys.version_info[0] < 3 and isinstance(array, unicode):
         return array
 
     elif isinstance(array, awkward1.highlevel.Array):
