@@ -75,6 +75,17 @@ def test_string2():
 
     assert awkward1.tolist(a) == [[104, 101, 121], [], [116, 104, 101, 114, 101]]
 
+    assert repr(a.type) == "3 * var * uint8"
+    assert repr(a[0].type) == "3 * uint8"
+    assert repr(a[1].type) == "0 * uint8"
+    assert repr(a[2].type) == "5 * uint8"
+
+    assert repr(a) == "<Array [[104, 101, 121], ... 101, 114, 101]] type='3 * var * uint8'>"
+    assert str(a) == "[[104, 101, 121], [], [116, 104, 101, 114, 101]]"
+    assert repr(a[0]) == "<Array [104, 101, 121] type='3 * uint8'>"
+    assert repr(a[1]) == "<Array [] type='0 * uint8'>"
+    assert repr(a[2]) == "<Array [116, 104, 101, 114, 101] type='5 * uint8'>"
+
     a.layout.type = awkward1.layout.ArrayType(awkward1.string, 3)
 
     assert repr(a.type) == "3 * string"

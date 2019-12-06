@@ -57,6 +57,9 @@ class Array(object):
                 yield x
 
     def __str__(self, limit_value=85):
+        if len(self) == 0:
+            return "[]"
+
         def forward(x, space, brackets=True):
             done = False
             if isinstance(x, awkward1.layout.Content):

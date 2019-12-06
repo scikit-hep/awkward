@@ -65,7 +65,6 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] Test all (tested in mock [studies/fillable.py](tree/master/studies/fillable.py)).
    * [X] JSON → Awkward via header-only [RapidJSON](https://rapidjson.org) and `awkward.fromiter`.
    * [ ] Explicit broadcasting functions for jagged and non-jagged arrays and scalars.
-   * [ ] ~~Structure-preserving ufunc-like operation on the C++ side that applies a lambda function to inner data. The Python `__array_ufunc__` implementation will _call_ this to preserve structure.~~
    * [ ] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old).
    * [ ] Full suite of array types:
       * [X] `EmptyArray`: 1-dimensional array with length 0 and unknown type (result of `UnknownFillable`, compatible with all types of arrays).
@@ -85,21 +84,19 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [ ] `ChunkedArray`: same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required. (Maybe `AmorphousChunkedArray` would fill that role.)
       * [ ] `RegularChunkedArray`: like a `ChunkedArray`, but all chunks are known to have the same size.
       * [ ] `VirtualArray`: same as the old version, including caching, but taking C++11 lambda functions for materialization, get-cache, and put-cache. The pybind11 layer will connect this to Python callables.
-   * [ ] Derived classes with ufunc-defined `Methods` and Numba extensions:
-      * [ ] `StringArray`: a `ListArray`/`ListOffsetArray` of characters with special methods and an optional encoding.
       * [ ] `PyVirtualArray`: takes a Python lambda (which gets carried into `VirtualArray`).
       * [ ] `PyObjectArray`: same as the old version.
    * [X] Describe high-level types using [datashape](https://datashape.readthedocs.io/en/latest/) and possibly also an in-house schema. (Emit datashape _strings_ from C++.)
-      * [ ] Type compatibility: option to treat nonexistent record fields as nullable data.
    * [ ] Describe mid-level "persistence types" with no lengths, somewhat minimal JSON, optional dtypes/compression.
    * [ ] Describe low-level layouts independently of filled arrays (JSON or something)?
-   * [ ] Layer 1 interface `Array`:
+   * [X] Layer 1 interface `Array`:
       * [ ] Pass through to the layout classes in Python and Numba.
       * [ ] Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before).
       * [ ] Pass through other Numpy functions using [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html) (this would be new).
       * [ ] `RecordArray` fields (not called "columns" anymore) through Layer 1 `__getattr__`.
       * [ ] Special Layer 1 `Record` type for `RecordArray` elements, supporting some methods and a visual representation based on `Identity` if available, all fields if `recordtype == "tuple"`, or the first field otherwise.
-      * [ ] Mechanism for adding user-defined `Methods` like `LorentzVector`, as before, but only on Layer 1.
+      * [X] Mechanism for adding user-defined `Methods` like `LorentzVector`, as before, but only on Layer 1.
+         * [X] High-level classes for characters and strings.
       * [ ] Inerhit from Pandas so that all Layer 1 arrays can be DataFrame columns.
    * [ ] Full suite of operations:
       * [X] `awkward.tolist`: same as before.
