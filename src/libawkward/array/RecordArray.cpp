@@ -124,7 +124,18 @@ namespace awkward {
 
   void RecordArray::settype(const std::shared_ptr<Type> type) {
     if (accepts(type)) {
-      // FIXME: apply to descendants
+      std::shared_ptr<Type> level = type.get()->level();
+      RecordType* raw = dynamic_cast<RecordType*>(level.get());
+      if (reverselookup_.get() == nullptr) {
+        for (int64_t i = 0;  i < numfields();  i++) {
+          contents_[i].get()->settype(raw->field(i));
+        }
+      }
+      else {
+        for (auto key : raw->keys()) {
+          contents_[fieldindex(key)].get()->settype(raw->field(key));
+        }
+      }
       type_ = type;
     }
     else {

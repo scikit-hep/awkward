@@ -45,7 +45,6 @@ namespace awkward {
 
   void EmptyArray::settype(const std::shared_ptr<Type> type) {
     if (accepts(type)) {
-      // FIXME: apply to descendants
       type_ = type;
     }
     else {

@@ -111,7 +111,7 @@ namespace awkward {
 
   void RegularArray::settype(const std::shared_ptr<Type> type) {
     if (accepts(type)) {
-      // FIXME: apply to descendants
+      content_.get()->settype(type.get()->inner());
       type_ = type;
     }
     else {
