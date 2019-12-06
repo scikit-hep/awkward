@@ -20,7 +20,7 @@ namespace awkward {
         , content_(content) { }
 
     const IndexOf<T> offsets() const { return offsets_; }
-    const std::shared_ptr<Content> content() const { return content_.get()->shallow_copy(); }
+    const std::shared_ptr<Content> content() const { return content_; }
 
     virtual const std::string classname() const;
     virtual void setid();

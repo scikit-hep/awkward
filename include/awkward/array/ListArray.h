@@ -22,7 +22,7 @@ namespace awkward {
 
     const IndexOf<T> starts() const { return starts_; }
     const IndexOf<T> stops() const { return stops_; }
-    const std::shared_ptr<Content> content() const { return content_.get()->shallow_copy(); }
+    const std::shared_ptr<Content> content() const { return content_; }
 
     virtual const std::string classname() const;
     virtual void setid();
