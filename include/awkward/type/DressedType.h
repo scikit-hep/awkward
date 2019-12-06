@@ -21,7 +21,7 @@ namespace awkward {
   class Dress {
   public:
     virtual const std::string name() const = 0;
-    virtual const std::string typestr(const DressParameters<T>& parameters) const = 0;
+    virtual const std::string typestr(std::shared_ptr<Type> baretype, const DressParameters<T>& parameters) const = 0;
     virtual bool equal(const Dress& other) const = 0;
   };
 
@@ -31,7 +31,7 @@ namespace awkward {
     DressedType(const std::shared_ptr<Type> type, const D& dress, const P& parameters): type_(type), dress_(dress), parameters_(parameters) { }
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const {
-      std::string outstr = dress_.typestr(parameters_);
+      std::string outstr = dress_.typestr(type_, parameters_);
       if (outstr.size() != 0) {
         return outstr;
       }

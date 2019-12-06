@@ -8,7 +8,7 @@ import awkward1.highlevel
 
 class String(awkward1.highlevel.Array):
     @staticmethod
-    def typestr(parameters):
+    def typestr(baretype, parameters):
         encoding = parameters.get("encoding")
         if encoding is None:
             return "bytes"

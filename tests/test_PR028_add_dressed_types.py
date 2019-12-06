@@ -2,6 +2,7 @@
 
 import sys
 import itertools
+import collections
 
 import pytest
 import numpy
@@ -99,3 +100,20 @@ def test_accepts():
     dressed2 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), Dummy)
     with pytest.raises(ValueError):
         listoffsetarray.type = dressed2
+
+class D(awkward1.highlevel.Array):
+    pass
+
+def test_type_propagation():
+    array = awkward1.Array([[{"one": 1, "two": [1.0, 1.1]}, {"one": 2, "two": [2.0]}, {"one": 3, "two": [3.0, 3.1, 3.2]}], [], [{"one": 4, "two": []}, {"one": 5, "two": [5.0, 5.1]}]])
+    assert awkward1.tolist(array) == [[{"one": 1, "two": [1.0, 1.1]}, {"one": 2, "two": [2.0]}, {"one": 3, "two": [3.0, 3.1, 3.2]}], [], [{"one": 4, "two": []}, {"one": 5, "two": [5.0, 5.1]}]]
+    assert repr(array.type) == "3 * var * {'one': int64, 'two': var * float64}"
+
+    dfloat64 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), D)
+    dvarfloat64 = awkward1.layout.DressedType(awkward1.layout.ListType(dfloat64), D)
+    dint64 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("int64"), D)
+    drec = awkward1.layout.DressedType(awkward1.layout.RecordType(collections.OrderedDict([("one", dint64), ("two", dvarfloat64)])), D)
+    dvarrec = awkward1.layout.DressedType(awkward1.layout.ListType(drec), D)
+
+    # print(dvarrec)
+    # raise Exception

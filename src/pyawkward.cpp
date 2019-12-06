@@ -109,10 +109,10 @@ public:
     return out;
   }
 
-  virtual const std::string typestr(const ak::DressParameters<py::object>& parameters) const {
+  virtual const std::string typestr(std::shared_ptr<ak::Type> baretype, const ak::DressParameters<py::object>& parameters) const {
     if (const PyDressParameters* raw = dynamic_cast<const PyDressParameters*>(&parameters)) {
       if (py::hasattr(pyclass_, "typestr")) {
-        return pyclass_.attr("typestr")(raw->pydict()).cast<std::string>();
+        return pyclass_.attr("typestr")(py::cast(baretype.get()), raw->pydict()).cast<std::string>();
       }
     }
     return std::string();
@@ -985,26 +985,40 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
   );
 }
 
+ak::RecordType tuple2recordtype(py::tuple args) {
+  std::vector<std::shared_ptr<ak::Type>> types;
+  for (auto x : args) {
+    types.push_back(unbox_type(x));
+  }
+  return ak::RecordType(types, std::shared_ptr<ak::RecordType::Lookup>(nullptr), std::shared_ptr<ak::RecordType::ReverseLookup>(nullptr));
+}
+
+ak::RecordType dict2recordtype(py::dict kwargs) {
+  std::shared_ptr<ak::RecordType::Lookup> lookup(new ak::RecordType::Lookup);
+  std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup(new ak::RecordType::ReverseLookup);
+  std::vector<std::shared_ptr<ak::Type>> types;
+  for (auto x : kwargs) {
+    std::string key = x.first.cast<std::string>();
+    (*lookup.get())[key] = types.size();
+    reverselookup.get()->push_back(key);
+    types.push_back(unbox_type(x.second));
+  }
+  return ak::RecordType(types, lookup, reverselookup);
+}
+
 py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_RecordType(py::handle m, std::string name) {
   return type_methods(py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type>(m, name.c_str())
+      .def(py::init([](py::tuple singlearg) -> ak::RecordType {
+        return tuple2recordtype(singlearg);
+      }))
+      .def(py::init([](py::dict singlearg) -> ak::RecordType {
+        return dict2recordtype(singlearg);
+      }))
       .def(py::init([](py::args args) -> ak::RecordType {
-        std::vector<std::shared_ptr<ak::Type>> types;
-        for (auto x : args) {
-          types.push_back(unbox_type(x));
-        }
-        return ak::RecordType(types, std::shared_ptr<ak::RecordType::Lookup>(nullptr), std::shared_ptr<ak::RecordType::ReverseLookup>(nullptr));
+        return tuple2recordtype(args);
       }))
       .def(py::init([](py::kwargs kwargs) -> ak::RecordType {
-        std::shared_ptr<ak::RecordType::Lookup> lookup(new ak::RecordType::Lookup);
-        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup(new ak::RecordType::ReverseLookup);
-        std::vector<std::shared_ptr<ak::Type>> types;
-        for (auto x : kwargs) {
-          std::string key = x.first.cast<std::string>();
-          (*lookup.get())[key] = types.size();
-          reverselookup.get()->push_back(key);
-          types.push_back(unbox_type(x.second));
-        }
-        return ak::RecordType(types, lookup, reverselookup);
+        return dict2recordtype(kwargs);
       }))
       .def("__getitem__", [](ak::RecordType& self, int64_t fieldindex) -> py::object {
         return box(self.field(fieldindex));
