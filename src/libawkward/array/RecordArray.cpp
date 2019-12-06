@@ -128,12 +128,12 @@ namespace awkward {
       RecordType* raw = dynamic_cast<RecordType*>(level.get());
       if (reverselookup_.get() == nullptr) {
         for (int64_t i = 0;  i < numfields();  i++) {
-          contents_[i].get()->settype(raw->field(i));
+          field(i).get()->settype(raw->field(i));
         }
       }
       else {
         for (auto key : raw->keys()) {
-          contents_[fieldindex(key)].get()->settype(raw->field(key));
+          field(key).get()->settype(raw->field(key));
         }
       }
       type_ = type;
