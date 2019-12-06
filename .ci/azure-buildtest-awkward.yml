@@ -69,11 +69,12 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -r requirements-test.txt
           python -c "import numpy; print(numpy.__version__)"
+          python -c "import pytest; print(pytest.__version__)"
         displayName: "Install"
 
       - script: |
           python setup.py build
-          pytest -vv tests
+          python -m pytest -vv tests
         displayName: "Build and test"
 
   - job: MacOS
@@ -119,11 +120,12 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -r requirements-test.txt
           python -c "import numpy; print(numpy.__version__)"
+          python -c "import pytest; print(pytest.__version__)"
         displayName: "Install"
 
       - script: |
           python setup.py build
-          pytest -vv tests
+          python -m pytest -vv tests
         displayName: "Build and test"
 
   - job: Linux
@@ -141,10 +143,6 @@ jobs:
           python.version: "2.7"
           python.architecture: "x64"
           numpy.version: "1.16.5"
-        "py34-np13":
-          python.version: "3.4"
-          python.architecture: "x64"
-          numpy.version: "1.13.1"
         "py35-np13":
           python.version: "3.5"
           python.architecture: "x64"
@@ -182,9 +180,10 @@ jobs:
           fi
           python -m pip install -r requirements-test.txt
           python -c "import numpy; print(numpy.__version__)"
+          python -c "import pytest; print(pytest.__version__)"
         displayName: "Install"
 
       - script: |
           python setup.py build
-          pytest -vv tests
+          python -m pytest -vv tests
         displayName: "Build and test"

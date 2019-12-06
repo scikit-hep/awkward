@@ -4,6 +4,7 @@
 #define AWKWARDCPU_UTIL_H_
 
 #ifdef _MSC_VER
+  #define EXPORT_SYMBOL __declspec(dllexport)
   #ifdef _WIN64
     typedef signed   __int64 ssize_t;
     typedef unsigned __int64 size_t;
@@ -21,6 +22,7 @@
   typedef   signed   __int64 int64_t;
   #define ERROR Error
 #else
+  #define EXPORT_SYMBOL __attribute__((visibility("default")))
   #include <cstddef>
   #include <cstdint>
   #define ERROR struct Error

@@ -15,8 +15,8 @@
 namespace awkward {
   class RegularArray: public Content {
   public:
-    RegularArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Content> content, int64_t size)
-        : id_(id)
+    RegularArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<Content> content, int64_t size)
+        : Content(id, type)
         , content_(content)
         , size_(size) { }
 
@@ -24,12 +24,13 @@ namespace awkward {
     int64_t size() const { return size_; }
 
     virtual const std::string classname() const;
-    virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
-    virtual const std::shared_ptr<Type> type_part() const;
+    virtual const std::shared_ptr<Type> innertype(bool bare) const;
+    virtual void settype_part(const std::shared_ptr<Type> type);
+    virtual bool accepts(const std::shared_ptr<Type> type);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;
@@ -42,6 +43,13 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
+    virtual int64_t numfields() const;
+    virtual int64_t fieldindex(const std::string& key) const;
+    virtual const std::string key(int64_t fieldindex) const;
+    virtual bool haskey(const std::string& key) const;
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const;
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const;
+    virtual const std::vector<std::string> keys() const;
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;
@@ -49,7 +57,6 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const;
 
   private:
-    std::shared_ptr<Identity> id_;
     const std::shared_ptr<Content> content_;
     int64_t size_;
   };

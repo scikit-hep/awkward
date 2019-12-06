@@ -6,6 +6,8 @@
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/ListType.h"
+#include "awkward/type/ArrayType.h"
+#include "awkward/type/UnknownType.h"
 #include "awkward/Slice.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/RegularArray.h"
@@ -160,8 +162,30 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListArrayOf<T>::type_part() const {
-    return std::shared_ptr<Type>(new ListType(content_.get()->type_part()));
+  const std::shared_ptr<Type> ListArrayOf<T>::innertype(bool bare) const {
+    if (bare  ||  content_.get()->isbare()) {
+      return std::shared_ptr<Type>(new ListType(content_.get()->innertype(bare)));
+    }
+    else {
+      return content_.get()->type().get()->nolength();
+    }
+  }
+
+  template <typename T>
+  void ListArrayOf<T>::settype_part(const std::shared_ptr<Type> type) {
+    if (accepts(type)) {
+      content_.get()->settype_part(type.get()->inner());
+      type_ = type;
+    }
+    else {
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
+    }
+  }
+
+  template <typename T>
+  bool ListArrayOf<T>::accepts(const std::shared_ptr<Type> type) {
+    const std::shared_ptr<Type> model(new ListType(std::shared_ptr<Type>(new UnknownType())));
+    return type.get()->level().get()->shallow_equal(model);
   }
 
   template <typename T>
@@ -171,7 +195,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::shallow_copy() const {
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, starts_, stops_, content_));
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, type_, starts_, stops_, content_));
   }
 
   template <typename T>
@@ -244,17 +268,21 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id, starts_.getitem_range_nowrap(start, stop), stops_.getitem_range_nowrap(start, stop), content_));
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id, type_, starts_.getitem_range_nowrap(start, stop), stops_.getitem_range_nowrap(start, stop), content_));
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_field(const std::string& key) const {
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, starts_, stops_, content_.get()->getitem_field(key)));
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, Type::none(), starts_, stops_, content_.get()->getitem_field(key)));
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, starts_, stops_, content_.get()->getitem_fields(keys)));
+    std::shared_ptr<Type> type = Type::none();
+    if (SliceFields(keys).preserves_type(type_, Index64(0))) {
+      type = type_;
+    }
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id_, type, starts_, stops_, content_.get()->getitem_fields(keys)));
   }
 
   template <typename T>
@@ -280,13 +308,48 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }
-    return std::shared_ptr<Content>(new ListArrayOf<T>(id, nextstarts, nextstops, content_));
+    return std::shared_ptr<Content>(new ListArrayOf<T>(id, type_, nextstarts, nextstops, content_));
   }
 
   template <typename T>
   const std::pair<int64_t, int64_t> ListArrayOf<T>::minmax_depth() const {
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);
+  }
+
+  template <typename T>
+  int64_t ListArrayOf<T>::numfields() const {
+    return content_.get()->numfields();
+  }
+
+  template <typename T>
+  int64_t ListArrayOf<T>::fieldindex(const std::string& key) const {
+    return content_.get()->fieldindex(key);
+  }
+
+  template <typename T>
+  const std::string ListArrayOf<T>::key(int64_t fieldindex) const {
+    return content_.get()->key(fieldindex);
+  }
+
+  template <typename T>
+  bool ListArrayOf<T>::haskey(const std::string& key) const {
+    return content_.get()->haskey(key);
+  }
+
+  template <typename T>
+  const std::vector<std::string> ListArrayOf<T>::keyaliases(int64_t fieldindex) const {
+    return content_.get()->keyaliases(fieldindex);
+  }
+
+  template <typename T>
+  const std::vector<std::string> ListArrayOf<T>::keyaliases(const std::string& key) const {
+    return content_.get()->keyaliases(key);
+  }
+
+  template <typename T>
+  const std::vector<std::string> ListArrayOf<T>::keys() const {
+    return content_.get()->keys();
   }
 
   template <typename T>
@@ -359,7 +422,7 @@ namespace awkward {
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
     if (advanced.length() == 0) {
-      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, type_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced)));
     }
     else {
       int64_t total;
@@ -375,7 +438,7 @@ namespace awkward {
         nextoffsets.ptr().get(),
         lenstarts);
       util::handle_error(err2, classname(), id_.get());
-      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
+      return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, type_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced)));
     }
   }
 

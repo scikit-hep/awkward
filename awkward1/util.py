@@ -5,6 +5,18 @@ import re
 
 import numpy
 
+def wrap(content):
+    import awkward1.layout
+    if isinstance(content, (awkward1.layout.Content, awkward1.layout.Record)):
+        if isinstance(content.type.nolength(), awkward1.layout.DressedType):
+            return content.type.nolength().dress(content)
+        elif isinstance(content, awkward1.layout.Record):
+            return awkward1.Record(content)
+        else:
+            return awkward1.Array(content)
+    else:
+        return content
+
 def field2index(lookup, numfields, key):
     if isinstance(key, (int, numbers.Integral, numpy.integer)):
         attempt = key

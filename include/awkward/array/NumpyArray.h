@@ -15,8 +15,8 @@
 namespace awkward {
   class NumpyArray: public Content {
   public:
-    NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<void> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
-        : id_(id)
+    NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<void> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
+        : Content(id, type)
         , ptr_(ptr)
         , shape_(shape)
         , strides_(strides)
@@ -42,12 +42,13 @@ namespace awkward {
 
     virtual bool isscalar() const;
     virtual const std::string classname() const;
-    virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
-    virtual const std::shared_ptr<Type> type_part() const;
+    virtual const std::shared_ptr<Type> innertype(bool bare) const;
+    virtual void settype_part(const std::shared_ptr<Type> type);
+    virtual bool accepts(const std::shared_ptr<Type> type);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;
@@ -62,6 +63,13 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
+    virtual int64_t numfields() const;
+    virtual int64_t fieldindex(const std::string& key) const;
+    virtual const std::string key(int64_t fieldindex) const;
+    virtual bool haskey(const std::string& key) const;
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const;
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const;
+    virtual const std::vector<std::string> keys() const;
 
     bool iscontiguous() const;
     void become_contiguous();
@@ -104,7 +112,6 @@ namespace awkward {
   void tojson_real(ToJson& builder) const;
 
   private:
-    std::shared_ptr<Identity> id_;
     std::shared_ptr<void> ptr_;
     std::vector<ssize_t> shape_;
     std::vector<ssize_t> strides_;

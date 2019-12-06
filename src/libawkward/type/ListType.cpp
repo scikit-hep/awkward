@@ -16,7 +16,11 @@ namespace awkward {
     return std::shared_ptr<Type>(new ListType(type_));
   }
 
-  bool ListType::equal(std::shared_ptr<Type> other) const {
+  bool ListType::shallow_equal(const std::shared_ptr<Type> other) const {
+    return (dynamic_cast<ListType*>(other.get()) != nullptr);
+  }
+
+  bool ListType::equal(const std::shared_ptr<Type> other) const {
     if (ListType* t = dynamic_cast<ListType*>(other.get())) {
       return type().get()->equal(t->type());
     }
@@ -25,19 +29,44 @@ namespace awkward {
     }
   }
 
-  bool ListType::compatible(std::shared_ptr<Type> other, bool bool_is_int, bool int_is_float, bool ignore_null, bool unknown_is_anything) const {
-    if (unknown_is_anything  &&  dynamic_cast<UnknownType*>(other.get())) {
-      return true;
-    }
-    else if (ignore_null  &&  dynamic_cast<OptionType*>(other.get())) {
-      return compatible(dynamic_cast<OptionType*>(other.get())->type(), bool_is_int, int_is_float, ignore_null, unknown_is_anything);
-    }
-    else if (ListType* t = dynamic_cast<ListType*>(other.get())) {
-      return type_.get()->compatible(t->type(), bool_is_int, int_is_float, ignore_null, unknown_is_anything);
-    }
-    else {
-      return false;
-    }
+  std::shared_ptr<Type> ListType::level() const {
+    return shallow_copy();
+  }
+
+  std::shared_ptr<Type> ListType::inner() const {
+    return type_;
+  }
+
+  std::shared_ptr<Type> ListType::inner(const std::string& key) const {
+    throw std::runtime_error("FIXME: ListType::inner(key)");
+  }
+
+  int64_t ListType::numfields() const {
+    return type_.get()->numfields();
+  }
+
+  int64_t ListType::fieldindex(const std::string& key) const {
+    return type_.get()->fieldindex(key);
+  }
+
+  const std::string ListType::key(int64_t fieldindex) const {
+    return type_.get()->key(fieldindex);
+  }
+
+  bool ListType::haskey(const std::string& key) const {
+    return type_.get()->haskey(key);
+  }
+
+  const std::vector<std::string> ListType::keyaliases(int64_t fieldindex) const {
+    return type_.get()->keyaliases(fieldindex);
+  }
+
+  const std::vector<std::string> ListType::keyaliases(const std::string& key) const {
+    return type_.get()->keyaliases(key);
+  }
+
+  const std::vector<std::string> ListType::keys() const {
+    return type_.get()->keys();
   }
 
   const std::shared_ptr<Type> ListType::type() const {

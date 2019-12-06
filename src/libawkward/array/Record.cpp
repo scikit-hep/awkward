@@ -5,6 +5,7 @@
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/RecordType.h"
+#include "awkward/type/ArrayType.h"
 
 #include "awkward/array/Record.h"
 
@@ -25,6 +26,10 @@ namespace awkward {
     else {
       return recid.get()->getitem_range_nowrap(at_, at_ + 1);
     }
+  }
+
+  const std::shared_ptr<Type> Record::type() const {
+    return array_.type().get()->inner();
   }
 
   void Record::setid() {
@@ -61,8 +66,23 @@ namespace awkward {
     builder.endrec();
   }
 
-  const std::shared_ptr<Type> Record::type_part() const {
-    return array_.type_part();
+  const std::shared_ptr<Type> Record::innertype(bool bare) const {
+    return array_.innertype(bare);
+  }
+
+  void Record::settype(const std::shared_ptr<Type> type) {
+    if (dynamic_cast<ArrayType*>(type.get())) {
+      throw std::invalid_argument("provided ArrayType is incompatible with Record because Record is a scalar");
+    }
+    array_.settype_part(type);
+  }
+
+  void Record::settype_part(const std::shared_ptr<Type> type) {
+    array_.settype_part(type);
+  }
+
+  bool Record::accepts(const std::shared_ptr<Type> type) {
+    return array_.accepts(type);
   }
 
   int64_t Record::length() const {
@@ -104,7 +124,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(array_.id(), length(), istuple());
+    std::shared_ptr<Type> type = Type::none();
+    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
+      type = type_;
+    }
+    RecordArray out(array_.id(), type, length(), istuple());
     if (istuple()) {
       for (auto key : keys) {
         out.append(array_.field(key));
@@ -130,39 +154,39 @@ namespace awkward {
     return array_.numfields();
   }
 
-  int64_t Record::index(const std::string& key) const {
-    return array_.index(key);
+  int64_t Record::fieldindex(const std::string& key) const {
+    return array_.fieldindex(key);
   }
 
-  const std::string Record::key(int64_t index) const {
-    return array_.key(index);
+  const std::string Record::key(int64_t fieldindex) const {
+    return array_.key(fieldindex);
   }
 
-  bool Record::has(const std::string& key) const {
-    return array_.has(key);
+  bool Record::haskey(const std::string& key) const {
+    return array_.haskey(key);
   }
 
-  const std::vector<std::string> Record::aliases(int64_t index) const {
-    return array_.aliases(index);
+  const std::vector<std::string> Record::keyaliases(int64_t fieldindex) const {
+    return array_.keyaliases(fieldindex);
   }
 
-  const std::vector<std::string> Record::aliases(const std::string& key) const {
-    return array_.aliases(key);
-  }
-
-  const std::shared_ptr<Content> Record::field(int64_t index) const {
-    return array_.field(index).get()->getitem_at_nowrap(at_);
-  }
-
-  const std::shared_ptr<Content> Record::field(const std::string& key) const {
-    return array_.field(key).get()->getitem_at_nowrap(at_);
+  const std::vector<std::string> Record::keyaliases(const std::string& key) const {
+    return array_.keyaliases(key);
   }
 
   const std::vector<std::string> Record::keys() const {
     return array_.keys();
   }
 
-  const std::vector<std::shared_ptr<Content>> Record::values() const {
+  const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
+    return array_.field(fieldindex).get()->getitem_at_nowrap(at_);
+  }
+
+  const std::shared_ptr<Content> Record::field(const std::string& key) const {
+    return array_.field(key).get()->getitem_at_nowrap(at_);
+  }
+
+  const std::vector<std::shared_ptr<Content>> Record::fields() const {
     std::vector<std::shared_ptr<Content>> out;
     int64_t cols = numfields();
     for (int64_t j = 0;  j < cols;  j++) {
@@ -171,7 +195,7 @@ namespace awkward {
     return out;
   }
 
-  const std::vector<std::pair<std::string, std::shared_ptr<Content>>> Record::items() const {
+  const std::vector<std::pair<std::string, std::shared_ptr<Content>>> Record::fielditems() const {
     std::vector<std::pair<std::string, std::shared_ptr<Content>>> out;
     std::shared_ptr<RecordArray::ReverseLookup> keys = array_.reverselookup();
     if (istuple()) {

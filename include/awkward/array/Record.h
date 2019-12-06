@@ -9,7 +9,8 @@ namespace awkward {
   class Record: public Content {
   public:
     Record(const RecordArray& array, int64_t at)
-        : array_(array)
+        : Content(Identity::none(), Type::none())
+        , array_(array)
         , at_(at) { }
 
     const std::shared_ptr<Content> array() const { return array_.shallow_copy(); }
@@ -32,7 +33,11 @@ namespace awkward {
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
-    virtual const std::shared_ptr<Type> type_part() const;
+    virtual const std::shared_ptr<Type> innertype(bool bare) const;
+    virtual const std::shared_ptr<Type> type() const;
+    virtual void settype(const std::shared_ptr<Type> type);
+    virtual void settype_part(const std::shared_ptr<Type> type);
+    virtual bool accepts(const std::shared_ptr<Type> type);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;
@@ -45,18 +50,18 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
+    virtual int64_t numfields() const;
+    virtual int64_t fieldindex(const std::string& key) const;
+    virtual const std::string key(int64_t fieldindex) const;
+    virtual bool haskey(const std::string& key) const;
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const;
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const;
+    virtual const std::vector<std::string> keys() const;
 
-    int64_t numfields() const;
-    int64_t index(const std::string& key) const;
-    const std::string key(int64_t index) const;
-    bool has(const std::string& key) const;
-    const std::vector<std::string> aliases(int64_t index) const;
-    const std::vector<std::string> aliases(const std::string& key) const;
-    const std::shared_ptr<Content> field(int64_t index) const;
+    const std::shared_ptr<Content> field(int64_t fieldindex) const;
     const std::shared_ptr<Content> field(const std::string& key) const;
-    const std::vector<std::string> keys() const;
-    const std::vector<std::shared_ptr<Content>> values() const;
-    const std::vector<std::pair<std::string, std::shared_ptr<Content>>> items() const;
+    const std::vector<std::shared_ptr<Content>> fields() const;
+    const std::vector<std::pair<std::string, std::shared_ptr<Content>>> fielditems() const;
     const Record astuple() const;
 
   protected:
@@ -67,7 +72,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
 
   private:
-    const RecordArray array_;
+    RecordArray array_;
     int64_t at_;
   };
 }

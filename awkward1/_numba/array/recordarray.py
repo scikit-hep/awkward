@@ -11,7 +11,7 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(val, c):
-    return RecordArrayType([numba.typeof(x) for x in val.values()], val.lookup, val.reverselookup, numba.typeof(val.id))
+    return RecordArrayType([numba.typeof(x) for x in val.fields()], val.lookup, val.reverselookup, numba.typeof(val.id))
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
 def typeof(val, c):
