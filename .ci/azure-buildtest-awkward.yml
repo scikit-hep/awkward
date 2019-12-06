@@ -70,7 +70,6 @@ jobs:
           python -m pip install -r requirements-test.txt
           python -c "import numpy; print(numpy.__version__)"
           python -c "import pytest; print(pytest.__version__)"
-          python -c "import numba; print(numba.__version__)"
         displayName: "Install"
 
       - script: |
@@ -122,7 +121,6 @@ jobs:
           python -m pip install -r requirements-test.txt
           python -c "import numpy; print(numpy.__version__)"
           python -c "import pytest; print(pytest.__version__)"
-          python -c "import numba; print(numba.__version__)"
         displayName: "Install"
 
       - script: |
@@ -183,7 +181,6 @@ jobs:
           python -m pip install -r requirements-test.txt
           python -c "import numpy; print(numpy.__version__)"
           python -c "import pytest; print(pytest.__version__)"
-          python -c "import numba; print(numba.__version__)"
         displayName: "Install"
 
       - script: |
