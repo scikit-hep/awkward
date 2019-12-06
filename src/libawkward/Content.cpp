@@ -26,8 +26,19 @@ namespace awkward {
       }
     }
     else {
-      return type_;
+      return std::shared_ptr<Type>(new ArrayType(type_, length()));
     }
+  }
+
+  void Content::settype(const std::shared_ptr<Type> type) {
+    std::shared_ptr<Type> toset = type;
+    if (ArrayType* raw = dynamic_cast<ArrayType*>(type.get())) {
+      if (raw->length() != length()) {
+        throw std::invalid_argument(std::string("provided ArrayType is incompatible with length of array: ") + std::to_string(raw->length()) + std::string(" versus ") + std::to_string(length()));
+      }
+      toset = raw->type();
+    }
+    settype_part(toset);
   }
 
   bool Content::isbare() const {

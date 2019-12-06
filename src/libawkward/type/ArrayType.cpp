@@ -26,6 +26,10 @@ namespace awkward {
     }
   }
 
+  std::shared_ptr<Type> ArrayType::nolength() const {
+    return type_;
+  }
+
   std::shared_ptr<Type> ArrayType::level() const {
     return shallow_copy();
   }

@@ -14,6 +14,7 @@ namespace awkward {
     virtual const std::shared_ptr<Type> shallow_copy() const;
     virtual bool shallow_equal(const std::shared_ptr<Type> other) const;
     virtual bool equal(const std::shared_ptr<Type> other) const;
+    virtual std::shared_ptr<Type> nolength() const;
     virtual std::shared_ptr<Type> level() const;
     virtual std::shared_ptr<Type> inner() const;
     virtual std::shared_ptr<Type> inner(const std::string& key) const;

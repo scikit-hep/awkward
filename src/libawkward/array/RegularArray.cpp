@@ -7,6 +7,7 @@
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/RegularType.h"
+#include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 
 #include "awkward/array/RegularArray.h"
@@ -105,13 +106,13 @@ namespace awkward {
       return std::shared_ptr<Type>(new RegularType(content_.get()->innertype(bare), size_));
     }
     else {
-      return content_.get()->type();
+      return content_.get()->type().get()->nolength();
     }
   }
 
-  void RegularArray::settype(const std::shared_ptr<Type> type) {
+  void RegularArray::settype_part(const std::shared_ptr<Type> type) {
     if (accepts(type)) {
-      content_.get()->settype(type.get()->inner());
+      content_.get()->settype_part(type.get()->inner());
       type_ = type;
     }
     else {

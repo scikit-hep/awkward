@@ -37,7 +37,7 @@ def test_dress():
     dressed0 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), Dummy, one=1, two=2)
     assert repr(dressed0) in ("dress[float64, 'tests.test_PR028_add_dressed_types.Dummy', one=1, two=2]", "dress[float64, 'tests.test_PR028_add_dressed_types.Dummy', two=2, one=1]")
 
-    pyclass = awkward1.dressing.string.String
+    pyclass = awkward1.dressing.string.Char
     inner = awkward1.layout.PrimitiveType("uint8")
 
     baseline = sys.getrefcount(pyclass)
@@ -49,8 +49,8 @@ def test_dress():
     dressed3 = awkward1.layout.DressedType(inner, pyclass)
     assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 3, 2)
 
-    assert repr(dressed1) == "string"
-    assert repr(dressed3) == "bytes"
+    assert repr(dressed1) == "utf8"
+    assert repr(dressed3) == "char"
     assert dressed1 == dressed2
     assert dressed1 != dressed3
 
@@ -64,20 +64,23 @@ def test_dress():
 
 def test_string1():
     a = awkward1.Array(numpy.array([ord(x) for x in "hey there"], dtype=numpy.uint8))
-    a.__class__ = awkward1.dressing.string.String
+    a.__class__ = awkward1.dressing.string.Char
     assert str(a) == str(b"hey there")
     assert repr(a) == repr(b"hey there")
 
 def test_string2():
-    string = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("uint8"), awkward1.dressing.string.String, encoding="utf-8")
-
     content = awkward1.layout.NumpyArray(numpy.array([ord(x) for x in "heythere"], dtype=numpy.uint8))
-    content.type = string
     listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 8])), content)
-    a = awkward1.util.wrap(listoffsetarray)
+    a = awkward1.Array(listoffsetarray)
 
-    assert repr(a.layout.content.type) == "string"
-    assert repr(a.layout.type) == "3 * string"
+    assert awkward1.tolist(a) == [[104, 101, 121], [], [116, 104, 101, 114, 101]]
+
+    a.layout.type = awkward1.layout.ArrayType(awkward1.string, 3)
+
+    assert repr(a.type) == "3 * string"
+    assert repr(a[0].type) == "3 * utf8"
+    assert repr(a[1].type) == "0 * utf8"
+    assert repr(a[2].type) == "5 * utf8"
 
     if py27:
         assert repr(a) == "<Array [u'hey', u'', u'there'] type='3 * string'>"
@@ -102,12 +105,14 @@ def test_accepts():
         listoffsetarray.type = dressed2
 
 class D(awkward1.highlevel.Array):
-    pass
+    @staticmethod
+    def typestr(baretype, parameters):
+        return "D[{0}]".format(baretype)
 
 def test_type_propagation():
-    array = awkward1.Array([[{"one": 1, "two": [1.0, 1.1]}, {"one": 2, "two": [2.0]}, {"one": 3, "two": [3.0, 3.1, 3.2]}], [], [{"one": 4, "two": []}, {"one": 5, "two": [5.0, 5.1]}]])
-    assert awkward1.tolist(array) == [[{"one": 1, "two": [1.0, 1.1]}, {"one": 2, "two": [2.0]}, {"one": 3, "two": [3.0, 3.1, 3.2]}], [], [{"one": 4, "two": []}, {"one": 5, "two": [5.0, 5.1]}]]
-    assert repr(array.type) == "3 * var * {'one': int64, 'two': var * float64}"
+    array = awkward1.Array([[{"one": 1, "two": [1.0, 1.1]}, {"one": 2, "two": [2.0]}, {"one": 3, "two": [3.0, 3.1, 3.2]}], [], [{"one": 4, "two": []}, {"one": 5, "two": [5.0, 5.1, 5.2, 5.3]}]])
+    assert awkward1.tolist(array) == [[{"one": 1, "two": [1.0, 1.1]}, {"one": 2, "two": [2.0]}, {"one": 3, "two": [3.0, 3.1, 3.2]}], [], [{"one": 4, "two": []}, {"one": 5, "two": [5.0, 5.1, 5.2, 5.3]}]]
+    assert repr(array.type) in ("3 * var * {'one': int64, 'two': var * float64}", "3 * var * {'two': var * float64, 'one': int64}")
 
     dfloat64 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), D)
     dvarfloat64 = awkward1.layout.DressedType(awkward1.layout.ListType(dfloat64), D)
@@ -115,5 +120,33 @@ def test_type_propagation():
     drec = awkward1.layout.DressedType(awkward1.layout.RecordType(collections.OrderedDict([("one", dint64), ("two", dvarfloat64)])), D)
     dvarrec = awkward1.layout.DressedType(awkward1.layout.ListType(drec), D)
 
-    # print(dvarrec)
+    array.layout.type = awkward1.layout.ArrayType(dvarrec, 3)
+    assert array.layout.type == awkward1.layout.ArrayType(dvarrec, 3)
+    assert array.layout.content.type == awkward1.layout.ArrayType(drec, 5)
+    assert array.layout.content.field("one").type == awkward1.layout.ArrayType(dint64, 5)
+    assert array.layout.content.field("two").type == awkward1.layout.ArrayType(dvarfloat64, 5)
+    assert array.layout.content.field("two").content.type == awkward1.layout.ArrayType(dfloat64, 10)
+
+    assert array.layout[-1].type == awkward1.layout.ArrayType(drec, 2)
+    assert array.layout[-1]["one"].type == awkward1.layout.ArrayType(dint64, 2)
+    assert array.layout[-1]["two"].type == awkward1.layout.ArrayType(dvarfloat64, 2)
+    assert array.layout[-1]["two"][1].type == awkward1.layout.ArrayType(dfloat64, 4)
+    assert array.layout[-1, "one"].type == awkward1.layout.ArrayType(dint64, 2)
+    assert array.layout[-1, "two"].type == awkward1.layout.ArrayType(dvarfloat64, 2)
+    assert array.layout[-1, "two", 1].type == awkward1.layout.ArrayType(dfloat64, 4)
+    assert array.layout["one", -1].type == awkward1.layout.ArrayType(dint64, 2)
+    assert array.layout["two", -1].type == awkward1.layout.ArrayType(dvarfloat64, 2)
+    assert array.layout["two", -1, 1].type == awkward1.layout.ArrayType(dfloat64, 4)
+
+    assert array.layout[1:].type == awkward1.layout.ArrayType(dvarrec, 2)
+    assert array.layout[1:, "one"].type == awkward1.layout.ArrayType(dint64, 2)
+    assert array.layout["one", 1:].type == awkward1.layout.ArrayType(dint64, 2)
+
+    assert array.layout[[2, 1]].type == awkward1.layout.ArrayType(dvarrec, 2)
+    assert array.layout[[2, 1], "one"].type == awkward1.layout.ArrayType(dint64, 2)
+
+    array2 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
+    array2.type = awkward1.layout.ArrayType(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3), 2)
+
+    # print(array2.type)
     # raise Exception

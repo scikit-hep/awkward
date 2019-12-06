@@ -6,6 +6,7 @@
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/ListType.h"
+#include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/Slice.h"
 #include "awkward/array/ListArray.h"
@@ -169,14 +170,14 @@ namespace awkward {
       return std::shared_ptr<Type>(new ListType(content_.get()->innertype(bare)));
     }
     else {
-      return content_.get()->type();
+      return content_.get()->type().get()->nolength();
     }
   }
 
   template <typename T>
-  void ListOffsetArrayOf<T>::settype(const std::shared_ptr<Type> type) {
+  void ListOffsetArrayOf<T>::settype_part(const std::shared_ptr<Type> type) {
     if (accepts(type)) {
-      content_.get()->settype(type.get()->inner());
+      content_.get()->settype_part(type.get()->inner());
       type_ = type;
     }
     else {

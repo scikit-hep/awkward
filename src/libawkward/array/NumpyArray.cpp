@@ -327,7 +327,7 @@ namespace awkward {
     }
   }
 
-  void NumpyArray::settype(const std::shared_ptr<Type> type) {
+  void NumpyArray::settype_part(const std::shared_ptr<Type> type) {
     if (accepts(type)) {
       type_ = type;
     }

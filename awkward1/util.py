@@ -7,17 +7,13 @@ import numpy
 
 def wrap(content):
     import awkward1.layout
-    if isinstance(content, awkward1.layout.Content):
-        if isinstance(content.type, awkward1.layout.DressedType):
-            return content.type.dress(content)
+    if isinstance(content, (awkward1.layout.Content, awkward1.layout.Record)):
+        if isinstance(content.type.nolength(), awkward1.layout.DressedType):
+            return content.type.nolength().dress(content)
+        elif isinstance(content, awkward1.layout.Record):
+            return awkward1.Record(content)
         else:
             return awkward1.Array(content)
-
-    elif isinstance(content, awkward1.layout.Record):
-        if isinstance(content.type, awkward1.layout.DressedType):
-            return type.dress(content)
-        else:
-            return awkward1.Record(content)
 
     else:
         return content

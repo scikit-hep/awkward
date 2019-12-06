@@ -221,7 +221,7 @@ namespace awkward {
       }
     }
 
-    virtual void settype(const std::shared_ptr<Type> type) {
+    virtual void settype_part(const std::shared_ptr<Type> type) {
       if (accepts(type)) {
         type_ = type;
       }

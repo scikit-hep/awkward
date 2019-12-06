@@ -846,6 +846,8 @@ template <typename T>
 py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>& x) {
   return x.def("__repr__", &T::tostring)
           .def("__eq__", &T::equal)
+          .def("nolength", &T::nolength)
+          .def("level", &T::level)
           .def("inner", &inner<T>)
           .def("inner", &inner_key<T>)
           .def_property_readonly("numfields", &T::numfields)

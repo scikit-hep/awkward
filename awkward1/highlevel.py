@@ -59,17 +59,12 @@ class Array(object):
     def __str__(self, limit_value=85):
         def forward(x, space, brackets=True):
             done = False
-            if isinstance(x, awkward1.layout.Content) and isinstance(x.type, awkward1.layout.DressedType):
-                y = x.type.dress(x)
-                if y.__repr__ is not Array.__repr__:
-                    yield space + repr(y)
-                    done = True
-            elif isinstance(x, awkward1.layout.Record) and isinstance(x.type, awkward1.layout.DressedType):
-                y = x.type.dress(x)
-                if y.__repr__ is not Record.__repr__:
-                    yield space + repr(y)
-                    done = True
-
+            if isinstance(x, awkward1.layout.Content):
+                if isinstance(x.type.nolength(), awkward1.layout.DressedType):
+                    y = x.type.nolength().dress(x)
+                    if "__repr__" in type(y).__dict__:
+                        yield space + repr(y)
+                        done = True
             if not done:
                 if isinstance(x, awkward1.layout.Content):
                     if brackets:
@@ -98,17 +93,12 @@ class Array(object):
 
         def backward(x, space, brackets=True):
             done = False
-            if isinstance(x, awkward1.layout.Content) and isinstance(x.type, awkward1.layout.DressedType):
-                y = x.type.dress(x)
-                if y.__repr__ is not Array.__repr__:
-                    yield repr(y) + space
-                    done = True
-            elif isinstance(x, awkward1.layout.Record) and isinstance(x.type, awkward1.layout.DressedType):
-                y = x.type.dress(x)
-                if y.__repr__ is not Record.__repr__:
-                    yield repr(y) + space
-                    done = True
-
+            if isinstance(x, awkward1.layout.Content):
+                if isinstance(x.type.nolength(), awkward1.layout.DressedType):
+                    y = x.type.nolength().dress(x)
+                    if "__repr__" in type(y).__dict__:
+                        yield repr(y) + space
+                        done = True
             if not done:
                 if isinstance(x, awkward1.layout.Content):
                     if brackets:
@@ -139,8 +129,8 @@ class Array(object):
                 else:
                     yield repr(x) + space
 
-        def forever(iterator):
-            for token in iterator:
+        def forever(iterable):
+            for token in iterable:
                 yield token
             while True:
                 yield None

@@ -43,7 +43,7 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnknownType());
   }
 
-  void EmptyArray::settype(const std::shared_ptr<Type> type) {
+  void EmptyArray::settype_part(const std::shared_ptr<Type> type) {
     if (accepts(type)) {
       type_ = type;
     }

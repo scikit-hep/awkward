@@ -122,18 +122,18 @@ namespace awkward {
     return std::shared_ptr<Type>(new RecordType(types, lookup_, reverselookup_));
   }
 
-  void RecordArray::settype(const std::shared_ptr<Type> type) {
+  void RecordArray::settype_part(const std::shared_ptr<Type> type) {
     if (accepts(type)) {
       std::shared_ptr<Type> level = type.get()->level();
       RecordType* raw = dynamic_cast<RecordType*>(level.get());
       if (reverselookup_.get() == nullptr) {
         for (int64_t i = 0;  i < numfields();  i++) {
-          field(i).get()->settype(raw->field(i));
+          field(i).get()->settype_part(raw->field(i));
         }
       }
       else {
         for (auto key : raw->keys()) {
-          field(key).get()->settype(raw->field(key));
+          field(key).get()->settype_part(raw->field(key));
         }
       }
       type_ = type;

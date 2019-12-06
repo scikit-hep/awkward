@@ -6,6 +6,7 @@ import awkward1.highlevel
 from awkward1.highlevel import Array
 from awkward1.highlevel import Record
 
+from awkward1.dressing.string import *
 from awkward1.operations.convert import *
 from awkward1.operations.describe import *
 

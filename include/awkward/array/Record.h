@@ -36,6 +36,7 @@ namespace awkward {
     virtual const std::shared_ptr<Type> innertype(bool bare) const;
     virtual const std::shared_ptr<Type> type() const;
     virtual void settype(const std::shared_ptr<Type> type);
+    virtual void settype_part(const std::shared_ptr<Type> type);
     virtual bool accepts(const std::shared_ptr<Type> type);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;

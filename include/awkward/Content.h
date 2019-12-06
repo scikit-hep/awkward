@@ -26,7 +26,8 @@ namespace awkward {
     virtual void tojson_part(ToJson& builder) const = 0;
     virtual const std::shared_ptr<Type> innertype(bool bare) const = 0;
     virtual const std::shared_ptr<Type> type() const;
-    virtual void settype(const std::shared_ptr<Type> type) = 0;
+    virtual void settype(const std::shared_ptr<Type> type);
+    virtual void settype_part(const std::shared_ptr<Type> type) = 0;
     virtual bool accepts(const std::shared_ptr<Type> type) = 0;
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;

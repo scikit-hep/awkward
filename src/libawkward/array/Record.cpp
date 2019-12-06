@@ -5,6 +5,7 @@
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/RecordType.h"
+#include "awkward/type/ArrayType.h"
 
 #include "awkward/array/Record.h"
 
@@ -70,7 +71,14 @@ namespace awkward {
   }
 
   void Record::settype(const std::shared_ptr<Type> type) {
-    array_.settype(type);
+    if (dynamic_cast<ArrayType*>(type.get())) {
+      throw std::invalid_argument("provided ArrayType is incompatible with Record because Record is a scalar");
+    }
+    array_.settype_part(type);
+  }
+
+  void Record::settype_part(const std::shared_ptr<Type> type) {
+    array_.settype_part(type);
   }
 
   bool Record::accepts(const std::shared_ptr<Type> type) {
