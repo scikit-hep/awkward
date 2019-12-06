@@ -38,7 +38,7 @@ def tolist(array):
         return array
 
     elif isinstance(array, awkward1.highlevel.Array):
-        return tolist(array.layout)
+        return [tolist(x) for x in array]
 
     elif isinstance(array, awkward1.Record):
         return tolist(array.layout)

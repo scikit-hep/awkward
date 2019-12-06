@@ -6,7 +6,7 @@ import numpy
 
 import awkward1.highlevel
 
-class Char(awkward1.highlevel.Array):
+class CharBehavior(awkward1.highlevel.Array):
     @staticmethod
     def typestr(baretype, parameters):
         encoding = parameters.get("encoding")
@@ -17,23 +17,28 @@ class Char(awkward1.highlevel.Array):
         else:
             return "encoded[{0}]".format(repr(encoding))
 
-    def __str__(self):
-        out = numpy.asarray(self.layout).tostring()
-        encoding = self.type.parameters.get("encoding")
-        if encoding is None:
-            return str(out)
-        else:
-            return out.decode(encoding)
+    def __bytes__(self):
+        return numpy.asarray(self.layout).tostring()
 
-    def __repr__(self):
-        out = numpy.asarray(self.layout).tostring()
+    def __str__(self):
         encoding = self.type.nolength().parameters.get("encoding")
         if encoding is None:
-            return repr(out)
+            return str(self.__bytes__())
         else:
-            return repr(out.decode(encoding))
+            return self.__bytes__().decode(encoding)
 
-class String(awkward1.highlevel.Array):
+    def __repr__(self):
+        encoding = self.type.nolength().parameters.get("encoding")
+        if encoding is None:
+            return repr(self.__bytes__())
+        else:
+            return repr(self.__bytes__().decode(encoding))
+
+    def __iter__(self):
+        for x in str(self):
+            yield x
+
+class StringBehavior(awkward1.highlevel.Array):
     @staticmethod
     def typestr(baretype, parameters):
         encoding = baretype.inner().parameters.get("encoding")
@@ -44,11 +49,18 @@ class String(awkward1.highlevel.Array):
         else:
             return "string[{0}]".format(repr(encoding))
 
+    def __iter__(self):
+        for x in super(StringBehavior, self).__iter__():
+            if x.type.nolength().parameters.get("encoding") is None:
+                yield x.__bytes__()
+            else:
+                yield x.__str__()
+
     def __eq__(self, other):
         raise NotImplementedError("return one boolean per string, not lists of booleans per character")
 
-char = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("uint8"), Char)
-utf8 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("uint8"), Char, encoding="utf-8")
+char = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("uint8"), CharBehavior)
+utf8 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("uint8"), CharBehavior, encoding="utf-8")
 
-bytestring = awkward1.layout.DressedType(awkward1.layout.ListType(char), String)
-string = awkward1.layout.DressedType(awkward1.layout.ListType(utf8), String)
+bytestring = awkward1.layout.DressedType(awkward1.layout.ListType(char), StringBehavior)
+string = awkward1.layout.DressedType(awkward1.layout.ListType(utf8), StringBehavior)

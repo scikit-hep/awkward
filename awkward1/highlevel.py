@@ -43,6 +43,9 @@ class Array(object):
     def type(self, type):
         if not isinstance(type, awkward1.layout.Type):
             raise TypeError("type must be a subclass of awkward1.layout.Type")
+        t = type.nolength()
+        if isinstance(t, awkward1.layout.DressedType) and isinstance(t.dress, __builtins__["type"]):
+            self.__class__ = t.dress
         self._layout.type = type
 
     @property
@@ -51,10 +54,7 @@ class Array(object):
 
     def __iter__(self):
         for x in self.layout:
-            if isinstance(x, awkward1.layout.Content):
-                yield awkward1.Array(x)
-            else:
-                yield x
+            yield awkward1.util.wrap(x)
 
     def __str__(self, limit_value=85):
         if len(self) == 0:
@@ -197,4 +197,39 @@ class Array(object):
         return awkward1.util.wrap(self.layout[where])
 
 class Record(object):
-    pass
+    def __init__(self, data, type=None, copy=False):
+        # FIXME: more checks here
+        layout = data
+        if not isinstance(layout, awkward1.layout.Record):
+            raise TypeError("could not convert data into an awkward1.Record")
+        if copy:
+            layout = layout.deep_copy()
+        self.layout = layout
+        if type is not None:
+            self.type = type
+
+    @property
+    def layout(self):
+        return self._layout
+
+    @layout.setter
+    def layout(self, layout):
+        if not isinstance(layout, awkward1.layout.Record):
+            raise TypeError("layout must be a subclass of awkward1.layout.Record")
+        self._layout = layout
+
+    @property
+    def type(self):
+        return self._layout.type
+
+    @type.setter
+    def type(self, type):
+        if not isinstance(type, awkward1.layout.Type):
+            raise TypeError("type must be a subclass of awkward1.layout.Type")
+        if isinstance(type, awkward1.layout.DressedType) and isinstance(type.dress, __builtins__["type"]):
+            self.__class__ = t.dress
+        self._layout.type = type
+
+    @property
+    def baretype(self):
+        return self._layout.baretype

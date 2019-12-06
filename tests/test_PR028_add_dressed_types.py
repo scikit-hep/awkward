@@ -8,7 +8,7 @@ import pytest
 import numpy
 
 import awkward1
-import awkward1.dressing.string
+import awkward1.behavior.string
 
 py27 = (sys.version_info[0] < 3)
 
@@ -37,7 +37,7 @@ def test_dress():
     dressed0 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), Dummy, one=1, two=2)
     assert repr(dressed0) in ("dress[float64, 'tests.test_PR028_add_dressed_types.Dummy', one=1, two=2]", "dress[float64, 'tests.test_PR028_add_dressed_types.Dummy', two=2, one=1]")
 
-    pyclass = awkward1.dressing.string.Char
+    pyclass = awkward1.behavior.string.CharBehavior
     inner = awkward1.layout.PrimitiveType("uint8")
 
     baseline = sys.getrefcount(pyclass)
@@ -64,7 +64,7 @@ def test_dress():
 
 def test_string1():
     a = awkward1.Array(numpy.array([ord(x) for x in "hey there"], dtype=numpy.uint8))
-    a.__class__ = awkward1.dressing.string.Char
+    a.__class__ = awkward1.behavior.string.CharBehavior
     assert str(a) == str(b"hey there")
     assert repr(a) == repr(b"hey there")
 
@@ -73,6 +73,8 @@ def test_string2():
     listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 8])), content)
     a = awkward1.Array(listoffsetarray)
 
+    assert isinstance(a, awkward1.Array)
+    assert not isinstance(a, awkward1.behavior.string.StringBehavior)
     assert awkward1.tolist(a) == [[104, 101, 121], [], [116, 104, 101, 114, 101]]
 
     assert repr(a.type) == "3 * var * uint8"
@@ -86,7 +88,11 @@ def test_string2():
     assert repr(a[1]) == "<Array [] type='0 * uint8'>"
     assert repr(a[2]) == "<Array [116, 104, 101, 114, 101] type='5 * uint8'>"
 
-    a.layout.type = awkward1.layout.ArrayType(awkward1.string, 3)
+    a.type = awkward1.layout.ArrayType(awkward1.string, 3)
+
+    assert isinstance(a, awkward1.Array)
+    assert isinstance(a, awkward1.behavior.string.StringBehavior)
+    assert awkward1.tolist(a) == ['hey', '', 'there']
 
     assert repr(a.type) == "3 * string"
     assert repr(a[0].type) == "3 * utf8"

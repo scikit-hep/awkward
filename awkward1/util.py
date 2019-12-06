@@ -14,7 +14,6 @@ def wrap(content):
             return awkward1.Record(content)
         else:
             return awkward1.Array(content)
-
     else:
         return content
 
