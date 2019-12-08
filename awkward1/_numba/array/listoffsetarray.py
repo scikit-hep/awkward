@@ -17,7 +17,7 @@ def typeof(val, c):
 
 class ListOffsetArrayType(content.ContentType):
     def __init__(self, offsetstpe, contenttpe, idtpe):
-        super(ListOffsetArrayType, self).__init__(name="ListOffsetArray{}{}Type({}, id={})".format("" if offsetstpe.dtype.signed else "U", offsetstpe.dtype.bitwidth, contenttpe.name, idtpe.name))
+        super(ListOffsetArrayType, self).__init__(name="ak::ListOffsetArray{}{}Type({}, id={})".format("" if offsetstpe.dtype.signed else "U", offsetstpe.dtype.bitwidth, contenttpe.name, idtpe.name))
         self.offsetstpe = offsetstpe
         self.contenttpe = contenttpe
         self.idtpe = idtpe

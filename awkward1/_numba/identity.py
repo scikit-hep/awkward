@@ -22,7 +22,7 @@ class IdentityType(numba.types.Type):
         return self.arraytpe.dtype.bitwidth
 
     def __init__(self, arraytpe):
-        super(IdentityType, self).__init__(name="Identity{0}Type".format(arraytpe.dtype.bitwidth))
+        super(IdentityType, self).__init__(name="ak::Identity{0}Type".format(arraytpe.dtype.bitwidth))
         self.arraytpe = arraytpe
 
 @numba.extending.register_model(IdentityType)

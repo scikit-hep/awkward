@@ -14,7 +14,7 @@ def typeof(val, c):
 
 class EmptyArrayType(content.ContentType):
     def __init__(self, idtpe):
-        super(EmptyArrayType, self).__init__(name="EmptyArrayType(id={})".format(idtpe.name))
+        super(EmptyArrayType, self).__init__(name="ak::EmptyArrayType(id={})".format(idtpe.name))
         self.idtpe = idtpe
 
     @property

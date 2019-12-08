@@ -266,4 +266,4 @@ def test_array():
 
     with pytest.raises(ValueError) as excinfo:
         f1(array)
-    assert str(excinfo.value) == "in RegularArray, indexing error"
+    assert str(excinfo.value) == "in ak::RegularArray, indexing error"

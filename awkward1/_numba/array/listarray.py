@@ -19,7 +19,7 @@ def typeof(val, c):
 class ListArrayType(content.ContentType):
     def __init__(self, startstpe, stopstpe, contenttpe, idtpe):
         assert startstpe == stopstpe
-        super(ListArrayType, self).__init__(name="ListArray{}{}Type({}, id={})".format("" if startstpe.dtype.signed else "U", startstpe.dtype.bitwidth, contenttpe.name, idtpe.name))
+        super(ListArrayType, self).__init__(name="ak::ListArray{}{}Type({}, id={})".format("" if startstpe.dtype.signed else "U", startstpe.dtype.bitwidth, contenttpe.name, idtpe.name))
         self.startstpe = startstpe
         self.contenttpe = contenttpe
         self.idtpe = idtpe

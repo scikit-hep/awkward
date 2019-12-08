@@ -15,7 +15,7 @@ def typeof(val, c):
 
 class RegularArrayType(content.ContentType):
     def __init__(self, contenttpe, idtpe):
-        super(RegularArrayType, self).__init__(name="RegularArrayType({}, id={})".format(contenttpe.name, idtpe.name))
+        super(RegularArrayType, self).__init__(name="ak::RegularArrayType({}, id={})".format(contenttpe.name, idtpe.name))
         self.contenttpe = contenttpe
         self.idtpe = idtpe
 

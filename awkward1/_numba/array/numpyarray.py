@@ -16,7 +16,7 @@ def typeof(val, c):
 
 class NumpyArrayType(content.ContentType):
     def __init__(self, arraytpe, idtpe):
-        super(NumpyArrayType, self).__init__(name="NumpyArrayType({0}, id={1})".format(arraytpe.name, idtpe.name))
+        super(NumpyArrayType, self).__init__(name="ak::NumpyArrayType({0}, id={1})".format(arraytpe.name, idtpe.name))
         self.arraytpe = arraytpe
         self.idtpe = idtpe
 

@@ -19,7 +19,7 @@ def typeof(val, c):
 
 class RecordArrayType(content.ContentType):
     def __init__(self, contenttpes, lookup, reverselookup, idtpe):
-        super(RecordArrayType, self).__init__(name="RecordArrayType([{}], {}, {}, id={})".format(", ".join(x.name for x in contenttpes), lookup, reverselookup, idtpe.name))
+        super(RecordArrayType, self).__init__(name="ak::RecordArrayType([{}], {}, {}, id={})".format(", ".join(x.name for x in contenttpes), lookup, reverselookup, idtpe.name))
         self.contenttpes = contenttpes
         self.lookup = lookup
         self.reverselookup = reverselookup
