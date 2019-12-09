@@ -11,13 +11,14 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RegularArray)
 def typeof(val, c):
-    return RegularArrayType(numba.typeof(val.content), numba.typeof(val.id))
+    return RegularArrayType(numba.typeof(val.content), numba.typeof(val.id), numba.typeof(val.type))
 
 class RegularArrayType(content.ContentType):
-    def __init__(self, contenttpe, idtpe):
-        super(RegularArrayType, self).__init__(name="ak::RegularArrayType({}, id={})".format(contenttpe.name, idtpe.name))
+    def __init__(self, contenttpe, idtpe, typetpe):
+        super(RegularArrayType, self).__init__(name="ak::RegularArrayType({0}, id={1}, type={2})".format(contenttpe.name, idtpe.name, typetpe.name))
         self.contenttpe = contenttpe
         self.idtpe = idtpe
+        self.typetpe = typetpe
 
     @property
     def ndim(self):
@@ -30,10 +31,10 @@ class RegularArrayType(content.ContentType):
         return self
 
     def getitem_str(self, key):
-        return RegularArrayType(self.contenttpe.getitem_str(key), self.idtpe)
+        return RegularArrayType(self.contenttpe.getitem_str(key), self.idtpe, numba.none)   # FIXME: Type::none()
 
     def getitem_tuple(self, wheretpe):
-        nexttpe = RegularArrayType(self, numba.none)
+        nexttpe = RegularArrayType(self, numba.none, numba.none)   # FIXME: Type::none()
         out = nexttpe.getitem_next(wheretpe, False)
         return out.getitem_int()
 
@@ -48,7 +49,7 @@ class RegularArrayType(content.ContentType):
 
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
-            return RegularArrayType(contenttpe, self.idtpe)
+            return RegularArrayType(contenttpe, self.idtpe, numba.none)   # FIXME: Type::none()
 
         elif isinstance(headtpe, numba.types.StringLiteral):
             return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
@@ -64,7 +65,7 @@ class RegularArrayType(content.ContentType):
                 raise NotImplementedError("array.ndim != 1")
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
             if not isadvanced:
-                return RegularArrayType(contenttpe, self.idtpe)
+                return RegularArrayType(contenttpe, self.idtpe, numba.none)   # FIXME: Type::none()
             else:
                 return contenttpe
 
@@ -72,7 +73,7 @@ class RegularArrayType(content.ContentType):
             raise AssertionError(headtpe)
 
     def carry(self):
-        return RegularArrayType(self.contenttpe.carry(), self.idtpe)
+        return RegularArrayType(self.contenttpe.carry(), self.idtpe, numba.none)   # FIXME: Type::none()
 
     @property
     def lower_len(self):
@@ -249,7 +250,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              util.cast(context, builder, headtpe, numba.int64, headval),
              leng,
              proxyin.size),
-            "in {}, indexing error".format(arraytpe.shortname))
+            "in {0}, indexing error".format(arraytpe.shortname))
         nextcontenttpe = arraytpe.contenttpe.carry()
         nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
         return nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
@@ -268,7 +269,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              leng,
              proxyin.size,
              nextsize),
-            "in {}, indexing error".format(arraytpe.shortname))
+            "in {0}, indexing error".format(arraytpe.shortname))
 
         nextcontenttpe = arraytpe.contenttpe.carry()
         nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
@@ -284,12 +285,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
                  util.arrayptr(context, builder, util.index64tpe, advanced),
                  leng,
                  nextsize),
-                "in {}, indexing error".format(arraytpe.shortname))
+                "in {0}, indexing error".format(arraytpe.shortname))
 
             outcontenttpe = nextcontenttpe.getitem_next(tailtpe, True)
             outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, nextadvanced)
 
-        outtpe = RegularArrayType(outcontenttpe, arraytpe.idtpe)
+        outtpe = RegularArrayType(outcontenttpe, arraytpe.idtpe, numba.none)   # FIXME: Type::none()
         proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
         proxyout.content = outcontentval
         proxyout.size = nextsize
@@ -321,7 +322,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              util.arrayptr(context, builder, util.index64tpe, flathead),
              lenflathead,
              proxyin.size),
-            "in {}, indexing error".format(arraytpe.shortname))
+            "in {0}, indexing error".format(arraytpe.shortname))
 
         if advanced is None:
             lencarry = builder.mul(leng, lenflathead)
@@ -335,7 +336,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
                  leng,
                  lenflathead,
                  proxyin.size),
-                "in {}, indexing error".format(arraytpe.shortname))
+                "in {0}, indexing error".format(arraytpe.shortname))
 
             nexttpe = arraytpe.contenttpe.carry()
             nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
@@ -343,7 +344,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             contenttpe = nexttpe.getitem_next(tailtpe, True)
             contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-            outtpe = RegularArrayType(contenttpe, arraytpe.idtpe)
+            outtpe = RegularArrayType(contenttpe, arraytpe.idtpe, numba.none)   # FIXME: Type::none()
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.content = contentval
             proxyout.size = lenflathead
@@ -363,7 +364,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
                  leng,
                  lenflathead,
                  proxyin.size),
-                "in {}, indexing error".format(arraytpe.shortname))
+                "in {0}, indexing error".format(arraytpe.shortname))
 
             nexttpe = arraytpe.contenttpe.carry()
             nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
@@ -386,7 +387,7 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
          util.arrayptr(context, builder, carrytpe, carryval),
          lencarry,
          proxyin.size),
-        "in {}, indexing error".format(arraytpe.shortname))
+        "in {0}, indexing error".format(arraytpe.shortname))
     nextcontent = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
 
     rettpe = arraytpe.carry()

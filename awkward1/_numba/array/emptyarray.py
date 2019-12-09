@@ -10,12 +10,13 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.EmptyArray)
 def typeof(val, c):
-    return EmptyArrayType(numba.typeof(val.id))
+    return EmptyArrayType(numba.typeof(val.id), numba.typeof(val.type))
 
 class EmptyArrayType(content.ContentType):
-    def __init__(self, idtpe):
-        super(EmptyArrayType, self).__init__(name="ak::EmptyArrayType(id={})".format(idtpe.name))
+    def __init__(self, idtpe, typetpe):
+        super(EmptyArrayType, self).__init__(name="ak::EmptyArrayType(id={0}, type={1})".format(idtpe.name, typetpe.name))
         self.idtpe = idtpe
+        self.typetpe = typetpe
 
     @property
     def ndim(self):

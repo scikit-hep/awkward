@@ -7,7 +7,7 @@ from .._numba import util
 
 class AwkwardType(numba.types.Type):
     def __init__(self, awkwardtype):
-        super(AwkwardType, self).__init__(name="ak::Type({})".format(repr(str(awkwardtype))))
+        super(AwkwardType, self).__init__(name="ak::Type({0})".format(repr(str(awkwardtype))))
         self.awkwardtype = awkwardtype
 
 @numba.extending.typeof_impl.register(awkward1.layout.Type)

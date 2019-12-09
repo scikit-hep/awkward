@@ -14,15 +14,16 @@ from ..._numba import cpu, util, content
 @numba.extending.typeof_impl.register(awkward1.layout.ListArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListArray64)
 def typeof(val, c):
-    return ListArrayType(numba.typeof(numpy.asarray(val.starts)), numba.typeof(numpy.asarray(val.stops)), numba.typeof(val.content), numba.typeof(val.id))
+    return ListArrayType(numba.typeof(numpy.asarray(val.starts)), numba.typeof(numpy.asarray(val.stops)), numba.typeof(val.content), numba.typeof(val.id), numba.typeof(val.type))
 
 class ListArrayType(content.ContentType):
-    def __init__(self, startstpe, stopstpe, contenttpe, idtpe):
+    def __init__(self, startstpe, stopstpe, contenttpe, idtpe, typetpe):
         assert startstpe == stopstpe
-        super(ListArrayType, self).__init__(name="ak::ListArray{}{}Type({}, id={})".format("" if startstpe.dtype.signed else "U", startstpe.dtype.bitwidth, contenttpe.name, idtpe.name))
+        super(ListArrayType, self).__init__(name="ak::ListArray{0}{1}Type({2}, id={3}, type={4})".format("" if startstpe.dtype.signed else "U", startstpe.dtype.bitwidth, contenttpe.name, idtpe.name, typetpe.name))
         self.startstpe = startstpe
         self.contenttpe = contenttpe
         self.idtpe = idtpe
+        self.typetpe = typetpe
 
     @property
     def stopstpe(self):
@@ -47,10 +48,10 @@ class ListArrayType(content.ContentType):
         return self
 
     def getitem_str(self, key):
-        return ListArrayType(self.startstpe, self.stopstpe, self.contenttpe.getitem_str(key), self.idtpe)
+        return ListArrayType(self.startstpe, self.stopstpe, self.contenttpe.getitem_str(key), self.idtpe, numba.none)   # FIXME: Type::none()
 
     def getitem_tuple(self, wheretpe):
-        nexttpe = ListArrayType(util.index64tpe, util.index64tpe, self, numba.none)
+        nexttpe = ListArrayType(util.index64tpe, util.index64tpe, self, numba.none, numba.none)   # FIXME: Type::none()
         outtpe = nexttpe.getitem_next(wheretpe, False)
         return outtpe.getitem_int()
 
@@ -66,7 +67,7 @@ class ListArrayType(content.ContentType):
 
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
-            return awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.idtpe)
+            return awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.idtpe, numba.none)   # FIXME: Type::none()
 
         elif isinstance(headtpe, numba.types.StringLiteral):
             return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
@@ -82,7 +83,7 @@ class ListArrayType(content.ContentType):
                 raise NotImplementedError("array.ndim != 1")
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
             if not isadvanced:
-                return awkward1._numba.array.regulararray.RegularArrayType(contenttpe, self.idtpe)
+                return awkward1._numba.array.regulararray.RegularArrayType(contenttpe, self.idtpe, numba.none)   # FIXME: Type::none()
             else:
                 return contenttpe
 
@@ -167,7 +168,7 @@ def box(tpe, val, c):
         Index_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.IndexU32))
         ListArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ListArrayU32))
     else:
-        raise AssertionError("unrecognized index type: {}".format(tpe.indexname))
+        raise AssertionError("unrecognized index type: {0}".format(tpe.indexname))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     startsarray_obj = c.pyapi.from_native_value(tpe.startstpe, proxyin.starts, c.env_manager)
     stopsarray_obj = c.pyapi.from_native_value(tpe.stopstpe, proxyin.stops, c.env_manager)
@@ -293,7 +294,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         elif arraytpe.indexname == "U32":
             kernel = cpu.kernels.awkward_listarrayU32_getitem_next_at_64
         else:
-            raise AssertionError("unrecognized index type: {}".format(arraytpe.indexname))
+            raise AssertionError("unrecognized index type: {0}".format(arraytpe.indexname))
 
         nextcarry = util.newindex64(context, builder, numba.int64, lenstarts)
         util.call(context, builder, kernel,
@@ -304,7 +305,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              context.get_constant(numba.int64, 0),
              context.get_constant(numba.int64, 0),
              util.cast(context, builder, headtpe, numba.int64, headval)),
-            "in {}, indexing error".format(arraytpe.shortname))
+            "in {0}, indexing error".format(arraytpe.shortname))
         nextcontenttpe = arraytpe.contenttpe.carry()
         nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
         return nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, advanced)
@@ -328,7 +329,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             determine_total = cpu.kernels.awkward_listarrayU32_getitem_next_range_counts_64
             fill_nextadvanced = cpu.kernels.awkward_listarrayU32_getitem_next_range_spreadadvanced_64
         else:
-            raise AssertionError("unrecognized index type: {}".format(arraytpe.indexname))
+            raise AssertionError("unrecognized index type: {0}".format(arraytpe.indexname))
 
         carrylength = numba.cgutils.alloca_once(builder, context.get_value_type(numba.int64))
         util.call(context, builder, determine_carrylength,
@@ -341,7 +342,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              util.cast(context, builder, numba.intp, numba.int64, proxyslicein.start),
              util.cast(context, builder, numba.intp, numba.int64, proxyslicein.stop),
              util.cast(context, builder, numba.intp, numba.int64, proxyslicein.step)),
-            "in {}, indexing error".format(arraytpe.shortname))
+            "in {0}, indexing error".format(arraytpe.shortname))
 
         nextoffsets = util.newindex(arraytpe.indexname, context, builder, numba.int64, builder.add(lenstarts, context.get_constant(numba.int64, 1)))
         nextcarry = util.newindex64(context, builder, numba.int64, builder.load(carrylength))
@@ -356,7 +357,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
              util.cast(context, builder, numba.intp, numba.int64, proxyslicein.start),
              util.cast(context, builder, numba.intp, numba.int64, proxyslicein.stop),
              util.cast(context, builder, numba.intp, numba.int64, proxyslicein.step)),
-            "in {}, indexing error".format(arraytpe.shortname))
+            "in {0}, indexing error".format(arraytpe.shortname))
 
         nextcontenttpe = arraytpe.contenttpe.carry()
         nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
@@ -371,7 +372,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
                 (total,
                  util.arrayptr(context, builder, util.indextpe(arraytpe.indexname), nextoffsets),
                  lenstarts),
-                "in {}, indexing error".format(arraytpe.shortname))
+                "in {0}, indexing error".format(arraytpe.shortname))
 
             nextadvanced = util.newindex64(context, builder, numba.int64, builder.load(total))
             util.call(context, builder, fill_nextadvanced,
@@ -379,12 +380,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
                  util.arrayptr(context, builder, util.index64tpe, advanced),
                  util.arrayptr(context, builder, util.indextpe(arraytpe.indexname), nextoffsets),
                  lenstarts),
-                "in {}, indexing error".format(arraytpe.shortname))
+                "in {0}, indexing error".format(arraytpe.shortname))
 
             outcontenttpe = nextcontenttpe.getitem_next(tailtpe, True)
             outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, nextadvanced)
 
-        outtpe = awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.indexname), outcontenttpe, arraytpe.idtpe)
+        outtpe = awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.indexname), outcontenttpe, arraytpe.idtpe, numba.none)   # FIXME: Type::none()
         proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
         proxyout.offsets = nextoffsets
         proxyout.content = outcontentval
@@ -418,7 +419,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             elif arraytpe.indexname == "U32":
                 kernel = cpu.kernels.awkward_listarrayU32_getitem_next_array_64
             else:
-                raise AssertionError("unrecognized index type: {}".format(arraytpe.indexname))
+                raise AssertionError("unrecognized index type: {0}".format(arraytpe.indexname))
 
             lencarry = builder.mul(lenstarts, lenflathead)
             lenoffsets = builder.add(lenstarts, context.get_constant(numba.int64, 1))
@@ -436,7 +437,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
                  lenstarts,
                  lenflathead,
                  lencontent),
-                "in {}, indexing error".format(arraytpe.shortname))
+                "in {0}, indexing error".format(arraytpe.shortname))
 
             nexttpe = arraytpe.contenttpe.carry()
             nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
@@ -444,7 +445,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             contenttpe = nexttpe.getitem_next(tailtpe, True)
             contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-            outtpe = awkward1._numba.array.regulararray.RegularArrayType(contenttpe, arraytpe.idtpe)
+            outtpe = awkward1._numba.array.regulararray.RegularArrayType(contenttpe, arraytpe.idtpe, numba.none)   # FIXME: Type::none()
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.content = contentval
             proxyout.size = lenflathead
@@ -460,7 +461,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             elif arraytpe.indexname == "U32":
                 kernel = cpu.kernels.awkward_listarrayU32_getitem_next_array_advanced_64
             else:
-                raise AssertionError("unrecognized index type: {}".format(arraytpe.indexname))
+                raise AssertionError("unrecognized index type: {0}".format(arraytpe.indexname))
 
             nextcarry = util.newindex64(context, builder, numba.int64, lenstarts)
             nextadvanced = util.newindex64(context, builder, numba.int64, lenstarts)
@@ -476,7 +477,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
                  lenstarts,
                  lenflathead,
                  lencontent),
-                "in {}, indexing error".format(arraytpe.shortname))
+                "in {0}, indexing error".format(arraytpe.shortname))
 
             nexttpe = arraytpe.contenttpe.carry()
             nextval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)

@@ -11,19 +11,20 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(val, c):
-    return RecordArrayType([numba.typeof(x) for x in val.fields()], val.lookup, val.reverselookup, numba.typeof(val.id))
+    return RecordArrayType([numba.typeof(x) for x in val.fields()], val.lookup, val.reverselookup, numba.typeof(val.id), numba.typeof(val.type))
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
 def typeof(val, c):
     return RecordType(numba.typeof(val.array))
 
 class RecordArrayType(content.ContentType):
-    def __init__(self, contenttpes, lookup, reverselookup, idtpe):
-        super(RecordArrayType, self).__init__(name="ak::RecordArrayType([{}], {}, {}, id={})".format(", ".join(x.name for x in contenttpes), lookup, reverselookup, idtpe.name))
+    def __init__(self, contenttpes, lookup, reverselookup, idtpe, typetpe):
+        super(RecordArrayType, self).__init__(name="ak::RecordArrayType([{0}], {1}, {2}, id={3}, type={4})".format(", ".join(x.name for x in contenttpes), lookup, reverselookup, idtpe.name, typetpe.name))
         self.contenttpes = contenttpes
         self.lookup = lookup
         self.reverselookup = reverselookup
         self.idtpe = idtpe
+        self.typetpe = typetpe
 
     @property
     def istuple(self):
@@ -48,7 +49,7 @@ class RecordArrayType(content.ContentType):
 
     def getitem_tuple(self, wheretpe):
         import awkward1._numba.array.regulararray
-        nexttpe = awkward1._numba.array.regulararray.RegularArrayType(self, numba.none)
+        nexttpe = awkward1._numba.array.regulararray.RegularArrayType(self, numba.none, numba.none)   # FIXME: Type::none()
         out = nexttpe.getitem_next(wheretpe, False)
         return out.getitem_int()
 
@@ -66,12 +67,12 @@ class RecordArrayType(content.ContentType):
             contenttpes = []
             for t in self.contenttpes:
                 contenttpes.append(t.getitem_next(numba.types.Tuple((headtpe,)), isadvanced))
-            nexttpe = RecordArrayType(contenttpes, self.lookup, self.reverselookup, numba.none)
+            nexttpe = RecordArrayType(contenttpes, self.lookup, self.reverselookup, numba.none, numba.none)   # FIXME: Type::none()
 
         return nexttpe.getitem_next(tailtpe, isadvanced)
 
     def carry(self):
-        return RecordArrayType([x.carry() for x in self.contenttpes], self.lookup, self.reverselookup, self.idtpe)
+        return RecordArrayType([x.carry() for x in self.contenttpes], self.lookup, self.reverselookup, self.idtpe, numba.none)   # FIXME: Type::none()
 
     @property
     def lower_len(self):
@@ -104,7 +105,7 @@ class RecordArrayType(content.ContentType):
 class RecordType(numba.types.Type):
     def __init__(self, arraytpe):
         self.arraytpe = arraytpe
-        super(RecordType, self).__init__("Record({})".format(self.arraytpe.name))
+        super(RecordType, self).__init__("Record({0})".format(self.arraytpe.name))
         assert isinstance(arraytpe, RecordArrayType)
 
     @property
@@ -353,7 +354,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         nextval = getattr(proxyin, field(index))
 
     else:
-        nexttpe = RecordArrayType([t.getitem_next(numba.types.Tuple((headtpe,)), advanced is not None) for t in arraytpe.contenttpes], arraytpe.lookup, arraytpe.reverselookup, numba.none)
+        nexttpe = RecordArrayType([t.getitem_next(numba.types.Tuple((headtpe,)), advanced is not None) for t in arraytpe.contenttpes], arraytpe.lookup, arraytpe.reverselookup, numba.none, numba.none)   # FIXME: Type::none()
         proxyout = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
         proxyout.length = proxyin.length
         wrappedheadtpe = numba.types.Tuple((headtpe,))
