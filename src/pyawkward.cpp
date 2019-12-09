@@ -877,6 +877,12 @@ py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type> make_Dressed
       .def_property_readonly("parameters", [](PyDressedType& self) -> py::dict {
         return self.parameters().pydict();
       })
+      .def(py::pickle([](const PyDressedType& self) {
+        return py::make_tuple(self.type(), self.dress().pyclass(), self.parameters().pydict());
+      }, [](py::tuple state) {
+        return PyDressedType(unbox_type(state[0]), PyDress(state[1]), PyDressParameters(state[2]));
+      }))
+
   );
 }
 
