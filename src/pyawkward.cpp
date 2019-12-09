@@ -777,8 +777,8 @@ void fillable_fill(ak::FillableArray& self, py::handle obj) {
     self.endrecord();
   }
   // FIXME: strings
-  else if (py::isinstance<py::sequence>(obj)) {
-    py::sequence seq = obj.cast<py::sequence>();
+  else if (py::isinstance<py::iterable>(obj)) {
+    py::iterable seq = obj.cast<py::iterable>();
     self.beginlist();
     for (auto x : seq) {
       fillable_fill(self, x);
@@ -1008,6 +1008,70 @@ ak::RecordType dict2recordtype(py::dict kwargs) {
   return ak::RecordType(types, lookup, reverselookup);
 }
 
+template <typename T>
+py::object lookup(const T& self) {
+  std::shared_ptr<ak::RecordArray::Lookup> lookup = self.lookup();
+  if (lookup.get() == nullptr) {
+    return py::none();
+  }
+  else {
+    py::dict out;
+    for (auto pair : *lookup.get()) {
+      std::string cppkey = pair.first;
+      py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(), cppkey.length(), "surrogateescape"));
+      out[pykey] = py::cast(pair.second);
+    }
+    return out;
+  }
+}
+
+template <typename T>
+py::object reverselookup(const T& self) {
+  std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup = self.reverselookup();
+  if (reverselookup.get() == nullptr) {
+    return py::none();
+  }
+  else {
+    py::list out;
+    for (auto item : *reverselookup.get()) {
+      std::string cppkey = item;
+      py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(), cppkey.length(), "surrogateescape"));
+      out.append(pykey);
+    }
+    return out;
+  }
+}
+
+template <typename L, typename R>
+void from_lookup(std::shared_ptr<L> lookup, std::shared_ptr<R> reverselookup, py::dict pylookup, py::object pyreverselookup, int64_t numfields) {
+  for (auto x : pylookup) {
+    std::string key = x.first.cast<std::string>();
+    (*lookup)[key] = x.second.cast<int64_t>();
+  }
+  if (pyreverselookup.is(py::none())) {
+    for (int64_t i = 0;  i < numfields;  i++) {
+      reverselookup.get()->push_back(std::to_string(i));
+    }
+    for (auto x : *lookup.get()) {
+      if (x.second > (int64_t)numfields) {
+        throw std::invalid_argument(std::string("lookup[") + ak::util::quote(x.first, true) + std::string("] is ") + std::to_string(x.second) + std::string(" but there are only ") + std::to_string(numfields) + std::string(" fields"));
+      }
+      (*reverselookup)[x.second] = x.first;
+    }
+  }
+  else {
+    if (!py::isinstance<py::iterable>(pyreverselookup)) {
+      throw std::invalid_argument("reverselookup must be iterable");
+    }
+    for (auto x : pyreverselookup.cast<py::iterable>()) {
+      if (!py::isinstance<py::str>(x)) {
+        throw std::invalid_argument("elements of reverselookup must all be strings");
+      }
+      reverselookup.get()->push_back(x.cast<std::string>());
+    }
+  }
+}
+
 py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_RecordType(py::handle m, std::string name) {
   return type_methods(py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type>(m, name.c_str())
       .def(py::init([](py::tuple singlearg) -> ak::RecordType {
@@ -1022,6 +1086,16 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
       .def(py::init([](py::kwargs kwargs) -> ak::RecordType {
         return dict2recordtype(kwargs);
       }))
+      .def_static("from_lookup", [](py::iterable types, py::dict pylookup, py::object pyreverselookup) -> ak::RecordType {
+        std::vector<std::shared_ptr<ak::Type>> out;
+        for (auto x : types) {
+          out.push_back(unbox_type(x));
+        }
+        std::shared_ptr<ak::RecordType::Lookup> lookup(new ak::RecordType::Lookup);
+        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup(new ak::RecordType::ReverseLookup);
+        from_lookup<ak::RecordType::Lookup, ak::RecordType::ReverseLookup>(lookup, reverselookup, pylookup, pyreverselookup, (int64_t)out.size());
+        return ak::RecordType(out, lookup, reverselookup);
+      }, py::arg("types"), py::arg("lookup"), py::arg("reverselookup") = py::none())
       .def("__getitem__", [](ak::RecordType& self, int64_t fieldindex) -> py::object {
         return box(self.field(fieldindex));
       })
@@ -1053,7 +1127,9 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         }
         return out;
       })
-      .def_property_readonly("parameters", &emptydict<ak::UnionType>)
+      .def_property_readonly("lookup", &lookup<ak::RecordType>)
+      .def_property_readonly("reverselookup", &reverselookup<ak::RecordType>)
+      .def_property_readonly("parameters", &emptydict<ak::RecordType>)
   );
 }
 
@@ -1244,40 +1320,6 @@ py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> mak
 
 /////////////////////////////////////////////////////////////// RecordArray
 
-template <typename T>
-py::object lookup(const T& self) {
-  std::shared_ptr<ak::RecordArray::Lookup> lookup = self.lookup();
-  if (lookup.get() == nullptr) {
-    return py::none();
-  }
-  else {
-    py::dict out;
-    for (auto pair : *lookup.get()) {
-      std::string cppkey = pair.first;
-      py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(), cppkey.length(), "surrogateescape"));
-      out[pykey] = py::cast(pair.second);
-    }
-    return out;
-  }
-}
-
-template <typename T>
-py::object reverselookup(const T& self) {
-  std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup = self.reverselookup();
-  if (reverselookup.get() == nullptr) {
-    return py::none();
-  }
-  else {
-    py::list out;
-    for (auto item : *reverselookup.get()) {
-      std::string cppkey = item;
-      py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(), cppkey.length(), "surrogateescape"));
-      out.append(pykey);
-    }
-    return out;
-  }
-}
-
 py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_RecordArray(py::handle m, std::string name) {
   return content_methods(py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content>(m, name.c_str())
       .def(py::init([](py::dict contents, py::object id, py::object type) -> ak::RecordArray {
@@ -1308,6 +1350,19 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
       .def(py::init([](int64_t length, bool istuple, py::object id, py::object type) -> ak::RecordArray {
         return ak::RecordArray(unbox_id_none(id), unbox_type_none(type), length, istuple);
       }), py::arg("length"), py::arg("istuple") = false, py::arg("id") = py::none(), py::arg("type") = py::none())
+      .def_static("from_lookup", [](py::iterable contents, py::dict pylookup, py::object pyreverselookup, py::object id, py::object type) -> ak::RecordArray {
+        std::vector<std::shared_ptr<ak::Content>> out;
+        for (auto x : contents) {
+          out.push_back(unbox_content(x));
+        }
+        if (out.size() == 0) {
+          throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
+        }
+        std::shared_ptr<ak::RecordArray::Lookup> lookup(new ak::RecordArray::Lookup);
+        std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup(new ak::RecordArray::ReverseLookup);
+        from_lookup<ak::RecordArray::Lookup, ak::RecordArray::ReverseLookup>(lookup, reverselookup, pylookup, pyreverselookup, (int64_t)out.size());
+        return ak::RecordArray(unbox_id_none(id), unbox_type_none(type), out, lookup, reverselookup);
+      }, py::arg("contents"), py::arg("lookup"), py::arg("reverselookup") = py::none(), py::arg("id") = py::none(), py::arg("type") = py::none())
 
       .def_property_readonly("istuple", &ak::RecordArray::istuple)
       .def("field", [](ak::RecordArray& self, int64_t fieldindex) -> std::shared_ptr<ak::Content> {
