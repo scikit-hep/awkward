@@ -333,6 +333,24 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Type> NumpyArray::type() const {
+    if (type_.get() == nullptr) {
+      if (isscalar()) {
+        return innertype(false);
+      }
+      else {
+        return std::shared_ptr<Type>(new ArrayType(innertype(false), length()));
+      }
+    }
+    else {
+      std::shared_ptr<Type> out = type_;
+      for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
+        out = std::shared_ptr<Type>(new RegularType(out, (int64_t)shape_[i]));
+      }
+      return std::shared_ptr<Type>(new ArrayType(out, length()));
+    }
+  }
+
   void NumpyArray::settype_part(const std::shared_ptr<Type> type) {
     if (accepts(type)) {
       std::shared_ptr<Type> t = type;

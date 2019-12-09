@@ -165,9 +165,8 @@ def test_type_propagation():
     array2 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
     array2.type = awkward1.layout.ArrayType(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3), 2)
 
-    # print(array2)
-    # print(array2.type)
-    # print(array2[0].type)
-    # print(array2[0, 0].type)
-    #
-    # raise Exception
+    assert repr(array2.baretype) == "2 * 3 * 5 * int64"
+    assert repr(array2.type) == "2 * 3 * 5 * D[int64]"
+    assert repr(array2[0].type) == "3 * 5 * D[int64]"
+    assert repr(array2[0, 0].type) == "5 * D[int64]"
+    assert array2[-1, -1, -1] == 29
