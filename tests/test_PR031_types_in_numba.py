@@ -12,7 +12,7 @@ numba = pytest.importorskip("numba")
 import awkward1
 
 if sys.version_info[0] < 3:
-    pytest.skip("pybind11 pickle, and hence numba serialization with types, only works in Python 3")
+    pytest.skip("pybind11 pickle, and hence numba serialization with types, only works in Python 3", allow_module_level=True)
 
 def test_from_lookup():
     r = awkward1.layout.RecordArray.from_lookup([awkward1.layout.EmptyArray(), awkward1.layout.EmptyArray()], {"one": 0, "two": 1})

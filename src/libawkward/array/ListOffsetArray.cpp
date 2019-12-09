@@ -148,6 +148,9 @@ namespace awkward {
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
+    if (type_.get() != nullptr) {
+      out << indent << "    <type>" + type_.get()->tostring() + "</type>\n";
+    }
     out << offsets_.tostring_part(indent + std::string("    "), "<offsets>", "</offsets>\n");
     out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
     out << indent << "</" << classname() << ">" << post;

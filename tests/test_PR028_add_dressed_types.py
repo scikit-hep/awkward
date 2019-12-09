@@ -165,5 +165,6 @@ def test_type_propagation():
     array2 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
     array2.type = awkward1.layout.ArrayType(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3), 2)
 
+    # print(array2)
     # print(array2.type)
     # raise Exception

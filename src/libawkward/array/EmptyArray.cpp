@@ -25,11 +25,16 @@ namespace awkward {
   const std::string EmptyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
-    if (id_.get() != nullptr) {
-      out << ">\n" << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
+    if (id_.get() == nullptr  &&  type_.get() == nullptr) {
+      out << "/>" << post;
     }
     else {
-      out << "/>" << post;
+      if (id_.get() != nullptr) {
+        out << ">\n" << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
+      }
+      if (type_.get() != nullptr) {
+        out << indent << "    <type>" + type_.get()->tostring() + "</type>\n";
+      }
     }
     return out.str();
   }
