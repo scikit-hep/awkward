@@ -45,16 +45,14 @@ def test_pickle():
     t = awkward1.layout.RecordType(one=awkward1.layout.PrimitiveType("int32"), two=awkward1.layout.PrimitiveType("float64")); assert pickle.loads(pickle.dumps(t)) == t
 
 def test_boxing():
-    t = awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")), 10)
-
     @numba.njit
     def f1(q):
         return 3.14
-
-    f1(t)
 
     @numba.njit
     def f2(q):
         return q
 
+    t = awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")), 10)
+    f1(t)
     assert f2(t) == t

@@ -1021,9 +1021,9 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
       .def("type", &ak::UnionType::type)
       .def_property_readonly("parameters", &emptydict<ak::UnionType>)
       .def(py::pickle([](const ak::UnionType& self) {
-        py::tuple types(self.numtypes());
+        py::tuple types((size_t)self.numtypes());
         for (int64_t i = 0;  i < self.numtypes();  i++) {
-          types[i] = box(self.type(i));
+          types[(size_t)i] = box(self.type(i));
         }
         return py::make_tuple(types);
       }, [](py::tuple state) {
@@ -1095,7 +1095,7 @@ template <typename L, typename R>
 void from_lookup(std::shared_ptr<L> lookup, std::shared_ptr<R> reverselookup, py::dict pylookup, py::object pyreverselookup, int64_t numfields) {
   for (auto x : pylookup) {
     std::string key = x.first.cast<std::string>();
-    (*lookup)[key] = x.second.cast<int64_t>();
+    (*lookup)[key] = (size_t)x.second.cast<int64_t>();
   }
   if (pyreverselookup.is(py::none())) {
     for (int64_t i = 0;  i < numfields;  i++) {
@@ -1180,9 +1180,9 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
       .def_property_readonly("reverselookup", &reverselookup<ak::RecordType>)
       .def_property_readonly("parameters", &emptydict<ak::RecordType>)
       .def(py::pickle([](const ak::RecordType& self) {
-        py::tuple fields(self.numfields());
+        py::tuple fields((size_t)self.numfields());
         for (int64_t i = 0;  i < self.numfields();  i++) {
-          fields[i] = box(self.field(i));
+          fields[(size_t)i] = box(self.field(i));
         }
         return py::make_tuple(fields, lookup<ak::RecordType>(self), reverselookup<ak::RecordType>(self));
       }, [](py::tuple state) {
