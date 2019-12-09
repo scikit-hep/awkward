@@ -53,6 +53,50 @@ def test_boxing():
     def f2(q):
         return q
 
-    t = awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")), 10)
+    t = awkward1.layout.UnknownType()
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.PrimitiveType("int32")
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.PrimitiveType("float64")
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.utf8
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.string
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.PrimitiveType("float64")
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")), 100)
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.ListType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")))
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.RegularType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")), 5)
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.OptionType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")))
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.UnionType(awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64"))
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.RecordType(one=awkward1.layout.PrimitiveType("int32"), two=awkward1.layout.PrimitiveType("float64"))
     f1(t)
     assert f2(t) == t
