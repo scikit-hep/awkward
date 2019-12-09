@@ -1053,7 +1053,7 @@ ak::RecordType dict2recordtype(py::dict kwargs) {
 
 template <typename T>
 py::object lookup(const T& self) {
-  std::shared_ptr<ak::RecordArray::Lookup> lookup = self.lookup();
+  std::shared_ptr<ak::RecordType::Lookup> lookup = self.lookup();
   if (lookup.get() == nullptr) {
     return py::none();
   }
@@ -1070,7 +1070,7 @@ py::object lookup(const T& self) {
 
 template <typename T>
 py::object reverselookup(const T& self) {
-  std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup = self.reverselookup();
+  std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup = self.reverselookup();
   if (reverselookup.get() == nullptr) {
     return py::none();
   }
@@ -1173,6 +1173,22 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
       .def_property_readonly("lookup", &lookup<ak::RecordType>)
       .def_property_readonly("reverselookup", &reverselookup<ak::RecordType>)
       .def_property_readonly("parameters", &emptydict<ak::RecordType>)
+      .def(py::pickle([](const ak::RecordType& self) {
+        py::tuple fields(self.numfields());
+        for (int64_t i = 0;  i < self.numfields();  i++) {
+          fields[i] = box(self.field(i));
+        }
+        return py::make_tuple(fields, lookup<ak::RecordType>(self), reverselookup<ak::RecordType>(self));
+      }, [](py::tuple state) {
+        std::vector<std::shared_ptr<ak::Type>> fields;
+        for (auto x : state[0]) {
+          fields.push_back(unbox_type(x));
+        }
+        std::shared_ptr<ak::RecordType::Lookup> lookup(new ak::RecordType::Lookup);
+        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup(new ak::RecordType::ReverseLookup);
+        from_lookup<ak::RecordType::Lookup, ak::RecordType::ReverseLookup>(lookup, reverselookup, state[1].cast<py::dict>(), state[2], (int64_t)fields.size());
+        return ak::RecordType(fields, lookup, reverselookup);
+      }))
   );
 }
 
