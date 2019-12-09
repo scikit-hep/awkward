@@ -28,18 +28,19 @@ def test_from_lookup():
     assert r.lookup == {"one": 0, "two": 1}
     assert r.reverselookup == ["uno", "dos"]
 
-# def test_pickle():
-#     t = awkward1.layout.UnknownType(); assert pickle.loads(pickle.dumps(t)) == t
+def test_pickle():
+    t = awkward1.layout.UnknownType(); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.PrimitiveType("int32"); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.PrimitiveType("float64"); assert pickle.loads(pickle.dumps(t)) == t
+    # t = awkward1.layout.DressedType; assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.ArrayType(awkward1.layout.PrimitiveType("int32"), 100); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.RegularType(awkward1.layout.PrimitiveType("int32"), 5); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.OptionType(awkward1.layout.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.UnionType([awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64")]); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.RecordType({"one": awkward1.layout.PrimitiveType("int32"), "two": awkward1.layout.PrimitiveType("float64")}); assert pickle.loads(pickle.dumps(t)) == t
 
-# class ArrayType(TypeType):
-# class ListType(TypeType):
-# class RegularType(TypeType):
-# class OptionType(TypeType):
-# class UnionType(TypeType):
-# class RecordType(TypeType):
 # class DressedType(TypeType):
-# class PrimitiveType(TypeType):
-# class UnknownType(TypeType):
 
 
 # def test_boxing():

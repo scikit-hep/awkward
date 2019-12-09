@@ -886,6 +886,11 @@ py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayTy
       .def_property_readonly("type", &ak::ArrayType::type)
       .def("length", &ak::ArrayType::length)
       .def_property_readonly("parameters", &emptydict<ak::ArrayType>)
+      .def(py::pickle([](const ak::ArrayType& self) {
+        return py::make_tuple(box(self.type()), py::cast(self.length()));
+      }, [](py::tuple state) {
+        return ak::ArrayType(unbox_type(state[0]), state[1].cast<int64_t>());
+      }))
   );
 }
 
@@ -893,6 +898,11 @@ py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_Unk
   return type_methods(py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type>(m, name.c_str())
       .def(py::init<>())
       .def_property_readonly("parameters", &emptydict<ak::UnknownType>)
+      .def(py::pickle([](const ak::UnknownType& self) {
+        return py::make_tuple();
+      }, [](py::tuple state) {
+        return ak::UnknownType();
+      }))
   );
 }
 
@@ -937,6 +947,11 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
         }
       }))
       .def_property_readonly("parameters", &emptydict<ak::PrimitiveType>)
+      .def(py::pickle([](const ak::PrimitiveType& self) {
+        return py::make_tuple(py::cast((int64_t)self.dtype()));
+      }, [](py::tuple state) {
+        return ak::PrimitiveType((ak::PrimitiveType::DType)state[0].cast<int64_t>());
+      }))
   );
 }
 
@@ -946,6 +961,11 @@ py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_Reg
       .def_property_readonly("type", &ak::RegularType::type)
       .def_property_readonly("size", &ak::RegularType::size)
       .def_property_readonly("parameters", &emptydict<ak::RegularType>)
+      .def(py::pickle([](const ak::RegularType& self) {
+        return py::make_tuple(box(self.type()), py::cast(self.size()));
+      }, [](py::tuple state) {
+        return ak::RegularType(unbox_type(state[0]), state[1].cast<int64_t>());
+      }))
   );
 }
 
@@ -954,6 +974,11 @@ py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(
       .def(py::init<std::shared_ptr<ak::Type>>())
       .def_property_readonly("type", &ak::ListType::type)
       .def_property_readonly("parameters", &emptydict<ak::ListType>)
+      .def(py::pickle([](const ak::ListType& self) {
+        return py::make_tuple(box(self.type()));
+      }, [](py::tuple state) {
+        return ak::ListType(unbox_type(state[0]));
+      }))
   );
 }
 
@@ -962,6 +987,11 @@ py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_Optio
       .def(py::init<std::shared_ptr<ak::Type>>())
       .def_property_readonly("type", &ak::OptionType::type)
       .def_property_readonly("parameters", &emptydict<ak::OptionType>)
+      .def(py::pickle([](const ak::OptionType& self) {
+        return py::make_tuple(box(self.type()));
+      }, [](py::tuple state) {
+        return ak::OptionType(unbox_type(state[0]));
+      }))
   );
 }
 
