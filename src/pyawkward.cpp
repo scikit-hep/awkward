@@ -1014,6 +1014,19 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
       })
       .def("type", &ak::UnionType::type)
       .def_property_readonly("parameters", &emptydict<ak::UnionType>)
+      .def(py::pickle([](const ak::UnionType& self) {
+        py::tuple types(self.numtypes());
+        for (int64_t i = 0;  i < self.numtypes();  i++) {
+          types[i] = box(self.type(i));
+        }
+        return py::make_tuple(types);
+      }, [](py::tuple state) {
+        std::vector<std::shared_ptr<ak::Type>> types;
+        for (auto x : state[0]) {
+          types.push_back(unbox_type(x));
+        }
+        return ak::UnionType(types);
+      }))
   );
 }
 

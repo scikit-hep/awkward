@@ -37,8 +37,8 @@ def test_pickle():
     t = awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.layout.RegularType(awkward1.layout.PrimitiveType("int32"), 5); assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.layout.OptionType(awkward1.layout.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.layout.UnionType([awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64")]); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.layout.RecordType({"one": awkward1.layout.PrimitiveType("int32"), "two": awkward1.layout.PrimitiveType("float64")}); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.UnionType(awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64")); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.RecordType(one=awkward1.layout.PrimitiveType("int32"), two=awkward1.layout.PrimitiveType("float64")); assert pickle.loads(pickle.dumps(t)) == t
 
 # class DressedType(TypeType):
 
