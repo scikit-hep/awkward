@@ -88,7 +88,7 @@ namespace awkward {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
     if (type_.get() != nullptr) {
-      out << indent << "    <type>" + type_.get()->tostring() + "</type>\n";
+      out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
     }
     out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
     out << indent << "</" << classname() << ">" << post;
@@ -119,7 +119,7 @@ namespace awkward {
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
     }
   }
 

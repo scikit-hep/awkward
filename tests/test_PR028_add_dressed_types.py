@@ -167,4 +167,7 @@ def test_type_propagation():
 
     # print(array2)
     # print(array2.type)
+    # print(array2[0].type)
+    # print(array2[0, 0].type)
+    #
     # raise Exception

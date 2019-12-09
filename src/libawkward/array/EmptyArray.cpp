@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 #include "awkward/type/UnknownType.h"
+#include "awkward/type/ArrayType.h"
 
 #include "awkward/array/EmptyArray.h"
 
@@ -33,7 +34,7 @@ namespace awkward {
         out << ">\n" << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
       }
       if (type_.get() != nullptr) {
-        out << indent << "    <type>" + type_.get()->tostring() + "</type>\n";
+        out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
       }
     }
     return out.str();
@@ -53,7 +54,7 @@ namespace awkward {
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
     }
   }
 

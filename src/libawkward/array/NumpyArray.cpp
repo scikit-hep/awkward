@@ -8,6 +8,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
+#include "awkward/type/ArrayType.h"
 #include "awkward/util.h"
 
 #include "awkward/array/NumpyArray.h"
@@ -205,7 +206,7 @@ namespace awkward {
         out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
       }
       if (type_.get() != nullptr) {
-        out << indent << "    <type>" + type_.get()->tostring() + "</type>\n";
+        out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
       }
       out << indent << "</" << classname() << ">" << post;
     }
@@ -334,10 +335,14 @@ namespace awkward {
 
   void NumpyArray::settype_part(const std::shared_ptr<Type> type) {
     if (accepts(type)) {
-      type_ = type;
+      std::shared_ptr<Type> t = type;
+      while (RegularType* raw = dynamic_cast<RegularType*>(t.get())) {
+        t = raw->type();
+      }
+      type_ = t;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
     }
   }
 
