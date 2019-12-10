@@ -106,10 +106,9 @@ class D(awkward1.highlevel.Array):
     def typestr(baretype, parameters):
         return "D[{0}]".format(baretype)
 
-dint64 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("int64"), D)
-
 def test_numpyarray():
     array1 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
+    dint64 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("int64"), D)
     array1.type = awkward1.layout.ArrayType(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3), 2)
 
     @numba.njit
@@ -124,17 +123,44 @@ def test_numpyarray():
     assert repr(array2[0, 0].type) == "5 * D[int64]"
     assert array2[-1, -1, -1] == 29
 
-# def test_regulararray():
-#     array1 = awkward1.layout.RegularArray(awkward1.layout.NumpyArray(numpy.arange(10, dtype=numpy.int64)), 5)
-#
-#     @numba.njit
-#     def f1(q):
-#         return q
-#
-#     array2 = f1(array1)
-#
-#     print(array1.baretype)
-#     print(array1.type)
-#     print(array2.baretype)
-#     print(array2.type)
-#     raise Exception
+def test_regulararray():
+    array1 = awkward1.layout.RegularArray(awkward1.layout.NumpyArray(numpy.arange(10, dtype=numpy.int64)), 5)
+    dregint64 = awkward1.layout.DressedType(awkward1.layout.RegularType(awkward1.layout.PrimitiveType("int64"), 5), D)
+    array1.type = awkward1.layout.ArrayType(dregint64, 2)
+
+    @numba.njit
+    def f1(q):
+        return q
+
+    array2 = f1(array1)
+
+    assert repr(array2.baretype) == "2 * 5 * int64"
+    assert repr(array2.type) == "2 * D[5 * int64]"
+
+def test_listoffsetarray():
+    array1 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64)))
+    dvarint64 = awkward1.layout.DressedType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int64")), D)
+    array1.type = awkward1.layout.ArrayType(dvarint64, 3)
+
+    @numba.njit
+    def f1(q):
+        return q
+
+    array2 = f1(array1)
+
+    assert repr(array2.baretype) == "3 * var * int64"
+    assert repr(array2.type) == "3 * D[var * int64]"
+
+def test_listarray():
+    array1 = awkward1.layout.ListArray64(awkward1.layout.Index64(numpy.array([0, 3, 3], dtype=numpy.int64)), awkward1.layout.Index64(numpy.array([3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64)))
+    dvarint64 = awkward1.layout.DressedType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int64")), D)
+    array1.type = awkward1.layout.ArrayType(dvarint64, 3)
+
+    @numba.njit
+    def f1(q):
+        return q
+
+    array2 = f1(array1)
+
+    assert repr(array2.baretype) == "3 * var * int64"
+    assert repr(array2.type) == "3 * D[var * int64]"

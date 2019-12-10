@@ -137,12 +137,19 @@ def box(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     content_obj = c.pyapi.from_native_value(tpe.contenttpe, proxyin.content, c.env_manager)
     size_obj = c.pyapi.long_from_longlong(proxyin.size)
+    args = [content_obj, size_obj]
     if tpe.idtpe != numba.none:
         id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
-        out = c.pyapi.call_function_objargs(RegularArray_obj, (content_obj, size_obj, id_obj))
-        c.pyapi.decref(id_obj)
+        args.append(id_obj)
     else:
-        out = c.pyapi.call_function_objargs(RegularArray_obj, (content_obj, size_obj))
+        args.append(c.pyapi.make_none())
+    if tpe.typetpe != numba.none:
+        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.type)))
+    else:
+        args.append(c.pyapi.make_none())
+    out = c.pyapi.call_function_objargs(RegularArray_obj, args)
+    if tpe.idtpe != numba.none:
+        c.pyapi.decref(id_obj)
     c.pyapi.decref(RegularArray_obj)
     c.pyapi.decref(content_obj)
     c.pyapi.decref(size_obj)

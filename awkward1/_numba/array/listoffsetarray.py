@@ -13,7 +13,10 @@ from ..._numba import cpu, util, content
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray64)
 def typeof(val, c):
-    return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets)), numba.typeof(val.content), numba.typeof(val.id), numba.typeof(val.type))
+    type = val.type
+    if isinstance(type, awkward1.layout.ArrayType):
+        type = type.type
+    return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets)), numba.typeof(val.content), numba.typeof(val.id), numba.typeof(type))
 
 class ListOffsetArrayType(content.ContentType):
     def __init__(self, offsetstpe, contenttpe, idtpe, typetpe):
@@ -165,12 +168,19 @@ def box(tpe, val, c):
     offsets_obj = c.pyapi.call_function_objargs(Index_obj, (offsetsarray_obj,))
     c.pyapi.decref(Index_obj)
     c.pyapi.decref(offsetsarray_obj)
+    args = [offsets_obj, content_obj]
     if tpe.idtpe != numba.none:
         id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
-        out = c.pyapi.call_function_objargs(ListOffsetArray_obj, (offsets_obj, content_obj, id_obj))
-        c.pyapi.decref(id_obj)
+        args.append(id_obj)
     else:
-        out = c.pyapi.call_function_objargs(ListOffsetArray_obj, (offsets_obj, content_obj))
+        args.append(c.pyapi.make_none())
+    if tpe.typetpe != numba.none:
+        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.type)))
+    else:
+        args.append(c.pyapi.make_none())
+    out = c.pyapi.call_function_objargs(ListOffsetArray_obj, args)
+    if tpe.idtpe != numba.none:
+        c.pyapi.decref(id_obj)
     c.pyapi.decref(ListOffsetArray_obj)
     c.pyapi.decref(offsets_obj)
     c.pyapi.decref(content_obj)

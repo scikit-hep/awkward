@@ -14,7 +14,10 @@ from ..._numba import cpu, util, content
 @numba.extending.typeof_impl.register(awkward1.layout.ListArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListArray64)
 def typeof(val, c):
-    return ListArrayType(numba.typeof(numpy.asarray(val.starts)), numba.typeof(numpy.asarray(val.stops)), numba.typeof(val.content), numba.typeof(val.id), numba.typeof(val.type))
+    type = val.type
+    if isinstance(type, awkward1.layout.ArrayType):
+        type = type.type
+    return ListArrayType(numba.typeof(numpy.asarray(val.starts)), numba.typeof(numpy.asarray(val.stops)), numba.typeof(val.content), numba.typeof(val.id), numba.typeof(type))
 
 class ListArrayType(content.ContentType):
     def __init__(self, startstpe, stopstpe, contenttpe, idtpe, typetpe):
@@ -178,12 +181,19 @@ def box(tpe, val, c):
     c.pyapi.decref(Index_obj)
     c.pyapi.decref(startsarray_obj)
     c.pyapi.decref(stopsarray_obj)
+    args = [starts_obj, stops_obj, content_obj]
     if tpe.idtpe != numba.none:
         id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
-        out = c.pyapi.call_function_objargs(ListArray_obj, (starts_obj, stops_obj, content_obj, id_obj))
-        c.pyapi.decref(id_obj)
+        args.append(id_obj)
     else:
-        out = c.pyapi.call_function_objargs(ListArray_obj, (starts_obj, stops_obj, content_obj))
+        args.append(c.pyapi.make_none())
+    if tpe.typetpe != numba.none:
+        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.type)))
+    else:
+        args.append(c.pyapi.make_none())
+    out = c.pyapi.call_function_objargs(ListArray_obj, args)
+    if tpe.idtpe != numba.none:
+        c.pyapi.decref(id_obj)
     c.pyapi.decref(ListArray_obj)
     c.pyapi.decref(starts_obj)
     c.pyapi.decref(stops_obj)
