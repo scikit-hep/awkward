@@ -12,7 +12,10 @@ from ..._numba import cpu, util, identity, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof(val, c):
-    return NumpyArrayType(numba.typeof(numpy.asarray(val)), numba.typeof(val.id), numba.typeof(val.type))
+    type = val.type
+    while isinstance(type, (awkward1.layout.ArrayType, awkward1.layout.RegularType)):
+        type = type.type
+    return NumpyArrayType(numba.typeof(numpy.asarray(val)), numba.typeof(val.id), numba.typeof(type))
 
 class NumpyArrayType(content.ContentType):
     def __init__(self, arraytpe, idtpe, typetpe):
@@ -113,12 +116,19 @@ def box(tpe, val, c):
     NumpyArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.NumpyArray))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
+    args = [array_obj]
     if tpe.idtpe != numba.none:
         id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
-        out = c.pyapi.call_function_objargs(NumpyArray_obj, (array_obj, id_obj))
-        c.pyapi.decref(id_obj)
+        args.append(id_obj)
     else:
-        out = c.pyapi.call_function_objargs(NumpyArray_obj, (array_obj,))
+        args.append(c.pyapi.make_none())
+    if tpe.typetpe != numba.none:
+        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.type)))
+    else:
+        args.append(c.pyapi.make_none())
+    out = c.pyapi.call_function_objargs(NumpyArray_obj, args)
+    if tpe.idtpe != numba.none:
+        c.pyapi.decref(id_obj)
     c.pyapi.decref(NumpyArray_obj)
     c.pyapi.decref(array_obj)
     return out

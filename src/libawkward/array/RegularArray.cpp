@@ -109,7 +109,7 @@ namespace awkward {
       return std::shared_ptr<Type>(new RegularType(content_.get()->innertype(bare), size_));
     }
     else {
-      return content_.get()->type().get()->nolength();
+      return std::shared_ptr<Type>(new RegularType(content_.get()->type().get()->nolength(), size_));
     }
   }
 

@@ -100,3 +100,41 @@ def test_boxing():
     t = awkward1.layout.RecordType(one=awkward1.layout.PrimitiveType("int32"), two=awkward1.layout.PrimitiveType("float64"))
     f1(t)
     assert f2(t) == t
+
+class D(awkward1.highlevel.Array):
+    @staticmethod
+    def typestr(baretype, parameters):
+        return "D[{0}]".format(baretype)
+
+dint64 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("int64"), D)
+
+def test_numpyarray():
+    array1 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
+    array1.type = awkward1.layout.ArrayType(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3), 2)
+
+    @numba.njit
+    def f1(q):
+        return q
+
+    array2 = f1(array1)
+
+    assert repr(array2.baretype) == "2 * 3 * 5 * int64"
+    assert repr(array2.type) == "2 * 3 * 5 * D[int64]"
+    assert repr(array2[0].type) == "3 * 5 * D[int64]"
+    assert repr(array2[0, 0].type) == "5 * D[int64]"
+    assert array2[-1, -1, -1] == 29
+
+# def test_regulararray():
+#     array1 = awkward1.layout.RegularArray(awkward1.layout.NumpyArray(numpy.arange(10, dtype=numpy.int64)), 5)
+#
+#     @numba.njit
+#     def f1(q):
+#         return q
+#
+#     array2 = f1(array1)
+#
+#     print(array1.baretype)
+#     print(array1.type)
+#     print(array2.baretype)
+#     print(array2.type)
+#     raise Exception

@@ -1254,6 +1254,7 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
             self.setid();
           })
           .def_property_readonly("baretype", &ak::Content::baretype)
+          .def_property_readonly("isbare", &ak::Content::isbare)
           .def_property("type", [](T& self) -> py::object {
             return box(self.type());
           }, [](T& self, py::object type) -> void {

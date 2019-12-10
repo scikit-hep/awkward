@@ -173,7 +173,7 @@ namespace awkward {
       return std::shared_ptr<Type>(new ListType(content_.get()->innertype(bare)));
     }
     else {
-      return content_.get()->type().get()->nolength();
+      return std::shared_ptr<Type>(new ListType(content_.get()->type().get()->nolength()));
     }
   }
 
