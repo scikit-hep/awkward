@@ -164,3 +164,20 @@ def test_listarray():
 
     assert repr(array2.baretype) == "3 * var * int64"
     assert repr(array2.type) == "3 * D[var * int64]"
+
+def test_recordarray():
+    array1 = awkward1.Array([{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}]).layout
+    dvarrec = awkward1.layout.DressedType(array1.type.nolength(), D)
+    array1.type = awkward1.layout.ArrayType(dvarrec, 3)
+
+    @numba.njit
+    def f1(q):
+        return q
+
+    array2 = f1(array1)
+
+    assert repr(array2.baretype) == "3 * {'one': int64, 'two': float64}"
+    assert repr(array2.type) == "3 * D[{'one': int64, 'two': float64}]"
+
+    assert repr(array2[0].baretype) == "{'one': int64, 'two': float64}"
+    assert repr(array2[0].type) == "D[{'one': int64, 'two': float64}]"

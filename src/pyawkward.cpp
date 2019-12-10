@@ -1102,7 +1102,7 @@ void from_lookup(std::shared_ptr<L> lookup, std::shared_ptr<R> reverselookup, py
       reverselookup.get()->push_back(std::to_string(i));
     }
     for (auto x : *lookup.get()) {
-      if (x.second > (int64_t)numfields) {
+      if ((int64_t)x.second > numfields) {
         throw std::invalid_argument(std::string("lookup[") + ak::util::quote(x.first, true) + std::string("] is ") + std::to_string(x.second) + std::string(" but there are only ") + std::to_string(numfields) + std::string(" fields"));
       }
       (*reverselookup)[x.second] = x.first;
@@ -1431,6 +1431,7 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
       }, py::arg("contents"), py::arg("lookup"), py::arg("reverselookup") = py::none(), py::arg("id") = py::none(), py::arg("type") = py::none())
 
       .def_property_readonly("istuple", &ak::RecordArray::istuple)
+      .def_property_readonly("contents", &ak::RecordArray::contents)
       .def("field", [](ak::RecordArray& self, int64_t fieldindex) -> std::shared_ptr<ak::Content> {
         return self.field(fieldindex);
       })
@@ -1481,6 +1482,11 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("id", [](ak::Record& self) -> py::object { return box(self.id()); })
       .def("__getitem__", &getitem<ak::Record>)
+      .def_property_readonly("baretype", &ak::Record::baretype)
+      .def_property_readonly("isbare", &ak::Record::isbare)
+      .def_property_readonly("type", [](ak::Record& self) -> py::object {
+        return box(self.type());
+      })
       .def("tojson", &tojson_string<ak::Record>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
       .def_property_readonly("type", &ak::Content::type)

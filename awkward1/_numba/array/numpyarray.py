@@ -118,8 +118,7 @@ def box(tpe, val, c):
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
     args = [array_obj]
     if tpe.idtpe != numba.none:
-        id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
-        args.append(id_obj)
+        args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
     else:
         args.append(c.pyapi.make_none())
     if tpe.typetpe != numba.none:
@@ -127,10 +126,9 @@ def box(tpe, val, c):
     else:
         args.append(c.pyapi.make_none())
     out = c.pyapi.call_function_objargs(NumpyArray_obj, args)
-    if tpe.idtpe != numba.none:
-        c.pyapi.decref(id_obj)
+    for x in args:
+        c.pyapi.decref(x)
     c.pyapi.decref(NumpyArray_obj)
-    c.pyapi.decref(array_obj)
     return out
 
 @numba.extending.lower_builtin(len, NumpyArrayType)

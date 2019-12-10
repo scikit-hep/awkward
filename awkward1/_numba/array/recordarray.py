@@ -11,7 +11,10 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(val, c):
-    return RecordArrayType([numba.typeof(x) for x in val.fields()], val.lookup, val.reverselookup, numba.typeof(val.id), numba.typeof(val.type))
+    type = val.type
+    if isinstance(type, awkward1.layout.ArrayType):
+        type = type.type
+    return RecordArrayType([numba.typeof(x) for x in val.fields()], val.lookup, val.reverselookup, numba.typeof(val.id), numba.typeof(type))
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
 def typeof(val, c):
@@ -202,34 +205,66 @@ def unbox_record(tpe, obj, c):
 
 @numba.extending.box(RecordArrayType)
 def box(tpe, val, c):
-    RecordArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.RecordArray))
-    istuple_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.istuple))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
-    length_obj = c.pyapi.long_from_longlong(proxyin.length)
+    args = []
     if tpe.idtpe != numba.none:
         id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
-        out = c.pyapi.call_function_objargs(RecordArray_obj, (length_obj, istuple_obj, id_obj))
-        c.pyapi.decref(id_obj)
+        args.append(id_obj)
     else:
-        out = c.pyapi.call_function_objargs(RecordArray_obj, (length_obj, istuple_obj))
-    append_obj = c.pyapi.object_getattr_string(out, "append")
-    for i, t in enumerate(tpe.contenttpes):
-        x_obj = c.pyapi.from_native_value(t, getattr(proxyin, field(i)), c.env_manager)
-        if tpe.reverselookup is None or len(tpe.reverselookup) <= i:
-            c.pyapi.call_function_objargs(append_obj, (x_obj,))
+        args.append(c.pyapi.make_none())
+    if tpe.typetpe != numba.none:
+        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.type)))
+    else:
+        args.append(c.pyapi.make_none())
+
+    if len(tpe.contenttpes) == 0:
+        RecordArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.RecordArray))
+        length_obj = c.pyapi.long_from_longlong(proxyin.length)
+        istuple_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.istuple))
+        out = c.pyapi.call_function_objargs(RecordArray_obj, [length_obj, istuple_obj] + args)
+        c.pyapi.decref(RecordArray_obj)
+        c.pyapi.decref(length_obj)
+        c.pyapi.decref(istuple_obj)
+
+    else:
+        RecordArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.RecordArray))
+        from_lookup_obj = c.pyapi.object_getattr_string(RecordArray_obj, "from_lookup")
+        if tpe.lookup is None:
+            lookup_obj = c.pyapi.make_none()
         else:
-            key_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.reverselookup[i]))
-            c.pyapi.call_function_objargs(append_obj, (x_obj, key_obj))
-            c.pyapi.decref(key_obj)
-        c.pyapi.decref(x_obj)
-    c.pyapi.decref(RecordArray_obj)
-    c.pyapi.decref(istuple_obj)
-    c.pyapi.decref(length_obj)
-    c.pyapi.decref(append_obj)
+            lookup_obj = c.pyapi.dict_new(len(tpe.lookup))
+            for key, fieldindex in tpe.lookup.items():
+                key_obj = c.pyapi.unserialize(c.pyapi.serialize_object(key))
+                fieldindex_obj = c.pyapi.unserialize(c.pyapi.serialize_object(fieldindex))
+                c.pyapi.dict_setitem(lookup_obj, key_obj, fieldindex_obj)
+                c.pyapi.decref(key_obj)
+                c.pyapi.decref(fieldindex_obj)
+        if tpe.reverselookup is None:
+            reverselookup_obj = c.pyapi.make_none()
+        else:
+            reverselookup_obj = c.pyapi.list_new(c.context.get_constant(numba.intp, 0))
+            for key in tpe.reverselookup:
+                key_obj = c.pyapi.unserialize(c.pyapi.serialize_object(key))
+                c.pyapi.list_append(reverselookup_obj, key_obj)
+                c.pyapi.decref(key_obj)
+        contents_obj = c.pyapi.list_new(c.context.get_constant(numba.intp, 0))
+        for i, t in enumerate(tpe.contenttpes):
+            x_obj = c.pyapi.from_native_value(t, getattr(proxyin, field(i)), c.env_manager)
+            c.pyapi.list_append(contents_obj, x_obj)
+            c.pyapi.decref(x_obj)
+        out = c.pyapi.call_function_objargs(from_lookup_obj, [contents_obj, lookup_obj, reverselookup_obj] + args)
+        c.pyapi.decref(RecordArray_obj)
+        c.pyapi.decref(from_lookup_obj)
+        c.pyapi.decref(lookup_obj)
+        c.pyapi.decref(reverselookup_obj)
+        c.pyapi.decref(contents_obj)
+
+    for x in args:
+        c.pyapi.decref(x)
     return out
 
 @numba.extending.box(RecordType)
-def box(tpe, val, c):
+def box_record(tpe, val, c):
     Record_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Record))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)

@@ -170,8 +170,7 @@ def box(tpe, val, c):
     c.pyapi.decref(offsetsarray_obj)
     args = [offsets_obj, content_obj]
     if tpe.idtpe != numba.none:
-        id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
-        args.append(id_obj)
+        args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
     else:
         args.append(c.pyapi.make_none())
     if tpe.typetpe != numba.none:
@@ -179,11 +178,9 @@ def box(tpe, val, c):
     else:
         args.append(c.pyapi.make_none())
     out = c.pyapi.call_function_objargs(ListOffsetArray_obj, args)
-    if tpe.idtpe != numba.none:
-        c.pyapi.decref(id_obj)
+    for x in args:
+        c.pyapi.decref(x)
     c.pyapi.decref(ListOffsetArray_obj)
-    c.pyapi.decref(offsets_obj)
-    c.pyapi.decref(content_obj)
     return out
 
 @numba.extending.lower_builtin(len, ListOffsetArrayType)
