@@ -890,7 +890,7 @@ py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayTy
   return type_methods(py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type>(m, name.c_str())
       .def(py::init<std::shared_ptr<ak::Type>, int64_t>())
       .def_property_readonly("type", &ak::ArrayType::type)
-      .def("length", &ak::ArrayType::length)
+      .def_property_readonly("length", &ak::ArrayType::length)
       .def_property_readonly("parameters", &emptydict<ak::ArrayType>)
       .def(py::pickle([](const ak::ArrayType& self) {
         return py::make_tuple(box(self.type()), py::cast(self.length()));
@@ -952,6 +952,23 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
           throw std::invalid_argument(std::string("unrecognized primitive type: ") + dtype);
         }
       }))
+      .def_property_readonly("dtype", [](ak::PrimitiveType& self) -> std::string {
+        switch (self.dtype()) {
+          case ak::PrimitiveType::boolean: return std::string("bool");
+          case ak::PrimitiveType::int8: return std::string("int8");
+          case ak::PrimitiveType::int16: return std::string("int16");
+          case ak::PrimitiveType::int32: return std::string("int32");
+          case ak::PrimitiveType::int64: return std::string("int64");
+          case ak::PrimitiveType::uint8: return std::string("uint8");
+          case ak::PrimitiveType::uint16: return std::string("uint16");
+          case ak::PrimitiveType::uint32: return std::string("uint32");
+          case ak::PrimitiveType::uint64: return std::string("uint64");
+          case ak::PrimitiveType::float32: return std::string("float32");
+          case ak::PrimitiveType::float64: return std::string("float64");
+          default:
+          throw std::invalid_argument(std::string("unrecognized primitive type: ") + std::to_string(self.dtype()));
+        }
+      })
       .def_property_readonly("parameters", &emptydict<ak::PrimitiveType>)
       .def(py::pickle([](const ak::PrimitiveType& self) {
         return py::make_tuple(py::cast((int64_t)self.dtype()));
@@ -1150,6 +1167,14 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
       })
       .def("__getitem__", [](ak::RecordType& self, std::string key) -> py::object {
         return box(self.field(key));
+      })
+      .def_property_readonly("types", [](ak::RecordType& self) -> py::object {
+        std::vector<std::shared_ptr<ak::Type>> types = self.types();
+        py::tuple pytypes(types.size());
+        for (size_t i = 0;  i < types.size();  i++) {
+          pytypes[i] = box(types[i]);
+        }
+        return pytypes;
       })
       .def("field", [](ak::RecordType& self, int64_t fieldindex) -> py::object {
         return box(self.field(fieldindex));
