@@ -176,8 +176,8 @@ def test_recordarray():
 
     array2 = f1(array1)
 
-    assert repr(array2.baretype) == "3 * {'one': int64, 'two': float64}"
-    assert repr(array2.type) == "3 * D[{'one': int64, 'two': float64}]"
+    assert repr(array2.baretype) in ("3 * {'one': int64, 'two': float64}", "3 * {'two': float64, 'one': int64}")
+    assert repr(array2.type) in ("3 * D[{'one': int64, 'two': float64}]", "3 * D[{'two': float64, 'one': int64}]")
 
-    assert repr(array2[0].baretype) == "{'one': int64, 'two': float64}"
-    assert repr(array2[0].type) == "D[{'one': int64, 'two': float64}]"
+    assert repr(array2[0].baretype) in ("{'one': int64, 'two': float64}", "{'two': float64, 'one': int64}")
+    assert repr(array2[0].type) in ("D[{'one': int64, 'two': float64}]", "D[{'two': float64, 'one': int64}]")
