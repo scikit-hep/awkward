@@ -52,7 +52,7 @@ class RecordArrayType(content.ContentType):
 
     def getitem_tuple(self, wheretpe):
         import awkward1._numba.array.regulararray
-        nexttpe = awkward1._numba.array.regulararray.RegularArrayType(self, numba.none, numba.none)   # FIXME: Type::none()
+        nexttpe = awkward1._numba.array.regulararray.RegularArrayType(self, numba.none, numba.none)
         out = nexttpe.getitem_next(wheretpe, False)
         return out.getitem_int()
 
@@ -70,12 +70,12 @@ class RecordArrayType(content.ContentType):
             contenttpes = []
             for t in self.contenttpes:
                 contenttpes.append(t.getitem_next(numba.types.Tuple((headtpe,)), isadvanced))
-            nexttpe = RecordArrayType(contenttpes, self.lookup, self.reverselookup, numba.none, numba.none)   # FIXME: Type::none()
+            nexttpe = RecordArrayType(contenttpes, self.lookup, self.reverselookup, numba.none, numba.none)
 
         return nexttpe.getitem_next(tailtpe, isadvanced)
 
     def carry(self):
-        return RecordArrayType([x.carry() for x in self.contenttpes], self.lookup, self.reverselookup, self.idtpe, numba.none)   # FIXME: Type::none()
+        return RecordArrayType([x.carry() for x in self.contenttpes], self.lookup, self.reverselookup, self.idtpe, self.typetpe)
 
     @property
     def lower_len(self):
@@ -389,7 +389,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         nextval = getattr(proxyin, field(index))
 
     else:
-        nexttpe = RecordArrayType([t.getitem_next(numba.types.Tuple((headtpe,)), advanced is not None) for t in arraytpe.contenttpes], arraytpe.lookup, arraytpe.reverselookup, numba.none, numba.none)   # FIXME: Type::none()
+        nexttpe = RecordArrayType([t.getitem_next(numba.types.Tuple((headtpe,)), advanced is not None) for t in arraytpe.contenttpes], arraytpe.lookup, arraytpe.reverselookup, numba.none, arraytpe.typetpe if util.preserves_type(headtpe, advanced is not None) else numba.none)
         proxyout = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
         proxyout.length = proxyin.length
         wrappedheadtpe = numba.types.Tuple((headtpe,))

@@ -300,8 +300,14 @@ namespace awkward {
 
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
+    std::shared_ptr<Type> outtype = Type::none();
+    if (type_.get() != nullptr) {
+      RegularType* raw = dynamic_cast<RegularType*>(type_.get());
+      outtype = std::shared_ptr<Type>(new RegularType(raw->type(), nextsize));
+    }
+
     if (advanced.length() == 0) {
-      return std::shared_ptr<Content>(new RegularArray(id_, type_, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize));
+      return std::shared_ptr<Content>(new RegularArray(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize));
     }
     else {
       Index64 nextadvanced(len*nextsize);
@@ -313,7 +319,7 @@ namespace awkward {
         nextsize);
       util::handle_error(err, classname(), id_.get());
 
-      return std::shared_ptr<Content>(new RegularArray(id_, type_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize));
+      return std::shared_ptr<Content>(new RegularArray(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize));
     }
   }
 

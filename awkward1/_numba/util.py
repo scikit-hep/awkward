@@ -236,3 +236,19 @@ def preprocess_slicetuple(context, builder, wheretpe, whereval):
     whereval3 = context.call_internal(builder, cres2.fndesc, wheretpe3(wheretpe2), (whereval2,))
 
     return wheretpe3, whereval3
+
+def preserves_type(slice, isadvanced):
+    if isinstance(slice, numba.types.Integer):
+        return False
+    elif isinstance(slice, numba.types.SliceType):
+        return True
+    elif isinstance(slice, numba.types.EllipsisType):
+        return True
+    elif isinstance(slice, type(numba.typeof(numpy.newaxis))):
+        return False
+    elif isinstance(slice, (numba.types.Array, numba.types.List, numba.types.ArrayCompatible)):
+        return not isadvanced
+    elif isinstance(slice, numba.types.StringLiteral):
+        return False
+    else:
+        raise AssertionError(slice)

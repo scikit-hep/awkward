@@ -34,10 +34,10 @@ class RegularArrayType(content.ContentType):
         return self
 
     def getitem_str(self, key):
-        return RegularArrayType(self.contenttpe.getitem_str(key), self.idtpe, numba.none)   # FIXME: Type::none()
+        return RegularArrayType(self.contenttpe.getitem_str(key), self.idtpe, numba.none)
 
     def getitem_tuple(self, wheretpe):
-        nexttpe = RegularArrayType(self, numba.none, numba.none)   # FIXME: Type::none()
+        nexttpe = RegularArrayType(self, numba.none, numba.none)
         out = nexttpe.getitem_next(wheretpe, False)
         return out.getitem_int()
 
@@ -52,7 +52,7 @@ class RegularArrayType(content.ContentType):
 
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
-            return RegularArrayType(contenttpe, self.idtpe, numba.none)   # FIXME: Type::none()
+            return RegularArrayType(contenttpe, self.idtpe, self.typetpe)
 
         elif isinstance(headtpe, numba.types.StringLiteral):
             return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
@@ -68,7 +68,7 @@ class RegularArrayType(content.ContentType):
                 raise NotImplementedError("array.ndim != 1")
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
             if not isadvanced:
-                return RegularArrayType(contenttpe, self.idtpe, numba.none)   # FIXME: Type::none()
+                return RegularArrayType(contenttpe, self.idtpe, self.typetpe)
             else:
                 return contenttpe
 
@@ -76,7 +76,7 @@ class RegularArrayType(content.ContentType):
             raise AssertionError(headtpe)
 
     def carry(self):
-        return RegularArrayType(self.contenttpe.carry(), self.idtpe, numba.none)   # FIXME: Type::none()
+        return RegularArrayType(self.contenttpe.carry(), self.idtpe, self.typetpe)
 
     @property
     def lower_len(self):

@@ -40,7 +40,7 @@ class NumpyArrayType(content.ContentType):
     def getitem_tuple(self, wheretpe):
         outtpe = numba.typing.arraydecl.get_array_index_type(self.arraytpe, wheretpe).result
         if isinstance(outtpe, numba.types.Array):
-            return NumpyArrayType(outtpe, self.idtpe, numba.none)   # FIXME: Type::none()
+            return NumpyArrayType(outtpe, self.idtpe, self.typetpe)
         else:
             return outtpe
 
@@ -55,7 +55,7 @@ class NumpyArrayType(content.ContentType):
         else:
             numreduce = sum(1 if isinstance(x, numba.types.Integer) else 0 for x in wheretpe.types)
         if numreduce < self.arraytpe.ndim:
-            return NumpyArrayType(numba.types.Array(self.arraytpe.dtype, self.arraytpe.ndim - numreduce, self.arraytpe.layout), self.idtpe, numba.none)   # FIXME: Type::none()
+            return NumpyArrayType(numba.types.Array(self.arraytpe.dtype, self.arraytpe.ndim - numreduce, self.arraytpe.layout), self.idtpe, self.typetpe)
         elif numreduce == self.arraytpe.ndim:
             return self.arraytpe.dtype
         else:
@@ -225,7 +225,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         nextarraytpe = numba.types.Array(arraytpe.arraytpe.dtype, arraytpe.arraytpe.ndim - 1, arraytpe.arraytpe.layout)
         nextarrayval = numba.targets.arrayobj.array_reshape(context, builder, nextarraytpe(arraytpe.arraytpe, nextshapetpe), (proxyin.array, nextshapeval))
 
-        nexttpe = NumpyArrayType(nextarraytpe, arraytpe.idtpe, numba.none)   # FIXME: Type::none()
+        nexttpe = NumpyArrayType(nextarraytpe, arraytpe.idtpe, arraytpe.typetpe)
         proxynext = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
         proxynext.array = nextarrayval
         if arraytpe.idtpe != numba.none:
@@ -246,7 +246,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         outval = numba.targets.arrayobj.getitem_array_tuple(context, builder, outtpe(arraytpe.arraytpe, wheretpe), (proxyin.array, whereval))
 
         if isinstance(outtpe, numba.types.Array):
-            proxyout = numba.cgutils.create_struct_proxy(NumpyArrayType(outtpe, arraytpe.idtpe, numba.none))(context, builder)   # FIXME: Type::none()
+            proxyout = numba.cgutils.create_struct_proxy(NumpyArrayType(outtpe, arraytpe.idtpe, arraytpe.typetpe))(context, builder)
             proxyout.array = outval
             if arraytpe.idtpe != numba.none:
                 proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, arraytpe.idtpe, wheretpe, proxyin.id, whereval)
