@@ -14,10 +14,7 @@ from ..._numba import cpu, util, content
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray64)
 def typeof(val, c):
     import awkward1._numba.types
-    # type = val.type
-    # if isinstance(type, awkward1.layout.ArrayType):
-    #     type = type.type
-    return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets)), numba.typeof(val.content), numba.typeof(val.id), awkward1._numba.types.typeof(val.type))   # numba.typeof(type))
+    return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets)), numba.typeof(val.content), numba.typeof(val.id), numba.typeof(val.type))
 
 class ListOffsetArrayType(content.ContentType):
     def __init__(self, offsetstpe, contenttpe, idtpe, typetpe):
@@ -128,6 +125,8 @@ class ListOffsetArrayModel(numba.datamodel.models.StructModel):
                    ("content", fe_type.contenttpe)]
         if fe_type.idtpe != numba.none:
             members.append(("id", fe_type.idtpe))
+        if fe_type.typetpe != numba.none:
+            members.append(("type", fe_type.typetpe))
         super(ListOffsetArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(ListOffsetArrayType)
@@ -147,6 +146,12 @@ def unbox(tpe, obj, c):
         id_obj = c.pyapi.object_getattr_string(obj, "id")
         proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
         c.pyapi.decref(id_obj)
+    if tpe.typetpe != numba.none:
+        type1_obj = c.pyapi.object_getattr_string(obj, "type")
+        type2_obj = c.pyapi.object_getattr_string(type1_obj, "type")
+        proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type2_obj).value
+        c.pyapi.decref(type1_obj)
+        c.pyapi.decref(type2_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
@@ -175,7 +180,7 @@ def box(tpe, val, c):
     else:
         args.append(c.pyapi.make_none())
     if tpe.typetpe != numba.none:
-        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.literal_type)))
+        args.append(c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager))
     else:
         args.append(c.pyapi.make_none())
     out = c.pyapi.call_function_objargs(ListOffsetArray_obj, args)

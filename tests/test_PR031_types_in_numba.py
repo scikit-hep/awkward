@@ -77,10 +77,6 @@ def test_boxing():
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.layout.ArrayType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")), 100)
-    f1(t)
-    assert f2(t) == t
-
     t = awkward1.layout.ListType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")))
     f1(t)
     assert f2(t) == t
@@ -165,19 +161,19 @@ def test_listarray():
     assert repr(array2.baretype) == "3 * var * int64"
     assert repr(array2.type) == "3 * D[var * int64]"
 
-def test_recordarray():
-    array1 = awkward1.Array([{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}]).layout
-    dvarrec = awkward1.layout.DressedType(array1.type.nolength(), D)
-    array1.type = awkward1.layout.ArrayType(dvarrec, 3)
+# def test_recordarray():
+#     array1 = awkward1.Array([{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}]).layout
+#     dvarrec = awkward1.layout.DressedType(array1.type.nolength(), D)
+#     array1.type = awkward1.layout.ArrayType(dvarrec, 3)
 
-    @numba.njit
-    def f1(q):
-        return q
+#     @numba.njit
+#     def f1(q):
+#         return q
 
-    array2 = f1(array1)
+#     array2 = f1(array1)
 
-    assert repr(array2.baretype) in ("3 * {'one': int64, 'two': float64}", "3 * {'two': float64, 'one': int64}")
-    assert repr(array2.type) in ("3 * D[{'one': int64, 'two': float64}]", "3 * D[{'two': float64, 'one': int64}]")
+#     assert repr(array2.baretype) in ("3 * {'one': int64, 'two': float64}", "3 * {'two': float64, 'one': int64}")
+#     assert repr(array2.type) in ("3 * D[{'one': int64, 'two': float64}]", "3 * D[{'two': float64, 'one': int64}]")
 
-    assert repr(array2[0].baretype) in ("{'one': int64, 'two': float64}", "{'two': float64, 'one': int64}")
-    assert repr(array2[0].type) in ("D[{'one': int64, 'two': float64}]", "D[{'two': float64, 'one': int64}]")
+#     assert repr(array2[0].baretype) in ("{'one': int64, 'two': float64}", "{'two': float64, 'one': int64}")
+#     assert repr(array2[0].type) in ("D[{'one': int64, 'two': float64}]", "D[{'two': float64, 'one': int64}]")

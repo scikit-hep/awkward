@@ -25,50 +25,46 @@ def unbox(tpe, obj, c):
 def box(tpe, val, c):
     return c.pyapi.unserialize(c.pyapi.serialize_object(tpe.literal_type))
 
-def typeof(literal_type):
+def typeof_literaltype(literal_type):
     if isinstance(literal_type, awkward1.layout.ArrayType):
         literal_type = literal_type.type
     return LiteralTypeType(literal_type)
 
-@numba.extending.typeof_impl.register(awkward1.layout.Type)
-def typeof_Type(val, c):
-    return LiteralTypeType(val)
+@numba.extending.typeof_impl.register(awkward1.layout.ArrayType)
+def typeof_ArrayType(val, c):
+    return numba.typeof(val.type)
 
-# @numba.extending.typeof_impl.register(awkward1.layout.UnknownType)
-# def typeof_UnknownType(val, c):
-#     return UnknownTypeType()
-#
-# @numba.extending.typeof_impl.register(awkward1.layout.PrimitiveType)
-# def typeof_PrimitiveType(val, c):
-#     return PrimitiveTypeType(val.dtype)
-#
-# @numba.extending.typeof_impl.register(awkward1.layout.ArrayType)
-# def typeof_ArrayType(val, c):
-#     return ArrayTypeType(numba.typeof(val.type))
-#
-# @numba.extending.typeof_impl.register(awkward1.layout.RegularType)
-# def typeof_RegularType(val, c):
-#     return RegularTypeType(numba.typeof(val.type))
-#
-# @numba.extending.typeof_impl.register(awkward1.layout.ListType)
-# def typeof_ListType(val, c):
-#     return ListTypeType(numba.typeof(val.type))
-#
-# @numba.extending.typeof_impl.register(awkward1.layout.OptionType)
-# def typeof_OptionType(val, c):
-#     return OptionTypeType(numba.typeof(val.type))
-#
-# @numba.extending.typeof_impl.register(awkward1.layout.UnionType)
-# def typeof_UnionType(val, c):
-#     return UnionTypeType([numba.typeof(x) for x in val.types])
-#
-# @numba.extending.typeof_impl.register(awkward1.layout.RecordType)
-# def typeof_RecordType(val, c):
-#     return RecordTypeType([numba.typeof(x) for x in val.types], val.lookup, val.reverselookup)
-#
-# @numba.extending.typeof_impl.register(awkward1.layout.DressedType)
-# def typeof_DressedType(val, c):
-#     return DressedTypeType(numba.typeof(val.type), val.dress, val.parameters)
+@numba.extending.typeof_impl.register(awkward1.layout.UnknownType)
+def typeof_UnknownType(val, c):
+    return UnknownTypeType()
+
+@numba.extending.typeof_impl.register(awkward1.layout.PrimitiveType)
+def typeof_PrimitiveType(val, c):
+    return PrimitiveTypeType(val.dtype)
+
+@numba.extending.typeof_impl.register(awkward1.layout.RegularType)
+def typeof_RegularType(val, c):
+    return RegularTypeType(numba.typeof(val.type))
+
+@numba.extending.typeof_impl.register(awkward1.layout.ListType)
+def typeof_ListType(val, c):
+    return ListTypeType(numba.typeof(val.type))
+
+@numba.extending.typeof_impl.register(awkward1.layout.OptionType)
+def typeof_OptionType(val, c):
+    return OptionTypeType(numba.typeof(val.type))
+
+@numba.extending.typeof_impl.register(awkward1.layout.UnionType)
+def typeof_UnionType(val, c):
+    return UnionTypeType([numba.typeof(x) for x in val.types])
+
+@numba.extending.typeof_impl.register(awkward1.layout.RecordType)
+def typeof_RecordType(val, c):
+    return RecordTypeType([numba.typeof(x) for x in val.types], val.lookup, val.reverselookup)
+
+@numba.extending.typeof_impl.register(awkward1.layout.DressedType)
+def typeof_DressedType(val, c):
+    return DressedTypeType(numba.typeof(val.type), val.dress, val.parameters)
 
 class TypeType(numba.types.Type):
     pass
@@ -82,10 +78,10 @@ class PrimitiveTypeType(TypeType):
         super(PrimitiveTypeType, self).__init__(name="ak::PrimitiveTypeType({0})".format(dtype))
         self.dtype = dtype
 
-class ArrayTypeType(TypeType):
-    def __init__(self, typetpe):
-        super(ArrayTypeType, self).__init__(name="ak::ArrayTypeType({0})".format(typetpe.name))
-        self.typetpe = typetpe
+# class ArrayTypeType(TypeType):
+#     def __init__(self, typetpe):
+#         super(ArrayTypeType, self).__init__(name="ak::ArrayTypeType({0})".format(typetpe.name))
+#         self.typetpe = typetpe
 
 class RegularTypeType(TypeType):
     def __init__(self, typetpe):
@@ -131,12 +127,12 @@ class PrimitiveTypeModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         super(PrimitiveTypeModel, self).__init__(dmm, fe_type, [])
 
-@numba.extending.register_model(ArrayTypeType)
-class ArrayTypeModel(numba.datamodel.models.StructModel):
-    def __init__(self, dmm, fe_type):
-        members = [("type", fe_type.typetpe),
-                   ("length", numba.int64)]
-        super(ArrayTypeModel, self).__init__(dmm, fe_type, members)
+# @numba.extending.register_model(ArrayTypeType)
+# class ArrayTypeModel(numba.datamodel.models.StructModel):
+#     def __init__(self, dmm, fe_type):
+#         members = [("type", fe_type.typetpe),
+#                    ("length", numba.int64)]
+#         super(ArrayTypeModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.register_model(RegularTypeType)
 class RegularTypeModel(numba.datamodel.models.StructModel):
@@ -179,9 +175,7 @@ class RecordTypeModel(numba.datamodel.models.StructModel):
 @numba.extending.register_model(DressedTypeType)
 class DressedTypeModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("type", fe_type.typetpe),
-                   ("dress", numba.types.pyobject),
-                   ("parameters", numba.types.pyobject)]
+        members = [("type", fe_type.typetpe)]
         super(DressedTypeModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(UnknownTypeType)
@@ -196,17 +190,17 @@ def unbox_PrimitiveType(tpe, obj, c):
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
-@numba.extending.unbox(ArrayTypeType)
-def unbox_ArrayType(tpe, obj, c):
-    proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
-    type_obj = c.pyapi.object_getattr_string(obj, "type")
-    length_obj = c.pyapi.object_getattr_string(obj, "length")
-    proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type_obj).value
-    proxyout.length = c.pyapi.to_native_value(numba.int64, length_obj).value
-    c.pyapi.decref(type_obj)
-    c.pyapi.decref(length_obj)
-    is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
-    return numba.extending.NativeValue(proxyout._getvalue(), is_error)
+# @numba.extending.unbox(ArrayTypeType)
+# def unbox_ArrayType(tpe, obj, c):
+#     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
+#     type_obj = c.pyapi.object_getattr_string(obj, "type")
+#     length_obj = c.pyapi.object_getattr_string(obj, "length")
+#     proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type_obj).value
+#     proxyout.length = c.pyapi.to_native_value(numba.int64, length_obj).value
+#     c.pyapi.decref(type_obj)
+#     c.pyapi.decref(length_obj)
+#     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+#     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
 @numba.extending.unbox(RegularTypeType)
 def unbox_RegularType(tpe, obj, c):
@@ -270,9 +264,8 @@ def unbox_RecordType(tpe, obj, c):
 def unbox_DressedType(tpe, obj, c):
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
     type_obj = c.pyapi.object_getattr_string(obj, "type")
+
     proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type_obj).value
-    proxyout.dress = c.pyapi.object_getattr_string(obj, "dress")
-    proxyout.parameters = c.pyapi.object_getattr_string(obj, "parameters")
     c.pyapi.decref(type_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -289,17 +282,17 @@ def box_UnknownType(tpe, val, c):
 def box_PrimitiveType(tpe, val, c):
     return c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.PrimitiveType(tpe.dtype)))
 
-@numba.extending.box(ArrayTypeType)
-def box_ArrayType(tpe, val, c):
-    proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
-    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ArrayType))
-    type_obj = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
-    length_obj = c.pyapi.from_native_value(numba.int64, proxyin.length, c.env_manager)
-    out = c.pyapi.call_function_objargs(class_obj, (type_obj, length_obj))
-    c.pyapi.decref(class_obj)
-    c.pyapi.decref(type_obj)
-    c.pyapi.decref(length_obj)
-    return out
+# @numba.extending.box(ArrayTypeType)
+# def box_ArrayType(tpe, val, c):
+#     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
+#     class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ArrayType))
+#     type_obj = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
+#     length_obj = c.pyapi.from_native_value(numba.int64, proxyin.length, c.env_manager)
+#     out = c.pyapi.call_function_objargs(class_obj, (type_obj, length_obj))
+#     c.pyapi.decref(class_obj)
+#     c.pyapi.decref(type_obj)
+#     c.pyapi.decref(length_obj)
+#     return out
 
 @numba.extending.box(RegularTypeType)
 def box_RegularType(tpe, val, c):
@@ -388,15 +381,24 @@ def box_DressedType(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.DressedType))
     type_obj = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
+    dress_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.dress))
     args = c.pyapi.tuple_new(2)
     c.pyapi.tuple_setitem(args, 0, type_obj)
-    c.pyapi.tuple_setitem(args, 1, proxyin.dress)
-    out = c.pyapi.call(class_obj, args, proxyin.parameters)
+    c.pyapi.tuple_setitem(args, 1, dress_obj)
+    kwargs = c.pyapi.dict_new(len(tpe.parameters))
+    for n, x in tpe.parameters.items():
+        n_obj = c.pyapi.unserialize(c.pyapi.serialize_object(n))
+        x_obj = c.pyapi.unserialize(c.pyapi.serialize_object(x))
+        c.pyapi.dict_setitem(kwargs, n_obj, x_obj)
+        c.pyapi.decref(n_obj)
+        c.pyapi.decref(x_obj)
+    out = c.pyapi.call(class_obj, args, kwargs)
     c.pyapi.decref(class_obj)
     c.pyapi.decref(args)
+    c.pyapi.decref(kwargs)
     return out
 
-numba.extending.make_attribute_wrapper(ArrayTypeType, "type", "type")
+# numba.extending.make_attribute_wrapper(ArrayTypeType, "type", "type")
 numba.extending.make_attribute_wrapper(RegularTypeType, "type", "type")
 numba.extending.make_attribute_wrapper(ListTypeType, "type", "type")
 numba.extending.make_attribute_wrapper(OptionTypeType, "type", "type")
