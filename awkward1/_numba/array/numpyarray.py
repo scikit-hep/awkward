@@ -12,10 +12,11 @@ from ..._numba import cpu, util, identity, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof(val, c):
+    import awkward1._numba.types
     type = val.type
     while isinstance(type, (awkward1.layout.ArrayType, awkward1.layout.RegularType)):
         type = type.type
-    return NumpyArrayType(numba.typeof(numpy.asarray(val)), numba.typeof(val.id), numba.typeof(type))
+    return NumpyArrayType(numba.typeof(numpy.asarray(val)), numba.typeof(val.id), awkward1._numba.types.typeof(type))   # numba.typeof(type))
 
 class NumpyArrayType(content.ContentType):
     def __init__(self, arraytpe, idtpe, typetpe):
@@ -122,7 +123,7 @@ def box(tpe, val, c):
     else:
         args.append(c.pyapi.make_none())
     if tpe.typetpe != numba.none:
-        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.type)))
+        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.literal_type)))
     else:
         args.append(c.pyapi.make_none())
     out = c.pyapi.call_function_objargs(NumpyArray_obj, args)

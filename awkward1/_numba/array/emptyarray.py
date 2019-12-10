@@ -10,7 +10,8 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.EmptyArray)
 def typeof(val, c):
-    return EmptyArrayType(numba.typeof(val.id), numba.typeof(val.type))
+    import awkward1._numba.types
+    return EmptyArrayType(numba.typeof(val.id), awkward1._numba.types.typeof(val.type))  # numba.typeof(val.type))
 
 class EmptyArrayType(content.ContentType):
     def __init__(self, idtpe, typetpe):
@@ -90,12 +91,14 @@ def unbox(tpe, obj, c):
 def box(tpe, val, c):
     EmptyArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.EmptyArray))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
+    args = []
     if tpe.idtpe != numba.none:
-        id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
-        out = c.pyapi.call_function_objargs(EmptyArray_obj, (id_obj,))
-        c.pyapi.decref(id_obj)
-    else:
-        out = c.pyapi.call_function_objargs(EmptyArray_obj, ())
+        args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
+    if tpe.typetpe != numba.none:
+        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.literal_type)))
+    out = c.pyapi.call_function_objargs(EmptyArray_obj, args)
+    for x in args:
+        c.pyapi.decref(x)
     c.pyapi.decref(EmptyArray_obj)
     return out
 

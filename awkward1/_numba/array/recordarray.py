@@ -11,10 +11,11 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(val, c):
-    type = val.type
-    if isinstance(type, awkward1.layout.ArrayType):
-        type = type.type
-    return RecordArrayType([numba.typeof(x) for x in val.fields()], val.lookup, val.reverselookup, numba.typeof(val.id), numba.typeof(type))
+    import awkward1._numba.types
+    # type = val.type
+    # if isinstance(type, awkward1.layout.ArrayType):
+    #     type = type.type
+    return RecordArrayType([numba.typeof(x) for x in val.fields()], val.lookup, val.reverselookup, numba.typeof(val.id), awkward1._numba.types.typeof(val.type))   # numba.typeof(type))
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
 def typeof(val, c):
@@ -213,7 +214,7 @@ def box(tpe, val, c):
     else:
         args.append(c.pyapi.make_none())
     if tpe.typetpe != numba.none:
-        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.type)))
+        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.literal_type)))
     else:
         args.append(c.pyapi.make_none())
 
