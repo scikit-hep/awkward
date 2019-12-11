@@ -8,6 +8,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
+#include "awkward/type/ArrayType.h"
 #include "awkward/util.h"
 
 #include "awkward/array/NumpyArray.h"
@@ -196,12 +197,17 @@ namespace awkward {
     }
     out << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get());
-    if (id_.get() == nullptr) {
+    if (id_.get() == nullptr  &&  type_.get() == nullptr) {
       out << "\"/>" << post;
     }
     else {
       out << "\">\n";
-      out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
+      if (id_.get() != nullptr) {
+        out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
+      }
+      if (type_.get() != nullptr) {
+        out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
+      }
       out << indent << "</" << classname() << ">" << post;
     }
     return out.str();
@@ -327,12 +333,34 @@ namespace awkward {
     }
   }
 
-  void NumpyArray::settype_part(const std::shared_ptr<Type> type) {
-    if (accepts(type)) {
-      type_ = type;
+  const std::shared_ptr<Type> NumpyArray::type() const {
+    if (type_.get() == nullptr) {
+      if (isscalar()) {
+        return innertype(false);
+      }
+      else {
+        return std::shared_ptr<Type>(new ArrayType(innertype(false), length()));
+      }
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
+      std::shared_ptr<Type> out = type_;
+      for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
+        out = std::shared_ptr<Type>(new RegularType(out, (int64_t)shape_[i]));
+      }
+      return std::shared_ptr<Type>(new ArrayType(out, length()));
+    }
+  }
+
+  void NumpyArray::settype_part(const std::shared_ptr<Type> type) {
+    if (accepts(type)) {
+      std::shared_ptr<Type> t = type;
+      while (RegularType* raw = dynamic_cast<RegularType*>(t.get())) {
+        t = raw->type();
+      }
+      type_ = t;
+    }
+    else {
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
     }
   }
 

@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 #include "awkward/type/UnknownType.h"
+#include "awkward/type/ArrayType.h"
 
 #include "awkward/array/EmptyArray.h"
 
@@ -25,11 +26,16 @@ namespace awkward {
   const std::string EmptyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
-    if (id_.get() != nullptr) {
-      out << ">\n" << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
+    if (id_.get() == nullptr  &&  type_.get() == nullptr) {
+      out << "/>" << post;
     }
     else {
-      out << "/>" << post;
+      if (id_.get() != nullptr) {
+        out << ">\n" << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
+      }
+      if (type_.get() != nullptr) {
+        out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
+      }
     }
     return out.str();
   }
@@ -48,7 +54,7 @@ namespace awkward {
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
     }
   }
 

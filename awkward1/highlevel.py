@@ -54,7 +54,7 @@ class Array(object):
 
     def __iter__(self):
         for x in self.layout:
-            yield awkward1.util.wrap(x)
+            yield awkward1._util.wrap(x)
 
     def __str__(self, limit_value=85):
         if len(self) == 0:
@@ -194,7 +194,7 @@ class Array(object):
         return len(self.layout)
 
     def __getitem__(self, where):
-        return awkward1.util.wrap(self.layout[where])
+        return awkward1._util.wrap(self.layout[where])
 
 class Record(object):
     def __init__(self, data, type=None, copy=False):

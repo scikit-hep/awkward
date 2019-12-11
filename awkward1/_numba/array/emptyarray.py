@@ -10,12 +10,13 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.EmptyArray)
 def typeof(val, c):
-    return EmptyArrayType(numba.typeof(val.id))
+    return EmptyArrayType(numba.typeof(val.id), numba.none if val.isbare else numba.typeof(val.type))
 
 class EmptyArrayType(content.ContentType):
-    def __init__(self, idtpe):
-        super(EmptyArrayType, self).__init__(name="EmptyArrayType(id={})".format(idtpe.name))
+    def __init__(self, idtpe, typetpe):
+        super(EmptyArrayType, self).__init__(name="ak::EmptyArrayType(id={0}, type={1})".format(idtpe.name, typetpe.name))
         self.idtpe = idtpe
+        self.typetpe = typetpe
 
     @property
     def ndim(self):
@@ -73,15 +74,21 @@ class EmptyArrayModel(numba.datamodel.models.StructModel):
         members = []
         if fe_type.idtpe != numba.none:
             members.append(("id", fe_type.idtpe))
+        if fe_type.typetpe != numba.none:
+            members.append(("type", fe_type.typetpe))
         super(EmptyArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(EmptyArrayType)
 def unbox(tpe, obj, c):
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
     if tpe.idtpe != numba.none:
-        id_obj = c.pyapi.obj_getattr_string(obj, "id")
+        id_obj = c.pyapi.object_getattr_string(obj, "id")
         proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
         c.pyapi.decref(id_obj)
+    if tpe.typetpe != numba.none:
+        type_obj = c.pyapi.object_getattr_string(obj, "type")
+        proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type_obj).value
+        c.pyapi.decref(type_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
@@ -89,12 +96,18 @@ def unbox(tpe, obj, c):
 def box(tpe, val, c):
     EmptyArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.EmptyArray))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
+    args = []
     if tpe.idtpe != numba.none:
-        id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
-        out = c.pyapi.call_function_objargs(EmptyArray_obj, (id_obj,))
-        c.pyapi.decref(id_obj)
+        args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
     else:
-        out = c.pyapi.call_function_objargs(EmptyArray_obj, ())
+        args.append(c.pyapi.make_none())
+    if tpe.typetpe != numba.none:
+        args.append(c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager))
+    else:
+        args.append(c.pyapi.make_none())
+    out = c.pyapi.call_function_objargs(EmptyArray_obj, args)
+    for x in args:
+        c.pyapi.decref(x)
     c.pyapi.decref(EmptyArray_obj)
     return out
 

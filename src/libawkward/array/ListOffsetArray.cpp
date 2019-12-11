@@ -148,6 +148,9 @@ namespace awkward {
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
+    if (type_.get() != nullptr) {
+      out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
+    }
     out << offsets_.tostring_part(indent + std::string("    "), "<offsets>", "</offsets>\n");
     out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
     out << indent << "</" << classname() << ">" << post;
@@ -170,7 +173,7 @@ namespace awkward {
       return std::shared_ptr<Type>(new ListType(content_.get()->innertype(bare)));
     }
     else {
-      return content_.get()->type().get()->nolength();
+      return std::shared_ptr<Type>(new ListType(content_.get()->type().get()->nolength()));
     }
   }
 
@@ -181,7 +184,7 @@ namespace awkward {
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
     }
   }
 

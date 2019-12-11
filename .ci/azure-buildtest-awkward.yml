@@ -41,6 +41,10 @@ jobs:
           python.version: "3.6"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py37-32bit":
+          python.version: "3.7"
+          python.architecture: "x86"
+          numpy.version: "latest"
         "py37-64bit":
           python.version: "3.7"
           python.architecture: "x64"

@@ -5,6 +5,7 @@
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/RecordType.h"
+#include "awkward/type/ArrayType.h"
 #include "awkward/array/Record.h"
 
 #include "awkward/array/RecordArray.h"
@@ -70,6 +71,9 @@ namespace awkward {
     out << ">\n";
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
+    }
+    if (type_.get() != nullptr) {
+      out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
     }
     for (size_t j = 0;  j < contents_.size();  j++) {
       out << indent << "    <field index=\"" << j << "\"";
@@ -139,7 +143,7 @@ namespace awkward {
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
     }
   }
 

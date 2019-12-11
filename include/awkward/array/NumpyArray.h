@@ -47,6 +47,7 @@ namespace awkward {
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
     virtual const std::shared_ptr<Type> innertype(bool bare) const;
+    virtual const std::shared_ptr<Type> type() const;
     virtual void settype_part(const std::shared_ptr<Type> type);
     virtual bool accepts(const std::shared_ptr<Type> type);
     virtual int64_t length() const;

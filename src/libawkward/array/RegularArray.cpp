@@ -87,6 +87,9 @@ namespace awkward {
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
+    if (type_.get() != nullptr) {
+      out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
+    }
     out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
     out << indent << "</" << classname() << ">" << post;
     return out.str();
@@ -106,7 +109,7 @@ namespace awkward {
       return std::shared_ptr<Type>(new RegularType(content_.get()->innertype(bare), size_));
     }
     else {
-      return content_.get()->type().get()->nolength();
+      return std::shared_ptr<Type>(new RegularType(content_.get()->type().get()->nolength(), size_));
     }
   }
 
@@ -116,7 +119,7 @@ namespace awkward {
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
     }
   }
 
@@ -297,8 +300,14 @@ namespace awkward {
 
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
+    std::shared_ptr<Type> outtype = Type::none();
+    if (type_.get() != nullptr) {
+      RegularType* raw = dynamic_cast<RegularType*>(type_.get());
+      outtype = std::shared_ptr<Type>(new RegularType(raw->type(), nextsize));
+    }
+
     if (advanced.length() == 0) {
-      return std::shared_ptr<Content>(new RegularArray(id_, type_, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize));
+      return std::shared_ptr<Content>(new RegularArray(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize));
     }
     else {
       Index64 nextadvanced(len*nextsize);
@@ -310,7 +319,7 @@ namespace awkward {
         nextsize);
       util::handle_error(err, classname(), id_.get());
 
-      return std::shared_ptr<Content>(new RegularArray(id_, type_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize));
+      return std::shared_ptr<Content>(new RegularArray(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize));
     }
   }
 

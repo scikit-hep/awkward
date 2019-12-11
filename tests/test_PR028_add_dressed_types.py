@@ -156,14 +156,17 @@ def test_type_propagation():
     assert array.layout["two", -1, 1].type == awkward1.layout.ArrayType(dfloat64, 4)
 
     assert array.layout[1:].type == awkward1.layout.ArrayType(dvarrec, 2)
-    assert array.layout[1:, "one"].type == awkward1.layout.ArrayType(dint64, 2)
-    assert array.layout["one", 1:].type == awkward1.layout.ArrayType(dint64, 2)
+    assert array.layout[1:, "one"].type == awkward1.layout.ArrayType(awkward1.layout.ListType(dint64), 2)
+    assert array.layout["one", 1:].type == awkward1.layout.ArrayType(awkward1.layout.ListType(dint64), 2)
 
     assert array.layout[[2, 1]].type == awkward1.layout.ArrayType(dvarrec, 2)
-    assert array.layout[[2, 1], "one"].type == awkward1.layout.ArrayType(dint64, 2)
+    assert array.layout[[2, 1], "one"].type == awkward1.layout.ArrayType(awkward1.layout.ListType(dint64), 2)
 
     array2 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
     array2.type = awkward1.layout.ArrayType(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3), 2)
 
-    # print(array2.type)
-    # raise Exception
+    assert repr(array2.baretype) == "2 * 3 * 5 * int64"
+    assert repr(array2.type) == "2 * 3 * 5 * D[int64]"
+    assert repr(array2[0].type) == "3 * 5 * D[int64]"
+    assert repr(array2[0, 0].type) == "5 * D[int64]"
+    assert array2[-1, -1, -1] == 29
