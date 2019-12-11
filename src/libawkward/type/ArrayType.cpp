@@ -6,6 +6,11 @@
 
 namespace awkward {
   std::string ArrayType::tostring_part(std::string indent, std::string pre, std::string post) const {
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
     return indent + pre + std::to_string(length_) + " * " + type_.get()->tostring_part(indent, "", "") + post;
   }
 

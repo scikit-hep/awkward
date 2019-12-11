@@ -50,6 +50,13 @@ def test_dress():
     assert repr(a2[1]) == "<Dummy []>"
     assert repr(a2[2]) == "<Dummy [4.4, 5.5]>"
 
+def test_typestr():
+    t = awkward1.layout.PrimitiveType("float64", {"__str__": "something"})
+    t2 = awkward1.layout.ListType(t)
+
+    assert repr(t) == "something"
+    assert repr(t2) == "var * something"
+
 numba = pytest.importorskip("numba")
 
 def test_boxing():

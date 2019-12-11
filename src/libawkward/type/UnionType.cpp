@@ -10,6 +10,11 @@
 
 namespace awkward {
   std::string UnionType::tostring_part(std::string indent, std::string pre, std::string post) const {
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
     std::stringstream out;
     out << indent << pre << "union[";
     for (int64_t i = 0;  i < numtypes();  i++) {

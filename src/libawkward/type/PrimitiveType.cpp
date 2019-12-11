@@ -10,6 +10,11 @@
 
 namespace awkward {
   std::string PrimitiveType::tostring_part(std::string indent, std::string pre, std::string post) const {
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
     std::stringstream out;
     std::string s;
     switch (dtype_) {

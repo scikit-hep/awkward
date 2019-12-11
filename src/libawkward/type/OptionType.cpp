@@ -11,6 +11,11 @@
 
 namespace awkward {
   std::string OptionType::tostring_part(std::string indent, std::string pre, std::string post) const {
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
     std::stringstream out;
     if (parameters_FIXME_.size() == 0) {
       if (dynamic_cast<ListType*>(type_.get()) != nullptr  ||

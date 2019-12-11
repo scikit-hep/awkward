@@ -41,6 +41,19 @@ namespace awkward {
     return true;
   }
 
+  bool Type::get_typestr(std::string& output) const {
+    auto typestr = parameters_FIXME_.find(std::string("__str__"));
+    if (typestr != parameters_FIXME_.end()) {
+      rj::Document mine;
+      mine.Parse<rj::kParseNanAndInfFlag>(typestr->second.c_str());
+      if (mine.IsString()) {
+        output = std::string(mine.GetString());
+        return true;
+      }
+    }
+    return false;
+  }
+
   const std::string Type::string_parameters() const {
     std::stringstream out;
     out << "parameters={";

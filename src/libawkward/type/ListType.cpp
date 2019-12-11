@@ -10,6 +10,11 @@
 
 namespace awkward {
   std::string ListType::tostring_part(std::string indent, std::string pre, std::string post) const {
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
     std::stringstream out;
     if (parameters_FIXME_.size() == 0) {
       out << indent << pre << "var * " << type_.get()->tostring_part(indent, "", "") << post;
