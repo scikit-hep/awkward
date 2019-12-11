@@ -13,18 +13,6 @@ namespace awkward {
     return std::shared_ptr<Type>(new ArrayType(parameters_FIXME_, type_, length_));
   }
 
-  bool ArrayType::shallow_equal(const std::shared_ptr<Type> other, bool check_parameters) const {
-    if (dynamic_cast<ArrayType*>(other.get()) != nullptr) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
-        return false;
-      }
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-
   bool ArrayType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {

@@ -23,18 +23,6 @@ namespace awkward {
     return std::shared_ptr<Type>(new OptionType(parameters_FIXME_, type_));
   }
 
-  bool OptionType::shallow_equal(const std::shared_ptr<Type> other, bool check_parameters) const {
-    if (dynamic_cast<OptionType*>(other.get()) != nullptr) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
-        return false;
-      }
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-
   bool OptionType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {

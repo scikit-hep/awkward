@@ -26,26 +26,6 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnionType(parameters_FIXME_, types_));
   }
 
-  bool UnionType::shallow_equal(const std::shared_ptr<Type> other, bool check_parameters) const {
-    if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
-        return false;
-      }
-      if (types_.size() != t->types_.size()) {
-        return false;
-      }
-      for (size_t i = 0;  i < types_.size();  i++) {
-        if (!types_[i].get()->shallow_equal(t->types_[i], check_parameters)) {
-          return false;
-        }
-      }
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-
   bool UnionType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {

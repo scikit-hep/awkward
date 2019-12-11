@@ -13,10 +13,6 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnknownType(parameters_FIXME_));
   }
 
-  bool UnknownType::shallow_equal(const std::shared_ptr<Type> other, bool check_parameters) const {
-    return equal(other, check_parameters);
-  }
-
   bool UnknownType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {

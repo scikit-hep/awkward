@@ -31,10 +31,6 @@ namespace awkward {
     return std::shared_ptr<Type>(new PrimitiveType(parameters_FIXME_, dtype_));
   }
 
-  bool PrimitiveType::shallow_equal(const std::shared_ptr<Type> other, bool check_parameters) const {
-    return equal(other, check_parameters);
-  }
-
   bool PrimitiveType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {

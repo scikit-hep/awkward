@@ -48,7 +48,7 @@ namespace awkward {
     virtual const std::shared_ptr<Type> shallow_copy() const {
       return std::shared_ptr<Type>(new DressedType(parameters_FIXME_, type_, dress_, parameters_));
     }
-    virtual bool shallow_equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+    virtual bool equal(const std::shared_ptr<Type> other, bool check_parameters) const {
       if (DressedType<D, P>* raw = dynamic_cast<DressedType<D, P>*>(other.get())) {
         D otherdress = raw->dress();
         if (!dress_.equal(otherdress, check_parameters)) {
@@ -61,11 +61,6 @@ namespace awkward {
         return true;
       }
       else {
-        return false;
-      }
-    }
-    virtual bool equal(const std::shared_ptr<Type> other, bool check_parameters) const {
-      if (!shallow_equal(other, check_parameters)) {
         return false;
       }
       return type_.get()->equal(dynamic_cast<DressedType<D, P>*>(other.get())->type(), check_parameters);

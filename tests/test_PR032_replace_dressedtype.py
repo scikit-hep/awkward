@@ -28,3 +28,6 @@ def test_types_with_parameters():
 
     t = awkward1.layout.UnknownType(parameters={"key1": ["val", "ue"], "key2": u"one \u2192 two"})
     assert t.parameters == {"key2": u"one \u2192 two", "key1": ["val", "ue"]}
+
+    assert t == awkward1.layout.UnknownType(parameters={"key2": u"one \u2192 two", "key1": ["val", "ue"]})
+    assert t != awkward1.layout.UnknownType(parameters={"key": ["val", "ue"]})
