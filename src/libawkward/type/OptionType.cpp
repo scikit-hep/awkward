@@ -20,7 +20,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> OptionType::shallow_copy() const {
-    return std::shared_ptr<Type>(new OptionType(type_));
+    return std::shared_ptr<Type>(new OptionType(parameters_FIXME_, type_));
   }
 
   bool OptionType::shallow_equal(const std::shared_ptr<Type> other) const {

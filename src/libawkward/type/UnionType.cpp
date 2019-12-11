@@ -23,7 +23,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnionType::shallow_copy() const {
-    return std::shared_ptr<Type>(new UnionType(types_));
+    return std::shared_ptr<Type>(new UnionType(parameters_FIXME_, types_));
   }
 
   bool UnionType::shallow_equal(const std::shared_ptr<Type> other) const {
@@ -69,7 +69,7 @@ namespace awkward {
     for (auto t : types_) {
       types.push_back(t.get()->level());
     }
-    return std::shared_ptr<Type>(new UnionType(types));
+    return std::shared_ptr<Type>(new UnionType(Type::Parameters(), types));
   }
 
   std::shared_ptr<Type> UnionType::inner() const {

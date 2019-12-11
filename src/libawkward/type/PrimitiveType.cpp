@@ -28,7 +28,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> PrimitiveType::shallow_copy() const {
-    return std::shared_ptr<Type>(new PrimitiveType(dtype_));
+    return std::shared_ptr<Type>(new PrimitiveType(parameters_FIXME_, dtype_));
   }
 
   bool PrimitiveType::shallow_equal(const std::shared_ptr<Type> other) const {

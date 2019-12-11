@@ -123,7 +123,7 @@ namespace awkward {
     for (auto item : contents_) {
       types.push_back(item.get()->innertype(bare));
     }
-    return std::shared_ptr<Type>(new RecordType(types, lookup_, reverselookup_));
+    return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types, lookup_, reverselookup_));
   }
 
   void RecordArray::settype_part(const std::shared_ptr<Type> type) {
@@ -143,7 +143,7 @@ namespace awkward {
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(Type::Parameters(), type, length()).compare(baretype()));
     }
   }
 

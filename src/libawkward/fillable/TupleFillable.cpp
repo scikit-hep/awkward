@@ -29,14 +29,14 @@ namespace awkward {
 
   const std::shared_ptr<Type> TupleFillable::type() const {
     if (length_ == -1) {
-      return std::shared_ptr<Type>(new UnknownType);
+      return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
       for (auto content : contents_) {
         types.push_back(content.get()->type());
       }
-      return std::shared_ptr<Type>(new RecordType(types));
+      return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types));
     }
   }
 

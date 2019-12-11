@@ -22,7 +22,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> ListFillable::type() const {
-    return std::shared_ptr<Type>(new ListType(content_.get()->type()));
+    return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->type()));
   }
 
   const std::shared_ptr<Content> ListFillable::snapshot() const {

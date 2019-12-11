@@ -8,7 +8,9 @@
 namespace awkward {
   class ListType: public Type {
   public:
-    ListType(const std::shared_ptr<Type> type): type_(type) { }
+    ListType(const Parameters& parameters, const std::shared_ptr<Type> type)
+        : Type(parameters)
+        , type_(type) { }
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
     virtual const std::shared_ptr<Type> shallow_copy() const;

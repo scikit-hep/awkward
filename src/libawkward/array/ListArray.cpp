@@ -167,10 +167,10 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Type> ListArrayOf<T>::innertype(bool bare) const {
     if (bare  ||  content_.get()->isbare()) {
-      return std::shared_ptr<Type>(new ListType(content_.get()->innertype(bare)));
+      return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->innertype(bare)));
     }
     else {
-      return std::shared_ptr<Type>(new ListType(content_.get()->type().get()->nolength()));
+      return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->type().get()->nolength()));
     }
   }
 
@@ -181,13 +181,13 @@ namespace awkward {
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(Type::Parameters(), type, length()).compare(baretype()));
     }
   }
 
   template <typename T>
   bool ListArrayOf<T>::accepts(const std::shared_ptr<Type> type) {
-    const std::shared_ptr<Type> model(new ListType(std::shared_ptr<Type>(new UnknownType())));
+    const std::shared_ptr<Type> model(new ListType(Type::Parameters(), std::shared_ptr<Type>(new UnknownType(Type::Parameters()))));
     return type.get()->level().get()->shallow_equal(model);
   }
 

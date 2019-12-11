@@ -23,7 +23,9 @@ namespace awkward {
       numtypes
     };
 
-    PrimitiveType(DType dtype): dtype_(dtype) { }
+    PrimitiveType(const Parameters& parameters, DType dtype)
+        : Type(parameters)
+        , dtype_(dtype) { }
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
     virtual const std::shared_ptr<Type> shallow_copy() const;

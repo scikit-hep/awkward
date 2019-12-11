@@ -8,7 +8,7 @@
 namespace awkward {
   class UnknownType: public Type {
   public:
-    UnknownType() { }
+    UnknownType(const Parameters& parameters): Type(parameters) { }
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
     virtual const std::shared_ptr<Type> shallow_copy() const;

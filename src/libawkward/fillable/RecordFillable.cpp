@@ -36,7 +36,7 @@ namespace awkward {
 
   const std::shared_ptr<Type> RecordFillable::type() const {
     if (length_ == -1) {
-      return std::shared_ptr<Type>(new UnknownType);
+      return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
@@ -47,8 +47,8 @@ namespace awkward {
         (*lookup.get())[keys_[i]] = i;
         reverselookup.get()->push_back(keys_[i]);
       }
-      return std::shared_ptr<Type>(new RecordType(types, lookup, reverselookup));
-      return std::shared_ptr<Type>(new RecordType(types));
+      return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types, lookup, reverselookup));
+      return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types));
     }
   }
 

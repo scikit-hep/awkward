@@ -15,12 +15,14 @@ namespace awkward {
     typedef std::unordered_map<std::string, size_t> Lookup;
     typedef std::vector<std::string> ReverseLookup;
 
-    RecordType(const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
-        : types_(types)
+    RecordType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
+        : Type(parameters)
+        , types_(types)
         , lookup_(lookup)
         , reverselookup_(reverselookup) { }
-    RecordType(const std::vector<std::shared_ptr<Type>>& types)
-        : types_(types)
+    RecordType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
+        : Type(parameters)
+        , types_(types)
         , lookup_(nullptr)
         , reverselookup_(nullptr) { }
 

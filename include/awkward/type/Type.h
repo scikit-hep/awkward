@@ -5,12 +5,16 @@
 
 #include <memory>
 #include <vector>
+#include <map>
 
 #include "awkward/cpu-kernels/util.h"
 
 namespace awkward {
   class Type {
   public:
+    typedef std::map<std::string, std::string> Parameters;
+
+    Type(const Parameters& parameters): parameters_FIXME_(parameters) { }
     virtual ~Type() { }
 
     static std::shared_ptr<Type> none() { return std::shared_ptr<Type>(nullptr); }
@@ -31,8 +35,13 @@ namespace awkward {
     virtual const std::vector<std::string> keyaliases(const std::string& key) const = 0;
     virtual const std::vector<std::string> keys() const = 0;
 
+    const Parameters parameters() const { return parameters_FIXME_; }
+    std::string parameter(const std::string& key) { return parameters_FIXME_[key]; }
     std::string tostring() const { return tostring_part("", "", ""); };
     const std::string compare(std::shared_ptr<Type> supertype);
+
+  protected:
+    Parameters parameters_FIXME_;
   };
 }
 

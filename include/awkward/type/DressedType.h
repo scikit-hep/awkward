@@ -28,7 +28,7 @@ namespace awkward {
   template <typename D, typename P>
   class DressedType: public Type {
   public:
-    DressedType(const std::shared_ptr<Type> type, const D& dress, const P& parameters): type_(type), dress_(dress), parameters_(parameters) { }
+    DressedType(const Parameters& parameters_FIXME, const std::shared_ptr<Type> type, const D& dress, const P& parameters): Type(parameters_FIXME), type_(type), dress_(dress), parameters_(parameters) { }
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const {
       std::string outstr = dress_.typestr(type_, parameters_);
@@ -46,7 +46,7 @@ namespace awkward {
       }
     }
     virtual const std::shared_ptr<Type> shallow_copy() const {
-      return std::shared_ptr<Type>(new DressedType(type_, dress_, parameters_));
+      return std::shared_ptr<Type>(new DressedType(parameters_FIXME_, type_, dress_, parameters_));
     }
     virtual bool shallow_equal(const std::shared_ptr<Type> other) const {
       if (DressedType<D, P>* raw = dynamic_cast<DressedType<D, P>*>(other.get())) {

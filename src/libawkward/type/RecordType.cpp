@@ -37,7 +37,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RecordType::shallow_copy() const {
-    return std::shared_ptr<Type>(new RecordType(types_, lookup_, reverselookup_));
+    return std::shared_ptr<Type>(new RecordType(parameters_FIXME_, types_, lookup_, reverselookup_));
   }
 
   bool RecordType::shallow_equal(const std::shared_ptr<Type> other) const {

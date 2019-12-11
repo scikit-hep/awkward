@@ -33,7 +33,7 @@ namespace awkward {
     for (auto x : contents_) {
       types.push_back(x.get()->type());
     }
-    return std::shared_ptr<Type>(new UnionType(types));
+    return std::shared_ptr<Type>(new UnionType(Type::Parameters(), types));
   }
 
   const std::shared_ptr<Content> UnionFillable::snapshot() const {

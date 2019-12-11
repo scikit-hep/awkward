@@ -13,7 +13,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RegularType::shallow_copy() const {
-    return std::shared_ptr<Type>(new RegularType(type_, size_));
+    return std::shared_ptr<Type>(new RegularType(parameters_FIXME_, type_, size_));
   }
 
   bool RegularType::shallow_equal(const std::shared_ptr<Type> other) const {
