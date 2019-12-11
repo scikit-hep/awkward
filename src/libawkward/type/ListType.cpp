@@ -16,13 +16,24 @@ namespace awkward {
     return std::shared_ptr<Type>(new ListType(parameters_FIXME_, type_));
   }
 
-  bool ListType::shallow_equal(const std::shared_ptr<Type> other) const {
-    return (dynamic_cast<ListType*>(other.get()) != nullptr);
+  bool ListType::shallow_equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+    if (dynamic_cast<ListType*>(other.get()) != nullptr) {
+      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+        return false;
+      }
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
-  bool ListType::equal(const std::shared_ptr<Type> other) const {
+  bool ListType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (ListType* t = dynamic_cast<ListType*>(other.get())) {
-      return type().get()->equal(t->type());
+      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+        return false;
+      }
+      return type().get()->equal(t->type(), check_parameters);
     }
     else {
       return false;

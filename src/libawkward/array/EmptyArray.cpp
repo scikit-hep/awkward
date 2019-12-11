@@ -59,8 +59,7 @@ namespace awkward {
   }
 
   bool EmptyArray::accepts(const std::shared_ptr<Type> type) {
-    const std::shared_ptr<Type> model(new UnknownType(Type::Parameters()));
-    return type.get()->level().get()->shallow_equal(model);
+    return dynamic_cast<UnknownType*>(type.get()->level().get()) != nullptr;
   }
 
   int64_t EmptyArray::length() const {

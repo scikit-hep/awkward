@@ -124,8 +124,12 @@ namespace awkward {
   }
 
   bool RegularArray::accepts(const std::shared_ptr<Type> type) {
-    const std::shared_ptr<Type> model(new RegularType(Type::Parameters(), std::shared_ptr<Type>(new UnknownType(Type::Parameters())), size_));
-    return type.get()->level().get()->shallow_equal(model);
+    if (RegularType* raw = dynamic_cast<RegularType*>(type.get()->level().get())) {
+      return raw->size() == size_;
+    }
+    else {
+      return false;
+    }
   }
 
   int64_t RegularArray::length() const {

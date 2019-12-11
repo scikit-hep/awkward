@@ -40,8 +40,11 @@ namespace awkward {
     return std::shared_ptr<Type>(new RecordType(parameters_FIXME_, types_, lookup_, reverselookup_));
   }
 
-  bool RecordType::shallow_equal(const std::shared_ptr<Type> other) const {
+  bool RecordType::shallow_equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
+      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+        return false;
+      }
       if (numfields() != t->numfields()) {
         return false;
       }
@@ -75,8 +78,11 @@ namespace awkward {
     }
   }
 
-  bool RecordType::equal(const std::shared_ptr<Type> other) const {
+  bool RecordType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
+      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+        return false;
+      }
       if (numfields() != t->numfields()) {
         return false;
       }
@@ -85,7 +91,7 @@ namespace awkward {
           return false;
         }
         for (int64_t j = 0;  j < numfields();  j++) {
-          if (!field(j).get()->equal(t->field(j))) {
+          if (!field(j).get()->equal(t->field(j), check_parameters)) {
             return false;
           }
         }
@@ -106,7 +112,7 @@ namespace awkward {
           catch (std::out_of_range err) {
             return false;
           }
-          if (!field((int64_t)pair.second).get()->equal(t->field(otherindex))) {
+          if (!field((int64_t)pair.second).get()->equal(t->field(otherindex), check_parameters)) {
             return false;
           }
         }

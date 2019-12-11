@@ -233,37 +233,37 @@ namespace awkward {
     virtual bool accepts(const std::shared_ptr<Type> type) {
       std::shared_ptr<Type> check = type.get()->level();
       if (std::is_same<T, double>::value) {
-        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64)));
+        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64)), false);
       }
       else if (std::is_same<T, float>::value) {
-        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float32)));
+        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float32)), false);
       }
       else if (std::is_same<T, int64_t>::value) {
-        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64)));
+        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64)), false);
       }
       else if (std::is_same<T, uint64_t>::value) {
-        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint64)));
+        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint64)), false);
       }
       else if (std::is_same<T, int32_t>::value) {
-        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int32)));
+        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int32)), false);
       }
       else if (std::is_same<T, uint32_t>::value) {
-        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint32)));
+        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint32)), false);
       }
       else if (std::is_same<T, int16_t>::value) {
-        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int16)));
+        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int16)), false);
       }
       else if (std::is_same<T, uint16_t>::value) {
-        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint16)));
+        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint16)), false);
       }
       else if (std::is_same<T, int8_t>::value) {
-        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int8)));
+        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int8)), false);
       }
       else if (std::is_same<T, uint8_t>::value) {
-        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint8)));
+        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint8)), false);
       }
       else if (std::is_same<T, bool>::value) {
-        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::boolean)));
+        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::boolean)), false);
       }
       else {
         return false;

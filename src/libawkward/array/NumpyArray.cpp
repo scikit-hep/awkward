@@ -365,63 +365,77 @@ namespace awkward {
   }
 
   bool NumpyArray::accepts(const std::shared_ptr<Type> type) {
-    std::shared_ptr<Type> model;
-    if (format_.compare("d") == 0) {
-      model = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64));
+    std::shared_ptr<Type> test = type->level();
+    for (size_t i = 1;  i < shape_.size();  i++) {
+      if (RegularType* raw = dynamic_cast<RegularType*>(test.get())) {
+        if (raw->size() == (int64_t)shape_[i]) {
+          test = raw->inner()->level();
+        }
+        else {
+          return false;
+        }
+      }
+      else {
+        return false;
+      }
     }
-    else if (format_.compare("f") == 0) {
-      model = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float32));
-    }
+    if (PrimitiveType* raw = dynamic_cast<PrimitiveType*>(test.get())) {
+      if (format_.compare("d") == 0) {
+        return raw->dtype() == PrimitiveType::float64;
+      }
+      else if (format_.compare("f") == 0) {
+        return raw->dtype() == PrimitiveType::float32;
+      }
 #ifdef _MSC_VER
-    else if (format_.compare("q") == 0) {
+      else if (format_.compare("q") == 0) {
 #else
-    else if (format_.compare("l") == 0) {
+      else if (format_.compare("l") == 0) {
 #endif
-      model = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64));
-    }
+        return raw->dtype() == PrimitiveType::int64;
+      }
 #ifdef _MSC_VER
-    else if (format_.compare("Q") == 0) {
+      else if (format_.compare("Q") == 0) {
 #else
-    else if (format_.compare("L") == 0) {
+      else if (format_.compare("L") == 0) {
 #endif
-      model = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint64));
-    }
+        return raw->dtype() == PrimitiveType::uint64;
+      }
 #ifdef _MSC_VER
-    else if (format_.compare("l") == 0) {
+      else if (format_.compare("l") == 0) {
 #else
-    else if (format_.compare("i") == 0) {
+      else if (format_.compare("i") == 0) {
 #endif
-      model = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int32));
-    }
+        return raw->dtype() == PrimitiveType::int32;
+      }
 #ifdef _MSC_VER
-    else if (format_.compare("L") == 0) {
+      else if (format_.compare("L") == 0) {
 #else
-    else if (format_.compare("I") == 0) {
+      else if (format_.compare("I") == 0) {
 #endif
-      model = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint32));
-    }
-    else if (format_.compare("h") == 0) {
-      model = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int16));
-    }
-    else if (format_.compare("H") == 0) {
-      model = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint16));
-    }
-    else if (format_.compare("b") == 0) {
-      model = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int8));
-    }
-    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      model = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint8));
-    }
-    else if (format_.compare("?") == 0) {
-      model = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::boolean));
+        return raw->dtype() == PrimitiveType::uint32;
+      }
+      else if (format_.compare("h") == 0) {
+        return raw->dtype() == PrimitiveType::int16;
+      }
+      else if (format_.compare("H") == 0) {
+        return raw->dtype() == PrimitiveType::uint16;
+      }
+      else if (format_.compare("b") == 0) {
+        return raw->dtype() == PrimitiveType::int8;
+      }
+      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+        return raw->dtype() == PrimitiveType::uint8;
+      }
+      else if (format_.compare("?") == 0) {
+        return raw->dtype() == PrimitiveType::boolean;
+      }
+      else {
+        return false;
+      }
     }
     else {
       return false;
     }
-    for (size_t i = shape_.size() - 1;  i > 0;  i--) {
-      model = std::shared_ptr<Type>(new RegularType(Type::Parameters(), model, shape_[i]));
-    }
-    return type.get()->level().get()->shallow_equal(model);
   }
 
   int64_t NumpyArray::length() const {

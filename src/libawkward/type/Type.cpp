@@ -2,7 +2,11 @@
 
 #include <string>
 
+#include "rapidjson/document.h"
+
 #include "awkward/type/Type.h"
+
+namespace rj = rapidjson;
 
 namespace awkward {
   std::shared_ptr<Type> Type::nolength() const {
@@ -12,5 +16,25 @@ namespace awkward {
   const std::string Type::compare(std::shared_ptr<Type> supertype) {
     // FIXME: better side-by-side comparison
     return tostring() + std::string(" versus ") + supertype.get()->tostring();
+  }
+
+  bool Type::equal_parameters(const Type::Parameters& other) const {
+    if (parameters_FIXME_.size() != other.size()) {
+      return false;
+    }
+    for (auto pair : parameters_FIXME_) {
+      auto other_value = other.find(pair.first);
+      if (other_value == other.end()) {
+        return false;
+      }
+      rj::Document mine;
+      rj::Document yours;
+      mine.Parse<rj::kParseNanAndInfFlag>(pair.second.c_str());
+      yours.Parse<rj::kParseNanAndInfFlag>(other_value->second.c_str());
+      if (mine != yours) {
+        return false;
+      }
+    }
+    return true;
   }
 }

@@ -14,7 +14,7 @@ namespace awkward {
     virtual const std::vector<std::string> keys() const = 0;
     virtual const T get(const std::string& key) const = 0;
     virtual const std::string get_string(const std::string& key) const = 0;
-    virtual bool equal(const DressParameters<T>& other) const = 0;
+    virtual bool equal(const DressParameters<T>& other, bool check_parameters) const = 0;
   };
 
   template <typename T>
@@ -22,7 +22,7 @@ namespace awkward {
   public:
     virtual const std::string name() const = 0;
     virtual const std::string typestr(std::shared_ptr<Type> baretype, const DressParameters<T>& parameters) const = 0;
-    virtual bool equal(const Dress& other) const = 0;
+    virtual bool equal(const Dress& other, bool check_parameters) const = 0;
   };
 
   template <typename D, typename P>
@@ -48,14 +48,14 @@ namespace awkward {
     virtual const std::shared_ptr<Type> shallow_copy() const {
       return std::shared_ptr<Type>(new DressedType(parameters_FIXME_, type_, dress_, parameters_));
     }
-    virtual bool shallow_equal(const std::shared_ptr<Type> other) const {
+    virtual bool shallow_equal(const std::shared_ptr<Type> other, bool check_parameters) const {
       if (DressedType<D, P>* raw = dynamic_cast<DressedType<D, P>*>(other.get())) {
         D otherdress = raw->dress();
-        if (!dress_.equal(otherdress)) {
+        if (!dress_.equal(otherdress, check_parameters)) {
           return false;
         }
         P otherparam = raw->parameters();
-        if (!parameters_.equal(otherparam)) {
+        if (!parameters_.equal(otherparam, check_parameters)) {
           return false;
         }
         return true;
@@ -64,11 +64,11 @@ namespace awkward {
         return false;
       }
     }
-    virtual bool equal(const std::shared_ptr<Type> other) const {
-      if (!shallow_equal(other)) {
+    virtual bool equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+      if (!shallow_equal(other, check_parameters)) {
         return false;
       }
-      return type_.get()->equal(dynamic_cast<DressedType<D, P>*>(other.get())->type());
+      return type_.get()->equal(dynamic_cast<DressedType<D, P>*>(other.get())->type(), check_parameters);
     }
     virtual std::shared_ptr<Type> level() const {
       return type_.get()->level();

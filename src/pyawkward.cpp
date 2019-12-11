@@ -73,7 +73,7 @@ public:
     return get(key).attr("__repr__")().cast<std::string>();
   }
 
-  virtual bool equal(const ak::DressParameters<py::object>& other) const {
+  virtual bool equal(const ak::DressParameters<py::object>& other, bool check_parameters) const {
     if (const PyDressParameters* raw = dynamic_cast<const PyDressParameters*>(&other)) {
       return pydict_.attr("__eq__")(raw->pydict()).cast<bool>();
     }
@@ -118,7 +118,7 @@ public:
     return std::string();
   }
 
-  virtual bool equal(const ak::Dress<py::object>& other) const {
+  virtual bool equal(const ak::Dress<py::object>& other, bool check_parameters) const {
     if (const PyDress* raw = dynamic_cast<const PyDress*>(&other)) {
       return pyclass_.is(raw->pyclass());
     }
@@ -133,8 +133,11 @@ private:
 
 py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::string name) {
   return (py::class_<ak::Type, std::shared_ptr<ak::Type>>(m, name.c_str())
+      .def("__eq__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
+        return self.get()->equal(other, true);
+      })
       .def("__ne__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
-        return !self.get()->equal(other);
+        return !self.get()->equal(other, true);
       })
   );
 }
@@ -885,7 +888,6 @@ void setparameters(T& self, py::object parameters) {
 template <typename T>
 py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>& x) {
   return x.def("__repr__", &T::tostring)
-          .def("__eq__", &T::equal)
           .def("nolength", &T::nolength)
           .def("level", &T::level)
           .def("inner", &inner<T>)

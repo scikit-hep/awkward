@@ -187,8 +187,7 @@ namespace awkward {
 
   template <typename T>
   bool ListArrayOf<T>::accepts(const std::shared_ptr<Type> type) {
-    const std::shared_ptr<Type> model(new ListType(Type::Parameters(), std::shared_ptr<Type>(new UnknownType(Type::Parameters()))));
-    return type.get()->level().get()->shallow_equal(model);
+    return dynamic_cast<ListType*>(type.get()->level().get()) != nullptr;
   }
 
   template <typename T>
