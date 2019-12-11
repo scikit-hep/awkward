@@ -10,7 +10,7 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.EmptyArray)
 def typeof(val, c):
-    return EmptyArrayType(numba.typeof(val.id), numba.typeof(val.type))
+    return EmptyArrayType(numba.typeof(val.id), numba.none if val.isbare else numba.typeof(val.type))
 
 class EmptyArrayType(content.ContentType):
     def __init__(self, idtpe, typetpe):

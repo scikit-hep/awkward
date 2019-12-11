@@ -14,7 +14,7 @@ from ..._numba import cpu, util, content
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray64)
 def typeof(val, c):
     import awkward1._numba.types
-    return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets)), numba.typeof(val.content), numba.typeof(val.id), numba.typeof(val.type))
+    return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets)), numba.typeof(val.content), numba.typeof(val.id), numba.none if val.isbare else numba.typeof(val.type))
 
 class ListOffsetArrayType(content.ContentType):
     def __init__(self, offsetstpe, contenttpe, idtpe, typetpe):

@@ -78,11 +78,6 @@ class PrimitiveTypeType(TypeType):
         super(PrimitiveTypeType, self).__init__(name="ak::PrimitiveTypeType({0})".format(dtype))
         self.dtype = dtype
 
-# class ArrayTypeType(TypeType):
-#     def __init__(self, typetpe):
-#         super(ArrayTypeType, self).__init__(name="ak::ArrayTypeType({0})".format(typetpe.name))
-#         self.typetpe = typetpe
-
 class RegularTypeType(TypeType):
     def __init__(self, typetpe):
         super(RegularTypeType, self).__init__(name="ak::RegularTypeType({0})".format(typetpe.name))
@@ -126,13 +121,6 @@ class UnknownTypeModel(numba.datamodel.models.StructModel):
 class PrimitiveTypeModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         super(PrimitiveTypeModel, self).__init__(dmm, fe_type, [])
-
-# @numba.extending.register_model(ArrayTypeType)
-# class ArrayTypeModel(numba.datamodel.models.StructModel):
-#     def __init__(self, dmm, fe_type):
-#         members = [("type", fe_type.typetpe),
-#                    ("length", numba.int64)]
-#         super(ArrayTypeModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.register_model(RegularTypeType)
 class RegularTypeModel(numba.datamodel.models.StructModel):
@@ -189,18 +177,6 @@ def unbox_PrimitiveType(tpe, obj, c):
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
-
-# @numba.extending.unbox(ArrayTypeType)
-# def unbox_ArrayType(tpe, obj, c):
-#     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
-#     type_obj = c.pyapi.object_getattr_string(obj, "type")
-#     length_obj = c.pyapi.object_getattr_string(obj, "length")
-#     proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type_obj).value
-#     proxyout.length = c.pyapi.to_native_value(numba.int64, length_obj).value
-#     c.pyapi.decref(type_obj)
-#     c.pyapi.decref(length_obj)
-#     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
-#     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
 @numba.extending.unbox(RegularTypeType)
 def unbox_RegularType(tpe, obj, c):
@@ -281,18 +257,6 @@ def box_UnknownType(tpe, val, c):
 @numba.extending.box(PrimitiveTypeType)
 def box_PrimitiveType(tpe, val, c):
     return c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.PrimitiveType(tpe.dtype)))
-
-# @numba.extending.box(ArrayTypeType)
-# def box_ArrayType(tpe, val, c):
-#     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
-#     class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.ArrayType))
-#     type_obj = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
-#     length_obj = c.pyapi.from_native_value(numba.int64, proxyin.length, c.env_manager)
-#     out = c.pyapi.call_function_objargs(class_obj, (type_obj, length_obj))
-#     c.pyapi.decref(class_obj)
-#     c.pyapi.decref(type_obj)
-#     c.pyapi.decref(length_obj)
-#     return out
 
 @numba.extending.box(RegularTypeType)
 def box_RegularType(tpe, val, c):
@@ -398,7 +362,6 @@ def box_DressedType(tpe, val, c):
     c.pyapi.decref(kwargs)
     return out
 
-# numba.extending.make_attribute_wrapper(ArrayTypeType, "type", "type")
 numba.extending.make_attribute_wrapper(RegularTypeType, "type", "type")
 numba.extending.make_attribute_wrapper(ListTypeType, "type", "type")
 numba.extending.make_attribute_wrapper(OptionTypeType, "type", "type")

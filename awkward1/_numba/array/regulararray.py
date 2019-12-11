@@ -11,7 +11,7 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RegularArray)
 def typeof(val, c):
-    return RegularArrayType(numba.typeof(val.content), numba.typeof(val.id), numba.typeof(val.type))
+    return RegularArrayType(numba.typeof(val.content), numba.typeof(val.id), numba.none if val.isbare else numba.typeof(val.type))
 
 class RegularArrayType(content.ContentType):
     def __init__(self, contenttpe, idtpe, typetpe):

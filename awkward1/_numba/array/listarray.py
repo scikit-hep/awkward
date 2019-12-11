@@ -14,7 +14,7 @@ from ..._numba import cpu, util, content
 @numba.extending.typeof_impl.register(awkward1.layout.ListArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListArray64)
 def typeof(val, c):
-    return ListArrayType(numba.typeof(numpy.asarray(val.starts)), numba.typeof(numpy.asarray(val.stops)), numba.typeof(val.content), numba.typeof(val.id), numba.typeof(val.type))
+    return ListArrayType(numba.typeof(numpy.asarray(val.starts)), numba.typeof(numpy.asarray(val.stops)), numba.typeof(val.content), numba.typeof(val.id), numba.none if val.isbare else numba.typeof(val.type))
 
 class ListArrayType(content.ContentType):
     def __init__(self, startstpe, stopstpe, contenttpe, idtpe, typetpe):
