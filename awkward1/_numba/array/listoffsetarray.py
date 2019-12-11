@@ -43,11 +43,11 @@ class ListOffsetArrayType(content.ContentType):
         return self
 
     def getitem_str(self, key):
-        return ListOffsetArrayType(self.offsetstpe, self.contenttpe.getitem_str(key), self.idtpe, numba.none)   # FIXME: Type::none()
+        return ListOffsetArrayType(self.offsetstpe, self.contenttpe.getitem_str(key), self.idtpe, numba.none)
 
     def getitem_tuple(self, wheretpe):
         import awkward1._numba.array.listarray
-        nexttpe = awkward1._numba.array.listarray.ListArrayType(util.index64tpe, util.index64tpe, self, numba.none, numba.none)   # FIXME: Type::none()
+        nexttpe = awkward1._numba.array.listarray.ListArrayType(util.index64tpe, util.index64tpe, self, numba.none, numba.none)
         out = nexttpe.getitem_next(wheretpe, False)
         return out.getitem_int()
 
@@ -63,7 +63,7 @@ class ListOffsetArrayType(content.ContentType):
 
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
-            return ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.idtpe, numba.none)   # FIXME: Type::none()
+            return ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.idtpe, self.typetpe)
 
         elif isinstance(headtpe, numba.types.StringLiteral):
             return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
@@ -79,7 +79,7 @@ class ListOffsetArrayType(content.ContentType):
                 raise NotImplementedError("array.ndim != 1")
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
             if not isadvanced:
-                return awkward1._numba.array.regulararray.RegularArrayType(contenttpe, self.idtpe, numba.none)   # FIXME: Type::none()
+                return awkward1._numba.array.regulararray.RegularArrayType(contenttpe, self.idtpe, self.typetpe)
             else:
                 return contenttpe
 
@@ -88,7 +88,7 @@ class ListOffsetArrayType(content.ContentType):
 
     def carry(self):
         import awkward1._numba.array.listarray
-        return awkward1._numba.array.listarray.ListArrayType(self.offsetstpe, self.offsetstpe, self.contenttpe, self.idtpe, numba.none)   # FIXME: Type::none()
+        return awkward1._numba.array.listarray.ListArrayType(self.offsetstpe, self.offsetstpe, self.contenttpe, self.idtpe, self.typetpe)
 
     @property
     def lower_len(self):
@@ -410,7 +410,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             outcontenttpe = nextcontenttpe.getitem_next(tailtpe, True)
             outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, nextadvanced)
 
-        outtpe = awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.indexname), outcontenttpe, arraytpe.idtpe, numba.none)   # FIXME: Type::none()
+        outtpe = awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.indexname), outcontenttpe, arraytpe.idtpe, arraytpe.typetpe)
         proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
         proxyout.offsets = nextoffsets
         proxyout.content = outcontentval
@@ -469,7 +469,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             contenttpe = nexttpe.getitem_next(tailtpe, True)
             contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-            outtpe = awkward1._numba.array.regulararray.RegularArrayType(contenttpe, arraytpe.idtpe, numba.none)   # FIXME: Type::none()
+            outtpe = awkward1._numba.array.regulararray.RegularArrayType(contenttpe, arraytpe.idtpe, arraytpe.typetpe)
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.content = contentval
             proxyout.size = lenflathead
@@ -521,7 +521,7 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
 
     starts, stops = starts_stops(context, builder, arraytpe.offsetstpe, proxyin.offsets, lenstarts, lenoffsets)
 
-    proxyout = numba.cgutils.create_struct_proxy(awkward1._numba.array.listarray.ListArrayType(arraytpe.offsetstpe, arraytpe.offsetstpe, arraytpe.contenttpe, arraytpe.idtpe, numba.none))(context, builder)   # FIXME: Type::none()
+    proxyout = numba.cgutils.create_struct_proxy(awkward1._numba.array.listarray.ListArrayType(arraytpe.offsetstpe, arraytpe.offsetstpe, arraytpe.contenttpe, arraytpe.idtpe, arraytpe.typetpe))(context, builder)
     proxyout.starts = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.offsetstpe(arraytpe.offsetstpe, carrytpe), (starts, carryval))
     proxyout.stops = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.offsetstpe(arraytpe.offsetstpe, carrytpe), (stops, carryval))
 

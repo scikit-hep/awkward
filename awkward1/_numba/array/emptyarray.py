@@ -99,8 +99,12 @@ def box(tpe, val, c):
     args = []
     if tpe.idtpe != numba.none:
         args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
+    else:
+        args.append(c.pyapi.make_none())
     if tpe.typetpe != numba.none:
         args.append(c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager))
+    else:
+        args.append(c.pyapi.make_none())
     out = c.pyapi.call_function_objargs(EmptyArray_obj, args)
     for x in args:
         c.pyapi.decref(x)

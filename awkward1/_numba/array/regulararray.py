@@ -302,7 +302,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             outcontenttpe = nextcontenttpe.getitem_next(tailtpe, True)
             outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, nextadvanced)
 
-        outtpe = RegularArrayType(outcontenttpe, arraytpe.idtpe, numba.none)   # FIXME: Type::none()
+        outtpe = RegularArrayType(outcontenttpe, arraytpe.idtpe, arraytpe.typetpe)
         proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
         proxyout.content = outcontentval
         proxyout.size = nextsize
@@ -356,7 +356,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             contenttpe = nexttpe.getitem_next(tailtpe, True)
             contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-            outtpe = RegularArrayType(contenttpe, arraytpe.idtpe, numba.none)   # FIXME: Type::none()
+            outtpe = RegularArrayType(contenttpe, arraytpe.idtpe, arraytpe.typetpe)
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.content = contentval
             proxyout.size = lenflathead

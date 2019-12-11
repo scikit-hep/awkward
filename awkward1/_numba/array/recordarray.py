@@ -394,7 +394,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         nextval = getattr(proxyin, field(index))
 
     else:
-        nexttpe = RecordArrayType([t.getitem_next(numba.types.Tuple((headtpe,)), advanced is not None) for t in arraytpe.contenttpes], arraytpe.lookup, arraytpe.reverselookup, numba.none, arraytpe.typetpe if util.preserves_type(headtpe, advanced is not None) else numba.none)
+        nexttpe = RecordArrayType([t.getitem_next(numba.types.Tuple((headtpe,)), advanced is not None) for t in arraytpe.contenttpes], arraytpe.lookup, arraytpe.reverselookup, numba.none, numba.none)   # FIXME: Type::none()   # arraytpe.typetpe if util.preserves_type(headtpe, advanced is not None) else 
         proxyout = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
         proxyout.length = proxyin.length
         wrappedheadtpe = numba.types.Tuple((headtpe,))
