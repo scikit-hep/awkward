@@ -1,12 +1,20 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <string>
+#include <sstream>
 
 #include "awkward/type/UnknownType.h"
 
 namespace awkward {
   std::string UnknownType::tostring_part(std::string indent, std::string pre, std::string post) const {
-    return indent + pre + "unknown" + post;
+    std::stringstream out;
+    if (parameters_FIXME_.size() == 0) {
+      out << indent << pre << "unknown" << post;
+    }
+    else {
+      out << indent << pre << "unknown[" << string_parameters() << "]" << post;
+    }
+    return out.str();
   }
 
   const std::shared_ptr<Type> UnknownType::shallow_copy() const {

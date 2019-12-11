@@ -12,26 +12,56 @@
 namespace awkward {
   std::string RecordType::tostring_part(std::string indent, std::string pre, std::string post) const {
     std::stringstream out;
-    if (reverselookup_.get() == nullptr) {
-      out << "(";
-      for (size_t j = 0;  j < types_.size();  j++) {
-        if (j != 0) {
-          out << ", ";
+    if (parameters_FIXME_.size() == 0) {
+      if (reverselookup_.get() == nullptr) {
+        out << "(";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << types_[j].get()->tostring_part("", "", "");
         }
-        out << types_[j].get()->tostring_part("", "", "");
+        out << ")";
       }
-      out << ")";
+      else {
+        out << "{";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << util::quote(reverselookup_.get()->at(j), false) << ": ";
+          out << types_[j].get()->tostring_part("", "", "");
+        }
+        out << "}";
+      }
     }
     else {
-      out << "{";
-      for (size_t j = 0;  j < types_.size();  j++) {
-        if (j != 0) {
-          out << ", ";
+      if (reverselookup_.get() == nullptr) {
+        out << "tuple[[";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << types_[j].get()->tostring_part("", "", "");
         }
-        out << util::quote(reverselookup_.get()->at(j), false) << ": ";
-        out << types_[j].get()->tostring_part("", "", "");
       }
-      out << "}";
+      else {
+        out << "struct[[";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << util::quote(reverselookup_.get()->at(j), false);
+        }
+        out << "], [";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << types_[j].get()->tostring_part("", "", "");
+        }
+      }
+      out << "], " << string_parameters() << "]";
     }
     return out.str();
   }

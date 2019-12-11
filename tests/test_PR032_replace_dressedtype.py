@@ -31,3 +31,58 @@ def test_types_with_parameters():
 
     assert t == awkward1.layout.UnknownType(parameters={"key2": u"one \u2192 two", "key1": ["val", "ue"]})
     assert t != awkward1.layout.UnknownType(parameters={"key": ["val", "ue"]})
+
+numba = pytest.importorskip("numba")
+
+def test_boxing():
+    @numba.njit
+    def f1(q):
+        return 3.14
+
+    @numba.njit
+    def f2(q):
+        return q
+
+    t = awkward1.layout.UnknownType(parameters={"one": 1, "two": 2})
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.PrimitiveType("int32", parameters={"one": 1, "two": 2})
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.PrimitiveType("float64", parameters={"one": 1, "two": 2})
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.ListType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32"), parameters={"one": 1, "two": 2}))
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.ListType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")), parameters={"one": 1, "two": 2})
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.RegularType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")), 5, parameters={"one": 1, "two": 2})
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.OptionType(awkward1.layout.PrimitiveType("int32"), parameters={"one": 1, "two": 2})
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.OptionType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")), parameters={"one": 1, "two": 2})
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.UnionType((awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64")), parameters={"one": 1, "two": 2})
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.RecordType((awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64")), parameters={"one": 1, "two": 2})
+    f1(t)
+    assert f2(t) == t
+
+    t = awkward1.layout.RecordType({"one": awkward1.layout.PrimitiveType("int32"), "two": awkward1.layout.PrimitiveType("float64")}, parameters={"one": 1, "two": 2})
+    f1(t)
+    assert f2(t) == t

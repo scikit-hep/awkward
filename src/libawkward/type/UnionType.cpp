@@ -18,6 +18,9 @@ namespace awkward {
       }
       out << type(i).get()->tostring_part(indent, "", "");
     }
+    if (parameters_FIXME_.size() != 0) {
+      out << ", " << string_parameters();
+    }
     out << "]" << post;
     return out.str();
   }

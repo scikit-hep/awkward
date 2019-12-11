@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <cassert>
+#include <sstream>
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
@@ -9,6 +10,7 @@
 
 namespace awkward {
   std::string PrimitiveType::tostring_part(std::string indent, std::string pre, std::string post) const {
+    std::stringstream out;
     std::string s;
     switch (dtype_) {
       case boolean: s = "bool"; break;
@@ -24,7 +26,13 @@ namespace awkward {
       case float64: s = "float64"; break;
       default:      assert(dtype_ < numtypes);
     }
-    return indent + pre + s + post;
+    if (parameters_FIXME_.size() == 0) {
+      out << indent << pre << s << post;
+    }
+    else {
+      out << indent << pre << s << "[" << string_parameters() << "]" << post;
+    }
+    return out.str();
   }
 
   const std::shared_ptr<Type> PrimitiveType::shallow_copy() const {

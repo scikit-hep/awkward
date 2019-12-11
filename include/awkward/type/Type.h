@@ -42,6 +42,7 @@ namespace awkward {
 
   protected:
     bool equal_parameters(const Parameters& other) const;
+    const std::string string_parameters() const;
 
     Parameters parameters_FIXME_;
   };

@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <string>
+#include <sstream>
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ListType.h"
@@ -10,13 +11,20 @@
 
 namespace awkward {
   std::string OptionType::tostring_part(std::string indent, std::string pre, std::string post) const {
-    if (dynamic_cast<ListType*>(type_.get()) != nullptr  ||
-        dynamic_cast<RegularType*>(type_.get()) != nullptr) {
-      return indent + pre + "option[" + type().get()->tostring_part(indent, "", "") + "]" + post;
+    std::stringstream out;
+    if (parameters_FIXME_.size() == 0) {
+      if (dynamic_cast<ListType*>(type_.get()) != nullptr  ||
+          dynamic_cast<RegularType*>(type_.get()) != nullptr) {
+        out << indent << pre << "option[" << type_.get()->tostring_part(indent, "", "") << "]" << post;
+      }
+      else {
+        out << indent << pre << "?" << type_.get()->tostring_part("", "", "") << post;
+      }
     }
     else {
-      return indent + pre + "?" + type_.get()->tostring_part("", "", "") + post;
+      out << indent << pre << "option[" << type_.get()->tostring_part(indent, "", "") << ", " << string_parameters() << "]" << post;
     }
+    return out.str();
   }
 
   const std::shared_ptr<Type> OptionType::shallow_copy() const {

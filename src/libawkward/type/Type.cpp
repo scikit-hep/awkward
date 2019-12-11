@@ -1,8 +1,11 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <string>
+#include <sstream>
 
 #include "rapidjson/document.h"
+
+#include "awkward/util.h"
 
 #include "awkward/type/Type.h"
 
@@ -36,5 +39,20 @@ namespace awkward {
       }
     }
     return true;
+  }
+
+  const std::string Type::string_parameters() const {
+    std::stringstream out;
+    out << "parameters={";
+    bool first = true;
+    for (auto pair : parameters_FIXME_) {
+      if (!first) {
+        out << ", ";
+      }
+      out << util::quote(pair.first, true) << ": " << pair.second;
+      first = false;
+    }
+    out << "}";
+    return out.str();
   }
 }
