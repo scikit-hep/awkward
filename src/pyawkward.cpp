@@ -842,6 +842,37 @@ py::dict emptydict(T& self) {
   return py::dict();
 }
 
+ak::Type::Parameters dict2parameters(py::object in) {
+  ak::Type::Parameters out;
+  if (in.is(py::none())) {
+    // None is equivalent to an empty dict
+  }
+  else if (py::isinstance<py::dict>(in)) {
+    for (auto pair : in.cast<py::dict>()) {
+      std::string key = pair.first.cast<std::string>();
+      py::object value = py::module::import("json").attr("dumps")(pair.second);
+      out[key] = value.cast<std::string>();
+    }
+  }
+  else {
+    throw std::invalid_argument("type parameters must be a dict (or None)");
+  }
+  return out;
+}
+
+template <typename T>
+py::dict parameters2dict(const ak::Type::Parameters in) {
+  py::dict out;
+  for (auto pair : in) {
+    std::string cppkey = pair.first;
+    std::string cppvalue = pair.second;
+    py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(), cppkey.length(), "surrogateescape"));
+    py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(), cppvalue.length(), "surrogateescape"));
+    out[pykey] = py::module::import("json").attr("loads")(pyvalue);
+  }
+  return out;
+}
+
 template <typename T>
 py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>& x) {
   return x.def("__repr__", &T::tostring)
@@ -888,7 +919,9 @@ py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type> make_Dressed
 
 py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayType(py::handle m, std::string name) {
   return type_methods(py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type>(m, name.c_str())
-      .def(py::init([](std::shared_ptr<ak::Type> type, int64_t length) -> ak::ArrayType { return ak::ArrayType(ak::Type::Parameters(), type, length); }))
+      .def(py::init([](std::shared_ptr<ak::Type> type, int64_t length, py::object parameters) -> ak::ArrayType {
+        return ak::ArrayType(ak::Type::Parameters(), type, length);
+      }), py::arg("type"), py::arg("length"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::ArrayType::type)
       .def_property_readonly("length", &ak::ArrayType::length)
       .def_property_readonly("parameters", &emptydict<ak::ArrayType>)
@@ -902,7 +935,9 @@ py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayTy
 
 py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_UnknownType(py::handle m, std::string name) {
   return type_methods(py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type>(m, name.c_str())
-      .def(py::init([]() -> ak::UnknownType { return ak::UnknownType(ak::Type::Parameters()); }))
+      .def(py::init([](py::object parameters) -> ak::UnknownType {
+        return ak::UnknownType(dict2parameters(parameters));
+      }), py::arg("parameters") = py::none())
       .def_property_readonly("parameters", &emptydict<ak::UnknownType>)
       .def(py::pickle([](const ak::UnknownType& self) {
         return py::make_tuple();
@@ -914,7 +949,7 @@ py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_Unk
 
 py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make_PrimitiveType(py::handle m, std::string name) {
   return type_methods(py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type>(m, name.c_str())
-      .def(py::init([](std::string dtype) -> ak::PrimitiveType {
+      .def(py::init([](std::string dtype, py::object parameters) -> ak::PrimitiveType {
         if (dtype == std::string("bool")) {
           return ak::PrimitiveType(ak::Type::Parameters(), ak::PrimitiveType::boolean);
         }
@@ -951,7 +986,7 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
         else {
           throw std::invalid_argument(std::string("unrecognized primitive type: ") + dtype);
         }
-      }))
+      }), py::arg("dtype"), py::arg("parameters") = py::none())
       .def_property_readonly("dtype", [](ak::PrimitiveType& self) -> std::string {
         switch (self.dtype()) {
           case ak::PrimitiveType::boolean: return std::string("bool");
@@ -980,7 +1015,9 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
 
 py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_RegularType(py::handle m, std::string name) {
   return type_methods(py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type>(m, name.c_str())
-      .def(py::init([](std::shared_ptr<ak::Type> type, int64_t size) -> ak::RegularType { return ak::RegularType(ak::Type::Parameters(), type, size); }))
+      .def(py::init([](std::shared_ptr<ak::Type> type, int64_t size, py::object parameters) -> ak::RegularType {
+        return ak::RegularType(ak::Type::Parameters(), type, size);
+      }), py::arg("type"), py::arg("size"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::RegularType::type)
       .def_property_readonly("size", &ak::RegularType::size)
       .def_property_readonly("parameters", &emptydict<ak::RegularType>)
@@ -994,7 +1031,9 @@ py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_Reg
 
 py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(py::handle m, std::string name) {
   return type_methods(py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type>(m, name.c_str())
-      .def(py::init([](std::shared_ptr<ak::Type> type) -> ak::ListType { return ak::ListType(ak::Type::Parameters(), type); }))
+      .def(py::init([](std::shared_ptr<ak::Type> type, py::object parameters) -> ak::ListType {
+        return ak::ListType(ak::Type::Parameters(), type);
+      }), py::arg("type"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::ListType::type)
       .def_property_readonly("parameters", &emptydict<ak::ListType>)
       .def(py::pickle([](const ak::ListType& self) {
@@ -1007,7 +1046,9 @@ py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(
 
 py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_OptionType(py::handle m, std::string name) {
   return type_methods(py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type>(m, name.c_str())
-      .def(py::init([](std::shared_ptr<ak::Type> type) -> ak::OptionType { return ak::OptionType(ak::Type::Parameters(), type); }))
+      .def(py::init([](std::shared_ptr<ak::Type> type, py::object parameters) -> ak::OptionType {
+        return ak::OptionType(ak::Type::Parameters(), type);
+      }), py::arg("type"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::OptionType::type)
       .def_property_readonly("parameters", &emptydict<ak::OptionType>)
       .def(py::pickle([](const ak::OptionType& self) {
