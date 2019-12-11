@@ -873,6 +873,16 @@ py::dict parameters2dict(const ak::Type::Parameters& in) {
 }
 
 template <typename T>
+py::dict getparameters(T& self) {
+  return parameters2dict(self.parameters());
+}
+
+template <typename T>
+void setparameters(T& self, py::object parameters) {
+  self.setparameters(dict2parameters(parameters));
+}
+
+template <typename T>
 py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>& x) {
   return x.def("__repr__", &T::tostring)
           .def("__eq__", &T::equal)
@@ -923,7 +933,7 @@ py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayTy
       }), py::arg("type"), py::arg("length"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::ArrayType::type)
       .def_property_readonly("length", &ak::ArrayType::length)
-      .def_property_readonly("parameters", &emptydict<ak::ArrayType>)
+      .def_property("parameters", &getparameters<ak::ArrayType>, &setparameters<ak::ArrayType>)
       .def(py::pickle([](const ak::ArrayType& self) {
         return py::make_tuple(parameters2dict(self.parameters()), box(self.type()), py::cast(self.length()));
       }, [](py::tuple state) {
@@ -937,7 +947,7 @@ py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_Unk
       .def(py::init([](py::object parameters) -> ak::UnknownType {
         return ak::UnknownType(dict2parameters(parameters));
       }), py::arg("parameters") = py::none())
-      .def_property_readonly("parameters", &emptydict<ak::UnknownType>)
+      .def_property("parameters", &getparameters<ak::UnknownType>, &setparameters<ak::UnknownType>)
       .def(py::pickle([](const ak::UnknownType& self) {
         return py::make_tuple(parameters2dict(self.parameters()));
       }, [](py::tuple state) {
@@ -1003,7 +1013,7 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
           throw std::invalid_argument(std::string("unrecognized primitive type: ") + std::to_string(self.dtype()));
         }
       })
-      .def_property_readonly("parameters", &emptydict<ak::PrimitiveType>)
+      .def_property("parameters", &getparameters<ak::PrimitiveType>, &setparameters<ak::PrimitiveType>)
       .def(py::pickle([](const ak::PrimitiveType& self) {
         return py::make_tuple(parameters2dict(self.parameters()), py::cast((int64_t)self.dtype()));
       }, [](py::tuple state) {
@@ -1019,7 +1029,7 @@ py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_Reg
       }), py::arg("type"), py::arg("size"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::RegularType::type)
       .def_property_readonly("size", &ak::RegularType::size)
-      .def_property_readonly("parameters", &emptydict<ak::RegularType>)
+      .def_property("parameters", &getparameters<ak::RegularType>, &setparameters<ak::RegularType>)
       .def(py::pickle([](const ak::RegularType& self) {
         return py::make_tuple(parameters2dict(self.parameters()), box(self.type()), py::cast(self.size()));
       }, [](py::tuple state) {
@@ -1034,7 +1044,7 @@ py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(
         return ak::ListType(dict2parameters(parameters), type);
       }), py::arg("type"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::ListType::type)
-      .def_property_readonly("parameters", &emptydict<ak::ListType>)
+      .def_property("parameters", &getparameters<ak::ListType>, &setparameters<ak::ListType>)
       .def(py::pickle([](const ak::ListType& self) {
         return py::make_tuple(parameters2dict(self.parameters()), box(self.type()));
       }, [](py::tuple state) {
@@ -1049,7 +1059,7 @@ py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_Optio
         return ak::OptionType(dict2parameters(parameters), type);
       }), py::arg("type"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::OptionType::type)
-      .def_property_readonly("parameters", &emptydict<ak::OptionType>)
+      .def_property("parameters", &getparameters<ak::OptionType>, &setparameters<ak::OptionType>)
       .def(py::pickle([](const ak::OptionType& self) {
         return py::make_tuple(parameters2dict(self.parameters()), box(self.type()));
       }, [](py::tuple state) {
@@ -1076,7 +1086,7 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
         return types;
       })
       .def("type", &ak::UnionType::type)
-      .def_property_readonly("parameters", &emptydict<ak::UnionType>)
+      .def_property("parameters", &getparameters<ak::UnionType>, &setparameters<ak::UnionType>)
       .def(py::pickle([](const ak::UnionType& self) {
         py::tuple types((size_t)self.numtypes());
         for (int64_t i = 0;  i < self.numtypes();  i++) {
@@ -1229,7 +1239,7 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
       })
       .def_property_readonly("lookup", &lookup<ak::RecordType>)
       .def_property_readonly("reverselookup", &reverselookup<ak::RecordType>)
-      .def_property_readonly("parameters", &emptydict<ak::RecordType>)
+      .def_property("parameters", &getparameters<ak::RecordType>, &setparameters<ak::RecordType>)
       .def(py::pickle([](const ak::RecordType& self) {
         py::tuple fields((size_t)self.numfields());
         for (int64_t i = 0;  i < self.numfields();  i++) {

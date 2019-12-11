@@ -36,6 +36,7 @@ namespace awkward {
     virtual const std::vector<std::string> keys() const = 0;
 
     const Parameters parameters() const { return parameters_FIXME_; }
+    void setparameters(const Parameters& parameters) { parameters_FIXME_ = parameters; }
     std::string parameter(const std::string& key) { return parameters_FIXME_[key]; }
     std::string tostring() const { return tostring_part("", "", ""); };
     const std::string compare(std::shared_ptr<Type> supertype);
