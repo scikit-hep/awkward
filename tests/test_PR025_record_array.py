@@ -110,7 +110,7 @@ def test_type():
 
     recordarray.setkey(0, "one")
     recordarray.setkey(1, "two")
-    assert str(awkward1.typeof(recordarray)) in ("5 * {'one': int64, 'two': var * float64}", "5 * {'two': var * float64, 'one': int64}")
+    assert str(awkward1.typeof(recordarray)) in ('5 * {"one": int64, "two": var * float64}', '5 * {"two": var * float64, "one": int64}')
     assert recordarray.lookup == {"one": 0, "two": 1}
 
     assert str(awkward1.layout.RecordType(
@@ -119,7 +119,7 @@ def test_type():
 
     assert str(awkward1.layout.RecordType(
         {"one": awkward1.layout.PrimitiveType("int32"),
-        "two": awkward1.layout.PrimitiveType("float64")})) in ("{'one': int32, 'two': float64}", "{'two': float64, 'one': int32}")
+        "two": awkward1.layout.PrimitiveType("float64")})) in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
 
     assert awkward1.typeof(recordarray) == awkward1.layout.ArrayType(awkward1.layout.RecordType({
         "one": awkward1.layout.PrimitiveType("int64"),
@@ -372,7 +372,7 @@ def test_fillable_record():
     fillable.real(3.3)
     fillable.endrecord()
 
-    assert str(fillable.type) == "3 * {'one': int64, 'two': float64}"
+    assert str(fillable.type) == '3 * {"one": int64, "two": float64}'
     assert awkward1.tolist(fillable.snapshot()) == [{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}]
 
 def test_fromiter():

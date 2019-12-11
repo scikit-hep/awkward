@@ -27,7 +27,7 @@ def test_highlevel():
     assert str(b) == "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ... 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]"
 
     c = awkward1.Array('[{"one": 3.14, "two": [1.1, 2.2]}, {"one": 99.9, "two": [-3.1415926]}]')
-    assert repr(c) == "<Array [{one: 3.14, two: [1.1, ... -3.14]}] type=\"2 * {'one': float64, 'two': va...\">"
+    assert repr(c) == "<Array [{one: 3.14, two: [1.1, ... -3.14]}] type='2 * {\"one\": float64, \"two\": va...'>"
     assert str(c) == "[{one: 3.14, two: [1.1, 2.2]}, {one: 99.9, two: [-3.14]}]"
 
 class Dummy(awkward1.highlevel.Array):
@@ -129,7 +129,7 @@ class D(awkward1.highlevel.Array):
 def test_type_propagation():
     array = awkward1.Array([[{"one": 1, "two": [1.0, 1.1]}, {"one": 2, "two": [2.0]}, {"one": 3, "two": [3.0, 3.1, 3.2]}], [], [{"one": 4, "two": []}, {"one": 5, "two": [5.0, 5.1, 5.2, 5.3]}]])
     assert awkward1.tolist(array) == [[{"one": 1, "two": [1.0, 1.1]}, {"one": 2, "two": [2.0]}, {"one": 3, "two": [3.0, 3.1, 3.2]}], [], [{"one": 4, "two": []}, {"one": 5, "two": [5.0, 5.1, 5.2, 5.3]}]]
-    assert repr(array.type) in ("3 * var * {'one': int64, 'two': var * float64}", "3 * var * {'two': var * float64, 'one': int64}")
+    assert repr(array.type) in ('3 * var * {"one": int64, "two": var * float64}', '3 * var * {"two": var * float64, "one": int64}')
 
     dfloat64 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), D)
     dvarfloat64 = awkward1.layout.DressedType(awkward1.layout.ListType(dfloat64), D)
