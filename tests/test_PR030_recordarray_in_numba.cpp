@@ -11,26 +11,37 @@ namespace ak = awkward;
 
 int main(int, char**) 
 {
-  std::vector<std::vector<std::vector<double>>> vector =
-  {{{true, 1, 1.1}, {false, 2, 2.2}, {true, 3, 3.3}}, {}, {}, {}};
 
-  //code to manually fill an awkward array with `vector`
-  include/fillable/FillableArray.h
+  // create fillable array
+  ak::FillableArray myarray(ak::FillableOptions(1024, 2.0));
+
+  // populate fillable array with lists
+  myarray.beginlist();
+  //myarray.boolean(true);
+  myarray.integer(1);
+  myarray.real(1.1);
+  myarray.endlist();
+  
+  myarray.beginlist();
+  //myarray.boolean(false);
+  myarray.integer(2);
+  myarray.real(2.2);
+  myarray.endlist();
+
+  myarray.beginlist();
+  //myarray.boolean(true);
+  myarray.integer(3);
+  myarray.real(3.3);
+  myarray.endlist();
+
+  // take a snapshot 
+  //std::shared_ptr<ak::Content> array = builder.snapshot();
+ 
+  // saving to compare fillable array to std vector
+  //std::vector<std::vector<std::vector<double>>> vector =
+  //{{{true, 1, 1.1}, {false, 2, 2.2}, {true, 3, 3.3}}, {}, {}, {}};
 
 
-
-//  ak::FillableArray builder(ak::FillableOptions(1024, 2.0));
-//  for (auto x : vector) builder.fill(x);
-//  std::shared_ptr<ak::Content> array = builder.snapshot();
-
-//  ak::Slice slice;
-//  slice.append(ak::SliceRange(ak::Slice::none(), ak::Slice::none(), -1));
-//  slice.append(ak::SliceRange(ak::Slice::none(), ak::Slice::none(), 2));
-//  slice.append(ak::SliceRange(1, ak::Slice::none(), ak::Slice::none()));
-
-//  if (array.get()->getitem(slice).get()->tojson(false, 1) !=
-//         "[[[7.7,8.8,9.9]],[],[[]],[[1.1,2.2],[4.4]]]")
-//   return -1;
   return 0;
 }
 
