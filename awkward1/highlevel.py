@@ -6,7 +6,11 @@ import awkward1.layout
 import awkward1.operations.convert
 
 class Array(object):
-    def __init__(self, data, type=None, copy=False):
+    def __init__(self, data, type=None, namespace=None, copy=False):
+        if namespace is None:
+            self._namespace = awkward1.namespace
+        else:
+            self._namespace = namespace
         if isinstance(data, awkward1.layout.Content):
             layout = data
         elif isinstance(data, Array):
@@ -24,6 +28,10 @@ class Array(object):
         self.layout = layout
         if type is not None:
             self.type = type
+        else:
+            t = self.layout.type.nolength()
+            if t.parameters.get("__class__") in self._namespace:
+                self.__class__ = self._namespace[t.parameters["__class__"]]
 
     @property
     def layout(self):
@@ -46,6 +54,10 @@ class Array(object):
         t = type.nolength()
         if isinstance(t, awkward1.layout.DressedType) and isinstance(t.dress, __builtins__["type"]):
             self.__class__ = t.dress
+
+        elif t.parameters.get("__class__") in self._namespace:
+            self.__class__ = self._namespace[t.parameters["__class__"]]
+
         self._layout.type = type
 
     @property
@@ -54,7 +66,7 @@ class Array(object):
 
     def __iter__(self):
         for x in self.layout:
-            yield awkward1._util.wrap(x)
+            yield awkward1._util.wrap(x, self._namespace)
 
     def __str__(self, limit_value=85):
         if len(self) == 0:
@@ -194,7 +206,7 @@ class Array(object):
         return len(self.layout)
 
     def __getitem__(self, where):
-        return awkward1._util.wrap(self.layout[where])
+        return awkward1._util.wrap(self.layout[where], self._namespace)
 
 class Record(object):
     def __init__(self, data, type=None, copy=False):

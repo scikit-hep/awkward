@@ -5,11 +5,16 @@ import re
 
 import numpy
 
-def wrap(content):
+def wrap(content, namespace):
     import awkward1.layout
     if isinstance(content, (awkward1.layout.Content, awkward1.layout.Record)):
-        if isinstance(content.type.nolength(), awkward1.layout.DressedType):
-            return content.type.nolength().dress(content)
+        t = content.type.nolength()
+
+        if isinstance(t, awkward1.layout.DressedType):
+            return t.dress(content)
+
+        elif t.parameters.get("__class__") in namespace:
+            return namespace[t.parameters["__class__"]](content, namespace=namespace)
         elif isinstance(content, awkward1.layout.Record):
             return awkward1.Record(content)
         else:

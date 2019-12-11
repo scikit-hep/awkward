@@ -32,6 +32,24 @@ def test_types_with_parameters():
     assert t == awkward1.layout.UnknownType(parameters={"key2": u"one \u2192 two", "key1": ["val", "ue"]})
     assert t != awkward1.layout.UnknownType(parameters={"key": ["val", "ue"]})
 
+def test_dress():
+    class Dummy(awkward1.highlevel.Array):
+        def __repr__(self):
+            return "<Dummy {0}>".format(str(self))
+    ns = {"Dummy": Dummy}
+
+    t = awkward1.layout.PrimitiveType("float64", {"__class__": "Dummy"})
+    x = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]), type=t)
+    a = awkward1.Array(x, namespace=ns)
+    assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
+
+    x2 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), x)
+    a2 = awkward1.Array(x2, namespace=ns)
+    assert repr(a2) == "<Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64[parameters={\"__...'>"
+    assert repr(a2[0]) == "<Dummy [1.1, 2.2, 3.3]>"
+    assert repr(a2[1]) == "<Dummy []>"
+    assert repr(a2[2]) == "<Dummy [4.4, 5.5]>"
+
 numba = pytest.importorskip("numba")
 
 def test_boxing():

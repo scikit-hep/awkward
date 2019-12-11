@@ -11,4 +11,6 @@ from awkward1.operations.describe import *
 
 from awkward1.behavior.string import *
 
+namespace = {}
+
 __version__ = awkward1.layout.__version__
