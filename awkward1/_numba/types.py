@@ -294,15 +294,13 @@ def box_OptionType(tpe, val, c):
 def box_UnionType(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.UnionType))
-    args = c.pyapi.tuple_new(len(tpe.typetpes))
+    types_obj = c.pyapi.tuple_new(len(tpe.typetpes))
     for i, t in enumerate(tpe.typetpes):
         x_obj = c.pyapi.from_native_value(t, getattr(proxyin, field(i)), c.env_manager)
-        c.pyapi.tuple_setitem(args, i, x_obj)
-    kwargs = c.pyapi.dict_new(0)
-    out = c.pyapi.call(class_obj, args, kwargs)
+        c.pyapi.tuple_setitem(types_obj, i, x_obj)
+    out = c.pyapi.call_function_objargs(class_obj, (types_obj,))
     c.pyapi.decref(class_obj)
-    c.pyapi.decref(args)
-    c.pyapi.decref(kwargs)
+    c.pyapi.decref(types_obj)
     return out
 
 @numba.extending.box(RecordTypeType)

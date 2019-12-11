@@ -41,8 +41,8 @@ def test_pickle():
     t = awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.layout.RegularType(awkward1.layout.PrimitiveType("int32"), 5); assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.layout.OptionType(awkward1.layout.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.layout.UnionType(awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64")); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.layout.RecordType(one=awkward1.layout.PrimitiveType("int32"), two=awkward1.layout.PrimitiveType("float64")); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.UnionType((awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64"))); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.RecordType({"one": awkward1.layout.PrimitiveType("int32"), "two": awkward1.layout.PrimitiveType("float64")}); assert pickle.loads(pickle.dumps(t)) == t
 
 def test_boxing():
     @numba.njit
@@ -89,11 +89,11 @@ def test_boxing():
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.layout.UnionType(awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64"))
+    t = awkward1.layout.UnionType((awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64")))
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.layout.RecordType(one=awkward1.layout.PrimitiveType("int32"), two=awkward1.layout.PrimitiveType("float64"))
+    t = awkward1.layout.RecordType({"one": awkward1.layout.PrimitiveType("int32"), "two": awkward1.layout.PrimitiveType("float64")})
     f1(t)
     assert f2(t) == t
 
