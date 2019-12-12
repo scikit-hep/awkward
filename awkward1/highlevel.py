@@ -47,13 +47,8 @@ class Array(object):
         if not isinstance(type, awkward1.layout.Type):
             raise TypeError("type must be a subclass of awkward1.layout.Type")
         t = type.nolength()
-
-        # if isinstance(t, awkward1.layout.DressedType) and isinstance(t.dress, __builtins__["type"]):
-        #     self.__class__ = t.dress
-
         if t.parameters.get("__class__") in self._namespace:
             self.__class__ = self._namespace[t.parameters["__class__"]]
-
         self._layout.type = type
 
     @property
@@ -82,11 +77,9 @@ class Array(object):
         def forward(x, space, brackets=True, wrap=True):
             done = False
             if wrap and isinstance(x, awkward1.layout.Content):
-                # if isinstance(x.type.nolength(), awkward1.layout.DressedType):
                 t = x.type.nolength()
                 if t.parameters.get("__class__") in self._namespace:
                     y = self._namespace[t.parameters["__class__"]](x, namespace=self._namespace)
-                    # y = t.dress(x)
                     if "__repr__" in type(y).__dict__:
                         yield space + repr(y)
                         done = True
@@ -119,11 +112,9 @@ class Array(object):
         def backward(x, space, brackets=True, wrap=True):
             done = False
             if wrap and isinstance(x, awkward1.layout.Content):
-                # if isinstance(x.type.nolength(), awkward1.layout.DressedType):
                 t = x.type.nolength()
                 if t.parameters.get("__class__") in self._namespace:
                     y = self._namespace[t.parameters["__class__"]](x, namespace=self._namespace)
-                    # y = t.dress(x)
                     if "__repr__" in type(y).__dict__:
                         yield repr(y) + space
                         done = True
@@ -252,8 +243,6 @@ class Record(object):
         t = type.nolength()
         if t.parameters.get("__class__") in self._namespace:
             self.__class__ = self._namespace[t.parameters["__class__"]]
-        # if isinstance(type, awkward1.layout.DressedType) and isinstance(type.dress, __builtins__["type"]):
-        #     self.__class__ = t.dress
         self._layout.type = type
 
     @property

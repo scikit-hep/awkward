@@ -41,7 +41,7 @@ def test_dress():
     t = awkward1.layout.PrimitiveType("float64", {"__class__": "Dummy"})
     x = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]), type=t)
     a = awkward1.Array(x, namespace=ns)
-    # assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
+    assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
     x2 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), x)
     a2 = awkward1.Array(x2, namespace=ns)

@@ -22,7 +22,6 @@
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
-// #include "awkward/type/DressedType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/PrimitiveType.h"
@@ -50,87 +49,6 @@ private:
   PyObject* pyobj_;
 };
 
-// class PyDressParameters: public ak::DressParameters<py::object> {
-// public:
-//   PyDressParameters(const py::dict& pydict): pydict_(pydict) { }
-//
-//   py::dict pydict() const { return pydict_; }
-//
-//   virtual const std::vector<std::string> keys() const {
-//     std::vector<std::string> out;
-//     for (auto pair : pydict_) {
-//       out.push_back(pair.first.cast<std::string>());
-//     }
-//     return out;
-//   }
-//
-//   virtual const py::object get(const std::string& key) const {
-//     py::str pykey(PyUnicode_DecodeUTF8(key.data(), key.length(), "surrogateescape"));
-//     return pydict_[pykey];
-//   }
-//
-//   virtual const std::string get_string(const std::string& key) const {
-//     return get(key).attr("__repr__")().cast<std::string>();
-//   }
-//
-//   virtual bool equal(const ak::DressParameters<py::object>& other, bool check_parameters) const {
-//     if (const PyDressParameters* raw = dynamic_cast<const PyDressParameters*>(&other)) {
-//       return pydict_.attr("__eq__")(raw->pydict()).cast<bool>();
-//     }
-//     else {
-//       return false;
-//     }
-//   }
-//
-// private:
-//   py::dict pydict_;
-// };
-//
-// class PyDress: public ak::Dress<py::object> {
-// public:
-//   PyDress(const py::object& pyclass): pyclass_(pyclass) { }
-//
-//   py::object pyclass() const { return pyclass_; }
-//
-//   virtual const std::string name() const {
-//     std::string out;
-//     if (py::hasattr(pyclass_, "__module__")) {
-//       out = pyclass_.attr("__module__").cast<std::string>() + std::string(".");
-//     }
-//     if (py::hasattr(pyclass_, "__qualname__")) {
-//       out = out + pyclass_.attr("__qualname__").cast<std::string>();
-//     }
-//     else if (py::hasattr(pyclass_, "__name__")) {
-//       out = out + pyclass_.attr("__name__").cast<std::string>();
-//     }
-//     else {
-//       out = out + std::string("<unknown name>");
-//     }
-//     return out;
-//   }
-//
-//   virtual const std::string typestr(std::shared_ptr<ak::Type> baretype, const ak::DressParameters<py::object>& parameters) const {
-//     if (const PyDressParameters* raw = dynamic_cast<const PyDressParameters*>(&parameters)) {
-//       if (py::hasattr(pyclass_, "typestr")) {
-//         return pyclass_.attr("typestr")(py::cast(baretype.get()), raw->pydict()).cast<std::string>();
-//       }
-//     }
-//     return std::string();
-//   }
-//
-//   virtual bool equal(const ak::Dress<py::object>& other, bool check_parameters) const {
-//     if (const PyDress* raw = dynamic_cast<const PyDress*>(&other)) {
-//       return pyclass_.is(raw->pyclass());
-//     }
-//     else {
-//       return false;
-//     }
-//   }
-//
-// private:
-//   py::object pyclass_;
-// };
-
 py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::string name) {
   return (py::class_<ak::Type, std::shared_ptr<ak::Type>>(m, name.c_str())
       .def("__eq__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
@@ -142,12 +60,8 @@ py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::str
   );
 }
 
-// typedef ak::DressedType<PyDress, PyDressParameters> PyDressedType;
 
 py::object box(std::shared_ptr<ak::Type> t) {
-  // if (PyDressedType* raw = dynamic_cast<PyDressedType*>(t.get())) {
-  //   return py::cast(*raw);
-  // }
   if (ak::ArrayType* raw = dynamic_cast<ak::ArrayType*>(t.get())) {
     return py::cast(*raw);
   }
@@ -244,10 +158,6 @@ py::object box(std::shared_ptr<ak::Identity> id) {
 }
 
 std::shared_ptr<ak::Type> unbox_type(py::handle obj) {
-  // try {
-  //   return obj.cast<PyDressedType*>()->shallow_copy();
-  // }
-  // catch (py::cast_error err) { }
   try {
     return obj.cast<ak::ArrayType*>()->shallow_copy();
   }
@@ -905,28 +815,6 @@ py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>
           .def("keys", &T::keys)
   ;
 }
-
-// py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type> make_DressedType(py::handle m, std::string name) {
-//   return type_methods(py::class_<PyDressedType, std::shared_ptr<PyDressedType>, ak::Type>(m, name.c_str())
-//       .def(py::init([](std::shared_ptr<ak::Type> type, py::object dress, py::kwargs kwargs) -> PyDressedType {
-//         kwargs = py::module::import("copy").attr("deepcopy")(kwargs);
-//         return PyDressedType(ak::Type::Parameters(), type, PyDress(dress), PyDressParameters(kwargs));
-//       }))
-//       .def_property_readonly("type", &PyDressedType::type)
-//       .def_property_readonly("dress", [](PyDressedType& self) -> py::object {
-//         return self.dress().pyclass();
-//       })
-//       .def_property_readonly("parameters", [](PyDressedType& self) -> py::dict {
-//         return self.parameters().pydict();
-//       })
-//       .def(py::pickle([](const PyDressedType& self) {
-//         return py::make_tuple(self.type(), self.dress().pyclass(), self.parameters().pydict());
-//       }, [](py::tuple state) {
-//         return PyDressedType(ak::Type::Parameters(), unbox_type(state[0]), PyDress(state[1]), PyDressParameters(state[2]));
-//       }))
-//
-//   );
-// }
 
 py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayType(py::handle m, std::string name) {
   return type_methods(py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type>(m, name.c_str())
@@ -1628,7 +1516,6 @@ PYBIND11_MODULE(layout, m) {
   make_FillableArray(m, "FillableArray");
 
   make_Type(m, "Type");
-  // make_DressedType(m, "DressedType");
   make_ArrayType(m, "ArrayType");
   make_PrimitiveType(m, "PrimitiveType");
   make_RegularType(m, "RegularType");

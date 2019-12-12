@@ -7,16 +7,6 @@ import numpy
 import awkward1.highlevel
 
 class CharBehavior(awkward1.highlevel.Array):
-    # @staticmethod
-    # def typestr(baretype, parameters):
-    #     encoding = parameters.get("encoding")
-    #     if encoding is None:
-    #         return "char"
-    #     elif codecs.getdecoder(encoding) is codecs.getdecoder("utf-8"):
-    #         return "utf8"
-    #     else:
-    #         return "encoded[{0}]".format(repr(encoding))
-
     def __bytes__(self):
         return numpy.asarray(self.layout).tostring()
 
@@ -43,16 +33,6 @@ byte = awkward1.layout.PrimitiveType("uint8", {"__class__": "char", "__str__": "
 utf8 = awkward1.layout.PrimitiveType("uint8", {"__class__": "char", "__str__": "utf8", "encoding": "utf-8"})
 
 class StringBehavior(awkward1.highlevel.Array):
-    # @staticmethod
-    # def typestr(baretype, parameters):
-    #     encoding = baretype.inner().parameters.get("encoding")
-    #     if encoding is None:
-    #         return "bytes"
-    #     elif codecs.getdecoder(encoding) is codecs.getdecoder("utf-8"):
-    #         return "string"
-    #     else:
-    #         return "string[{0}]".format(repr(encoding))
-
     def __iter__(self):
         if self.type.nolength().inner().parameters.get("encoding") is None:
             for x in super(StringBehavior, self).__iter__():
@@ -67,9 +47,3 @@ class StringBehavior(awkward1.highlevel.Array):
 awkward1.namespace["string"] = StringBehavior
 bytestring = awkward1.layout.ListType(byte, {"__class__": "string", "__str__": "bytes"})
 string = awkward1.layout.ListType(utf8, {"__class__": "string", "__str__": "string"})
-
-# char = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("uint8"), CharBehavior)
-# utf8 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("uint8"), CharBehavior, encoding="utf-8")
-#
-# bytestring = awkward1.layout.DressedType(awkward1.layout.ListType(char), StringBehavior)
-# string = awkward1.layout.DressedType(awkward1.layout.ListType(utf8), StringBehavior)
