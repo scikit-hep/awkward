@@ -33,35 +33,6 @@ def test_highlevel():
 class Dummy(awkward1.highlevel.Array):
     pass
 
-def test_dress():
-    dressed0 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), Dummy, one=1, two=2)
-    assert repr(dressed0) in ("dress[float64, 'tests.test_PR028_add_dressed_types.Dummy', one=1, two=2]", "dress[float64, 'tests.test_PR028_add_dressed_types.Dummy', two=2, one=1]")
-
-    pyclass = awkward1.behavior.string.CharBehavior
-    inner = awkward1.layout.PrimitiveType("uint8")
-
-    baseline = sys.getrefcount(pyclass)
-    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline, 2)
-    dressed1 = awkward1.layout.DressedType(inner, pyclass, encoding="utf-8")
-    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 1, 2)
-    dressed2 = awkward1.layout.DressedType(inner, pyclass, encoding="utf-8")
-    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 2, 2)
-    dressed3 = awkward1.layout.DressedType(inner, pyclass)
-    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 3, 2)
-
-    assert repr(dressed1) == "utf8"
-    assert repr(dressed3) == "char"
-    assert dressed1 == dressed2
-    assert dressed1 != dressed3
-
-    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 3, 2)
-    del dressed1
-    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 2, 2)
-    del dressed2
-    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline + 1, 2)
-    del dressed3
-    assert (sys.getrefcount(pyclass), sys.getrefcount(inner)) == (baseline, 2)
-
 def test_string1():
     a = awkward1.Array(numpy.array([ord(x) for x in "hey there"], dtype=numpy.uint8))
     a.__class__ = awkward1.behavior.string.CharBehavior
@@ -114,10 +85,10 @@ def test_accepts():
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
     listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5])), content)
 
-    dressed1 = awkward1.layout.DressedType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")), Dummy)
+    dressed1 = awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"), {"__class__": "Dummy"})
     listoffsetarray.type = dressed1
 
-    dressed2 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), Dummy)
+    dressed2 = awkward1.layout.PrimitiveType("float64", {"__class__": "Dummy"})
     with pytest.raises(ValueError):
         listoffsetarray.type = dressed2
 
@@ -131,11 +102,11 @@ def test_type_propagation():
     assert awkward1.tolist(array) == [[{"one": 1, "two": [1.0, 1.1]}, {"one": 2, "two": [2.0]}, {"one": 3, "two": [3.0, 3.1, 3.2]}], [], [{"one": 4, "two": []}, {"one": 5, "two": [5.0, 5.1, 5.2, 5.3]}]]
     assert repr(array.type) in ('3 * var * {"one": int64, "two": var * float64}', '3 * var * {"two": var * float64, "one": int64}')
 
-    dfloat64 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("float64"), D)
-    dvarfloat64 = awkward1.layout.DressedType(awkward1.layout.ListType(dfloat64), D)
-    dint64 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("int64"), D)
-    drec = awkward1.layout.DressedType(awkward1.layout.RecordType(collections.OrderedDict([("one", dint64), ("two", dvarfloat64)])), D)
-    dvarrec = awkward1.layout.DressedType(awkward1.layout.ListType(drec), D)
+    dfloat64 = awkward1.layout.PrimitiveType("float64", {"__class__": "D", "__str__": "D[float64]"})
+    dvarfloat64 = awkward1.layout.ListType(dfloat64, {"__class__": "D", "__str__": "D[var * D[float64]]"})
+    dint64 = awkward1.layout.PrimitiveType("int64", {"__class__": "D", "__str__": "D[int64]"})
+    drec = awkward1.layout.RecordType(collections.OrderedDict([("one", dint64), ("two", dvarfloat64)]), {"__class__": "D", "__str__": "D[{\"one\": D[int64], \"two\": D[var * D[float64]]}]"})
+    dvarrec = awkward1.layout.ListType(drec, {"__class__": "D", "__str__": "D[var * D[{\"one\": D[int64], \"two\": D[var * D[float64]]}]]"})
 
     array.layout.type = awkward1.layout.ArrayType(dvarrec, 3)
     assert array.layout.type == awkward1.layout.ArrayType(dvarrec, 3)

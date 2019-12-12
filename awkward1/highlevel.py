@@ -6,11 +6,7 @@ import awkward1.layout
 import awkward1.operations.convert
 
 class Array(object):
-    def __init__(self, data, type=None, namespace=None, copy=False):
-        if namespace is None:
-            self._namespace = awkward1.namespace
-        else:
-            self._namespace = namespace
+    def __init__(self, data, type=None, namespace=None):
         if isinstance(data, awkward1.layout.Content):
             layout = data
         elif isinstance(data, Array):
@@ -23,9 +19,8 @@ class Array(object):
             layout = awkward1.operations.convert.fromiter(data).layout
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
-        if copy:
-            layout = layout.deep_copy()
         self.layout = layout
+        self.namespace = namespace
         if type is not None:
             self.type = type
         else:
@@ -52,13 +47,25 @@ class Array(object):
         if not isinstance(type, awkward1.layout.Type):
             raise TypeError("type must be a subclass of awkward1.layout.Type")
         t = type.nolength()
-        if isinstance(t, awkward1.layout.DressedType) and isinstance(t.dress, __builtins__["type"]):
-            self.__class__ = t.dress
 
-        elif t.parameters.get("__class__") in self._namespace:
+        # if isinstance(t, awkward1.layout.DressedType) and isinstance(t.dress, __builtins__["type"]):
+        #     self.__class__ = t.dress
+
+        if t.parameters.get("__class__") in self._namespace:
             self.__class__ = self._namespace[t.parameters["__class__"]]
 
         self._layout.type = type
+
+    @property
+    def namespace(self):
+        return self._namespace
+
+    @namespace.setter
+    def namespace(self, namespace):
+        if namespace is None:
+            self._namespace = awkward1.namespace
+        else:
+            self._namespace = namespace
 
     @property
     def baretype(self):
@@ -72,11 +79,14 @@ class Array(object):
         if len(self) == 0:
             return "[]"
 
-        def forward(x, space, brackets=True):
+        def forward(x, space, brackets=True, wrap=True):
             done = False
-            if isinstance(x, awkward1.layout.Content):
-                if isinstance(x.type.nolength(), awkward1.layout.DressedType):
-                    y = x.type.nolength().dress(x)
+            if wrap and isinstance(x, awkward1.layout.Content):
+                # if isinstance(x.type.nolength(), awkward1.layout.DressedType):
+                t = x.type.nolength()
+                if t.parameters.get("__class__") in self._namespace:
+                    y = self._namespace[t.parameters["__class__"]](x, namespace=self._namespace)
+                    # y = t.dress(x)
                     if "__repr__" in type(y).__dict__:
                         yield space + repr(y)
                         done = True
@@ -106,11 +116,14 @@ class Array(object):
                 else:
                     yield space + repr(x)
 
-        def backward(x, space, brackets=True):
+        def backward(x, space, brackets=True, wrap=True):
             done = False
-            if isinstance(x, awkward1.layout.Content):
-                if isinstance(x.type.nolength(), awkward1.layout.DressedType):
-                    y = x.type.nolength().dress(x)
+            if wrap and isinstance(x, awkward1.layout.Content):
+                # if isinstance(x.type.nolength(), awkward1.layout.DressedType):
+                t = x.type.nolength()
+                if t.parameters.get("__class__") in self._namespace:
+                    y = self._namespace[t.parameters["__class__"]](x, namespace=self._namespace)
+                    # y = t.dress(x)
                     if "__repr__" in type(y).__dict__:
                         yield repr(y) + space
                         done = True
@@ -153,8 +166,8 @@ class Array(object):
         halfway = len(self.layout) // 2
         left, right = ["["], ["]"]
         leftlen, rightlen = 1, 1
-        leftgen = forever(forward(self.layout[:halfway], "", brackets=False))
-        rightgen = forever(backward(self.layout[halfway:], "", brackets=False))
+        leftgen = forever(forward(self.layout[:halfway], "", brackets=False, wrap=False))
+        rightgen = forever(backward(self.layout[halfway:], "", brackets=False, wrap=False))
         while True:
             l = next(leftgen)
             if l is not None:
@@ -209,13 +222,11 @@ class Array(object):
         return awkward1._util.wrap(self.layout[where], self._namespace)
 
 class Record(object):
-    def __init__(self, data, type=None, copy=False):
+    def __init__(self, data, type=None):
         # FIXME: more checks here
         layout = data
         if not isinstance(layout, awkward1.layout.Record):
             raise TypeError("could not convert data into an awkward1.Record")
-        if copy:
-            layout = layout.deep_copy()
         self.layout = layout
         if type is not None:
             self.type = type
@@ -238,8 +249,11 @@ class Record(object):
     def type(self, type):
         if not isinstance(type, awkward1.layout.Type):
             raise TypeError("type must be a subclass of awkward1.layout.Type")
-        if isinstance(type, awkward1.layout.DressedType) and isinstance(type.dress, __builtins__["type"]):
-            self.__class__ = t.dress
+        t = type.nolength()
+        if t.parameters.get("__class__") in self._namespace:
+            self.__class__ = self._namespace[t.parameters["__class__"]]
+        # if isinstance(type, awkward1.layout.DressedType) and isinstance(type.dress, __builtins__["type"]):
+        #     self.__class__ = t.dress
         self._layout.type = type
 
     @property

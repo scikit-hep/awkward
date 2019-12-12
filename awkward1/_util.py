@@ -10,10 +10,10 @@ def wrap(content, namespace):
     if isinstance(content, (awkward1.layout.Content, awkward1.layout.Record)):
         t = content.type.nolength()
 
-        if isinstance(t, awkward1.layout.DressedType):
-            return t.dress(content)
+        # if isinstance(t, awkward1.layout.DressedType):
+        #     return t.dress(content)
 
-        elif t.parameters.get("__class__") in namespace:
+        if t.parameters.get("__class__") in namespace:
             return namespace[t.parameters["__class__"]](content, namespace=namespace)
         elif isinstance(content, awkward1.layout.Record):
             return awkward1.Record(content)

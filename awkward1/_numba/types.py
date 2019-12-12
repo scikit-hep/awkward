@@ -64,9 +64,9 @@ def typeof_UnionType(val, c):
 def typeof_RecordType(val, c):
     return RecordTypeType([numba.typeof(x) for x in val.types], val.lookup, val.reverselookup, val.parameters)
 
-@numba.extending.typeof_impl.register(awkward1.layout.DressedType)
-def typeof_DressedType(val, c):
-    return DressedTypeType(numba.typeof(val.type), val.dress, val.parameters)
+# @numba.extending.typeof_impl.register(awkward1.layout.DressedType)
+# def typeof_DressedType(val, c):
+#     return DressedTypeType(numba.typeof(val.type), val.dress, val.parameters)
 
 class TypeType(numba.types.Type):
     pass
@@ -114,12 +114,12 @@ class RecordTypeType(TypeType):
         self.reverselookup = reverselookup
         self.parameters = parameters
 
-class DressedTypeType(TypeType):
-    def __init__(self, typetpe, dress, parameters):
-        super(DressedTypeType, self).__init__(name="ak::DressedTypeType({0}, {1}, {2}, parameters={3})".format(typetpe.name, repr(dress), repr(parameters), json.dumps(parameters)))
-        self.typetpe = typetpe
-        self.dress = dress
-        self.parameters = parameters
+# class DressedTypeType(TypeType):
+#     def __init__(self, typetpe, dress, parameters):
+#         super(DressedTypeType, self).__init__(name="ak::DressedTypeType({0}, {1}, {2}, parameters={3})".format(typetpe.name, repr(dress), repr(parameters), json.dumps(parameters)))
+#         self.typetpe = typetpe
+#         self.dress = dress
+#         self.parameters = parameters
 
 @numba.extending.register_model(UnknownTypeType)
 class UnknownTypeModel(numba.datamodel.models.StructModel):
@@ -169,11 +169,11 @@ class RecordTypeModel(numba.datamodel.models.StructModel):
             members.append((field(i), tpe))
         super(RecordTypeModel, self).__init__(dmm, fe_type, members)
 
-@numba.extending.register_model(DressedTypeType)
-class DressedTypeModel(numba.datamodel.models.StructModel):
-    def __init__(self, dmm, fe_type):
-        members = [("type", fe_type.typetpe)]
-        super(DressedTypeModel, self).__init__(dmm, fe_type, members)
+# @numba.extending.register_model(DressedTypeType)
+# class DressedTypeModel(numba.datamodel.models.StructModel):
+#     def __init__(self, dmm, fe_type):
+#         members = [("type", fe_type.typetpe)]
+#         super(DressedTypeModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(UnknownTypeType)
 def unbox_UnknownType(tpe, obj, c):
@@ -245,15 +245,15 @@ def unbox_RecordType(tpe, obj, c):
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
-@numba.extending.unbox(DressedTypeType)
-def unbox_DressedType(tpe, obj, c):
-    proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
-    type_obj = c.pyapi.object_getattr_string(obj, "type")
-
-    proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type_obj).value
-    c.pyapi.decref(type_obj)
-    is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
-    return numba.extending.NativeValue(proxyout._getvalue(), is_error)
+# @numba.extending.unbox(DressedTypeType)
+# def unbox_DressedType(tpe, obj, c):
+#     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
+#     type_obj = c.pyapi.object_getattr_string(obj, "type")
+#
+#     proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type_obj).value
+#     c.pyapi.decref(type_obj)
+#     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+#     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
 @numba.extending.box(UnknownTypeType)
 def box_UnknownType(tpe, val, c):
@@ -367,29 +367,29 @@ def box_RecordType(tpe, val, c):
     c.pyapi.decref(parameters_obj)
     return out
 
-@numba.extending.box(DressedTypeType)
-def box_DressedType(tpe, val, c):
-    proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
-    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.DressedType))
-    type_obj = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
-    dress_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.dress))
-    args = c.pyapi.tuple_new(2)
-    c.pyapi.tuple_setitem(args, 0, type_obj)
-    c.pyapi.tuple_setitem(args, 1, dress_obj)
-    kwargs = c.pyapi.dict_new(len(tpe.parameters))
-    for n, x in tpe.parameters.items():
-        n_obj = c.pyapi.unserialize(c.pyapi.serialize_object(n))
-        x_obj = c.pyapi.unserialize(c.pyapi.serialize_object(x))
-        c.pyapi.dict_setitem(kwargs, n_obj, x_obj)
-        c.pyapi.decref(n_obj)
-        c.pyapi.decref(x_obj)
-    out = c.pyapi.call(class_obj, args, kwargs)
-    c.pyapi.decref(class_obj)
-    c.pyapi.decref(args)
-    c.pyapi.decref(kwargs)
-    return out
+# @numba.extending.box(DressedTypeType)
+# def box_DressedType(tpe, val, c):
+#     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
+#     class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.DressedType))
+#     type_obj = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
+#     dress_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.dress))
+#     args = c.pyapi.tuple_new(2)
+#     c.pyapi.tuple_setitem(args, 0, type_obj)
+#     c.pyapi.tuple_setitem(args, 1, dress_obj)
+#     kwargs = c.pyapi.dict_new(len(tpe.parameters))
+#     for n, x in tpe.parameters.items():
+#         n_obj = c.pyapi.unserialize(c.pyapi.serialize_object(n))
+#         x_obj = c.pyapi.unserialize(c.pyapi.serialize_object(x))
+#         c.pyapi.dict_setitem(kwargs, n_obj, x_obj)
+#         c.pyapi.decref(n_obj)
+#         c.pyapi.decref(x_obj)
+#     out = c.pyapi.call(class_obj, args, kwargs)
+#     c.pyapi.decref(class_obj)
+#     c.pyapi.decref(args)
+#     c.pyapi.decref(kwargs)
+#     return out
 
 numba.extending.make_attribute_wrapper(RegularTypeType, "type", "type")
 numba.extending.make_attribute_wrapper(ListTypeType, "type", "type")
 numba.extending.make_attribute_wrapper(OptionTypeType, "type", "type")
-numba.extending.make_attribute_wrapper(DressedTypeType, "type", "type")
+# numba.extending.make_attribute_wrapper(DressedTypeType, "type", "type")
