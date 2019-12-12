@@ -17,6 +17,12 @@
 #include "awkward/fillable/UnknownFillable.h"
 
 namespace awkward {
+  const std::shared_ptr<Fillable> UnknownFillable::fromempty(const FillableOptions& options) {
+    std::shared_ptr<Fillable> out(new UnknownFillable(options, 0));
+    out.get()->setthat(out);
+    return out;
+  }
+
   int64_t UnknownFillable::length() const {
     return nullcount_;
   }
@@ -42,123 +48,86 @@ namespace awkward {
     return false;
   }
 
-  Fillable* UnknownFillable::null() {
+  const std::shared_ptr<Fillable> UnknownFillable::null() {
     nullcount_++;
-    return this;
+    return that_;
   }
 
-  Fillable* UnknownFillable::boolean(bool x) {
-    Fillable* out = BoolFillable::fromempty(options_);
+  const std::shared_ptr<Fillable> UnknownFillable::boolean(bool x) {
+    std::shared_ptr<Fillable> out = BoolFillable::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
-    try {
-      out->boolean(x);
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+    out.get()->boolean(x);
     return out;
   }
 
-  Fillable* UnknownFillable::integer(int64_t x) {
-    Fillable* out = Int64Fillable::fromempty(options_);
+  const std::shared_ptr<Fillable> UnknownFillable::integer(int64_t x) {
+    std::shared_ptr<Fillable> out = Int64Fillable::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
-    try {
-      out->integer(x);
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+    out.get()->integer(x);
     return out;
   }
 
-  Fillable* UnknownFillable::real(double x) {
-    Fillable* out = Float64Fillable::fromempty(options_);
+  const std::shared_ptr<Fillable> UnknownFillable::real(double x) {
+    std::shared_ptr<Fillable> out = Float64Fillable::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
-    try {
-      out->real(x);
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+    out.get()->real(x);
     return out;
   }
 
-  Fillable* UnknownFillable::beginlist() {
-    Fillable* out = ListFillable::fromempty(options_);
+  const std::shared_ptr<Fillable> UnknownFillable::beginlist() {
+    std::shared_ptr<Fillable> out = ListFillable::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
-    try {
-      out->beginlist();
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+    out.get()->beginlist();
     return out;
   }
 
-  Fillable* UnknownFillable::endlist() {
+  const std::shared_ptr<Fillable> UnknownFillable::endlist() {
     throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
   }
 
-  Fillable* UnknownFillable::begintuple(int64_t numfields) {
-    Fillable* out = TupleFillable::fromempty(options_);
+  const std::shared_ptr<Fillable> UnknownFillable::begintuple(int64_t numfields) {
+    std::shared_ptr<Fillable> out = TupleFillable::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
-    try {
-      out->begintuple(numfields);
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+    out.get()->begintuple(numfields);
     return out;
   }
 
-  Fillable* UnknownFillable::index(int64_t index) {
+  const std::shared_ptr<Fillable> UnknownFillable::index(int64_t index) {
     throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
   }
 
-  Fillable* UnknownFillable::endtuple() {
+  const std::shared_ptr<Fillable> UnknownFillable::endtuple() {
     throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
-  Fillable* UnknownFillable::beginrecord(int64_t disambiguator) {
-    Fillable* out = RecordFillable::fromempty(options_);
+  const std::shared_ptr<Fillable> UnknownFillable::beginrecord(int64_t disambiguator) {
+    std::shared_ptr<Fillable> out = RecordFillable::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
-    try {
-      out->beginrecord(disambiguator);
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+    out.get()->beginrecord(disambiguator);
     return out;
   }
 
-  Fillable* UnknownFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> UnknownFillable::field_fast(const char* key) {
     throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
   }
 
-  Fillable* UnknownFillable::field_check(const char* key) {
+  const std::shared_ptr<Fillable> UnknownFillable::field_check(const char* key) {
     throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
   }
 
-  Fillable* UnknownFillable::endrecord() {
+  const std::shared_ptr<Fillable> UnknownFillable::endrecord() {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
-
 }

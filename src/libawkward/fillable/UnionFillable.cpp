@@ -16,6 +16,15 @@
 #include "awkward/fillable/UnionFillable.h"
 
 namespace awkward {
+  const std::shared_ptr<Fillable> UnionFillable::fromsingle(const FillableOptions& options, const std::shared_ptr<Fillable> firstcontent) {
+    GrowableBuffer<int8_t> types = GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
+    GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::arange(options, firstcontent->length());
+    std::vector<std::shared_ptr<Fillable>> contents({ firstcontent });
+    std::shared_ptr<Fillable> out(new UnionFillable(options, types, offsets, contents));
+    out.get()->setthat(out);
+    return out;
+  }
+
   int64_t UnionFillable::length() const {
     return types_.length();
   }
@@ -43,143 +52,137 @@ namespace awkward {
   }
 
   bool UnionFillable::active() const {
-    throw std::runtime_error("FIXME: UnionFillable::active");
+    return current_ != -1;
   }
 
-  Fillable* UnionFillable::null() {
+  const std::shared_ptr<Fillable> UnionFillable::null() {
     if (current_ == -1) {
-      Fillable* out = OptionFillable::fromvalids(options_, this);
-      try {
-        out->null();
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = OptionFillable::fromvalids(options_, that_);
+      out.get()->null();
       return out;
     }
     else {
       contents_[(size_t)current_].get()->null();
-      return this;
+      return that_;
     }
   }
 
-  Fillable* UnionFillable::boolean(bool x) {
+  const std::shared_ptr<Fillable> UnionFillable::boolean(bool x) {
     if (current_ == -1) {
-      Fillable* tofill = nullptr;
+      std::shared_ptr<Fillable> tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<BoolFillable*>(content.get()) != nullptr) {
-          tofill = content.get();
+          tofill = content;
           break;
         }
         i++;
       }
-      if (tofill == nullptr) {
+      if (tofill.get() == nullptr) {
         tofill = BoolFillable::fromempty(options_);
-        contents_.push_back(std::shared_ptr<Fillable>(tofill));
+        contents_.push_back(tofill);
       }
-      int64_t length = tofill->length();
-      tofill->boolean(x);
+      int64_t length = tofill.get()->length();
+      tofill.get()->boolean(x);
       types_.append(i);
       offsets_.append(length);
     }
     else {
       contents_[(size_t)current_].get()->boolean(x);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* UnionFillable::integer(int64_t x) {
+  const std::shared_ptr<Fillable> UnionFillable::integer(int64_t x) {
     if (current_ == -1) {
-      Fillable* tofill = nullptr;
+      std::shared_ptr<Fillable> tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<Int64Fillable*>(content.get()) != nullptr) {
-          tofill = content.get();
+          tofill = content;
           break;
         }
         i++;
       }
-      if (tofill == nullptr) {
+      if (tofill.get() == nullptr) {
         tofill = Int64Fillable::fromempty(options_);
-        contents_.push_back(std::shared_ptr<Fillable>(tofill));
+        contents_.push_back(tofill);
       }
-      int64_t length = tofill->length();
-      tofill->integer(x);
+      int64_t length = tofill.get()->length();
+      tofill.get()->integer(x);
       types_.append(i);
       offsets_.append(length);
     }
     else {
       contents_[(size_t)current_].get()->integer(x);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* UnionFillable::real(double x) {
+  const std::shared_ptr<Fillable> UnionFillable::real(double x) {
     if (current_ == -1) {
-      Fillable* tofill = nullptr;
+      std::shared_ptr<Fillable> tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<Float64Fillable*>(content.get()) != nullptr) {
-          tofill = content.get();
+          tofill = content;
           break;
         }
         i++;
       }
-      if (tofill == nullptr) {
+      if (tofill.get() == nullptr) {
         i = 0;
         for (auto content : contents_) {
           if (dynamic_cast<Int64Fillable*>(content.get()) != nullptr) {
-            tofill = content.get();
+            tofill = content;
             break;
           }
           i++;
         }
-        if (tofill != nullptr) {
-          tofill = Float64Fillable::fromint64(options_, dynamic_cast<Int64Fillable*>(tofill)->buffer());
-          contents_[(size_t)i] = std::shared_ptr<Fillable>(tofill);
+        if (tofill.get() != nullptr) {
+          tofill = Float64Fillable::fromint64(options_, dynamic_cast<Int64Fillable*>(tofill.get())->buffer());
+          contents_[(size_t)i] = tofill;
         }
         else {
           tofill = Float64Fillable::fromempty(options_);
-          contents_.push_back(std::shared_ptr<Fillable>(tofill));
+          contents_.push_back(tofill);
         }
       }
-      int64_t length = tofill->length();
-      tofill->real(x);
+      int64_t length = tofill.get()->length();
+      tofill.get()->real(x);
       types_.append(i);
       offsets_.append(length);
     }
     else {
       contents_[(size_t)current_].get()->real(x);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* UnionFillable::beginlist() {
+  const std::shared_ptr<Fillable> UnionFillable::beginlist() {
     if (current_ == -1) {
-      Fillable* tofill = nullptr;
+      std::shared_ptr<Fillable> tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (dynamic_cast<ListFillable*>(content.get()) != nullptr) {
-          tofill = content.get();
+          tofill = content;
           break;
         }
         i++;
       }
-      if (tofill == nullptr) {
+      if (tofill.get() == nullptr) {
         tofill = ListFillable::fromempty(options_);
-        contents_.push_back(std::shared_ptr<Fillable>(tofill));
+        contents_.push_back(tofill);
       }
       tofill->beginlist();
     }
     else {
       contents_[(size_t)current_].get()->beginlist();
     }
-    return this;
+    return that_;
   }
 
-  Fillable* UnionFillable::endlist() {
+  const std::shared_ptr<Fillable> UnionFillable::endlist() {
     if (current_ == -1) {
       throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
     }
@@ -192,25 +195,25 @@ namespace awkward {
         current_ = -1;
       }
     }
-    return this;
+    return that_;
   }
 
-  Fillable* UnionFillable::begintuple(int64_t numfields) {
+  const std::shared_ptr<Fillable> UnionFillable::begintuple(int64_t numfields) {
     if (current_ == -1) {
-      Fillable* tofill = nullptr;
+      std::shared_ptr<Fillable> tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (TupleFillable* raw = dynamic_cast<TupleFillable*>(content.get())) {
           if (raw->length() == -1  ||  raw->numfields() == numfields) {
-            tofill = content.get();
+            tofill = content;
             break;
           }
         }
         i++;
       }
-      if (tofill == nullptr) {
+      if (tofill.get() == nullptr) {
         tofill = TupleFillable::fromempty(options_);
-        contents_.push_back(std::shared_ptr<Fillable>(tofill));
+        contents_.push_back(tofill);
       }
       tofill->begintuple(numfields);
       current_ = i;
@@ -218,20 +221,20 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->begintuple(numfields);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* UnionFillable::index(int64_t index) {
+  const std::shared_ptr<Fillable> UnionFillable::index(int64_t index) {
     if (current_ == -1) {
       throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
     }
     else {
       contents_[(size_t)current_].get()->index(index);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* UnionFillable::endtuple() {
+  const std::shared_ptr<Fillable> UnionFillable::endtuple() {
     if (current_ == -1) {
       throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
     }
@@ -244,25 +247,25 @@ namespace awkward {
         current_ = -1;
       }
     }
-    return this;
+    return that_;
   }
 
-  Fillable* UnionFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> UnionFillable::beginrecord(int64_t disambiguator) {
     if (current_ == -1) {
-      Fillable* tofill = nullptr;
+      std::shared_ptr<Fillable> tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (RecordFillable* raw = dynamic_cast<RecordFillable*>(content.get())) {
           if (raw->length() == -1  ||  raw->disambiguator() == disambiguator) {
-            tofill = content.get();
+            tofill = content;
             break;
           }
         }
         i++;
       }
-      if (tofill == nullptr) {
+      if (tofill.get() == nullptr) {
         tofill = RecordFillable::fromempty(options_);
-        contents_.push_back(std::shared_ptr<Fillable>(tofill));
+        contents_.push_back(tofill);
       }
       tofill->beginrecord(disambiguator);
       current_ = i;
@@ -270,30 +273,30 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->beginrecord(disambiguator);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* UnionFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> UnionFillable::field_fast(const char* key) {
     if (current_ == -1) {
       throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
     }
     else {
       contents_[(size_t)current_].get()->field_fast(key);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* UnionFillable::field_check(const char* key) {
+  const std::shared_ptr<Fillable> UnionFillable::field_check(const char* key) {
     if (current_ == -1) {
       throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
     }
     else {
       contents_[(size_t)current_].get()->field_check(key);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* UnionFillable::endrecord() {
+  const std::shared_ptr<Fillable> UnionFillable::endrecord() {
     if (current_ == -1) {
       throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
     }
@@ -306,7 +309,6 @@ namespace awkward {
         current_ = -1;
       }
     }
-    return this;
+    return that_;
   }
-
 }
