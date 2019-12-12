@@ -55,6 +55,7 @@ set_target_properties(awkward-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward PROPERTIES CXX_VISIBILITY_PRESET hidden)
 addtest(PR016 tests/test_PR016_finish_getitem_for_rawarray.cpp)
 addtest(PR019 tests/test_PR019_use_json_library.cpp)
+addtest(PR030 tests/test_PR030_recordarray_in_numba.cpp)
 
 pybind11_add_module(layout src/pyawkward.cpp)
 set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)

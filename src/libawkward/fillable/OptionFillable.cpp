@@ -9,6 +9,20 @@
 #include "awkward/fillable/OptionFillable.h"
 
 namespace awkward {
+  const std::shared_ptr<Fillable> OptionFillable::fromnulls(const FillableOptions& options, int64_t nullcount, std::shared_ptr<Fillable> content) {
+    GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::full(options, -1, nullcount);
+    std::shared_ptr<Fillable> out(new OptionFillable(options, offsets, content));
+    out.get()->setthat(out);
+    return out;
+  }
+
+  const std::shared_ptr<Fillable> OptionFillable::fromvalids(const FillableOptions& options, std::shared_ptr<Fillable> content) {
+    GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::arange(options, content->length());
+    std::shared_ptr<Fillable> out(new OptionFillable(options, offsets, content));
+    out.get()->setthat(out);
+    return out;
+  }
+
   int64_t OptionFillable::length() const {
     return offsets_.length();
   }
@@ -31,17 +45,17 @@ namespace awkward {
     return content_.get()->active();
   }
 
-  Fillable* OptionFillable::null() {
+  const std::shared_ptr<Fillable> OptionFillable::null() {
     if (!content_.get()->active()) {
       offsets_.append(-1);
     }
     else {
       content_.get()->null();
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::boolean(bool x) {
+  const std::shared_ptr<Fillable> OptionFillable::boolean(bool x) {
     if (!content_.get()->active()) {
       int64_t length = content_.get()->length();
       maybeupdate(content_.get()->boolean(x));
@@ -50,10 +64,10 @@ namespace awkward {
     else {
       content_.get()->boolean(x);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::integer(int64_t x) {
+  const std::shared_ptr<Fillable> OptionFillable::integer(int64_t x) {
     if (!content_.get()->active()) {
       int64_t length = content_.get()->length();
       maybeupdate(content_.get()->integer(x));
@@ -62,10 +76,10 @@ namespace awkward {
     else {
       content_.get()->integer(x);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::real(double x) {
+  const std::shared_ptr<Fillable> OptionFillable::real(double x) {
     if (!content_.get()->active()) {
       int64_t length = content_.get()->length();
       maybeupdate(content_.get()->real(x));
@@ -74,20 +88,20 @@ namespace awkward {
     else {
       content_.get()->real(x);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::beginlist() {
+  const std::shared_ptr<Fillable> OptionFillable::beginlist() {
     if (!content_.get()->active()) {
       maybeupdate(content_.get()->beginlist());
     }
     else {
       content_.get()->beginlist();
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::endlist() {
+  const std::shared_ptr<Fillable> OptionFillable::endlist() {
     if (!content_.get()->active()) {
       throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
     }
@@ -98,30 +112,30 @@ namespace awkward {
         offsets_.append(length);
       }
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::begintuple(int64_t numfields) {
+  const std::shared_ptr<Fillable> OptionFillable::begintuple(int64_t numfields) {
     if (!content_.get()->active()) {
       maybeupdate(content_.get()->begintuple(numfields));
     }
     else {
       content_.get()->begintuple(numfields);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::index(int64_t index) {
+  const std::shared_ptr<Fillable> OptionFillable::index(int64_t index) {
     if (!content_.get()->active()) {
       throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
     }
     else {
       content_.get()->index(index);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::endtuple() {
+  const std::shared_ptr<Fillable> OptionFillable::endtuple() {
     if (!content_.get()->active()) {
       throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
     }
@@ -132,40 +146,40 @@ namespace awkward {
         offsets_.append(length);
       }
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> OptionFillable::beginrecord(int64_t disambiguator) {
     if (!content_.get()->active()) {
       maybeupdate(content_.get()->beginrecord(disambiguator));
     }
     else {
       content_.get()->beginrecord(disambiguator);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> OptionFillable::field_fast(const char* key) {
     if (!content_.get()->active()) {
       throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
     }
     else {
       content_.get()->field_fast(key);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::field_check(const char* key) {
+  const std::shared_ptr<Fillable> OptionFillable::field_check(const char* key) {
     if (!content_.get()->active()) {
       throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
     }
     else {
       content_.get()->field_check(key);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* OptionFillable::endrecord() {
+  const std::shared_ptr<Fillable> OptionFillable::endrecord() {
     if (!content_.get()->active()) {
       throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
     }
@@ -176,12 +190,12 @@ namespace awkward {
         offsets_.append(length);
       }
     }
-    return this;
+    return that_;
   }
 
-  void OptionFillable::maybeupdate(Fillable* tmp) {
-    if (tmp != content_.get()) {
-      content_ = std::shared_ptr<Fillable>(tmp);
+  void OptionFillable::maybeupdate(const std::shared_ptr<Fillable>& tmp) {
+    if (tmp.get() != content_.get()) {
+      content_ = tmp;
     }
   }
 }

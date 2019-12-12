@@ -55,7 +55,7 @@ namespace awkward {
   private:
     std::shared_ptr<Fillable> fillable_;
 
-    void maybeupdate(Fillable* tmp);
+    void maybeupdate(const std::shared_ptr<Fillable>& tmp);
   };
 }
 
