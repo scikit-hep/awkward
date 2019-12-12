@@ -258,7 +258,7 @@ def lower_beginrecord(context, builder, sig, args):
     tpe, = sig.args
     val, = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    call(context, builder, libawkward.FillableArray_beginrecord, (proxyin.rawptr, context.get_constant(numba.int64, 0)))
+    call(context, builder, libawkward.FillableArray_beginrecord, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("beginrecord", FillableArrayType, numba.types.StringLiteral)
@@ -266,8 +266,8 @@ def lower_beginrecord(context, builder, sig, args):
     tpe, nametpe = sig.args
     val, nameval = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    name = util.globalstring(context, builder, nametpe.literal_value, inttype=numba.int64)
-    call(context, builder, libawkward.FillableArray_beginrecord, (proxyin.rawptr, name))
+    name = util.globalstring(context, builder, nametpe.literal_value)
+    call(context, builder, libawkward.FillableArray_beginrecord_fast, (proxyin.rawptr, name))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("field", FillableArrayType, numba.types.StringLiteral)

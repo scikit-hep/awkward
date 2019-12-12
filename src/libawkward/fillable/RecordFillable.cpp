@@ -232,7 +232,12 @@ namespace awkward {
 
   const std::shared_ptr<Fillable> RecordFillable::beginrecord(const char* name, bool check) {
     if (length_ == -1) {
-      name_ = std::string(name);
+      if (name == nullptr) {
+        name_ = std::string("");
+      }
+      else {
+        name_ = std::string(name);
+      }
       nameptr_ = name;
       length_ = 0;
     }
