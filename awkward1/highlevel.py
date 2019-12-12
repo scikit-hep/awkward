@@ -256,11 +256,11 @@ class FillableArray(object):
 
     @property
     def type(self):
-        return self._fillablearray.snapshot().type
+        return self._fillablearray.type
 
     @property
     def baretype(self):
-        return self._fillablearray.type
+        return self._fillablearray.snapshot().baretype
 
     @property
     def namespace(self):
