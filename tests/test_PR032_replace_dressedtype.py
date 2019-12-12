@@ -57,7 +57,52 @@ def test_typestr():
     assert repr(t) == "something"
     assert repr(t2) == "var * something"
 
+def test_record_name():
+    fillable = awkward1.layout.FillableArray()
+
+    fillable.beginrecord("Dummy")
+    fillable.field("one")
+    fillable.integer(1)
+    fillable.field("two")
+    fillable.real(1.1)
+    fillable.endrecord()
+
+    fillable.beginrecord("Dummy")
+    fillable.field("two")
+    fillable.real(2.2)
+    fillable.field("one")
+    fillable.integer(2)
+    fillable.endrecord()
+
+    a = fillable.snapshot()
+    assert repr(a.type) == '2 * struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
+    assert a.type.nolength().parameters == {"__class__": "Dummy"}
+
 numba = pytest.importorskip("numba")
+
+def test_record_name_numba():
+    @numba.njit
+    def f1(fillable):
+        fillable.beginrecord("Dummy")
+        fillable.field("one")
+        fillable.integer(1)
+        fillable.field("two")
+        fillable.real(1.1)
+        fillable.endrecord()
+
+        fillable.beginrecord("Dummy")
+        fillable.field("two")
+        fillable.real(2.2)
+        fillable.field("one")
+        fillable.integer(2)
+        fillable.endrecord()
+
+    fillable = awkward1.layout.FillableArray()
+    f1(fillable)
+
+    a = fillable.snapshot()
+    assert repr(a.type) == '2 * struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
+    assert a.type.nolength().parameters == {"__class__": "Dummy"}
 
 def test_boxing():
     @numba.njit

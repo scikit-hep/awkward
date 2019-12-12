@@ -37,6 +37,7 @@ namespace awkward {
     const Parameters parameters() const { return parameters_FIXME_; }
     void setparameters(const Parameters& parameters) { parameters_FIXME_ = parameters; }
     std::string parameter(const std::string& key) { return parameters_FIXME_[key]; }
+    void setparameter(const std::string& key, const std::string& value) { parameters_FIXME_[key] = value; }
     std::string tostring() const { return tostring_part("", "", ""); };
     const std::string compare(std::shared_ptr<Type> supertype);
 
