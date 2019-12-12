@@ -10,6 +10,7 @@ else:
     import awkward1._numba.libawkward
     import awkward1._numba.util
     import awkward1._numba.identity
+    import awkward1._numba.types
     import awkward1._numba.content
     import awkward1._numba.iterator
     import awkward1._numba.fillable

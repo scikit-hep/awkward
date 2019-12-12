@@ -31,20 +31,6 @@ def test_types():
     assert [repr(x) for x in t3.types] == ["int32", "float64"]
     assert repr(t4.type) == "int32"
     assert repr(t5.type) == "var * int32"
-    assert t0.compatible(t1)
-    assert t0.compatible(t2)
-    assert t0.compatible(t3)
-    assert t0.compatible(t4)
-    assert t0.compatible(t5)
-    assert t0.compatible(t6)
-    assert t1.compatible(t0)
-    assert t2.compatible(t0)
-    assert t3.compatible(t0)
-    assert t4.compatible(t0)
-    assert t5.compatible(t0)
-    assert t6.compatible(t0)
-    assert t4.compatible(t4b)
-    assert not t4.compatible(t5)
 
 def test_boolean():
     a = awkward1.layout.FillableArray()

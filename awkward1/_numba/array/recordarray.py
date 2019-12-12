@@ -11,19 +11,20 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(val, c):
-    return RecordArrayType([numba.typeof(x) for x in val.values()], val.lookup, val.reverselookup, numba.typeof(val.id))
+    return RecordArrayType([numba.typeof(x) for x in val.fields()], val.lookup, val.reverselookup, numba.typeof(val.id), numba.none if val.isbare else numba.typeof(val.type))
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
 def typeof(val, c):
     return RecordType(numba.typeof(val.array))
 
 class RecordArrayType(content.ContentType):
-    def __init__(self, contenttpes, lookup, reverselookup, idtpe):
-        super(RecordArrayType, self).__init__(name="RecordArrayType([{}], {}, {}, id={})".format(", ".join(x.name for x in contenttpes), lookup, reverselookup, idtpe.name))
+    def __init__(self, contenttpes, lookup, reverselookup, idtpe, typetpe):
+        super(RecordArrayType, self).__init__(name="ak::RecordArrayType([{0}], {1}, {2}, id={3}, type={4})".format(", ".join(x.name for x in contenttpes), lookup, reverselookup, idtpe.name, typetpe.name))
         self.contenttpes = contenttpes
         self.lookup = lookup
         self.reverselookup = reverselookup
         self.idtpe = idtpe
+        self.typetpe = typetpe
 
     @property
     def istuple(self):
@@ -44,11 +45,11 @@ class RecordArrayType(content.ContentType):
         return self
 
     def getitem_str(self, key):
-        return self.contenttpes[awkward1.util.field2index(self.lookup, self.numfields, key)]
+        return self.contenttpes[awkward1._util.field2index(self.lookup, self.numfields, key)]
 
     def getitem_tuple(self, wheretpe):
         import awkward1._numba.array.regulararray
-        nexttpe = awkward1._numba.array.regulararray.RegularArrayType(self, numba.none)
+        nexttpe = awkward1._numba.array.regulararray.RegularArrayType(self, numba.none, numba.none)
         out = nexttpe.getitem_next(wheretpe, False)
         return out.getitem_int()
 
@@ -59,19 +60,19 @@ class RecordArrayType(content.ContentType):
         tailtpe = numba.types.Tuple(wheretpe.types[1:])
 
         if isinstance(headtpe, numba.types.StringLiteral):
-            index = awkward1.util.field2index(self.lookup, self.numfields, headtpe.literal_value)
+            index = awkward1._util.field2index(self.lookup, self.numfields, headtpe.literal_value)
             nexttpe = self.contenttpes[index]
 
         else:
             contenttpes = []
             for t in self.contenttpes:
                 contenttpes.append(t.getitem_next(numba.types.Tuple((headtpe,)), isadvanced))
-            nexttpe = RecordArrayType(contenttpes, self.lookup, self.reverselookup, numba.none)
+            nexttpe = RecordArrayType(contenttpes, self.lookup, self.reverselookup, numba.none, numba.none)
 
         return nexttpe.getitem_next(tailtpe, isadvanced)
 
     def carry(self):
-        return RecordArrayType([x.carry() for x in self.contenttpes], self.lookup, self.reverselookup, self.idtpe)
+        return RecordArrayType([x.carry() for x in self.contenttpes], self.lookup, self.reverselookup, self.idtpe, self.typetpe)
 
     @property
     def lower_len(self):
@@ -104,7 +105,7 @@ class RecordArrayType(content.ContentType):
 class RecordType(numba.types.Type):
     def __init__(self, arraytpe):
         self.arraytpe = arraytpe
-        super(RecordType, self).__init__("Record({})".format(self.arraytpe.name))
+        super(RecordType, self).__init__("Record({0})".format(self.arraytpe.name))
         assert isinstance(arraytpe, RecordArrayType)
 
     @property
@@ -153,6 +154,8 @@ class RecordArrayModel(numba.datamodel.models.StructModel):
             members.append((field(i), x))
         if fe_type.idtpe != numba.none:
             members.append(("id", fe_type.idtpe))
+        if fe_type.typetpe != numba.none:
+            members.append(("type", fe_type.typetpe))
         super(RecordArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.datamodel.registry.register_default(RecordType)
@@ -182,6 +185,12 @@ def unbox(tpe, obj, c):
         id_obj = c.pyapi.object_getattr_string(obj, "id")
         proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
         c.pyapi.decref(id_obj)
+    if tpe.typetpe != numba.none:
+        type1_obj = c.pyapi.object_getattr_string(obj, "type")
+        type2_obj = c.pyapi.object_getattr_string(type1_obj, "type")
+        proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type2_obj).value
+        c.pyapi.decref(type1_obj)
+        c.pyapi.decref(type2_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
@@ -201,34 +210,66 @@ def unbox_record(tpe, obj, c):
 
 @numba.extending.box(RecordArrayType)
 def box(tpe, val, c):
-    RecordArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.RecordArray))
-    istuple_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.istuple))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
-    length_obj = c.pyapi.long_from_longlong(proxyin.length)
+    args = []
     if tpe.idtpe != numba.none:
         id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
-        out = c.pyapi.call_function_objargs(RecordArray_obj, (length_obj, istuple_obj, id_obj))
-        c.pyapi.decref(id_obj)
+        args.append(id_obj)
     else:
-        out = c.pyapi.call_function_objargs(RecordArray_obj, (length_obj, istuple_obj))
-    append_obj = c.pyapi.object_getattr_string(out, "append")
-    for i, t in enumerate(tpe.contenttpes):
-        x_obj = c.pyapi.from_native_value(t, getattr(proxyin, field(i)), c.env_manager)
-        if tpe.reverselookup is None or len(tpe.reverselookup) <= i:
-            c.pyapi.call_function_objargs(append_obj, (x_obj,))
+        args.append(c.pyapi.make_none())
+    if tpe.typetpe != numba.none:
+        args.append(c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager))
+    else:
+        args.append(c.pyapi.make_none())
+
+    if len(tpe.contenttpes) == 0:
+        RecordArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.RecordArray))
+        length_obj = c.pyapi.long_from_longlong(proxyin.length)
+        istuple_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.istuple))
+        out = c.pyapi.call_function_objargs(RecordArray_obj, [length_obj, istuple_obj] + args)
+        c.pyapi.decref(RecordArray_obj)
+        c.pyapi.decref(length_obj)
+        c.pyapi.decref(istuple_obj)
+
+    else:
+        RecordArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.RecordArray))
+        from_lookup_obj = c.pyapi.object_getattr_string(RecordArray_obj, "from_lookup")
+        if tpe.lookup is None:
+            lookup_obj = c.pyapi.make_none()
         else:
-            key_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.reverselookup[i]))
-            c.pyapi.call_function_objargs(append_obj, (x_obj, key_obj))
-            c.pyapi.decref(key_obj)
-        c.pyapi.decref(x_obj)
-    c.pyapi.decref(RecordArray_obj)
-    c.pyapi.decref(istuple_obj)
-    c.pyapi.decref(length_obj)
-    c.pyapi.decref(append_obj)
+            lookup_obj = c.pyapi.dict_new(len(tpe.lookup))
+            for key, fieldindex in tpe.lookup.items():
+                key_obj = c.pyapi.unserialize(c.pyapi.serialize_object(key))
+                fieldindex_obj = c.pyapi.unserialize(c.pyapi.serialize_object(fieldindex))
+                c.pyapi.dict_setitem(lookup_obj, key_obj, fieldindex_obj)
+                c.pyapi.decref(key_obj)
+                c.pyapi.decref(fieldindex_obj)
+        if tpe.reverselookup is None:
+            reverselookup_obj = c.pyapi.make_none()
+        else:
+            reverselookup_obj = c.pyapi.list_new(c.context.get_constant(numba.intp, 0))
+            for key in tpe.reverselookup:
+                key_obj = c.pyapi.unserialize(c.pyapi.serialize_object(key))
+                c.pyapi.list_append(reverselookup_obj, key_obj)
+                c.pyapi.decref(key_obj)
+        contents_obj = c.pyapi.list_new(c.context.get_constant(numba.intp, 0))
+        for i, t in enumerate(tpe.contenttpes):
+            x_obj = c.pyapi.from_native_value(t, getattr(proxyin, field(i)), c.env_manager)
+            c.pyapi.list_append(contents_obj, x_obj)
+            c.pyapi.decref(x_obj)
+        out = c.pyapi.call_function_objargs(from_lookup_obj, [contents_obj, lookup_obj, reverselookup_obj] + args)
+        c.pyapi.decref(RecordArray_obj)
+        c.pyapi.decref(from_lookup_obj)
+        c.pyapi.decref(lookup_obj)
+        c.pyapi.decref(reverselookup_obj)
+        c.pyapi.decref(contents_obj)
+
+    for x in args:
+        c.pyapi.decref(x)
     return out
 
 @numba.extending.box(RecordType)
-def box(tpe, val, c):
+def box_record(tpe, val, c):
     Record_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Record))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
@@ -292,7 +333,7 @@ def lower_getitem_range(context, builder, sig, args):
 def lower_getitem_str(context, builder, sig, args):
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
-    index = awkward1.util.field2index(tpe.lookup, tpe.numfields, wheretpe.literal_value)
+    index = awkward1._util.field2index(tpe.lookup, tpe.numfields, wheretpe.literal_value)
 
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
 
@@ -348,12 +389,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
 
     if isinstance(headtpe, numba.types.StringLiteral):
-        index = awkward1.util.field2index(arraytpe.lookup, arraytpe.numfields, headtpe.literal_value)
+        index = awkward1._util.field2index(arraytpe.lookup, arraytpe.numfields, headtpe.literal_value)
         nexttpe = arraytpe.contenttpes[index]
         nextval = getattr(proxyin, field(index))
 
     else:
-        nexttpe = RecordArrayType([t.getitem_next(numba.types.Tuple((headtpe,)), advanced is not None) for t in arraytpe.contenttpes], arraytpe.lookup, arraytpe.reverselookup, numba.none)
+        nexttpe = RecordArrayType([t.getitem_next(numba.types.Tuple((headtpe,)), advanced is not None) for t in arraytpe.contenttpes], arraytpe.lookup, arraytpe.reverselookup, numba.none, numba.none)   # FIXME: Type::none()   # arraytpe.typetpe if util.preserves_type(headtpe, advanced is not None) else 
         proxyout = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
         proxyout.length = proxyin.length
         wrappedheadtpe = numba.types.Tuple((headtpe,))

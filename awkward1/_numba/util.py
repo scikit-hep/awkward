@@ -23,7 +23,7 @@ dynamic_addrs = {}
 def globalstring(context, builder, pyvalue, inttype=None):
     if pyvalue not in dynamic_addrs:
         buf = dynamic_addrs[pyvalue] = numpy.array(pyvalue.encode("utf-8") + b"\x00")
-        context.add_dynamic_addr(builder, buf.ctypes.data, info="str({})".format(repr(pyvalue)))
+        context.add_dynamic_addr(builder, buf.ctypes.data, info="str({0})".format(repr(pyvalue)))
     if inttype is None:
         ptr = context.get_constant(numba.types.uintp, dynamic_addrs[pyvalue].ctypes.data)
         return builder.inttoptr(ptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(8)))
@@ -49,7 +49,7 @@ def indextpe(indexname):
     elif indexname == "U8":
         return indexU8tpe
     else:
-        raise AssertionError("unrecognized index type: {}".format(indexname))
+        raise AssertionError("unrecognized index type: {0}".format(indexname))
 
 def cast(context, builder, fromtpe, totpe, val):
     if isinstance(fromtpe, llvmlite.ir.types.IntType):
@@ -118,7 +118,7 @@ def newindex(indexname, context, builder, lentpe, lenval):
     elif indexname == "U8":
         return newindexU8(context, builder, lentpe, lenval)
     else:
-        raise AssertionError("unrecognized index type: {}".format(indexname))
+        raise AssertionError("unrecognized index type: {0}".format(indexname))
 
 @numba.jit(nopython=True)
 def shapeat(shapeat, array, at, ndim):
@@ -160,16 +160,16 @@ def broadcast_arrays(arrays):
             if i == -1:
                 return "1"
             elif isinstance(arrays.types[i], numba.types.Array):
-                return "shapeat({}, arrays[{}], {}, {})".format(getshape(i - 1, at), i, at, ndim)
+                return "shapeat({0}, arrays[{1}], {2}, {3})".format(getshape(i - 1, at), i, at, ndim)
             else:
                 return getshape(i - 1, at)
         g = {"shapeat": shapeat, "broadcast_to": broadcast_to}
         exec("""
 def impl(arrays):
-    shape = ({})
-    return ({})
+    shape = ({0})
+    return ({1})
 """.format(" ".join(getshape(len(arrays.types) - 1, at) + "," for at in range(ndim)),
-           " ".join("broadcast_to(arrays[{}], shape),".format(at) if isinstance(arrays.types[at], (numba.types.Array, numba.types.Integer)) else "arrays[{}],".format(at) for at in range(len(arrays.types)))), g)
+           " ".join("broadcast_to(arrays[{0}], shape),".format(at) if isinstance(arrays.types[at], (numba.types.Array, numba.types.Integer)) else "arrays[{0}],".format(at) for at in range(len(arrays.types)))), g)
         return g["impl"]
 
 def typing_broadcast_arrays(arrays):
@@ -191,15 +191,15 @@ def regularize_slice(arrays):
         indexes = []   # all entries have trailing commas to ensure output is a tuple
         for i, t in enumerate(arrays.types):
             if isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(t.dtype, numba.types.Boolean):
-                code += "    x{} = numpy.nonzero(arrays[{}])\n".format(i, i)
-                indexes.extend(["x{}[{}],".format(i, j) for j in range(arrays.types[i].ndim)])
+                code += "    x{0} = numpy.nonzero(arrays[{1}])\n".format(i, i)
+                indexes.extend(["x{0}[{1}],".format(i, j) for j in range(arrays.types[i].ndim)])
             elif isinstance(t, (numba.types.ArrayCompatible, numba.types.List)) and isinstance(t.dtype, numba.types.Integer):
-                indexes.append("numpy.asarray(arrays[{}], numpy.int64),".format(i))
+                indexes.append("numpy.asarray(arrays[{0}], numpy.int64),".format(i))
             elif isinstance(t, (numba.types.ArrayCompatible, numba.types.List)):
                 raise TypeError("arrays must have boolean or integer type")
             else:
-                indexes.append("arrays[{}],".format(i))
-        code += "    return ({})".format(" ".join(indexes))
+                indexes.append("arrays[{0}],".format(i))
+        code += "    return ({0})".format(" ".join(indexes))
         g = {"numpy": numpy}
         exec(code, g)
         return g["impl"]
@@ -236,3 +236,19 @@ def preprocess_slicetuple(context, builder, wheretpe, whereval):
     whereval3 = context.call_internal(builder, cres2.fndesc, wheretpe3(wheretpe2), (whereval2,))
 
     return wheretpe3, whereval3
+
+def preserves_type(slice, isadvanced):
+    if isinstance(slice, numba.types.Integer):
+        return False
+    elif isinstance(slice, numba.types.SliceType):
+        return True
+    elif isinstance(slice, numba.types.EllipsisType):
+        return True
+    elif isinstance(slice, type(numba.typeof(numpy.newaxis))):
+        return False
+    elif isinstance(slice, (numba.types.Array, numba.types.List, numba.types.ArrayCompatible)):
+        return not isadvanced
+    elif isinstance(slice, numba.types.StringLiteral):
+        return False
+    else:
+        raise AssertionError(slice)

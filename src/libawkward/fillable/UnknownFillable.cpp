@@ -37,7 +37,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> UnknownFillable::snapshot() const {
     if (nullcount_ == 0) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));   // FIXME: Type::none()
     }
     else {
       throw std::runtime_error("UnknownFillable::snapshot() needs OptionArray");

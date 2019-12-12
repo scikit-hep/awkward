@@ -17,24 +17,24 @@ namespace awkward {
     typedef std::unordered_map<std::string, size_t> Lookup;
     typedef std::vector<std::string> ReverseLookup;
 
-    RecordArray(const std::shared_ptr<Identity> id, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
-        : id_(id)
+    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
+        : Content(id, type)
         , contents_(contents)
         , lookup_(lookup)
         , reverselookup_(reverselookup)
         , length_(0) {
       assert(contents.size() != 0);
     }
-    RecordArray(const std::shared_ptr<Identity> id, const std::vector<std::shared_ptr<Content>>& contents)
-        : id_(id)
+    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::vector<std::shared_ptr<Content>>& contents)
+        : Content(id, type)
         , contents_(contents)
         , lookup_(nullptr)
         , reverselookup_(nullptr)
         , length_(0) {
       assert(contents.size() != 0);
     }
-    RecordArray(const std::shared_ptr<Identity> id, int64_t length, bool istuple)
-        : id_(id)
+    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, int64_t length, bool istuple)
+        : Content(id, type)
         , contents_()
         , lookup_(istuple ? nullptr : new Lookup)
         , reverselookup_(istuple ? nullptr : new ReverseLookup)
@@ -46,12 +46,13 @@ namespace awkward {
     bool istuple() const { return lookup_.get() == nullptr; }
 
     virtual const std::string classname() const;
-    virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
-    virtual const std::shared_ptr<Type> type_part() const;
+    virtual const std::shared_ptr<Type> innertype(bool bare) const;
+    virtual void settype_part(const std::shared_ptr<Type> type);
+    virtual bool accepts(const std::shared_ptr<Type> type);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;
@@ -65,23 +66,23 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const;
+    virtual int64_t numfields() const;
+    virtual int64_t fieldindex(const std::string& key) const;
+    virtual const std::string key(int64_t fieldindex) const;
+    virtual bool haskey(const std::string& key) const;
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const;
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const;
+    virtual const std::vector<std::string> keys() const;
 
-    int64_t numfields() const;
-    int64_t index(const std::string& key) const;
-    const std::string key(int64_t index) const;
-    bool has(const std::string& key) const;
-    const std::vector<std::string> aliases(int64_t index) const;
-    const std::vector<std::string> aliases(const std::string& key) const;
-    const std::shared_ptr<Content> field(int64_t index) const;
+    const std::shared_ptr<Content> field(int64_t fieldindex) const;
     const std::shared_ptr<Content> field(const std::string& key) const;
-    const std::vector<std::string> keys() const;
-    const std::vector<std::shared_ptr<Content>> values() const;
-    const std::vector<std::pair<std::string, std::shared_ptr<Content>>> items() const;
+    const std::vector<std::shared_ptr<Content>> fields() const;
+    const std::vector<std::pair<std::string, std::shared_ptr<Content>>> fielditems() const;
     const RecordArray astuple() const;
 
     void append(const std::shared_ptr<Content>& content, const std::string& key);
     void append(const std::shared_ptr<Content>& content);
-    void setkey(int64_t index, const std::string& key);
+    void setkey(int64_t fieldindex, const std::string& key);
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;
@@ -91,7 +92,6 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
 
   private:
-    std::shared_ptr<Identity> id_;
     std::vector<std::shared_ptr<Content>> contents_;
     std::shared_ptr<Lookup> lookup_;
     std::shared_ptr<ReverseLookup> reverselookup_;

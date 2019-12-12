@@ -44,8 +44,8 @@ namespace awkward {
   template <typename T>
   class RawArrayOf: public Content {
   public:
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<T> ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
-        : id_(id)
+    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<T> ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
+        : Content(id, type)
         , ptr_(ptr)
         , offset_(offset)
         , length_(length)
@@ -53,15 +53,15 @@ namespace awkward {
           assert(sizeof(T) == itemsize);
         }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<T> ptr, const int64_t length)
-        : id_(id)
+    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<T> ptr, const int64_t length)
+        : Content(id, type)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const int64_t length)
-        : id_(id)
+    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const int64_t length)
+        : Content(id, type)
         , ptr_(std::shared_ptr<T>(new T[(size_t)length], awkward::util::array_deleter<T>()))
         , offset_(0)
         , length_(length)
@@ -81,7 +81,6 @@ namespace awkward {
 
     virtual const std::string classname() const { return std::string("RawArrayOf<") + std::string(typeid(T).name()) + std::string(">"); }
 
-    virtual const std::shared_ptr<Identity> id() const { return id_; }
     virtual void setid() {
       if (length() <= kMaxInt32) {
         Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
@@ -152,35 +151,38 @@ namespace awkward {
         tojson_real(builder, reinterpret_cast<float*>(byteptr()), length());
       }
       else if (std::is_same<T, int64_t>::value) {
-        tojson_real(builder, reinterpret_cast<int64_t*>(byteptr()), length());
+        tojson_integer(builder, reinterpret_cast<int64_t*>(byteptr()), length());
       }
       else if (std::is_same<T, uint64_t>::value) {
-        tojson_real(builder, reinterpret_cast<uint64_t*>(byteptr()), length());
+        tojson_integer(builder, reinterpret_cast<uint64_t*>(byteptr()), length());
       }
       else if (std::is_same<T, int32_t>::value) {
-        tojson_real(builder, reinterpret_cast<int32_t*>(byteptr()), length());
+        tojson_integer(builder, reinterpret_cast<int32_t*>(byteptr()), length());
       }
       else if (std::is_same<T, uint32_t>::value) {
-        tojson_real(builder, reinterpret_cast<uint32_t*>(byteptr()), length());
+        tojson_integer(builder, reinterpret_cast<uint32_t*>(byteptr()), length());
       }
       else if (std::is_same<T, int16_t>::value) {
-        tojson_real(builder, reinterpret_cast<int16_t*>(byteptr()), length());
+        tojson_integer(builder, reinterpret_cast<int16_t*>(byteptr()), length());
       }
       else if (std::is_same<T, uint16_t>::value) {
-        tojson_real(builder, reinterpret_cast<uint16_t*>(byteptr()), length());
+        tojson_integer(builder, reinterpret_cast<uint16_t*>(byteptr()), length());
       }
       else if (std::is_same<T, int8_t>::value) {
-        tojson_real(builder, reinterpret_cast<int8_t*>(byteptr()), length());
+        tojson_integer(builder, reinterpret_cast<int8_t*>(byteptr()), length());
       }
       else if (std::is_same<T, uint8_t>::value) {
-        tojson_real(builder, reinterpret_cast<uint8_t*>(byteptr()), length());
+        tojson_integer(builder, reinterpret_cast<uint8_t*>(byteptr()), length());
+      }
+      else if (std::is_same<T, bool>::value) {
+        tojson_boolean(builder, reinterpret_cast<bool*>(byteptr()), length());
       }
       else {
         throw std::invalid_argument(std::string("cannot convert RawArrayOf<") + typeid(T).name() + std::string("> into JSON"));
       }
     }
 
-    virtual const std::shared_ptr<Type> type_part() const {
+    virtual const std::shared_ptr<Type> innertype(bool bare) const {
       if (std::is_same<T, double>::value) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
       }
@@ -211,14 +213,66 @@ namespace awkward {
       else if (std::is_same<T, uint8_t>::value) {
         return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint8));
       }
+      else if (std::is_same<T, bool>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::boolean));
+      }
       else {
         throw std::invalid_argument(std::string("RawArrayOf<") + typeid(T).name() + std::string("> cannot be expressed as a PrimitiveType"));
       }
     }
 
+    virtual void settype_part(const std::shared_ptr<Type> type) {
+      if (accepts(type)) {
+        type_ = type;
+      }
+      else {
+        throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
+      }
+    }
+
+    virtual bool accepts(const std::shared_ptr<Type> type) {
+      std::shared_ptr<Type> check = type.get()->level();
+      if (std::is_same<T, double>::value) {
+        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64)));
+      }
+      else if (std::is_same<T, float>::value) {
+        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float32)));
+      }
+      else if (std::is_same<T, int64_t>::value) {
+        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int64)));
+      }
+      else if (std::is_same<T, uint64_t>::value) {
+        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint64)));
+      }
+      else if (std::is_same<T, int32_t>::value) {
+        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int32)));
+      }
+      else if (std::is_same<T, uint32_t>::value) {
+        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint32)));
+      }
+      else if (std::is_same<T, int16_t>::value) {
+        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int16)));
+      }
+      else if (std::is_same<T, uint16_t>::value) {
+        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint16)));
+      }
+      else if (std::is_same<T, int8_t>::value) {
+        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int8)));
+      }
+      else if (std::is_same<T, uint8_t>::value) {
+        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::uint8)));
+      }
+      else if (std::is_same<T, bool>::value) {
+        return check.get()->shallow_equal(std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::boolean)));
+      }
+      else {
+        return false;
+      }
+    }
+
     virtual int64_t length() const { return length_; }
 
-    virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, ptr_, offset_, length_, itemsize_)); }
+    virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, type_, ptr_, offset_, length_, itemsize_)); }
 
     virtual void check_for_iteration() const {
       if (id_.get() != nullptr  &&  id_.get()->length() < length_) {
@@ -260,7 +314,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_range_nowrap(start, stop);
       }
-      return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr_, offset_ + start, stop - start, itemsize_));
+      return std::shared_ptr<Content>(new RawArrayOf<T>(id, type_, ptr_, offset_ + start, stop - start, itemsize_));
     }
 
     virtual const std::shared_ptr<Content> getitem_field(const std::string& key) const {
@@ -301,10 +355,38 @@ namespace awkward {
         id = id_.get()->getitem_carry_64(carry);
       }
 
-      return std::shared_ptr<Content>(new RawArrayOf<T>(id, ptr, 0, carry.length(), itemsize_));
+      return std::shared_ptr<Content>(new RawArrayOf<T>(id, type_, ptr, 0, carry.length(), itemsize_));
     }
 
-    virtual const std::pair<int64_t, int64_t> minmax_depth() const { return std::pair<int64_t, int64_t>(1, 1); }
+    virtual const std::pair<int64_t, int64_t> minmax_depth() const {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
+
+    virtual int64_t numfields() const { return -1; }
+
+    virtual int64_t fieldindex(const std::string& key) const {
+      throw std::invalid_argument("array contains no Records");
+    }
+
+    virtual const std::string key(int64_t fieldindex) const {
+      throw std::invalid_argument("array contains no Records");
+    }
+
+    virtual bool haskey(const std::string& key) const {
+      throw std::invalid_argument("array contains no Records");
+    }
+
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const {
+      throw std::invalid_argument("array contains no Records");
+    }
+
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const {
+      throw std::invalid_argument("array contains no Records");
+    }
+
+    virtual const std::vector<std::string> keys() const {
+      throw std::invalid_argument("array contains no Records");
+    }
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
@@ -366,7 +448,6 @@ namespace awkward {
     }
 
   private:
-    std::shared_ptr<Identity> id_;
     const std::shared_ptr<T> ptr_;
     const int64_t offset_;
     const int64_t length_;

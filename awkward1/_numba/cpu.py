@@ -21,7 +21,7 @@ kernels = ctypes.cdll.LoadLibrary(libpath)
 
 class ErrorType(numba.types.Type):
     def __init__(self):
-        super(ErrorType, self).__init__(name="awkward._numba.cpu.ErrorType")
+        super(ErrorType, self).__init__(name="ak::ErrorType")
 
 class Error(ctypes.Structure):
     _fields_ = [("str", ctypes.c_char_p),

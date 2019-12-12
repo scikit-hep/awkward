@@ -30,20 +30,23 @@ namespace awkward {
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
     virtual const std::shared_ptr<Type> shallow_copy() const;
-    virtual bool equal(std::shared_ptr<Type> other) const;
-    virtual bool compatible(std::shared_ptr<Type> other, bool bool_is_int, bool int_is_float, bool ignore_null, bool unknown_is_anything) const;
+    virtual bool shallow_equal(const std::shared_ptr<Type> other) const;
+    virtual bool equal(const std::shared_ptr<Type> other) const;
+    virtual std::shared_ptr<Type> level() const;
+    virtual std::shared_ptr<Type> inner() const;
+    virtual std::shared_ptr<Type> inner(const std::string& key) const;
+    virtual int64_t numfields() const;
+    virtual int64_t fieldindex(const std::string& key) const;
+    virtual const std::string key(int64_t fieldindex) const;
+    virtual bool haskey(const std::string& key) const;
+    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const;
+    virtual const std::vector<std::string> keyaliases(const std::string& key) const;
+    virtual const std::vector<std::string> keys() const;
 
-    int64_t numfields() const;
-    int64_t index(const std::string& key) const;
-    const std::string key(int64_t index) const;
-    bool has(const std::string& key) const;
-    const std::vector<std::string> aliases(int64_t index) const;
-    const std::vector<std::string> aliases(const std::string& key) const;
-    const std::shared_ptr<Type> field(int64_t index) const;
+    const std::shared_ptr<Type> field(int64_t fieldindex) const;
     const std::shared_ptr<Type> field(const std::string& key) const;
-    const std::vector<std::string> keys() const;
-    const std::vector<std::shared_ptr<Type>> values() const;
-    const std::vector<std::pair<std::string, std::shared_ptr<Type>>> items() const;
+    const std::vector<std::shared_ptr<Type>> fields() const;
+    const std::vector<std::pair<std::string, std::shared_ptr<Type>>> fielditems() const;
 
   private:
     const std::vector<std::shared_ptr<Type>> types_;

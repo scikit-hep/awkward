@@ -13,7 +13,11 @@ namespace awkward {
     return std::shared_ptr<Type>(new ArrayType(type_, length_));
   }
 
-  bool ArrayType::equal(std::shared_ptr<Type> other) const {
+  bool ArrayType::shallow_equal(const std::shared_ptr<Type> other) const {
+    return (dynamic_cast<ArrayType*>(other.get()) != nullptr);
+  }
+
+  bool ArrayType::equal(const std::shared_ptr<Type> other) const {
     if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
       return length_ == t->length_  &&  type_.get()->equal(t->type_);
     }
@@ -22,13 +26,48 @@ namespace awkward {
     }
   }
 
-  bool ArrayType::compatible(std::shared_ptr<Type> other, bool bool_is_int, bool int_is_float, bool ignore_null, bool unknown_is_anything) const {
-    if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
-      return type_.get()->compatible(t->type_, bool_is_int, int_is_float, ignore_null, unknown_is_anything);   // lengths DO NOT need to be equal (unlike RegularType)
-    }
-    else {
-      return false;
-    }
+  std::shared_ptr<Type> ArrayType::nolength() const {
+    return type_;
+  }
+
+  std::shared_ptr<Type> ArrayType::level() const {
+    return shallow_copy();
+  }
+
+  std::shared_ptr<Type> ArrayType::inner() const {
+    return type_;
+  }
+
+  std::shared_ptr<Type> ArrayType::inner(const std::string& key) const {
+    throw std::runtime_error("FIXME: ArrayType::inner(key)");
+  }
+
+  int64_t ArrayType::numfields() const {
+    return type_.get()->numfields();
+  }
+
+  int64_t ArrayType::fieldindex(const std::string& key) const {
+    return type_.get()->fieldindex(key);
+  }
+
+  const std::string ArrayType::key(int64_t fieldindex) const {
+    return type_.get()->key(fieldindex);
+  }
+
+  bool ArrayType::haskey(const std::string& key) const {
+    return type_.get()->haskey(key);
+  }
+
+  const std::vector<std::string> ArrayType::keyaliases(int64_t fieldindex) const {
+    return type_.get()->keyaliases(fieldindex);
+  }
+
+  const std::vector<std::string> ArrayType::keyaliases(const std::string& key) const {
+    return type_.get()->keyaliases(key);
+  }
+
+  const std::vector<std::string> ArrayType::keys() const {
+    return type_.get()->keys();
   }
 
   int64_t ArrayType::length() const {

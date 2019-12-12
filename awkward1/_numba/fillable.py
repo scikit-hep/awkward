@@ -11,7 +11,7 @@ def typeof(val, c):
 
 class FillableArrayType(numba.types.Type):
     def __init__(self):
-        super(FillableArrayType, self).__init__("FillableArrayType")
+        super(FillableArrayType, self).__init__(name="ak::FillableArrayType")
 
 @numba.typing.templates.infer_global(len)
 class type_len(numba.typing.templates.AbstractTemplate):

@@ -13,7 +13,11 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnknownType());
   }
 
-  bool UnknownType::equal(std::shared_ptr<Type> other) const {
+  bool UnknownType::shallow_equal(const std::shared_ptr<Type> other) const {
+    return equal(other);
+  }
+
+  bool UnknownType::equal(const std::shared_ptr<Type> other) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
       return true;
     }
@@ -22,12 +26,43 @@ namespace awkward {
     }
   }
 
-  bool UnknownType::compatible(std::shared_ptr<Type> other, bool bool_is_int, bool int_is_float, bool ignore_null, bool unknown_is_anything) const {
-    if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
-      return true;
-    }
-    else {
-      return unknown_is_anything;
-    }
+  std::shared_ptr<Type> UnknownType::level() const {
+    return shallow_copy();
+  }
+
+  std::shared_ptr<Type> UnknownType::inner() const {
+    return shallow_copy();
+  }
+
+  std::shared_ptr<Type> UnknownType::inner(const std::string& key) const {
+    return shallow_copy();
+  }
+
+  int64_t UnknownType::numfields() const {
+    return -1;
+  }
+
+  int64_t UnknownType::fieldindex(const std::string& key) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::string UnknownType::key(int64_t fieldindex) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  bool UnknownType::haskey(const std::string& key) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::vector<std::string> UnknownType::keyaliases(int64_t fieldindex) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::vector<std::string> UnknownType::keyaliases(const std::string& key) const {
+    throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::vector<std::string> UnknownType::keys() const {
+    throw std::invalid_argument("type contains no Records");
   }
 }

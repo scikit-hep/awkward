@@ -60,10 +60,10 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordFillable::snapshot() const {
     if (length_ == -1) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none()));
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));   // FIXME: Type::none()
     }
     else if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), length_, false));
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, false));   // FIXME: Type::none()
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
@@ -74,7 +74,7 @@ namespace awkward {
         (*lookup.get())[keys_[i]] = i;
         reverselookup.get()->push_back(keys_[i]);
       }
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), contents, lookup, reverselookup));
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), contents, lookup, reverselookup));   // FIXME: Type::none()
     }
   }
 

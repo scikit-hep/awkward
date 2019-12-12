@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 #include "awkward/type/UnknownType.h"
+#include "awkward/type/ArrayType.h"
 
 #include "awkward/array/EmptyArray.h"
 
@@ -25,11 +26,16 @@ namespace awkward {
   const std::string EmptyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
-    if (id_.get() != nullptr) {
-      out << ">\n" << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
+    if (id_.get() == nullptr  &&  type_.get() == nullptr) {
+      out << "/>" << post;
     }
     else {
-      out << "/>" << post;
+      if (id_.get() != nullptr) {
+        out << ">\n" << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
+      }
+      if (type_.get() != nullptr) {
+        out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
+      }
     }
     return out.str();
   }
@@ -39,8 +45,22 @@ namespace awkward {
     builder.endlist();
   }
 
-  const std::shared_ptr<Type> EmptyArray::type_part() const {
+  const std::shared_ptr<Type> EmptyArray::innertype(bool bare) const {
     return std::shared_ptr<Type>(new UnknownType());
+  }
+
+  void EmptyArray::settype_part(const std::shared_ptr<Type> type) {
+    if (accepts(type)) {
+      type_ = type;
+    }
+    else {
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
+    }
+  }
+
+  bool EmptyArray::accepts(const std::shared_ptr<Type> type) {
+    const std::shared_ptr<Type> model(new UnknownType());
+    return type.get()->level().get()->shallow_equal(model);
   }
 
   int64_t EmptyArray::length() const {
@@ -48,7 +68,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new EmptyArray(id_));
+    return std::shared_ptr<Content>(new EmptyArray(id_, type_));
   }
 
   void EmptyArray::check_for_iteration() const { }
@@ -89,6 +109,32 @@ namespace awkward {
 
   const std::pair<int64_t, int64_t> EmptyArray::minmax_depth() const {
     return std::pair<int64_t, int64_t>(1, 1);
+  }
+
+  int64_t EmptyArray::numfields() const { return -1; }
+
+  int64_t EmptyArray::fieldindex(const std::string& key) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::string EmptyArray::key(int64_t fieldindex) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  bool EmptyArray::haskey(const std::string& key) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::vector<std::string> EmptyArray::keyaliases(int64_t fieldindex) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::vector<std::string> EmptyArray::keyaliases(const std::string& key) const {
+    throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::vector<std::string> EmptyArray::keys() const {
+    throw std::invalid_argument("array contains no Records");
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
