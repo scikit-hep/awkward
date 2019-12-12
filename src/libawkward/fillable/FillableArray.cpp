@@ -90,19 +90,23 @@ namespace awkward {
   }
 
   void FillableArray::beginrecord() {
-    beginrecord(0);
+    beginrecord_fast(nullptr);
   }
 
-  void FillableArray::beginrecord(int64_t disambiguator) {
-    maybeupdate(fillable_.get()->beginrecord(disambiguator));
+  void FillableArray::beginrecord_fast(const char* name) {
+    maybeupdate(fillable_.get()->beginrecord(name, false));
+  }
+
+  void FillableArray::beginrecord_check(const char* name) {
+    maybeupdate(fillable_.get()->beginrecord(name, true));
   }
 
   void FillableArray::field_fast(const char* key) {
-    maybeupdate(fillable_.get()->field_fast(key));
+    maybeupdate(fillable_.get()->field(key, false));
   }
 
   void FillableArray::field_check(const char* key) {
-    maybeupdate(fillable_.get()->field_check(key));
+    maybeupdate(fillable_.get()->field(key, true));
   }
 
   void FillableArray::endrecord() {
@@ -237,10 +241,32 @@ uint8_t awkward_FillableArray_endtuple(void* fillablearray) {
   return 0;
 }
 
-uint8_t awkward_FillableArray_beginrecord(void* fillablearray, int64_t disambiguator) {
+uint8_t awkward_FillableArray_beginrecord(void* fillablearray) {
   awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
   try {
-    obj->beginrecord(disambiguator);
+    obj->beginrecord();
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_beginrecord_fast(void* fillablearray, const char* name) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->beginrecord_fast(name);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_beginrecord_check(void* fillablearray, const char* name) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->beginrecord_check(name);
   }
   catch (...) {
     return 1;

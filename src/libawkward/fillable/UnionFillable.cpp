@@ -250,13 +250,13 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Fillable> UnionFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> UnionFillable::beginrecord(const char* name, bool check) {
     if (current_ == -1) {
       std::shared_ptr<Fillable> tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (RecordFillable* raw = dynamic_cast<RecordFillable*>(content.get())) {
-          if (raw->length() == -1  ||  raw->disambiguator() == disambiguator) {
+          if (raw->length() == -1  ||  ((check  &&  raw->name() == name)  ||  (!check  &&  raw->nameptr() == name))) {
             tofill = content;
             break;
           }
@@ -267,31 +267,21 @@ namespace awkward {
         tofill = RecordFillable::fromempty(options_);
         contents_.push_back(tofill);
       }
-      tofill->beginrecord(disambiguator);
+      tofill->beginrecord(name, check);
       current_ = i;
     }
     else {
-      contents_[(size_t)current_].get()->beginrecord(disambiguator);
+      contents_[(size_t)current_].get()->beginrecord(name, check);
     }
     return that_;
   }
 
-  const std::shared_ptr<Fillable> UnionFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> UnionFillable::field(const char* key, bool check) {
     if (current_ == -1) {
-      throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
     else {
-      contents_[(size_t)current_].get()->field_fast(key);
-    }
-    return that_;
-  }
-
-  const std::shared_ptr<Fillable> UnionFillable::field_check(const char* key) {
-    if (current_ == -1) {
-      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
-    }
-    else {
-      contents_[(size_t)current_].get()->field_check(key);
+      contents_[(size_t)current_].get()->field(key, check);
     }
     return that_;
   }

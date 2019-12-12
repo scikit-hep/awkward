@@ -110,21 +110,17 @@ namespace awkward {
     throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
-  const std::shared_ptr<Fillable> UnknownFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> UnknownFillable::beginrecord(const char* name, bool check) {
     std::shared_ptr<Fillable> out = RecordFillable::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
-    out.get()->beginrecord(disambiguator);
+    out.get()->beginrecord(name, check);
     return out;
   }
 
-  const std::shared_ptr<Fillable> UnknownFillable::field_fast(const char* key) {
-    throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
-  }
-
-  const std::shared_ptr<Fillable> UnknownFillable::field_check(const char* key) {
-    throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+  const std::shared_ptr<Fillable> UnknownFillable::field(const char* key, bool check) {
+    throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
   }
 
   const std::shared_ptr<Fillable> UnknownFillable::endrecord() {

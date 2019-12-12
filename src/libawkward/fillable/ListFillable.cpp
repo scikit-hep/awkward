@@ -146,34 +146,24 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Fillable> ListFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> ListFillable::beginrecord(const char* name, bool check) {
     if (!begun_) {
       std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
-      out.get()->beginrecord(disambiguator);
+      out.get()->beginrecord(name, check);
       return out;
     }
     else {
-      maybeupdate(content_.get()->beginrecord(disambiguator));
+      maybeupdate(content_.get()->beginrecord(name, check));
       return that_;
     }
   }
 
-  const std::shared_ptr<Fillable> ListFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> ListFillable::field(const char* key, bool check) {
     if (!begun_) {
-      throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
     else {
-      content_.get()->field_fast(key);
-      return that_;
-    }
-  }
-
-  const std::shared_ptr<Fillable> ListFillable::field_check(const char* key) {
-    if (!begun_) {
-      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
-    }
-    else {
-      content_.get()->field_check(key);
+      content_.get()->field(key, check);
       return that_;
     }
   }

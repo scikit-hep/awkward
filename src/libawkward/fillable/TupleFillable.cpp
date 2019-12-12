@@ -235,25 +235,25 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Fillable> TupleFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> TupleFillable::beginrecord(const char* name, bool check) {
     if (!begun_) {
       std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
-      out.get()->beginrecord(disambiguator);
+      out.get()->beginrecord(name, check);
       return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument("called 'beginrecord' immediately after 'begintuple'; needs 'index' or 'endtuple'");
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->beginrecord(disambiguator));
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->beginrecord(name, check));
     }
     else {
-      contents_[(size_t)nextindex_].get()->beginrecord(disambiguator);
+      contents_[(size_t)nextindex_].get()->beginrecord(name, check);
     }
     return that_;
   }
 
-  const std::shared_ptr<Fillable> TupleFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> TupleFillable::field(const char* key, bool check) {
     if (!begun_) {
       throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
     }
@@ -261,20 +261,7 @@ namespace awkward {
       throw std::invalid_argument("called 'field_fast' immediately after 'begintuple'; needs 'index' or 'endtuple' and then 'beginrecord'");
     }
     else {
-      contents_[(size_t)nextindex_].get()->field_fast(key);
-    }
-    return that_;
-  }
-
-  const std::shared_ptr<Fillable> TupleFillable::field_check(const char* key) {
-    if (!begun_) {
-      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
-    }
-    else if (nextindex_ == -1) {
-      throw std::invalid_argument("called 'field_check' immediately after 'begintuple'; needs 'index' or 'endtuple' and then 'beginrecord'");
-    }
-    else {
-      contents_[(size_t)nextindex_].get()->field_check(key);
+      contents_[(size_t)nextindex_].get()->field(key, check);
     }
     return that_;
   }

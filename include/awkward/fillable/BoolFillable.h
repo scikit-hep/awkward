@@ -31,9 +31,8 @@ namespace awkward {
     virtual const std::shared_ptr<Fillable> begintuple(int64_t numfields);
     virtual const std::shared_ptr<Fillable> index(int64_t index);
     virtual const std::shared_ptr<Fillable> endtuple();
-    virtual const std::shared_ptr<Fillable> beginrecord(int64_t disambiguator);
-    virtual const std::shared_ptr<Fillable> field_fast(const char* key);
-    virtual const std::shared_ptr<Fillable> field_check(const char* key);
+    virtual const std::shared_ptr<Fillable> beginrecord(const char* name, bool check);
+    virtual const std::shared_ptr<Fillable> field(const char* key, bool check);
     virtual const std::shared_ptr<Fillable> endrecord();
 
   private:

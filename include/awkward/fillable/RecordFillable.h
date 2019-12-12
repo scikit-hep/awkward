@@ -14,12 +14,13 @@
 namespace awkward {
   class RecordFillable: public Fillable {
   public:
-    RecordFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, const std::vector<std::string>& keys, const std::vector<const char*>& pointers, int64_t disambiguator, int64_t length, bool begun, int64_t nextindex, int64_t nexttotry)
+    RecordFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, const std::vector<std::string>& keys, const std::vector<const char*>& pointers, const std::string& name, const char* nameptr, int64_t length, bool begun, int64_t nextindex, int64_t nexttotry)
         : options_(options)
         , contents_(contents)
         , keys_(keys)
         , pointers_(pointers)
-        , disambiguator_(disambiguator)
+        , name_(name)
+        , nameptr_(nameptr)
         , length_(length)
         , begun_(begun)
         , nextindex_(nextindex)
@@ -43,19 +44,23 @@ namespace awkward {
     virtual const std::shared_ptr<Fillable> begintuple(int64_t numfields);
     virtual const std::shared_ptr<Fillable> index(int64_t index);
     virtual const std::shared_ptr<Fillable> endtuple();
-    virtual const std::shared_ptr<Fillable> beginrecord(int64_t disambiguator);
-    virtual const std::shared_ptr<Fillable> field_fast(const char* key);
-    virtual const std::shared_ptr<Fillable> field_check(const char* key);
+    virtual const std::shared_ptr<Fillable> beginrecord(const char* name, bool check);
+    virtual const std::shared_ptr<Fillable> field(const char* key, bool check);
     virtual const std::shared_ptr<Fillable> endrecord();
 
-    int64_t disambiguator() const { return disambiguator_; }
+    const std::string name() const { return name_; }
+    const char* nameptr() const { return nameptr_; }
 
   private:
+    const std::shared_ptr<Fillable> field_fast(const char* key);
+    const std::shared_ptr<Fillable> field_check(const char* key);
+
     const FillableOptions options_;
     std::vector<std::shared_ptr<Fillable>> contents_;
     std::vector<std::string> keys_;
     std::vector<const char*> pointers_;
-    int64_t disambiguator_;
+    std::string name_;
+    const char* nameptr_;
     int64_t length_;
     bool begun_;
     int64_t nextindex_;

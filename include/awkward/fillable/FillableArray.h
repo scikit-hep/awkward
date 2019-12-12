@@ -36,7 +36,8 @@ namespace awkward {
     void index(int64_t index);
     void endtuple();
     void beginrecord();
-    void beginrecord(int64_t disambiguator);
+    void beginrecord_fast(const char* name);
+    void beginrecord_check(const char* name);
     void field_fast(const char* key);
     void field_check(const char* key);
     void endrecord();
@@ -72,7 +73,9 @@ extern "C" {
   EXPORT_SYMBOL uint8_t awkward_FillableArray_begintuple(void* fillablearray, int64_t numfields);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_index(void* fillablearray, int64_t index);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_endtuple(void* fillablearray);
-  EXPORT_SYMBOL uint8_t awkward_FillableArray_beginrecord(void* fillablearray, int64_t disambiguator);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_beginrecord(void* fillablearray);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_beginrecord_fast(void* fillablearray, const char* name);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_beginrecord_check(void* fillablearray, const char* name);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_field_fast(void* fillablearray, const char* key);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_field_check(void* fillablearray, const char* key);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_endrecord(void* fillablearray);

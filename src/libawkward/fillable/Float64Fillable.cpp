@@ -96,18 +96,14 @@ namespace awkward {
     throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
-  const std::shared_ptr<Fillable> Float64Fillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> Float64Fillable::beginrecord(const char* name, bool check) {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
-    out.get()->beginrecord(disambiguator);
+    out.get()->beginrecord(name, check);
     return out;
   }
 
-  const std::shared_ptr<Fillable> Float64Fillable::field_fast(const char* key) {
-    throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
-  }
-
-  const std::shared_ptr<Fillable> Float64Fillable::field_check(const char* key) {
-    throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+  const std::shared_ptr<Fillable> Float64Fillable::field(const char* key, bool check) {
+    throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
   }
 
   const std::shared_ptr<Fillable> Float64Fillable::endrecord() {

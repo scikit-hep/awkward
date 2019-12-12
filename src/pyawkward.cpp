@@ -678,7 +678,7 @@ void fillable_fill(ak::FillableArray& self, py::handle obj) {
   }
   else if (py::isinstance<py::dict>(obj)) {
     py::dict dict = obj.cast<py::dict>();
-    self.beginrecord(dict.size());
+    self.beginrecord();
     for (auto pair : dict) {
       if (!py::isinstance<py::str>(pair.first)) {
         throw std::invalid_argument("keys of dicts in 'fromiter' must all be strings");
@@ -729,9 +729,15 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("begintuple", &ak::FillableArray::begintuple)
       .def("index", &ak::FillableArray::index)
       .def("endtuple", &ak::FillableArray::endtuple)
-      .def("beginrecord", [](ak::FillableArray& self, int64_t disambiguator) -> void {
-        self.beginrecord(disambiguator);
-      }, py::arg("disambiguator") = 0)
+      .def("beginrecord", [](ak::FillableArray& self, py::object name) -> void {
+        if (name.is(py::none())) {
+          self.beginrecord();
+        }
+        else {
+          std::string cppname = name.cast<std::string>();
+          self.beginrecord_check(cppname.c_str());
+        }
+      }, py::arg("name") = py::none())
       .def("field", &ak::FillableArray::field_check)
       .def("endrecord", &ak::FillableArray::endrecord)
       .def("fill", &fillable_fill)
