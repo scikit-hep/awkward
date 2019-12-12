@@ -66,10 +66,10 @@ namespace awkward {
 
     std::vector<ssize_t> shape = { (ssize_t)bytepos_tocopy.length() };
     std::vector<ssize_t> strides = { (ssize_t)itemsize };
-    std::shared_ptr<Content> out(new NumpyArray(Identity::none(), Type::none(), ptr, shape, strides, 0, (ssize_t)itemsize, format));   // FIXME: Type::none()
+    std::shared_ptr<Content> out(new NumpyArray(Identity::none(), Type::none(), ptr, shape, strides, 0, (ssize_t)itemsize, format));
 
     for (int64_t i = depth - 1;  i >= 0;  i--) {
-      out = std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), Type::none(), levels[(size_t)i].toindex(), out));   // FIXME: Type::none()
+      out = std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), Type::none(), levels[(size_t)i].toindex(), out));
     }
     return out;
   }

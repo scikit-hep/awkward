@@ -35,7 +35,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> ListFillable::snapshot() const {
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), Type::none(), offsets, content_.get()->snapshot()));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), Type::none(), offsets, content_.get()->snapshot()));
   }
 
   bool ListFillable::active() const {

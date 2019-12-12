@@ -17,7 +17,7 @@ namespace awkward {
     }
 
     std::stringstream out;
-    if (parameters_FIXME_.size() == 0) {
+    if (parameters_.size() == 0) {
       if (dynamic_cast<ListType*>(type_.get()) != nullptr  ||
           dynamic_cast<RegularType*>(type_.get()) != nullptr) {
         out << indent << pre << "option[" << type_.get()->tostring_part(indent, "", "") << "]" << post;
@@ -33,7 +33,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> OptionType::shallow_copy() const {
-    return std::shared_ptr<Type>(new OptionType(parameters_FIXME_, type_));
+    return std::shared_ptr<Type>(new OptionType(parameters_, type_));
   }
 
   bool OptionType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {

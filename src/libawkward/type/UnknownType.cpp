@@ -13,7 +13,7 @@ namespace awkward {
     }
 
     std::stringstream out;
-    if (parameters_FIXME_.size() == 0) {
+    if (parameters_.size() == 0) {
       out << indent << pre << "unknown" << post;
     }
     else {
@@ -23,7 +23,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnknownType::shallow_copy() const {
-    return std::shared_ptr<Type>(new UnknownType(parameters_FIXME_));
+    return std::shared_ptr<Type>(new UnknownType(parameters_));
   }
 
   bool UnknownType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {

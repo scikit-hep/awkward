@@ -58,7 +58,7 @@ def test_typestr():
     assert repr(t2) == "var * something"
 
 def test_record_name():
-    fillable = awkward1.layout.FillableArray()
+    fillable = awkward1.FillableArray()
 
     fillable.beginrecord("Dummy")
     fillable.field("one")

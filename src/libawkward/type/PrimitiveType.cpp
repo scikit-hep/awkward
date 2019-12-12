@@ -31,7 +31,7 @@ namespace awkward {
       case float64: s = "float64"; break;
       default:      assert(dtype_ < numtypes);
     }
-    if (parameters_FIXME_.size() == 0) {
+    if (parameters_.size() == 0) {
       out << indent << pre << s << post;
     }
     else {
@@ -41,7 +41,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> PrimitiveType::shallow_copy() const {
-    return std::shared_ptr<Type>(new PrimitiveType(parameters_FIXME_, dtype_));
+    return std::shared_ptr<Type>(new PrimitiveType(parameters_, dtype_));
   }
 
   bool PrimitiveType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {

@@ -52,6 +52,10 @@ class Array(object):
         self._layout.type = type
 
     @property
+    def baretype(self):
+        return self._layout.baretype
+
+    @property
     def namespace(self):
         return self._namespace
 
@@ -61,10 +65,6 @@ class Array(object):
             self._namespace = awkward1.namespace
         else:
             self._namespace = namespace
-
-    @property
-    def baretype(self):
-        return self._layout.baretype
 
     def __iter__(self):
         for x in self.layout:
@@ -248,3 +248,89 @@ class Record(object):
     @property
     def baretype(self):
         return self._layout.baretype
+
+class FillableArray(object):
+    def __init__(self, namespace=None):
+        self._fillablearray = awkward1.layout.FillableArray()
+        self.namespace = namespace
+
+    @property
+    def type(self):
+        return self._fillablearray.snapshot().type
+
+    @property
+    def baretype(self):
+        return self._fillablearray.type
+
+    @property
+    def namespace(self):
+        return self._namespace
+
+    @namespace.setter
+    def namespace(self, namespace):
+        if namespace is None:
+            self._namespace = awkward1.namespace
+        else:
+            self._namespace = namespace
+
+    def __len__(self):
+        return len(self._fillablearray)
+
+    def __getitem__(self, where):
+        return awkward1._util.wrap(self._fillablearray[where], self._namespace)
+
+    def __iter__(self):
+        for x in self._fillablearray.snapshot():
+            yield awkward1._util.wrap(x, self._namespace)
+
+    def __str__(self, limit_value=85, snapshot=None):
+        if snapshot is None:
+            snapshot = self.snapshot()
+        return snapshot.__str__(limit_value=limit_value)
+
+    def __repr__(self, limit_value=40, limit_total=85):
+        snapshot = self.snapshot()
+        value = self.__str__(limit_value=limit_value, snapshot=snapshot)
+
+        limit_type = limit_total - len(value) - len("<FillableArray  type=>")
+        type = repr(str(snapshot.type))
+        if len(type) > limit_type:
+            type = type[:(limit_type - 4)] + "..." + type[-1]
+
+        return "<FillableArray {0} type={1}>".format(value, type)
+
+    def snapshot(self):
+        return awkward1._util.wrap(self._fillablearray.snapshot(), self._namespace)
+
+    def null(self):
+        self._fillablearray.null()
+
+    def boolean(self, x):
+        self._fillablearray.boolean(x)
+
+    def integer(self, x):
+        self._fillablearray.integer(x)
+
+    def real(self, x):
+        self._fillablearray.real(x)
+
+    def beginlist(self):
+        self._fillablearray.beginlist()
+
+    def endlist(self):
+        self._fillablearray.endlist()
+
+    def begintuple(self):
+        self._fillablearray.begintuple()
+
+    def endtuple(self):
+        self._fillablearray.endtuple()
+
+    def beginrecord(self, name=None):
+        self._fillablearray.beginrecord(name)
+
+    def field(self, key):
+        self._fillablearray.field(key)
+
+    def endrecord(self):
+        self._fillablearray.endrecord()

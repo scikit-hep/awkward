@@ -22,10 +22,10 @@ namespace awkward {
   }
 
   bool Type::equal_parameters(const Type::Parameters& other) const {
-    if (parameters_FIXME_.size() != other.size()) {
+    if (parameters_.size() != other.size()) {
       return false;
     }
-    for (auto pair : parameters_FIXME_) {
+    for (auto pair : parameters_) {
       auto other_value = other.find(pair.first);
       if (other_value == other.end()) {
         return false;
@@ -42,8 +42,8 @@ namespace awkward {
   }
 
   bool Type::get_typestr(std::string& output) const {
-    auto typestr = parameters_FIXME_.find(std::string("__str__"));
-    if (typestr != parameters_FIXME_.end()) {
+    auto typestr = parameters_.find(std::string("__str__"));
+    if (typestr != parameters_.end()) {
       rj::Document mine;
       mine.Parse<rj::kParseNanAndInfFlag>(typestr->second.c_str());
       if (mine.IsString()) {
@@ -58,7 +58,7 @@ namespace awkward {
     std::stringstream out;
     out << "parameters={";
     bool first = true;
-    for (auto pair : parameters_FIXME_) {
+    for (auto pair : parameters_) {
       if (!first) {
         out << ", ";
       }

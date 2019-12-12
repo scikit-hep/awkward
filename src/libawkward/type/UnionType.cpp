@@ -23,7 +23,7 @@ namespace awkward {
       }
       out << type(i).get()->tostring_part(indent, "", "");
     }
-    if (parameters_FIXME_.size() != 0) {
+    if (parameters_.size() != 0) {
       out << ", " << string_parameters();
     }
     out << "]" << post;
@@ -31,7 +31,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnionType::shallow_copy() const {
-    return std::shared_ptr<Type>(new UnionType(parameters_FIXME_, types_));
+    return std::shared_ptr<Type>(new UnionType(parameters_, types_));
   }
 
   bool UnionType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {

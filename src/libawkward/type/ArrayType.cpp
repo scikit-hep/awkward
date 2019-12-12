@@ -15,7 +15,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> ArrayType::shallow_copy() const {
-    return std::shared_ptr<Type>(new ArrayType(parameters_FIXME_, type_, length_));
+    return std::shared_ptr<Type>(new ArrayType(parameters_, type_, length_));
   }
 
   bool ArrayType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {

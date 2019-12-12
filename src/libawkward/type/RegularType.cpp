@@ -16,7 +16,7 @@ namespace awkward {
     }
 
     std::stringstream out;
-    if (parameters_FIXME_.size() == 0) {
+    if (parameters_.size() == 0) {
       out << indent << pre << size_ << " * " << type_.get()->tostring_part(indent, "", "") << post;
     }
     else {
@@ -26,7 +26,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RegularType::shallow_copy() const {
-    return std::shared_ptr<Type>(new RegularType(parameters_FIXME_, type_, size_));
+    return std::shared_ptr<Type>(new RegularType(parameters_, type_, size_));
   }
 
   bool RegularType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
