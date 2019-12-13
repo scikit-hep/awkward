@@ -30,15 +30,32 @@ namespace awkward {
     void boolean(bool x);
     void integer(int64_t x);
     void real(double x);
+    void bytestring(const char* x);
+    void bytestring(const char* x, int64_t length);
+    void bytestring(const std::string& x) {
+      bytestring(x.c_str(), (int64_t)x.length());
+    }
+    void string(const char* x);
+    void string(const char* x, int64_t length);
+    void string(const std::string& x) {
+      string(x.c_str(), (int64_t)x.length());
+    }
     void beginlist();
     void endlist();
     void begintuple(int64_t numfields);
     void index(int64_t index);
     void endtuple();
     void beginrecord();
-    void beginrecord(int64_t disambiguator);
+    void beginrecord_fast(const char* name);
+    void beginrecord_check(const char* name);
+    void beginrecord_check(const std::string& name) {
+      beginrecord_check(name.c_str());
+    }
     void field_fast(const char* key);
     void field_check(const char* key);
+    void field_check(const std::string& key) {
+      field_check(key.c_str());
+    }
     void endrecord();
 
     template <typename T>
@@ -51,11 +68,16 @@ namespace awkward {
     }
     void fill(int64_t x) { integer(x); }
     void fill(double x) { real(x); }
+    void fill(const char* x) { bytestring(x); }
+    void fill(const std::string& x) { bytestring(x.c_str()); }
 
   private:
-    std::shared_ptr<Fillable> fillable_;
+    void maybeupdate(const std::shared_ptr<Fillable>& tmp);
 
-    void maybeupdate(Fillable* tmp);
+    static const char* no_encoding;
+    static const char* utf8_encoding;
+
+    std::shared_ptr<Fillable> fillable_;
   };
 }
 
@@ -67,12 +89,18 @@ extern "C" {
   EXPORT_SYMBOL uint8_t awkward_FillableArray_boolean(void* fillablearray, bool x);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_integer(void* fillablearray, int64_t x);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_real(void* fillablearray, double x);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_bytestring(void* fillablearray, const char* x);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_bytestring_length(void* fillablearray, const char* x, int64_t length);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_string(void* fillablearray, const char* x);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_string_length(void* fillablearray, const char* x, int64_t length);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_beginlist(void* fillablearray);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_endlist(void* fillablearray);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_begintuple(void* fillablearray, int64_t numfields);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_index(void* fillablearray, int64_t index);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_endtuple(void* fillablearray);
-  EXPORT_SYMBOL uint8_t awkward_FillableArray_beginrecord(void* fillablearray, int64_t disambiguator);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_beginrecord(void* fillablearray);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_beginrecord_fast(void* fillablearray, const char* name);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_beginrecord_check(void* fillablearray, const char* name);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_field_fast(void* fillablearray, const char* key);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_field_check(void* fillablearray, const char* key);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_endrecord(void* fillablearray);

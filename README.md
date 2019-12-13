@@ -1,54 +1,128 @@
+<img src="docs/img/logo-300px.png">
+
 # awkward-1.0
 
-Development of awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array) in 2020.
+Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array#readme) in 2020.
 
-   * [Motivation and requirements](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) as a Google Doc (for comments).
+   * The [original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now a little out-of-date.
+   * My [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
+   * My [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
 
-## Short summary
+## Motivation for a new Awkward Array
 
-Awkward-array has proven to be a useful way to analyze variable-length and tree-like data in Python, by extending Numpy's idioms from flat arrays to arrays of data structures. Unlike previous iterations of this idea ([Femtocode](https://github.com/diana-hep/femtocode), [OAMap](https://github.com/diana-hep/oamap)), awkward-array is used in data analysis, with feedback from users.
+Awkward Array has proven to be a useful way to analyze variable-length and tree-like data in Python, by extending Numpy's idioms from rectilinear arrays to arrays of complex data structures. For over a year, physicists have been using Awkward Array both in and out of [uproot](https://github.com/scikit-hep/uproot#readme); it is already one of the most popular Python packages in particle physics.
 
-The original awkward-array is written in pure Python + Numpy, and it incorporates some clever tricks to do nested structure manipulations with only Numpy calls (e.g. Jaydeep Nandi's [cross-join](https://gitlab.com/Jayd_1234/GSoC_vectorized_proof_of_concepts/blob/master/argproduct.md) and [self-join without replacement](https://gitlab.com/Jayd_1234/GSoC_vectorized_proof_of_concepts/blob/master/argpairs.md), Nick Smith's [N choose k for k < 5](https://github.com/scikit-hep/awkward-array/pull/102), Jonas Rembser's [JaggedArray concatenation for axis=1](https://github.com/scikit-hep/awkward-array/pull/117), and my [deep JaggedArray get-item](https://github.com/scikit-hep/awkward-array/blob/423ca484e17fb0d0b3938e2ec0a0dcd8ef26c735/awkward/array/jagged.py#L597-L775)). However, cleverness is hard to scale: JaggedArray get-item raises `NotImplementedError` for some triply nested or deeper cases. Also, most bugs reported by users have been related to Numpy special cases, such as Numpy's raising an error for the min or max of an empty array. And finally, these implementations make multiple passes over the data, whereas a straightforward implementation (where we're allowed to use for loops, because it's compiled code) would be single-pass and therefore more cache-friendly.
+<p align="center"><img src="docs/img/awkward-0-popularity.png" width="60%"></p>
 
-Awkward-array 1.0 will be rewritten in C++ using simple, single-pass algorithms, and exposed to Python through pybind11 and Numba. It will consist of four layers:
+However, its pure-NumPy implementation is hard to extend (finding for-loop-free implementations of operations on nested data is _hard_) and maintain (most bugs are NumPy corner cases). Also, the feedback users have given me through [GitHub](https://github.com/scikit-hep/awkward-array/issues), [StackOverflow](https://stackoverflow.com/questions/tagged/awkward-array), and [in-person tutorials](https://github.com/jpivarski/2019-07-29-dpf-python#readme) have pointed out some design mistakes. A backward-incompatible release will allow us to fix design mistakes while providing freedom to make deep changes in the implementation.
 
-   1. A single `Array` class in Python that can be lowered in Numba, representing a sequence of abstract objects according to a high-level [datashape](https://datashape.readthedocs.io/en/latest/).
-   2. Its columnar implementation in terms of nested `ListArray`, `RecordArray`, `MaskedArray`, etc., exposed to Python through pybind11. The modularity of this "layout" is very useful for engineering, but it has some features that have tripped up users, such as different physical arrays representing the same logical objects.
-   3. Memory management of this layout in C++ classes, and again as [Numba extensions](https://numba.pydata.org/numba-doc/dev/extending/index.html). As a side-effect, `libawkward.so` would be a library for creating and manipulating awkward-arrays purely in C++, with no pybind11 dependencies.
-   4. Implementations of the actual algorithms for (a) CPUs and (b) GPUs. This layer performs no memory management (arrays must be allocated and owned by the caller), but they perform all loops over data, reading old arrays, filling new arrays.
+The Awkward 1.0 project is a major investment, a six-month sprint from late August 2019 to late February 2020. The time spent on a clean, robust Awkward Array is justified by the widespread adoption of Awkward 0.x: its usefulness to the community has been demonstrated.
 
-Below is a diagram of how each component uses those at a lower level of abstraction:
+## Main goals of Awkward 1.0
+
+   * Full access to create and manipulate Awkward Arrays in C++ with no Python dependencies. This is so that C++ libraries can produce and share data with Python front-ends.
+   * Easy installation with `pip install` and `conda install` for most users (Mac, Windows, and [most Linux](https://github.com/pypa/manylinux)).
+   * Imperative (for-loop-style) access to Awkward Arrays in [Numba](https://numba.pydata.org/), a just-in-time compiler for Python. This is so that physicists can write critical loops in straightforward Python without a performance penalty.
+   * A single `awkward.Array` class that hides the details of how columnar data is built, with a suite of operations that apply to all internal types.
+   * Conformance to NumPy, where Awkward and NumPy overlap.
+   * Better control over "behavioral mix-ins," such as `LorentzVector` (i.e. adding methods like `pt()` to arrays of records with `px` and `py` fields). In Awkward 0.x, this was achieved with multiple inheritance, but that was brittle.
+   * Support for set operations and database-style joins, which can be put to use in a [declarative analysis language](https://github.com/jpivarski/PartiQL#readme), but requires database-style accounting of an index (like a Pandas index).
+   * Better interoperability with Pandas, NumExpr, and Dask, while maintaining support for ROOT, Arrow, and Parquet.
+   * Ability to add GPU implementations of array operations in the future.
+   * Better error messages and extensive documentation.
+
+## Architecture of Awkward 1.0
+
+To achieve these goals, Awkward 1.0 is separated into four layers:
+
+   1. The user-facing Python layer with a single `awkward.Array` class, whose data is described by a [datashape](https://datashape.readthedocs.io/en/latest/) type.
+   2. The columnar representation (i.e. nested `ListArray`, `RecordArray`, etc.) is accessible but hidden, and these are all C++ classes presented to Python through [pybind11](https://pybind11.readthedocs.io/en/stable/).
+   3. Two object models for the columnar representation, one in C++11 (with only header-only dependencies) and the other as [Numba extensions](https://numba.pydata.org/numba-doc/dev/extending/index.html). This is the only layer in which array-allocation occurs.
+   4. A suite of operations on arrays, computing new values but not allocating memory. The first implementation of this suite is in C++ with a pure-C interface; the second may be CUDA (or other GPU language). With one exception (`FillableArray`), iterations over arrays only occur at this level, so performance optimizations can focus on this layer.
 
 <p align="center"><img src="docs/img/awkward-1-0-layers.png" width="60%"></p>
 
-Layer 4 is a dynamically linked library named `{lib,}awkward-cpu-kernels.{so,dylib,dll}` with an unmangled C FFI interface. The layer 3 C++ library is `{lib,}awkward.{so,dylib,dll}` and layer 3 Numba extensions are in the `numbaext` submodule of the `awkward1` Python library. Layer 2 is the `layout` submodule, linked via pybind11, and layer 1 is the Python code in `awkward1`.
+## The Awkward transition
 
-The original `awkward` library will continue to be maintained while `awkward1` is in development, and the two will be swapped, becoming `awkward0` and `awkward`, respectively, in a gradual deprecation process in 2020. [Uproot 3.x](https://github.com/scikit-hep/uproot) will continue to depend on `awkward0`, but uproot 4.x will make the new `awkward` an optional but highly recommended dependency. Many users are only directly aware of uproot, so a major change in version from 3 to 4 will alert them to changes in interface.
+Since Awkward 1.0 is not backward-compatible, existing users of Awkward 0.x will need to update their scripts or only use the new version on new scripts. Awkward 1.0 is already available to early adopters as [awkward1 in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python). When [uproot](https://github.com/scikit-hep/uproot#readme) is ready to use the new Awkward Array,
 
-## What will not change
+   * it will be released as **uproot 4.0**,
+   * **awkward1** will be renamed **awkward**, and
+   * the old Awkward 0.x will be renamed **awkward0**.
 
-The following features of awkward 0.x will be features of awkward 1.x.
+The original Awkward 0.x will be available in perpetuity as **awkward0**, but only minor bugs will be fixed, and that only for the duration of 2020. This repository will replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array#readme) on GitHub.
 
-   * The efficient, columnar data representation built out of "layout" classes, such as `ListArray` (`JaggedArray`), `RecordArray` (`Table`), and `MaskedArray` (same name). This was the key idea in the transition from OAMap to awkward-array, and it has paid off. If anything, we will be increasing the composability, with a larger number of classes that take on smaller roles (e.g. separate `ListArray` from `ListOffsetArray` for the starts/stops vs offsets cases).
-   * Numpy-like interface: awkward 1.x will be more consistent with Numpy's API, not less.
-   * Interoperability with ROOT, Arrow, Parquet and Pandas, as well as planned interoperability with Numba and Dask.
-   * The goals of zero-copy and shallow manipulations, such as slicing an array of objects without necessarily loading all of their attributes.
-   * The ability to attach domain-specific methods to arrays, such as Lorentz transformations for arrays of Lorentz vectors.
-   * `VirtualArrays`, and therefore lazy-loading, will be supported.
+## Compiling from source
 
-## What will change
+Awkward 1.0 is available to early adopters as [awkward1 in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python), but developers will need to compile from source. For that, you will need
 
-   * Awkward 0.x's single specification, many implementations model: awkward 1.x will have at most two implementations of each algorithm, one for CPUs and one for GPUs. All the goals of precompiled kernels, Numba interface, Pandas interoperability, etc. will be accomplished through the four-layer system described above instead of completely separate implementations. Each of the four layers will be fully specified by documentation, though.
-   * Native access to the layout in C++ and the ability to develop an implementation in any language that supports C FFI (i.e. all of them).
-   * Data analysts will see a single `Array` class that hides details about the layout. This is an API-breaking change for data analysis scripts, but one that would help new users.
-   * All manipulations of this `Array` class will be through functions in the `awkward` namespace, such as `awkward.cross(a, b)` instead of `a.cross(b)` to mean a cross-join of `a` and `b` per element. The namespace on the arrays is therefore free for data fields like `a.x`, `a.y`, `a.z` and domain-specific methods like `a.cross(b)` meaning 3-D cross product. This is an API-breaking change for data analysis scripts, but one that would help new users.
-   * Arrays will pass through optional Pandas-style indexes for high-level operations [like these](https://github.com/jpivarski/PartiQL#readme).
+   * [CMake/CTest](https://cmake.org/),
+   * a C++11-compliant compiler,
+
+and optionally
+
+   * Python 2.7, 3.5, 3.6, 3.7, or 3.8 (CPython, not an alternative like PyPy),
+   * NumPy 1.13.1 or later,
+   * pytest 3.9 or later (to run tests),
+   * Numba 0.46 or later (to run all the tests).
+
+To get the code from GitHub, be sure to use `--recursive` to get Awkward's git-module dependencies (pybind11 and RapidJSON):
+
+```bash
+git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
+```
+
+To compile _without Python_ (unusual case):
+
+```bash
+mkdir build
+cd build
+cmake ..
+make all
+make CTEST_OUTPUT_ON_FAILURE=1 test    # optional: run C++ tests
+cd ..
+```
+
+To compile _with Python_ (the usual case):
+
+```bash
+python setup.py build
+pytest -vv tests                       # optional: run Python tests
+```
+
+In lieu of "make clean" for Python builds, I use the following to remove compiled code from the source tree:
+
+```bash
+rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
+```
+
+<br>
+<p align="center">See Azure Pipelines <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary">buildtest-awkward</a> (CI) and <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary">deploy-awkward</a> (CD).</p>
+<br>
 
 ## Roadmap
 
-The rough estimate for development time to a minimally usable library for physics was six months, starting in late August (i.e. finishing in late February). **Progress is currently on track.**
+**The six-month sprint:**
 
-### Approximate order of implementation
+   * [X] **September 2019:** Set up CI/CD; define jagged array types in C++; pervasive infrastructure like database-style indexing.
+   * [X] **October 2019:** NumPy-compliant slicing; the Numba implementation. Feature parity will be maintained in Numba continuously.
+   * [X] **November 2019:** Fillable arrays to create columnar data; high-level type objects; all list and record types.
+   * [ ] **December 2019:** The `awkward.Array` user interface; behavioral mix-ins, including the string type; [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) and [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html).
+   * [ ] **January 2020:** The rest of the array nodes: option and union types, indirection, chunking, and laziness.
+   * [ ] **February 2020:** The array operations: flattening, padding, concatenating, combinatorics, etc.
+
+**Updating dependent libraries:**
+
+   * [ ] **March 2020:** Update [vector](https://github.com/scikit-hep/vector) (from [hepvector](https://github.com/henryiii/hepvector#readme) and [uproot-methods](https://github.com/scikit-hep/uproot-methods#readme)). This work will be done with [Henry Schreiner](https://github.com/henryiii).
+   * [ ] **April 2020:** Update [uproot](https://github.com/scikit-hep/uproot#readme) to 4.0 using Awkward 1.0.
+
+Most users will see Awkward 1.0 for the first time when uproot 4.0 is released.
+
+<br>
+<p align="center"><b>Progress is currently on track.</b></p>
+<br>
+
+### Checklist of features for the six-month sprint
 
 Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-hep/awkward-1.0/pulls?q=is%3Apr+is%3Aclosed) for more details.
 
@@ -75,9 +149,9 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
          * [X] Implement it in Numba as well.
-      * [ ] `MaskedArray`, `BitMaskedArray`, `IndexedMaskedArray`: same as the old versions.
+      * [ ] `OptionArray`: for nullable data, covering both bit and byte granularity (old `MaskedArray` and `BitMaskedArray`).
       * [ ] `UnionArray`: same as the old version; `SparseUnionArray`: the additional case found in Apache Arrow.
-      * [ ] `IndexedArray`: same as the old version.
+      * [ ] `IndexedArray`: same as the old version, but allowing negative values to be `None`; hence, it has option type and fills the role of `IndexedMaskedArray`.
       * [ ] `RedirectArray`: an explicit weak-reference to another part of the structure (no hard-linked cycles). Often used with an `IndexedArray`.
       * [ ] `SlicedArray`: lazy-slicing (from old `Table`) that can be applied to any type.
       * [ ] `SparseArray`: same as the old version.
@@ -118,7 +192,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [ ] `awkward.join`: performs an inner join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event intersection, zipping all fields.
       * [ ] `awkward.union`: performs an outer join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event union, zipping fields where possible.
 
-### Soon after (possibly within) the six-month timeframe
+### Soon after the six-month sprint
 
    * [ ] Update [hepvector](https://github.com/henryiii/hepvector#readme) to be Derived classes, replacing the `TLorentzVectorArray` in uproot-methods.
    * [ ] Update uproot (on a branch) to use Awkward 1.0.
@@ -128,7 +202,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
    * [ ] Universal `array.get[...]` as a softer form of `array[...]` that inserts `None` for non-existent indexes, rather than raising errors.
    * [ ] Explicit interface with [NumExpr](https://numexpr.readthedocs.io/en/latest/index.html).
 
-### At some point in the future
+### Thereafter
 
    * [ ] Demonstrate Awkward 1.0 as a C++ wrapping library with [FastJet](http://fastjet.fr/).
    * [ ] GPU implementations of the cpu-kernels in Layer 4, with the Layer 3 C++ passing a "device" variable at every level of the layout to indicate whether the data pointers refer to main memory or a particular GPU.

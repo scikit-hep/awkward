@@ -111,6 +111,7 @@ namespace awkward {
   void tojson_integer(ToJson& builder) const;
   template <typename T>
   void tojson_real(ToJson& builder) const;
+  void tojson_string(ToJson& builder) const;
 
   private:
     std::shared_ptr<void> ptr_;

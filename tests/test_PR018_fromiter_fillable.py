@@ -12,7 +12,7 @@ def test_types():
     t0 = awkward1.layout.UnknownType()
     t1 = awkward1.layout.PrimitiveType("int32")
     t2 = awkward1.layout.OptionType(t1)
-    t3 = awkward1.layout.UnionType(t1, awkward1.layout.PrimitiveType("float64"))
+    t3 = awkward1.layout.UnionType((t1, awkward1.layout.PrimitiveType("float64")))
     t4 = awkward1.layout.ListType(t1)
     t4b = awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32"))
     t5 = awkward1.layout.ListType(t4)

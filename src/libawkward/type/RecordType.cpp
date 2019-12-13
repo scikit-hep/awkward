@@ -11,72 +11,75 @@
 
 namespace awkward {
   std::string RecordType::tostring_part(std::string indent, std::string pre, std::string post) const {
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
     std::stringstream out;
-    if (reverselookup_.get() == nullptr) {
-      out << "(";
-      for (size_t j = 0;  j < types_.size();  j++) {
-        if (j != 0) {
-          out << ", ";
+    if (parameters_.size() == 0) {
+      if (reverselookup_.get() == nullptr) {
+        out << "(";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << types_[j].get()->tostring_part("", "", "");
         }
-        out << types_[j].get()->tostring_part("", "", "");
+        out << ")";
       }
-      out << ")";
+      else {
+        out << "{";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << util::quote(reverselookup_.get()->at(j), true) << ": ";
+          out << types_[j].get()->tostring_part("", "", "");
+        }
+        out << "}";
+      }
     }
     else {
-      out << "{";
-      for (size_t j = 0;  j < types_.size();  j++) {
-        if (j != 0) {
-          out << ", ";
+      if (reverselookup_.get() == nullptr) {
+        out << "tuple[[";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << types_[j].get()->tostring_part("", "", "");
         }
-        out << util::quote(reverselookup_.get()->at(j), false) << ": ";
-        out << types_[j].get()->tostring_part("", "", "");
       }
-      out << "}";
+      else {
+        out << "struct[[";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << util::quote(reverselookup_.get()->at(j), true);
+        }
+        out << "], [";
+        for (size_t j = 0;  j < types_.size();  j++) {
+          if (j != 0) {
+            out << ", ";
+          }
+          out << types_[j].get()->tostring_part("", "", "");
+        }
+      }
+      out << "], " << string_parameters() << "]";
     }
     return out.str();
   }
 
   const std::shared_ptr<Type> RecordType::shallow_copy() const {
-    return std::shared_ptr<Type>(new RecordType(types_, lookup_, reverselookup_));
+    return std::shared_ptr<Type>(new RecordType(parameters_, types_, lookup_, reverselookup_));
   }
 
-  bool RecordType::shallow_equal(const std::shared_ptr<Type> other) const {
+  bool RecordType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
-      if (numfields() != t->numfields()) {
+      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;
       }
-      if (reverselookup_.get() == nullptr) {
-        if (t->reverselookup().get() != nullptr) {
-          return false;
-        }
-        return true;
-      }
-      else {
-        if (t->reverselookup().get() == nullptr) {
-          return false;
-        }
-        if (lookup_.get()->size() != t->lookup().get()->size()) {
-          return false;
-        }
-        for (auto pair : *lookup_.get()) {
-          int64_t otherindex;
-          try {
-            otherindex = (int64_t)t->lookup().get()->at(pair.first);
-          }
-          catch (std::out_of_range err) {
-            return false;
-          }
-        }
-        return true;
-      }
-    }
-    else {
-      return false;
-    }
-  }
-
-  bool RecordType::equal(const std::shared_ptr<Type> other) const {
-    if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
       if (numfields() != t->numfields()) {
         return false;
       }
@@ -85,7 +88,7 @@ namespace awkward {
           return false;
         }
         for (int64_t j = 0;  j < numfields();  j++) {
-          if (!field(j).get()->equal(t->field(j))) {
+          if (!field(j).get()->equal(t->field(j), check_parameters)) {
             return false;
           }
         }
@@ -106,7 +109,7 @@ namespace awkward {
           catch (std::out_of_range err) {
             return false;
           }
-          if (!field((int64_t)pair.second).get()->equal(t->field(otherindex))) {
+          if (!field((int64_t)pair.second).get()->equal(t->field(otherindex), check_parameters)) {
             return false;
           }
         }

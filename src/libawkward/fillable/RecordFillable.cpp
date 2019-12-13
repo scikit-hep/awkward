@@ -17,6 +17,12 @@
 #include "awkward/fillable/RecordFillable.h"
 
 namespace awkward {
+  const std::shared_ptr<Fillable> RecordFillable::fromempty(const FillableOptions& options) {
+    std::shared_ptr<Fillable> out(new RecordFillable(options, std::vector<std::shared_ptr<Fillable>>(), std::vector<std::string>(), std::vector<const char*>(), "", nullptr, -1, false, -1, -1));
+    out.get()->setthat(out);
+    return out;
+  }
+
   int64_t RecordFillable::length() const {
     return length_;
   }
@@ -27,7 +33,8 @@ namespace awkward {
     }
     keys_.clear();
     pointers_.clear();
-    disambiguator_ = 0;
+    name_ = "";
+    nameptr_ = nullptr;
     length_ = -1;
     begun_ = false;
     nextindex_ = -1;
@@ -36,7 +43,7 @@ namespace awkward {
 
   const std::shared_ptr<Type> RecordFillable::type() const {
     if (length_ == -1) {
-      return std::shared_ptr<Type>(new UnknownType);
+      return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
@@ -47,17 +54,27 @@ namespace awkward {
         (*lookup.get())[keys_[i]] = i;
         reverselookup.get()->push_back(keys_[i]);
       }
-      return std::shared_ptr<Type>(new RecordType(types, lookup, reverselookup));
-      return std::shared_ptr<Type>(new RecordType(types));
+      Type::Parameters parameters;
+      if (nameptr_ != nullptr) {
+        parameters["__class__"] = util::quote(name_, true);
+      }
+      return std::shared_ptr<Type>(new RecordType(parameters, types, lookup, reverselookup));
+      return std::shared_ptr<Type>(new RecordType(parameters, types));
     }
   }
 
   const std::shared_ptr<Content> RecordFillable::snapshot() const {
     if (length_ == -1) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
     }
     else if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, false));   // FIXME: Type::none()
+      std::shared_ptr<Content> out(new RecordArray(Identity::none(), Type::none(), length_, false));
+      if (nameptr_ != nullptr) {
+        std::shared_ptr<Type> type = out.get()->type();
+        type.get()->nolength().get()->setparameter("__class__", util::quote(name_, true));
+        out.get()->settype(type);
+      }
+      return out;
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
@@ -68,7 +85,13 @@ namespace awkward {
         (*lookup.get())[keys_[i]] = i;
         reverselookup.get()->push_back(keys_[i]);
       }
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), contents, lookup, reverselookup));   // FIXME: Type::none()
+      std::shared_ptr<Content> out(new RecordArray(Identity::none(), Type::none(), contents, lookup, reverselookup));
+      if (nameptr_ != nullptr) {
+        std::shared_ptr<Type> type = out.get()->type();
+        type.get()->nolength().get()->setparameter("__class__", util::quote(name_, true));
+        out.get()->settype(type);
+      }
+      return out;
     }
   }
 
@@ -76,16 +99,10 @@ namespace awkward {
     return begun_;
   }
 
-  Fillable* RecordFillable::null() {
+  const std::shared_ptr<Fillable> RecordFillable::null() {
     if (!begun_) {
-      Fillable* out = OptionFillable::fromvalids(options_, this);
-      try {
-        out->null();
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = OptionFillable::fromvalids(options_, that_);
+      out.get()->null();
       return out;
     }
     else if (nextindex_ == -1) {
@@ -97,19 +114,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->null();
     }
-    return this;
+    return that_;
   }
 
-  Fillable* RecordFillable::boolean(bool x) {
+  const std::shared_ptr<Fillable> RecordFillable::boolean(bool x) {
     if (!begun_) {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
-      try {
-        out->boolean(x);
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->boolean(x);
       return out;
     }
     else if (nextindex_ == -1) {
@@ -121,19 +132,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->boolean(x);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* RecordFillable::integer(int64_t x) {
+  const std::shared_ptr<Fillable> RecordFillable::integer(int64_t x) {
     if (!begun_) {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
-      try {
-        out->integer(x);
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->integer(x);
       return out;
     }
     else if (nextindex_ == -1) {
@@ -145,19 +150,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->integer(x);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* RecordFillable::real(double x) {
+  const std::shared_ptr<Fillable> RecordFillable::real(double x) {
     if (!begun_) {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
-      try {
-        out->real(x);
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->real(x);
       return out;
     }
     else if (nextindex_ == -1) {
@@ -169,19 +168,31 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->real(x);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* RecordFillable::beginlist() {
+  const std::shared_ptr<Fillable> RecordFillable::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
-      try {
-        out->beginlist();
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->string(x, length, encoding);
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'string' immediately after 'beginrecord'; needs 'index' or 'endrecord'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->string(x, length, encoding));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->string(x, length, encoding);
+    }
+    return that_;
+  }
+
+  const std::shared_ptr<Fillable> RecordFillable::beginlist() {
+    if (!begun_) {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->beginlist();
       return out;
     }
     else if (nextindex_ == -1) {
@@ -193,10 +204,10 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->beginlist();
     }
-    return this;
+    return that_;
   }
 
-  Fillable* RecordFillable::endlist() {
+  const std::shared_ptr<Fillable> RecordFillable::endlist() {
     if (!begun_) {
       throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
     }
@@ -206,19 +217,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->endlist();
     }
-    return this;
+    return that_;
   }
 
-  Fillable* RecordFillable::begintuple(int64_t numfields) {
+  const std::shared_ptr<Fillable> RecordFillable::begintuple(int64_t numfields) {
     if (!begun_) {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
-      try {
-        out->begintuple(numfields);
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->begintuple(numfields);
       return out;
     }
     else if (nextindex_ == -1) {
@@ -230,10 +235,10 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->begintuple(numfields);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* RecordFillable::index(int64_t index) {
+  const std::shared_ptr<Fillable> RecordFillable::index(int64_t index) {
     if (!begun_) {
       throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
     }
@@ -243,10 +248,10 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->index(index);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* RecordFillable::endtuple() {
+  const std::shared_ptr<Fillable> RecordFillable::endtuple() {
     if (!begun_) {
       throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
     }
@@ -256,46 +261,55 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->endtuple();
     }
-    return this;
+    return that_;
   }
 
-  Fillable* RecordFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> RecordFillable::beginrecord(const char* name, bool check) {
     if (length_ == -1) {
-      disambiguator_ = disambiguator;
+      if (name == nullptr) {
+        name_ = std::string("");
+      }
+      else {
+        name_ = std::string(name);
+      }
+      nameptr_ = name;
       length_ = 0;
     }
 
-    if (!begun_  &&  disambiguator == disambiguator_) {
+    if (!begun_  &&  ((check  &&  name_ == name)  ||  (!check  &&  nameptr_ == name))) {
       begun_ = true;
       nextindex_ = -1;
       nexttotry_ = 0;
     }
     else if (!begun_) {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
-      try {
-        out->beginrecord(disambiguator);
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->beginrecord(name, check);
       return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument("called 'beginrecord' immediately after 'beginrecord'; needs 'field_fast', 'field_check', or 'endrecord'");
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->beginrecord(disambiguator));
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->beginrecord(name, check));
     }
     else {
-      contents_[(size_t)nextindex_].get()->beginrecord(disambiguator);
+      contents_[(size_t)nextindex_].get()->beginrecord(name, check);
     }
-    return this;
+    return that_;
   }
 
-  Fillable* RecordFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> RecordFillable::field(const char* key, bool check) {
+    if (check) {
+      return field_check(key);
+    }
+    else {
+      return field_fast(key);
+    }
+  }
+
+  const std::shared_ptr<Fillable> RecordFillable::field_fast(const char* key) {
     if (!begun_) {
-      throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
     else if (nextindex_ == -1  ||  !contents_[(size_t)nextindex_].get()->active()) {
       int64_t wrap_around = (int64_t)pointers_.size();
@@ -310,31 +324,31 @@ namespace awkward {
         if (pointers_[(size_t)i] == key) {
           nextindex_ = i;
           nexttotry_ = i + 1;
-          return this;
+          return that_;
         }
         i++;
       } while (i != nexttotry_);
       nextindex_ = wrap_around;
       nexttotry_ = 0;
       if (length_ == 0) {
-        contents_.push_back(std::shared_ptr<Fillable>(UnknownFillable::fromempty(options_)));
+        contents_.push_back(UnknownFillable::fromempty(options_));
       }
       else {
-        contents_.push_back(std::shared_ptr<Fillable>(OptionFillable::fromnulls(options_, length_, UnknownFillable::fromempty(options_))));
+        contents_.push_back(OptionFillable::fromnulls(options_, length_, UnknownFillable::fromempty(options_)));
       }
       keys_.push_back(std::string(key));
       pointers_.push_back(key);
-      return this;
+      return that_;
     }
     else {
-      contents_[(size_t)nextindex_].get()->field_fast(key);
-      return this;
+      contents_[(size_t)nextindex_].get()->field(key, false);
+      return that_;
     }
   }
 
-  Fillable* RecordFillable::field_check(const char* key) {
+  const std::shared_ptr<Fillable> RecordFillable::field_check(const char* key) {
     if (!begun_) {
-      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
     else if (nextindex_ == -1  ||  !contents_[(size_t)nextindex_].get()->active()) {
       int64_t wrap_around = (int64_t)keys_.size();
@@ -349,29 +363,29 @@ namespace awkward {
         if (keys_[(size_t)i].compare(key) == 0) {
           nextindex_ = i;
           nexttotry_ = i + 1;
-          return this;
+          return that_;
         }
         i++;
       } while (i != nexttotry_);
       nextindex_ = wrap_around;
       nexttotry_ = 0;
       if (length_ == 0) {
-        contents_.push_back(std::shared_ptr<Fillable>(UnknownFillable::fromempty(options_)));
+        contents_.push_back(UnknownFillable::fromempty(options_));
       }
       else {
-        contents_.push_back(std::shared_ptr<Fillable>(OptionFillable::fromnulls(options_, length_, UnknownFillable::fromempty(options_))));
+        contents_.push_back(OptionFillable::fromnulls(options_, length_, UnknownFillable::fromempty(options_)));
       }
       keys_.push_back(std::string(key));
       pointers_.push_back(nullptr);
-      return this;
+      return that_;
     }
     else {
-      contents_[(size_t)nextindex_].get()->field_check(key);
-      return this;
+      contents_[(size_t)nextindex_].get()->field(key, true);
+      return that_;
     }
   }
 
-  Fillable* RecordFillable::endrecord() {
+  const std::shared_ptr<Fillable> RecordFillable::endrecord() {
     if (!begun_) {
       throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
     }
@@ -392,13 +406,12 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->endrecord();
     }
-    return this;
+    return that_;
   }
 
-  void RecordFillable::maybeupdate(int64_t i, Fillable* tmp) {
-    if (tmp != contents_[(size_t)i].get()) {
-      contents_[(size_t)i] = std::shared_ptr<Fillable>(tmp);
+  void RecordFillable::maybeupdate(int64_t i, const std::shared_ptr<Fillable>& tmp) {
+    if (tmp.get() != contents_[(size_t)i].get()) {
+      contents_[(size_t)i] = tmp;
     }
   }
-
 }

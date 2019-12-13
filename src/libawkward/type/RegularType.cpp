@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <string>
+#include <sstream>
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
@@ -9,25 +10,31 @@
 
 namespace awkward {
   std::string RegularType::tostring_part(std::string indent, std::string pre, std::string post) const {
-    return indent + pre + std::to_string(size_) + std::string(" * ") + type_.get()->tostring_part(indent, "", "") + post;
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
+    std::stringstream out;
+    if (parameters_.size() == 0) {
+      out << indent << pre << size_ << " * " << type_.get()->tostring_part(indent, "", "") << post;
+    }
+    else {
+      out << indent << pre << "[" << size_ << " * " << type_.get()->tostring_part(indent, "", "") << ", " << string_parameters() << "]" << post;
+    }
+    return out.str();
   }
 
   const std::shared_ptr<Type> RegularType::shallow_copy() const {
-    return std::shared_ptr<Type>(new RegularType(type_, size_));
+    return std::shared_ptr<Type>(new RegularType(parameters_, type_, size_));
   }
 
-  bool RegularType::shallow_equal(const std::shared_ptr<Type> other) const {
+  bool RegularType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
-      return size() == t->size();
-    }
-    else {
-      return false;
-    }
-  }
-
-  bool RegularType::equal(const std::shared_ptr<Type> other) const {
-    if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
-      return size() == t->size()  &&  type().get()->equal(t->type());
+      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+        return false;
+      }
+      return size() == t->size()  &&  type().get()->equal(t->type(), check_parameters);
     }
     else {
       return false;

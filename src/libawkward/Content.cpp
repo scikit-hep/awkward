@@ -22,11 +22,11 @@ namespace awkward {
         return innertype(false);
       }
       else {
-        return std::shared_ptr<Type>(new ArrayType(innertype(false), length()));
+        return std::shared_ptr<Type>(new ArrayType(Type::Parameters(), innertype(false), length()));
       }
     }
     else {
-      return std::shared_ptr<Type>(new ArrayType(type_, length()));
+      return std::shared_ptr<Type>(new ArrayType(Type::Parameters(), type_, length()));
     }
   }
 
@@ -50,7 +50,7 @@ namespace awkward {
       return innertype(true);
     }
     else {
-      return std::shared_ptr<Type>(new ArrayType(innertype(true), length()));
+      return std::shared_ptr<Type>(new ArrayType(Type::Parameters(), innertype(true), length()));
     }
   }
 

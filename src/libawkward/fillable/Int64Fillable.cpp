@@ -10,6 +10,12 @@
 #include "awkward/fillable/Int64Fillable.h"
 
 namespace awkward {
+  const std::shared_ptr<Fillable> Int64Fillable::fromempty(const FillableOptions& options) {
+    std::shared_ptr<Fillable> out(new Int64Fillable(options, GrowableBuffer<int64_t>::empty(options)));
+    out.get()->setthat(out);
+    return out;
+  }
+
   int64_t Int64Fillable::length() const {
     return buffer_.length();
   }
@@ -19,16 +25,16 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> Int64Fillable::type() const {
-    return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int64));
+    return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64));
   }
 
   const std::shared_ptr<Content> Int64Fillable::snapshot() const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
 #ifdef _MSC_VER
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "q"));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "q"));
 #else
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "l"));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "l"));
 #endif
   }
 
@@ -36,105 +42,70 @@ namespace awkward {
     return false;
   }
 
-  Fillable* Int64Fillable::null() {
-    Fillable* out = OptionFillable::fromvalids(options_, this);
-    try {
-      out->null();
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+  const std::shared_ptr<Fillable> Int64Fillable::null() {
+    std::shared_ptr<Fillable> out = OptionFillable::fromvalids(options_, that_);
+    out.get()->null();
     return out;
   }
 
-  Fillable* Int64Fillable::boolean(bool x) {
-    Fillable* out = UnionFillable::fromsingle(options_, this);
-    try {
-      out->boolean(x);
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+  const std::shared_ptr<Fillable> Int64Fillable::boolean(bool x) {
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->boolean(x);
     return out;
   }
 
-  Fillable* Int64Fillable::integer(int64_t x) {
+  const std::shared_ptr<Fillable> Int64Fillable::integer(int64_t x) {
     buffer_.append(x);
-    return this;
+    return that_;
   }
 
-  Fillable* Int64Fillable::real(double x) {
-    Float64Fillable* out = Float64Fillable::fromint64(options_, buffer_);
-    try {
-      out->real(x);
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+  const std::shared_ptr<Fillable> Int64Fillable::real(double x) {
+    std::shared_ptr<Fillable> out = Float64Fillable::fromint64(options_, buffer_);
+    out.get()->real(x);
     return out;
   }
 
-  Fillable* Int64Fillable::beginlist() {
-    Fillable* out = UnionFillable::fromsingle(options_, this);
-    try {
-      out->beginlist();
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+  const std::shared_ptr<Fillable> Int64Fillable::string(const char* x, int64_t length, const char* encoding) {
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->string(x, length, encoding);
     return out;
   }
 
-  Fillable* Int64Fillable::endlist() {
+  const std::shared_ptr<Fillable> Int64Fillable::beginlist() {
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->beginlist();
+    return out;
+  }
+
+  const std::shared_ptr<Fillable> Int64Fillable::endlist() {
     throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
   }
 
-  Fillable* Int64Fillable::begintuple(int64_t numfields) {
-    Fillable* out = UnionFillable::fromsingle(options_, this);
-    try {
-      out->begintuple(numfields);
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+  const std::shared_ptr<Fillable> Int64Fillable::begintuple(int64_t numfields) {
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->begintuple(numfields);
     return out;
   }
 
-  Fillable* Int64Fillable::index(int64_t index) {
+  const std::shared_ptr<Fillable> Int64Fillable::index(int64_t index) {
     throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
   }
 
-  Fillable* Int64Fillable::endtuple() {
+  const std::shared_ptr<Fillable> Int64Fillable::endtuple() {
     throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
-  Fillable* Int64Fillable::beginrecord(int64_t disambiguator) {
-    Fillable* out = UnionFillable::fromsingle(options_, this);
-    try {
-      out->beginrecord(disambiguator);
-    }
-    catch (...) {
-      delete out;
-      throw;
-    }
+  const std::shared_ptr<Fillable> Int64Fillable::beginrecord(const char* name, bool check) {
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->beginrecord(name, check);
     return out;
   }
 
-  Fillable* Int64Fillable::field_fast(const char* key) {
-    throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+  const std::shared_ptr<Fillable> Int64Fillable::field(const char* key, bool check) {
+    throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
   }
 
-  Fillable* Int64Fillable::field_check(const char* key) {
-    throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
-  }
-
-  Fillable* Int64Fillable::endrecord() {
+  const std::shared_ptr<Fillable> Int64Fillable::endrecord() {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
-
 }

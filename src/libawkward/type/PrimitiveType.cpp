@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <cassert>
+#include <sstream>
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
@@ -9,6 +10,12 @@
 
 namespace awkward {
   std::string PrimitiveType::tostring_part(std::string indent, std::string pre, std::string post) const {
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
+    std::stringstream out;
     std::string s;
     switch (dtype_) {
       case boolean: s = "bool"; break;
@@ -24,19 +31,24 @@ namespace awkward {
       case float64: s = "float64"; break;
       default:      assert(dtype_ < numtypes);
     }
-    return indent + pre + s + post;
+    if (parameters_.size() == 0) {
+      out << indent << pre << s << post;
+    }
+    else {
+      out << indent << pre << s << "[" << string_parameters() << "]" << post;
+    }
+    return out.str();
   }
 
   const std::shared_ptr<Type> PrimitiveType::shallow_copy() const {
-    return std::shared_ptr<Type>(new PrimitiveType(dtype_));
+    return std::shared_ptr<Type>(new PrimitiveType(parameters_, dtype_));
   }
 
-  bool PrimitiveType::shallow_equal(const std::shared_ptr<Type> other) const {
-    return equal(other);
-  }
-
-  bool PrimitiveType::equal(const std::shared_ptr<Type> other) const {
+  bool PrimitiveType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
+      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+        return false;
+      }
       return dtype_ == t->dtype_;
     }
     else {

@@ -32,12 +32,12 @@ namespace awkward {
     virtual void boolean(bool x) = 0;
     virtual void integer(int64_t x) = 0;
     virtual void real(double x) = 0;
+    virtual void string(const char* x, int64_t length) = 0;
     virtual void beginlist() = 0;
     virtual void endlist() = 0;
-    virtual void beginrec() = 0;
-    virtual void endrec() = 0;
-    virtual void fieldkey(const char* x) = 0;
-    virtual void string(const char* x) = 0;
+    virtual void beginrecord() = 0;
+    virtual void field(const char* x) = 0;
+    virtual void endrecord() = 0;
   };
 
   class ToJsonString: public ToJson {
@@ -52,12 +52,12 @@ namespace awkward {
     virtual void boolean(bool x) { writer_.Bool(x); }
     virtual void integer(int64_t x) { writer_.Int64(x); }
     virtual void real(double x) { writer_.Double(x); }
+    virtual void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
     virtual void beginlist() { writer_.StartArray(); }
     virtual void endlist() { writer_.EndArray(); }
-    virtual void beginrec() { writer_.StartObject(); }
-    virtual void endrec() { writer_.EndObject(); }
-    virtual void fieldkey(const char* x) { writer_.Key(x); }
-    virtual void string(const char* x) { writer_.String(x); }
+    virtual void beginrecord() { writer_.StartObject(); }
+    virtual void field(const char* x) { writer_.Key(x); }
+    virtual void endrecord() { writer_.EndObject(); }
 
     std::string tostring() {
       return std::string(buffer_.GetString());
@@ -80,12 +80,12 @@ namespace awkward {
     virtual void boolean(bool x) { writer_.Bool(x); }
     virtual void integer(int64_t x) { writer_.Int64(x); }
     virtual void real(double x) { writer_.Double(x); }
+    virtual void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
     virtual void beginlist() { writer_.StartArray(); }
     virtual void endlist() { writer_.EndArray(); }
-    virtual void beginrec() { writer_.StartObject(); }
-    virtual void endrec() { writer_.EndObject(); }
-    virtual void fieldkey(const char* x) { writer_.Key(x); }
-    virtual void string(const char* x) { writer_.String(x); }
+    virtual void beginrecord() { writer_.StartObject(); }
+    virtual void field(const char* x) { writer_.Key(x); }
+    virtual void endrecord() { writer_.EndObject(); }
 
     std::string tostring() {
       return std::string(buffer_.GetString());
@@ -108,12 +108,12 @@ namespace awkward {
     virtual void boolean(bool x) { writer_.Bool(x); }
     virtual void integer(int64_t x) { writer_.Int64(x); }
     virtual void real(double x) { writer_.Double(x); }
+    virtual void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
     virtual void beginlist() { writer_.StartArray(); }
     virtual void endlist() { writer_.EndArray(); }
-    virtual void beginrec() { writer_.StartObject(); }
-    virtual void endrec() { writer_.EndObject(); }
-    virtual void fieldkey(const char* x) { writer_.Key(x); }
-    virtual void string(const char* x) { writer_.String(x); }
+    virtual void beginrecord() { writer_.StartObject(); }
+    virtual void field(const char* x) { writer_.Key(x); }
+    virtual void endrecord() { writer_.EndObject(); }
 
   private:
     std::shared_ptr<char> buffer_;
@@ -133,12 +133,12 @@ namespace awkward {
     virtual void boolean(bool x) { writer_.Bool(x); }
     virtual void integer(int64_t x) { writer_.Int64(x); }
     virtual void real(double x) { writer_.Double(x); }
+    virtual void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
     virtual void beginlist() { writer_.StartArray(); }
     virtual void endlist() { writer_.EndArray(); }
-    virtual void beginrec() { writer_.StartObject(); }
-    virtual void endrec() { writer_.EndObject(); }
-    virtual void fieldkey(const char* x) { writer_.Key(x); }
-    virtual void string(const char* x) { writer_.String(x); }
+    virtual void beginrecord() { writer_.StartObject(); }
+    virtual void field(const char* x) { writer_.Key(x); }
+    virtual void endrecord() { writer_.EndObject(); }
 
   private:
     std::shared_ptr<char> buffer_;
@@ -149,3 +149,5 @@ namespace awkward {
 }
 
 #endif // AWKWARD_IO_JSON_H_
+
+// , rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag, rj::UTF8<>, rj::UTF8<>, rj::CrtAllocator<>, rj::kWriteNanAndInfFlag

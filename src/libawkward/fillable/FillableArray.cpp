@@ -22,7 +22,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> FillableArray::type() const {
-    return std::shared_ptr<Type>(new ArrayType(fillable_.get()->type(), fillable_.get()->length()));
+    return std::shared_ptr<Type>(new ArrayType(Type::Parameters(), fillable_.get()->type(), fillable_.get()->length()));
   }
 
   const std::shared_ptr<Content> FillableArray::snapshot() const {
@@ -65,13 +65,29 @@ namespace awkward {
     maybeupdate(fillable_.get()->real(x));
   }
 
+  void FillableArray::bytestring(const char* x) {
+    maybeupdate(fillable_.get()->string(x, -1, no_encoding));
+  }
+
+  void FillableArray::bytestring(const char* x, int64_t length) {
+    maybeupdate(fillable_.get()->string(x, length, no_encoding));
+  }
+
+  void FillableArray::string(const char* x) {
+    maybeupdate(fillable_.get()->string(x, -1, utf8_encoding));
+  }
+
+  void FillableArray::string(const char* x, int64_t length) {
+    maybeupdate(fillable_.get()->string(x, length, utf8_encoding));
+  }
+
   void FillableArray::beginlist() {
     maybeupdate(fillable_.get()->beginlist());
   }
 
   void FillableArray::endlist() {
-    Fillable* tmp = fillable_.get()->endlist();
-    if (tmp == nullptr) {
+    std::shared_ptr<Fillable> tmp = fillable_.get()->endlist();
+    if (tmp.get() == nullptr) {
       throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
     }
     maybeupdate(tmp);
@@ -90,30 +106,37 @@ namespace awkward {
   }
 
   void FillableArray::beginrecord() {
-    beginrecord(0);
+    beginrecord_fast(nullptr);
   }
 
-  void FillableArray::beginrecord(int64_t disambiguator) {
-    maybeupdate(fillable_.get()->beginrecord(disambiguator));
+  void FillableArray::beginrecord_fast(const char* name) {
+    maybeupdate(fillable_.get()->beginrecord(name, false));
+  }
+
+  void FillableArray::beginrecord_check(const char* name) {
+    maybeupdate(fillable_.get()->beginrecord(name, true));
   }
 
   void FillableArray::field_fast(const char* key) {
-    maybeupdate(fillable_.get()->field_fast(key));
+    maybeupdate(fillable_.get()->field(key, false));
   }
 
   void FillableArray::field_check(const char* key) {
-    maybeupdate(fillable_.get()->field_check(key));
+    maybeupdate(fillable_.get()->field(key, true));
   }
 
   void FillableArray::endrecord() {
     maybeupdate(fillable_.get()->endrecord());
   }
 
-  void FillableArray::maybeupdate(Fillable* tmp) {
-    if (tmp != fillable_.get()  &&  tmp != nullptr) {
-      fillable_ = std::shared_ptr<Fillable>(tmp);
+  void FillableArray::maybeupdate(const std::shared_ptr<Fillable>& tmp) {
+    if (tmp.get() != fillable_.get()) {
+      fillable_ = tmp;
     }
   }
+
+  const char* FillableArray::no_encoding = nullptr;
+  const char* FillableArray::utf8_encoding = "utf-8";
 }
 
 uint8_t awkward_FillableArray_length(void* fillablearray, int64_t* result) {
@@ -182,6 +205,50 @@ uint8_t awkward_FillableArray_real(void* fillablearray, double x) {
   return 0;
 }
 
+uint8_t awkward_FillableArray_bytestring(void* fillablearray, const char* x) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->bytestring(x);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_bytestring_length(void* fillablearray, const char* x, int64_t length) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->bytestring(x, length);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_string(void* fillablearray, const char* x) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->string(x);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_string_length(void* fillablearray, const char* x, int64_t length) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->string(x, length);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
 uint8_t awkward_FillableArray_beginlist(void* fillablearray) {
   awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
   try {
@@ -237,10 +304,32 @@ uint8_t awkward_FillableArray_endtuple(void* fillablearray) {
   return 0;
 }
 
-uint8_t awkward_FillableArray_beginrecord(void* fillablearray, int64_t disambiguator) {
+uint8_t awkward_FillableArray_beginrecord(void* fillablearray) {
   awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
   try {
-    obj->beginrecord(disambiguator);
+    obj->beginrecord();
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_beginrecord_fast(void* fillablearray, const char* name) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->beginrecord_fast(name);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_beginrecord_check(void* fillablearray, const char* name) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->beginrecord_check(name);
   }
   catch (...) {
     return 1;

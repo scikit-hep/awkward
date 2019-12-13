@@ -46,7 +46,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> EmptyArray::innertype(bool bare) const {
-    return std::shared_ptr<Type>(new UnknownType());
+    return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
   }
 
   void EmptyArray::settype_part(const std::shared_ptr<Type> type) {
@@ -54,13 +54,12 @@ namespace awkward {
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(Type::Parameters(), type, length()).compare(baretype()));
     }
   }
 
   bool EmptyArray::accepts(const std::shared_ptr<Type> type) {
-    const std::shared_ptr<Type> model(new UnknownType());
-    return type.get()->level().get()->shallow_equal(model);
+    return dynamic_cast<UnknownType*>(type.get()->level().get()) != nullptr;
   }
 
   int64_t EmptyArray::length() const {

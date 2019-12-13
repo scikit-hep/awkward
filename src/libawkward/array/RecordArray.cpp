@@ -108,12 +108,12 @@ namespace awkward {
     }
     builder.beginlist();
     for (int64_t i = 0;  i < rows;  i++) {
-      builder.beginrec();
+      builder.beginrecord();
       for (size_t j = 0;  j < cols;  j++) {
-        builder.fieldkey(keys.get()->at(j).c_str());
+        builder.field(keys.get()->at(j).c_str());
         contents_[j].get()->getitem_at_nowrap(i).get()->tojson_part(builder);
       }
-      builder.endrec();
+      builder.endrecord();
     }
     builder.endlist();
   }
@@ -123,7 +123,7 @@ namespace awkward {
     for (auto item : contents_) {
       types.push_back(item.get()->innertype(bare));
     }
-    return std::shared_ptr<Type>(new RecordType(types, lookup_, reverselookup_));
+    return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types, lookup_, reverselookup_));
   }
 
   void RecordArray::settype_part(const std::shared_ptr<Type> type) {
@@ -143,7 +143,7 @@ namespace awkward {
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(Type::Parameters(), type, length()).compare(baretype()));
     }
   }
 

@@ -95,12 +95,26 @@ FillableArray_endtuple.argtypes = [ctypes.c_voidp]
 FillableArray_endtuple.restype  = ctypes.c_uint8
 FillableArray_endtuple.numbatpe = numba.typing.ctypes_utils.make_function_type(FillableArray_endtuple)
 
-# uint8_t awkward_FillableArray_beginrecord(void* fillablearray, int64_t disambiguator);
+# uint8_t awkward_FillableArray_beginrecord(void* fillablearray);
 FillableArray_beginrecord = lib.awkward_FillableArray_beginrecord
 FillableArray_beginrecord.name = "FillableArray.beginrecord"
-FillableArray_beginrecord.argtypes = [ctypes.c_voidp, ctypes.c_int64]
+FillableArray_beginrecord.argtypes = [ctypes.c_voidp]
 FillableArray_beginrecord.restype  = ctypes.c_uint8
 FillableArray_beginrecord.numbatpe = numba.typing.ctypes_utils.make_function_type(FillableArray_beginrecord)
+
+# uint8_t awkward_FillableArray_beginrecord_fast(void* fillablearray, const char* name);
+FillableArray_beginrecord_fast = lib.awkward_FillableArray_beginrecord_fast
+FillableArray_beginrecord_fast.name = "FillableArray.beginrecord_fast"
+FillableArray_beginrecord_fast.argtypes = [ctypes.c_voidp, ctypes.c_voidp]
+FillableArray_beginrecord_fast.restype  = ctypes.c_uint8
+FillableArray_beginrecord_fast.numbatpe = numba.typing.ctypes_utils.make_function_type(FillableArray_beginrecord_fast)
+
+# uint8_t awkward_FillableArray_beginrecord_check(void* fillablearray, const char* name);
+FillableArray_beginrecord_check = lib.awkward_FillableArray_beginrecord_check
+FillableArray_beginrecord_check.name = "FillableArray.beginrecord_check"
+FillableArray_beginrecord_check.argtypes = [ctypes.c_voidp, ctypes.c_voidp]
+FillableArray_beginrecord_check.restype  = ctypes.c_uint8
+FillableArray_beginrecord_check.numbatpe = numba.typing.ctypes_utils.make_function_type(FillableArray_beginrecord_check)
 
 # uint8_t awkward_FillableArray_field_fast(void* fillablearray, const char* key);
 FillableArray_field_fast = lib.awkward_FillableArray_field_fast

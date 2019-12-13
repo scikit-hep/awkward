@@ -12,111 +12,108 @@
 #include "awkward/fillable/ListFillable.h"
 
 namespace awkward {
+  const std::shared_ptr<Fillable> ListFillable::fromempty(const FillableOptions& options) {
+    GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
+    offsets.append(0);
+    std::shared_ptr<Fillable> out(new ListFillable(options, offsets, UnknownFillable::fromempty(options), false));
+    out.get()->setthat(out);
+    return out;
+  }
+
   int64_t ListFillable::length() const {
     return offsets_.length() - 1;
   }
 
   void ListFillable::clear() {
     offsets_.clear();
+    offsets_.append(0);
     content_.get()->clear();
   }
 
   const std::shared_ptr<Type> ListFillable::type() const {
-    return std::shared_ptr<Type>(new ListType(content_.get()->type()));
+    return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->type()));
   }
 
   const std::shared_ptr<Content> ListFillable::snapshot() const {
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), Type::none(), offsets, content_.get()->snapshot()));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), Type::none(), offsets, content_.get()->snapshot()));
   }
 
   bool ListFillable::active() const {
     return begun_;
   }
 
-  Fillable* ListFillable::null() {
+  const std::shared_ptr<Fillable> ListFillable::null() {
     if (!begun_) {
-      Fillable* out = OptionFillable::fromvalids(options_, this);
-      try {
-        out->null();
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = OptionFillable::fromvalids(options_, that_);
+      out.get()->null();
       return out;
     }
     else {
       maybeupdate(content_.get()->null());
-      return this;
+      return that_;
     }
   }
 
-  Fillable* ListFillable::boolean(bool x) {
+  const std::shared_ptr<Fillable> ListFillable::boolean(bool x) {
     if (!begun_) {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
-      try {
-        out->boolean(x);
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->boolean(x);
       return out;
     }
     else {
       maybeupdate(content_.get()->boolean(x));
-      return this;
+      return that_;
     }
   }
 
-  Fillable* ListFillable::integer(int64_t x) {
+  const std::shared_ptr<Fillable> ListFillable::integer(int64_t x) {
     if (!begun_) {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
-      try {
-        out->integer(x);
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->integer(x);
       return out;
     }
     else {
       maybeupdate(content_.get()->integer(x));
-      return this;
+      return that_;
     }
   }
 
-  Fillable* ListFillable::real(double x) {
+  const std::shared_ptr<Fillable> ListFillable::real(double x) {
     if (!begun_) {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
-      try {
-        out->real(x);
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->real(x);
       return out;
     }
     else {
       maybeupdate(content_.get()->real(x));
-      return this;
+      return that_;
     }
   }
 
-  Fillable* ListFillable::beginlist() {
+  const std::shared_ptr<Fillable> ListFillable::string(const char* x, int64_t length, const char* encoding) {
+    if (!begun_) {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->string(x, length, encoding);
+      return out;
+    }
+    else {
+      maybeupdate(content_.get()->string(x, length, encoding));
+      return that_;
+    }
+  }
+
+  const std::shared_ptr<Fillable> ListFillable::beginlist() {
     if (!begun_) {
       begun_ = true;
     }
     else {
       maybeupdate(content_.get()->beginlist());
     }
-    return this;
+    return that_;
   }
 
-  Fillable* ListFillable::endlist() {
+  const std::shared_ptr<Fillable> ListFillable::endlist() {
     if (!begun_) {
       throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
     }
@@ -127,99 +124,76 @@ namespace awkward {
     else {
       maybeupdate(content_.get()->endlist());
     }
-    return this;
+    return that_;
   }
 
-  Fillable* ListFillable::begintuple(int64_t numfields) {
+  const std::shared_ptr<Fillable> ListFillable::begintuple(int64_t numfields) {
     if (!begun_) {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
-      try {
-        out->begintuple(numfields);
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->begintuple(numfields);
       return out;
     }
     else {
       maybeupdate(content_.get()->begintuple(numfields));
-      return this;
+      return that_;
     }
   }
 
-  Fillable* ListFillable::index(int64_t index) {
+  const std::shared_ptr<Fillable> ListFillable::index(int64_t index) {
     if (!begun_) {
       throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
     }
     else {
       content_.get()->index(index);
-      return this;
+      return that_;
     }
   }
 
-  Fillable* ListFillable::endtuple() {
+  const std::shared_ptr<Fillable> ListFillable::endtuple() {
     if (!begun_) {
       throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
     }
     else {
       content_.get()->endtuple();
-      return this;
+      return that_;
     }
   }
 
-  Fillable* ListFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> ListFillable::beginrecord(const char* name, bool check) {
     if (!begun_) {
-      Fillable* out = UnionFillable::fromsingle(options_, this);
-      try {
-        out->beginrecord(disambiguator);
-      }
-      catch (...) {
-        delete out;
-        throw;
-      }
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->beginrecord(name, check);
       return out;
     }
     else {
-      maybeupdate(content_.get()->beginrecord(disambiguator));
-      return this;
+      maybeupdate(content_.get()->beginrecord(name, check));
+      return that_;
     }
   }
 
-  Fillable* ListFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> ListFillable::field(const char* key, bool check) {
     if (!begun_) {
-      throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
     else {
-      content_.get()->field_fast(key);
-      return this;
+      content_.get()->field(key, check);
+      return that_;
     }
   }
 
-  Fillable* ListFillable::field_check(const char* key) {
-    if (!begun_) {
-      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
-    }
-    else {
-      content_.get()->field_check(key);
-      return this;
-    }
-  }
-
-  Fillable* ListFillable::endrecord() {
+  const std::shared_ptr<Fillable> ListFillable::endrecord() {
     if (!begun_) {
       throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
     }
     else {
       content_.get()->endrecord();
-      return this;
+      return that_;
     }
   }
 
-  Fillable* ListFillable::maybeupdate(Fillable* tmp) {
-    if (tmp != content_.get()) {
-      content_ = std::shared_ptr<Fillable>(tmp);
+  void ListFillable::maybeupdate(const std::shared_ptr<Fillable>& tmp) {
+    if (tmp.get() != content_.get()) {
+      content_ = tmp;
     }
-    return this;
   }
 }
