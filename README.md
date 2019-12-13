@@ -96,6 +96,10 @@ In lieu of "make clean" for Python builds, I use the following to remove compile
 rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
 ```
 
+<br>
+<p align="center">See Azure Pipelines <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary">buildtest-awkward</a> (CI) and <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary">deploy-awkward</a> (CD).</p>
+<br>
+
 ## Roadmap
 
 **The six-month sprint:**
