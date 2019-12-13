@@ -98,6 +98,8 @@ rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
 
 ## Roadmap
 
+<p align="center"><b>Progress is currently on track.</b></p>
+
 The six-month sprint:
 
    * [X] **September 2019:** Set up CI/CD; define jagged array types in C++; pervasive infrastructure like database-style indexing.
@@ -113,8 +115,6 @@ Updating dependent libraries:
    * [ ] **April 2020:** Update [uproot](https://github.com/scikit-hep/uproot#readme) to 4.0 using Awkward 1.0.
 
 Most users will see Awkward 1.0 for the first time when uproot 4.0 is released.
-
-<p align="center"><b>Progress is currently on track.</b></p>
 
 ### Checklist of features for the six-month sprint
 
