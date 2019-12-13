@@ -9,6 +9,8 @@ import numpy
 
 import awkward1
 
+py27 = (sys.version_info[0] < 3)
+
 def test_types_with_parameters():
     t = awkward1.layout.UnknownType()
     assert t.parameters == {}
@@ -86,10 +88,16 @@ def test_fillable_string():
     fillable.bytestring(b"three")
 
     a = fillable.snapshot()
-    assert str(a) == "[b'one', b'two', b'three']"
+    if py27:
+        assert str(a) == "['one', 'two', 'three']"
+    else:
+        assert str(a) == "[b'one', b'two', b'three']"
     assert awkward1.tolist(a) == [b'one', b'two', b'three']
     assert awkward1.tojson(a) == '["one","two","three"]'
-    assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
+    if py27:
+        assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * bytes'>"
+    else:
+        assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
     assert repr(a.type) == "3 * bytes"
 
     fillable = awkward1.FillableArray()
