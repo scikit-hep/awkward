@@ -114,8 +114,8 @@ rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
 
 Most users will see Awkward 1.0 for the first time when uproot 4.0 is released.
 
-<p align="center"><b>Progress is currently on track.</b></p>
 <br>
+<p align="center"><b>Progress is currently on track.</b></p>
 <br>
 
 ### Checklist of features for the six-month sprint
