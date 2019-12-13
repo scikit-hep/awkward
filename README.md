@@ -98,9 +98,7 @@ rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
 
 ## Roadmap
 
-<p align="center"><b>Progress is currently on track.</b></p>
-
-The six-month sprint:
+**The six-month sprint:**
 
    * [X] **September 2019:** Set up CI/CD; define jagged array types in C++; pervasive infrastructure like database-style indexing.
    * [X] **October 2019:** NumPy-compliant slicing; the Numba implementation. Feature parity will be maintained in Numba continuously.
@@ -109,12 +107,14 @@ The six-month sprint:
    * [ ] **January 2020:** The rest of the array nodes: option and union types, indirection, chunking, and laziness.
    * [ ] **February 2020:** The array operations: flattening, padding, concatenating, combinatorics, etc.
 
-Updating dependent libraries:
+**Updating dependent libraries:**
 
    * [ ] **March 2020:** Update [vector](https://github.com/scikit-hep/vector) (from [hepvector](https://github.com/henryiii/hepvector#readme) and [uproot-methods](https://github.com/scikit-hep/uproot-methods#readme)). This work will be done with [Henry Schreiner](https://github.com/henryiii).
    * [ ] **April 2020:** Update [uproot](https://github.com/scikit-hep/uproot#readme) to 4.0 using Awkward 1.0.
 
 Most users will see Awkward 1.0 for the first time when uproot 4.0 is released.
+
+<p align="center"><b>Progress is currently on track.</b></p>
 
 ### Checklist of features for the six-month sprint
 
