@@ -17,29 +17,29 @@ int main(int, char**)
 
   // populate fillable array with lists
   myarray.beginrecord();
-  myarray.field("one");
+  myarray.field_check("one");
   myarray.boolean(true);
-  myarray.field("two");
+  myarray.field_check("two");
   myarray.integer(1);
-  myarray.field("three");
+  myarray.field_check("three");
   myarray.real(1.1);
   myarray.endrecord();
   
   myarray.beginrecord();
-  myarray.field("one");
+  myarray.field_check("one");
   myarray.boolean(false);
-  myarray.field("two");
+  myarray.field_check("two");
   myarray.integer(2);
-  myarray.field("three");
+  myarray.field_check("three");
   myarray.real(2.2);
   myarray.endrecord();
 
   myarray.beginrecord();
-  myarray.field("one");
+  myarray.field_check("one");
   myarray.boolean(true);
-  myarray.field("two");
+  myarray.field_check("two");
   myarray.integer(3);
-  myarray.field("three");
+  myarray.field_check("three");
   myarray.real(3.3);
   myarray.endrecord();
 
@@ -49,6 +49,7 @@ int main(int, char**)
   // saving to compare fillable array to std vector
   //std::vector<std::vector<std::vector<double>>> vector =
   //{{{true, 1, 1.1}, {false, 2, 2.2}, {true, 3, 3.3}}, {}, {}, {}};
+
 
   return 0;
 }
