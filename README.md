@@ -27,7 +27,7 @@ The Awkward 1.0 project is a major investment, a six-month sprint from late Augu
    * Conformance to NumPy, where Awkward and NumPy overlap.
    * Better control over "behavioral mix-ins," such as `LorentzVector` (i.e. adding methods like `pt()` to arrays of records with `px` and `py` fields). In Awkward 0.x, this was achieved with multiple inheritance, but that was brittle.
    * Support for set operations and database-style joins, which can be put to use in a [declarative analysis language](https://github.com/jpivarski/PartiQL#readme), but requires database-style accounting of an index (like a Pandas index).
-   * Better interoperability with Pandas, NumExpr, and Dask, while maintaining interoperability with ROOT, Arrow, and Parquet.
+   * Better interoperability with Pandas, NumExpr, and Dask, while maintaining support for ROOT, Arrow, and Parquet.
    * Ability to add GPU implementations of array operations in the future.
    * Better error messages.
 
