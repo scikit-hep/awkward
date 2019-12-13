@@ -2,11 +2,21 @@
 
 Development of awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array) in 2020.
 
-   * [Motivation and requirements](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) as a Google Doc (for comments).
+   * The [original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing), now out-of-date.
 
 ## Short summary
 
-Awkward-array has proven to be a useful way to analyze variable-length and tree-like data in Python, by extending Numpy's idioms from flat arrays to arrays of data structures. Unlike previous iterations of this idea ([Femtocode](https://github.com/diana-hep/femtocode), [OAMap](https://github.com/diana-hep/oamap)), awkward-array is used in data analysis, with feedback from users.
+Awkward-array has proven to be a useful way to analyze variable-length and tree-like data in Python, by extending Numpy's idioms from flat arrays to arrays of data structures.
+
+<p align="center"><img src="docs/img/awkward-0-popularity.png" width="75%"></p>
+
+
+
+
+
+
+
+Unlike previous iterations of this idea ([Femtocode](https://github.com/diana-hep/femtocode), [OAMap](https://github.com/diana-hep/oamap)), awkward-array is used in data analysis, with feedback from users.
 
 The original awkward-array is written in pure Python + Numpy, and it incorporates some clever tricks to do nested structure manipulations with only Numpy calls (e.g. Jaydeep Nandi's [cross-join](https://gitlab.com/Jayd_1234/GSoC_vectorized_proof_of_concepts/blob/master/argproduct.md) and [self-join without replacement](https://gitlab.com/Jayd_1234/GSoC_vectorized_proof_of_concepts/blob/master/argpairs.md), Nick Smith's [N choose k for k < 5](https://github.com/scikit-hep/awkward-array/pull/102), Jonas Rembser's [JaggedArray concatenation for axis=1](https://github.com/scikit-hep/awkward-array/pull/117), and my [deep JaggedArray get-item](https://github.com/scikit-hep/awkward-array/blob/423ca484e17fb0d0b3938e2ec0a0dcd8ef26c735/awkward/array/jagged.py#L597-L775)). However, cleverness is hard to scale: JaggedArray get-item raises `NotImplementedError` for some triply nested or deeper cases. Also, most bugs reported by users have been related to Numpy special cases, such as Numpy's raising an error for the min or max of an empty array. And finally, these implementations make multiple passes over the data, whereas a straightforward implementation (where we're allowed to use for loops, because it's compiled code) would be single-pass and therefore more cache-friendly.
 
