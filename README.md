@@ -2,7 +2,7 @@
 
 # awkward-1.0
 
-Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array) in 2020.
+Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array#readme) in 2020.
 
    * The [original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing), now out-of-date.
    * My [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
@@ -29,7 +29,7 @@ The Awkward 1.0 project is a major investment, a six-month sprint from late Augu
    * Support for set operations and database-style joins, which can be put to use in a [declarative analysis language](https://github.com/jpivarski/PartiQL#readme), but requires database-style accounting of an index (like a Pandas index).
    * Better interoperability with Pandas, NumExpr, and Dask, while maintaining support for ROOT, Arrow, and Parquet.
    * Ability to add GPU implementations of array operations in the future.
-   * Better error messages.
+   * Better error messages and extensive documentation.
 
 ## Architecture of Awkward 1.0
 
@@ -38,9 +38,53 @@ To achieve these goals, Awkward 1.0 is separated into four layers:
    1. The user-facing Python layer with a single `awkward.Array` class, whose data is described by a [datashape](https://datashape.readthedocs.io/en/latest/) type.
    2. The columnar representation (i.e. nested `ListArray`, `RecordArray`, etc.) is accessible but hidden, and these are all C++ classes presented to Python through [pybind11](https://pybind11.readthedocs.io/en/stable/).
    3. Two object models for the columnar representation, one in C++11 (with only header-only dependencies) and the other as [Numba extensions](https://numba.pydata.org/numba-doc/dev/extending/index.html). This is the only layer in which array-allocation occurs.
-   4. A suite of operations on arrays, computing new values but not allocating memory. The first implementation of this suite is in C++ with a pure-C interface; the second may be CUDA (or other GPU language). With one exception (`FillableArray`), iterations over arrays only occur at this level, so this is the only layer that needs to be optimized for speed.
+   4. A suite of operations on arrays, computing new values but not allocating memory. The first implementation of this suite is in C++ with a pure-C interface; the second may be CUDA (or other GPU language). With one exception (`FillableArray`), iterations over arrays only occur at this level, so performance optimizations can focus on this layer.
 
 <p align="center"><img src="docs/img/awkward-1-0-layers.png" width="60%"></p>
+
+## The Awkward transition
+
+Since Awkward 1.0 is not backward-compatible, existing users of Awkward 0.x will need to update their scripts or only use the new version on new scripts. Awkward 1.0 is already available to early adopters as [**awkward1** in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python). When [uproot](https://github.com/scikit-hep/uproot#readme) is ready to use the new Awkward Array,
+
+   * it will be released as **uproot 4.0**,
+   * **awkward1** will be renamed **awkward**, and
+   * the old Awkward 0.x will be renamed **awkward0**.
+
+The original Awkward 0.x will be available in perpetuity as **awkward0**, but only minor bugs will be fixed, and that only for the duration of 2020. This repository will replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array#readme) on GitHub.
+
+## Compiling from source
+
+Awkward 1.0 is available to early adopters as [**awkward1** in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python), but developers will need to compile from source. For that, you will need
+
+   * [CMake/CTest](https://cmake.org/),
+   * a C++11-compliant compiler,
+
+and optionally
+
+   * Python 2.7, 3.5, 3.6, 3.7, or 3.8 (CPython, not an alternative like PyPy),
+   * NumPy 1.13.1 or later,
+   * pytest 3.9 or later (to run tests),
+   * Numba 0.46 or later (to run all the tests).
+
+To compile _without Python_ (unusual case):
+
+```bash
+mkdir build
+cd build
+cmake ..
+make all
+make CTEST_OUTPUT_ON_FAILURE=1 test    # optional: run C++ tests
+cd ..
+```
+
+To compile _with Python_ (the usual case):
+
+```bash
+python setup.py build
+pytest -vv tests                       # optional: run Python tests
+```
+
+
 
 ## Old
 
