@@ -171,6 +171,24 @@ namespace awkward {
     return that_;
   }
 
+  const std::shared_ptr<Fillable> RecordFillable::string(const char* x, int64_t length, const char* encoding) {
+    if (!begun_) {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->string(x, length, encoding);
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'string' immediately after 'beginrecord'; needs 'index' or 'endrecord'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->string(x, length, encoding));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->string(x, length, encoding);
+    }
+    return that_;
+  }
+
   const std::shared_ptr<Fillable> RecordFillable::beginlist() {
     if (!begun_) {
       std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);

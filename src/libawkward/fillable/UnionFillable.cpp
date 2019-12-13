@@ -159,6 +159,34 @@ namespace awkward {
     return that_;
   }
 
+  const std::shared_ptr<Fillable> UnionFillable::string(const char* x, int64_t length, const char* encoding) {
+    if (current_ == -1) {
+      std::shared_ptr<Fillable> tofill(nullptr);
+      int8_t i = 0;
+      for (auto content : contents_) {
+        if (StringFillable* raw = dynamic_cast<StringFillable*>(content.get())) {
+          if (raw->encoding() == encoding) {
+            tofill = content;
+            break;
+          }
+        }
+        i++;
+      }
+      if (tofill.get() == nullptr) {
+        tofill = StringFillable::fromempty(options_, encoding);
+        contents_.push_back(tofill);
+      }
+      int64_t len = tofill.get()->length();
+      tofill.get()->string(x, length, encoding);
+      types_.append(i);
+      offsets_.append(len);
+    }
+    else {
+      contents_[(size_t)current_].get()->string(x, length, encoding);
+    }
+    return that_;
+  }
+
   const std::shared_ptr<Fillable> UnionFillable::beginlist() {
     if (current_ == -1) {
       std::shared_ptr<Fillable> tofill(nullptr);

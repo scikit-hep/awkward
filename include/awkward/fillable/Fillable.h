@@ -26,6 +26,7 @@ namespace awkward {
     virtual const std::shared_ptr<Fillable> boolean(bool x) = 0;
     virtual const std::shared_ptr<Fillable> integer(int64_t x) = 0;
     virtual const std::shared_ptr<Fillable> real(double x) = 0;
+    virtual const std::shared_ptr<Fillable> string(const char* x, int64_t length, const char* encoding) = 0;
     virtual const std::shared_ptr<Fillable> beginlist() = 0;
     virtual const std::shared_ptr<Fillable> endlist() = 0;
     virtual const std::shared_ptr<Fillable> begintuple(int64_t numfields) = 0;

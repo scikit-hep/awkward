@@ -80,6 +80,15 @@ namespace awkward {
     return out;
   }
 
+  const std::shared_ptr<Fillable> UnknownFillable::string(const char* x, int64_t length, const char* encoding) {
+    std::shared_ptr<Fillable> out = StringFillable::fromempty(options_, encoding);
+    if (nullcount_ != 0) {
+      out = OptionFillable::fromnulls(options_, nullcount_, out);
+    }
+    out.get()->string(x, length, encoding);
+    return out;
+  }
+
   const std::shared_ptr<Fillable> UnknownFillable::beginlist() {
     std::shared_ptr<Fillable> out = ListFillable::fromempty(options_);
     if (nullcount_ != 0) {

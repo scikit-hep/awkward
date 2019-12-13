@@ -65,6 +65,22 @@ namespace awkward {
     maybeupdate(fillable_.get()->real(x));
   }
 
+  void FillableArray::bytestring(const char* x) {
+    maybeupdate(fillable_.get()->string(x, -1, no_encoding));
+  }
+
+  void FillableArray::bytestring(const char* x, int64_t length) {
+    maybeupdate(fillable_.get()->string(x, length, no_encoding));
+  }
+
+  void FillableArray::string(const char* x) {
+    maybeupdate(fillable_.get()->string(x, -1, utf8_encoding));
+  }
+
+  void FillableArray::string(const char* x, int64_t length) {
+    maybeupdate(fillable_.get()->string(x, length, utf8_encoding));
+  }
+
   void FillableArray::beginlist() {
     maybeupdate(fillable_.get()->beginlist());
   }
@@ -118,6 +134,9 @@ namespace awkward {
       fillable_ = tmp;
     }
   }
+
+  const char* FillableArray::no_encoding = nullptr;
+  const char* FillableArray::utf8_encoding = "utf-8";
 }
 
 uint8_t awkward_FillableArray_length(void* fillablearray, int64_t* result) {
@@ -179,6 +198,50 @@ uint8_t awkward_FillableArray_real(void* fillablearray, double x) {
   awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
   try {
     obj->real(x);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_bytestring(void* fillablearray, const char* x) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->bytestring(x);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_bytestring_length(void* fillablearray, const char* x, int64_t length) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->bytestring(x, length);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_string(void* fillablearray, const char* x) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->string(x);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_string_length(void* fillablearray, const char* x, int64_t length) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  try {
+    obj->string(x, length);
   }
   catch (...) {
     return 1;

@@ -72,6 +72,12 @@ namespace awkward {
     return that_;
   }
 
+  const std::shared_ptr<Fillable> Float64Fillable::string(const char* x, int64_t length, const char* encoding) {
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->string(x, length, encoding);
+    return out;
+  }
+
   const std::shared_ptr<Fillable> Float64Fillable::beginlist() {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
     out.get()->beginlist();

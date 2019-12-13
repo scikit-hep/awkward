@@ -91,6 +91,18 @@ namespace awkward {
     return that_;
   }
 
+  const std::shared_ptr<Fillable> OptionFillable::string(const char* x, int64_t length, const char* encoding) {
+    if (!content_.get()->active()) {
+      int64_t len = content_.get()->length();
+      maybeupdate(content_.get()->string(x, length, encoding));
+      offsets_.append(len);
+    }
+    else {
+      content_.get()->string(x, length, encoding);
+    }
+    return that_;
+  }
+
   const std::shared_ptr<Fillable> OptionFillable::beginlist() {
     if (!content_.get()->active()) {
       maybeupdate(content_.get()->beginlist());

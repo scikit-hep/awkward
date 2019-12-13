@@ -26,6 +26,7 @@ namespace awkward {
 
   void ListFillable::clear() {
     offsets_.clear();
+    offsets_.append(0);
     content_.get()->clear();
   }
 
@@ -86,6 +87,18 @@ namespace awkward {
     }
     else {
       maybeupdate(content_.get()->real(x));
+      return that_;
+    }
+  }
+
+  const std::shared_ptr<Fillable> ListFillable::string(const char* x, int64_t length, const char* encoding) {
+    if (!begun_) {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->string(x, length, encoding);
+      return out;
+    }
+    else {
+      maybeupdate(content_.get()->string(x, length, encoding));
       return that_;
     }
   }
