@@ -107,10 +107,16 @@ def test_fillable_string():
     fillable.string("three")
 
     a = fillable.snapshot()
-    assert str(a) == "['one', 'two', 'three']"
+    if py27:
+        assert str(a) == "[u'one', u'two', u'three']"
+    else:
+        assert str(a) == "['one', 'two', 'three']"
     assert awkward1.tolist(a) == ['one', 'two', 'three']
     assert awkward1.tojson(a) == '["one","two","three"]'
-    assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
+    if py27:
+        assert repr(a) == "<Array [u'one', u'two', u'three'] type='3 * string'>"
+    else:
+        assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
     assert repr(a.type) == "3 * string"
 
     fillable = awkward1.FillableArray()
@@ -130,7 +136,10 @@ def test_fillable_string():
     fillable.endlist()
 
     a = fillable.snapshot()
-    assert str(a) == "[['one', 'two', 'three'], [], ['four', 'five']]"
+    if py27:
+        assert str(a) == "[[u'one', u'two', u'three'], [], [u'four', u'five']]"
+    else:
+        assert str(a) == "[['one', 'two', 'three'], [], ['four', 'five']]"
     assert awkward1.tolist(a) == [['one', 'two', 'three'], [], ['four', 'five']]
     assert awkward1.tojson(a) == '[["one","two","three"],[],["four","five"]]'
     assert repr(a.type) == "3 * var * string"
