@@ -8,7 +8,7 @@ Development of awkward 1.0, to replace [scikit-hep/awkward-array](https://github
 
 Awkward-array has proven to be a useful way to analyze variable-length and tree-like data in Python, by extending Numpy's idioms from flat arrays to arrays of data structures.
 
-<p align="center"><img src="docs/img/awkward-0-popularity.png" width="75%"></p>
+<p align="center"><img src="docs/img/awkward-0-popularity.png" width="60%"></p>
 
 
 
