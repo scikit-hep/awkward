@@ -1,3 +1,5 @@
+<img src="docs/img/logo-300px.png">
+
 # awkward-1.0
 
 Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array) in 2020.
@@ -8,7 +10,7 @@ Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github
 
 ## Motivation for a new Awkward Array
 
-Awkward Array has proven to be a useful way to analyze variable-length and tree-like data in Python, by extending Numpy's idioms from flat arrays to arrays of data structures. For over a year, physicists have been using Awkward Array both in and out of uproot; it is already one of the most popular Python packages in particle physics.
+Awkward Array has proven to be a useful way to analyze variable-length and tree-like data in Python, by extending Numpy's idioms from flat arrays to arrays of data structures. For over a year, physicists have been using Awkward Array both in and out of [uproot](https://github.com/scikit-hep/uproot#readme); it is already one of the most popular Python packages in particle physics.
 
 <p align="center"><img src="docs/img/awkward-0-popularity.png" width="60%"></p>
 
