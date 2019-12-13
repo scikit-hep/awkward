@@ -16,15 +16,25 @@ However, the pure-NumPy implementation is hard to extend (finding for-loop-free 
 
 The Awkward 1.0 project is a major investment, a six-month sprint from late August 2019 to late February 2020. The time spent on a clean, robust Awkward Array is justified by its widespread adoption: it is likely to be the bottom layer of Pythonic data analysis with nested structures for years to come.
 
+## Main goals of Awkward 1.0
+
+   * Full access to create and manipulate Awkward Arrays in C++ with no Python dependencies. This is so that C++ libraries can share data with Python front-ends.
+   * Easy installation with `pip install` and `conda install` for most users (Mac, Windows, and most Linux (`manylinux`)).
+   * Imperative (for-loop-style) access to Awkward Arrays in [Numba](https://numba.pydata.org/), a just-in-time compiler for Python. This is so that physicists can write critical loops in Python without a performance penalty.
+   * A single `awkward.Array` class that hides the details of how columnar data is built, with a suite of operations that apply to all internal types.
+   * Conformance to NumPy, where Awkward and NumPy overlap.
+   * Better control over "behavioral mix-ins," such as `LorentzVector` (i.e. adding methods like `pt()` to arrays of records with `px` and `py` fields). In Awkward 0.x, this was achieved with multiple inheritance, but that was brittle.
+   * Better interoperability with Pandas, NumExpr, and Dask, while maintaining interoperability with ROOT, Arrow, and Parquet.
+   * Ability to add GPU implementations of array operations in the future.
+
+## Architecture of Awkward 1.0
+
+
 
 
 
 
 ## Old
-
-Unlike previous iterations of this idea ([Femtocode](https://github.com/diana-hep/femtocode), [OAMap](https://github.com/diana-hep/oamap)), awkward-array is used in data analysis, with feedback from users.
-
-The original awkward-array is written in pure Python + Numpy, and it incorporates some clever tricks to do nested structure manipulations with only Numpy calls (e.g. Jaydeep Nandi's [cross-join](https://gitlab.com/Jayd_1234/GSoC_vectorized_proof_of_concepts/blob/master/argproduct.md) and [self-join without replacement](https://gitlab.com/Jayd_1234/GSoC_vectorized_proof_of_concepts/blob/master/argpairs.md), Nick Smith's [N choose k for k < 5](https://github.com/scikit-hep/awkward-array/pull/102), Jonas Rembser's [JaggedArray concatenation for axis=1](https://github.com/scikit-hep/awkward-array/pull/117), and my [deep JaggedArray get-item](https://github.com/scikit-hep/awkward-array/blob/423ca484e17fb0d0b3938e2ec0a0dcd8ef26c735/awkward/array/jagged.py#L597-L775)). However, cleverness is hard to scale: JaggedArray get-item raises `NotImplementedError` for some triply nested or deeper cases. Also, most bugs reported by users have been related to Numpy special cases, such as Numpy's raising an error for the min or max of an empty array. And finally, these implementations make multiple passes over the data, whereas a straightforward implementation (where we're allowed to use for loops, because it's compiled code) would be single-pass and therefore more cache-friendly.
 
 Awkward-array 1.0 will be rewritten in C++ using simple, single-pass algorithms, and exposed to Python through pybind11 and Numba. It will consist of four layers:
 
