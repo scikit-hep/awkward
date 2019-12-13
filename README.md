@@ -44,7 +44,7 @@ To achieve these goals, Awkward 1.0 is separated into four layers:
 
 ## The Awkward transition
 
-Since Awkward 1.0 is not backward-compatible, existing users of Awkward 0.x will need to update their scripts or only use the new version on new scripts. Awkward 1.0 is already available to early adopters as [**awkward1** in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python). When [uproot](https://github.com/scikit-hep/uproot#readme) is ready to use the new Awkward Array,
+Since Awkward 1.0 is not backward-compatible, existing users of Awkward 0.x will need to update their scripts or only use the new version on new scripts. Awkward 1.0 is already available to early adopters as [awkward1 in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python). When [uproot](https://github.com/scikit-hep/uproot#readme) is ready to use the new Awkward Array,
 
    * it will be released as **uproot 4.0**,
    * **awkward1** will be renamed **awkward**, and
@@ -54,7 +54,7 @@ The original Awkward 0.x will be available in perpetuity as **awkward0**, but on
 
 ## Compiling from source
 
-Awkward 1.0 is available to early adopters as [**awkward1** in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python), but developers will need to compile from source. For that, you will need
+Awkward 1.0 is available to early adopters as [awkward1 in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python), but developers will need to compile from source. For that, you will need
 
    * [CMake/CTest](https://cmake.org/),
    * a C++11-compliant compiler,
@@ -65,6 +65,12 @@ and optionally
    * NumPy 1.13.1 or later,
    * pytest 3.9 or later (to run tests),
    * Numba 0.46 or later (to run all the tests).
+
+To get the code from GitHub, be sure to use `--recursive` to get Awkward's git-module dependencies (pybind11 and RapidJSON):
+
+```bash
+git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
+```
 
 To compile _without Python_ (unusual case):
 
@@ -84,40 +90,33 @@ python setup.py build
 pytest -vv tests                       # optional: run Python tests
 ```
 
+In lieu of "make clean" for Python builds, I use the following to remove compiled code from the source tree:
 
-
-## Old
-
-
-
-Layer 4 is a dynamically linked library named `{lib,}awkward-cpu-kernels.{so,dylib,dll}` with an unmangled C FFI interface. The layer 3 C++ library is `{lib,}awkward.{so,dylib,dll}` and layer 3 Numba extensions are in the `numbaext` submodule of the `awkward1` Python library. Layer 2 is the `layout` submodule, linked via pybind11, and layer 1 is the Python code in `awkward1`.
-
-The original `awkward` library will continue to be maintained while `awkward1` is in development, and the two will be swapped, becoming `awkward0` and `awkward`, respectively, in a gradual deprecation process in 2020. [Uproot 3.x](https://github.com/scikit-hep/uproot) will continue to depend on `awkward0`, but uproot 4.x will make the new `awkward` an optional but highly recommended dependency. Many users are only directly aware of uproot, so a major change in version from 3 to 4 will alert them to changes in interface.
-
-## What will not change
-
-The following features of awkward 0.x will be features of awkward 1.x.
-
-   * The efficient, columnar data representation built out of "layout" classes, such as `ListArray` (`JaggedArray`), `RecordArray` (`Table`), and `MaskedArray` (same name). This was the key idea in the transition from OAMap to awkward-array, and it has paid off. If anything, we will be increasing the composability, with a larger number of classes that take on smaller roles (e.g. separate `ListArray` from `ListOffsetArray` for the starts/stops vs offsets cases).
-   * Numpy-like interface: awkward 1.x will be more consistent with Numpy's API, not less.
-   * Interoperability with ROOT, Arrow, Parquet and Pandas, as well as planned interoperability with Numba and Dask.
-   * The goals of zero-copy and shallow manipulations, such as slicing an array of objects without necessarily loading all of their attributes.
-   * The ability to attach domain-specific methods to arrays, such as Lorentz transformations for arrays of Lorentz vectors.
-   * `VirtualArrays`, and therefore lazy-loading, will be supported.
-
-## What will change
-
-   * Awkward 0.x's single specification, many implementations model: awkward 1.x will have at most two implementations of each algorithm, one for CPUs and one for GPUs. All the goals of precompiled kernels, Numba interface, Pandas interoperability, etc. will be accomplished through the four-layer system described above instead of completely separate implementations. Each of the four layers will be fully specified by documentation, though.
-   * Native access to the layout in C++ and the ability to develop an implementation in any language that supports C FFI (i.e. all of them).
-   * Data analysts will see a single `Array` class that hides details about the layout. This is an API-breaking change for data analysis scripts, but one that would help new users.
-   * All manipulations of this `Array` class will be through functions in the `awkward` namespace, such as `awkward.cross(a, b)` instead of `a.cross(b)` to mean a cross-join of `a` and `b` per element. The namespace on the arrays is therefore free for data fields like `a.x`, `a.y`, `a.z` and domain-specific methods like `a.cross(b)` meaning 3-D cross product. This is an API-breaking change for data analysis scripts, but one that would help new users.
-   * Arrays will pass through optional Pandas-style indexes for high-level operations [like these](https://github.com/jpivarski/PartiQL#readme).
+```bash
+rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
+```
 
 ## Roadmap
 
-The rough estimate for development time to a minimally usable library for physics was six months, starting in late August (i.e. finishing in late February). **Progress is currently on track.**
+The six-month sprint:
 
-### Approximate order of implementation
+   * [X] **September 2019:**
+   * [X] **October 2019:**
+   * [X] **November 2019:**
+   * [ ] **December 2019:**
+   * [ ] **January 2020:**
+   * [ ] **February 2020:**
+
+Updating dependent libraries:
+
+   * [ ] **March 2020:** Update [vector](https://github.com/scikit-hep/vector) (from [hepvector](https://github.com/henryiii/hepvector#readme) and [uproot-methods](https://github.com/scikit-hep/uproot-methods#readme)).
+   * [ ] **April 2020:** Update [uproot](https://github.com/scikit-hep/uproot#readme) to 4.0 using Awkward 1.0.
+
+Most users will see Awkward 1.0 for the first time when uproot 4.0 is released.
+
+**Progress is currently on track.**
+
+### Checklist of features for the six-month sprint
 
 Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-hep/awkward-1.0/pulls?q=is%3Apr+is%3Aclosed) for more details.
 
@@ -187,7 +186,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [ ] `awkward.join`: performs an inner join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event intersection, zipping all fields.
       * [ ] `awkward.union`: performs an outer join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event union, zipping fields where possible.
 
-### Soon after (possibly within) the six-month timeframe
+### Soon after the six-month sprint
 
    * [ ] Update [hepvector](https://github.com/henryiii/hepvector#readme) to be Derived classes, replacing the `TLorentzVectorArray` in uproot-methods.
    * [ ] Update uproot (on a branch) to use Awkward 1.0.
@@ -197,7 +196,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
    * [ ] Universal `array.get[...]` as a softer form of `array[...]` that inserts `None` for non-existent indexes, rather than raising errors.
    * [ ] Explicit interface with [NumExpr](https://numexpr.readthedocs.io/en/latest/index.html).
 
-### At some point in the future
+### Thereafter
 
    * [ ] Demonstrate Awkward 1.0 as a C++ wrapping library with [FastJet](http://fastjet.fr/).
    * [ ] GPU implementations of the cpu-kernels in Layer 4, with the Layer 3 C++ passing a "device" variable at every level of the layout to indicate whether the data pointers refer to main memory or a particular GPU.
