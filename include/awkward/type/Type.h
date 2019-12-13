@@ -34,11 +34,30 @@ namespace awkward {
     virtual const std::vector<std::string> keyaliases(const std::string& key) const = 0;
     virtual const std::vector<std::string> keys() const = 0;
 
-    const Parameters parameters() const { return parameters_; }
-    void setparameters(const Parameters& parameters) { parameters_ = parameters; }
-    std::string parameter(const std::string& key) { return parameters_[key]; }
-    void setparameter(const std::string& key, const std::string& value) { parameters_[key] = value; }
-    std::string tostring() const { return tostring_part("", "", ""); };
+    const Parameters parameters() const {
+      return parameters_;
+    }
+    void setparameters(const Parameters& parameters) {
+      parameters_ = parameters;
+    }
+    std::string parameter(const std::string& key) {
+      return parameters_[key];
+    }
+    void setparameter(const std::string& key, const std::string& value) {
+      parameters_[key] = value;
+    }
+    bool parameter_equals(const std::string& key, const std::string& value) {
+      auto item = parameters_.find(key);
+      if (item == parameters_.end()) {
+        return false;
+      }
+      else {
+        return item->second == value;
+      }
+    }
+    std::string tostring() const {
+      return tostring_part("", "", "");
+    };
     const std::string compare(std::shared_ptr<Type> supertype);
 
   protected:

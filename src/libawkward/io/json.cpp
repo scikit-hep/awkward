@@ -22,6 +22,11 @@ namespace awkward {
     bool Uint64(uint64_t x)   { array_.integer((int64_t)x); return true; }
     bool Double(double x)     { array_.real(x);             return true; }
 
+    bool String(const char* str, rj::SizeType length, bool copy) {
+      array_.string(str, (int64_t)length);
+      return true;
+    }
+
     bool StartArray() {
       if (depth_ != 0) {
         array_.beginlist();
@@ -48,10 +53,6 @@ namespace awkward {
     bool Key(const char* str, rj::SizeType length, bool copy) {
       array_.field_check(str);
       return true;
-    }
-
-    bool String(const char* str, rj::SizeType length, bool copy) {
-      throw std::runtime_error("not implemented: Handler::String");
     }
 
   private:

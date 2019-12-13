@@ -108,12 +108,12 @@ namespace awkward {
     }
     builder.beginlist();
     for (int64_t i = 0;  i < rows;  i++) {
-      builder.beginrec();
+      builder.beginrecord();
       for (size_t j = 0;  j < cols;  j++) {
-        builder.fieldkey(keys.get()->at(j).c_str());
+        builder.field(keys.get()->at(j).c_str());
         contents_[j].get()->getitem_at_nowrap(i).get()->tojson_part(builder);
       }
-      builder.endrec();
+      builder.endrecord();
     }
     builder.endlist();
   }

@@ -214,7 +214,10 @@ namespace awkward {
   }
 
   void NumpyArray::tojson_part(ToJson& builder) const {
-    if (format_.compare("d") == 0) {
+    if (type_.get() != nullptr  &&  type_.get()->parameter_equals("__class__", "\"char\"")) {
+      tojson_string(builder);
+    }
+    else if (format_.compare("d") == 0) {
       tojson_real<double>(builder);
     }
     else if (format_.compare("f") == 0) {
@@ -249,16 +252,16 @@ namespace awkward {
       tojson_integer<uint32_t>(builder);
     }
     else if (format_.compare("h") == 0) {
-      tojson_real<int16_t>(builder);
+      tojson_integer<int16_t>(builder);
     }
     else if (format_.compare("H") == 0) {
-      tojson_real<uint16_t>(builder);
+      tojson_integer<uint16_t>(builder);
     }
     else if (format_.compare("b") == 0) {
-      tojson_real<int8_t>(builder);
+      tojson_integer<int8_t>(builder);
     }
     else if (format_.compare("B") == 0) {
-      tojson_real<uint8_t>(builder);
+      tojson_integer<uint8_t>(builder);
     }
     else if (format_.compare("?") == 0) {
       tojson_boolean(builder);
@@ -1170,4 +1173,25 @@ namespace awkward {
     }
   }
 
+  void NumpyArray::tojson_string(ToJson& builder) const {
+    if (ndim() == 0) {
+      char* array = reinterpret_cast<char*>(byteptr());
+      builder.string(array, 1);
+    }
+    else if (ndim() == 1) {
+      char* array = reinterpret_cast<char*>(byteptr());
+      builder.string(array, length());
+    }
+    else {
+      const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
+      const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
+      builder.beginlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
+        NumpyArray numpy(Identity::none(), Type::none(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        numpy.tojson_string(builder);
+      }
+      builder.endlist();
+    }
+  }
 }
