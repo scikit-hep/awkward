@@ -1,24 +1,36 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <string>
+#include <sstream>
 
 #include "awkward/type/UnknownType.h"
 
 namespace awkward {
   std::string UnknownType::tostring_part(std::string indent, std::string pre, std::string post) const {
-    return indent + pre + "unknown" + post;
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
+    std::stringstream out;
+    if (parameters_.size() == 0) {
+      out << indent << pre << "unknown" << post;
+    }
+    else {
+      out << indent << pre << "unknown[" << string_parameters() << "]" << post;
+    }
+    return out.str();
   }
 
   const std::shared_ptr<Type> UnknownType::shallow_copy() const {
-    return std::shared_ptr<Type>(new UnknownType());
+    return std::shared_ptr<Type>(new UnknownType(parameters_));
   }
 
-  bool UnknownType::shallow_equal(const std::shared_ptr<Type> other) const {
-    return equal(other);
-  }
-
-  bool UnknownType::equal(const std::shared_ptr<Type> other) const {
+  bool UnknownType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
+      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+        return false;
+      }
       return true;
     }
     else {

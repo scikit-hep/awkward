@@ -34,7 +34,7 @@ namespace awkward {
 
   const std::shared_ptr<Type> OptionFillable::type() const {
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    return std::shared_ptr<Type>(new OptionType(content_.get()->type()));
+    return std::shared_ptr<Type>(new OptionType(Type::Parameters(), content_.get()->type()));
   }
 
   const std::shared_ptr<Content> OptionFillable::snapshot() const {
@@ -87,6 +87,18 @@ namespace awkward {
     }
     else {
       content_.get()->real(x);
+    }
+    return that_;
+  }
+
+  const std::shared_ptr<Fillable> OptionFillable::string(const char* x, int64_t length, const char* encoding) {
+    if (!content_.get()->active()) {
+      int64_t len = content_.get()->length();
+      maybeupdate(content_.get()->string(x, length, encoding));
+      offsets_.append(len);
+    }
+    else {
+      content_.get()->string(x, length, encoding);
     }
     return that_;
   }
@@ -149,32 +161,22 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Fillable> OptionFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> OptionFillable::beginrecord(const char* name, bool check) {
     if (!content_.get()->active()) {
-      maybeupdate(content_.get()->beginrecord(disambiguator));
+      maybeupdate(content_.get()->beginrecord(name, check));
     }
     else {
-      content_.get()->beginrecord(disambiguator);
+      content_.get()->beginrecord(name, check);
     }
     return that_;
   }
 
-  const std::shared_ptr<Fillable> OptionFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> OptionFillable::field(const char* key, bool check) {
     if (!content_.get()->active()) {
-      throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
     else {
-      content_.get()->field_fast(key);
-    }
-    return that_;
-  }
-
-  const std::shared_ptr<Fillable> OptionFillable::field_check(const char* key) {
-    if (!content_.get()->active()) {
-      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
-    }
-    else {
-      content_.get()->field_check(key);
+      content_.get()->field(key, check);
     }
     return that_;
   }

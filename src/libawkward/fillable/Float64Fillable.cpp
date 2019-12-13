@@ -37,13 +37,13 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> Float64Fillable::type() const {
-    return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::float64));
+    return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64));
   }
 
   const std::shared_ptr<Content> Float64Fillable::snapshot() const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(double) };
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(double), "d"));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(double), "d"));
   }
 
   bool Float64Fillable::active() const {
@@ -72,6 +72,12 @@ namespace awkward {
     return that_;
   }
 
+  const std::shared_ptr<Fillable> Float64Fillable::string(const char* x, int64_t length, const char* encoding) {
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->string(x, length, encoding);
+    return out;
+  }
+
   const std::shared_ptr<Fillable> Float64Fillable::beginlist() {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
     out.get()->beginlist();
@@ -96,18 +102,14 @@ namespace awkward {
     throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
-  const std::shared_ptr<Fillable> Float64Fillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> Float64Fillable::beginrecord(const char* name, bool check) {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
-    out.get()->beginrecord(disambiguator);
+    out.get()->beginrecord(name, check);
     return out;
   }
 
-  const std::shared_ptr<Fillable> Float64Fillable::field_fast(const char* key) {
-    throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
-  }
-
-  const std::shared_ptr<Fillable> Float64Fillable::field_check(const char* key) {
-    throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+  const std::shared_ptr<Fillable> Float64Fillable::field(const char* key, bool check) {
+    throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
   }
 
   const std::shared_ptr<Fillable> Float64Fillable::endrecord() {

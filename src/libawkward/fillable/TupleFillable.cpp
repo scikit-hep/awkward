@@ -35,30 +35,30 @@ namespace awkward {
 
   const std::shared_ptr<Type> TupleFillable::type() const {
     if (length_ == -1) {
-      return std::shared_ptr<Type>(new UnknownType);
+      return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
       for (auto content : contents_) {
         types.push_back(content.get()->type());
       }
-      return std::shared_ptr<Type>(new RecordType(types));
+      return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types));
     }
   }
 
   const std::shared_ptr<Content> TupleFillable::snapshot() const {
     if (length_ == -1) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
     }
     else if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, true));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, true));
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->snapshot());
       }
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), contents));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), contents));
     }
   }
 
@@ -134,6 +134,24 @@ namespace awkward {
     }
     else {
       contents_[(size_t)nextindex_].get()->real(x);
+    }
+    return that_;
+  }
+
+  const std::shared_ptr<Fillable> TupleFillable::string(const char* x, int64_t length, const char* encoding) {
+    if (!begun_) {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->string(x, length, encoding);
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'string' immediately after 'begintuple'; needs 'index' or 'endtuple'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->string(x, length, encoding));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->string(x, length, encoding);
     }
     return that_;
   }
@@ -235,25 +253,25 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Fillable> TupleFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> TupleFillable::beginrecord(const char* name, bool check) {
     if (!begun_) {
       std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
-      out.get()->beginrecord(disambiguator);
+      out.get()->beginrecord(name, check);
       return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument("called 'beginrecord' immediately after 'begintuple'; needs 'index' or 'endtuple'");
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->beginrecord(disambiguator));
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->beginrecord(name, check));
     }
     else {
-      contents_[(size_t)nextindex_].get()->beginrecord(disambiguator);
+      contents_[(size_t)nextindex_].get()->beginrecord(name, check);
     }
     return that_;
   }
 
-  const std::shared_ptr<Fillable> TupleFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> TupleFillable::field(const char* key, bool check) {
     if (!begun_) {
       throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
     }
@@ -261,20 +279,7 @@ namespace awkward {
       throw std::invalid_argument("called 'field_fast' immediately after 'begintuple'; needs 'index' or 'endtuple' and then 'beginrecord'");
     }
     else {
-      contents_[(size_t)nextindex_].get()->field_fast(key);
-    }
-    return that_;
-  }
-
-  const std::shared_ptr<Fillable> TupleFillable::field_check(const char* key) {
-    if (!begun_) {
-      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
-    }
-    else if (nextindex_ == -1) {
-      throw std::invalid_argument("called 'field_check' immediately after 'begintuple'; needs 'index' or 'endtuple' and then 'beginrecord'");
-    }
-    else {
-      contents_[(size_t)nextindex_].get()->field_check(key);
+      contents_[(size_t)nextindex_].get()->field(key, check);
     }
     return that_;
   }

@@ -106,10 +106,10 @@ namespace awkward {
 
   const std::shared_ptr<Type> RegularArray::innertype(bool bare) const {
     if (bare  ||  content_.get()->isbare()) {
-      return std::shared_ptr<Type>(new RegularType(content_.get()->innertype(bare), size_));
+      return std::shared_ptr<Type>(new RegularType(Type::Parameters(), content_.get()->innertype(bare), size_));
     }
     else {
-      return std::shared_ptr<Type>(new RegularType(content_.get()->type().get()->nolength(), size_));
+      return std::shared_ptr<Type>(new RegularType(Type::Parameters(), content_.get()->type().get()->nolength(), size_));
     }
   }
 
@@ -119,13 +119,17 @@ namespace awkward {
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(type, length()).compare(baretype()));
+      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(Type::Parameters(), type, length()).compare(baretype()));
     }
   }
 
   bool RegularArray::accepts(const std::shared_ptr<Type> type) {
-    const std::shared_ptr<Type> model(new RegularType(std::shared_ptr<Type>(new UnknownType()), size_));
-    return type.get()->level().get()->shallow_equal(model);
+    if (RegularType* raw = dynamic_cast<RegularType*>(type.get()->level().get())) {
+      return raw->size() == size_;
+    }
+    else {
+      return false;
+    }
   }
 
   int64_t RegularArray::length() const {
@@ -303,7 +307,7 @@ namespace awkward {
     std::shared_ptr<Type> outtype = Type::none();
     if (type_.get() != nullptr) {
       RegularType* raw = dynamic_cast<RegularType*>(type_.get());
-      outtype = std::shared_ptr<Type>(new RegularType(raw->type(), nextsize));
+      outtype = std::shared_ptr<Type>(new RegularType(Type::Parameters(), raw->type(), nextsize));
     }
 
     if (advanced.length() == 0) {

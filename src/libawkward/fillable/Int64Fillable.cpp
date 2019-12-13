@@ -25,16 +25,16 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> Int64Fillable::type() const {
-    return std::shared_ptr<Type>(new PrimitiveType(PrimitiveType::int64));
+    return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64));
   }
 
   const std::shared_ptr<Content> Int64Fillable::snapshot() const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
 #ifdef _MSC_VER
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "q"));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "q"));
 #else
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "l"));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "l"));
 #endif
   }
 
@@ -65,6 +65,12 @@ namespace awkward {
     return out;
   }
 
+  const std::shared_ptr<Fillable> Int64Fillable::string(const char* x, int64_t length, const char* encoding) {
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->string(x, length, encoding);
+    return out;
+  }
+
   const std::shared_ptr<Fillable> Int64Fillable::beginlist() {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
     out.get()->beginlist();
@@ -89,18 +95,14 @@ namespace awkward {
     throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
-  const std::shared_ptr<Fillable> Int64Fillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> Int64Fillable::beginrecord(const char* name, bool check) {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
-    out.get()->beginrecord(disambiguator);
+    out.get()->beginrecord(name, check);
     return out;
   }
 
-  const std::shared_ptr<Fillable> Int64Fillable::field_fast(const char* key) {
-    throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
-  }
-
-  const std::shared_ptr<Fillable> Int64Fillable::field_check(const char* key) {
-    throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+  const std::shared_ptr<Fillable> Int64Fillable::field(const char* key, bool check) {
+    throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
   }
 
   const std::shared_ptr<Fillable> Int64Fillable::endrecord() {

@@ -41,8 +41,8 @@ def test_pickle():
     t = awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.layout.RegularType(awkward1.layout.PrimitiveType("int32"), 5); assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.layout.OptionType(awkward1.layout.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.layout.UnionType(awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64")); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.layout.RecordType(one=awkward1.layout.PrimitiveType("int32"), two=awkward1.layout.PrimitiveType("float64")); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.UnionType((awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64"))); assert pickle.loads(pickle.dumps(t)) == t
+    t = awkward1.layout.RecordType({"one": awkward1.layout.PrimitiveType("int32"), "two": awkward1.layout.PrimitiveType("float64")}); assert pickle.loads(pickle.dumps(t)) == t
 
 def test_boxing():
     @numba.njit
@@ -89,11 +89,11 @@ def test_boxing():
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.layout.UnionType(awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64"))
+    t = awkward1.layout.UnionType((awkward1.layout.PrimitiveType("int32"), awkward1.layout.PrimitiveType("float64")))
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.layout.RecordType(one=awkward1.layout.PrimitiveType("int32"), two=awkward1.layout.PrimitiveType("float64"))
+    t = awkward1.layout.RecordType({"one": awkward1.layout.PrimitiveType("int32"), "two": awkward1.layout.PrimitiveType("float64")})
     f1(t)
     assert f2(t) == t
 
@@ -104,7 +104,7 @@ class D(awkward1.highlevel.Array):
 
 def test_numpyarray():
     array1 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
-    dint64 = awkward1.layout.DressedType(awkward1.layout.PrimitiveType("int64"), D)
+    dint64 = awkward1.layout.PrimitiveType("int64", {"__class__": "D", "__str__": "D[int64]"})
     array1.type = awkward1.layout.ArrayType(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3), 2)
 
     @numba.njit
@@ -121,7 +121,7 @@ def test_numpyarray():
 
 def test_regulararray():
     array1 = awkward1.layout.RegularArray(awkward1.layout.NumpyArray(numpy.arange(10, dtype=numpy.int64)), 5)
-    dregint64 = awkward1.layout.DressedType(awkward1.layout.RegularType(awkward1.layout.PrimitiveType("int64"), 5), D)
+    dregint64 = awkward1.layout.RegularType(awkward1.layout.PrimitiveType("int64"), 5, {"__class__": "D", "__str__": "D[5 * int64]"})
     array1.type = awkward1.layout.ArrayType(dregint64, 2)
 
     @numba.njit
@@ -135,7 +135,7 @@ def test_regulararray():
 
 def test_listoffsetarray():
     array1 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64)))
-    dvarint64 = awkward1.layout.DressedType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int64")), D)
+    dvarint64 = awkward1.layout.ListType(awkward1.layout.PrimitiveType("int64"), {"__class__": "D", "__str__": "D[var * int64]"})
     array1.type = awkward1.layout.ArrayType(dvarint64, 3)
 
     @numba.njit
@@ -149,7 +149,7 @@ def test_listoffsetarray():
 
 def test_listarray():
     array1 = awkward1.layout.ListArray64(awkward1.layout.Index64(numpy.array([0, 3, 3], dtype=numpy.int64)), awkward1.layout.Index64(numpy.array([3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64)))
-    dvarint64 = awkward1.layout.DressedType(awkward1.layout.ListType(awkward1.layout.PrimitiveType("int64")), D)
+    dvarint64 = awkward1.layout.ListType(awkward1.layout.PrimitiveType("int64"), {"__class__": "D", "__str__": "D[var * int64]"})
     array1.type = awkward1.layout.ArrayType(dvarint64, 3)
 
     @numba.njit
@@ -163,7 +163,7 @@ def test_listarray():
 
 def test_recordarray():
     array1 = awkward1.Array([{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}]).layout
-    dvarrec = awkward1.layout.DressedType(array1.type.nolength(), D)
+    dvarrec = awkward1.layout.RecordType({"one": awkward1.layout.PrimitiveType("int64"), "two": awkward1.layout.PrimitiveType("float64")}, {"__class__": "D", "__str__": "D[{\"one\": int64, \"two\": float64}]"})
     array1.type = awkward1.layout.ArrayType(dvarrec, 3)
 
     @numba.njit
@@ -172,8 +172,8 @@ def test_recordarray():
 
     array2 = f1(array1)
 
-    assert repr(array2.baretype) in ("3 * {'one': int64, 'two': float64}", "3 * {'two': float64, 'one': int64}")
-    assert repr(array2.type) in ("3 * D[{'one': int64, 'two': float64}]", "3 * D[{'two': float64, 'one': int64}]")
+    assert repr(array2.baretype) in ('3 * {"one": int64, "two": float64}', '3 * {"two": float64, "one": int64}')
+    assert repr(array2.type) in ('3 * D[{"one": int64, "two": float64}]', '3 * D[{"two": float64, "one": int64}]')
 
-    assert repr(array2[0].baretype) in ("{'one': int64, 'two': float64}", "{'two': float64, 'one': int64}")
-    assert repr(array2[0].type) in ("D[{'one': int64, 'two': float64}]", "D[{'two': float64, 'one': int64}]")
+    assert repr(array2[0].baretype) in ('{"one": int64, "two": float64}', '{"two": float64, "one": int64}')
+    assert repr(array2[0].type) in ('D[{"one": int64, "two": float64}]', 'D[{"two": float64, "one": int64}]')

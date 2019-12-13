@@ -34,14 +34,14 @@ namespace awkward {
     virtual const std::shared_ptr<Fillable> boolean(bool x);
     virtual const std::shared_ptr<Fillable> integer(int64_t x);
     virtual const std::shared_ptr<Fillable> real(double x);
+    virtual const std::shared_ptr<Fillable> string(const char* x, int64_t length, const char* encoding);
     virtual const std::shared_ptr<Fillable> beginlist();
     virtual const std::shared_ptr<Fillable> endlist();
     virtual const std::shared_ptr<Fillable> begintuple(int64_t numfields);
     virtual const std::shared_ptr<Fillable> index(int64_t index);
     virtual const std::shared_ptr<Fillable> endtuple();
-    virtual const std::shared_ptr<Fillable> beginrecord(int64_t disambiguator);
-    virtual const std::shared_ptr<Fillable> field_fast(const char* key);
-    virtual const std::shared_ptr<Fillable> field_check(const char* key);
+    virtual const std::shared_ptr<Fillable> beginrecord(const char* name, bool check);
+    virtual const std::shared_ptr<Fillable> field(const char* key, bool check);
     virtual const std::shared_ptr<Fillable> endrecord();
 
     int64_t numfields() const { return (int64_t)contents_.size(); }

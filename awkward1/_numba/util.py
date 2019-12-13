@@ -20,15 +20,12 @@ def debug(context, builder, *args):
 """, globals())
 
 dynamic_addrs = {}
-def globalstring(context, builder, pyvalue, inttype=None):
+def globalstring(context, builder, pyvalue):
     if pyvalue not in dynamic_addrs:
         buf = dynamic_addrs[pyvalue] = numpy.array(pyvalue.encode("utf-8") + b"\x00")
         context.add_dynamic_addr(builder, buf.ctypes.data, info="str({0})".format(repr(pyvalue)))
-    if inttype is None:
-        ptr = context.get_constant(numba.types.uintp, dynamic_addrs[pyvalue].ctypes.data)
-        return builder.inttoptr(ptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(8)))
-    else:
-        return context.get_constant(inttype, dynamic_addrs[pyvalue].ctypes.data)
+    ptr = context.get_constant(numba.types.uintp, dynamic_addrs[pyvalue].ctypes.data)
+    return builder.inttoptr(ptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(8)))
 
 RefType = numba.int64
 

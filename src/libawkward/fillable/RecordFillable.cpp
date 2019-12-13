@@ -18,7 +18,7 @@
 
 namespace awkward {
   const std::shared_ptr<Fillable> RecordFillable::fromempty(const FillableOptions& options) {
-    std::shared_ptr<Fillable> out(new RecordFillable(options, std::vector<std::shared_ptr<Fillable>>(), std::vector<std::string>(), std::vector<const char*>(), 0, -1, false, -1, -1));
+    std::shared_ptr<Fillable> out(new RecordFillable(options, std::vector<std::shared_ptr<Fillable>>(), std::vector<std::string>(), std::vector<const char*>(), "", nullptr, -1, false, -1, -1));
     out.get()->setthat(out);
     return out;
   }
@@ -33,7 +33,8 @@ namespace awkward {
     }
     keys_.clear();
     pointers_.clear();
-    disambiguator_ = 0;
+    name_ = "";
+    nameptr_ = nullptr;
     length_ = -1;
     begun_ = false;
     nextindex_ = -1;
@@ -42,7 +43,7 @@ namespace awkward {
 
   const std::shared_ptr<Type> RecordFillable::type() const {
     if (length_ == -1) {
-      return std::shared_ptr<Type>(new UnknownType);
+      return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
@@ -53,17 +54,27 @@ namespace awkward {
         (*lookup.get())[keys_[i]] = i;
         reverselookup.get()->push_back(keys_[i]);
       }
-      return std::shared_ptr<Type>(new RecordType(types, lookup, reverselookup));
-      return std::shared_ptr<Type>(new RecordType(types));
+      Type::Parameters parameters;
+      if (nameptr_ != nullptr) {
+        parameters["__class__"] = util::quote(name_, true);
+      }
+      return std::shared_ptr<Type>(new RecordType(parameters, types, lookup, reverselookup));
+      return std::shared_ptr<Type>(new RecordType(parameters, types));
     }
   }
 
   const std::shared_ptr<Content> RecordFillable::snapshot() const {
     if (length_ == -1) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
     }
     else if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, false));   // FIXME: Type::none()
+      std::shared_ptr<Content> out(new RecordArray(Identity::none(), Type::none(), length_, false));
+      if (nameptr_ != nullptr) {
+        std::shared_ptr<Type> type = out.get()->type();
+        type.get()->nolength().get()->setparameter("__class__", util::quote(name_, true));
+        out.get()->settype(type);
+      }
+      return out;
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
@@ -74,7 +85,13 @@ namespace awkward {
         (*lookup.get())[keys_[i]] = i;
         reverselookup.get()->push_back(keys_[i]);
       }
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), contents, lookup, reverselookup));   // FIXME: Type::none()
+      std::shared_ptr<Content> out(new RecordArray(Identity::none(), Type::none(), contents, lookup, reverselookup));
+      if (nameptr_ != nullptr) {
+        std::shared_ptr<Type> type = out.get()->type();
+        type.get()->nolength().get()->setparameter("__class__", util::quote(name_, true));
+        out.get()->settype(type);
+      }
+      return out;
     }
   }
 
@@ -154,6 +171,24 @@ namespace awkward {
     return that_;
   }
 
+  const std::shared_ptr<Fillable> RecordFillable::string(const char* x, int64_t length, const char* encoding) {
+    if (!begun_) {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->string(x, length, encoding);
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'string' immediately after 'beginrecord'; needs 'index' or 'endrecord'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->string(x, length, encoding));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->string(x, length, encoding);
+    }
+    return that_;
+  }
+
   const std::shared_ptr<Fillable> RecordFillable::beginlist() {
     if (!begun_) {
       std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
@@ -229,37 +264,52 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Fillable> RecordFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> RecordFillable::beginrecord(const char* name, bool check) {
     if (length_ == -1) {
-      disambiguator_ = disambiguator;
+      if (name == nullptr) {
+        name_ = std::string("");
+      }
+      else {
+        name_ = std::string(name);
+      }
+      nameptr_ = name;
       length_ = 0;
     }
 
-    if (!begun_  &&  disambiguator == disambiguator_) {
+    if (!begun_  &&  ((check  &&  name_ == name)  ||  (!check  &&  nameptr_ == name))) {
       begun_ = true;
       nextindex_ = -1;
       nexttotry_ = 0;
     }
     else if (!begun_) {
       std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
-      out.get()->beginrecord(disambiguator);
+      out.get()->beginrecord(name, check);
       return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument("called 'beginrecord' immediately after 'beginrecord'; needs 'field_fast', 'field_check', or 'endrecord'");
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->beginrecord(disambiguator));
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->beginrecord(name, check));
     }
     else {
-      contents_[(size_t)nextindex_].get()->beginrecord(disambiguator);
+      contents_[(size_t)nextindex_].get()->beginrecord(name, check);
     }
     return that_;
   }
 
+  const std::shared_ptr<Fillable> RecordFillable::field(const char* key, bool check) {
+    if (check) {
+      return field_check(key);
+    }
+    else {
+      return field_fast(key);
+    }
+  }
+
   const std::shared_ptr<Fillable> RecordFillable::field_fast(const char* key) {
     if (!begun_) {
-      throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
     else if (nextindex_ == -1  ||  !contents_[(size_t)nextindex_].get()->active()) {
       int64_t wrap_around = (int64_t)pointers_.size();
@@ -291,14 +341,14 @@ namespace awkward {
       return that_;
     }
     else {
-      contents_[(size_t)nextindex_].get()->field_fast(key);
+      contents_[(size_t)nextindex_].get()->field(key, false);
       return that_;
     }
   }
 
   const std::shared_ptr<Fillable> RecordFillable::field_check(const char* key) {
     if (!begun_) {
-      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
     else if (nextindex_ == -1  ||  !contents_[(size_t)nextindex_].get()->active()) {
       int64_t wrap_around = (int64_t)keys_.size();
@@ -330,7 +380,7 @@ namespace awkward {
       return that_;
     }
     else {
-      contents_[(size_t)nextindex_].get()->field_check(key);
+      contents_[(size_t)nextindex_].get()->field(key, true);
       return that_;
     }
   }

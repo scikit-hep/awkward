@@ -10,6 +10,7 @@
 #include "awkward/fillable/BoolFillable.h"
 #include "awkward/fillable/Int64Fillable.h"
 #include "awkward/fillable/Float64Fillable.h"
+#include "awkward/fillable/StringFillable.h"
 #include "awkward/fillable/ListFillable.h"
 #include "awkward/fillable/TupleFillable.h"
 #include "awkward/fillable/RecordFillable.h"
@@ -32,12 +33,12 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnknownFillable::type() const {
-    return std::shared_ptr<Type>(new UnknownType);
+    return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
   }
 
   const std::shared_ptr<Content> UnknownFillable::snapshot() const {
     if (nullcount_ == 0) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));   // FIXME: Type::none()
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
     }
     else {
       throw std::runtime_error("UnknownFillable::snapshot() needs OptionArray");
@@ -80,11 +81,21 @@ namespace awkward {
     return out;
   }
 
+  const std::shared_ptr<Fillable> UnknownFillable::string(const char* x, int64_t length, const char* encoding) {
+    std::shared_ptr<Fillable> out = StringFillable::fromempty(options_, encoding);
+    if (nullcount_ != 0) {
+      out = OptionFillable::fromnulls(options_, nullcount_, out);
+    }
+    out.get()->string(x, length, encoding);
+    return out;
+  }
+
   const std::shared_ptr<Fillable> UnknownFillable::beginlist() {
     std::shared_ptr<Fillable> out = ListFillable::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
+
     out.get()->beginlist();
     return out;
   }
@@ -110,21 +121,17 @@ namespace awkward {
     throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
-  const std::shared_ptr<Fillable> UnknownFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> UnknownFillable::beginrecord(const char* name, bool check) {
     std::shared_ptr<Fillable> out = RecordFillable::fromempty(options_);
     if (nullcount_ != 0) {
       out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
-    out.get()->beginrecord(disambiguator);
+    out.get()->beginrecord(name, check);
     return out;
   }
 
-  const std::shared_ptr<Fillable> UnknownFillable::field_fast(const char* key) {
-    throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
-  }
-
-  const std::shared_ptr<Fillable> UnknownFillable::field_check(const char* key) {
-    throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
+  const std::shared_ptr<Fillable> UnknownFillable::field(const char* key, bool check) {
+    throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
   }
 
   const std::shared_ptr<Fillable> UnknownFillable::endrecord() {

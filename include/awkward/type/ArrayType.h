@@ -8,12 +8,14 @@
 namespace awkward {
   class ArrayType: public Type {
   public:
-    ArrayType(const std::shared_ptr<Type> type, int64_t length): type_(type), length_(length) { }
+    ArrayType(const Parameters& parameters, const std::shared_ptr<Type> type, int64_t length)
+        : Type(parameters)
+        , type_(type)
+        , length_(length) { }
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
     virtual const std::shared_ptr<Type> shallow_copy() const;
-    virtual bool shallow_equal(const std::shared_ptr<Type> other) const;
-    virtual bool equal(const std::shared_ptr<Type> other) const;
+    virtual bool equal(const std::shared_ptr<Type> other, bool check_parameters) const;
     virtual std::shared_ptr<Type> nolength() const;
     virtual std::shared_ptr<Type> level() const;
     virtual std::shared_ptr<Type> inner() const;

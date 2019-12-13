@@ -58,12 +58,12 @@ namespace awkward {
       }
     }
     std::vector<std::shared_ptr<Content>> contents = array_.contents();
-    builder.beginrec();
+    builder.beginrecord();
     for (size_t j = 0;  j < cols;  j++) {
-      builder.fieldkey(keys.get()->at(j).c_str());
+      builder.field(keys.get()->at(j).c_str());
       contents[j].get()->getitem_at_nowrap(at_).get()->tojson_part(builder);
     }
-    builder.endrec();
+    builder.endrecord();
   }
 
   const std::shared_ptr<Type> Record::innertype(bool bare) const {

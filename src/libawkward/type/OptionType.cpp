@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <string>
+#include <sstream>
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ListType.h"
@@ -10,26 +11,37 @@
 
 namespace awkward {
   std::string OptionType::tostring_part(std::string indent, std::string pre, std::string post) const {
-    if (dynamic_cast<ListType*>(type_.get()) != nullptr  ||
-        dynamic_cast<RegularType*>(type_.get()) != nullptr) {
-      return indent + pre + "option[" + type().get()->tostring_part(indent, "", "") + "]" + post;
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
+    std::stringstream out;
+    if (parameters_.size() == 0) {
+      if (dynamic_cast<ListType*>(type_.get()) != nullptr  ||
+          dynamic_cast<RegularType*>(type_.get()) != nullptr) {
+        out << indent << pre << "option[" << type_.get()->tostring_part(indent, "", "") << "]" << post;
+      }
+      else {
+        out << indent << pre << "?" << type_.get()->tostring_part("", "", "") << post;
+      }
     }
     else {
-      return indent + pre + "?" + type_.get()->tostring_part("", "", "") + post;
+      out << indent << pre << "option[" << type_.get()->tostring_part(indent, "", "") << ", " << string_parameters() << "]" << post;
     }
+    return out.str();
   }
 
   const std::shared_ptr<Type> OptionType::shallow_copy() const {
-    return std::shared_ptr<Type>(new OptionType(type_));
+    return std::shared_ptr<Type>(new OptionType(parameters_, type_));
   }
 
-  bool OptionType::shallow_equal(const std::shared_ptr<Type> other) const {
-    return (dynamic_cast<OptionType*>(other.get()) != nullptr);
-  }
-
-  bool OptionType::equal(const std::shared_ptr<Type> other) const {
+  bool OptionType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
-      return type().get()->equal(t->type());
+      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+        return false;
+      }
+      return type().get()->equal(t->type(), check_parameters);
     }
     else {
       return false;

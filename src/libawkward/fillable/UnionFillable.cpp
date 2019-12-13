@@ -9,6 +9,7 @@
 #include "awkward/fillable/BoolFillable.h"
 #include "awkward/fillable/Int64Fillable.h"
 #include "awkward/fillable/Float64Fillable.h"
+#include "awkward/fillable/StringFillable.h"
 #include "awkward/fillable/ListFillable.h"
 #include "awkward/fillable/TupleFillable.h"
 #include "awkward/fillable/RecordFillable.h"
@@ -42,7 +43,7 @@ namespace awkward {
     for (auto x : contents_) {
       types.push_back(x.get()->type());
     }
-    return std::shared_ptr<Type>(new UnionType(types));
+    return std::shared_ptr<Type>(new UnionType(Type::Parameters(), types));
   }
 
   const std::shared_ptr<Content> UnionFillable::snapshot() const {
@@ -159,6 +160,34 @@ namespace awkward {
     return that_;
   }
 
+  const std::shared_ptr<Fillable> UnionFillable::string(const char* x, int64_t length, const char* encoding) {
+    if (current_ == -1) {
+      std::shared_ptr<Fillable> tofill(nullptr);
+      int8_t i = 0;
+      for (auto content : contents_) {
+        if (StringFillable* raw = dynamic_cast<StringFillable*>(content.get())) {
+          if (raw->encoding() == encoding) {
+            tofill = content;
+            break;
+          }
+        }
+        i++;
+      }
+      if (tofill.get() == nullptr) {
+        tofill = StringFillable::fromempty(options_, encoding);
+        contents_.push_back(tofill);
+      }
+      int64_t len = tofill.get()->length();
+      tofill.get()->string(x, length, encoding);
+      types_.append(i);
+      offsets_.append(len);
+    }
+    else {
+      contents_[(size_t)current_].get()->string(x, length, encoding);
+    }
+    return that_;
+  }
+
   const std::shared_ptr<Fillable> UnionFillable::beginlist() {
     if (current_ == -1) {
       std::shared_ptr<Fillable> tofill(nullptr);
@@ -250,13 +279,13 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Fillable> UnionFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> UnionFillable::beginrecord(const char* name, bool check) {
     if (current_ == -1) {
       std::shared_ptr<Fillable> tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
         if (RecordFillable* raw = dynamic_cast<RecordFillable*>(content.get())) {
-          if (raw->length() == -1  ||  raw->disambiguator() == disambiguator) {
+          if (raw->length() == -1  ||  ((check  &&  raw->name() == name)  ||  (!check  &&  raw->nameptr() == name))) {
             tofill = content;
             break;
           }
@@ -267,31 +296,21 @@ namespace awkward {
         tofill = RecordFillable::fromempty(options_);
         contents_.push_back(tofill);
       }
-      tofill->beginrecord(disambiguator);
+      tofill->beginrecord(name, check);
       current_ = i;
     }
     else {
-      contents_[(size_t)current_].get()->beginrecord(disambiguator);
+      contents_[(size_t)current_].get()->beginrecord(name, check);
     }
     return that_;
   }
 
-  const std::shared_ptr<Fillable> UnionFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> UnionFillable::field(const char* key, bool check) {
     if (current_ == -1) {
-      throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
     else {
-      contents_[(size_t)current_].get()->field_fast(key);
-    }
-    return that_;
-  }
-
-  const std::shared_ptr<Fillable> UnionFillable::field_check(const char* key) {
-    if (current_ == -1) {
-      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
-    }
-    else {
-      contents_[(size_t)current_].get()->field_check(key);
+      contents_[(size_t)current_].get()->field(key, check);
     }
     return that_;
   }

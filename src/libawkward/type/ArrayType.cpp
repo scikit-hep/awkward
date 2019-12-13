@@ -6,20 +6,24 @@
 
 namespace awkward {
   std::string ArrayType::tostring_part(std::string indent, std::string pre, std::string post) const {
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
     return indent + pre + std::to_string(length_) + " * " + type_.get()->tostring_part(indent, "", "") + post;
   }
 
   const std::shared_ptr<Type> ArrayType::shallow_copy() const {
-    return std::shared_ptr<Type>(new ArrayType(type_, length_));
+    return std::shared_ptr<Type>(new ArrayType(parameters_, type_, length_));
   }
 
-  bool ArrayType::shallow_equal(const std::shared_ptr<Type> other) const {
-    return (dynamic_cast<ArrayType*>(other.get()) != nullptr);
-  }
-
-  bool ArrayType::equal(const std::shared_ptr<Type> other) const {
+  bool ArrayType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
-      return length_ == t->length_  &&  type_.get()->equal(t->type_);
+      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+        return false;
+      }
+      return length_ == t->length_  &&  type_.get()->equal(t->type_, check_parameters);
     }
     else {
       return false;

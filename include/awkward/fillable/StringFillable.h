@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_INT64FILLABLE_H_
-#define AWKWARD_INT64FILLABLE_H_
+#ifndef AWKWARD_STRINGFILLABLE_H_
+#define AWKWARD_STRINGFILLABLE_H_
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/fillable/FillableOptions.h"
@@ -9,13 +9,13 @@
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
-  class Int64Fillable: public Fillable {
+  class StringFillable: public Fillable {
   public:
-    Int64Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& buffer): options_(options), buffer_(buffer) { }
+    StringFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, GrowableBuffer<uint8_t>& content, const char* encoding): options_(options), offsets_(offsets), content_(content), encoding_(encoding) { }
 
-    static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options);
+    static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options, const char* encoding);
 
-    virtual const std::string classname() const { return "Int64Fillable"; };
+    virtual const std::string classname() const { return "StringFillable"; };
     virtual int64_t length() const;
     virtual void clear();
     virtual const std::shared_ptr<Type> type() const;
@@ -36,12 +36,14 @@ namespace awkward {
     virtual const std::shared_ptr<Fillable> field(const char* key, bool check);
     virtual const std::shared_ptr<Fillable> endrecord();
 
-    const GrowableBuffer<int64_t> buffer() const { return buffer_; }
+    const char* encoding() const { return encoding_; }
 
   private:
     const FillableOptions options_;
-    GrowableBuffer<int64_t> buffer_;
+    GrowableBuffer<int64_t> offsets_;
+    GrowableBuffer<uint8_t> content_;
+    const char* encoding_;
   };
 }
 
-#endif // AWKWARD_INT64FILLABLE_H_
+#endif // AWKWARD_STRINGFILLABLE_H_

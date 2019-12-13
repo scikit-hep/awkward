@@ -26,16 +26,17 @@ namespace awkward {
 
   void ListFillable::clear() {
     offsets_.clear();
+    offsets_.append(0);
     content_.get()->clear();
   }
 
   const std::shared_ptr<Type> ListFillable::type() const {
-    return std::shared_ptr<Type>(new ListType(content_.get()->type()));
+    return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->type()));
   }
 
   const std::shared_ptr<Content> ListFillable::snapshot() const {
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), Type::none(), offsets, content_.get()->snapshot()));   // FIXME: Type::none()
+    return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), Type::none(), offsets, content_.get()->snapshot()));
   }
 
   bool ListFillable::active() const {
@@ -86,6 +87,18 @@ namespace awkward {
     }
     else {
       maybeupdate(content_.get()->real(x));
+      return that_;
+    }
+  }
+
+  const std::shared_ptr<Fillable> ListFillable::string(const char* x, int64_t length, const char* encoding) {
+    if (!begun_) {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->string(x, length, encoding);
+      return out;
+    }
+    else {
+      maybeupdate(content_.get()->string(x, length, encoding));
       return that_;
     }
   }
@@ -146,34 +159,24 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Fillable> ListFillable::beginrecord(int64_t disambiguator) {
+  const std::shared_ptr<Fillable> ListFillable::beginrecord(const char* name, bool check) {
     if (!begun_) {
       std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
-      out.get()->beginrecord(disambiguator);
+      out.get()->beginrecord(name, check);
       return out;
     }
     else {
-      maybeupdate(content_.get()->beginrecord(disambiguator));
+      maybeupdate(content_.get()->beginrecord(name, check));
       return that_;
     }
   }
 
-  const std::shared_ptr<Fillable> ListFillable::field_fast(const char* key) {
+  const std::shared_ptr<Fillable> ListFillable::field(const char* key, bool check) {
     if (!begun_) {
-      throw std::invalid_argument("called 'field_fast' without 'beginrecord' at the same level before it");
+      throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
     }
     else {
-      content_.get()->field_fast(key);
-      return that_;
-    }
-  }
-
-  const std::shared_ptr<Fillable> ListFillable::field_check(const char* key) {
-    if (!begun_) {
-      throw std::invalid_argument("called 'field_check' without 'beginrecord' at the same level before it");
-    }
-    else {
-      content_.get()->field_check(key);
+      content_.get()->field(key, check);
       return that_;
     }
   }

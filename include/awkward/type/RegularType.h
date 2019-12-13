@@ -10,12 +10,14 @@
 namespace awkward {
   class RegularType: public Type {
   public:
-    RegularType(const std::shared_ptr<Type> type, int64_t size): type_(type), size_(size) { }
+    RegularType(const Parameters& parameters, const std::shared_ptr<Type> type, int64_t size)
+        : Type(parameters)
+        , type_(type)
+        , size_(size) { }
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
     virtual const std::shared_ptr<Type> shallow_copy() const;
-    virtual bool shallow_equal(const std::shared_ptr<Type> other) const;
-    virtual bool equal(const std::shared_ptr<Type> other) const;
+    virtual bool equal(const std::shared_ptr<Type> other, bool check_parameters) const;
     virtual std::shared_ptr<Type> level() const;
     virtual std::shared_ptr<Type> inner() const;
     virtual std::shared_ptr<Type> inner(const std::string& key) const;

@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <string>
+#include <sstream>
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
@@ -9,20 +10,31 @@
 
 namespace awkward {
   std::string ListType::tostring_part(std::string indent, std::string pre, std::string post) const {
-    return indent + pre + "var * " + type().get()->tostring_part(indent, "", "") + post;
+    std::string typestr;
+    if (get_typestr(typestr)) {
+      return typestr;
+    }
+
+    std::stringstream out;
+    if (parameters_.size() == 0) {
+      out << indent << pre << "var * " << type_.get()->tostring_part(indent, "", "") << post;
+    }
+    else {
+      out << indent << pre << "[var * " << type_.get()->tostring_part(indent, "", "") << ", " << string_parameters() << "]" << post;
+    }
+    return out.str();
   }
 
   const std::shared_ptr<Type> ListType::shallow_copy() const {
-    return std::shared_ptr<Type>(new ListType(type_));
+    return std::shared_ptr<Type>(new ListType(parameters_, type_));
   }
 
-  bool ListType::shallow_equal(const std::shared_ptr<Type> other) const {
-    return (dynamic_cast<ListType*>(other.get()) != nullptr);
-  }
-
-  bool ListType::equal(const std::shared_ptr<Type> other) const {
+  bool ListType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
     if (ListType* t = dynamic_cast<ListType*>(other.get())) {
-      return type().get()->equal(t->type());
+      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+        return false;
+      }
+      return type().get()->equal(t->type(), check_parameters);
     }
     else {
       return false;
