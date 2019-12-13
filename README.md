@@ -114,7 +114,7 @@ Updating dependent libraries:
 
 Most users will see Awkward 1.0 for the first time when uproot 4.0 is released.
 
-<p align="center" style="color: red">Progress is currently on track.</p>
+<p align="center"><b>Progress is currently on track.</b></p>
 
 ### Checklist of features for the six-month sprint
 
