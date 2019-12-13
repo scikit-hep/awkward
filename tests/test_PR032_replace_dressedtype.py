@@ -144,6 +144,13 @@ def test_fillable_string():
     assert awkward1.tojson(a) == '[["one","two","three"],[],["four","five"]]'
     assert repr(a.type) == "3 * var * string"
 
+def test_fromiter_fromjson():
+    assert awkward1.tolist(awkward1.fromiter(["one", "two", "three"])) == ["one", "two", "three"]
+    assert awkward1.tolist(awkward1.fromiter([["one", "two", "three"], [], ["four", "five"]])) == [["one", "two", "three"], [], ["four", "five"]]
+
+    assert awkward1.tolist(awkward1.fromjson('["one", "two", "three"]')) == ["one", "two", "three"]
+    assert awkward1.tolist(awkward1.fromjson('[["one", "two", "three"], [], ["four", "five"]]')) == [["one", "two", "three"], [], ["four", "five"]]
+    
 numba = pytest.importorskip("numba")
 
 def test_record_name_numba():
