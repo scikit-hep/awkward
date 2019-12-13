@@ -33,23 +33,18 @@ The Awkward 1.0 project is a major investment, a six-month sprint from late Augu
 
 ## Architecture of Awkward 1.0
 
+To achieve these goals, Awkward 1.0 is separated into four layers:
 
+   1. The user-facing Python layer with a single `awkward.Array` class, whose data is described by a [datashape](https://datashape.readthedocs.io/en/latest/) type.
+   2. The columnar representation (i.e. nested `ListArray`, `RecordArray`, etc.) is accessible but hidden, and these are all C++ classes presented to Python through [pybind11](https://pybind11.readthedocs.io/en/stable/).
+   3. Two object models for the columnar representation, one in C++11 (with only header-only dependencies) and the other as [Numba extensions](https://numba.pydata.org/numba-doc/dev/extending/index.html). This is the only layer in which array-allocation occurs.
+   4. A suite of operations on arrays, computing new values but not allocating memory. The first implementation of this suite is in C++ with a pure-C interface; the second may be CUDA (or other GPU language). With one exception (`FillableArray`), iterations over arrays only occur at this level, so this is the only layer that needs to be optimized for speed.
 
-
-
+<p align="center"><img src="docs/img/awkward-1-0-layers.png" width="60%"></p>
 
 ## Old
 
-Awkward-array 1.0 will be rewritten in C++ using simple, single-pass algorithms, and exposed to Python through pybind11 and Numba. It will consist of four layers:
 
-   1. A single `Array` class in Python that can be lowered in Numba, representing a sequence of abstract objects according to a high-level [datashape](https://datashape.readthedocs.io/en/latest/).
-   2. Its columnar implementation in terms of nested `ListArray`, `RecordArray`, `MaskedArray`, etc., exposed to Python through pybind11. The modularity of this "layout" is very useful for engineering, but it has some features that have tripped up users, such as different physical arrays representing the same logical objects.
-   3. Memory management of this layout in C++ classes, and again as [Numba extensions](https://numba.pydata.org/numba-doc/dev/extending/index.html). As a side-effect, `libawkward.so` would be a library for creating and manipulating awkward-arrays purely in C++, with no pybind11 dependencies.
-   4. Implementations of the actual algorithms for (a) CPUs and (b) GPUs. This layer performs no memory management (arrays must be allocated and owned by the caller), but they perform all loops over data, reading old arrays, filling new arrays.
-
-Below is a diagram of how each component uses those at a lower level of abstraction:
-
-<p align="center"><img src="docs/img/awkward-1-0-layers.png" width="60%"></p>
 
 Layer 4 is a dynamically linked library named `{lib,}awkward-cpu-kernels.{so,dylib,dll}` with an unmangled C FFI interface. The layer 3 C++ library is `{lib,}awkward.{so,dylib,dll}` and layer 3 Numba extensions are in the `numbaext` submodule of the `awkward1` Python library. Layer 2 is the `layout` submodule, linked via pybind11, and layer 1 is the Python code in `awkward1`.
 
