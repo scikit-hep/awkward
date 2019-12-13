@@ -100,16 +100,16 @@ rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
 
 The six-month sprint:
 
-   * [X] **September 2019:**
-   * [X] **October 2019:**
-   * [X] **November 2019:**
-   * [ ] **December 2019:**
-   * [ ] **January 2020:**
-   * [ ] **February 2020:**
+   * [X] **September 2019:** Set up CI/CD; define jagged array types in C++; pervasive infrastructure like database-style indexing.
+   * [X] **October 2019:** NumPy-compliant slicing; the Numba implementation. Feature parity will be maintained in Numba continuously.
+   * [X] **November 2019:** Fillable arrays to create columnar data; high-level type objects; all list and record types.
+   * [ ] **December 2019:** The `awkward.Array` user interface; behavioral mix-ins, including the string type; [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) and [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html).
+   * [ ] **January 2020:** The rest of the array nodes: option and union types, indirection, chunking, and laziness.
+   * [ ] **February 2020:** The array operations: flattening, padding, concatenating, combinatorics, etc.
 
 Updating dependent libraries:
 
-   * [ ] **March 2020:** Update [vector](https://github.com/scikit-hep/vector) (from [hepvector](https://github.com/henryiii/hepvector#readme) and [uproot-methods](https://github.com/scikit-hep/uproot-methods#readme)).
+   * [ ] **March 2020:** Update [vector](https://github.com/scikit-hep/vector) (from [hepvector](https://github.com/henryiii/hepvector#readme) and [uproot-methods](https://github.com/scikit-hep/uproot-methods#readme)). This work will be done with [Henry Schreiner](https://github.com/henryiii).
    * [ ] **April 2020:** Update [uproot](https://github.com/scikit-hep/uproot#readme) to 4.0 using Awkward 1.0.
 
 Most users will see Awkward 1.0 for the first time when uproot 4.0 is released.
@@ -143,9 +143,9 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
          * [X] Implement it in Numba as well.
-      * [ ] `MaskedArray`, `BitMaskedArray`, `IndexedMaskedArray`: same as the old versions.
+      * [ ] `OptionArray`: for nullable data, covering both bit and byte granularity (old `MaskedArray` and `BitMaskedArray`).
       * [ ] `UnionArray`: same as the old version; `SparseUnionArray`: the additional case found in Apache Arrow.
-      * [ ] `IndexedArray`: same as the old version.
+      * [ ] `IndexedArray`: same as the old version, but allowing negative values to be `None`; hence, it has option type and fills the role of `IndexedMaskedArray`.
       * [ ] `RedirectArray`: an explicit weak-reference to another part of the structure (no hard-linked cycles). Often used with an `IndexedArray`.
       * [ ] `SlicedArray`: lazy-slicing (from old `Table`) that can be applied to any type.
       * [ ] `SparseArray`: same as the old version.
