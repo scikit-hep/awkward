@@ -3,10 +3,10 @@
 Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array) in 2020.
 
    * The [original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing), now out-of-date.
-   * My [PyHEP 2019 talk](https://indico.cern.ch/event/833895/contributions/3577882) on Awkward 1.0.
-   * My [CHEP 2019 talk](https://indico.cern.ch/event/773049/contributions/3473258) on Awkward 1.0.
+   * My [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
+   * My [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
 
-## Motivation
+## Motivation for a new Awkward Array
 
 Awkward Array has proven to be a useful way to analyze variable-length and tree-like data in Python, by extending Numpy's idioms from flat arrays to arrays of data structures. For over a year, physicists have been using Awkward Array both in and out of uproot; it is already one of the most popular Python packages in particle physics.
 
@@ -14,18 +14,20 @@ Awkward Array has proven to be a useful way to analyze variable-length and tree-
 
 However, the pure-NumPy implementation is hard to extend (finding for-loop-free implementations of operations on nested data is _hard_) and maintain (most bugs are NumPy corner cases). Also, the feedback users have given me through [GitHub](https://github.com/scikit-hep/awkward-array/issues), [StackOverflow](https://stackoverflow.com/questions/tagged/awkward-array), and [in-person tutorials](https://github.com/jpivarski/2019-07-29-dpf-python#readme) have pointed out some design mistakes. A backward-incompatible release will allow us to fix design mistakes while providing freedom to make deep changes in the implementation.
 
-The Awkward 1.0 project is a major investment, a six-month sprint from late August 2019 to late February 2020. The time spent on a clean, robust Awkward Array is justified by its widespread adoption: it is likely to be the bottom layer of Pythonic data analysis with nested structures for years to come.
+The Awkward 1.0 project is a major investment, a six-month sprint from late August 2019 to late February 2020. The time spent on a clean, robust Awkward Array is justified by the widespread adoption of Awkward 0.x: its usefulness to the community has been demonstrated.
 
 ## Main goals of Awkward 1.0
 
-   * Full access to create and manipulate Awkward Arrays in C++ with no Python dependencies. This is so that C++ libraries can share data with Python front-ends.
-   * Easy installation with `pip install` and `conda install` for most users (Mac, Windows, and most Linux (`manylinux`)).
-   * Imperative (for-loop-style) access to Awkward Arrays in [Numba](https://numba.pydata.org/), a just-in-time compiler for Python. This is so that physicists can write critical loops in Python without a performance penalty.
+   * Full access to create and manipulate Awkward Arrays in C++ with no Python dependencies. This is so that C++ libraries can produce and share data with Python front-ends.
+   * Easy installation with `pip install` and `conda install` for most users (Mac, Windows, and [most Linux](https://github.com/pypa/manylinux)).
+   * Imperative (for-loop-style) access to Awkward Arrays in [Numba](https://numba.pydata.org/), a just-in-time compiler for Python. This is so that physicists can write critical loops in straightforward Python without a performance penalty.
    * A single `awkward.Array` class that hides the details of how columnar data is built, with a suite of operations that apply to all internal types.
    * Conformance to NumPy, where Awkward and NumPy overlap.
    * Better control over "behavioral mix-ins," such as `LorentzVector` (i.e. adding methods like `pt()` to arrays of records with `px` and `py` fields). In Awkward 0.x, this was achieved with multiple inheritance, but that was brittle.
+   * Support for set operations and database-style joins, which can be put to use in a [declarative analysis language](https://github.com/jpivarski/PartiQL#readme), but requires database-style accounting of an index (like a Pandas index).
    * Better interoperability with Pandas, NumExpr, and Dask, while maintaining interoperability with ROOT, Arrow, and Parquet.
    * Ability to add GPU implementations of array operations in the future.
+   * Better error messages.
 
 ## Architecture of Awkward 1.0
 
