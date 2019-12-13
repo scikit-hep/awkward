@@ -87,6 +87,7 @@ def test_fillable_string():
 
     a = fillable.snapshot()
     assert str(a) == "[b'one', b'two', b'three']"
+    assert awkward1.tolist(a) == [b'one', b'two', b'three']
     assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
     assert repr(a.type) == "3 * bytes"
 
@@ -98,8 +99,30 @@ def test_fillable_string():
 
     a = fillable.snapshot()
     assert str(a) == "['one', 'two', 'three']"
+    assert awkward1.tolist(a) == ['one', 'two', 'three']
     assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
     assert repr(a.type) == "3 * string"
+
+    fillable = awkward1.FillableArray()
+
+    fillable.beginlist()
+    fillable.string("one")
+    fillable.string("two")
+    fillable.string("three")
+    fillable.endlist()
+
+    fillable.beginlist()
+    fillable.endlist()
+
+    fillable.beginlist()
+    fillable.string("four")
+    fillable.string("five")
+    fillable.endlist()
+
+    a = fillable.snapshot()
+    assert str(a) == "[['one', 'two', 'three'], [], ['four', 'five']]"
+    assert awkward1.tolist(a) == [['one', 'two', 'three'], [], ['four', 'five']]
+    assert repr(a.type) == "3 * var * string"
 
 numba = pytest.importorskip("numba")
 

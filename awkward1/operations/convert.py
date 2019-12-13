@@ -41,7 +41,7 @@ def tolist(array):
     elif sys.version_info[0] < 3 and isinstance(array, unicode):
         return array
 
-    elif isinstance(array, awkward1.behavior.CharBehavior):
+    elif isinstance(array, awkward1.behavior.string.CharBehavior):
         if array.type.parameters.get("encoding") is None:
             return array.__bytes__()
         else:
