@@ -16,23 +16,32 @@ int main(int, char**)
   ak::FillableArray myarray(ak::FillableOptions(1024, 2.0));
 
   // populate fillable array with lists
-  myarray.beginlist();
-  //myarray.boolean(true);
+  myarray.beginrecord();
+  myarray.field("one");
+  myarray.boolean(true);
+  myarray.field("two");
   myarray.integer(1);
+  myarray.field("three");
   myarray.real(1.1);
-  myarray.endlist();
+  myarray.endrecord();
   
-  myarray.beginlist();
-  //myarray.boolean(false);
+  myarray.beginrecord();
+  myarray.field("one");
+  myarray.boolean(false);
+  myarray.field("two");
   myarray.integer(2);
+  myarray.field("three");
   myarray.real(2.2);
-  myarray.endlist();
+  myarray.endrecord();
 
-  myarray.beginlist();
-  //myarray.boolean(true);
+  myarray.beginrecord();
+  myarray.field("one");
+  myarray.boolean(true);
+  myarray.field("two");
   myarray.integer(3);
+  myarray.field("three");
   myarray.real(3.3);
-  myarray.endlist();
+  myarray.endrecord();
 
   // take a snapshot 
   //std::shared_ptr<ak::Content> array = builder.snapshot();
@@ -40,7 +49,6 @@ int main(int, char**)
   // saving to compare fillable array to std vector
   //std::vector<std::vector<std::vector<double>>> vector =
   //{{{true, 1, 1.1}, {false, 2, 2.2}, {true, 3, 3.3}}, {}, {}, {}};
-
 
   return 0;
 }
