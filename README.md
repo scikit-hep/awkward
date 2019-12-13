@@ -1,20 +1,26 @@
 # awkward-1.0
 
-Development of awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array) in 2020.
+Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array) in 2020.
 
    * The [original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing), now out-of-date.
+   * My [PyHEP 2019 talk](https://indico.cern.ch/event/833895/contributions/3577882) on Awkward 1.0.
+   * My [CHEP 2019 talk](https://indico.cern.ch/event/773049/contributions/3473258) on Awkward 1.0.
 
-## Short summary
+## Motivation
 
-Awkward-array has proven to be a useful way to analyze variable-length and tree-like data in Python, by extending Numpy's idioms from flat arrays to arrays of data structures.
+Awkward Array has proven to be a useful way to analyze variable-length and tree-like data in Python, by extending Numpy's idioms from flat arrays to arrays of data structures. For over a year, physicists have been using Awkward Array both in and out of uproot; it is already one of the most popular Python packages in particle physics.
 
 <p align="center"><img src="docs/img/awkward-0-popularity.png" width="60%"></p>
 
+However, the pure-NumPy implementation is hard to extend (finding for-loop-free implementations of operations on nested data is _hard_) and maintain (most bugs are NumPy corner cases). Also, the feedback users have given me through [GitHub](https://github.com/scikit-hep/awkward-array/issues), [StackOverflow](https://stackoverflow.com/questions/tagged/awkward-array), and [in-person tutorials](https://github.com/jpivarski/2019-07-29-dpf-python#readme) have pointed out some design mistakes. A backward-incompatible release will allow us to fix design mistakes while providing freedom to make deep changes in the implementation.
+
+The Awkward 1.0 project is a major investment, a six-month sprint from late August 2019 to late February 2020. The time spent on a clean, robust Awkward Array is justified by its widespread adoption: it is likely to be the bottom layer of Pythonic data analysis with nested structures for years to come.
 
 
 
 
 
+## Old
 
 Unlike previous iterations of this idea ([Femtocode](https://github.com/diana-hep/femtocode), [OAMap](https://github.com/diana-hep/oamap)), awkward-array is used in data analysis, with feedback from users.
 
