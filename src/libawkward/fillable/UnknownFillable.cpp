@@ -95,7 +95,6 @@ namespace awkward {
     if (nullcount_ != 0) {
       out = OptionFillable::fromnulls(options_, nullcount_, out);
     }
-
     out.get()->beginlist();
     return out;
   }
