@@ -78,6 +78,29 @@ def test_record_name():
     assert repr(a.type) == '2 * struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
     assert a.type.nolength().parameters == {"__class__": "Dummy"}
 
+def test_fillable_string():
+    fillable = awkward1.FillableArray()
+
+    fillable.bytestring(b"one")
+    fillable.bytestring(b"two")
+    fillable.bytestring(b"three")
+
+    a = fillable.snapshot()
+    assert str(a) == "[b'one', b'two', b'three']"
+    assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
+    assert repr(a.type) == "3 * bytes"
+
+    fillable = awkward1.FillableArray()
+
+    fillable.string("one")
+    fillable.string("two")
+    fillable.string("three")
+
+    a = fillable.snapshot()
+    assert str(a) == "['one', 'two', 'three']"
+    assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
+    assert repr(a.type) == "3 * string"
+
 numba = pytest.importorskip("numba")
 
 def test_record_name_numba():

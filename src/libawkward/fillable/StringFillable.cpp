@@ -35,26 +35,28 @@ namespace awkward {
     char_parameters["__class__"] = std::string("\"char\"");
 
     Type::Parameters string_parameters;
-    string_parameters["__class__"] = std::string("string");
+    string_parameters["__class__"] = std::string("\"string\"");
 
     if (encoding_ == nullptr) {
       char_parameters["__str__"] = std::string("\"byte\"");
       char_parameters["encoding"] = std::string("null");
-      string_parameters["__str__"] = std::string("bytes");
+      string_parameters["__str__"] = std::string("\"bytes\"");
     }
     else {
+      std::string quoted = util::quote(encoding_, true);
+      std::string slashquoted = std::string("\\\"") + quoted.substr(1, quoted.length() - 2) + std::string("\\\"");
       if (std::string(encoding_) == std::string("utf-8")) {
         char_parameters["__str__"] = std::string("\"utf8\"");
-      string_parameters["__str__"] = std::string("string");
+      string_parameters["__str__"] = std::string("\"string\"");
       }
       else {
-        char_parameters["__str__"] = std::string("\"char[\\\"") + std::string(encoding_) + std::string("\\\"]\"");
-        string_parameters["__str__"] = std::string("\"string[\\\"") + std::string(encoding_) + std::string("\\\"]\"");
+        char_parameters["__str__"] = std::string("\"char[") + slashquoted + std::string("]\"");
+        string_parameters["__str__"] = std::string("\"string[") + slashquoted + std::string("]\"");
       }
-      char_parameters["encoding"] = std::string(encoding_);
+      char_parameters["encoding"] = std::string(quoted);
     }
 
-    return std::shared_ptr<Type>(new ListType(string_parameters, std::shared_ptr(new PrimitiveType(char_parameters, PrimitiveType::uint8))));
+    return std::shared_ptr<Type>(new ListType(string_parameters, std::shared_ptr<Type>(new PrimitiveType(char_parameters, PrimitiveType::uint8))));
   }
 
   const std::shared_ptr<Content> StringFillable::snapshot() const {
@@ -64,7 +66,7 @@ namespace awkward {
 
     std::vector<ssize_t> shape = { (ssize_t)content_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(uint8_t) };
-    std::shared_ptr<Content> content(new NumpyArray(Identity::none(), stringtype.get()->inner(), content_.ptr(), shape, strides, 0, sizeof(uint_8), "B"));
+    std::shared_ptr<Content> content(new NumpyArray(Identity::none(), stringtype.get()->inner(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B"));
 
     return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), stringtype, offsets, content));
   }
@@ -80,8 +82,9 @@ namespace awkward {
   }
 
   const std::shared_ptr<Fillable> StringFillable::boolean(bool x) {
-    buffer_.append(x);
-    return that_;
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->boolean(x);
+    return out;
   }
 
   const std::shared_ptr<Fillable> StringFillable::integer(int64_t x) {
@@ -108,7 +111,7 @@ namespace awkward {
       }
     }
     offsets_.append(content_.length());
-    return out;
+    return that_;
   }
 
   const std::shared_ptr<Fillable> StringFillable::beginlist() {

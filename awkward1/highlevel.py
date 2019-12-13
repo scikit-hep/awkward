@@ -314,6 +314,12 @@ class FillableArray(object):
     def real(self, x):
         self._fillablearray.real(x)
 
+    def bytestring(self, x):
+        self._fillablearray.bytestring(x)
+
+    def string(self, x):
+        self._fillablearray.string(x)
+
     def beginlist(self):
         self._fillablearray.beginlist()
 

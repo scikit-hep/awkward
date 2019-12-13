@@ -667,6 +667,12 @@ void fillable_fill(ak::FillableArray& self, py::handle obj) {
   else if (py::isinstance<py::float_>(obj)) {
     self.real(obj.cast<double>());
   }
+  else if (py::isinstance<py::bytes>(obj)) {
+    self.bytestring(obj.cast<std::string>());
+  }
+  else if (py::isinstance<py::str>(obj)) {
+    self.string(obj.cast<std::string>());
+  }
   else if (py::isinstance<py::tuple>(obj)) {
     py::tuple tup = obj.cast<py::tuple>();
     self.begintuple(tup.size());
@@ -689,7 +695,6 @@ void fillable_fill(ak::FillableArray& self, py::handle obj) {
     }
     self.endrecord();
   }
-  // FIXME: strings
   else if (py::isinstance<py::iterable>(obj)) {
     py::iterable seq = obj.cast<py::iterable>();
     self.beginlist();
@@ -724,6 +729,12 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("boolean", &ak::FillableArray::boolean)
       .def("integer", &ak::FillableArray::integer)
       .def("real", &ak::FillableArray::real)
+      .def("bytestring", [](ak::FillableArray& self, py::bytes x) -> void {
+        self.bytestring(x.cast<std::string>());
+      })
+      .def("string", [](ak::FillableArray& self, py::str x) -> void {
+        self.string(x.cast<std::string>());
+      })
       .def("beginlist", &ak::FillableArray::beginlist)
       .def("endlist", &ak::FillableArray::endlist)
       .def("begintuple", &ak::FillableArray::begintuple)
@@ -738,7 +749,9 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
           self.beginrecord_check(cppname.c_str());
         }
       }, py::arg("name") = py::none())
-      .def("field", &ak::FillableArray::field_check)
+      .def("field", [](ak::FillableArray& self, const std::string& x) -> void {
+        self.field_check(x);
+      })
       .def("endrecord", &ak::FillableArray::endrecord)
       .def("fill", &fillable_fill)
   );

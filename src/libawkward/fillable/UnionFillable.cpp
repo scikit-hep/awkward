@@ -9,6 +9,7 @@
 #include "awkward/fillable/BoolFillable.h"
 #include "awkward/fillable/Int64Fillable.h"
 #include "awkward/fillable/Float64Fillable.h"
+#include "awkward/fillable/StringFillable.h"
 #include "awkward/fillable/ListFillable.h"
 #include "awkward/fillable/TupleFillable.h"
 #include "awkward/fillable/RecordFillable.h"
