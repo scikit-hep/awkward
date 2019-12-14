@@ -44,13 +44,11 @@ int main(int, char**)
   myarray.endrecord();
 
   // take a snapshot 
-  //std::shared_ptr<ak::Content> array = builder.snapshot();
- 
-  // saving to compare fillable array to std vector
-  //std::vector<std::vector<std::vector<double>>> vector =
-  //{{{true, 1, 1.1}, {false, 2, 2.2}, {true, 3, 3.3}}, {}, {}, {}};
+  std::shared_ptr<ak::Content> array = myarray.snapshot();
 
-
+  // check output 
+  if (array.get()->tojson(false,1) != "[{\"one\":true,\"two\":1,\"three\":1.1},{\"one\":false,\"two\":2,\"three\":2.2},{\"one\":true,\"two\":3,\"three\":3.3}]")
+    {return -1;}
   return 0;
 }
 
