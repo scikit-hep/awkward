@@ -120,8 +120,15 @@ namespace awkward {
 
   const std::shared_ptr<Type> RecordArray::baretype(bool baredown) const {
     std::vector<std::shared_ptr<Type>> types;
-    for (auto item : contents_) {
-      types.push_back(item.get()->baretype(baredown));
+    if (baredown) {
+      for (auto item : contents_) {
+        types.push_back(item.get()->baretype(baredown));
+      }
+    }
+    else {
+      for (auto item : contents_) {
+        types.push_back(item.get()->type());
+      }
     }
     return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types, lookup_, reverselookup_));
   }

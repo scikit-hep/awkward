@@ -6,7 +6,7 @@ import awkward1.layout
 import awkward1.operations.convert
 
 class Array(object):
-    def __init__(self, data, namespace=None):
+    def __init__(self, data, type=None, namespace=None):
         if isinstance(data, awkward1.layout.Content):
             layout = data
         elif isinstance(data, Array):
@@ -19,8 +19,24 @@ class Array(object):
             layout = awkward1.operations.convert.fromiter(data).layout
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
-        self.layout = layout
+
         self.namespace = namespace
+
+        if type is not None:
+            if not isinstance(type, awkward1.layout.ArrayType):
+                raise TypeError("type must be an awkward1.layout.ArrayType")
+            if type.length > len(layout):
+                raise TypeError("ArrayType length ({0}) is greater than layout length {1}".format(type.length, len(layout)))
+            layout = layout[:type.length]
+            cls = self._namespace.get(type.parameters.get("__class__"))
+            if cls is not None:
+                if not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Array):
+                    raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Array".format(repr(type.parameters["__class__"])))
+                self.__class__ = cls
+            layout.type = type.type
+            self._type = type
+
+        self.layout = layout
 
     @property
     def layout(self):
@@ -47,27 +63,6 @@ class Array(object):
     def type(self):
         return awkward1.layout.ArrayType(self._layout.type, len(self._layout))
 
-    # @type.setter
-    # def type(self, type):
-    #     if type is None:
-    #         self.__class__ = Array
-    #         self._type = None
-    #         self._layout.type = None
-    #
-    #     else:
-    #         if not isinstance(type, awkward1.layout.ArrayType):
-    #             raise TypeError("type must be an awkward1.layout.ArrayType")
-    #
-    #         cls = self._namespace.get(type.parameters.get("__class__"))
-    #         if cls is None:
-    #             cls = Array
-    #         elif not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Array):
-    #             raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Array".format(repr(type.parameters["__class__"])))
-    #
-    #         self.__class__ = cls
-    #         self._type = type
-    #         self._layout.type = type.inner()
-
     def __len__(self):
         return len(self.layout)
 
@@ -92,13 +87,26 @@ class Array(object):
         return "<Array {0} type={1}>".format(value, type)
 
 class Record(object):
-    def __init__(self, data, namespace=None):
+    def __init__(self, data, type=None, namespace=None):
         # FIXME: more checks here
         layout = data
         if not isinstance(layout, awkward1.layout.Record):
             raise TypeError("could not convert data into an awkward1.Record")
-        self.layout = layout
+
         self.namespace = namespace
+
+        if type is not None:
+            if not isinstance(type, awkward1.layout.RecordType):
+                raise TypeError("type must be an awkward1.layout.RecordType")
+            cls = self._namespace.get(type.parameters.get("__class__"))
+            if cls is not None:
+                if not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Record):
+                    raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Record".format(repr(type.parameters["__class__"])))
+                self.__class__ = cls
+            layout.type = type.type
+            self._type = type
+
+        self.layout = layout
 
     @property
     def layout(self):
@@ -124,25 +132,6 @@ class Record(object):
     @property
     def type(self):
         return self._layout.type
-
-    # @type.setter
-    # def type(self, type):
-    #     if type is None:
-    #         self.__class__ = Record
-    #         self._layout.type = None
-    #
-    #     else:
-    #         if not isinstance(type, awkward1.layout.RecordType):
-    #             raise TypeError("type must be an awkward1.layout.RecordType")
-    #
-    #         cls = self._namespace.get(type.parameters.get("__class__"))
-    #         if cls is None:
-    #             cls = Record
-    #         elif not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Record):
-    #             raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Record".format(repr(type.parameters["__class__"])))
-    #
-    #         self.__class__ = cls
-    #         self._layout.type = type
 
     def __getitem__(self, where):
         return awkward1._util.wrap(self.layout[where], self._namespace)

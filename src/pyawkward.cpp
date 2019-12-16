@@ -1463,7 +1463,9 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("id", [](ak::Record& self) -> py::object { return box(self.id()); })
       .def("__getitem__", &getitem<ak::Record>)
-      .def_property_readonly("baretype", &ak::Record::baretype)
+      .def_property_readonly("baretype", [](ak::Record& self) -> py::object {
+        return box(self.baretype(true));
+      })
       .def_property_readonly("isbare", &ak::Record::isbare)
       .def_property("type", [](ak::Record& self) -> py::object {
         return box(self.type());

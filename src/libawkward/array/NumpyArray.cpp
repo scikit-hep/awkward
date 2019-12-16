@@ -271,6 +271,19 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Type> NumpyArray::type() const {
+    if (type_.get() == nullptr) {
+      return baretype(false);
+    }
+    else {
+      std::shared_ptr<Type> out = type_;
+      for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
+        out = std::shared_ptr<Type>(new RegularType(Type::Parameters(), out, (int64_t)shape_[i]));
+      }
+      return out;
+    }
+  }
+
   const std::shared_ptr<Type> NumpyArray::baretype(bool baredown) const {
     std::shared_ptr<Type> out;
     if (format_.compare("d") == 0) {

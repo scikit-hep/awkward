@@ -105,7 +105,12 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RegularArray::baretype(bool baredown) const {
-    return std::shared_ptr<Type>(new RegularType(Type::Parameters(), content_.get()->baretype(baredown), size_));
+    if (baredown) {
+      return std::shared_ptr<Type>(new RegularType(Type::Parameters(), content_.get()->baretype(baredown), size_));
+    }
+    else {
+      return std::shared_ptr<Type>(new RegularType(Type::Parameters(), content_.get()->type(), size_));
+    }
   }
 
   void RegularArray::settype_part(const std::shared_ptr<Type> type) {

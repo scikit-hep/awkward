@@ -166,7 +166,12 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Type> ListArrayOf<T>::baretype(bool baredown) const {
-    return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->baretype(baredown)));
+    if (baredown) {
+      return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->baretype(baredown)));
+    }
+    else {
+      return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->type()));
+    }
   }
 
   template <typename T>

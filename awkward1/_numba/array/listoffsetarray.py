@@ -147,11 +147,9 @@ def unbox(tpe, obj, c):
         proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
         c.pyapi.decref(id_obj)
     if tpe.typetpe != numba.none:
-        type1_obj = c.pyapi.object_getattr_string(obj, "type")
-        type2_obj = c.pyapi.object_getattr_string(type1_obj, "type")
-        proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type2_obj).value
-        c.pyapi.decref(type1_obj)
-        c.pyapi.decref(type2_obj)
+        type_obj = c.pyapi.object_getattr_string(obj, "type")
+        proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type_obj).value
+        c.pyapi.decref(type_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
