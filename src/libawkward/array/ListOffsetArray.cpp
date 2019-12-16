@@ -179,7 +179,8 @@ namespace awkward {
       type_ = type;
     }
     else {
-      content_.get()->settype_part(type.get()->level().get()->inner());
+      ListType* raw = dynamic_cast<ListType*>(type.get()->level().get());
+      content_.get()->settype_part(raw->type());
       type_ = type;
     }
   }
@@ -187,7 +188,7 @@ namespace awkward {
   template <typename T>
   bool ListOffsetArrayOf<T>::accepts(const std::shared_ptr<Type> type) {
     if (ListType* raw = dynamic_cast<ListType*>(type.get()->level().get())) {
-      return content_.get()->accepts(raw->inner());
+      return content_.get()->accepts(raw->type());
     }
     else {
       return false;

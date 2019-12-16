@@ -59,12 +59,13 @@ def test_string2():
     assert repr(a[1]) == "<Array [] type='0 * uint8'>"
     assert repr(a[2]) == "<Array [116, 104, 101, 114, 101] type='5 * uint8'>"
 
-    a.type = awkward1.layout.ArrayType(awkward1.string, 3)
+    a.layout.type = awkward1.string
+    listoffsetarray.type = awkward1.string
 
     assert isinstance(a, awkward1.Array)
     assert isinstance(a, awkward1.behavior.string.StringBehavior)
     assert awkward1.tolist(a) == ['hey', '', 'there']
-
+    
     assert repr(a.type) == "3 * string"
     assert repr(a[0].type) == "3 * utf8"
     assert repr(a[1].type) == "0 * utf8"

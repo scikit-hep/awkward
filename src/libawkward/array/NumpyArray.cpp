@@ -338,7 +338,7 @@ namespace awkward {
     else {
       std::shared_ptr<Type> t = type;
       while (RegularType* raw = dynamic_cast<RegularType*>(t.get())) {
-        t = raw->inner().get()->level();
+        t = raw->type().get()->level();
       }
       type_ = t;
     }
@@ -349,7 +349,7 @@ namespace awkward {
     for (size_t i = 1;  i < shape_.size();  i++) {
       if (RegularType* raw = dynamic_cast<RegularType*>(test.get())) {
         if (raw->size() == (int64_t)shape_[i]) {
-          test = raw->inner().get()->level();
+          test = raw->type().get()->level();
         }
         else {
           return false;

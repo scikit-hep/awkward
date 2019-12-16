@@ -114,7 +114,8 @@ namespace awkward {
       type_ = type;
     }
     else {
-      content_.get()->settype_part(type.get()->level().get()->inner());
+      RegularType* raw = dynamic_cast<RegularType*>(type.get()->level().get());
+      content_.get()->settype_part(raw->type());
       type_ = type;
     }
   }
@@ -122,7 +123,7 @@ namespace awkward {
   bool RegularArray::accepts(const std::shared_ptr<Type> type) {
     if (RegularType* raw = dynamic_cast<RegularType*>(type.get()->level().get())) {
       if (raw->size() == size_) {
-        return content_.get()->accepts(raw->inner());
+        return content_.get()->accepts(raw->type());
       }
       else {
         return false;
