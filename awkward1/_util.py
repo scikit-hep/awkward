@@ -7,14 +7,18 @@ import numpy
 
 def wrap(content, namespace):
     import awkward1.layout
-    if isinstance(content, (awkward1.layout.Content, awkward1.layout.Record)):
-        t = content.type.nolength()
-        if t.parameters.get("__class__") in namespace:
-            return namespace[t.parameters["__class__"]](content, namespace=namespace)
-        elif isinstance(content, awkward1.layout.Record):
-            return awkward1.Record(content)
-        else:
-            return awkward1.Array(content)
+    if isinstance(content, awkward1.layout.Content):
+        cls = namespace.get(content.type.parameters.get("__class__"))
+        if cls is None:
+            cls = awkward1.Array
+        return cls(content, namespace=namespace)
+
+    elif isinstance(content, awkward1.layout.Record):
+        cls = namespace.get(content.type.parameters.get("__class__"))
+        if cls is None:
+            cls = awkward1.Record
+        return cls(content, namespace=namespace)
+
     else:
         return content
 
@@ -51,6 +55,13 @@ def minimally_touching_string(limit_length, layout, namespace):
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
+        if wrap and isinstance(x, awkward1.layout.Record):
+            t = x.type
+            if t.parameters.get("__class__") in namespace:
+                y = namespace[t.parameters["__class__"]](x, namespace=namespace)
+                if "__repr__" in type(y).__dict__:
+                    yield space + repr(y)
+                    done = True
         if not done:
             if isinstance(x, awkward1.layout.Content):
                 if brackets:
@@ -81,6 +92,13 @@ def minimally_touching_string(limit_length, layout, namespace):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
             t = x.type.nolength()
+            if t.parameters.get("__class__") in namespace:
+                y = namespace[t.parameters["__class__"]](x, namespace=namespace)
+                if "__repr__" in type(y).__dict__:
+                    yield repr(y) + space
+                    done = True
+        if wrap and isinstance(x, awkward1.layout.Record):
+            t = x.type
             if t.parameters.get("__class__") in namespace:
                 y = namespace[t.parameters["__class__"]](x, namespace=namespace)
                 if "__repr__" in type(y).__dict__:

@@ -118,16 +118,22 @@ namespace awkward {
     builder.endlist();
   }
 
-  const std::shared_ptr<Type> RecordArray::innertype(bool bare) const {
+  const std::shared_ptr<Type> RecordArray::baretype(bool baredown) const {
     std::vector<std::shared_ptr<Type>> types;
     for (auto item : contents_) {
-      types.push_back(item.get()->innertype(bare));
+      types.push_back(item.get()->baretype(baredown));
     }
     return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types, lookup_, reverselookup_));
   }
 
   void RecordArray::settype_part(const std::shared_ptr<Type> type) {
-    if (accepts(type)) {
+    if (type.get() == nullptr) {
+      for (int64_t i = 0;  i < numfields();  i++) {
+        field(i).get()->settype_part(type);
+      }
+      type_ = type;
+    }
+    else {
       std::shared_ptr<Type> level = type.get()->level();
       RecordType* raw = dynamic_cast<RecordType*>(level.get());
       if (reverselookup_.get() == nullptr) {
@@ -141,9 +147,6 @@ namespace awkward {
         }
       }
       type_ = type;
-    }
-    else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(Type::Parameters(), type, length()).compare(baretype()));
     }
   }
 

@@ -2,8 +2,6 @@
 
 #include <sstream>
 
-#include "awkward/type/ArrayType.h"
-
 #include "awkward/fillable/FillableArray.h"
 
 namespace awkward {
@@ -22,7 +20,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> FillableArray::type() const {
-    return std::shared_ptr<Type>(new ArrayType(Type::Parameters(), fillable_.get()->type(), fillable_.get()->length()));
+    return fillable_.get()->type();
   }
 
   const std::shared_ptr<Content> FillableArray::snapshot() const {

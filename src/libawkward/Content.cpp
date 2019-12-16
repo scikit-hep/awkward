@@ -16,41 +16,25 @@ namespace awkward {
     return id_;
   }
 
-  const std::shared_ptr<Type> Content::type() const {
-    if (type_.get() == nullptr) {
-      if (isscalar()) {
-        return innertype(false);
-      }
-      else {
-        return std::shared_ptr<Type>(new ArrayType(Type::Parameters(), innertype(false), length()));
-      }
-    }
-    else {
-      return std::shared_ptr<Type>(new ArrayType(Type::Parameters(), type_, length()));
-    }
-  }
-
-  void Content::settype(const std::shared_ptr<Type> type) {
-    std::shared_ptr<Type> toset = type;
-    if (ArrayType* raw = dynamic_cast<ArrayType*>(type.get())) {
-      if (raw->length() != length()) {
-        throw std::invalid_argument(std::string("provided ArrayType is incompatible with length of array: ") + std::to_string(raw->length()) + std::string(" versus ") + std::to_string(length()));
-      }
-      toset = raw->type();
-    }
-    settype_part(toset);
-  }
-
   bool Content::isbare() const {
     return type_.get() == nullptr;
   }
 
-  const std::shared_ptr<Type> Content::baretype() const {
-    if (isscalar()) {
-      return innertype(true);
+  const std::shared_ptr<Type> Content::type() const {
+    if (type_.get() == nullptr) {
+      return baretype(false);
     }
     else {
-      return std::shared_ptr<Type>(new ArrayType(Type::Parameters(), innertype(true), length()));
+      return type_;
+    }
+  }
+
+  void Content::settype(const std::shared_ptr<Type> type) {
+    if (type.get() == nullptr  ||  accepts(type)) {
+      settype_part(type);
+    }
+    else {
+      throw std::invalid_argument(std::string("provided type is incompatible with array's baretype: ") + type.get()->compare(baretype(true)));
     }
   }
 

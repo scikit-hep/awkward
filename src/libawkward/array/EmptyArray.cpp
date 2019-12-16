@@ -45,21 +45,16 @@ namespace awkward {
     builder.endlist();
   }
 
-  const std::shared_ptr<Type> EmptyArray::innertype(bool bare) const {
+  const std::shared_ptr<Type> EmptyArray::baretype(bool baredown) const {
     return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
   }
 
   void EmptyArray::settype_part(const std::shared_ptr<Type> type) {
-    if (accepts(type)) {
-      type_ = type;
-    }
-    else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(Type::Parameters(), type, length()).compare(baretype()));
-    }
+    type_ = type;
   }
 
   bool EmptyArray::accepts(const std::shared_ptr<Type> type) {
-    return dynamic_cast<UnknownType*>(type.get()->level().get()) != nullptr;
+    return dynamic_cast<UnknownType*>(type.get()->level().get());
   }
 
   int64_t EmptyArray::length() const {

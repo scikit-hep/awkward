@@ -182,7 +182,7 @@ namespace awkward {
       }
     }
 
-    virtual const std::shared_ptr<Type> innertype(bool bare) const {
+    virtual const std::shared_ptr<Type> baretype(bool baredown) const {
       if (std::is_same<T, double>::value) {
         return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64));
       }
@@ -222,48 +222,48 @@ namespace awkward {
     }
 
     virtual void settype_part(const std::shared_ptr<Type> type) {
-      if (accepts(type)) {
-        type_ = type;
-      }
-      else {
-        throw std::invalid_argument(std::string("provided type is incompatible with array: ") + type.get()->compare(baretype()));
-      }
+      type_ = type;
     }
 
     virtual bool accepts(const std::shared_ptr<Type> type) {
       std::shared_ptr<Type> check = type.get()->level();
-      if (std::is_same<T, double>::value) {
-        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64)), false);
-      }
-      else if (std::is_same<T, float>::value) {
-        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float32)), false);
-      }
-      else if (std::is_same<T, int64_t>::value) {
-        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64)), false);
-      }
-      else if (std::is_same<T, uint64_t>::value) {
-        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint64)), false);
-      }
-      else if (std::is_same<T, int32_t>::value) {
-        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int32)), false);
-      }
-      else if (std::is_same<T, uint32_t>::value) {
-        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint32)), false);
-      }
-      else if (std::is_same<T, int16_t>::value) {
-        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int16)), false);
-      }
-      else if (std::is_same<T, uint16_t>::value) {
-        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint16)), false);
-      }
-      else if (std::is_same<T, int8_t>::value) {
-        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int8)), false);
-      }
-      else if (std::is_same<T, uint8_t>::value) {
-        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint8)), false);
-      }
-      else if (std::is_same<T, bool>::value) {
-        return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::boolean)), false);
+      if (PrimitiveType* raw = dynamic_cast<PrimitiveType*>(check.get())) {
+        if (std::is_same<T, double>::value) {
+          return raw->dtype() == PrimitiveType::float64;
+        }
+        else if (std::is_same<T, float>::value) {
+          return raw->dtype() == PrimitiveType::float32;
+        }
+        else if (std::is_same<T, int64_t>::value) {
+          return raw->dtype() == PrimitiveType::int64;
+        }
+        else if (std::is_same<T, uint64_t>::value) {
+          return raw->dtype() == PrimitiveType::uint64;
+        }
+        else if (std::is_same<T, int32_t>::value) {
+          return raw->dtype() == PrimitiveType::int32;
+        }
+        else if (std::is_same<T, uint32_t>::value) {
+          return raw->dtype() == PrimitiveType::uint32;
+        }
+        else if (std::is_same<T, int16_t>::value) {
+          return raw->dtype() == PrimitiveType::int16;
+        }
+        else if (std::is_same<T, uint16_t>::value) {
+          return raw->dtype() == PrimitiveType::uint16;
+        }
+        else if (std::is_same<T, int8_t>::value) {
+          return raw->dtype() == PrimitiveType::int8;
+        }
+        else if (std::is_same<T, uint8_t>::value) {
+          return raw->dtype() == PrimitiveType::uint8;
+        }
+        else if (std::is_same<T, bool>::value) {
+          return raw->dtype() == PrimitiveType::boolean;
+        }
+        else {
+          return false;
+        }
       }
       else {
         return false;

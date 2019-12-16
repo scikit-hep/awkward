@@ -821,6 +821,15 @@ py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>
           .def("level", &T::level)
           .def("inner", &inner<T>)
           .def("inner", &inner_key<T>)
+          .def("__getitem__", [](T& self, const std::string& key) -> py::object {
+            std::string cppvalue = self.parameter(key);
+            py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(), cppvalue.length(), "surrogateescape"));
+            return py::module::import("json").attr("loads")(pyvalue);
+          })
+          .def("__setitem__", [](T& self, const std::string& key, py::object value) -> void {
+            py::object valuestr = py::module::import("json").attr("dumps")(value);
+            self.setparameter(key, valuestr.cast<std::string>());
+          })
           .def_property_readonly("numfields", &T::numfields)
           .def("fieldindex", &T::fieldindex)
           .def("key", &T::key)
@@ -1223,12 +1232,14 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("setid", [](T& self) -> void {
             self.setid();
           })
-          .def_property_readonly("baretype", &ak::Content::baretype)
+          .def_property_readonly("baretype", [](T& self) -> py::object {
+            return box(self.baretype(true));
+          })
           .def_property_readonly("isbare", &ak::Content::isbare)
           .def_property("type", [](T& self) -> py::object {
             return box(self.type());
           }, [](T& self, py::object type) -> void {
-            self.settype(unbox_type(type));
+            self.settype(unbox_type_none(type));
           })
           .def("accepts", [](T& self, py::object type) -> bool {
             return self.accepts(unbox_type(type));
@@ -1454,12 +1465,13 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
       .def("__getitem__", &getitem<ak::Record>)
       .def_property_readonly("baretype", &ak::Record::baretype)
       .def_property_readonly("isbare", &ak::Record::isbare)
-      .def_property_readonly("type", [](ak::Record& self) -> py::object {
+      .def_property("type", [](ak::Record& self) -> py::object {
         return box(self.type());
+      }, [](ak::Record& self, py::object type) -> void {
+        self.settype(unbox_type_none(type));
       })
       .def("tojson", &tojson_string<ak::Record>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
-      .def_property_readonly("type", &ak::Content::type)
 
       .def_property_readonly("array", [](ak::Record& self) -> py::object { return box(self.array()); })
       .def_property_readonly("at", &ak::Record::at)

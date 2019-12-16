@@ -168,29 +168,30 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListOffsetArrayOf<T>::innertype(bool bare) const {
-    if (bare  ||  content_.get()->isbare()) {
-      return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->innertype(bare)));
-    }
-    else {
-      return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->type().get()->nolength()));
-    }
+  const std::shared_ptr<Type> ListOffsetArrayOf<T>::baretype(bool baredown) const {
+    return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->baretype(baredown)));
   }
 
   template <typename T>
   void ListOffsetArrayOf<T>::settype_part(const std::shared_ptr<Type> type) {
-    if (accepts(type)) {
-      content_.get()->settype_part(type.get()->inner());
+    if (type.get() == nullptr) {
+      content_.get()->settype_part(type);
       type_ = type;
     }
     else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(Type::Parameters(), type, length()).compare(baretype()));
+      content_.get()->settype_part(type.get()->level().get()->inner());
+      type_ = type;
     }
   }
 
   template <typename T>
   bool ListOffsetArrayOf<T>::accepts(const std::shared_ptr<Type> type) {
-    return dynamic_cast<ListType*>(type.get()->level().get()) != nullptr;
+    if (ListType* raw = dynamic_cast<ListType*>(type.get()->level().get())) {
+      return content_.get()->accepts(raw->inner());
+    }
+    else {
+      return false;
+    }
   }
 
   template <typename T>

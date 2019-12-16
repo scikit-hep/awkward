@@ -28,10 +28,6 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> Record::type() const {
-    return array_.type().get()->inner();
-  }
-
   void Record::setid() {
     throw std::runtime_error("undefined operation: Record::setid");
   }
@@ -66,15 +62,12 @@ namespace awkward {
     builder.endrecord();
   }
 
-  const std::shared_ptr<Type> Record::innertype(bool bare) const {
-    return array_.innertype(bare);
+  const std::shared_ptr<Type> Record::baretype(bool baredown) const {
+    return array_.baretype(baredown);
   }
 
-  void Record::settype(const std::shared_ptr<Type> type) {
-    if (dynamic_cast<ArrayType*>(type.get())) {
-      throw std::invalid_argument("provided ArrayType is incompatible with Record because Record is a scalar");
-    }
-    array_.settype_part(type);
+  const std::shared_ptr<Type> Record::type() const {
+    return array_.type();
   }
 
   void Record::settype_part(const std::shared_ptr<Type> type) {
