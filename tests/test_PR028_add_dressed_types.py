@@ -126,11 +126,11 @@ def test_type_propagation():
     assert array.layout["two", -1, 1].type == dfloat64
 
     assert array.layout[1:].type == dvarrec
-    assert array.layout[1:, "one"].type == awkward1.layout.ListType(awkward1.layout.PrimitiveType("int64"))
-    assert array.layout["one", 1:].type == awkward1.layout.ListType(awkward1.layout.PrimitiveType("int64"))
+    assert array.layout[1:, "one"].type == awkward1.layout.ListType(dint64)
+    assert array.layout["one", 1:].type == awkward1.layout.ListType(dint64)
 
     assert array.layout[[2, 1]].type == dvarrec
-    assert array.layout[[2, 1], "one"].type == awkward1.layout.ListType(awkward1.layout.PrimitiveType("int64"))
+    assert array.layout[[2, 1], "one"].type == awkward1.layout.ListType(dint64)
 
     array2 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
     array2.type = awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3)

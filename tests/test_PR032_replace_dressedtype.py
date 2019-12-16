@@ -59,7 +59,7 @@ def test_typestr():
     assert repr(t2) == "var * something"
 
 def test_record_name():
-    fillable = awkward1.FillableArray()
+    fillable = awkward1.layout.FillableArray()
 
     fillable.beginrecord("Dummy")
     fillable.field("one")
@@ -76,7 +76,7 @@ def test_record_name():
     fillable.endrecord()
 
     a = fillable.snapshot()
-    assert repr(a.type) == '2 * struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
+    assert repr(a.type) == 'struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
     assert a.type.nolength().parameters == {"__class__": "Dummy"}
 
 def test_fillable_string():
@@ -173,7 +173,7 @@ def test_record_name_numba():
     f1(fillable)
 
     a = fillable.snapshot()
-    assert repr(a.type) == '2 * struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
+    assert repr(a.type) == 'struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
     assert a.type.nolength().parameters == {"__class__": "Dummy"}
 
 def test_boxing():

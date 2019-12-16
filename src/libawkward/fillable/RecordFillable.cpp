@@ -71,7 +71,7 @@ namespace awkward {
       std::shared_ptr<Content> out(new RecordArray(Identity::none(), Type::none(), length_, false));
       if (nameptr_ != nullptr) {
         std::shared_ptr<Type> type = out.get()->type();
-        type.get()->nolength().get()->setparameter("__class__", util::quote(name_, true));
+        type.get()->setparameter("__class__", util::quote(name_, true));
         out.get()->settype(type);
       }
       return out;
@@ -88,7 +88,7 @@ namespace awkward {
       std::shared_ptr<Content> out(new RecordArray(Identity::none(), Type::none(), contents, lookup, reverselookup));
       if (nameptr_ != nullptr) {
         std::shared_ptr<Type> type = out.get()->type();
-        type.get()->nolength().get()->setparameter("__class__", util::quote(name_, true));
+        type.get()->setparameter("__class__", util::quote(name_, true));
         out.get()->settype(type);
       }
       return out;
