@@ -759,21 +759,6 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
 
 /////////////////////////////////////////////////////////////// Type
 
-template <typename T>
-std::shared_ptr<ak::Type> inner(T& self) {
-  return self.inner();
-}
-
-template <typename T>
-std::shared_ptr<ak::Type> inner_key(T& self, std::string key) {
-  return self.inner(key);
-}
-
-template <typename T>
-py::dict emptydict(T& self) {
-  return py::dict();
-}
-
 ak::Type::Parameters dict2parameters(py::object in) {
   ak::Type::Parameters out;
   if (in.is(py::none())) {
@@ -817,10 +802,7 @@ void setparameters(T& self, py::object parameters) {
 template <typename T>
 py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>& x) {
   return x.def("__repr__", &T::tostring)
-          .def("nolength", &T::nolength)
           .def("level", &T::level)
-          .def("inner", &inner<T>)
-          .def("inner", &inner_key<T>)
           .def("__getitem__", [](T& self, const std::string& key) -> py::object {
             std::string cppvalue = self.parameter(key);
             py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(), cppvalue.length(), "surrogateescape"));

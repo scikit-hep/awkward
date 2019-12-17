@@ -60,14 +60,6 @@ namespace awkward {
     return shallow_copy();
   }
 
-  std::shared_ptr<Type> PrimitiveType::inner() const {
-    throw std::invalid_argument("PrimitiveType has no inner type");
-  }
-
-  std::shared_ptr<Type> PrimitiveType::inner(const std::string& key) const {
-    throw std::invalid_argument("PrimitiveType has no inner type");
-  }
-
   int64_t PrimitiveType::numfields() const {
     return -1;
   }

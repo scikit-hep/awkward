@@ -42,14 +42,6 @@ namespace awkward {
     return shallow_copy();
   }
 
-  std::shared_ptr<Type> UnknownType::inner() const {
-    return shallow_copy();
-  }
-
-  std::shared_ptr<Type> UnknownType::inner(const std::string& key) const {
-    return shallow_copy();
-  }
-
   int64_t UnknownType::numfields() const {
     return -1;
   }

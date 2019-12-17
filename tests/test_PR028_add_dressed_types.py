@@ -62,8 +62,13 @@ def test_string2():
     listoffsetarray.type = awkward1.string
     a = awkward1.Array(listoffsetarray, type=awkward1.layout.ArrayType(listoffsetarray.type, len(listoffsetarray)))
     assert isinstance(a, awkward1.Array)
+
+    print(a._layout)
+    print([type(x) for x in a])
+    print([x.type for x in a])
+
     assert awkward1.tolist(a) == ['hey', '', 'there']
-    
+
     assert repr(a.type) == "3 * string"
     assert repr(a[0].type) == "3 * utf8"
     assert repr(a[1].type) == "0 * utf8"

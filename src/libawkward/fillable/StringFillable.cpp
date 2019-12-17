@@ -61,12 +61,13 @@ namespace awkward {
 
   const std::shared_ptr<Content> StringFillable::snapshot() const {
     std::shared_ptr<Type> stringtype = type();
+    ListType* raw = dynamic_cast<ListType*>(stringtype.get());
 
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
 
     std::vector<ssize_t> shape = { (ssize_t)content_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(uint8_t) };
-    std::shared_ptr<Content> content(new NumpyArray(Identity::none(), stringtype.get()->inner(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B"));
+    std::shared_ptr<Content> content(new NumpyArray(Identity::none(), raw->type(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B"));
 
     return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), stringtype, offsets, content));
   }

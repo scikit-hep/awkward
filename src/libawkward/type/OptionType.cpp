@@ -52,14 +52,6 @@ namespace awkward {
     return type_.get()->level();
   }
 
-  std::shared_ptr<Type> OptionType::inner() const {
-    return type_.get()->inner();
-  }
-
-  std::shared_ptr<Type> OptionType::inner(const std::string& key) const {
-    throw std::runtime_error("FIXME: OptionType::inner(key)");
-  }
-
   int64_t OptionType::numfields() const {
     return type_.get()->numfields();
   }

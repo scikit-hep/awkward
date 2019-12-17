@@ -77,7 +77,7 @@ def test_record_name():
 
     a = fillable.snapshot()
     assert repr(a.type) == 'struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
-    assert a.type.nolength().parameters == {"__class__": "Dummy"}
+    assert a.type.parameters == {"__class__": "Dummy"}
 
 def test_fillable_string():
     fillable = awkward1.FillableArray()
@@ -149,7 +149,7 @@ def test_fromiter_fromjson():
 
     assert awkward1.tolist(awkward1.fromjson('["one", "two", "three"]')) == ["one", "two", "three"]
     assert awkward1.tolist(awkward1.fromjson('[["one", "two", "three"], [], ["four", "five"]]')) == [["one", "two", "three"], [], ["four", "five"]]
-    
+
 numba = pytest.importorskip("numba")
 
 def test_record_name_numba():
@@ -174,7 +174,7 @@ def test_record_name_numba():
 
     a = fillable.snapshot()
     assert repr(a.type) == 'struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
-    assert a.type.nolength().parameters == {"__class__": "Dummy"}
+    assert a.type.parameters == {"__class__": "Dummy"}
 
 def test_boxing():
     @numba.njit

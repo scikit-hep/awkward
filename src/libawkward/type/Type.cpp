@@ -12,10 +12,6 @@
 namespace rj = rapidjson;
 
 namespace awkward {
-  std::shared_ptr<Type> Type::nolength() const {
-    return shallow_copy();
-  }
-
   const std::string Type::compare(std::shared_ptr<Type> supertype) {
     // FIXME: better side-by-side comparison
     return tostring() + std::string(" versus ") + supertype.get()->tostring();

@@ -125,14 +125,6 @@ namespace awkward {
     return shallow_copy();
   }
 
-  std::shared_ptr<Type> RecordType::inner() const {
-    throw std::invalid_argument("RecordType has no inner type without a key");
-  }
-
-  std::shared_ptr<Type> RecordType::inner(const std::string& key) const {
-    return field(key);
-  }
-
   int64_t RecordType::numfields() const {
     return (int64_t)types_.size();
   }

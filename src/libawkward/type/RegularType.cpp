@@ -45,14 +45,6 @@ namespace awkward {
     return shallow_copy();
   }
 
-  std::shared_ptr<Type> RegularType::inner() const {
-    return type_;
-  }
-
-  std::shared_ptr<Type> RegularType::inner(const std::string& key) const {
-    throw std::runtime_error("FIXME: RegularType::inner(key)");
-  }
-
   int64_t RegularType::numfields() const {
     return type_.get()->numfields();
   }

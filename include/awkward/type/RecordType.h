@@ -34,8 +34,6 @@ namespace awkward {
     virtual const std::shared_ptr<Type> shallow_copy() const;
     virtual bool equal(const std::shared_ptr<Type> other, bool check_parameters) const;
     virtual std::shared_ptr<Type> level() const;
-    virtual std::shared_ptr<Type> inner() const;
-    virtual std::shared_ptr<Type> inner(const std::string& key) const;
     virtual int64_t numfields() const;
     virtual int64_t fieldindex(const std::string& key) const;
     virtual const std::string key(int64_t fieldindex) const;

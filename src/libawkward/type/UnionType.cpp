@@ -66,14 +66,6 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnionType(Type::Parameters(), types));
   }
 
-  std::shared_ptr<Type> UnionType::inner() const {
-    throw std::runtime_error("FIXME: UnionType::inner()");
-  }
-
-  std::shared_ptr<Type> UnionType::inner(const std::string& key) const {
-    throw std::runtime_error("FIXME: UnionType::inner(key)");
-  }
-
   int64_t UnionType::numfields() const {
     throw std::runtime_error("FIXME: UnionType::numfields");
   }

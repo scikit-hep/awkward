@@ -45,14 +45,6 @@ namespace awkward {
     return shallow_copy();
   }
 
-  std::shared_ptr<Type> ListType::inner() const {
-    return type_;
-  }
-
-  std::shared_ptr<Type> ListType::inner(const std::string& key) const {
-    throw std::runtime_error("FIXME: ListType::inner(key)");
-  }
-
   int64_t ListType::numfields() const {
     return type_.get()->numfields();
   }
