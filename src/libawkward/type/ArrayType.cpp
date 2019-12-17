@@ -30,10 +30,6 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> ArrayType::level() const {
-    return shallow_copy();
-  }
-
   int64_t ArrayType::numfields() const {
     return type_.get()->numfields();
   }

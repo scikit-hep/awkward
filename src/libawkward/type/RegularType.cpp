@@ -41,10 +41,6 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> RegularType::level() const {
-    return shallow_copy();
-  }
-
   int64_t RegularType::numfields() const {
     return type_.get()->numfields();
   }

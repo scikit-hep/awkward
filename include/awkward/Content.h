@@ -22,6 +22,8 @@ namespace awkward {
     virtual const std::shared_ptr<Identity> id() const;
     virtual void setid() = 0;
     virtual void setid(const std::shared_ptr<Identity> id) = 0;
+    virtual bool isbare() const;
+    virtual bool istypeptr(Type* pointer) const;
     virtual const std::shared_ptr<Type> type() const = 0;
     virtual const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const = 0;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;

@@ -41,10 +41,6 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> ListType::level() const {
-    return shallow_copy();
-  }
-
   int64_t ListType::numfields() const {
     return type_.get()->numfields();
   }

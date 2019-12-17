@@ -58,14 +58,6 @@ namespace awkward {
     return (int64_t)types_.size();
   }
 
-  std::shared_ptr<Type> UnionType::level() const {
-    std::vector<std::shared_ptr<Type>> types;
-    for (auto t : types_) {
-      types.push_back(t.get()->level());
-    }
-    return std::shared_ptr<Type>(new UnionType(Type::Parameters(), types));
-  }
-
   int64_t UnionType::numfields() const {
     throw std::runtime_error("FIXME: UnionType::numfields");
   }

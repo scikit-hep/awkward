@@ -56,10 +56,6 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> PrimitiveType::level() const {
-    return shallow_copy();
-  }
-
   int64_t PrimitiveType::numfields() const {
     return -1;
   }

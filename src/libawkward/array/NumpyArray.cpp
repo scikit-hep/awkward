@@ -123,6 +123,21 @@ namespace awkward {
     }
   }
 
+  bool NumpyArray::istypeptr(Type* pointer) const {
+    Type* ptr = pointer;
+    if (ptr != nullptr) {
+      for (size_t i = 1;  i < shape_.size();  i++) {
+        if (RegularType* raw = dynamic_cast<RegularType*>(ptr)) {
+          ptr = raw->type().get();
+        }
+        else {
+          return false;
+        }
+      }
+    }
+    return ptr == type_.get();
+  }
+
   const std::shared_ptr<Type> NumpyArray::type() const {
     std::shared_ptr<Type> out;
     if (type_.get() != nullptr) {
@@ -530,18 +545,18 @@ namespace awkward {
     if (type.get() == nullptr) {
       return type;
     }
-    std::shared_ptr<Type> out = type->level();
+    std::shared_ptr<Type> out = type;
     for (size_t i = 1;  i < shape.size();  i++) {
       if (RegularType* raw = dynamic_cast<RegularType*>(out.get())) {
         if (raw->size() == (int64_t)shape[i]) {
-          out = raw->type().get()->level();
+          out = raw->type();
         }
         else {
-          throw std::invalid_argument(std::string("cannot assign type ") + type.get()->level().get()->tostring() + std::string(" to NumpyArray"));
+          throw std::invalid_argument(std::string("cannot assign type ") + type.get()->tostring() + std::string(" to NumpyArray"));
         }
       }
       else {
-        throw std::invalid_argument(std::string("cannot assign type ") + type.get()->level().get()->tostring() + std::string(" to NumpyArray"));
+        throw std::invalid_argument(std::string("cannot assign type ") + type.get()->tostring() + std::string(" to NumpyArray"));
       }
     }
     return out;
@@ -601,7 +616,7 @@ namespace awkward {
       }
     }
     if (!okay) {
-      throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->level().get()->tostring() + std::string(" to ") + classname());
+      throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
     }
   }
 

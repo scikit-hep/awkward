@@ -155,7 +155,7 @@ namespace awkward {
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::astype(const std::shared_ptr<Type> type) const {
     std::shared_ptr<Type> inner = type;
     if (inner.get() != nullptr) {
-      if (ListType* raw = dynamic_cast<ListType*>(inner.get()->level().get())) {
+      if (ListType* raw = dynamic_cast<ListType*>(inner.get())) {
         inner = raw->type();
       }
     }
@@ -344,11 +344,11 @@ namespace awkward {
   template <typename T>
   void ListOffsetArrayOf<T>::checktype() const {
     bool okay = false;
-    if (ListType* raw = dynamic_cast<ListType*>(type_.get()->level().get())) {
+    if (ListType* raw = dynamic_cast<ListType*>(type_.get())) {
       okay = (raw->type().get() == content_.get()->type().get());
     }
     if (!okay) {
-        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->level().get()->tostring() + std::string(" to ") + classname());
+        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
     }
   }
 

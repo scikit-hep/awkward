@@ -38,10 +38,6 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> UnknownType::level() const {
-    return shallow_copy();
-  }
-
   int64_t UnknownType::numfields() const {
     return -1;
   }

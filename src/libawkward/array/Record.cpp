@@ -36,6 +36,14 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::setid");
   }
 
+  bool Record::isbare() const {
+    return array_.isbare();
+  }
+
+  bool Record::istypeptr(Type* pointer) const {
+    return array_.istypeptr(pointer);
+  }
+
   const std::shared_ptr<Type> Record::type() const {
     return array_.type();
   }

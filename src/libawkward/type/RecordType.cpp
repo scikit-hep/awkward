@@ -121,10 +121,6 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> RecordType::level() const {
-    return shallow_copy();
-  }
-
   int64_t RecordType::numfields() const {
     return (int64_t)types_.size();
   }

@@ -93,7 +93,7 @@ namespace awkward {
   const std::shared_ptr<Content> RegularArray::astype(const std::shared_ptr<Type> type) const {
     std::shared_ptr<Type> inner = type;
     if (inner.get() != nullptr) {
-      if (RegularType* raw = dynamic_cast<RegularType*>(inner.get()->level().get())) {
+      if (RegularType* raw = dynamic_cast<RegularType*>(inner.get())) {
         inner = raw->type();
       }
     }
@@ -239,11 +239,11 @@ namespace awkward {
 
   void RegularArray::checktype() const {
     bool okay = false;
-    if (RegularType* raw = dynamic_cast<RegularType*>(type_.get()->level().get())) {
+    if (RegularType* raw = dynamic_cast<RegularType*>(type_.get())) {
       okay = (raw->type().get() == content_.get()->type().get()  &&  raw->size() == size_);
     }
     if (!okay) {
-        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->level().get()->tostring() + std::string(" to ") + classname() + std::string(" with size ") + std::to_string(size_));
+        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname() + std::string(" with size ") + std::to_string(size_));
     }
   }
 

@@ -48,10 +48,6 @@ namespace awkward {
     }
   }
 
-  std::shared_ptr<Type> OptionType::level() const {
-    return type_.get()->level();
-  }
-
   int64_t OptionType::numfields() const {
     return type_.get()->numfields();
   }

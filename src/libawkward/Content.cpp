@@ -16,6 +16,14 @@ namespace awkward {
     return id_;
   }
 
+  bool Content::isbare() const {
+    return type_.get() == nullptr;
+  }
+
+  bool Content::istypeptr(Type* pointer) const {
+    return type_.get() == pointer;
+  }
+
   const std::string Content::tostring() const {
     return tostring_part("", "", "");
   }

@@ -802,7 +802,6 @@ void setparameters(T& self, py::object parameters) {
 template <typename T>
 py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>& x) {
   return x.def("__repr__", &T::tostring)
-          .def("level", &T::level)
           .def("__getitem__", [](T& self, const std::string& key) -> py::object {
             std::string cppvalue = self.parameter(key);
             py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(), cppvalue.length(), "surrogateescape"));
@@ -1214,6 +1213,7 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("setid", [](T& self) -> void {
             self.setid();
           })
+          .def_property_readonly("isbare", &T::isbare)
           .def_property_readonly("type", [](T& self) -> py::object {
             return box(self.type());
           })
@@ -1439,6 +1439,7 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("id", [](ak::Record& self) -> py::object { return box(self.id()); })
       .def("__getitem__", &getitem<ak::Record>)
+      .def_property_readonly("isbare", &ak::Record::isbare)
       .def_property_readonly("type", [](ak::Record& self) -> py::object {
         return box(self.type());
       })

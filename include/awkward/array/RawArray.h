@@ -349,7 +349,7 @@ namespace awkward {
   protected:
     virtual void checktype() const {
       bool okay = false;
-      if (PrimitiveType* raw = dynamic_cast<PrimitiveType*>(type_.get()->level().get())) {
+      if (PrimitiveType* raw = dynamic_cast<PrimitiveType*>(type_.get())) {
         if (std::is_same<T, double>::value) {
           okay = (raw->dtype() == PrimitiveType::float64);
         }
@@ -385,7 +385,7 @@ namespace awkward {
         }
       }
       if (!okay) {
-        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->level().get()->tostring() + std::string(" to ") + classname());
+        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
       }
     }
 

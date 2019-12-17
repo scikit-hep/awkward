@@ -76,7 +76,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::astype(const std::shared_ptr<Type> type) const {
-    if (type.get() == nullptr  ||  dynamic_cast<RecordType*>(type.get()->level().get()) == nullptr) {
+    if (type.get() == nullptr  ||  dynamic_cast<RecordType*>(type.get()) == nullptr) {
       if (contents_.size() == 0) {
         return std::shared_ptr<Content>(new RecordArray(id_, type, length(), istuple()));
       }
@@ -84,22 +84,22 @@ namespace awkward {
         return std::shared_ptr<Content>(new RecordArray(id_, type, contents_, lookup_, reverselookup_));
       }
     }
-    RecordType* raw = dynamic_cast<RecordType*>(type.get()->level().get());
+    RecordType* raw = dynamic_cast<RecordType*>(type.get());
     std::vector<std::shared_ptr<Content>> contents;
     if (raw->reverselookup().get() == nullptr) {
       for (int64_t i = 0;  i < raw->numfields();  i++) {
         if (i >= numfields()) {
-          throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->level().get()->tostring() + std::string(" to ") + classname());
+          throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
         }
-        contents.push_back(field(i).get()->astype(raw->field(i)));
+        contents.push_back(contents_[(size_t)i].get()->astype(raw->field(i)));
       }
     }
     else {
       for (auto key : raw->keys()) {
         if (!haskey(key)) {
-          throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->level().get()->tostring() + std::string(" to ") + classname());
+          throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
         }
-        contents.push_back(field(key).get()->astype(raw->field(key)));
+        contents.push_back(contents_[(size_t)fieldindex(key)].get()->astype(raw->field(key)));
       }
     }
     if (contents.size() == 0) {
@@ -430,8 +430,7 @@ namespace awkward {
       return RecordArray(id_, Type::none(), contents_);
     }
     else {
-      std::shared_ptr<Type> type = type_.get()->level();
-      RecordType* raw = dynamic_cast<RecordType*>(type.get());
+      RecordType* raw = dynamic_cast<RecordType*>(type_.get());
       return RecordArray(id_, raw->astuple(), contents_);
     }
   }
@@ -440,8 +439,10 @@ namespace awkward {
     size_t j = contents_.size();
     append(content);
     setkey(j, key);
-    if (RecordType* raw = dynamic_cast<RecordType*>(type_.get()->level().get())) {
-      raw->setkey(j, key);
+    if (type_.get() != nullptr) {
+      if (RecordType* raw = dynamic_cast<RecordType*>(type_.get())) {
+        raw->setkey(j, key);
+      }
     }
   }
 
@@ -450,8 +451,10 @@ namespace awkward {
       reverselookup_.get()->push_back(std::to_string(contents_.size()));
     }
     contents_.push_back(content);
-    if (RecordType* raw = dynamic_cast<RecordType*>(type_.get()->level().get())) {
-      raw->append(content.get()->type());
+    if (type_.get() != nullptr) {
+      if (RecordType* raw = dynamic_cast<RecordType*>(type_.get())) {
+        raw->append(content.get()->type());
+      }
     }
   }
 
@@ -469,34 +472,21 @@ namespace awkward {
 
   void RecordArray::checktype() const {
     bool okay = false;
-    if (RecordType* raw = dynamic_cast<RecordType*>(type_.get()->level().get())) {
-      if (raw->reverselookup().get() == nullptr  &&  reverselookup_.get() == nullptr) {
-        if (raw->numfields() == numfields()) {
-          bool allmatch = true;
-          for (int64_t i = 0;  i < numfields();  i++) {
-            if (raw->field(i).get() != field(i).get()->type().get()) {
-              allmatch = false;
-              break;
-            }
-          }
-          okay = allmatch;
-        }
+    if (RecordType* raw = dynamic_cast<RecordType*>(type_.get())) {
+      if (raw->lookup().get() != nullptr  &&  lookup_.get() != nullptr  &&  raw->reverselookup().get() != nullptr  &&  reverselookup_.get() != nullptr) {
+        okay = *(raw->lookup().get()) == *(lookup_.get())  &&  *(raw->reverselookup().get()) == *(reverselookup_.get());
       }
-      else if (raw->reverselookup().get() != nullptr  &&  reverselookup_.get() != nullptr) {
-        if (raw->numfields() == numfields()) {
-          bool allmatch = true;
-          for (auto key : raw->keys()) {
-            if (!haskey(key)  ||  raw->field(key).get() != field(key).get()->type().get()) {
-              allmatch = false;
-              break;
-            }
+      if (okay) {
+        for (size_t i = 0;  i < contents_.size();  i++) {
+          if (contents_[i].get()->istypeptr(raw->field((int64_t)i).get())) {
+            okay = false;
+            break;
           }
-          okay = allmatch;
         }
       }
     }
     if (!okay) {
-        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->level().get()->tostring() + std::string(" to ") + classname());
+        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
     }
   }
 
