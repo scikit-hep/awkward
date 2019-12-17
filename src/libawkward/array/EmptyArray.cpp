@@ -43,12 +43,14 @@ namespace awkward {
       out << "/>" << post;
     }
     else {
+      out << ">\n";
       if (id_.get() != nullptr) {
-        out << ">\n" << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
+        out << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
       }
       if (type_.get() != nullptr) {
         out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
       }
+      out << indent << "</" << classname() << ">" << post;
     }
     return out.str();
   }
