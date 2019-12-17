@@ -123,6 +123,73 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Type> NumpyArray::type() const {
+    std::shared_ptr<Type> out;
+    if (type_.get() != nullptr) {
+      out = type_;
+    }
+    else if (format_.compare("d") == 0) {
+      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64));
+    }
+    else if (format_.compare("f") == 0) {
+      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float32));
+    }
+#ifdef _MSC_VER
+    else if (format_.compare("q") == 0) {
+#else
+    else if (format_.compare("l") == 0) {
+#endif
+      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64));
+    }
+#ifdef _MSC_VER
+    else if (format_.compare("Q") == 0) {
+#else
+    else if (format_.compare("L") == 0) {
+#endif
+      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint64));
+    }
+#ifdef _MSC_VER
+    else if (format_.compare("l") == 0) {
+#else
+    else if (format_.compare("i") == 0) {
+#endif
+      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int32));
+    }
+#ifdef _MSC_VER
+    else if (format_.compare("L") == 0) {
+#else
+    else if (format_.compare("I") == 0) {
+#endif
+      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint32));
+    }
+    else if (format_.compare("h") == 0) {
+      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int16));
+    }
+    else if (format_.compare("H") == 0) {
+      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint16));
+    }
+    else if (format_.compare("b") == 0) {
+      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int8));
+    }
+    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint8));
+    }
+    else if (format_.compare("?") == 0) {
+      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::boolean));
+    }
+    else {
+      throw std::invalid_argument(std::string("Numpy format \"") + format_ + std::string("\" cannot be expressed as a PrimitiveType"));
+    }
+    for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
+      out = std::shared_ptr<Type>(new RegularType(Type::Parameters(), out, (int64_t)shape_[i]));
+    }
+    return out;
+  }
+
+  const std::shared_ptr<Content> NumpyArray::astype(const std::shared_ptr<Type> type) const {
+    return std::shared_ptr<Content>(new NumpyArray(id_, type, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
+  }
+
   const std::string NumpyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     assert(!isscalar());
     std::stringstream out;
@@ -268,166 +335,6 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(std::string("cannot convert Numpy format \"") + format_ + std::string("\" into JSON"));
-    }
-  }
-
-  const std::shared_ptr<Type> NumpyArray::type() const {
-    if (type_.get() == nullptr) {
-      return baretype(false);
-    }
-    else {
-      std::shared_ptr<Type> out = type_;
-      for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
-        out = std::shared_ptr<Type>(new RegularType(Type::Parameters(), out, (int64_t)shape_[i]));
-      }
-      return out;
-    }
-  }
-
-  const std::shared_ptr<Type> NumpyArray::baretype(bool baredown) const {
-    std::shared_ptr<Type> out;
-    if (format_.compare("d") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64));
-    }
-    else if (format_.compare("f") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float32));
-    }
-#ifdef _MSC_VER
-    else if (format_.compare("q") == 0) {
-#else
-    else if (format_.compare("l") == 0) {
-#endif
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64));
-    }
-#ifdef _MSC_VER
-    else if (format_.compare("Q") == 0) {
-#else
-    else if (format_.compare("L") == 0) {
-#endif
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint64));
-    }
-#ifdef _MSC_VER
-    else if (format_.compare("l") == 0) {
-#else
-    else if (format_.compare("i") == 0) {
-#endif
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int32));
-    }
-#ifdef _MSC_VER
-    else if (format_.compare("L") == 0) {
-#else
-    else if (format_.compare("I") == 0) {
-#endif
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint32));
-    }
-    else if (format_.compare("h") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int16));
-    }
-    else if (format_.compare("H") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint16));
-    }
-    else if (format_.compare("b") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int8));
-    }
-    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint8));
-    }
-    else if (format_.compare("?") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::boolean));
-    }
-    else {
-      throw std::invalid_argument(std::string("Numpy format \"") + format_ + std::string("\" cannot be expressed as a PrimitiveType"));
-    }
-    for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
-      out = std::shared_ptr<Type>(new RegularType(Type::Parameters(), out, (int64_t)shape_[i]));
-    }
-    return out;
-  }
-
-  void NumpyArray::settype_part(const std::shared_ptr<Type> type) {
-    if (type.get() == nullptr) {
-      type_ = type;
-    }
-    else {
-      std::shared_ptr<Type> t = type;
-      while (RegularType* raw = dynamic_cast<RegularType*>(t.get())) {
-        t = raw->type().get()->level();
-      }
-      type_ = t;
-    }
-  }
-
-  bool NumpyArray::accepts(const std::shared_ptr<Type> type) {
-    std::shared_ptr<Type> test = type->level();
-    for (size_t i = 1;  i < shape_.size();  i++) {
-      if (RegularType* raw = dynamic_cast<RegularType*>(test.get())) {
-        if (raw->size() == (int64_t)shape_[i]) {
-          test = raw->type().get()->level();
-        }
-        else {
-          return false;
-        }
-      }
-      else {
-        return false;
-      }
-    }
-    if (PrimitiveType* raw = dynamic_cast<PrimitiveType*>(test.get())) {
-      if (format_.compare("d") == 0) {
-        return raw->dtype() == PrimitiveType::float64;
-      }
-      else if (format_.compare("f") == 0) {
-        return raw->dtype() == PrimitiveType::float32;
-      }
-#ifdef _MSC_VER
-      else if (format_.compare("q") == 0) {
-#else
-      else if (format_.compare("l") == 0) {
-#endif
-        return raw->dtype() == PrimitiveType::int64;
-      }
-#ifdef _MSC_VER
-      else if (format_.compare("Q") == 0) {
-#else
-      else if (format_.compare("L") == 0) {
-#endif
-        return raw->dtype() == PrimitiveType::uint64;
-      }
-#ifdef _MSC_VER
-      else if (format_.compare("l") == 0) {
-#else
-      else if (format_.compare("i") == 0) {
-#endif
-        return raw->dtype() == PrimitiveType::int32;
-      }
-#ifdef _MSC_VER
-      else if (format_.compare("L") == 0) {
-#else
-      else if (format_.compare("I") == 0) {
-#endif
-        return raw->dtype() == PrimitiveType::uint32;
-      }
-      else if (format_.compare("h") == 0) {
-        return raw->dtype() == PrimitiveType::int16;
-      }
-      else if (format_.compare("H") == 0) {
-        return raw->dtype() == PrimitiveType::uint16;
-      }
-      else if (format_.compare("b") == 0) {
-        return raw->dtype() == PrimitiveType::int8;
-      }
-      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-        return raw->dtype() == PrimitiveType::uint8;
-      }
-      else if (format_.compare("?") == 0) {
-        return raw->dtype() == PrimitiveType::boolean;
-      }
-      else {
-        return false;
-      }
-    }
-    else {
-      return false;
     }
   }
 
@@ -617,6 +524,85 @@ namespace awkward {
 
   const std::vector<std::string> NumpyArray::keys() const {
     throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::shared_ptr<Type> NumpyArray::unwrap_type(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape) {
+    if (type.get() == nullptr) {
+      return type;
+    }
+    std::shared_ptr<Type> out = type->level();
+    for (size_t i = 1;  i < shape.size();  i++) {
+      if (RegularType* raw = dynamic_cast<RegularType*>(out.get())) {
+        if (raw->size() == (int64_t)shape[i]) {
+          out = raw->type().get()->level();
+        }
+        else {
+          throw std::invalid_argument(std::string("cannot assign type ") + type.get()->level().get()->tostring() + std::string(" to NumpyArray"));
+        }
+      }
+      else {
+        throw std::invalid_argument(std::string("cannot assign type ") + type.get()->level().get()->tostring() + std::string(" to NumpyArray"));
+      }
+    }
+    return out;
+  }
+
+  void NumpyArray::checktype() const {
+    bool okay = false;
+    if (PrimitiveType* raw = dynamic_cast<PrimitiveType*>(type_.get())) {
+      if (format_.compare("d") == 0) {
+        okay = (raw->dtype() == PrimitiveType::float64);
+      }
+      else if (format_.compare("f") == 0) {
+        okay = (raw->dtype() == PrimitiveType::float32);
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("q") == 0) {
+#else
+      else if (format_.compare("l") == 0) {
+#endif
+        okay = (raw->dtype() == PrimitiveType::int64);
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("Q") == 0) {
+#else
+      else if (format_.compare("L") == 0) {
+#endif
+        okay = (raw->dtype() == PrimitiveType::uint64);
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("l") == 0) {
+#else
+      else if (format_.compare("i") == 0) {
+#endif
+        okay = (raw->dtype() == PrimitiveType::int32);
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("L") == 0) {
+#else
+      else if (format_.compare("I") == 0) {
+#endif
+        okay = (raw->dtype() == PrimitiveType::uint32);
+      }
+      else if (format_.compare("h") == 0) {
+        okay = (raw->dtype() == PrimitiveType::int16);
+      }
+      else if (format_.compare("H") == 0) {
+        okay = (raw->dtype() == PrimitiveType::uint16);
+      }
+      else if (format_.compare("b") == 0) {
+        okay = (raw->dtype() == PrimitiveType::int8);
+      }
+      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+        okay = (raw->dtype() == PrimitiveType::uint8);
+      }
+      else if (format_.compare("?") == 0) {
+        okay = (raw->dtype() == PrimitiveType::boolean);
+      }
+    }
+    if (!okay) {
+      throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->level().get()->tostring() + std::string(" to ") + classname());
+    }
   }
 
   const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {

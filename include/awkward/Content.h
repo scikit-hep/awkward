@@ -22,12 +22,10 @@ namespace awkward {
     virtual const std::shared_ptr<Identity> id() const;
     virtual void setid() = 0;
     virtual void setid(const std::shared_ptr<Identity> id) = 0;
+    virtual const std::shared_ptr<Type> type() const = 0;
+    virtual const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const = 0;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
     virtual void tojson_part(ToJson& builder) const = 0;
-    virtual const std::shared_ptr<Type> type() const;
-    virtual const std::shared_ptr<Type> baretype(bool baredown) const = 0;
-    virtual void settype_part(const std::shared_ptr<Type> type) = 0;
-    virtual bool accepts(const std::shared_ptr<Type> type) = 0;
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
     virtual void check_for_iteration() const = 0;
@@ -50,13 +48,13 @@ namespace awkward {
     virtual const std::vector<std::string> keyaliases(const std::string& key) const = 0;
     virtual const std::vector<std::string> keys() const = 0;
 
-    bool isbare() const;
-    void settype(const std::shared_ptr<Type> type);
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
     void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
 
   protected:
+    virtual void checktype() const = 0;
+
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const = 0;
     virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const = 0;
     virtual const std::shared_ptr<Content> getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& advanced) const;
@@ -69,7 +67,7 @@ namespace awkward {
 
   protected:
     std::shared_ptr<Identity> id_;
-    std::shared_ptr<Type> type_;
+    const std::shared_ptr<Type> type_;
   };
 }
 

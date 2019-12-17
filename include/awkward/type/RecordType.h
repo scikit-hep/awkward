@@ -29,6 +29,7 @@ namespace awkward {
     const std::vector<std::shared_ptr<Type>> types() const { return types_; };
     const std::shared_ptr<Lookup> lookup() const { return lookup_; }
     const std::shared_ptr<ReverseLookup> reverselookup() const { return reverselookup_; }
+    bool istuple() const { return lookup_.get() == nullptr; }
 
     virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
     virtual const std::shared_ptr<Type> shallow_copy() const;
@@ -46,11 +47,15 @@ namespace awkward {
     const std::shared_ptr<Type> field(const std::string& key) const;
     const std::vector<std::shared_ptr<Type>> fields() const;
     const std::vector<std::pair<std::string, std::shared_ptr<Type>>> fielditems() const;
+    const std::shared_ptr<Type> astuple() const;
+
+    void append(const std::shared_ptr<Type>& type);
+    void setkey(int64_t fieldindex, const std::string& key);
 
   private:
-    const std::vector<std::shared_ptr<Type>> types_;
-    const std::shared_ptr<Lookup> lookup_;
-    const std::shared_ptr<ReverseLookup> reverselookup_;
+    std::vector<std::shared_ptr<Type>> types_;
+    std::shared_ptr<Lookup> lookup_;
+    std::shared_ptr<ReverseLookup> reverselookup_;
   };
 }
 

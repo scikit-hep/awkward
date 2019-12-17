@@ -23,6 +23,19 @@ namespace awkward {
 
   void EmptyArray::setid() { }
 
+  const std::shared_ptr<Type> EmptyArray::type() const {
+    if (type_.get() != nullptr) {
+      return type_;
+    }
+    else {
+      return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
+    }
+  }
+
+  const std::shared_ptr<Content> EmptyArray::astype(const std::shared_ptr<Type> type) const {
+    return std::shared_ptr<Content>(new EmptyArray(id_, type));
+  }
+
   const std::string EmptyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
@@ -43,18 +56,6 @@ namespace awkward {
   void EmptyArray::tojson_part(ToJson& builder) const {
     builder.beginlist();
     builder.endlist();
-  }
-
-  const std::shared_ptr<Type> EmptyArray::baretype(bool baredown) const {
-    return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
-  }
-
-  void EmptyArray::settype_part(const std::shared_ptr<Type> type) {
-    type_ = type;
-  }
-
-  bool EmptyArray::accepts(const std::shared_ptr<Type> type) {
-    return dynamic_cast<UnknownType*>(type.get()->level().get());
   }
 
   int64_t EmptyArray::length() const {
@@ -130,6 +131,8 @@ namespace awkward {
   const std::vector<std::string> EmptyArray::keys() const {
     throw std::invalid_argument("array contains no Records");
   }
+
+  void EmptyArray::checktype() const { }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());

@@ -16,28 +16,6 @@ namespace awkward {
     return id_;
   }
 
-  bool Content::isbare() const {
-    return type_.get() == nullptr;
-  }
-
-  const std::shared_ptr<Type> Content::type() const {
-    if (type_.get() == nullptr) {
-      return baretype(false);
-    }
-    else {
-      return type_;
-    }
-  }
-
-  void Content::settype(const std::shared_ptr<Type> type) {
-    if (type.get() == nullptr  ||  accepts(type)) {
-      settype_part(type);
-    }
-    else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array's baretype: ") + type.get()->compare(baretype(true)));
-    }
-  }
-
   const std::string Content::tostring() const {
     return tostring_part("", "", "");
   }

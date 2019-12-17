@@ -23,7 +23,17 @@ namespace awkward {
         , lookup_(lookup)
         , reverselookup_(reverselookup)
         , length_(0) {
-      assert(contents.size() != 0);
+      if (contents.size() != 0) {
+        throw std::runtime_error("this constructor can only be used with non-empty contents");
+      }
+      if (reverselookup_.get() == nullptr  &&  lookup_.get() == nullptr) { }
+      else if (reverselookup_.get() != nullptr  &&  lookup_.get() != nullptr) { }
+      else {
+        throw std::runtime_error("either 'lookup' and 'reverselookup' should both be None or neither should be");
+      }
+      if (type_.get() != nullptr) {
+        checktype();
+      }
     }
     RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::vector<std::shared_ptr<Content>>& contents)
         : Content(id, type)
@@ -31,14 +41,23 @@ namespace awkward {
         , lookup_(nullptr)
         , reverselookup_(nullptr)
         , length_(0) {
-      assert(contents.size() != 0);
+      if (contents.size() != 0) {
+        throw std::runtime_error("this constructor can only be used with non-empty contents");
+      }
+      if (type_.get() != nullptr) {
+        checktype();
+      }
     }
     RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, int64_t length, bool istuple)
         : Content(id, type)
         , contents_()
         , lookup_(istuple ? nullptr : new Lookup)
         , reverselookup_(istuple ? nullptr : new ReverseLookup)
-        , length_(length) { }
+        , length_(length) {
+      if (type_.get() != nullptr) {
+        checktype();
+      }
+    }
 
     const std::vector<std::shared_ptr<Content>> contents() const { return contents_; }
     const std::shared_ptr<Lookup> lookup() const { return lookup_; }
@@ -49,10 +68,9 @@ namespace awkward {
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
+    virtual const std::shared_ptr<Type> type() const;
+    virtual const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const;
     virtual void tojson_part(ToJson& builder) const;
-    virtual const std::shared_ptr<Type> baretype(bool baredown) const;
-    virtual void settype_part(const std::shared_ptr<Type> type);
-    virtual bool accepts(const std::shared_ptr<Type> type);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;
@@ -85,6 +103,8 @@ namespace awkward {
     void setkey(int64_t fieldindex, const std::string& key);
 
   protected:
+    virtual void checktype() const;
+
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const;

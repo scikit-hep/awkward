@@ -245,4 +245,27 @@ namespace awkward {
     }
     return out;
   }
+
+  const std::shared_ptr<Type> RecordType::astuple() const {
+    return std::shared_ptr<Type>(new RecordType(parameters_, types_, std::shared_ptr<Lookup>(nullptr), std::shared_ptr<ReverseLookup>(nullptr)));
+  }
+
+  void RecordType::append(const std::shared_ptr<Type>& type) {
+    if (!istuple()) {
+      reverselookup_.get()->push_back(std::to_string(types_.size()));
+    }
+    types_.push_back(type);
+  }
+
+  void RecordType::setkey(int64_t fieldindex, const std::string& fieldname) {
+    if (istuple()) {
+      lookup_ = std::shared_ptr<Lookup>(new Lookup);
+      reverselookup_ = std::shared_ptr<ReverseLookup>(new ReverseLookup);
+      for (size_t j = 0;  j < types_.size();  j++) {
+        reverselookup_.get()->push_back(std::to_string(j));
+      }
+    }
+    (*lookup_.get())[fieldname] = (size_t)fieldindex;
+    (*reverselookup_.get())[(size_t)fieldindex] = fieldname;
+  }
 }

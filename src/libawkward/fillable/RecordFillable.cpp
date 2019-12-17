@@ -68,13 +68,12 @@ namespace awkward {
       return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
     }
     else if (contents_.size() == 0) {
-      std::shared_ptr<Content> out(new RecordArray(Identity::none(), Type::none(), length_, false));
-      if (nameptr_ != nullptr) {
-        std::shared_ptr<Type> type = out.get()->type();
-        type.get()->setparameter("__class__", util::quote(name_, true));
-        out.get()->settype(type);
+      if (nameptr_ == nullptr) {
+        return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, false));
       }
-      return out;
+      else {
+        return std::shared_ptr<Content>(new RecordArray(Identity::none(), type(), length_, false));
+      }
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
@@ -85,13 +84,12 @@ namespace awkward {
         (*lookup.get())[keys_[i]] = i;
         reverselookup.get()->push_back(keys_[i]);
       }
-      std::shared_ptr<Content> out(new RecordArray(Identity::none(), Type::none(), contents, lookup, reverselookup));
-      if (nameptr_ != nullptr) {
-        std::shared_ptr<Type> type = out.get()->type();
-        type.get()->setparameter("__class__", util::quote(name_, true));
-        out.get()->settype(type);
+      if (nameptr_ == nullptr) {
+        return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), contents, lookup, reverselookup));
       }
-      return out;
+      else {
+        return std::shared_ptr<Content>(new RecordArray(Identity::none(), type(), contents, lookup, reverselookup));
+      }
     }
   }
 

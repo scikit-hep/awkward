@@ -36,6 +36,31 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::setid");
   }
 
+  const std::shared_ptr<Type> Record::type() const {
+    return array_.type();
+  }
+
+  const std::shared_ptr<Content> Record::astype(const std::shared_ptr<Type> type) const {
+    if (type.get() == nullptr) {
+      if (array_.numfields() == 0) {
+        return std::shared_ptr<Content>(new Record(RecordArray(array_.id(), type, array_.length(), array_.istuple()), at_));
+      }
+      else {
+        return std::shared_ptr<Content>(new Record(RecordArray(array_.id(), type, array_.contents(), array_.lookup(), array_.reverselookup()), at_));
+      }
+    }
+    else {
+      std::shared_ptr<Content> record = array_.astype(type);
+      RecordArray* raw = dynamic_cast<RecordArray*>(record.get());
+      if (raw->numfields() == 0) {
+        return std::shared_ptr<Content>(new Record(RecordArray(raw->id(), raw->type(), raw->length(), raw->istuple()), at_));
+      }
+      else {
+        return std::shared_ptr<Content>(new Record(RecordArray(raw->id(), raw->type(), raw->contents(), raw->lookup(), raw->reverselookup()), at_));
+      }
+    }
+  }
+
   const std::string Record::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " at=\"" << at_ << "\">\n";
@@ -60,22 +85,6 @@ namespace awkward {
       contents[j].get()->getitem_at_nowrap(at_).get()->tojson_part(builder);
     }
     builder.endrecord();
-  }
-
-  const std::shared_ptr<Type> Record::baretype(bool baredown) const {
-    return array_.baretype(baredown);
-  }
-
-  const std::shared_ptr<Type> Record::type() const {
-    return array_.type();
-  }
-
-  void Record::settype_part(const std::shared_ptr<Type> type) {
-    array_.settype_part(type);
-  }
-
-  bool Record::accepts(const std::shared_ptr<Type> type) {
-    return array_.accepts(type);
   }
 
   int64_t Record::length() const {
@@ -209,6 +218,8 @@ namespace awkward {
   const Record Record::astuple() const {
     return Record(array_.astuple(), at_);
   }
+
+  void Record::checktype() const { }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(at)");

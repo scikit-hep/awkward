@@ -17,7 +17,11 @@ namespace awkward {
     ListOffsetArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const IndexOf<T> offsets, const std::shared_ptr<Content> content)
         : Content(id, type)
         , offsets_(offsets)
-        , content_(content) { }
+        , content_(content) {
+      if (type_.get() != nullptr) {
+        checktype();
+      }
+    }
 
     const IndexOf<T> offsets() const { return offsets_; }
     const std::shared_ptr<Content> content() const { return content_; }
@@ -25,11 +29,10 @@ namespace awkward {
     virtual const std::string classname() const;
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
+    virtual const std::shared_ptr<Type> type() const;
+    virtual const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
-    virtual const std::shared_ptr<Type> baretype(bool baredown) const;
-    virtual void settype_part(const std::shared_ptr<Type> type);
-    virtual bool accepts(const std::shared_ptr<Type> type);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;
@@ -51,6 +54,8 @@ namespace awkward {
     virtual const std::vector<std::string> keys() const;
 
   protected:
+    virtual void checktype() const;
+
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const;

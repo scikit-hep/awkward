@@ -11,7 +11,11 @@ namespace awkward {
     Record(const RecordArray& array, int64_t at)
         : Content(Identity::none(), Type::none())
         , array_(array)
-        , at_(at) { }
+        , at_(at) {
+      if (type_.get() != nullptr) {
+        checktype();
+      }
+    }
 
     const std::shared_ptr<Content> array() const { return array_.shallow_copy(); }
     int64_t at() const { return at_; }
@@ -31,12 +35,10 @@ namespace awkward {
     virtual const std::shared_ptr<Identity> id() const;
     virtual void setid();
     virtual void setid(const std::shared_ptr<Identity> id);
+    virtual const std::shared_ptr<Type> type() const;
+    virtual const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const;
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
     virtual void tojson_part(ToJson& builder) const;
-    virtual const std::shared_ptr<Type> baretype(bool baredown) const;
-    virtual const std::shared_ptr<Type> type() const;
-    virtual void settype_part(const std::shared_ptr<Type> type);
-    virtual bool accepts(const std::shared_ptr<Type> type);
     virtual int64_t length() const;
     virtual const std::shared_ptr<Content> shallow_copy() const;
     virtual void check_for_iteration() const;
@@ -64,6 +66,8 @@ namespace awkward {
     const Record astuple() const;
 
   protected:
+    virtual void checktype() const;
+
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const;

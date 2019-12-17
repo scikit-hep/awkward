@@ -102,6 +102,52 @@ namespace awkward {
       id_ = id;
     }
 
+    virtual const std::shared_ptr<Type> type() const {
+      if (type_.get() != nullptr) {
+        return type_;
+      }
+      else if (std::is_same<T, double>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64));
+      }
+      else if (std::is_same<T, float>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float32));
+      }
+      else if (std::is_same<T, int64_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64));
+      }
+      else if (std::is_same<T, uint64_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint64));
+      }
+      else if (std::is_same<T, int32_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int32));
+      }
+      else if (std::is_same<T, uint32_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint32));
+      }
+      else if (std::is_same<T, int16_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int16));
+      }
+      else if (std::is_same<T, uint16_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint16));
+      }
+      else if (std::is_same<T, int8_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int8));
+      }
+      else if (std::is_same<T, uint8_t>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint8));
+      }
+      else if (std::is_same<T, bool>::value) {
+        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::boolean));
+      }
+      else {
+        throw std::invalid_argument(std::string("RawArrayOf<") + typeid(T).name() + std::string("> does not have a known type"));
+      }
+    }
+
+    virtual const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const {
+      return std::shared_ptr<Content>(new RawArrayOf<T>(id_, type, ptr_, offset_, length_, itemsize_));
+    }
+
     const std::string tostring() { return tostring_part("", "", ""); }
     virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const {
       std::stringstream out;
@@ -179,94 +225,6 @@ namespace awkward {
       }
       else {
         throw std::invalid_argument(std::string("cannot convert RawArrayOf<") + typeid(T).name() + std::string("> into JSON"));
-      }
-    }
-
-    virtual const std::shared_ptr<Type> baretype(bool baredown) const {
-      if (std::is_same<T, double>::value) {
-        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64));
-      }
-      else if (std::is_same<T, float>::value) {
-        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float32));
-      }
-      else if (std::is_same<T, int64_t>::value) {
-        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64));
-      }
-      else if (std::is_same<T, uint64_t>::value) {
-        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint64));
-      }
-      else if (std::is_same<T, int32_t>::value) {
-        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int32));
-      }
-      else if (std::is_same<T, uint32_t>::value) {
-        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint32));
-      }
-      else if (std::is_same<T, int16_t>::value) {
-        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int16));
-      }
-      else if (std::is_same<T, uint16_t>::value) {
-        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint16));
-      }
-      else if (std::is_same<T, int8_t>::value) {
-        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int8));
-      }
-      else if (std::is_same<T, uint8_t>::value) {
-        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint8));
-      }
-      else if (std::is_same<T, bool>::value) {
-        return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::boolean));
-      }
-      else {
-        throw std::invalid_argument(std::string("RawArrayOf<") + typeid(T).name() + std::string("> cannot be expressed as a PrimitiveType"));
-      }
-    }
-
-    virtual void settype_part(const std::shared_ptr<Type> type) {
-      type_ = type;
-    }
-
-    virtual bool accepts(const std::shared_ptr<Type> type) {
-      std::shared_ptr<Type> check = type.get()->level();
-      if (PrimitiveType* raw = dynamic_cast<PrimitiveType*>(check.get())) {
-        if (std::is_same<T, double>::value) {
-          return raw->dtype() == PrimitiveType::float64;
-        }
-        else if (std::is_same<T, float>::value) {
-          return raw->dtype() == PrimitiveType::float32;
-        }
-        else if (std::is_same<T, int64_t>::value) {
-          return raw->dtype() == PrimitiveType::int64;
-        }
-        else if (std::is_same<T, uint64_t>::value) {
-          return raw->dtype() == PrimitiveType::uint64;
-        }
-        else if (std::is_same<T, int32_t>::value) {
-          return raw->dtype() == PrimitiveType::int32;
-        }
-        else if (std::is_same<T, uint32_t>::value) {
-          return raw->dtype() == PrimitiveType::uint32;
-        }
-        else if (std::is_same<T, int16_t>::value) {
-          return raw->dtype() == PrimitiveType::int16;
-        }
-        else if (std::is_same<T, uint16_t>::value) {
-          return raw->dtype() == PrimitiveType::uint16;
-        }
-        else if (std::is_same<T, int8_t>::value) {
-          return raw->dtype() == PrimitiveType::int8;
-        }
-        else if (std::is_same<T, uint8_t>::value) {
-          return raw->dtype() == PrimitiveType::uint8;
-        }
-        else if (std::is_same<T, bool>::value) {
-          return raw->dtype() == PrimitiveType::boolean;
-        }
-        else {
-          return false;
-        }
-      }
-      else {
-        return false;
       }
     }
 
@@ -389,6 +347,48 @@ namespace awkward {
     }
 
   protected:
+    virtual void checktype() const {
+      bool okay = false;
+      if (PrimitiveType* raw = dynamic_cast<PrimitiveType*>(type_.get()->level().get())) {
+        if (std::is_same<T, double>::value) {
+          okay = (raw->dtype() == PrimitiveType::float64);
+        }
+        else if (std::is_same<T, float>::value) {
+          okay = (raw->dtype() == PrimitiveType::float32);
+        }
+        else if (std::is_same<T, int64_t>::value) {
+          okay = (raw->dtype() == PrimitiveType::int64);
+        }
+        else if (std::is_same<T, uint64_t>::value) {
+          okay = (raw->dtype() == PrimitiveType::uint64);
+        }
+        else if (std::is_same<T, int32_t>::value) {
+          okay = (raw->dtype() == PrimitiveType::int32);
+        }
+        else if (std::is_same<T, uint32_t>::value) {
+          okay = (raw->dtype() == PrimitiveType::uint32);
+        }
+        else if (std::is_same<T, int16_t>::value) {
+          okay = (raw->dtype() == PrimitiveType::int16);
+        }
+        else if (std::is_same<T, uint16_t>::value) {
+          okay = (raw->dtype() == PrimitiveType::uint16);
+        }
+        else if (std::is_same<T, int8_t>::value) {
+          okay = (raw->dtype() == PrimitiveType::int8);
+        }
+        else if (std::is_same<T, uint8_t>::value) {
+          okay = (raw->dtype() == PrimitiveType::uint8);
+        }
+        else if (std::is_same<T, bool>::value) {
+          okay = (raw->dtype() == PrimitiveType::boolean);
+        }
+      }
+      if (!okay) {
+        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->level().get()->tostring() + std::string(" to ") + classname());
+      }
+    }
+
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
       return getitem_at(at.at());
     }

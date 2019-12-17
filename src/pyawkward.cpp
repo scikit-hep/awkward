@@ -1214,17 +1214,11 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("setid", [](T& self) -> void {
             self.setid();
           })
-          .def_property_readonly("baretype", [](T& self) -> py::object {
-            return box(self.baretype(true));
-          })
-          .def_property_readonly("isbare", &ak::Content::isbare)
-          .def_property("type", [](T& self) -> py::object {
+          .def_property_readonly("type", [](T& self) -> py::object {
             return box(self.type());
-          }, [](T& self, py::object type) -> void {
-            self.settype(unbox_type_none(type));
           })
-          .def("accepts", [](T& self, py::object type) -> bool {
-            return self.accepts(unbox_type(type));
+          .def("astype", [](T& self, std::shared_ptr<ak::Type>& type) -> py::object {
+            return box(self.astype(type));
           })
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
@@ -1445,14 +1439,11 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("id", [](ak::Record& self) -> py::object { return box(self.id()); })
       .def("__getitem__", &getitem<ak::Record>)
-      .def_property_readonly("baretype", [](ak::Record& self) -> py::object {
-        return box(self.baretype(true));
-      })
-      .def_property_readonly("isbare", &ak::Record::isbare)
-      .def_property("type", [](ak::Record& self) -> py::object {
+      .def_property_readonly("type", [](ak::Record& self) -> py::object {
         return box(self.type());
-      }, [](ak::Record& self, py::object type) -> void {
-        self.settype(unbox_type_none(type));
+      })
+      .def("astype", [](ak::Record& self, std::shared_ptr<ak::Type>& type) -> py::object {
+        return box(self.astype(type));
       })
       .def("tojson", &tojson_string<ak::Record>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)

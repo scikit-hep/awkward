@@ -142,6 +142,27 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Type> ListOffsetArrayOf<T>::type() const {
+    if (type_.get() != nullptr) {
+      return type_;
+    }
+    else {
+      return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->type()));
+    }
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::astype(const std::shared_ptr<Type> type) const {
+    std::shared_ptr<Type> inner = type;
+    if (inner.get() != nullptr) {
+      if (ListType* raw = dynamic_cast<ListType*>(inner.get()->level().get())) {
+        inner = raw->type();
+      }
+    }
+    return std::shared_ptr<Content>(new ListOffsetArrayOf<T>(id_, type, offsets_, content_.get()->astype(inner)));
+  }
+
+  template <typename T>
   const std::string ListOffsetArrayOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << ">\n";
@@ -165,39 +186,6 @@ namespace awkward {
       getitem_at_nowrap(i).get()->tojson_part(builder);
     }
     builder.endlist();
-  }
-
-  template <typename T>
-  const std::shared_ptr<Type> ListOffsetArrayOf<T>::baretype(bool baredown) const {
-    if (baredown) {
-      return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->baretype(baredown)));
-    }
-    else {
-      return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->type()));
-    }
-  }
-
-  template <typename T>
-  void ListOffsetArrayOf<T>::settype_part(const std::shared_ptr<Type> type) {
-    if (type.get() == nullptr) {
-      content_.get()->settype_part(type);
-      type_ = type;
-    }
-    else {
-      ListType* raw = dynamic_cast<ListType*>(type.get()->level().get());
-      content_.get()->settype_part(raw->type());
-      type_ = type;
-    }
-  }
-
-  template <typename T>
-  bool ListOffsetArrayOf<T>::accepts(const std::shared_ptr<Type> type) {
-    if (ListType* raw = dynamic_cast<ListType*>(type.get()->level().get())) {
-      return content_.get()->accepts(raw->type());
-    }
-    else {
-      return false;
-    }
   }
 
   template <typename T>
@@ -351,6 +339,17 @@ namespace awkward {
   template <typename T>
   const std::vector<std::string> ListOffsetArrayOf<T>::keys() const {
     return content_.get()->keys();
+  }
+
+  template <typename T>
+  void ListOffsetArrayOf<T>::checktype() const {
+    bool okay = false;
+    if (ListType* raw = dynamic_cast<ListType*>(type_.get()->level().get())) {
+      okay = (raw->type().get() == content_.get()->type().get());
+    }
+    if (!okay) {
+        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->level().get()->tostring() + std::string(" to ") + classname());
+    }
   }
 
   template <typename T>

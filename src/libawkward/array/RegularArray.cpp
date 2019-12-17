@@ -81,6 +81,25 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Type> RegularArray::type() const {
+    if (type_.get() != nullptr) {
+      return type_;
+    }
+    else {
+      return std::shared_ptr<Type>(new RegularType(Type::Parameters(), content_.get()->type(), size_));
+    }
+  }
+
+  const std::shared_ptr<Content> RegularArray::astype(const std::shared_ptr<Type> type) const {
+    std::shared_ptr<Type> inner = type;
+    if (inner.get() != nullptr) {
+      if (RegularType* raw = dynamic_cast<RegularType*>(inner.get()->level().get())) {
+        inner = raw->type();
+      }
+    }
+    return std::shared_ptr<Content>(new RegularArray(id_, type, content_.get()->astype(inner), size_));
+  }
+
   const std::string RegularArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " size=\"" << size_ << "\">\n";
@@ -102,41 +121,6 @@ namespace awkward {
       getitem_at_nowrap(i).get()->tojson_part(builder);
     }
     builder.endlist();
-  }
-
-  const std::shared_ptr<Type> RegularArray::baretype(bool baredown) const {
-    if (baredown) {
-      return std::shared_ptr<Type>(new RegularType(Type::Parameters(), content_.get()->baretype(baredown), size_));
-    }
-    else {
-      return std::shared_ptr<Type>(new RegularType(Type::Parameters(), content_.get()->type(), size_));
-    }
-  }
-
-  void RegularArray::settype_part(const std::shared_ptr<Type> type) {
-    if (type.get() == nullptr) {
-      content_.get()->settype_part(type);
-      type_ = type;
-    }
-    else {
-      RegularType* raw = dynamic_cast<RegularType*>(type.get()->level().get());
-      content_.get()->settype_part(raw->type());
-      type_ = type;
-    }
-  }
-
-  bool RegularArray::accepts(const std::shared_ptr<Type> type) {
-    if (RegularType* raw = dynamic_cast<RegularType*>(type.get()->level().get())) {
-      if (raw->size() == size_) {
-        return content_.get()->accepts(raw->type());
-      }
-      else {
-        return false;
-      }
-    }
-    else {
-      return false;
-    }
   }
 
   int64_t RegularArray::length() const {
@@ -251,6 +235,16 @@ namespace awkward {
 
   const std::vector<std::string> RegularArray::keys() const {
     return content_.get()->keys();
+  }
+
+  void RegularArray::checktype() const {
+    bool okay = false;
+    if (RegularType* raw = dynamic_cast<RegularType*>(type_.get()->level().get())) {
+      okay = (raw->type().get() == content_.get()->type().get()  &&  raw->size() == size_);
+    }
+    if (!okay) {
+        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->level().get()->tostring() + std::string(" to ") + classname() + std::string(" with size ") + std::to_string(size_));
+    }
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
