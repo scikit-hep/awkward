@@ -23,9 +23,7 @@ namespace awkward {
     return out;
   }
 
-  int64_t OptionFillable::length() const {
-    return offsets_.length();
-  }
+  int64_t OptionFillable::length() const { return offsets_.length(); }
 
   void OptionFillable::clear() {
     offsets_.clear();

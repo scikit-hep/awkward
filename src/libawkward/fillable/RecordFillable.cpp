@@ -23,9 +23,7 @@ namespace awkward {
     return out;
   }
 
-  int64_t RecordFillable::length() const {
-    return length_;
-  }
+  int64_t RecordFillable::length() const { return length_; }
 
   void RecordFillable::clear() {
     for (auto x : contents_) {

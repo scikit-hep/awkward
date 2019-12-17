@@ -1,4 +1,5 @@
-// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see
+// https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <cstring>
 
@@ -13,7 +14,7 @@ struct Error success() {
   return out;
 }
 
-struct Error failure(const char* str, int64_t location, int64_t attempt) {
+struct Error failure(const char *str, int64_t location, int64_t attempt) {
   struct Error out;
   out.str = str;
   out.location = location;

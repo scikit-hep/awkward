@@ -24,7 +24,7 @@ namespace awkward {
         return true;
       }
     }
-    return false;  // false for isscalar(), too
+    return false; // false for isscalar(), too
   }
 
   void* NumpyArray::byteptr() const {
