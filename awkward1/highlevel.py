@@ -22,18 +22,21 @@ class Array(object):
 
         self.namespace = namespace
 
-        if type is not None:
+        if type is None:
+            self._type = None
+        else:
             if not isinstance(type, awkward1.layout.ArrayType):
                 raise TypeError("type must be an awkward1.layout.ArrayType")
             if type.length > len(layout):
                 raise TypeError("ArrayType length ({0}) is greater than layout length {1}".format(type.length, len(layout)))
-            layout = layout[:type.length]
+            if type.length < len(layout):
+                layout = layout[:type.length]
             cls = self._namespace.get(type.parameters.get("__class__"))
             if cls is not None:
                 if not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Array):
                     raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Array".format(repr(type.parameters["__class__"])))
                 self.__class__ = cls
-            layout.type = type.type
+            layout = layout.astype(type.type)
             self._type = type
 
         self.layout = layout
@@ -61,7 +64,10 @@ class Array(object):
 
     @property
     def type(self):
-        return awkward1.layout.ArrayType(self._layout.type, len(self._layout))
+        if self._type is None:
+            return awkward1.layout.ArrayType(self._layout.type, len(self._layout))
+        else:
+            return self._type
 
     def __len__(self):
         return len(self.layout)
@@ -103,8 +109,7 @@ class Record(object):
                 if not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Record):
                     raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Record".format(repr(type.parameters["__class__"])))
                 self.__class__ = cls
-            layout.type = type.type
-            self._type = type
+            layout = layout.astype(type)
 
         self.layout = layout
 

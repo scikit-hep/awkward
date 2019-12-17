@@ -476,9 +476,12 @@ namespace awkward {
       if (raw->lookup().get() != nullptr  &&  lookup_.get() != nullptr  &&  raw->reverselookup().get() != nullptr  &&  reverselookup_.get() != nullptr) {
         okay = *(raw->lookup().get()) == *(lookup_.get())  &&  *(raw->reverselookup().get()) == *(reverselookup_.get());
       }
+      else {
+        okay = (raw->numfields() == numfields());
+      }
       if (okay) {
         for (size_t i = 0;  i < contents_.size();  i++) {
-          if (contents_[i].get()->istypeptr(raw->field((int64_t)i).get())) {
+          if (!contents_[i].get()->istypeptr(raw->field((int64_t)i).get())) {
             okay = false;
             break;
           }

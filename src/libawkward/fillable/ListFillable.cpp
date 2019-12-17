@@ -34,9 +34,13 @@ namespace awkward {
     return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->type()));
   }
 
-  const std::shared_ptr<Content> ListFillable::snapshot() const {
+  const std::shared_ptr<Content> ListFillable::snapshot(const std::shared_ptr<Type> type) const {
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), Type::none(), offsets, content_.get()->snapshot()));
+    std::shared_ptr<Type> innertype = Type::none();
+    if (ListType* raw = dynamic_cast<ListType*>(type.get())) {
+      innertype = raw->type();
+    }
+    return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), type, offsets, content_.get()->snapshot(innertype)));
   }
 
   bool ListFillable::active() const {

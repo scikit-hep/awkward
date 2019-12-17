@@ -14,12 +14,9 @@
 
 namespace awkward {
   class NumpyArray: public Content {
-  private:
-    static const std::shared_ptr<Type> unwrap_type(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape);
-
   public:
     NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<void> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
-        : Content(id, unwrap_type(type, shape))
+        : Content(id, type)
         , ptr_(ptr)
         , shape_(shape)
         , strides_(strides)
@@ -33,6 +30,8 @@ namespace awkward {
         checktype();
       }
     }
+
+    static const std::shared_ptr<Type> unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape);
 
     const std::shared_ptr<void> ptr() const { return ptr_; }
     const std::vector<ssize_t> shape() const { return shape_; }

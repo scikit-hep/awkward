@@ -46,10 +46,10 @@ namespace awkward {
     return std::shared_ptr<Type>(new UnionType(Type::Parameters(), types));
   }
 
-  const std::shared_ptr<Content> UnionFillable::snapshot() const {
+  const std::shared_ptr<Content> UnionFillable::snapshot(const std::shared_ptr<Type> type) const {
     Index8 types(types_.ptr(), 0, types_.length());
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    throw std::runtime_error("UnionFillable::snapshot() needs UnionArray");
+    throw std::runtime_error("UnionFillable::snapshot needs UnionArray");
   }
 
   bool UnionFillable::active() const {

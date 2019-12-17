@@ -39,26 +39,34 @@ namespace awkward {
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
-      for (auto content : contents_) {
-        types.push_back(content.get()->type());
+      for (size_t i = 0;  i < contents_.size();  i++) {
+        types.push_back(contents_[i].get()->type());
       }
       return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types));
     }
   }
 
-  const std::shared_ptr<Content> TupleFillable::snapshot() const {
+  const std::shared_ptr<Content> TupleFillable::snapshot(const std::shared_ptr<Type> type) const {
     if (length_ == -1) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), type));
     }
-    else if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, true));
+
+    RecordType* raw = dynamic_cast<RecordType*>(type.get());
+    std::vector<std::shared_ptr<Content>> contents;
+    for (size_t i = 0;  i < contents_.size();  i++) {
+      if (raw == nullptr) {
+        contents.push_back(contents_[i].get()->snapshot(Type::none()));
+      }
+      else {
+        contents.push_back(contents_[i].get()->snapshot(raw->field((int64_t)i)));
+      }
+    }
+    
+    if (contents.size() == 0) {
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), type, length_, true));
     }
     else {
-      std::vector<std::shared_ptr<Content>> contents;
-      for (auto content : contents_) {
-        contents.push_back(content.get()->snapshot());
-      }
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), contents));
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), type, contents));
     }
   }
 

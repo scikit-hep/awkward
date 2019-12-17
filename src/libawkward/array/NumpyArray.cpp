@@ -202,7 +202,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::astype(const std::shared_ptr<Type> type) const {
-    return std::shared_ptr<Content>(new NumpyArray(id_, type, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
+    return std::shared_ptr<Content>(new NumpyArray(id_, unwrap_regulartype(type, shape_), ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
   }
 
   const std::string NumpyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
@@ -541,7 +541,7 @@ namespace awkward {
     throw std::invalid_argument("array contains no Records");
   }
 
-  const std::shared_ptr<Type> NumpyArray::unwrap_type(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape) {
+  const std::shared_ptr<Type> NumpyArray::unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape) {
     if (type.get() == nullptr) {
       return type;
     }

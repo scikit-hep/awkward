@@ -28,13 +28,13 @@ namespace awkward {
     return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64));
   }
 
-  const std::shared_ptr<Content> Int64Fillable::snapshot() const {
+  const std::shared_ptr<Content> Int64Fillable::snapshot(const std::shared_ptr<Type> type) const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
 #ifdef _MSC_VER
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "q"));
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), type, buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "q"));
 #else
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "l"));
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), type, buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "l"));
 #endif
   }
 

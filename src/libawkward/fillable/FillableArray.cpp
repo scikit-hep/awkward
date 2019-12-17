@@ -24,7 +24,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> FillableArray::snapshot() const {
-    return fillable_.get()->snapshot();
+    return fillable_.get()->snapshot(type());
   }
 
   const std::shared_ptr<Content> FillableArray::getitem_at(int64_t at) const {

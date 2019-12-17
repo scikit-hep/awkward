@@ -59,37 +59,34 @@ namespace awkward {
         parameters["__class__"] = util::quote(name_, true);
       }
       return std::shared_ptr<Type>(new RecordType(parameters, types, lookup, reverselookup));
-      return std::shared_ptr<Type>(new RecordType(parameters, types));
     }
   }
 
-  const std::shared_ptr<Content> RecordFillable::snapshot() const {
+  const std::shared_ptr<Content> RecordFillable::snapshot(const std::shared_ptr<Type> type) const {
     if (length_ == -1) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
+      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), type));
     }
-    else if (contents_.size() == 0) {
-      if (nameptr_ == nullptr) {
-        return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, false));
+
+    RecordType* raw = dynamic_cast<RecordType*>(type.get());
+    std::vector<std::shared_ptr<Content>> contents;
+    std::shared_ptr<RecordArray::Lookup> lookup(new RecordArray::Lookup);
+    std::shared_ptr<RecordArray::ReverseLookup> reverselookup(new RecordArray::ReverseLookup);
+    for (size_t i = 0;  i < contents_.size();  i++) {
+      if (raw == nullptr) {
+        contents.push_back(contents_[i].get()->snapshot(Type::none()));
       }
       else {
-        return std::shared_ptr<Content>(new RecordArray(Identity::none(), type(), length_, false));
+        contents.push_back(contents_[i].get()->snapshot(raw->field((int64_t)i)));
       }
+      (*lookup.get())[keys_[i]] = i;
+      reverselookup.get()->push_back(keys_[i]);
+    }
+    
+    if (contents.size() == 0) {
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), type, length_, false));
     }
     else {
-      std::vector<std::shared_ptr<Content>> contents;
-      std::shared_ptr<RecordArray::Lookup> lookup(new RecordArray::Lookup);
-      std::shared_ptr<RecordArray::ReverseLookup> reverselookup(new RecordArray::ReverseLookup);
-      for (size_t i = 0;  i < contents_.size();  i++) {
-        contents.push_back(contents_[i].get()->snapshot());
-        (*lookup.get())[keys_[i]] = i;
-        reverselookup.get()->push_back(keys_[i]);
-      }
-      if (nameptr_ == nullptr) {
-        return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), contents, lookup, reverselookup));
-      }
-      else {
-        return std::shared_ptr<Content>(new RecordArray(Identity::none(), type(), contents, lookup, reverselookup));
-      }
+      return std::shared_ptr<Content>(new RecordArray(Identity::none(), type, contents, lookup, reverselookup));
     }
   }
 

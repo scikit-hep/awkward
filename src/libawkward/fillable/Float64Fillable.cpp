@@ -40,10 +40,10 @@ namespace awkward {
     return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64));
   }
 
-  const std::shared_ptr<Content> Float64Fillable::snapshot() const {
+  const std::shared_ptr<Content> Float64Fillable::snapshot(const std::shared_ptr<Type> type) const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(double) };
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(double), "d"));
+    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), type, buffer_.ptr(), shape, strides, 0, sizeof(double), "d"));
   }
 
   bool Float64Fillable::active() const {

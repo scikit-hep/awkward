@@ -1266,7 +1266,7 @@ py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_Nu
         if (info.shape.size() != info.ndim  ||  info.strides.size() != info.ndim) {
           throw std::invalid_argument("NumpyArray len(shape) != ndim or len(strides) != ndim");
         }
-        return ak::NumpyArray(unbox_id_none(id), unbox_type_none(type), std::shared_ptr<void>(
+        return ak::NumpyArray(unbox_id_none(id), ak::NumpyArray::unwrap_regulartype(unbox_type_none(type), info.shape), std::shared_ptr<void>(
           reinterpret_cast<void*>(info.ptr), pyobject_deleter<void>(array.ptr())),
           info.shape,
           info.strides,
