@@ -79,7 +79,7 @@ namespace awkward {
         }
         i++;
       }
-      if (tofill.get() == nullptr) {
+      if (tofill == nullptr) {
         tofill = BoolFillable::fromempty(options_);
         contents_.push_back(tofill);
       }
@@ -105,7 +105,7 @@ namespace awkward {
         }
         i++;
       }
-      if (tofill.get() == nullptr) {
+      if (tofill == nullptr) {
         tofill = Int64Fillable::fromempty(options_);
         contents_.push_back(tofill);
       }
@@ -131,7 +131,7 @@ namespace awkward {
         }
         i++;
       }
-      if (tofill.get() == nullptr) {
+      if (tofill == nullptr) {
         i = 0;
         for (auto content : contents_) {
           if (dynamic_cast<Int64Fillable*>(content.get()) != nullptr) {
@@ -140,7 +140,7 @@ namespace awkward {
           }
           i++;
         }
-        if (tofill.get() != nullptr) {
+        if (tofill != nullptr) {
           tofill = Float64Fillable::fromint64(options_, dynamic_cast<Int64Fillable*>(tofill.get())->buffer());
           contents_[(size_t)i] = tofill;
         }
@@ -173,7 +173,7 @@ namespace awkward {
         }
         i++;
       }
-      if (tofill.get() == nullptr) {
+      if (tofill == nullptr) {
         tofill = StringFillable::fromempty(options_, encoding);
         contents_.push_back(tofill);
       }
@@ -199,7 +199,7 @@ namespace awkward {
         }
         i++;
       }
-      if (tofill.get() == nullptr) {
+      if (tofill == nullptr) {
         tofill = ListFillable::fromempty(options_);
         contents_.push_back(tofill);
       }
@@ -240,7 +240,7 @@ namespace awkward {
         }
         i++;
       }
-      if (tofill.get() == nullptr) {
+      if (tofill == nullptr) {
         tofill = TupleFillable::fromempty(options_);
         contents_.push_back(tofill);
       }
@@ -292,7 +292,7 @@ namespace awkward {
         }
         i++;
       }
-      if (tofill.get() == nullptr) {
+      if (tofill == nullptr) {
         tofill = RecordFillable::fromempty(options_);
         contents_.push_back(tofill);
       }

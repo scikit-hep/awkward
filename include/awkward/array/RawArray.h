@@ -96,7 +96,7 @@ namespace awkward {
       }
     }
     void setid(const std::shared_ptr<Identity> id) override {
-      if (id.get() != nullptr  &&  length() != id.get()->length()) {
+      if (id != nullptr  &&  length() != id.get()->length()) {
         throw std::invalid_argument("content and its id must have the same length");
       }
       id_ = id;
@@ -409,8 +409,8 @@ namespace awkward {
         }
         awkward_regularize_rangeslice(&start, &stop, step > 0, range.hasstart(), range.hasstop(), length_);
 
-        int64_t numer = abs(start - stop);
-        int64_t denom = abs(step);
+        int64_t numer = std::abs(start - stop);
+        int64_t denom = std::abs(step);
         int64_t d = numer / denom;
         int64_t m = numer % denom;
         int64_t lenhead = d + (m != 0 ? 1 : 0);

@@ -18,7 +18,7 @@ namespace awkward {
 
     std::stringstream out;
     if (parameters_.empty()) {
-      if (reverselookup_.get() == nullptr) {
+      if (reverselookup_ == nullptr) {
         out << "(";
         for (size_t j = 0;  j < types_.size();  j++) {
           if (j != 0) {
@@ -41,7 +41,7 @@ namespace awkward {
       }
     }
     else {
-      if (reverselookup_.get() == nullptr) {
+      if (reverselookup_ == nullptr) {
         out << "tuple[[";
         for (size_t j = 0;  j < types_.size();  j++) {
           if (j != 0) {
@@ -83,8 +83,8 @@ namespace awkward {
       if (numfields() != t->numfields()) {
         return false;
       }
-      if (reverselookup_.get() == nullptr) {
-        if (t->reverselookup().get() != nullptr) {
+      if (reverselookup_ == nullptr) {
+        if (t->reverselookup() != nullptr) {
           return false;
         }
         for (int64_t j = 0;  j < numfields();  j++) {
@@ -95,7 +95,7 @@ namespace awkward {
         return true;
       }
       else {
-        if (t->reverselookup().get() == nullptr) {
+        if (t->reverselookup() == nullptr) {
           return false;
         }
         if (lookup_.get()->size() != t->lookup().get()->size()) {
@@ -139,7 +139,7 @@ namespace awkward {
 
   int64_t RecordType::fieldindex(const std::string& key) const {
     int64_t out = -1;
-    if (lookup_.get() != nullptr) {
+    if (lookup_ != nullptr) {
       try {
         out = (int64_t)lookup_.get()->at(key);
       }
@@ -166,7 +166,7 @@ namespace awkward {
     if (fieldindex >= numfields()) {
       throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for RecordType with only " + std::to_string(numfields()) + std::string(" fields")));
     }
-    if (reverselookup_.get() != nullptr) {
+    if (reverselookup_ != nullptr) {
       return reverselookup_.get()->at((size_t)fieldindex);
     }
     else {
@@ -188,7 +188,7 @@ namespace awkward {
     std::vector<std::string> out;
     std::string _default = std::to_string(fieldindex);
     bool has_default = false;
-    if (lookup_.get() != nullptr) {
+    if (lookup_ != nullptr) {
       for (auto pair : *lookup_.get()) {
         if (pair.second == fieldindex) {
           out.push_back(pair.first);
@@ -210,7 +210,7 @@ namespace awkward {
 
   const std::vector<std::string> RecordType::keys() const {
     std::vector<std::string> out;
-    if (reverselookup_.get() == nullptr) {
+    if (reverselookup_ == nullptr) {
       int64_t cols = numfields();
       for (int64_t j = 0;  j < cols;  j++) {
         out.push_back(std::to_string(j));
@@ -239,7 +239,7 @@ namespace awkward {
 
   const std::vector<std::pair<std::string, std::shared_ptr<Type>>> RecordType::fielditems() const {
     std::vector<std::pair<std::string, std::shared_ptr<Type>>> out;
-    if (reverselookup_.get() == nullptr) {
+    if (reverselookup_ == nullptr) {
       size_t cols = types_.size();
       for (size_t j = 0;  j < cols;  j++) {
         out.push_back(std::pair<std::string, std::shared_ptr<Type>>(std::to_string(j), types_[j]));

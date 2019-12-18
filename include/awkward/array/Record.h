@@ -24,7 +24,7 @@ namespace awkward {
     }
     const std::shared_ptr<RecordArray::Lookup> lookup() const { return array_.lookup(); }
     const std::shared_ptr<RecordArray::ReverseLookup> reverselookup() const { return array_.reverselookup(); }
-    bool istuple() const { return lookup().get() == nullptr; }
+    bool istuple() const { return lookup() == nullptr; }
 
     bool isscalar() const override;
     const std::string classname() const override;

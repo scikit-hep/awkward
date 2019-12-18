@@ -57,7 +57,7 @@ namespace awkward {
   }
 
   void NumpyArray::setid(const std::shared_ptr<Identity> id) {
-    if (id.get() != nullptr  &&  length() != id.get()->length()) {
+    if (id != nullptr  &&  length() != id.get()->length()) {
       util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
     }
     id_ = id;
@@ -197,15 +197,15 @@ namespace awkward {
     }
     out << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get());
-    if (id_.get() == nullptr  &&  type_.get() == nullptr) {
+    if (id_ == nullptr  &&  type_ == nullptr) {
       out << "\"/>" << post;
     }
     else {
       out << "\">\n";
-      if (id_.get() != nullptr) {
+      if (id_ != nullptr) {
         out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
       }
-      if (type_.get() != nullptr) {
+      if (type_ != nullptr) {
         out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
       }
       out << indent << "</" << classname() << ">" << post;
@@ -214,7 +214,7 @@ namespace awkward {
   }
 
   void NumpyArray::tojson_part(ToJson& builder) const {
-    if (type_.get() != nullptr  &&  type_.get()->parameter_equals("__class__", "\"char\"")) {
+    if (type_ != nullptr  &&  type_.get()->parameter_equals("__class__", "\"char\"")) {
       tojson_string(builder);
     }
     else if (format_.compare("d") == 0) {
@@ -337,7 +337,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> NumpyArray::type() const {
-    if (type_.get() == nullptr) {
+    if (type_ == nullptr) {
       if (isscalar()) {
         return innertype(false);
       }
@@ -455,7 +455,7 @@ namespace awkward {
   }
 
   void NumpyArray::check_for_iteration() const {
-    if (id_.get() != nullptr  &&  id_.get()->length() < shape_[0]) {
+    if (id_ != nullptr  &&  id_.get()->length() < shape_[0]) {
       util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
     }
   }
@@ -464,7 +464,7 @@ namespace awkward {
     const std::vector<ssize_t> shape({ 0 });
     const std::vector<ssize_t> strides({ itemsize_ });
     std::shared_ptr<Identity> id;
-    if (id_.get() != nullptr) {
+    if (id_ != nullptr) {
       id = id_.get()->getitem_range_nowrap(0, 0);
     }
     return std::shared_ptr<Content>(new NumpyArray(id, type_, ptr_, shape, strides, byteoffset_, itemsize_, format_));
@@ -487,7 +487,7 @@ namespace awkward {
     const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
     const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
     std::shared_ptr<Identity> id;
-    if (id_.get() != nullptr) {
+    if (id_ != nullptr) {
       if (at >= id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, at), id_.get()->classname(), nullptr);
       }
@@ -510,7 +510,7 @@ namespace awkward {
     shape.push_back((ssize_t)(stop - start));
     shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
     std::shared_ptr<Identity> id;
-    if (id_.get() != nullptr) {
+    if (id_ != nullptr) {
       if (stop > id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
       }
@@ -530,7 +530,7 @@ namespace awkward {
   const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
     assert(!isscalar());
 
-    if (!where.isadvanced()  &&  id_.get() == nullptr) {
+    if (!where.isadvanced()  &&  id_ == nullptr) {
       std::vector<ssize_t> nextshape = { 1 };
       nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
       std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };
@@ -590,7 +590,7 @@ namespace awkward {
     util::handle_error(err, classname(), id_.get());
 
     std::shared_ptr<Identity> id(nullptr);
-    if (id_.get() != nullptr) {
+    if (id_ != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }
 
@@ -729,7 +729,7 @@ namespace awkward {
   }
 
   const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>& head, const Slice& tail, int64_t length) const {
-    if (head.get() == nullptr) {
+    if (head == nullptr) {
       return NumpyArray(id_, type_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
     }
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
@@ -791,8 +791,8 @@ namespace awkward {
     }
     awkward_regularize_rangeslice(&start, &stop, step > 0, range.hasstart(), range.hasstop(), (int64_t)shape_[1]);
 
-    int64_t numer = abs(start - stop);
-    int64_t denom = abs(step);
+    int64_t numer = std::abs(start - stop);
+    int64_t denom = std::abs(step);
     int64_t d = numer / denom;
     int64_t m = numer % denom;
     int64_t lenhead = d + (m != 0 ? 1 : 0);
@@ -845,7 +845,7 @@ namespace awkward {
   }
 
   const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
-    if (head.get() == nullptr) {
+    if (head == nullptr) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*stride)], awkward::util::array_deleter<uint8_t>());
       struct Error err = awkward_numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
@@ -857,7 +857,7 @@ namespace awkward {
       util::handle_error(err, classname(), id_.get());
 
       std::shared_ptr<Identity> id(nullptr);
-      if (id_.get() != nullptr) {
+      if (id_ != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
 
@@ -943,8 +943,8 @@ namespace awkward {
     }
     awkward_regularize_rangeslice(&start, &stop, step > 0, range.hasstart(), range.hasstop(), (int64_t)shape_[1]);
 
-    int64_t numer = abs(start - stop);
-    int64_t denom = abs(step);
+    int64_t numer = std::abs(start - stop);
+    int64_t denom = std::abs(step);
     int64_t d = numer / denom;
     int64_t m = numer % denom;
     int64_t lenhead = d + (m != 0 ? 1 : 0);

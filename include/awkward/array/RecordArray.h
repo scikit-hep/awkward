@@ -43,7 +43,7 @@ namespace awkward {
     const std::vector<std::shared_ptr<Content>> contents() const { return contents_; }
     const std::shared_ptr<Lookup> lookup() const { return lookup_; }
     const std::shared_ptr<ReverseLookup> reverselookup() const { return reverselookup_; }
-    bool istuple() const { return lookup_.get() == nullptr; }
+    bool istuple() const { return lookup_ == nullptr; }
 
     const std::string classname() const override;
     void setid() override;

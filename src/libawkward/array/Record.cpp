@@ -21,7 +21,7 @@ namespace awkward {
 
   const std::shared_ptr<Identity> Record::id() const {
     std::shared_ptr<Identity> recid = array_.id();
-    if (recid.get() == nullptr) {
+    if (recid == nullptr) {
       return recid;
     }
     else {
@@ -95,7 +95,7 @@ namespace awkward {
   }
 
   void Record::check_for_iteration() const {
-    if (array_.id().get() != nullptr  &&  array_.id().get()->length() != 1) {
+    if (array_.id() != nullptr  &&  array_.id().get()->length() != 1) {
       util::handle_error(failure("len(id) != 1 for scalar Record", kSliceNone, kSliceNone), array_.id().get()->classname(), nullptr);
     }
   }
@@ -126,7 +126,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& keys) const {
     std::shared_ptr<Type> type = Type::none();
-    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
+    if (type_ != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
       type = type_;
     }
     RecordArray out(array_.id(), type, length(), istuple());

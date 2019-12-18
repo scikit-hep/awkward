@@ -33,7 +33,7 @@ namespace awkward {
 
   template <>
   void ListArrayOf<int32_t>::setid(const std::shared_ptr<Identity> id) {
-    if (id.get() == nullptr) {
+    if (id == nullptr) {
       content_.get()->setid(id);
     }
     else {
@@ -87,7 +87,7 @@ namespace awkward {
 
   template <typename T>
   void ListArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
-    if (id.get() == nullptr) {
+    if (id == nullptr) {
       content_.get()->setid(id);
     }
     else {
@@ -141,10 +141,10 @@ namespace awkward {
   const std::string ListArrayOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << ">\n";
-    if (id_.get() != nullptr) {
+    if (id_ != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
-    if (type_.get() != nullptr) {
+    if (type_ != nullptr) {
       out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
     }
     out << starts_.tostring_part(indent + std::string("    "), "<starts>", "</starts>\n");
@@ -205,7 +205,7 @@ namespace awkward {
     if (stops_.length() < starts_.length()) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), id_.get());
     }
-    if (id_.get() != nullptr  &&  id_.get()->length() < starts_.length()) {
+    if (id_ != nullptr  &&  id_.get()->length() < starts_.length()) {
       util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
     }
   }
@@ -258,7 +258,7 @@ namespace awkward {
     if (regular_stop > stops_.length()) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), id_.get());
     }
-    if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
+    if (id_ != nullptr  &&  regular_stop > id_.get()->length()) {
       util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
     }
     return getitem_range_nowrap(regular_start, regular_stop);
@@ -267,7 +267,7 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
     std::shared_ptr<Identity> id(nullptr);
-    if (id_.get() != nullptr) {
+    if (id_ != nullptr) {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
     return std::shared_ptr<Content>(new ListArrayOf<T>(id, type_, starts_.getitem_range_nowrap(start, stop), stops_.getitem_range_nowrap(start, stop), content_));
@@ -307,7 +307,7 @@ namespace awkward {
       carry.length());
     util::handle_error(err, classname(), id_.get());
     std::shared_ptr<Identity> id(nullptr);
-    if (id_.get() != nullptr) {
+    if (id_ != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }
     return std::shared_ptr<Content>(new ListArrayOf<T>(id, type_, nextstarts, nextstops, content_));

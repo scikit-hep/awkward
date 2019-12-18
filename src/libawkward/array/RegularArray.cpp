@@ -18,7 +18,7 @@ namespace awkward {
   }
 
   void RegularArray::setid(const std::shared_ptr<Identity> id) {
-    if (id.get() == nullptr) {
+    if (id == nullptr) {
       content_.get()->setid(id);
     }
     else {
@@ -84,10 +84,10 @@ namespace awkward {
   const std::string RegularArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " size=\"" << size_ << "\">\n";
-    if (id_.get() != nullptr) {
+    if (id_ != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
-    if (type_.get() != nullptr) {
+    if (type_ != nullptr) {
       out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
     }
     out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
@@ -141,7 +141,7 @@ namespace awkward {
   }
 
   void RegularArray::check_for_iteration() const {
-    if (id_.get() != nullptr  && id_.get()->length() < length()) {
+    if (id_ != nullptr  && id_.get()->length() < length()) {
       util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
     }
   }
@@ -170,7 +170,7 @@ namespace awkward {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
-    if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
+    if (id_ != nullptr  &&  regular_stop > id_.get()->length()) {
       util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
     }
     return getitem_range_nowrap(regular_start, regular_stop);
@@ -178,7 +178,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> RegularArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     std::shared_ptr<Identity> id(nullptr);
-    if (id_.get() != nullptr) {
+    if (id_ != nullptr) {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
     return std::shared_ptr<Content>(new RegularArray(id_, type_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_));
@@ -207,7 +207,7 @@ namespace awkward {
     util::handle_error(err, classname(), id_.get());
 
     std::shared_ptr<Identity> id(nullptr);
-    if (id_.get() != nullptr) {
+    if (id_ != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }
     return std::shared_ptr<Content>(new RegularArray(id, type_, content_.get()->carry(nextcarry), size_));
@@ -273,7 +273,7 @@ namespace awkward {
     assert(range.step() != 0);
     int64_t regular_start = range.start();
     int64_t regular_stop = range.stop();
-    int64_t regular_step = abs(range.step());
+    int64_t regular_step = std::abs(range.step());
     awkward_regularize_rangeslice(&regular_start, &regular_stop, range.step() > 0, range.start() != Slice::none(), range.stop() != Slice::none(), size_);
     int64_t nextsize = 0;
     if (range.step() > 0  &&  regular_stop - regular_start > 0) {
@@ -305,7 +305,7 @@ namespace awkward {
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
     std::shared_ptr<Type> outtype = Type::none();
-    if (type_.get() != nullptr) {
+    if (type_ != nullptr) {
       RegularType* raw = dynamic_cast<RegularType*>(type_.get());
       outtype = std::shared_ptr<Type>(new RegularType(Type::Parameters(), raw->type(), nextsize));
     }

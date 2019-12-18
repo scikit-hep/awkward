@@ -35,7 +35,7 @@ namespace awkward {
   }
 
   void RecordArray::setid(const std::shared_ptr<Identity> id) {
-    if (id.get() == nullptr) {
+    if (id == nullptr) {
       for (auto content : contents_) {
         content.get()->setid(id);
       }
@@ -70,10 +70,10 @@ namespace awkward {
       out << " length=\"" << length_ << "\"";
     }
     out << ">\n";
-    if (id_.get() != nullptr) {
+    if (id_ != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
-    if (type_.get() != nullptr) {
+    if (type_ != nullptr) {
       out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
     }
     for (size_t j = 0;  j < contents_.size();  j++) {
@@ -131,7 +131,7 @@ namespace awkward {
     if (accepts(type)) {
       std::shared_ptr<Type> level = type.get()->level();
       RecordType* raw = dynamic_cast<RecordType*>(level.get());
-      if (reverselookup_.get() == nullptr) {
+      if (reverselookup_ == nullptr) {
         for (int64_t i = 0;  i < numfields();  i++) {
           field(i).get()->settype_part(raw->field(i));
         }
@@ -151,14 +151,14 @@ namespace awkward {
   bool RecordArray::accepts(const std::shared_ptr<Type> type) {
     std::shared_ptr<Type> check = type.get()->level();
     if (RecordType* raw = dynamic_cast<RecordType*>(check.get())) {
-      if (reverselookup_.get() == nullptr) {
-        if (raw->reverselookup().get() != nullptr) {
+      if (reverselookup_ == nullptr) {
+        if (raw->reverselookup() != nullptr) {
           return false;
         }
         return numfields() == raw->numfields();
       }
       else {
-        if (raw->reverselookup().get() == nullptr) {
+        if (raw->reverselookup() == nullptr) {
           return false;
         }
         for (auto key : raw->keys()) {
@@ -200,7 +200,7 @@ namespace awkward {
   }
 
   void RecordArray::check_for_iteration() const {
-    if (id_.get() != nullptr  &&  id_.get()->length() < length()) {
+    if (id_ != nullptr  &&  id_.get()->length() < length()) {
       util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
     }
   }
@@ -260,7 +260,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
     std::shared_ptr<Type> type = Type::none();
-    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
+    if (type_ != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
       type = type_;
     }
     RecordArray out(id_, type, length(), istuple());
@@ -280,7 +280,7 @@ namespace awkward {
   const std::shared_ptr<Content> RecordArray::carry(const Index64& carry) const {
     if (contents_.empty()) {
       std::shared_ptr<Identity> id(nullptr);
-      if (id_.get() != nullptr) {
+      if (id_ != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
       return std::shared_ptr<Content>(new RecordArray(id, type_, carry.length(), istuple()));
@@ -291,7 +291,7 @@ namespace awkward {
         contents.push_back(content.get()->carry(carry));
       }
       std::shared_ptr<Identity> id(nullptr);
-      if (id_.get() != nullptr) {
+      if (id_ != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
       return std::shared_ptr<Content>(new RecordArray(id, type_, contents, lookup_, reverselookup_));
@@ -439,7 +439,7 @@ namespace awkward {
 
   const RecordArray RecordArray::astuple() const {
     RecordArray out(id_, Type::none(), contents_);
-    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(out.keys(), type_.get()->keys())) {
+    if (type_ != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(out.keys(), type_.get()->keys())) {
       out.type_ = type_;
     }
     return out;
@@ -476,7 +476,7 @@ namespace awkward {
     Slice emptytail;
     emptytail.become_sealed();
 
-    if (head.get() == nullptr) {
+    if (head == nullptr) {
       return shallow_copy();
     }
     else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {

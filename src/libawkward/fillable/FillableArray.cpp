@@ -87,7 +87,7 @@ namespace awkward {
 
   void FillableArray::endlist() {
     std::shared_ptr<Fillable> tmp = fillable_.get()->endlist();
-    if (tmp.get() == nullptr) {
+    if (tmp == nullptr) {
       throw std::invalid_argument("endlist doesn't match a corresponding beginlist");
     }
     maybeupdate(tmp);

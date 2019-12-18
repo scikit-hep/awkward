@@ -17,7 +17,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> Content::type() const {
-    if (type_.get() == nullptr) {
+    if (type_ == nullptr) {
       if (isscalar()) {
         return innertype(false);
       }
@@ -42,7 +42,7 @@ namespace awkward {
   }
 
   bool Content::isbare() const {
-    return type_.get() == nullptr;
+    return type_ == nullptr;
   }
 
   const std::shared_ptr<Type> Content::baretype() const {
@@ -103,7 +103,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
-    if (head.get() == nullptr) {
+    if (head == nullptr) {
       return shallow_copy();
     }
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {

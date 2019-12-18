@@ -139,7 +139,7 @@ namespace awkward {
     }
     virtual const std::string tostring() const;
     virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
-      return type.get() != nullptr  &&  type.get()->numfields() != -1  &&  util::subset(keys_, type.get()->keys());
+      return type != nullptr  &&  type.get()->numfields() != -1  &&  util::subset(keys_, type.get()->keys());
     }
   private:
     const std::vector<std::string> keys_;
