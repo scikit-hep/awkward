@@ -782,8 +782,8 @@ namespace awkward {
     }
     awkward_regularize_rangeslice(&start, &stop, step > 0, range.hasstart(), range.hasstop(), (int64_t)shape_[1]);
 
-    int64_t numer = abs(start - stop);
-    int64_t denom = abs(step);
+    int64_t numer = std::abs(start - stop);
+    int64_t denom = std::abs(step);
     int64_t d = numer / denom;
     int64_t m = numer % denom;
     int64_t lenhead = d + (m != 0 ? 1 : 0);
@@ -934,8 +934,8 @@ namespace awkward {
     }
     awkward_regularize_rangeslice(&start, &stop, step > 0, range.hasstart(), range.hasstop(), (int64_t)shape_[1]);
 
-    int64_t numer = abs(start - stop);
-    int64_t denom = abs(step);
+    int64_t numer = std::abs(start - stop);
+    int64_t denom = std::abs(step);
     int64_t d = numer / denom;
     int64_t m = numer % denom;
     int64_t lenhead = d + (m != 0 ? 1 : 0);

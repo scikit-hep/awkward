@@ -28,7 +28,7 @@ namespace awkward {
       else {
         throw std::runtime_error("either 'lookup' and 'reverselookup' should both be None or neither should be");
       }
-      if (contents_.size() == 0) {
+      if (contents_.empty()) {
         throw std::runtime_error("this constructor can only be used with non-empty contents");
       }
       if (type_.get() != nullptr) {
@@ -41,7 +41,7 @@ namespace awkward {
         , lookup_(nullptr)
         , reverselookup_(nullptr)
         , length_(0) {
-      if (contents_.size() == 0) {
+      if (contents_.empty()) {
         throw std::runtime_error("this constructor can only be used with non-empty contents");
       }
       if (type_.get() != nullptr) {

@@ -77,7 +77,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::astype(const std::shared_ptr<Type> type) const {
     if (type.get() == nullptr  ||  dynamic_cast<RecordType*>(type.get()) == nullptr) {
-      if (contents_.size() == 0) {
+      if (contents_.empty()) {
         return std::shared_ptr<Content>(new RecordArray(id_, type, length(), istuple()));
       }
       else {
@@ -102,7 +102,7 @@ namespace awkward {
         contents.push_back(contents_[(size_t)fieldindex(key)].get()->astype(raw->field(key)));
       }
     }
-    if (contents.size() == 0) {
+    if (contents.empty()) {
       return std::shared_ptr<Content>(new RecordArray(id_, type, length(), istuple()));
     }
     else {
@@ -113,7 +113,7 @@ namespace awkward {
   const std::string RecordArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       out << " length=\"" << length_ << "\"";
     }
     out << ">\n";
@@ -167,7 +167,7 @@ namespace awkward {
   }
 
   int64_t RecordArray::length() const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       return length_;
     }
     else {
@@ -183,7 +183,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::shallow_copy() const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       return std::shared_ptr<Content>(new RecordArray(id_, type_, length(), istuple()));
     }
     else {
@@ -218,7 +218,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range(int64_t start, int64_t stop) const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
@@ -234,7 +234,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       return std::shared_ptr<Content>(new RecordArray(id_, type_, stop - start, istuple()));
     }
     else {
@@ -266,7 +266,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::carry(const Index64& carry) const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       std::shared_ptr<Identity> id(nullptr);
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
@@ -287,7 +287,7 @@ namespace awkward {
   }
 
   const std::pair<int64_t, int64_t> RecordArray::minmax_depth() const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       return std::pair<int64_t, int64_t>(0, 0);
     }
     int64_t min = kMaxInt64;
@@ -510,7 +510,7 @@ namespace awkward {
       std::shared_ptr<Content> out = getitem_next(*fields, emptytail, advanced);
       return out.get()->getitem_next(nexthead, nexttail, advanced);
     }
-    else if (contents_.size() == 0) {
+    else if (contents_.empty()) {
       RecordArray out(Identity::none(), type_, length(), istuple());
       return out.getitem_next(nexthead, nexttail, advanced);
     }

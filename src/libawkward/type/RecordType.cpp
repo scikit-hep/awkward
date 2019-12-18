@@ -17,7 +17,7 @@ namespace awkward {
     }
 
     std::stringstream out;
-    if (parameters_.size() == 0) {
+    if (parameters_.empty()) {
       if (reverselookup_.get() == nullptr) {
         out << "(";
         for (size_t j = 0;  j < types_.size();  j++) {

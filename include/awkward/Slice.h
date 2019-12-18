@@ -90,7 +90,7 @@ namespace awkward {
   class SliceArrayOf: public SliceItem {
   public:
     SliceArrayOf<T>(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides): index_(index), shape_(shape), strides_(strides) {
-      assert(shape_.size() != 0);
+      assert(!shape_.empty());
       assert(shape_.size() == strides_.size());
     }
     const IndexOf<T> index() const { return index_; }

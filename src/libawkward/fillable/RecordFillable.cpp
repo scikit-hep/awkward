@@ -82,7 +82,7 @@ namespace awkward {
       reverselookup.get()->push_back(keys_[i]);
     }
     
-    if (contents.size() == 0) {
+    if (contents.empty()) {
       return std::shared_ptr<Content>(new RecordArray(Identity::none(), type, length_, false));
     }
     else {

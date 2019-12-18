@@ -274,7 +274,7 @@ namespace awkward {
     assert(range.step() != 0);
     int64_t regular_start = range.start();
     int64_t regular_stop = range.stop();
-    int64_t regular_step = abs(range.step());
+    int64_t regular_step = std::abs(range.step());
     awkward_regularize_rangeslice(&regular_start, &regular_stop, range.step() > 0, range.start() != Slice::none(), range.stop() != Slice::none(), size_);
     int64_t nextsize = 0;
     if (range.step() > 0  &&  regular_stop - regular_start > 0) {

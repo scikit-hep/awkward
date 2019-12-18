@@ -62,7 +62,7 @@ namespace awkward {
       }
     }
     
-    if (contents.size() == 0) {
+    if (contents.empty()) {
       return std::shared_ptr<Content>(new RecordArray(Identity::none(), type, length_, true));
     }
     else {

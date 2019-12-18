@@ -491,7 +491,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
       }
     }
 
-    if (all_strings  &&  strings.size() != 0) {
+    if (all_strings  &&  !strings.empty()) {
       slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceFields(strings)));
     }
     else {
@@ -646,7 +646,7 @@ py::object getitem(T& self, py::object obj) {
         break;
       }
     }
-    if (all_strings  &&  strings.size() != 0) {
+    if (all_strings  &&  !strings.empty()) {
       return box(self.getitem_fields(strings));
     }
     // NOTE: control flow can pass through here; don't make the last line an 'else'!
@@ -1355,7 +1355,7 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
           reverselookup.get()->push_back(key);
           out.push_back(unbox_content(x.second));
         }
-        if (out.size() == 0) {
+        if (out.empty()) {
           throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
         }
         return ak::RecordArray(unbox_id_none(id), unbox_type_none(type), out, lookup, reverselookup);
@@ -1365,7 +1365,7 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         for (auto x : contents) {
           out.push_back(unbox_content(x));
         }
-        if (out.size() == 0) {
+        if (out.empty()) {
           throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
         }
         return ak::RecordArray(unbox_id_none(id), unbox_type_none(type), out, std::shared_ptr<ak::RecordArray::Lookup>(nullptr), std::shared_ptr<ak::RecordArray::ReverseLookup>(nullptr));
@@ -1378,7 +1378,7 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         for (auto x : contents) {
           out.push_back(unbox_content(x));
         }
-        if (out.size() == 0) {
+        if (out.empty()) {
           throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
         }
         std::shared_ptr<ak::RecordArray::Lookup> lookup(new ak::RecordArray::Lookup);

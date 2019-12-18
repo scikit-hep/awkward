@@ -23,7 +23,7 @@ namespace awkward {
       }
       out << type(i).get()->tostring_part(indent, "", "");
     }
-    if (parameters_.size() != 0) {
+    if (!parameters_.empty()) {
       out << ", " << string_parameters();
     }
     out << "]" << post;
