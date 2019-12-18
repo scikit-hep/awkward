@@ -43,11 +43,19 @@ namespace awkward {
     }
 
     bool StartObject() {
+      if (depth_ == 0) {
+        array_.beginlist();
+      }
+      depth_++;
       array_.beginrecord();
       return true;
     }
     bool EndObject(rj::SizeType numfields) {
+      depth_--;
       array_.endrecord();
+      if (depth_ == 0) {
+        array_.endlist();
+      }
       return true;
     }
     bool Key(const char* str, rj::SizeType length, bool copy) {

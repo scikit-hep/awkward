@@ -204,6 +204,7 @@ namespace awkward {
         contents_.push_back(tofill);
       }
       tofill->beginlist();
+      current_ = i;
     }
     else {
       contents_[(size_t)current_].get()->beginlist();

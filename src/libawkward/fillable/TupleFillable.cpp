@@ -242,12 +242,11 @@ namespace awkward {
       throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
     }
     else if (nextindex_ == -1  ||  !contents_[(size_t)nextindex_].get()->active()) {
-      int64_t i = 0;
-      for (auto content : contents_) {
-        if (content.get()->length() == length_) {
-          maybeupdate(i, content.get()->null());
+      for (size_t i = 0;  i < contents_.size();  i++) {
+        if (contents_[i].get()->length() == length_) {
+          maybeupdate(i, contents_[i].get()->null());
         }
-        if (content.get()->length() != length_ + 1) {
+        if (contents_[i].get()->length() != length_ + 1) {
           throw std::invalid_argument(std::string("tuple index ") + std::to_string(i) + std::string(" filled more than once"));
         }
         i++;

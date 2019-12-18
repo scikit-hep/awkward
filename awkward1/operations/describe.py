@@ -25,7 +25,7 @@ def typeof(array):
     elif isinstance(array, numpy.generic):
         raise ValueError("cannot describe {0} as a PrimitiveType".format(type(array)))
 
-    elif isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
+    elif isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)):
         return array.type
 
     elif isinstance(array, awkward1.layout.Record):
