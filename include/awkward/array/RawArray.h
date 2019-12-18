@@ -79,9 +79,9 @@ namespace awkward {
 
     T* borrow(int64_t at) const { return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)itemsize_*(ssize_t)(offset_ + at)); }
 
-    virtual const std::string classname() const { return std::string("RawArrayOf<") + std::string(typeid(T).name()) + std::string(">"); }
+    const std::string classname() const override { return std::string("RawArrayOf<") + std::string(typeid(T).name()) + std::string(">"); }
 
-    virtual void setid() {
+    void setid() override {
       if (length() <= kMaxInt32) {
         Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
         std::shared_ptr<Identity> newid(rawid);
@@ -95,7 +95,7 @@ namespace awkward {
         setid(newid);
       }
     }
-    virtual void setid(const std::shared_ptr<Identity> id) {
+    void setid(const std::shared_ptr<Identity> id) override {
       if (id.get() != nullptr  &&  length() != id.get()->length()) {
         throw std::invalid_argument("content and its id must have the same length");
       }
@@ -103,7 +103,7 @@ namespace awkward {
     }
 
     const std::string tostring() { return tostring_part("", "", ""); }
-    virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+    const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const override {
       std::stringstream out;
       out << indent << pre << "<RawArray of=\"" << typeid(T).name() << "\" length=\"" << length_ << "\" itemsize=\"" << itemsize_ << "\" data=\"";
       ssize_t len = bytelength();
@@ -143,7 +143,7 @@ namespace awkward {
       return out.str();
     }
 
-    virtual void tojson_part(ToJson& builder) const {
+    void tojson_part(ToJson& builder) const override {
       if (std::is_same<T, double>::value) {
         tojson_real(builder, reinterpret_cast<double*>(byteptr()), length());
       }
@@ -182,7 +182,7 @@ namespace awkward {
       }
     }
 
-    virtual const std::shared_ptr<Type> innertype(bool bare) const {
+    const std::shared_ptr<Type> innertype(bool bare) const override {
       if (std::is_same<T, double>::value) {
         return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64));
       }
@@ -221,7 +221,7 @@ namespace awkward {
       }
     }
 
-    virtual void settype_part(const std::shared_ptr<Type> type) {
+    void settype_part(const std::shared_ptr<Type> type) override {
       if (accepts(type)) {
         type_ = type;
       }
@@ -230,7 +230,7 @@ namespace awkward {
       }
     }
 
-    virtual bool accepts(const std::shared_ptr<Type> type) {
+    bool accepts(const std::shared_ptr<Type> type) override {
       std::shared_ptr<Type> check = type.get()->level();
       if (std::is_same<T, double>::value) {
         return check.get()->equal(std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64)), false);
@@ -270,21 +270,21 @@ namespace awkward {
       }
     }
 
-    virtual int64_t length() const { return length_; }
+    int64_t length() const override { return length_; }
 
-    virtual const std::shared_ptr<Content> shallow_copy() const { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, type_, ptr_, offset_, length_, itemsize_)); }
+    const std::shared_ptr<Content> shallow_copy() const override { return std::shared_ptr<Content>(new RawArrayOf<T>(id_, type_, ptr_, offset_, length_, itemsize_)); }
 
-    virtual void check_for_iteration() const {
+    void check_for_iteration() const override {
       if (id_.get() != nullptr  &&  id_.get()->length() < length_) {
         util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
       }
     }
 
-    virtual const std::shared_ptr<Content> getitem_nothing() const {
+    const std::shared_ptr<Content> getitem_nothing() const override {
       return getitem_range_nowrap(0, 0);
     }
 
-    virtual const std::shared_ptr<Content> getitem_at(int64_t at) const {
+    const std::shared_ptr<Content> getitem_at(int64_t at) const override {
       int64_t regular_at = at;
       if (regular_at < 0) {
         regular_at += length_;
@@ -295,11 +295,11 @@ namespace awkward {
       return getitem_at_nowrap(regular_at);
     }
 
-    virtual const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const {
+    const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const override {
       return getitem_range_nowrap(at, at + 1);
     }
 
-    virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const {
+    const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const override {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
@@ -309,7 +309,7 @@ namespace awkward {
       return getitem_range_nowrap(regular_start, regular_stop);
     }
 
-    virtual const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const {
+    const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const override {
       std::shared_ptr<Identity> id(nullptr);
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_range_nowrap(start, stop);
@@ -317,29 +317,29 @@ namespace awkward {
       return std::shared_ptr<Content>(new RawArrayOf<T>(id, type_, ptr_, offset_ + start, stop - start, itemsize_));
     }
 
-    virtual const std::shared_ptr<Content> getitem_field(const std::string& key) const {
+    const std::shared_ptr<Content> getitem_field(const std::string& key) const override {
       throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
     }
 
-    virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const {
+    const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const override {
       throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
     }
 
-    virtual const std::shared_ptr<Content> getitem(const Slice& where) const {
+    const std::shared_ptr<Content> getitem(const Slice& where) const override {
       std::shared_ptr<SliceItem> nexthead = where.head();
       Slice nexttail = where.tail();
       Index64 nextadvanced(0);
       return getitem_next(nexthead, nexttail, nextadvanced);
     }
 
-    virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
+    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const override {
       if (tail.length() != 0) {
         throw std::invalid_argument("too many indexes for array");
       }
       return Content::getitem_next(head, tail, advanced);
     }
 
-    virtual const std::shared_ptr<Content> carry(const Index64& carry) const {
+    const std::shared_ptr<Content> carry(const Index64& carry) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()], awkward::util::array_deleter<T>());
       struct Error err = awkward_numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
@@ -358,42 +358,42 @@ namespace awkward {
       return std::shared_ptr<Content>(new RawArrayOf<T>(id, type_, ptr, 0, carry.length(), itemsize_));
     }
 
-    virtual const std::pair<int64_t, int64_t> minmax_depth() const {
+    const std::pair<int64_t, int64_t> minmax_depth() const override {
       return std::pair<int64_t, int64_t>(1, 1);
     }
 
-    virtual int64_t numfields() const { return -1; }
+    int64_t numfields() const override { return -1; }
 
-    virtual int64_t fieldindex(const std::string& key) const {
+    int64_t fieldindex(const std::string& key) const override {
       throw std::invalid_argument("array contains no Records");
     }
 
-    virtual const std::string key(int64_t fieldindex) const {
+    const std::string key(int64_t fieldindex) const override {
       throw std::invalid_argument("array contains no Records");
     }
 
-    virtual bool haskey(const std::string& key) const {
+    bool haskey(const std::string& key) const override {
       throw std::invalid_argument("array contains no Records");
     }
 
-    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const {
+    const std::vector<std::string> keyaliases(int64_t fieldindex) const override {
       throw std::invalid_argument("array contains no Records");
     }
 
-    virtual const std::vector<std::string> keyaliases(const std::string& key) const {
+    const std::vector<std::string> keyaliases(const std::string& key) const override {
       throw std::invalid_argument("array contains no Records");
     }
 
-    virtual const std::vector<std::string> keys() const {
+    const std::vector<std::string> keys() const override {
       throw std::invalid_argument("array contains no Records");
     }
 
   protected:
-    virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+    const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
       return getitem_at(at.at());
     }
 
-    virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+    const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override {
       if (range.step() == Slice::none()  ||  range.step() == 1) {
         return getitem_range(range.start(), range.stop());
       }
@@ -425,7 +425,7 @@ namespace awkward {
       }
     }
 
-    virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+    const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override {
       assert(advanced.length() == 0);
       if (array.shape().size() != 1) {
         throw std::runtime_error("array.ndim != 1");
@@ -439,11 +439,11 @@ namespace awkward {
       return carry(flathead);
     }
 
-    virtual const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+    const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const override {
       throw std::invalid_argument(field.tostring() + std::string(" is not a valid slice type for ") + classname());
     }
 
-    virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+    const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override {
       throw std::invalid_argument(fields.tostring() + std::string(" is not a valid slice type for ") + classname());
     }
 

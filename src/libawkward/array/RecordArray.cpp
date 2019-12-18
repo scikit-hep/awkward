@@ -1,5 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <memory>
 #include <sstream>
 
 #include "awkward/cpu-kernels/identity.h"
@@ -65,7 +66,7 @@ namespace awkward {
   const std::string RecordArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       out << " length=\"" << length_ << "\"";
     }
     out << ">\n";
@@ -101,7 +102,7 @@ namespace awkward {
     size_t cols = contents_.size();
     std::shared_ptr<ReverseLookup> keys = reverselookup_;
     if (istuple()) {
-      keys = std::shared_ptr<ReverseLookup>(new ReverseLookup);
+      keys = std::make_shared<ReverseLookup>();
       for (size_t j = 0;  j < cols;  j++) {
         keys.get()->push_back(std::to_string(j));
       }
@@ -174,7 +175,7 @@ namespace awkward {
   }
 
   int64_t RecordArray::length() const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       return length_;
     }
     else {
@@ -190,7 +191,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::shallow_copy() const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       return std::shared_ptr<Content>(new RecordArray(id_, type_, length(), istuple()));
     }
     else {
@@ -225,7 +226,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range(int64_t start, int64_t stop) const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
@@ -241,7 +242,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       return std::shared_ptr<Content>(new RecordArray(id_, type_, stop - start, istuple()));
     }
     else {
@@ -277,7 +278,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::carry(const Index64& carry) const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       std::shared_ptr<Identity> id(nullptr);
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
@@ -298,7 +299,7 @@ namespace awkward {
   }
 
   const std::pair<int64_t, int64_t> RecordArray::minmax_depth() const {
-    if (contents_.size() == 0) {
+    if (contents_.empty()) {
       return std::pair<int64_t, int64_t>(0, 0);
     }
     int64_t min = kMaxInt64;
@@ -459,8 +460,8 @@ namespace awkward {
 
   void RecordArray::setkey(int64_t fieldindex, const std::string& fieldname) {
     if (istuple()) {
-      lookup_ = std::shared_ptr<Lookup>(new Lookup);
-      reverselookup_ = std::shared_ptr<ReverseLookup>(new ReverseLookup);
+      lookup_ = std::make_shared<Lookup>();
+      reverselookup_ = std::make_shared<ReverseLookup>();
       for (size_t j = 0;  j < contents_.size();  j++) {
         reverselookup_.get()->push_back(std::to_string(j));
       }
@@ -486,7 +487,7 @@ namespace awkward {
       std::shared_ptr<Content> out = getitem_next(*fields, emptytail, advanced);
       return out.get()->getitem_next(nexthead, nexttail, advanced);
     }
-    else if (contents_.size() == 0) {
+    else if (contents_.empty()) {
       RecordArray out(Identity::none(), type_, length(), istuple());
       return out.getitem_next(nexthead, nexttail, advanced);
     }

@@ -16,7 +16,7 @@ namespace awkward {
     }
 
     std::stringstream out;
-    if (parameters_.size() == 0) {
+    if (parameters_.empty()) {
       out << indent << pre << size_ << " * " << type_.get()->tostring_part(indent, "", "") << post;
     }
     else {

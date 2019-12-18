@@ -50,7 +50,7 @@ namespace awkward {
     if (length_ == -1) {
       return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
     }
-    else if (contents_.size() == 0) {
+    else if (contents_.empty()) {
       return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, true));
     }
     else {

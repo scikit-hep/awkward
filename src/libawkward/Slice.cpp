@@ -163,7 +163,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> Slice::head() const {
-    if (items_.size() != 0) {
+    if (!items_.empty()) {
       return items_[0];
     }
     else {
@@ -173,7 +173,7 @@ namespace awkward {
 
   const Slice Slice::tail() const {
     std::vector<std::shared_ptr<SliceItem>> items;
-    if (items_.size() != 0) {
+    if (!items_.empty()) {
       items.insert(items.end(), items_.begin() + 1, items_.end());
     }
     return Slice(items, true);
@@ -224,7 +224,7 @@ namespace awkward {
     std::vector<int64_t> shape;
     for (size_t i = 0;  i < items_.size();  i++) {
       if (SliceArray64* array = dynamic_cast<SliceArray64*>(items_[i].get())) {
-        if (shape.size() == 0) {
+        if (shape.empty()) {
           shape = array->shape();
         }
         else if (shape.size() != array->ndim()) {
@@ -244,7 +244,7 @@ namespace awkward {
       }
     }
 
-    if (shape.size() != 0) {
+    if (!shape.empty()) {
       for (size_t i = 0;  i < items_.size();  i++) {
         if (SliceAt* at = dynamic_cast<SliceAt*>(items_[i].get())) {
           Index64 index(1);

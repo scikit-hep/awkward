@@ -67,7 +67,7 @@ namespace awkward {
     if (length_ == -1) {
       return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
     }
-    else if (contents_.size() == 0) {
+    else if (contents_.empty()) {
       std::shared_ptr<Content> out(new RecordArray(Identity::none(), Type::none(), length_, false));
       if (nameptr_ != nullptr) {
         std::shared_ptr<Type> type = out.get()->type();

@@ -1,5 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <memory>
 #include <sstream>
 
 #include "awkward/cpu-kernels/identity.h"
@@ -52,7 +53,7 @@ namespace awkward {
     size_t cols = (size_t)numfields();
     std::shared_ptr<RecordArray::ReverseLookup> keys = array_.reverselookup();
     if (istuple()) {
-      keys = std::shared_ptr<RecordArray::ReverseLookup>(new RecordArray::ReverseLookup);
+      keys = std::make_shared<RecordArray::ReverseLookup>();
       for (size_t j = 0;  j < cols;  j++) {
         keys.get()->push_back(std::to_string(j));
       }

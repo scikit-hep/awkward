@@ -17,7 +17,7 @@ namespace awkward {
     }
 
     std::stringstream out;
-    if (parameters_.size() == 0) {
+    if (parameters_.empty()) {
       if (dynamic_cast<ListType*>(type_.get()) != nullptr  ||
           dynamic_cast<RegularType*>(type_.get()) != nullptr) {
         out << indent << pre << "option[" << type_.get()->tostring_part(indent, "", "") << "]" << post;

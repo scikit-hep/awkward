@@ -31,7 +31,7 @@ namespace awkward {
       case float64: s = "float64"; break;
       default:      assert(dtype_ < numtypes);
     }
-    if (parameters_.size() == 0) {
+    if (parameters_.empty()) {
       out << indent << pre << s << post;
     }
     else {
