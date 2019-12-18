@@ -170,14 +170,14 @@ def minimally_touching_string(limit_length, layout, namespace):
         right.pop()
         r = ""
     if l is None and r is None:
-        if len(left) == 0:
-            return "".join(reversed(right)).lstrip(" ")
+        if left == ["["]:
+            return "[" + "".join(reversed(right)).lstrip(" ")
         else:
             return "".join(left).rstrip(" ") + ", " + "".join(reversed(right)).lstrip(" ")
     else:
-        if len(left) == 0 and len(right) == 0:
-            return "..."
-        elif len(left) == 0:
-            return "... " + "".join(reversed(right)).lstrip(" ")
+        if left == ["["] and right == ["]"]:
+            return "[...]"
+        elif left == ["["]:
+            return "[... " + "".join(reversed(right)).lstrip(" ")
         else:
             return "".join(left).rstrip(" ") + ", ... " + "".join(reversed(right)).lstrip(" ")
