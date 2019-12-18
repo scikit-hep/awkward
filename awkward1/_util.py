@@ -58,7 +58,7 @@ def minimally_touching_string(limit_length, layout, namespace):
         if wrap and isinstance(x, awkward1.layout.Record):
             cls = namespace.get(x.type.parameters.get("__class__"))
             if cls is not None:
-                y = cls(x, namespacae=namespace)
+                y = cls(x, namespace=namespace)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True

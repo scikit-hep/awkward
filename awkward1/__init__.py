@@ -3,7 +3,18 @@
 namespace = {}
 
 import awkward1.layout
+from awkward1.layout import Type
+from awkward1.layout import UnknownType
+from awkward1.layout import PrimitiveType
+from awkward1.layout import ListType
+from awkward1.layout import RegularType
+from awkward1.layout import RecordType
+from awkward1.layout import OptionType
+from awkward1.layout import UnionType
+from awkward1.layout import ArrayType
+
 import awkward1._numba
+
 import awkward1.highlevel
 from awkward1.highlevel import Array
 from awkward1.highlevel import Record
