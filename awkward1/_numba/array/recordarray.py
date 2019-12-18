@@ -215,10 +215,6 @@ def box(tpe, val, c):
         args.append(id_obj)
     else:
         args.append(c.pyapi.make_none())
-    if tpe.typetpe != numba.none:
-        args.append(c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager))
-    else:
-        args.append(c.pyapi.make_none())
 
     if len(tpe.contenttpes) == 0:
         RecordArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.RecordArray))
@@ -264,6 +260,16 @@ def box(tpe, val, c):
 
     for x in args:
         c.pyapi.decref(x)
+
+    if tpe.typetpe != numba.none:
+        old = out
+        astype_obj = c.pyapi.object_getattr_string(out, "astype")
+        t = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
+        out = c.pyapi.call_function_objargs(astype_obj, (t,))
+        c.pyapi.decref(old)
+        c.pyapi.decref(astype_obj)
+        c.pyapi.decref(t)
+
     return out
 
 @numba.extending.box(RecordType)

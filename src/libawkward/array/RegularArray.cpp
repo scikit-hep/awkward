@@ -243,7 +243,7 @@ namespace awkward {
       okay = (raw->type().get() == content_.get()->type().get()  &&  raw->size() == size_);
     }
     if (!okay) {
-        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname() + std::string(" with size ") + std::to_string(size_));
+        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
     }
   }
 

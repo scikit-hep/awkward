@@ -34,8 +34,6 @@ def test_boxing():
     b = f2(a)
     assert sys.getrefcount(a) == 3
 
-    print(str(b.snapshot()))
-
     assert str(b.snapshot()) == """<EmptyArray>
     <type>unknown</type>
 </EmptyArray>"""
