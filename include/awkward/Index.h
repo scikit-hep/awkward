@@ -12,6 +12,7 @@
 namespace awkward {
   class Index {
     virtual const std::shared_ptr<Index> shallow_copy() const = 0;
+    virtual const std::shared_ptr<Index> deep_copy() const = 0;
   };
 
   template <typename T>
@@ -39,6 +40,7 @@ namespace awkward {
     IndexOf<T> getitem_range(int64_t start, int64_t stop) const;
     IndexOf<T> getitem_range_nowrap(int64_t start, int64_t stop) const;
     const std::shared_ptr<Index> shallow_copy() const override;
+    const std::shared_ptr<Index> deep_copy() const override;
 
   private:
     const std::shared_ptr<T> ptr_;

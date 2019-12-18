@@ -1,5 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <cstring>
 #include <iomanip>
 #include <sstream>
 #include <type_traits>
@@ -109,6 +110,16 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Index> IndexOf<T>::shallow_copy() const {
     return std::make_shared<IndexOf<T>>(ptr_, offset_, length_);
+  }
+
+  template <typename T>
+  const std::shared_ptr<Index> IndexOf<T>::deep_copy() const {
+    int64_t length;
+    std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_], awkward::util::array_deleter<T>());
+    if (length_ != 0) {
+      memcpy(ptr.get(), &ptr_.get()[offset_], sizeof(T)*length_);
+    }
+    return std::make_shared<IndexOf<T>>(ptr, 0, length_);
   }
 
   template class IndexOf<int8_t>;
