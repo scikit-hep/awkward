@@ -38,7 +38,7 @@ namespace awkward {
     void setitem_at_nowrap(int64_t at, T value) const;
     IndexOf<T> getitem_range(int64_t start, int64_t stop) const;
     IndexOf<T> getitem_range_nowrap(int64_t start, int64_t stop) const;
-    virtual const std::shared_ptr<Index> shallow_copy() const;
+    const std::shared_ptr<Index> shallow_copy() const override;
 
   private:
     const std::shared_ptr<T> ptr_;

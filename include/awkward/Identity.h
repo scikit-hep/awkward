@@ -64,15 +64,15 @@ namespace awkward {
 
     const std::shared_ptr<T> ptr() const { return ptr_; }
 
-    virtual const std::string classname() const;
-    virtual const std::string location_at(int64_t at) const;
-    virtual const std::shared_ptr<Identity> to64() const;
-    virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
-    virtual const std::shared_ptr<Identity> getitem_range_nowrap(int64_t start, int64_t stop) const;
-    virtual const std::shared_ptr<Identity> shallow_copy() const;
-    virtual const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const;
-    virtual const std::shared_ptr<Identity> withfieldloc(const FieldLoc& fieldloc) const;
-    virtual int64_t value(int64_t row, int64_t col) const;
+    const std::string classname() const override;
+    const std::string location_at(int64_t at) const override;
+    const std::shared_ptr<Identity> to64() const override;
+    const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const override;
+    const std::shared_ptr<Identity> getitem_range_nowrap(int64_t start, int64_t stop) const override;
+    const std::shared_ptr<Identity> shallow_copy() const override;
+    const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const override;
+    const std::shared_ptr<Identity> withfieldloc(const FieldLoc& fieldloc) const override;
+    int64_t value(int64_t row, int64_t col) const override;
 
     const std::vector<T> getitem_at(int64_t at) const;
     const std::vector<T> getitem_at_nowrap(int64_t at) const;

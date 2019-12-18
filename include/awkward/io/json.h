@@ -48,16 +48,16 @@ namespace awkward {
       }
     }
 
-    virtual void null() { writer_.Null(); }
-    virtual void boolean(bool x) { writer_.Bool(x); }
-    virtual void integer(int64_t x) { writer_.Int64(x); }
-    virtual void real(double x) { writer_.Double(x); }
-    virtual void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
-    virtual void beginlist() { writer_.StartArray(); }
-    virtual void endlist() { writer_.EndArray(); }
-    virtual void beginrecord() { writer_.StartObject(); }
-    virtual void field(const char* x) { writer_.Key(x); }
-    virtual void endrecord() { writer_.EndObject(); }
+    void null() override { writer_.Null(); }
+    void boolean(bool x) override { writer_.Bool(x); }
+    void integer(int64_t x) override { writer_.Int64(x); }
+    void real(double x) override { writer_.Double(x); }
+    void string(const char* x, int64_t length) override { writer_.String(x, (rj::SizeType)length); }
+    void beginlist() override { writer_.StartArray(); }
+    void endlist() override { writer_.EndArray(); }
+    void beginrecord() override { writer_.StartObject(); }
+    void field(const char* x) override { writer_.Key(x); }
+    void endrecord() override { writer_.EndObject(); }
 
     std::string tostring() {
       return std::string(buffer_.GetString());
@@ -76,16 +76,16 @@ namespace awkward {
       }
     }
 
-    virtual void null() { writer_.Null(); }
-    virtual void boolean(bool x) { writer_.Bool(x); }
-    virtual void integer(int64_t x) { writer_.Int64(x); }
-    virtual void real(double x) { writer_.Double(x); }
-    virtual void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
-    virtual void beginlist() { writer_.StartArray(); }
-    virtual void endlist() { writer_.EndArray(); }
-    virtual void beginrecord() { writer_.StartObject(); }
-    virtual void field(const char* x) { writer_.Key(x); }
-    virtual void endrecord() { writer_.EndObject(); }
+    void null() override { writer_.Null(); }
+    void boolean(bool x) override { writer_.Bool(x); }
+    void integer(int64_t x) override { writer_.Int64(x); }
+    void real(double x) override { writer_.Double(x); }
+    void string(const char* x, int64_t length) override { writer_.String(x, (rj::SizeType)length); }
+    void beginlist() override { writer_.StartArray(); }
+    void endlist() override { writer_.EndArray(); }
+    void beginrecord() override { writer_.StartObject(); }
+    void field(const char* x) override { writer_.Key(x); }
+    void endrecord() override { writer_.EndObject(); }
 
     std::string tostring() {
       return std::string(buffer_.GetString());
@@ -104,16 +104,16 @@ namespace awkward {
       }
     }
 
-    virtual void null() { writer_.Null(); }
-    virtual void boolean(bool x) { writer_.Bool(x); }
-    virtual void integer(int64_t x) { writer_.Int64(x); }
-    virtual void real(double x) { writer_.Double(x); }
-    virtual void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
-    virtual void beginlist() { writer_.StartArray(); }
-    virtual void endlist() { writer_.EndArray(); }
-    virtual void beginrecord() { writer_.StartObject(); }
-    virtual void field(const char* x) { writer_.Key(x); }
-    virtual void endrecord() { writer_.EndObject(); }
+    void null() override { writer_.Null(); }
+    void boolean(bool x) override { writer_.Bool(x); }
+    void integer(int64_t x) override { writer_.Int64(x); }
+    void real(double x) override { writer_.Double(x); }
+    void string(const char* x, int64_t length) override { writer_.String(x, (rj::SizeType)length); }
+    void beginlist() override { writer_.StartArray(); }
+    void endlist() override { writer_.EndArray(); }
+    void beginrecord() override { writer_.StartObject(); }
+    void field(const char* x) override { writer_.Key(x); }
+    void endrecord() override { writer_.EndObject(); }
 
   private:
     std::shared_ptr<char> buffer_;
@@ -129,16 +129,16 @@ namespace awkward {
       }
     }
 
-    virtual void null() { writer_.Null(); }
-    virtual void boolean(bool x) { writer_.Bool(x); }
-    virtual void integer(int64_t x) { writer_.Int64(x); }
-    virtual void real(double x) { writer_.Double(x); }
-    virtual void string(const char* x, int64_t length) { writer_.String(x, (rj::SizeType)length); }
-    virtual void beginlist() { writer_.StartArray(); }
-    virtual void endlist() { writer_.EndArray(); }
-    virtual void beginrecord() { writer_.StartObject(); }
-    virtual void field(const char* x) { writer_.Key(x); }
-    virtual void endrecord() { writer_.EndObject(); }
+    void null() override { writer_.Null(); }
+    void boolean(bool x) override { writer_.Bool(x); }
+    void integer(int64_t x) override { writer_.Int64(x); }
+    void real(double x) override { writer_.Double(x); }
+    void string(const char* x, int64_t length) override { writer_.String(x, (rj::SizeType)length); }
+    void beginlist() override { writer_.StartArray(); }
+    void endlist() override { writer_.EndArray(); }
+    void beginrecord() override { writer_.StartObject(); }
+    void field(const char* x) override { writer_.Key(x); }
+    void endrecord() override { writer_.EndObject(); }
 
   private:
     std::shared_ptr<char> buffer_;

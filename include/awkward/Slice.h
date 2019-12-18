@@ -28,11 +28,11 @@ namespace awkward {
   public:
     SliceAt(int64_t at): at_(at) { }
     int64_t at() const { return at_; }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+    const std::shared_ptr<SliceItem> shallow_copy() const override {
       return std::shared_ptr<SliceItem>(new SliceAt(at_));
     }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override {
       return false;
     }
   private:
@@ -49,11 +49,11 @@ namespace awkward {
     int64_t step() const { return step_; }
     bool hasstart() const { return start_ != none(); }
     bool hasstop() const { return stop_ != none(); }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+    const std::shared_ptr<SliceItem> shallow_copy() const override {
       return std::shared_ptr<SliceItem>(new SliceRange(start_, stop_, step_));
     }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override {
       return true;
     }
   private:
@@ -65,11 +65,11 @@ namespace awkward {
   class SliceEllipsis: public SliceItem {
   public:
     SliceEllipsis() { }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+    const std::shared_ptr<SliceItem> shallow_copy() const override {
       return std::shared_ptr<SliceItem>(new SliceEllipsis());
     }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override {
       return true;
     }
   };
@@ -77,11 +77,11 @@ namespace awkward {
   class SliceNewAxis: public SliceItem {
   public:
     SliceNewAxis() { }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+    const std::shared_ptr<SliceItem> shallow_copy() const override {
       return std::shared_ptr<SliceItem>(new SliceNewAxis());
     }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override {
       return false;
     }
   };
@@ -98,11 +98,11 @@ namespace awkward {
     const std::vector<int64_t> shape() const { return shape_; }
     const std::vector<int64_t> strides() const { return strides_; }
     int64_t ndim() const { return (int64_t)shape_.size(); }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+    const std::shared_ptr<SliceItem> shallow_copy() const override {
       return std::shared_ptr<SliceItem>(new SliceArrayOf<T>(index_, shape_, strides_));
     }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override {
       return advanced.length() == 0;
     }
     const std::string tostring_part() const;
@@ -119,11 +119,11 @@ namespace awkward {
   public:
     SliceField(const std::string& key): key_(key) { }
     const std::string key() const { return key_; }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+    const std::shared_ptr<SliceItem> shallow_copy() const override {
       return std::shared_ptr<SliceItem>(new SliceField(key_));
     }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override {
       return false;
     }
   private:
@@ -134,11 +134,11 @@ namespace awkward {
   public:
     SliceFields(const std::vector<std::string>& keys): keys_(keys) { }
     const std::vector<std::string> keys() const { return keys_; }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
+    const std::shared_ptr<SliceItem> shallow_copy() const override {
       return std::shared_ptr<SliceItem>(new SliceFields(keys_));
     }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override {
       return type.get() != nullptr  &&  type.get()->numfields() != -1  &&  util::subset(keys_, type.get()->keys());
     }
   private:

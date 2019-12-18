@@ -31,16 +31,16 @@ namespace awkward {
     const std::shared_ptr<ReverseLookup> reverselookup() const { return reverselookup_; }
     bool istuple() const { return lookup_.get() == nullptr; }
 
-    virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const;
-    virtual const std::shared_ptr<Type> shallow_copy() const;
-    virtual bool equal(const std::shared_ptr<Type> other, bool check_parameters) const;
-    virtual int64_t numfields() const;
-    virtual int64_t fieldindex(const std::string& key) const;
-    virtual const std::string key(int64_t fieldindex) const;
-    virtual bool haskey(const std::string& key) const;
-    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const;
-    virtual const std::vector<std::string> keyaliases(const std::string& key) const;
-    virtual const std::vector<std::string> keys() const;
+    std::string tostring_part(std::string indent, std::string pre, std::string post) const override;
+    const std::shared_ptr<Type> shallow_copy() const override;
+    bool equal(const std::shared_ptr<Type> other, bool check_parameters) const override;
+    int64_t numfields() const override;
+    int64_t fieldindex(const std::string& key) const override;
+    const std::string key(int64_t fieldindex) const override;
+    bool haskey(const std::string& key) const override;
+    const std::vector<std::string> keyaliases(int64_t fieldindex) const override;
+    const std::vector<std::string> keyaliases(const std::string& key) const override;
+    const std::vector<std::string> keys() const override;
 
     const std::shared_ptr<Type> field(int64_t fieldindex) const;
     const std::shared_ptr<Type> field(const std::string& key) const;
