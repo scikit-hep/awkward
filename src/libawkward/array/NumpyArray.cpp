@@ -66,15 +66,15 @@ namespace awkward {
   void NumpyArray::setid() {
     assert(!isscalar());
     if (length() <= kMaxInt32) {
-      Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
-      std::shared_ptr<Identity> newid(rawid);
+      std::shared_ptr<Identity> newid = std::make_shared<Identity32>(Identity::newref(), Identity::FieldLoc(), 1, length());
+      Identity32* rawid = reinterpret_cast<Identity32*>(newid.get());
       struct Error err = awkward_new_identity32(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
     else {
-      Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, length());
-      std::shared_ptr<Identity> newid(rawid);
+      std::shared_ptr<Identity> newid = std::make_shared<Identity64>(Identity::newref(), Identity::FieldLoc(), 1, length());
+      Identity64* rawid = reinterpret_cast<Identity64*>(newid.get());
       struct Error err = awkward_new_identity64(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
@@ -144,65 +144,65 @@ namespace awkward {
       out = type_;
     }
     else if (format_.compare("d") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64));
+      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::float64);
     }
     else if (format_.compare("f") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float32));
+      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::float32);
     }
 #ifdef _MSC_VER
     else if (format_.compare("q") == 0) {
 #else
     else if (format_.compare("l") == 0) {
 #endif
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64));
+      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::int64);
     }
 #ifdef _MSC_VER
     else if (format_.compare("Q") == 0) {
 #else
     else if (format_.compare("L") == 0) {
 #endif
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint64));
+      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::uint64);
     }
 #ifdef _MSC_VER
     else if (format_.compare("l") == 0) {
 #else
     else if (format_.compare("i") == 0) {
 #endif
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int32));
+      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::int32);
     }
 #ifdef _MSC_VER
     else if (format_.compare("L") == 0) {
 #else
     else if (format_.compare("I") == 0) {
 #endif
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint32));
+      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::uint32);
     }
     else if (format_.compare("h") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int16));
+      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::int16);
     }
     else if (format_.compare("H") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint16));
+      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::uint16);
     }
     else if (format_.compare("b") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int8));
+      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::int8);
     }
     else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::uint8));
+      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::uint8);
     }
     else if (format_.compare("?") == 0) {
-      out = std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::boolean));
+      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::boolean);
     }
     else {
       throw std::invalid_argument(std::string("Numpy format \"") + format_ + std::string("\" cannot be expressed as a PrimitiveType"));
     }
     for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
-      out = std::shared_ptr<Type>(new RegularType(Type::Parameters(), out, (int64_t)shape_[i]));
+      out = std::make_shared<RegularType>(Type::Parameters(), out, (int64_t)shape_[i]);
     }
     return out;
   }
 
   const std::shared_ptr<Content> NumpyArray::astype(const std::shared_ptr<Type> type) const {
-    return std::shared_ptr<Content>(new NumpyArray(id_, unwrap_regulartype(type, shape_), ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
+    return std::make_shared<NumpyArray>(id_, unwrap_regulartype(type, shape_), ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
 
   const std::string NumpyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
@@ -363,7 +363,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new NumpyArray(id_, type_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_));
+    return std::make_shared<NumpyArray>(id_, type_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
 
   void NumpyArray::check_for_iteration() const {
@@ -379,7 +379,7 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_range_nowrap(0, 0);
     }
-    return std::shared_ptr<Content>(new NumpyArray(id, type_, ptr_, shape, strides, byteoffset_, itemsize_, format_));
+    return std::make_shared<NumpyArray>(id, type_, ptr_, shape, strides, byteoffset_, itemsize_, format_);
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_at(int64_t at) const {
@@ -405,7 +405,7 @@ namespace awkward {
       }
       id = id_.get()->getitem_range_nowrap(at, at + 1);
     }
-    return std::shared_ptr<Content>(new NumpyArray(id, type_, ptr_, shape, strides, byteoffset, itemsize_, format_));
+    return std::make_shared<NumpyArray>(id, type_, ptr_, shape, strides, byteoffset, itemsize_, format_);
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_range(int64_t start, int64_t stop) const {
@@ -428,7 +428,7 @@ namespace awkward {
       }
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::shared_ptr<Content>(new NumpyArray(id, type_, ptr_, shape, strides_, byteoffset, itemsize_, format_));
+    return std::make_shared<NumpyArray>(id, type_, ptr_, shape, strides_, byteoffset, itemsize_, format_);
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_field(const std::string& key) const {
@@ -455,7 +455,7 @@ namespace awkward {
 
       std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
       std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
-      return std::shared_ptr<Content>(new NumpyArray(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_));
+      return std::make_shared<NumpyArray>(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
 
     else {
@@ -476,7 +476,7 @@ namespace awkward {
 
       std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
       std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
-      return std::shared_ptr<Content>(new NumpyArray(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_));
+      return std::make_shared<NumpyArray>(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
   }
 
@@ -508,7 +508,7 @@ namespace awkward {
 
     std::vector<ssize_t> shape = { (ssize_t)carry.length() };
     shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-    return std::shared_ptr<Content>(new NumpyArray(id, type_, ptr, shape, strides_, 0, itemsize_, format_));
+    return std::make_shared<NumpyArray>(id, type_, ptr, shape, strides_, 0, itemsize_, format_);
   }
 
   const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
@@ -814,10 +814,10 @@ namespace awkward {
     }
     else {
       std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
-      std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
+      std::vector<std::shared_ptr<SliceItem>> items = { std::make_shared<SliceEllipsis>() };
       items.insert(items.end(), tailitems.begin(), tailitems.end());
 
-      std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
+      std::shared_ptr<SliceItem> nexthead = std::make_shared<SliceRange>(Slice::none(), Slice::none(), 1);
       Slice nexttail(items);
       return getitem_bystrides(nexthead, nexttail, length);
     }
@@ -1000,9 +1000,9 @@ namespace awkward {
     }
     else {
       std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
-      std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
+      std::vector<std::shared_ptr<SliceItem>> items = { std::make_shared<SliceEllipsis>() };
       items.insert(items.end(), tailitems.begin(), tailitems.end());
-      std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
+      std::shared_ptr<SliceItem> nexthead = std::make_shared<SliceRange>(Slice::none(), Slice::none(), 1);
       Slice nexttail(items);
       return getitem_next(nexthead, nexttail, carry, advanced, length, stride, false);
     }

@@ -108,7 +108,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Index> IndexOf<T>::shallow_copy() const {
-    return std::shared_ptr<Index>(new IndexOf<T>(ptr_, offset_, length_));
+    return std::make_shared<IndexOf<T>>(ptr_, offset_, length_);
   }
 
   template class IndexOf<int8_t>;

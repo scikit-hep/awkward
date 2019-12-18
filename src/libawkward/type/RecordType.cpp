@@ -72,7 +72,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RecordType::shallow_copy() const {
-    return std::shared_ptr<Type>(new RecordType(parameters_, types_, lookup_, reverselookup_));
+    return std::make_shared<RecordType>(parameters_, types_, lookup_, reverselookup_);
   }
 
   bool RecordType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
@@ -243,7 +243,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RecordType::astuple() const {
-    return std::shared_ptr<Type>(new RecordType(parameters_, types_, std::shared_ptr<Lookup>(nullptr), std::shared_ptr<ReverseLookup>(nullptr)));
+    return std::make_shared<RecordType>(parameters_, types_, std::shared_ptr<Lookup>(nullptr), std::shared_ptr<ReverseLookup>(nullptr));
   }
 
   void RecordType::append(const std::shared_ptr<Type>& type) {
@@ -255,8 +255,8 @@ namespace awkward {
 
   void RecordType::setkey(int64_t fieldindex, const std::string& fieldname) {
     if (istuple()) {
-      lookup_ = std::shared_ptr<Lookup>(new Lookup);
-      reverselookup_ = std::shared_ptr<ReverseLookup>(new ReverseLookup);
+      lookup_ = std::make_shared<Lookup>();
+      reverselookup_ = std::make_shared<ReverseLookup>();
       for (size_t j = 0;  j < types_.size();  j++) {
         reverselookup_.get()->push_back(std::to_string(j));
       }

@@ -23,7 +23,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnknownType::shallow_copy() const {
-    return std::shared_ptr<Type>(new UnknownType(parameters_));
+    return std::make_shared<UnknownType>(parameters_);
   }
 
   bool UnknownType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {

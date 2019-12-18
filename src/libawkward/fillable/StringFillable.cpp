@@ -15,7 +15,7 @@ namespace awkward {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
     offsets.append(0);
     GrowableBuffer<uint8_t> content = GrowableBuffer<uint8_t>::empty(options);
-    std::shared_ptr<Fillable> out(new StringFillable(options, offsets, content, encoding));
+    std::shared_ptr<Fillable> out = std::make_shared<StringFillable>(options, offsets, content, encoding);
     out.get()->setthat(out);
     return out;
   }
@@ -56,7 +56,7 @@ namespace awkward {
       char_parameters["encoding"] = std::string(quoted);
     }
 
-    return std::shared_ptr<Type>(new ListType(string_parameters, std::shared_ptr<Type>(new PrimitiveType(char_parameters, PrimitiveType::uint8))));
+    return std::make_shared<ListType>(string_parameters, std::make_shared<PrimitiveType>(char_parameters, PrimitiveType::uint8));
   }
 
   const std::shared_ptr<Content> StringFillable::snapshot(const std::shared_ptr<Type> type) const {
@@ -66,12 +66,12 @@ namespace awkward {
     std::vector<ssize_t> strides = { (ssize_t)sizeof(uint8_t) };
     std::shared_ptr<Content> content;
     if (raw == nullptr) {
-      content = std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B"));
+      content = std::make_shared<NumpyArray>(Identity::none(), Type::none(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B");
     }
     else {
-      content = std::shared_ptr<Content>(new NumpyArray(Identity::none(), raw->type(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B"));
+      content = std::make_shared<NumpyArray>(Identity::none(), raw->type(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B");
     }
-    return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), type, offsets, content));
+    return std::make_shared<ListOffsetArray64>(Identity::none(), type, offsets, content);
   }
 
   bool StringFillable::active() const {

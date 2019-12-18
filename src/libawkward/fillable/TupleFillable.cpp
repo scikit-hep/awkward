@@ -15,7 +15,7 @@
 
 namespace awkward {
   const std::shared_ptr<Fillable> TupleFillable::fromempty(const FillableOptions& options) {
-    std::shared_ptr<Fillable> out(new TupleFillable(options, std::vector<std::shared_ptr<Fillable>>(), -1, false, -1));
+    std::shared_ptr<Fillable> out = std::make_shared<TupleFillable>(options, std::vector<std::shared_ptr<Fillable>>(), -1, false, -1);
     out.get()->setthat(out);
     return out;
   }
@@ -35,20 +35,20 @@ namespace awkward {
 
   const std::shared_ptr<Type> TupleFillable::type() const {
     if (length_ == -1) {
-      return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
+      return std::make_shared<UnknownType>(Type::Parameters());
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
       for (size_t i = 0;  i < contents_.size();  i++) {
         types.push_back(contents_[i].get()->type());
       }
-      return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types));
+      return std::make_shared<RecordType>(Type::Parameters(), types);
     }
   }
 
   const std::shared_ptr<Content> TupleFillable::snapshot(const std::shared_ptr<Type> type) const {
     if (length_ == -1) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), type));
+      return std::make_shared<EmptyArray>(Identity::none(), type);
     }
 
     RecordType* raw = dynamic_cast<RecordType*>(type.get());
@@ -63,10 +63,10 @@ namespace awkward {
     }
     
     if (contents.empty()) {
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), type, length_, true));
+      return std::make_shared<RecordArray>(Identity::none(), type, length_, true);
     }
     else {
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), type, contents));
+      return std::make_shared<RecordArray>(Identity::none(), type, contents);
     }
   }
 

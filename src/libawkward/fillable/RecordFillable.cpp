@@ -18,7 +18,7 @@
 
 namespace awkward {
   const std::shared_ptr<Fillable> RecordFillable::fromempty(const FillableOptions& options) {
-    std::shared_ptr<Fillable> out(new RecordFillable(options, std::vector<std::shared_ptr<Fillable>>(), std::vector<std::string>(), std::vector<const char*>(), "", nullptr, -1, false, -1, -1));
+    std::shared_ptr<Fillable> out = std::make_shared<RecordFillable>(options, std::vector<std::shared_ptr<Fillable>>(), std::vector<std::string>(), std::vector<const char*>(), "", nullptr, -1, false, -1, -1);
     out.get()->setthat(out);
     return out;
   }
@@ -43,12 +43,12 @@ namespace awkward {
 
   const std::shared_ptr<Type> RecordFillable::type() const {
     if (length_ == -1) {
-      return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
+      return std::make_shared<UnknownType>(Type::Parameters());
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
-      std::shared_ptr<RecordType::Lookup> lookup(new RecordType::Lookup);
-      std::shared_ptr<RecordType::ReverseLookup> reverselookup(new RecordType::ReverseLookup);
+      std::shared_ptr<RecordType::Lookup> lookup = std::make_shared<RecordType::Lookup>();
+      std::shared_ptr<RecordType::ReverseLookup> reverselookup = std::make_shared<RecordType::ReverseLookup>();
       for (size_t i = 0;  i < contents_.size();  i++) {
         types.push_back(contents_[i].get()->type());
         (*lookup.get())[keys_[i]] = i;
@@ -58,19 +58,19 @@ namespace awkward {
       if (nameptr_ != nullptr) {
         parameters["__class__"] = util::quote(name_, true);
       }
-      return std::shared_ptr<Type>(new RecordType(parameters, types, lookup, reverselookup));
+      return std::make_shared<RecordType>(parameters, types, lookup, reverselookup);
     }
   }
 
   const std::shared_ptr<Content> RecordFillable::snapshot(const std::shared_ptr<Type> type) const {
     if (length_ == -1) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), type));
+      return std::make_shared<EmptyArray>(Identity::none(), type);
     }
 
     RecordType* raw = dynamic_cast<RecordType*>(type.get());
     std::vector<std::shared_ptr<Content>> contents;
-    std::shared_ptr<RecordArray::Lookup> lookup(new RecordArray::Lookup);
-    std::shared_ptr<RecordArray::ReverseLookup> reverselookup(new RecordArray::ReverseLookup);
+    std::shared_ptr<RecordType::Lookup> lookup = std::make_shared<RecordType::Lookup>();
+    std::shared_ptr<RecordType::ReverseLookup> reverselookup = std::make_shared<RecordType::ReverseLookup>();
     for (size_t i = 0;  i < contents_.size();  i++) {
       if (raw == nullptr) {
         contents.push_back(contents_[i].get()->snapshot(Type::none()));
@@ -83,10 +83,10 @@ namespace awkward {
     }
     
     if (contents.empty()) {
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), type, length_, false));
+      return std::make_shared<RecordArray>(Identity::none(), type, length_, false);
     }
     else {
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), type, contents, lookup, reverselookup));
+      return std::make_shared<RecordArray>(Identity::none(), type, contents, lookup, reverselookup);
     }
   }
 

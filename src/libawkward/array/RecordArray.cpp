@@ -18,15 +18,15 @@ namespace awkward {
   void RecordArray::setid() {
     int64_t len = length();
     if (len <= kMaxInt32) {
-      Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, len);
-      std::shared_ptr<Identity> newid(rawid);
+      std::shared_ptr<Identity> newid = std::make_shared<Identity32>(Identity::newref(), Identity::FieldLoc(), 1, len);
+      Identity32* rawid = reinterpret_cast<Identity32*>(newid.get());
       struct Error err = awkward_new_identity32(rawid->ptr().get(), len);
       util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
     else {
-      Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, len);
-      std::shared_ptr<Identity> newid(rawid);
+      std::shared_ptr<Identity> newid = std::make_shared<Identity64>(Identity::newref(), Identity::FieldLoc(), 1, len);
+      Identity64* rawid = reinterpret_cast<Identity64*>(newid.get());
       struct Error err = awkward_new_identity64(rawid->ptr().get(), len);
       util::handle_error(err, classname(), id_.get());
       setid(newid);
@@ -71,17 +71,17 @@ namespace awkward {
       for (auto item : contents_) {
         types.push_back(item.get()->type());
       }
-      return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types, lookup_, reverselookup_));
+      return std::make_shared<RecordType>(Type::Parameters(), types, lookup_, reverselookup_);
     }
   }
 
   const std::shared_ptr<Content> RecordArray::astype(const std::shared_ptr<Type> type) const {
     if (type.get() == nullptr  ||  dynamic_cast<RecordType*>(type.get()) == nullptr) {
       if (contents_.empty()) {
-        return std::shared_ptr<Content>(new RecordArray(id_, type, length(), istuple()));
+        return std::make_shared<RecordArray>(id_, type, length(), istuple());
       }
       else {
-        return std::shared_ptr<Content>(new RecordArray(id_, type, contents_, lookup_, reverselookup_));
+        return std::make_shared<RecordArray>(id_, type, contents_, lookup_, reverselookup_);
       }
     }
     RecordType* raw = dynamic_cast<RecordType*>(type.get());
@@ -103,10 +103,10 @@ namespace awkward {
       }
     }
     if (contents.empty()) {
-      return std::shared_ptr<Content>(new RecordArray(id_, type, length(), istuple()));
+      return std::make_shared<RecordArray>(id_, type, length(), istuple());
     }
     else {
-      return std::shared_ptr<Content>(new RecordArray(id_, type, contents, raw->lookup(), raw->reverselookup()));
+      return std::make_shared<RecordArray>(id_, type, contents, raw->lookup(), raw->reverselookup());
     }
   }
 
@@ -149,7 +149,7 @@ namespace awkward {
     size_t cols = contents_.size();
     std::shared_ptr<ReverseLookup> keys = reverselookup_;
     if (istuple()) {
-      keys = std::shared_ptr<ReverseLookup>(new ReverseLookup);
+      keys = std::make_shared<ReverseLookup>();
       for (size_t j = 0;  j < cols;  j++) {
         keys.get()->push_back(std::to_string(j));
       }
@@ -184,10 +184,10 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::shallow_copy() const {
     if (contents_.empty()) {
-      return std::shared_ptr<Content>(new RecordArray(id_, type_, length(), istuple()));
+      return std::make_shared<RecordArray>(id_, type_, length(), istuple());
     }
     else {
-      return std::shared_ptr<Content>(new RecordArray(id_, type_, contents_, lookup_, reverselookup_));
+      return std::make_shared<RecordArray>(id_, type_, contents_, lookup_, reverselookup_);
     }
   }
 
@@ -214,7 +214,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_at_nowrap(int64_t at) const {
-    return std::shared_ptr<Content>(new Record(*this, at));
+    return std::make_shared<Record>(*this, at);
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range(int64_t start, int64_t stop) const {
@@ -222,27 +222,27 @@ namespace awkward {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
-      return std::shared_ptr<Content>(new RecordArray(id_, type_, regular_stop - regular_start, istuple()));
+      return std::make_shared<RecordArray>(id_, type_, regular_stop - regular_start, istuple());
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range(start, stop));
       }
-      return std::shared_ptr<Content>(new RecordArray(id_, type_, contents, lookup_, reverselookup_));
+      return std::make_shared<RecordArray>(id_, type_, contents, lookup_, reverselookup_);
     }
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     if (contents_.empty()) {
-      return std::shared_ptr<Content>(new RecordArray(id_, type_, stop - start, istuple()));
+      return std::make_shared<RecordArray>(id_, type_, stop - start, istuple());
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range_nowrap(start, stop));
       }
-      return std::shared_ptr<Content>(new RecordArray(id_, type_, contents, lookup_, reverselookup_));
+      return std::make_shared<RecordArray>(id_, type_, contents, lookup_, reverselookup_);
     }
   }
 
@@ -271,7 +271,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
-      return std::shared_ptr<Content>(new RecordArray(id, type_, carry.length(), istuple()));
+      return std::make_shared<RecordArray>(id, type_, carry.length(), istuple());
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
@@ -282,7 +282,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
-      return std::shared_ptr<Content>(new RecordArray(id, type_, contents, lookup_, reverselookup_));
+      return std::make_shared<RecordArray>(id, type_, contents, lookup_, reverselookup_);
     }
   }
 
@@ -460,8 +460,8 @@ namespace awkward {
 
   void RecordArray::setkey(int64_t fieldindex, const std::string& fieldname) {
     if (istuple()) {
-      lookup_ = std::shared_ptr<Lookup>(new Lookup);
-      reverselookup_ = std::shared_ptr<ReverseLookup>(new ReverseLookup);
+      lookup_ = std::make_shared<Lookup>();
+      reverselookup_ = std::make_shared<ReverseLookup>();
       for (size_t j = 0;  j < contents_.size();  j++) {
         reverselookup_.get()->push_back(std::to_string(j));
       }

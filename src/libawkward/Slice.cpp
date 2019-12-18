@@ -253,7 +253,7 @@ namespace awkward {
           for (size_t j = 0;  j < shape.size();  j++) {
             strides.push_back(0);
           }
-          items_[i] = std::shared_ptr<SliceItem>(new SliceArray64(index, shape, strides));
+          items_[i] = std::make_shared<SliceArray64>(index, shape, strides);
         }
         else if (SliceArray64* array = dynamic_cast<SliceArray64*>(items_[i].get())) {
           std::vector<int64_t> arrayshape = array->shape();
@@ -270,7 +270,7 @@ namespace awkward {
               throw std::invalid_argument("cannot broadcast arrays in slice");
             }
           }
-          items_[i] = std::shared_ptr<SliceItem>(new SliceArray64(array->index(), shape, strides));
+          items_[i] = std::make_shared<SliceArray64>(array->index(), shape, strides);
         }
       }
 

@@ -26,7 +26,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> ListType::shallow_copy() const {
-    return std::shared_ptr<Type>(new ListType(parameters_, type_));
+    return std::make_shared<ListType>(parameters_, type_);
   }
 
   bool ListType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {

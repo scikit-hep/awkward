@@ -11,14 +11,14 @@
 namespace awkward {
   const std::shared_ptr<Fillable> OptionFillable::fromnulls(const FillableOptions& options, int64_t nullcount, std::shared_ptr<Fillable> content) {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::full(options, -1, nullcount);
-    std::shared_ptr<Fillable> out(new OptionFillable(options, offsets, content));
+    std::shared_ptr<Fillable> out = std::make_shared<OptionFillable>(options, offsets, content);
     out.get()->setthat(out);
     return out;
   }
 
   const std::shared_ptr<Fillable> OptionFillable::fromvalids(const FillableOptions& options, std::shared_ptr<Fillable> content) {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::arange(options, content->length());
-    std::shared_ptr<Fillable> out(new OptionFillable(options, offsets, content));
+    std::shared_ptr<Fillable> out = std::make_shared<OptionFillable>(options, offsets, content);
     out.get()->setthat(out);
     return out;
   }
@@ -34,7 +34,7 @@ namespace awkward {
 
   const std::shared_ptr<Type> OptionFillable::type() const {
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    return std::shared_ptr<Type>(new OptionType(Type::Parameters(), content_.get()->type()));
+    return std::make_shared<OptionType>(Type::Parameters(), content_.get()->type());
   }
 
   const std::shared_ptr<Content> OptionFillable::snapshot(const std::shared_ptr<Type> type) const {

@@ -26,7 +26,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RegularType::shallow_copy() const {
-    return std::shared_ptr<Type>(new RegularType(parameters_, type_, size_));
+    return std::make_shared<RegularType>(parameters_, type_, size_);
   }
 
   bool RegularType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {

@@ -28,12 +28,12 @@ namespace awkward {
       return type_;
     }
     else {
-      return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
+      return std::make_shared<UnknownType>(Type::Parameters());
     }
   }
 
   const std::shared_ptr<Content> EmptyArray::astype(const std::shared_ptr<Type> type) const {
-    return std::shared_ptr<Content>(new EmptyArray(id_, type));
+    return std::make_shared<EmptyArray>(id_, type);
   }
 
   const std::string EmptyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
@@ -65,7 +65,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new EmptyArray(id_, type_));
+    return std::make_shared<EmptyArray>(id_, type_);
   }
 
   void EmptyArray::check_for_iteration() const { }

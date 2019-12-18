@@ -57,7 +57,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
-    std::shared_ptr<Content> next(new RegularArray(Identity::none(), Type::none(), shallow_copy(), length()));
+    std::shared_ptr<Content> next = std::make_shared<RegularArray>(Identity::none(), Type::none(), shallow_copy(), length());
 
     std::shared_ptr<SliceItem> nexthead = where.head();
     Slice nexttail = where.tail();
@@ -117,9 +117,9 @@ namespace awkward {
     }
     else {
       std::vector<std::shared_ptr<SliceItem>> tailitems = tail.items();
-      std::vector<std::shared_ptr<SliceItem>> items = { std::shared_ptr<SliceItem>(new SliceEllipsis()) };
+      std::vector<std::shared_ptr<SliceItem>> items = { std::make_shared<SliceEllipsis>() };
       items.insert(items.end(), tailitems.begin(), tailitems.end());
-      std::shared_ptr<SliceItem> nexthead(new SliceRange(Slice::none(), Slice::none(), 1));
+      std::shared_ptr<SliceItem> nexthead = std::make_shared<SliceRange>(Slice::none(), Slice::none(), 1);
       Slice nexttail(items);
       return getitem_next(nexthead, nexttail, advanced);
     }
@@ -128,7 +128,7 @@ namespace awkward {
   const std::shared_ptr<Content> Content::getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& advanced) const {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
-    return std::shared_ptr<Content>(new RegularArray(Identity::none(), Type::none(), getitem_next(nexthead, nexttail, advanced), 1));
+    return std::make_shared<RegularArray>(Identity::none(), Type::none(), getitem_next(nexthead, nexttail, advanced), 1);
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
@@ -144,9 +144,9 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content> outcontent, const std::vector<int64_t>& shape) const {
-    std::shared_ptr<Content> out(new RegularArray(Identity::none(), Type::none(), outcontent, (int64_t)shape[shape.size() - 1]));
+    std::shared_ptr<Content> out = std::make_shared<RegularArray>(Identity::none(), Type::none(), outcontent, (int64_t)shape[shape.size() - 1]);
     for (int64_t i = (int64_t)shape.size() - 2;  i >= 0;  i--) {
-      out = std::shared_ptr<Content>(new RegularArray(Identity::none(), Type::none(), out, (int64_t)shape[(size_t)i]));
+      out = std::make_shared<RegularArray>(Identity::none(), Type::none(), out, (int64_t)shape[(size_t)i]);
     }
     return out;
   }

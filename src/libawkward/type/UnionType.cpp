@@ -31,7 +31,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnionType::shallow_copy() const {
-    return std::shared_ptr<Type>(new UnionType(parameters_, types_));
+    return std::make_shared<UnionType>(parameters_, types_);
   }
 
   bool UnionType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {

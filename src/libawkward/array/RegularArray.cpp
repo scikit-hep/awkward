@@ -30,8 +30,8 @@ namespace awkward {
         bigid = id.get()->to64();
       }
       if (Identity32* rawid = dynamic_cast<Identity32*>(bigid.get())) {
-        Identity32* rawsubid = new Identity32(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        std::shared_ptr<Identity> subid(rawsubid);
+        std::shared_ptr<Identity> subid = std::make_shared<Identity32>(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        Identity32* rawsubid = reinterpret_cast<Identity32*>(subid.get());
         struct Error err = awkward_identity32_from_regulararray(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
@@ -44,8 +44,8 @@ namespace awkward {
         content_.get()->setid(subid);
       }
       else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
-        Identity64* rawsubid = new Identity64(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        std::shared_ptr<Identity> subid(rawsubid);
+        std::shared_ptr<Identity> subid = std::make_shared<Identity64>(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        Identity64* rawsubid = reinterpret_cast<Identity64*>(subid.get());
         struct Error err = awkward_identity64_from_regulararray(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
@@ -66,15 +66,15 @@ namespace awkward {
 
   void RegularArray::setid() {
     if (length() < kMaxInt32) {
-      Identity32* rawid = new Identity32(Identity::newref(), Identity::FieldLoc(), 1, length());
-      std::shared_ptr<Identity> newid(rawid);
+      std::shared_ptr<Identity> newid = std::make_shared<Identity32>(Identity::newref(), Identity::FieldLoc(), 1, length());
+      Identity32* rawid = reinterpret_cast<Identity32*>(newid.get());
       struct Error err = awkward_new_identity32(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
     else {
-      Identity64* rawid = new Identity64(Identity::newref(), Identity::FieldLoc(), 1, length());
-      std::shared_ptr<Identity> newid(rawid);
+      std::shared_ptr<Identity> newid = std::make_shared<Identity64>(Identity::newref(), Identity::FieldLoc(), 1, length());
+      Identity64* rawid = reinterpret_cast<Identity64*>(newid.get());
       struct Error err = awkward_new_identity64(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
@@ -86,7 +86,7 @@ namespace awkward {
       return type_;
     }
     else {
-      return std::shared_ptr<Type>(new RegularType(Type::Parameters(), content_.get()->type(), size_));
+      return std::make_shared<RegularType>(Type::Parameters(), content_.get()->type(), size_);
     }
   }
 
@@ -97,7 +97,7 @@ namespace awkward {
         inner = raw->type();
       }
     }
-    return std::shared_ptr<Content>(new RegularArray(id_, type, content_.get()->astype(inner), size_));
+    return std::make_shared<RegularArray>(id_, type, content_.get()->astype(inner), size_);
   }
 
   const std::string RegularArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
@@ -128,7 +128,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new RegularArray(id_, type_, content_, size_));
+    return std::make_shared<RegularArray>(id_, type_, content_, size_);
   }
 
   void RegularArray::check_for_iteration() const {
@@ -172,11 +172,11 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::shared_ptr<Content>(new RegularArray(id_, type_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_));
+    return std::make_shared<RegularArray>(id_, type_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_field(const std::string& key) const {
-    return std::shared_ptr<Content>(new RegularArray(id_, Type::none(), content_.get()->getitem_field(key), size_));
+    return std::make_shared<RegularArray>(id_, Type::none(), content_.get()->getitem_field(key), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
@@ -184,7 +184,7 @@ namespace awkward {
     if (SliceFields(keys).preserves_type(type_, Index64(0))) {
       type = type_;
     }
-    return std::shared_ptr<Content>(new RegularArray(id_, type, content_.get()->getitem_fields(keys), size_));
+    return std::make_shared<RegularArray>(id_, type, content_.get()->getitem_fields(keys), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::carry(const Index64& carry) const {
@@ -201,7 +201,7 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }
-    return std::shared_ptr<Content>(new RegularArray(id, type_, content_.get()->carry(nextcarry), size_));
+    return std::make_shared<RegularArray>(id, type_, content_.get()->carry(nextcarry), size_);
   }
 
   const std::pair<int64_t, int64_t> RegularArray::minmax_depth() const {
@@ -308,11 +308,11 @@ namespace awkward {
     std::shared_ptr<Type> outtype = Type::none();
     if (type_.get() != nullptr) {
       RegularType* raw = dynamic_cast<RegularType*>(type_.get());
-      outtype = std::shared_ptr<Type>(new RegularType(Type::Parameters(), raw->type(), nextsize));
+      outtype = std::make_shared<RegularType>(Type::Parameters(), raw->type(), nextsize);
     }
 
     if (advanced.length() == 0) {
-      return std::shared_ptr<Content>(new RegularArray(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize));
+      return std::make_shared<RegularArray>(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize);
     }
     else {
       Index64 nextadvanced(len*nextsize);
@@ -324,7 +324,7 @@ namespace awkward {
         nextsize);
       util::handle_error(err, classname(), id_.get());
 
-      return std::shared_ptr<Content>(new RegularArray(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize));
+      return std::make_shared<RegularArray>(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize);
     }
   }
 

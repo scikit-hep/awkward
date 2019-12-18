@@ -21,7 +21,7 @@ namespace awkward {
     GrowableBuffer<int8_t> types = GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::arange(options, firstcontent->length());
     std::vector<std::shared_ptr<Fillable>> contents({ firstcontent });
-    std::shared_ptr<Fillable> out(new UnionFillable(options, types, offsets, contents));
+    std::shared_ptr<Fillable> out = std::make_shared<UnionFillable>(options, types, offsets, contents);
     out.get()->setthat(out);
     return out;
   }
@@ -43,7 +43,7 @@ namespace awkward {
     for (auto x : contents_) {
       types.push_back(x.get()->type());
     }
-    return std::shared_ptr<Type>(new UnionType(Type::Parameters(), types));
+    return std::make_shared<UnionType>(Type::Parameters(), types);
   }
 
   const std::shared_ptr<Content> UnionFillable::snapshot(const std::shared_ptr<Type> type) const {

@@ -439,7 +439,7 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
 void toslice_part(ak::Slice& slice, py::object obj) {
   if (py::isinstance<py::int_>(obj)) {
     // FIXME: what happens if you give this a Numpy integer? a Numpy 0-dimensional array?
-    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceAt(obj.cast<int64_t>())));
+    slice.append(std::make_shared<ak::SliceAt>(obj.cast<int64_t>()));
   }
 
   else if (py::isinstance<py::slice>(obj)) {
@@ -461,21 +461,21 @@ void toslice_part(ak::Slice& slice, py::object obj) {
     if (step == 0) {
       throw std::invalid_argument("slice step must not be 0");
     }
-    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceRange(start, stop, step)));
+    slice.append(std::make_shared<ak::SliceRange>(start, stop, step));
   }
 
 #if PY_MAJOR_VERSION >= 3
   else if (py::isinstance<py::ellipsis>(obj)) {
-    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceEllipsis()));
+    slice.append(std::make_shared<ak::SliceEllipsis>());
   }
 #endif
 
   else if (obj.is(py::module::import("numpy").attr("newaxis"))) {
-    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceNewAxis()));
+    slice.append(std::make_shared<ak::SliceNewAxis>());
   }
 
   else if (py::isinstance<py::str>(obj)) {
-    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceField(obj.cast<std::string>())));
+    slice.append(std::make_shared<ak::SliceField>(obj.cast<std::string>()));
   }
 
   else if (py::isinstance<py::iterable>(obj)) {
@@ -492,7 +492,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
     }
 
     if (all_strings  &&  !strings.empty()) {
-      slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceFields(strings)));
+      slice.append(std::make_shared<ak::SliceFields>(strings));
     }
     else {
       py::object objarray = py::module::import("numpy").attr("asarray")(obj);
@@ -518,7 +518,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
             strides.push_back((int64_t)intinfo.strides[i] / sizeof(int64_t));
           }
           ak::Index64 index(std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(intinfo.ptr), pyobject_deleter<int64_t>(intarray.ptr())), 0, shape[0]);
-          slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceArray64(index, shape, strides)));
+          slice.append(std::make_shared<ak::SliceArray64>(index, shape, strides));
         }
       }
 
@@ -550,7 +550,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
           strides.push_back((int64_t)intinfo.strides[i] / (int64_t)sizeof(int64_t));
         }
         ak::Index64 index(std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(intinfo.ptr), pyobject_deleter<int64_t>(intarray.ptr())), 0, shape[0]);
-        slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceArray64(index, shape, strides)));
+        slice.append(std::make_shared<ak::SliceArray64>(index, shape, strides));
       }
     }
 
@@ -1076,8 +1076,8 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         return ak::RecordType(dict2parameters(parameters), out, std::shared_ptr<ak::RecordType::Lookup>(nullptr), std::shared_ptr<ak::RecordType::ReverseLookup>(nullptr));
       }), py::arg("types"), py::arg("parameters") = py::none())
       .def(py::init([](py::dict types, py::object parameters) -> ak::RecordType {
-        std::shared_ptr<ak::RecordType::Lookup> lookup(new ak::RecordType::Lookup);
-        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup(new ak::RecordType::ReverseLookup);
+        std::shared_ptr<ak::RecordType::Lookup> lookup = std::make_shared<ak::RecordType::Lookup>();
+        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup = std::make_shared<ak::RecordType::ReverseLookup>();
         std::vector<std::shared_ptr<ak::Type>> out;
         for (auto x : types) {
           std::string key = x.first.cast<std::string>();
@@ -1092,8 +1092,8 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         for (auto x : types) {
           out.push_back(unbox_type(x));
         }
-        std::shared_ptr<ak::RecordType::Lookup> lookup(new ak::RecordType::Lookup);
-        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup(new ak::RecordType::ReverseLookup);
+        std::shared_ptr<ak::RecordType::Lookup> lookup = std::make_shared<ak::RecordType::Lookup>();
+        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup = std::make_shared<ak::RecordType::ReverseLookup>();
         from_lookup<ak::RecordType::Lookup, ak::RecordType::ReverseLookup>(lookup, reverselookup, pylookup, pyreverselookup, (int64_t)out.size());
         return ak::RecordType(dict2parameters(parameters), out, lookup, reverselookup);
       }, py::arg("types"), py::arg("lookup"), py::arg("reverselookup") = py::none(), py::arg("parameters") = py::none())
@@ -1150,8 +1150,8 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         for (auto x : state[1]) {
           fields.push_back(unbox_type(x));
         }
-        std::shared_ptr<ak::RecordType::Lookup> lookup(new ak::RecordType::Lookup);
-        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup(new ak::RecordType::ReverseLookup);
+        std::shared_ptr<ak::RecordType::Lookup> lookup = std::make_shared<ak::RecordType::Lookup>();
+        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup = std::make_shared<ak::RecordType::ReverseLookup>();
         from_lookup<ak::RecordType::Lookup, ak::RecordType::ReverseLookup>(lookup, reverselookup, state[2].cast<py::dict>(), state[3], (int64_t)fields.size());
         return ak::RecordType(dict2parameters(state[0]), fields, lookup, reverselookup);
       }))
@@ -1346,8 +1346,8 @@ py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> mak
 py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_RecordArray(py::handle m, std::string name) {
   return content_methods(py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content>(m, name.c_str())
       .def(py::init([](py::dict contents, py::object id, py::object type) -> ak::RecordArray {
-        std::shared_ptr<ak::RecordArray::Lookup> lookup(new ak::RecordArray::Lookup);
-        std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup(new ak::RecordArray::ReverseLookup);
+        std::shared_ptr<ak::RecordArray::Lookup> lookup = std::make_shared<ak::RecordArray::Lookup>();
+        std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup = std::make_shared<ak::RecordArray::ReverseLookup>();
         std::vector<std::shared_ptr<ak::Content>> out;
         for (auto x : contents) {
           std::string key = x.first.cast<std::string>();
@@ -1381,8 +1381,8 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         if (out.empty()) {
           throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
         }
-        std::shared_ptr<ak::RecordArray::Lookup> lookup(new ak::RecordArray::Lookup);
-        std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup(new ak::RecordArray::ReverseLookup);
+        std::shared_ptr<ak::RecordArray::Lookup> lookup = std::make_shared<ak::RecordArray::Lookup>();
+        std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup = std::make_shared<ak::RecordArray::ReverseLookup>();
         from_lookup<ak::RecordArray::Lookup, ak::RecordArray::ReverseLookup>(lookup, reverselookup, pylookup, pyreverselookup, (int64_t)out.size());
         return ak::RecordArray(unbox_id_none(id), unbox_type_none(type), out, lookup, reverselookup);
       }, py::arg("contents"), py::arg("lookup"), py::arg("reverselookup") = py::none(), py::arg("id") = py::none(), py::arg("type") = py::none())

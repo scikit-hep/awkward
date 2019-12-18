@@ -51,20 +51,20 @@ namespace awkward {
   const std::shared_ptr<Content> Record::astype(const std::shared_ptr<Type> type) const {
     if (type.get() == nullptr) {
       if (array_.numfields() == 0) {
-        return std::shared_ptr<Content>(new Record(RecordArray(array_.id(), type, array_.length(), array_.istuple()), at_));
+        return std::make_shared<Record>(RecordArray(array_.id(), type, array_.length(), array_.istuple()), at_);
       }
       else {
-        return std::shared_ptr<Content>(new Record(RecordArray(array_.id(), type, array_.contents(), array_.lookup(), array_.reverselookup()), at_));
+        return std::make_shared<Record>(RecordArray(array_.id(), type, array_.contents(), array_.lookup(), array_.reverselookup()), at_);
       }
     }
     else {
       std::shared_ptr<Content> record = array_.astype(type);
       RecordArray* raw = dynamic_cast<RecordArray*>(record.get());
       if (raw->numfields() == 0) {
-        return std::shared_ptr<Content>(new Record(RecordArray(raw->id(), raw->type(), raw->length(), raw->istuple()), at_));
+        return std::make_shared<Record>(RecordArray(raw->id(), raw->type(), raw->length(), raw->istuple()), at_);
       }
       else {
-        return std::shared_ptr<Content>(new Record(RecordArray(raw->id(), raw->type(), raw->contents(), raw->lookup(), raw->reverselookup()), at_));
+        return std::make_shared<Record>(RecordArray(raw->id(), raw->type(), raw->contents(), raw->lookup(), raw->reverselookup()), at_);
       }
     }
   }
@@ -81,7 +81,7 @@ namespace awkward {
     size_t cols = (size_t)numfields();
     std::shared_ptr<RecordArray::ReverseLookup> keys = array_.reverselookup();
     if (istuple()) {
-      keys = std::shared_ptr<RecordArray::ReverseLookup>(new RecordArray::ReverseLookup);
+      keys = std::make_shared<RecordArray::ReverseLookup>();
       for (size_t j = 0;  j < cols;  j++) {
         keys.get()->push_back(std::to_string(j));
       }
@@ -100,7 +100,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::shallow_copy() const {
-    return std::shared_ptr<Content>(new Record(array_, at_));
+    return std::make_shared<Record>(array_, at_);
   }
 
   void Record::check_for_iteration() const {
