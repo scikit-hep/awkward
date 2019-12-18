@@ -15,7 +15,7 @@
 namespace awkward {
   class RegularArray: public Content {
   public:
-    RegularArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<Content> content, int64_t size)
+    RegularArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<Content>& content, int64_t size)
         : Content(id, type)
         , content_(content)
         , size_(size) {
@@ -29,10 +29,10 @@ namespace awkward {
 
     const std::string classname() const override;
     void setid() override;
-    void setid(const std::shared_ptr<Identity> id) override;
+    void setid(const std::shared_ptr<Identity>& id) override;
     const std::shared_ptr<Type> type() const override;
-    const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const override;
-    const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const override;
+    const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
+    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     void tojson_part(ToJson& builder) const override;
     int64_t length() const override;
     const std::shared_ptr<Content> shallow_copy() const override;

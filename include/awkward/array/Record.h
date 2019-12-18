@@ -34,12 +34,12 @@ namespace awkward {
     const std::string classname() const override;
     const std::shared_ptr<Identity> id() const override;
     void setid() override;
-    void setid(const std::shared_ptr<Identity> id) override;
+    void setid(const std::shared_ptr<Identity>& id) override;
     bool isbare() const override;
     bool istypeptr(Type* pointer) const override;
     const std::shared_ptr<Type> type() const override;
-    const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const override;
-    const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const override;
+    const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
+    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     void tojson_part(ToJson& builder) const override;
     int64_t length() const override;
     const std::shared_ptr<Content> shallow_copy() const override;

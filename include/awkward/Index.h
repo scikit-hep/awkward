@@ -21,7 +21,7 @@ namespace awkward {
         : ptr_(std::shared_ptr<T>(length == 0 ? nullptr : new T[(size_t)length], awkward::util::array_deleter<T>()))
         , offset_(0)
         , length_(length) { }
-    IndexOf<T>(const std::shared_ptr<T> ptr, int64_t offset, int64_t length)
+    IndexOf<T>(const std::shared_ptr<T>& ptr, int64_t offset, int64_t length)
         : ptr_(ptr)
         , offset_(offset)
         , length_(length) { }
@@ -32,7 +32,7 @@ namespace awkward {
 
     const std::string classname() const;
     const std::string tostring() const;
-    const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
+    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const;
     T getitem_at(int64_t at) const;
     T getitem_at_nowrap(int64_t at) const;
     void setitem_at_nowrap(int64_t at, T value) const;

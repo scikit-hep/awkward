@@ -62,7 +62,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordFillable::snapshot(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> RecordFillable::snapshot(const std::shared_ptr<Type>& type) const {
     if (length_ == -1) {
       return std::make_shared<EmptyArray>(Identity::none(), type);
     }
@@ -81,7 +81,7 @@ namespace awkward {
       (*lookup.get())[keys_[i]] = i;
       reverselookup.get()->push_back(keys_[i]);
     }
-    
+
     if (contents.empty()) {
       return std::make_shared<RecordArray>(Identity::none(), type, length_, false);
     }

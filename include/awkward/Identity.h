@@ -19,7 +19,7 @@ namespace awkward {
     static Ref newref();
     static std::shared_ptr<Identity> none() { return std::shared_ptr<Identity>(nullptr); }
 
-    Identity(const Ref ref, const FieldLoc fieldloc, int64_t offset, int64_t width, int64_t length)
+    Identity(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length)
         : ref_(ref)
         , fieldloc_(fieldloc)
         , offset_(offset)
@@ -35,7 +35,7 @@ namespace awkward {
     virtual const std::string classname() const = 0;
     virtual const std::string location_at(int64_t where) const = 0;
     virtual const std::shared_ptr<Identity> to64() const = 0;
-    virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
+    virtual const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
     virtual const std::shared_ptr<Identity> getitem_range_nowrap(int64_t start, int64_t stop) const = 0;
     virtual const std::shared_ptr<Identity> shallow_copy() const = 0;
     virtual const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const = 0;
@@ -55,10 +55,10 @@ namespace awkward {
   template <typename T>
   class IdentityOf: public Identity {
   public:
-    IdentityOf<T>(const Ref ref, const FieldLoc fieldloc, int64_t width, int64_t length)
+    IdentityOf<T>(const Ref ref, const FieldLoc& fieldloc, int64_t width, int64_t length)
         : Identity(ref, fieldloc, 0, width, length)
         , ptr_(std::shared_ptr<T>(length*width == 0 ? nullptr : new T[(size_t)(length*width)], awkward::util::array_deleter<T>())) { }
-    IdentityOf<T>(const Ref ref, const FieldLoc fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr)
+    IdentityOf<T>(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr)
         : Identity(ref, fieldloc, offset, width, length)
         , ptr_(ptr) { }
 
@@ -67,7 +67,7 @@ namespace awkward {
     const std::string classname() const override;
     const std::string location_at(int64_t at) const override;
     const std::shared_ptr<Identity> to64() const override;
-    const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const override;
+    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Identity> getitem_range_nowrap(int64_t start, int64_t stop) const override;
     const std::shared_ptr<Identity> shallow_copy() const override;
     const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const override;

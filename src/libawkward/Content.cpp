@@ -72,7 +72,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
+  const std::shared_ptr<Content> Content::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
@@ -143,7 +143,7 @@ namespace awkward {
     return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
   }
 
-  const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content> outcontent, const std::vector<int64_t>& shape) const {
+  const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const {
     std::shared_ptr<Content> out = std::make_shared<RegularArray>(Identity::none(), Type::none(), outcontent, (int64_t)shape[shape.size() - 1]);
     for (int64_t i = (int64_t)shape.size() - 2;  i >= 0;  i--) {
       out = std::make_shared<RegularArray>(Identity::none(), Type::none(), out, (int64_t)shape[(size_t)i]);

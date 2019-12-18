@@ -63,7 +63,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::string IdentityOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  const std::string IdentityOf<T>::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     std::string name = "Unrecognized Identity";
     if (std::is_same<T, int32_t>::value) {

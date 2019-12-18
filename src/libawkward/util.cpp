@@ -11,7 +11,7 @@
 
 namespace awkward {
   namespace util {
-    void handle_error(const struct Error& err, const std::string classname, const Identity* id) {
+    void handle_error(const struct Error& err, const std::string& classname, const Identity* id) {
       if (err.str != nullptr) {
         std::stringstream out;
         out << "in " << classname;
@@ -32,7 +32,7 @@ namespace awkward {
       }
     }
 
-    std::string quote(std::string x, bool doublequote) {
+    std::string quote(const std::string& x, bool doublequote) {
       // TODO: escape characters, possibly using RapidJSON.
       if (doublequote) {
         return std::string("\"") + x + std::string("\"");

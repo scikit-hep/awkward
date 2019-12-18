@@ -32,7 +32,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::setid");
   }
 
-  void Record::setid(const std::shared_ptr<Identity> id) {
+  void Record::setid(const std::shared_ptr<Identity>& id) {
     throw std::runtime_error("undefined operation: Record::setid");
   }
 
@@ -48,7 +48,7 @@ namespace awkward {
     return array_.type();
   }
 
-  const std::shared_ptr<Content> Record::astype(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> Record::astype(const std::shared_ptr<Type>& type) const {
     if (type.get() == nullptr) {
       if (array_.numfields() == 0) {
         return std::make_shared<Record>(RecordArray(array_.id(), type, array_.length(), array_.istuple()), at_);
@@ -69,7 +69,7 @@ namespace awkward {
     }
   }
 
-  const std::string Record::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  const std::string Record::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " at=\"" << at_ << "\">\n";
     out << array_.tostring_part(indent + std::string("    "), "", "\n");

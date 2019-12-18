@@ -5,7 +5,7 @@
 #include "awkward/type/ArrayType.h"
 
 namespace awkward {
-  std::string ArrayType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  std::string ArrayType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
@@ -18,7 +18,7 @@ namespace awkward {
     return std::make_shared<ArrayType>(parameters_, type_, length_);
   }
 
-  bool ArrayType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool ArrayType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;

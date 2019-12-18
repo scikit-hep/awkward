@@ -14,7 +14,7 @@ namespace awkward {
     return "EmptyArray";
   }
 
-  void EmptyArray::setid(const std::shared_ptr<Identity> id) {
+  void EmptyArray::setid(const std::shared_ptr<Identity>& id) {
     if (id.get() != nullptr  &&  length() != id.get()->length()) {
       util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
     }
@@ -32,11 +32,11 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> EmptyArray::astype(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> EmptyArray::astype(const std::shared_ptr<Type>& type) const {
     return std::make_shared<EmptyArray>(id_, type);
   }
 
-  const std::string EmptyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  const std::string EmptyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
     if (id_.get() == nullptr  &&  type_.get() == nullptr) {

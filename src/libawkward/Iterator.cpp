@@ -13,7 +13,7 @@ namespace awkward {
     return content_.get()->getitem_at_nowrap(at_++);
   }
 
-  const std::string Iterator::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  const std::string Iterator::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<Iterator at=\"" << at_ << "\">\n";
     out << content_.get()->tostring_part(indent + std::string("    "), "", "\n");

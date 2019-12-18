@@ -37,7 +37,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::string IndexOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  const std::string IndexOf<T>::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " i=\"[";
     if (length_ <= 10) {

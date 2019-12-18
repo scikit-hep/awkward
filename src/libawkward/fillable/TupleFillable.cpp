@@ -46,7 +46,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> TupleFillable::snapshot(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> TupleFillable::snapshot(const std::shared_ptr<Type>& type) const {
     if (length_ == -1) {
       return std::make_shared<EmptyArray>(Identity::none(), type);
     }
@@ -61,7 +61,7 @@ namespace awkward {
         contents.push_back(contents_[i].get()->snapshot(raw->field((int64_t)i)));
       }
     }
-    
+
     if (contents.empty()) {
       return std::make_shared<RecordArray>(Identity::none(), type, length_, true);
     }

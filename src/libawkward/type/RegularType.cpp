@@ -9,7 +9,7 @@
 #include "awkward/type/RegularType.h"
 
 namespace awkward {
-  std::string RegularType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  std::string RegularType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
@@ -29,7 +29,7 @@ namespace awkward {
     return std::make_shared<RegularType>(parameters_, type_, size_);
   }
 
-  bool RegularType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool RegularType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;

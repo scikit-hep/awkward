@@ -150,8 +150,8 @@ namespace awkward {
     static int64_t none() { return SliceItem::none(); }
 
     Slice(): items_(std::vector<std::shared_ptr<SliceItem>>()), sealed_(false) { }
-    Slice(const std::vector<std::shared_ptr<SliceItem>> items): items_(items), sealed_(false) { }
-    Slice(const std::vector<std::shared_ptr<SliceItem>> items, bool sealed): items_(items), sealed_(sealed) { }
+    Slice(const std::vector<std::shared_ptr<SliceItem>>& items): items_(items), sealed_(false) { }
+    Slice(const std::vector<std::shared_ptr<SliceItem>>& items, bool sealed): items_(items), sealed_(sealed) { }
     const std::vector<std::shared_ptr<SliceItem>> items() const { return items_; }
     bool sealed() const { return sealed_; }
 

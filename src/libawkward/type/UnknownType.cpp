@@ -6,7 +6,7 @@
 #include "awkward/type/UnknownType.h"
 
 namespace awkward {
-  std::string UnknownType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  std::string UnknownType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
@@ -26,7 +26,7 @@ namespace awkward {
     return std::make_shared<UnknownType>(parameters_);
   }
 
-  bool UnknownType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool UnknownType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;

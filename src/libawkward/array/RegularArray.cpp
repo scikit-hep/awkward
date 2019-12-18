@@ -17,7 +17,7 @@ namespace awkward {
     return "RegularArray";
   }
 
-  void RegularArray::setid(const std::shared_ptr<Identity> id) {
+  void RegularArray::setid(const std::shared_ptr<Identity>& id) {
     if (id.get() == nullptr) {
       content_.get()->setid(id);
     }
@@ -90,7 +90,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RegularArray::astype(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> RegularArray::astype(const std::shared_ptr<Type>& type) const {
     std::shared_ptr<Type> inner = type;
     if (inner.get() != nullptr) {
       if (RegularType* raw = dynamic_cast<RegularType*>(inner.get())) {
@@ -100,7 +100,7 @@ namespace awkward {
     return std::make_shared<RegularArray>(id_, type, content_.get()->astype(inner), size_);
   }
 
-  const std::string RegularArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  const std::string RegularArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " size=\"" << size_ << "\">\n";
     if (id_.get() != nullptr) {

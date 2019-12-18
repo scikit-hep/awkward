@@ -10,9 +10,9 @@ namespace awkward {
   public:
     UnknownType(const Parameters& parameters): Type(parameters) { }
 
-    std::string tostring_part(std::string indent, std::string pre, std::string post) const override;
+    std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> shallow_copy() const override;
-    bool equal(const std::shared_ptr<Type> other, bool check_parameters) const override;
+    bool equal(const std::shared_ptr<Type>& other, bool check_parameters) const override;
     int64_t numfields() const override;
     int64_t fieldindex(const std::string& key) const override;
     const std::string key(int64_t fieldindex) const override;

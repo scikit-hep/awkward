@@ -9,7 +9,7 @@
 namespace awkward {
   class Iterator {
   public:
-    Iterator(const std::shared_ptr<Content> content)
+    Iterator(const std::shared_ptr<Content>& content)
         : content_(content)
         , at_(0) {
       content.get()->check_for_iteration();
@@ -21,7 +21,7 @@ namespace awkward {
     const bool isdone() const;
     const std::shared_ptr<Content> next();
 
-    const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
+    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const;
     const std::string tostring() const;
 
   private:

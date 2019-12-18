@@ -37,7 +37,7 @@ namespace awkward {
     return std::make_shared<OptionType>(Type::Parameters(), content_.get()->type());
   }
 
-  const std::shared_ptr<Content> OptionFillable::snapshot(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> OptionFillable::snapshot(const std::shared_ptr<Type>& type) const {
     throw std::runtime_error("OptionFillable::snapshot needs OptionArray");
   }
 

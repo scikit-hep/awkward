@@ -42,7 +42,7 @@ namespace awkward {
   }
 
   template <>
-  void ListOffsetArrayOf<int32_t>::setid(const std::shared_ptr<Identity> id) {
+  void ListOffsetArrayOf<int32_t>::setid(const std::shared_ptr<Identity>& id) {
     if (id.get() == nullptr) {
       content_.get()->setid(id);
     }
@@ -92,7 +92,7 @@ namespace awkward {
   }
 
   template <typename T>
-  void ListOffsetArrayOf<T>::setid(const std::shared_ptr<Identity> id) {
+  void ListOffsetArrayOf<T>::setid(const std::shared_ptr<Identity>& id) {
     if (id.get() == nullptr) {
       content_.get()->setid(id);
     }
@@ -152,7 +152,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::astype(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::astype(const std::shared_ptr<Type>& type) const {
     std::shared_ptr<Type> inner = type;
     if (inner.get() != nullptr) {
       if (ListType* raw = dynamic_cast<ListType*>(inner.get())) {
@@ -163,7 +163,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::string ListOffsetArrayOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  const std::string ListOffsetArrayOf<T>::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << ">\n";
     if (id_.get() != nullptr) {

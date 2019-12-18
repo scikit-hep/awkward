@@ -9,7 +9,7 @@
 #include "awkward/type/PrimitiveType.h"
 
 namespace awkward {
-  std::string PrimitiveType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  std::string PrimitiveType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
@@ -44,7 +44,7 @@ namespace awkward {
     return std::make_shared<PrimitiveType>(parameters_, dtype_);
   }
 
-  bool PrimitiveType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool PrimitiveType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;

@@ -33,7 +33,7 @@ namespace awkward {
     }
   }
 
-  void RecordArray::setid(const std::shared_ptr<Identity> id) {
+  void RecordArray::setid(const std::shared_ptr<Identity>& id) {
     if (id.get() == nullptr) {
       for (auto content : contents_) {
         content.get()->setid(id);
@@ -75,7 +75,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::astype(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> RecordArray::astype(const std::shared_ptr<Type>& type) const {
     if (type.get() == nullptr  ||  dynamic_cast<RecordType*>(type.get()) == nullptr) {
       if (contents_.empty()) {
         return std::make_shared<RecordArray>(id_, type, length(), istuple());
@@ -110,7 +110,7 @@ namespace awkward {
     }
   }
 
-  const std::string RecordArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  const std::string RecordArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
     if (contents_.empty()) {
@@ -493,7 +493,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
+  const std::shared_ptr<Content> RecordArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     Slice emptytail;

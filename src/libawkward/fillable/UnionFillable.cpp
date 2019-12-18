@@ -17,7 +17,7 @@
 #include "awkward/fillable/UnionFillable.h"
 
 namespace awkward {
-  const std::shared_ptr<Fillable> UnionFillable::fromsingle(const FillableOptions& options, const std::shared_ptr<Fillable> firstcontent) {
+  const std::shared_ptr<Fillable> UnionFillable::fromsingle(const FillableOptions& options, const std::shared_ptr<Fillable>& firstcontent) {
     GrowableBuffer<int8_t> types = GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::arange(options, firstcontent->length());
     std::vector<std::shared_ptr<Fillable>> contents({ firstcontent });
@@ -46,7 +46,7 @@ namespace awkward {
     return std::make_shared<UnionType>(Type::Parameters(), types);
   }
 
-  const std::shared_ptr<Content> UnionFillable::snapshot(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> UnionFillable::snapshot(const std::shared_ptr<Type>& type) const {
     Index8 types(types_.ptr(), 0, types_.length());
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
     throw std::runtime_error("UnionFillable::snapshot needs UnionArray");

@@ -59,7 +59,7 @@ namespace awkward {
     return std::make_shared<ListType>(string_parameters, std::make_shared<PrimitiveType>(char_parameters, PrimitiveType::uint8));
   }
 
-  const std::shared_ptr<Content> StringFillable::snapshot(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> StringFillable::snapshot(const std::shared_ptr<Type>& type) const {
     ListType* raw = dynamic_cast<ListType*>(type.get());
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
     std::vector<ssize_t> shape = { (ssize_t)content_.length() };

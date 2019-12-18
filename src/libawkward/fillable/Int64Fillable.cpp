@@ -28,7 +28,7 @@ namespace awkward {
     return std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::int64);
   }
 
-  const std::shared_ptr<Content> Int64Fillable::snapshot(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> Int64Fillable::snapshot(const std::shared_ptr<Type>& type) const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
 #ifdef _MSC_VER

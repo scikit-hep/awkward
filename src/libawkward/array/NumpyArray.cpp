@@ -56,7 +56,7 @@ namespace awkward {
     return "NumpyArray";
   }
 
-  void NumpyArray::setid(const std::shared_ptr<Identity> id) {
+  void NumpyArray::setid(const std::shared_ptr<Identity>& id) {
     if (id.get() != nullptr  &&  length() != id.get()->length()) {
       util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
     }
@@ -201,11 +201,11 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Content> NumpyArray::astype(const std::shared_ptr<Type> type) const {
+  const std::shared_ptr<Content> NumpyArray::astype(const std::shared_ptr<Type>& type) const {
     return std::make_shared<NumpyArray>(id_, unwrap_regulartype(type, shape_), ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
 
-  const std::string NumpyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  const std::string NumpyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     assert(!isscalar());
     std::stringstream out;
     out << indent << pre << "<" << classname() << " format=" << util::quote(format_, true) << " shape=\"";
@@ -480,7 +480,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const {
+  const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
     assert(!isscalar());
     Index64 carry(shape_[0]);
     struct Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
@@ -672,7 +672,7 @@ namespace awkward {
     }
   }
 
-  const NumpyArray NumpyArray::contiguous_next(Index64 bytepos) const {
+  const NumpyArray NumpyArray::contiguous_next(const Index64& bytepos) const {
     if (iscontiguous()) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
       struct Error err = awkward_numpyarray_contiguous_copy_64(
@@ -835,7 +835,7 @@ namespace awkward {
     return NumpyArray(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
   }
 
-  const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
+  const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
     if (head.get() == nullptr) {
       std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*stride)], awkward::util::array_deleter<uint8_t>());
       struct Error err = awkward_numpyarray_getitem_next_null_64(

@@ -10,7 +10,7 @@
 #include "awkward/type/OptionType.h"
 
 namespace awkward {
-  std::string OptionType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  std::string OptionType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
@@ -36,7 +36,7 @@ namespace awkward {
     return std::make_shared<OptionType>(parameters_, type_);
   }
 
-  bool OptionType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool OptionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;

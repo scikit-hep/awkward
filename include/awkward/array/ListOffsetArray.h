@@ -14,7 +14,7 @@ namespace awkward {
   template <typename T>
   class ListOffsetArrayOf: public Content {
   public:
-    ListOffsetArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const IndexOf<T> offsets, const std::shared_ptr<Content> content)
+    ListOffsetArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content)
         : Content(id, type)
         , offsets_(offsets)
         , content_(content) {
@@ -28,10 +28,10 @@ namespace awkward {
 
     const std::string classname() const override;
     void setid() override;
-    void setid(const std::shared_ptr<Identity> id) override;
+    void setid(const std::shared_ptr<Identity>& id) override;
     const std::shared_ptr<Type> type() const override;
-    const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const override;
-    const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const override;
+    const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
+    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     void tojson_part(ToJson& builder) const override;
     int64_t length() const override;
     const std::shared_ptr<Content> shallow_copy() const override;

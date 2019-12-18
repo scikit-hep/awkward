@@ -14,7 +14,7 @@
 namespace awkward {
   class ListFillable: public Fillable {
   public:
-    ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, std::shared_ptr<Fillable> content, bool begun): options_(options), offsets_(offsets), content_(std::shared_ptr<Fillable>(content)), begun_(begun) { }
+    ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, std::shared_ptr<Fillable> content, bool begun): options_(options), offsets_(offsets), content_(content), begun_(begun) { }
 
     static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options);
 
@@ -22,7 +22,7 @@ namespace awkward {
     int64_t length() const override;
     void clear() override;
     const std::shared_ptr<Type> type() const override;
-    const std::shared_ptr<Content> snapshot(const std::shared_ptr<Type> type) const override;
+    const std::shared_ptr<Content> snapshot(const std::shared_ptr<Type>& type) const override;
 
     bool active() const override;
     const std::shared_ptr<Fillable> null() override;

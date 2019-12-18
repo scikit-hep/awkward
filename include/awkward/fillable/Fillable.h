@@ -19,7 +19,7 @@ namespace awkward {
     virtual int64_t length() const = 0;
     virtual void clear() = 0;
     virtual const std::shared_ptr<Type> type() const = 0;
-    virtual const std::shared_ptr<Content> snapshot(const std::shared_ptr<Type> type) const = 0;
+    virtual const std::shared_ptr<Content> snapshot(const std::shared_ptr<Type>& type) const = 0;
 
     virtual bool active() const = 0;
     virtual const std::shared_ptr<Fillable> null() = 0;

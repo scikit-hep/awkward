@@ -44,7 +44,7 @@ namespace awkward {
   template <typename T>
   class RawArrayOf: public Content {
   public:
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<T> ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
+    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<T>& ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
         : Content(id, type)
         , ptr_(ptr)
         , offset_(offset)
@@ -53,14 +53,14 @@ namespace awkward {
           assert(sizeof(T) == itemsize);
         }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<T> ptr, const int64_t length)
+    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<T>& ptr, const int64_t length)
         : Content(id, type)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const int64_t length)
+    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const int64_t length)
         : Content(id, type)
         , ptr_(std::shared_ptr<T>(new T[(size_t)length], awkward::util::array_deleter<T>()))
         , offset_(0)
@@ -95,7 +95,7 @@ namespace awkward {
         setid(newid);
       }
     }
-    void setid(const std::shared_ptr<Identity> id) override {
+    void setid(const std::shared_ptr<Identity>& id) override {
       if (id.get() != nullptr  &&  length() != id.get()->length()) {
         throw std::invalid_argument("content and its id must have the same length");
       }
@@ -144,12 +144,12 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const override {
+    const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override {
       return std::make_shared<RawArrayOf<T>>(id_, type, ptr_, offset_, length_, itemsize_);
     }
 
     const std::string tostring() { return tostring_part("", "", ""); }
-    const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const override {
+    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override {
       std::stringstream out;
       out << indent << pre << "<RawArray of=\"" << typeid(T).name() << "\" length=\"" << length_ << "\" itemsize=\"" << itemsize_ << "\" data=\"";
       ssize_t len = bytelength();
@@ -292,7 +292,7 @@ namespace awkward {
       return getitem_next(nexthead, nexttail, nextadvanced);
     }
 
-    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const override {
+    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const override {
       if (tail.length() != 0) {
         throw std::invalid_argument("too many indexes for array");
       }

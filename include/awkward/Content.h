@@ -14,19 +14,19 @@
 namespace awkward {
   class Content {
   public:
-    Content(std::shared_ptr<Identity> id, std::shared_ptr<Type> type): id_(id), type_(type) { }
+    Content(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type): id_(id), type_(type) { }
     virtual ~Content() { }
 
     virtual bool isscalar() const;
     virtual const std::string classname() const = 0;
     virtual const std::shared_ptr<Identity> id() const;
     virtual void setid() = 0;
-    virtual void setid(const std::shared_ptr<Identity> id) = 0;
+    virtual void setid(const std::shared_ptr<Identity>& id) = 0;
     virtual bool isbare() const;
     virtual bool istypeptr(Type* pointer) const;
     virtual const std::shared_ptr<Type> type() const = 0;
-    virtual const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const = 0;
-    virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
+    virtual const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const = 0;
+    virtual const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
     virtual void tojson_part(ToJson& builder) const = 0;
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
@@ -39,7 +39,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_field(const std::string& key) const = 0;
     virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const = 0;
     virtual const std::shared_ptr<Content> getitem(const Slice& where) const;
-    virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const;
+    virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const = 0;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const = 0;
     virtual int64_t numfields() const = 0;
@@ -65,7 +65,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
 
-    const std::shared_ptr<Content> getitem_next_array_wrap(const std::shared_ptr<Content> outcontent, const std::vector<int64_t>& shape) const;
+    const std::shared_ptr<Content> getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const;
 
   protected:
     std::shared_ptr<Identity> id_;

@@ -19,9 +19,9 @@ namespace awkward {
 
     static std::shared_ptr<Type> none() { return std::shared_ptr<Type>(nullptr); }
 
-    virtual std::string tostring_part(std::string indent, std::string pre, std::string post) const = 0;
+    virtual std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
     virtual const std::shared_ptr<Type> shallow_copy() const = 0;
-    virtual bool equal(const std::shared_ptr<Type> other, bool check_parameters) const = 0;
+    virtual bool equal(const std::shared_ptr<Type>& other, bool check_parameters) const = 0;
     virtual int64_t numfields() const = 0;
     virtual int64_t fieldindex(const std::string& key) const = 0;
     virtual const std::string key(int64_t fieldindex) const = 0;

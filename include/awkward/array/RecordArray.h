@@ -17,7 +17,7 @@ namespace awkward {
     typedef std::unordered_map<std::string, size_t> Lookup;
     typedef std::vector<std::string> ReverseLookup;
 
-    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
+    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
         : Content(id, type)
         , contents_(contents)
         , lookup_(lookup)
@@ -35,7 +35,7 @@ namespace awkward {
         checktype();
       }
     }
-    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::vector<std::shared_ptr<Content>>& contents)
+    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents)
         : Content(id, type)
         , contents_(contents)
         , lookup_(nullptr)
@@ -48,7 +48,7 @@ namespace awkward {
         checktype();
       }
     }
-    RecordArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, int64_t length, bool istuple)
+    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, int64_t length, bool istuple)
         : Content(id, type)
         , contents_()
         , lookup_(istuple ? nullptr : new Lookup)
@@ -66,10 +66,10 @@ namespace awkward {
 
     const std::string classname() const override;
     void setid() override;
-    void setid(const std::shared_ptr<Identity> id) override;
-    const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const override;
+    void setid(const std::shared_ptr<Identity>& id) override;
+    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> type() const override;
-    const std::shared_ptr<Content> astype(const std::shared_ptr<Type> type) const override;
+    const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
     void tojson_part(ToJson& builder) const override;
     int64_t length() const override;
     const std::shared_ptr<Content> shallow_copy() const override;
@@ -81,7 +81,7 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const override;
     const std::shared_ptr<Content> getitem_field(const std::string& key) const override;
     const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const override;
-    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const override;
+    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> carry(const Index64& carry) const override;
     const std::pair<int64_t, int64_t> minmax_depth() const override;
     int64_t numfields() const override;

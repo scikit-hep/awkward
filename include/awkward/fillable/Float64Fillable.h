@@ -20,7 +20,7 @@ namespace awkward {
     int64_t length() const override;
     void clear() override;
     const std::shared_ptr<Type> type() const override;
-    const std::shared_ptr<Content> snapshot(const std::shared_ptr<Type> type) const override;
+    const std::shared_ptr<Content> snapshot(const std::shared_ptr<Type>& type) const override;
 
     bool active() const override;
     const std::shared_ptr<Fillable> null() override;
