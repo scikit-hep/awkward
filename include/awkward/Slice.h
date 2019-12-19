@@ -41,9 +41,9 @@ namespace awkward {
     int64_t step() const;
     bool hasstart() const;
     bool hasstop() const;
-    const std::shared_ptr<SliceItem> shallow_copy() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
     const std::string tostring() const override;
-    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
   private:
     const int64_t start_;
     const int64_t stop_;
@@ -53,7 +53,7 @@ namespace awkward {
   class EXPORT_SYMBOL SliceEllipsis: public SliceItem {
   public:
     SliceEllipsis();
-    const std::shared_ptr<SliceItem> shallow_copy() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
     const std::string tostring() const override;
     bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
   };
@@ -61,13 +61,13 @@ namespace awkward {
   class EXPORT_SYMBOL SliceNewAxis: public SliceItem {
   public:
     SliceNewAxis();
-    const std::shared_ptr<SliceItem> shallow_copy() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
     const std::string tostring() const override;
-    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
   };
 
   template <typename T>
-  class EXPORT_SYMBOL SliceArrayOf: public SliceItem {
+  class SliceArrayOf: public SliceItem {
   public:
     SliceArrayOf<T>(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides);
     const IndexOf<T> index() const;
@@ -75,9 +75,9 @@ namespace awkward {
     const std::vector<int64_t> shape() const;
     const std::vector<int64_t> strides() const;
     int64_t ndim() const;
-    const std::shared_ptr<SliceItem> shallow_copy() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
     const std::string tostring() const override;
-    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
     const std::string tostring_part() const;
     const IndexOf<T> ravel() const;
   private:
@@ -87,6 +87,7 @@ namespace awkward {
   };
 
   typedef SliceArrayOf<int64_t> SliceArray64;
+  template class EXPORT_SYMBOL SliceArrayOf<int64_t>;
 
   class EXPORT_SYMBOL SliceField: public SliceItem {
   public:
