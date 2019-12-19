@@ -5,6 +5,20 @@
 #include "awkward/Iterator.h"
 
 namespace awkward {
+  Iterator::Iterator(const std::shared_ptr<Content>& content)
+    : content_(content)
+    , at_(0) {
+    content.get()->check_for_iteration();
+  }
+
+  const std::shared_ptr<Content> Iterator::content() const {
+    return content_;
+  }
+
+  const int64_t Iterator::at() const {
+    return at_;
+  }
+
   const bool Iterator::isdone() const {
     return at_ >= content_.get()->length();
   }

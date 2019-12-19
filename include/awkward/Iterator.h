@@ -7,20 +7,14 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  class Iterator {
+  class EXPORT_SYMBOL Iterator {
   public:
-    Iterator(const std::shared_ptr<Content>& content)
-        : content_(content)
-        , at_(0) {
-      content.get()->check_for_iteration();
-    }
+    Iterator(const std::shared_ptr<Content>& content);
 
-    const std::shared_ptr<Content> content() const { return content_; }
-    const int64_t at() const { return at_; }
-
+    const std::shared_ptr<Content> content() const;
+    const int64_t at() const;
     const bool isdone() const;
     const std::shared_ptr<Content> next();
-
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const;
     const std::string tostring() const;
 
