@@ -108,11 +108,6 @@ namespace awkward {
     return ptr_.get()[at];
   }
 
-  template <typename T>
-  IndexOf<T> GrowableBuffer<T>::toindex() const {
-    return IndexOf<T>(ptr_, 0, length_);
-  }
-
   template class GrowableBuffer<int8_t>;
   template class GrowableBuffer<uint8_t>;
   template class GrowableBuffer<int64_t>;

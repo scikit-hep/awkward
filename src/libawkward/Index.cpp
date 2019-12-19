@@ -153,5 +153,4 @@ namespace awkward {
   template class IndexOf<int32_t>;
   template class IndexOf<uint32_t>;
   template class IndexOf<int64_t>;
-  template class IndexOf<double>;   // only exists so that GrowableBuffer<double> can link
 }

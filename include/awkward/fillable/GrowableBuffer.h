@@ -30,7 +30,6 @@ namespace awkward {
     void clear();
     void append(T datum);
     T getitem_at_nowrap(int64_t at) const;
-    IndexOf<T> toindex() const;
 
   private:
     const FillableOptions options_;

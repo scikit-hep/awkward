@@ -69,7 +69,8 @@ namespace awkward {
     std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identity::none(), Type::none(), ptr, shape, strides, 0, (ssize_t)itemsize, format);
 
     for (int64_t i = depth - 1;  i >= 0;  i--) {
-      out = std::make_shared<ListOffsetArray64>(Identity::none(), Type::none(), levels[(size_t)i].toindex(), out);
+      Index64 index(levels[(size_t)i].ptr(), 0, levels[(size_t)i].length());
+      out = std::make_shared<ListOffsetArray64>(Identity::none(), Type::none(), index, out);
     }
     return out;
   }
