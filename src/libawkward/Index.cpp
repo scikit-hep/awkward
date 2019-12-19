@@ -143,7 +143,7 @@ namespace awkward {
   const std::shared_ptr<Index> IndexOf<T>::deep_copy() const {
     std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_], awkward::util::array_deleter<T>());
     if (length_ != 0) {
-      memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*length_);
+      memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*((size_t)length_));
     }
     return std::make_shared<IndexOf<T>>(ptr, 0, length_);
   }

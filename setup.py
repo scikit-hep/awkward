@@ -55,6 +55,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
+        print("========================================================================")
+        print("from", self.build_temp)
+        subprocess.check_call(["ls", "-R"], cwd=self.build_temp)
+        print("========================================================================")
+        print("from", extdir)
+        subprocess.check_call(["ls", "-R"], cwd=extdir)
+        print("========================================================================")
 
         for lib in (glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "libawkward-cpu-kernels-static.*")) +
                     glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "libawkward-static.*")) +
