@@ -56,11 +56,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
 
-        for lib in (glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.so")) +
+        for lib in (glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "libawkward-static.*")) +
+                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.so")) +
                     glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.dylib")) +
                     glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.dll")) +
                     glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.pyd"))):
           if os.path.exists(lib):
+              print("deleting", lib)
               os.remove(lib)
 
         for lib in os.listdir(extdir):
@@ -73,6 +75,11 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
                 if lib.endswith(".dll") or lib.endswith(".pyd"):
                     shutil.copy(os.path.join(os.path.join(self.build_temp, cfg), lib), "awkward1")
                     shutil.move(os.path.join(os.path.join(self.build_temp, cfg), lib), os.path.join(extdir, "awkward1"))
+
+        for lib in os.listdir(self.build_temp):
+            if lib.startswith("libawkward-static.") or lib.startswith("libawkward-cpu-kernels-static."):
+                shutil.copy(os.path.join(self.build_temp, lib), "awkward1")
+                shutil.move(os.path.join(self.build_temp, lib), os.path.join(extdir, "awkward1"))
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(exclude=["tests"]),

@@ -10,13 +10,13 @@
 #include "awkward/util.h"
 
 namespace awkward {
-  class EXPORT_SYMBOL Index {
+  class Index {
     virtual const std::shared_ptr<Index> shallow_copy() const = 0;
     virtual const std::shared_ptr<Index> deep_copy() const = 0;
   };
 
   template <typename T>
-  class EXPORT_SYMBOL IndexOf: public Index {
+  class IndexOf: public Index {
   public:
     IndexOf<T>(int64_t length);
     IndexOf<T>(const std::shared_ptr<T>& ptr, int64_t offset, int64_t length);

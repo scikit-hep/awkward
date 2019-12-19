@@ -7,7 +7,7 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  class EXPORT_SYMBOL Iterator {
+  class Iterator {
   public:
     Iterator(const std::shared_ptr<Content>& content);
 

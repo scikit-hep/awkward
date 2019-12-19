@@ -11,10 +11,6 @@
 namespace awkward {
   class Identity;
 
-#ifdef _MSC_VER
-  class EXPORT_SYMBOL export_vector_int64: public std::vector<int64_t> { };
-#endif
-
   namespace util {
     void handle_error(const struct Error& err, const std::string& classname, const Identity* id);
 

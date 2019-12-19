@@ -259,7 +259,7 @@ namespace awkward {
     return index;
   }
 
-  template class EXPORT_SYMBOL SliceArrayOf<int64_t>;
+  template class SliceArrayOf<int64_t>;
 
   /////////////////////////////////////////////////////// SliceField
 

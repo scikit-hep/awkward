@@ -13,7 +13,7 @@
 #include "awkward/Index.h"
 
 namespace awkward {
-  class EXPORT_SYMBOL SliceItem {
+  class SliceItem {
   public:
     static int64_t none();
     virtual ~SliceItem();
@@ -22,7 +22,7 @@ namespace awkward {
     virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const = 0;
   };
 
-  class EXPORT_SYMBOL SliceAt: public SliceItem {
+  class SliceAt: public SliceItem {
   public:
     SliceAt(int64_t at);
     int64_t at() const;
@@ -33,7 +33,7 @@ namespace awkward {
     const int64_t at_;
   };
 
-  class EXPORT_SYMBOL SliceRange: public SliceItem {
+  class SliceRange: public SliceItem {
   public:
     SliceRange(int64_t start, int64_t stop, int64_t step);
     int64_t start() const;
@@ -50,7 +50,7 @@ namespace awkward {
     const int64_t step_;
   };
 
-  class EXPORT_SYMBOL SliceEllipsis: public SliceItem {
+  class SliceEllipsis: public SliceItem {
   public:
     SliceEllipsis();
     const std::shared_ptr<SliceItem> shallow_copy() const override;
@@ -58,7 +58,7 @@ namespace awkward {
     bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
   };
 
-  class EXPORT_SYMBOL SliceNewAxis: public SliceItem {
+  class SliceNewAxis: public SliceItem {
   public:
     SliceNewAxis();
     const std::shared_ptr<SliceItem> shallow_copy() const override;
@@ -88,7 +88,7 @@ namespace awkward {
 
   typedef SliceArrayOf<int64_t> SliceArray64;
 
-  class EXPORT_SYMBOL SliceField: public SliceItem {
+  class SliceField: public SliceItem {
   public:
     SliceField(const std::string& key);
     const std::string key() const;
@@ -99,7 +99,7 @@ namespace awkward {
     const std::string key_;
   };
 
-  class EXPORT_SYMBOL SliceFields: public SliceItem {
+  class SliceFields: public SliceItem {
   public:
     SliceFields(const std::vector<std::string>& keys);
     const std::vector<std::string> keys() const;
@@ -110,7 +110,7 @@ namespace awkward {
     const std::vector<std::string> keys_;
   };
 
-  class EXPORT_SYMBOL Slice {
+  class Slice {
   public:
     static int64_t none();
 
