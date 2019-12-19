@@ -12,11 +12,11 @@
 namespace awkward {
   class UnknownFillable: public Fillable {
   public:
-    UnknownFillable(const FillableOptions& options, int64_t nullcount): options_(options), nullcount_(nullcount) { }
-
     static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options);
 
-    const std::string classname() const override { return "UnknownFillable"; };
+    UnknownFillable(const FillableOptions& options, int64_t nullcount);
+
+    const std::string classname() const override;
     int64_t length() const override;
     void clear() override;
     const std::shared_ptr<Type> type() const override;

@@ -9,6 +9,10 @@
 #include "awkward/type/PrimitiveType.h"
 
 namespace awkward {
+  PrimitiveType::PrimitiveType(const Type::Parameters& parameters, DType dtype)
+      : Type(parameters)
+      , dtype_(dtype) { }
+
   std::string PrimitiveType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {

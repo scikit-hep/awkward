@@ -16,11 +16,11 @@ namespace awkward {
 
   class UnionFillable: public Fillable {
   public:
-    UnionFillable(const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>>& contents): options_(options), types_(types), offsets_(offsets), contents_(contents), current_(-1) { }
-
     static const std::shared_ptr<Fillable> fromsingle(const FillableOptions& options, const std::shared_ptr<Fillable>& firstcontent);
 
-    const std::string classname() const override { return "UnionFillable"; };
+    UnionFillable(const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>>& contents);
+
+    const std::string classname() const override;
     int64_t length() const override;
     void clear() override;
     const std::shared_ptr<Type> type() const override;

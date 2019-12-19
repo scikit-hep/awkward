@@ -20,6 +20,20 @@ namespace awkward {
     return out;
   }
 
+  StringFillable::StringFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, GrowableBuffer<uint8_t>& content, const char* encoding)
+      : options_(options)
+      , offsets_(offsets)
+      , content_(content)
+      , encoding_(encoding) { }
+
+  const std::string StringFillable::classname() const {
+    return "StringFillable";
+  };
+
+  const char* StringFillable::encoding() const {
+    return encoding_;
+  }
+
   int64_t StringFillable::length() const {
     return offsets_.length() - 1;
   }

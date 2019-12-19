@@ -11,11 +11,12 @@
 namespace awkward {
   class StringFillable: public Fillable {
   public:
-    StringFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, GrowableBuffer<uint8_t>& content, const char* encoding): options_(options), offsets_(offsets), content_(content), encoding_(encoding) { }
-
     static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options, const char* encoding);
 
-    const std::string classname() const override { return "StringFillable"; };
+    StringFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, GrowableBuffer<uint8_t>& content, const char* encoding);
+    const char* encoding() const;
+
+    const std::string classname() const override;
     int64_t length() const override;
     void clear() override;
     const std::shared_ptr<Type> type() const override;
@@ -35,8 +36,6 @@ namespace awkward {
     const std::shared_ptr<Fillable> beginrecord(const char* name, bool check) override;
     const std::shared_ptr<Fillable> field(const char* key, bool check) override;
     const std::shared_ptr<Fillable> endrecord() override;
-
-    const char* encoding() const { return encoding_; }
 
   private:
     const FillableOptions options_;

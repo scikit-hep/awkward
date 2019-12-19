@@ -9,6 +9,11 @@
 #include "awkward/type/RegularType.h"
 
 namespace awkward {
+  RegularType::RegularType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t size)
+      : Type(parameters)
+      , type_(type)
+      , size_(size) { }
+
   std::string RegularType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {

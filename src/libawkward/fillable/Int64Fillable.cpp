@@ -16,6 +16,18 @@ namespace awkward {
     return out;
   }
 
+  Int64Fillable::Int64Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& buffer)
+      : options_(options)
+      , buffer_(buffer) { }
+
+  const GrowableBuffer<int64_t> Int64Fillable::buffer() const {
+    return buffer_;
+  }
+
+  const std::string Int64Fillable::classname() const {
+    return "Int64Fillable";
+  };
+
   int64_t Int64Fillable::length() const {
     return buffer_.length();
   }

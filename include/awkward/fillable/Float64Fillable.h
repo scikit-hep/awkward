@@ -11,12 +11,12 @@
 namespace awkward {
   class Float64Fillable: public Fillable {
   public:
-    Float64Fillable(const FillableOptions& options, const GrowableBuffer<double>& buffer): options_(options), buffer_(buffer) { }
-
     static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options);
     static const std::shared_ptr<Fillable> fromint64(const FillableOptions& options, GrowableBuffer<int64_t> old);
 
-    const std::string classname() const override { return "Float64Fillable"; };
+    Float64Fillable(const FillableOptions& options, const GrowableBuffer<double>& buffer);
+
+    const std::string classname() const override;
     int64_t length() const override;
     void clear() override;
     const std::shared_ptr<Type> type() const override;

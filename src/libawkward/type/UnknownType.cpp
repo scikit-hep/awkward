@@ -6,6 +6,9 @@
 #include "awkward/type/UnknownType.h"
 
 namespace awkward {
+  UnknownType::UnknownType(const Parameters& parameters)
+      : Type(parameters) { }
+
   std::string UnknownType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {

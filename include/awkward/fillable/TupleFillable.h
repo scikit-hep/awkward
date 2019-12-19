@@ -14,16 +14,12 @@
 namespace awkward {
   class TupleFillable: public Fillable {
   public:
-    TupleFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, int64_t length, bool begun, size_t nextindex)
-        : options_(options)
-        , contents_(contents)
-        , length_(length)
-        , begun_(begun)
-        , nextindex_(nextindex) { }
-
     static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options);
 
-    const std::string classname() const override { return "TupleFillable"; };
+    TupleFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, int64_t length, bool begun, size_t nextindex);
+    int64_t numfields() const;
+
+    const std::string classname() const override;
     int64_t length() const override;
     void clear() override;
     const std::shared_ptr<Type> type() const override;
@@ -43,8 +39,6 @@ namespace awkward {
     const std::shared_ptr<Fillable> beginrecord(const char* name, bool check) override;
     const std::shared_ptr<Fillable> field(const char* key, bool check) override;
     const std::shared_ptr<Fillable> endrecord() override;
-
-    int64_t numfields() const { return (int64_t)contents_.size(); }
 
   private:
     const FillableOptions options_;

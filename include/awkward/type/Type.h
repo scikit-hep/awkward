@@ -14,10 +14,10 @@ namespace awkward {
   public:
     typedef std::map<std::string, std::string> Parameters;
 
-    Type(const Parameters& parameters): parameters_(parameters) { }
-    virtual ~Type() { }
+    static std::shared_ptr<Type> none();
 
-    static std::shared_ptr<Type> none() { return std::shared_ptr<Type>(nullptr); }
+    Type(const Parameters& parameters);
+    virtual ~Type();
 
     virtual std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
     virtual const std::shared_ptr<Type> shallow_copy() const = 0;
@@ -30,30 +30,12 @@ namespace awkward {
     virtual const std::vector<std::string> keyaliases(const std::string& key) const = 0;
     virtual const std::vector<std::string> keys() const = 0;
 
-    const Parameters parameters() const {
-      return parameters_;
-    }
-    void setparameters(const Parameters& parameters) {
-      parameters_ = parameters;
-    }
-    std::string parameter(const std::string& key) {
-      return parameters_[key];
-    }
-    void setparameter(const std::string& key, const std::string& value) {
-      parameters_[key] = value;
-    }
-    bool parameter_equals(const std::string& key, const std::string& value) {
-      auto item = parameters_.find(key);
-      if (item == parameters_.end()) {
-        return false;
-      }
-      else {
-        return item->second == value;
-      }
-    }
-    std::string tostring() const {
-      return tostring_part("", "", "");
-    };
+    const Parameters parameters() const;
+    void setparameters(const Parameters& parameters);
+    std::string parameter(const std::string& key);
+    void setparameter(const std::string& key, const std::string& value);
+    bool parameter_equals(const std::string& key, const std::string& value);
+    std::string tostring() const;
     const std::string compare(std::shared_ptr<Type> supertype);
 
   protected:

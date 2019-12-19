@@ -24,6 +24,14 @@ namespace awkward {
     return out;
   }
 
+  UnknownFillable::UnknownFillable(const FillableOptions& options, int64_t nullcount)
+      : options_(options)
+      , nullcount_(nullcount) { }
+
+  const std::string UnknownFillable::classname() const {
+    return "UnknownFillable";
+  };
+
   int64_t UnknownFillable::length() const {
     return nullcount_;
   }

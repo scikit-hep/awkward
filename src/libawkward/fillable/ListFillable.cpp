@@ -20,6 +20,16 @@ namespace awkward {
     return out;
   }
 
+  ListFillable::ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, std::shared_ptr<Fillable> content, bool begun)
+      : options_(options)
+      , offsets_(offsets)
+      , content_(content)
+      , begun_(begun) { }
+
+  const std::string ListFillable::classname() const {
+    return "ListFillable";
+  };
+
   int64_t ListFillable::length() const {
     return offsets_.length() - 1;
   }

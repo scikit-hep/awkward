@@ -15,21 +15,13 @@ namespace awkward {
     typedef std::unordered_map<std::string, size_t> Lookup;
     typedef std::vector<std::string> ReverseLookup;
 
-    RecordType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
-        : Type(parameters)
-        , types_(types)
-        , lookup_(lookup)
-        , reverselookup_(reverselookup) { }
-    RecordType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
-        : Type(parameters)
-        , types_(types)
-        , lookup_(nullptr)
-        , reverselookup_(nullptr) { }
+    RecordType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup);
+    RecordType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types);
 
-    const std::vector<std::shared_ptr<Type>> types() const { return types_; };
-    const std::shared_ptr<Lookup> lookup() const { return lookup_; }
-    const std::shared_ptr<ReverseLookup> reverselookup() const { return reverselookup_; }
-    bool istuple() const { return lookup_.get() == nullptr; }
+    const std::vector<std::shared_ptr<Type>> types() const;
+    const std::shared_ptr<Lookup> lookup() const;
+    const std::shared_ptr<ReverseLookup> reverselookup() const;
+    bool istuple() const;
 
     std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> shallow_copy() const override;

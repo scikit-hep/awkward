@@ -10,6 +10,10 @@
 #include "awkward/type/OptionType.h"
 
 namespace awkward {
+  OptionType::OptionType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type)
+      : Type(parameters)
+      , type_(type) { }
+
   std::string OptionType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {

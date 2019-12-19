@@ -5,6 +5,11 @@
 #include "awkward/type/ArrayType.h"
 
 namespace awkward {
+  ArrayType::ArrayType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t length)
+      : Type(parameters)
+      , type_(type)
+      , length_(length) { }
+
   std::string ArrayType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {

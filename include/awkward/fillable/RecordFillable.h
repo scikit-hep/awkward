@@ -14,21 +14,14 @@
 namespace awkward {
   class RecordFillable: public Fillable {
   public:
-    RecordFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, const std::vector<std::string>& keys, const std::vector<const char*>& pointers, const std::string& name, const char* nameptr, int64_t length, bool begun, int64_t nextindex, int64_t nexttotry)
-        : options_(options)
-        , contents_(contents)
-        , keys_(keys)
-        , pointers_(pointers)
-        , name_(name)
-        , nameptr_(nameptr)
-        , length_(length)
-        , begun_(begun)
-        , nextindex_(nextindex)
-        , nexttotry_(nexttotry) { }
-
     static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options);
 
-    const std::string classname() const override { return "RecordFillable"; };
+    RecordFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, const std::vector<std::string>& keys, const std::vector<const char*>& pointers, const std::string& name, const char* nameptr, int64_t length, bool begun, int64_t nextindex, int64_t nexttotry);
+
+    const std::string name() const;
+    const char* nameptr() const;
+
+    const std::string classname() const override;
     int64_t length() const override;
     void clear() override;
     const std::shared_ptr<Type> type() const override;
@@ -48,9 +41,6 @@ namespace awkward {
     const std::shared_ptr<Fillable> beginrecord(const char* name, bool check) override;
     const std::shared_ptr<Fillable> field(const char* key, bool check) override;
     const std::shared_ptr<Fillable> endrecord() override;
-
-    const std::string name() const { return name_; }
-    const char* nameptr() const { return nameptr_; }
 
   private:
     const std::shared_ptr<Fillable> field_fast(const char* key);

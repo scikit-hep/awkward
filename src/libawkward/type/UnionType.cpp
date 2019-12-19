@@ -9,6 +9,10 @@
 #include "awkward/type/UnionType.h"
 
 namespace awkward {
+  UnionType::UnionType(const Type::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
+      : Type(parameters)
+      , types_(types) { }
+
   std::string UnionType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {

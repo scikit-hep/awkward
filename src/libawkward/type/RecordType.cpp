@@ -10,6 +10,34 @@
 #include "awkward/type/RecordType.h"
 
 namespace awkward {
+  RecordType::RecordType(const Type::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<RecordType::Lookup>& lookup, const std::shared_ptr<RecordType::ReverseLookup>& reverselookup)
+      : Type(parameters)
+      , types_(types)
+      , lookup_(lookup)
+      , reverselookup_(reverselookup) { }
+
+  RecordType::RecordType(const Type::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
+      : Type(parameters)
+      , types_(types)
+      , lookup_(nullptr)
+      , reverselookup_(nullptr) { }
+
+  const std::vector<std::shared_ptr<Type>> RecordType::types() const {
+    return types_;
+  };
+
+  const std::shared_ptr<RecordType::Lookup> RecordType::lookup() const {
+    return lookup_;
+  }
+
+  const std::shared_ptr<RecordType::ReverseLookup> RecordType::reverselookup() const {
+    return reverselookup_;
+  }
+
+  bool RecordType::istuple() const {
+    return lookup_.get() == nullptr;
+  }
+
   std::string RecordType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {

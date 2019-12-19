@@ -5,6 +5,9 @@
 #include "awkward/fillable/FillableArray.h"
 
 namespace awkward {
+  FillableArray::FillableArray(const FillableOptions& options)
+      : fillable_(UnknownFillable::fromempty(options)) { }
+
   const std::string FillableArray::tostring() const {
     std::stringstream out;
     out << "<FillableArray length=\"" << length() << "\" type=\"" << type().get()->tostring() << "\"/>";
@@ -71,12 +74,20 @@ namespace awkward {
     maybeupdate(fillable_.get()->string(x, length, no_encoding));
   }
 
+  void FillableArray::bytestring(const std::string& x) {
+    bytestring(x.c_str(), (int64_t)x.length());
+  }
+
   void FillableArray::string(const char* x) {
     maybeupdate(fillable_.get()->string(x, -1, utf8_encoding));
   }
 
   void FillableArray::string(const char* x, int64_t length) {
     maybeupdate(fillable_.get()->string(x, length, utf8_encoding));
+  }
+
+  void FillableArray::string(const std::string& x) {
+    string(x.c_str(), (int64_t)x.length());
   }
 
   void FillableArray::beginlist() {
@@ -115,6 +126,10 @@ namespace awkward {
     maybeupdate(fillable_.get()->beginrecord(name, true));
   }
 
+  void FillableArray::beginrecord_check(const std::string& name) {
+    beginrecord_check(name.c_str());
+  }
+
   void FillableArray::field_fast(const char* key) {
     maybeupdate(fillable_.get()->field(key, false));
   }
@@ -123,8 +138,28 @@ namespace awkward {
     maybeupdate(fillable_.get()->field(key, true));
   }
 
+  void FillableArray::field_check(const std::string& key) {
+    field_check(key.c_str());
+  }
+
   void FillableArray::endrecord() {
     maybeupdate(fillable_.get()->endrecord());
+  }
+
+  void FillableArray::fill(int64_t x) {
+    integer(x);
+  }
+
+  void FillableArray::fill(double x) {
+    real(x);
+  }
+
+  void FillableArray::fill(const char* x) {
+    bytestring(x);
+  }
+
+  void FillableArray::fill(const std::string& x) {
+    bytestring(x.c_str());
   }
 
   void FillableArray::maybeupdate(const std::shared_ptr<Fillable>& tmp) {

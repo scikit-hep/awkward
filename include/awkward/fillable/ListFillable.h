@@ -14,11 +14,11 @@
 namespace awkward {
   class ListFillable: public Fillable {
   public:
-    ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, std::shared_ptr<Fillable> content, bool begun): options_(options), offsets_(offsets), content_(content), begun_(begun) { }
-
     static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options);
 
-    const std::string classname() const override { return "ListFillable"; };
+    ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, std::shared_ptr<Fillable> content, bool begun);
+
+    const std::string classname() const override;
     int64_t length() const override;
     void clear() override;
     const std::shared_ptr<Type> type() const override;

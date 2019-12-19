@@ -15,6 +15,14 @@ namespace awkward {
     return out;
   }
 
+  BoolFillable::BoolFillable(const FillableOptions& options, const GrowableBuffer<uint8_t>& buffer)
+      : options_(options)
+      , buffer_(buffer) { }
+
+  const std::string BoolFillable::classname() const {
+    return "BoolFillable";
+  };
+
   int64_t BoolFillable::length() const {
     return buffer_.length();
   }

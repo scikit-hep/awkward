@@ -10,7 +10,7 @@
 namespace awkward {
   class UnionType: public Type {
   public:
-    UnionType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types): Type(parameters), types_(types) { }
+    UnionType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types);
 
     std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> shallow_copy() const override;

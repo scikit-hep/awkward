@@ -15,86 +15,22 @@ namespace awkward {
   template <typename T>
   class GrowableBuffer {
   public:
-    GrowableBuffer(const FillableOptions& options, std::shared_ptr<T> ptr, int64_t length, int64_t reserved): options_(options), ptr_(ptr), length_(length), reserved_(reserved) { }
-    GrowableBuffer(const FillableOptions& options): GrowableBuffer(options, std::shared_ptr<T>(new T[(size_t)options.initial()], awkward::util::array_deleter<T>()), 0, options.initial()) { }
+    static GrowableBuffer<T> empty(const FillableOptions& options);
+    static GrowableBuffer<T> empty(const FillableOptions& options, int64_t minreserve);
+    static GrowableBuffer<T> full(const FillableOptions& options, T value, int64_t length);
+    static GrowableBuffer<T> arange(const FillableOptions& options, int64_t length);
 
-    static GrowableBuffer<T> empty(const FillableOptions& options) {
-      return GrowableBuffer<T>::empty(options, 0);
-    }
-
-    static GrowableBuffer<T> empty(const FillableOptions& options, int64_t minreserve) {
-      size_t actual = (size_t)options.initial();
-      if (actual < (size_t)minreserve) {
-        actual = (size_t)minreserve;
-      }
-      std::shared_ptr<T> ptr(new T[actual], awkward::util::array_deleter<T>());
-      return GrowableBuffer(options, ptr, 0, (int64_t)actual);
-    }
-
-    static GrowableBuffer<T> full(const FillableOptions& options, T value, int64_t length) {
-      GrowableBuffer<T> out = empty(options, length);
-      T* rawptr = out.ptr().get();
-      for (int64_t i = 0;  i < length;  i++) {
-        rawptr[i] = value;
-      }
-      return GrowableBuffer<T>(options, out.ptr(), length, out.reserved());
-    }
-
-    static GrowableBuffer<T> arange(const FillableOptions& options, int64_t length) {
-      size_t actual = (size_t)options.initial();
-      if (actual < (size_t)length) {
-        actual = (size_t)length;
-      }
-      T* rawptr = new T[(size_t)actual];
-      std::shared_ptr<T> ptr(rawptr, awkward::util::array_deleter<T>());
-      for (int64_t i = 0;  i < length;  i++) {
-        rawptr[i] = (T)i;
-      }
-      return GrowableBuffer(options, ptr, length, (int64_t)actual);
-    }
-
-    const std::shared_ptr<T> ptr() const { return ptr_; }
-
-    int64_t length() const { return length_; }
-    void set_length(int64_t newlength) {
-      if (newlength > reserved_) {
-        set_reserved(newlength);
-      }
-      length_ = newlength;
-    }
-
-    int64_t reserved() const { return reserved_; }
-    void set_reserved(int64_t minreserved) {
-      if (minreserved > reserved_) {
-        std::shared_ptr<T> ptr(new T[(size_t)minreserved], awkward::util::array_deleter<T>());
-        memcpy(ptr.get(), ptr_.get(), (size_t)(length_ * sizeof(T)));
-        ptr_ = ptr;
-        reserved_ = minreserved;
-      }
-    }
-
-    void clear() {
-      length_ = 0;
-      reserved_ = options_.initial();
-      ptr_ = std::shared_ptr<T>(new T[(size_t)options_.initial()], awkward::util::array_deleter<T>());
-    }
-
-    void append(T datum) {
-      assert(length_ <= reserved_);
-      if (length_ == reserved_) {
-        set_reserved((int64_t)ceil(reserved_ * options_.resize()));
-      }
-      ptr_.get()[length_] = datum;
-      length_++;
-    }
-
-    T getitem_at_nowrap(int64_t at) const {
-      return ptr_.get()[at];
-    }
-
-    IndexOf<T> toindex() const {
-      return IndexOf<T>(ptr_, 0, length_);
-    }
+    GrowableBuffer(const FillableOptions& options, std::shared_ptr<T> ptr, int64_t length, int64_t reserved);
+    GrowableBuffer(const FillableOptions& options);
+    const std::shared_ptr<T> ptr() const;
+    int64_t length() const;
+    void set_length(int64_t newlength);
+    int64_t reserved() const;
+    void set_reserved(int64_t minreserved);
+    void clear();
+    void append(T datum);
+    T getitem_at_nowrap(int64_t at) const;
+    IndexOf<T> toindex() const;
 
   private:
     const FillableOptions options_;

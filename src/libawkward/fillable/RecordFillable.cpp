@@ -23,6 +23,30 @@ namespace awkward {
     return out;
   }
 
+  RecordFillable::RecordFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, const std::vector<std::string>& keys, const std::vector<const char*>& pointers, const std::string& name, const char* nameptr, int64_t length, bool begun, int64_t nextindex, int64_t nexttotry)
+      : options_(options)
+      , contents_(contents)
+      , keys_(keys)
+      , pointers_(pointers)
+      , name_(name)
+      , nameptr_(nameptr)
+      , length_(length)
+      , begun_(begun)
+      , nextindex_(nextindex)
+      , nexttotry_(nexttotry) { }
+
+  const std::string RecordFillable::name() const {
+    return name_;
+  }
+
+  const char* RecordFillable::nameptr() const {
+    return nameptr_;
+  }
+
+  const std::string RecordFillable::classname() const {
+    return "RecordFillable";
+  };
+
   int64_t RecordFillable::length() const {
     return length_;
   }

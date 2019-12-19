@@ -20,6 +20,21 @@ namespace awkward {
     return out;
   }
 
+  TupleFillable::TupleFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, int64_t length, bool begun, size_t nextindex)
+      : options_(options)
+      , contents_(contents)
+      , length_(length)
+      , begun_(begun)
+      , nextindex_(nextindex) { }
+
+  int64_t TupleFillable::numfields() const {
+    return (int64_t)contents_.size();
+  }
+
+  const std::string TupleFillable::classname() const {
+    return "TupleFillable";
+  };
+
   int64_t TupleFillable::length() const {
     return length_;
   }

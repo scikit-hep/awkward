@@ -26,6 +26,17 @@ namespace awkward {
     return out;
   }
 
+  UnionFillable::UnionFillable(const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>>& contents)
+      : options_(options)
+      , types_(types)
+      , offsets_(offsets)
+      , contents_(contents)
+      , current_(-1) { }
+
+  const std::string UnionFillable::classname() const {
+    return "UnionFillable";
+  };
+
   int64_t UnionFillable::length() const {
     return types_.length();
   }

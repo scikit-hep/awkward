@@ -23,6 +23,15 @@ namespace awkward {
     return out;
   }
 
+  OptionFillable::OptionFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, std::shared_ptr<Fillable> content)
+      : options_(options)
+      , offsets_(offsets)
+      , content_(content) { }
+
+  const std::string OptionFillable::classname() const {
+    return "OptionFillable";
+  };
+
   int64_t OptionFillable::length() const {
     return offsets_.length();
   }

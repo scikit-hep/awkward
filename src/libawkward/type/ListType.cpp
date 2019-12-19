@@ -9,6 +9,10 @@
 #include "awkward/type/ListType.h"
 
 namespace awkward {
+  ListType::ListType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type)
+      : Type(parameters)
+      , type_(type) { }
+
   std::string ListType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {

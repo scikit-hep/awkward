@@ -28,6 +28,14 @@ namespace awkward {
     return out;
   }
 
+  Float64Fillable::Float64Fillable(const FillableOptions& options, const GrowableBuffer<double>& buffer)
+      : options_(options)
+      , buffer_(buffer) { }
+
+  const std::string Float64Fillable::classname() const {
+    return "Float64Fillable";
+  }
+
   int64_t Float64Fillable::length() const {
     return buffer_.length();
   }
