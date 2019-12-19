@@ -15,30 +15,16 @@
 namespace awkward {
   class NumpyArray: public Content {
   public:
-    NumpyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
-        : Content(id, type)
-        , ptr_(ptr)
-        , shape_(shape)
-        , strides_(strides)
-        , byteoffset_(byteoffset)
-        , itemsize_(itemsize)
-        , format_(format) {
-      if (shape_.size() != strides_.size()) {
-        throw std::runtime_error("len(shape) must be equal to len(strides)");
-      }
-      if (type_.get() != nullptr) {
-        checktype();
-      }
-    }
-
     static const std::shared_ptr<Type> unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape);
 
-    const std::shared_ptr<void> ptr() const { return ptr_; }
-    const std::vector<ssize_t> shape() const { return shape_; }
-    const std::vector<ssize_t> strides() const { return strides_; }
-    ssize_t byteoffset() const { return byteoffset_; }
-    ssize_t itemsize() const { return itemsize_; }
-    const std::string format() const { return format_; }
+    NumpyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format);
+
+    const std::shared_ptr<void> ptr() const;
+    const std::vector<ssize_t> shape() const;
+    const std::vector<ssize_t> strides() const;
+    ssize_t byteoffset() const;
+    ssize_t itemsize() const;
+    const std::string format() const;
 
     ssize_t ndim() const;
     bool isempty() const;
@@ -85,21 +71,11 @@ namespace awkward {
   protected:
     void checktype() const override;
 
-    const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
-      throw std::runtime_error("NumpyArray has its own getitem_next system");
-    }
-    const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override {
-      throw std::runtime_error("NumpyArray has its own getitem_next system");
-    }
-    const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override {
-      throw std::runtime_error("NumpyArray has its own getitem_next system");
-    }
-    const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const override {
-      throw std::runtime_error("NumpyArray has its own getitem_next system");
-    }
-    const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override {
-      throw std::runtime_error("NumpyArray has its own getitem_next system");
-    }
+    const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
+    const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
+    const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;
+    const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const override;
+    const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override;
 
     const NumpyArray contiguous_next(const Index64& bytepos) const;
     const NumpyArray getitem_bystrides(const std::shared_ptr<SliceItem>& head, const Slice& tail, int64_t length) const;

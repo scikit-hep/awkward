@@ -17,20 +17,14 @@ namespace awkward {
     typedef std::vector<std::pair<int64_t, std::string>> FieldLoc;
 
     static Ref newref();
-    static std::shared_ptr<Identity> none() { return std::shared_ptr<Identity>(nullptr); }
+    static std::shared_ptr<Identity> none();
 
-    Identity(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length)
-        : ref_(ref)
-        , fieldloc_(fieldloc)
-        , offset_(offset)
-        , width_(width)
-        , length_(length) { }
-
-    const Ref ref() const { return ref_; }
-    const FieldLoc fieldloc() const { return fieldloc_; }
-    const int64_t offset() const { return offset_; }
-    const int64_t width() const { return width_; }
-    const int64_t length() const { return length_; }
+    Identity(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length);
+    const Ref ref() const;
+    const FieldLoc fieldloc() const;
+    const int64_t offset() const;
+    const int64_t width() const;
+    const int64_t length() const;
 
     virtual const std::string classname() const = 0;
     virtual const std::string location_at(int64_t where) const = 0;
@@ -55,14 +49,10 @@ namespace awkward {
   template <typename T>
   class IdentityOf: public Identity {
   public:
-    IdentityOf<T>(const Ref ref, const FieldLoc& fieldloc, int64_t width, int64_t length)
-        : Identity(ref, fieldloc, 0, width, length)
-        , ptr_(std::shared_ptr<T>(length*width == 0 ? nullptr : new T[(size_t)(length*width)], awkward::util::array_deleter<T>())) { }
-    IdentityOf<T>(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr)
-        : Identity(ref, fieldloc, offset, width, length)
-        , ptr_(ptr) { }
+    IdentityOf<T>(const Ref ref, const FieldLoc& fieldloc, int64_t width, int64_t length);
+    IdentityOf<T>(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr);
 
-    const std::shared_ptr<T> ptr() const { return ptr_; }
+    const std::shared_ptr<T> ptr() const;
 
     const std::string classname() const override;
     const std::string location_at(int64_t at) const override;

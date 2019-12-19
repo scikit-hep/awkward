@@ -50,8 +50,10 @@ namespace awkward {
         , offset_(offset)
         , length_(length)
         , itemsize_(itemsize) {
-          assert(sizeof(T) == itemsize);
-        }
+      if (sizeof(T) != itemsize) {
+        throw std::runtime_error("sizeof(T) != itemsize");
+      }
+    }
 
     RawArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<T>& ptr, const int64_t length)
         : Content(id, type)
@@ -67,19 +69,43 @@ namespace awkward {
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
-    const std::shared_ptr<T> ptr() const { return ptr_; }
-    const int64_t offset() const { return offset_; }
-    const int64_t itemsize() const { return itemsize_; }
+    const std::shared_ptr<T> ptr() const {
+      return ptr_;
+    }
 
-    bool isempty() const { return length_ == 0; }
-    ssize_t byteoffset() const { return (ssize_t)itemsize_*(ssize_t)offset_; }
-    uint8_t* byteptr() const { return reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset()); }
-    ssize_t bytelength() const { return (ssize_t)itemsize_*(ssize_t)length_; }
-    uint8_t getbyte(ssize_t at) const { return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)(byteoffset() + at)); }
+    const int64_t offset() const {
+      return offset_;
+    }
 
-    T* borrow(int64_t at) const { return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)itemsize_*(ssize_t)(offset_ + at)); }
+    const int64_t itemsize() const {
+      return itemsize_;
+    }
 
-    const std::string classname() const override { return std::string("RawArrayOf<") + std::string(typeid(T).name()) + std::string(">"); }
+    bool isempty() const {
+      return length_ == 0;
+    }
+
+    ssize_t byteoffset() const {
+      return (ssize_t)itemsize_*(ssize_t)offset_;
+    }
+
+    uint8_t* byteptr() const {
+      return reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset());
+    }
+    ssize_t bytelength() const {
+      return (ssize_t)itemsize_*(ssize_t)length_;
+    }
+    uint8_t getbyte(ssize_t at) const {
+      return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)(byteoffset() + at));
+    }
+
+    T* borrow(int64_t at) const {
+      return reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + (ssize_t)itemsize_*(ssize_t)(offset_ + at));
+    }
+
+    const std::string classname() const override {
+      return std::string("RawArrayOf<") + std::string(typeid(T).name()) + std::string(">");
+    }
 
     void setid() override {
       if (length() <= kMaxInt32) {
@@ -95,6 +121,7 @@ namespace awkward {
         setid(newid);
       }
     }
+
     void setid(const std::shared_ptr<Identity>& id) override {
       if (id.get() != nullptr  &&  length() != id.get()->length()) {
         throw std::invalid_argument("content and its id must have the same length");
@@ -148,7 +175,10 @@ namespace awkward {
       return std::make_shared<RawArrayOf<T>>(id_, type, ptr_, offset_, length_, itemsize_);
     }
 
-    const std::string tostring() { return tostring_part("", "", ""); }
+    const std::string tostring() {
+      return tostring_part("", "", "");
+    }
+
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override {
       std::stringstream out;
       out << indent << pre << "<RawArray of=\"" << typeid(T).name() << "\" length=\"" << length_ << "\" itemsize=\"" << itemsize_ << "\" data=\"";
@@ -228,7 +258,9 @@ namespace awkward {
       }
     }
 
-    int64_t length() const override { return length_; }
+    int64_t length() const override {
+      return length_;
+    }
 
     const std::shared_ptr<Content> shallow_copy() const override {
       return std::make_shared<RawArrayOf<T>>(id_, type_, ptr_, offset_, length_, itemsize_);
@@ -322,7 +354,9 @@ namespace awkward {
       return std::pair<int64_t, int64_t>(1, 1);
     }
 
-    int64_t numfields() const override { return -1; }
+    int64_t numfields() const override {
+      return -1;
+    }
 
     int64_t fieldindex(const std::string& key) const override {
       throw std::invalid_argument("array contains no Records");

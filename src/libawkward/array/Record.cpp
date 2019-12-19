@@ -10,6 +10,43 @@
 #include "awkward/array/Record.h"
 
 namespace awkward {
+  Record::Record(const RecordArray& array, int64_t at)
+      : Content(Identity::none(), Type::none())
+      , array_(array)
+      , at_(at) {
+    if (type_.get() != nullptr) {
+      checktype();
+    }
+  }
+
+  const std::shared_ptr<Content> Record::array() const {
+    return array_.shallow_copy();
+  }
+
+  int64_t Record::at() const {
+    return at_;
+  }
+
+  const std::vector<std::shared_ptr<Content>> Record::contents() const {
+    std::vector<std::shared_ptr<Content>> out;
+    for (auto item : array_.contents()) {
+      out.push_back(item.get()->getitem_at_nowrap(at_));
+    }
+    return out;
+  }
+
+  const std::shared_ptr<RecordArray::Lookup> Record::lookup() const {
+    return array_.lookup();
+  }
+
+  const std::shared_ptr<RecordArray::ReverseLookup> Record::reverselookup() const {
+    return array_.reverselookup();
+  }
+
+  bool Record::istuple() const {
+    return lookup().get() == nullptr;
+  }
+
   bool Record::isscalar() const {
     return true;
   }

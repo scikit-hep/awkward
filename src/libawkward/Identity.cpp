@@ -19,6 +19,52 @@ namespace awkward {
     return numrefs++;
   }
 
+  std::shared_ptr<Identity> Identity::none() {
+    return std::shared_ptr<Identity>(nullptr);
+  }
+
+  Identity::Identity(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length)
+      : ref_(ref)
+      , fieldloc_(fieldloc)
+      , offset_(offset)
+      , width_(width)
+      , length_(length) { }
+
+  const Identity::Ref Identity::ref() const {
+    return ref_;
+  }
+
+  const Identity::FieldLoc Identity::fieldloc() const {
+    return fieldloc_;
+  }
+
+  const int64_t Identity::offset() const {
+    return offset_;
+  }
+
+  const int64_t Identity::width() const {
+    return width_;
+  }
+
+  const int64_t Identity::length() const {
+    return length_;
+  }
+
+  template <typename T>
+  IdentityOf<T>::IdentityOf(const Ref ref, const FieldLoc& fieldloc, int64_t width, int64_t length)
+      : Identity(ref, fieldloc, 0, width, length)
+      , ptr_(std::shared_ptr<T>(length*width == 0 ? nullptr : new T[(size_t)(length*width)], awkward::util::array_deleter<T>())) { }
+
+  template <typename T>
+  IdentityOf<T>::IdentityOf(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr)
+      : Identity(ref, fieldloc, offset, width, length)
+      , ptr_(ptr) { }
+
+  template <typename T>
+  const std::shared_ptr<T> IdentityOf<T>::ptr() const {
+    return ptr_;
+  }
+
   template <typename T>
   const std::string IdentityOf<T>::classname() const {
     if (std::is_same<T, int32_t>::value) {

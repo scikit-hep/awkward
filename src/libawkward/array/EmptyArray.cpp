@@ -10,6 +10,13 @@
 #include "awkward/array/EmptyArray.h"
 
 namespace awkward {
+  EmptyArray::EmptyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type)
+      : Content(id, type) {
+    if (type_.get() != nullptr) {
+      checktype();
+    }
+  }
+
   const std::string EmptyArray::classname() const {
     return "EmptyArray";
   }

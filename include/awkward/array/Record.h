@@ -8,27 +8,13 @@
 namespace awkward {
   class Record: public Content {
   public:
-    Record(const RecordArray& array, int64_t at)
-        : Content(Identity::none(), Type::none())
-        , array_(array)
-        , at_(at) {
-      if (type_.get() != nullptr) {
-        checktype();
-      }
-    }
-
-    const std::shared_ptr<Content> array() const { return array_.shallow_copy(); }
-    int64_t at() const { return at_; }
-    const std::vector<std::shared_ptr<Content>> contents() const {
-      std::vector<std::shared_ptr<Content>> out;
-      for (auto item : array_.contents()) {
-        out.push_back(item.get()->getitem_at_nowrap(at_));
-      }
-      return out;
-    }
-    const std::shared_ptr<RecordArray::Lookup> lookup() const { return array_.lookup(); }
-    const std::shared_ptr<RecordArray::ReverseLookup> reverselookup() const { return array_.reverselookup(); }
-    bool istuple() const { return lookup().get() == nullptr; }
+    Record(const RecordArray& array, int64_t at);
+    const std::shared_ptr<Content> array() const;
+    int64_t at() const;
+    const std::vector<std::shared_ptr<Content>> contents() const;
+    const std::shared_ptr<RecordArray::Lookup> lookup() const;
+    const std::shared_ptr<RecordArray::ReverseLookup> reverselookup() const;
+    bool istuple() const;
 
     bool isscalar() const override;
     const std::string classname() const override;

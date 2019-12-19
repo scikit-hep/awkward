@@ -8,6 +8,12 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+  Content::Content(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type)
+      : id_(id)
+      , type_(type) { }
+
+  Content::~Content() { }
+
   bool Content::isscalar() const {
     return false;
   }

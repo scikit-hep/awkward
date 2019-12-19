@@ -13,6 +13,23 @@
 #include "awkward/array/RegularArray.h"
 
 namespace awkward {
+  RegularArray::RegularArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<Content>& content, int64_t size)
+      : Content(id, type)
+      , content_(content)
+      , size_(size) {
+    if (type_.get() != nullptr) {
+      checktype();
+    }
+  }
+
+  const std::shared_ptr<Content> RegularArray::content() const {
+    return content_;
+  }
+
+  int64_t RegularArray::size() const {
+    return size_;
+  }
+
   const std::string RegularArray::classname() const {
     return "RegularArray";
   }

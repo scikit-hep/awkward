@@ -14,19 +14,10 @@ namespace awkward {
   template <typename T>
   class ListArrayOf: public Content {
   public:
-    ListArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const IndexOf<T>& starts, const IndexOf<T>& stops, const std::shared_ptr<Content>& content)
-        : Content(id, type)
-        , starts_(starts)
-        , stops_(stops)
-        , content_(content) {
-      if (type_.get() != nullptr) {
-        checktype();
-      }
-    }
-
-    const IndexOf<T> starts() const { return starts_; }
-    const IndexOf<T> stops() const { return stops_; }
-    const std::shared_ptr<Content> content() const { return content_; }
+    ListArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const IndexOf<T>& starts, const IndexOf<T>& stops, const std::shared_ptr<Content>& content);
+    const IndexOf<T> starts() const;
+    const IndexOf<T> stops() const;
+    const std::shared_ptr<Content> content() const;
 
     const std::string classname() const override;
     void setid() override;

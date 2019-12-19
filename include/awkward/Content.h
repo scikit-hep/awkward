@@ -14,8 +14,8 @@
 namespace awkward {
   class Content {
   public:
-    Content(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type): id_(id), type_(type) { }
-    virtual ~Content() { }
+    Content(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type);
+    virtual ~Content();
 
     virtual bool isscalar() const;
     virtual const std::string classname() const = 0;

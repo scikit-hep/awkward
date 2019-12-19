@@ -17,52 +17,14 @@ namespace awkward {
     typedef std::unordered_map<std::string, size_t> Lookup;
     typedef std::vector<std::string> ReverseLookup;
 
-    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
-        : Content(id, type)
-        , contents_(contents)
-        , lookup_(lookup)
-        , reverselookup_(reverselookup)
-        , length_(0) {
-      if (reverselookup_.get() == nullptr  &&  lookup_.get() == nullptr) { }
-      else if (reverselookup_.get() != nullptr  &&  lookup_.get() != nullptr) { }
-      else {
-        throw std::runtime_error("either 'lookup' and 'reverselookup' should both be None or neither should be");
-      }
-      if (contents_.empty()) {
-        throw std::runtime_error("this constructor can only be used with non-empty contents");
-      }
-      if (type_.get() != nullptr) {
-        checktype();
-      }
-    }
-    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents)
-        : Content(id, type)
-        , contents_(contents)
-        , lookup_(nullptr)
-        , reverselookup_(nullptr)
-        , length_(0) {
-      if (contents_.empty()) {
-        throw std::runtime_error("this constructor can only be used with non-empty contents");
-      }
-      if (type_.get() != nullptr) {
-        checktype();
-      }
-    }
-    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, int64_t length, bool istuple)
-        : Content(id, type)
-        , contents_()
-        , lookup_(istuple ? nullptr : new Lookup)
-        , reverselookup_(istuple ? nullptr : new ReverseLookup)
-        , length_(length) {
-      if (type_.get() != nullptr) {
-        checktype();
-      }
-    }
+    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup);
+    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents);
+    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, int64_t length, bool istuple);
 
-    const std::vector<std::shared_ptr<Content>> contents() const { return contents_; }
-    const std::shared_ptr<Lookup> lookup() const { return lookup_; }
-    const std::shared_ptr<ReverseLookup> reverselookup() const { return reverselookup_; }
-    bool istuple() const { return lookup_.get() == nullptr; }
+    const std::vector<std::shared_ptr<Content>> contents() const;
+    const std::shared_ptr<Lookup> lookup() const;
+    const std::shared_ptr<ReverseLookup> reverselookup() const;
+    bool istuple() const;
 
     const std::string classname() const override;
     void setid() override;

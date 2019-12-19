@@ -15,12 +15,7 @@
 namespace awkward {
   class EmptyArray: public Content {
   public:
-    EmptyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type)
-        : Content(id, type) {
-      if (type_.get() != nullptr) {
-        checktype();
-      }
-    }
+    EmptyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type);
 
     const std::string classname() const override;
     void setid() override;

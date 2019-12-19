@@ -14,17 +14,9 @@ namespace awkward {
   template <typename T>
   class ListOffsetArrayOf: public Content {
   public:
-    ListOffsetArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content)
-        : Content(id, type)
-        , offsets_(offsets)
-        , content_(content) {
-      if (type_.get() != nullptr) {
-        checktype();
-      }
-    }
-
-    const IndexOf<T> offsets() const { return offsets_; }
-    const std::shared_ptr<Content> content() const { return content_; }
+    ListOffsetArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content);
+    const IndexOf<T> offsets() const;
+    const std::shared_ptr<Content> content() const;
 
     const std::string classname() const override;
     void setid() override;

@@ -14,6 +14,67 @@
 #include "awkward/array/NumpyArray.h"
 
 namespace awkward {
+  const std::shared_ptr<Type> NumpyArray::unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape) {
+    if (type.get() == nullptr) {
+      return type;
+    }
+    std::shared_ptr<Type> out = type;
+    for (size_t i = 1;  i < shape.size();  i++) {
+      if (RegularType* raw = dynamic_cast<RegularType*>(out.get())) {
+        if (raw->size() == (int64_t)shape[i]) {
+          out = raw->type();
+        }
+        else {
+          throw std::invalid_argument(std::string("cannot assign type ") + type.get()->tostring() + std::string(" to NumpyArray"));
+        }
+      }
+      else {
+        throw std::invalid_argument(std::string("cannot assign type ") + type.get()->tostring() + std::string(" to NumpyArray"));
+      }
+    }
+    return out;
+  }
+
+  NumpyArray::NumpyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
+      : Content(id, type)
+      , ptr_(ptr)
+      , shape_(shape)
+      , strides_(strides)
+      , byteoffset_(byteoffset)
+      , itemsize_(itemsize)
+      , format_(format) {
+    if (shape_.size() != strides_.size()) {
+      throw std::runtime_error("len(shape) must be equal to len(strides)");
+    }
+    if (type_.get() != nullptr) {
+      checktype();
+    }
+  }
+
+  const std::shared_ptr<void> NumpyArray::ptr() const {
+    return ptr_;
+  }
+
+  const std::vector<ssize_t> NumpyArray::shape() const {
+    return shape_;
+  }
+
+  const std::vector<ssize_t> NumpyArray::strides() const {
+    return strides_;
+  }
+
+  ssize_t NumpyArray::byteoffset() const {
+    return byteoffset_;
+  }
+
+  ssize_t NumpyArray::itemsize() const {
+    return itemsize_;
+  }
+
+  const std::string NumpyArray::format() const {
+    return format_;
+  }
+
   ssize_t NumpyArray::ndim() const {
     return shape_.size();
   }
@@ -541,27 +602,6 @@ namespace awkward {
     throw std::invalid_argument("array contains no Records");
   }
 
-  const std::shared_ptr<Type> NumpyArray::unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape) {
-    if (type.get() == nullptr) {
-      return type;
-    }
-    std::shared_ptr<Type> out = type;
-    for (size_t i = 1;  i < shape.size();  i++) {
-      if (RegularType* raw = dynamic_cast<RegularType*>(out.get())) {
-        if (raw->size() == (int64_t)shape[i]) {
-          out = raw->type();
-        }
-        else {
-          throw std::invalid_argument(std::string("cannot assign type ") + type.get()->tostring() + std::string(" to NumpyArray"));
-        }
-      }
-      else {
-        throw std::invalid_argument(std::string("cannot assign type ") + type.get()->tostring() + std::string(" to NumpyArray"));
-      }
-    }
-    return out;
-  }
-
   void NumpyArray::checktype() const {
     bool okay = false;
     if (PrimitiveType* raw = dynamic_cast<PrimitiveType*>(type_.get())) {
@@ -618,6 +658,26 @@ namespace awkward {
     if (!okay) {
       throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
     }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("NumpyArray has its own getitem_next system");
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("NumpyArray has its own getitem_next system");
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("NumpyArray has its own getitem_next system");
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("NumpyArray has its own getitem_next system");
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("NumpyArray has its own getitem_next system");
   }
 
   const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {

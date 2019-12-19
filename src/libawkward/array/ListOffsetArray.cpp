@@ -16,6 +16,26 @@
 
 namespace awkward {
   template <typename T>
+  ListOffsetArrayOf<T>::ListOffsetArrayOf(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content)
+      : Content(id, type)
+      , offsets_(offsets)
+      , content_(content) {
+    if (type_.get() != nullptr) {
+      checktype();
+    }
+  }
+
+  template <typename T>
+  const IndexOf<T> ListOffsetArrayOf<T>::offsets() const {
+    return offsets_;
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::content() const {
+    return content_;
+  }
+
+  template <typename T>
   const std::string ListOffsetArrayOf<T>::classname() const {
     if (std::is_same<T, int32_t>::value) {
       return "ListOffsetArray32";

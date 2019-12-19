@@ -16,6 +16,32 @@
 
 namespace awkward {
   template <typename T>
+  ListArrayOf<T>::ListArrayOf(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const IndexOf<T>& starts, const IndexOf<T>& stops, const std::shared_ptr<Content>& content)
+      : Content(id, type)
+      , starts_(starts)
+      , stops_(stops)
+      , content_(content) {
+    if (type_.get() != nullptr) {
+      checktype();
+    }
+  }
+
+  template <typename T>
+  const IndexOf<T> ListArrayOf<T>::starts() const {
+    return starts_;
+  }
+
+  template <typename T>
+  const IndexOf<T> ListArrayOf<T>::stops() const {
+    return stops_;
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::content() const {
+    return content_;
+  }
+
+  template <typename T>
   const std::string ListArrayOf<T>::classname() const {
     if (std::is_same<T, int32_t>::value) {
       return "ListArray32";
