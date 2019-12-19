@@ -259,6 +259,8 @@ namespace awkward {
     return index;
   }
 
+  template class EXPORT_SYMBOL SliceArrayOf<int64_t>;
+
   /////////////////////////////////////////////////////// SliceField
 
   SliceField::SliceField(const std::string& key)

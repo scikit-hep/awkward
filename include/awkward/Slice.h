@@ -87,7 +87,6 @@ namespace awkward {
   };
 
   typedef SliceArrayOf<int64_t> SliceArray64;
-  template class EXPORT_SYMBOL SliceArrayOf<int64_t>;
 
   class EXPORT_SYMBOL SliceField: public SliceItem {
   public:
