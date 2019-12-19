@@ -11,6 +11,33 @@
 
 namespace awkward {
   template <typename T>
+  IndexOf<T>::IndexOf(int64_t length)
+      : ptr_(std::shared_ptr<T>(length == 0 ? nullptr : new T[(size_t)length], awkward::util::array_deleter<T>()))
+      , offset_(0)
+      , length_(length) { }
+
+  template <typename T>
+  IndexOf<T>::IndexOf(const std::shared_ptr<T>& ptr, int64_t offset, int64_t length)
+      : ptr_(ptr)
+      , offset_(offset)
+      , length_(length) { }
+
+  template <typename T>
+  const std::shared_ptr<T> IndexOf<T>::ptr() const {
+    return ptr_;
+  }
+
+  template <typename T>
+  int64_t IndexOf<T>::offset() const {
+    return offset_;
+  }
+
+  template <typename T>
+  int64_t IndexOf<T>::length() const {
+    return length_;
+  }
+
+  template <typename T>
   const std::string IndexOf<T>::classname() const {
     if (std::is_same<T, int8_t>::value) {
       return "Index8";
@@ -122,9 +149,9 @@ namespace awkward {
     return std::make_shared<IndexOf<T>>(ptr, 0, length_);
   }
 
-  template class IndexOf<int8_t>;
-  template class IndexOf<uint8_t>;
-  template class IndexOf<int32_t>;
-  template class IndexOf<uint32_t>;
-  template class IndexOf<int64_t>;
+  template class EXPORT_SYMBOL IndexOf<int8_t>;
+  template class EXPORT_SYMBOL IndexOf<uint8_t>;
+  template class EXPORT_SYMBOL IndexOf<int32_t>;
+  template class EXPORT_SYMBOL IndexOf<uint32_t>;
+  template class EXPORT_SYMBOL IndexOf<int64_t>;
 }

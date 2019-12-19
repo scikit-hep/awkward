@@ -10,26 +10,20 @@
 #include "awkward/util.h"
 
 namespace awkward {
-  class Index {
+  class EXPORT_SYMBOL Index {
     virtual const std::shared_ptr<Index> shallow_copy() const = 0;
     virtual const std::shared_ptr<Index> deep_copy() const = 0;
   };
 
   template <typename T>
-  class IndexOf: public Index {
+  class EXPORT_SYMBOL IndexOf: public Index {
   public:
-    IndexOf<T>(int64_t length)
-        : ptr_(std::shared_ptr<T>(length == 0 ? nullptr : new T[(size_t)length], awkward::util::array_deleter<T>()))
-        , offset_(0)
-        , length_(length) { }
-    IndexOf<T>(const std::shared_ptr<T>& ptr, int64_t offset, int64_t length)
-        : ptr_(ptr)
-        , offset_(offset)
-        , length_(length) { }
+    IndexOf<T>(int64_t length);
+    IndexOf<T>(const std::shared_ptr<T>& ptr, int64_t offset, int64_t length);
 
-    const std::shared_ptr<T> ptr() const { return ptr_; }
-    int64_t offset() const { return offset_; }
-    int64_t length() const { return length_; }
+    const std::shared_ptr<T> ptr() const;
+    int64_t offset() const;
+    int64_t length() const;
 
     const std::string classname() const;
     const std::string tostring() const;
