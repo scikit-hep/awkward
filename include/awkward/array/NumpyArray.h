@@ -15,23 +15,16 @@
 namespace awkward {
   class NumpyArray: public Content {
   public:
-    NumpyArray(const std::shared_ptr<Identity> id, const std::shared_ptr<Type> type, const std::shared_ptr<void> ptr, const std::vector<ssize_t> shape, const std::vector<ssize_t> strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
-        : Content(id, type)
-        , ptr_(ptr)
-        , shape_(shape)
-        , strides_(strides)
-        , byteoffset_(byteoffset)
-        , itemsize_(itemsize)
-        , format_(format) {
-          assert(shape_.size() == strides_.size());
-        }
+    static const std::shared_ptr<Type> unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape);
 
-    const std::shared_ptr<void> ptr() const { return ptr_; }
-    const std::vector<ssize_t> shape() const { return shape_; }
-    const std::vector<ssize_t> strides() const { return strides_; }
-    ssize_t byteoffset() const { return byteoffset_; }
-    ssize_t itemsize() const { return itemsize_; }
-    const std::string format() const { return format_; }
+    NumpyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format);
+
+    const std::shared_ptr<void> ptr() const;
+    const std::vector<ssize_t> shape() const;
+    const std::vector<ssize_t> strides() const;
+    ssize_t byteoffset() const;
+    ssize_t itemsize() const;
+    const std::string format() const;
 
     ssize_t ndim() const;
     bool isempty() const;
@@ -40,66 +33,57 @@ namespace awkward {
     ssize_t bytelength() const;
     uint8_t getbyte(ssize_t at) const;
 
-    virtual bool isscalar() const;
-    virtual const std::string classname() const;
-    virtual void setid();
-    virtual void setid(const std::shared_ptr<Identity> id);
-    virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
-    virtual void tojson_part(ToJson& builder) const;
-    virtual const std::shared_ptr<Type> innertype(bool bare) const;
-    virtual const std::shared_ptr<Type> type() const;
-    virtual void settype_part(const std::shared_ptr<Type> type);
-    virtual bool accepts(const std::shared_ptr<Type> type);
-    virtual int64_t length() const;
-    virtual const std::shared_ptr<Content> shallow_copy() const;
-    virtual void check_for_iteration() const;
-    virtual const std::shared_ptr<Content> getitem_nothing() const;
-    virtual const std::shared_ptr<Content> getitem_at(int64_t at) const;
-    virtual const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const;
-    virtual const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;
-    virtual const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const;
-    virtual const std::shared_ptr<Content> getitem_field(const std::string& key) const;
-    virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const;
-    virtual const std::shared_ptr<Content> getitem(const Slice& where) const;
-    virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& advanced) const;
-    virtual const std::shared_ptr<Content> carry(const Index64& carry) const;
-    virtual const std::pair<int64_t, int64_t> minmax_depth() const;
-    virtual int64_t numfields() const;
-    virtual int64_t fieldindex(const std::string& key) const;
-    virtual const std::string key(int64_t fieldindex) const;
-    virtual bool haskey(const std::string& key) const;
-    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const;
-    virtual const std::vector<std::string> keyaliases(const std::string& key) const;
-    virtual const std::vector<std::string> keys() const;
+    bool isscalar() const override;
+    const std::string classname() const override;
+    void setid() override;
+    void setid(const std::shared_ptr<Identity>& id) override;
+    bool istypeptr(Type* pointer) const override;
+    const std::shared_ptr<Type> type() const override;
+    const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
+    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
+    void tojson_part(ToJson& builder) const override;
+    int64_t length() const override;
+    const std::shared_ptr<Content> shallow_copy() const override;
+    void check_for_iteration() const override;
+    const std::shared_ptr<Content> getitem_nothing() const override;
+    const std::shared_ptr<Content> getitem_at(int64_t at) const override;
+    const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const override;
+    const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const override;
+    const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const override;
+    const std::shared_ptr<Content> getitem_field(const std::string& key) const override;
+    const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const override;
+    const std::shared_ptr<Content> getitem(const Slice& where) const override;
+    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const override;
+    const std::shared_ptr<Content> carry(const Index64& carry) const override;
+    const std::pair<int64_t, int64_t> minmax_depth() const override;
+    int64_t numfields() const override;
+    int64_t fieldindex(const std::string& key) const override;
+    const std::string key(int64_t fieldindex) const override;
+    bool haskey(const std::string& key) const override;
+    const std::vector<std::string> keyaliases(int64_t fieldindex) const override;
+    const std::vector<std::string> keyaliases(const std::string& key) const override;
+    const std::vector<std::string> keys() const override;
 
     bool iscontiguous() const;
     void become_contiguous();
     const NumpyArray contiguous() const;
 
   protected:
-    virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-      throw std::runtime_error("NumpyArray has its own getitem_next system");
-    }
-    virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-      throw std::runtime_error("NumpyArray has its own getitem_next system");
-    }
-    virtual const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-      throw std::runtime_error("NumpyArray has its own getitem_next system");
-    }
-    virtual const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
-      throw std::runtime_error("NumpyArray has its own getitem_next system");
-    }
-    virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
-      throw std::runtime_error("NumpyArray has its own getitem_next system");
-    }
+    void checktype() const override;
 
-    const NumpyArray contiguous_next(Index64 bytepos) const;
+    const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
+    const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
+    const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;
+    const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const override;
+    const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override;
+
+    const NumpyArray contiguous_next(const Index64& bytepos) const;
     const NumpyArray getitem_bystrides(const std::shared_ptr<SliceItem>& head, const Slice& tail, int64_t length) const;
     const NumpyArray getitem_bystrides(const SliceAt& at, const Slice& tail, int64_t length) const;
     const NumpyArray getitem_bystrides(const SliceRange& range, const Slice& tail, int64_t length) const;
     const NumpyArray getitem_bystrides(const SliceEllipsis& ellipsis, const Slice& tail, int64_t length) const;
     const NumpyArray getitem_bystrides(const SliceNewAxis& newaxis, const Slice& tail, int64_t length) const;
-    const NumpyArray getitem_next(const std::shared_ptr<SliceItem> head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
+    const NumpyArray getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
     const NumpyArray getitem_next(const SliceAt& at, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
     const NumpyArray getitem_next(const SliceRange& range, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
     const NumpyArray getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;

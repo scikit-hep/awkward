@@ -19,6 +19,52 @@ namespace awkward {
     return numrefs++;
   }
 
+  std::shared_ptr<Identity> Identity::none() {
+    return std::shared_ptr<Identity>(nullptr);
+  }
+
+  Identity::Identity(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length)
+      : ref_(ref)
+      , fieldloc_(fieldloc)
+      , offset_(offset)
+      , width_(width)
+      , length_(length) { }
+
+  const Identity::Ref Identity::ref() const {
+    return ref_;
+  }
+
+  const Identity::FieldLoc Identity::fieldloc() const {
+    return fieldloc_;
+  }
+
+  const int64_t Identity::offset() const {
+    return offset_;
+  }
+
+  const int64_t Identity::width() const {
+    return width_;
+  }
+
+  const int64_t Identity::length() const {
+    return length_;
+  }
+
+  template <typename T>
+  IdentityOf<T>::IdentityOf(const Ref ref, const FieldLoc& fieldloc, int64_t width, int64_t length)
+      : Identity(ref, fieldloc, 0, width, length)
+      , ptr_(std::shared_ptr<T>(length*width == 0 ? nullptr : new T[(size_t)(length*width)], awkward::util::array_deleter<T>())) { }
+
+  template <typename T>
+  IdentityOf<T>::IdentityOf(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr)
+      : Identity(ref, fieldloc, offset, width, length)
+      , ptr_(ptr) { }
+
+  template <typename T>
+  const std::shared_ptr<T> IdentityOf<T>::ptr() const {
+    return ptr_;
+  }
+
   template <typename T>
   const std::string IdentityOf<T>::classname() const {
     if (std::is_same<T, int32_t>::value) {
@@ -55,15 +101,15 @@ namespace awkward {
       return shallow_copy();
     }
     else if (std::is_same<T, int32_t>::value) {
-      Identity64* raw = new Identity64(ref_, fieldloc_, width_, length_);
-      std::shared_ptr<Identity> out(raw);
+      std::shared_ptr<Identity> out = std::make_shared<Identity64>(ref_, fieldloc_, width_, length_);
+      Identity64* raw = reinterpret_cast<Identity64*>(out.get());
       awkward_identity32_to_identity64(raw->ptr().get(), reinterpret_cast<int32_t*>(ptr_.get()), length_, width_);
       return out;
     }
   }
 
   template <typename T>
-  const std::string IdentityOf<T>::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  const std::string IdentityOf<T>::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     std::string name = "Unrecognized Identity";
     if (std::is_same<T, int32_t>::value) {
@@ -87,18 +133,18 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Identity> IdentityOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
     assert(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop < length_);
-    return std::shared_ptr<Identity>(new IdentityOf<T>(ref_, fieldloc_, offset_ + width_*start*(start != stop), width_, (stop - start), ptr_));
+    return std::make_shared<IdentityOf<T>>(ref_, fieldloc_, offset_ + width_*start*(start != stop), width_, (stop - start), ptr_);
   }
 
   template <typename T>
   const std::shared_ptr<Identity> IdentityOf<T>::shallow_copy() const {
-    return std::shared_ptr<Identity>(new IdentityOf<T>(ref_, fieldloc_, offset_, width_, length_, ptr_));
+    return std::make_shared<IdentityOf<T>>(ref_, fieldloc_, offset_, width_, length_, ptr_);
   }
 
   template <typename T>
   const std::shared_ptr<Identity> IdentityOf<T>::getitem_carry_64(const Index64& carry) const {
-    IdentityOf<T>* rawout = new IdentityOf<T>(ref_, fieldloc_, width_, carry.length());
-    std::shared_ptr<Identity> out(rawout);
+    std::shared_ptr<Identity> out = std::make_shared<IdentityOf<T>>(ref_, fieldloc_, width_, carry.length());
+    IdentityOf<T>* rawout = reinterpret_cast<IdentityOf<T>*>(out.get());
 
     if (std::is_same<T, int32_t>::value) {
       struct Error err = awkward_identity32_getitem_carry_64(
@@ -135,7 +181,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Identity> IdentityOf<T>::withfieldloc(const FieldLoc& fieldloc) const {
-    return std::shared_ptr<Identity>(new IdentityOf<T>(ref_, fieldloc, offset_, width_, length_, ptr_));
+    return std::make_shared<IdentityOf<T>>(ref_, fieldloc, offset_, width_, length_, ptr_);
   }
 
   template <typename T>

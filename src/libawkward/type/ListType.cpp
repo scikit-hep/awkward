@@ -9,14 +9,18 @@
 #include "awkward/type/ListType.h"
 
 namespace awkward {
-  std::string ListType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  ListType::ListType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type)
+      : Type(parameters)
+      , type_(type) { }
+
+  std::string ListType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
     }
 
     std::stringstream out;
-    if (parameters_.size() == 0) {
+    if (parameters_.empty()) {
       out << indent << pre << "var * " << type_.get()->tostring_part(indent, "", "") << post;
     }
     else {
@@ -26,10 +30,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> ListType::shallow_copy() const {
-    return std::shared_ptr<Type>(new ListType(parameters_, type_));
+    return std::make_shared<ListType>(parameters_, type_);
   }
 
-  bool ListType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool ListType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (ListType* t = dynamic_cast<ListType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;
@@ -39,18 +43,6 @@ namespace awkward {
     else {
       return false;
     }
-  }
-
-  std::shared_ptr<Type> ListType::level() const {
-    return shallow_copy();
-  }
-
-  std::shared_ptr<Type> ListType::inner() const {
-    return type_;
-  }
-
-  std::shared_ptr<Type> ListType::inner(const std::string& key) const {
-    throw std::runtime_error("FIXME: ListType::inner(key)");
   }
 
   int64_t ListType::numfields() const {

@@ -123,7 +123,17 @@ def box(tpe, val, c):
     else:
         args.append(c.pyapi.make_none())
     if tpe.typetpe != numba.none:
-        args.append(c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.literal_type)))
+        RegularType_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.RegularType))
+        t = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.literal_type))
+        arrayval = numba.targets.arrayobj.make_array(tpe.arraytpe)(c.context, c.builder, proxyin.array)
+        arrayshape = arrayval.shape
+        for i in range(tpe.arraytpe.ndim - 1, 0, -1):
+            size_val = c.builder.extract_value(arrayshape, i)
+            size_obj = c.pyapi.from_native_value(numba.intp, size_val, c.env_manager)
+            t = c.pyapi.call_function_objargs(RegularType_obj, (t, size_obj))
+            c.pyapi.decref(size_obj)
+        c.pyapi.decref(RegularType_obj)
+        args.append(t)
     else:
         args.append(c.pyapi.make_none())
     out = c.pyapi.call_function_objargs(NumpyArray_obj, args)

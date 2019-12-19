@@ -9,14 +9,19 @@
 #include "awkward/type/RegularType.h"
 
 namespace awkward {
-  std::string RegularType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  RegularType::RegularType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t size)
+      : Type(parameters)
+      , type_(type)
+      , size_(size) { }
+
+  std::string RegularType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
     }
 
     std::stringstream out;
-    if (parameters_.size() == 0) {
+    if (parameters_.empty()) {
       out << indent << pre << size_ << " * " << type_.get()->tostring_part(indent, "", "") << post;
     }
     else {
@@ -26,10 +31,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RegularType::shallow_copy() const {
-    return std::shared_ptr<Type>(new RegularType(parameters_, type_, size_));
+    return std::make_shared<RegularType>(parameters_, type_, size_);
   }
 
-  bool RegularType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool RegularType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;
@@ -39,18 +44,6 @@ namespace awkward {
     else {
       return false;
     }
-  }
-
-  std::shared_ptr<Type> RegularType::level() const {
-    return shallow_copy();
-  }
-
-  std::shared_ptr<Type> RegularType::inner() const {
-    return type_;
-  }
-
-  std::shared_ptr<Type> RegularType::inner(const std::string& key) const {
-    throw std::runtime_error("FIXME: RegularType::inner(key)");
   }
 
   int64_t RegularType::numfields() const {

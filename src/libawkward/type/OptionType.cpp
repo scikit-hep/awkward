@@ -10,14 +10,18 @@
 #include "awkward/type/OptionType.h"
 
 namespace awkward {
-  std::string OptionType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  OptionType::OptionType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type)
+      : Type(parameters)
+      , type_(type) { }
+
+  std::string OptionType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
     }
 
     std::stringstream out;
-    if (parameters_.size() == 0) {
+    if (parameters_.empty()) {
       if (dynamic_cast<ListType*>(type_.get()) != nullptr  ||
           dynamic_cast<RegularType*>(type_.get()) != nullptr) {
         out << indent << pre << "option[" << type_.get()->tostring_part(indent, "", "") << "]" << post;
@@ -33,10 +37,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> OptionType::shallow_copy() const {
-    return std::shared_ptr<Type>(new OptionType(parameters_, type_));
+    return std::make_shared<OptionType>(parameters_, type_);
   }
 
-  bool OptionType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool OptionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;
@@ -46,18 +50,6 @@ namespace awkward {
     else {
       return false;
     }
-  }
-
-  std::shared_ptr<Type> OptionType::level() const {
-    return type_.get()->level();
-  }
-
-  std::shared_ptr<Type> OptionType::inner() const {
-    return type_.get()->inner();
-  }
-
-  std::shared_ptr<Type> OptionType::inner(const std::string& key) const {
-    throw std::runtime_error("FIXME: OptionType::inner(key)");
   }
 
   int64_t OptionType::numfields() const {

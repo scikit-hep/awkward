@@ -5,7 +5,12 @@
 #include "awkward/type/ArrayType.h"
 
 namespace awkward {
-  std::string ArrayType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  ArrayType::ArrayType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t length)
+      : Type(parameters)
+      , type_(type)
+      , length_(length) { }
+
+  std::string ArrayType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
@@ -15,10 +20,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> ArrayType::shallow_copy() const {
-    return std::shared_ptr<Type>(new ArrayType(parameters_, type_, length_));
+    return std::make_shared<ArrayType>(parameters_, type_, length_);
   }
 
-  bool ArrayType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool ArrayType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;
@@ -28,22 +33,6 @@ namespace awkward {
     else {
       return false;
     }
-  }
-
-  std::shared_ptr<Type> ArrayType::nolength() const {
-    return type_;
-  }
-
-  std::shared_ptr<Type> ArrayType::level() const {
-    return shallow_copy();
-  }
-
-  std::shared_ptr<Type> ArrayType::inner() const {
-    return type_;
-  }
-
-  std::shared_ptr<Type> ArrayType::inner(const std::string& key) const {
-    throw std::runtime_error("FIXME: ArrayType::inner(key)");
   }
 
   int64_t ArrayType::numfields() const {

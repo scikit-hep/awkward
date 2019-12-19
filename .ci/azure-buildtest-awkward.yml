@@ -78,6 +78,7 @@ jobs:
 
       - script: |
           python setup.py build
+          ls awkward1
           python -m pytest -vv tests
         displayName: "Build and test"
 
@@ -129,6 +130,7 @@ jobs:
 
       - script: |
           python setup.py build
+          ls awkward1
           python -m pytest -vv tests
         displayName: "Build and test"
 
@@ -189,5 +191,6 @@ jobs:
 
       - script: |
           python setup.py build
+          ls awkward1
           python -m pytest -vv tests
         displayName: "Build and test"

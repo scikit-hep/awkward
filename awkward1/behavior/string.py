@@ -11,14 +11,14 @@ class CharBehavior(awkward1.highlevel.Array):
         return numpy.asarray(self.layout).tostring()
 
     def __str__(self):
-        encoding = self.type.nolength().parameters.get("encoding")
+        encoding = self.layout.type.parameters.get("encoding")
         if encoding is None:
             return str(self.__bytes__())
         else:
             return self.__bytes__().decode(encoding)
 
     def __repr__(self):
-        encoding = self.type.nolength().parameters.get("encoding")
+        encoding = self.layout.type.parameters.get("encoding")
         if encoding is None:
             return repr(self.__bytes__())
         else:
@@ -34,7 +34,7 @@ utf8 = awkward1.layout.PrimitiveType("uint8", {"__class__": "char", "__str__": "
 
 class StringBehavior(awkward1.highlevel.Array):
     def __iter__(self):
-        if self.type.nolength().inner().parameters.get("encoding") is None:
+        if self.layout.type.type.parameters.get("encoding") is None:
             for x in super(StringBehavior, self).__iter__():
                 yield x.__bytes__()
         else:

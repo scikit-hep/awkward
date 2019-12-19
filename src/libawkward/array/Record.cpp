@@ -10,6 +10,43 @@
 #include "awkward/array/Record.h"
 
 namespace awkward {
+  Record::Record(const RecordArray& array, int64_t at)
+      : Content(Identity::none(), Type::none())
+      , array_(array)
+      , at_(at) {
+    if (type_.get() != nullptr) {
+      checktype();
+    }
+  }
+
+  const std::shared_ptr<Content> Record::array() const {
+    return array_.shallow_copy();
+  }
+
+  int64_t Record::at() const {
+    return at_;
+  }
+
+  const std::vector<std::shared_ptr<Content>> Record::contents() const {
+    std::vector<std::shared_ptr<Content>> out;
+    for (auto item : array_.contents()) {
+      out.push_back(item.get()->getitem_at_nowrap(at_));
+    }
+    return out;
+  }
+
+  const std::shared_ptr<RecordArray::Lookup> Record::lookup() const {
+    return array_.lookup();
+  }
+
+  const std::shared_ptr<RecordArray::ReverseLookup> Record::reverselookup() const {
+    return array_.reverselookup();
+  }
+
+  bool Record::istuple() const {
+    return lookup().get() == nullptr;
+  }
+
   bool Record::isscalar() const {
     return true;
   }
@@ -28,19 +65,48 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> Record::type() const {
-    return array_.type().get()->inner();
-  }
-
   void Record::setid() {
     throw std::runtime_error("undefined operation: Record::setid");
   }
 
-  void Record::setid(const std::shared_ptr<Identity> id) {
+  void Record::setid(const std::shared_ptr<Identity>& id) {
     throw std::runtime_error("undefined operation: Record::setid");
   }
 
-  const std::string Record::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  bool Record::isbare() const {
+    return array_.isbare();
+  }
+
+  bool Record::istypeptr(Type* pointer) const {
+    return array_.istypeptr(pointer);
+  }
+
+  const std::shared_ptr<Type> Record::type() const {
+    return array_.type();
+  }
+
+  const std::shared_ptr<Content> Record::astype(const std::shared_ptr<Type>& type) const {
+    if (type.get() == nullptr) {
+      if (array_.numfields() == 0) {
+        return std::make_shared<Record>(RecordArray(array_.id(), type, array_.length(), array_.istuple()), at_);
+      }
+      else {
+        return std::make_shared<Record>(RecordArray(array_.id(), type, array_.contents(), array_.lookup(), array_.reverselookup()), at_);
+      }
+    }
+    else {
+      std::shared_ptr<Content> record = array_.astype(type);
+      RecordArray* raw = dynamic_cast<RecordArray*>(record.get());
+      if (raw->numfields() == 0) {
+        return std::make_shared<Record>(RecordArray(raw->id(), raw->type(), raw->length(), raw->istuple()), at_);
+      }
+      else {
+        return std::make_shared<Record>(RecordArray(raw->id(), raw->type(), raw->contents(), raw->lookup(), raw->reverselookup()), at_);
+      }
+    }
+  }
+
+  const std::string Record::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " at=\"" << at_ << "\">\n";
     out << array_.tostring_part(indent + std::string("    "), "", "\n");
@@ -52,7 +118,7 @@ namespace awkward {
     size_t cols = (size_t)numfields();
     std::shared_ptr<RecordArray::ReverseLookup> keys = array_.reverselookup();
     if (istuple()) {
-      keys = std::shared_ptr<RecordArray::ReverseLookup>(new RecordArray::ReverseLookup);
+      keys = std::make_shared<RecordArray::ReverseLookup>();
       for (size_t j = 0;  j < cols;  j++) {
         keys.get()->push_back(std::to_string(j));
       }
@@ -66,31 +132,12 @@ namespace awkward {
     builder.endrecord();
   }
 
-  const std::shared_ptr<Type> Record::innertype(bool bare) const {
-    return array_.innertype(bare);
-  }
-
-  void Record::settype(const std::shared_ptr<Type> type) {
-    if (dynamic_cast<ArrayType*>(type.get())) {
-      throw std::invalid_argument("provided ArrayType is incompatible with Record because Record is a scalar");
-    }
-    array_.settype_part(type);
-  }
-
-  void Record::settype_part(const std::shared_ptr<Type> type) {
-    array_.settype_part(type);
-  }
-
-  bool Record::accepts(const std::shared_ptr<Type> type) {
-    return array_.accepts(type);
-  }
-
   int64_t Record::length() const {
     return -1;   // just like NumpyArray with ndim == 0, which is also a scalar
   }
 
   const std::shared_ptr<Content> Record::shallow_copy() const {
-    return std::shared_ptr<Content>(new Record(array_, at_));
+    return std::make_shared<Record>(array_, at_);
   }
 
   void Record::check_for_iteration() const {
@@ -216,6 +263,8 @@ namespace awkward {
   const Record Record::astuple() const {
     return Record(array_.astuple(), at_);
   }
+
+  void Record::checktype() const { }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(at)");

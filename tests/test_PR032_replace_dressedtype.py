@@ -40,12 +40,11 @@ def test_dress():
             return "<Dummy {0}>".format(str(self))
     ns = {"Dummy": Dummy}
 
-    t = awkward1.layout.PrimitiveType("float64", {"__class__": "Dummy"})
-    x = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]), type=t)
-    a = awkward1.Array(x, namespace=ns)
+    x = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    a = awkward1.Array(x, type=awkward1.layout.ArrayType(x.type, 5, {"__class__": "Dummy", "__str__": "D[5 * float64]"}), namespace=ns)
     assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
-    x2 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), x)
+    x2 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]), type=awkward1.layout.PrimitiveType("float64", {"__class__": "Dummy"})))
     a2 = awkward1.Array(x2, namespace=ns)
     assert repr(a2) == "<Array [<Dummy [1.1, 2.2, 3.3]>, ... ] type='3 * var * float64[parameters={\"__cl...'>"
     assert repr(a2[0]) == "<Dummy [1.1, 2.2, 3.3]>"
@@ -60,7 +59,7 @@ def test_typestr():
     assert repr(t2) == "var * something"
 
 def test_record_name():
-    fillable = awkward1.FillableArray()
+    fillable = awkward1.layout.FillableArray()
 
     fillable.beginrecord("Dummy")
     fillable.field("one")
@@ -77,8 +76,8 @@ def test_record_name():
     fillable.endrecord()
 
     a = fillable.snapshot()
-    assert repr(a.type) == '2 * struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
-    assert a.type.nolength().parameters == {"__class__": "Dummy"}
+    assert repr(a.type) == 'struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
+    assert a.type.parameters == {"__class__": "Dummy"}
 
 def test_fillable_string():
     fillable = awkward1.FillableArray()
@@ -150,7 +149,7 @@ def test_fromiter_fromjson():
 
     assert awkward1.tolist(awkward1.fromjson('["one", "two", "three"]')) == ["one", "two", "three"]
     assert awkward1.tolist(awkward1.fromjson('[["one", "two", "three"], [], ["four", "five"]]')) == [["one", "two", "three"], [], ["four", "five"]]
-    
+
 numba = pytest.importorskip("numba")
 
 def test_record_name_numba():
@@ -174,8 +173,8 @@ def test_record_name_numba():
     f1(fillable)
 
     a = fillable.snapshot()
-    assert repr(a.type) == '2 * struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
-    assert a.type.nolength().parameters == {"__class__": "Dummy"}
+    assert repr(a.type) == 'struct[["one", "two"], [int64, float64], parameters={"__class__": "Dummy"}]'
+    assert a.type.parameters == {"__class__": "Dummy"}
 
 def test_boxing():
     @numba.njit

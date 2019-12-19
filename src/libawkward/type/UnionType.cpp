@@ -9,7 +9,11 @@
 #include "awkward/type/UnionType.h"
 
 namespace awkward {
-  std::string UnionType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  UnionType::UnionType(const Type::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
+      : Type(parameters)
+      , types_(types) { }
+
+  std::string UnionType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
@@ -23,7 +27,7 @@ namespace awkward {
       }
       out << type(i).get()->tostring_part(indent, "", "");
     }
-    if (parameters_.size() != 0) {
+    if (!parameters_.empty()) {
       out << ", " << string_parameters();
     }
     out << "]" << post;
@@ -31,10 +35,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnionType::shallow_copy() const {
-    return std::shared_ptr<Type>(new UnionType(parameters_, types_));
+    return std::make_shared<UnionType>(parameters_, types_);
   }
 
-  bool UnionType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool UnionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;
@@ -56,22 +60,6 @@ namespace awkward {
 
   int64_t UnionType::numtypes() const {
     return (int64_t)types_.size();
-  }
-
-  std::shared_ptr<Type> UnionType::level() const {
-    std::vector<std::shared_ptr<Type>> types;
-    for (auto t : types_) {
-      types.push_back(t.get()->level());
-    }
-    return std::shared_ptr<Type>(new UnionType(Type::Parameters(), types));
-  }
-
-  std::shared_ptr<Type> UnionType::inner() const {
-    throw std::runtime_error("FIXME: UnionType::inner()");
-  }
-
-  std::shared_ptr<Type> UnionType::inner(const std::string& key) const {
-    throw std::runtime_error("FIXME: UnionType::inner(key)");
   }
 
   int64_t UnionType::numfields() const {

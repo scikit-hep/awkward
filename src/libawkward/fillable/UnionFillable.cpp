@@ -17,14 +17,25 @@
 #include "awkward/fillable/UnionFillable.h"
 
 namespace awkward {
-  const std::shared_ptr<Fillable> UnionFillable::fromsingle(const FillableOptions& options, const std::shared_ptr<Fillable> firstcontent) {
+  const std::shared_ptr<Fillable> UnionFillable::fromsingle(const FillableOptions& options, const std::shared_ptr<Fillable>& firstcontent) {
     GrowableBuffer<int8_t> types = GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::arange(options, firstcontent->length());
     std::vector<std::shared_ptr<Fillable>> contents({ firstcontent });
-    std::shared_ptr<Fillable> out(new UnionFillable(options, types, offsets, contents));
+    std::shared_ptr<Fillable> out = std::make_shared<UnionFillable>(options, types, offsets, contents);
     out.get()->setthat(out);
     return out;
   }
+
+  UnionFillable::UnionFillable(const FillableOptions& options, const GrowableBuffer<int8_t>& types, const GrowableBuffer<int64_t>& offsets, std::vector<std::shared_ptr<Fillable>>& contents)
+      : options_(options)
+      , types_(types)
+      , offsets_(offsets)
+      , contents_(contents)
+      , current_(-1) { }
+
+  const std::string UnionFillable::classname() const {
+    return "UnionFillable";
+  };
 
   int64_t UnionFillable::length() const {
     return types_.length();
@@ -43,13 +54,13 @@ namespace awkward {
     for (auto x : contents_) {
       types.push_back(x.get()->type());
     }
-    return std::shared_ptr<Type>(new UnionType(Type::Parameters(), types));
+    return std::make_shared<UnionType>(Type::Parameters(), types);
   }
 
-  const std::shared_ptr<Content> UnionFillable::snapshot() const {
+  const std::shared_ptr<Content> UnionFillable::snapshot(const std::shared_ptr<Type>& type) const {
     Index8 types(types_.ptr(), 0, types_.length());
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    throw std::runtime_error("UnionFillable::snapshot() needs UnionArray");
+    throw std::runtime_error("UnionFillable::snapshot needs UnionArray");
   }
 
   bool UnionFillable::active() const {
@@ -204,6 +215,7 @@ namespace awkward {
         contents_.push_back(tofill);
       }
       tofill->beginlist();
+      current_ = i;
     }
     else {
       contents_[(size_t)current_].get()->beginlist();

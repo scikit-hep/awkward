@@ -13,13 +13,13 @@
 namespace awkward {
   class Fillable {
   public:
-    virtual ~Fillable() { }
+    virtual ~Fillable();
 
     virtual const std::string classname() const = 0;
     virtual int64_t length() const = 0;
     virtual void clear() = 0;
     virtual const std::shared_ptr<Type> type() const = 0;
-    virtual const std::shared_ptr<Content> snapshot() const = 0;
+    virtual const std::shared_ptr<Content> snapshot(const std::shared_ptr<Type>& type) const = 0;
 
     virtual bool active() const = 0;
     virtual const std::shared_ptr<Fillable> null() = 0;
@@ -36,9 +36,7 @@ namespace awkward {
     virtual const std::shared_ptr<Fillable> field(const char* key, bool check) = 0;
     virtual const std::shared_ptr<Fillable> endrecord() = 0;
 
-    void setthat(const std::shared_ptr<Fillable>& that) {
-      that_ = that;
-    }
+    void setthat(const std::shared_ptr<Fillable>& that);
 
   protected:
     std::shared_ptr<Fillable> that_;

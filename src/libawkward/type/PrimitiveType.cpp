@@ -9,7 +9,11 @@
 #include "awkward/type/PrimitiveType.h"
 
 namespace awkward {
-  std::string PrimitiveType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  PrimitiveType::PrimitiveType(const Type::Parameters& parameters, DType dtype)
+      : Type(parameters)
+      , dtype_(dtype) { }
+
+  std::string PrimitiveType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
@@ -31,7 +35,7 @@ namespace awkward {
       case float64: s = "float64"; break;
       default:      assert(dtype_ < numtypes);
     }
-    if (parameters_.size() == 0) {
+    if (parameters_.empty()) {
       out << indent << pre << s << post;
     }
     else {
@@ -41,10 +45,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> PrimitiveType::shallow_copy() const {
-    return std::shared_ptr<Type>(new PrimitiveType(parameters_, dtype_));
+    return std::make_shared<PrimitiveType>(parameters_, dtype_);
   }
 
-  bool PrimitiveType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool PrimitiveType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;
@@ -54,18 +58,6 @@ namespace awkward {
     else {
       return false;
     }
-  }
-
-  std::shared_ptr<Type> PrimitiveType::level() const {
-    return shallow_copy();
-  }
-
-  std::shared_ptr<Type> PrimitiveType::inner() const {
-    throw std::invalid_argument("PrimitiveType has no inner type");
-  }
-
-  std::shared_ptr<Type> PrimitiveType::inner(const std::string& key) const {
-    throw std::invalid_argument("PrimitiveType has no inner type");
   }
 
   int64_t PrimitiveType::numfields() const {

@@ -98,19 +98,19 @@ def test_type():
     recordarray = awkward1.layout.RecordArray(0, True)
     recordarray.append(content1)
     recordarray.append(listoffsetarray)
-    assert str(awkward1.typeof(recordarray)) == '5 * (int64, var * float64)'
+    assert str(awkward1.typeof(recordarray)) == '(int64, var * float64)'
     assert recordarray.lookup is None
 
-    assert awkward1.typeof(recordarray) == awkward1.layout.ArrayType(awkward1.layout.RecordType((
+    assert awkward1.typeof(recordarray) == awkward1.layout.RecordType((
         awkward1.layout.PrimitiveType("int64"),
-        awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")))), 5)
+        awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))))
     assert awkward1.typeof(recordarray[2]) == awkward1.layout.RecordType(
         (awkward1.layout.PrimitiveType("int64"),
         awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))))
 
     recordarray.setkey(0, "one")
     recordarray.setkey(1, "two")
-    assert str(awkward1.typeof(recordarray)) in ('5 * {"one": int64, "two": var * float64}', '5 * {"two": var * float64, "one": int64}')
+    assert str(awkward1.typeof(recordarray)) in ('{"one": int64, "two": var * float64}', '{"two": var * float64, "one": int64}')
     assert recordarray.lookup == {"one": 0, "two": 1}
 
     assert str(awkward1.layout.RecordType(
@@ -121,9 +121,9 @@ def test_type():
         {"one": awkward1.layout.PrimitiveType("int32"),
         "two": awkward1.layout.PrimitiveType("float64")})) in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
 
-    assert awkward1.typeof(recordarray) == awkward1.layout.ArrayType(awkward1.layout.RecordType({
+    assert awkward1.typeof(recordarray) == awkward1.layout.RecordType({
         "one": awkward1.layout.PrimitiveType("int64"),
-        "two": awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))}), 5)
+        "two": awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))})
     assert awkward1.typeof(recordarray[2]) == awkward1.layout.RecordType({
         "one": awkward1.layout.PrimitiveType("int64"),
         "two": awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))})
@@ -276,7 +276,7 @@ def test_setid():
 
 def test_fillable_tuple():
     fillable = awkward1.layout.FillableArray()
-    assert str(fillable.type) == '0 * unknown'
+    assert str(fillable.type) == 'unknown'
     assert awkward1.tolist(fillable.snapshot()) == []
 
     fillable.begintuple(0)
@@ -288,7 +288,7 @@ def test_fillable_tuple():
     fillable.begintuple(0)
     fillable.endtuple()
 
-    assert str(fillable.type) == '3 * ()'
+    assert str(fillable.type) == '()'
     assert awkward1.tolist(fillable.snapshot()) == [(), (), ()]
 
     fillable = awkward1.layout.FillableArray()
@@ -329,12 +329,12 @@ def test_fillable_tuple():
     fillable.boolean(True)
     fillable.endtuple()
 
-    assert str(fillable.type) == '3 * (bool, var * int64, float64)'
+    assert str(fillable.type) == '(bool, var * int64, float64)'
     assert awkward1.tolist(fillable.snapshot()) == [(True, [1], 1.1), (False, [2, 2], 2.2), (True, [3, 3, 3], 3.3)]
 
 def test_fillable_record():
     fillable = awkward1.layout.FillableArray()
-    assert str(fillable.type) == '0 * unknown'
+    assert str(fillable.type) == 'unknown'
     assert awkward1.tolist(fillable.snapshot()) == []
 
     fillable.beginrecord()
@@ -346,7 +346,7 @@ def test_fillable_record():
     fillable.beginrecord()
     fillable.endrecord()
 
-    assert str(fillable.type) == '3 * {}'
+    assert str(fillable.type) == '{}'
     assert awkward1.tolist(fillable.snapshot()) == [{}, {}, {}]
 
     fillable = awkward1.layout.FillableArray()
@@ -372,7 +372,7 @@ def test_fillable_record():
     fillable.real(3.3)
     fillable.endrecord()
 
-    assert str(fillable.type) == '3 * {"one": int64, "two": float64}'
+    assert str(fillable.type) == '{"one": int64, "two": float64}'
     assert awkward1.tolist(fillable.snapshot()) == [{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}]
 
 def test_fromiter():

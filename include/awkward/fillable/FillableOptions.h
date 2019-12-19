@@ -11,10 +11,9 @@
 namespace awkward {
   class FillableOptions {
   public:
-    FillableOptions(int64_t initial, double resize): initial_(initial), resize_(resize) { }
-
-    int64_t initial() const { return initial_; }
-    double resize() const { return resize_; }
+    FillableOptions(int64_t initial, double resize);
+    int64_t initial() const;
+    double resize() const;
 
   private:
     int64_t initial_;

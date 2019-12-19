@@ -7,8 +7,66 @@
 #include "awkward/Slice.h"
 
 namespace awkward {
+  int64_t SliceItem::none() {
+    return kSliceNone;
+  }
+
+  SliceItem::~SliceItem() { }
+
+  /////////////////////////////////////////////////////// SliceAt
+
+  SliceAt::SliceAt(int64_t at)
+      : at_(at) { }
+
+  int64_t SliceAt::at() const {
+    return at_;
+  }
+
+  const std::shared_ptr<SliceItem> SliceAt::shallow_copy() const {
+    return std::make_shared<SliceAt>(at_);
+  }
+
   const std::string SliceAt::tostring() const {
     return std::to_string(at_);
+  }
+
+  bool SliceAt::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    return false;
+  }
+
+  /////////////////////////////////////////////////////// SliceRange
+
+  SliceRange::SliceRange(int64_t start, int64_t stop, int64_t step)
+      : start_(start)
+      , stop_(stop)
+      , step_(step == none() ? 1 : step) {
+    if (step_ == 0) {
+      throw std::runtime_error("step must not be zero");
+    }
+  }
+
+  int64_t SliceRange::start() const {
+    return start_;
+  }
+
+  int64_t SliceRange::stop() const {
+    return stop_;
+  }
+
+  int64_t SliceRange::step() const {
+    return step_;
+  }
+
+  bool SliceRange::hasstart() const {
+    return start_ != none();
+  }
+
+  bool SliceRange::hasstop() const {
+    return stop_ != none();
+  }
+
+  const std::shared_ptr<SliceItem> SliceRange::shallow_copy() const {
+    return std::make_shared<SliceRange>(start_, stop_, step_);
   }
 
   const std::string SliceRange::tostring() const {
@@ -26,12 +84,85 @@ namespace awkward {
     return out.str();
   }
 
+  bool SliceRange::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    return true;
+  }
+
+  /////////////////////////////////////////////////////// SliceEllipsis
+
+  SliceEllipsis::SliceEllipsis() { }
+
+  const std::shared_ptr<SliceItem> SliceEllipsis::shallow_copy() const {
+    return std::make_shared<SliceEllipsis>();
+  }
+
   const std::string SliceEllipsis::tostring() const {
     return std::string("...");
   }
 
+  bool SliceEllipsis::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    return true;
+  }
+
+  /////////////////////////////////////////////////////// SliceNewAxis
+
+  SliceNewAxis::SliceNewAxis() { }
+
+  const std::shared_ptr<SliceItem> SliceNewAxis::shallow_copy() const {
+    return std::make_shared<SliceNewAxis>();
+  }
+
   const std::string SliceNewAxis::tostring() const {
     return std::string("newaxis");
+  }
+
+  bool SliceNewAxis::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    return false;
+  }
+
+  /////////////////////////////////////////////////////// SliceArrayOf<T>
+
+  template <typename T>
+  SliceArrayOf<T>::SliceArrayOf(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides)
+      : index_(index)
+      , shape_(shape)
+      , strides_(strides) {
+    if (shape_.empty()) {
+      throw std::runtime_error("shape must not be zero-dimensional");
+    }
+    if (shape_.size() != strides_.size()) {
+      throw std::runtime_error("shape must have the same number of dimensions as strides");
+    }
+  }
+
+  template <typename T>
+  const IndexOf<T> SliceArrayOf<T>::index() const {
+    return index_;
+  }
+
+  template <typename T>
+  const int64_t SliceArrayOf<T>::length() const {
+    return shape_[0];
+  }
+
+  template <typename T>
+  const std::vector<int64_t> SliceArrayOf<T>::shape() const {
+    return shape_;
+  }
+
+  template <typename T>
+  const std::vector<int64_t> SliceArrayOf<T>::strides() const {
+    return strides_;
+  }
+
+  template <typename T>
+  int64_t SliceArrayOf<T>::ndim() const {
+    return (int64_t)shape_.size();
+  }
+
+  template <typename T>
+  const std::shared_ptr<SliceItem> SliceArrayOf<T>::shallow_copy() const {
+    return std::make_shared<SliceArrayOf<T>>(index_, shape_, strides_);
   }
 
   template <typename T>
@@ -106,6 +237,11 @@ namespace awkward {
   }
 
   template <typename T>
+  bool SliceArrayOf<T>::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    return advanced.length() == 0;
+  }
+
+  template <typename T>
   const IndexOf<T> SliceArrayOf<T>::ravel() const {
     int64_t length = 1;
     for (int64_t i = 0;  i < ndim();  i++) {
@@ -125,8 +261,38 @@ namespace awkward {
 
   template class SliceArrayOf<int64_t>;
 
+  /////////////////////////////////////////////////////// SliceField
+
+  SliceField::SliceField(const std::string& key)
+      : key_(key) { }
+
+  const std::string SliceField::key() const {
+    return key_;
+  }
+
+  const std::shared_ptr<SliceItem> SliceField::shallow_copy() const {
+    return std::make_shared<SliceField>(key_);
+  }
+
   const std::string SliceField::tostring() const {
     return util::quote(key_, true);
+  }
+
+  bool SliceField::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    return false;
+  }
+
+  /////////////////////////////////////////////////////// SliceFields
+
+  SliceFields::SliceFields(const std::vector<std::string>& keys)
+      : keys_(keys) { }
+
+  const std::vector<std::string> SliceFields::keys() const {
+    return keys_;
+  }
+
+  const std::shared_ptr<SliceItem> SliceFields::shallow_copy() const {
+    return std::make_shared<SliceFields>(keys_);
   }
 
   const std::string SliceFields::tostring() const {
@@ -140,6 +306,36 @@ namespace awkward {
     }
     out << "]";
     return out.str();
+  }
+
+  bool SliceFields::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+    return type.get() != nullptr  &&  type.get()->numfields() != -1  &&  util::subset(keys_, type.get()->keys());
+  }
+
+  /////////////////////////////////////////////////////// Slice
+
+  int64_t Slice::none() {
+    return SliceItem::none();
+  }
+
+  Slice::Slice()
+      : items_(std::vector<std::shared_ptr<SliceItem>>())
+      , sealed_(false) { }
+
+  Slice::Slice(const std::vector<std::shared_ptr<SliceItem>>& items)
+      : items_(items)
+      , sealed_(false) { }
+
+  Slice::Slice(const std::vector<std::shared_ptr<SliceItem>>& items, bool sealed)
+      : items_(items)
+      , sealed_(sealed) { }
+
+  const std::vector<std::shared_ptr<SliceItem>> Slice::items() const {
+    return items_;
+  }
+
+  bool Slice::sealed() const {
+    return sealed_;
   }
 
   int64_t Slice::length() const {
@@ -163,7 +359,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> Slice::head() const {
-    if (items_.size() != 0) {
+    if (!items_.empty()) {
       return items_[0];
     }
     else {
@@ -173,7 +369,7 @@ namespace awkward {
 
   const Slice Slice::tail() const {
     std::vector<std::shared_ptr<SliceItem>> items;
-    if (items_.size() != 0) {
+    if (!items_.empty()) {
       items.insert(items.end(), items_.begin() + 1, items_.end());
     }
     return Slice(items, true);
@@ -224,7 +420,7 @@ namespace awkward {
     std::vector<int64_t> shape;
     for (size_t i = 0;  i < items_.size();  i++) {
       if (SliceArray64* array = dynamic_cast<SliceArray64*>(items_[i].get())) {
-        if (shape.size() == 0) {
+        if (shape.empty()) {
           shape = array->shape();
         }
         else if (shape.size() != array->ndim()) {
@@ -244,7 +440,7 @@ namespace awkward {
       }
     }
 
-    if (shape.size() != 0) {
+    if (!shape.empty()) {
       for (size_t i = 0;  i < items_.size();  i++) {
         if (SliceAt* at = dynamic_cast<SliceAt*>(items_[i].get())) {
           Index64 index(1);
@@ -253,7 +449,7 @@ namespace awkward {
           for (size_t j = 0;  j < shape.size();  j++) {
             strides.push_back(0);
           }
-          items_[i] = std::shared_ptr<SliceItem>(new SliceArray64(index, shape, strides));
+          items_[i] = std::make_shared<SliceArray64>(index, shape, strides);
         }
         else if (SliceArray64* array = dynamic_cast<SliceArray64*>(items_[i].get())) {
           std::vector<int64_t> arrayshape = array->shape();
@@ -270,7 +466,7 @@ namespace awkward {
               throw std::invalid_argument("cannot broadcast arrays in slice");
             }
           }
-          items_[i] = std::shared_ptr<SliceItem>(new SliceArray64(array->index(), shape, strides));
+          items_[i] = std::make_shared<SliceArray64>(array->index(), shape, strides);
         }
       }
 

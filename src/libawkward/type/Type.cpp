@@ -12,9 +12,44 @@
 namespace rj = rapidjson;
 
 namespace awkward {
-  std::shared_ptr<Type> Type::nolength() const {
-    return shallow_copy();
+  std::shared_ptr<Type> Type::none() {
+    return std::shared_ptr<Type>(nullptr);
   }
+
+  Type::Type(const Type::Parameters& parameters)
+      : parameters_(parameters) { }
+
+  Type::~Type() { }
+
+  const Type::Parameters Type::parameters() const {
+    return parameters_;
+  }
+
+  void Type::setparameters(const Type::Parameters& parameters) {
+    parameters_ = parameters;
+  }
+
+  std::string Type::parameter(const std::string& key) {
+    return parameters_[key];
+  }
+
+  void Type::setparameter(const std::string& key, const std::string& value) {
+    parameters_[key] = value;
+  }
+
+  bool Type::parameter_equals(const std::string& key, const std::string& value) {
+    auto item = parameters_.find(key);
+    if (item == parameters_.end()) {
+      return false;
+    }
+    else {
+      return item->second == value;
+    }
+  }
+
+  std::string Type::tostring() const {
+    return tostring_part("", "", "");
+  };
 
   const std::string Type::compare(std::shared_ptr<Type> supertype) {
     // FIXME: better side-by-side comparison

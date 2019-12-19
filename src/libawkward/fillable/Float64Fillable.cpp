@@ -10,7 +10,7 @@
 
 namespace awkward {
   const std::shared_ptr<Fillable> Float64Fillable::fromempty(const FillableOptions& options) {
-    std::shared_ptr<Fillable> out(new Float64Fillable(options, GrowableBuffer<double>::empty(options)));
+    std::shared_ptr<Fillable> out = std::make_shared<Float64Fillable>(options, GrowableBuffer<double>::empty(options));
     out.get()->setthat(out);
     return out;
   }
@@ -23,9 +23,17 @@ namespace awkward {
       newraw[i] = (double)oldraw[i];
     }
     buffer.set_length(old.length());
-    std::shared_ptr<Fillable> out(new Float64Fillable(options, buffer));
+    std::shared_ptr<Fillable> out = std::make_shared<Float64Fillable>(options, buffer);
     out.get()->setthat(out);
     return out;
+  }
+
+  Float64Fillable::Float64Fillable(const FillableOptions& options, const GrowableBuffer<double>& buffer)
+      : options_(options)
+      , buffer_(buffer) { }
+
+  const std::string Float64Fillable::classname() const {
+    return "Float64Fillable";
   }
 
   int64_t Float64Fillable::length() const {
@@ -37,13 +45,13 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> Float64Fillable::type() const {
-    return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::float64));
+    return std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::float64);
   }
 
-  const std::shared_ptr<Content> Float64Fillable::snapshot() const {
+  const std::shared_ptr<Content> Float64Fillable::snapshot(const std::shared_ptr<Type>& type) const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(double) };
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(double), "d"));
+    return std::make_shared<NumpyArray>(Identity::none(), type, buffer_.ptr(), shape, strides, 0, sizeof(double), "d");
   }
 
   bool Float64Fillable::active() const {

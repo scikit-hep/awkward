@@ -17,25 +17,19 @@ namespace awkward {
     typedef std::vector<std::pair<int64_t, std::string>> FieldLoc;
 
     static Ref newref();
-    static std::shared_ptr<Identity> none() { return std::shared_ptr<Identity>(nullptr); }
+    static std::shared_ptr<Identity> none();
 
-    Identity(const Ref ref, const FieldLoc fieldloc, int64_t offset, int64_t width, int64_t length)
-        : ref_(ref)
-        , fieldloc_(fieldloc)
-        , offset_(offset)
-        , width_(width)
-        , length_(length) { }
-
-    const Ref ref() const { return ref_; }
-    const FieldLoc fieldloc() const { return fieldloc_; }
-    const int64_t offset() const { return offset_; }
-    const int64_t width() const { return width_; }
-    const int64_t length() const { return length_; }
+    Identity(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length);
+    const Ref ref() const;
+    const FieldLoc fieldloc() const;
+    const int64_t offset() const;
+    const int64_t width() const;
+    const int64_t length() const;
 
     virtual const std::string classname() const = 0;
     virtual const std::string location_at(int64_t where) const = 0;
     virtual const std::shared_ptr<Identity> to64() const = 0;
-    virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const = 0;
+    virtual const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
     virtual const std::shared_ptr<Identity> getitem_range_nowrap(int64_t start, int64_t stop) const = 0;
     virtual const std::shared_ptr<Identity> shallow_copy() const = 0;
     virtual const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const = 0;
@@ -55,24 +49,20 @@ namespace awkward {
   template <typename T>
   class IdentityOf: public Identity {
   public:
-    IdentityOf<T>(const Ref ref, const FieldLoc fieldloc, int64_t width, int64_t length)
-        : Identity(ref, fieldloc, 0, width, length)
-        , ptr_(std::shared_ptr<T>(length*width == 0 ? nullptr : new T[(size_t)(length*width)], awkward::util::array_deleter<T>())) { }
-    IdentityOf<T>(const Ref ref, const FieldLoc fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr)
-        : Identity(ref, fieldloc, offset, width, length)
-        , ptr_(ptr) { }
+    IdentityOf<T>(const Ref ref, const FieldLoc& fieldloc, int64_t width, int64_t length);
+    IdentityOf<T>(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr);
 
-    const std::shared_ptr<T> ptr() const { return ptr_; }
+    const std::shared_ptr<T> ptr() const;
 
-    virtual const std::string classname() const;
-    virtual const std::string location_at(int64_t at) const;
-    virtual const std::shared_ptr<Identity> to64() const;
-    virtual const std::string tostring_part(const std::string indent, const std::string pre, const std::string post) const;
-    virtual const std::shared_ptr<Identity> getitem_range_nowrap(int64_t start, int64_t stop) const;
-    virtual const std::shared_ptr<Identity> shallow_copy() const;
-    virtual const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const;
-    virtual const std::shared_ptr<Identity> withfieldloc(const FieldLoc& fieldloc) const;
-    virtual int64_t value(int64_t row, int64_t col) const;
+    const std::string classname() const override;
+    const std::string location_at(int64_t at) const override;
+    const std::shared_ptr<Identity> to64() const override;
+    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
+    const std::shared_ptr<Identity> getitem_range_nowrap(int64_t start, int64_t stop) const override;
+    const std::shared_ptr<Identity> shallow_copy() const override;
+    const std::shared_ptr<Identity> getitem_carry_64(const Index64& carry) const override;
+    const std::shared_ptr<Identity> withfieldloc(const FieldLoc& fieldloc) const override;
+    int64_t value(int64_t row, int64_t col) const override;
 
     const std::vector<T> getitem_at(int64_t at) const;
     const std::vector<T> getitem_at_nowrap(int64_t at) const;

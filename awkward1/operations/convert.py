@@ -42,7 +42,7 @@ def tolist(array):
         return array
 
     elif isinstance(array, awkward1.behavior.string.CharBehavior):
-        if array.type.parameters.get("encoding") is None:
+        if array.layout.type.parameters.get("encoding") is None:
             return array.__bytes__()
         else:
             return array.__str__()
@@ -50,8 +50,11 @@ def tolist(array):
     elif isinstance(array, awkward1.highlevel.Array):
         return [tolist(x) for x in array]
 
-    elif isinstance(array, awkward1.Record):
+    elif isinstance(array, awkward1.highlevel.Record):
         return tolist(array.layout)
+
+    elif isinstance(array, awkward1.highlevel.FillableArray):
+        return tolist(array.snapshot())
 
     elif isinstance(array, awkward1.layout.Record) and array.istuple:
         return tuple(tolist(x) for x in array.fields())
@@ -63,7 +66,7 @@ def tolist(array):
         return array.tolist()
 
     elif isinstance(array, awkward1.layout.FillableArray):
-        return [tolist(x) for x in array]
+        return [tolist(x) for x in array.snapshot()]
 
     elif isinstance(array, awkward1.layout.NumpyArray):
         return numpy.asarray(array).tolist()
@@ -81,17 +84,23 @@ def tojson(array, destination=None, pretty=False, maxdecimals=None, buffersize=6
         return json.dumps(array)
 
     elif isinstance(array, awkward1.highlevel.Array):
-        return tojson(array.layout, destination=destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize)
+        out = array.layout
 
     elif isinstance(array, awkward1.highlevel.Record):
-        return tojson(array.layout, destination=destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize)
+        out = array.layout
+
+    elif isinstance(array, awkward1.highlevel.FillableArray):
+        out = array.snapshot().layout
 
     elif isinstance(array, awkward1.layout.Record):
         out = array
+
     elif isinstance(array, numpy.ndarray):
         out = awkward1.layout.NumpyArray(array)
+
     elif isinstance(array, awkward1.layout.FillableArray):
         out = array.snapshot()
+
     elif isinstance(array, awkward1.layout.Content):
         out = array
 

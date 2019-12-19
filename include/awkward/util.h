@@ -12,7 +12,7 @@ namespace awkward {
   class Identity;
 
   namespace util {
-    void handle_error(const struct Error& err, const std::string classname, const Identity* id);
+    void handle_error(const struct Error& err, const std::string& classname, const Identity* id);
 
     template<typename T>
     class array_deleter {
@@ -28,7 +28,7 @@ namespace awkward {
       void operator()(T const *p) { }
     };
 
-    std::string quote(std::string x, bool doublequote);
+    std::string quote(const std::string& x, bool doublequote);
     bool subset(const std::vector<std::string>& super, const std::vector<std::string>& sub);
 
     template <typename T>

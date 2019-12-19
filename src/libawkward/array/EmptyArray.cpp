@@ -10,11 +10,18 @@
 #include "awkward/array/EmptyArray.h"
 
 namespace awkward {
+  EmptyArray::EmptyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type)
+      : Content(id, type) {
+    if (type_.get() != nullptr) {
+      checktype();
+    }
+  }
+
   const std::string EmptyArray::classname() const {
     return "EmptyArray";
   }
 
-  void EmptyArray::setid(const std::shared_ptr<Identity> id) {
+  void EmptyArray::setid(const std::shared_ptr<Identity>& id) {
     if (id.get() != nullptr  &&  length() != id.get()->length()) {
       util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
     }
@@ -23,19 +30,34 @@ namespace awkward {
 
   void EmptyArray::setid() { }
 
-  const std::string EmptyArray::tostring_part(const std::string indent, const std::string pre, const std::string post) const {
+  const std::shared_ptr<Type> EmptyArray::type() const {
+    if (type_.get() != nullptr) {
+      return type_;
+    }
+    else {
+      return std::make_shared<UnknownType>(Type::Parameters());
+    }
+  }
+
+  const std::shared_ptr<Content> EmptyArray::astype(const std::shared_ptr<Type>& type) const {
+    return std::make_shared<EmptyArray>(id_, type);
+  }
+
+  const std::string EmptyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
     if (id_.get() == nullptr  &&  type_.get() == nullptr) {
       out << "/>" << post;
     }
     else {
+      out << ">\n";
       if (id_.get() != nullptr) {
-        out << ">\n" << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
+        out << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
       }
       if (type_.get() != nullptr) {
         out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
       }
+      out << indent << "</" << classname() << ">" << post;
     }
     return out.str();
   }
@@ -45,29 +67,12 @@ namespace awkward {
     builder.endlist();
   }
 
-  const std::shared_ptr<Type> EmptyArray::innertype(bool bare) const {
-    return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
-  }
-
-  void EmptyArray::settype_part(const std::shared_ptr<Type> type) {
-    if (accepts(type)) {
-      type_ = type;
-    }
-    else {
-      throw std::invalid_argument(std::string("provided type is incompatible with array: ") + ArrayType(Type::Parameters(), type, length()).compare(baretype()));
-    }
-  }
-
-  bool EmptyArray::accepts(const std::shared_ptr<Type> type) {
-    return dynamic_cast<UnknownType*>(type.get()->level().get()) != nullptr;
-  }
-
   int64_t EmptyArray::length() const {
     return 0;
   }
 
   const std::shared_ptr<Content> EmptyArray::shallow_copy() const {
-    return std::shared_ptr<Content>(new EmptyArray(id_, type_));
+    return std::make_shared<EmptyArray>(id_, type_);
   }
 
   void EmptyArray::check_for_iteration() const { }
@@ -135,6 +140,8 @@ namespace awkward {
   const std::vector<std::string> EmptyArray::keys() const {
     throw std::invalid_argument("array contains no Records");
   }
+
+  void EmptyArray::checktype() const { }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());

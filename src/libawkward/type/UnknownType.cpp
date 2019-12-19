@@ -6,14 +6,17 @@
 #include "awkward/type/UnknownType.h"
 
 namespace awkward {
-  std::string UnknownType::tostring_part(std::string indent, std::string pre, std::string post) const {
+  UnknownType::UnknownType(const Parameters& parameters)
+      : Type(parameters) { }
+
+  std::string UnknownType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
       return typestr;
     }
 
     std::stringstream out;
-    if (parameters_.size() == 0) {
+    if (parameters_.empty()) {
       out << indent << pre << "unknown" << post;
     }
     else {
@@ -23,10 +26,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnknownType::shallow_copy() const {
-    return std::shared_ptr<Type>(new UnknownType(parameters_));
+    return std::make_shared<UnknownType>(parameters_);
   }
 
-  bool UnknownType::equal(const std::shared_ptr<Type> other, bool check_parameters) const {
+  bool UnknownType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
       if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
         return false;
@@ -36,18 +39,6 @@ namespace awkward {
     else {
       return false;
     }
-  }
-
-  std::shared_ptr<Type> UnknownType::level() const {
-    return shallow_copy();
-  }
-
-  std::shared_ptr<Type> UnknownType::inner() const {
-    return shallow_copy();
-  }
-
-  std::shared_ptr<Type> UnknownType::inner(const std::string& key) const {
-    return shallow_copy();
   }
 
   int64_t UnknownType::numfields() const {
