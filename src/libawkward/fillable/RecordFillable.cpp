@@ -18,10 +18,34 @@
 
 namespace awkward {
   const std::shared_ptr<Fillable> RecordFillable::fromempty(const FillableOptions& options) {
-    std::shared_ptr<Fillable> out(new RecordFillable(options, std::vector<std::shared_ptr<Fillable>>(), std::vector<std::string>(), std::vector<const char*>(), "", nullptr, -1, false, -1, -1));
+    std::shared_ptr<Fillable> out = std::make_shared<RecordFillable>(options, std::vector<std::shared_ptr<Fillable>>(), std::vector<std::string>(), std::vector<const char*>(), "", nullptr, -1, false, -1, -1);
     out.get()->setthat(out);
     return out;
   }
+
+  RecordFillable::RecordFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, const std::vector<std::string>& keys, const std::vector<const char*>& pointers, const std::string& name, const char* nameptr, int64_t length, bool begun, int64_t nextindex, int64_t nexttotry)
+      : options_(options)
+      , contents_(contents)
+      , keys_(keys)
+      , pointers_(pointers)
+      , name_(name)
+      , nameptr_(nameptr)
+      , length_(length)
+      , begun_(begun)
+      , nextindex_(nextindex)
+      , nexttotry_(nexttotry) { }
+
+  const std::string RecordFillable::name() const {
+    return name_;
+  }
+
+  const char* RecordFillable::nameptr() const {
+    return nameptr_;
+  }
+
+  const std::string RecordFillable::classname() const {
+    return "RecordFillable";
+  };
 
   int64_t RecordFillable::length() const {
     return length_;
@@ -43,12 +67,12 @@ namespace awkward {
 
   const std::shared_ptr<Type> RecordFillable::type() const {
     if (length_ == -1) {
-      return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
+      return std::make_shared<UnknownType>(Type::Parameters());
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
-      std::shared_ptr<RecordType::Lookup> lookup(new RecordType::Lookup);
-      std::shared_ptr<RecordType::ReverseLookup> reverselookup(new RecordType::ReverseLookup);
+      std::shared_ptr<RecordType::Lookup> lookup = std::make_shared<RecordType::Lookup>();
+      std::shared_ptr<RecordType::ReverseLookup> reverselookup = std::make_shared<RecordType::ReverseLookup>();
       for (size_t i = 0;  i < contents_.size();  i++) {
         types.push_back(contents_[i].get()->type());
         (*lookup.get())[keys_[i]] = i;
@@ -58,40 +82,35 @@ namespace awkward {
       if (nameptr_ != nullptr) {
         parameters["__class__"] = util::quote(name_, true);
       }
-      return std::shared_ptr<Type>(new RecordType(parameters, types, lookup, reverselookup));
-      return std::shared_ptr<Type>(new RecordType(parameters, types));
+      return std::make_shared<RecordType>(parameters, types, lookup, reverselookup);
     }
   }
 
-  const std::shared_ptr<Content> RecordFillable::snapshot() const {
+  const std::shared_ptr<Content> RecordFillable::snapshot(const std::shared_ptr<Type>& type) const {
     if (length_ == -1) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
+      return std::make_shared<EmptyArray>(Identity::none(), type);
     }
-    else if (contents_.size() == 0) {
-      std::shared_ptr<Content> out(new RecordArray(Identity::none(), Type::none(), length_, false));
-      if (nameptr_ != nullptr) {
-        std::shared_ptr<Type> type = out.get()->type();
-        type.get()->nolength().get()->setparameter("__class__", util::quote(name_, true));
-        out.get()->settype(type);
+
+    RecordType* raw = dynamic_cast<RecordType*>(type.get());
+    std::vector<std::shared_ptr<Content>> contents;
+    std::shared_ptr<RecordType::Lookup> lookup = std::make_shared<RecordType::Lookup>();
+    std::shared_ptr<RecordType::ReverseLookup> reverselookup = std::make_shared<RecordType::ReverseLookup>();
+    for (size_t i = 0;  i < contents_.size();  i++) {
+      if (raw == nullptr) {
+        contents.push_back(contents_[i].get()->snapshot(Type::none()));
       }
-      return out;
+      else {
+        contents.push_back(contents_[i].get()->snapshot(raw->field((int64_t)i)));
+      }
+      (*lookup.get())[keys_[i]] = i;
+      reverselookup.get()->push_back(keys_[i]);
+    }
+
+    if (contents.empty()) {
+      return std::make_shared<RecordArray>(Identity::none(), type, length_, false);
     }
     else {
-      std::vector<std::shared_ptr<Content>> contents;
-      std::shared_ptr<RecordArray::Lookup> lookup(new RecordArray::Lookup);
-      std::shared_ptr<RecordArray::ReverseLookup> reverselookup(new RecordArray::ReverseLookup);
-      for (size_t i = 0;  i < contents_.size();  i++) {
-        contents.push_back(contents_[i].get()->snapshot());
-        (*lookup.get())[keys_[i]] = i;
-        reverselookup.get()->push_back(keys_[i]);
-      }
-      std::shared_ptr<Content> out(new RecordArray(Identity::none(), Type::none(), contents, lookup, reverselookup));
-      if (nameptr_ != nullptr) {
-        std::shared_ptr<Type> type = out.get()->type();
-        type.get()->nolength().get()->setparameter("__class__", util::quote(name_, true));
-        out.get()->settype(type);
-      }
-      return out;
+      return std::make_shared<RecordArray>(Identity::none(), type, contents, lookup, reverselookup);
     }
   }
 
@@ -390,13 +409,12 @@ namespace awkward {
       throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
     }
     else if (nextindex_ == -1  ||  !contents_[(size_t)nextindex_].get()->active()) {
-      int64_t i = 0;
-      for (auto content : contents_) {
-        if (content.get()->length() == length_) {
-          maybeupdate(i, content.get()->null());
+      for (size_t i = 0;  i < contents_.size();  i++) {
+        if (contents_[i].get()->length() == length_) {
+          maybeupdate((int64_t)i, contents_[i].get()->null());
         }
-        if (content.get()->length() != length_ + 1) {
-          throw std::invalid_argument(std::string("record field ") + util::quote(keys_[(size_t)i], true) + std::string(" filled more than once"));
+        if (contents_[i].get()->length() != length_ + 1) {
+          throw std::invalid_argument(std::string("record field ") + util::quote(keys_[i], true) + std::string(" filled more than once"));
         }
         i++;
       }

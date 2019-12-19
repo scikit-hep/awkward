@@ -11,10 +11,22 @@
 
 namespace awkward {
   const std::shared_ptr<Fillable> Int64Fillable::fromempty(const FillableOptions& options) {
-    std::shared_ptr<Fillable> out(new Int64Fillable(options, GrowableBuffer<int64_t>::empty(options)));
+    std::shared_ptr<Fillable> out = std::make_shared<Int64Fillable>(options, GrowableBuffer<int64_t>::empty(options));
     out.get()->setthat(out);
     return out;
   }
+
+  Int64Fillable::Int64Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& buffer)
+      : options_(options)
+      , buffer_(buffer) { }
+
+  const GrowableBuffer<int64_t> Int64Fillable::buffer() const {
+    return buffer_;
+  }
+
+  const std::string Int64Fillable::classname() const {
+    return "Int64Fillable";
+  };
 
   int64_t Int64Fillable::length() const {
     return buffer_.length();
@@ -25,16 +37,16 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> Int64Fillable::type() const {
-    return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::int64));
+    return std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::int64);
   }
 
-  const std::shared_ptr<Content> Int64Fillable::snapshot() const {
+  const std::shared_ptr<Content> Int64Fillable::snapshot(const std::shared_ptr<Type>& type) const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
 #ifdef _MSC_VER
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "q"));
+    return std::make_shared<NumpyArray>(Identity::none(), type, buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "q");
 #else
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "l"));
+    return std::make_shared<NumpyArray>(Identity::none(), type, buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "l");
 #endif
   }
 

@@ -156,11 +156,9 @@ def unbox(tpe, obj, c):
         proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
         c.pyapi.decref(id_obj)
     if tpe.typetpe != numba.none:
-        type1_obj = c.pyapi.object_getattr_string(obj, "type")
-        type2_obj = c.pyapi.object_getattr_string(type1_obj, "type")
-        proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type2_obj).value
-        c.pyapi.decref(type1_obj)
-        c.pyapi.decref(type2_obj)
+        type_obj = c.pyapi.object_getattr_string(obj, "type")
+        proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type_obj).value
+        c.pyapi.decref(type_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
@@ -191,14 +189,18 @@ def box(tpe, val, c):
         args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
     else:
         args.append(c.pyapi.make_none())
-    if tpe.typetpe != numba.none:
-        args.append(c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager))
-    else:
-        args.append(c.pyapi.make_none())
     out = c.pyapi.call_function_objargs(ListArray_obj, args)
     for x in args:
         c.pyapi.decref(x)
     c.pyapi.decref(ListArray_obj)
+    if tpe.typetpe != numba.none:
+        old = out
+        astype_obj = c.pyapi.object_getattr_string(out, "astype")
+        t = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
+        out = c.pyapi.call_function_objargs(astype_obj, (t,))
+        c.pyapi.decref(old)
+        c.pyapi.decref(astype_obj)
+        c.pyapi.decref(t)
     return out
 
 @numba.extending.lower_builtin(len, ListArrayType)

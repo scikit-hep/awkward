@@ -13,7 +13,7 @@
 namespace awkward {
   class FillableArray {
   public:
-    FillableArray(const FillableOptions& options): fillable_(UnknownFillable::fromempty(options)) { }
+    FillableArray(const FillableOptions& options);
 
     const std::string tostring() const;
     int64_t length() const;
@@ -32,14 +32,10 @@ namespace awkward {
     void real(double x);
     void bytestring(const char* x);
     void bytestring(const char* x, int64_t length);
-    void bytestring(const std::string& x) {
-      bytestring(x.c_str(), (int64_t)x.length());
-    }
+    void bytestring(const std::string& x);
     void string(const char* x);
     void string(const char* x, int64_t length);
-    void string(const std::string& x) {
-      string(x.c_str(), (int64_t)x.length());
-    }
+    void string(const std::string& x);
     void beginlist();
     void endlist();
     void begintuple(int64_t numfields);
@@ -48,14 +44,10 @@ namespace awkward {
     void beginrecord();
     void beginrecord_fast(const char* name);
     void beginrecord_check(const char* name);
-    void beginrecord_check(const std::string& name) {
-      beginrecord_check(name.c_str());
-    }
+    void beginrecord_check(const std::string& name);
     void field_fast(const char* key);
     void field_check(const char* key);
-    void field_check(const std::string& key) {
-      field_check(key.c_str());
-    }
+    void field_check(const std::string& key);
     void endrecord();
 
     template <typename T>
@@ -66,10 +58,11 @@ namespace awkward {
       }
       endlist();
     }
-    void fill(int64_t x) { integer(x); }
-    void fill(double x) { real(x); }
-    void fill(const char* x) { bytestring(x); }
-    void fill(const std::string& x) { bytestring(x.c_str()); }
+
+    void fill(int64_t x);
+    void fill(double x);
+    void fill(const char* x);
+    void fill(const std::string& x);
 
   private:
     void maybeupdate(const std::shared_ptr<Fillable>& tmp);

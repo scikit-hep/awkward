@@ -15,10 +15,20 @@ namespace awkward {
   const std::shared_ptr<Fillable> ListFillable::fromempty(const FillableOptions& options) {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
     offsets.append(0);
-    std::shared_ptr<Fillable> out(new ListFillable(options, offsets, UnknownFillable::fromempty(options), false));
+    std::shared_ptr<Fillable> out = std::make_shared<ListFillable>(options, offsets, UnknownFillable::fromempty(options), false);
     out.get()->setthat(out);
     return out;
   }
+
+  ListFillable::ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, std::shared_ptr<Fillable> content, bool begun)
+      : options_(options)
+      , offsets_(offsets)
+      , content_(content)
+      , begun_(begun) { }
+
+  const std::string ListFillable::classname() const {
+    return "ListFillable";
+  };
 
   int64_t ListFillable::length() const {
     return offsets_.length() - 1;
@@ -31,12 +41,16 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> ListFillable::type() const {
-    return std::shared_ptr<Type>(new ListType(Type::Parameters(), content_.get()->type()));
+    return std::make_shared<ListType>(Type::Parameters(), content_.get()->type());
   }
 
-  const std::shared_ptr<Content> ListFillable::snapshot() const {
+  const std::shared_ptr<Content> ListFillable::snapshot(const std::shared_ptr<Type>& type) const {
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), Type::none(), offsets, content_.get()->snapshot()));
+    std::shared_ptr<Type> innertype = Type::none();
+    if (ListType* raw = dynamic_cast<ListType*>(type.get())) {
+      innertype = raw->type();
+    }
+    return std::make_shared<ListOffsetArray64>(Identity::none(), type, offsets, content_.get()->snapshot(innertype));
   }
 
   bool ListFillable::active() const {

@@ -15,10 +15,25 @@
 
 namespace awkward {
   const std::shared_ptr<Fillable> TupleFillable::fromempty(const FillableOptions& options) {
-    std::shared_ptr<Fillable> out(new TupleFillable(options, std::vector<std::shared_ptr<Fillable>>(), -1, false, -1));
+    std::shared_ptr<Fillable> out = std::make_shared<TupleFillable>(options, std::vector<std::shared_ptr<Fillable>>(), -1, false, -1);
     out.get()->setthat(out);
     return out;
   }
+
+  TupleFillable::TupleFillable(const FillableOptions& options, const std::vector<std::shared_ptr<Fillable>>& contents, int64_t length, bool begun, size_t nextindex)
+      : options_(options)
+      , contents_(contents)
+      , length_(length)
+      , begun_(begun)
+      , nextindex_(nextindex) { }
+
+  int64_t TupleFillable::numfields() const {
+    return (int64_t)contents_.size();
+  }
+
+  const std::string TupleFillable::classname() const {
+    return "TupleFillable";
+  };
 
   int64_t TupleFillable::length() const {
     return length_;
@@ -35,30 +50,38 @@ namespace awkward {
 
   const std::shared_ptr<Type> TupleFillable::type() const {
     if (length_ == -1) {
-      return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
+      return std::make_shared<UnknownType>(Type::Parameters());
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
-      for (auto content : contents_) {
-        types.push_back(content.get()->type());
+      for (size_t i = 0;  i < contents_.size();  i++) {
+        types.push_back(contents_[i].get()->type());
       }
-      return std::shared_ptr<Type>(new RecordType(Type::Parameters(), types));
+      return std::make_shared<RecordType>(Type::Parameters(), types);
     }
   }
 
-  const std::shared_ptr<Content> TupleFillable::snapshot() const {
+  const std::shared_ptr<Content> TupleFillable::snapshot(const std::shared_ptr<Type>& type) const {
     if (length_ == -1) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
+      return std::make_shared<EmptyArray>(Identity::none(), type);
     }
-    else if (contents_.size() == 0) {
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), length_, true));
+
+    RecordType* raw = dynamic_cast<RecordType*>(type.get());
+    std::vector<std::shared_ptr<Content>> contents;
+    for (size_t i = 0;  i < contents_.size();  i++) {
+      if (raw == nullptr) {
+        contents.push_back(contents_[i].get()->snapshot(Type::none()));
+      }
+      else {
+        contents.push_back(contents_[i].get()->snapshot(raw->field((int64_t)i)));
+      }
+    }
+
+    if (contents.empty()) {
+      return std::make_shared<RecordArray>(Identity::none(), type, length_, true);
     }
     else {
-      std::vector<std::shared_ptr<Content>> contents;
-      for (auto content : contents_) {
-        contents.push_back(content.get()->snapshot());
-      }
-      return std::shared_ptr<Content>(new RecordArray(Identity::none(), Type::none(), contents));
+      return std::make_shared<RecordArray>(Identity::none(), type, contents);
     }
   }
 
@@ -234,12 +257,11 @@ namespace awkward {
       throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
     }
     else if (nextindex_ == -1  ||  !contents_[(size_t)nextindex_].get()->active()) {
-      int64_t i = 0;
-      for (auto content : contents_) {
-        if (content.get()->length() == length_) {
-          maybeupdate(i, content.get()->null());
+      for (size_t i = 0;  i < contents_.size();  i++) {
+        if (contents_[i].get()->length() == length_) {
+          maybeupdate(i, contents_[i].get()->null());
         }
-        if (content.get()->length() != length_ + 1) {
+        if (contents_[i].get()->length() != length_ + 1) {
           throw std::invalid_argument(std::string("tuple index ") + std::to_string(i) + std::string(" filled more than once"));
         }
         i++;

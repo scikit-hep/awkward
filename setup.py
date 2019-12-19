@@ -56,12 +56,20 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
         subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
 
-        for lib in (glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.so")) +
+        for lib in (glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "libawkward-cpu-kernels-static.*")) +
+                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "libawkward-static.*")) +
+                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.so")) +
                     glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.dylib")) +
                     glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.dll")) +
+                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.exp")) +
                     glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.pyd"))):
           if os.path.exists(lib):
               os.remove(lib)
+
+        for lib in os.listdir(self.build_temp):
+            if lib.startswith("libawkward-cpu-kernels-static.") or lib.startswith("libawkward-static."):
+                shutil.copy(os.path.join(self.build_temp, lib), "awkward1")
+                shutil.move(os.path.join(self.build_temp, lib), os.path.join(extdir, "awkward1"))
 
         for lib in os.listdir(extdir):
             if lib.endswith(".so") or lib.endswith(".dylib") or lib.endswith(".dll") or lib.endswith(".pyd"):
@@ -70,7 +78,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
         if platform.system() == "Windows":
             for lib in os.listdir(os.path.join(self.build_temp, cfg)):
-                if lib.endswith(".dll") or lib.endswith(".pyd"):
+                if lib.startswith("awkward-cpu-kernels-static.") or lib.startswith("awkward-static.") or lib.endswith(".dll") or lib.endswith(".exp") or lib.endswith(".pyd"):
                     shutil.copy(os.path.join(os.path.join(self.build_temp, cfg), lib), "awkward1")
                     shutil.move(os.path.join(os.path.join(self.build_temp, cfg), lib), os.path.join(extdir, "awkward1"))
 

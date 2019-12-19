@@ -19,10 +19,18 @@
 
 namespace awkward {
   const std::shared_ptr<Fillable> UnknownFillable::fromempty(const FillableOptions& options) {
-    std::shared_ptr<Fillable> out(new UnknownFillable(options, 0));
+    std::shared_ptr<Fillable> out = std::make_shared<UnknownFillable>(options, 0);
     out.get()->setthat(out);
     return out;
   }
+
+  UnknownFillable::UnknownFillable(const FillableOptions& options, int64_t nullcount)
+      : options_(options)
+      , nullcount_(nullcount) { }
+
+  const std::string UnknownFillable::classname() const {
+    return "UnknownFillable";
+  };
 
   int64_t UnknownFillable::length() const {
     return nullcount_;
@@ -33,15 +41,15 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnknownFillable::type() const {
-    return std::shared_ptr<Type>(new UnknownType(Type::Parameters()));
+    return std::make_shared<UnknownType>(Type::Parameters());
   }
 
-  const std::shared_ptr<Content> UnknownFillable::snapshot() const {
+  const std::shared_ptr<Content> UnknownFillable::snapshot(const std::shared_ptr<Type>& type) const {
     if (nullcount_ == 0) {
-      return std::shared_ptr<Content>(new EmptyArray(Identity::none(), Type::none()));
+      return std::make_shared<EmptyArray>(Identity::none(), type);
     }
     else {
-      throw std::runtime_error("UnknownFillable::snapshot() needs OptionArray");
+      throw std::runtime_error("UnknownFillable::snapshot needs OptionArray");
     }
   }
 

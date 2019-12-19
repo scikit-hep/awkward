@@ -15,10 +15,8 @@
 namespace awkward {
   class SliceItem {
   public:
-    static int64_t none() { return kSliceNone; }
-
-    virtual ~SliceItem() { }
-
+    static int64_t none();
+    virtual ~SliceItem();
     virtual const std::shared_ptr<SliceItem> shallow_copy() const = 0;
     virtual const std::string tostring() const = 0;
     virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const = 0;
@@ -26,36 +24,26 @@ namespace awkward {
 
   class SliceAt: public SliceItem {
   public:
-    SliceAt(int64_t at): at_(at) { }
-    int64_t at() const { return at_; }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
-      return std::shared_ptr<SliceItem>(new SliceAt(at_));
-    }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
-      return false;
-    }
+    SliceAt(int64_t at);
+    int64_t at() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
   private:
     const int64_t at_;
   };
 
   class SliceRange: public SliceItem {
   public:
-    SliceRange(int64_t start, int64_t stop, int64_t step): start_(start), stop_(stop), step_(step == none() ? 1 : step) {
-      assert(step_ != 0);
-    }
-    int64_t start() const { return start_; }
-    int64_t stop() const { return stop_; }
-    int64_t step() const { return step_; }
-    bool hasstart() const { return start_ != none(); }
-    bool hasstop() const { return stop_ != none(); }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
-      return std::shared_ptr<SliceItem>(new SliceRange(start_, stop_, step_));
-    }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
-      return true;
-    }
+    SliceRange(int64_t start, int64_t stop, int64_t step);
+    int64_t start() const;
+    int64_t stop() const;
+    int64_t step() const;
+    bool hasstart() const;
+    bool hasstop() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
   private:
     const int64_t start_;
     const int64_t stop_;
@@ -64,47 +52,32 @@ namespace awkward {
 
   class SliceEllipsis: public SliceItem {
   public:
-    SliceEllipsis() { }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
-      return std::shared_ptr<SliceItem>(new SliceEllipsis());
-    }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
-      return true;
-    }
+    SliceEllipsis();
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
   };
 
   class SliceNewAxis: public SliceItem {
   public:
-    SliceNewAxis() { }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
-      return std::shared_ptr<SliceItem>(new SliceNewAxis());
-    }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
-      return false;
-    }
+    SliceNewAxis();
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
   };
 
   template <typename T>
   class SliceArrayOf: public SliceItem {
   public:
-    SliceArrayOf<T>(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides): index_(index), shape_(shape), strides_(strides) {
-      assert(shape_.size() != 0);
-      assert(shape_.size() == strides_.size());
-    }
-    const IndexOf<T> index() const { return index_; }
-    const int64_t length() const { return shape_[0]; }
-    const std::vector<int64_t> shape() const { return shape_; }
-    const std::vector<int64_t> strides() const { return strides_; }
-    int64_t ndim() const { return (int64_t)shape_.size(); }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
-      return std::shared_ptr<SliceItem>(new SliceArrayOf<T>(index_, shape_, strides_));
-    }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
-      return advanced.length() == 0;
-    }
+    SliceArrayOf<T>(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides);
+    const IndexOf<T> index() const;
+    const int64_t length() const;
+    const std::vector<int64_t> shape() const;
+    const std::vector<int64_t> strides() const;
+    int64_t ndim() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
     const std::string tostring_part() const;
     const IndexOf<T> ravel() const;
   private:
@@ -117,44 +90,35 @@ namespace awkward {
 
   class SliceField: public SliceItem {
   public:
-    SliceField(const std::string& key): key_(key) { }
-    const std::string key() const { return key_; }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
-      return std::shared_ptr<SliceItem>(new SliceField(key_));
-    }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
-      return false;
-    }
+    SliceField(const std::string& key);
+    const std::string key() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
   private:
     const std::string key_;
   };
 
   class SliceFields: public SliceItem {
   public:
-    SliceFields(const std::vector<std::string>& keys): keys_(keys) { }
-    const std::vector<std::string> keys() const { return keys_; }
-    virtual const std::shared_ptr<SliceItem> shallow_copy() const {
-      return std::shared_ptr<SliceItem>(new SliceFields(keys_));
-    }
-    virtual const std::string tostring() const;
-    virtual bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
-      return type.get() != nullptr  &&  type.get()->numfields() != -1  &&  util::subset(keys_, type.get()->keys());
-    }
+    SliceFields(const std::vector<std::string>& keys);
+    const std::vector<std::string> keys() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
+    const std::string tostring() const override;
+    bool preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const override;
   private:
     const std::vector<std::string> keys_;
   };
 
   class Slice {
   public:
-    static int64_t none() { return SliceItem::none(); }
+    static int64_t none();
 
-    Slice(): items_(std::vector<std::shared_ptr<SliceItem>>()), sealed_(false) { }
-    Slice(const std::vector<std::shared_ptr<SliceItem>> items): items_(items), sealed_(false) { }
-    Slice(const std::vector<std::shared_ptr<SliceItem>> items, bool sealed): items_(items), sealed_(sealed) { }
-    const std::vector<std::shared_ptr<SliceItem>> items() const { return items_; }
-    bool sealed() const { return sealed_; }
-
+    Slice();
+    Slice(const std::vector<std::shared_ptr<SliceItem>>& items);
+    Slice(const std::vector<std::shared_ptr<SliceItem>>& items, bool sealed);
+    const std::vector<std::shared_ptr<SliceItem>> items() const;
+    bool sealed() const;
     int64_t length() const;
     int64_t dimlength() const;
     const std::shared_ptr<SliceItem> head() const;

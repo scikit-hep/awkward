@@ -58,11 +58,9 @@ def test_string2():
     assert repr(a[0]) == "<Array [104, 101, 121] type='3 * uint8'>"
     assert repr(a[1]) == "<Array [] type='0 * uint8'>"
     assert repr(a[2]) == "<Array [116, 104, 101, 114, 101] type='5 * uint8'>"
-
-    a.type = awkward1.layout.ArrayType(awkward1.string, 3)
-
+    
+    a = awkward1.Array(listoffsetarray.astype(awkward1.string))
     assert isinstance(a, awkward1.Array)
-    assert isinstance(a, awkward1.behavior.string.StringBehavior)
     assert awkward1.tolist(a) == ['hey', '', 'there']
 
     assert repr(a.type) == "3 * string"
@@ -82,15 +80,13 @@ def test_string2():
         assert repr(a[2]) == "'there'"
 
 def test_accepts():
-    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
-    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5])), content)
-
     dressed1 = awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"), {"__class__": "Dummy"})
-    listoffsetarray.type = dressed1
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5])), content).astype(dressed1)
 
     dressed2 = awkward1.layout.PrimitiveType("float64", {"__class__": "Dummy"})
     with pytest.raises(ValueError):
-        listoffsetarray.type = dressed2
+        awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5])), content).astype(dressed2)
 
 class D(awkward1.highlevel.Array):
     @staticmethod
@@ -108,36 +104,35 @@ def test_type_propagation():
     drec = awkward1.layout.RecordType(collections.OrderedDict([("one", dint64), ("two", dvarfloat64)]), {"__class__": "D", "__str__": "D[{\"one\": D[int64], \"two\": D[var * D[float64]]}]"})
     dvarrec = awkward1.layout.ListType(drec, {"__class__": "D", "__str__": "D[var * D[{\"one\": D[int64], \"two\": D[var * D[float64]]}]]"})
 
-    array.layout.type = awkward1.layout.ArrayType(dvarrec, 3)
-    assert array.layout.type == awkward1.layout.ArrayType(dvarrec, 3)
-    assert array.layout.content.type == awkward1.layout.ArrayType(drec, 5)
-    assert array.layout.content.field("one").type == awkward1.layout.ArrayType(dint64, 5)
-    assert array.layout.content.field("two").type == awkward1.layout.ArrayType(dvarfloat64, 5)
-    assert array.layout.content.field("two").content.type == awkward1.layout.ArrayType(dfloat64, 10)
+    array = awkward1.Array(array.layout.astype(dvarrec))
 
-    assert array.layout[-1].type == awkward1.layout.ArrayType(drec, 2)
-    assert array.layout[-1]["one"].type == awkward1.layout.ArrayType(dint64, 2)
-    assert array.layout[-1]["two"].type == awkward1.layout.ArrayType(dvarfloat64, 2)
-    assert array.layout[-1]["two"][1].type == awkward1.layout.ArrayType(dfloat64, 4)
-    assert array.layout[-1, "one"].type == awkward1.layout.ArrayType(dint64, 2)
-    assert array.layout[-1, "two"].type == awkward1.layout.ArrayType(dvarfloat64, 2)
-    assert array.layout[-1, "two", 1].type == awkward1.layout.ArrayType(dfloat64, 4)
-    assert array.layout["one", -1].type == awkward1.layout.ArrayType(dint64, 2)
-    assert array.layout["two", -1].type == awkward1.layout.ArrayType(dvarfloat64, 2)
-    assert array.layout["two", -1, 1].type == awkward1.layout.ArrayType(dfloat64, 4)
+    assert array.layout.type == dvarrec
+    assert array.layout.content.type == drec
+    assert array.layout.content.field("one").type == dint64
+    assert array.layout.content.field("two").type == dvarfloat64
+    assert array.layout.content.field("two").content.type == dfloat64
 
-    assert array.layout[1:].type == awkward1.layout.ArrayType(dvarrec, 2)
-    assert array.layout[1:, "one"].type == awkward1.layout.ArrayType(awkward1.layout.ListType(dint64), 2)
-    assert array.layout["one", 1:].type == awkward1.layout.ArrayType(awkward1.layout.ListType(dint64), 2)
+    assert array.layout[-1].type == drec
+    assert array.layout[-1]["one"].type == dint64
+    assert array.layout[-1]["two"].type == dvarfloat64
+    assert array.layout[-1]["two"][1].type == dfloat64
+    assert array.layout[-1, "one"].type == dint64
+    assert array.layout[-1, "two"].type == dvarfloat64
+    assert array.layout[-1, "two", 1].type == dfloat64
+    assert array.layout["one", -1].type == dint64
+    assert array.layout["two", -1].type == dvarfloat64
+    assert array.layout["two", -1, 1].type == dfloat64
 
-    assert array.layout[[2, 1]].type == awkward1.layout.ArrayType(dvarrec, 2)
-    assert array.layout[[2, 1], "one"].type == awkward1.layout.ArrayType(awkward1.layout.ListType(dint64), 2)
+    assert array.layout[1:].type == dvarrec
+    assert array.layout[1:, "one"].type == awkward1.layout.ListType(dint64)
+    assert array.layout["one", 1:].type == awkward1.layout.ListType(dint64)
 
-    array2 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
-    array2.type = awkward1.layout.ArrayType(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3), 2)
+    assert array.layout[[2, 1]].type == dvarrec
+    assert array.layout[[2, 1], "one"].type == awkward1.layout.ListType(dint64)
 
-    assert repr(array2.baretype) == "2 * 3 * 5 * int64"
-    assert repr(array2.type) == "2 * 3 * 5 * D[int64]"
-    assert repr(array2[0].type) == "3 * 5 * D[int64]"
-    assert repr(array2[0, 0].type) == "5 * D[int64]"
+    array2 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5)).astype(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3))
+
+    assert repr(array2.type) == "3 * 5 * D[int64]"
+    assert repr(array2[0].type) == "5 * D[int64]"
+    assert repr(array2[0, 0].type) == "D[int64]"
     assert array2[-1, -1, -1] == 29

@@ -439,7 +439,7 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
 void toslice_part(ak::Slice& slice, py::object obj) {
   if (py::isinstance<py::int_>(obj)) {
     // FIXME: what happens if you give this a Numpy integer? a Numpy 0-dimensional array?
-    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceAt(obj.cast<int64_t>())));
+    slice.append(std::make_shared<ak::SliceAt>(obj.cast<int64_t>()));
   }
 
   else if (py::isinstance<py::slice>(obj)) {
@@ -461,21 +461,21 @@ void toslice_part(ak::Slice& slice, py::object obj) {
     if (step == 0) {
       throw std::invalid_argument("slice step must not be 0");
     }
-    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceRange(start, stop, step)));
+    slice.append(std::make_shared<ak::SliceRange>(start, stop, step));
   }
 
 #if PY_MAJOR_VERSION >= 3
   else if (py::isinstance<py::ellipsis>(obj)) {
-    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceEllipsis()));
+    slice.append(std::make_shared<ak::SliceEllipsis>());
   }
 #endif
 
   else if (obj.is(py::module::import("numpy").attr("newaxis"))) {
-    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceNewAxis()));
+    slice.append(std::make_shared<ak::SliceNewAxis>());
   }
 
   else if (py::isinstance<py::str>(obj)) {
-    slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceField(obj.cast<std::string>())));
+    slice.append(std::make_shared<ak::SliceField>(obj.cast<std::string>()));
   }
 
   else if (py::isinstance<py::iterable>(obj)) {
@@ -491,8 +491,8 @@ void toslice_part(ak::Slice& slice, py::object obj) {
       }
     }
 
-    if (all_strings  &&  strings.size() != 0) {
-      slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceFields(strings)));
+    if (all_strings  &&  !strings.empty()) {
+      slice.append(std::make_shared<ak::SliceFields>(strings));
     }
     else {
       py::object objarray = py::module::import("numpy").attr("asarray")(obj);
@@ -518,7 +518,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
             strides.push_back((int64_t)intinfo.strides[i] / sizeof(int64_t));
           }
           ak::Index64 index(std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(intinfo.ptr), pyobject_deleter<int64_t>(intarray.ptr())), 0, shape[0]);
-          slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceArray64(index, shape, strides)));
+          slice.append(std::make_shared<ak::SliceArray64>(index, shape, strides));
         }
       }
 
@@ -550,7 +550,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
           strides.push_back((int64_t)intinfo.strides[i] / (int64_t)sizeof(int64_t));
         }
         ak::Index64 index(std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(intinfo.ptr), pyobject_deleter<int64_t>(intarray.ptr())), 0, shape[0]);
-        slice.append(std::shared_ptr<ak::SliceItem>(new ak::SliceArray64(index, shape, strides)));
+        slice.append(std::make_shared<ak::SliceArray64>(index, shape, strides));
       }
     }
 
@@ -646,7 +646,7 @@ py::object getitem(T& self, py::object obj) {
         break;
       }
     }
-    if (all_strings  &&  strings.size() != 0) {
+    if (all_strings  &&  !strings.empty()) {
       return box(self.getitem_fields(strings));
     }
     // NOTE: control flow can pass through here; don't make the last line an 'else'!
@@ -759,21 +759,6 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
 
 /////////////////////////////////////////////////////////////// Type
 
-template <typename T>
-std::shared_ptr<ak::Type> inner(T& self) {
-  return self.inner();
-}
-
-template <typename T>
-std::shared_ptr<ak::Type> inner_key(T& self, std::string key) {
-  return self.inner(key);
-}
-
-template <typename T>
-py::dict emptydict(T& self) {
-  return py::dict();
-}
-
 ak::Type::Parameters dict2parameters(py::object in) {
   ak::Type::Parameters out;
   if (in.is(py::none())) {
@@ -817,10 +802,15 @@ void setparameters(T& self, py::object parameters) {
 template <typename T>
 py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>& x) {
   return x.def("__repr__", &T::tostring)
-          .def("nolength", &T::nolength)
-          .def("level", &T::level)
-          .def("inner", &inner<T>)
-          .def("inner", &inner_key<T>)
+          .def("__getitem__", [](T& self, const std::string& key) -> py::object {
+            std::string cppvalue = self.parameter(key);
+            py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(), cppvalue.length(), "surrogateescape"));
+            return py::module::import("json").attr("loads")(pyvalue);
+          })
+          .def("__setitem__", [](T& self, const std::string& key, py::object value) -> void {
+            py::object valuestr = py::module::import("json").attr("dumps")(value);
+            self.setparameter(key, valuestr.cast<std::string>());
+          })
           .def_property_readonly("numfields", &T::numfields)
           .def("fieldindex", &T::fieldindex)
           .def("key", &T::key)
@@ -1086,8 +1076,8 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         return ak::RecordType(dict2parameters(parameters), out, std::shared_ptr<ak::RecordType::Lookup>(nullptr), std::shared_ptr<ak::RecordType::ReverseLookup>(nullptr));
       }), py::arg("types"), py::arg("parameters") = py::none())
       .def(py::init([](py::dict types, py::object parameters) -> ak::RecordType {
-        std::shared_ptr<ak::RecordType::Lookup> lookup(new ak::RecordType::Lookup);
-        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup(new ak::RecordType::ReverseLookup);
+        std::shared_ptr<ak::RecordType::Lookup> lookup = std::make_shared<ak::RecordType::Lookup>();
+        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup = std::make_shared<ak::RecordType::ReverseLookup>();
         std::vector<std::shared_ptr<ak::Type>> out;
         for (auto x : types) {
           std::string key = x.first.cast<std::string>();
@@ -1102,8 +1092,8 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         for (auto x : types) {
           out.push_back(unbox_type(x));
         }
-        std::shared_ptr<ak::RecordType::Lookup> lookup(new ak::RecordType::Lookup);
-        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup(new ak::RecordType::ReverseLookup);
+        std::shared_ptr<ak::RecordType::Lookup> lookup = std::make_shared<ak::RecordType::Lookup>();
+        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup = std::make_shared<ak::RecordType::ReverseLookup>();
         from_lookup<ak::RecordType::Lookup, ak::RecordType::ReverseLookup>(lookup, reverselookup, pylookup, pyreverselookup, (int64_t)out.size());
         return ak::RecordType(dict2parameters(parameters), out, lookup, reverselookup);
       }, py::arg("types"), py::arg("lookup"), py::arg("reverselookup") = py::none(), py::arg("parameters") = py::none())
@@ -1160,8 +1150,8 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         for (auto x : state[1]) {
           fields.push_back(unbox_type(x));
         }
-        std::shared_ptr<ak::RecordType::Lookup> lookup(new ak::RecordType::Lookup);
-        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup(new ak::RecordType::ReverseLookup);
+        std::shared_ptr<ak::RecordType::Lookup> lookup = std::make_shared<ak::RecordType::Lookup>();
+        std::shared_ptr<ak::RecordType::ReverseLookup> reverselookup = std::make_shared<ak::RecordType::ReverseLookup>();
         from_lookup<ak::RecordType::Lookup, ak::RecordType::ReverseLookup>(lookup, reverselookup, state[2].cast<py::dict>(), state[3], (int64_t)fields.size());
         return ak::RecordType(dict2parameters(state[0]), fields, lookup, reverselookup);
       }))
@@ -1223,15 +1213,12 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("setid", [](T& self) -> void {
             self.setid();
           })
-          .def_property_readonly("baretype", &ak::Content::baretype)
-          .def_property_readonly("isbare", &ak::Content::isbare)
-          .def_property("type", [](T& self) -> py::object {
+          .def_property_readonly("isbare", &T::isbare)
+          .def_property_readonly("type", [](T& self) -> py::object {
             return box(self.type());
-          }, [](T& self, py::object type) -> void {
-            self.settype(unbox_type(type));
           })
-          .def("accepts", [](T& self, py::object type) -> bool {
-            return self.accepts(unbox_type(type));
+          .def("astype", [](T& self, std::shared_ptr<ak::Type>& type) -> py::object {
+            return box(self.astype(type));
           })
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
@@ -1279,7 +1266,7 @@ py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_Nu
         if (info.shape.size() != info.ndim  ||  info.strides.size() != info.ndim) {
           throw std::invalid_argument("NumpyArray len(shape) != ndim or len(strides) != ndim");
         }
-        return ak::NumpyArray(unbox_id_none(id), unbox_type_none(type), std::shared_ptr<void>(
+        return ak::NumpyArray(unbox_id_none(id), ak::NumpyArray::unwrap_regulartype(unbox_type_none(type), info.shape), std::shared_ptr<void>(
           reinterpret_cast<void*>(info.ptr), pyobject_deleter<void>(array.ptr())),
           info.shape,
           info.strides,
@@ -1359,8 +1346,8 @@ py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> mak
 py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_RecordArray(py::handle m, std::string name) {
   return content_methods(py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content>(m, name.c_str())
       .def(py::init([](py::dict contents, py::object id, py::object type) -> ak::RecordArray {
-        std::shared_ptr<ak::RecordArray::Lookup> lookup(new ak::RecordArray::Lookup);
-        std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup(new ak::RecordArray::ReverseLookup);
+        std::shared_ptr<ak::RecordArray::Lookup> lookup = std::make_shared<ak::RecordArray::Lookup>();
+        std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup = std::make_shared<ak::RecordArray::ReverseLookup>();
         std::vector<std::shared_ptr<ak::Content>> out;
         for (auto x : contents) {
           std::string key = x.first.cast<std::string>();
@@ -1368,7 +1355,7 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
           reverselookup.get()->push_back(key);
           out.push_back(unbox_content(x.second));
         }
-        if (out.size() == 0) {
+        if (out.empty()) {
           throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
         }
         return ak::RecordArray(unbox_id_none(id), unbox_type_none(type), out, lookup, reverselookup);
@@ -1378,7 +1365,7 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         for (auto x : contents) {
           out.push_back(unbox_content(x));
         }
-        if (out.size() == 0) {
+        if (out.empty()) {
           throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
         }
         return ak::RecordArray(unbox_id_none(id), unbox_type_none(type), out, std::shared_ptr<ak::RecordArray::Lookup>(nullptr), std::shared_ptr<ak::RecordArray::ReverseLookup>(nullptr));
@@ -1391,11 +1378,11 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         for (auto x : contents) {
           out.push_back(unbox_content(x));
         }
-        if (out.size() == 0) {
+        if (out.empty()) {
           throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
         }
-        std::shared_ptr<ak::RecordArray::Lookup> lookup(new ak::RecordArray::Lookup);
-        std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup(new ak::RecordArray::ReverseLookup);
+        std::shared_ptr<ak::RecordArray::Lookup> lookup = std::make_shared<ak::RecordArray::Lookup>();
+        std::shared_ptr<ak::RecordArray::ReverseLookup> reverselookup = std::make_shared<ak::RecordArray::ReverseLookup>();
         from_lookup<ak::RecordArray::Lookup, ak::RecordArray::ReverseLookup>(lookup, reverselookup, pylookup, pyreverselookup, (int64_t)out.size());
         return ak::RecordArray(unbox_id_none(id), unbox_type_none(type), out, lookup, reverselookup);
       }, py::arg("contents"), py::arg("lookup"), py::arg("reverselookup") = py::none(), py::arg("id") = py::none(), py::arg("type") = py::none())
@@ -1452,14 +1439,15 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("id", [](ak::Record& self) -> py::object { return box(self.id()); })
       .def("__getitem__", &getitem<ak::Record>)
-      .def_property_readonly("baretype", &ak::Record::baretype)
       .def_property_readonly("isbare", &ak::Record::isbare)
       .def_property_readonly("type", [](ak::Record& self) -> py::object {
         return box(self.type());
       })
+      .def("astype", [](ak::Record& self, std::shared_ptr<ak::Type>& type) -> py::object {
+        return box(self.astype(type));
+      })
       .def("tojson", &tojson_string<ak::Record>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
-      .def_property_readonly("type", &ak::Content::type)
 
       .def_property_readonly("array", [](ak::Record& self) -> py::object { return box(self.array()); })
       .def_property_readonly("at", &ak::Record::at)

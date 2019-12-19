@@ -15,9 +15,23 @@ namespace awkward {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
     offsets.append(0);
     GrowableBuffer<uint8_t> content = GrowableBuffer<uint8_t>::empty(options);
-    std::shared_ptr<Fillable> out(new StringFillable(options, offsets, content, encoding));
+    std::shared_ptr<Fillable> out = std::make_shared<StringFillable>(options, offsets, content, encoding);
     out.get()->setthat(out);
     return out;
+  }
+
+  StringFillable::StringFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, GrowableBuffer<uint8_t>& content, const char* encoding)
+      : options_(options)
+      , offsets_(offsets)
+      , content_(content)
+      , encoding_(encoding) { }
+
+  const std::string StringFillable::classname() const {
+    return "StringFillable";
+  };
+
+  const char* StringFillable::encoding() const {
+    return encoding_;
   }
 
   int64_t StringFillable::length() const {
@@ -56,19 +70,22 @@ namespace awkward {
       char_parameters["encoding"] = std::string(quoted);
     }
 
-    return std::shared_ptr<Type>(new ListType(string_parameters, std::shared_ptr<Type>(new PrimitiveType(char_parameters, PrimitiveType::uint8))));
+    return std::make_shared<ListType>(string_parameters, std::make_shared<PrimitiveType>(char_parameters, PrimitiveType::uint8));
   }
 
-  const std::shared_ptr<Content> StringFillable::snapshot() const {
-    std::shared_ptr<Type> stringtype = type();
-
+  const std::shared_ptr<Content> StringFillable::snapshot(const std::shared_ptr<Type>& type) const {
+    ListType* raw = dynamic_cast<ListType*>(type.get());
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-
     std::vector<ssize_t> shape = { (ssize_t)content_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(uint8_t) };
-    std::shared_ptr<Content> content(new NumpyArray(Identity::none(), stringtype.get()->inner(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B"));
-
-    return std::shared_ptr<Content>(new ListOffsetArray64(Identity::none(), stringtype, offsets, content));
+    std::shared_ptr<Content> content;
+    if (raw == nullptr) {
+      content = std::make_shared<NumpyArray>(Identity::none(), Type::none(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B");
+    }
+    else {
+      content = std::make_shared<NumpyArray>(Identity::none(), raw->type(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B");
+    }
+    return std::make_shared<ListOffsetArray64>(Identity::none(), type, offsets, content);
   }
 
   bool StringFillable::active() const {

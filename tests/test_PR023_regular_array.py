@@ -17,7 +17,7 @@ stops = awkward1.layout.Index64(numpy.array([2, 3]))
 listarray = awkward1.layout.ListArray64(starts, stops, regulararray)
 
 def test_type():
-    assert str(awkward1.typeof(regulararray)) == "3 * 2 * var * float64"
+    assert str(awkward1.typeof(regulararray)) == "2 * var * float64"
 
 def test_iteration():
     assert awkward1.tolist(regulararray) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]

@@ -10,10 +10,18 @@
 
 namespace awkward {
   const std::shared_ptr<Fillable> BoolFillable::fromempty(const FillableOptions& options) {
-    std::shared_ptr<Fillable> out(new BoolFillable(options, GrowableBuffer<uint8_t>::empty(options)));
+    std::shared_ptr<Fillable> out = std::make_shared<BoolFillable>(options, GrowableBuffer<uint8_t>::empty(options));
     out.get()->setthat(out);
     return out;
   }
+
+  BoolFillable::BoolFillable(const FillableOptions& options, const GrowableBuffer<uint8_t>& buffer)
+      : options_(options)
+      , buffer_(buffer) { }
+
+  const std::string BoolFillable::classname() const {
+    return "BoolFillable";
+  };
 
   int64_t BoolFillable::length() const {
     return buffer_.length();
@@ -24,13 +32,13 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> BoolFillable::type() const {
-    return std::shared_ptr<Type>(new PrimitiveType(Type::Parameters(), PrimitiveType::boolean));
+    return std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::boolean);
   }
 
-  const std::shared_ptr<Content> BoolFillable::snapshot() const {
+  const std::shared_ptr<Content> BoolFillable::snapshot(const std::shared_ptr<Type>& type) const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(bool) };
-    return std::shared_ptr<Content>(new NumpyArray(Identity::none(), Type::none(), buffer_.ptr(), shape, strides, 0, sizeof(bool), "?"));
+    return std::make_shared<NumpyArray>(Identity::none(), type, buffer_.ptr(), shape, strides, 0, sizeof(bool), "?");
   }
 
   bool BoolFillable::active() const {

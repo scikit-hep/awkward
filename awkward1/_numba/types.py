@@ -28,13 +28,7 @@ def box(tpe, val, c):
     return c.pyapi.unserialize(c.pyapi.serialize_object(tpe.literal_type))
 
 def typeof_literaltype(literal_type):
-    if isinstance(literal_type, awkward1.layout.ArrayType):
-        literal_type = literal_type.type
     return LiteralTypeType(literal_type)
-
-@numba.extending.typeof_impl.register(awkward1.layout.ArrayType)
-def typeof_ArrayType(val, c):
-    return numba.typeof(val.type)
 
 @numba.extending.typeof_impl.register(awkward1.layout.UnknownType)
 def typeof_UnknownType(val, c):
