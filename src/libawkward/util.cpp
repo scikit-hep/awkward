@@ -11,7 +11,7 @@
 
 namespace awkward {
   namespace util {
-    int64_t fieldindex(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key) {
+    int64_t fieldindex(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields) {
       int64_t out = -1;
       if (recordlookup.get() != nullptr) {
         for (size_t i = 0;  i < recordlookup.get()->size();  i++) {
@@ -28,16 +28,16 @@ namespace awkward {
         catch (std::invalid_argument err) {
           throw std::invalid_argument(std::string("key \"") + key + std::string("\" is not in Record"));
         }
-        if (out >= numfields()) {
-          throw std::invalid_argument(std::string("key interpreted as fieldindex ") + key + std::string(" for record with only " + std::to_string(numfields()) + std::string(" fields")));
+        if (out >= numfields) {
+          throw std::invalid_argument(std::string("key interpreted as fieldindex ") + key + std::string(" for record with only " + std::to_string(numfields) + std::string(" fields")));
         }
       }
       return out;
     }
 
-    const std::string key(const std::shared_ptr<RecordLookup>& recordlookup, int64_t fieldindex) {
-      if (fieldindex >= numfields()) {
-        throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields()) + std::string(" fields")));
+    const std::string key(const std::shared_ptr<RecordLookup>& recordlookup, int64_t fieldindex, int64_t numfields) {
+      if (fieldindex >= numfields) {
+        throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields) + std::string(" fields")));
       }
       if (recordlookup.get() != nullptr) {
         return recordlookup.get()->at((size_t)fieldindex);
@@ -47,9 +47,9 @@ namespace awkward {
       }
     }
 
-    bool haskey(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key) {
+    bool haskey(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields) {
       try {
-        fieldindex(recordlookup, key);
+        fieldindex(recordlookup, key, numfields);
       }
       catch (std::invalid_argument err) {
         return false;
@@ -57,13 +57,13 @@ namespace awkward {
       return true;
     }
 
-    const std::vector<std::string> keys(const std::shared_ptr<RecordLookup>& recordlookup) {
+    const std::vector<std::string> keys(const std::shared_ptr<RecordLookup>& recordlookup, int64_t numfields) {
       std::vector<std::string> out;
       if (recordlookup.get() != nullptr) {
         out.insert(out.end(), recordlookup.get()->begin(), recordlookup.get()->end());
       }
       else {
-        int64_t cols = numfields();
+        int64_t cols = numfields;
         for (int64_t j = 0;  j < cols;  j++) {
           out.push_back(std::to_string(j));
         }

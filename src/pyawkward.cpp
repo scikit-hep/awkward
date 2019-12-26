@@ -815,12 +815,6 @@ py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>
           .def("fieldindex", &T::fieldindex)
           .def("key", &T::key)
           .def("haskey", &T::haskey)
-          .def("keyaliases", [](T& self, int64_t fieldindex) -> std::vector<std::string> {
-            return self.keyaliases(fieldindex);
-          })
-          .def("keyaliases", [](T& self, std::string key) -> std::vector<std::string> {
-            return self.keyaliases(key);
-          })
           .def("keys", &T::keys)
   ;
 }
@@ -1080,7 +1074,7 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         for (int64_t i = 0;  i < self.numfields();  i++) {
           pytypes[(size_t)i] = box(self.field(i));
         }
-        std::shared_ptr<util::RecordLookup> recordlookup = self.recordlookup();
+        std::shared_ptr<ak::util::RecordLookup> recordlookup = self.recordlookup();
         if (recordlookup.get() == nullptr) {
           return py::make_tuple(pytypes, py::none(), parameters2dict(self.parameters()));
         }
@@ -1173,12 +1167,6 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("fieldindex", &T::fieldindex)
           .def("key", &T::key)
           .def("haskey", &T::haskey)
-          .def("keyaliases", [](T& self, int64_t fieldindex) -> std::vector<std::string> {
-            return self.keyaliases(fieldindex);
-          })
-          .def("keyaliases", [](T& self, std::string key) -> std::vector<std::string> {
-            return self.keyaliases(key);
-          })
           .def("keys", &T::keys)
   ;
 }
@@ -1286,7 +1274,7 @@ py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> mak
 
 /////////////////////////////////////////////////////////////// RecordArray
 
-ak::RecordArray iterable_to_RecordArray(py::iterable contents, py::object keys, py::object id, py::object type)) {
+ak::RecordArray iterable_to_RecordArray(py::iterable contents, py::object keys, py::object id, py::object type) {
   std::vector<std::shared_ptr<ak::Content>> out;
   for (auto x : contents) {
     out.push_back(unbox_content(x));
@@ -1298,7 +1286,7 @@ ak::RecordArray iterable_to_RecordArray(py::iterable contents, py::object keys, 
     return ak::RecordArray(unbox_id_none(id), unbox_type_none(type), out, std::shared_ptr<ak::util::RecordLookup>(nullptr));
   }
   else {
-    std::shared_ptr<ak::util::RecordLookup> recordlookup = std::make_shared<ak:util::RecordLookup>();
+    std::shared_ptr<ak::util::RecordLookup> recordlookup = std::make_shared<ak::util::RecordLookup>();
     for (auto x : keys.cast<py::iterable>()) {
       recordlookup.get()->push_back(x.cast<std::string>());
     }
@@ -1324,7 +1312,7 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         }
         return ak::RecordArray(unbox_id_none(id), unbox_type_none(type), out, recordlookup);
       }), py::arg("contents"), py::arg("id") = py::none(), py::arg("type") = py::none())
-      .def(py::init(iterable_to_RecordArray), py::arg("contents"), py::arg("keys") = py::none(), py::arg("id") = py::none(), py::arg("type") = py::none())
+      .def(py::init(&iterable_to_RecordArray), py::arg("contents"), py::arg("keys") = py::none(), py::arg("id") = py::none(), py::arg("type") = py::none())
       .def(py::init([](int64_t length, bool istuple, py::object id, py::object type) -> ak::RecordArray {
         return ak::RecordArray(unbox_id_none(id), unbox_type_none(type), length, istuple);
       }), py::arg("length"), py::arg("istuple") = false, py::arg("id") = py::none(), py::arg("type") = py::none())
@@ -1396,12 +1384,6 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
       .def("fieldindex", &ak::Record::fieldindex)
       .def("key", &ak::Record::key)
       .def("haskey", &ak::Record::haskey)
-      .def("keyaliases", [](ak::Record& self, int64_t fieldindex) -> std::vector<std::string> {
-        return self.keyaliases(fieldindex);
-      })
-      .def("keyaliases", [](ak::Record& self, std::string key) -> std::vector<std::string> {
-        return self.keyaliases(key);
-      })
       .def("keys", &ak::Record::keys)
       .def("field", [](ak::Record& self, int64_t fieldindex) -> py::object {
         return box(self.field(fieldindex));

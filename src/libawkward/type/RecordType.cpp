@@ -67,7 +67,7 @@ namespace awkward {
       }
     }
     else {
-      if (lookup_.get() != nullptr) {
+      if (recordlookup_.get() != nullptr) {
         out << "struct[[";
         for (size_t j = 0;  j < types_.size();  j++) {
           if (j != 0) {
@@ -145,19 +145,19 @@ namespace awkward {
   }
 
   int64_t RecordType::fieldindex(const std::string& key) const {
-    return util::fieldindex(recordlookup_, key);
+    return util::fieldindex(recordlookup_, key, numfields());
   }
 
   const std::string RecordType::key(int64_t fieldindex) const {
-    return util::key(recordlookup_, fieldindex);
+    return util::key(recordlookup_, fieldindex, numfields());
   }
 
   bool RecordType::haskey(const std::string& key) const {
-    return util::haskey(recordlookup_, key);
+    return util::haskey(recordlookup_, key, numfields());
   }
 
   const std::vector<std::string> RecordType::keys() const {
-    return util::keys(recordlookup_);
+    return util::keys(recordlookup_, numfields());
   }
 
   const std::shared_ptr<Type> RecordType::field(int64_t fieldindex) const {
@@ -198,7 +198,7 @@ namespace awkward {
 
   void RecordType::append(const std::shared_ptr<Type>& type) {
     if (!istuple()) {
-      reverselookup_.get()->push_back(std::to_string(types_.size()));
+      recordlookup_.get()->push_back(std::to_string(types_.size()));
     }
     types_.push_back(type);
   }

@@ -74,14 +74,13 @@ namespace awkward {
       std::shared_ptr<util::RecordLookup> recordlookup = std::make_shared<util::RecordLookup>();
       for (size_t i = 0;  i < contents_.size();  i++) {
         types.push_back(contents_[i].get()->type());
-        (*lookup.get())[keys_[i]] = i;
-        reverselookup.get()->push_back(keys_[i]);
+        recordlookup.get()->push_back(keys_[i]);
       }
       Type::Parameters parameters;
       if (nameptr_ != nullptr) {
         parameters["__class__"] = util::quote(name_, true);
       }
-      return std::make_shared<RecordType>(parameters, types, lookup, reverselookup);
+      return std::make_shared<RecordType>(parameters, types, recordlookup);
     }
   }
 
@@ -100,15 +99,14 @@ namespace awkward {
       else {
         contents.push_back(contents_[i].get()->snapshot(raw->field((int64_t)i)));
       }
-      (*lookup.get())[keys_[i]] = i;
-      reverselookup.get()->push_back(keys_[i]);
+      recordlookup.get()->push_back(keys_[i]);
     }
 
     if (contents.empty()) {
       return std::make_shared<RecordArray>(Identity::none(), type, length_, false);
     }
     else {
-      return std::make_shared<RecordArray>(Identity::none(), type, contents, lookup, reverselookup);
+      return std::make_shared<RecordArray>(Identity::none(), type, contents, recordlookup);
     }
   }
 

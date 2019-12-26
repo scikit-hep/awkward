@@ -355,19 +355,19 @@ namespace awkward {
   }
 
   int64_t RecordArray::fieldindex(const std::string& key) const {
-    return util::fieldindex(recordlookup_, key);
+    return util::fieldindex(recordlookup_, key, numfields());
   }
 
   const std::string RecordArray::key(int64_t fieldindex) const {
-    return util::key(recordlookup_, fieldindex);
+    return util::key(recordlookup_, fieldindex, numfields());
   }
 
   bool RecordArray::haskey(const std::string& key) const {
-    return util::haskey(recordlookup_, key);
+    return util::haskey(recordlookup_, key, numfields());
   }
 
   const std::vector<std::string> RecordArray::keys() const {
-    return util::keys(recordlookup_);
+    return util::keys(recordlookup_, numfields());
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
