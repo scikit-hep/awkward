@@ -11,7 +11,7 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(val, c):
-    return RecordArrayType([numba.typeof(x) for x in val.fields()], tuple(val.keys()), numba.typeof(val.id), numba.none if val.isbare else numba.typeof(val.type))
+    return RecordArrayType([numba.typeof(x) for x in val.fields()], None if val.istuple else tuple(val.keys()), numba.typeof(val.id), numba.none if val.isbare else numba.typeof(val.type))
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
 def typeof(val, c):

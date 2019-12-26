@@ -56,7 +56,7 @@ def typeof_UnionType(val, c):
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordType)
 def typeof_RecordType(val, c):
-    return RecordTypeType([numba.typeof(x) for x in val.types], val.keys, val.parameters)
+    return RecordTypeType([numba.typeof(x) for x in val.types], None if val.istuple else tuple(val.keys()), val.parameters)
 
 class TypeType(numba.types.Type):
     pass
@@ -306,14 +306,11 @@ def box_RecordType(tpe, val, c):
         c.pyapi.tuple_setitem(types_obj, i, x_obj)
     parameters_obj = box_parameters(tpe.parameters, c)
 
-    if tpe.keys is None:
-        out = c.pyapi.call_function_objargs(class_obj, (types_obj, parameters_obj))
-    else:
-        keys_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.keys))
-        out = c.pyapi.call_function_objargs(class_obj, (types_obj, keys_obj, parameters_obj))
-        c.pyapi.decref(keys_obj)
+    keys_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.keys))
+    out = c.pyapi.call_function_objargs(class_obj, (types_obj, keys_obj, parameters_obj))
 
     c.pyapi.decref(class_obj)
     c.pyapi.decref(types_obj)
+    c.pyapi.decref(keys_obj)
     c.pyapi.decref(parameters_obj)
     return out

@@ -1035,6 +1035,7 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
       .def("__getitem__", [](ak::RecordType& self, std::string key) -> py::object {
         return box(self.field(key));
       })
+      .def_property_readonly("istuple", &ak::RecordType::istuple)
       .def_property_readonly("types", [](ak::RecordType& self) -> py::object {
         std::vector<std::shared_ptr<ak::Type>> types = self.types();
         py::tuple pytypes(types.size());
@@ -1094,10 +1095,6 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
           return py::make_tuple(pytypes, pyrecordlookup, parameters2dict(self.parameters()));
         }
       }, [](py::tuple state) {
-        std::vector<std::shared_ptr<ak::Type>> pytypes;
-        for (auto x : state[1]) {
-          pytypes.push_back(unbox_type(x));
-        }
         return iterable_to_RecordType(state[0].cast<py::iterable>(), state[1], state[2]);
       }))
   );

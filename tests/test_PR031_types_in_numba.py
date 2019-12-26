@@ -14,23 +14,6 @@ import awkward1
 if sys.version_info[0] < 3:
     pytest.skip("pybind11 pickle, and hence numba serialization with types, only works in Python 3", allow_module_level=True)
 
-def test_from_lookup():
-    r = awkward1.layout.RecordArray.from_lookup([awkward1.layout.EmptyArray(), awkward1.layout.EmptyArray()], {"one": 0, "two": 1})
-    assert r.lookup == {"one": 0, "two": 1}
-    assert r.reverselookup == ["one", "two"]
-
-    r = awkward1.layout.RecordArray.from_lookup([awkward1.layout.EmptyArray(), awkward1.layout.EmptyArray()], {"one": 0, "two": 1}, ["uno", "dos"])
-    assert r.lookup == {"one": 0, "two": 1}
-    assert r.reverselookup == ["uno", "dos"]
-
-    r = awkward1.layout.RecordType.from_lookup([awkward1.layout.UnknownType(), awkward1.layout.UnknownType()], {"one": 0, "two": 1})
-    assert r.lookup == {"one": 0, "two": 1}
-    assert r.reverselookup == ["one", "two"]
-
-    r = awkward1.layout.RecordType.from_lookup([awkward1.layout.UnknownType(), awkward1.layout.UnknownType()], {"one": 0, "two": 1}, ["uno", "dos"])
-    assert r.lookup == {"one": 0, "two": 1}
-    assert r.reverselookup == ["uno", "dos"]
-
 def test_pickle():
     t = awkward1.layout.UnknownType(); assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.layout.PrimitiveType("int32"); assert pickle.loads(pickle.dumps(t)) == t
