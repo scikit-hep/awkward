@@ -12,15 +12,11 @@
 namespace awkward {
   class RecordType: public Type {
   public:
-    typedef std::unordered_map<std::string, size_t> Lookup;
-    typedef std::vector<std::string> ReverseLookup;
-
-    RecordType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup);
+    RecordType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup);
     RecordType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types);
 
     const std::vector<std::shared_ptr<Type>> types() const;
-    const std::shared_ptr<Lookup> lookup() const;
-    const std::shared_ptr<ReverseLookup> reverselookup() const;
+    const std::shared_ptr<util::RecordLookup> recordlookup() const;
     bool istuple() const;
 
     std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
@@ -45,8 +41,7 @@ namespace awkward {
 
   private:
     std::vector<std::shared_ptr<Type>> types_;
-    std::shared_ptr<Lookup> lookup_;
-    std::shared_ptr<ReverseLookup> reverselookup_;
+    std::shared_ptr<util::RecordLookup> recordlookup_;
   };
 }
 

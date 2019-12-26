@@ -14,16 +14,12 @@
 namespace awkward {
   class RecordArray: public Content {
   public:
-    typedef std::unordered_map<std::string, size_t> Lookup;
-    typedef std::vector<std::string> ReverseLookup;
-
-    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup);
+    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
     RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents);
     RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, int64_t length, bool istuple);
 
     const std::vector<std::shared_ptr<Content>> contents() const;
-    const std::shared_ptr<Lookup> lookup() const;
-    const std::shared_ptr<ReverseLookup> reverselookup() const;
+    const std::shared_ptr<util::RecordLookup> recordlookup() const;
     bool istuple() const;
 
     const std::string classname() const override;
@@ -75,8 +71,7 @@ namespace awkward {
 
   private:
     std::vector<std::shared_ptr<Content>> contents_;
-    std::shared_ptr<Lookup> lookup_;
-    std::shared_ptr<ReverseLookup> reverselookup_;
+    std::shared_ptr<util::RecordLookup> recordlookup_;
     int64_t length_;
   };
 }

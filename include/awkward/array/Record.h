@@ -12,8 +12,7 @@ namespace awkward {
     const std::shared_ptr<Content> array() const;
     int64_t at() const;
     const std::vector<std::shared_ptr<Content>> contents() const;
-    const std::shared_ptr<RecordArray::Lookup> lookup() const;
-    const std::shared_ptr<RecordArray::ReverseLookup> reverselookup() const;
+    const std::shared_ptr<util::RecordLookup> recordlookup() const;
     bool istuple() const;
 
     bool isscalar() const override;

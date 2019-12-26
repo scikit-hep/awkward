@@ -12,6 +12,8 @@ namespace awkward {
   class Identity;
 
   namespace util {
+    typedef std::vector<std::string> RecordLookup;
+
     void handle_error(const struct Error& err, const std::string& classname, const Identity* id);
 
     template<typename T>
