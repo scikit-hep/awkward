@@ -56,7 +56,7 @@ def typeof_UnionType(val, c):
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordType)
 def typeof_RecordType(val, c):
-    return RecordTypeType([numba.typeof(x) for x in val.types], val.lookup, val.reverselookup, val.parameters)
+    return RecordTypeType([numba.typeof(x) for x in val.types], val.keys, val.parameters)
 
 class TypeType(numba.types.Type):
     pass
@@ -97,11 +97,10 @@ class UnionTypeType(TypeType):
         self.parameters = parameters
 
 class RecordTypeType(TypeType):
-    def __init__(self, typetpes, lookup, reverselookup, parameters):
-        super(RecordTypeType, self).__init__(name="ak::RecordTypeType([{0}], {1}, {2}, parameters={3})".format(", ".join(x.name for x in typetpes), repr(lookup), repr(reverselookup), json.dumps(parameters)))
+    def __init__(self, typetpes, keys, parameters):
+        super(RecordTypeType, self).__init__(name="ak::RecordTypeType([{0}], {1}, parameters={2})".format(", ".join(x.name for x in typetpes), repr(keys), json.dumps(parameters)))
         self.typetpes = typetpes
-        self.lookup = lookup
-        self.reverselookup = reverselookup
+        self.keys = keys
         self.parameters = parameters
 
 @numba.extending.register_model(UnknownTypeType)
@@ -307,33 +306,12 @@ def box_RecordType(tpe, val, c):
         c.pyapi.tuple_setitem(types_obj, i, x_obj)
     parameters_obj = box_parameters(tpe.parameters, c)
 
-    if tpe.lookup is None:
+    if tpe.keys is None:
         out = c.pyapi.call_function_objargs(class_obj, (types_obj, parameters_obj))
-
     else:
-        from_lookup_obj = c.pyapi.object_getattr_string(class_obj, "from_lookup")
-        if tpe.lookup is None:
-            lookup_obj = c.pyapi.make_none()
-        else:
-            lookup_obj = c.pyapi.dict_new(len(tpe.lookup))
-            for key, fieldindex in tpe.lookup.items():
-                key_obj = c.pyapi.unserialize(c.pyapi.serialize_object(key))
-                fieldindex_obj = c.pyapi.unserialize(c.pyapi.serialize_object(fieldindex))
-                c.pyapi.dict_setitem(lookup_obj, key_obj, fieldindex_obj)
-                c.pyapi.decref(key_obj)
-                c.pyapi.decref(fieldindex_obj)
-        if tpe.reverselookup is None:
-            reverselookup_obj = c.pyapi.make_none()
-        else:
-            reverselookup_obj = c.pyapi.list_new(c.context.get_constant(numba.intp, 0))
-            for key in tpe.reverselookup:
-                key_obj = c.pyapi.unserialize(c.pyapi.serialize_object(key))
-                c.pyapi.list_append(reverselookup_obj, key_obj)
-                c.pyapi.decref(key_obj)
-        out = c.pyapi.call_function_objargs(from_lookup_obj, (types_obj, lookup_obj, reverselookup_obj, parameters_obj))
-        c.pyapi.decref(from_lookup_obj)
-        c.pyapi.decref(lookup_obj)
-        c.pyapi.decref(reverselookup_obj)
+        keys_obj = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.keys))
+        out = c.pyapi.call_function_objargs(class_obj, (types_obj, keys_obj, parameters_obj))
+        c.pyapi.decref(keys_obj)
 
     c.pyapi.decref(class_obj)
     c.pyapi.decref(types_obj)

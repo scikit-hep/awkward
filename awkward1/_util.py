@@ -22,23 +22,26 @@ def wrap(content, namespace):
     else:
         return content
 
-def field2index(lookup, numfields, key):
-    if isinstance(key, (int, numbers.Integral, numpy.integer)):
-        attempt = key
+def key2index(keys, key):
+    if keys is None:
+        attempt = None
     else:
-        attempt = None if lookup is None else lookup.get(key)
+        try:
+            attempt = keys.index(key)
+        except ValueError:
+            attempt = None
 
     if attempt is None:
-        m = field2index._pattern.match(key)
+        m = key2index._pattern.match(key)
         if m is not None:
             attempt = m.group(0)
 
-    if attempt is None or attempt >= numfields:
-        raise ValueError("key {0} not found in Record".format(repr(key)))
+    if attempt is None:
+        raise ValueError("key {0} not found in record".format(repr(key)))
     else:
         return attempt
 
-field2index._pattern = re.compile(r"^[1-9][0-9]*$")
+key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
 def minimally_touching_string(limit_length, layout, namespace):
     import awkward1.layout
