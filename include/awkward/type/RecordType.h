@@ -36,8 +36,8 @@ namespace awkward {
     const std::vector<std::pair<std::string, std::shared_ptr<Type>>> fielditems() const;
     const std::shared_ptr<Type> astuple() const;
 
+    void append(const std::shared_ptr<Type>& type, const std::string& key);
     void append(const std::shared_ptr<Type>& type);
-    void setkey(int64_t fieldindex, const std::string& key);
 
   private:
     std::vector<std::shared_ptr<Type>> types_;

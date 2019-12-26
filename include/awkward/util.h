@@ -14,6 +14,7 @@ namespace awkward {
 
   namespace util {
     typedef std::vector<std::string> RecordLookup;
+    std::shared_ptr<RecordLookup> init_recordlookup(int64_t numfields);
     int64_t fieldindex(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);
     const std::string key(const std::shared_ptr<RecordLookup>& recordlookup, int64_t fieldindex, int64_t numfields);
     bool haskey(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);

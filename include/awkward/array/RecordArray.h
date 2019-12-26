@@ -56,7 +56,6 @@ namespace awkward {
 
     void append(const std::shared_ptr<Content>& content, const std::string& key);
     void append(const std::shared_ptr<Content>& content);
-    void setkey(int64_t fieldindex, const std::string& key);
 
   protected:
     void checktype() const override;

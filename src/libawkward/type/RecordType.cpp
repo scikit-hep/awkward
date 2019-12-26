@@ -196,20 +196,21 @@ namespace awkward {
     return std::make_shared<RecordType>(parameters_, types_, std::shared_ptr<util::RecordLookup>(nullptr));
   }
 
-  void RecordType::append(const std::shared_ptr<Type>& type) {
-    if (!istuple()) {
-      recordlookup_.get()->push_back(std::to_string(types_.size()));
+  void RecordType::append(const std::shared_ptr<Type>& type, const std::string& key) {
+    if (recordlookup_.get() == nullptr) {
+      recordlookup_ = util::init_recordlookup(numfields());
     }
     types_.push_back(type);
+    recordlookup_.get()->push_back(key);
   }
 
-  void RecordType::setkey(int64_t fieldindex, const std::string& fieldname) {
-    if (istuple()) {
-      recordlookup_ = std::make_shared<util::RecordLookup>();
-      for (size_t j = 0;  j < types_.size();  j++) {
-        recordlookup_.get()->push_back(std::to_string(j));
-      }
+  void RecordType::append(const std::shared_ptr<Type>& type) {
+    if (recordlookup_.get() == nullptr) {
+      types_.push_back(type);
     }
-    (*recordlookup_.get())[(size_t)fieldindex] = fieldname;
+    else {
+      append(type, std::to_string(numfields()));
+    }
   }
+
 }

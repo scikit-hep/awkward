@@ -1068,6 +1068,14 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         }
         return out;
       })
+      .def("append", [](ak::RecordType& self, py::object type, py::object key) -> void {
+        if (key.is(py::none())) {
+          self.append(unbox_type(type));
+        }
+        else {
+          self.append(unbox_type(type), key.cast<std::string>());
+        }
+      }, py::arg("type"), py::arg("key") = py::none())
       .def_property("parameters", &getparameters<ak::RecordType>, &setparameters<ak::RecordType>)
       .def(py::pickle([](const ak::RecordType& self) {
         py::tuple pytypes((size_t)self.numfields());
@@ -1355,8 +1363,7 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         else {
           self.append(unbox_content(content), key.cast<std::string>());
         }
-      }, py::arg("content"), py::arg("key") = py::none())
-      .def("setkey", &ak::RecordArray::setkey)
+      }, py::arg("type"), py::arg("key") = py::none())
 
   );
 }

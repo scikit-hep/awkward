@@ -413,36 +413,30 @@ namespace awkward {
   }
 
   void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {
-    size_t j = contents_.size();
-    append(content);
-    setkey(j, key);
+    if (recordlookup_.get() == nullptr) {
+      recordlookup_ = util::init_recordlookup(numfields());
+    }
+    contents_.push_back(content);
+    recordlookup_.get()->push_back(key);
     if (type_.get() != nullptr) {
       if (RecordType* raw = dynamic_cast<RecordType*>(type_.get())) {
-        raw->setkey(j, key);
+        raw->append(content.get()->type(), key);
       }
     }
   }
 
   void RecordArray::append(const std::shared_ptr<Content>& content) {
-    if (!istuple()) {
-      recordlookup_.get()->push_back(std::to_string(contents_.size()));
+    if (recordlookup_.get() == nullptr) {
+      contents_.push_back(content);
     }
-    contents_.push_back(content);
+    else {
+      append(content, std::to_string(numfields()));
+    }
     if (type_.get() != nullptr) {
       if (RecordType* raw = dynamic_cast<RecordType*>(type_.get())) {
         raw->append(content.get()->type());
       }
     }
-  }
-
-  void RecordArray::setkey(int64_t fieldindex, const std::string& fieldname) {
-    if (istuple()) {
-      recordlookup_ = std::make_shared<util::RecordLookup>();
-      for (size_t j = 0;  j < contents_.size();  j++) {
-        recordlookup_.get()->push_back(std::to_string(j));
-      }
-    }
-    (*recordlookup_.get())[(size_t)fieldindex] = fieldname;
   }
 
   void RecordArray::checktype() const {

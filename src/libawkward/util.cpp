@@ -11,6 +11,14 @@
 
 namespace awkward {
   namespace util {
+    std::shared_ptr<RecordLookup> init_recordlookup(int64_t numfields) {
+      std::shared_ptr<RecordLookup> out = std::make_shared<RecordLookup>();
+      for (int64_t i = 0;  i < numfields;  i++) {
+        out.get()->push_back(std::to_string(i));
+      }
+      return out;
+    }
+
     int64_t fieldindex(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields) {
       int64_t out = -1;
       if (recordlookup.get() != nullptr) {
