@@ -57,14 +57,6 @@ namespace awkward {
     throw std::invalid_argument("type contains no Records");
   }
 
-  const std::vector<std::string> UnknownType::keyaliases(int64_t fieldindex) const {
-    throw std::invalid_argument("type contains no Records");
-  }
-
-  const std::vector<std::string> UnknownType::keyaliases(const std::string& key) const {
-    throw std::invalid_argument("type contains no Records");
-  }
-
   const std::vector<std::string> UnknownType::keys() const {
     throw std::invalid_argument("type contains no Records");
   }

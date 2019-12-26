@@ -51,14 +51,6 @@ namespace awkward {
     return type_.get()->haskey(key);
   }
 
-  const std::vector<std::string> ArrayType::keyaliases(int64_t fieldindex) const {
-    return type_.get()->keyaliases(fieldindex);
-  }
-
-  const std::vector<std::string> ArrayType::keyaliases(const std::string& key) const {
-    return type_.get()->keyaliases(key);
-  }
-
   const std::vector<std::string> ArrayType::keys() const {
     return type_.get()->keys();
   }

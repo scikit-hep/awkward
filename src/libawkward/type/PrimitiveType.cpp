@@ -76,14 +76,6 @@ namespace awkward {
     throw std::invalid_argument("type contains no Records");
   }
 
-  const std::vector<std::string> PrimitiveType::keyaliases(int64_t fieldindex) const {
-    throw std::invalid_argument("type contains no Records");
-  }
-
-  const std::vector<std::string> PrimitiveType::keyaliases(const std::string& key) const {
-    throw std::invalid_argument("type contains no Records");
-  }
-
   const std::vector<std::string> PrimitiveType::keys() const {
     throw std::invalid_argument("type contains no Records");
   }

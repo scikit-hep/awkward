@@ -13,6 +13,10 @@ namespace awkward {
 
   namespace util {
     typedef std::vector<std::string> RecordLookup;
+    int64_t fieldindex(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key);
+    const std::string key(const std::shared_ptr<RecordLookup>& recordlookup, int64_t fieldindex);
+    bool haskey(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key);
+    const std::vector<std::string> keys(const std::shared_ptr<RecordLookup>& recordlookup);
 
     void handle_error(const struct Error& err, const std::string& classname, const Identity* id);
 

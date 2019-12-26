@@ -46,8 +46,6 @@ namespace awkward {
     int64_t fieldindex(const std::string& key) const override;
     const std::string key(int64_t fieldindex) const override;
     bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keyaliases(int64_t fieldindex) const override;
-    const std::vector<std::string> keyaliases(const std::string& key) const override;
     const std::vector<std::string> keys() const override;
 
     const std::shared_ptr<Content> field(int64_t fieldindex) const;

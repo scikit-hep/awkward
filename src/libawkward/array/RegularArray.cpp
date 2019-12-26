@@ -242,14 +242,6 @@ namespace awkward {
     return content_.get()->haskey(key);
   }
 
-  const std::vector<std::string> RegularArray::keyaliases(int64_t fieldindex) const {
-    return content_.get()->keyaliases(fieldindex);
-  }
-
-  const std::vector<std::string> RegularArray::keyaliases(const std::string& key) const {
-    return content_.get()->keyaliases(key);
-  }
-
   const std::vector<std::string> RegularArray::keys() const {
     return content_.get()->keys();
   }
