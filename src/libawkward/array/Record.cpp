@@ -35,16 +35,12 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<RecordArray::Lookup> Record::lookup() const {
-    return array_.lookup();
-  }
-
-  const std::shared_ptr<RecordArray::ReverseLookup> Record::reverselookup() const {
-    return array_.reverselookup();
+  const std::shared_ptr<util::RecordLookup> Record::recordlookup() const {
+    return array_.recordlookup();
   }
 
   bool Record::istuple() const {
-    return lookup().get() == nullptr;
+    return array_.istuple();
   }
 
   bool Record::isscalar() const {
@@ -91,7 +87,7 @@ namespace awkward {
         return std::make_shared<Record>(RecordArray(array_.id(), type, array_.length(), array_.istuple()), at_);
       }
       else {
-        return std::make_shared<Record>(RecordArray(array_.id(), type, array_.contents(), array_.lookup(), array_.reverselookup()), at_);
+        return std::make_shared<Record>(RecordArray(array_.id(), type, array_.contents(), array_.recordlookup()), at_);
       }
     }
     else {
@@ -101,7 +97,7 @@ namespace awkward {
         return std::make_shared<Record>(RecordArray(raw->id(), raw->type(), raw->length(), raw->istuple()), at_);
       }
       else {
-        return std::make_shared<Record>(RecordArray(raw->id(), raw->type(), raw->contents(), raw->lookup(), raw->reverselookup()), at_);
+        return std::make_shared<Record>(RecordArray(raw->id(), raw->type(), raw->contents(), raw->recordlookup()), at_);
       }
     }
   }
@@ -116,9 +112,9 @@ namespace awkward {
 
   void Record::tojson_part(ToJson& builder) const {
     size_t cols = (size_t)numfields();
-    std::shared_ptr<RecordArray::ReverseLookup> keys = array_.reverselookup();
+    std::shared_ptr<util::RecordLookup> keys = array_.recordlookup();
     if (istuple()) {
-      keys = std::make_shared<RecordArray::ReverseLookup>();
+      keys = std::make_shared<util::RecordLookup>();
       for (size_t j = 0;  j < cols;  j++) {
         keys.get()->push_back(std::to_string(j));
       }
@@ -213,14 +209,6 @@ namespace awkward {
     return array_.haskey(key);
   }
 
-  const std::vector<std::string> Record::keyaliases(int64_t fieldindex) const {
-    return array_.keyaliases(fieldindex);
-  }
-
-  const std::vector<std::string> Record::keyaliases(const std::string& key) const {
-    return array_.keyaliases(key);
-  }
-
   const std::vector<std::string> Record::keys() const {
     return array_.keys();
   }
@@ -244,7 +232,7 @@ namespace awkward {
 
   const std::vector<std::pair<std::string, std::shared_ptr<Content>>> Record::fielditems() const {
     std::vector<std::pair<std::string, std::shared_ptr<Content>>> out;
-    std::shared_ptr<RecordArray::ReverseLookup> keys = array_.reverselookup();
+    std::shared_ptr<util::RecordLookup> keys = array_.recordlookup();
     if (istuple()) {
       int64_t cols = numfields();
       for (int64_t j = 0;  j < cols;  j++) {

@@ -12,8 +12,7 @@ namespace awkward {
     const std::shared_ptr<Content> array() const;
     int64_t at() const;
     const std::vector<std::shared_ptr<Content>> contents() const;
-    const std::shared_ptr<RecordArray::Lookup> lookup() const;
-    const std::shared_ptr<RecordArray::ReverseLookup> reverselookup() const;
+    const std::shared_ptr<util::RecordLookup> recordlookup() const;
     bool istuple() const;
 
     bool isscalar() const override;
@@ -43,8 +42,6 @@ namespace awkward {
     int64_t fieldindex(const std::string& key) const override;
     const std::string key(int64_t fieldindex) const override;
     bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keyaliases(int64_t fieldindex) const override;
-    const std::vector<std::string> keyaliases(const std::string& key) const override;
     const std::vector<std::string> keys() const override;
 
     const std::shared_ptr<Content> field(int64_t fieldindex) const;

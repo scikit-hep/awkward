@@ -347,16 +347,6 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::vector<std::string> ListOffsetArrayOf<T>::keyaliases(int64_t fieldindex) const {
-    return content_.get()->keyaliases(fieldindex);
-  }
-
-  template <typename T>
-  const std::vector<std::string> ListOffsetArrayOf<T>::keyaliases(const std::string& key) const {
-    return content_.get()->keyaliases(key);
-  }
-
-  template <typename T>
   const std::vector<std::string> ListOffsetArrayOf<T>::keys() const {
     return content_.get()->keys();
   }

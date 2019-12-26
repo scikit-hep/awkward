@@ -17,19 +17,20 @@ def test_basic():
     recordarray.append(content1, "one")
     recordarray.append(listoffsetarray, "two")
     recordarray.append(content2)
-    recordarray.setkey(0, "wonky")
+    recordarray.append(content1, "wonky")
     assert awkward1.tolist(recordarray.field(0)) == [1, 2, 3, 4, 5]
     assert awkward1.tolist(recordarray.field("two")) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert awkward1.tolist(recordarray.field("wonky")) == [1, 2, 3, 4, 5]
 
     str(recordarray)
-    assert awkward1.tojson(recordarray) == '[{"wonky":1,"two":[1.1,2.2,3.3],"2":1.1},{"wonky":2,"two":[],"2":2.2},{"wonky":3,"two":[4.4,5.5],"2":3.3},{"wonky":4,"two":[6.6],"2":4.4},{"wonky":5,"two":[7.7,8.8,9.9],"2":5.5}]'
+    assert awkward1.tojson(recordarray) == '[{"one":1,"two":[1.1,2.2,3.3],"2":1.1,"wonky":1},{"one":2,"two":[],"2":2.2,"wonky":2},{"one":3,"two":[4.4,5.5],"2":3.3,"wonky":3},{"one":4,"two":[6.6],"2":4.4,"wonky":4},{"one":5,"two":[7.7,8.8,9.9],"2":5.5,"wonky":5}]'
 
     assert len(recordarray) == 5
-    assert recordarray.key(0) == "wonky"
+    assert recordarray.key(0) == "one"
     assert recordarray.key(1) == "two"
     assert recordarray.key(2) == "2"
-    assert recordarray.fieldindex("wonky") == 0
+    assert recordarray.key(3) == "wonky"
+    assert recordarray.fieldindex("wonky") == 3
     assert recordarray.fieldindex("one") == 0
     assert recordarray.fieldindex("0") == 0
     assert recordarray.fieldindex("two") == 1
@@ -41,30 +42,20 @@ def test_basic():
     assert recordarray.haskey("two")
     assert recordarray.haskey("1")
     assert recordarray.haskey("2")
-    assert set(recordarray.keyaliases(0)) == set(["wonky", "one", "0"])
-    assert set(recordarray.keyaliases("wonky")) == set(["wonky", "one", "0"])
-    assert set(recordarray.keyaliases("one")) == set(["wonky", "one", "0"])
-    assert set(recordarray.keyaliases("0")) == set(["wonky", "one", "0"])
-    assert set(recordarray.keyaliases(1)) == set(["two", "1"])
-    assert set(recordarray.keyaliases("two")) == set(["two", "1"])
-    assert set(recordarray.keyaliases("1")) == set(["two", "1"])
-    assert set(recordarray.keyaliases(2)) == set(["2"])
-    assert set(recordarray.keyaliases("2")) == set(["2"])
 
-    assert recordarray.keys() == ["wonky", "two", "2"]
-    assert [awkward1.tolist(x) for x in recordarray.fields()] == [[1, 2, 3, 4, 5], [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]]
+    assert recordarray.keys() == ["one", "two", "2", "wonky"]
+    assert [awkward1.tolist(x) for x in recordarray.fields()] == [[1, 2, 3, 4, 5], [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], [1, 2, 3, 4, 5]]
     pairs = recordarray.fielditems()
-    assert pairs[0][0] == "wonky"
+    assert pairs[0][0] == "one"
     assert pairs[1][0] == "two"
     assert pairs[2][0] == "2"
+    assert pairs[3][0] == "wonky"
     assert awkward1.tolist(pairs[0][1]) == [1, 2, 3, 4, 5]
     assert awkward1.tolist(pairs[1][1]) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert awkward1.tolist(pairs[2][1]) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+    assert awkward1.tolist(pairs[3][1]) == [1, 2, 3, 4, 5]
 
-    assert awkward1.tojson(recordarray.astuple) == '[{"0":1,"1":[1.1,2.2,3.3],"2":1.1},{"0":2,"1":[],"2":2.2},{"0":3,"1":[4.4,5.5],"2":3.3},{"0":4,"1":[6.6],"2":4.4},{"0":5,"1":[7.7,8.8,9.9],"2":5.5}]'
-
-    assert recordarray.lookup == {"one": 0, "two": 1, "wonky": 0}
-    assert recordarray.astuple.lookup is None
+    assert awkward1.tojson(recordarray.astuple) == '[{"0":1,"1":[1.1,2.2,3.3],"2":1.1,"3":1},{"0":2,"1":[],"2":2.2,"3":2},{"0":3,"1":[4.4,5.5],"2":3.3,"3":3},{"0":4,"1":[6.6],"2":4.4,"3":4},{"0":5,"1":[7.7,8.8,9.9],"2":5.5,"3":5}]'
 
 def test_scalar_record():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
@@ -99,7 +90,6 @@ def test_type():
     recordarray.append(content1)
     recordarray.append(listoffsetarray)
     assert str(awkward1.typeof(recordarray)) == '(int64, var * float64)'
-    assert recordarray.lookup is None
 
     assert awkward1.typeof(recordarray) == awkward1.layout.RecordType((
         awkward1.layout.PrimitiveType("int64"),
@@ -108,10 +98,10 @@ def test_type():
         (awkward1.layout.PrimitiveType("int64"),
         awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))))
 
-    recordarray.setkey(0, "one")
-    recordarray.setkey(1, "two")
+    recordarray = awkward1.layout.RecordArray(0, True)
+    recordarray.append(content1, "one")
+    recordarray.append(listoffsetarray, "two")
     assert str(awkward1.typeof(recordarray)) in ('{"one": int64, "two": var * float64}', '{"two": var * float64, "one": int64}')
-    assert recordarray.lookup == {"one": 0, "two": 1}
 
     assert str(awkward1.layout.RecordType(
         (awkward1.layout.PrimitiveType("int32"),

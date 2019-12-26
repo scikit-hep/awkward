@@ -71,18 +71,16 @@ namespace awkward {
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
-      std::shared_ptr<RecordType::Lookup> lookup = std::make_shared<RecordType::Lookup>();
-      std::shared_ptr<RecordType::ReverseLookup> reverselookup = std::make_shared<RecordType::ReverseLookup>();
+      std::shared_ptr<util::RecordLookup> recordlookup = std::make_shared<util::RecordLookup>();
       for (size_t i = 0;  i < contents_.size();  i++) {
         types.push_back(contents_[i].get()->type());
-        (*lookup.get())[keys_[i]] = i;
-        reverselookup.get()->push_back(keys_[i]);
+        recordlookup.get()->push_back(keys_[i]);
       }
       Type::Parameters parameters;
       if (nameptr_ != nullptr) {
         parameters["__class__"] = util::quote(name_, true);
       }
-      return std::make_shared<RecordType>(parameters, types, lookup, reverselookup);
+      return std::make_shared<RecordType>(parameters, types, recordlookup);
     }
   }
 
@@ -93,8 +91,7 @@ namespace awkward {
 
     RecordType* raw = dynamic_cast<RecordType*>(type.get());
     std::vector<std::shared_ptr<Content>> contents;
-    std::shared_ptr<RecordType::Lookup> lookup = std::make_shared<RecordType::Lookup>();
-    std::shared_ptr<RecordType::ReverseLookup> reverselookup = std::make_shared<RecordType::ReverseLookup>();
+    std::shared_ptr<util::RecordLookup> recordlookup = std::make_shared<util::RecordLookup>();
     for (size_t i = 0;  i < contents_.size();  i++) {
       if (raw == nullptr) {
         contents.push_back(contents_[i].get()->snapshot(Type::none()));
@@ -102,15 +99,14 @@ namespace awkward {
       else {
         contents.push_back(contents_[i].get()->snapshot(raw->field((int64_t)i)));
       }
-      (*lookup.get())[keys_[i]] = i;
-      reverselookup.get()->push_back(keys_[i]);
+      recordlookup.get()->push_back(keys_[i]);
     }
 
     if (contents.empty()) {
       return std::make_shared<RecordArray>(Identity::none(), type, length_, false);
     }
     else {
-      return std::make_shared<RecordArray>(Identity::none(), type, contents, lookup, reverselookup);
+      return std::make_shared<RecordArray>(Identity::none(), type, contents, recordlookup);
     }
   }
 

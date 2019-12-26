@@ -590,14 +590,6 @@ namespace awkward {
     throw std::invalid_argument("array contains no Records");
   }
 
-  const std::vector<std::string> NumpyArray::keyaliases(int64_t fieldindex) const {
-    throw std::invalid_argument("array contains no Records");
-  }
-
-  const std::vector<std::string> NumpyArray::keyaliases(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
-  }
-
   const std::vector<std::string> NumpyArray::keys() const {
     throw std::invalid_argument("array contains no Records");
   }

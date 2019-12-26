@@ -129,14 +129,6 @@ namespace awkward {
     throw std::invalid_argument("array contains no Records");
   }
 
-  const std::vector<std::string> EmptyArray::keyaliases(int64_t fieldindex) const {
-    throw std::invalid_argument("array contains no Records");
-  }
-
-  const std::vector<std::string> EmptyArray::keyaliases(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
-  }
-
   const std::vector<std::string> EmptyArray::keys() const {
     throw std::invalid_argument("array contains no Records");
   }

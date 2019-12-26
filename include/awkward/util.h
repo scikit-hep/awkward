@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "awkward/cpu-kernels/util.h"
 
@@ -12,6 +13,13 @@ namespace awkward {
   class Identity;
 
   namespace util {
+    typedef std::vector<std::string> RecordLookup;
+    std::shared_ptr<RecordLookup> init_recordlookup(int64_t numfields);
+    int64_t fieldindex(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);
+    const std::string key(const std::shared_ptr<RecordLookup>& recordlookup, int64_t fieldindex, int64_t numfields);
+    bool haskey(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);
+    const std::vector<std::string> keys(const std::shared_ptr<RecordLookup>& recordlookup, int64_t numfields);
+
     void handle_error(const struct Error& err, const std::string& classname, const Identity* id);
 
     template<typename T>

@@ -370,14 +370,6 @@ namespace awkward {
       throw std::invalid_argument("array contains no Records");
     }
 
-    const std::vector<std::string> keyaliases(int64_t fieldindex) const override {
-      throw std::invalid_argument("array contains no Records");
-    }
-
-    const std::vector<std::string> keyaliases(const std::string& key) const override {
-      throw std::invalid_argument("array contains no Records");
-    }
-
     const std::vector<std::string> keys() const override {
       throw std::invalid_argument("array contains no Records");
     }
