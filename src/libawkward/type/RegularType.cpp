@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 
+#include "awkward/array/RegularArray.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
 
@@ -64,6 +65,11 @@ namespace awkward {
 
   const std::vector<std::string> RegularType::keys() const {
     return type_.get()->keys();
+  }
+
+  const std::shared_ptr<Content> RegularType::empty() const {
+    std::shared_ptr<Content> content = type_.get()->empty();
+    return std::make_shared<RegularArray>(Identity::none(), Type::none(), content, size_);
   }
 
   const std::shared_ptr<Type> RegularType::type() const {

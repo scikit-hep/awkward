@@ -55,6 +55,13 @@ namespace awkward {
     return type_.get()->keys();
   }
 
+  const std::shared_ptr<Content> ArrayType::empty() const {
+    if (length_ != 0) {
+      throw std::invalid_argument(std::string("ArrayType with length ") + std::to_string(length_) + std::string(" does not describe an empty array"));
+    }
+    return type_.get()->empty();
+  }
+
   int64_t ArrayType::length() const {
     return length_;
   }

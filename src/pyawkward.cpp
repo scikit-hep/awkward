@@ -49,18 +49,6 @@ private:
   PyObject* pyobj_;
 };
 
-py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::string name) {
-  return (py::class_<ak::Type, std::shared_ptr<ak::Type>>(m, name.c_str())
-      .def("__eq__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
-        return self.get()->equal(other, true);
-      })
-      .def("__ne__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
-        return !self.get()->equal(other, true);
-      })
-  );
-}
-
-
 py::object box(std::shared_ptr<ak::Type> t) {
   if (ak::ArrayType* raw = dynamic_cast<ak::ArrayType*>(t.get())) {
     return py::cast(*raw);
@@ -799,6 +787,17 @@ void setparameters(T& self, py::object parameters) {
   self.setparameters(dict2parameters(parameters));
 }
 
+py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::string name) {
+  return (py::class_<ak::Type, std::shared_ptr<ak::Type>>(m, name.c_str())
+      .def("__eq__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
+        return self.get()->equal(other, true);
+      })
+      .def("__ne__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
+        return !self.get()->equal(other, true);
+      })
+  );
+}
+
 template <typename T>
 py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>& x) {
   return x.def("__repr__", &T::tostring)
@@ -816,6 +815,7 @@ py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>
           .def("key", &T::key)
           .def("haskey", &T::haskey)
           .def("keys", &T::keys)
+          .def("empty", &T::empty)
   ;
 }
 

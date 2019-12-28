@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 
+#include "awkward/array/ListOffsetArray.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
 
@@ -63,6 +64,13 @@ namespace awkward {
 
   const std::vector<std::string> ListType::keys() const {
     return type_.get()->keys();
+  }
+
+  const std::shared_ptr<Content> ListType::empty() const {
+    Index64 offsets(1);
+    offsets.ptr().get()[0] = 0;
+    std::shared_ptr<Content> content = type_.get()->empty();
+    return std::make_shared<ListOffsetArray64>(Identity::none(), Type::none(), offsets, content);
   }
 
   const std::shared_ptr<Type> ListType::type() const {

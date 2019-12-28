@@ -10,6 +10,8 @@
 #include "awkward/cpu-kernels/util.h"
 
 namespace awkward {
+  class Content;
+
   class Type {
   public:
     typedef std::map<std::string, std::string> Parameters;
@@ -27,6 +29,7 @@ namespace awkward {
     virtual const std::string key(int64_t fieldindex) const = 0;
     virtual bool haskey(const std::string& key) const = 0;
     virtual const std::vector<std::string> keys() const = 0;
+    virtual const std::shared_ptr<Content> empty() const = 0;
 
     const Parameters parameters() const;
     void setparameters(const Parameters& parameters);
