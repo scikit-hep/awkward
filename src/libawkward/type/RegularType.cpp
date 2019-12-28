@@ -37,7 +37,7 @@ namespace awkward {
 
   bool RegularType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       return size() == t->size()  &&  type().get()->equal(t->type(), check_parameters);

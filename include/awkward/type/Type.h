@@ -31,14 +31,14 @@ namespace awkward {
 
     const util::Parameters parameters() const;
     void setparameters(const util::Parameters& parameters);
-    std::string parameter(const std::string& key);
+    const std::string parameter(const std::string& key) const;
     void setparameter(const std::string& key, const std::string& value);
-    bool parameter_equals(const std::string& key, const std::string& value);
-    std::string tostring() const;
+    bool parameter_equals(const std::string& key, const std::string& value) const;
+    bool parameters_equal(const util::Parameters& other) const;
+    const std::string tostring() const;
     const std::string compare(std::shared_ptr<Type> supertype);
 
   protected:
-    bool equal_parameters(const util::Parameters& other) const;
     bool get_typestr(std::string& output) const;
     const std::string string_parameters() const;
 

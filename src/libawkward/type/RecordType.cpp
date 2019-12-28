@@ -104,7 +104,7 @@ namespace awkward {
 
   bool RecordType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       if (numfields() != t->numfields()) {

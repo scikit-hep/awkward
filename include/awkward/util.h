@@ -22,6 +22,8 @@ namespace awkward {
     const std::vector<std::string> keys(const std::shared_ptr<RecordLookup>& recordlookup, int64_t numfields);
 
     typedef std::map<std::string, std::string> Parameters;
+    bool parameter_equals(const Parameters& parameters, const std::string& key, const std::string& value);
+    bool parameters_equal(const Parameters& self, const Parameters& other);
 
     void handle_error(const struct Error& err, const std::string& classname, const Identity* id);
 

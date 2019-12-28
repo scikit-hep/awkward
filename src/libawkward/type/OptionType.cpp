@@ -42,7 +42,7 @@ namespace awkward {
 
   bool OptionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       return type().get()->equal(t->type(), check_parameters);

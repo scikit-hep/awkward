@@ -3,11 +3,15 @@
 #include <cassert>
 #include <sstream>
 
+#include "rapidjson/document.h"
+
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 
 #include "awkward/util.h"
 #include "awkward/Identity.h"
+
+namespace rj = rapidjson;
 
 namespace awkward {
   namespace util {
@@ -77,6 +81,32 @@ namespace awkward {
         }
       }
       return out;
+    }
+
+    bool parameter_equals(const Parameters& parameters, const std::string& key, const std::string& value) {
+      auto item = parameters.find(key);
+      if (item == parameters.end()) {
+        return false;
+      }
+      else {
+        rj::Document mine;
+        rj::Document yours;
+        mine.Parse<rj::kParseNanAndInfFlag>(item->second.c_str());
+        yours.Parse<rj::kParseNanAndInfFlag>(value.c_str());
+        return mine == yours;
+      }
+    }
+
+    bool parameters_equal(const Parameters& self, const Parameters& other) {
+      if (self.size() != other.size()) {
+        return false;
+      }
+      for (auto pair : self) {
+        if (!parameter_equals(other, pair.first, pair.second)) {
+          return false;
+        }
+      }
+      return true;
     }
 
     void handle_error(const struct Error& err, const std::string& classname, const Identity* id) {
