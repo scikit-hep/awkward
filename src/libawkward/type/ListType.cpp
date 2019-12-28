@@ -10,7 +10,7 @@
 #include "awkward/type/ListType.h"
 
 namespace awkward {
-  ListType::ListType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type)
+  ListType::ListType(const util::Parameters& parameters, const std::shared_ptr<Type>& type)
       : Type(parameters)
       , type_(type) { }
 

@@ -122,7 +122,7 @@ namespace awkward {
       for (auto item : contents_) {
         types.push_back(item.get()->type());
       }
-      return std::make_shared<RecordType>(Type::Parameters(), types, recordlookup_);
+      return std::make_shared<RecordType>(util::Parameters(), types, recordlookup_);
     }
   }
 

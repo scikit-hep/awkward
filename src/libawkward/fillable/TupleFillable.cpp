@@ -50,14 +50,14 @@ namespace awkward {
 
   const std::shared_ptr<Type> TupleFillable::type() const {
     if (length_ == -1) {
-      return std::make_shared<UnknownType>(Type::Parameters());
+      return std::make_shared<UnknownType>(util::Parameters());
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
       for (size_t i = 0;  i < contents_.size();  i++) {
         types.push_back(contents_[i].get()->type());
       }
-      return std::make_shared<RecordType>(Type::Parameters(), types);
+      return std::make_shared<RecordType>(util::Parameters(), types);
     }
   }
 

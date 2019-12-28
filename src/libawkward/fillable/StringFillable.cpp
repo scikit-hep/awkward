@@ -45,10 +45,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> StringFillable::type() const {
-    Type::Parameters char_parameters;
+    util::Parameters char_parameters;
     char_parameters["__class__"] = std::string("\"char\"");
 
-    Type::Parameters string_parameters;
+    util::Parameters string_parameters;
     string_parameters["__class__"] = std::string("\"string\"");
 
     if (encoding_ == nullptr) {

@@ -14,8 +14,8 @@
 namespace awkward {
   class RecordType: public Type {
   public:
-    RecordType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup);
-    RecordType(const Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types);
+    RecordType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup);
+    RecordType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types);
 
     const std::vector<std::shared_ptr<Type>> types() const;
     const std::shared_ptr<util::RecordLookup> recordlookup() const;

@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <memory>
 
 #include "awkward/cpu-kernels/util.h"
@@ -19,6 +20,8 @@ namespace awkward {
     const std::string key(const std::shared_ptr<RecordLookup>& recordlookup, int64_t fieldindex, int64_t numfields);
     bool haskey(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);
     const std::vector<std::string> keys(const std::shared_ptr<RecordLookup>& recordlookup, int64_t numfields);
+
+    typedef std::map<std::string, std::string> Parameters;
 
     void handle_error(const struct Error& err, const std::string& classname, const Identity* id);
 

@@ -10,7 +10,7 @@
 #include "awkward/type/RegularType.h"
 
 namespace awkward {
-  RegularType::RegularType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t size)
+  RegularType::RegularType(const util::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t size)
       : Type(parameters)
       , type_(type)
       , size_(size) { }

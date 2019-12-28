@@ -747,8 +747,8 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
 
 /////////////////////////////////////////////////////////////// Type
 
-ak::Type::Parameters dict2parameters(py::object in) {
-  ak::Type::Parameters out;
+ak::util::Parameters dict2parameters(py::object in) {
+  ak::util::Parameters out;
   if (in.is(py::none())) {
     // None is equivalent to an empty dict
   }
@@ -765,7 +765,7 @@ ak::Type::Parameters dict2parameters(py::object in) {
   return out;
 }
 
-py::dict parameters2dict(const ak::Type::Parameters& in) {
+py::dict parameters2dict(const ak::util::Parameters& in) {
   py::dict out;
   for (auto pair : in) {
     std::string cppkey = pair.first;

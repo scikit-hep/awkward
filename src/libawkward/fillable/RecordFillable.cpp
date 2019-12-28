@@ -67,7 +67,7 @@ namespace awkward {
 
   const std::shared_ptr<Type> RecordFillable::type() const {
     if (length_ == -1) {
-      return std::make_shared<UnknownType>(Type::Parameters());
+      return std::make_shared<UnknownType>(util::Parameters());
     }
     else {
       std::vector<std::shared_ptr<Type>> types;
@@ -76,7 +76,7 @@ namespace awkward {
         types.push_back(contents_[i].get()->type());
         recordlookup.get()->push_back(keys_[i]);
       }
-      Type::Parameters parameters;
+      util::Parameters parameters;
       if (nameptr_ != nullptr) {
         parameters["__class__"] = util::quote(name_, true);
       }

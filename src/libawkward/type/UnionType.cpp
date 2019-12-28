@@ -9,7 +9,7 @@
 #include "awkward/type/UnionType.h"
 
 namespace awkward {
-  UnionType::UnionType(const Type::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
+  UnionType::UnionType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
       : Type(parameters)
       , types_(types) { }
 

@@ -32,7 +32,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> BoolFillable::type() const {
-    return std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::boolean);
+    return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::boolean);
   }
 
   const std::shared_ptr<Content> BoolFillable::snapshot(const std::shared_ptr<Type>& type) const {

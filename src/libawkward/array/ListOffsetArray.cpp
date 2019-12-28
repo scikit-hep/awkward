@@ -167,7 +167,7 @@ namespace awkward {
       return type_;
     }
     else {
-      return std::make_shared<ListType>(Type::Parameters(), content_.get()->type());
+      return std::make_shared<ListType>(util::Parameters(), content_.get()->type());
     }
   }
 

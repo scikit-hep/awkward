@@ -5,20 +5,18 @@
 
 #include <memory>
 #include <vector>
-#include <map>
 
 #include "awkward/cpu-kernels/util.h"
+#include "awkward/util.h"
 
 namespace awkward {
   class Content;
 
   class Type {
   public:
-    typedef std::map<std::string, std::string> Parameters;
-
     static std::shared_ptr<Type> none();
 
-    Type(const Parameters& parameters);
+    Type(const util::Parameters& parameters);
     virtual ~Type();
 
     virtual std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
@@ -31,8 +29,8 @@ namespace awkward {
     virtual const std::vector<std::string> keys() const = 0;
     virtual const std::shared_ptr<Content> empty() const = 0;
 
-    const Parameters parameters() const;
-    void setparameters(const Parameters& parameters);
+    const util::Parameters parameters() const;
+    void setparameters(const util::Parameters& parameters);
     std::string parameter(const std::string& key);
     void setparameter(const std::string& key, const std::string& value);
     bool parameter_equals(const std::string& key, const std::string& value);
@@ -40,11 +38,11 @@ namespace awkward {
     const std::string compare(std::shared_ptr<Type> supertype);
 
   protected:
-    bool equal_parameters(const Parameters& other) const;
+    bool equal_parameters(const util::Parameters& other) const;
     bool get_typestr(std::string& output) const;
     const std::string string_parameters() const;
 
-    Parameters parameters_;
+    util::Parameters parameters_;
   };
 }
 

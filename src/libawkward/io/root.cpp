@@ -55,7 +55,7 @@ namespace awkward {
       level0.setitem_at_nowrap(i + 1, levels[0].length());
     }
 
-    std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos_tocopy.length()*itemsize)], awkward::util::array_deleter<uint8_t>());
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos_tocopy.length()*itemsize)], util::array_deleter<uint8_t>());
     ssize_t offset = rawdata.byteoffset();
     uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
     uint8_t* fromptr = reinterpret_cast<uint8_t*>(rawdata.ptr().get());

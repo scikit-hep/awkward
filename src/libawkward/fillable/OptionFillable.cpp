@@ -43,7 +43,7 @@ namespace awkward {
 
   const std::shared_ptr<Type> OptionFillable::type() const {
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    return std::make_shared<OptionType>(Type::Parameters(), content_.get()->type());
+    return std::make_shared<OptionType>(util::Parameters(), content_.get()->type());
   }
 
   const std::shared_ptr<Content> OptionFillable::snapshot(const std::shared_ptr<Type>& type) const {

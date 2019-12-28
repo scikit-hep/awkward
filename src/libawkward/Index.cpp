@@ -12,7 +12,7 @@
 namespace awkward {
   template <typename T>
   IndexOf<T>::IndexOf(int64_t length)
-      : ptr_(std::shared_ptr<T>(length == 0 ? nullptr : new T[(size_t)length], awkward::util::array_deleter<T>()))
+      : ptr_(std::shared_ptr<T>(length == 0 ? nullptr : new T[(size_t)length], util::array_deleter<T>()))
       , offset_(0)
       , length_(length) { }
 
@@ -141,7 +141,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Index> IndexOf<T>::deep_copy() const {
-    std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_], awkward::util::array_deleter<T>());
+    std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_], util::array_deleter<T>());
     if (length_ != 0) {
       memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*((size_t)length_));
     }

@@ -16,16 +16,16 @@ namespace awkward {
     return std::shared_ptr<Type>(nullptr);
   }
 
-  Type::Type(const Type::Parameters& parameters)
+  Type::Type(const util::Parameters& parameters)
       : parameters_(parameters) { }
 
   Type::~Type() { }
 
-  const Type::Parameters Type::parameters() const {
+  const util::Parameters Type::parameters() const {
     return parameters_;
   }
 
-  void Type::setparameters(const Type::Parameters& parameters) {
+  void Type::setparameters(const util::Parameters& parameters) {
     parameters_ = parameters;
   }
 
@@ -56,7 +56,7 @@ namespace awkward {
     return tostring() + std::string(" versus ") + supertype.get()->tostring();
   }
 
-  bool Type::equal_parameters(const Type::Parameters& other) const {
+  bool Type::equal_parameters(const util::Parameters& other) const {
     if (parameters_.size() != other.size()) {
       return false;
     }

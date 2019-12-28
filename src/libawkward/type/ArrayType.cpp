@@ -5,7 +5,7 @@
 #include "awkward/type/ArrayType.h"
 
 namespace awkward {
-  ArrayType::ArrayType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t length)
+  ArrayType::ArrayType(const util::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t length)
       : Type(parameters)
       , type_(type)
       , length_(length) { }

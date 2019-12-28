@@ -103,7 +103,7 @@ namespace awkward {
       return type_;
     }
     else {
-      return std::make_shared<RegularType>(Type::Parameters(), content_.get()->type(), size_);
+      return std::make_shared<RegularType>(util::Parameters(), content_.get()->type(), size_);
     }
   }
 
@@ -317,7 +317,7 @@ namespace awkward {
     std::shared_ptr<Type> outtype = Type::none();
     if (type_.get() != nullptr) {
       RegularType* raw = dynamic_cast<RegularType*>(type_.get());
-      outtype = std::make_shared<RegularType>(Type::Parameters(), raw->type(), nextsize);
+      outtype = std::make_shared<RegularType>(util::Parameters(), raw->type(), nextsize);
     }
 
     if (advanced.length() == 0) {

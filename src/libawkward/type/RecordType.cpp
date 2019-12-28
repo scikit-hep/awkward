@@ -11,7 +11,7 @@
 #include "awkward/type/RecordType.h"
 
 namespace awkward {
-  RecordType::RecordType(const Type::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup)
+  RecordType::RecordType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup)
       : Type(parameters)
       , types_(types)
       , recordlookup_(recordlookup) {
@@ -20,7 +20,7 @@ namespace awkward {
     }
   }
 
-  RecordType::RecordType(const Type::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
+  RecordType::RecordType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
       : Type(parameters)
       , types_(types)
       , recordlookup_(nullptr) { }

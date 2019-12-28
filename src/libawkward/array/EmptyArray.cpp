@@ -35,7 +35,7 @@ namespace awkward {
       return type_;
     }
     else {
-      return std::make_shared<UnknownType>(Type::Parameters());
+      return std::make_shared<UnknownType>(util::Parameters());
     }
   }
 

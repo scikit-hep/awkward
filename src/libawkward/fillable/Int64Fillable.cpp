@@ -37,7 +37,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> Int64Fillable::type() const {
-    return std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::int64);
+    return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::int64);
   }
 
   const std::shared_ptr<Content> Int64Fillable::snapshot(const std::shared_ptr<Type>& type) const {

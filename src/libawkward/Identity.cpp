@@ -53,7 +53,7 @@ namespace awkward {
   template <typename T>
   IdentityOf<T>::IdentityOf(const Ref ref, const FieldLoc& fieldloc, int64_t width, int64_t length)
       : Identity(ref, fieldloc, 0, width, length)
-      , ptr_(std::shared_ptr<T>(length*width == 0 ? nullptr : new T[(size_t)(length*width)], awkward::util::array_deleter<T>())) { }
+      , ptr_(std::shared_ptr<T>(length*width == 0 ? nullptr : new T[(size_t)(length*width)], util::array_deleter<T>())) { }
 
   template <typename T>
   IdentityOf<T>::IdentityOf(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr)

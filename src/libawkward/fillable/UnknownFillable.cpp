@@ -41,7 +41,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnknownFillable::type() const {
-    return std::make_shared<UnknownType>(Type::Parameters());
+    return std::make_shared<UnknownType>(util::Parameters());
   }
 
   const std::shared_ptr<Content> UnknownFillable::snapshot(const std::shared_ptr<Type>& type) const {
