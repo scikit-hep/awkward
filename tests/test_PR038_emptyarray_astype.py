@@ -28,3 +28,10 @@ def test_typeempty():
     assert type(array["one"]) is awkward1.layout.NumpyArray
     assert numpy.asarray(array["one"]).dtype == numpy.dtype("float64")
     assert type(array["two"]) is awkward1.layout.ListOffsetArray64
+
+def test_astype():
+    empty = awkward1.layout.EmptyArray()
+    assert numpy.asarray(empty.astype(awkward1.layout.PrimitiveType("bool"))).dtype == numpy.dtype("bool")
+    assert numpy.asarray(empty.astype(awkward1.layout.PrimitiveType("uint8"))).dtype == numpy.dtype("uint8")
+    assert numpy.asarray(empty.astype(awkward1.layout.PrimitiveType("float64"))).dtype == numpy.dtype("float64")
+    assert type(empty.astype(awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64")))) is awkward1.layout.ListOffsetArray64

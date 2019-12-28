@@ -40,7 +40,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::astype(const std::shared_ptr<Type>& type) const {
-    return std::make_shared<EmptyArray>(id_, type);
+    return type.get()->empty();
   }
 
   const std::string EmptyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
