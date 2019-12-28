@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 
+#include "awkward/array/RecordArray.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/util.h"
@@ -158,6 +159,14 @@ namespace awkward {
 
   const std::vector<std::string> RecordType::keys() const {
     return util::keys(recordlookup_, numfields());
+  }
+
+  const std::shared_ptr<Content> RecordType::empty() const {
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto type : types_) {
+      contents.push_back(type.get()->empty());
+    }
+    return std::make_shared<RecordArray>(Identity::none(), Type::none(), contents, recordlookup_);
   }
 
   const std::shared_ptr<Type> RecordType::field(int64_t fieldindex) const {

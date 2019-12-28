@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 
+#include "awkward/array/EmptyArray.h"
 #include "awkward/type/UnknownType.h"
 
 namespace awkward {
@@ -59,5 +60,9 @@ namespace awkward {
 
   const std::vector<std::string> UnknownType::keys() const {
     throw std::invalid_argument("type contains no Records");
+  }
+
+  const std::shared_ptr<Content> UnknownType::empty() const {
+    return std::make_shared<EmptyArray>(Identity::none(), Type::none());
   }
 }

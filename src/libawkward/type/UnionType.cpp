@@ -86,6 +86,14 @@ namespace awkward {
     return types_;
   }
 
+  const std::shared_ptr<Content> UnionType::empty() const {
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto type : types_) {
+      contents.push_back(type.get()->empty());
+    }
+    throw std::runtime_error("UnionType::empty() needs UnionArray");
+  }
+
   const std::shared_ptr<Type> UnionType::type(int64_t index) const {
     return types_[(size_t)index];
   }

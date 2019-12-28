@@ -72,6 +72,11 @@ namespace awkward {
     return type_.get()->keys();
   }
 
+  const std::shared_ptr<Content> OptionType::empty() const {
+    std::shared_ptr<Content> content = type_.get()->empty();
+    throw std::runtime_error("OptionType::empty() needs OptionArray");
+  }
+
   const std::shared_ptr<Type> OptionType::type() const {
     std::shared_ptr<Type> out = type_;
     while (OptionType* t = dynamic_cast<OptionType*>(out.get())) {
