@@ -166,7 +166,7 @@ namespace awkward {
     for (auto type : types_) {
       contents.push_back(type.get()->empty());
     }
-    return std::make_shared<RecordArray>(Identity::none(), Type::none(), contents, recordlookup_);
+    return std::make_shared<RecordArray>(Identity::none(), parameters_, contents, recordlookup_);
   }
 
   const std::shared_ptr<Type> RecordType::field(int64_t fieldindex) const {

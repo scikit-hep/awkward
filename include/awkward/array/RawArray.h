@@ -44,8 +44,8 @@ namespace awkward {
   template <typename T>
   class RawArrayOf: public Content {
   public:
-    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<T>& ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
-        : Content(id, type)
+    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
+        : Content(id, parameters)
         , ptr_(ptr)
         , offset_(offset)
         , length_(length)
@@ -55,15 +55,15 @@ namespace awkward {
       }
     }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<T>& ptr, const int64_t length)
-        : Content(id, type)
+    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t length)
+        : Content(id, parameters)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const int64_t length)
-        : Content(id, type)
+    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const int64_t length)
+        : Content(id, parameters)
         , ptr_(std::shared_ptr<T>(new T[(size_t)length], util::array_deleter<T>()))
         , offset_(0)
         , length_(length)
@@ -130,41 +130,38 @@ namespace awkward {
     }
 
     const std::shared_ptr<Type> type() const override {
-      if (type_.get() != nullptr) {
-        return type_;
-      }
-      else if (std::is_same<T, double>::value) {
-        return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::float64);
+      if (std::is_same<T, double>::value) {
+        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float64);
       }
       else if (std::is_same<T, float>::value) {
-        return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::float32);
+        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float32);
       }
       else if (std::is_same<T, int64_t>::value) {
-        return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::int64);
+        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int64);
       }
       else if (std::is_same<T, uint64_t>::value) {
-        return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::uint64);
+        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint64);
       }
       else if (std::is_same<T, int32_t>::value) {
-        return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::int32);
+        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int32);
       }
       else if (std::is_same<T, uint32_t>::value) {
-        return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::uint32);
+        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint32);
       }
       else if (std::is_same<T, int16_t>::value) {
-        return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::int16);
+        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int16);
       }
       else if (std::is_same<T, uint16_t>::value) {
-        return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::uint16);
+        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint16);
       }
       else if (std::is_same<T, int8_t>::value) {
-        return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::int8);
+        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int8);
       }
       else if (std::is_same<T, uint8_t>::value) {
-        return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::uint8);
+        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint8);
       }
       else if (std::is_same<T, bool>::value) {
-        return std::make_shared<PrimitiveType>(util::Parameters(), PrimitiveType::boolean);
+        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::boolean);
       }
       else {
         throw std::invalid_argument(std::string("RawArrayOf<") + typeid(T).name() + std::string("> does not have a known type"));
@@ -172,7 +169,8 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override {
-      return std::make_shared<RawArrayOf<T>>(id_, type, ptr_, offset_, length_, itemsize_);
+    // FIXME: if the type does not match T, actually convert it!
+      return std::make_shared<RawArrayOf<T>>(id_, type.get()->parameters(), ptr_, offset_, length_, itemsize_);
     }
 
     const std::string tostring() {
@@ -266,7 +264,7 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> shallow_copy() const override {
-      return std::make_shared<RawArrayOf<T>>(id_, type_, ptr_, offset_, length_, itemsize_);
+      return std::make_shared<RawArrayOf<T>>(id_, parameters_, ptr_, offset_, length_, itemsize_);
     }
 
     void check_for_iteration() const override {
@@ -309,7 +307,7 @@ namespace awkward {
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_range_nowrap(start, stop);
       }
-      return std::make_shared<RawArrayOf<T>>(id, type_, ptr_, offset_ + start, stop - start, itemsize_);
+      return std::make_shared<RawArrayOf<T>>(id, parameters_, ptr_, offset_ + start, stop - start, itemsize_);
     }
 
     const std::shared_ptr<Content> getitem_field(const std::string& key) const override {
@@ -350,7 +348,7 @@ namespace awkward {
         id = id_.get()->getitem_carry_64(carry);
       }
 
-      return std::make_shared<RawArrayOf<T>>(id, type_, ptr, 0, carry.length(), itemsize_);
+      return std::make_shared<RawArrayOf<T>>(id, parameters_, ptr, 0, carry.length(), itemsize_);
     }
 
     const std::pair<int64_t, int64_t> minmax_depth() const override {
@@ -378,48 +376,6 @@ namespace awkward {
     }
 
   protected:
-    void checktype() const override {
-      bool okay = false;
-      if (PrimitiveType* raw = dynamic_cast<PrimitiveType*>(type_.get())) {
-        if (std::is_same<T, double>::value) {
-          okay = (raw->dtype() == PrimitiveType::float64);
-        }
-        else if (std::is_same<T, float>::value) {
-          okay = (raw->dtype() == PrimitiveType::float32);
-        }
-        else if (std::is_same<T, int64_t>::value) {
-          okay = (raw->dtype() == PrimitiveType::int64);
-        }
-        else if (std::is_same<T, uint64_t>::value) {
-          okay = (raw->dtype() == PrimitiveType::uint64);
-        }
-        else if (std::is_same<T, int32_t>::value) {
-          okay = (raw->dtype() == PrimitiveType::int32);
-        }
-        else if (std::is_same<T, uint32_t>::value) {
-          okay = (raw->dtype() == PrimitiveType::uint32);
-        }
-        else if (std::is_same<T, int16_t>::value) {
-          okay = (raw->dtype() == PrimitiveType::int16);
-        }
-        else if (std::is_same<T, uint16_t>::value) {
-          okay = (raw->dtype() == PrimitiveType::uint16);
-        }
-        else if (std::is_same<T, int8_t>::value) {
-          okay = (raw->dtype() == PrimitiveType::int8);
-        }
-        else if (std::is_same<T, uint8_t>::value) {
-          okay = (raw->dtype() == PrimitiveType::uint8);
-        }
-        else if (std::is_same<T, bool>::value) {
-          okay = (raw->dtype() == PrimitiveType::boolean);
-        }
-      }
-      if (!okay) {
-        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
-      }
-    }
-
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
       return getitem_at(at.at());
     }

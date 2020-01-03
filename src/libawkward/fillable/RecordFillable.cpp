@@ -65,48 +65,25 @@ namespace awkward {
     nexttotry_ = 0;
   }
 
-  const std::shared_ptr<Type> RecordFillable::type() const {
+  const std::shared_ptr<Content> RecordFillable::snapshot() const {
     if (length_ == -1) {
-      return std::make_shared<UnknownType>(util::Parameters());
+      return std::make_shared<EmptyArray>(Identity::none(), util::Parameters());
     }
-    else {
-      std::vector<std::shared_ptr<Type>> types;
-      std::shared_ptr<util::RecordLookup> recordlookup = std::make_shared<util::RecordLookup>();
-      for (size_t i = 0;  i < contents_.size();  i++) {
-        types.push_back(contents_[i].get()->type());
-        recordlookup.get()->push_back(keys_[i]);
-      }
-      util::Parameters parameters;
-      if (nameptr_ != nullptr) {
-        parameters["__class__"] = util::quote(name_, true);
-      }
-      return std::make_shared<RecordType>(parameters, types, recordlookup);
+    util::Parameters parameters;
+    if (nameptr_ != nullptr) {
+      parameters["__class__"] = util::quote(name_, true);
     }
-  }
-
-  const std::shared_ptr<Content> RecordFillable::snapshot(const std::shared_ptr<Type>& type) const {
-    if (length_ == -1) {
-      return std::make_shared<EmptyArray>(Identity::none(), type);
-    }
-
-    RecordType* raw = dynamic_cast<RecordType*>(type.get());
     std::vector<std::shared_ptr<Content>> contents;
     std::shared_ptr<util::RecordLookup> recordlookup = std::make_shared<util::RecordLookup>();
     for (size_t i = 0;  i < contents_.size();  i++) {
-      if (raw == nullptr) {
-        contents.push_back(contents_[i].get()->snapshot(Type::none()));
-      }
-      else {
-        contents.push_back(contents_[i].get()->snapshot(raw->field((int64_t)i)));
-      }
+      contents.push_back(contents_[i].get()->snapshot());
       recordlookup.get()->push_back(keys_[i]);
     }
-
     if (contents.empty()) {
-      return std::make_shared<RecordArray>(Identity::none(), type, length_, false);
+      return std::make_shared<RecordArray>(Identity::none(), parameters, length_, false);
     }
     else {
-      return std::make_shared<RecordArray>(Identity::none(), type, contents, recordlookup);
+      return std::make_shared<RecordArray>(Identity::none(), parameters, contents, recordlookup);
     }
   }
 

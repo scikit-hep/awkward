@@ -14,7 +14,7 @@ namespace awkward {
   template <typename T>
   class ListOffsetArrayOf: public Content {
   public:
-    ListOffsetArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content);
+    ListOffsetArrayOf<T>(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content);
     const IndexOf<T> offsets() const;
     const std::shared_ptr<Content> content() const;
 
@@ -44,8 +44,6 @@ namespace awkward {
     const std::vector<std::string> keys() const override;
 
   protected:
-    void checktype() const override;
-
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;

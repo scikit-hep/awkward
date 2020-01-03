@@ -10,12 +10,8 @@
 #include "awkward/array/EmptyArray.h"
 
 namespace awkward {
-  EmptyArray::EmptyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type)
-      : Content(id, type) {
-    if (type_.get() != nullptr) {
-      checktype();
-    }
-  }
+  EmptyArray::EmptyArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters)
+      : Content(id, parameters) { }
 
   const std::string EmptyArray::classname() const {
     return "EmptyArray";
@@ -31,12 +27,7 @@ namespace awkward {
   void EmptyArray::setid() { }
 
   const std::shared_ptr<Type> EmptyArray::type() const {
-    if (type_.get() != nullptr) {
-      return type_;
-    }
-    else {
-      return std::make_shared<UnknownType>(util::Parameters());
-    }
+    return std::make_shared<UnknownType>(util::Parameters());
   }
 
   const std::shared_ptr<Content> EmptyArray::astype(const std::shared_ptr<Type>& type) const {
@@ -46,7 +37,7 @@ namespace awkward {
   const std::string EmptyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
-    if (id_.get() == nullptr  &&  parameters_.empty()  &&  type_.get() == nullptr) {
+    if (id_.get() == nullptr  &&  parameters_.empty()) {
       out << "/>" << post;
     }
     else {
@@ -56,9 +47,6 @@ namespace awkward {
       }
       if (!parameters_.empty()) {
         out << parameters_tostring(indent + std::string("    "), "", "\n");
-      }
-      if (type_.get() != nullptr) {
-        out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
       }
       out << indent << "</" << classname() << ">" << post;
     }
@@ -75,7 +63,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::shallow_copy() const {
-    return std::make_shared<EmptyArray>(id_, type_);
+    return std::make_shared<EmptyArray>(id_, parameters_);
   }
 
   void EmptyArray::check_for_iteration() const { }
@@ -135,8 +123,6 @@ namespace awkward {
   const std::vector<std::string> EmptyArray::keys() const {
     throw std::invalid_argument("array contains no Records");
   }
-
-  void EmptyArray::checktype() const { }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());

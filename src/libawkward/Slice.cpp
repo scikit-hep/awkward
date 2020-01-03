@@ -30,7 +30,7 @@ namespace awkward {
     return std::to_string(at_);
   }
 
-  bool SliceAt::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+  bool SliceAt::preserves_type(const Index64& advanced) const {
     return false;
   }
 
@@ -84,7 +84,7 @@ namespace awkward {
     return out.str();
   }
 
-  bool SliceRange::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+  bool SliceRange::preserves_type(const Index64& advanced) const {
     return true;
   }
 
@@ -100,7 +100,7 @@ namespace awkward {
     return std::string("...");
   }
 
-  bool SliceEllipsis::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+  bool SliceEllipsis::preserves_type(const Index64& advanced) const {
     return true;
   }
 
@@ -116,7 +116,7 @@ namespace awkward {
     return std::string("newaxis");
   }
 
-  bool SliceNewAxis::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+  bool SliceNewAxis::preserves_type(const Index64& advanced) const {
     return false;
   }
 
@@ -237,7 +237,7 @@ namespace awkward {
   }
 
   template <typename T>
-  bool SliceArrayOf<T>::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+  bool SliceArrayOf<T>::preserves_type(const Index64& advanced) const {
     return advanced.length() == 0;
   }
 
@@ -278,7 +278,7 @@ namespace awkward {
     return util::quote(key_, true);
   }
 
-  bool SliceField::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
+  bool SliceField::preserves_type(const Index64& advanced) const {
     return false;
   }
 
@@ -308,8 +308,8 @@ namespace awkward {
     return out.str();
   }
 
-  bool SliceFields::preserves_type(const std::shared_ptr<Type>& type, const Index64& advanced) const {
-    return type.get() != nullptr  &&  type.get()->numfields() != -1  &&  util::subset(keys_, type.get()->keys());
+  bool SliceFields::preserves_type(const Index64& advanced) const {
+    return false;
   }
 
   /////////////////////////////////////////////////////// Slice

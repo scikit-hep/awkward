@@ -70,7 +70,7 @@ namespace awkward {
     Index64 offsets(1);
     offsets.ptr().get()[0] = 0;
     std::shared_ptr<Content> content = type_.get()->empty();
-    return std::make_shared<ListOffsetArray64>(Identity::none(), Type::none(), offsets, content);
+    return std::make_shared<ListOffsetArray64>(Identity::none(), parameters_, offsets, content);
   }
 
   const std::shared_ptr<Type> ListType::type() const {

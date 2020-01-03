@@ -14,9 +14,9 @@
 namespace awkward {
   class RecordArray: public Content {
   public:
-    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
-    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents);
-    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, int64_t length, bool istuple);
+    RecordArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
+    RecordArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents);
+    RecordArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, int64_t length, bool istuple);
 
     const std::vector<std::shared_ptr<Content>> contents() const;
     const std::shared_ptr<util::RecordLookup> recordlookup() const;
@@ -58,8 +58,6 @@ namespace awkward {
     void append(const std::shared_ptr<Content>& content);
 
   protected:
-    void checktype() const override;
-
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;

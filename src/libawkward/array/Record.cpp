@@ -11,13 +11,9 @@
 
 namespace awkward {
   Record::Record(const RecordArray& array, int64_t at)
-      : Content(Identity::none(), Type::none())
+      : Content(Identity::none(), array.parameters())
       , array_(array)
-      , at_(at) {
-    if (type_.get() != nullptr) {
-      checktype();
-    }
-  }
+      , at_(at) { }
 
   const std::shared_ptr<Content> Record::array() const {
     return array_.shallow_copy();
@@ -69,36 +65,24 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::setid");
   }
 
-  bool Record::isbare() const {
-    return array_.isbare();
-  }
-
-  bool Record::istypeptr(Type* pointer) const {
-    return array_.istypeptr(pointer);
-  }
-
   const std::shared_ptr<Type> Record::type() const {
-    return array_.type();
+    std::shared_ptr<Type> out = array_.type();
+    out.get()->setparameters(parameters_);
+    return out;
   }
 
   const std::shared_ptr<Content> Record::astype(const std::shared_ptr<Type>& type) const {
-    if (type.get() == nullptr) {
-      if (array_.numfields() == 0) {
-        return std::make_shared<Record>(RecordArray(array_.id(), type, array_.length(), array_.istuple()), at_);
+    std::shared_ptr<Content> record = array_.astype(type);
+    if (RecordArray* raw = dynamic_cast<RecordArray*>(record.get())) {
+      if (raw->numfields() == 0) {
+        return std::make_shared<Record>(RecordArray(raw->id(), raw->parameters(), raw->length(), raw->istuple()), at_);
       }
       else {
-        return std::make_shared<Record>(RecordArray(array_.id(), type, array_.contents(), array_.recordlookup()), at_);
+        return std::make_shared<Record>(RecordArray(raw->id(), raw->parameters(), raw->contents(), raw->recordlookup()), at_);
       }
     }
     else {
-      std::shared_ptr<Content> record = array_.astype(type);
-      RecordArray* raw = dynamic_cast<RecordArray*>(record.get());
-      if (raw->numfields() == 0) {
-        return std::make_shared<Record>(RecordArray(raw->id(), raw->type(), raw->length(), raw->istuple()), at_);
-      }
-      else {
-        return std::make_shared<Record>(RecordArray(raw->id(), raw->type(), raw->contents(), raw->recordlookup()), at_);
-      }
+      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
     }
   }
 
@@ -170,11 +154,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& keys) const {
-    std::shared_ptr<Type> type = Type::none();
-    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
-      type = type_;
-    }
-    RecordArray out(array_.id(), type, length(), istuple());
+    RecordArray out(array_.id(), parameters_, length(), istuple());
     if (istuple()) {
       for (auto key : keys) {
         out.append(array_.field(key));
@@ -254,8 +234,6 @@ namespace awkward {
   const Record Record::astuple() const {
     return Record(array_.astuple(), at_);
   }
-
-  void Record::checktype() const { }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(at)");
