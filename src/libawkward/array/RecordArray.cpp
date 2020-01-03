@@ -171,6 +171,9 @@ namespace awkward {
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
+    if (!parameters_.empty()) {
+      out << parameters_tostring(indent + std::string("    "), "", "\n");
+    }
     if (type_.get() != nullptr) {
       out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
     }

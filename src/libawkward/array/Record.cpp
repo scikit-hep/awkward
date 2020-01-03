@@ -105,6 +105,9 @@ namespace awkward {
   const std::string Record::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " at=\"" << at_ << "\">\n";
+    if (!parameters_.empty()) {
+      out << parameters_tostring(indent + std::string("    "), "", "\n");
+    }
     out << array_.tostring_part(indent + std::string("    "), "", "\n");
     out << indent << "</" << classname() << ">" << post;
     return out.str();

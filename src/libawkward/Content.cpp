@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <sstream>
+
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/EmptyArray.h"
@@ -60,6 +62,34 @@ namespace awkward {
       tojson_part(builder);
       builder.endlist();
     }
+  }
+
+  const util::Parameters Content::parameters() const {
+    return parameters_;
+  }
+
+  void Content::setparameters(const util::Parameters& parameters) {
+    parameters_ = parameters;
+  }
+
+  const std::string Content::parameter(const std::string& key) const {
+    auto item = parameters_.find(key);
+    if (item == parameters_.end()) {
+      return "null";
+    }
+    return item->second;
+  }
+
+  void Content::setparameter(const std::string& key, const std::string& value) {
+    parameters_[key] = value;
+  }
+
+  bool Content::parameter_equals(const std::string& key, const std::string& value) const {
+    return util::parameter_equals(parameters_, key, value);
+  }
+
+  bool Content::parameters_equal(const util::Parameters& other) const {
+    return util::parameters_equal(parameters_, other);
   }
 
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
@@ -155,6 +185,21 @@ namespace awkward {
       out = std::make_shared<RegularArray>(Identity::none(), Type::none(), out, (int64_t)shape[(size_t)i]);
     }
     return out;
+  }
+
+  const std::string Content::parameters_tostring(const std::string& indent, const std::string& pre, const std::string& post) const {
+    if (parameters_.empty()) {
+      return "";
+    }
+    else {
+      std::stringstream out;
+      out << indent << pre << "<parameters>\n";
+      for (auto pair : parameters_) {
+        out << indent << "    <param key=" << util::quote(pair.first, true) << ">" << pair.second << "</param>\n";
+      }
+      out << indent << "</parameters>" << post;
+      return out.str();
+    }
   }
 
 }

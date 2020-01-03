@@ -52,12 +52,12 @@ namespace awkward {
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
     void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
 
-    // const util::Parameters parameters() const;
-    // void setparameters(const util::Parameters& parameters);
-    // const std::string parameter(const std::string& key) const;
-    // void setparameter(const std::string& key, const std::string& value);
-    // bool parameter_equals(const std::string& key, const std::string& value) const;
-    // bool parameters_equal(const util::Parameters& other) const;
+    const util::Parameters parameters() const;
+    void setparameters(const util::Parameters& parameters);
+    const std::string parameter(const std::string& key) const;
+    void setparameter(const std::string& key, const std::string& value);
+    bool parameter_equals(const std::string& key, const std::string& value) const;
+    bool parameters_equal(const util::Parameters& other) const;
 
   protected:
     virtual void checktype() const = 0;
@@ -71,12 +71,12 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
 
     const std::shared_ptr<Content> getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const;
-    // const std::string string_parameters(const std::string& indent, const std::string& pre, const std::string& post) const;
+    const std::string parameters_tostring(const std::string& indent, const std::string& pre, const std::string& post) const;
 
   protected:
     std::shared_ptr<Identity> id_;
     const std::shared_ptr<Type> type_;
-    // util::Parameters parameters_;
+    util::Parameters parameters_;
   };
 }
 

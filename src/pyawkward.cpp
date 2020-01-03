@@ -787,6 +787,12 @@ void setparameters(T& self, py::object parameters) {
   self.setparameters(dict2parameters(parameters));
 }
 
+template <typename T>
+void setparameter(T& self, std::string& key, py::object value) {
+  py::object valuestr = py::module::import("json").attr("dumps")(value);
+  self.setparameter(key, valuestr.cast<std::string>());
+}
+
 py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::string name) {
   return (py::class_<ak::Type, std::shared_ptr<ak::Type>>(m, name.c_str())
       .def("__eq__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
@@ -801,15 +807,8 @@ py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::str
 template <typename T>
 py::class_<T, ak::Type> type_methods(py::class_<T, std::shared_ptr<T>, ak::Type>& x) {
   return x.def("__repr__", &T::tostring)
-          .def("__getitem__", [](T& self, const std::string& key) -> py::object {
-            std::string cppvalue = self.parameter(key);
-            py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(), cppvalue.length(), "surrogateescape"));
-            return py::module::import("json").attr("loads")(pyvalue);
-          })
-          .def("__setitem__", [](T& self, const std::string& key, py::object value) -> void {
-            py::object valuestr = py::module::import("json").attr("dumps")(value);
-            self.setparameter(key, valuestr.cast<std::string>());
-          })
+          .def_property("parameters", &getparameters<T>, &setparameters<T>)
+          .def("setparameter", &setparameter<T>)
           .def_property_readonly("numfields", &T::numfields)
           .def("fieldindex", &T::fieldindex)
           .def("key", &T::key)
@@ -826,7 +825,6 @@ py::class_<ak::ArrayType, std::shared_ptr<ak::ArrayType>, ak::Type> make_ArrayTy
       }), py::arg("type"), py::arg("length"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::ArrayType::type)
       .def_property_readonly("length", &ak::ArrayType::length)
-      .def_property("parameters", &getparameters<ak::ArrayType>, &setparameters<ak::ArrayType>)
       .def(py::pickle([](const ak::ArrayType& self) {
         return py::make_tuple(parameters2dict(self.parameters()), box(self.type()), py::cast(self.length()));
       }, [](py::tuple state) {
@@ -840,7 +838,6 @@ py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_Unk
       .def(py::init([](py::object parameters) -> ak::UnknownType {
         return ak::UnknownType(dict2parameters(parameters));
       }), py::arg("parameters") = py::none())
-      .def_property("parameters", &getparameters<ak::UnknownType>, &setparameters<ak::UnknownType>)
       .def(py::pickle([](const ak::UnknownType& self) {
         return py::make_tuple(parameters2dict(self.parameters()));
       }, [](py::tuple state) {
@@ -906,7 +903,6 @@ py::class_<ak::PrimitiveType, std::shared_ptr<ak::PrimitiveType>, ak::Type> make
           throw std::invalid_argument(std::string("unrecognized primitive type: ") + std::to_string(self.dtype()));
         }
       })
-      .def_property("parameters", &getparameters<ak::PrimitiveType>, &setparameters<ak::PrimitiveType>)
       .def(py::pickle([](const ak::PrimitiveType& self) {
         return py::make_tuple(parameters2dict(self.parameters()), py::cast((int64_t)self.dtype()));
       }, [](py::tuple state) {
@@ -922,7 +918,6 @@ py::class_<ak::RegularType, std::shared_ptr<ak::RegularType>, ak::Type> make_Reg
       }), py::arg("type"), py::arg("size"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::RegularType::type)
       .def_property_readonly("size", &ak::RegularType::size)
-      .def_property("parameters", &getparameters<ak::RegularType>, &setparameters<ak::RegularType>)
       .def(py::pickle([](const ak::RegularType& self) {
         return py::make_tuple(parameters2dict(self.parameters()), box(self.type()), py::cast(self.size()));
       }, [](py::tuple state) {
@@ -937,7 +932,6 @@ py::class_<ak::ListType, std::shared_ptr<ak::ListType>, ak::Type> make_ListType(
         return ak::ListType(dict2parameters(parameters), type);
       }), py::arg("type"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::ListType::type)
-      .def_property("parameters", &getparameters<ak::ListType>, &setparameters<ak::ListType>)
       .def(py::pickle([](const ak::ListType& self) {
         return py::make_tuple(parameters2dict(self.parameters()), box(self.type()));
       }, [](py::tuple state) {
@@ -952,7 +946,6 @@ py::class_<ak::OptionType, std::shared_ptr<ak::OptionType>, ak::Type> make_Optio
         return ak::OptionType(dict2parameters(parameters), type);
       }), py::arg("type"), py::arg("parameters") = py::none())
       .def_property_readonly("type", &ak::OptionType::type)
-      .def_property("parameters", &getparameters<ak::OptionType>, &setparameters<ak::OptionType>)
       .def(py::pickle([](const ak::OptionType& self) {
         return py::make_tuple(parameters2dict(self.parameters()), box(self.type()));
       }, [](py::tuple state) {
@@ -979,7 +972,6 @@ py::class_<ak::UnionType, std::shared_ptr<ak::UnionType>, ak::Type> make_UnionTy
         return types;
       })
       .def("type", &ak::UnionType::type)
-      .def_property("parameters", &getparameters<ak::UnionType>, &setparameters<ak::UnionType>)
       .def(py::pickle([](const ak::UnionType& self) {
         py::tuple types((size_t)self.numtypes());
         for (int64_t i = 0;  i < self.numtypes();  i++) {
@@ -1077,7 +1069,6 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
           self.append(unbox_type(type), key.cast<std::string>());
         }
       }, py::arg("type"), py::arg("key") = py::none())
-      .def_property("parameters", &getparameters<ak::RecordType>, &setparameters<ak::RecordType>)
       .def(py::pickle([](const ak::RecordType& self) {
         py::tuple pytypes((size_t)self.numfields());
         for (int64_t i = 0;  i < self.numfields();  i++) {
@@ -1155,6 +1146,8 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("setid", [](T& self) -> void {
             self.setid();
           })
+          .def_property("parameters", &getparameters<T>, &setparameters<T>)
+          .def("setparameter", &setparameter<T>)
           .def_property_readonly("isbare", &T::isbare)
           .def_property_readonly("type", [](T& self) -> py::object {
             return box(self.type());

@@ -208,12 +208,15 @@ namespace awkward {
       }
       out << "\" at=\"0x";
       out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get());
-      if (id_.get() == nullptr) {
+      if (id_.get() == nullptr  &&  parameters_.empty()) {
         out << "\"/>" << post;
       }
       else {
         out << "\">\n";
         out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
+        if (!parameters_.empty()) {
+          out << parameters_tostring(indent + std::string("    "), "", "\n");
+        }
         out << indent << "</RawArray>" << post;
       }
       return out.str();
