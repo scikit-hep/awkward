@@ -11,8 +11,8 @@
 #include "awkward/array/RecordArray.h"
 
 namespace awkward {
-  RecordArray::RecordArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup)
-      : Content(id, parameters)
+  RecordArray::RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup)
+      : Content(identities, parameters)
       , contents_(contents)
       , recordlookup_(recordlookup)
       , length_(0) {
@@ -24,8 +24,8 @@ namespace awkward {
     }
   }
 
-  RecordArray::RecordArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents)
-      : Content(id, parameters)
+  RecordArray::RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents)
+      : Content(identities, parameters)
       , contents_(contents)
       , recordlookup_(nullptr)
       , length_(0) {
@@ -34,8 +34,8 @@ namespace awkward {
     }
   }
 
-  RecordArray::RecordArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, int64_t length, bool istuple)
-      : Content(id, parameters)
+  RecordArray::RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, int64_t length, bool istuple)
+      : Content(identities, parameters)
       , contents_()
       , recordlookup_(istuple ? nullptr : new util::RecordLookup)
       , length_(length) { }
@@ -56,51 +56,51 @@ namespace awkward {
     return "RecordArray";
   }
 
-  void RecordArray::setid() {
+  void RecordArray::setidentities() {
     int64_t len = length();
     if (len <= kMaxInt32) {
-      std::shared_ptr<Identities> newid = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, len);
-      Identities32* rawid = reinterpret_cast<Identities32*>(newid.get());
-      struct Error err = awkward_new_identity32(rawid->ptr().get(), len);
-      util::handle_error(err, classname(), id_.get());
-      setid(newid);
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, len);
+      Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
+      struct Error err = awkward_new_identity32(rawidentities->ptr().get(), len);
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
     }
     else {
-      std::shared_ptr<Identities> newid = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, len);
-      Identities64* rawid = reinterpret_cast<Identities64*>(newid.get());
-      struct Error err = awkward_new_identity64(rawid->ptr().get(), len);
-      util::handle_error(err, classname(), id_.get());
-      setid(newid);
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, len);
+      Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
+      struct Error err = awkward_new_identity64(rawidentities->ptr().get(), len);
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
     }
   }
 
-  void RecordArray::setid(const std::shared_ptr<Identities>& id) {
-    if (id.get() == nullptr) {
+  void RecordArray::setidentities(const std::shared_ptr<Identities>& identities) {
+    if (identities.get() == nullptr) {
       for (auto content : contents_) {
-        content.get()->setid(id);
+        content.get()->setidentities(identities);
       }
     }
     else {
-      if (length() != id.get()->length()) {
-        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
+      if (length() != identities.get()->length()) {
+        util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
       }
       if (istuple()) {
         for (size_t j = 0;  j < contents_.size();  j++) {
-          Identities::FieldLoc fieldloc(id.get()->fieldloc().begin(), id.get()->fieldloc().end());
-          fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width() - 1, std::to_string(j)));
-          contents_[j].get()->setid(id.get()->withfieldloc(fieldloc));
+          Identities::FieldLoc fieldloc(identities.get()->fieldloc().begin(), identities.get()->fieldloc().end());
+          fieldloc.push_back(std::pair<int64_t, std::string>(identities.get()->width() - 1, std::to_string(j)));
+          contents_[j].get()->setidentities(identities.get()->withfieldloc(fieldloc));
         }
       }
       else {
-        Identities::FieldLoc original = id.get()->fieldloc();
+        Identities::FieldLoc original = identities.get()->fieldloc();
         for (size_t j = 0;  j < contents_.size();  j++) {
           Identities::FieldLoc fieldloc(original.begin(), original.end());
-          fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width() - 1, recordlookup_.get()->at(j)));
-          contents_[j].get()->setid(id.get()->withfieldloc(fieldloc));
+          fieldloc.push_back(std::pair<int64_t, std::string>(identities.get()->width() - 1, recordlookup_.get()->at(j)));
+          contents_[j].get()->setidentities(identities.get()->withfieldloc(fieldloc));
         }
       }
     }
-    id_ = id;
+    identities_ = identities;
   }
 
   const std::shared_ptr<Type> RecordArray::type() const {
@@ -131,10 +131,10 @@ namespace awkward {
         }
       }
       if (contents.empty()) {
-        return std::make_shared<RecordArray>(id_, type.get()->parameters(), length(), istuple());
+        return std::make_shared<RecordArray>(identities_, type.get()->parameters(), length(), istuple());
       }
       else {
-        return std::make_shared<RecordArray>(id_, type.get()->parameters(), contents, raw->recordlookup());
+        return std::make_shared<RecordArray>(identities_, type.get()->parameters(), contents, raw->recordlookup());
       }
     }
     else {
@@ -149,8 +149,8 @@ namespace awkward {
       out << " length=\"" << length_ << "\"";
     }
     out << ">\n";
-    if (id_.get() != nullptr) {
-      out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
+    if (identities_.get() != nullptr) {
+      out << identities_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
     if (!parameters_.empty()) {
       out << parameters_tostring(indent + std::string("    "), "", "\n");
@@ -211,16 +211,16 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::shallow_copy() const {
     if (contents_.empty()) {
-      return std::make_shared<RecordArray>(id_, parameters_, length(), istuple());
+      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
     }
     else {
-      return std::make_shared<RecordArray>(id_, parameters_, contents_, recordlookup_);
+      return std::make_shared<RecordArray>(identities_, parameters_, contents_, recordlookup_);
     }
   }
 
   void RecordArray::check_for_iteration() const {
-    if (id_.get() != nullptr  &&  id_.get()->length() < length()) {
-      util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+    if (identities_.get() != nullptr  &&  identities_.get()->length() < length()) {
+      util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);
     }
   }
 
@@ -235,7 +235,7 @@ namespace awkward {
       regular_at += len;
     }
     if (!(0 <= regular_at  &&  regular_at < len)) {
-      util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
     }
     return getitem_at_nowrap(regular_at);
   }
@@ -249,27 +249,27 @@ namespace awkward {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
-      return std::make_shared<RecordArray>(id_, parameters_, regular_stop - regular_start, istuple());
+      return std::make_shared<RecordArray>(identities_, parameters_, regular_stop - regular_start, istuple());
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range(start, stop));
       }
-      return std::make_shared<RecordArray>(id_, parameters_, contents, recordlookup_);
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
     }
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     if (contents_.empty()) {
-      return std::make_shared<RecordArray>(id_, parameters_, stop - start, istuple());
+      return std::make_shared<RecordArray>(identities_, parameters_, stop - start, istuple());
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range_nowrap(start, stop));
       }
-      return std::make_shared<RecordArray>(id_, parameters_, contents, recordlookup_);
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
     }
   }
 
@@ -278,7 +278,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(id_, parameters_, length(), istuple());
+    RecordArray out(identities_, parameters_, length(), istuple());
     if (istuple()) {
       for (auto key : keys) {
         out.append(field(key).get()->getitem_range_nowrap(0, length()));
@@ -294,22 +294,22 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::carry(const Index64& carry) const {
     if (contents_.empty()) {
-      std::shared_ptr<Identities> id(nullptr);
-      if (id_.get() != nullptr) {
-        id = id_.get()->getitem_carry_64(carry);
+      std::shared_ptr<Identities> identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->getitem_carry_64(carry);
       }
-      return std::make_shared<RecordArray>(id, parameters_, carry.length(), istuple());
+      return std::make_shared<RecordArray>(identities, parameters_, carry.length(), istuple());
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->carry(carry));
       }
-      std::shared_ptr<Identities> id(nullptr);
-      if (id_.get() != nullptr) {
-        id = id_.get()->getitem_carry_64(carry);
+      std::shared_ptr<Identities> identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->getitem_carry_64(carry);
       }
-      return std::make_shared<RecordArray>(id, parameters_, contents, recordlookup_);
+      return std::make_shared<RecordArray>(identities, parameters_, contents, recordlookup_);
     }
   }
 
@@ -384,7 +384,7 @@ namespace awkward {
   }
 
   const RecordArray RecordArray::astuple() const {
-    return RecordArray(id_, parameters_, contents_);
+    return RecordArray(identities_, parameters_, contents_);
   }
 
   void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {

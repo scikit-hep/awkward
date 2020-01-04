@@ -118,17 +118,17 @@ namespace awkward {
       return true;
     }
 
-    void handle_error(const struct Error& err, const std::string& classname, const Identities* id) {
+    void handle_error(const struct Error& err, const std::string& classname, const Identities* identities) {
       if (err.str != nullptr) {
         std::stringstream out;
         out << "in " << classname;
-        if (err.location != kSliceNone  &&  id != nullptr) {
+        if (err.location != kSliceNone  &&  identities != nullptr) {
           assert(err.location > 0);
-          if (0 <= err.location  &&  err.location < id->length()) {
-            out << " at id[" << id->location_at(err.location) << "]";
+          if (0 <= err.location  &&  err.location < identities->length()) {
+            out << " with identity [" << identities->location_at(err.location) << "]";
           }
           else {
-            out << " at id[???]";
+            out << " with invalid identity";
           }
         }
         if (err.attempt != kSliceNone) {

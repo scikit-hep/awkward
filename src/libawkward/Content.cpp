@@ -10,8 +10,8 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  Content::Content(const std::shared_ptr<Identities>& id, const util::Parameters& parameters)
-      : id_(id)
+  Content::Content(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters)
+      : identities_(identities)
       , parameters_(parameters) { }
 
   Content::~Content() { }
@@ -20,8 +20,8 @@ namespace awkward {
     return false;
   }
 
-  const std::shared_ptr<Identities> Content::id() const {
-    return id_;
+  const std::shared_ptr<Identities> Content::identities() const {
+    return identities_;
   }
 
   const std::string Content::tostring() const {

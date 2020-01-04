@@ -15,13 +15,13 @@
 namespace awkward {
   class RegularArray: public Content {
   public:
-    RegularArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::shared_ptr<Content>& content, int64_t size);
+    RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<Content>& content, int64_t size);
     const std::shared_ptr<Content> content() const;
     int64_t size() const;
 
     const std::string classname() const override;
-    void setid() override;
-    void setid(const std::shared_ptr<Identities>& id) override;
+    void setidentities() override;
+    void setidentities(const std::shared_ptr<Identities>& identities) override;
     const std::shared_ptr<Type> type() const override;
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;

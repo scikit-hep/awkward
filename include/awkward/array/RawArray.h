@@ -44,8 +44,8 @@ namespace awkward {
   template <typename T>
   class RawArrayOf: public Content {
   public:
-    RawArrayOf<T>(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
-        : Content(id, parameters)
+    RawArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
+        : Content(identities, parameters)
         , ptr_(ptr)
         , offset_(offset)
         , length_(length)
@@ -55,15 +55,15 @@ namespace awkward {
       }
     }
 
-    RawArrayOf<T>(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t length)
-        : Content(id, parameters)
+    RawArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t length)
+        : Content(identities, parameters)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
-    RawArrayOf<T>(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const int64_t length)
-        : Content(id, parameters)
+    RawArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const int64_t length)
+        : Content(identities, parameters)
         , ptr_(std::shared_ptr<T>(new T[(size_t)length], util::array_deleter<T>()))
         , offset_(0)
         , length_(length)
@@ -107,26 +107,26 @@ namespace awkward {
       return std::string("RawArrayOf<") + std::string(typeid(T).name()) + std::string(">");
     }
 
-    void setid() override {
+    void setidentities() override {
       if (length() <= kMaxInt32) {
-        std::shared_ptr<Identities> newid = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
-        Identities32* rawid = reinterpret_cast<Identities32*>(newid.get());
-        awkward_new_identity32(rawid->ptr().get(), length());
-        setid(newid);
+        std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+        Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
+        awkward_new_identity32(rawidentities->ptr().get(), length());
+        setidentities(newidentities);
       }
       else {
-        std::shared_ptr<Identities> newid = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
-        Identities64* rawid = reinterpret_cast<Identities64*>(newid.get());
-        awkward_new_identity64(rawid->ptr().get(), length());
-        setid(newid);
+        std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+        Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
+        awkward_new_identity64(rawidentities->ptr().get(), length());
+        setidentities(newidentities);
       }
     }
 
-    void setid(const std::shared_ptr<Identities>& id) override {
-      if (id.get() != nullptr  &&  length() != id.get()->length()) {
-        throw std::invalid_argument("content and its id must have the same length");
+    void setidentities(const std::shared_ptr<Identities>& identities) override {
+      if (identities.get() != nullptr  &&  length() != identities.get()->length()) {
+        throw std::invalid_argument("content and its identities must have the same length");
       }
-      id_ = id;
+      identities_ = identities;
     }
 
     const std::shared_ptr<Type> type() const override {
@@ -170,7 +170,7 @@ namespace awkward {
 
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override {
     // FIXME: if the type does not match T, actually convert it!
-      return std::make_shared<RawArrayOf<T>>(id_, type.get()->parameters(), ptr_, offset_, length_, itemsize_);
+      return std::make_shared<RawArrayOf<T>>(identities_, type.get()->parameters(), ptr_, offset_, length_, itemsize_);
     }
 
     const std::string tostring() {
@@ -206,12 +206,12 @@ namespace awkward {
       }
       out << "\" at=\"0x";
       out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get());
-      if (id_.get() == nullptr  &&  parameters_.empty()) {
+      if (identities_.get() == nullptr  &&  parameters_.empty()) {
         out << "\"/>" << post;
       }
       else {
         out << "\">\n";
-        out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
+        out << identities_.get()->tostring_part(indent + std::string("    "), "", "\n");
         if (!parameters_.empty()) {
           out << parameters_tostring(indent + std::string("    "), "", "\n");
         }
@@ -264,12 +264,12 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> shallow_copy() const override {
-      return std::make_shared<RawArrayOf<T>>(id_, parameters_, ptr_, offset_, length_, itemsize_);
+      return std::make_shared<RawArrayOf<T>>(identities_, parameters_, ptr_, offset_, length_, itemsize_);
     }
 
     void check_for_iteration() const override {
-      if (id_.get() != nullptr  &&  id_.get()->length() < length_) {
-        util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+      if (identities_.get() != nullptr  &&  identities_.get()->length() < length_) {
+        util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);
       }
     }
 
@@ -283,7 +283,7 @@ namespace awkward {
         regular_at += length_;
       }
       if (!(0 <= regular_at  &&  regular_at < length_)) {
-        util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+        util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
       }
       return getitem_at_nowrap(regular_at);
     }
@@ -296,18 +296,18 @@ namespace awkward {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
-      if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
-        util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
+      if (identities_.get() != nullptr  &&  regular_stop > identities_.get()->length()) {
+        util::handle_error(failure("index out of range", kSliceNone, stop), identities_.get()->classname(), nullptr);
       }
       return getitem_range_nowrap(regular_start, regular_stop);
     }
 
     const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const override {
-      std::shared_ptr<Identities> id(nullptr);
-      if (id_.get() != nullptr) {
-        id = id_.get()->getitem_range_nowrap(start, stop);
+      std::shared_ptr<Identities> identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->getitem_range_nowrap(start, stop);
       }
-      return std::make_shared<RawArrayOf<T>>(id, parameters_, ptr_, offset_ + start, stop - start, itemsize_);
+      return std::make_shared<RawArrayOf<T>>(identities, parameters_, ptr_, offset_ + start, stop - start, itemsize_);
     }
 
     const std::shared_ptr<Content> getitem_field(const std::string& key) const override {
@@ -341,14 +341,14 @@ namespace awkward {
         itemsize_,
         byteoffset(),
         carry.ptr().get());
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
 
-      std::shared_ptr<Identities> id(nullptr);
-      if (id_.get() != nullptr) {
-        id = id_.get()->getitem_carry_64(carry);
+      std::shared_ptr<Identities> identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->getitem_carry_64(carry);
       }
 
-      return std::make_shared<RawArrayOf<T>>(id, parameters_, ptr, 0, carry.length(), itemsize_);
+      return std::make_shared<RawArrayOf<T>>(identities, parameters_, ptr, 0, carry.length(), itemsize_);
     }
 
     const std::pair<int64_t, int64_t> minmax_depth() const override {
@@ -422,7 +422,7 @@ namespace awkward {
         flathead.ptr().get(),
         flathead.length(),
         length_);
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
       return carry(flathead);
     }
 

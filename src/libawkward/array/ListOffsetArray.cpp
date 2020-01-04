@@ -16,8 +16,8 @@
 
 namespace awkward {
   template <typename T>
-  ListOffsetArrayOf<T>::ListOffsetArrayOf(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content)
-      : Content(id, parameters)
+  ListOffsetArrayOf<T>::ListOffsetArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content)
+      : Content(identities, parameters)
       , offsets_(offsets)
       , content_(content) { }
 
@@ -58,102 +58,102 @@ namespace awkward {
   }
 
   template <>
-  void ListOffsetArrayOf<int32_t>::setid(const std::shared_ptr<Identities>& id) {
-    if (id.get() == nullptr) {
-      content_.get()->setid(id);
+  void ListOffsetArrayOf<int32_t>::setidentities(const std::shared_ptr<Identities>& identities) {
+    if (identities.get() == nullptr) {
+      content_.get()->setidentities(identities);
     }
     else {
-      if (length() != id.get()->length()) {
-        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
+      if (length() != identities.get()->length()) {
+        util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
       }
-      std::shared_ptr<Identities> bigid = id;
+      std::shared_ptr<Identities> bigidentities = identities;
       if (content_.get()->length() > kMaxInt32) {
-        bigid = id.get()->to64();
+        bigidentities = identities.get()->to64();
       }
-      if (Identities32* rawid = dynamic_cast<Identities32*>(bigid.get())) {
-        std::shared_ptr<Identities> subid = std::make_shared<Identities32>(Identities::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        Identities32* rawsubid = reinterpret_cast<Identities32*>(subid.get());
+      if (Identities32* rawidentities = dynamic_cast<Identities32*>(bigidentities.get())) {
+        std::shared_ptr<Identities> subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
+        Identities32* rawsubidentities = reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = awkward_identity32_from_listoffsetarray32(
-          rawsubid->ptr().get(),
-          rawid->ptr().get(),
+          rawsubidentities->ptr().get(),
+          rawidentities->ptr().get(),
           offsets_.ptr().get(),
-          rawid->offset(),
+          rawidentities->offset(),
           offsets_.offset(),
           content_.get()->length(),
           length(),
-          rawid->width());
-        util::handle_error(err, classname(), id_.get());
-        content_.get()->setid(subid);
+          rawidentities->width());
+        util::handle_error(err, classname(), identities_.get());
+        content_.get()->setidentities(subidentities);
       }
-      else if (Identities64* rawid = dynamic_cast<Identities64*>(bigid.get())) {
-        std::shared_ptr<Identities> subid = std::make_shared<Identities64>(Identities::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        Identities64* rawsubid = reinterpret_cast<Identities64*>(subid.get());
+      else if (Identities64* rawidentities = dynamic_cast<Identities64*>(bigidentities.get())) {
+        std::shared_ptr<Identities> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
+        Identities64* rawsubidentities = reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = awkward_identity64_from_listoffsetarray32(
-          rawsubid->ptr().get(),
-          rawid->ptr().get(),
+          rawsubidentities->ptr().get(),
+          rawidentities->ptr().get(),
           offsets_.ptr().get(),
-          rawid->offset(),
+          rawidentities->offset(),
           offsets_.offset(),
           content_.get()->length(),
           length(),
-          rawid->width());
-        util::handle_error(err, classname(), id_.get());
-        content_.get()->setid(subid);
+          rawidentities->width());
+        util::handle_error(err, classname(), identities_.get());
+        content_.get()->setidentities(subidentities);
       }
       else {
         throw std::runtime_error("unrecognized Identities specialization");
       }
     }
-    id_ = id;
+    identities_ = identities;
   }
 
   template <typename T>
-  void ListOffsetArrayOf<T>::setid(const std::shared_ptr<Identities>& id) {
-    if (id.get() == nullptr) {
-      content_.get()->setid(id);
+  void ListOffsetArrayOf<T>::setidentities(const std::shared_ptr<Identities>& identities) {
+    if (identities.get() == nullptr) {
+      content_.get()->setidentities(identities);
     }
     else {
-      if (length() != id.get()->length()) {
-        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
+      if (length() != identities.get()->length()) {
+        util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
       }
-      std::shared_ptr<Identities> bigid = id.get()->to64();
-      if (Identities64* rawid = dynamic_cast<Identities64*>(bigid.get())) {
-        std::shared_ptr<Identities> subid = std::make_shared<Identities64>(Identities::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        Identities64* rawsubid = reinterpret_cast<Identities64*>(subid.get());
+      std::shared_ptr<Identities> bigidentities = identities.get()->to64();
+      if (Identities64* rawidentities = dynamic_cast<Identities64*>(bigidentities.get())) {
+        std::shared_ptr<Identities> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
+        Identities64* rawsubidentities = reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = util::awkward_identity64_from_listoffsetarray<T>(
-          rawsubid->ptr().get(),
-          rawid->ptr().get(),
+          rawsubidentities->ptr().get(),
+          rawidentities->ptr().get(),
           offsets_.ptr().get(),
-          rawid->offset(),
+          rawidentities->offset(),
           offsets_.offset(),
           content_.get()->length(),
           length(),
-          rawid->width());
-        util::handle_error(err, classname(), id_.get());
-        content_.get()->setid(subid);
+          rawidentities->width());
+        util::handle_error(err, classname(), identities_.get());
+        content_.get()->setidentities(subidentities);
       }
       else {
         throw std::runtime_error("unrecognized Identities specialization");
       }
     }
-    id_ = id;
+    identities_ = identities;
   }
 
   template <typename T>
-  void ListOffsetArrayOf<T>::setid() {
+  void ListOffsetArrayOf<T>::setidentities() {
     if (length() <= kMaxInt32) {
-      std::shared_ptr<Identities> newid = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
-      Identities32* rawid = reinterpret_cast<Identities32*>(newid.get());
-      struct Error err = awkward_new_identity32(rawid->ptr().get(), length());
-      util::handle_error(err, classname(), id_.get());
-      setid(newid);
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
+      struct Error err = awkward_new_identity32(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
     }
     else {
-      std::shared_ptr<Identities> newid = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
-      Identities64* rawid = reinterpret_cast<Identities64*>(newid.get());
-      struct Error err = awkward_new_identity64(rawid->ptr().get(), length());
-      util::handle_error(err, classname(), id_.get());
-      setid(newid);
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
+      struct Error err = awkward_new_identity64(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
     }
   }
 
@@ -165,7 +165,7 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::astype(const std::shared_ptr<Type>& type) const {
     if (ListType* raw = dynamic_cast<ListType*>(type.get())) {
-      return std::make_shared<ListOffsetArrayOf<T>>(id_, type.get()->parameters(), offsets_, content_.get()->astype(raw->type()));
+      return std::make_shared<ListOffsetArrayOf<T>>(identities_, type.get()->parameters(), offsets_, content_.get()->astype(raw->type()));
     }
     else {
       throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
@@ -176,8 +176,8 @@ namespace awkward {
   const std::string ListOffsetArrayOf<T>::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << ">\n";
-    if (id_.get() != nullptr) {
-      out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
+    if (identities_.get() != nullptr) {
+      out << identities_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
     if (!parameters_.empty()) {
       out << parameters_tostring(indent + std::string("    "), "", "\n");
@@ -205,13 +205,13 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::shallow_copy() const {
-    return std::make_shared<ListOffsetArrayOf<T>>(id_, parameters_, offsets_, content_);
+    return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets_, content_);
   }
 
   template <typename T>
   void ListOffsetArrayOf<T>::check_for_iteration() const {
-    if (id_.get() != nullptr  &&  id_.get()->length() < offsets_.length() - 1) {
-      util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+    if (identities_.get() != nullptr  &&  identities_.get()->length() < offsets_.length() - 1) {
+      util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);
     }
   }
 
@@ -227,7 +227,7 @@ namespace awkward {
       regular_at += offsets_.length() - 1;
     }
     if (!(0 <= regular_at  &&  regular_at < offsets_.length() - 1)) {
-      util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
     }
     return getitem_at_nowrap(regular_at);
   }
@@ -241,13 +241,13 @@ namespace awkward {
       start = stop = 0;
     }
     if (start < 0) {
-      util::handle_error(failure("offsets[i] < 0", kSliceNone, at), classname(), id_.get());
+      util::handle_error(failure("offsets[i] < 0", kSliceNone, at), classname(), identities_.get());
     }
     if (start > stop) {
-      util::handle_error(failure("offsets[i] > offsets[i + 1]", kSliceNone, at), classname(), id_.get());
+      util::handle_error(failure("offsets[i] > offsets[i + 1]", kSliceNone, at), classname(), identities_.get());
     }
     if (stop > lencontent) {
-      util::handle_error(failure("offsets[i] != offsets[i + 1] and offsets[i + 1] > len(content)", kSliceNone, at), classname(), id_.get());
+      util::handle_error(failure("offsets[i] != offsets[i + 1] and offsets[i + 1] > len(content)", kSliceNone, at), classname(), identities_.get());
     }
     return content_.get()->getitem_range_nowrap(start, stop);
   }
@@ -257,29 +257,29 @@ namespace awkward {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), offsets_.length() - 1);
-    if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
-      util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
+    if (identities_.get() != nullptr  &&  regular_stop > identities_.get()->length()) {
+      util::handle_error(failure("index out of range", kSliceNone, stop), identities_.get()->classname(), nullptr);
     }
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    std::shared_ptr<Identities> id(nullptr);
-    if (id_.get() != nullptr) {
-      id = id_.get()->getitem_range_nowrap(start, stop);
+    std::shared_ptr<Identities> identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::make_shared<ListOffsetArrayOf<T>>(id, parameters_, offsets_.getitem_range_nowrap(start, stop + 1), content_);
+    return std::make_shared<ListOffsetArrayOf<T>>(identities, parameters_, offsets_.getitem_range_nowrap(start, stop + 1), content_);
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_field(const std::string& key) const {
-    return std::make_shared<ListOffsetArrayOf<T>>(id_, util::Parameters(), offsets_, content_.get()->getitem_field(key));
+    return std::make_shared<ListOffsetArrayOf<T>>(identities_, util::Parameters(), offsets_, content_.get()->getitem_field(key));
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<ListOffsetArrayOf<T>>(id_, util::Parameters(), offsets_, content_.get()->getitem_fields(keys));
+    return std::make_shared<ListOffsetArrayOf<T>>(identities_, util::Parameters(), offsets_, content_.get()->getitem_fields(keys));
   }
 
   template <typename T>
@@ -298,12 +298,12 @@ namespace awkward {
       stops.offset(),
       offsets_.length() - 1,
       carry.length());
-    util::handle_error(err, classname(), id_.get());
-    std::shared_ptr<Identities> id(nullptr);
-    if (id_.get() != nullptr) {
-      id = id_.get()->getitem_carry_64(carry);
+    util::handle_error(err, classname(), identities_.get());
+    std::shared_ptr<Identities> identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_carry_64(carry);
     }
-    return std::make_shared<ListArrayOf<T>>(id, parameters_, nextstarts, nextstops, content_);
+    return std::make_shared<ListArrayOf<T>>(identities, parameters_, nextstarts, nextstops, content_);
   }
 
   template <typename T>
@@ -354,7 +354,7 @@ namespace awkward {
       starts.offset(),
       stops.offset(),
       at.at());
-    util::handle_error(err, classname(), id_.get());
+    util::handle_error(err, classname(), identities_.get());
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
     return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
   }
@@ -383,7 +383,7 @@ namespace awkward {
       start,
       stop,
       step);
-    util::handle_error(err1, classname(), id_.get());
+    util::handle_error(err1, classname(), identities_.get());
 
     IndexOf<T> nextoffsets(lenstarts + 1);
     Index64 nextcarry(carrylength);
@@ -399,11 +399,11 @@ namespace awkward {
       start,
       stop,
       step);
-    util::handle_error(err2, classname(), id_.get());
+    util::handle_error(err2, classname(), identities_.get());
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
     if (advanced.length() == 0) {
-      return std::make_shared<ListOffsetArrayOf<T>>(id_, parameters_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced));
+      return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced));
     }
     else {
       int64_t total;
@@ -411,15 +411,15 @@ namespace awkward {
         &total,
         nextoffsets.ptr().get(),
         lenstarts);
-      util::handle_error(err1, classname(), id_.get());
+      util::handle_error(err1, classname(), identities_.get());
       Index64 nextadvanced(total);
       struct Error err2 = util::awkward_listarray_getitem_next_range_spreadadvanced_64<T>(
         nextadvanced.ptr().get(),
         advanced.ptr().get(),
         nextoffsets.ptr().get(),
         lenstarts);
-      util::handle_error(err2, classname(), id_.get());
-      return std::make_shared<ListOffsetArrayOf<T>>(id_, parameters_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced));
+      util::handle_error(err2, classname(), identities_.get());
+      return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced));
     }
   }
 
@@ -445,7 +445,7 @@ namespace awkward {
         lenstarts,
         flathead.length(),
         content_.get()->length());
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       return getitem_next_array_wrap(nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), array.shape());
     }
@@ -464,7 +464,7 @@ namespace awkward {
         lenstarts,
         flathead.length(),
         content_.get()->length());
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
     }
