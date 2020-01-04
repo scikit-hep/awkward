@@ -107,8 +107,8 @@ rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
    * [X] **September 2019:** Set up CI/CD; define jagged array types in C++; pervasive infrastructure like database-style indexing.
    * [X] **October 2019:** NumPy-compliant slicing; the Numba implementation. Feature parity will be maintained in Numba continuously.
    * [X] **November 2019:** Fillable arrays to create columnar data; high-level type objects; all list and record types.
-   * [ ] **December 2019:** The `awkward.Array` user interface; behavioral mix-ins, including the string type; [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) and [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html).
-   * [ ] **January 2020:** The rest of the array nodes: option and union types, indirection, chunking, and laziness.
+   * [X] **December 2019:** The `awkward.Array` user interface; behavioral mix-ins, including the string type.
+   * [ ] **January 2020:** [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) and [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html); the rest of the array nodes: option and union types, indirection, chunking, and laziness.
    * [ ] **February 2020:** The array operations: flattening, padding, concatenating, combinatorics, etc.
 
 **Updating dependent libraries:**
@@ -149,26 +149,27 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
          * [X] Implement it in Numba as well.
-      * [ ] `OptionArray`: for nullable data, covering both bit and byte granularity (old `MaskedArray` and `BitMaskedArray`).
+      * [ ] `ByteMaskedArray`: for nullable data with a byte mask (for NumPy).
+      * [ ] `BitMaskedArray`: for nullable data with a bit mask (for Arrow).
+      * [ ] `UnmaskedArray`: for optional type without actually having a mask.
+      * [ ] `IndexedArray`: same as the old version `IndexedMaskedArray`, has option type.
       * [ ] `UnionArray`: same as the old version; `SparseUnionArray`: the additional case found in Apache Arrow.
-      * [ ] `IndexedArray`: same as the old version, but allowing negative values to be `None`; hence, it has option type and fills the role of `IndexedMaskedArray`.
       * [ ] `RedirectArray`: an explicit weak-reference to another part of the structure (no hard-linked cycles). Often used with an `IndexedArray`.
       * [ ] `SlicedArray`: lazy-slicing (from old `Table`) that can be applied to any type.
-      * [ ] `SparseArray`: same as the old version.
+      * [ ] `SparseArray`: same as the old version, but now we need a good lookup mechanism.
       * [ ] `ChunkedArray`: same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required. (Maybe `AmorphousChunkedArray` would fill that role.)
       * [ ] `RegularChunkedArray`: like a `ChunkedArray`, but all chunks are known to have the same size.
       * [ ] `VirtualArray`: same as the old version, including caching, but taking C++11 lambda functions for materialization, get-cache, and put-cache. The pybind11 layer will connect this to Python callables.
       * [ ] `PyVirtualArray`: takes a Python lambda (which gets carried into `VirtualArray`).
       * [ ] `PyObjectArray`: same as the old version.
    * [X] Describe high-level types using [datashape](https://datashape.readthedocs.io/en/latest/) and possibly also an in-house schema. (Emit datashape _strings_ from C++.)
-   * [ ] Describe mid-level "persistence types" with no lengths, somewhat minimal JSON, optional dtypes/compression.
-   * [ ] Describe low-level layouts independently of filled arrays (JSON or something)?
+   * [ ] Translation to and from Apache Arrow and Parquet in C++.
    * [X] Layer 1 interface `Array`:
-      * [ ] Pass through to the layout classes in Python and Numba.
+      * [X] Pass through to the layout classes in Python and Numba.
       * [ ] Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before).
       * [ ] Pass through other Numpy functions using [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html) (this would be new).
       * [ ] `RecordArray` fields (not called "columns" anymore) through Layer 1 `__getattr__`.
-      * [ ] Special Layer 1 `Record` type for `RecordArray` elements, supporting some methods and a visual representation based on `Identity` if available, all fields if `recordtype == "tuple"`, or the first field otherwise.
+      * [X] Special Layer 1 `Record` type for `RecordArray` elements, supporting some methods and a visual representation based on `Identity` if available, all fields if `recordtype == "tuple"`, or the first field otherwise.
       * [X] Mechanism for adding user-defined `Methods` like `LorentzVector`, as before, but only on Layer 1.
          * [X] High-level classes for characters and strings.
       * [ ] Inerhit from Pandas so that all Layer 1 arrays can be DataFrame columns.
@@ -197,10 +198,11 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
    * [ ] Update [hepvector](https://github.com/henryiii/hepvector#readme) to be Derived classes, replacing the `TLorentzVectorArray` in uproot-methods.
    * [ ] Update uproot (on a branch) to use Awkward 1.0.
    * [ ] Start the `awkward → awkward0`, `awkward1 → awkward` transition.
-   * [ ] Translation to and from Apache Arrow and Parquet in C++.
    * [ ] Persistence to any medium that stores named binary blobs, as before, but accessible via C++ (especially for writing). The persistence format might differ slightly from the existing one (break backward compatibility, if needed).
    * [ ] Universal `array.get[...]` as a softer form of `array[...]` that inserts `None` for non-existent indexes, rather than raising errors.
    * [ ] Explicit interface with [NumExpr](https://numexpr.readthedocs.io/en/latest/index.html).
+   * [ ] Describe mid-level "persistence types" with no lengths, somewhat minimal JSON, optional dtypes/compression.
+   * [ ] Describe low-level layouts independently of filled arrays (JSON or something)?
 
 ### Thereafter
 
