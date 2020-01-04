@@ -4,6 +4,8 @@
     <compoundname>util.cpp</compoundname>
     <includes local="no">cassert</includes>
     <includes local="no">sstream</includes>
+    <includes local="no">set</includes>
+    <includes local="yes">rapidjson/document.h</includes>
     <includes local="yes">awkward/cpu-kernels/identity.h</includes>
     <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
     <includes local="yes">awkward/util.h</includes>
@@ -24,40 +26,209 @@
         </childnode>
         <childnode refid="7" relation="include">
         </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
       </node>
-      <node id="6">
+      <node id="8">
         <label>awkward/util.h</label>
       </node>
       <node id="2">
         <label>cassert</label>
       </node>
-      <node id="5">
+      <node id="7">
         <label>awkward/cpu-kernels/getitem.h</label>
       </node>
-      <node id="4">
+      <node id="6">
         <label>awkward/cpu-kernels/identity.h</label>
       </node>
-      <node id="7">
-        <label>awkward/Identities.h</label>
+      <node id="5">
+        <label>rapidjson/document.h</label>
       </node>
       <node id="3">
         <label>sstream</label>
+      </node>
+      <node id="9">
+        <label>awkward/Identities.h</label>
+      </node>
+      <node id="4">
+        <label>set</label>
       </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>
     <innernamespace refid="namespaceawkward_1_1util">awkward::util</innernamespace>
       <sectiondef kind="func">
-      <memberdef kind="function" id="namespaceawkward_1_1util_1a5cf65ec676d09c60c51f50794ab88153" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a59e9e406e10c16cbe5a43e297fac511d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::shared_ptr&lt; RecordLookup &gt;</type>
+        <definition>std::shared_ptr&lt;RecordLookup&gt; awkward::util::init_recordlookup</definition>
+        <argsstring>(int64_t numfields)</argsstring>
+        <name>init_recordlookup</name>
+        <param>
+          <type>int64_t</type>
+          <declname>numfields</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="19" column="21" bodyfile="src/libawkward/util.cpp" bodystart="19" bodyend="25"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a60c549ed8a8040819b34954813813fe3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int64_t</type>
+        <definition>int64_t awkward::util::fieldindex</definition>
+        <argsstring>(const std::shared_ptr&lt; RecordLookup &gt; &amp;recordlookup, const std::string &amp;key, int64_t numfields)</argsstring>
+        <name>fieldindex</name>
+        <param>
+          <type>const std::shared_ptr&lt; RecordLookup &gt; &amp;</type>
+          <declname>recordlookup</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>numfields</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="27" column="13" bodyfile="src/libawkward/util.cpp" bodystart="27" bodyend="49"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a96d7483cb27ab5c1a85412fa5348528d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>const std::string</type>
+        <definition>const std::string awkward::util::key</definition>
+        <argsstring>(const std::shared_ptr&lt; RecordLookup &gt; &amp;recordlookup, int64_t fieldindex, int64_t numfields)</argsstring>
+        <name>key</name>
+        <param>
+          <type>const std::shared_ptr&lt; RecordLookup &gt; &amp;</type>
+          <declname>recordlookup</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fieldindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>numfields</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="51" column="23" bodyfile="src/libawkward/util.cpp" bodystart="51" bodyend="61"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a7edf467c33f32026419e65ef0b80e712" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool awkward::util::haskey</definition>
+        <argsstring>(const std::shared_ptr&lt; RecordLookup &gt; &amp;recordlookup, const std::string &amp;key, int64_t numfields)</argsstring>
+        <name>haskey</name>
+        <param>
+          <type>const std::shared_ptr&lt; RecordLookup &gt; &amp;</type>
+          <declname>recordlookup</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>numfields</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="63" column="10" bodyfile="src/libawkward/util.cpp" bodystart="63" bodyend="71"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a5a6b04fdbf7f630a775ec95c968a12d6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>const std::vector&lt; std::string &gt;</type>
+        <definition>const std::vector&lt;std::string&gt; awkward::util::keys</definition>
+        <argsstring>(const std::shared_ptr&lt; RecordLookup &gt; &amp;recordlookup, int64_t numfields)</argsstring>
+        <name>keys</name>
+        <param>
+          <type>const std::shared_ptr&lt; RecordLookup &gt; &amp;</type>
+          <declname>recordlookup</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>numfields</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="73" column="23" bodyfile="src/libawkward/util.cpp" bodystart="73" bodyend="85"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1ad26802b2772a48bb0589859e3c138100" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool awkward::util::parameter_equals</definition>
+        <argsstring>(const Parameters &amp;parameters, const std::string &amp;key, const std::string &amp;value)</argsstring>
+        <name>parameter_equals</name>
+        <param>
+          <type>const Parameters &amp;</type>
+          <declname>parameters</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>key</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="87" column="10" bodyfile="src/libawkward/util.cpp" bodystart="87" bodyend="101"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1aa515755f3ae5039f0e9ea330e823ac37" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool awkward::util::parameters_equal</definition>
+        <argsstring>(const Parameters &amp;self, const Parameters &amp;other)</argsstring>
+        <name>parameters_equal</name>
+        <param>
+          <type>const Parameters &amp;</type>
+          <declname>self</declname>
+        </param>
+        <param>
+          <type>const Parameters &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="103" column="10" bodyfile="src/libawkward/util.cpp" bodystart="103" bodyend="119"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a98ea8f49b80a9b677819c763a0638665" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>void</type>
         <definition>void awkward::util::handle_error</definition>
-        <argsstring>(const struct Error &amp;err, const std::string classname, const Identities *id)</argsstring>
+        <argsstring>(const struct Error &amp;err, const std::string &amp;classname, const Identities *id)</argsstring>
         <name>handle_error</name>
         <param>
           <type>const struct Error &amp;</type>
           <declname>err</declname>
         </param>
         <param>
-          <type>const std::string</type>
+          <type>const std::string &amp;</type>
           <declname>classname</declname>
         </param>
         <param>
@@ -70,15 +241,15 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="14" column="10" bodyfile="src/libawkward/util.cpp" bodystart="14" bodyend="33"/>
+        <location file="src/libawkward/util.cpp" line="121" column="10" bodyfile="src/libawkward/util.cpp" bodystart="121" bodyend="140"/>
       </memberdef>
-      <memberdef kind="function" id="namespaceawkward_1_1util_1a0f7537c9eb09fb13062c51be394a4a58" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a945d62c19d05d0598581fbae333c8fdd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>std::string</type>
         <definition>std::string awkward::util::quote</definition>
-        <argsstring>(std::string x, bool doublequote)</argsstring>
+        <argsstring>(const std::string &amp;x, bool doublequote)</argsstring>
         <name>quote</name>
         <param>
-          <type>std::string</type>
+          <type>const std::string &amp;</type>
           <declname>x</declname>
         </param>
         <param>
@@ -91,7 +262,28 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="35" column="17" bodyfile="src/libawkward/util.cpp" bodystart="35" bodyend="43"/>
+        <location file="src/libawkward/util.cpp" line="142" column="17" bodyfile="src/libawkward/util.cpp" bodystart="142" bodyend="150"/>
+      </memberdef>
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a615ff48b62091268459c1c8b3a65bc45" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool awkward::util::subset</definition>
+        <argsstring>(const std::vector&lt; std::string &gt; &amp;super, const std::vector&lt; std::string &gt; &amp;sub)</argsstring>
+        <name>subset</name>
+        <param>
+          <type>const std::vector&lt; std::string &gt; &amp;</type>
+          <declname>super</declname>
+        </param>
+        <param>
+          <type>const std::vector&lt; std::string &gt; &amp;</type>
+          <declname>sub</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/util.cpp" line="152" column="10" bodyfile="src/libawkward/util.cpp" bodystart="152" bodyend="169"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a8edd45202d3bb99b953a0dedee1c4d59" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -138,7 +330,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="46" column="5" bodyfile="src/libawkward/util.cpp" bodystart="46" bodyend="48"/>
+        <location file="src/libawkward/util.cpp" line="172" column="5" bodyfile="src/libawkward/util.cpp" bodystart="172" bodyend="174"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a6e2acdfc954f14dffc2d3f582026428c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -185,7 +377,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="50" column="5" bodyfile="src/libawkward/util.cpp" bodystart="50" bodyend="52"/>
+        <location file="src/libawkward/util.cpp" line="176" column="5" bodyfile="src/libawkward/util.cpp" bodystart="176" bodyend="178"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a16520ab2a50710adc4155e188d7bd450" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -240,7 +432,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="55" column="5" bodyfile="src/libawkward/util.cpp" bodystart="55" bodyend="57"/>
+        <location file="src/libawkward/util.cpp" line="181" column="5" bodyfile="src/libawkward/util.cpp" bodystart="181" bodyend="183"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a1bd30b78640996660a7ed6083ac8ef27" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -295,7 +487,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="59" column="5" bodyfile="src/libawkward/util.cpp" bodystart="59" bodyend="61"/>
+        <location file="src/libawkward/util.cpp" line="185" column="5" bodyfile="src/libawkward/util.cpp" bodystart="185" bodyend="187"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a35cdf735524b577a33696b6dfbe507c7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -338,7 +530,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="64" column="5" bodyfile="src/libawkward/util.cpp" bodystart="64" bodyend="66"/>
+        <location file="src/libawkward/util.cpp" line="190" column="5" bodyfile="src/libawkward/util.cpp" bodystart="190" bodyend="192"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a332e036036f0a2a7b6ae1ccbd5fb9328" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -381,7 +573,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="68" column="5" bodyfile="src/libawkward/util.cpp" bodystart="68" bodyend="70"/>
+        <location file="src/libawkward/util.cpp" line="194" column="5" bodyfile="src/libawkward/util.cpp" bodystart="194" bodyend="196"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a6669b4753da68138261314266664870f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -424,7 +616,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="72" column="5" bodyfile="src/libawkward/util.cpp" bodystart="72" bodyend="74"/>
+        <location file="src/libawkward/util.cpp" line="198" column="5" bodyfile="src/libawkward/util.cpp" bodystart="198" bodyend="200"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1af6d5697f061dd5b2bc6d6371fab63406" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -475,7 +667,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="77" column="5" bodyfile="src/libawkward/util.cpp" bodystart="77" bodyend="79"/>
+        <location file="src/libawkward/util.cpp" line="203" column="5" bodyfile="src/libawkward/util.cpp" bodystart="203" bodyend="205"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a5994a80cfed68d5ca9a74ec77532eec6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -526,7 +718,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="81" column="5" bodyfile="src/libawkward/util.cpp" bodystart="81" bodyend="83"/>
+        <location file="src/libawkward/util.cpp" line="207" column="5" bodyfile="src/libawkward/util.cpp" bodystart="207" bodyend="209"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1ab91ff6d314c26700c4e4130b6ab4e6b8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -577,7 +769,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="85" column="5" bodyfile="src/libawkward/util.cpp" bodystart="85" bodyend="87"/>
+        <location file="src/libawkward/util.cpp" line="211" column="5" bodyfile="src/libawkward/util.cpp" bodystart="211" bodyend="213"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1ace2f8fb19c1c5895a11057e5f06ba44a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -632,7 +824,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="90" column="5" bodyfile="src/libawkward/util.cpp" bodystart="90" bodyend="92"/>
+        <location file="src/libawkward/util.cpp" line="216" column="5" bodyfile="src/libawkward/util.cpp" bodystart="216" bodyend="218"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a35f040e2474502f3ebcd72814d81697d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -687,7 +879,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="94" column="5" bodyfile="src/libawkward/util.cpp" bodystart="94" bodyend="96"/>
+        <location file="src/libawkward/util.cpp" line="220" column="5" bodyfile="src/libawkward/util.cpp" bodystart="220" bodyend="222"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a27301acf05d62d2cddc63402f113186d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -742,7 +934,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="98" column="5" bodyfile="src/libawkward/util.cpp" bodystart="98" bodyend="100"/>
+        <location file="src/libawkward/util.cpp" line="224" column="5" bodyfile="src/libawkward/util.cpp" bodystart="224" bodyend="226"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a821d22c5eb2612a50ccd25fad385d50c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -769,7 +961,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="103" column="5" bodyfile="src/libawkward/util.cpp" bodystart="103" bodyend="105"/>
+        <location file="src/libawkward/util.cpp" line="229" column="5" bodyfile="src/libawkward/util.cpp" bodystart="229" bodyend="231"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1ab7818ea817b037e54c287c5e6209e8a4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -796,7 +988,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="107" column="5" bodyfile="src/libawkward/util.cpp" bodystart="107" bodyend="109"/>
+        <location file="src/libawkward/util.cpp" line="233" column="5" bodyfile="src/libawkward/util.cpp" bodystart="233" bodyend="235"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1ad129226cfdbe60197ecfef8bb310799d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -823,7 +1015,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="111" column="5" bodyfile="src/libawkward/util.cpp" bodystart="111" bodyend="113"/>
+        <location file="src/libawkward/util.cpp" line="237" column="5" bodyfile="src/libawkward/util.cpp" bodystart="237" bodyend="239"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a24d53416cb24aeef4b57ca3b206006f0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -854,7 +1046,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="116" column="5" bodyfile="src/libawkward/util.cpp" bodystart="116" bodyend="118"/>
+        <location file="src/libawkward/util.cpp" line="242" column="5" bodyfile="src/libawkward/util.cpp" bodystart="242" bodyend="244"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1ab0ff064b87b541a65ddcba92a1b2292e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -885,7 +1077,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="120" column="5" bodyfile="src/libawkward/util.cpp" bodystart="120" bodyend="122"/>
+        <location file="src/libawkward/util.cpp" line="246" column="5" bodyfile="src/libawkward/util.cpp" bodystart="246" bodyend="248"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a55f52d86ee9c4cc0959c9d5123830143" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -916,7 +1108,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="124" column="5" bodyfile="src/libawkward/util.cpp" bodystart="124" bodyend="126"/>
+        <location file="src/libawkward/util.cpp" line="250" column="5" bodyfile="src/libawkward/util.cpp" bodystart="250" bodyend="252"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1af4bc0f3e2a70ded4d83275a82befbf25" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -971,7 +1163,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="129" column="5" bodyfile="src/libawkward/util.cpp" bodystart="129" bodyend="131"/>
+        <location file="src/libawkward/util.cpp" line="255" column="5" bodyfile="src/libawkward/util.cpp" bodystart="255" bodyend="257"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a5ed659284b8769b5f1a86c4f80b3d91a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1026,7 +1218,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="133" column="5" bodyfile="src/libawkward/util.cpp" bodystart="133" bodyend="135"/>
+        <location file="src/libawkward/util.cpp" line="259" column="5" bodyfile="src/libawkward/util.cpp" bodystart="259" bodyend="261"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a1e4359f0b4b6cd14f0c3655abc01efa4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1081,7 +1273,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="137" column="5" bodyfile="src/libawkward/util.cpp" bodystart="137" bodyend="139"/>
+        <location file="src/libawkward/util.cpp" line="263" column="5" bodyfile="src/libawkward/util.cpp" bodystart="263" bodyend="265"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a3c9079e2d6d2eff270b7df911801b07e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1140,7 +1332,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="142" column="5" bodyfile="src/libawkward/util.cpp" bodystart="142" bodyend="144"/>
+        <location file="src/libawkward/util.cpp" line="268" column="5" bodyfile="src/libawkward/util.cpp" bodystart="268" bodyend="270"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a0a5ce7851259ae74844da07ed068ab7e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1199,7 +1391,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="146" column="5" bodyfile="src/libawkward/util.cpp" bodystart="146" bodyend="148"/>
+        <location file="src/libawkward/util.cpp" line="272" column="5" bodyfile="src/libawkward/util.cpp" bodystart="272" bodyend="274"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a3853c79e8dfd566edb8c1c2affc70934" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1258,7 +1450,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="150" column="5" bodyfile="src/libawkward/util.cpp" bodystart="150" bodyend="152"/>
+        <location file="src/libawkward/util.cpp" line="276" column="5" bodyfile="src/libawkward/util.cpp" bodystart="276" bodyend="278"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a56c8f0daa473f11d34e367c7f6d7100e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1309,7 +1501,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="155" column="5" bodyfile="src/libawkward/util.cpp" bodystart="155" bodyend="157"/>
+        <location file="src/libawkward/util.cpp" line="281" column="5" bodyfile="src/libawkward/util.cpp" bodystart="281" bodyend="283"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1ab998cec0a24c51454bdf93e04ee173a3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1360,7 +1552,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="159" column="5" bodyfile="src/libawkward/util.cpp" bodystart="159" bodyend="161"/>
+        <location file="src/libawkward/util.cpp" line="285" column="5" bodyfile="src/libawkward/util.cpp" bodystart="285" bodyend="287"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1_1util_1a02e137f16fe72a0671a42b43cc5bb543" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -1411,7 +1603,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/util.cpp" line="163" column="5" bodyfile="src/libawkward/util.cpp" bodystart="163" bodyend="165"/>
+        <location file="src/libawkward/util.cpp" line="289" column="5" bodyfile="src/libawkward/util.cpp" bodystart="289" bodyend="291"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

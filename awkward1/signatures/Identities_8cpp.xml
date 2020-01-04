@@ -49,14 +49,14 @@
         <childnode refid="10" relation="include">
         </childnode>
       </node>
-      <node id="10">
-        <label>awkward/Identities.h</label>
-      </node>
       <node id="5">
         <label>sstream</label>
       </node>
       <node id="9">
         <label>awkward/Slice.h</label>
+      </node>
+      <node id="10">
+        <label>awkward/Identities.h</label>
       </node>
       <node id="6">
         <label>type_traits</label>
@@ -64,7 +64,7 @@
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>
       <sectiondef kind="var">
-      <memberdef kind="variable" id="namespaceawkward_1a2614e4dcca2a62c52ecf253838ef28de" prot="public" static="no" mutable="no">
+      <memberdef kind="variable" id="namespaceawkward_1a12e7dedb21a92a4537d670ab95741747" prot="public" static="no" mutable="no">
         <type>std::atomic&lt; Identities::Ref &gt;</type>
         <definition>std::atomic&lt;Identities::Ref&gt; awkward::numrefs</definition>
         <argsstring></argsstring>
