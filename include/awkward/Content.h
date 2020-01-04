@@ -6,7 +6,7 @@
 #include <cstdio>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Slice.h"
 #include "awkward/io/json.h"
 #include "awkward/type/Type.h"
@@ -14,14 +14,14 @@
 namespace awkward {
   class Content {
   public:
-    Content(const std::shared_ptr<Identity>& id, const util::Parameters& parameters);
+    Content(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters);
     virtual ~Content();
 
     virtual bool isscalar() const;
     virtual const std::string classname() const = 0;
-    virtual const std::shared_ptr<Identity> id() const;
-    virtual void setid() = 0;
-    virtual void setid(const std::shared_ptr<Identity>& id) = 0;
+    virtual const std::shared_ptr<Identities> identities() const;
+    virtual void setidentities() = 0;
+    virtual void setidentities(const std::shared_ptr<Identities>& identities) = 0;
     virtual const std::shared_ptr<Type> type() const = 0;
     virtual const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const = 0;
     virtual const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
@@ -70,7 +70,7 @@ namespace awkward {
     const std::string parameters_tostring(const std::string& indent, const std::string& pre, const std::string& post) const;
 
   protected:
-    std::shared_ptr<Identity> id_;
+    std::shared_ptr<Identities> identities_;
     util::Parameters parameters_;
   };
 }

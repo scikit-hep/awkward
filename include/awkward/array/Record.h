@@ -17,9 +17,9 @@ namespace awkward {
 
     bool isscalar() const override;
     const std::string classname() const override;
-    const std::shared_ptr<Identity> id() const override;
-    void setid() override;
-    void setid(const std::shared_ptr<Identity>& id) override;
+    const std::shared_ptr<Identities> identities() const override;
+    void setidentities() override;
+    void setidentities(const std::shared_ptr<Identities>& identities) override;
     const std::shared_ptr<Type> type() const override;
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;

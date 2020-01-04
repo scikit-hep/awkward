@@ -10,21 +10,21 @@
 #include "awkward/array/EmptyArray.h"
 
 namespace awkward {
-  EmptyArray::EmptyArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters)
-      : Content(id, parameters) { }
+  EmptyArray::EmptyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters)
+      : Content(identities, parameters) { }
 
   const std::string EmptyArray::classname() const {
     return "EmptyArray";
   }
 
-  void EmptyArray::setid(const std::shared_ptr<Identity>& id) {
-    if (id.get() != nullptr  &&  length() != id.get()->length()) {
-      util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
+  void EmptyArray::setidentities(const std::shared_ptr<Identities>& identities) {
+    if (identities.get() != nullptr  &&  length() != identities.get()->length()) {
+      util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
     }
-    id_ = id;
+    identities_ = identities;
   }
 
-  void EmptyArray::setid() { }
+  void EmptyArray::setidentities() { }
 
   const std::shared_ptr<Type> EmptyArray::type() const {
     return std::make_shared<UnknownType>(parameters_);
@@ -37,13 +37,13 @@ namespace awkward {
   const std::string EmptyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
-    if (id_.get() == nullptr  &&  parameters_.empty()) {
+    if (identities_.get() == nullptr  &&  parameters_.empty()) {
       out << "/>" << post;
     }
     else {
       out << ">\n";
-      if (id_.get() != nullptr) {
-        out << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
+      if (identities_.get() != nullptr) {
+        out << identities_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
       }
       if (!parameters_.empty()) {
         out << parameters_tostring(indent + std::string("    "), "", "\n");
@@ -63,7 +63,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::shallow_copy() const {
-    return std::make_shared<EmptyArray>(id_, parameters_);
+    return std::make_shared<EmptyArray>(identities_, parameters_);
   }
 
   void EmptyArray::check_for_iteration() const { }
@@ -73,12 +73,12 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_at(int64_t at) const {
-    util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+    util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_at_nowrap(int64_t at) const {
-    util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+    util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
@@ -125,17 +125,17 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 

@@ -2,6 +2,7 @@
 <doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
   <compounddef id="Content_8cpp" kind="file" language="C++">
     <compoundname>Content.cpp</compoundname>
+    <includes local="no">sstream</includes>
     <includes local="yes">awkward/array/RegularArray.h</includes>
     <includes local="yes">awkward/array/ListArray.h</includes>
     <includes local="yes">awkward/array/EmptyArray.h</includes>
@@ -21,20 +22,25 @@
         </childnode>
         <childnode refid="6" relation="include">
         </childnode>
-      </node>
-      <node id="5">
-        <label>awkward/type/ArrayType.h</label>
-      </node>
-      <node id="2">
-        <label>awkward/array/RegularArray.h</label>
+        <childnode refid="7" relation="include">
+        </childnode>
       </node>
       <node id="6">
-        <label>awkward/Content.h</label>
+        <label>awkward/type/ArrayType.h</label>
       </node>
       <node id="3">
-        <label>awkward/array/ListArray.h</label>
+        <label>awkward/array/RegularArray.h</label>
+      </node>
+      <node id="7">
+        <label>awkward/Content.h</label>
+      </node>
+      <node id="2">
+        <label>sstream</label>
       </node>
       <node id="4">
+        <label>awkward/array/ListArray.h</label>
+      </node>
+      <node id="5">
         <label>awkward/array/EmptyArray.h</label>
       </node>
     </incdepgraph>

@@ -46,7 +46,7 @@ def test_numpyarray():
         array[[5, 3, -20, 8]]
     assert str(excinfo.value) == "in NumpyArray attempting to get -20, index out of range"
 
-    array.setid()
+    array.setidentities()
 
     with pytest.raises(ValueError) as excinfo:
         array[20]
@@ -132,39 +132,39 @@ def test_listarray_numpyarray():
     content = awkward1.layout.NumpyArray(numpy.arange(10)*1.1)
     array   = awkward1.layout.ListArray64(starts, stops, content)
 
-    array.setid()
+    array.setidentities()
 
     with pytest.raises(ValueError) as excinfo:
         array[2, 20]
-    assert str(excinfo.value) == "in ListArray64 at id[2] attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [2] attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array[2, -20]
-    assert str(excinfo.value) == "in ListArray64 at id[2] attempting to get -20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [2] attempting to get -20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array[1:][2, 20]
-    assert str(excinfo.value) == "in ListArray64 at id[3] attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [3] attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array[1:][2, -20]
-    assert str(excinfo.value) == "in ListArray64 at id[3] attempting to get -20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [3] attempting to get -20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array[2, [1, 0, 0, 20]]
-    assert str(excinfo.value) == "in ListArray64 at id[2] attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [2] attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array[2, [1, 0, 0, -20]]
-    assert str(excinfo.value) == "in ListArray64 at id[2] attempting to get -20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [2] attempting to get -20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array[1:][2, [0, 20]]
-    assert str(excinfo.value) == "in ListArray64 at id[3] attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [3] attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array[1:][2, [0, -20]]
-    assert str(excinfo.value) == "in ListArray64 at id[3] attempting to get -20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [3] attempting to get -20, index out of range"
 
 def test_listarray_listarray_numpyarray():
     content  = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -206,7 +206,7 @@ def test_listarray_listarray_numpyarray():
         array2[1, 0, 20]
     assert str(excinfo.value) == "in ListArray64 attempting to get 20, index out of range"
 
-    array2.setid()
+    array2.setidentities()
 
     with pytest.raises(ValueError) as excinfo:
         array2[20]
@@ -218,11 +218,11 @@ def test_listarray_listarray_numpyarray():
 
     with pytest.raises(ValueError) as excinfo:
         array2[2, 20]
-    assert str(excinfo.value) == "in ListArray64 at id[2] attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [2] attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array2[1:][2, 20]
-    assert str(excinfo.value) == "in ListArray64 at id[3] attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [3] attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array2[-20]
@@ -234,23 +234,23 @@ def test_listarray_listarray_numpyarray():
 
     with pytest.raises(ValueError) as excinfo:
         array2[2, -20]
-    assert str(excinfo.value) == "in ListArray64 at id[2] attempting to get -20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [2] attempting to get -20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array2[1:][2, -20]
-    assert str(excinfo.value) == "in ListArray64 at id[3] attempting to get -20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [3] attempting to get -20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array2[1, 0, 20]
-    assert str(excinfo.value) == "in ListArray64 at id[1, 0] attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [1, 0] attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array2[1:][2, 0, 20]
-    assert str(excinfo.value) == "in ListArray64 at id[3, 0] attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [3, 0] attempting to get 20, index out of range"
 
     with pytest.raises(ValueError) as excinfo:
         array2[:, 1:][3, 0, 20]
-    assert str(excinfo.value) == "in ListArray64 at id[3, 1] attempting to get 20, index out of range"
+    assert str(excinfo.value) == "in ListArray64 with identity [3, 1] attempting to get 20, index out of range"
 
 def test_array():
     starts  = numpy.array([0, 3, 3, 5, 6])

@@ -17,7 +17,7 @@ namespace awkward {
   public:
     static const std::shared_ptr<Type> unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape);
 
-    NumpyArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format);
+    NumpyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format);
 
     const std::shared_ptr<void> ptr() const;
     const std::vector<ssize_t> shape() const;
@@ -35,8 +35,8 @@ namespace awkward {
 
     bool isscalar() const override;
     const std::string classname() const override;
-    void setid() override;
-    void setid(const std::shared_ptr<Identity>& id) override;
+    void setidentities() override;
+    void setidentities(const std::shared_ptr<Identities>& identities) override;
     const std::shared_ptr<Type> type() const override;
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;

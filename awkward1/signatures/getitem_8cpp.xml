@@ -231,7 +231,7 @@
         </inbodydescription>
         <location file="src/cpu-kernels/getitem.cpp" line="80" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="80" bodyend="82"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1ae88233cc7236563ffedab4b90ff62795" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1ad6881a0ef458895003b60a91406d5f51" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
           <param>
             <type>typename ID</type>
@@ -241,16 +241,16 @@
           </param>
         </templateparamlist>
         <type>ERROR</type>
-        <definition>ERROR awkward_identity_getitem_carry</definition>
-        <argsstring>(ID *newidentityptr, const ID *identityptr, const T *carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length)</argsstring>
-        <name>awkward_identity_getitem_carry</name>
+        <definition>ERROR awkward_identities_getitem_carry</definition>
+        <argsstring>(ID *newidentitiesptr, const ID *identitiesptr, const T *carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length)</argsstring>
+        <name>awkward_identities_getitem_carry</name>
         <param>
           <type>ID *</type>
-          <declname>newidentityptr</declname>
+          <declname>newidentitiesptr</declname>
         </param>
         <param>
           <type>const ID *</type>
-          <declname>identityptr</declname>
+          <declname>identitiesptr</declname>
         </param>
         <param>
           <type>const T *</type>
@@ -280,18 +280,18 @@
         </inbodydescription>
         <location file="src/cpu-kernels/getitem.cpp" line="85" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="85" bodyend="95"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1a676b71b871c32dc413baa2deb02653df" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a961bad26f9895aada5235501909b0758" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
-        <definition>ERROR awkward_identity32_getitem_carry_64</definition>
-        <argsstring>(int32_t *newidentityptr, const int32_t *identityptr, const int64_t *carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length)</argsstring>
-        <name>awkward_identity32_getitem_carry_64</name>
+        <definition>ERROR awkward_identities32_getitem_carry_64</definition>
+        <argsstring>(int32_t *newidentitiesptr, const int32_t *identitiesptr, const int64_t *carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length)</argsstring>
+        <name>awkward_identities32_getitem_carry_64</name>
         <param>
           <type>int32_t *</type>
-          <declname>newidentityptr</declname>
+          <declname>newidentitiesptr</declname>
         </param>
         <param>
           <type>const int32_t *</type>
-          <declname>identityptr</declname>
+          <declname>identitiesptr</declname>
         </param>
         <param>
           <type>const int64_t *</type>
@@ -321,18 +321,18 @@
         </inbodydescription>
         <location file="src/cpu-kernels/getitem.cpp" line="96" column="7" bodyfile="src/cpu-kernels/getitem.cpp" bodystart="96" bodyend="98"/>
       </memberdef>
-      <memberdef kind="function" id="getitem_8cpp_1ad331bbb4b5c8dc946c81f6747d4ebd1f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="getitem_8cpp_1a1a736f2a2195e028d769faf60bc5c844" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
-        <definition>ERROR awkward_identity64_getitem_carry_64</definition>
-        <argsstring>(int64_t *newidentityptr, const int64_t *identityptr, const int64_t *carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length)</argsstring>
-        <name>awkward_identity64_getitem_carry_64</name>
+        <definition>ERROR awkward_identities64_getitem_carry_64</definition>
+        <argsstring>(int64_t *newidentitiesptr, const int64_t *identitiesptr, const int64_t *carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length)</argsstring>
+        <name>awkward_identities64_getitem_carry_64</name>
         <param>
           <type>int64_t *</type>
-          <declname>newidentityptr</declname>
+          <declname>newidentitiesptr</declname>
         </param>
         <param>
           <type>const int64_t *</type>
-          <declname>identityptr</declname>
+          <declname>identitiesptr</declname>
         </param>
         <param>
           <type>const int64_t *</type>

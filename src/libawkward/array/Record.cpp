@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"
@@ -11,7 +11,7 @@
 
 namespace awkward {
   Record::Record(const RecordArray& array, int64_t at)
-      : Content(Identity::none(), array.parameters())
+      : Content(Identities::none(), array.parameters())
       , array_(array)
       , at_(at) { }
 
@@ -47,22 +47,22 @@ namespace awkward {
     return "Record";
   }
 
-  const std::shared_ptr<Identity> Record::id() const {
-    std::shared_ptr<Identity> recid = array_.id();
-    if (recid.get() == nullptr) {
-      return recid;
+  const std::shared_ptr<Identities> Record::identities() const {
+    std::shared_ptr<Identities> recidentities = array_.identities();
+    if (recidentities.get() == nullptr) {
+      return recidentities;
     }
     else {
-      return recid.get()->getitem_range_nowrap(at_, at_ + 1);
+      return recidentities.get()->getitem_range_nowrap(at_, at_ + 1);
     }
   }
 
-  void Record::setid() {
-    throw std::runtime_error("undefined operation: Record::setid");
+  void Record::setidentities() {
+    throw std::runtime_error("undefined operation: Record::setidentities");
   }
 
-  void Record::setid(const std::shared_ptr<Identity>& id) {
-    throw std::runtime_error("undefined operation: Record::setid");
+  void Record::setidentities(const std::shared_ptr<Identities>& identities) {
+    throw std::runtime_error("undefined operation: Record::setidentities");
   }
 
   const std::shared_ptr<Type> Record::type() const {
@@ -75,10 +75,10 @@ namespace awkward {
     std::shared_ptr<Content> record = array_.astype(type);
     if (RecordArray* raw = dynamic_cast<RecordArray*>(record.get())) {
       if (raw->numfields() == 0) {
-        return std::make_shared<Record>(RecordArray(raw->id(), raw->parameters(), raw->length(), raw->istuple()), at_);
+        return std::make_shared<Record>(RecordArray(raw->identities(), raw->parameters(), raw->length(), raw->istuple()), at_);
       }
       else {
-        return std::make_shared<Record>(RecordArray(raw->id(), raw->parameters(), raw->contents(), raw->recordlookup()), at_);
+        return std::make_shared<Record>(RecordArray(raw->identities(), raw->parameters(), raw->contents(), raw->recordlookup()), at_);
       }
     }
     else {
@@ -124,8 +124,8 @@ namespace awkward {
   }
 
   void Record::check_for_iteration() const {
-    if (array_.id().get() != nullptr  &&  array_.id().get()->length() != 1) {
-      util::handle_error(failure("len(id) != 1 for scalar Record", kSliceNone, kSliceNone), array_.id().get()->classname(), nullptr);
+    if (array_.identities().get() != nullptr  &&  array_.identities().get()->length() != 1) {
+      util::handle_error(failure("len(identities) != 1 for scalar Record", kSliceNone, kSliceNone), array_.identities().get()->classname(), nullptr);
     }
   }
 
@@ -154,7 +154,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(array_.id(), parameters_, length(), istuple());
+    RecordArray out(array_.identities(), parameters_, length(), istuple());
     if (istuple()) {
       for (auto key : keys) {
         out.append(array_.field(key));

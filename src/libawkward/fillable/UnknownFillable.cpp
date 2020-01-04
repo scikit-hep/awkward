@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Index.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/type/UnknownType.h"
@@ -42,7 +42,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> UnknownFillable::snapshot() const {
     if (nullcount_ == 0) {
-      return std::make_shared<EmptyArray>(Identity::none(), util::Parameters());
+      return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
     }
     else {
       throw std::runtime_error("UnknownFillable::snapshot needs OptionArray");

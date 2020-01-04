@@ -4,14 +4,19 @@
     <compoundname>ListArray.cpp</compoundname>
     <includes local="no">sstream</includes>
     <includes local="no">type_traits</includes>
-    <includes local="yes">awkward/cpu-kernels/identity.h</includes>
+    <includes local="yes">awkward/cpu-kernels/identities.h</includes>
     <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
     <includes local="yes">awkward/type/ListType.h</includes>
+    <includes local="yes">awkward/type/ArrayType.h</includes>
+    <includes local="yes">awkward/type/UnknownType.h</includes>
     <includes local="yes">awkward/Slice.h</includes>
     <includes local="yes">awkward/array/ListOffsetArray.h</includes>
     <includes local="yes">awkward/array/RegularArray.h</includes>
     <includes local="yes">awkward/array/ListArray.h</includes>
     <incdepgraph>
+      <node id="7">
+        <label>awkward/type/ArrayType.h</label>
+      </node>
       <node id="6">
         <label>awkward/type/ListType.h</label>
       </node>
@@ -39,23 +44,30 @@
         </childnode>
         <childnode refid="10" relation="include">
         </childnode>
-      </node>
-      <node id="4">
-        <label>awkward/cpu-kernels/identity.h</label>
-      </node>
-      <node id="9">
-        <label>awkward/array/RegularArray.h</label>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
       </node>
       <node id="8">
+        <label>awkward/type/UnknownType.h</label>
+      </node>
+      <node id="4">
+        <label>awkward/cpu-kernels/identities.h</label>
+      </node>
+      <node id="11">
+        <label>awkward/array/RegularArray.h</label>
+      </node>
+      <node id="10">
         <label>awkward/array/ListOffsetArray.h</label>
       </node>
       <node id="2">
         <label>sstream</label>
       </node>
-      <node id="10">
+      <node id="12">
         <label>awkward/array/ListArray.h</label>
       </node>
-      <node id="7">
+      <node id="9">
         <label>awkward/Slice.h</label>
       </node>
       <node id="3">

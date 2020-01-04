@@ -11,7 +11,7 @@
 #include "awkward/cpu-kernels/util.h"
 
 namespace awkward {
-  class Identity;
+  class Identities;
 
   namespace util {
     typedef std::vector<std::string> RecordLookup;
@@ -25,7 +25,7 @@ namespace awkward {
     bool parameter_equals(const Parameters& parameters, const std::string& key, const std::string& value);
     bool parameters_equal(const Parameters& self, const Parameters& other);
 
-    void handle_error(const struct Error& err, const std::string& classname, const Identity* id);
+    void handle_error(const struct Error& err, const std::string& classname, const Identities* id);
 
     template<typename T>
     class array_deleter {
@@ -45,9 +45,9 @@ namespace awkward {
     bool subset(const std::vector<std::string>& super, const std::vector<std::string>& sub);
 
     template <typename T>
-    ERROR awkward_identity64_from_listoffsetarray(int64_t* toptr, const int64_t* fromptr, const T* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+    ERROR awkward_identities64_from_listoffsetarray(int64_t* toptr, const int64_t* fromptr, const T* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
     template <typename T>
-    ERROR awkward_identity64_from_listarray(int64_t* toptr, const int64_t* fromptr, const T* fromstarts, const T* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+    ERROR awkward_identities64_from_listarray(int64_t* toptr, const int64_t* fromptr, const T* fromstarts, const T* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
     template <typename T>
     ERROR awkward_listarray_getitem_next_at_64(int64_t* tocarry, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at);
     template <typename T>

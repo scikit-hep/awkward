@@ -2,10 +2,10 @@
 
 #include <stdexcept>
 
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Index.h"
 
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Index.h"
 #include "awkward/array/RecordArray.h"
 #include "awkward/array/EmptyArray.h"
@@ -67,7 +67,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordFillable::snapshot() const {
     if (length_ == -1) {
-      return std::make_shared<EmptyArray>(Identity::none(), util::Parameters());
+      return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
     }
     util::Parameters parameters;
     if (nameptr_ != nullptr) {
@@ -80,10 +80,10 @@ namespace awkward {
       recordlookup.get()->push_back(keys_[i]);
     }
     if (contents.empty()) {
-      return std::make_shared<RecordArray>(Identity::none(), parameters, length_, false);
+      return std::make_shared<RecordArray>(Identities::none(), parameters, length_, false);
     }
     else {
-      return std::make_shared<RecordArray>(Identity::none(), parameters, contents, recordlookup);
+      return std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
     }
   }
 

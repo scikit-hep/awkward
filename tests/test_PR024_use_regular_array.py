@@ -31,14 +31,14 @@ def test_nonflat_slice():
     inneroffsets = awkward1.layout.Index64(numpy.array([0, 5, 10, 15, 20, 25, 30]))
     outeroffsets = awkward1.layout.Index64(numpy.array([0, 3, 6]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(outeroffsets, awkward1.layout.ListOffsetArray64(inneroffsets, content))
-    listoffsetarray.setid()
+    listoffsetarray.setidentities()
 
     assert awkward1.tolist(array[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]) == [27, 4, 22, 24, 25, 1]
     assert awkward1.tolist(array[[[1, 0], [1, 1], [1, 0]], [[2, 0], [1, 1], [2, 0]], [[2, 4], [2, 4], [0, 1]]]) == [[27, 4], [22, 24], [25, 1]]
 
     one = listoffsetarray[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]
     assert awkward1.tolist(one) == [27, 4, 22, 24, 25, 1]
-    assert numpy.asarray(one.id).tolist() == [
+    assert numpy.asarray(one.identities).tolist() == [
         [1, 2, 2],
         [0, 0, 4],
         [1, 1, 2],
@@ -48,14 +48,14 @@ def test_nonflat_slice():
 
     two = listoffsetarray[[[1, 0], [1, 1], [1, 0]], [[2, 0], [1, 1], [2, 0]], [[2, 4], [2, 4], [0, 1]]]
     assert awkward1.tolist(two) == [[27, 4], [22, 24], [25, 1]]
-    assert numpy.asarray(two.content.id).tolist() == [
+    assert numpy.asarray(two.content.identities).tolist() == [
         [1, 2, 2],
         [0, 0, 4],
         [1, 1, 2],
         [1, 1, 4],
         [1, 2, 0],
         [0, 0, 1]]
-    assert two.id is None
+    assert two.identities is None
 
 def test_newaxis():
     array = numpy.arange(2*3*5).reshape(2, 3, 5)

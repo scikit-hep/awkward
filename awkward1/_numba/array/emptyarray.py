@@ -10,13 +10,13 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.EmptyArray)
 def typeof(val, c):
-    return EmptyArrayType(numba.typeof(val.id), util.dict2parameters(val.parameters))
+    return EmptyArrayType(numba.typeof(val.identities), util.dict2parameters(val.parameters))
 
 class EmptyArrayType(content.ContentType):
-    def __init__(self, idtpe, parameters):
+    def __init__(self, identitiestpe, parameters):
         assert isinstance(parameters, tuple)
-        super(EmptyArrayType, self).__init__(name="ak::EmptyArrayType(id={0}, parameters={1})".format(idtpe.name, util.parameters2str(parameters)))
-        self.idtpe = idtpe
+        super(EmptyArrayType, self).__init__(name="ak::EmptyArrayType(identities={0}, parameters={1})".format(identitiestpe.name, util.parameters2str(parameters)))
+        self.identitiestpe = identitiestpe
         self.parameters = parameters
 
     @property
@@ -73,16 +73,16 @@ class EmptyArrayType(content.ContentType):
 class EmptyArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = []
-        if fe_type.idtpe != numba.none:
-            members.append(("id", fe_type.idtpe))
+        if fe_type.identitiestpe != numba.none:
+            members.append(("identities", fe_type.identitiestpe))
         super(EmptyArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(EmptyArrayType)
 def unbox(tpe, obj, c):
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
-    if tpe.idtpe != numba.none:
-        id_obj = c.pyapi.object_getattr_string(obj, "id")
-        proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
+    if tpe.identitiestpe != numba.none:
+        id_obj = c.pyapi.object_getattr_string(obj, "identities")
+        proxyout.identities = c.pyapi.to_native_value(tpe.identitiestpe, id_obj).value
         c.pyapi.decref(id_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -92,8 +92,8 @@ def box(tpe, val, c):
     EmptyArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.EmptyArray))
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     args = []
-    if tpe.idtpe != numba.none:
-        args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
+    if tpe.identitiestpe != numba.none:
+        args.append(c.pyapi.from_native_value(tpe.identitiestpe, proxyin.identities, c.env_manager))
     else:
         args.append(c.pyapi.make_none())
     args.append(util.parameters2dict_impl(c, tpe.parameters))
@@ -141,18 +141,18 @@ class type_methods(numba.typing.templates.AttributeTemplate):
     key = EmptyArrayType
 
     def generic_resolve(self, tpe, attr):
-        if attr == "id":
-            if tpe.idtpe == numba.none:
-                return numba.optional(identity.IdentityType(numba.int32[:, :]))
+        if attr == "identities":
+            if tpe.identitiestpe == numba.none:
+                return numba.optional(identity.IdentitiesType(numba.int32[:, :]))
             else:
-                return tpe.idtpe
+                return tpe.identitiestpe
 
-@numba.extending.lower_getattr(EmptyArrayType, "id")
-def lower_id(context, builder, tpe, val):
+@numba.extending.lower_getattr(EmptyArrayType, "identities")
+def lower_identities(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    if tpe.idtpe == numba.none:
-        return context.make_optional_none(builder, identity.IdentityType(numba.int32[:, :]))
+    if tpe.identitiestpe == numba.none:
+        return context.make_optional_none(builder, identity.IdentitiesType(numba.int32[:, :]))
     else:
         if context.enable_nrt:
-            context.nrt.incref(builder, tpe.idtpe, proxyin.id)
-        return proxyin.id
+            context.nrt.incref(builder, tpe.identitiestpe, proxyin.identities)
+        return proxyin.identities

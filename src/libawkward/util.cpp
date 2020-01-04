@@ -6,11 +6,11 @@
 
 #include "rapidjson/document.h"
 
-#include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 
 #include "awkward/util.h"
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 
 namespace rj = rapidjson;
 
@@ -118,17 +118,17 @@ namespace awkward {
       return true;
     }
 
-    void handle_error(const struct Error& err, const std::string& classname, const Identity* id) {
+    void handle_error(const struct Error& err, const std::string& classname, const Identities* identities) {
       if (err.str != nullptr) {
         std::stringstream out;
         out << "in " << classname;
-        if (err.location != kSliceNone  &&  id != nullptr) {
-          assert(err.location > 0);
-          if (0 <= err.location  &&  err.location < id->length()) {
-            out << " at id[" << id->location_at(err.location) << "]";
+        if (err.identity != kSliceNone  &&  identities != nullptr) {
+          assert(err.identity > 0);
+          if (0 <= err.identity  &&  err.identity < identities->length()) {
+            out << " with identity [" << identities->identity_at(err.identity) << "]";
           }
           else {
-            out << " at id[???]";
+            out << " with invalid identity";
           }
         }
         if (err.attempt != kSliceNone) {
@@ -169,21 +169,21 @@ namespace awkward {
     }
 
     template <>
-    Error awkward_identity64_from_listoffsetarray<uint32_t>(int64_t* toptr, const int64_t* fromptr, const uint32_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
-      return awkward_identity64_from_listoffsetarrayU32(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);
+    Error awkward_identities64_from_listoffsetarray<uint32_t>(int64_t* toptr, const int64_t* fromptr, const uint32_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identities64_from_listoffsetarrayU32(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);
     }
     template <>
-    Error awkward_identity64_from_listoffsetarray<int64_t>(int64_t* toptr, const int64_t* fromptr, const int64_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
-      return awkward_identity64_from_listoffsetarray64(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);
+    Error awkward_identities64_from_listoffsetarray<int64_t>(int64_t* toptr, const int64_t* fromptr, const int64_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identities64_from_listoffsetarray64(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);
     }
 
     template <>
-    Error awkward_identity64_from_listarray<uint32_t>(int64_t* toptr, const int64_t* fromptr, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
-      return awkward_identity64_from_listarrayU32(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
+    Error awkward_identities64_from_listarray<uint32_t>(int64_t* toptr, const int64_t* fromptr, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identities64_from_listarrayU32(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
     }
     template <>
-    Error awkward_identity64_from_listarray<int64_t>(int64_t* toptr, const int64_t* fromptr, const int64_t* fromstarts, const int64_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
-      return awkward_identity64_from_listarray64(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
+    Error awkward_identities64_from_listarray<int64_t>(int64_t* toptr, const int64_t* fromptr, const int64_t* fromstarts, const int64_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identities64_from_listarray64(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
     }
 
     template <>

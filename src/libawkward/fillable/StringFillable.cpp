@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/type/PrimitiveType.h"
@@ -74,8 +74,8 @@ namespace awkward {
     std::vector<ssize_t> shape = { (ssize_t)content_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(uint8_t) };
     std::shared_ptr<Content> content;
-    content = std::make_shared<NumpyArray>(Identity::none(), char_parameters, content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B");
-    return std::make_shared<ListOffsetArray64>(Identity::none(), string_parameters, offsets, content);
+    content = std::make_shared<NumpyArray>(Identities::none(), char_parameters, content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B");
+    return std::make_shared<ListOffsetArray64>(Identities::none(), string_parameters, offsets, content);
   }
 
   bool StringFillable::active() const {

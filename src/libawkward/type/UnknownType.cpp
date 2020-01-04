@@ -63,6 +63,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> UnknownType::empty() const {
-    return std::make_shared<EmptyArray>(Identity::none(), parameters_);
+    return std::make_shared<EmptyArray>(Identities::none(), parameters_);
   }
 }
