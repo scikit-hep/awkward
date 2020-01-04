@@ -81,9 +81,7 @@ def test_boxing():
     assert f2(t) == t
 
 class D(awkward1.highlevel.Array):
-    @staticmethod
-    def typestr(baretype, parameters):
-        return "D[{0}]".format(baretype)
+    pass
 
 def test_numpyarray():
     dint64 = awkward1.layout.PrimitiveType("int64", {"__class__": "D", "__str__": "D[int64]"})
