@@ -8,7 +8,7 @@
 namespace awkward {
   class OptionType: public Type {
   public:
-    OptionType(const Parameters& parameters, const std::shared_ptr<Type>& type);
+    OptionType(const util::Parameters& parameters, const std::shared_ptr<Type>& type);
 
     std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> shallow_copy() const override;

@@ -20,8 +20,6 @@ namespace awkward {
     const std::shared_ptr<Identity> id() const override;
     void setid() override;
     void setid(const std::shared_ptr<Identity>& id) override;
-    bool isbare() const override;
-    bool istypeptr(Type* pointer) const override;
     const std::shared_ptr<Type> type() const override;
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
@@ -51,8 +49,6 @@ namespace awkward {
     const Record astuple() const;
 
   protected:
-    void checktype() const override;
-
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;

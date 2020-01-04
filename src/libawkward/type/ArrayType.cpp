@@ -5,7 +5,7 @@
 #include "awkward/type/ArrayType.h"
 
 namespace awkward {
-  ArrayType::ArrayType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t length)
+  ArrayType::ArrayType(const util::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t length)
       : Type(parameters)
       , type_(type)
       , length_(length) { }
@@ -25,7 +25,7 @@ namespace awkward {
 
   bool ArrayType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       return length_ == t->length_  &&  type_.get()->equal(t->type_, check_parameters);

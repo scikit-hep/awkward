@@ -49,15 +49,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> UnionFillable::type() const {
-    std::vector<std::shared_ptr<Type>> types;
-    for (auto x : contents_) {
-      types.push_back(x.get()->type());
-    }
-    return std::make_shared<UnionType>(Type::Parameters(), types);
-  }
-
-  const std::shared_ptr<Content> UnionFillable::snapshot(const std::shared_ptr<Type>& type) const {
+  const std::shared_ptr<Content> UnionFillable::snapshot() const {
     Index8 types(types_.ptr(), 0, types_.length());
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
     throw std::runtime_error("UnionFillable::snapshot needs UnionArray");

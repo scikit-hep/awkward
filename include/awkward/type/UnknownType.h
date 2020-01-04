@@ -8,7 +8,7 @@
 namespace awkward {
   class UnknownType: public Type {
   public:
-    UnknownType(const Parameters& parameters);
+    UnknownType(const util::Parameters& parameters);
 
     std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> shallow_copy() const override;

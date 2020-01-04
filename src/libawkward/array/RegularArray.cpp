@@ -13,14 +13,10 @@
 #include "awkward/array/RegularArray.h"
 
 namespace awkward {
-  RegularArray::RegularArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<Content>& content, int64_t size)
-      : Content(id, type)
+  RegularArray::RegularArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::shared_ptr<Content>& content, int64_t size)
+      : Content(id, parameters)
       , content_(content)
-      , size_(size) {
-    if (type_.get() != nullptr) {
-      checktype();
-    }
-  }
+      , size_(size) { }
 
   const std::shared_ptr<Content> RegularArray::content() const {
     return content_;
@@ -99,22 +95,21 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RegularArray::type() const {
-    if (type_.get() != nullptr) {
-      return type_;
-    }
-    else {
-      return std::make_shared<RegularType>(Type::Parameters(), content_.get()->type(), size_);
-    }
+    return std::make_shared<RegularType>(parameters_, content_.get()->type(), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::astype(const std::shared_ptr<Type>& type) const {
-    std::shared_ptr<Type> inner = type;
-    if (inner.get() != nullptr) {
-      if (RegularType* raw = dynamic_cast<RegularType*>(inner.get())) {
-        inner = raw->type();
+    if (RegularType* raw = dynamic_cast<RegularType*>(type.get())) {
+      if (raw->size() == size_) {
+        return std::make_shared<RegularArray>(id_, type.get()->parameters(), content_.get()->astype(raw->type()), size_);
+      }
+      else {
+        throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because sizes do not match"));
       }
     }
-    return std::make_shared<RegularArray>(id_, type, content_.get()->astype(inner), size_);
+    else {
+      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
+    }
   }
 
   const std::string RegularArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
@@ -123,8 +118,8 @@ namespace awkward {
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
-    if (type_.get() != nullptr) {
-      out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
+    if (!parameters_.empty()) {
+      out << parameters_tostring(indent + std::string("    "), "", "\n");
     }
     out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
     out << indent << "</" << classname() << ">" << post;
@@ -145,7 +140,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::shallow_copy() const {
-    return std::make_shared<RegularArray>(id_, type_, content_, size_);
+    return std::make_shared<RegularArray>(id_, parameters_, content_, size_);
   }
 
   void RegularArray::check_for_iteration() const {
@@ -189,19 +184,15 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::make_shared<RegularArray>(id_, type_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_);
+    return std::make_shared<RegularArray>(id_, parameters_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_field(const std::string& key) const {
-    return std::make_shared<RegularArray>(id_, Type::none(), content_.get()->getitem_field(key), size_);
+    return std::make_shared<RegularArray>(id_, util::Parameters(), content_.get()->getitem_field(key), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
-    std::shared_ptr<Type> type = Type::none();
-    if (SliceFields(keys).preserves_type(type_, Index64(0))) {
-      type = type_;
-    }
-    return std::make_shared<RegularArray>(id_, type, content_.get()->getitem_fields(keys), size_);
+    return std::make_shared<RegularArray>(id_, util::Parameters(), content_.get()->getitem_fields(keys), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::carry(const Index64& carry) const {
@@ -218,7 +209,7 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }
-    return std::make_shared<RegularArray>(id, type_, content_.get()->carry(nextcarry), size_);
+    return std::make_shared<RegularArray>(id, parameters_, content_.get()->carry(nextcarry), size_);
   }
 
   const std::pair<int64_t, int64_t> RegularArray::minmax_depth() const {
@@ -244,16 +235,6 @@ namespace awkward {
 
   const std::vector<std::string> RegularArray::keys() const {
     return content_.get()->keys();
-  }
-
-  void RegularArray::checktype() const {
-    bool okay = false;
-    if (RegularType* raw = dynamic_cast<RegularType*>(type_.get())) {
-      okay = (raw->type().get() == content_.get()->type().get()  &&  raw->size() == size_);
-    }
-    if (!okay) {
-        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
-    }
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
@@ -314,14 +295,8 @@ namespace awkward {
 
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
-    std::shared_ptr<Type> outtype = Type::none();
-    if (type_.get() != nullptr) {
-      RegularType* raw = dynamic_cast<RegularType*>(type_.get());
-      outtype = std::make_shared<RegularType>(Type::Parameters(), raw->type(), nextsize);
-    }
-
     if (advanced.length() == 0) {
-      return std::make_shared<RegularArray>(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize);
+      return std::make_shared<RegularArray>(id_, parameters_, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize);
     }
     else {
       Index64 nextadvanced(len*nextsize);
@@ -333,7 +308,7 @@ namespace awkward {
         nextsize);
       util::handle_error(err, classname(), id_.get());
 
-      return std::make_shared<RegularArray>(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize);
+      return std::make_shared<RegularArray>(id_, parameters_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize);
     }
   }
 

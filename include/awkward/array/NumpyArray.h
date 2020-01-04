@@ -17,7 +17,7 @@ namespace awkward {
   public:
     static const std::shared_ptr<Type> unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape);
 
-    NumpyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format);
+    NumpyArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format);
 
     const std::shared_ptr<void> ptr() const;
     const std::vector<ssize_t> shape() const;
@@ -37,7 +37,6 @@ namespace awkward {
     const std::string classname() const override;
     void setid() override;
     void setid(const std::shared_ptr<Identity>& id) override;
-    bool istypeptr(Type* pointer) const override;
     const std::shared_ptr<Type> type() const override;
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
@@ -67,8 +66,6 @@ namespace awkward {
     const NumpyArray contiguous() const;
 
   protected:
-    void checktype() const override;
-
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;

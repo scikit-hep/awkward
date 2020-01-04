@@ -10,7 +10,7 @@
 #include "awkward/type/PrimitiveType.h"
 
 namespace awkward {
-  PrimitiveType::PrimitiveType(const Type::Parameters& parameters, DType dtype)
+  PrimitiveType::PrimitiveType(const util::Parameters& parameters, DType dtype)
       : Type(parameters)
       , dtype_(dtype) { }
 
@@ -51,7 +51,7 @@ namespace awkward {
 
   bool PrimitiveType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (PrimitiveType* t = dynamic_cast<PrimitiveType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       return dtype_ == t->dtype_;
@@ -82,7 +82,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> PrimitiveType::empty() const {
-    std::shared_ptr<void> ptr(new uint8_t[0], awkward::util::array_deleter<uint8_t>());
+    std::shared_ptr<void> ptr(new uint8_t[0], util::array_deleter<uint8_t>());
     std::vector<ssize_t> shape({ 0 });
     std::vector<ssize_t> strides({ 0 });
     ssize_t itemsize;
@@ -108,7 +108,7 @@ namespace awkward {
       case float64: itemsize = 8; format = "d"; break;
       default: throw std::runtime_error(std::string("unexpected dtype: ") + std::to_string(dtype_));
     }
-    return std::make_shared<NumpyArray>(Identity::none(), Type::none(), ptr, shape, strides, 0, itemsize, format);
+    return std::make_shared<NumpyArray>(Identity::none(), parameters_, ptr, shape, strides, 0, itemsize, format);
   }
 
   const PrimitiveType::DType PrimitiveType::dtype() const {

@@ -16,15 +16,11 @@
 
 namespace awkward {
   template <typename T>
-  ListArrayOf<T>::ListArrayOf(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const IndexOf<T>& starts, const IndexOf<T>& stops, const std::shared_ptr<Content>& content)
-      : Content(id, type)
+  ListArrayOf<T>::ListArrayOf(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const IndexOf<T>& starts, const IndexOf<T>& stops, const std::shared_ptr<Content>& content)
+      : Content(id, parameters)
       , starts_(starts)
       , stops_(stops)
-      , content_(content) {
-    if (type_.get() != nullptr) {
-      checktype();
-    }
-  }
+      , content_(content) { }
 
   template <typename T>
   const IndexOf<T> ListArrayOf<T>::starts() const {
@@ -165,23 +161,17 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Type> ListArrayOf<T>::type() const {
-    if (type_.get() != nullptr) {
-      return type_;
-    }
-    else {
-      return std::make_shared<ListType>(Type::Parameters(), content_.get()->type());
-    }
+    return std::make_shared<ListType>(parameters_, content_.get()->type());
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::astype(const std::shared_ptr<Type>& type) const {
-    std::shared_ptr<Type> inner = type;
-    if (inner.get() != nullptr) {
-      if (ListType* raw = dynamic_cast<ListType*>(inner.get())) {
-        inner = raw->type();
-      }
+    if (ListType* raw = dynamic_cast<ListType*>(type.get())) {
+      return std::make_shared<ListArrayOf<T>>(id_, type.get()->parameters(), starts_, stops_, content_.get()->astype(raw->type()));
     }
-    return std::make_shared<ListArrayOf<T>>(id_, type, starts_, stops_, content_.get()->astype(inner));
+    else {
+      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
+    }
   }
 
   template <typename T>
@@ -191,8 +181,8 @@ namespace awkward {
     if (id_.get() != nullptr) {
       out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
-    if (type_.get() != nullptr) {
-      out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
+    if (!parameters_.empty()) {
+      out << parameters_tostring(indent + std::string("    "), "", "\n");
     }
     out << starts_.tostring_part(indent + std::string("    "), "<starts>", "</starts>\n");
     out << stops_.tostring_part(indent + std::string("    "), "<stops>", "</stops>\n");
@@ -218,7 +208,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::shallow_copy() const {
-    return std::make_shared<ListArrayOf<T>>(id_, type_, starts_, stops_, content_);
+    return std::make_shared<ListArrayOf<T>>(id_, parameters_, starts_, stops_, content_);
   }
 
   template <typename T>
@@ -291,21 +281,17 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::make_shared<ListArrayOf<T>>(id, type_, starts_.getitem_range_nowrap(start, stop), stops_.getitem_range_nowrap(start, stop), content_);
+    return std::make_shared<ListArrayOf<T>>(id, parameters_, starts_.getitem_range_nowrap(start, stop), stops_.getitem_range_nowrap(start, stop), content_);
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_field(const std::string& key) const {
-    return std::make_shared<ListArrayOf<T>>(id_, Type::none(), starts_, stops_, content_.get()->getitem_field(key));
+    return std::make_shared<ListArrayOf<T>>(id_, util::Parameters(), starts_, stops_, content_.get()->getitem_field(key));
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_fields(const std::vector<std::string>& keys) const {
-    std::shared_ptr<Type> type = Type::none();
-    if (SliceFields(keys).preserves_type(type_, Index64(0))) {
-      type = type_;
-    }
-    return std::make_shared<ListArrayOf<T>>(id_, type, starts_, stops_, content_.get()->getitem_fields(keys));
+    return std::make_shared<ListArrayOf<T>>(id_, util::Parameters(), starts_, stops_, content_.get()->getitem_fields(keys));
   }
 
   template <typename T>
@@ -331,7 +317,7 @@ namespace awkward {
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }
-    return std::make_shared<ListArrayOf<T>>(id, type_, nextstarts, nextstops, content_);
+    return std::make_shared<ListArrayOf<T>>(id, parameters_, nextstarts, nextstops, content_);
   }
 
   template <typename T>
@@ -363,17 +349,6 @@ namespace awkward {
   template <typename T>
   const std::vector<std::string> ListArrayOf<T>::keys() const {
     return content_.get()->keys();
-  }
-
-  template <typename T>
-  void ListArrayOf<T>::checktype() const {
-    bool okay = false;
-    if (ListType* raw = dynamic_cast<ListType*>(type_.get())) {
-      okay = (raw->type().get() == content_.get()->type().get());
-    }
-    if (!okay) {
-      throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
-    }
   }
 
   template <typename T>
@@ -446,7 +421,7 @@ namespace awkward {
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
     if (advanced.length() == 0) {
-      return std::make_shared<ListOffsetArrayOf<T>>(id_, type_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced));
+      return std::make_shared<ListOffsetArrayOf<T>>(id_, parameters_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, advanced));
     }
     else {
       int64_t total;
@@ -462,7 +437,7 @@ namespace awkward {
         nextoffsets.ptr().get(),
         lenstarts);
       util::handle_error(err2, classname(), id_.get());
-      return std::make_shared<ListOffsetArrayOf<T>>(id_, type_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced));
+      return std::make_shared<ListOffsetArrayOf<T>>(id_, parameters_, nextoffsets, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced));
     }
   }
 

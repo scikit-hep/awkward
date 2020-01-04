@@ -10,7 +10,7 @@
 #include "awkward/type/ListType.h"
 
 namespace awkward {
-  ListType::ListType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type)
+  ListType::ListType(const util::Parameters& parameters, const std::shared_ptr<Type>& type)
       : Type(parameters)
       , type_(type) { }
 
@@ -36,7 +36,7 @@ namespace awkward {
 
   bool ListType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (ListType* t = dynamic_cast<ListType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       return type().get()->equal(t->type(), check_parameters);
@@ -70,7 +70,7 @@ namespace awkward {
     Index64 offsets(1);
     offsets.ptr().get()[0] = 0;
     std::shared_ptr<Content> content = type_.get()->empty();
-    return std::make_shared<ListOffsetArray64>(Identity::none(), Type::none(), offsets, content);
+    return std::make_shared<ListOffsetArray64>(Identity::none(), parameters_, offsets, content);
   }
 
   const std::shared_ptr<Type> ListType::type() const {

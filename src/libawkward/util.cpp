@@ -2,12 +2,17 @@
 
 #include <cassert>
 #include <sstream>
+#include <set>
+
+#include "rapidjson/document.h"
 
 #include "awkward/cpu-kernels/identity.h"
 #include "awkward/cpu-kernels/getitem.h"
 
 #include "awkward/util.h"
 #include "awkward/Identity.h"
+
+namespace rj = rapidjson;
 
 namespace awkward {
   namespace util {
@@ -77,6 +82,40 @@ namespace awkward {
         }
       }
       return out;
+    }
+
+    bool parameter_equals(const Parameters& parameters, const std::string& key, const std::string& value) {
+      auto item = parameters.find(key);
+      std::string myvalue;
+      if (item == parameters.end()) {
+        myvalue = "null";
+      }
+      else {
+        myvalue = item->second;
+      }
+      rj::Document mine;
+      rj::Document yours;
+      mine.Parse<rj::kParseNanAndInfFlag>(myvalue.c_str());
+      yours.Parse<rj::kParseNanAndInfFlag>(value.c_str());
+      return mine == yours;
+    }
+
+    bool parameters_equal(const Parameters& self, const Parameters& other) {
+      std::set<std::string> checked;
+      for (auto pair : self) {
+        if (!parameter_equals(other, pair.first, pair.second)) {
+          return false;
+        }
+        checked.insert(pair.first);
+      }
+      for (auto pair : other) {
+        if (checked.find(pair.first) == checked.end()) {
+          if (!parameter_equals(self, pair.first, pair.second)) {
+            return false;
+          }
+        }
+      }
+      return true;
     }
 
     void handle_error(const struct Error& err, const std::string& classname, const Identity* id) {

@@ -9,7 +9,7 @@
 #include "awkward/type/UnionType.h"
 
 namespace awkward {
-  UnionType::UnionType(const Type::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
+  UnionType::UnionType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
       : Type(parameters)
       , types_(types) { }
 
@@ -40,7 +40,7 @@ namespace awkward {
 
   bool UnionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       if (types_.size() != t->types_.size()) {

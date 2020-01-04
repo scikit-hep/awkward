@@ -11,7 +11,7 @@
 #include "awkward/type/RecordType.h"
 
 namespace awkward {
-  RecordType::RecordType(const Type::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup)
+  RecordType::RecordType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup)
       : Type(parameters)
       , types_(types)
       , recordlookup_(recordlookup) {
@@ -20,7 +20,7 @@ namespace awkward {
     }
   }
 
-  RecordType::RecordType(const Type::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
+  RecordType::RecordType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
       : Type(parameters)
       , types_(types)
       , recordlookup_(nullptr) { }
@@ -104,7 +104,7 @@ namespace awkward {
 
   bool RecordType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       if (numfields() != t->numfields()) {
@@ -166,7 +166,7 @@ namespace awkward {
     for (auto type : types_) {
       contents.push_back(type.get()->empty());
     }
-    return std::make_shared<RecordArray>(Identity::none(), Type::none(), contents, recordlookup_);
+    return std::make_shared<RecordArray>(Identity::none(), parameters_, contents, recordlookup_);
   }
 
   const std::shared_ptr<Type> RecordType::field(int64_t fieldindex) const {

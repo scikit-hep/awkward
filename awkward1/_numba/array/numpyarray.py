@@ -16,14 +16,15 @@ def typeof(val, c):
     type = val.type
     while isinstance(type, (awkward1.layout.ArrayType, awkward1.layout.RegularType)):
         type = type.type
-    return NumpyArrayType(numba.typeof(numpy.asarray(val)), numba.typeof(val.id), numba.none if val.isbare else awkward1._numba.types.typeof_literaltype(type))
+    return NumpyArrayType(numba.typeof(numpy.asarray(val)), numba.typeof(val.id), util.dict2parameters(val.parameters))
 
 class NumpyArrayType(content.ContentType):
-    def __init__(self, arraytpe, idtpe, typetpe):
-        super(NumpyArrayType, self).__init__(name="ak::NumpyArrayType({0}, id={1}, type={2})".format(arraytpe.name, idtpe.name, typetpe.name))
+    def __init__(self, arraytpe, idtpe, parameters):
+        assert isinstance(parameters, tuple)
+        super(NumpyArrayType, self).__init__(name="ak::NumpyArrayType({0}, id={1}, parameters={2})".format(arraytpe.name, idtpe.name, util.parameters2str(parameters)))
         self.arraytpe = arraytpe
         self.idtpe = idtpe
-        self.typetpe = typetpe
+        self.parameters = parameters
 
     @property
     def ndim(self):
@@ -41,7 +42,7 @@ class NumpyArrayType(content.ContentType):
     def getitem_tuple(self, wheretpe):
         outtpe = numba.typing.arraydecl.get_array_index_type(self.arraytpe, wheretpe).result
         if isinstance(outtpe, numba.types.Array):
-            return NumpyArrayType(outtpe, self.idtpe, self.typetpe)
+            return NumpyArrayType(outtpe, self.idtpe, self.parameters)
         else:
             return outtpe
 
@@ -56,7 +57,7 @@ class NumpyArrayType(content.ContentType):
         else:
             numreduce = sum(1 if isinstance(x, numba.types.Integer) else 0 for x in wheretpe.types)
         if numreduce < self.arraytpe.ndim:
-            return NumpyArrayType(numba.types.Array(self.arraytpe.dtype, self.arraytpe.ndim - numreduce, self.arraytpe.layout), self.idtpe, self.typetpe)
+            return NumpyArrayType(numba.types.Array(self.arraytpe.dtype, self.arraytpe.ndim - numreduce, self.arraytpe.layout), self.idtpe, self.parameters)
         elif numreduce == self.arraytpe.ndim:
             return self.arraytpe.dtype
         else:
@@ -122,20 +123,7 @@ def box(tpe, val, c):
         args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
     else:
         args.append(c.pyapi.make_none())
-    if tpe.typetpe != numba.none:
-        RegularType_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.RegularType))
-        t = c.pyapi.unserialize(c.pyapi.serialize_object(tpe.typetpe.literal_type))
-        arrayval = numba.targets.arrayobj.make_array(tpe.arraytpe)(c.context, c.builder, proxyin.array)
-        arrayshape = arrayval.shape
-        for i in range(tpe.arraytpe.ndim - 1, 0, -1):
-            size_val = c.builder.extract_value(arrayshape, i)
-            size_obj = c.pyapi.from_native_value(numba.intp, size_val, c.env_manager)
-            t = c.pyapi.call_function_objargs(RegularType_obj, (t, size_obj))
-            c.pyapi.decref(size_obj)
-        c.pyapi.decref(RegularType_obj)
-        args.append(t)
-    else:
-        args.append(c.pyapi.make_none())
+    args.append(util.parameters2dict_impl(c, tpe.parameters))
     out = c.pyapi.call_function_objargs(NumpyArray_obj, args)
     for x in args:
         c.pyapi.decref(x)
@@ -209,7 +197,11 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         lenself, skip = shapeunpacked[:2]
         lennext = builder.mul(lenself, skip)
 
-        carry = numba.targets.arrayobj.numpy_arange_1(context, builder, util.index64tpe(numba.intp), (lenself,))
+        carry = util.newindex64(context, builder, numba.intp, lenself)
+        util.call(context, builder, cpu.kernels.awkward_carry_arange_64,
+            (util.arrayptr(context, builder, util.index64tpe, carry),
+             util.cast(context, builder, numba.intp, numba.int64, lenself)),
+            "in {0}, indexing error".format(arraytpe.shortname))
 
         flathead = numba.targets.arrayobj.array_flatten(context, builder, util.index64tpe(headtpe), (headval,))
         lenflathead = util.arraylen(context, builder, util.index64tpe, flathead)
@@ -236,7 +228,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         nextarraytpe = numba.types.Array(arraytpe.arraytpe.dtype, arraytpe.arraytpe.ndim - 1, arraytpe.arraytpe.layout)
         nextarrayval = numba.targets.arrayobj.array_reshape(context, builder, nextarraytpe(arraytpe.arraytpe, nextshapetpe), (proxyin.array, nextshapeval))
 
-        nexttpe = NumpyArrayType(nextarraytpe, arraytpe.idtpe, arraytpe.typetpe)
+        nexttpe = NumpyArrayType(nextarraytpe, arraytpe.idtpe, arraytpe.parameters)
         proxynext = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
         proxynext.array = nextarrayval
         if arraytpe.idtpe != numba.none:
@@ -257,7 +249,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         outval = numba.targets.arrayobj.getitem_array_tuple(context, builder, outtpe(arraytpe.arraytpe, wheretpe), (proxyin.array, whereval))
 
         if isinstance(outtpe, numba.types.Array):
-            proxyout = numba.cgutils.create_struct_proxy(NumpyArrayType(outtpe, arraytpe.idtpe, arraytpe.typetpe))(context, builder)
+            proxyout = numba.cgutils.create_struct_proxy(NumpyArrayType(outtpe, arraytpe.idtpe, arraytpe.parameters))(context, builder)
             proxyout.array = outval
             if arraytpe.idtpe != numba.none:
                 proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, arraytpe.idtpe, wheretpe, proxyin.id, whereval)

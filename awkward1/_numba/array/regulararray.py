@@ -11,14 +11,15 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RegularArray)
 def typeof(val, c):
-    return RegularArrayType(numba.typeof(val.content), numba.typeof(val.id), numba.none if val.isbare else numba.typeof(val.type))
+    return RegularArrayType(numba.typeof(val.content), numba.typeof(val.id), util.dict2parameters(val.parameters))
 
 class RegularArrayType(content.ContentType):
-    def __init__(self, contenttpe, idtpe, typetpe):
-        super(RegularArrayType, self).__init__(name="ak::RegularArrayType({0}, id={1}, type={2})".format(contenttpe.name, idtpe.name, typetpe.name))
+    def __init__(self, contenttpe, idtpe, parameters):
+        assert isinstance(parameters, tuple)
+        super(RegularArrayType, self).__init__(name="ak::RegularArrayType({0}, id={1}, parameters={2})".format(contenttpe.name, idtpe.name, util.parameters2str(parameters)))
         self.contenttpe = contenttpe
         self.idtpe = idtpe
-        self.typetpe = typetpe
+        self.parameters = parameters
 
     @property
     def ndim(self):
@@ -31,10 +32,10 @@ class RegularArrayType(content.ContentType):
         return self
 
     def getitem_str(self, key):
-        return RegularArrayType(self.contenttpe.getitem_str(key), self.idtpe, numba.none)
+        return RegularArrayType(self.contenttpe.getitem_str(key), self.idtpe, ())
 
     def getitem_tuple(self, wheretpe):
-        nexttpe = RegularArrayType(self, numba.none, numba.none)
+        nexttpe = RegularArrayType(self, numba.none, ())
         out = nexttpe.getitem_next(wheretpe, False)
         return out.getitem_int()
 
@@ -49,7 +50,7 @@ class RegularArrayType(content.ContentType):
 
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
-            return RegularArrayType(contenttpe, self.idtpe, self.typetpe)
+            return RegularArrayType(contenttpe, self.idtpe, self.parameters)
 
         elif isinstance(headtpe, numba.types.StringLiteral):
             return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
@@ -65,7 +66,7 @@ class RegularArrayType(content.ContentType):
                 raise NotImplementedError("array.ndim != 1")
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
             if not isadvanced:
-                return RegularArrayType(contenttpe, self.idtpe, self.typetpe)
+                return RegularArrayType(contenttpe, self.idtpe, self.parameters)
             else:
                 return contenttpe
 
@@ -73,7 +74,7 @@ class RegularArrayType(content.ContentType):
             raise AssertionError(headtpe)
 
     def carry(self):
-        return RegularArrayType(self.contenttpe.carry(), self.idtpe, self.typetpe)
+        return RegularArrayType(self.contenttpe.carry(), self.idtpe, self.parameters)
 
     @property
     def lower_len(self):
@@ -110,8 +111,6 @@ class RegularArrayModel(numba.datamodel.models.StructModel):
                    ("size", numba.int64)]
         if fe_type.idtpe != numba.none:
             members.append(("id", fe_type.idtpe))
-        if fe_type.typetpe != numba.none:
-            members.append(("type", fe_type.typetpe))
         super(RegularArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(RegularArrayType)
@@ -127,10 +126,6 @@ def unbox(tpe, obj, c):
         id_obj = c.pyapi.object_getattr_string(obj, "id")
         proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
         c.pyapi.decref(id_obj)
-    if tpe.typetpe != numba.none:
-        type_obj = c.pyapi.object_getattr_string(obj, "type")
-        proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type_obj).value
-        c.pyapi.decref(type_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
@@ -145,18 +140,11 @@ def box(tpe, val, c):
         args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
     else:
         args.append(c.pyapi.make_none())
+    args.append(util.parameters2dict_impl(c, tpe.parameters))
     out = c.pyapi.call_function_objargs(RegularArray_obj, args)
     for x in args:
         c.pyapi.decref(x)
     c.pyapi.decref(RegularArray_obj)
-    if tpe.typetpe != numba.none:
-        old = out
-        astype_obj = c.pyapi.object_getattr_string(out, "astype")
-        t = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
-        out = c.pyapi.call_function_objargs(astype_obj, (t,))
-        c.pyapi.decref(old)
-        c.pyapi.decref(astype_obj)
-        c.pyapi.decref(t)
     return out
 
 @numba.extending.lower_builtin(len, RegularArrayType)
@@ -304,7 +292,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             outcontenttpe = nextcontenttpe.getitem_next(tailtpe, True)
             outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, nextadvanced)
 
-        outtpe = RegularArrayType(outcontenttpe, arraytpe.idtpe, arraytpe.typetpe)
+        outtpe = RegularArrayType(outcontenttpe, arraytpe.idtpe, arraytpe.parameters)
         proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
         proxyout.content = outcontentval
         proxyout.size = nextsize
@@ -358,7 +346,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             contenttpe = nexttpe.getitem_next(tailtpe, True)
             contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-            outtpe = RegularArrayType(contenttpe, arraytpe.idtpe, arraytpe.typetpe)
+            outtpe = RegularArrayType(contenttpe, arraytpe.idtpe, arraytpe.parameters)
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.content = contentval
             proxyout.size = lenflathead

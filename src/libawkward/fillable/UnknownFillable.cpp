@@ -40,13 +40,9 @@ namespace awkward {
     nullcount_ = 0;
   }
 
-  const std::shared_ptr<Type> UnknownFillable::type() const {
-    return std::make_shared<UnknownType>(Type::Parameters());
-  }
-
-  const std::shared_ptr<Content> UnknownFillable::snapshot(const std::shared_ptr<Type>& type) const {
+  const std::shared_ptr<Content> UnknownFillable::snapshot() const {
     if (nullcount_ == 0) {
-      return std::make_shared<EmptyArray>(Identity::none(), type);
+      return std::make_shared<EmptyArray>(Identity::none(), util::Parameters());
     }
     else {
       throw std::runtime_error("UnknownFillable::snapshot needs OptionArray");

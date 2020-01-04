@@ -249,3 +249,17 @@ def preserves_type(slice, isadvanced):
         return False
     else:
         raise AssertionError(slice)
+
+def dict2parameters(parameters):
+    return tuple(sorted(parameters.items()))
+
+def parameters2str(parameters):
+    return "{" + ", ".join("{0}: {1}".format(n, x) for n, x in parameters) + "}"
+
+def parameters2dict_impl(c, parameters):
+    dict_obj = c.pyapi.unserialize(c.pyapi.serialize_object(dict))
+    parameters_obj = c.pyapi.unserialize(c.pyapi.serialize_object(parameters))
+    out = c.pyapi.call_function_objargs(dict_obj, (parameters_obj,))
+    c.pyapi.decref(dict_obj)
+    c.pyapi.decref(parameters_obj)
+    return out
