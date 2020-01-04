@@ -6,7 +6,7 @@
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/Slice.h"
 
@@ -103,7 +103,7 @@ namespace awkward {
     else if (std::is_same<T, int32_t>::value) {
       std::shared_ptr<Identities> out = std::make_shared<Identities64>(ref_, fieldloc_, width_, length_);
       Identities64* raw = reinterpret_cast<Identities64*>(out.get());
-      awkward_identity32_to_identity64(raw->ptr().get(), reinterpret_cast<int32_t*>(ptr_.get()), length_, width_);
+      awkward_identities32_to_identities64(raw->ptr().get(), reinterpret_cast<int32_t*>(ptr_.get()), length_, width_);
       return out;
     }
   }
@@ -147,7 +147,7 @@ namespace awkward {
     IdentitiesOf<T>* rawout = reinterpret_cast<IdentitiesOf<T>*>(out.get());
 
     if (std::is_same<T, int32_t>::value) {
-      struct Error err = awkward_identity32_getitem_carry_64(
+      struct Error err = awkward_identities32_getitem_carry_64(
         reinterpret_cast<int32_t*>(rawout->ptr().get()),
         reinterpret_cast<int32_t*>(ptr_.get()),
         carry.ptr().get(),
@@ -158,7 +158,7 @@ namespace awkward {
       util::handle_error(err, classname(), nullptr);
     }
     else if (std::is_same<T, int64_t>::value) {
-      struct Error err = awkward_identity64_getitem_carry_64(
+      struct Error err = awkward_identities64_getitem_carry_64(
         reinterpret_cast<int64_t*>(rawout->ptr().get()),
         reinterpret_cast<int64_t*>(ptr_.get()),
         carry.ptr().get(),

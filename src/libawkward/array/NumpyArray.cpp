@@ -4,7 +4,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
@@ -123,14 +123,14 @@ namespace awkward {
     if (length() <= kMaxInt32) {
       std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = awkward_new_identity32(rawidentities->ptr().get(), length());
+      struct Error err = awkward_new_identities32(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
     else {
       std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = awkward_new_identity64(rawidentities->ptr().get(), length());
+      struct Error err = awkward_new_identities64(rawidentities->ptr().get(), length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }

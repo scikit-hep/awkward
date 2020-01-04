@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_IDENTITY_H_
-#define AWKWARD_IDENTITY_H_
+#ifndef AWKWARD_IDENTITIES_H_
+#define AWKWARD_IDENTITIES_H_
 
 #include <string>
 #include <vector>
@@ -76,4 +76,4 @@ namespace awkward {
   typedef IdentitiesOf<int64_t> Identities64;
 }
 
-#endif // AWKWARD_IDENTITY_H_
+#endif // AWKWARD_IDENTITIES_H_

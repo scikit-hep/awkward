@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"

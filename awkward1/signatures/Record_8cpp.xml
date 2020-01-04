@@ -3,7 +3,7 @@
   <compounddef id="Record_8cpp" kind="file" language="C++">
     <compoundname>Record.cpp</compoundname>
     <includes local="no">sstream</includes>
-    <includes local="yes">awkward/cpu-kernels/identity.h</includes>
+    <includes local="yes">awkward/cpu-kernels/identities.h</includes>
     <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
     <includes local="yes">awkward/type/RecordType.h</includes>
     <includes local="yes">awkward/type/ArrayType.h</includes>
@@ -22,7 +22,7 @@
         <label>awkward/cpu-kernels/getitem.h</label>
       </node>
       <node id="3">
-        <label>awkward/cpu-kernels/identity.h</label>
+        <label>awkward/cpu-kernels/identities.h</label>
       </node>
       <node id="1">
         <label>src/libawkward/array/Record.cpp</label>

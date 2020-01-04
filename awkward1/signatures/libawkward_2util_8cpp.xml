@@ -6,7 +6,7 @@
     <includes local="no">sstream</includes>
     <includes local="no">set</includes>
     <includes local="yes">rapidjson/document.h</includes>
-    <includes local="yes">awkward/cpu-kernels/identity.h</includes>
+    <includes local="yes">awkward/cpu-kernels/identities.h</includes>
     <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
     <includes local="yes">awkward/util.h</includes>
     <includes local="yes">awkward/Identities.h</includes>
@@ -40,11 +40,11 @@
       <node id="7">
         <label>awkward/cpu-kernels/getitem.h</label>
       </node>
-      <node id="6">
-        <label>awkward/cpu-kernels/identity.h</label>
-      </node>
       <node id="5">
         <label>rapidjson/document.h</label>
+      </node>
+      <node id="6">
+        <label>awkward/cpu-kernels/identities.h</label>
       </node>
       <node id="3">
         <label>sstream</label>
@@ -218,10 +218,10 @@
         </inbodydescription>
         <location file="src/libawkward/util.cpp" line="103" column="10" bodyfile="src/libawkward/util.cpp" bodystart="103" bodyend="119"/>
       </memberdef>
-      <memberdef kind="function" id="namespaceawkward_1_1util_1a98ea8f49b80a9b677819c763a0638665" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a0c0ee9730e162bb57e17694a503dafa9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>void</type>
         <definition>void awkward::util::handle_error</definition>
-        <argsstring>(const struct Error &amp;err, const std::string &amp;classname, const Identities *id)</argsstring>
+        <argsstring>(const struct Error &amp;err, const std::string &amp;classname, const Identities *identities)</argsstring>
         <name>handle_error</name>
         <param>
           <type>const struct Error &amp;</type>
@@ -233,7 +233,7 @@
         </param>
         <param>
           <type>const Identities *</type>
-          <declname>id</declname>
+          <declname>identities</declname>
         </param>
         <briefdescription>
         </briefdescription>
@@ -285,13 +285,13 @@
         </inbodydescription>
         <location file="src/libawkward/util.cpp" line="152" column="10" bodyfile="src/libawkward/util.cpp" bodystart="152" bodyend="169"/>
       </memberdef>
-      <memberdef kind="function" id="namespaceawkward_1_1util_1a8edd45202d3bb99b953a0dedee1c4d59" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a35cbb19ed4389f759b25ecc694448ac3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
         </templateparamlist>
         <type>Error</type>
-        <definition>Error awkward::util::awkward_identity64_from_listoffsetarray&lt; uint32_t &gt;</definition>
+        <definition>Error awkward::util::awkward_identities64_from_listoffsetarray&lt; uint32_t &gt;</definition>
         <argsstring>(int64_t *toptr, const int64_t *fromptr, const uint32_t *fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
-        <name>awkward_identity64_from_listoffsetarray&lt; uint32_t &gt;</name>
+        <name>awkward_identities64_from_listoffsetarray&lt; uint32_t &gt;</name>
         <param>
           <type>int64_t *</type>
           <declname>toptr</declname>
@@ -332,13 +332,13 @@
         </inbodydescription>
         <location file="src/libawkward/util.cpp" line="172" column="5" bodyfile="src/libawkward/util.cpp" bodystart="172" bodyend="174"/>
       </memberdef>
-      <memberdef kind="function" id="namespaceawkward_1_1util_1a6e2acdfc954f14dffc2d3f582026428c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a73949ff843b38ba437f19732c876ca24" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
         </templateparamlist>
         <type>Error</type>
-        <definition>Error awkward::util::awkward_identity64_from_listoffsetarray&lt; int64_t &gt;</definition>
+        <definition>Error awkward::util::awkward_identities64_from_listoffsetarray&lt; int64_t &gt;</definition>
         <argsstring>(int64_t *toptr, const int64_t *fromptr, const int64_t *fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
-        <name>awkward_identity64_from_listoffsetarray&lt; int64_t &gt;</name>
+        <name>awkward_identities64_from_listoffsetarray&lt; int64_t &gt;</name>
         <param>
           <type>int64_t *</type>
           <declname>toptr</declname>
@@ -379,13 +379,13 @@
         </inbodydescription>
         <location file="src/libawkward/util.cpp" line="176" column="5" bodyfile="src/libawkward/util.cpp" bodystart="176" bodyend="178"/>
       </memberdef>
-      <memberdef kind="function" id="namespaceawkward_1_1util_1a16520ab2a50710adc4155e188d7bd450" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a0ef7b0340bf22a52577220dc84a9073f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
         </templateparamlist>
         <type>Error</type>
-        <definition>Error awkward::util::awkward_identity64_from_listarray&lt; uint32_t &gt;</definition>
+        <definition>Error awkward::util::awkward_identities64_from_listarray&lt; uint32_t &gt;</definition>
         <argsstring>(int64_t *toptr, const int64_t *fromptr, const uint32_t *fromstarts, const uint32_t *fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
-        <name>awkward_identity64_from_listarray&lt; uint32_t &gt;</name>
+        <name>awkward_identities64_from_listarray&lt; uint32_t &gt;</name>
         <param>
           <type>int64_t *</type>
           <declname>toptr</declname>
@@ -434,13 +434,13 @@
         </inbodydescription>
         <location file="src/libawkward/util.cpp" line="181" column="5" bodyfile="src/libawkward/util.cpp" bodystart="181" bodyend="183"/>
       </memberdef>
-      <memberdef kind="function" id="namespaceawkward_1_1util_1a1bd30b78640996660a7ed6083ac8ef27" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="namespaceawkward_1_1util_1a7a6e0e64af7feda69b7f12da1e297d59" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
         </templateparamlist>
         <type>Error</type>
-        <definition>Error awkward::util::awkward_identity64_from_listarray&lt; int64_t &gt;</definition>
+        <definition>Error awkward::util::awkward_identities64_from_listarray&lt; int64_t &gt;</definition>
         <argsstring>(int64_t *toptr, const int64_t *fromptr, const int64_t *fromstarts, const int64_t *fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth)</argsstring>
-        <name>awkward_identity64_from_listarray&lt; int64_t &gt;</name>
+        <name>awkward_identities64_from_listarray&lt; int64_t &gt;</name>
         <param>
           <type>int64_t *</type>
           <declname>toptr</declname>
