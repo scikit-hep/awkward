@@ -230,6 +230,9 @@ class FillableArray(object):
     def begintuple(self):
         self._fillablearray.begintuple()
 
+    def index(self, i):
+        self._fillablearray.index(i)
+
     def endtuple(self):
         self._fillablearray.endtuple()
 
