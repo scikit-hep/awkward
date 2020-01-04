@@ -11,19 +11,20 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(val, c):
-    return RecordArrayType([numba.typeof(x) for x in val.fields()], None if val.istuple else tuple(val.keys()), numba.typeof(val.id), numba.none if val.isbare else numba.typeof(val.type))
+    return RecordArrayType([numba.typeof(x) for x in val.fields()], None if val.istuple else tuple(val.keys()), numba.typeof(val.id), util.dict2parameters(val.parameters))
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
 def typeof(val, c):
     return RecordType(numba.typeof(val.array))
 
 class RecordArrayType(content.ContentType):
-    def __init__(self, contenttpes, keys, idtpe, typetpe):
-        super(RecordArrayType, self).__init__(name="ak::RecordArrayType([{0}], {1}, id={2}, type={3})".format(", ".join(x.name for x in contenttpes), keys, idtpe.name, typetpe.name))
+    def __init__(self, contenttpes, keys, idtpe, parameters):
+        assert isinstance(parameters, tuple)
+        super(RecordArrayType, self).__init__(name="ak::RecordArrayType([{0}], {1}, id={2}, parameters={3})".format(", ".join(x.name for x in contenttpes), keys, idtpe.name, util.parameters2str(parameters)))
         self.contenttpes = contenttpes
         self.keys = keys
         self.idtpe = idtpe
-        self.typetpe = typetpe
+        self.parameters = parameters
 
     @property
     def istuple(self):
@@ -48,7 +49,7 @@ class RecordArrayType(content.ContentType):
 
     def getitem_tuple(self, wheretpe):
         import awkward1._numba.array.regulararray
-        nexttpe = awkward1._numba.array.regulararray.RegularArrayType(self, numba.none, numba.none)
+        nexttpe = awkward1._numba.array.regulararray.RegularArrayType(self, numba.none, ())
         out = nexttpe.getitem_next(wheretpe, False)
         return out.getitem_int()
 
@@ -66,12 +67,12 @@ class RecordArrayType(content.ContentType):
             contenttpes = []
             for t in self.contenttpes:
                 contenttpes.append(t.getitem_next(numba.types.Tuple((headtpe,)), isadvanced))
-            nexttpe = RecordArrayType(contenttpes, self.keys, numba.none, numba.none)
+            nexttpe = RecordArrayType(contenttpes, self.keys, numba.none, ())
 
         return nexttpe.getitem_next(tailtpe, isadvanced)
 
     def carry(self):
-        return RecordArrayType([x.carry() for x in self.contenttpes], self.keys, self.idtpe, self.typetpe)
+        return RecordArrayType([x.carry() for x in self.contenttpes], self.keys, self.idtpe, self.parameters)
 
     @property
     def lower_len(self):
@@ -153,8 +154,6 @@ class RecordArrayModel(numba.datamodel.models.StructModel):
             members.append((field(i), x))
         if fe_type.idtpe != numba.none:
             members.append(("id", fe_type.idtpe))
-        if fe_type.typetpe != numba.none:
-            members.append(("type", fe_type.typetpe))
         super(RecordArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.datamodel.registry.register_default(RecordType)
@@ -184,10 +183,6 @@ def unbox(tpe, obj, c):
         id_obj = c.pyapi.object_getattr_string(obj, "id")
         proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
         c.pyapi.decref(id_obj)
-    if tpe.typetpe != numba.none:
-        type_obj = c.pyapi.object_getattr_string(obj, "type")
-        proxyout.type = c.pyapi.to_native_value(tpe.typetpe, type_obj).value
-        c.pyapi.decref(type_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
@@ -214,6 +209,7 @@ def box(tpe, val, c):
         args.append(id_obj)
     else:
         args.append(c.pyapi.make_none())
+    args.append(util.parameters2dict_impl(c, tpe.parameters))
 
     if len(tpe.contenttpes) == 0:
         RecordArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.RecordArray))
@@ -239,15 +235,6 @@ def box(tpe, val, c):
 
     for x in args:
         c.pyapi.decref(x)
-
-    if tpe.typetpe != numba.none:
-        old = out
-        astype_obj = c.pyapi.object_getattr_string(out, "astype")
-        t = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
-        out = c.pyapi.call_function_objargs(astype_obj, (t,))
-        c.pyapi.decref(old)
-        c.pyapi.decref(astype_obj)
-        c.pyapi.decref(t)
 
     return out
 
@@ -377,7 +364,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         nextval = getattr(proxyin, field(index))
 
     else:
-        nexttpe = RecordArrayType([t.getitem_next(numba.types.Tuple((headtpe,)), advanced is not None) for t in arraytpe.contenttpes], arraytpe.keys, numba.none, numba.none)   # FIXME: Type::none()   # arraytpe.typetpe if util.preserves_type(headtpe, advanced is not None) else
+        nexttpe = RecordArrayType([t.getitem_next(numba.types.Tuple((headtpe,)), advanced is not None) for t in arraytpe.contenttpes], arraytpe.keys, numba.none, arraytpe.parameters if util.preserves_type(headtpe, advanced is not None) else ())
         proxyout = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
         proxyout.length = proxyin.length
         wrappedheadtpe = numba.types.Tuple((headtpe,))

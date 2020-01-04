@@ -87,7 +87,7 @@ class D(awkward1.highlevel.Array):
 
 def test_numpyarray():
     dint64 = awkward1.layout.PrimitiveType("int64", {"__class__": "D", "__str__": "D[int64]"})
-    array1 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5), type=awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3))
+    array1 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5)).astype(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3))
 
     @numba.njit
     def f1(q):

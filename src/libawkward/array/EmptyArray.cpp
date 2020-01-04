@@ -27,7 +27,7 @@ namespace awkward {
   void EmptyArray::setid() { }
 
   const std::shared_ptr<Type> EmptyArray::type() const {
-    return std::make_shared<UnknownType>(util::Parameters());
+    return std::make_shared<UnknownType>(parameters_);
   }
 
   const std::shared_ptr<Content> EmptyArray::astype(const std::shared_ptr<Type>& type) const {

@@ -34,9 +34,7 @@ def test_boxing():
     b = f2(a)
     assert sys.getrefcount(a) == 3
 
-    assert str(b.snapshot()) == """<EmptyArray>
-    <type>unknown</type>
-</EmptyArray>"""
+    assert str(b.snapshot()) == """<EmptyArray/>"""
 
 def test_simple():
     @numba.njit
