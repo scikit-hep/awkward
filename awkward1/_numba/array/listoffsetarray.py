@@ -14,15 +14,15 @@ from ..._numba import cpu, util, content
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray64)
 def typeof(val, c):
     import awkward1._numba.types
-    return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets)), numba.typeof(val.content), numba.typeof(val.id), util.dict2parameters(val.parameters))
+    return ListOffsetArrayType(numba.typeof(numpy.asarray(val.offsets)), numba.typeof(val.content), numba.typeof(val.identities), util.dict2parameters(val.parameters))
 
 class ListOffsetArrayType(content.ContentType):
-    def __init__(self, offsetstpe, contenttpe, idtpe, parameters):
+    def __init__(self, offsetstpe, contenttpe, identitiestpe, parameters):
         assert isinstance(parameters, tuple)
-        super(ListOffsetArrayType, self).__init__(name="ak::ListOffsetArray{0}{1}Type({2}, id={3}, parameters={4})".format("" if offsetstpe.dtype.signed else "U", offsetstpe.dtype.bitwidth, contenttpe.name, idtpe.name, util.parameters2str(parameters)))
+        super(ListOffsetArrayType, self).__init__(name="ak::ListOffsetArray{0}{1}Type({2}, identities={3}, parameters={4})".format("" if offsetstpe.dtype.signed else "U", offsetstpe.dtype.bitwidth, contenttpe.name, identitiestpe.name, util.parameters2str(parameters)))
         self.offsetstpe = offsetstpe
         self.contenttpe = contenttpe
-        self.idtpe = idtpe
+        self.identitiestpe = identitiestpe
         self.parameters = parameters
 
     @property
@@ -44,7 +44,7 @@ class ListOffsetArrayType(content.ContentType):
         return self
 
     def getitem_str(self, key):
-        return ListOffsetArrayType(self.offsetstpe, self.contenttpe.getitem_str(key), self.idtpe, ())
+        return ListOffsetArrayType(self.offsetstpe, self.contenttpe.getitem_str(key), self.identitiestpe, ())
 
     def getitem_tuple(self, wheretpe):
         import awkward1._numba.array.listarray
@@ -64,7 +64,7 @@ class ListOffsetArrayType(content.ContentType):
 
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
-            return ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.idtpe, self.parameters)
+            return ListOffsetArrayType(util.indextpe(self.indexname), contenttpe, self.identitiestpe, self.parameters)
 
         elif isinstance(headtpe, numba.types.StringLiteral):
             return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
@@ -80,7 +80,7 @@ class ListOffsetArrayType(content.ContentType):
                 raise NotImplementedError("array.ndim != 1")
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
             if not isadvanced:
-                return awkward1._numba.array.regulararray.RegularArrayType(contenttpe, self.idtpe, self.parameters)
+                return awkward1._numba.array.regulararray.RegularArrayType(contenttpe, self.identitiestpe, self.parameters)
             else:
                 return contenttpe
 
@@ -89,7 +89,7 @@ class ListOffsetArrayType(content.ContentType):
 
     def carry(self):
         import awkward1._numba.array.listarray
-        return awkward1._numba.array.listarray.ListArrayType(self.offsetstpe, self.offsetstpe, self.contenttpe, self.idtpe, self.parameters)
+        return awkward1._numba.array.listarray.ListArrayType(self.offsetstpe, self.offsetstpe, self.contenttpe, self.identitiestpe, self.parameters)
 
     @property
     def lower_len(self):
@@ -124,8 +124,8 @@ class ListOffsetArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("offsets", fe_type.offsetstpe),
                    ("content", fe_type.contenttpe)]
-        if fe_type.idtpe != numba.none:
-            members.append(("id", fe_type.idtpe))
+        if fe_type.identitiestpe != numba.none:
+            members.append(("identities", fe_type.identitiestpe))
         super(ListOffsetArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(ListOffsetArrayType)
@@ -141,9 +141,9 @@ def unbox(tpe, obj, c):
     c.pyapi.decref(offsets_obj)
     c.pyapi.decref(content_obj)
     c.pyapi.decref(offsetsarray_obj)
-    if tpe.idtpe != numba.none:
-        id_obj = c.pyapi.object_getattr_string(obj, "id")
-        proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
+    if tpe.identitiestpe != numba.none:
+        id_obj = c.pyapi.object_getattr_string(obj, "identities")
+        proxyout.identities = c.pyapi.to_native_value(tpe.identitiestpe, id_obj).value
         c.pyapi.decref(id_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -168,8 +168,8 @@ def box(tpe, val, c):
     c.pyapi.decref(Index_obj)
     c.pyapi.decref(offsetsarray_obj)
     args = [offsets_obj, content_obj]
-    if tpe.idtpe != numba.none:
-        args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
+    if tpe.identitiestpe != numba.none:
+        args.append(c.pyapi.from_native_value(tpe.identitiestpe, proxyin.identities, c.env_manager))
     else:
         args.append(c.pyapi.make_none())
     args.append(util.parameters2dict_impl(c, tpe.parameters))
@@ -228,8 +228,8 @@ def lower_getitem_range(context, builder, sig, args):
     proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
     proxyout.offsets = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.offsetstpe(tpe.offsetstpe, numba.types.slice2_type), (proxyin.offsets, proxysliceout._getvalue()))
     proxyout.content = proxyin.content
-    if tpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
+    if tpe.identitiestpe != numba.none:
+        proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, tpe.identitiestpe, wheretpe, proxyin.identities, whereval)
 
     out = proxyout._getvalue()
     if context.enable_nrt:
@@ -245,8 +245,8 @@ def lower_getitem_str(context, builder, sig, args):
     proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
     proxyout.offsets = proxyin.offsets
     proxyout.content = tpe.contenttpe.lower_getitem_str(context, builder, rettpe.contenttpe(tpe.contenttpe, wheretpe), (proxyin.content, whereval))
-    if tpe.idtpe != numba.none:
-        proxyout.id = proxyin.id
+    if tpe.identitiestpe != numba.none:
+        proxyout.identities = proxyin.identities
 
     out = proxyout._getvalue()
     if context.enable_nrt:
@@ -400,12 +400,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             outcontenttpe = nextcontenttpe.getitem_next(tailtpe, True)
             outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, nextadvanced)
 
-        outtpe = awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.indexname), outcontenttpe, arraytpe.idtpe, arraytpe.parameters)
+        outtpe = awkward1._numba.array.listoffsetarray.ListOffsetArrayType(util.indextpe(arraytpe.indexname), outcontenttpe, arraytpe.identitiestpe, arraytpe.parameters)
         proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
         proxyout.offsets = nextoffsets
         proxyout.content = outcontentval
-        if arraytpe.idtpe != numba.none:
-            proxyout.id = proxyin.id
+        if arraytpe.identitiestpe != numba.none:
+            proxyout.identities = proxyin.identities
         return proxyout._getvalue()
 
     elif isinstance(headtpe, numba.types.StringLiteral):
@@ -459,12 +459,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             contenttpe = nexttpe.getitem_next(tailtpe, True)
             contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-            outtpe = awkward1._numba.array.regulararray.RegularArrayType(contenttpe, arraytpe.idtpe, arraytpe.parameters)
+            outtpe = awkward1._numba.array.regulararray.RegularArrayType(contenttpe, arraytpe.identitiestpe, arraytpe.parameters)
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.content = contentval
             proxyout.size = lenflathead
-            if outtpe.idtpe != numba.none:
-                proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, outtpe.idtpe, util.index64tpe, proxyin.id, flathead)
+            if outtpe.identitiestpe != numba.none:
+                proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, outtpe.identitiestpe, util.index64tpe, proxyin.identities, flathead)
             return proxyout._getvalue()
 
         else:
@@ -511,13 +511,13 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
 
     starts, stops = starts_stops(context, builder, arraytpe.offsetstpe, proxyin.offsets, lenstarts, lenoffsets)
 
-    proxyout = numba.cgutils.create_struct_proxy(awkward1._numba.array.listarray.ListArrayType(arraytpe.offsetstpe, arraytpe.offsetstpe, arraytpe.contenttpe, arraytpe.idtpe, arraytpe.parameters))(context, builder)
+    proxyout = numba.cgutils.create_struct_proxy(awkward1._numba.array.listarray.ListArrayType(arraytpe.offsetstpe, arraytpe.offsetstpe, arraytpe.contenttpe, arraytpe.identitiestpe, arraytpe.parameters))(context, builder)
     proxyout.starts = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.offsetstpe(arraytpe.offsetstpe, carrytpe), (starts, carryval))
     proxyout.stops = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.offsetstpe(arraytpe.offsetstpe, carrytpe), (stops, carryval))
 
     proxyout.content = proxyin.content
-    if arraytpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
+    if arraytpe.identitiestpe != numba.none:
+        proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, arraytpe.identitiestpe, carrytpe, proxyin.identities, carryval)
     return proxyout._getvalue()
 
 @numba.typing.templates.infer_getattr
@@ -531,11 +531,11 @@ class type_methods(numba.typing.templates.AttributeTemplate):
         elif attr == "content":
             return tpe.contenttpe
 
-        elif attr == "id":
-            if tpe.idtpe == numba.none:
+        elif attr == "identities":
+            if tpe.identitiestpe == numba.none:
                 return numba.optional(identity.IdentitiesType(numba.int32[:, :]))
             else:
-                return tpe.idtpe
+                return tpe.identitiestpe
 
 @numba.extending.lower_getattr(ListOffsetArrayType, "offsets")
 def lower_offsets(context, builder, tpe, val):
@@ -551,12 +551,12 @@ def lower_content(context, builder, tpe, val):
         context.nrt.incref(builder, tpe.contenttpe, proxyin.content)
     return proxyin.content
 
-@numba.extending.lower_getattr(ListOffsetArrayType, "id")
-def lower_id(context, builder, tpe, val):
+@numba.extending.lower_getattr(ListOffsetArrayType, "identities")
+def lower_identities(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    if tpe.idtpe == numba.none:
+    if tpe.identitiestpe == numba.none:
         return context.make_optional_none(builder, identity.IdentitiesType(numba.int32[:, :]))
     else:
         if context.enable_nrt:
-            context.nrt.incref(builder, tpe.idtpe, proxyin.id)
-        return proxyin.id
+            context.nrt.incref(builder, tpe.identitiestpe, proxyin.identities)
+        return proxyin.identities

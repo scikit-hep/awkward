@@ -80,8 +80,8 @@ def lower_len(context, builder, sig, args):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     return numba.targets.arrayobj.array_len(context, builder, numba.types.intp(tpe.arraytpe), (proxyin.array,))
 
-def lower_getitem_any(context, builder, idtpe, wheretpe, idval, whereval):
-    proxyin = numba.cgutils.create_struct_proxy(idtpe)(context, builder, value=idval)
+def lower_getitem_any(context, builder, identitiestpe, wheretpe, idval, whereval):
+    proxyin = numba.cgutils.create_struct_proxy(identitiestpe)(context, builder, value=idval)
 
     if isinstance(wheretpe, numba.types.Integer):
         proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(context, builder)
@@ -91,15 +91,15 @@ def lower_getitem_any(context, builder, idtpe, wheretpe, idval, whereval):
         wheretpe = numba.types.slice2_type
         whereval = proxyslice._getvalue()
 
-    proxyout = numba.cgutils.create_struct_proxy(idtpe)(context, builder)
+    proxyout = numba.cgutils.create_struct_proxy(identitiestpe)(context, builder)
     proxyout.ref = proxyin.ref
     proxyout.fieldloc = proxyin.fieldloc
     if isinstance(wheretpe, numba.types.BaseTuple):
-        proxyout.array = numba.targets.arrayobj.getitem_array_tuple(context, builder, idtpe.arraytpe(idtpe.arraytpe, wheretpe), (proxyin.array, whereval))
+        proxyout.array = numba.targets.arrayobj.getitem_array_tuple(context, builder, identitiestpe.arraytpe(identitiestpe.arraytpe, wheretpe), (proxyin.array, whereval))
     elif isinstance(wheretpe, numba.types.Array):
-        proxyout.array = numba.targets.arrayobj.fancy_getitem_array(context, builder, idtpe.arraytpe(idtpe.arraytpe, wheretpe), (proxyin.array, whereval))
+        proxyout.array = numba.targets.arrayobj.fancy_getitem_array(context, builder, identitiestpe.arraytpe(identitiestpe.arraytpe, wheretpe), (proxyin.array, whereval))
     else:
-        proxyout.array = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, idtpe.arraytpe(idtpe.arraytpe, wheretpe), (proxyin.array, whereval))
+        proxyout.array = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, identitiestpe.arraytpe(identitiestpe.arraytpe, wheretpe), (proxyin.array, whereval))
 
     return proxyout._getvalue()
 

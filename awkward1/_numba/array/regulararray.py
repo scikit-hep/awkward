@@ -11,14 +11,14 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RegularArray)
 def typeof(val, c):
-    return RegularArrayType(numba.typeof(val.content), numba.typeof(val.id), util.dict2parameters(val.parameters))
+    return RegularArrayType(numba.typeof(val.content), numba.typeof(val.identities), util.dict2parameters(val.parameters))
 
 class RegularArrayType(content.ContentType):
-    def __init__(self, contenttpe, idtpe, parameters):
+    def __init__(self, contenttpe, identitiestpe, parameters):
         assert isinstance(parameters, tuple)
-        super(RegularArrayType, self).__init__(name="ak::RegularArrayType({0}, id={1}, parameters={2})".format(contenttpe.name, idtpe.name, util.parameters2str(parameters)))
+        super(RegularArrayType, self).__init__(name="ak::RegularArrayType({0}, identities={1}, parameters={2})".format(contenttpe.name, identitiestpe.name, util.parameters2str(parameters)))
         self.contenttpe = contenttpe
-        self.idtpe = idtpe
+        self.identitiestpe = identitiestpe
         self.parameters = parameters
 
     @property
@@ -32,7 +32,7 @@ class RegularArrayType(content.ContentType):
         return self
 
     def getitem_str(self, key):
-        return RegularArrayType(self.contenttpe.getitem_str(key), self.idtpe, ())
+        return RegularArrayType(self.contenttpe.getitem_str(key), self.identitiestpe, ())
 
     def getitem_tuple(self, wheretpe):
         nexttpe = RegularArrayType(self, numba.none, ())
@@ -50,7 +50,7 @@ class RegularArrayType(content.ContentType):
 
         elif isinstance(headtpe, numba.types.SliceType):
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, isadvanced)
-            return RegularArrayType(contenttpe, self.idtpe, self.parameters)
+            return RegularArrayType(contenttpe, self.identitiestpe, self.parameters)
 
         elif isinstance(headtpe, numba.types.StringLiteral):
             return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
@@ -66,7 +66,7 @@ class RegularArrayType(content.ContentType):
                 raise NotImplementedError("array.ndim != 1")
             contenttpe = self.contenttpe.carry().getitem_next(tailtpe, True)
             if not isadvanced:
-                return RegularArrayType(contenttpe, self.idtpe, self.parameters)
+                return RegularArrayType(contenttpe, self.identitiestpe, self.parameters)
             else:
                 return contenttpe
 
@@ -74,7 +74,7 @@ class RegularArrayType(content.ContentType):
             raise AssertionError(headtpe)
 
     def carry(self):
-        return RegularArrayType(self.contenttpe.carry(), self.idtpe, self.parameters)
+        return RegularArrayType(self.contenttpe.carry(), self.identitiestpe, self.parameters)
 
     @property
     def lower_len(self):
@@ -109,8 +109,8 @@ class RegularArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("content", fe_type.contenttpe),
                    ("size", numba.int64)]
-        if fe_type.idtpe != numba.none:
-            members.append(("id", fe_type.idtpe))
+        if fe_type.identitiestpe != numba.none:
+            members.append(("identities", fe_type.identitiestpe))
         super(RegularArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(RegularArrayType)
@@ -122,9 +122,9 @@ def unbox(tpe, obj, c):
     proxyout.size = c.pyapi.to_native_value(numba.int64, size_obj).value
     c.pyapi.decref(content_obj)
     c.pyapi.decref(size_obj)
-    if tpe.idtpe != numba.none:
-        id_obj = c.pyapi.object_getattr_string(obj, "id")
-        proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
+    if tpe.identitiestpe != numba.none:
+        id_obj = c.pyapi.object_getattr_string(obj, "identities")
+        proxyout.identities = c.pyapi.to_native_value(tpe.identitiestpe, id_obj).value
         c.pyapi.decref(id_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -136,8 +136,8 @@ def box(tpe, val, c):
     content_obj = c.pyapi.from_native_value(tpe.contenttpe, proxyin.content, c.env_manager)
     size_obj = c.pyapi.long_from_longlong(proxyin.size)
     args = [content_obj, size_obj]
-    if tpe.idtpe != numba.none:
-        args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
+    if tpe.identitiestpe != numba.none:
+        args.append(c.pyapi.from_native_value(tpe.identitiestpe, proxyin.identities, c.env_manager))
     else:
         args.append(c.pyapi.make_none())
     args.append(util.parameters2dict_impl(c, tpe.parameters))
@@ -195,8 +195,8 @@ def lower_getitem_range(context, builder, sig, args):
     proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
     proxyout.content = tpe.contenttpe.lower_getitem_range(context, builder, rettpe.contenttpe(tpe.contenttpe, numba.types.slice2_type), (proxyin.content, proxysliceout._getvalue()))
     proxyout.size = proxyin.size
-    if tpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
+    if tpe.identitiestpe != numba.none:
+        proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, tpe.identitiestpe, wheretpe, proxyin.identities, whereval)
 
     out = proxyout._getvalue()
     if context.enable_nrt:
@@ -212,8 +212,8 @@ def lower_getitem_str(context, builder, sig, args):
     proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
     proxyout.size = proxyin.size
     proxyout.content = tpe.contenttpe.lower_getitem_str(context, builder, rettpe.contenttpe(tpe.contenttpe, wheretpe), (proxyin.content, whereval))
-    if tpe.idtpe != numba.none:
-        proxyout.id = proxyin.id
+    if tpe.identitiestpe != numba.none:
+        proxyout.identities = proxyin.identities
 
     out = proxyout._getvalue()
     if context.enable_nrt:
@@ -292,12 +292,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             outcontenttpe = nextcontenttpe.getitem_next(tailtpe, True)
             outcontentval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, tailtpe, nextcontentval, tailval, nextadvanced)
 
-        outtpe = RegularArrayType(outcontenttpe, arraytpe.idtpe, arraytpe.parameters)
+        outtpe = RegularArrayType(outcontenttpe, arraytpe.identitiestpe, arraytpe.parameters)
         proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
         proxyout.content = outcontentval
         proxyout.size = nextsize
-        if arraytpe.idtpe != numba.none:
-            proxyout.id = proxyin.id
+        if arraytpe.identitiestpe != numba.none:
+            proxyout.identities = proxyin.identities
         return proxyout._getvalue()
 
     elif isinstance(headtpe, numba.types.StringLiteral):
@@ -346,12 +346,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             contenttpe = nexttpe.getitem_next(tailtpe, True)
             contentval = nexttpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, nextadvanced)
 
-            outtpe = RegularArrayType(contenttpe, arraytpe.idtpe, arraytpe.parameters)
+            outtpe = RegularArrayType(contenttpe, arraytpe.identitiestpe, arraytpe.parameters)
             proxyout = numba.cgutils.create_struct_proxy(outtpe)(context, builder)
             proxyout.content = contentval
             proxyout.size = lenflathead
-            if outtpe.idtpe != numba.none:
-                proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, outtpe.idtpe, util.index64tpe, proxyin.id, flathead)
+            if outtpe.identitiestpe != numba.none:
+                proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, outtpe.identitiestpe, util.index64tpe, proxyin.identities, flathead)
             return proxyout._getvalue()
 
         else:
@@ -396,8 +396,8 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
     proxyout.content = nextcontent
     proxyout.size = proxyin.size
-    if rettpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, rettpe.idtpe, carrytpe, proxyin.id, carryval)
+    if rettpe.identitiestpe != numba.none:
+        proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, rettpe.identitiestpe, carrytpe, proxyin.identities, carryval)
 
     return proxyout._getvalue()
 
@@ -412,11 +412,11 @@ class type_methods(numba.typing.templates.AttributeTemplate):
         elif attr == "size":
             return numba.int64
 
-        elif attr == "id":
-            if tpe.idtpe == numba.none:
+        elif attr == "identities":
+            if tpe.identitiestpe == numba.none:
                 return numba.optional(identity.IdentitiesType(numba.int32[:, :]))
             else:
-                return tpe.idtpe
+                return tpe.identitiestpe
 
 @numba.extending.lower_getattr(RegularArrayType, "content")
 def lower_content(context, builder, tpe, val):
@@ -430,12 +430,12 @@ def lower_size(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     return proxyin.size
 
-@numba.extending.lower_getattr(RegularArrayType, "id")
-def lower_id(context, builder, tpe, val):
+@numba.extending.lower_getattr(RegularArrayType, "identities")
+def lower_identities(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    if tpe.idtpe == numba.none:
+    if tpe.identitiestpe == numba.none:
         return context.make_optional_none(builder, identity.IdentitiesType(numba.int32[:, :]))
     else:
         if context.enable_nrt:
-            context.nrt.incref(builder, tpe.idtpe, proxyin.id)
-        return proxyin.id
+            context.nrt.incref(builder, tpe.identitiestpe, proxyin.identities)
+        return proxyin.identities

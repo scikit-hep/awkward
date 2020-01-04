@@ -11,19 +11,19 @@ from ..._numba import cpu, util, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(val, c):
-    return RecordArrayType([numba.typeof(x) for x in val.fields()], None if val.istuple else tuple(val.keys()), numba.typeof(val.id), util.dict2parameters(val.parameters))
+    return RecordArrayType([numba.typeof(x) for x in val.fields()], None if val.istuple else tuple(val.keys()), numba.typeof(val.identities), util.dict2parameters(val.parameters))
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
 def typeof(val, c):
     return RecordType(numba.typeof(val.array))
 
 class RecordArrayType(content.ContentType):
-    def __init__(self, contenttpes, keys, idtpe, parameters):
+    def __init__(self, contenttpes, keys, identitiestpe, parameters):
         assert isinstance(parameters, tuple)
-        super(RecordArrayType, self).__init__(name="ak::RecordArrayType([{0}], {1}, id={2}, parameters={3})".format(", ".join(x.name for x in contenttpes), keys, idtpe.name, util.parameters2str(parameters)))
+        super(RecordArrayType, self).__init__(name="ak::RecordArrayType([{0}], {1}, identities={2}, parameters={3})".format(", ".join(x.name for x in contenttpes), keys, identitiestpe.name, util.parameters2str(parameters)))
         self.contenttpes = contenttpes
         self.keys = keys
-        self.idtpe = idtpe
+        self.identitiestpe = identitiestpe
         self.parameters = parameters
 
     @property
@@ -72,7 +72,7 @@ class RecordArrayType(content.ContentType):
         return nexttpe.getitem_next(tailtpe, isadvanced)
 
     def carry(self):
-        return RecordArrayType([x.carry() for x in self.contenttpes], self.keys, self.idtpe, self.parameters)
+        return RecordArrayType([x.carry() for x in self.contenttpes], self.keys, self.identitiestpe, self.parameters)
 
     @property
     def lower_len(self):
@@ -152,8 +152,8 @@ class RecordArrayModel(numba.datamodel.models.StructModel):
         members = [("length", numba.int64)]
         for i, x in enumerate(fe_type.contenttpes):
             members.append((field(i), x))
-        if fe_type.idtpe != numba.none:
-            members.append(("id", fe_type.idtpe))
+        if fe_type.identitiestpe != numba.none:
+            members.append(("identities", fe_type.identitiestpe))
         super(RecordArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.datamodel.registry.register_default(RecordType)
@@ -179,9 +179,9 @@ def unbox(tpe, obj, c):
         c.pyapi.decref(i_obj)
         c.pyapi.decref(x_obj)
     c.pyapi.decref(field_obj)
-    if tpe.idtpe != numba.none:
-        id_obj = c.pyapi.object_getattr_string(obj, "id")
-        proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
+    if tpe.identitiestpe != numba.none:
+        id_obj = c.pyapi.object_getattr_string(obj, "identities")
+        proxyout.identities = c.pyapi.to_native_value(tpe.identitiestpe, id_obj).value
         c.pyapi.decref(id_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -204,8 +204,8 @@ def unbox_record(tpe, obj, c):
 def box(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     args = []
-    if tpe.idtpe != numba.none:
-        id_obj = c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager)
+    if tpe.identitiestpe != numba.none:
+        id_obj = c.pyapi.from_native_value(tpe.identitiestpe, proxyin.identities, c.env_manager)
         args.append(id_obj)
     else:
         args.append(c.pyapi.make_none())
@@ -291,8 +291,8 @@ def lower_getitem_range(context, builder, sig, args):
     proxyout.length = util.cast(context, builder, numba.intp, numba.int64, builder.sub(proxyslicein.stop, proxyslicein.start))
     for i, t in enumerate(tpe.contenttpes):
         setattr(proxyout, field(i), t.lower_getitem_range(context, builder, t.getitem_range()(t, numba.types.slice2_type), (getattr(proxyin, field(i)), sliceout)))
-    if tpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
+    if tpe.identitiestpe != numba.none:
+        proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, tpe.identitiestpe, wheretpe, proxyin.identities, whereval)
 
     out = proxyout._getvalue()
     if context.enable_nrt:
@@ -385,6 +385,27 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     proxyout.length = util.arraylen(context, builder, carrytpe, carryval, totpe=numba.int64)
     for i, t in enumerate(arraytpe.contenttpes):
         setattr(proxyout, field(i), t.lower_carry(context, builder, t, carrytpe, getattr(proxyin, field(i)), carryval))
-    if rettpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, rettpe.idtpe, carrytpe, proxyin.id, carryval)
+    if rettpe.identitiestpe != numba.none:
+        proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, rettpe.identitiestpe, carrytpe, proxyin.identities, carryval)
     return proxyout._getvalue()
+
+@numba.typing.templates.infer_getattr
+class type_methods(numba.typing.templates.AttributeTemplate):
+    key = RecordArrayType
+
+    def generic_resolve(self, tpe, attr):
+        if attr == "identities":
+            if tpe.identitiestpe == numba.none:
+                return numba.optional(identity.IdentitiesType(numba.int32[:, :]))
+            else:
+                return tpe.identitiestpe
+
+@numba.extending.lower_getattr(RecordArrayType, "identities")
+def lower_identities(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if tpe.identitiestpe == numba.none:
+        return context.make_optional_none(builder, identity.IdentitiesType(numba.int32[:, :]))
+    else:
+        if context.enable_nrt:
+            context.nrt.incref(builder, tpe.identitiestpe, proxyin.identities)
+        return proxyin.identities

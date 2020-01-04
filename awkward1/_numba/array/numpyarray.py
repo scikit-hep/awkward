@@ -16,14 +16,14 @@ def typeof(val, c):
     type = val.type
     while isinstance(type, (awkward1.layout.ArrayType, awkward1.layout.RegularType)):
         type = type.type
-    return NumpyArrayType(numba.typeof(numpy.asarray(val)), numba.typeof(val.id), util.dict2parameters(val.parameters))
+    return NumpyArrayType(numba.typeof(numpy.asarray(val)), numba.typeof(val.identities), util.dict2parameters(val.parameters))
 
 class NumpyArrayType(content.ContentType):
-    def __init__(self, arraytpe, idtpe, parameters):
+    def __init__(self, arraytpe, identitiestpe, parameters):
         assert isinstance(parameters, tuple)
-        super(NumpyArrayType, self).__init__(name="ak::NumpyArrayType({0}, id={1}, parameters={2})".format(arraytpe.name, idtpe.name, util.parameters2str(parameters)))
+        super(NumpyArrayType, self).__init__(name="ak::NumpyArrayType({0}, identities={1}, parameters={2})".format(arraytpe.name, identitiestpe.name, util.parameters2str(parameters)))
         self.arraytpe = arraytpe
-        self.idtpe = idtpe
+        self.identitiestpe = identitiestpe
         self.parameters = parameters
 
     @property
@@ -42,7 +42,7 @@ class NumpyArrayType(content.ContentType):
     def getitem_tuple(self, wheretpe):
         outtpe = numba.typing.arraydecl.get_array_index_type(self.arraytpe, wheretpe).result
         if isinstance(outtpe, numba.types.Array):
-            return NumpyArrayType(outtpe, self.idtpe, self.parameters)
+            return NumpyArrayType(outtpe, self.identitiestpe, self.parameters)
         else:
             return outtpe
 
@@ -57,7 +57,7 @@ class NumpyArrayType(content.ContentType):
         else:
             numreduce = sum(1 if isinstance(x, numba.types.Integer) else 0 for x in wheretpe.types)
         if numreduce < self.arraytpe.ndim:
-            return NumpyArrayType(numba.types.Array(self.arraytpe.dtype, self.arraytpe.ndim - numreduce, self.arraytpe.layout), self.idtpe, self.parameters)
+            return NumpyArrayType(numba.types.Array(self.arraytpe.dtype, self.arraytpe.ndim - numreduce, self.arraytpe.layout), self.identitiestpe, self.parameters)
         elif numreduce == self.arraytpe.ndim:
             return self.arraytpe.dtype
         else:
@@ -94,8 +94,8 @@ class NumpyArrayType(content.ContentType):
 class NumpyArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("array", fe_type.arraytpe)]
-        if fe_type.idtpe != numba.none:
-            members.append(("id", fe_type.idtpe))
+        if fe_type.identitiestpe != numba.none:
+            members.append(("identities", fe_type.identitiestpe))
         super(NumpyArrayModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(NumpyArrayType)
@@ -106,9 +106,9 @@ def unbox(tpe, obj, c):
     proxyout.array = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
     c.pyapi.decref(asarray_obj)
     c.pyapi.decref(array_obj)
-    if tpe.idtpe != numba.none:
-        id_obj = c.pyapi.object_getattr_string(obj, "id")
-        proxyout.id = c.pyapi.to_native_value(tpe.idtpe, id_obj).value
+    if tpe.identitiestpe != numba.none:
+        id_obj = c.pyapi.object_getattr_string(obj, "identities")
+        proxyout.identities = c.pyapi.to_native_value(tpe.identitiestpe, id_obj).value
         c.pyapi.decref(id_obj)
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -119,8 +119,8 @@ def box(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
     args = [array_obj]
-    if tpe.idtpe != numba.none:
-        args.append(c.pyapi.from_native_value(tpe.idtpe, proxyin.id, c.env_manager))
+    if tpe.identitiestpe != numba.none:
+        args.append(c.pyapi.from_native_value(tpe.identitiestpe, proxyin.identities, c.env_manager))
     else:
         args.append(c.pyapi.make_none())
     args.append(util.parameters2dict_impl(c, tpe.parameters))
@@ -171,8 +171,8 @@ def lower_getitem(context, builder, sig, args):
     if isinstance(rettpe, NumpyArrayType):
         proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
         proxyout.array = out
-        if rettpe.idtpe != numba.none:
-            proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, rettpe.idtpe, wheretpe, proxyin.id, whereval)
+        if rettpe.identitiestpe != numba.none:
+            proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, rettpe.identitiestpe, wheretpe, proxyin.identities, whereval)
         return proxyout._getvalue()
     else:
         return out
@@ -228,11 +228,11 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         nextarraytpe = numba.types.Array(arraytpe.arraytpe.dtype, arraytpe.arraytpe.ndim - 1, arraytpe.arraytpe.layout)
         nextarrayval = numba.targets.arrayobj.array_reshape(context, builder, nextarraytpe(arraytpe.arraytpe, nextshapetpe), (proxyin.array, nextshapeval))
 
-        nexttpe = NumpyArrayType(nextarraytpe, arraytpe.idtpe, arraytpe.parameters)
+        nexttpe = NumpyArrayType(nextarraytpe, arraytpe.identitiestpe, arraytpe.parameters)
         proxynext = numba.cgutils.create_struct_proxy(nexttpe)(context, builder)
         proxynext.array = nextarrayval
-        if arraytpe.idtpe != numba.none:
-            proxynext.id = proxyin.id
+        if arraytpe.identitiestpe != numba.none:
+            proxynext.identities = proxyin.identities
 
         outval = lower_carry(context, builder, nexttpe, util.index64tpe, proxynext._getvalue(), nextcarry)
         return lower_getitem_next(context, builder, nexttpe, tailtpe, outval, tailval, advanced)
@@ -249,10 +249,10 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         outval = numba.targets.arrayobj.getitem_array_tuple(context, builder, outtpe(arraytpe.arraytpe, wheretpe), (proxyin.array, whereval))
 
         if isinstance(outtpe, numba.types.Array):
-            proxyout = numba.cgutils.create_struct_proxy(NumpyArrayType(outtpe, arraytpe.idtpe, arraytpe.parameters))(context, builder)
+            proxyout = numba.cgutils.create_struct_proxy(NumpyArrayType(outtpe, arraytpe.identitiestpe, arraytpe.parameters))(context, builder)
             proxyout.array = outval
-            if arraytpe.idtpe != numba.none:
-                proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, arraytpe.idtpe, wheretpe, proxyin.id, whereval)
+            if arraytpe.identitiestpe != numba.none:
+                proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, arraytpe.identitiestpe, wheretpe, proxyin.identities, whereval)
             return proxyout._getvalue()
         else:
             return out
@@ -264,8 +264,8 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
 
     proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)
     proxyout.array = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.arraytpe(arraytpe.arraytpe, carrytpe), (proxyin.array, carryval))
-    if arraytpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
+    if arraytpe.identitiestpe != numba.none:
+        proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, arraytpe.identitiestpe, carrytpe, proxyin.identities, carryval)
     return proxyout._getvalue()
 
 @numba.typing.templates.infer_getattr
@@ -273,18 +273,18 @@ class type_methods(numba.typing.templates.AttributeTemplate):
     key = NumpyArrayType
 
     def generic_resolve(self, tpe, attr):
-        if attr == "id":
-            if tpe.idtpe == numba.none:
+        if attr == "identities":
+            if tpe.identitiestpe == numba.none:
                 return numba.optional(identities.IdentitiesType(numba.int32[:, :]))
             else:
-                return tpe.idtpe
+                return tpe.identitiestpe
 
-@numba.extending.lower_getattr(NumpyArrayType, "id")
-def lower_id(context, builder, tpe, val):
+@numba.extending.lower_getattr(NumpyArrayType, "identities")
+def lower_identities(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    if tpe.idtpe == numba.none:
+    if tpe.identitiestpe == numba.none:
         return context.make_optional_none(builder, identities.IdentitiesType(numba.int32[:, :]))
     else:
         if context.enable_nrt:
-            context.nrt.incref(builder, tpe.idtpe, proxyin.id)
-        return proxyin.id
+            context.nrt.incref(builder, tpe.identitiestpe, proxyin.identities)
+        return proxyin.identities

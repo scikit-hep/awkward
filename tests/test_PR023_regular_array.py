@@ -129,20 +129,20 @@ def test_numpy():
                 continue
             assert awkward1.tolist(modelB[cuts]) == awkward1.tolist(regulararrayB[cuts])
 
-def test_setid():
-    regulararray.setid()
-    assert numpy.asarray(regulararray.id).tolist() == [
+def test_setidentities():
+    regulararray.setidentities()
+    assert numpy.asarray(regulararray.identities).tolist() == [
         [0],
         [1],
         [2]]
-    assert numpy.asarray(regulararray.content.id).tolist() == [
+    assert numpy.asarray(regulararray.content.identities).tolist() == [
         [0, 0],
         [0, 1],
         [1, 0],
         [1, 1],
         [2, 0],
         [2, 1]]
-    assert numpy.asarray(regulararray.content.content.id).tolist() == [
+    assert numpy.asarray(regulararray.content.content.identities).tolist() == [
         [0, 0, 0],   # 0.0
         [0, 0, 1],   # 1.1
         [0, 0, 2],   # 2.2
@@ -156,11 +156,11 @@ def test_setid():
         [2, 0, 3]]   # 9.9
       # [2, 1,  ],   # (empty list)
 
-    regulararrayB.setid()
-    assert numpy.asarray(regulararrayB.id).tolist() == [
+    regulararrayB.setidentities()
+    assert numpy.asarray(regulararrayB.identities).tolist() == [
         [0],
         [1]]
-    assert numpy.asarray(regulararrayB.content.id).tolist() == [
+    assert numpy.asarray(regulararrayB.content.identities).tolist() == [
         [0, 0],
         [0, 1],
         [0, 2],
