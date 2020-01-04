@@ -197,7 +197,11 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         lenself, skip = shapeunpacked[:2]
         lennext = builder.mul(lenself, skip)
 
-        carry = numba.targets.arrayobj.numpy_arange_1(context, builder, util.index64tpe(numba.intp), (lenself,))
+        carry = util.newindex64(context, builder, numba.intp, lenself)
+        util.call(context, builder, cpu.kernels.awkward_carry_arange_64,
+            (util.arrayptr(context, builder, util.index64tpe, carry),
+             util.cast(context, builder, numba.intp, numba.int64, lenself)),
+            "in {0}, indexing error".format(arraytpe.shortname))
 
         flathead = numba.targets.arrayobj.array_flatten(context, builder, util.index64tpe(headtpe), (headval,))
         lenflathead = util.arraylen(context, builder, util.index64tpe, flathead)
