@@ -122,10 +122,10 @@ namespace awkward {
       if (err.str != nullptr) {
         std::stringstream out;
         out << "in " << classname;
-        if (err.location != kSliceNone  &&  identities != nullptr) {
-          assert(err.location > 0);
-          if (0 <= err.location  &&  err.location < identities->length()) {
-            out << " with identity [" << identities->location_at(err.location) << "]";
+        if (err.identity != kSliceNone  &&  identities != nullptr) {
+          assert(err.identity > 0);
+          if (0 <= err.identity  &&  err.identity < identities->length()) {
+            out << " with identity [" << identities->identity_at(err.identity) << "]";
           }
           else {
             out << " with invalid identity";

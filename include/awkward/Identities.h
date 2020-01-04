@@ -27,7 +27,7 @@ namespace awkward {
     const int64_t length() const;
 
     virtual const std::string classname() const = 0;
-    virtual const std::string location_at(int64_t where) const = 0;
+    virtual const std::string identity_at(int64_t where) const = 0;
     virtual const std::shared_ptr<Identities> to64() const = 0;
     virtual const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
     virtual const std::shared_ptr<Identities> getitem_range_nowrap(int64_t start, int64_t stop) const = 0;
@@ -55,7 +55,7 @@ namespace awkward {
     const std::shared_ptr<T> ptr() const;
 
     const std::string classname() const override;
-    const std::string location_at(int64_t at) const override;
+    const std::string identity_at(int64_t at) const override;
     const std::shared_ptr<Identities> to64() const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Identities> getitem_range_nowrap(int64_t start, int64_t stop) const override;

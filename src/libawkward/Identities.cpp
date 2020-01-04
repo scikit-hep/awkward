@@ -79,7 +79,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::string IdentitiesOf<T>::location_at(int64_t at) const {
+  const std::string IdentitiesOf<T>::identity_at(int64_t at) const {
     std::stringstream out;
     for (int64_t i = 0;  i < width_;  i++) {
       if (i != 0) {

@@ -235,10 +235,10 @@ def test_setidentities():
     with pytest.raises(ValueError) as excinfo:
         recordarray2["outer", "two", 0, 99]
     assert str(excinfo.value) == 'in ListArray64 with identity [0, "outer", "two"] attempting to get 99, index out of range'
-    assert recordarray2.location == ()
-    assert recordarray2[2].location == (2,)
-    assert recordarray2[2, "outer"].location == (2, "outer")
-    assert recordarray2[2, "outer", "two"].location == (2, "outer", "two")
+    assert recordarray2.identity == ()
+    assert recordarray2[2].identity == (2,)
+    assert recordarray2[2, "outer"].identity == (2, "outer")
+    assert recordarray2[2, "outer", "two"].identity == (2, "outer", "two")
 
     recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
     recordarray2 = awkward1.layout.RecordArray({"outer": awkward1.layout.RegularArray(recordarray, 1)})
@@ -258,11 +258,11 @@ def test_setidentities():
     with pytest.raises(ValueError) as excinfo:
         recordarray2["outer", 2, "two", 0, 99]
     assert str(excinfo.value) == 'in ListArray64 with identity [2, "outer", 0, "two"] attempting to get 99, index out of range'
-    assert recordarray2.location == ()
-    assert recordarray2[2].location == (2,)
-    assert recordarray2[2, "outer"].location == (2, "outer")
-    assert recordarray2[2, "outer", 0].location == (2, "outer", 0)
-    assert recordarray2[2, "outer", 0, "two"].location == (2, "outer", 0, "two")
+    assert recordarray2.identity == ()
+    assert recordarray2[2].identity == (2,)
+    assert recordarray2[2, "outer"].identity == (2, "outer")
+    assert recordarray2[2, "outer", 0].identity == (2, "outer", 0)
+    assert recordarray2[2, "outer", 0, "two"].identity == (2, "outer", 0, "two")
 
 def test_fillable_tuple():
     fillable = awkward1.layout.FillableArray()

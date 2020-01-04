@@ -304,7 +304,7 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
 /////////////////////////////////////////////////////////////// Identities
 
 template <typename T>
-py::tuple location(const T& self) {
+py::tuple identity(const T& self) {
   if (self.identities().get() == nullptr) {
     throw std::invalid_argument(self.classname() + std::string(" instance has no associated identities (use 'setidentities' to assign one to the array it is in)"));
   }
@@ -401,8 +401,8 @@ py::class_<ak::IdentitiesOf<T>> make_IdentitiesOf(py::handle m, std::string name
       .def_property_readonly("array", [](py::buffer& self) -> py::array {
         return py::array(self);
       })
-      .def("location_at_str", &ak::IdentitiesOf<T>::location_at)
-      .def("location_at", [](const ak::Identities& self, int64_t at) -> py::tuple {
+      .def("identity_at_str", &ak::IdentitiesOf<T>::identity_at)
+      .def("identity_at", [](const ak::Identities& self, int64_t at) -> py::tuple {
         ak::Identities::FieldLoc fieldloc = self.fieldloc();
         py::tuple out((size_t)self.width() + fieldloc.size());
         size_t j = 0;
@@ -1159,7 +1159,7 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("__iter__", &iter<T>)
           .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
           .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
-          .def_property_readonly("location", &location<T>)
+          .def_property_readonly("identity", &identity<T>)
           .def_property_readonly("numfields", &T::numfields)
           .def("fieldindex", &T::fieldindex)
           .def("key", &T::key)
@@ -1408,7 +1408,7 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
       .def_property_readonly("astuple", [](ak::Record& self) -> py::object {
         return box(self.astuple().shallow_copy());
       })
-     .def_property_readonly("location", &location<ak::Record>)
+     .def_property_readonly("identity", &identity<ak::Record>)
 
   ;
 }
