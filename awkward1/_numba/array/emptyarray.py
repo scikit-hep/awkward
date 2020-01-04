@@ -143,7 +143,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
     def generic_resolve(self, tpe, attr):
         if attr == "id":
             if tpe.idtpe == numba.none:
-                return numba.optional(identity.IdentityType(numba.int32[:, :]))
+                return numba.optional(identity.IdentitiesType(numba.int32[:, :]))
             else:
                 return tpe.idtpe
 
@@ -151,7 +151,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
 def lower_id(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     if tpe.idtpe == numba.none:
-        return context.make_optional_none(builder, identity.IdentityType(numba.int32[:, :]))
+        return context.make_optional_none(builder, identity.IdentitiesType(numba.int32[:, :]))
     else:
         if context.enable_nrt:
             context.nrt.incref(builder, tpe.idtpe, proxyin.id)

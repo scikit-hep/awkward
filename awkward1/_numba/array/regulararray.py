@@ -175,7 +175,7 @@ def lower_getitem_int(context, builder, sig, args):
 
 @numba.extending.lower_builtin(operator.getitem, RegularArrayType, numba.types.slice2_type)
 def lower_getitem_range(context, builder, sig, args):
-    import awkward1._numba.identity
+    import awkward1._numba.identities
 
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
@@ -196,7 +196,7 @@ def lower_getitem_range(context, builder, sig, args):
     proxyout.content = tpe.contenttpe.lower_getitem_range(context, builder, rettpe.contenttpe(tpe.contenttpe, numba.types.slice2_type), (proxyin.content, proxysliceout._getvalue()))
     proxyout.size = proxyin.size
     if tpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
+        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
 
     out = proxyout._getvalue()
     if context.enable_nrt:
@@ -351,7 +351,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             proxyout.content = contentval
             proxyout.size = lenflathead
             if outtpe.idtpe != numba.none:
-                proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, outtpe.idtpe, util.index64tpe, proxyin.id, flathead)
+                proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, outtpe.idtpe, util.index64tpe, proxyin.id, flathead)
             return proxyout._getvalue()
 
         else:
@@ -378,7 +378,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
         raise AssertionError(headtpe)
 
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
-    import awkward1._numba.identity
+    import awkward1._numba.identities
 
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
 
@@ -397,7 +397,7 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     proxyout.content = nextcontent
     proxyout.size = proxyin.size
     if rettpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, rettpe.idtpe, carrytpe, proxyin.id, carryval)
+        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, rettpe.idtpe, carrytpe, proxyin.id, carryval)
 
     return proxyout._getvalue()
 
@@ -414,7 +414,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
 
         elif attr == "id":
             if tpe.idtpe == numba.none:
-                return numba.optional(identity.IdentityType(numba.int32[:, :]))
+                return numba.optional(identity.IdentitiesType(numba.int32[:, :]))
             else:
                 return tpe.idtpe
 
@@ -434,7 +434,7 @@ def lower_size(context, builder, tpe, val):
 def lower_id(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     if tpe.idtpe == numba.none:
-        return context.make_optional_none(builder, identity.IdentityType(numba.int32[:, :]))
+        return context.make_optional_none(builder, identity.IdentitiesType(numba.int32[:, :]))
     else:
         if context.enable_nrt:
             context.nrt.incref(builder, tpe.idtpe, proxyin.id)

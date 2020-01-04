@@ -5,7 +5,7 @@ import operator
 import numpy
 import numba
 
-from .._numba import cpu, util, identity
+from .._numba import util
 
 class ContentType(numba.types.Type):
     @property

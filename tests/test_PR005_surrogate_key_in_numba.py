@@ -36,7 +36,7 @@ def test_reminder():
 
 def test_refcount():
     array = numpy.arange(40, dtype="i4").reshape(-1, 4)
-    identity = awkward1.layout.Identity32(0, [], array)
+    identity = awkward1.layout.Identities32(0, [], array)
     assert (sys.getrefcount(array), sys.getrefcount(identity)) == (3, 2)
 
     @numba.njit
@@ -62,7 +62,7 @@ def test_refcount():
     del tmp
 
 def test_width():
-    identity = awkward1.layout.Identity32(0, [], numpy.arange(40, dtype="i4").reshape(-1, 4))
+    identity = awkward1.layout.Identities32(0, [], numpy.arange(40, dtype="i4").reshape(-1, 4))
     @numba.njit
     def f1(q):
         return q.width
@@ -70,7 +70,7 @@ def test_width():
 
 def test_numpyarray():
     i1 = numpy.arange(3, dtype="i4").reshape(-1, 1)
-    i2 = awkward1.layout.Identity32(0, [], i1)
+    i2 = awkward1.layout.Identities32(0, [], i1)
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]), id=i2)
 
     assert (sys.getrefcount(i1), sys.getrefcount(i2), sys.getrefcount(content)) == (3, 2, 2)
@@ -90,7 +90,7 @@ def test_numpyarray():
 
 def test_listoffsetarray():
     i1 = numpy.arange(3, dtype="i4").reshape(-1, 1)
-    i2 = awkward1.layout.Identity32(0, [], i1)
+    i2 = awkward1.layout.Identities32(0, [], i1)
     offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
     array = awkward1.layout.ListOffsetArray32(offsets, content, id=i2)

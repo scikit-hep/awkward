@@ -10,7 +10,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 
 #include "awkward/util.h"
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 
 namespace rj = rapidjson;
 
@@ -118,7 +118,7 @@ namespace awkward {
       return true;
     }
 
-    void handle_error(const struct Error& err, const std::string& classname, const Identity* id) {
+    void handle_error(const struct Error& err, const std::string& classname, const Identities* id) {
       if (err.str != nullptr) {
         std::stringstream out;
         out << "in " << classname;

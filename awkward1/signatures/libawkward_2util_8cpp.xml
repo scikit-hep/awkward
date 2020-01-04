@@ -7,7 +7,7 @@
     <includes local="yes">awkward/cpu-kernels/identity.h</includes>
     <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
     <includes local="yes">awkward/util.h</includes>
-    <includes local="yes">awkward/Identity.h</includes>
+    <includes local="yes">awkward/Identities.h</includes>
     <incdepgraph>
       <node id="1">
         <label>src/libawkward/util.cpp</label>
@@ -38,7 +38,7 @@
         <label>awkward/cpu-kernels/identity.h</label>
       </node>
       <node id="7">
-        <label>awkward/Identity.h</label>
+        <label>awkward/Identities.h</label>
       </node>
       <node id="3">
         <label>sstream</label>
@@ -50,7 +50,7 @@
       <memberdef kind="function" id="namespaceawkward_1_1util_1a5cf65ec676d09c60c51f50794ab88153" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>void</type>
         <definition>void awkward::util::handle_error</definition>
-        <argsstring>(const struct Error &amp;err, const std::string classname, const Identity *id)</argsstring>
+        <argsstring>(const struct Error &amp;err, const std::string classname, const Identities *id)</argsstring>
         <name>handle_error</name>
         <param>
           <type>const struct Error &amp;</type>
@@ -61,7 +61,7 @@
           <declname>classname</declname>
         </param>
         <param>
-          <type>const Identity *</type>
+          <type>const Identities *</type>
           <declname>id</declname>
         </param>
         <briefdescription>

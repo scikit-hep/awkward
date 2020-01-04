@@ -8,7 +8,7 @@ import numba.typing.arraydecl
 import numba.typing.ctypes_utils
 
 import awkward1.layout
-from ..._numba import cpu, util, identity, content
+from ..._numba import cpu, util, identities, content
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof(val, c):
@@ -146,7 +146,7 @@ def lower_len(context, builder, sig, args):
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, type(numba.typeof(numpy.newaxis)))
 @numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.BaseTuple)
 def lower_getitem(context, builder, sig, args):
-    import awkward1._numba.identity
+    import awkward1._numba.identities
 
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
@@ -172,7 +172,7 @@ def lower_getitem(context, builder, sig, args):
         proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
         proxyout.array = out
         if rettpe.idtpe != numba.none:
-            proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, rettpe.idtpe, wheretpe, proxyin.id, whereval)
+            proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, rettpe.idtpe, wheretpe, proxyin.id, whereval)
         return proxyout._getvalue()
     else:
         return out
@@ -252,20 +252,20 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             proxyout = numba.cgutils.create_struct_proxy(NumpyArrayType(outtpe, arraytpe.idtpe, arraytpe.parameters))(context, builder)
             proxyout.array = outval
             if arraytpe.idtpe != numba.none:
-                proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, arraytpe.idtpe, wheretpe, proxyin.id, whereval)
+                proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, arraytpe.idtpe, wheretpe, proxyin.id, whereval)
             return proxyout._getvalue()
         else:
             return out
 
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
-    import awkward1._numba.identity
+    import awkward1._numba.identities
 
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
 
     proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)
     proxyout.array = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.arraytpe(arraytpe.arraytpe, carrytpe), (proxyin.array, carryval))
     if arraytpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
+        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, arraytpe.idtpe, carrytpe, proxyin.id, carryval)
     return proxyout._getvalue()
 
 @numba.typing.templates.infer_getattr
@@ -275,7 +275,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
     def generic_resolve(self, tpe, attr):
         if attr == "id":
             if tpe.idtpe == numba.none:
-                return numba.optional(identity.IdentityType(numba.int32[:, :]))
+                return numba.optional(identities.IdentitiesType(numba.int32[:, :]))
             else:
                 return tpe.idtpe
 
@@ -283,7 +283,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
 def lower_id(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     if tpe.idtpe == numba.none:
-        return context.make_optional_none(builder, identity.IdentityType(numba.int32[:, :]))
+        return context.make_optional_none(builder, identities.IdentitiesType(numba.int32[:, :]))
     else:
         if context.enable_nrt:
             context.nrt.incref(builder, tpe.idtpe, proxyin.id)

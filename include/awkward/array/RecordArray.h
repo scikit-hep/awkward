@@ -8,15 +8,15 @@
 #include <unordered_map>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Content.h"
 
 namespace awkward {
   class RecordArray: public Content {
   public:
-    RecordArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
-    RecordArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents);
-    RecordArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, int64_t length, bool istuple);
+    RecordArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
+    RecordArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents);
+    RecordArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, int64_t length, bool istuple);
 
     const std::vector<std::shared_ptr<Content>> contents() const;
     const std::shared_ptr<util::RecordLookup> recordlookup() const;
@@ -24,7 +24,7 @@ namespace awkward {
 
     const std::string classname() const override;
     void setid() override;
-    void setid(const std::shared_ptr<Identity>& id) override;
+    void setid(const std::shared_ptr<Identities>& id) override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> type() const override;
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;

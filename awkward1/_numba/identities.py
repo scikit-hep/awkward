@@ -10,34 +10,34 @@ import numba.typing.ctypes_utils
 import awkward1.layout
 from .._numba import cpu, util
 
-@numba.extending.typeof_impl.register(awkward1.layout.Identity32)
-@numba.extending.typeof_impl.register(awkward1.layout.Identity64)
+@numba.extending.typeof_impl.register(awkward1.layout.Identities32)
+@numba.extending.typeof_impl.register(awkward1.layout.Identities64)
 def typeof(val, c):
-    return IdentityType(numba.typeof(val.array))
+    return IdentitiesType(numba.typeof(val.array))
 
-class IdentityType(numba.types.Type):
+class IdentitiesType(numba.types.Type):
     fieldloctpe = numba.types.List(numba.types.Tuple((numba.int64, numba.types.string)))
 
     def bitwidth(self):
         return self.arraytpe.dtype.bitwidth
 
     def __init__(self, arraytpe):
-        super(IdentityType, self).__init__(name="ak::Identity{0}Type".format(arraytpe.dtype.bitwidth))
+        super(IdentitiesType, self).__init__(name="ak::Identities{0}Type".format(arraytpe.dtype.bitwidth))
         self.arraytpe = arraytpe
 
-@numba.extending.register_model(IdentityType)
-class IdentityModel(numba.datamodel.models.StructModel):
+@numba.extending.register_model(IdentitiesType)
+class IdentitiesModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("ref", util.RefType),
                    ("fieldloc", fe_type.fieldloctpe),
                    ("array", fe_type.arraytpe)]
-        super(IdentityModel, self).__init__(dmm, fe_type, members)
+        super(IdentitiesModel, self).__init__(dmm, fe_type, members)
 
-numba.extending.make_attribute_wrapper(IdentityType, "ref", "ref")
-numba.extending.make_attribute_wrapper(IdentityType, "fieldloc", "fieldloc")
-numba.extending.make_attribute_wrapper(IdentityType, "array", "array")
+numba.extending.make_attribute_wrapper(IdentitiesType, "ref", "ref")
+numba.extending.make_attribute_wrapper(IdentitiesType, "fieldloc", "fieldloc")
+numba.extending.make_attribute_wrapper(IdentitiesType, "array", "array")
 
-@numba.extending.unbox(IdentityType)
+@numba.extending.unbox(IdentitiesType)
 def unbox(tpe, obj, c):
     ref_obj = c.pyapi.object_getattr_string(obj, "ref")
     fieldloc_obj = c.pyapi.object_getattr_string(obj, "fieldloc")
@@ -54,26 +54,26 @@ def unbox(tpe, obj, c):
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
-@numba.extending.box(IdentityType)
+@numba.extending.box(IdentitiesType)
 def box(tpe, val, c):
     if tpe.bitwidth() == 32:
-        Identity_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Identity32))
+        Identities_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Identities32))
     elif tpe.bitwidth() == 64:
-        Identity_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Identity64))
+        Identities_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.Identities64))
     else:
         assert False, "unrecognized bitwidth"
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     ref_obj = c.pyapi.from_native_value(util.RefType, proxyin.ref, c.env_manager)
     fieldloc_obj = c.pyapi.from_native_value(tpe.fieldloctpe, proxyin.fieldloc, c.env_manager)
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
-    out = c.pyapi.call_function_objargs(Identity_obj, (ref_obj, fieldloc_obj, array_obj))
-    c.pyapi.decref(Identity_obj)
+    out = c.pyapi.call_function_objargs(Identities_obj, (ref_obj, fieldloc_obj, array_obj))
+    c.pyapi.decref(Identities_obj)
     c.pyapi.decref(ref_obj)
     c.pyapi.decref(fieldloc_obj)
     c.pyapi.decref(array_obj)
     return out
 
-@numba.extending.lower_builtin(len, IdentityType)
+@numba.extending.lower_builtin(len, IdentitiesType)
 def lower_len(context, builder, sig, args):
     tpe, = sig.args
     val, = args
@@ -105,13 +105,13 @@ def lower_getitem_any(context, builder, idtpe, wheretpe, idval, whereval):
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):
-    key = IdentityType
+    key = IdentitiesType
 
     def generic_resolve(self, tpe, attr):
         if attr == "width":
             return numba.int64
 
-@numba.extending.lower_getattr(IdentityType, "width")
+@numba.extending.lower_getattr(IdentitiesType, "width")
 def lower_content(context, builder, tpe, val):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     array_proxy = numba.cgutils.create_struct_proxy(tpe.arraytpe)(context, builder, value=proxyin.array)

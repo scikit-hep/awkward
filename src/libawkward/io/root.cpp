@@ -3,7 +3,7 @@
 #include <cstring>
 
 #include "awkward/Content.h"
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/fillable/GrowableBuffer.h"
 
@@ -66,11 +66,11 @@ namespace awkward {
 
     std::vector<ssize_t> shape = { (ssize_t)bytepos_tocopy.length() };
     std::vector<ssize_t> strides = { (ssize_t)itemsize };
-    std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identity::none(), util::Parameters(), ptr, shape, strides, 0, (ssize_t)itemsize, format);
+    std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, (ssize_t)itemsize, format);
 
     for (int64_t i = depth - 1;  i >= 0;  i--) {
       Index64 index(levels[(size_t)i].ptr(), 0, levels[(size_t)i].length());
-      out = std::make_shared<ListOffsetArray64>(Identity::none(), util::Parameters(), index, out);
+      out = std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), index, out);
     }
     return out;
   }

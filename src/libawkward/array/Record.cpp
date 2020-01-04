@@ -11,7 +11,7 @@
 
 namespace awkward {
   Record::Record(const RecordArray& array, int64_t at)
-      : Content(Identity::none(), array.parameters())
+      : Content(Identities::none(), array.parameters())
       , array_(array)
       , at_(at) { }
 
@@ -47,8 +47,8 @@ namespace awkward {
     return "Record";
   }
 
-  const std::shared_ptr<Identity> Record::id() const {
-    std::shared_ptr<Identity> recid = array_.id();
+  const std::shared_ptr<Identities> Record::id() const {
+    std::shared_ptr<Identities> recid = array_.id();
     if (recid.get() == nullptr) {
       return recid;
     }
@@ -61,7 +61,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::setid");
   }
 
-  void Record::setid(const std::shared_ptr<Identity>& id) {
+  void Record::setid(const std::shared_ptr<Identities>& id) {
     throw std::runtime_error("undefined operation: Record::setid");
   }
 

@@ -9,7 +9,7 @@
 
 #include "awkward/Index.h"
 #include "awkward/Slice.h"
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Content.h"
 #include "awkward/Iterator.h"
 #include "awkward/array/NumpyArray.h"
@@ -130,18 +130,18 @@ py::object box(std::shared_ptr<ak::Content> content) {
   }
 }
 
-py::object box(std::shared_ptr<ak::Identity> id) {
+py::object box(std::shared_ptr<ak::Identities> id) {
   if (id.get() == nullptr) {
     return py::none();
   }
-  else if (ak::Identity32* raw = dynamic_cast<ak::Identity32*>(id.get())) {
+  else if (ak::Identities32* raw = dynamic_cast<ak::Identities32*>(id.get())) {
     return py::cast(*raw);
   }
-  else if (ak::Identity64* raw = dynamic_cast<ak::Identity64*>(id.get())) {
+  else if (ak::Identities64* raw = dynamic_cast<ak::Identities64*>(id.get())) {
     return py::cast(*raw);
   }
   else {
-    throw std::runtime_error("missing boxer for Identity subtype");
+    throw std::runtime_error("missing boxer for Identities subtype");
   }
 }
 
@@ -239,19 +239,19 @@ std::shared_ptr<ak::Content> unbox_content(py::handle obj) {
   throw std::invalid_argument("content argument must be a Content subtype");
 }
 
-std::shared_ptr<ak::Identity> unbox_id_none(py::handle obj) {
+std::shared_ptr<ak::Identities> unbox_id_none(py::handle obj) {
   if (obj.is(py::none())) {
-    return ak::Identity::none();
+    return ak::Identities::none();
   }
   try {
-    return obj.cast<ak::Identity32*>()->shallow_copy();
+    return obj.cast<ak::Identities32*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   try {
-    return obj.cast<ak::Identity64*>()->shallow_copy();
+    return obj.cast<ak::Identities64*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
-  throw std::invalid_argument("id argument must be an Identity subtype");
+  throw std::invalid_argument("id argument must be an Identities subtype");
 }
 
 template <typename T>
@@ -301,14 +301,14 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
   );
 }
 
-/////////////////////////////////////////////////////////////// Identity
+/////////////////////////////////////////////////////////////// Identities
 
 template <typename T>
 py::tuple location(const T& self) {
   if (self.id().get() == nullptr) {
     throw std::invalid_argument(self.classname() + std::string(" instance has no associated id (use 'setid' to assign one to the array it is in)"));
   }
-  ak::Identity::FieldLoc fieldloc = self.id().get()->fieldloc();
+  ak::Identities::FieldLoc fieldloc = self.id().get()->fieldloc();
   if (self.isscalar()) {
     py::tuple out((size_t)(self.id().get()->width()) + fieldloc.size());
     size_t j = 0;
@@ -359,9 +359,9 @@ void setid_noarg(T& self) {
 }
 
 template <typename T>
-py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
-  return (py::class_<ak::IdentityOf<T>>(m, name.c_str(), py::buffer_protocol())
-      .def_buffer([](ak::IdentityOf<T>& self) -> py::buffer_info {
+py::class_<ak::IdentitiesOf<T>> make_IdentitiesOf(py::handle m, std::string name) {
+  return (py::class_<ak::IdentitiesOf<T>>(m, name.c_str(), py::buffer_protocol())
+      .def_buffer([](ak::IdentitiesOf<T>& self) -> py::buffer_info {
         return py::buffer_info(
           reinterpret_cast<void*>(reinterpret_cast<ssize_t>(self.ptr().get()) + self.offset()*sizeof(T)),
           sizeof(T),
@@ -371,13 +371,13 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
           { (ssize_t)(sizeof(T)*self.width()), (ssize_t)sizeof(T) });
         })
 
-      .def_static("newref", &ak::Identity::newref)
+      .def_static("newref", &ak::Identities::newref)
 
-      .def(py::init([](ak::Identity::Ref ref, ak::Identity::FieldLoc fieldloc, int64_t width, int64_t length) {
-        return ak::IdentityOf<T>(ref, fieldloc, width, length);
+      .def(py::init([](ak::Identities::Ref ref, ak::Identities::FieldLoc fieldloc, int64_t width, int64_t length) {
+        return ak::IdentitiesOf<T>(ref, fieldloc, width, length);
       }))
 
-      .def(py::init([name](ak::Identity::Ref ref, ak::Identity::FieldLoc fieldloc, py::array_t<T, py::array::c_style | py::array::forcecast> array) {
+      .def(py::init([name](ak::Identities::Ref ref, ak::Identities::FieldLoc fieldloc, py::array_t<T, py::array::c_style | py::array::forcecast> array) {
         py::buffer_info info = array.request();
         if (info.ndim != 2) {
           throw std::invalid_argument(name + std::string(" must be built from a two-dimensional array"));
@@ -385,25 +385,25 @@ py::class_<ak::IdentityOf<T>> make_IdentityOf(py::handle m, std::string name) {
         if (info.strides[0] != sizeof(T)*info.shape[1]  ||  info.strides[1] != sizeof(T)) {
           throw std::invalid_argument(name + std::string(" must be built from a contiguous array (array.stries == (array.shape[1]*array.itemsize, array.itemsize)); try array.copy()"));
         }
-        return ak::IdentityOf<T>(ref, fieldloc, 0, info.shape[1], info.shape[0],
+        return ak::IdentitiesOf<T>(ref, fieldloc, 0, info.shape[1], info.shape[0],
             std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr), pyobject_deleter<T>(array.ptr())));
       }))
 
-      .def("__repr__", &ak::IdentityOf<T>::tostring)
-      .def("__len__", &ak::IdentityOf<T>::length)
-      .def("__getitem__", &ak::IdentityOf<T>::getitem_at)
-      .def("__getitem__", &ak::IdentityOf<T>::getitem_range)
+      .def("__repr__", &ak::IdentitiesOf<T>::tostring)
+      .def("__len__", &ak::IdentitiesOf<T>::length)
+      .def("__getitem__", &ak::IdentitiesOf<T>::getitem_at)
+      .def("__getitem__", &ak::IdentitiesOf<T>::getitem_range)
 
-      .def_property_readonly("ref", &ak::IdentityOf<T>::ref)
-      .def_property_readonly("fieldloc", &ak::IdentityOf<T>::fieldloc)
-      .def_property_readonly("width", &ak::IdentityOf<T>::width)
-      .def_property_readonly("length", &ak::IdentityOf<T>::length)
+      .def_property_readonly("ref", &ak::IdentitiesOf<T>::ref)
+      .def_property_readonly("fieldloc", &ak::IdentitiesOf<T>::fieldloc)
+      .def_property_readonly("width", &ak::IdentitiesOf<T>::width)
+      .def_property_readonly("length", &ak::IdentitiesOf<T>::length)
       .def_property_readonly("array", [](py::buffer& self) -> py::array {
         return py::array(self);
       })
-      .def("location_at_str", &ak::IdentityOf<T>::location_at)
-      .def("location_at", [](const ak::Identity& self, int64_t at) -> py::tuple {
-        ak::Identity::FieldLoc fieldloc = self.fieldloc();
+      .def("location_at_str", &ak::IdentitiesOf<T>::location_at)
+      .def("location_at", [](const ak::Identities& self, int64_t at) -> py::tuple {
+        ak::Identities::FieldLoc fieldloc = self.fieldloc();
         py::tuple out((size_t)self.width() + fieldloc.size());
         size_t j = 0;
         for (int64_t i = 0;  i < self.width();  i++) {
@@ -1428,8 +1428,8 @@ PYBIND11_MODULE(layout, m) {
   make_IndexOf<uint32_t>(m, "IndexU32");
   make_IndexOf<int64_t>(m,  "Index64");
 
-  make_IdentityOf<int32_t>(m, "Identity32");
-  make_IdentityOf<int64_t>(m, "Identity64");
+  make_IdentitiesOf<int32_t>(m, "Identities32");
+  make_IdentitiesOf<int64_t>(m, "Identities64");
 
   make_Slice(m, "Slice");
 

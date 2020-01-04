@@ -271,7 +271,7 @@ def lower_getitem_int(context, builder, sig, args):
 
 @numba.extending.lower_builtin(operator.getitem, RecordArrayType, numba.types.slice2_type)
 def lower_getitem_range(context, builder, sig, args):
-    import awkward1._numba.identity
+    import awkward1._numba.identities
 
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
@@ -292,7 +292,7 @@ def lower_getitem_range(context, builder, sig, args):
     for i, t in enumerate(tpe.contenttpes):
         setattr(proxyout, field(i), t.lower_getitem_range(context, builder, t.getitem_range()(t, numba.types.slice2_type), (getattr(proxyin, field(i)), sliceout)))
     if tpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
+        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, tpe.idtpe, wheretpe, proxyin.id, whereval)
 
     out = proxyout._getvalue()
     if context.enable_nrt:
@@ -378,7 +378,7 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     return rettpe.lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, advanced)
 
 def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
-    import awkward1._numba.identity
+    import awkward1._numba.identities
     rettpe = arraytpe.carry()
     proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
     proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
@@ -386,5 +386,5 @@ def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
     for i, t in enumerate(arraytpe.contenttpes):
         setattr(proxyout, field(i), t.lower_carry(context, builder, t, carrytpe, getattr(proxyin, field(i)), carryval))
     if rettpe.idtpe != numba.none:
-        proxyout.id = awkward1._numba.identity.lower_getitem_any(context, builder, rettpe.idtpe, carrytpe, proxyin.id, carryval)
+        proxyout.id = awkward1._numba.identities.lower_getitem_any(context, builder, rettpe.idtpe, carrytpe, proxyin.id, carryval)
     return proxyout._getvalue()

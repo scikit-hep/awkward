@@ -10,14 +10,14 @@
 #include "awkward/array/EmptyArray.h"
 
 namespace awkward {
-  EmptyArray::EmptyArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters)
+  EmptyArray::EmptyArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters)
       : Content(id, parameters) { }
 
   const std::string EmptyArray::classname() const {
     return "EmptyArray";
   }
 
-  void EmptyArray::setid(const std::shared_ptr<Identity>& id) {
+  void EmptyArray::setid(const std::shared_ptr<Identities>& id) {
     if (id.get() != nullptr  &&  length() != id.get()->length()) {
       util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
     }

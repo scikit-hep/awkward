@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Index.h"
 #include "awkward/type/UnionType.h"
 #include "awkward/fillable/OptionFillable.h"

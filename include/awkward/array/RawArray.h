@@ -44,7 +44,7 @@ namespace awkward {
   template <typename T>
   class RawArrayOf: public Content {
   public:
-    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
+    RawArrayOf<T>(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
         : Content(id, parameters)
         , ptr_(ptr)
         , offset_(offset)
@@ -55,14 +55,14 @@ namespace awkward {
       }
     }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t length)
+    RawArrayOf<T>(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t length)
         : Content(id, parameters)
         , ptr_(ptr)
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
 
-    RawArrayOf<T>(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const int64_t length)
+    RawArrayOf<T>(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const int64_t length)
         : Content(id, parameters)
         , ptr_(std::shared_ptr<T>(new T[(size_t)length], util::array_deleter<T>()))
         , offset_(0)
@@ -109,20 +109,20 @@ namespace awkward {
 
     void setid() override {
       if (length() <= kMaxInt32) {
-        std::shared_ptr<Identity> newid = std::make_shared<Identity32>(Identity::newref(), Identity::FieldLoc(), 1, length());
-        Identity32* rawid = reinterpret_cast<Identity32*>(newid.get());
+        std::shared_ptr<Identities> newid = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+        Identities32* rawid = reinterpret_cast<Identities32*>(newid.get());
         awkward_new_identity32(rawid->ptr().get(), length());
         setid(newid);
       }
       else {
-        std::shared_ptr<Identity> newid = std::make_shared<Identity64>(Identity::newref(), Identity::FieldLoc(), 1, length());
-        Identity64* rawid = reinterpret_cast<Identity64*>(newid.get());
+        std::shared_ptr<Identities> newid = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+        Identities64* rawid = reinterpret_cast<Identities64*>(newid.get());
         awkward_new_identity64(rawid->ptr().get(), length());
         setid(newid);
       }
     }
 
-    void setid(const std::shared_ptr<Identity>& id) override {
+    void setid(const std::shared_ptr<Identities>& id) override {
       if (id.get() != nullptr  &&  length() != id.get()->length()) {
         throw std::invalid_argument("content and its id must have the same length");
       }
@@ -303,7 +303,7 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const override {
-      std::shared_ptr<Identity> id(nullptr);
+      std::shared_ptr<Identities> id(nullptr);
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_range_nowrap(start, stop);
       }
@@ -343,7 +343,7 @@ namespace awkward {
         carry.ptr().get());
       util::handle_error(err, classname(), id_.get());
 
-      std::shared_ptr<Identity> id(nullptr);
+      std::shared_ptr<Identities> id(nullptr);
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }

@@ -14,7 +14,7 @@ def test_refcount1():
     i = numpy.arange(12, dtype="i4").reshape(3, 4)
     assert sys.getrefcount(i) == 2
 
-    i2 = awkward1.layout.Identity32(awkward1.layout.Identity32.newref(), [(0, "hey"), (1, "there")], i)
+    i2 = awkward1.layout.Identities32(awkward1.layout.Identities32.newref(), [(0, "hey"), (1, "there")], i)
     assert (sys.getrefcount(i), sys.getrefcount(i2)) == (3, 2)
 
     tmp = numpy.asarray(i2)
@@ -42,7 +42,7 @@ def test_refcount1():
 
 def test_refcount2():
     i = numpy.arange(6, dtype="i4").reshape(3, 2)
-    i2 = awkward1.layout.Identity32(awkward1.layout.Identity32.newref(), [], i)
+    i2 = awkward1.layout.Identities32(awkward1.layout.Identities32.newref(), [], i)
     x = numpy.arange(12).reshape(3, 4)
     x2 = awkward1.layout.NumpyArray(x)
     x2.id = i2
@@ -58,7 +58,7 @@ def test_refcount2():
 
 def test_refcount3():
     i = numpy.arange(6, dtype="i4").reshape(3, 2)
-    i2 = awkward1.layout.Identity32(awkward1.layout.Identity32.newref(), [], i)
+    i2 = awkward1.layout.Identities32(awkward1.layout.Identities32.newref(), [], i)
     x = numpy.arange(12).reshape(3, 4)
     x2 = awkward1.layout.NumpyArray(x)
     x2.id = i2
@@ -108,7 +108,7 @@ def test_setid_none():
 
 def test_setid_constructor():
     offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
-    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]), id=awkward1.layout.Identity32(awkward1.layout.Identity32.newref(), [], numpy.array([[0, 0], [0, 1], [2, 0]], dtype="i4")))
-    array = awkward1.layout.ListOffsetArray32(offsets, content, id=awkward1.layout.Identity32(awkward1.layout.Identity32.newref(), [], numpy.array([[0], [1], [2]], dtype="i4")))
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]), id=awkward1.layout.Identities32(awkward1.layout.Identities32.newref(), [], numpy.array([[0, 0], [0, 1], [2, 0]], dtype="i4")))
+    array = awkward1.layout.ListOffsetArray32(offsets, content, id=awkward1.layout.Identities32(awkward1.layout.Identities32.newref(), [], numpy.array([[0], [1], [2]], dtype="i4")))
     assert numpy.asarray(array.id).tolist() == [[0], [1], [2]]
     assert numpy.asarray(array.content.id).tolist() == [[0, 0], [0, 1], [2, 0]]

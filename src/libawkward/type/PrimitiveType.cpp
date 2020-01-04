@@ -108,7 +108,7 @@ namespace awkward {
       case float64: itemsize = 8; format = "d"; break;
       default: throw std::runtime_error(std::string("unexpected dtype: ") + std::to_string(dtype_));
     }
-    return std::make_shared<NumpyArray>(Identity::none(), parameters_, ptr, shape, strides, 0, itemsize, format);
+    return std::make_shared<NumpyArray>(Identities::none(), parameters_, ptr, shape, strides, 0, itemsize, format);
   }
 
   const PrimitiveType::DType PrimitiveType::dtype() const {

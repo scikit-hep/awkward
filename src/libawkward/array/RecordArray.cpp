@@ -11,7 +11,7 @@
 #include "awkward/array/RecordArray.h"
 
 namespace awkward {
-  RecordArray::RecordArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup)
+  RecordArray::RecordArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup)
       : Content(id, parameters)
       , contents_(contents)
       , recordlookup_(recordlookup)
@@ -24,7 +24,7 @@ namespace awkward {
     }
   }
 
-  RecordArray::RecordArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents)
+  RecordArray::RecordArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents)
       : Content(id, parameters)
       , contents_(contents)
       , recordlookup_(nullptr)
@@ -34,7 +34,7 @@ namespace awkward {
     }
   }
 
-  RecordArray::RecordArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, int64_t length, bool istuple)
+  RecordArray::RecordArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, int64_t length, bool istuple)
       : Content(id, parameters)
       , contents_()
       , recordlookup_(istuple ? nullptr : new util::RecordLookup)
@@ -59,22 +59,22 @@ namespace awkward {
   void RecordArray::setid() {
     int64_t len = length();
     if (len <= kMaxInt32) {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity32>(Identity::newref(), Identity::FieldLoc(), 1, len);
-      Identity32* rawid = reinterpret_cast<Identity32*>(newid.get());
+      std::shared_ptr<Identities> newid = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, len);
+      Identities32* rawid = reinterpret_cast<Identities32*>(newid.get());
       struct Error err = awkward_new_identity32(rawid->ptr().get(), len);
       util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
     else {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity64>(Identity::newref(), Identity::FieldLoc(), 1, len);
-      Identity64* rawid = reinterpret_cast<Identity64*>(newid.get());
+      std::shared_ptr<Identities> newid = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, len);
+      Identities64* rawid = reinterpret_cast<Identities64*>(newid.get());
       struct Error err = awkward_new_identity64(rawid->ptr().get(), len);
       util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
   }
 
-  void RecordArray::setid(const std::shared_ptr<Identity>& id) {
+  void RecordArray::setid(const std::shared_ptr<Identities>& id) {
     if (id.get() == nullptr) {
       for (auto content : contents_) {
         content.get()->setid(id);
@@ -86,15 +86,15 @@ namespace awkward {
       }
       if (istuple()) {
         for (size_t j = 0;  j < contents_.size();  j++) {
-          Identity::FieldLoc fieldloc(id.get()->fieldloc().begin(), id.get()->fieldloc().end());
+          Identities::FieldLoc fieldloc(id.get()->fieldloc().begin(), id.get()->fieldloc().end());
           fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width() - 1, std::to_string(j)));
           contents_[j].get()->setid(id.get()->withfieldloc(fieldloc));
         }
       }
       else {
-        Identity::FieldLoc original = id.get()->fieldloc();
+        Identities::FieldLoc original = id.get()->fieldloc();
         for (size_t j = 0;  j < contents_.size();  j++) {
-          Identity::FieldLoc fieldloc(original.begin(), original.end());
+          Identities::FieldLoc fieldloc(original.begin(), original.end());
           fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width() - 1, recordlookup_.get()->at(j)));
           contents_[j].get()->setid(id.get()->withfieldloc(fieldloc));
         }
@@ -294,7 +294,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::carry(const Index64& carry) const {
     if (contents_.empty()) {
-      std::shared_ptr<Identity> id(nullptr);
+      std::shared_ptr<Identities> id(nullptr);
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
@@ -305,7 +305,7 @@ namespace awkward {
       for (auto content : contents_) {
         contents.push_back(content.get()->carry(carry));
       }
-      std::shared_ptr<Identity> id(nullptr);
+      std::shared_ptr<Identities> id(nullptr);
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
@@ -422,7 +422,7 @@ namespace awkward {
       return out.get()->getitem_next(nexthead, nexttail, advanced);
     }
     else if (contents_.empty()) {
-      RecordArray out(Identity::none(), parameters_, length(), istuple());
+      RecordArray out(Identities::none(), parameters_, length(), istuple());
       return out.getitem_next(nexthead, nexttail, advanced);
     }
     else {
@@ -434,7 +434,7 @@ namespace awkward {
       if (head.get()->preserves_type(advanced)) {
         parameters = parameters_;
       }
-      RecordArray out(Identity::none(), parameters, contents, recordlookup_);
+      RecordArray out(Identities::none(), parameters, contents, recordlookup_);
       return out.getitem_next(nexthead, nexttail, advanced);
     }
   }

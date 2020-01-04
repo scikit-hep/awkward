@@ -11,7 +11,7 @@
 #include "awkward/cpu-kernels/util.h"
 
 namespace awkward {
-  class Identity;
+  class Identities;
 
   namespace util {
     typedef std::vector<std::string> RecordLookup;
@@ -25,7 +25,7 @@ namespace awkward {
     bool parameter_equals(const Parameters& parameters, const std::string& key, const std::string& value);
     bool parameters_equal(const Parameters& self, const Parameters& other);
 
-    void handle_error(const struct Error& err, const std::string& classname, const Identity* id);
+    void handle_error(const struct Error& err, const std::string& classname, const Identities* id);
 
     template<typename T>
     class array_deleter {

@@ -32,7 +32,7 @@ namespace awkward {
     return out;
   }
 
-  NumpyArray::NumpyArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
+  NumpyArray::NumpyArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
       : Content(id, parameters)
       , ptr_(ptr)
       , shape_(shape)
@@ -111,7 +111,7 @@ namespace awkward {
     return "NumpyArray";
   }
 
-  void NumpyArray::setid(const std::shared_ptr<Identity>& id) {
+  void NumpyArray::setid(const std::shared_ptr<Identities>& id) {
     if (id.get() != nullptr  &&  length() != id.get()->length()) {
       util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
     }
@@ -121,15 +121,15 @@ namespace awkward {
   void NumpyArray::setid() {
     assert(!isscalar());
     if (length() <= kMaxInt32) {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity32>(Identity::newref(), Identity::FieldLoc(), 1, length());
-      Identity32* rawid = reinterpret_cast<Identity32*>(newid.get());
+      std::shared_ptr<Identities> newid = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities32* rawid = reinterpret_cast<Identities32*>(newid.get());
       struct Error err = awkward_new_identity32(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
     else {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity64>(Identity::newref(), Identity::FieldLoc(), 1, length());
-      Identity64* rawid = reinterpret_cast<Identity64*>(newid.get());
+      std::shared_ptr<Identities> newid = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities64* rawid = reinterpret_cast<Identities64*>(newid.get());
       struct Error err = awkward_new_identity64(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
@@ -415,7 +415,7 @@ namespace awkward {
   const std::shared_ptr<Content> NumpyArray::getitem_nothing() const {
     const std::vector<ssize_t> shape({ 0 });
     const std::vector<ssize_t> strides({ itemsize_ });
-    std::shared_ptr<Identity> id;
+    std::shared_ptr<Identities> id;
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_range_nowrap(0, 0);
     }
@@ -438,7 +438,7 @@ namespace awkward {
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
     const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
     const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
-    std::shared_ptr<Identity> id;
+    std::shared_ptr<Identities> id;
     if (id_.get() != nullptr) {
       if (at >= id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, at), id_.get()->classname(), nullptr);
@@ -461,7 +461,7 @@ namespace awkward {
     std::vector<ssize_t> shape;
     shape.push_back((ssize_t)(stop - start));
     shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-    std::shared_ptr<Identity> id;
+    std::shared_ptr<Identities> id;
     if (id_.get() != nullptr) {
       if (stop > id_.get()->length()) {
         util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
@@ -541,7 +541,7 @@ namespace awkward {
       carry.ptr().get());
     util::handle_error(err, classname(), id_.get());
 
-    std::shared_ptr<Identity> id(nullptr);
+    std::shared_ptr<Identities> id(nullptr);
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }
@@ -820,7 +820,7 @@ namespace awkward {
         carry.ptr().get());
       util::handle_error(err, classname(), id_.get());
 
-      std::shared_ptr<Identity> id(nullptr);
+      std::shared_ptr<Identities> id(nullptr);
       if (id_.get() != nullptr) {
         id = id_.get()->getitem_carry_64(carry);
       }
@@ -863,7 +863,7 @@ namespace awkward {
       util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
     }
 
-    NumpyArray next(first ? id_ : Identity::none(), parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    NumpyArray next(first ? id_ : Identities::none(), parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
@@ -913,7 +913,7 @@ namespace awkward {
     int64_t m = numer % denom;
     int64_t lenhead = d + (m != 0 ? 1 : 0);
 
-    NumpyArray next(first ? id_ : Identity::none(), parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    NumpyArray next(first ? id_ : Identities::none(), parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
@@ -998,7 +998,7 @@ namespace awkward {
       util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
     }
 
-    NumpyArray next(first ? id_ : Identity::none(), parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    NumpyArray next(first ? id_ : Identities::none(), parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
@@ -1035,7 +1035,7 @@ namespace awkward {
       for (auto x = arrayshape.rbegin();  x != arrayshape.rend();  ++x) {
         outstrides.insert(outstrides.begin(), ((ssize_t)(*x))*outstrides[0]);
       }
-      return NumpyArray(arrayshape.size() == 1 ? out.id_ : Identity::none(), out.parameters_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+      return NumpyArray(arrayshape.size() == 1 ? out.id_ : Identities::none(), out.parameters_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
 
     else {
@@ -1076,7 +1076,7 @@ namespace awkward {
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
-        NumpyArray numpy(Identity::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        NumpyArray numpy(Identities::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
         numpy.tojson_boolean(builder);
       }
       builder.endlist();
@@ -1103,7 +1103,7 @@ namespace awkward {
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
-        NumpyArray numpy(Identity::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        NumpyArray numpy(Identities::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
         numpy.tojson_integer<T>(builder);
       }
       builder.endlist();
@@ -1130,7 +1130,7 @@ namespace awkward {
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
-        NumpyArray numpy(Identity::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        NumpyArray numpy(Identities::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
         numpy.tojson_real<T>(builder);
       }
       builder.endlist();
@@ -1152,7 +1152,7 @@ namespace awkward {
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
-        NumpyArray numpy(Identity::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        NumpyArray numpy(Identities::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
         numpy.tojson_string(builder);
       }
       builder.endlist();

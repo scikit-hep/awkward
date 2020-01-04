@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/fillable/OptionFillable.h"
@@ -47,7 +47,7 @@ namespace awkward {
   const std::shared_ptr<Content> Float64Fillable::snapshot() const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(double) };
-    return std::make_shared<NumpyArray>(Identity::none(), util::Parameters(), buffer_.ptr(), shape, strides, 0, sizeof(double), "d");
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), buffer_.ptr(), shape, strides, 0, sizeof(double), "d");
   }
 
   bool Float64Fillable::active() const {

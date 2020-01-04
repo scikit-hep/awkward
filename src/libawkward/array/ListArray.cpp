@@ -16,7 +16,7 @@
 
 namespace awkward {
   template <typename T>
-  ListArrayOf<T>::ListArrayOf(const std::shared_ptr<Identity>& id, const util::Parameters& parameters, const IndexOf<T>& starts, const IndexOf<T>& stops, const std::shared_ptr<Content>& content)
+  ListArrayOf<T>::ListArrayOf(const std::shared_ptr<Identities>& id, const util::Parameters& parameters, const IndexOf<T>& starts, const IndexOf<T>& stops, const std::shared_ptr<Content>& content)
       : Content(id, parameters)
       , starts_(starts)
       , stops_(stops)
@@ -54,7 +54,7 @@ namespace awkward {
   }
 
   template <>
-  void ListArrayOf<int32_t>::setid(const std::shared_ptr<Identity>& id) {
+  void ListArrayOf<int32_t>::setid(const std::shared_ptr<Identities>& id) {
     if (id.get() == nullptr) {
       content_.get()->setid(id);
     }
@@ -62,13 +62,13 @@ namespace awkward {
       if (length() != id.get()->length()) {
         util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
       }
-      std::shared_ptr<Identity> bigid = id;
+      std::shared_ptr<Identities> bigid = id;
       if (content_.get()->length() > kMaxInt32) {
         bigid = id.get()->to64();
       }
-      if (Identity32* rawid = dynamic_cast<Identity32*>(bigid.get())) {
-        std::shared_ptr<Identity> subid = std::make_shared<Identity32>(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        Identity32* rawsubid = reinterpret_cast<Identity32*>(subid.get());
+      if (Identities32* rawid = dynamic_cast<Identities32*>(bigid.get())) {
+        std::shared_ptr<Identities> subid = std::make_shared<Identities32>(Identities::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        Identities32* rawsubid = reinterpret_cast<Identities32*>(subid.get());
         struct Error err = awkward_identity32_from_listarray32(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
@@ -83,9 +83,9 @@ namespace awkward {
         util::handle_error(err, classname(), id_.get());
         content_.get()->setid(subid);
       }
-      else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
-        std::shared_ptr<Identity> subid = std::make_shared<Identity64>(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        Identity64* rawsubid = reinterpret_cast<Identity64*>(subid.get());
+      else if (Identities64* rawid = dynamic_cast<Identities64*>(bigid.get())) {
+        std::shared_ptr<Identities> subid = std::make_shared<Identities64>(Identities::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        Identities64* rawsubid = reinterpret_cast<Identities64*>(subid.get());
         struct Error err = awkward_identity64_from_listarray32(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
@@ -101,14 +101,14 @@ namespace awkward {
         content_.get()->setid(subid);
       }
       else {
-        throw std::runtime_error("unrecognized Identity specialization");
+        throw std::runtime_error("unrecognized Identities specialization");
       }
     }
     id_ = id;
   }
 
   template <typename T>
-  void ListArrayOf<T>::setid(const std::shared_ptr<Identity>& id) {
+  void ListArrayOf<T>::setid(const std::shared_ptr<Identities>& id) {
     if (id.get() == nullptr) {
       content_.get()->setid(id);
     }
@@ -116,10 +116,10 @@ namespace awkward {
       if (length() != id.get()->length()) {
         util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
       }
-      std::shared_ptr<Identity> bigid = id.get()->to64();
-      if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
-        std::shared_ptr<Identity> subid = std::make_shared<Identity64>(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        Identity64* rawsubid = reinterpret_cast<Identity64*>(subid.get());
+      std::shared_ptr<Identities> bigid = id.get()->to64();
+      if (Identities64* rawid = dynamic_cast<Identities64*>(bigid.get())) {
+        std::shared_ptr<Identities> subid = std::make_shared<Identities64>(Identities::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
+        Identities64* rawsubid = reinterpret_cast<Identities64*>(subid.get());
         struct Error err = util::awkward_identity64_from_listarray<T>(
           rawsubid->ptr().get(),
           rawid->ptr().get(),
@@ -135,7 +135,7 @@ namespace awkward {
         content_.get()->setid(subid);
       }
       else {
-        throw std::runtime_error("unrecognized Identity specialization");
+        throw std::runtime_error("unrecognized Identities specialization");
       }
     }
     id_ = id;
@@ -144,15 +144,15 @@ namespace awkward {
   template <typename T>
   void ListArrayOf<T>::setid() {
     if (length() <= kMaxInt32) {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity32>(Identity::newref(), Identity::FieldLoc(), 1, length());
-      Identity32* rawid = reinterpret_cast<Identity32*>(newid.get());
+      std::shared_ptr<Identities> newid = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities32* rawid = reinterpret_cast<Identities32*>(newid.get());
       struct Error err = awkward_new_identity32(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
     }
     else {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity64>(Identity::newref(), Identity::FieldLoc(), 1, length());
-      Identity64* rawid = reinterpret_cast<Identity64*>(newid.get());
+      std::shared_ptr<Identities> newid = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities64* rawid = reinterpret_cast<Identities64*>(newid.get());
       struct Error err = awkward_new_identity64(rawid->ptr().get(), length());
       util::handle_error(err, classname(), id_.get());
       setid(newid);
@@ -277,7 +277,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    std::shared_ptr<Identity> id(nullptr);
+    std::shared_ptr<Identities> id(nullptr);
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_range_nowrap(start, stop);
     }
@@ -313,7 +313,7 @@ namespace awkward {
       lenstarts,
       carry.length());
     util::handle_error(err, classname(), id_.get());
-    std::shared_ptr<Identity> id(nullptr);
+    std::shared_ptr<Identities> id(nullptr);
     if (id_.get() != nullptr) {
       id = id_.get()->getitem_carry_64(carry);
     }

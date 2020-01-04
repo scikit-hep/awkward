@@ -15,11 +15,11 @@
 namespace awkward {
   class EmptyArray: public Content {
   public:
-    EmptyArray(const std::shared_ptr<Identity>& id, const util::Parameters& parameters);
+    EmptyArray(const std::shared_ptr<Identities>& id, const util::Parameters& parameters);
 
     const std::string classname() const override;
     void setid() override;
-    void setid(const std::shared_ptr<Identity>& id) override;
+    void setid(const std::shared_ptr<Identities>& id) override;
     const std::shared_ptr<Type> type() const override;
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
