@@ -339,7 +339,9 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: not implemented");
+    int64_t start = offsets_.getitem_at_nowrap(0);
+    int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
+    return content_.get()->getitem_range_nowrap(start, stop);
   }
 
   template <typename T>

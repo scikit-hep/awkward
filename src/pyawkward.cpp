@@ -1167,7 +1167,9 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("keys", &T::keys)
 
           // operations
-          .def("flatten", &T::flatten, py::arg("axis") = 0)
+          .def("flatten", [](T&self, int64_t axis) -> py::object {
+            return box(self.flatten(axis));
+          }, py::arg("axis") = 0)
 
   ;
 }
