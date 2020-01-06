@@ -42,10 +42,16 @@ def tolist(array):
         return array
 
     elif isinstance(array, awkward1.behavior.string.CharBehavior):
-        if array.layout.type.parameters.get("encoding") is None:
+        if array.layout.parameters.get("encoding") is None:
             return array.__bytes__()
         else:
             return array.__str__()
+
+    elif awkward1.operations.describe.parameters(array).get("__class__") == "char":
+        if awkward1.operations.describe.parameters(array).get("encoding") is None:
+            return awkward1.behavior.string.CharBehavior(array).__bytes__()
+        else:
+            return awkward1.behavior.string.CharBehavior(array).__str__()
 
     elif isinstance(array, awkward1.highlevel.Array):
         return [tolist(x) for x in array]
