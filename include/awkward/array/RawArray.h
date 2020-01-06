@@ -375,6 +375,11 @@ namespace awkward {
       throw std::invalid_argument("array contains no Records");
     }
 
+    // operations
+    const std::shared_ptr<Content> flatten(int64_t axis) const override {
+      throw std::runtime_error("FIXME: not implemented");
+    }
+
   protected:
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
       return getitem_at(at.at());

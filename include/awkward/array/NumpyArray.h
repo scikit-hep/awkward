@@ -61,6 +61,9 @@ namespace awkward {
     bool haskey(const std::string& key) const override;
     const std::vector<std::string> keys() const override;
 
+    // operations
+    const std::shared_ptr<Content> flatten(int64_t axis) const override;
+
     bool iscontiguous() const;
     void become_contiguous();
     const NumpyArray contiguous() const;

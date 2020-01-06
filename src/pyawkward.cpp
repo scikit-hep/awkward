@@ -1165,6 +1165,10 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("key", &T::key)
           .def("haskey", &T::haskey)
           .def("keys", &T::keys)
+
+          // operations
+          .def("flatten", &T::flatten, py::arg("axis") = 0)
+
   ;
 }
 

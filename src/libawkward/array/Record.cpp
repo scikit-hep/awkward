@@ -196,6 +196,10 @@ namespace awkward {
     return array_.keys();
   }
 
+  const std::shared_ptr<Content> Record::flatten(int64_t axis) const {
+    throw std::runtime_error("FIXME: not implemented");
+  }
+
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
     return array_.field(fieldindex).get()->getitem_at_nowrap(at_);
   }

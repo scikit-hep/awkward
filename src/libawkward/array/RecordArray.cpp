@@ -351,6 +351,10 @@ namespace awkward {
     return util::keys(recordlookup_, numfields());
   }
 
+  const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {
+    throw std::runtime_error("FIXME: not implemented");
+  }
+
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
     if (fieldindex >= numfields()) {
       throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields()) + std::string(" fields")));

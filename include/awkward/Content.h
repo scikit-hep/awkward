@@ -46,6 +46,9 @@ namespace awkward {
     virtual bool haskey(const std::string& key) const = 0;
     virtual const std::vector<std::string> keys() const = 0;
 
+    // operations
+    virtual const std::shared_ptr<Content> flatten(int64_t axis) const = 0;
+
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
     void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
