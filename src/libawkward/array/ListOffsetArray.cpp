@@ -338,6 +338,13 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::flatten(int64_t axis) const {
+    int64_t start = offsets_.getitem_at_nowrap(0);
+    int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
+    return content_.get()->getitem_range_nowrap(start, stop);
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     assert(advanced.length() == 0);
     int64_t lenstarts = offsets_.length() - 1;
