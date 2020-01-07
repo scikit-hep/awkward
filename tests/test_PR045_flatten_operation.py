@@ -7,6 +7,20 @@ import numpy
 
 import awkward1
 
+def flatten(data, axis=0):
+    if axis < 0:
+        raise NotImplementedError("axis < 0 is much harder for untyped data...")
+    if isinstance(data, list):
+        if axis == 0:
+            if all(isinstance(x, list) for x in data):
+                return sum(data, [])
+            else:
+                raise ValueError("cannot concatenate non-lists")
+        else:
+            return [flatten(x, axis - 1) for x in data]
+    else:
+        raise ValueError("cannot flatten {0} objects".format(type(data)))
+
 def test_flatten_empty_array():
     empty = awkward1.layout.EmptyArray()
 
@@ -24,6 +38,22 @@ def test_flatten_list_array():
 
     array2 = array[2:-1]
     assert awkward1.tolist(array2.flatten()) == [3.3, 4.4, 5.5]
+
+    # The following are allowed:
+    #     * out of order (4:7 before 0:1)
+    #     * overlaps (0:1 and 0:4 and 1:5)
+    #     * beyond content starts[i] == stops[i] (999)
+    #
+    # See https://github.com/scikit-hep/awkward-1.0/wiki/ListArray.md
+    #
+    content = awkward1.layout.NumpyArray(numpy.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=numpy.int64))
+    starts  = awkward1.layout.Index64(numpy.array([4, 999, 0, 0, 1, 7]))
+    stops   = awkward1.layout.Index64(numpy.array([7, 999, 1, 4, 5, 10]))
+    array   = awkward1.layout.ListArray64(starts, stops, content)
+    assert awkward1.tolist(array) == [[4, 5, 6], [], [0], [0, 1, 2, 3], [1, 2, 3, 4], [7, 8, 9]]
+    assert flatten(awkward1.tolist(array)) == [4, 5, 6, 0, 0, 1, 2, 3, 1, 2, 3, 4, 7, 8, 9]
+    # Flatten should handle this.
+    # assert awkward1.tolist(array.flatten()) == [4, 5, 6, 0, 0, 1, 2, 3, 1, 2, 3, 4, 7, 8, 9]
 
 def test_flatten_list_offset_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
