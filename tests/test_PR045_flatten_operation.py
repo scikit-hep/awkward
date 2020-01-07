@@ -11,13 +11,7 @@ def test_flatten_empty_array():
     empty = awkward1.layout.EmptyArray()
 
     assert awkward1.tolist(empty) == []
-
-    try:
-        empty.flatten()
-    except ValueError as err:
-        print("ValueError: {0}".format(err))
-    except:
-        print("Unexpected error:", sys.exc_info()[0])
+    assert awkward1.tolist(empty.flatten()) == []
 
 def test_flatten_list_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -43,11 +37,18 @@ def test_flatten_list_offset_array():
     assert awkward1.tolist(array2.flatten()) == [3.3, 4.4, 5.5]
 
 def test_flatten_numpy_array():
-    array = awkward1.layout.NumpyArray(numpy.array([[0.0, 1.1, 2.2], [], [3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]]))
+    dint64 = awkward1.layout.PrimitiveType("int64", {"__class__": "D", "__str__": "D[int64]"})
+    array = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5)).astype(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3))
     print(awkward1.tolist(array))
 
-    assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], [3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]]
-    #FIXME: assert awkward1.tolist(array.flatten()) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+    assert awkward1.tolist(array) == [[[ 0,  1,  2,  3,  4], [ 5,  6,  7,  8,  9], [10, 11, 12, 13, 14]],
+                                      [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]
+    ## assert awkward1.tolist(array.flatten(0)) == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
+
+    array2 = awkward1.layout.NumpyArray(numpy.arange(1*6*5, dtype=numpy.int64).reshape(1, 6, 5)).astype(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 6))
+    print(awkward1.tolist(array2))
+
+    ## assert awkward1.tolist(array.flatten(0)) == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
 
 ## def test_flatten_raw_array():
     ## RawArrayOf<T> is usable only in C++
@@ -88,7 +89,7 @@ def test_flatten_regular_array():
     regulararray_m1 = awkward1.layout.RegularArray(listoffsetarray[:-1], 2)
 
     assert awkward1.tolist(regulararray_m1) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]]
-    assert awkward1.tolist(regulararray_m1.flatten()) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(regulararray_m1.flatten()) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5]]
 
     regulararray_m2 = awkward1.layout.RegularArray(listoffsetarray[:-2], 2)
 
