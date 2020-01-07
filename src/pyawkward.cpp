@@ -19,6 +19,7 @@
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/RecordArray.h"
 #include "awkward/array/Record.h"
+#include "awkward/array/IndexedArray.h"
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
@@ -123,6 +124,21 @@ py::object box(std::shared_ptr<ak::Content> content) {
     return py::cast(*raw);
   }
   else if (ak::RecordArray* raw = dynamic_cast<ak::RecordArray*>(content.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::IndexedArray32* raw = dynamic_cast<ak::IndexedArray32*>(content.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::IndexedArrayU32* raw = dynamic_cast<ak::IndexedArrayU32*>(content.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::IndexedArray64* raw = dynamic_cast<ak::IndexedArray64*>(content.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::IndexedOptionArray32* raw = dynamic_cast<ak::IndexedOptionArray32*>(content.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::IndexedOptionArray64* raw = dynamic_cast<ak::IndexedOptionArray64*>(content.get())) {
     return py::cast(*raw);
   }
   else {
@@ -234,6 +250,26 @@ std::shared_ptr<ak::Content> unbox_content(py::handle obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::RecordArray*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::IndexedArray32*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::IndexedArrayU32*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::IndexedArray64*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::IndexedOptionArray32*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::IndexedOptionArray64*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   throw std::invalid_argument("content argument must be a Content subtype");
@@ -1424,6 +1460,20 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
   ;
 }
 
+/////////////////////////////////////////////////////////////// IndexedArray
+
+template <typename T, bool ISOPTION>
+py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T, ISOPTION>>, ak::Content> make_IndexedArrayOf(py::handle m, std::string name) {
+  return content_methods(py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T, ISOPTION>>, ak::Content>(m, name.c_str())
+      .def(py::init([](ak::IndexOf<T>& index, py::object content, py::object identities, py::object parameters) -> ak::IndexedArrayOf<T, ISOPTION> {
+        return ak::IndexedArrayOf<T, ISOPTION>(unbox_identities_none(identities), dict2parameters(parameters), index, std::shared_ptr<ak::Content>(unbox_content(content)));
+      }), py::arg("index"), py::arg("content"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
+
+      .def_property_readonly("index", &ak::IndexedArrayOf<T, ISOPTION>::index)
+      .def_property_readonly("content", &ak::IndexedArrayOf<T, ISOPTION>::content)
+  );
+}
+
 /////////////////////////////////////////////////////////////// module
 
 PYBIND11_MODULE(layout, m) {
@@ -1476,6 +1526,12 @@ PYBIND11_MODULE(layout, m) {
 
   make_RecordArray(m, "RecordArray");
   make_Record(m, "Record");
+
+  make_IndexedArrayOf<int32_t, false>(m,  "IndexedArray32");
+  make_IndexedArrayOf<uint32_t, false>(m, "IndexedArrayU32");
+  make_IndexedArrayOf<int64_t, false>(m,  "IndexedArray64");
+  make_IndexedArrayOf<int32_t, true>(m,  "IndexedOptionArray32");
+  make_IndexedArrayOf<int64_t, true>(m,  "IndexedOptionArray64");
 
   m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;
