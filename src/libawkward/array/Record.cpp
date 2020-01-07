@@ -197,7 +197,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::flatten(int64_t axis) const {
-    return array_.flatten(axis);
+    throw std::invalid_argument("Record is not an array");
   }
 
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {

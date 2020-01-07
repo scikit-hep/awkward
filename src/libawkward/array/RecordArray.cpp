@@ -352,7 +352,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {
-    return getitem_range_nowrap(0, length() - 1);
+    throw std::invalid_argument("RecordArray is one-dimentional");
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
