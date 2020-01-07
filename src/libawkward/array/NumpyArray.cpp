@@ -574,7 +574,24 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: not implemented");
+    std::cout << "My length is " << length() << "\n";
+    std::cout << "My dimentions are " << ndim() << "\n";
+    std::cout << "My num fields are " << numfields() << "\n";
+    std::cout << "My format is " << format() << "\n";
+    std::cout << "My shape size is " << shape().size() << "\n";
+    std::cout << "My strides size is " << strides().size() << "\n";
+    std::cout << "My item size is " << int64_t(itemsize()) << "\n";
+    for(auto& ishape : shape())
+      std::cout << int64_t(ishape) << "\n";
+    for(auto& istride : strides())
+      std::cout << int64_t(istride) << "\n";
+
+    for(int64_t i = 0; i < length(); ++i) {
+      std::shared_ptr<Content> content = getitem_at_nowrap(itemsize());
+      std::cout << " " << i << ": " << content.get()->length() << "\n";
+    }
+
+    throw std::invalid_argument("array contains no Records");
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

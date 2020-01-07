@@ -197,7 +197,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: not implemented");
+    return array_.flatten(axis);
   }
 
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {

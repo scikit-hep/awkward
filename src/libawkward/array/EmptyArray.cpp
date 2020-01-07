@@ -125,7 +125,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: not implemented");
+    throw std::invalid_argument("array contains no Records");
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

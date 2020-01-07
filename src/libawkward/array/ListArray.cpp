@@ -353,7 +353,11 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: not implemented");
+    if(axis <= -1)
+      throw std::invalid_argument("axis must be a non-negative integer (can't count from the end)");
+    int64_t start = starts_.getitem_at_nowrap(0);
+    int64_t stop = stops_.getitem_at_nowrap(stops_.length() - 1);
+    return content_.get()->getitem_range_nowrap(start, stop);
   }
 
   template <typename T>
