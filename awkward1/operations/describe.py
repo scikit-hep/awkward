@@ -6,6 +6,22 @@ import numpy
 
 import awkward1.layout
 
+def parameters(array):
+    if isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
+        return array.layout.parameters
+
+    elif isinstance(array, (awkward1.layout.Content, awkward1.layout.Record)):
+        return array.parameters
+
+    elif isinstance(array, awkward1.highlevel.FillableArray):
+        return array.snapshot().layout.parameters
+
+    elif isinstance(array, awkward1.layout.FillableArray):
+        return array.snapshot().parameters
+
+    else:
+        return {}
+
 def typeof(array):
     if array is None:
         return awkward1.layout.UnknownType()

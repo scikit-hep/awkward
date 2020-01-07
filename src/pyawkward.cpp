@@ -1358,7 +1358,7 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         else {
           self.append(unbox_content(content), key.cast<std::string>());
         }
-      }, py::arg("type"), py::arg("key") = py::none())
+      }, py::arg("content"), py::arg("key") = py::none())
 
   );
 }
@@ -1369,6 +1369,11 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("identities", [](ak::Record& self) -> py::object { return box(self.identities()); })
       .def("__getitem__", &getitem<ak::Record>)
+      .def_property_readonly("type", [](ak::Record& self) -> py::object {
+        return box(self.type());
+      })
+      .def_property("parameters", &getparameters<ak::Record>, &setparameters<ak::Record>)
+      .def("setparameter", &setparameter<ak::Record>)
       .def_property_readonly("type", [](ak::Record& self) -> py::object {
         return box(self.type());
       })
