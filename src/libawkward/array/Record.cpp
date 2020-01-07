@@ -173,7 +173,8 @@ namespace awkward {
   }
 
   const std::pair<int64_t, int64_t> Record::minmax_depth() const {
-    return array_.minmax_depth();
+    std::pair<int64_t, int64_t> out = array_.minmax_depth();
+    return std::pair<int64_t, int64_t>(out.first - 1, out.second - 1);
   }
 
   int64_t Record::numfields() const {

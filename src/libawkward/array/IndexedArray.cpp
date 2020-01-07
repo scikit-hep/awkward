@@ -9,8 +9,7 @@
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/Slice.h"
-#include "awkward/array/ListOffsetArray.h"
-#include "awkward/array/RegularArray.h"
+#include "awkward/array/None.h"
 
 #include "awkward/array/IndexedArray.h"
 
@@ -162,7 +161,7 @@ namespace awkward {
     int64_t index = (int64_t)index_.getitem_at_nowrap(at);
     if (index < 0) {
       if (ISOPTION) {
-        throw std::runtime_error("FIXME: return None");
+        return std::make_shared<None>();
       }
       else {
         util::handle_error(failure("index[i] < 0", kSliceNone, at), classname(), identities_.get());

@@ -12,6 +12,7 @@
 #include "awkward/Identities.h"
 #include "awkward/Content.h"
 #include "awkward/Iterator.h"
+#include "awkward/array/None.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
@@ -95,6 +96,9 @@ py::object box(std::shared_ptr<ak::Content> content) {
     else {
       return py::cast(*raw);
     }
+  }
+  else if (ak::None* raw = dynamic_cast<ak::None*>(content.get())) {
+    return py::none();
   }
   else if (ak::ListArray32* raw = dynamic_cast<ak::ListArray32*>(content.get())) {
     return py::cast(*raw);

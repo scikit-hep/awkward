@@ -44,3 +44,9 @@ def test_basic():
     assert awkward1.tolist(array) == [2.2, 2.2, 0.0, 3.3, 4.4]
     ind[3] = 1
     assert awkward1.tolist(array) == [2.2, 2.2, 0.0, 1.1, 4.4]
+
+def test_null():
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4]))
+    index = awkward1.layout.Index64(numpy.array([2, 2, 0, -1, 4], dtype=numpy.int64))
+    array = awkward1.layout.IndexedOptionArray64(index, content)
+    assert awkward1.tolist(array) == [2.2, 2.2, 0.0, None, 4.4]
