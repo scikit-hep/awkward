@@ -9,6 +9,11 @@ extern "C" {
   EXPORT_SYMBOL void awkward_regularize_rangeslice(int64_t* start, int64_t* stop, bool posstep, bool hasstart, bool hasstop, int64_t length);
   EXPORT_SYMBOL struct Error awkward_regularize_arrayslice_64(int64_t* flatheadptr, int64_t lenflathead, int64_t length);
 
+  EXPORT_SYMBOL struct Error awkward_index8_to_index64(int64_t* toptr, const int8_t* fromptr, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_indexU8_to_index64(int64_t* toptr, const uint8_t* fromptr, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_index32_to_index64(int64_t* toptr, const int32_t* fromptr, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_indexU32_to_index64(int64_t* toptr, const uint32_t* fromptr, int64_t length);
+
   EXPORT_SYMBOL struct Error awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_t ndim, const int64_t* shape, const int64_t* strides);
 
   EXPORT_SYMBOL struct Error awkward_carry_arange_64(int64_t* toptr, int64_t length);

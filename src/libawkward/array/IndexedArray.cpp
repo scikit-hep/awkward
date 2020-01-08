@@ -205,6 +205,38 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+    if (head.get() == nullptr) {
+      return shallow_copy();
+    }
+    else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())) {
+      if (ISOPTION) {
+        throw std::runtime_error("FIXME");
+      }
+      else {
+        std::shared_ptr<Content> next = content_.get()->carry(index_.to64());
+        return next.get()->getitem_next(head, tail, advanced);
+      }
+      // return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, content_.get()->getitem_next(head, tail, advanced));
+    }
+    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+      return Content::getitem_next(*ellipsis, tail, advanced);
+    }
+    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+      return Content::getitem_next(*newaxis, tail, advanced);
+    }
+    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+      return Content::getitem_next(*field, tail, advanced);
+    }
+    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+      return Content::getitem_next(*fields, tail, advanced);
+    }
+    else {
+      throw std::runtime_error("unrecognized slice type");
+    }
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::carry(const Index64& carry) const {
     IndexOf<T> nextindex(carry.length());
     struct Error err = util::awkward_indexedarray_getitem_carry_64<T>(
@@ -259,17 +291,17 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("IndexedArrayOf<T, ISOPTION>::getitem_next");
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(SliceAt)");
   }
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("IndexedArrayOf<T, ISOPTION>::getitem_next");
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(SliceRange)");
   }
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("IndexedArrayOf<T, ISOPTION>::getitem_next");
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(SliceArray64)");
   }
 
   template class IndexedArrayOf<int32_t, false>;

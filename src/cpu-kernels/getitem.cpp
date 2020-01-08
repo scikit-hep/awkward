@@ -49,6 +49,31 @@ ERROR awkward_regularize_arrayslice_64(int64_t* flatheadptr, int64_t lenflathead
   return awkward_regularize_arrayslice<int64_t>(flatheadptr, lenflathead, length);
 }
 
+ERROR awkward_index8_to_index64(int64_t* toptr, const int8_t* fromptr, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toptr[i]= (int64_t)fromptr[i];
+  }
+  return success();
+}
+ERROR awkward_indexU8_to_index64(int64_t* toptr, const uint8_t* fromptr, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toptr[i]= (int64_t)fromptr[i];
+  }
+  return success();
+}
+ERROR awkward_index32_to_index64(int64_t* toptr, const int32_t* fromptr, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toptr[i]= (int64_t)fromptr[i];
+  }
+  return success();
+}
+ERROR awkward_indexU32_to_index64(int64_t* toptr, const uint32_t* fromptr, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toptr[i]= (int64_t)fromptr[i];
+  }
+  return success();
+}
+
 template <typename T>
 ERROR awkward_slicearray_ravel(T* toptr, const T* fromptr, int64_t ndim, const int64_t* shape, const int64_t* strides) {
   if (ndim == 1) {
