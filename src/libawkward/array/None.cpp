@@ -137,4 +137,5 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::getitem_next(SliceFields)");
   }
 
+  const std::shared_ptr<Content> none = std::make_shared<None>();
 }

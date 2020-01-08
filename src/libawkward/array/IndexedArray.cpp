@@ -161,7 +161,7 @@ namespace awkward {
     int64_t index = (int64_t)index_.getitem_at_nowrap(at);
     if (index < 0) {
       if (ISOPTION) {
-        return std::make_shared<None>();
+        return none;
       }
       else {
         util::handle_error(failure("index[i] < 0", kSliceNone, at), classname(), identities_.get());

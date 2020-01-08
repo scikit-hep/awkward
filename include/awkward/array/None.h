@@ -53,6 +53,8 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override;
   };
+
+  extern const std::shared_ptr<Content> none;
 }
 
 #endif // AWKWARD_NONE_H_
