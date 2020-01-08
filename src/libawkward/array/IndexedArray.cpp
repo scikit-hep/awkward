@@ -206,7 +206,20 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::carry(const Index64& carry) const {
-    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION>::carry");
+    IndexOf<T> nextindex(carry.length());
+    struct Error err = util::awkward_indexedarray_getitem_carry_64<T>(
+      nextindex.ptr().get(),
+      index_.ptr().get(),
+      carry.ptr().get(),
+      index_.offset(),
+      index_.length(),
+      carry.length());
+    util::handle_error(err, classname(), identities_.get());
+    std::shared_ptr<Identities> identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_carry_64(carry);
+    }
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities, parameters_, nextindex, content_);
   }
 
   template <typename T, bool ISOPTION>

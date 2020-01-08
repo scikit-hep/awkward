@@ -50,3 +50,17 @@ def test_null():
     index = awkward1.layout.Index64(numpy.array([2, 2, 0, -1, 4], dtype=numpy.int64))
     array = awkward1.layout.IndexedOptionArray64(index, content)
     assert awkward1.tolist(array) == [2.2, 2.2, 0.0, None, 4.4]
+
+def test_carry():
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4]))
+    index = awkward1.layout.Index64(numpy.array([2, 2, 0, 3, 4], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedArray64(index, content)
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, indexedarray)
+    assert awkward1.tolist(listoffsetarray) == [[2.2, 2.2, 0.0], [], [3.3, 4.4]]
+    assert awkward1.tolist(listoffsetarray[::-1]) == [[3.3, 4.4], [], [2.2, 2.2, 0.0]]
+    assert awkward1.tolist(listoffsetarray[[2, 0]]) == [[3.3, 4.4], [2.2, 2.2, 0.0]]
+
+    # these actually invoke carry
+    assert awkward1.tolist(listoffsetarray[[2, 0], 1]) == [4.4, 2.2]
+    assert awkward1.tolist(listoffsetarray[2:, 1]) == [4.4]

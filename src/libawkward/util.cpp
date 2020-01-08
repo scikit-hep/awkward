@@ -290,5 +290,18 @@ namespace awkward {
       return awkward_listarray64_getitem_carry_64(tostarts, tostops, fromstarts, fromstops, fromcarry, startsoffset, stopsoffset, lenstarts, lencarry);
     }
 
+    template <>
+    Error awkward_indexedarray_getitem_carry_64<int32_t>(int32_t* toindex, const int32_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
+      return awkward_indexedarray32_getitem_carry_64(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry);
+    }
+    template <>
+    Error awkward_indexedarray_getitem_carry_64<uint32_t>(uint32_t* toindex, const uint32_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
+      return awkward_indexedarrayU32_getitem_carry_64(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry);
+    }
+    template <>
+    Error awkward_indexedarray_getitem_carry_64<int64_t>(int64_t* toindex, const int64_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
+      return awkward_indexedarray64_getitem_carry_64(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry);
+    }
+
   }
 }

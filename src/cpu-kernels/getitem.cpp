@@ -531,3 +531,23 @@ ERROR awkward_regulararray_getitem_carry(T* tocarry, const T* fromcarry, int64_t
 ERROR awkward_regulararray_getitem_carry_64(int64_t* tocarry, const int64_t* fromcarry, int64_t lencarry, int64_t size) {
   return awkward_regulararray_getitem_carry<int64_t>(tocarry, fromcarry, lencarry, size);
 }
+
+template <typename C, typename T>
+ERROR awkward_indexedarray_getitem_carry(C* toindex, const C* fromindex, const T* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    if (fromcarry[i] >= lenindex) {
+      return failure("index out of range", i, fromcarry[i]);
+    }
+    toindex[i] = (C)(fromindex[indexoffset + fromcarry[i]]);
+  }
+  return success();
+}
+ERROR awkward_indexedarray32_getitem_carry_64(int32_t* toindex, const int32_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
+  return awkward_indexedarray_getitem_carry<int32_t, int64_t>(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry);
+}
+ERROR awkward_indexedarrayU32_getitem_carry_64(uint32_t* toindex, const uint32_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
+  return awkward_indexedarray_getitem_carry<uint32_t, int64_t>(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry);
+}
+ERROR awkward_indexedarray64_getitem_carry_64(int64_t* toindex, const int64_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
+  return awkward_indexedarray_getitem_carry<int64_t, int64_t>(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry);
+}

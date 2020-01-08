@@ -44,7 +44,7 @@ namespace awkward {
   }
 
   void None::tojson_part(ToJson& builder) const {
-    throw std::runtime_error("undefined operation: None::tojson_part");
+    builder.null();
   }
 
   int64_t None::length() const {
