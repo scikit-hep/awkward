@@ -5,6 +5,7 @@
 #include "awkward/Identities.h"
 #include "awkward/Index.h"
 #include "awkward/array/EmptyArray.h"
+#include "awkward/array/IndexedArray.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/fillable/OptionFillable.h"
 #include "awkward/fillable/BoolFillable.h"
@@ -45,7 +46,13 @@ namespace awkward {
       return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
     }
     else {
-      throw std::runtime_error("UnknownFillable::snapshot needs OptionArray");
+      // This is the only snapshot that is O(N), rather than O(1), but it is unusual (array of only None).
+      Index64 index(nullcount_);
+      int64_t* rawptr = index.ptr().get();
+      for (int64_t i = 0;  i < nullcount_;  i++) {
+        rawptr[i] = -1;
+      }
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, std::make_shared<EmptyArray>(Identities::none(), util::Parameters()));
     }
   }
 
