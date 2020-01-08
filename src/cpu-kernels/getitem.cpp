@@ -575,26 +575,54 @@ ERROR awkward_indexedarray64_numnull(int64_t* numnull, const int64_t* fromindex,
 }
 
 template <typename C, typename T>
-ERROR awkward_indexedarray_getitem_nextcarry_outindex(T* tocarry, C* toindex, const C* fromindex, int64_t indexoffset, int64_t lenindex) {
+ERROR awkward_indexedarray_getitem_nextcarry_outindex(T* tocarry, C* toindex, const C* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
   int64_t k = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
     C j = fromindex[indexoffset + i];
-    if (j < 0) {
+    if (j >= lencontent) {
+      return failure("IndexedOptionArray index out of range", i, j);
+    }
+    else if (j < 0) {
       toindex[i] = -1;
     }
     else {
       tocarry[k] = j;
-      toindex[i] = k;
+      toindex[i] = (C)k;
       k++;
     }
   }
   return success();
 }
-ERROR awkward_indexedarray32_getitem_nextcarry_outindex_64(int64_t* tocarry, int32_t* toindex, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex) {
-  return awkward_indexedarray_getitem_nextcarry_outindex<int32_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex);
+ERROR awkward_indexedarray32_getitem_nextcarry_outindex_64(int64_t* tocarry, int32_t* toindex, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  return awkward_indexedarray_getitem_nextcarry_outindex<int32_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
 }
-ERROR awkward_indexedarray64_getitem_nextcarry_outindex_64(int64_t* tocarry, int64_t* toindex, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex) {
-  return awkward_indexedarray_getitem_nextcarry_outindex<int64_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex);
+ERROR awkward_indexedarray64_getitem_nextcarry_outindex_64(int64_t* tocarry, int64_t* toindex, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  return awkward_indexedarray_getitem_nextcarry_outindex<int64_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
+}
+
+template <typename C, typename T>
+ERROR awkward_indexedarray_getitem_nextcarry(T* tocarry, const C* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < lenindex;  i++) {
+    C j = fromindex[indexoffset + i];
+    if (j < 0  ||  j >= lencontent) {
+      return failure("IndexedArray index out of range", i, j);
+    }
+    else {
+      tocarry[k] = j;
+      k++;
+    }
+  }
+  return success();
+}
+ERROR awkward_indexedarray32_getitem_nextcarry_64(int64_t* tocarry, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  return awkward_indexedarray_getitem_nextcarry<int32_t, int64_t>(tocarry, fromindex, indexoffset, lenindex, lencontent);
+}
+ERROR awkward_indexedarrayU32_getitem_nextcarry_64(int64_t* tocarry, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  return awkward_indexedarray_getitem_nextcarry<uint32_t, int64_t>(tocarry, fromindex, indexoffset, lenindex, lencontent);
+}
+ERROR awkward_indexedarray64_getitem_nextcarry_64(int64_t* tocarry, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  return awkward_indexedarray_getitem_nextcarry<int64_t, int64_t>(tocarry, fromindex, indexoffset, lenindex, lencontent);
 }
 
 template <typename C, typename T>

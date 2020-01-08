@@ -226,7 +226,8 @@ namespace awkward {
           outindex.ptr().get(),
           index_.ptr().get(),
           index_.offset(),
-          index_.length());
+          index_.length(),
+          content_.get()->length());
         util::handle_error(err2, classname(), identities_.get());
 
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
@@ -234,7 +235,16 @@ namespace awkward {
         return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, outindex, out);
       }
       else {
-        std::shared_ptr<Content> next = content_.get()->carry(index_.to64());
+        Index64 nextcarry(length());
+        struct Error err = util::awkward_indexedarray_getitem_nextcarry_64<T>(
+          nextcarry.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          content_.get()->length());
+        util::handle_error(err, classname(), identities_.get());
+
+        std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
         return next.get()->getitem_next(head, tail, advanced);
       }
     }
