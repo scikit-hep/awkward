@@ -85,9 +85,11 @@ def test_others():
     assert awkward1.tolist(indexedarray[3:, ::-1]) == [[1.0, 0.1], [3.0, 0.3]]
     assert awkward1.tolist(indexedarray[3:, [1, 1, 0]]) == [[1.0, 1.0, 0.1], [3.0, 3.0, 0.3]]
 
-# def test_missing():
-#     content = awkward1.layout.NumpyArray(numpy.array([[0.0, 0.0], [0.1, 1.0], [0.2, 2.0], [0.3, 3.0], [0.4, 4.0], [0.5, 5.0]]))
-#     index = awkward1.layout.Index64(numpy.array([4, 0, 3, -1, 3], dtype=numpy.int64))
-#     indexedarray = awkward1.layout.IndexedOptionArray64(index, content)
-#     print(indexedarray[3:, 0])
-#     raise Exception
+def test_missing():
+    content = awkward1.layout.NumpyArray(numpy.array([[0.0, 0.0], [0.1, 1.0], [0.2, 2.0], [0.3, 3.0], [0.4, 4.0], [0.5, 5.0]]))
+    index = awkward1.layout.Index64(numpy.array([4, 0, 3, -1, 3], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedOptionArray64(index, content)
+    assert awkward1.tolist(indexedarray[3:, 0]) == [None, 0.3]
+    assert awkward1.tolist(indexedarray[3:, 1]) == [None, 3.0]
+    assert awkward1.tolist(indexedarray[3:, ::-1]) == [None, [3.0, 0.3]]
+    assert awkward1.tolist(indexedarray[3:, [1, 1, 0]]) == [None, [3.0, 3.0, 0.3]]

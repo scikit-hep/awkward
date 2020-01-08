@@ -212,17 +212,26 @@ namespace awkward {
     else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())) {
       if (ISOPTION) {
         int64_t numnull;
-        struct Error err = util::awkward_indexedarray_numnull<T>(
+        struct Error err1 = util::awkward_indexedarray_numnull<T>(
           &numnull,
           index_.ptr().get(),
           index_.offset(),
           index_.length());
-        util::handle_error(err, classname(), identities_.get());
+        util::handle_error(err1, classname(), identities_.get());
 
-        std::cout << "numnull " << numnull;
+        Index64 nextcarry(length() - numnull);
+        IndexOf<T> outindex(length());
+        struct Error err2 = util::awkward_indexedarray_getitem_nextcarry_outindex_64<T>(
+          nextcarry.ptr().get(),
+          outindex.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length());
+        util::handle_error(err2, classname(), identities_.get());
 
-
-        throw std::runtime_error("FIXME");
+        std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+        std::shared_ptr<Content> out = next.get()->getitem_next(head, tail, advanced);
+        return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, outindex, out);
       }
       else {
         std::shared_ptr<Content> next = content_.get()->carry(index_.to64());

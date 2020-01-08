@@ -300,6 +300,15 @@ namespace awkward {
     }
 
     template <>
+    Error awkward_indexedarray_getitem_nextcarry_outindex_64<int32_t>(int64_t* tocarry, int32_t* toindex, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex) {
+      return awkward_indexedarray32_getitem_nextcarry_outindex_64(tocarry, toindex, fromindex, indexoffset, lenindex);
+    }
+    template <>
+    Error awkward_indexedarray_getitem_nextcarry_outindex_64<int64_t>(int64_t* tocarry, int64_t* toindex, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex) {
+      return awkward_indexedarray64_getitem_nextcarry_outindex_64(tocarry, toindex, fromindex, indexoffset, lenindex);
+    }
+
+    template <>
     Error awkward_indexedarray_getitem_carry_64<int32_t>(int32_t* toindex, const int32_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
       return awkward_indexedarray32_getitem_carry_64(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry);
     }
