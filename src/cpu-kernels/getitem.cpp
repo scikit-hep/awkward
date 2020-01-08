@@ -557,6 +557,23 @@ ERROR awkward_regulararray_getitem_carry_64(int64_t* tocarry, const int64_t* fro
   return awkward_regulararray_getitem_carry<int64_t>(tocarry, fromcarry, lencarry, size);
 }
 
+template <typename C>
+ERROR awkward_indexedarray_numnull(int64_t* numnull, const C* fromindex, int64_t indexoffset, int64_t lenindex) {
+  *numnull = 0;
+  for (int64_t i = 0;  i < lenindex;  i++) {
+    if (fromindex[indexoffset + i] < 0) {
+      *numnull = *numnull + 1;
+    }
+  }
+  return success();
+}
+ERROR awkward_indexedarray32_numnull(int64_t* numnull, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex) {
+  return awkward_indexedarray_numnull<int32_t>(numnull, fromindex, indexoffset, lenindex);
+}
+ERROR awkward_indexedarray64_numnull(int64_t* numnull, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex) {
+  return awkward_indexedarray_numnull<int64_t>(numnull, fromindex, indexoffset, lenindex);
+}
+
 template <typename C, typename T>
 ERROR awkward_indexedarray_getitem_carry(C* toindex, const C* fromindex, const T* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
   for (int64_t i = 0;  i < lencarry;  i++) {

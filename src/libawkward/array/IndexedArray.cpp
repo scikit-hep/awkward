@@ -211,13 +211,23 @@ namespace awkward {
     }
     else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())) {
       if (ISOPTION) {
+        int64_t numnull;
+        struct Error err = util::awkward_indexedarray_numnull<T>(
+          &numnull,
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length());
+        util::handle_error(err, classname(), identities_.get());
+
+        std::cout << "numnull " << numnull;
+
+
         throw std::runtime_error("FIXME");
       }
       else {
         std::shared_ptr<Content> next = content_.get()->carry(index_.to64());
         return next.get()->getitem_next(head, tail, advanced);
       }
-      // return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, content_.get()->getitem_next(head, tail, advanced));
     }
     else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
       return Content::getitem_next(*ellipsis, tail, advanced);
