@@ -6,6 +6,8 @@
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ListType.h"
 #include "awkward/type/RegularType.h"
+#include "awkward/array/IndexedArray.h"
+#include "awkward/Index.h"
 
 #include "awkward/type/OptionType.h"
 
@@ -74,7 +76,8 @@ namespace awkward {
 
   const std::shared_ptr<Content> OptionType::empty() const {
     std::shared_ptr<Content> content = type_.get()->empty();
-    throw std::runtime_error("OptionType::empty() needs OptionArray");
+    Index64 index(0);
+    return std::make_shared<IndexedOptionArray64>(Identities::none(), parameters_, index, content);
   }
 
   const std::shared_ptr<Type> OptionType::type() const {

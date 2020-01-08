@@ -45,6 +45,14 @@ def test_basic():
     ind[3] = 1
     assert awkward1.tolist(array) == [2.2, 2.2, 0.0, 1.1, 4.4]
 
+def test_type():
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4]))
+    index = awkward1.layout.Index32(numpy.array([2, 2, 0, 3, 4], dtype=numpy.int32))
+    array = awkward1.layout.IndexedArray32(index, content)
+    assert awkward1.typeof(array) == awkward1.layout.PrimitiveType("float64")
+    array = awkward1.layout.IndexedOptionArray32(index, content)
+    assert awkward1.typeof(array) == awkward1.layout.OptionType(awkward1.layout.PrimitiveType("float64"))
+
 def test_null():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4]))
     index = awkward1.layout.Index64(numpy.array([2, 2, 0, -1, 4], dtype=numpy.int64))
@@ -93,3 +101,63 @@ def test_missing():
     assert awkward1.tolist(indexedarray[3:, 1]) == [None, 3.0]
     assert awkward1.tolist(indexedarray[3:, ::-1]) == [None, [3.0, 0.3]]
     assert awkward1.tolist(indexedarray[3:, [1, 1, 0]]) == [None, [3.0, 3.0, 0.3]]
+
+def test_highlevel():
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4]))
+    index = awkward1.layout.Index64(numpy.array([2, 2, 0, -1, 4], dtype=numpy.int64))
+    array = awkward1.Array(awkward1.layout.IndexedOptionArray64(index, content))
+    assert awkward1.tolist(array) == [2.2, 2.2, 0.0, None, 4.4]
+    assert str(array) == "[2.2, 2.2, 0, None, 4.4]"
+    assert repr(array) == "<Array [2.2, 2.2, 0, None, 4.4] type='5 * ?float64'>"
+
+def test_fillable():
+    assert awkward1.tolist(awkward1.Array([1.1, 2.2, 3.3, None, 4.4])) == [1.1, 2.2, 3.3, None, 4.4]
+    assert awkward1.tolist(awkward1.Array([None, 2.2, 3.3, None, 4.4])) == [None, 2.2, 3.3, None, 4.4]
+
+    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], [], [None, 4.4]])) == [[1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], [], None, [None, 4.4]])) == [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], None, [], [None, 4.4]])) == [[1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], None, [], [None, 4.4]])) != [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+
+    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], [], [None, 4.4]])) == [[None, 1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]])) == [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]])) == [[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]])) != [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+
+    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], [], [None, 4.4]])) == [None, [1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], [], None, [None, 4.4]])) == [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], None, [], [None, 4.4]])) == [None, [1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], None, [], [None, 4.4]])) != [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+
+    assert awkward1.tolist(awkward1.Array([None, None, None, None, None])) == [None, None, None, None, None]
+    assert awkward1.tolist(awkward1.Array([[None, None, None], [], [None, None]])) == [[None, None, None], [], [None, None]]
+
+def test_json():
+    assert awkward1.tolist(awkward1.Array("[1.1, 2.2, 3.3, null, 4.4]")) == [1.1, 2.2, 3.3, None, 4.4]
+    assert awkward1.tolist(awkward1.Array("[null, 2.2, 3.3, null, 4.4]")) == [None, 2.2, 3.3, None, 4.4]
+
+    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], [], [null, 4.4]]")) == [[1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], [], null, [null, 4.4]]")) == [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], null, [], [null, 4.4]]")) == [[1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], null, [], [null, 4.4]]")) != [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+
+    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], [], [null, 4.4]]")) == [[None, 1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], [], null, [null, 4.4]]")) == [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], null, [], [null, 4.4]]")) == [[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], null, [], [null, 4.4]]")) != [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+
+    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], [], [null, 4.4]]")) == [None, [1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], [], null, [null, 4.4]]")) == [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], null, [], [null, 4.4]]")) == [None, [1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], null, [], [null, 4.4]]")) != [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+
+    assert awkward1.tolist(awkward1.Array("[null, null, null, null, null]")) == [None, None, None, None, None]
+    assert awkward1.tolist(awkward1.Array("[[null, null, null], [], [null, null]]")) == [[None, None, None], [], [None, None]]
+
+def test_emptyarray():
+    array = awkward1.layout.EmptyArray()
+    assert isinstance(array.astype(awkward1.layout.OptionType(awkward1.layout.PrimitiveType("float32"))), awkward1.layout.IndexedOptionArray64)
+
+    offsets = awkward1.layout.Index64(numpy.array([0], dtype=numpy.int64))
+    array = awkward1.layout.ListOffsetArray64(offsets, awkward1.layout.EmptyArray())
+    assert isinstance(array.astype(awkward1.layout.ListType(awkward1.layout.OptionType(awkward1.layout.PrimitiveType("float32")))).content, awkward1.layout.IndexedOptionArray64)

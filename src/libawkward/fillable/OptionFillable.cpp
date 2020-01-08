@@ -4,6 +4,7 @@
 
 #include "awkward/Identities.h"
 #include "awkward/Index.h"
+#include "awkward/array/IndexedArray.h"
 #include "awkward/type/OptionType.h"
 
 #include "awkward/fillable/OptionFillable.h"
@@ -42,7 +43,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> OptionFillable::snapshot() const {
-    throw std::runtime_error("OptionFillable::snapshot needs OptionArray");
+    Index64 index(offsets_.ptr(), 0, offsets_.length());
+    return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content_.get()->snapshot());
   }
 
   bool OptionFillable::active() const {
