@@ -8,6 +8,7 @@
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 
 #include "awkward/util.h"
 #include "awkward/Identities.h"
@@ -290,5 +291,17 @@ namespace awkward {
       return awkward_listarray64_getitem_carry_64(tostarts, tostops, fromstarts, fromstops, fromcarry, startsoffset, stopsoffset, lenstarts, lencarry);
     }
 
+    template <>
+    Error awkward_listarray_flatten_64<int32_t>(int32_t* tostarts, int32_t* tostops, const int32_t* fromstarts, const int32_t* fromstops, const int64_t lenstarts, int64_t* toarray, int64_t* tolen) {
+      return awkward_listarray32_flatten_64(tostarts, tostops, fromstarts, fromstops, lenstarts, toarray, tolen);
+    }
+    template <>
+    Error awkward_listarray_flatten_64<uint32_t>(uint32_t* tostarts, uint32_t* tostops, const uint32_t* fromstarts, const uint32_t* fromstops, const int64_t lenstarts, int64_t* toarray, int64_t* tolen) {
+      return awkward_listarrayU32_flatten_64(tostarts, tostops, fromstarts, fromstops, lenstarts, toarray, tolen);
+    }
+    template <>
+    Error awkward_listarray_flatten_64<int64_t>(int64_t* tostarts, int64_t* tostops, const int64_t* fromstarts, const int64_t* fromstops, const int64_t lenstarts, int64_t* toarray, int64_t* tolen) {
+      return awkward_listarray64_flatten_64(tostarts, tostops, fromstarts, fromstops, lenstarts, toarray, tolen);
+    }
   }
 }

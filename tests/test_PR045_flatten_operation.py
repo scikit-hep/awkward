@@ -53,7 +53,7 @@ def test_flatten_list_array():
     assert awkward1.tolist(array) == [[4, 5, 6], [], [0], [0, 1, 2, 3], [1, 2, 3, 4], [7, 8, 9]]
     assert flatten(awkward1.tolist(array)) == [4, 5, 6, 0, 0, 1, 2, 3, 1, 2, 3, 4, 7, 8, 9]
     # Flatten should handle this.
-    # assert awkward1.tolist(array.flatten()) == [4, 5, 6, 0, 0, 1, 2, 3, 1, 2, 3, 4, 7, 8, 9]
+    #assert awkward1.tolist(array.flatten()) == [4, 5, 6, 0, 0, 1, 2, 3, 1, 2, 3, 4, 7, 8, 9]
 
 def test_flatten_list_offset_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -67,18 +67,17 @@ def test_flatten_list_offset_array():
     assert awkward1.tolist(array2.flatten()) == [3.3, 4.4, 5.5]
 
 def test_flatten_numpy_array():
-    dint64 = awkward1.layout.PrimitiveType("int64", {"__class__": "D", "__str__": "D[int64]"})
-    array = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5)).astype(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 3))
+    array = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
     print(awkward1.tolist(array))
 
     assert awkward1.tolist(array) == [[[ 0,  1,  2,  3,  4], [ 5,  6,  7,  8,  9], [10, 11, 12, 13, 14]],
                                       [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]
-    ## assert awkward1.tolist(array.flatten(0)) == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
+    assert awkward1.tolist(array.flatten()) == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
 
-    array2 = awkward1.layout.NumpyArray(numpy.arange(1*6*5, dtype=numpy.int64).reshape(1, 6, 5)).astype(awkward1.layout.RegularType(awkward1.layout.RegularType(dint64, 5), 6))
+    array2 = awkward1.layout.NumpyArray(numpy.arange(1*6*5, dtype=numpy.int64).reshape(1, 6, 5))
     print(awkward1.tolist(array2))
 
-    ## assert awkward1.tolist(array.flatten(0)) == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
+    assert awkward1.tolist(array.flatten()) == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
 
 ## def test_flatten_raw_array():
     ## RawArrayOf<T> is usable only in C++

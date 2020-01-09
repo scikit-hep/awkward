@@ -5,6 +5,7 @@
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/ListType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -355,9 +356,38 @@ namespace awkward {
   const std::shared_ptr<Content> ListArrayOf<T>::flatten(int64_t axis) const {
     if(axis <= -1)
       throw std::invalid_argument("axis must be a non-negative integer (can't count from the end)");
-    int64_t start = starts_.getitem_at_nowrap(0);
-    int64_t stop = stops_.getitem_at_nowrap(stops_.length() - 1);
-    return content_.get()->getitem_range_nowrap(start, stop);
+    int64_t lenstarts = starts_.length();
+    if (stops_.length() < lenstarts) {
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+    IndexOf<T> nextstarts(lenstarts);
+    IndexOf<T> nextstops(lenstarts);
+
+    // FIXME: calculate and make it big enough
+    Index64 toarray(content_.get()->length()*lenstarts);
+
+    int64_t lenarray(0);
+    struct Error err = util::awkward_listarray_flatten_64<T>(
+      nextstarts.ptr().get(),
+      nextstops.ptr().get(),
+      starts_.ptr().get(),
+      stops_.ptr().get(),
+      lenstarts,
+      toarray.ptr().get(),
+      &lenarray);
+    util::handle_error(err, classname(), identities_.get());
+
+    int64_t astart = starts_.getitem_at_nowrap(0);
+    std::cout << "start[0] " << astart << "\n";
+    // FIXME: shink it here
+    Index64 indxarray(toarray.ptr(), 0, lenarray);
+    std::cout << "lencarry " << lenarray << ": (length " << indxarray.length() << ") " << indxarray.tostring() << "\n";
+
+    int64_t start = indxarray.getitem_at_nowrap(0) + astart;
+    int64_t stop = indxarray.getitem_at_nowrap(indxarray.length() - 1)  + astart;
+    std::cout << "start " << start << ", stop " << stop << "\n";
+    // stop is non-inclusive
+    return content_.get()->getitem_range_nowrap(start, stop + 1);
   }
 
   template <typename T>

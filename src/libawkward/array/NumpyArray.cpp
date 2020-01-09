@@ -573,25 +573,28 @@ namespace awkward {
     throw std::invalid_argument("array contains no Records");
   }
 
-  const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
-    std::cout << "My length is " << length() << "\n";
-    std::cout << "My dimentions are " << ndim() << "\n";
-    std::cout << "My num fields are " << numfields() << "\n";
-    std::cout << "My format is " << format() << "\n";
-    std::cout << "My shape size is " << shape().size() << "\n";
-    std::cout << "My strides size is " << strides().size() << "\n";
-    std::cout << "My item size is " << int64_t(itemsize()) << "\n";
-    for(auto& ishape : shape())
-      std::cout << int64_t(ishape) << "\n";
-    for(auto& istride : strides())
-      std::cout << int64_t(istride) << "\n";
-
-    for(int64_t i = 0; i < length(); ++i) {
-      std::shared_ptr<Content> content = getitem_at_nowrap(itemsize());
-      std::cout << " " << i << ": " << content.get()->length() << "\n";
+  const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
+    if (shape.size() == 1) {
+      return std::vector<ssize_t>();
     }
+    else {
+      std::vector<ssize_t> out = { shape[0]*shape[1] };
+      out.insert(out.end(), shape.begin() + 2, shape.end());
+      return out;
+    }
+  }
 
-    throw std::invalid_argument("array contains no Records");
+  const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t> strides) {
+    if (strides.size() == 1) {
+      return std::vector<ssize_t>();
+    }
+    else {
+      return std::vector<ssize_t>(strides.begin() + 1, strides.end());
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
+    return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
@@ -612,26 +615,6 @@ namespace awkward {
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("NumpyArray has its own getitem_next system");
-  }
-
-  const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
-    if (shape.size() == 1) {
-      return std::vector<ssize_t>();
-    }
-    else {
-      std::vector<ssize_t> out = { shape[0]*shape[1] };
-      out.insert(out.end(), shape.begin() + 2, shape.end());
-      return out;
-    }
-  }
-
-  const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t> strides) {
-    if (strides.size() == 1) {
-      return std::vector<ssize_t>();
-    }
-    else {
-      return std::vector<ssize_t>(strides.begin() + 1, strides.end());
-    }
   }
 
   bool NumpyArray::iscontiguous() const {
