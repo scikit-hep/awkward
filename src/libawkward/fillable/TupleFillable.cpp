@@ -243,7 +243,6 @@ namespace awkward {
         if (contents_[i].get()->length() != length_ + 1) {
           throw std::invalid_argument(std::string("tuple index ") + std::to_string(i) + std::string(" filled more than once"));
         }
-        i++;
       }
       length_++;
       begun_ = false;
