@@ -389,7 +389,6 @@ namespace awkward {
         if (contents_[i].get()->length() != length_ + 1) {
           throw std::invalid_argument(std::string("record field ") + util::quote(keys_[i], true) + std::string(" filled more than once"));
         }
-        i++;
       }
       length_++;
       begun_ = false;
