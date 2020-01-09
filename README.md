@@ -152,7 +152,9 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [ ] `ByteMaskedArray`: for nullable data with a byte mask (for NumPy).
       * [ ] `BitMaskedArray`: for nullable data with a bit mask (for Arrow).
       * [ ] `UnmaskedArray`: for optional type without actually having a mask.
-      * [ ] `IndexedArray`: same as the old version `IndexedMaskedArray`, has option type.
+      * [X] `IndexedArray` and `IndexedOptionArray`: the old `IndexedArray` and `IndexedMaskedArray`; the latter has option type.
+         * [ ] Implement `Identities` for `IndexedArray`.
+         * [ ] Implement Numba lowering for `IndexedArray`.
       * [ ] `UnionArray`: same as the old version; `SparseUnionArray`: the additional case found in Apache Arrow.
       * [ ] `RedirectArray`: an explicit weak-reference to another part of the structure (no hard-linked cycles). Often used with an `IndexedArray`.
       * [ ] `SlicedArray`: lazy-slicing (from old `Table`) that can be applied to any type.
