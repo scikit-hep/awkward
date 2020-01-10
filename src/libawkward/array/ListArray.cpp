@@ -361,26 +361,23 @@ namespace awkward {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
     }
 
-    // FIXME: calculate new ranges
-    IndexOf<T> nextstarts(lenstarts);
-    IndexOf<T> nextstops(lenstarts);
-
-    // FIXME: pre-calculate length and make it big enough
-    Index64 toarray(content_.get()->length()*lenstarts);
-
     int64_t lenarray(0);
-    struct Error err = util::awkward_listarray_flatten_64<T>(
-      nextstarts.ptr().get(),
-      nextstops.ptr().get(),
+    struct Error err = util::awkward_listarray_flatten_length_64(
+      &lenarray,
       starts_.ptr().get(),
       stops_.ptr().get(),
-      lenstarts,
-      toarray.ptr().get(),
-      &lenarray);
+      lenstarts);
     util::handle_error(err, classname(), identities_.get());
 
-    // FIXME: shrink it here
-    Index64 indxarray(toarray.ptr(), 0, lenarray);
+    Index64 indxarray(lenarray);
+
+    struct Error err1 = util::awkward_listarray_flatten_64<T>(
+      indxarray.ptr().get(),
+      starts_.ptr().get(),
+      stops_.ptr().get(),
+      lenstarts);
+    util::handle_error(err1, classname(), identities_.get());
+
     return content_.get()->carry(indxarray);
   }
 
