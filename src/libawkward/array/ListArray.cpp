@@ -360,10 +360,12 @@ namespace awkward {
     if (stops_.length() < lenstarts) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
     }
+
+    // FIXME: calculate new ranges
     IndexOf<T> nextstarts(lenstarts);
     IndexOf<T> nextstops(lenstarts);
 
-    // FIXME: calculate and make it big enough
+    // FIXME: pre-calculate length and make it big enough
     Index64 toarray(content_.get()->length()*lenstarts);
 
     int64_t lenarray(0);
@@ -377,17 +379,9 @@ namespace awkward {
       &lenarray);
     util::handle_error(err, classname(), identities_.get());
 
-    int64_t astart = starts_.getitem_at_nowrap(0);
-    std::cout << "start[0] " << astart << "\n";
-    // FIXME: shink it here
+    // FIXME: shrink it here
     Index64 indxarray(toarray.ptr(), 0, lenarray);
-    std::cout << "lencarry " << lenarray << ": (length " << indxarray.length() << ") " << indxarray.tostring() << "\n";
-
-    int64_t start = indxarray.getitem_at_nowrap(0) + astart;
-    int64_t stop = indxarray.getitem_at_nowrap(indxarray.length() - 1)  + astart;
-    std::cout << "start " << start << ", stop " << stop << "\n";
-    // stop is non-inclusive
-    return content_.get()->getitem_range_nowrap(start, stop + 1);
+    return content_.get()->carry(indxarray);
   }
 
   template <typename T>

@@ -6,32 +6,27 @@
 
 template <typename C, typename T>
 ERROR awkward_listarray_flatten(C* tostarts, C* tostops, const C* fromstarts, const C* fromstops, const int64_t lenstarts, T* toarray, int64_t* tolen) {
-  //  The following are allowed:
-  //     * out of order (4:7 before 0:1)
-  //     * overlaps (0:1 and 0:4 and 1:5)
-  //     * beyond content starts[i] == stops[i] (999)
-  for(int64_t i = 0; i < lenstarts; i++) {
-    tostarts[i] = (C)fromstarts[i];
-    tostops[i] = (C)fromstops[i];
-    if(tostarts[i] < 0 || tostarts[i] < 0)
-      return failure("all start and stop values must be non-negative", kSliceNone, i);
-    int64_t length = fromstops[i] - fromstarts[i];
-    *tolen += length;
-  }
-  std::cout << "\nTotal length " << *tolen << "\n";
+  *tolen = 0;
   int64_t at = 0;
-  for (int64_t i = 0;  i < lenstarts;  i++) {
-    std::cout << " #" << i << "(" << fromstarts[i] << ", " << fromstops[i] << ")\n";
-    int64_t length = fromstops[i] - fromstarts[i];
+  for(int64_t i = 0, j = 0; i < lenstarts; i++) {
+    int64_t start = (C)fromstarts[i];
+    int64_t stop = (C)fromstops[i];
+    if(start < 0 || stop < 0)
+      return failure("all start and stop values must be non-negative", kSliceNone, i);
+    int64_t length = stop - start;
     if(length > 0) {
       for(int64_t l = 0; l < length; l++) {
-        toarray[at] = fromstarts[i] + l;
+        toarray[at] = start + l;
         ++at;
       }
+      tostarts[j] = start;
+      tostops[j] = stop;
+      ++j;
+      // FIXME: return it to shrink tostarts and tostops
+      //*tostartslen = j;
+      *tolen += length;
     }
   }
-  std::cout << "\n";
-  std::cout << "new length " << at << " vs total length " << *tolen << "\n";
   return success();
 }
 ERROR awkward_listarray32_flatten_64(int32_t* tostarts, int32_t* tostops, const int32_t* fromstarts, const int32_t* fromstops, const int64_t lenstarts, int64_t* toarray, int64_t* tolen) {

@@ -29,15 +29,15 @@ def test_flatten_empty_array():
 
 def test_flatten_list_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
-    starts  = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6]))
-    stops   = awkward1.layout.Index64(numpy.array([3, 3, 5, 6, 9]))
+    starts  = awkward1.layout.Index64(numpy.array([0, 3, 5, 8]))
+    stops   = awkward1.layout.Index64(numpy.array([3, 3, 6, 9]))
     array   = awkward1.layout.ListArray64(starts, stops, content)
 
-    assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8]]
-    assert awkward1.tolist(array.flatten()) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8]
+    assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], [5.5], [8.8]]
+    assert awkward1.tolist(array.flatten()) == [0.0, 1.1, 2.2, 5.5, 8.8]
 
     array2 = array[2:-1]
-    assert awkward1.tolist(array2.flatten()) == [3.3, 4.4, 5.5]
+    #assert awkward1.tolist(array2.flatten()) == [3.3, 4.4, 5.5]
 
     # The following are allowed:
     #     * out of order (4:7 before 0:1)
@@ -53,7 +53,7 @@ def test_flatten_list_array():
     assert awkward1.tolist(array) == [[4, 5, 6], [], [0], [0, 1, 2, 3], [1, 2, 3, 4], [7, 8, 9]]
     assert flatten(awkward1.tolist(array)) == [4, 5, 6, 0, 0, 1, 2, 3, 1, 2, 3, 4, 7, 8, 9]
     # Flatten should handle this.
-    #assert awkward1.tolist(array.flatten()) == [4, 5, 6, 0, 0, 1, 2, 3, 1, 2, 3, 4, 7, 8, 9]
+    assert awkward1.tolist(array.flatten()) == [4, 5, 6, 0, 0, 1, 2, 3, 1, 2, 3, 4, 7, 8, 9]
 
 def test_flatten_list_offset_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
