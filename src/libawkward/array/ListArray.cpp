@@ -375,7 +375,9 @@ namespace awkward {
       indxarray.ptr().get(),
       starts_.ptr().get(),
       stops_.ptr().get(),
-      lenstarts);
+      lenstarts,
+      starts_.offset(),
+      stops_.offset());
     util::handle_error(err1, classname(), identities_.get());
 
     return content_.get()->carry(indxarray);

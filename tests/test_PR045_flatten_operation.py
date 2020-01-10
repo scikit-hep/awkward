@@ -38,7 +38,7 @@ def test_flatten_list_array():
 
     array2 = array[2:-1]
     assert flatten(awkward1.tolist(array2)) == [5.5, 6.6, 7.7]
-    #assert awkward1.tolist(array2.flatten()) == [5.5, 6.6, 7.7]
+    assert awkward1.tolist(array2.flatten()) == [5.5, 6.6, 7.7]
 
     # The following are allowed:
     #     * out of order (4:7 before 0:1)
