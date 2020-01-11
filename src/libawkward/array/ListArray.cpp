@@ -366,7 +366,9 @@ namespace awkward {
       &lenarray,
       starts_.ptr().get(),
       stops_.ptr().get(),
-      lenstarts);
+      lenstarts,
+      starts_.offset(),
+      stops_.offset());
     util::handle_error(err, classname(), identities_.get());
 
     Index64 indxarray(lenarray);
