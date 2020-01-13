@@ -9,13 +9,13 @@ def wrap(content, namespace):
     import awkward1.layout
     if isinstance(content, awkward1.layout.Content):
         cls = namespace.get(content.type.parameters.get("__class__"))
-        if cls is None:
+        if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Array)):
             cls = awkward1.Array
         return cls(content, namespace=namespace)
 
     elif isinstance(content, awkward1.layout.Record):
         cls = namespace.get(content.type.parameters.get("__class__"))
-        if cls is None:
+        if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Record)):
             cls = awkward1.Record
         return cls(content, namespace=namespace)
 
@@ -53,14 +53,14 @@ def minimally_touching_string(limit_length, layout, namespace):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
             cls = namespace.get(x.type.parameters.get("__class__"))
-            if cls is not None:
+            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
                 y = cls(x, namespace=namespace)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
             cls = namespace.get(x.type.parameters.get("__class__"))
-            if cls is not None:
+            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
                 y = cls(x, namespace=namespace)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
@@ -95,14 +95,14 @@ def minimally_touching_string(limit_length, layout, namespace):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
             cls = namespace.get(x.type.parameters.get("__class__"))
-            if cls is not None:
+            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
                 y = cls(x, namespace=namespace)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
             cls = namespace.get(x.type.parameters.get("__class__"))
-            if cls is not None:
+            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
                 y = cls(x, namespace=namespace)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
