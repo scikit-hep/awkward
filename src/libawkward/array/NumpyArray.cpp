@@ -573,8 +573,33 @@ namespace awkward {
     throw std::invalid_argument("array contains no Records");
   }
 
+  const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
+    if (shape.size() == 1) {
+      return std::vector<ssize_t>();
+    }
+    else {
+      std::vector<ssize_t> out = { shape[0]*shape[1] };
+      out.insert(out.end(), shape.begin() + 2, shape.end());
+      return out;
+    }
+  }
+
+  const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t> strides) {
+    if (strides.size() == 1) {
+      return std::vector<ssize_t>();
+    }
+    else {
+      return std::vector<ssize_t>(strides.begin() + 1, strides.end());
+    }
+  }
+
   const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: not implemented");
+    if (iscontiguous()) {
+      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    }
+    else {
+      return contiguous().flatten(axis);
+    }
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
@@ -595,26 +620,6 @@ namespace awkward {
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("NumpyArray has its own getitem_next system");
-  }
-
-  const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
-    if (shape.size() == 1) {
-      return std::vector<ssize_t>();
-    }
-    else {
-      std::vector<ssize_t> out = { shape[0]*shape[1] };
-      out.insert(out.end(), shape.begin() + 2, shape.end());
-      return out;
-    }
-  }
-
-  const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t> strides) {
-    if (strides.size() == 1) {
-      return std::vector<ssize_t>();
-    }
-    else {
-      return std::vector<ssize_t>(strides.begin() + 1, strides.end());
-    }
   }
 
   bool NumpyArray::iscontiguous() const {

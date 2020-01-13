@@ -5,6 +5,7 @@
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/ListType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -353,7 +354,35 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: not implemented");
+    if(axis <= -1)
+      throw std::invalid_argument("axis must be a non-negative integer (can't count from the end)");
+    int64_t lenstarts = starts_.length();
+    if (stops_.length() < lenstarts) {
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+
+    int64_t lenarray(0);
+    struct Error err = util::awkward_listarray_flatten_length_64(
+      &lenarray,
+      starts_.ptr().get(),
+      stops_.ptr().get(),
+      lenstarts,
+      starts_.offset(),
+      stops_.offset());
+    util::handle_error(err, classname(), identities_.get());
+
+    Index64 indxarray(lenarray);
+
+    struct Error err1 = util::awkward_listarray_flatten_64<T>(
+      indxarray.ptr().get(),
+      starts_.ptr().get(),
+      stops_.ptr().get(),
+      lenstarts,
+      starts_.offset(),
+      stops_.offset());
+    util::handle_error(err1, classname(), identities_.get());
+
+    return content_.get()->carry(indxarray);
   }
 
   template <typename T>
