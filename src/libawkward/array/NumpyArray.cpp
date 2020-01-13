@@ -594,7 +594,12 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
-    return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    if (iscontiguous()) {
+      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    }
+    else {
+      return contiguous().flatten(axis);
+    }
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
