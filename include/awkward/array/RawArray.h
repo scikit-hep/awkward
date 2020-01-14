@@ -419,7 +419,12 @@ namespace awkward {
       }
       else if (std::is_same<T, int64_t>::value) {
         Index64 out(length());
-        std::memcpy(out.ptr().get(), ptr_.get(), length()*sizeof(int64_t));
+        struct Error err = awkward_index_to64_from64(
+          out.ptr().get(),
+          reinterpret_cast<int64_t*>(ptr_.get()),
+          length_,
+          offset_);
+        util::handle_error(err, classname(), identities_.get());
         return out;
       }
       else {

@@ -11,53 +11,26 @@ ERROR awkward_index_to_from(TO* toindex, const FROM* fromindex, int64_t length, 
   }
   return success();
 }
-ERROR awkward_index_to8_from32(int8_t* toindex, const int32_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<int8_t, int32_t>(toindex, fromindex, length, offset);
-}
-ERROR awkward_index_to8_fromU32(int8_t* toindex, const uint32_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<int8_t, uint32_t>(toindex, fromindex, length, offset);
-}
-ERROR awkward_index_to8_from64(int8_t* toindex, const int64_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<int8_t, int64_t>(toindex, fromindex, length, offset);
-}
-ERROR awkward_index_toU8_from32(uint8_t* toindex, const int32_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<uint8_t, int32_t>(toindex, fromindex, length, offset);
-}
-ERROR awkward_index_toU8_fromU32(uint8_t* toindex, const uint32_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<uint8_t, uint32_t>(toindex, fromindex, length, offset);
-}
-ERROR awkward_index_toU8_from64(uint8_t* toindex, const int64_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<uint8_t, int64_t>(toindex, fromindex, length, offset);
-}
-ERROR awkward_index_to32_from8(int32_t* toindex, const int8_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<int32_t, int8_t>(toindex, fromindex, length, offset);
-}
-ERROR awkward_index_to32_fromU8(int32_t* toindex, const uint8_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<int32_t, uint8_t>(toindex, fromindex, length, offset);
-}
-ERROR awkward_index_to32_from64(int32_t* toindex, const int64_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<int32_t, int64_t>(toindex, fromindex, length, offset);
-}
-ERROR awkward_index_toU32_from8(uint32_t* toindex, const int8_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<uint32_t, int8_t>(toindex, fromindex, length, offset);
-}
-ERROR awkward_index_toU32_fromU8(uint32_t* toindex, const uint8_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<uint32_t, uint8_t>(toindex, fromindex, length, offset);
-}
-ERROR awkward_index_toU32_from64(uint32_t* toindex, const int64_t* fromindex, int64_t length, int64_t offset) {
-  return awkward_index_to_from<uint32_t, int64_t>(toindex, fromindex, length, offset);
-}
 ERROR awkward_index_to64_from8(int64_t* toindex, const int8_t* fromindex, int64_t length, int64_t offset) {
   return awkward_index_to_from<int64_t, int8_t>(toindex, fromindex, length, offset);
 }
 ERROR awkward_index_to64_fromU8(int64_t* toindex, const uint8_t* fromindex, int64_t length, int64_t offset) {
   return awkward_index_to_from<int64_t, uint8_t>(toindex, fromindex, length, offset);
 }
+ERROR awkward_index_to64_from16(int64_t* toindex, const int16_t* fromindex, int64_t length, int64_t offset) {
+  return awkward_index_to_from<int64_t, int16_t>(toindex, fromindex, length, offset);
+}
+ERROR awkward_index_to64_fromU16(int64_t* toindex, const uint16_t* fromindex, int64_t length, int64_t offset) {
+  return awkward_index_to_from<int64_t, uint16_t>(toindex, fromindex, length, offset);
+}
 ERROR awkward_index_to64_from32(int64_t* toindex, const int32_t* fromindex, int64_t length, int64_t offset) {
   return awkward_index_to_from<int64_t, int32_t>(toindex, fromindex, length, offset);
 }
 ERROR awkward_index_to64_fromU32(int64_t* toindex, const uint32_t* fromindex, int64_t length, int64_t offset) {
   return awkward_index_to_from<int64_t, uint32_t>(toindex, fromindex, length, offset);
+}
+ERROR awkward_index_to64_from64(int64_t* toindex, const int64_t* fromindex, int64_t length, int64_t offset) {
+  return awkward_index_to_from<int64_t, int64_t>(toindex, fromindex, length, offset);
 }
 
 template <typename C>
