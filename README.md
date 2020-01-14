@@ -124,9 +124,7 @@ Most users will see Awkward 1.0 for the first time when uproot 4.0 is released.
 
 ### Checklist of features for the six-month sprint
 
-Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-hep/awkward-1.0/pulls?q=is%3Apr+is%3Aclosed) for more details.
-
-All remaining items have been assigned an [issue](https://github.com/scikit-hep/awkward-1.0/issues) and a [milestone](https://github.com/scikit-hep/awkward-1.0/milestones).
+Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-hep/awkward-1.0/pulls?q=is%3Apr+is%3Aclosed) for more details. All remaining items have been assigned an [issue](https://github.com/scikit-hep/awkward-1.0/issues) and a [milestone](https://github.com/scikit-hep/awkward-1.0/milestones).
 
    * [X] Cross-platform, cross-Python version build and deploy process. Regularly deploying [30 wheels](https://pypi.org/project/awkward1/#files) after closing each PR.
    * [X] Basic `NumpyArray`, `ListArray`, and `ListOffsetArray` with `__getitem__` for int/slice and `__iter__` in C++/pybind11 to establish structure and ensure proper reference counting.
@@ -140,8 +138,8 @@ All remaining items have been assigned an [issue](https://github.com/scikit-hep/
       * [X] Implement appendable records.
       * [X] Test all (tested in mock [studies/fillable.py](tree/master/studies/fillable.py)).
    * [X] JSON → Awkward via header-only [RapidJSON](https://rapidjson.org) and `awkward.fromiter`.
-   * [ ] Explicit broadcasting functions for jagged and non-jagged arrays and scalars (issue #66).
-   * [ ] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old; issue #67).
+   * [ ] Explicit broadcasting functions for jagged and non-jagged arrays and scalars (issue [#66](https://github.com/scikit-hep/awkward-1.0/issues/66)).
+   * [ ] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old; issue [#67](https://github.com/scikit-hep/awkward-1.0/issues/67)).
    * [ ] Full suite of array types:
       * [X] `EmptyArray`: 1-dimensional array with length 0 and unknown type (result of `UnknownFillable`, compatible with all types of arrays).
       * [X] `RawArray`: flat, 1-dimensional array type for pure C++ (header-only).
@@ -151,44 +149,44 @@ All remaining items have been assigned an [issue](https://github.com/scikit-hep/
       * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
          * [X] Implement it in Numba as well.
-      * [ ] `BitMaskedArray` (issue #58): for nullable data with a bit mask (for Arrow).
-      * [ ] `UnmaskedArray` (issue #59): for optional type without actually having a mask.
+      * [ ] `BitMaskedArray` (issue [#58](https://github.com/scikit-hep/awkward-1.0/issues/58)): for nullable data with a bit mask (for Arrow).
+      * [ ] `UnmaskedArray` (issue [#59](https://github.com/scikit-hep/awkward-1.0/issues/59)): for optional type without actually having a mask.
       * [X] `IndexedArray` and `IndexedOptionArray`: the old `IndexedArray` and `IndexedMaskedArray`; the latter has option type.
-         * [ ] Implement `Identities` for `IndexedArray` (issue #52).
-         * [ ] Implement Numba lowering for `IndexedArray` (issue #53).
-      * [ ] `UnionArray` (issue #54): same as the old version.
-      * [ ] `SlicedArray` (issue #55): lazy-slicing (from old `Table`) that can be applied to any type.
-      * [ ] `ChunkedArray` (issue #56): same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required.
-      * [ ] `PyVirtualArray` (issue #57): same as old `VirtualArray`, but it only works in Python (passes _through_ C++).
+         * [ ] Implement `Identities` for `IndexedArray` (issue [#52](https://github.com/scikit-hep/awkward-1.0/issues/52)).
+         * [ ] Implement Numba lowering for `IndexedArray` (issue [#53](https://github.com/scikit-hep/awkward-1.0/issues/53)).
+      * [ ] `UnionArray` (issue [#54](https://github.com/scikit-hep/awkward-1.0/issues/54)): same as the old version.
+      * [ ] `SlicedArray` (issue [#55](https://github.com/scikit-hep/awkward-1.0/issues/55)): lazy-slicing (from old `Table`) that can be applied to any type.
+      * [ ] `ChunkedArray` (issue [#56](https://github.com/scikit-hep/awkward-1.0/issues/56)): same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required.
+      * [ ] `PyVirtualArray` (issue [#57](https://github.com/scikit-hep/awkward-1.0/issues/57)): same as old `VirtualArray`, but it only works in Python (passes _through_ C++).
    * [X] Describe high-level types using [datashape](https://datashape.readthedocs.io/en/latest/) and possibly also an in-house schema. (Emit datashape _strings_ from C++.)
-   * [ ] Translation to and from Apache Arrow and Parquet in C++ (issue #68).
+   * [ ] Translation to and from Apache Arrow and Parquet in C++ (issue [#68](https://github.com/scikit-hep/awkward-1.0/issues/68)).
    * [X] Layer 1 interface `Array`:
       * [X] Pass through to the layout classes in Python and Numba.
-      * [ ] Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before; issue #60).
-      * [ ] Pass through other Numpy functions using [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html) (this would be new; issue #61).
-      * [ ] `RecordArray` fields (not called "columns" anymore) through Layer 1 `__getattr__` (issue #62).
+      * [ ] Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before; issue [#60](https://github.com/scikit-hep/awkward-1.0/issues/60)).
+      * [ ] Pass through other Numpy functions using [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html) (this would be new; issue [#61](https://github.com/scikit-hep/awkward-1.0/issues/61)).
+      * [ ] `RecordArray` fields (not called "columns" anymore) through Layer 1 `__getattr__` (issue [#62](https://github.com/scikit-hep/awkward-1.0/issues/62)).
       * [X] Special Layer 1 `Record` type for `RecordArray` elements, supporting some methods and a visual representation based on `Identity` if available, all fields if `recordtype == "tuple"`, or the first field otherwise.
       * [X] Mechanism for adding user-defined `Methods` like `LorentzVector`, as before, but only on Layer 1.
          * [X] High-level classes for characters and strings.
-      * [ ] Inerhit from Pandas so that all Layer 1 arrays can be DataFrame columns (issue #63).
+      * [ ] Inerhit from Pandas so that all Layer 1 arrays can be DataFrame columns (issue [#63](https://github.com/scikit-hep/awkward-1.0/issues/63)).
    * [ ] Full suite of operations:
       * [X] `awkward.tolist`: same as before.
       * [X] `awkward.fromiter`: same as before.
       * [X] `awkward.typeof`: reports the high-level type (accepting some non-awkward objects).
-      * [ ] `awkward.tonumpy` (issue #65): to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
-      * [ ] `awkward.flatpandas` (issue #80): flattening jaggedness into `MultiIndex` rows and nested records into `MultiIndex` columns. This is distinct from the arrays' inheritance from Pandas, distinct from the natural ability to use any one of them as DataFrame columns.
-      * [ ] `awkward.flatten`: same as old with an `axis` parameter (issue #51).
-      * [ ] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporting an `axis` method (issue #69).
-      * [ ] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std` (addendum to issue #69).
-      * [ ] `awkward.argmin`, `awkward.argmax` (issue #70): return values and `None` instead of singleton and empty lists.
-      * [ ] `awkward.argsort`, and `awkward.sort` (issue #74): same as old.
-      * [ ] `awkward.where` (issue #75): like `numpy.where`; old doesn't have this yet, but we'll need it.
-      * [ ] `awkward.concatenate` (issue #76): same as old, but supporting `axis` at any depth.
-      * [ ] `awkward.zip` (issue #77): makes jagged tables; this is a naive version of `awkward.join` below.
-      * [ ] `awkward.pad` (issue #73): same as old, but without the `clip` option (use slicing instead).
-      * [ ] `awkward.fillna` (issue #72): same as old.
-      * [ ] `awkward.cross` (and `awkward.argcross`, issue #78): to make combinations by cross-joining multiple arrays; option to use `Identity` index.
-      * [ ] `awkward.choose` (and `awkward.argchoose`, issue #79): to make combinations by choosing a fixed number from a single array; option to use `Identity` index and an option to include same-object combinations.
+      * [ ] `awkward.tonumpy` (issue [#65](https://github.com/scikit-hep/awkward-1.0/issues/65)): to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
+      * [ ] `awkward.flatpandas` (issue [#80](https://github.com/scikit-hep/awkward-1.0/issues/80)): flattening jaggedness into `MultiIndex` rows and nested records into `MultiIndex` columns. This is distinct from the arrays' inheritance from Pandas, distinct from the natural ability to use any one of them as DataFrame columns.
+      * [ ] `awkward.flatten`: same as old with an `axis` parameter (issue [#51](https://github.com/scikit-hep/awkward-1.0/issues/51)).
+      * [ ] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporting an `axis` method (issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
+      * [ ] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std` (addendum to issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
+      * [ ] `awkward.argmin`, `awkward.argmax` (issue [#70](https://github.com/scikit-hep/awkward-1.0/issues/70)): return values and `None` instead of singleton and empty lists.
+      * [ ] `awkward.argsort`, and `awkward.sort` (issue [#74](https://github.com/scikit-hep/awkward-1.0/issues/74)): same as old.
+      * [ ] `awkward.where` (issue [#75](https://github.com/scikit-hep/awkward-1.0/issues/75)): like `numpy.where`; old doesn't have this yet, but we'll need it.
+      * [ ] `awkward.concatenate` (issue [#76](https://github.com/scikit-hep/awkward-1.0/issues/76)): same as old, but supporting `axis` at any depth.
+      * [ ] `awkward.zip` (issue [#77](https://github.com/scikit-hep/awkward-1.0/issues/77)): makes jagged tables; this is a naive version of `awkward.join` below.
+      * [ ] `awkward.pad` (issue [#73](https://github.com/scikit-hep/awkward-1.0/issues/73)): same as old, but without the `clip` option (use slicing instead).
+      * [ ] `awkward.fillna` (issue [#72](https://github.com/scikit-hep/awkward-1.0/issues/72)): same as old.
+      * [ ] `awkward.cross` (and `awkward.argcross`, issue [#78](https://github.com/scikit-hep/awkward-1.0/issues/78)): to make combinations by cross-joining multiple arrays; option to use `Identity` index.
+      * [ ] `awkward.choose` (and `awkward.argchoose`, issue [#79](https://github.com/scikit-hep/awkward-1.0/issues/79)): to make combinations by choosing a fixed number from a single array; option to use `Identity` index and an option to include same-object combinations.
 
 ### Soon after the six-month sprint
 
