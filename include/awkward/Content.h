@@ -47,6 +47,7 @@ namespace awkward {
     virtual const std::vector<std::string> keys() const = 0;
 
     // operations
+    virtual const std::shared_ptr<Content> count(int64_t axis) const = 0;
     virtual const std::shared_ptr<Content> flatten(int64_t axis) const = 0;
 
     const std::string tostring() const;

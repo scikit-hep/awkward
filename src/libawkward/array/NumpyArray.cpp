@@ -6,6 +6,7 @@
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
@@ -571,6 +572,31 @@ namespace awkward {
 
   const std::vector<std::string> NumpyArray::keys() const {
     throw std::invalid_argument("array contains no Records");
+  }
+
+  const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: NumpyArray::count(axis != 0)");
+    }
+    if (shape_.size() <= 1) {
+      // FIXME: the cut-off for countability depends on axis
+      throw std::invalid_argument(std::string("NumpyArray cannot be counted because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    }
+    int64_t len = length();
+    Index64 tocount(len);
+    struct Error err = awkward_regulararray_count(
+      tocount.ptr().get(),
+      (int64_t)shape_[1],
+      len);
+    util::handle_error(err, classname(), identities_.get());
+    std::vector<ssize_t> shape({ len });
+    std::vector<ssize_t> strides({ sizeof(int64_t) });
+#ifdef _MSC_VER
+    std::string format = "q";
+#else
+    std::string format = "l";
+#endif
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
   }
 
   const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {

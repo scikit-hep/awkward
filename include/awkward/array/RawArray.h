@@ -376,6 +376,10 @@ namespace awkward {
     }
 
     // operations
+    const std::shared_ptr<Content> count(int64_t axis) const override {
+      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
+    }
+
     const std::shared_ptr<Content> flatten(int64_t axis) const override {
       throw std::invalid_argument("RawArray cannot be flattened because it is one-dimentional");
     }

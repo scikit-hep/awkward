@@ -11,6 +11,7 @@
 #include "awkward/Slice.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/NumpyArray.h"
 
 #include "awkward/array/ListOffsetArray.h"
 
@@ -335,6 +336,53 @@ namespace awkward {
   template <typename T>
   const std::vector<std::string> ListOffsetArrayOf<T>::keys() const {
     return content_.get()->keys();
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::count(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: ListOffsetArray::count(axis != 0)");
+    }
+    IndexOf<T> starts = make_starts(offsets_);
+    IndexOf<T> stops = make_stops(offsets_);
+    int64_t lenstarts = starts.length();
+    IndexOf<T> tocount(starts.length());
+    struct Error err = util::awkward_listarray_count(
+      tocount.ptr().get(),
+      starts.ptr().get(),
+      stops.ptr().get(),
+      lenstarts,
+      starts.offset(),
+      stops.offset());
+    util::handle_error(err, classname(), identities_.get());
+    std::vector<ssize_t> shape({ lenstarts });
+    std::vector<ssize_t> strides({ sizeof(T) });
+    std::string format;
+#ifdef _MSC_VER
+    if (std::is_same<T, int32_t>::value) {
+      format = "l";
+    }
+    else if (std::is_same<T, uint32_t>::value) {
+      format = "L";
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      format = "q";
+    }
+#else
+    if (std::is_same<T, int32_t>::value) {
+      format = "i";
+    }
+    else if (std::is_same<T, uint32_t>::value) {
+      format = "I";
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      format = "l";
+    }
+#endif
+    else {
+      throw std::runtime_error("unrecognized ListArray specialization");
+    }
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(T), format);
   }
 
   template <typename T>

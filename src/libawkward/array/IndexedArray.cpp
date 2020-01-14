@@ -314,6 +314,14 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::count(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: IndexedArray::count(axis != 0)");
+    }
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, content_.get()->count(axis));
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::flatten(int64_t axis) const {
     if (axis != 0) {
       throw std::runtime_error("FIXME: IndexedArray::flatten(axis != 0)");
