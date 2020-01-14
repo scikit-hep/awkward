@@ -38,6 +38,32 @@ ERROR awkward_regulararray_count(int64_t* tocount, int64_t size, int64_t length)
 }
 
 template <typename C>
+ERROR awkward_indexedarray_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const C* fromindex, int64_t lenindex, int64_t indexoffset) {
+  for (int64_t i = 0;  i < lenindex;  i++) {
+    C j = fromindex[indexoffset + i];
+    if (j >= lencontent) {
+      return failure("IndexedArray index out of range", i, j);
+    }
+    else if (j < 0) {
+      tocount[i] = 0;
+    }
+    else {
+      tocount[i] = contentcount[j];
+    }
+  }
+  return success();
+}
+ERROR awkward_indexedarray32_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const int32_t* fromindex, int64_t lenindex, int64_t indexoffset) {
+  return awkward_indexedarray_count<int32_t>(tocount, contentcount, lencontent, fromindex, lenindex, indexoffset);
+}
+ERROR awkward_indexedarrayU32_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const uint32_t* fromindex, int64_t lenindex, int64_t indexoffset) {
+  return awkward_indexedarray_count<uint32_t>(tocount, contentcount, lencontent, fromindex, lenindex, indexoffset);
+}
+ERROR awkward_indexedarray64_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const int64_t* fromindex, int64_t lenindex, int64_t indexoffset) {
+  return awkward_indexedarray_count<int64_t>(tocount, contentcount, lencontent, fromindex, lenindex, indexoffset);
+}
+
+template <typename C>
 ERROR awkward_listarray_flatten_length(int64_t* tolen, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
   *tolen = 0;
   for (int64_t i = 0; i < lenstarts; i++) {

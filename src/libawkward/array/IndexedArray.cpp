@@ -315,7 +315,17 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const Index64 IndexedArrayOf<T, ISOPTION>::count64() const {
-    throw std::runtime_error("FIXME");
+    Index64 contentcount = content_.get()->count64();
+    Index64 tocount(index_.length());
+    struct Error err = util::awkward_indexedarray_count(
+      tocount.ptr().get(),
+      contentcount.ptr().get(),
+      contentcount.length(),
+      index_.ptr().get(),
+      index_.length(),
+      index_.offset());
+    util::handle_error(err, classname(), identities_.get());
+    return tocount;
   }
 
   template <typename T, bool ISOPTION>
