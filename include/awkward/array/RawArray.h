@@ -15,6 +15,7 @@
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/util.h"
 #include "awkward/Slice.h"
@@ -373,6 +374,57 @@ namespace awkward {
 
     const std::vector<std::string> keys() const override {
       throw std::invalid_argument("array contains no Records");
+    }
+
+    const Index64 toindex64() const override {
+      if (std::is_same<T, int8_t>::value) {
+        Index64 out(length());
+        struct Error err = awkward_index_to64_from8(
+          out.ptr().get(),
+          reinterpret_cast<int8_t*>(ptr_.get()),
+          length_,
+          offset_);
+        util::handle_error(err, classname(), identities_.get());
+        return out;
+      }
+      else if (std::is_same<T, uint8_t>::value) {
+        Index64 out(length());
+        struct Error err = awkward_index_to64_fromU8(
+          out.ptr().get(),
+          reinterpret_cast<uint8_t*>(ptr_.get()),
+          length_,
+          offset_);
+        util::handle_error(err, classname(), identities_.get());
+        return out;
+      }
+      else if (std::is_same<T, int32_t>::value) {
+        Index64 out(length());
+        struct Error err = awkward_index_to64_from32(
+          out.ptr().get(),
+          reinterpret_cast<int32_t*>(ptr_.get()),
+          length_,
+          offset_);
+        util::handle_error(err, classname(), identities_.get());
+        return out;
+      }
+      else if (std::is_same<T, uint32_t>::value) {
+        Index64 out(length());
+        struct Error err = awkward_index_to64_fromU32(
+          out.ptr().get(),
+          reinterpret_cast<uint32_t*>(ptr_.get()),
+          length_,
+          offset_);
+        util::handle_error(err, classname(), identities_.get());
+        return out;
+      }
+      else if (std::is_same<T, int64_t>::value) {
+        Index64 out(length());
+        std::memcpy(out.ptr().get(), ptr_.get(), length()*sizeof(int64_t));
+        return out;
+      }
+      else {
+        throw std::invalid_argument(std::string("cannot convert RawArrayOf<") + typeid(T).name() + std::string("> into Index64"));
+      }
     }
 
     // operations

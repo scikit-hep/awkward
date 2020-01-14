@@ -10,6 +10,7 @@
 #include "awkward/Slice.h"
 #include "awkward/io/json.h"
 #include "awkward/type/Type.h"
+#include "awkward/Index.h"
 
 namespace awkward {
   class Content {
@@ -45,6 +46,7 @@ namespace awkward {
     virtual const std::string key(int64_t fieldindex) const = 0;
     virtual bool haskey(const std::string& key) const = 0;
     virtual const std::vector<std::string> keys() const = 0;
+    virtual const Index64 toindex64() const = 0;
 
     // operations
     virtual const std::shared_ptr<Content> count(int64_t axis) const = 0;

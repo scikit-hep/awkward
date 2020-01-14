@@ -41,8 +41,8 @@ namespace awkward {
       , byteoffset_(byteoffset)
       , itemsize_(itemsize)
       , format_(format) {
-    if (shape_.size() != strides_.size()) {
-      throw std::runtime_error("len(shape) must be equal to len(strides)");
+    if (shape.size() != strides.size()) {
+      throw std::runtime_error(std::string("len(shape), which is ") + std::to_string(shape.size()) + std::string(", must be equal to len(strides), which is ") + std::to_string(strides.size()));
     }
   }
 
@@ -574,6 +574,10 @@ namespace awkward {
     throw std::invalid_argument("array contains no Records");
   }
 
+  const Index64 NumpyArray::toindex64() const {
+    throw std::runtime_error("FIXME");
+  }
+
   const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
     if (axis != 0) {
       throw std::runtime_error("FIXME: NumpyArray::count(axis != 0)");
@@ -590,7 +594,7 @@ namespace awkward {
       len);
     util::handle_error(err, classname(), identities_.get());
     std::vector<ssize_t> shape({ (ssize_t)len });
-    std::vector<ssize_t> strides({ sizeof(int64_t) });
+    std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
 #ifdef _MSC_VER
     std::string format = "q";
 #else

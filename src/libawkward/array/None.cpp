@@ -113,6 +113,10 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::keys");
   }
 
+  const Index64 None::toindex64() const {
+    throw std::runtime_error("undefined operation: None::toindex64");
+  }
+
   const std::shared_ptr<Content> None::count(int64_t axis) const {
     throw std::runtime_error("undefined operation: None::count");
   }

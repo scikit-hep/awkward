@@ -339,6 +339,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const Index64 ListOffsetArrayOf<T>::toindex64() const {
+    throw std::runtime_error("FIXME");
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::count(int64_t axis) const {
     if (axis != 0) {
       throw std::runtime_error("FIXME: ListOffsetArray::count(axis != 0)");
@@ -356,7 +361,7 @@ namespace awkward {
       stops.offset());
     util::handle_error(err, classname(), identities_.get());
     std::vector<ssize_t> shape({ (ssize_t)lenstarts });
-    std::vector<ssize_t> strides({ sizeof(T) });
+    std::vector<ssize_t> strides({ (ssize_t)sizeof(T) });
     std::string format;
 #ifdef _MSC_VER
     if (std::is_same<T, int32_t>::value) {

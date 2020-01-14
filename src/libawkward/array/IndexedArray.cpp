@@ -314,6 +314,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const Index64 IndexedArrayOf<T, ISOPTION>::toindex64() const {
+    throw std::runtime_error("FIXME");
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::count(int64_t axis) const {
     if (axis != 0) {
       throw std::runtime_error("FIXME: IndexedArray::count(axis != 0)");

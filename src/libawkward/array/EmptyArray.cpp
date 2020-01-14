@@ -124,6 +124,10 @@ namespace awkward {
     throw std::invalid_argument("array contains no Records");
   }
 
+  const Index64 EmptyArray::toindex64() const {
+    throw std::runtime_error("FIXME");
+  }
+
   const std::shared_ptr<Content> EmptyArray::count(int64_t axis) const {
     throw std::invalid_argument("EmptyArray cannot be counted because it has unknown type");
   }

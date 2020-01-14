@@ -351,6 +351,10 @@ namespace awkward {
     return util::keys(recordlookup_, numfields());
   }
 
+  const Index64 RecordArray::toindex64() const {
+    throw std::runtime_error("FIXME");
+  }
+
   const std::shared_ptr<Content> RecordArray::count(int64_t axis) const {
     if (axis != 0) {
       throw std::runtime_error("FIXME: RecordArray::count(axis != 0)");
