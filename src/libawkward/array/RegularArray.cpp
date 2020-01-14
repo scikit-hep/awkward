@@ -250,7 +250,7 @@ namespace awkward {
       size_,
       len);
     util::handle_error(err, classname(), identities_.get());
-    std::vector<ssize_t> shape({ len });
+    std::vector<ssize_t> shape({ (ssize_t)len });
     std::vector<ssize_t> strides({ sizeof(int64_t) });
 #ifdef _MSC_VER
     std::string format = "q";

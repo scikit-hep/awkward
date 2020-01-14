@@ -371,7 +371,7 @@ namespace awkward {
       starts_.offset(),
       stops_.offset());
     util::handle_error(err, classname(), identities_.get());
-    std::vector<ssize_t> shape({ lenstarts });
+    std::vector<ssize_t> shape({ (ssize_t)lenstarts });
     std::vector<ssize_t> strides({ sizeof(T) });
     std::string format;
 #ifdef _MSC_VER

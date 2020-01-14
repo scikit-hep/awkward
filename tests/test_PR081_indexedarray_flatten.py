@@ -28,6 +28,11 @@ def test_count():
     assert awkward1.tolist(content2) == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
     assert awkward1.tolist(content2.count()) == [5, 5]
 
+    index1 = awkward1.layout.Index64(numpy.array([2, 4, 0, 0, 1, 3], dtype=numpy.int64))
+    array4 = awkward1.layout.IndexedArray64(index1, array2)
+    assert awkward1.tolist(array4) == [[3, 4], [6, 7, 8, 9], [0, 1, 2], [0, 1, 2], [], [5]]
+    assert awkward1.tolist(array4.count()) == [2, 4, 3, 3, 0, 1]
+
 def test_indexedarray():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     index1 = awkward1.layout.Index64(numpy.array([2, 3, 3, 0, 4, 8], dtype=numpy.int64))
