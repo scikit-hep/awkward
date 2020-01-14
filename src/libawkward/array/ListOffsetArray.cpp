@@ -339,6 +339,9 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::flatten(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: ListOffsetArray::flatten(axis != 0)");
+    }
     int64_t start = offsets_.getitem_at_nowrap(0);
     int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
     return content_.get()->getitem_range_nowrap(start, stop);

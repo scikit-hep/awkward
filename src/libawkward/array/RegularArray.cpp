@@ -238,10 +238,15 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::flatten(int64_t axis) const {
-    if(content_.get()->length() % size_ != 0)
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: RegularArray::flatten(axis != 0)");
+    }
+    if (content_.get()->length() % size_ != 0) {
       return content_.get()->getitem_range_nowrap(0, length()*size_);
-    else
+    }
+    else {
       return content_;
+    }
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

@@ -354,33 +354,33 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::flatten(int64_t axis) const {
-    if(axis <= -1)
-      throw std::invalid_argument("axis must be a non-negative integer (can't count from the end)");
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: ListArray::flatten(axis != 0)");
+    }
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
     }
 
     int64_t lenarray(0);
-    struct Error err = util::awkward_listarray_flatten_length_64(
+    struct Error err1 = util::awkward_listarray_flatten_length_64(
       &lenarray,
       starts_.ptr().get(),
       stops_.ptr().get(),
       lenstarts,
       starts_.offset(),
       stops_.offset());
-    util::handle_error(err, classname(), identities_.get());
+    util::handle_error(err1, classname(), identities_.get());
 
     Index64 indxarray(lenarray);
-
-    struct Error err1 = util::awkward_listarray_flatten_64<T>(
+    struct Error err2 = util::awkward_listarray_flatten_64<T>(
       indxarray.ptr().get(),
       starts_.ptr().get(),
       stops_.ptr().get(),
       lenstarts,
       starts_.offset(),
       stops_.offset());
-    util::handle_error(err1, classname(), identities_.get());
+    util::handle_error(err2, classname(), identities_.get());
 
     return content_.get()->carry(indxarray);
   }

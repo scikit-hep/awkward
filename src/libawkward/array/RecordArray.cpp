@@ -352,7 +352,14 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {
-    throw std::invalid_argument("RecordArray cannot be flattened");
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: RecordArray::flatten(axis != 0)");
+    }
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->flatten(axis));
+    }
+    return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {

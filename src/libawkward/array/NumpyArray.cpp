@@ -594,6 +594,13 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: NumpyArray::flatten(axis != 0)");
+    }
+    if (shape_.size() <= 1) {
+      // FIXME: the cut-off for flattenability depends on axis
+      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    }
     if (iscontiguous()) {
       return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
     }
