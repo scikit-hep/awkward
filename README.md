@@ -126,6 +126,8 @@ Most users will see Awkward 1.0 for the first time when uproot 4.0 is released.
 
 Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-hep/awkward-1.0/pulls?q=is%3Apr+is%3Aclosed) for more details.
 
+All remaining items have been assigned an [issue](https://github.com/scikit-hep/awkward-1.0/issues) and a [milestone](https://github.com/scikit-hep/awkward-1.0/milestones).
+
    * [X] Cross-platform, cross-Python version build and deploy process. Regularly deploying [30 wheels](https://pypi.org/project/awkward1/#files) after closing each PR.
    * [X] Basic `NumpyArray`, `ListArray`, and `ListOffsetArray` with `__getitem__` for int/slice and `__iter__` in C++/pybind11 to establish structure and ensure proper reference counting.
    * [X] Introduce `Identity` as a Pandas-style index to pass through `__getitem__`.
@@ -138,8 +140,8 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] Implement appendable records.
       * [X] Test all (tested in mock [studies/fillable.py](tree/master/studies/fillable.py)).
    * [X] JSON → Awkward via header-only [RapidJSON](https://rapidjson.org) and `awkward.fromiter`.
-   * [ ] Explicit broadcasting functions for jagged and non-jagged arrays and scalars.
-   * [ ] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old).
+   * [ ] Explicit broadcasting functions for jagged and non-jagged arrays and scalars (issue #66).
+   * [ ] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old; issue #67).
    * [ ] Full suite of array types:
       * [X] `EmptyArray`: 1-dimensional array with length 0 and unknown type (result of `UnknownFillable`, compatible with all types of arrays).
       * [X] `RawArray`: flat, 1-dimensional array type for pure C++ (header-only).
@@ -149,66 +151,69 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
          * [X] Implement it in Numba as well.
-      * [ ] `ByteMaskedArray`: for nullable data with a byte mask (for NumPy).
-      * [ ] `BitMaskedArray`: for nullable data with a bit mask (for Arrow).
-      * [ ] `UnmaskedArray`: for optional type without actually having a mask.
+      * [ ] `BitMaskedArray` (issue #58): for nullable data with a bit mask (for Arrow).
+      * [ ] `UnmaskedArray` (issue #59): for optional type without actually having a mask.
       * [X] `IndexedArray` and `IndexedOptionArray`: the old `IndexedArray` and `IndexedMaskedArray`; the latter has option type.
-         * [ ] Implement `Identities` for `IndexedArray`.
-         * [ ] Implement Numba lowering for `IndexedArray`.
-      * [ ] `UnionArray`: same as the old version; `SparseUnionArray`: the additional case found in Apache Arrow.
-      * [ ] `RedirectArray`: an explicit weak-reference to another part of the structure (no hard-linked cycles). Often used with an `IndexedArray`.
-      * [ ] `SlicedArray`: lazy-slicing (from old `Table`) that can be applied to any type.
-      * [ ] `SparseArray`: same as the old version, but now we need a good lookup mechanism.
-      * [ ] `ChunkedArray`: same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required. (Maybe `AmorphousChunkedArray` would fill that role.)
-      * [ ] `RegularChunkedArray`: like a `ChunkedArray`, but all chunks are known to have the same size.
-      * [ ] `VirtualArray`: same as the old version, including caching, but taking C++11 lambda functions for materialization, get-cache, and put-cache. The pybind11 layer will connect this to Python callables.
-      * [ ] `PyVirtualArray`: takes a Python lambda (which gets carried into `VirtualArray`).
-      * [ ] `PyObjectArray`: same as the old version.
+         * [ ] Implement `Identities` for `IndexedArray` (issue #52).
+         * [ ] Implement Numba lowering for `IndexedArray` (issue #53).
+      * [ ] `UnionArray` (issue #54): same as the old version.
+      * [ ] `SlicedArray` (issue #55): lazy-slicing (from old `Table`) that can be applied to any type.
+      * [ ] `ChunkedArray` (issue #56): same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required.
+      * [ ] `PyVirtualArray` (issue #57): same as old `VirtualArray`, but it only works in Python (passes _through_ C++).
    * [X] Describe high-level types using [datashape](https://datashape.readthedocs.io/en/latest/) and possibly also an in-house schema. (Emit datashape _strings_ from C++.)
-   * [ ] Translation to and from Apache Arrow and Parquet in C++.
+   * [ ] Translation to and from Apache Arrow and Parquet in C++ (issue #68).
    * [X] Layer 1 interface `Array`:
       * [X] Pass through to the layout classes in Python and Numba.
-      * [ ] Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before).
-      * [ ] Pass through other Numpy functions using [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html) (this would be new).
-      * [ ] `RecordArray` fields (not called "columns" anymore) through Layer 1 `__getattr__`.
+      * [ ] Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before; issue #60).
+      * [ ] Pass through other Numpy functions using [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html) (this would be new; issue #61).
+      * [ ] `RecordArray` fields (not called "columns" anymore) through Layer 1 `__getattr__` (issue #62).
       * [X] Special Layer 1 `Record` type for `RecordArray` elements, supporting some methods and a visual representation based on `Identity` if available, all fields if `recordtype == "tuple"`, or the first field otherwise.
       * [X] Mechanism for adding user-defined `Methods` like `LorentzVector`, as before, but only on Layer 1.
          * [X] High-level classes for characters and strings.
-      * [ ] Inerhit from Pandas so that all Layer 1 arrays can be DataFrame columns.
+      * [ ] Inerhit from Pandas so that all Layer 1 arrays can be DataFrame columns (issue #63).
    * [ ] Full suite of operations:
       * [X] `awkward.tolist`: same as before.
       * [X] `awkward.fromiter`: same as before.
       * [X] `awkward.typeof`: reports the high-level type (accepting some non-awkward objects).
-      * [ ] `awkward.tonumpy`: to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
-      * [ ] `awkward.topandas`: flattening jaggedness into `MultiIndex` rows and nested records into `MultiIndex` columns. This is distinct from the arrays' inheritance from Pandas, distinct from the natural ability to use any one of them as DataFrame columns.
-      * [ ] `awkward.flatten`: same as old with an `axis` parameter.
-      * [ ] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporting an `axis` method.
-      * [ ] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std`.
-      * [ ] `awkward.argmin`, `awkward.argmax`, `awkward.argsort`, and `awkward.sort`: same as old.
-      * [ ] `awkward.where`: like `numpy.where`; old doesn't have this yet, but we'll need it.
-      * [ ] `awkward.concatenate`: same as old, but supporting `axis` at any depth.
-      * [ ] `awkward.zip`: makes jagged tables; this is a naive version of `awkward.join` below.
-      * [ ] `awkward.pad`: same as old, but without the `clip` option (use slicing instead).
-      * [ ] `awkward.fillna`: same as old.
-      * [ ] `awkward.cross` (and `awkward.argcross`): to make combinations by cross-joining multiple arrays; option to use `Identity` index.
-      * [ ] `awkward.choose` (and `awkward.argchoose`): to make combinations by choosing a fixed number from a single array; option to use `Identity` index and an option to include same-object combinations.
-      * [ ] `awkward.join`: performs an inner join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event intersection, zipping all fields.
-      * [ ] `awkward.union`: performs an outer join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event union, zipping fields where possible.
+      * [ ] `awkward.tonumpy` (issue #65): to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
+      * [ ] `awkward.flatpandas` (issue #80): flattening jaggedness into `MultiIndex` rows and nested records into `MultiIndex` columns. This is distinct from the arrays' inheritance from Pandas, distinct from the natural ability to use any one of them as DataFrame columns.
+      * [ ] `awkward.flatten`: same as old with an `axis` parameter (issue #51).
+      * [ ] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporting an `axis` method (issue #69).
+      * [ ] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std` (addendum to issue #69).
+      * [ ] `awkward.argmin`, `awkward.argmax` (issue #70): return values and `None` instead of singleton and empty lists.
+      * [ ] `awkward.argsort`, and `awkward.sort` (issue #74): same as old.
+      * [ ] `awkward.where` (issue #75): like `numpy.where`; old doesn't have this yet, but we'll need it.
+      * [ ] `awkward.concatenate` (issue #76): same as old, but supporting `axis` at any depth.
+      * [ ] `awkward.zip` (issue #77): makes jagged tables; this is a naive version of `awkward.join` below.
+      * [ ] `awkward.pad` (issue #73): same as old, but without the `clip` option (use slicing instead).
+      * [ ] `awkward.fillna` (issue #72): same as old.
+      * [ ] `awkward.cross` (and `awkward.argcross`, issue #78): to make combinations by cross-joining multiple arrays; option to use `Identity` index.
+      * [ ] `awkward.choose` (and `awkward.argchoose`, issue #79): to make combinations by choosing a fixed number from a single array; option to use `Identity` index and an option to include same-object combinations.
 
 ### Soon after the six-month sprint
 
    * [ ] Update [hepvector](https://github.com/henryiii/hepvector#readme) to be Derived classes, replacing the `TLorentzVectorArray` in uproot-methods.
    * [ ] Update uproot (on a branch) to use Awkward 1.0.
    * [ ] Start the `awkward → awkward0`, `awkward1 → awkward` transition.
-   * [ ] Persistence to any medium that stores named binary blobs, as before, but accessible via C++ (especially for writing). The persistence format might differ slightly from the existing one (break backward compatibility, if needed).
-   * [ ] Universal `array.get[...]` as a softer form of `array[...]` that inserts `None` for non-existent indexes, rather than raising errors.
-   * [ ] Explicit interface with [NumExpr](https://numexpr.readthedocs.io/en/latest/index.html).
-   * [ ] Describe mid-level "persistence types" with no lengths, somewhat minimal JSON, optional dtypes/compression.
-   * [ ] Describe low-level layouts independently of filled arrays (JSON or something)?
 
 ### Thereafter
 
-   * [ ] Demonstrate Awkward 1.0 as a C++ wrapping library with [FastJet](http://fastjet.fr/).
    * [ ] GPU implementations of the cpu-kernels in Layer 4, with the Layer 3 C++ passing a "device" variable at every level of the layout to indicate whether the data pointers refer to main memory or a particular GPU.
    * [ ] CPU-acceleration of the cpu-kernels using vectorization and other tricks.
+   * [ ] Explicit interface with [NumExpr](https://numexpr.readthedocs.io/en/latest/index.html).
    * [ ] Explicit interface with [Dask](https://dask.org).
+   * [ ] Demonstrate Awkward 1.0 as a C++ wrapping library with [FastJet](http://fastjet.fr/).
+   * [ ] Deferred array types:
+      * [ ] `ByteMaskedArray`: for nullable data with a byte mask (for NumPy).
+      * [ ] `RedirectArray`: an explicit weak-reference to another part of the structure (no hard-linked cycles). Often used with an `IndexedArray`.
+      * [ ] `SparseUnionArray`: the additional `UnionArray` case found in Apache Arrow.
+      * [ ] `SparseArray`: same as the old version, but now we need a good lookup mechanism.
+      * [ ] `RegularChunkedArray`: like a `ChunkedArray`, but all chunks are known to have the same size.
+      * [ ] `AmorphousChunkedArray`: a `ChunkedArray` without known chunk lengths (maybe not ever).
+   * [ ] Deferred operations:
+      * [ ] `awkward.join`: performs an inner join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event intersection, zipping all fields.
+      * [ ] `awkward.union`: performs an outer join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event union, zipping fields where possible.
+   * [ ] Persistence to any medium that stores named binary blobs, as before, but accessible via C++ (especially for writing). The persistence format might differ slightly from the existing one (break backward compatibility, if needed).
+   * [ ] Describe mid-level "persistence types" with no lengths, somewhat minimal JSON, optional dtypes/compression.
+   * [ ] Describe low-level layouts independently of filled arrays (JSON or something)?
+   * [ ] Universal `array.get[...]` as a softer form of `array[...]` that inserts `None` for non-existent indexes, rather than raising errors.
