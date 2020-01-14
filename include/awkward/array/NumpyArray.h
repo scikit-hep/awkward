@@ -60,9 +60,9 @@ namespace awkward {
     const std::string key(int64_t fieldindex) const override;
     bool haskey(const std::string& key) const override;
     const std::vector<std::string> keys() const override;
-    const Index64 toindex64() const override;
 
     // operations
+    const Index64 count64() const override;
     const std::shared_ptr<Content> count(int64_t axis) const override;
     const std::shared_ptr<Content> flatten(int64_t axis) const override;
 

@@ -351,8 +351,8 @@ namespace awkward {
     return util::keys(recordlookup_, numfields());
   }
 
-  const Index64 RecordArray::toindex64() const {
-    throw std::runtime_error("FIXME");
+  const Index64 RecordArray::count64() const {
+    throw std::invalid_argument("RecordArray cannot be counted, because records are not lists");
   }
 
   const std::shared_ptr<Content> RecordArray::count(int64_t axis) const {

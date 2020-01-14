@@ -305,6 +305,19 @@ namespace awkward {
     }
 
     template <>
+    Error awkward_listarray_count_64<int32_t>(int64_t* tocount, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+      return awkward_listarray32_count_64(tocount, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+    }
+    template <>
+    Error awkward_listarray_count_64<uint32_t>(int64_t* tocount, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+      return awkward_listarrayU32_count_64(tocount, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+    }
+    template <>
+    Error awkward_listarray_count_64<int64_t>(int64_t* tocount, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+      return awkward_listarray64_count_64(tocount, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+    }
+
+    template <>
     Error awkward_listarray_flatten_length<int32_t>(int64_t* tolen, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
       return awkward_listarray32_flatten_length(tolen, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
     }

@@ -314,7 +314,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const Index64 IndexedArrayOf<T, ISOPTION>::toindex64() const {
+  const Index64 IndexedArrayOf<T, ISOPTION>::count64() const {
     throw std::runtime_error("FIXME");
   }
 

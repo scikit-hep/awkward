@@ -354,8 +354,21 @@ namespace awkward {
   }
 
   template <typename T>
-  const Index64 ListArrayOf<T>::toindex64() const {
-    throw std::runtime_error("FIXME");
+  const Index64 ListArrayOf<T>::count64() const {
+    int64_t lenstarts = starts_.length();
+    if (stops_.length() < lenstarts) {
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+    Index64 tocount(starts_.length());
+    struct Error err = util::awkward_listarray_count_64(
+      tocount.ptr().get(),
+      starts_.ptr().get(),
+      stops_.ptr().get(),
+      lenstarts,
+      starts_.offset(),
+      stops_.offset());
+    util::handle_error(err, classname(), identities_.get());
+    return tocount;
   }
 
   template <typename T>

@@ -574,55 +574,7 @@ namespace awkward {
     throw std::invalid_argument("array contains no Records");
   }
 
-  const Index64 NumpyArray::toindex64() const {
-    if (shape_.size() != 1) {
-      throw std::invalid_argument(std::string("cannot convert NumpyArray with ndim ") + std::to_string(shape_.size()) + std::string(" into Index64"));
-    }
-    if (strides_[0] != itemsize_) {
-      throw std::invalid_argument(std::string("cannot convert NumpyArray with strides [") + std::to_string(strides_[0]) + std::string("] != itemsize of ") + std::to_string(itemsize_) + std::string(" into Index64"));
-    }
-#ifdef _MSC_VER
-    if (format_.compare("q") == 0) {
-#else
-    else if (format_.compare("l") == 0) {
-#endif
-      return Index64(ptr_, byteoffset_ / itemsize_, (int64_t)shape_[0]);
-    }
-#ifdef _MSC_VER
-      else if (format_.compare("l") == 0) {
-#else
-      else if (format_.compare("i") == 0) {
-#endif
-      throw std::runtime_error("FIXME");
-    }
-#ifdef _MSC_VER
-    else if (format_.compare("L") == 0) {
-#else
-    else if (format_.compare("I") == 0) {
-#endif
-      throw std::runtime_error("FIXME");
-    }
-    else if (format_.compare("h") == 0) {
-      throw std::runtime_error("FIXME");
-    }
-    else if (format_.compare("H") == 0) {
-      throw std::runtime_error("FIXME");
-    }
-    else if (format_.compare("b") == 0) {
-      throw std::runtime_error("FIXME");
-    }
-    else if (format_.compare("B") == 0) {
-      throw std::runtime_error("FIXME");
-    }
-    else {
-        throw std::invalid_argument(std::string("cannot convert Numpy format \"") + format_ + std::string("\" into Index64"));
-    }
-  }
-
-  const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: NumpyArray::count(axis != 0)");
-    }
+  const Index64 NumpyArray::count64() const {
     if (shape_.size() <= 1) {
       // FIXME: the cut-off for countability depends on axis
       throw std::invalid_argument(std::string("NumpyArray cannot be counted because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
@@ -634,7 +586,15 @@ namespace awkward {
       (int64_t)shape_[1],
       len);
     util::handle_error(err, classname(), identities_.get());
-    std::vector<ssize_t> shape({ (ssize_t)len });
+    return tocount;
+  }
+
+  const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: NumpyArray::count(axis != 0)");
+    }
+    Index64 tocount = count64();
+    std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
     std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
 #ifdef _MSC_VER
     std::string format = "q";

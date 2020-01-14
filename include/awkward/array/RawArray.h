@@ -376,63 +376,12 @@ namespace awkward {
       throw std::invalid_argument("array contains no Records");
     }
 
-    const Index64 toindex64() const override {
-      if (std::is_same<T, int8_t>::value) {
-        Index64 out(length());
-        struct Error err = awkward_index_to64_from8(
-          out.ptr().get(),
-          reinterpret_cast<int8_t*>(ptr_.get()),
-          length_,
-          offset_);
-        util::handle_error(err, classname(), identities_.get());
-        return out;
-      }
-      else if (std::is_same<T, uint8_t>::value) {
-        Index64 out(length());
-        struct Error err = awkward_index_to64_fromU8(
-          out.ptr().get(),
-          reinterpret_cast<uint8_t*>(ptr_.get()),
-          length_,
-          offset_);
-        util::handle_error(err, classname(), identities_.get());
-        return out;
-      }
-      else if (std::is_same<T, int32_t>::value) {
-        Index64 out(length());
-        struct Error err = awkward_index_to64_from32(
-          out.ptr().get(),
-          reinterpret_cast<int32_t*>(ptr_.get()),
-          length_,
-          offset_);
-        util::handle_error(err, classname(), identities_.get());
-        return out;
-      }
-      else if (std::is_same<T, uint32_t>::value) {
-        Index64 out(length());
-        struct Error err = awkward_index_to64_fromU32(
-          out.ptr().get(),
-          reinterpret_cast<uint32_t*>(ptr_.get()),
-          length_,
-          offset_);
-        util::handle_error(err, classname(), identities_.get());
-        return out;
-      }
-      else if (std::is_same<T, int64_t>::value) {
-        Index64 out(length());
-        struct Error err = awkward_index_to64_from64(
-          out.ptr().get(),
-          reinterpret_cast<int64_t*>(ptr_.get()),
-          length_,
-          offset_);
-        util::handle_error(err, classname(), identities_.get());
-        return out;
-      }
-      else {
-        throw std::invalid_argument(std::string("cannot convert RawArrayOf<") + typeid(T).name() + std::string("> into Index64"));
-      }
+    // operations
+
+    const Index64 count64() const override {
+      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
     }
 
-    // operations
     const std::shared_ptr<Content> count(int64_t axis) const override {
       throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
     }

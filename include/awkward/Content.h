@@ -46,9 +46,9 @@ namespace awkward {
     virtual const std::string key(int64_t fieldindex) const = 0;
     virtual bool haskey(const std::string& key) const = 0;
     virtual const std::vector<std::string> keys() const = 0;
-    virtual const Index64 toindex64() const = 0;
 
     // operations
+    virtual const Index64 count64() const = 0;
     virtual const std::shared_ptr<Content> count(int64_t axis) const = 0;
     virtual const std::shared_ptr<Content> flatten(int64_t axis) const = 0;
 

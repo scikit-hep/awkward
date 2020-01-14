@@ -239,14 +239,7 @@ namespace awkward {
     return content_.get()->keys();
   }
 
-  const Index64 RegularArray::toindex64() const {
-    throw std::runtime_error("FIXME");
-  }
-
-  const std::shared_ptr<Content> RegularArray::count(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: RegularArray::count(axis != 0)");
-    }
+  const Index64 RegularArray::count64() const {
     int64_t len = length();
     Index64 tocount(len);
     struct Error err = awkward_regulararray_count(
@@ -254,7 +247,15 @@ namespace awkward {
       size_,
       len);
     util::handle_error(err, classname(), identities_.get());
-    std::vector<ssize_t> shape({ (ssize_t)len });
+    return tocount;
+  }
+
+  const std::shared_ptr<Content> RegularArray::count(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: RegularArray::count(axis != 0)");
+    }
+    Index64 tocount = count64();
+    std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
     std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
 #ifdef _MSC_VER
     std::string format = "q";
