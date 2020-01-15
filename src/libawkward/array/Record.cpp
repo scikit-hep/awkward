@@ -197,8 +197,16 @@ namespace awkward {
     return array_.keys();
   }
 
+  const Index64 Record::count64() const {
+    throw std::invalid_argument("Record cannot be counted because it is not an array");
+  }
+
+  const std::shared_ptr<Content> Record::count(int64_t axis) const {
+    throw std::invalid_argument("Record cannot be counted because it is not an array");
+  }
+
   const std::shared_ptr<Content> Record::flatten(int64_t axis) const {
-    throw std::invalid_argument("Record is not an array");
+    throw std::invalid_argument("Record cannot be flattened because it is not an array");
   }
 
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {

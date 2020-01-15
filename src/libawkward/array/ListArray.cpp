@@ -12,6 +12,7 @@
 #include "awkward/Slice.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/NumpyArray.h"
 
 #include "awkward/array/ListArray.h"
 
@@ -353,34 +354,100 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::flatten(int64_t axis) const {
-    if(axis <= -1)
-      throw std::invalid_argument("axis must be a non-negative integer (can't count from the end)");
+  const Index64 ListArrayOf<T>::count64() const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
     }
-
-    int64_t lenarray(0);
-    struct Error err = util::awkward_listarray_flatten_length_64(
-      &lenarray,
+    Index64 tocount(starts_.length());
+    struct Error err = util::awkward_listarray_count_64(
+      tocount.ptr().get(),
       starts_.ptr().get(),
       stops_.ptr().get(),
       lenstarts,
       starts_.offset(),
       stops_.offset());
     util::handle_error(err, classname(), identities_.get());
+    return tocount;
+  }
 
-    Index64 indxarray(lenarray);
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::count(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: ListArray::count(axis != 0)");
+    }
+    int64_t lenstarts = starts_.length();
+    if (stops_.length() < lenstarts) {
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+    IndexOf<T> tocount(starts_.length());
+    struct Error err = util::awkward_listarray_count(
+      tocount.ptr().get(),
+      starts_.ptr().get(),
+      stops_.ptr().get(),
+      lenstarts,
+      starts_.offset(),
+      stops_.offset());
+    util::handle_error(err, classname(), identities_.get());
+    std::vector<ssize_t> shape({ (ssize_t)lenstarts });
+    std::vector<ssize_t> strides({ (ssize_t)sizeof(T) });
+    std::string format;
+#ifdef _MSC_VER
+    if (std::is_same<T, int32_t>::value) {
+      format = "l";
+    }
+    else if (std::is_same<T, uint32_t>::value) {
+      format = "L";
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      format = "q";
+    }
+#else
+    if (std::is_same<T, int32_t>::value) {
+      format = "i";
+    }
+    else if (std::is_same<T, uint32_t>::value) {
+      format = "I";
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      format = "l";
+    }
+#endif
+    else {
+      throw std::runtime_error("unrecognized ListArray specialization");
+    }
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(T), format);
+  }
 
-    struct Error err1 = util::awkward_listarray_flatten_64<T>(
-      indxarray.ptr().get(),
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::flatten(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: ListArray::flatten(axis != 0)");
+    }
+    int64_t lenstarts = starts_.length();
+    if (stops_.length() < lenstarts) {
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+
+    int64_t lenarray(0);
+    struct Error err1 = util::awkward_listarray_flatten_length(
+      &lenarray,
       starts_.ptr().get(),
       stops_.ptr().get(),
       lenstarts,
       starts_.offset(),
       stops_.offset());
     util::handle_error(err1, classname(), identities_.get());
+
+    Index64 indxarray(lenarray);
+    struct Error err2 = util::awkward_listarray_flatten_64<T>(
+      indxarray.ptr().get(),
+      starts_.ptr().get(),
+      stops_.ptr().get(),
+      lenstarts,
+      starts_.offset(),
+      stops_.offset());
+    util::handle_error(err2, classname(), identities_.get());
 
     return content_.get()->carry(indxarray);
   }

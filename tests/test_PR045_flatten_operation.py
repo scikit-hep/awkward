@@ -91,7 +91,7 @@ def test_flatten_record():
     #FIXME: array   = awkward1.layout.Record()
 
 def test_flatten_record_array():
-    with pytest.raises(ValueError, match="RecordArray cannot be flattened"):
+    with pytest.raises(ValueError, match="NumpyArray cannot be flattened because it has 1 dimensions"):
         content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
         content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
         offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))

@@ -41,6 +41,8 @@ class ErrorModel(numba.datamodel.models.StructModel):
 
 h2ctypes = {
     "bool": ctypes.c_uint8,
+    "int8_t *": ctypes.POINTER(ctypes.c_int8),
+    "const int8_t *": ctypes.POINTER(ctypes.c_int8),
     "uint8_t *": ctypes.POINTER(ctypes.c_uint8),
     "const uint8_t *": ctypes.POINTER(ctypes.c_uint8),
     "int32_t": ctypes.c_int32,

@@ -1,55 +1,36 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
-  <compounddef id="RegularArray_8cpp" kind="file" language="C++">
-    <compoundname>RegularArray.cpp</compoundname>
-    <includes local="no">iomanip</includes>
+  <compounddef id="IndexedArray_8cpp" kind="file" language="C++">
+    <compoundname>IndexedArray.cpp</compoundname>
     <includes local="no">sstream</includes>
-    <includes local="no">stdexcept</includes>
+    <includes local="no">type_traits</includes>
     <includes local="yes">awkward/cpu-kernels/identities.h</includes>
     <includes local="yes">awkward/cpu-kernels/getitem.h</includes>
-    <includes local="yes">awkward/cpu-kernels/operations.h</includes>
-    <includes local="yes">awkward/type/RegularType.h</includes>
+    <includes local="yes">awkward/type/OptionType.h</includes>
     <includes local="yes">awkward/type/ArrayType.h</includes>
     <includes local="yes">awkward/type/UnknownType.h</includes>
-    <includes local="yes">awkward/array/NumpyArray.h</includes>
-    <includes local="yes">awkward/array/RegularArray.h</includes>
+    <includes local="yes">awkward/Slice.h</includes>
+    <includes local="yes">awkward/array/None.h</includes>
+    <includes local="yes">awkward/array/IndexedArray.h</includes>
     <incdepgraph>
-      <node id="7">
-        <label>awkward/cpu-kernels/operations.h</label>
-      </node>
-      <node id="2">
-        <label>iomanip</label>
-      </node>
-      <node id="9">
-        <label>awkward/type/ArrayType.h</label>
-      </node>
-      <node id="4">
-        <label>stdexcept</label>
-      </node>
       <node id="6">
-        <label>awkward/cpu-kernels/getitem.h</label>
+        <label>awkward/type/OptionType.h</label>
       </node>
       <node id="10">
-        <label>awkward/type/UnknownType.h</label>
+        <label>awkward/array/None.h</label>
+      </node>
+      <node id="7">
+        <label>awkward/type/ArrayType.h</label>
       </node>
       <node id="5">
-        <label>awkward/cpu-kernels/identities.h</label>
-      </node>
-      <node id="12">
-        <label>awkward/array/RegularArray.h</label>
-      </node>
-      <node id="11">
-        <label>awkward/array/NumpyArray.h</label>
+        <label>awkward/cpu-kernels/getitem.h</label>
       </node>
       <node id="8">
-        <label>awkward/type/RegularType.h</label>
-      </node>
-      <node id="3">
-        <label>sstream</label>
+        <label>awkward/type/UnknownType.h</label>
       </node>
       <node id="1">
-        <label>src/libawkward/array/RegularArray.cpp</label>
-        <link refid="RegularArray_8cpp"/>
+        <label>src/libawkward/array/IndexedArray.cpp</label>
+        <link refid="IndexedArray_8cpp"/>
         <childnode refid="2" relation="include">
         </childnode>
         <childnode refid="3" relation="include">
@@ -70,8 +51,21 @@
         </childnode>
         <childnode refid="11" relation="include">
         </childnode>
-        <childnode refid="12" relation="include">
-        </childnode>
+      </node>
+      <node id="4">
+        <label>awkward/cpu-kernels/identities.h</label>
+      </node>
+      <node id="2">
+        <label>sstream</label>
+      </node>
+      <node id="11">
+        <label>awkward/array/IndexedArray.h</label>
+      </node>
+      <node id="9">
+        <label>awkward/Slice.h</label>
+      </node>
+      <node id="3">
+        <label>type_traits</label>
       </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>
@@ -79,6 +73,6 @@
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="src/libawkward/array/RegularArray.cpp"/>
+    <location file="src/libawkward/array/IndexedArray.cpp"/>
   </compounddef>
 </doxygen>

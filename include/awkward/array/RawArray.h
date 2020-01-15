@@ -15,6 +15,7 @@
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/util.h"
 #include "awkward/Slice.h"
@@ -376,8 +377,17 @@ namespace awkward {
     }
 
     // operations
+
+    const Index64 count64() const override {
+      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
+    }
+
+    const std::shared_ptr<Content> count(int64_t axis) const override {
+      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
+    }
+
     const std::shared_ptr<Content> flatten(int64_t axis) const override {
-      throw std::invalid_argument("RawArray is strictly one-dimentional");
+      throw std::invalid_argument("RawArray cannot be flattened because it is one-dimentional");
     }
 
   protected:

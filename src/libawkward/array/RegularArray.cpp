@@ -6,9 +6,11 @@
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
+#include "awkward/array/NumpyArray.h"
 
 #include "awkward/array/RegularArray.h"
 
@@ -237,11 +239,42 @@ namespace awkward {
     return content_.get()->keys();
   }
 
+  const Index64 RegularArray::count64() const {
+    int64_t len = length();
+    Index64 tocount(len);
+    struct Error err = awkward_regulararray_count(
+      tocount.ptr().get(),
+      size_,
+      len);
+    util::handle_error(err, classname(), identities_.get());
+    return tocount;
+  }
+
+  const std::shared_ptr<Content> RegularArray::count(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: RegularArray::count(axis != 0)");
+    }
+    Index64 tocount = count64();
+    std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
+    std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+#ifdef _MSC_VER
+    std::string format = "q";
+#else
+    std::string format = "l";
+#endif
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+  }
+
   const std::shared_ptr<Content> RegularArray::flatten(int64_t axis) const {
-    if(content_.get()->length() % size_ != 0)
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: RegularArray::flatten(axis != 0)");
+    }
+    if (content_.get()->length() % size_ != 0) {
       return content_.get()->getitem_range_nowrap(0, length()*size_);
-    else
+    }
+    else {
       return content_;
+    }
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

@@ -314,8 +314,67 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const Index64 IndexedArrayOf<T, ISOPTION>::count64() const {
+    Index64 contentcount = content_.get()->count64();
+    Index64 tocount(index_.length());
+    struct Error err = util::awkward_indexedarray_count(
+      tocount.ptr().get(),
+      contentcount.ptr().get(),
+      contentcount.length(),
+      index_.ptr().get(),
+      index_.length(),
+      index_.offset());
+    util::handle_error(err, classname(), identities_.get());
+    return tocount;
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::count(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: IndexedArray::count(axis != 0)");
+    }
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, content_.get()->count(axis));
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION>::flatten");
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: IndexedArray::flatten(axis != 0)");
+    }
+    if (ISOPTION) {
+      int64_t numnull;
+      struct Error err1 = util::awkward_indexedarray_numnull<T>(
+        &numnull,
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length());
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 nextcarry(length() - numnull);
+      struct Error err2 = util::awkward_indexedarray_flatten_nextcarry_64<T>(
+        nextcarry.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length(),
+        content_.get()->length());
+      util::handle_error(err2, classname(), identities_.get());
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      return next.get()->flatten(axis);
+    }
+    else {
+      Index64 nextcarry(length());
+      struct Error err = util::awkward_indexedarray_getitem_nextcarry_64<T>(
+        nextcarry.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length(),
+        content_.get()->length());
+      util::handle_error(err, classname(), identities_.get());
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      return next.get()->flatten(axis);
+    }
   }
 
   template <typename T, bool ISOPTION>

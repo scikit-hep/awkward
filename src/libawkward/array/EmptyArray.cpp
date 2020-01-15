@@ -6,6 +6,7 @@
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ArrayType.h"
+#include "awkward/array/NumpyArray.h"
 
 #include "awkward/array/EmptyArray.h"
 
@@ -122,6 +123,22 @@ namespace awkward {
 
   const std::vector<std::string> EmptyArray::keys() const {
     throw std::invalid_argument("array contains no Records");
+  }
+
+  const Index64 EmptyArray::count64() const {
+    return Index64(0);
+  }
+
+  const std::shared_ptr<Content> EmptyArray::count(int64_t axis) const {
+    Index64 tocount = count64();
+    std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
+    std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+#ifdef _MSC_VER
+    std::string format = "q";
+#else
+    std::string format = "l";
+#endif
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
   }
 
   const std::shared_ptr<Content> EmptyArray::flatten(int64_t axis) const {
