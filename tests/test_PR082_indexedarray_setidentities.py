@@ -98,7 +98,7 @@ indexedarray4 = awkward1.layout.IndexedOptionArray64(index4, listoffsetarray3)
 
 def test_boxing():
     @numba.njit
-    def f1(x):
+    def f1(q):
         return 3.14
 
     f1(indexedarray1)
@@ -107,8 +107,8 @@ def test_boxing():
     f1(indexedarray4)
 
     @numba.njit
-    def f2(x):
-        return x
+    def f2(q):
+        return q
 
     assert awkward1.tolist(f2(indexedarray1)) == [2.2, 3.3, 3.3, 0.0, 4.4, 8.8]
     assert awkward1.tolist(f2(indexedarray2)) == [2.2, 3.3, 3.3, None, None, 8.8]
@@ -117,8 +117,8 @@ def test_boxing():
 
 def test_len():
     @numba.njit
-    def f1(x):
-        return len(x)
+    def f1(q):
+        return len(q)
 
     assert f1(indexedarray1) == 6
     assert f1(indexedarray2) == 6
@@ -127,8 +127,8 @@ def test_len():
 
 def test_getitem_int():
     @numba.njit
-    def f1(x, i):
-        return x[i]
+    def f1(q, i):
+        return q[i]
 
     assert f1(indexedarray1, 2) == 3.3
     assert f1(indexedarray1, 3) == 0.0
@@ -137,3 +137,44 @@ def test_getitem_int():
     assert awkward1.tolist(f1(indexedarray3, 1)) == [0.0, 1.1, 2.2]
     assert awkward1.tolist(f1(indexedarray4, 1)) == None
     assert awkward1.tolist(f1(indexedarray4, 3)) == [5.5]
+
+def test_iter():
+    @numba.njit
+    def f1(q):
+        total = 0.0
+        for x in q:
+            total += x
+        return total
+
+    assert f1(indexedarray1) == 2.2 + 3.3 + 3.3 + 0.0 + 4.4 + 8.8
+
+    @numba.njit
+    def f1(q):
+        total = 0.0
+        for x in q:
+            if x is not None:
+                total += x
+        return total
+
+    assert f1(indexedarray2) == 2.2 + 3.3 + 3.3 + 8.8
+
+    @numba.njit
+    def f1(q):
+        total = 0.0
+        for x in q:
+            for y in x:
+                total += y
+        return total
+
+    assert f1(indexedarray3) == 3.3 + 4.4 + 0.0 + 1.1 + 2.2 + 5.5 + 5.5 + 6.6 + 7.7 + 8.8 + 9.9
+
+    @numba.njit
+    def f1(q):
+        total = 0.0
+        for x in q:
+            if x is not None:
+                for y in x:
+                    total += y
+        return total
+
+    assert f1(indexedarray4) == 3.3 + 4.4 + 5.5 + 5.5 + 6.6 + 7.7 + 8.8 + 9.9
