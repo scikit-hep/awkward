@@ -12,6 +12,7 @@
     <includes local="yes">awkward/Slice.h</includes>
     <includes local="yes">awkward/array/ListArray.h</includes>
     <includes local="yes">awkward/array/RegularArray.h</includes>
+    <includes local="yes">awkward/array/NumpyArray.h</includes>
     <includes local="yes">awkward/array/ListOffsetArray.h</includes>
     <incdepgraph>
       <node id="7">
@@ -31,6 +32,9 @@
       </node>
       <node id="11">
         <label>awkward/array/RegularArray.h</label>
+      </node>
+      <node id="12">
+        <label>awkward/array/NumpyArray.h</label>
       </node>
       <node id="1">
         <label>src/libawkward/array/ListOffsetArray.cpp</label>
@@ -57,8 +61,10 @@
         </childnode>
         <childnode refid="12" relation="include">
         </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
       </node>
-      <node id="12">
+      <node id="13">
         <label>awkward/array/ListOffsetArray.h</label>
       </node>
       <node id="2">
@@ -96,7 +102,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/ListOffsetArray.cpp" line="51" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="51" bodyend="53"/>
+        <location file="src/libawkward/array/ListOffsetArray.cpp" line="52" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="52" bodyend="54"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1aa3d73a21953e0578aa577329c38dc0ed" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -118,7 +124,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/ListOffsetArray.cpp" line="56" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="56" bodyend="58"/>
+        <location file="src/libawkward/array/ListOffsetArray.cpp" line="57" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="57" bodyend="59"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

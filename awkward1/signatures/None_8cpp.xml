@@ -1,24 +1,32 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.16">
-  <compounddef id="EmptyArray_8cpp" kind="file" language="C++">
-    <compoundname>EmptyArray.cpp</compoundname>
+  <compounddef id="None_8cpp" kind="file" language="C++">
+    <compoundname>None.cpp</compoundname>
     <includes local="no">iomanip</includes>
     <includes local="no">sstream</includes>
     <includes local="no">stdexcept</includes>
     <includes local="yes">awkward/type/UnknownType.h</includes>
     <includes local="yes">awkward/type/ArrayType.h</includes>
-    <includes local="yes">awkward/array/NumpyArray.h</includes>
-    <includes local="yes">awkward/array/EmptyArray.h</includes>
+    <includes local="yes">awkward/array/None.h</includes>
     <incdepgraph>
       <node id="2">
         <label>iomanip</label>
       </node>
+      <node id="7">
+        <label>awkward/array/None.h</label>
+      </node>
       <node id="6">
         <label>awkward/type/ArrayType.h</label>
       </node>
+      <node id="4">
+        <label>stdexcept</label>
+      </node>
+      <node id="5">
+        <label>awkward/type/UnknownType.h</label>
+      </node>
       <node id="1">
-        <label>src/libawkward/array/EmptyArray.cpp</label>
-        <link refid="EmptyArray_8cpp"/>
+        <label>src/libawkward/array/None.cpp</label>
+        <link refid="None_8cpp"/>
         <childnode refid="2" relation="include">
         </childnode>
         <childnode refid="3" relation="include">
@@ -31,30 +39,32 @@
         </childnode>
         <childnode refid="7" relation="include">
         </childnode>
-        <childnode refid="8" relation="include">
-        </childnode>
-      </node>
-      <node id="4">
-        <label>stdexcept</label>
-      </node>
-      <node id="5">
-        <label>awkward/type/UnknownType.h</label>
-      </node>
-      <node id="7">
-        <label>awkward/array/NumpyArray.h</label>
       </node>
       <node id="3">
         <label>sstream</label>
       </node>
-      <node id="8">
-        <label>awkward/array/EmptyArray.h</label>
-      </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>
+      <sectiondef kind="var">
+      <memberdef kind="variable" id="namespaceawkward_1aa9ea1020f3a5702249593d9a0db0aac4" prot="public" static="no" mutable="no">
+        <type>const std::shared_ptr&lt; Content &gt;</type>
+        <definition>int64_t awkward::Slice::none</definition>
+        <argsstring></argsstring>
+        <name>none</name>
+        <initializer>= std::make_shared&lt;None&gt;()</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/array/None.cpp" line="148" column="25" bodyfile="src/libawkward/array/None.cpp" bodystart="148" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="src/libawkward/array/EmptyArray.cpp"/>
+    <location file="src/libawkward/array/None.cpp"/>
   </compounddef>
 </doxygen>
