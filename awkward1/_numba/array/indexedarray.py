@@ -183,3 +183,35 @@ def box(tpe, val, c):
         c.pyapi.decref(x)
     c.pyapi.decref(IndexedArray_obj)
     return out
+
+@numba.extending.lower_builtin(len, IndexedArrayType)
+def lower_len(context, builder, sig, args):
+    rettpe, (tpe,) = sig.return_type, sig.args
+    val, = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    indexlen = numba.targets.arrayobj.array_len(context, builder, numba.intp(tpe.indextpe), (proxyin.index,))
+    return indexlen
+
+@numba.extending.lower_builtin(operator.getitem, IndexedArrayType, numba.types.Integer)
+def lower_getitem_int(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+
+    indexval = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.indextpe.dtype(tpe.indextpe, wheretpe), (proxyin.index, whereval))
+
+    outval = tpe.contenttpe.lower_getitem_int(context, builder, tpe.contenttpe.getitem_int()(tpe.contenttpe, tpe.indextpe.dtype), (proxyin.content, indexval))
+
+    if tpe.isoption:
+        output = context.make_helper(builder, tpe.getitem_int())
+        with builder.if_else(builder.icmp_signed("<", indexval, context.get_constant(tpe.indextpe.dtype, 0))) as (isnone, isvalid):
+            with isnone:
+                output.valid = numba.cgutils.false_bit
+                output.data = numba.cgutils.get_null_value(output.data.type)
+            with isvalid:
+                output.valid = numba.cgutils.true_bit
+                output.data = tpe.contenttpe.lower_getitem_int(context, builder, tpe.contenttpe.getitem_int()(tpe.contenttpe, tpe.indextpe.dtype), (proxyin.content, indexval))
+        return output._getvalue()
+
+    else:
+        return tpe.contenttpe.lower_getitem_int(context, builder, tpe.contenttpe.getitem_int()(tpe.contenttpe, tpe.indextpe.dtype), (proxyin.content, indexval))

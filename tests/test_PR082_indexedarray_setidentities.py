@@ -114,3 +114,26 @@ def test_boxing():
     assert awkward1.tolist(f2(indexedarray2)) == [2.2, 3.3, 3.3, None, None, 8.8]
     assert awkward1.tolist(f2(indexedarray3)) == [[3.3, 4.4], [0.0, 1.1, 2.2], [], [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]
     assert awkward1.tolist(f2(indexedarray4)) == [[3.3, 4.4], None, None, [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]
+
+def test_len():
+    @numba.njit
+    def f1(x):
+        return len(x)
+
+    assert f1(indexedarray1) == 6
+    assert f1(indexedarray2) == 6
+    assert f1(indexedarray3) == 6
+    assert f1(indexedarray4) == 6
+
+def test_getitem_int():
+    @numba.njit
+    def f1(x, i):
+        return x[i]
+
+    assert f1(indexedarray1, 2) == 3.3
+    assert f1(indexedarray1, 3) == 0.0
+    assert f1(indexedarray2, 2) == 3.3
+    assert f1(indexedarray2, 3) == None
+    assert awkward1.tolist(f1(indexedarray3, 1)) == [0.0, 1.1, 2.2]
+    assert awkward1.tolist(f1(indexedarray4, 1)) == None
+    assert awkward1.tolist(f1(indexedarray4, 3)) == [5.5]
