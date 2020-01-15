@@ -116,31 +116,24 @@ ERROR awkward_listarray64_flatten_64(int64_t* tocarry, const int64_t* fromstarts
   return awkward_listarray_flatten<int64_t, int64_t>(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
 }
 
-template <typename C>
-ERROR awkward_indexedarray_flatten_numnull_lenout(int64_t* numnull, int64_t* lenout, const C* fromindex, int64_t indexoffset, int64_t lenindex, const int64_t* contentcount, int64_t lencontent) {
-  *numnull = 0;
-  *lenout = 0;
+template <typename C, typename T>
+ERROR awkward_indexedarray_flatten_nextcarry(T* tocarry, const C* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  int64_t k = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
     C j = fromindex[indexoffset + i];
     if (j >= lencontent) {
-      failure("IndexedArray index out of range", i, j);
+      return failure("IndexedOptionArray index out of range", i, j);
     }
-    else if (j < 0) {
-      *numnull = *numnull + 1;
-      *lenout = *lenout + 1;
-    }
-    else {
-      *lenout = *lenout + contentcount[j];
+    else if (j >= 0) {
+      tocarry[k] = j;
+      k++;
     }
   }
   return success();
 }
-ERROR awkward_indexedarray32_flatten_numnull_lenout(int64_t* numnull, int64_t* lenout, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, const int64_t* contentcount, int64_t lencontent) {
-  return awkward_indexedarray_flatten_numnull_lenout<int32_t>(numnull, lenout, fromindex, indexoffset, lenindex, contentcount, lencontent);
+ERROR awkward_indexedarray32_flatten_nextcarry_64(int64_t* tocarry, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  return awkward_indexedarray_flatten_nextcarry<int32_t, int64_t>(tocarry, fromindex, indexoffset, lenindex, lencontent);
 }
-ERROR awkward_indexedarray64_flatten_numnull_lenout(int64_t* numnull, int64_t* lenout, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, const int64_t* contentcount, int64_t lencontent) {
-  return awkward_indexedarray_flatten_numnull_lenout<int64_t>(numnull, lenout, fromindex, indexoffset, lenindex, contentcount, lencontent);
+ERROR awkward_indexedarray64_flatten_nextcarry_64(int64_t* tocarry, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  return awkward_indexedarray_flatten_nextcarry<int64_t, int64_t>(tocarry, fromindex, indexoffset, lenindex, lencontent);
 }
-
-// template <typename C, typename T>
-// ERROR awkward_indexedarray_flatten_nextcarry_outindex(T* nextcarry, C* outindex, )

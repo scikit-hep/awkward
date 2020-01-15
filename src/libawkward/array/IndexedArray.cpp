@@ -342,35 +342,25 @@ namespace awkward {
       throw std::runtime_error("FIXME: IndexedArray::flatten(axis != 0)");
     }
     if (ISOPTION) {
-      Index64 contentcount = content_.get()->count64();
-
       int64_t numnull;
-      int64_t lenout;
-      struct Error err1 = util::awkward_indexedarray_flatten_numnull_lenout<T>(
+      struct Error err1 = util::awkward_indexedarray_numnull<T>(
         &numnull,
-        &lenout,
         index_.ptr().get(),
         index_.offset(),
-        index_.length(),
-        contentcount.ptr().get(),
-        contentcount.length());
+        index_.length());
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 nextcarry(length() - numnull);
-      IndexOf<T> outindex(lenout);
-      struct Error err2 = util::awkward_indexedarray_flatten_nextcarry_outindex_64<T>(
+      struct Error err2 = util::awkward_indexedarray_flatten_nextcarry_64<T>(
         nextcarry.ptr().get(),
-        outindex.ptr().get(),
         index_.ptr().get(),
         index_.offset(),
         index_.length(),
-        contentcount.ptr().get(),
-        contentcount.length());
+        content_.get()->length());
       util::handle_error(err2, classname(), identities_.get());
 
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-      std::shared_ptr<Content> out = next.get()->flatten(axis);
-      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, outindex, out);
+      return next.get()->flatten(axis);
     }
     else {
       Index64 nextcarry(length());
