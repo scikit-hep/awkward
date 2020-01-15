@@ -78,3 +78,39 @@ def test_dontpass_64():
     indexedarray.setidentities()
     assert numpy.asarray(indexedarray.identities).tolist() == [[0], [1], [2], [3], [4], [5], [6], [7], [8]]
     assert indexedarray.content.identities is None
+
+numba = pytest.importorskip("numba")
+
+content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+index1 = awkward1.layout.Index64(numpy.array([2, 3, 3, 0, 4, 8], dtype=numpy.int64))
+indexedarray1 = awkward1.layout.IndexedArray64(index1, content)
+index2 = awkward1.layout.Index64(numpy.array([2, 3, 3, -1, -1, 8], dtype=numpy.int64))
+indexedarray2 = awkward1.layout.IndexedOptionArray64(index2, content)
+offsets1 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6], dtype=numpy.int64))
+listoffsetarray1 = awkward1.layout.ListOffsetArray64(offsets1, indexedarray1)
+listoffsetarray2 = awkward1.layout.ListOffsetArray64(offsets1, indexedarray2)
+offsets3 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10], dtype=numpy.int64))
+listoffsetarray3 = awkward1.layout.ListOffsetArray64(offsets3, content)
+index3 = awkward1.layout.Index64(numpy.array([2, 0, 1, 3, 3, 4], dtype=numpy.int64))
+indexedarray3 = awkward1.layout.IndexedArray64(index3, listoffsetarray3)
+index4 = awkward1.layout.Index64(numpy.array([2, -1, -1, 3, 3, 4], dtype=numpy.int64))
+indexedarray4 = awkward1.layout.IndexedOptionArray64(index4, listoffsetarray3)
+
+def test_boxing():
+    @numba.njit
+    def f1(x):
+        return 3.14
+
+    f1(indexedarray1)
+    f1(indexedarray2)
+    f1(indexedarray3)
+    f1(indexedarray4)
+
+    @numba.njit
+    def f2(x):
+        return x
+
+    assert awkward1.tolist(f2(indexedarray1)) == [2.2, 3.3, 3.3, 0.0, 4.4, 8.8]
+    assert awkward1.tolist(f2(indexedarray2)) == [2.2, 3.3, 3.3, None, None, 8.8]
+    assert awkward1.tolist(f2(indexedarray3)) == [[3.3, 4.4], [0.0, 1.1, 2.2], [], [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(f2(indexedarray4)) == [[3.3, 4.4], None, None, [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]

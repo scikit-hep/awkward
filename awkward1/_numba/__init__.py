@@ -20,3 +20,4 @@ else:
     import awkward1._numba.array.emptyarray
     import awkward1._numba.array.regulararray
     import awkward1._numba.array.recordarray
+    import awkward1._numba.array.indexedarray

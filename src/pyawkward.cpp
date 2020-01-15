@@ -1478,6 +1478,7 @@ py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T
 
       .def_property_readonly("index", &ak::IndexedArrayOf<T, ISOPTION>::index)
       .def_property_readonly("content", &ak::IndexedArrayOf<T, ISOPTION>::content)
+      .def_property_readonly("isoption", &ak::IndexedArrayOf<T, ISOPTION>::isoption)
   );
 }
 
