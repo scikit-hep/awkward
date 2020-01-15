@@ -58,8 +58,8 @@ namespace awkward {
     return IndexOf<T>(offsets.ptr(), offsets.offset() + 1, offsets.length() - 1);
   }
 
-  template <>
-  void ListOffsetArrayOf<int32_t>::setidentities(const std::shared_ptr<Identities>& identities) {
+  template <typename T>
+  void ListOffsetArrayOf<T>::setidentities(const std::shared_ptr<Identities>& identities) {
     if (identities.get() == nullptr) {
       content_.get()->setidentities(identities);
     }
@@ -68,13 +68,13 @@ namespace awkward {
         util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
       }
       std::shared_ptr<Identities> bigidentities = identities;
-      if (content_.get()->length() > kMaxInt32) {
+      if (content_.get()->length() > kMaxInt32  ||  !std::is_same<T, int32_t>::value) {
         bigidentities = identities.get()->to64();
       }
       if (Identities32* rawidentities = dynamic_cast<Identities32*>(bigidentities.get())) {
         std::shared_ptr<Identities> subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
         Identities32* rawsubidentities = reinterpret_cast<Identities32*>(subidentities.get());
-        struct Error err = awkward_identities32_from_listoffsetarray32(
+        struct Error err = util::awkward_identities32_from_listoffsetarray<T>(
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           offsets_.ptr().get(),
@@ -87,38 +87,6 @@ namespace awkward {
         content_.get()->setidentities(subidentities);
       }
       else if (Identities64* rawidentities = dynamic_cast<Identities64*>(bigidentities.get())) {
-        std::shared_ptr<Identities> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
-        Identities64* rawsubidentities = reinterpret_cast<Identities64*>(subidentities.get());
-        struct Error err = awkward_identities64_from_listoffsetarray32(
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          offsets_.ptr().get(),
-          rawidentities->offset(),
-          offsets_.offset(),
-          content_.get()->length(),
-          length(),
-          rawidentities->width());
-        util::handle_error(err, classname(), identities_.get());
-        content_.get()->setidentities(subidentities);
-      }
-      else {
-        throw std::runtime_error("unrecognized Identities specialization");
-      }
-    }
-    identities_ = identities;
-  }
-
-  template <typename T>
-  void ListOffsetArrayOf<T>::setidentities(const std::shared_ptr<Identities>& identities) {
-    if (identities.get() == nullptr) {
-      content_.get()->setidentities(identities);
-    }
-    else {
-      if (length() != identities.get()->length()) {
-        util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
-      }
-      std::shared_ptr<Identities> bigidentities = identities.get()->to64();
-      if (Identities64* rawidentities = dynamic_cast<Identities64*>(bigidentities.get())) {
         std::shared_ptr<Identities> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
         Identities64* rawsubidentities = reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = util::awkward_identities64_from_listoffsetarray<T>(

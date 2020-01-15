@@ -45,6 +45,8 @@ namespace awkward {
     bool subset(const std::vector<std::string>& super, const std::vector<std::string>& sub);
 
     template <typename T>
+    ERROR awkward_identities32_from_listoffsetarray(int32_t* toptr, const int32_t* fromptr, const T* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+    template <typename T>
     ERROR awkward_identities64_from_listoffsetarray(int64_t* toptr, const int64_t* fromptr, const T* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
     template <typename T>
     ERROR awkward_identities32_from_listarray(int32_t* toptr, const int32_t* fromptr, const T* fromstarts, const T* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
