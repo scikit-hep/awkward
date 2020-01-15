@@ -87,6 +87,12 @@ ERROR awkward_identities_from_listarray(ID* toptr, const ID* fromptr, const T* f
 ERROR awkward_identities32_from_listarray32(int32_t* toptr, const int32_t* fromptr, const int32_t* fromstarts, const int32_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
   return awkward_identities_from_listarray<int32_t, int32_t>(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
 }
+ERROR awkward_identities32_from_listarrayU32(int32_t* toptr, const int32_t* fromptr, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+  return awkward_identities_from_listarray<int32_t, uint32_t>(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
+}
+ERROR awkward_identities32_from_listarray64(int32_t* toptr, const int32_t* fromptr, const int64_t* fromstarts, const int64_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+  return awkward_identities_from_listarray<int32_t, int64_t>(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
+}
 ERROR awkward_identities64_from_listarray32(int64_t* toptr, const int64_t* fromptr, const int32_t* fromstarts, const int32_t* fromstops, int64_t fromptroffset, int64_t startsoffset, int64_t stopsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
   return awkward_identities_from_listarray<int64_t, int32_t>(toptr, fromptr, fromstarts, fromstops, fromptroffset, startsoffset, stopsoffset, tolength, fromlength, fromwidth);
 }
