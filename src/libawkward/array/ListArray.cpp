@@ -69,9 +69,11 @@ namespace awkward {
         bigidentities = identities.get()->to64();
       }
       if (Identities32* rawidentities = dynamic_cast<Identities32*>(bigidentities.get())) {
+        bool uniquecontents;
         std::shared_ptr<Identities> subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
         Identities32* rawsubidentities = reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = util::awkward_identities32_from_listarray<T>(
+          &uniquecontents,
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           starts_.ptr().get(),
@@ -83,12 +85,19 @@ namespace awkward {
           length(),
           rawidentities->width());
         util::handle_error(err, classname(), identities_.get());
-        content_.get()->setidentities(subidentities);
+        if (uniquecontents) {
+          content_.get()->setidentities(subidentities);
+        }
+        else {
+          content_.get()->setidentities(Identities::none());
+        }
       }
       else if (Identities64* rawidentities = dynamic_cast<Identities64*>(bigidentities.get())) {
+        bool uniquecontents;
         std::shared_ptr<Identities> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
         Identities64* rawsubidentities = reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = util::awkward_identities64_from_listarray<T>(
+          &uniquecontents,
           rawsubidentities->ptr().get(),
           rawidentities->ptr().get(),
           starts_.ptr().get(),
@@ -100,7 +109,12 @@ namespace awkward {
           length(),
           rawidentities->width());
         util::handle_error(err, classname(), identities_.get());
-        content_.get()->setidentities(subidentities);
+        if (uniquecontents) {
+          content_.get()->setidentities(subidentities);
+        }
+        else {
+          content_.get()->setidentities(Identities::none());
+        }
       }
       else {
         throw std::runtime_error("unrecognized Identities specialization");

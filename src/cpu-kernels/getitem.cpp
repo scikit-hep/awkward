@@ -580,7 +580,7 @@ ERROR awkward_indexedarray_getitem_nextcarry_outindex(T* tocarry, C* toindex, co
   for (int64_t i = 0;  i < lenindex;  i++) {
     C j = fromindex[indexoffset + i];
     if (j >= lencontent) {
-      return failure("IndexedOptionArray index out of range", i, j);
+      return failure("index out of range", i, j);
     }
     else if (j < 0) {
       toindex[i] = -1;
@@ -606,7 +606,7 @@ ERROR awkward_indexedarray_getitem_nextcarry(T* tocarry, const C* fromindex, int
   for (int64_t i = 0;  i < lenindex;  i++) {
     C j = fromindex[indexoffset + i];
     if (j < 0  ||  j >= lencontent) {
-      return failure("IndexedArray index out of range", i, j);
+      return failure("index out of range", i, j);
     }
     else {
       tocarry[k] = j;
