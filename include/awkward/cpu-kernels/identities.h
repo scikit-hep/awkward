@@ -23,6 +23,14 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_identities32_from_regulararray(int32_t* toptr, const int32_t* fromptr, int64_t fromptroffset, int64_t size, int64_t tolength, int64_t fromlength, int64_t fromwidth);
   EXPORT_SYMBOL struct Error awkward_identities64_from_regulararray(int64_t* toptr, const int64_t* fromptr, int64_t fromptroffset, int64_t size, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+
+  EXPORT_SYMBOL struct Error awkward_identities32_from_indexedarray32(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const int32_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+  EXPORT_SYMBOL struct Error awkward_identities32_from_indexedarrayU32(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const uint32_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+  EXPORT_SYMBOL struct Error awkward_identities32_from_indexedarray64(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const int64_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+  EXPORT_SYMBOL struct Error awkward_identities64_from_indexedarray32(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const int32_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+  EXPORT_SYMBOL struct Error awkward_identities64_from_indexedarrayU32(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const uint32_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+  EXPORT_SYMBOL struct Error awkward_identities64_from_indexedarray64(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const int64_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+
 }
 
 #endif // AWKWARDCPU_IDENTITIES_H_

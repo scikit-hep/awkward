@@ -61,12 +61,84 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   void IndexedArrayOf<T, ISOPTION>::setidentities(const std::shared_ptr<Identities>& identities) {
-    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION>::setidentities(identities)");
+    if (identities.get() == nullptr) {
+      content_.get()->setidentities(identities);
+    }
+    else {
+      if (length() != identities.get()->length()) {
+        util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
+      }
+      std::shared_ptr<Identities> bigidentities = identities;
+      if (content_.get()->length() > kMaxInt32  ||  !std::is_same<T, int32_t>::value) {
+        bigidentities = identities.get()->to64();
+      }
+      if (Identities32* rawidentities = dynamic_cast<Identities32*>(bigidentities.get())) {
+        bool uniquecontents;
+        std::shared_ptr<Identities> subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content_.get()->length());
+        Identities32* rawsubidentitites = reinterpret_cast<Identities32*>(subidentities.get());
+        struct Error err = util::awkward_identities32_from_indexedarray<T>(
+          &uniquecontents,
+          rawsubidentitites->ptr().get(),
+          rawidentities->ptr().get(),
+          index_.ptr().get(),
+          rawidentities->offset(),
+          index_.offset(),
+          content_.get()->length(),
+          length(),
+          rawidentities->width());
+        util::handle_error(err, classname(), identities_.get());
+        if (uniquecontents) {
+          content_.get()->setidentities(subidentities);
+        }
+        else {
+          content_.get()->setidentities(Identities::none());
+        }
+      }
+      else if (Identities64* rawidentities = dynamic_cast<Identities64*>(bigidentities.get())) {
+        bool uniquecontents;
+        std::shared_ptr<Identities> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content_.get()->length());
+        Identities64* rawsubidentitites = reinterpret_cast<Identities64*>(subidentities.get());
+        struct Error err = util::awkward_identities64_from_indexedarray<T>(
+          &uniquecontents,
+          rawsubidentitites->ptr().get(),
+          rawidentities->ptr().get(),
+          index_.ptr().get(),
+          rawidentities->offset(),
+          index_.offset(),
+          content_.get()->length(),
+          length(),
+          rawidentities->width());
+        util::handle_error(err, classname(), identities_.get());
+        if (uniquecontents) {
+          content_.get()->setidentities(subidentities);
+        }
+        else {
+          content_.get()->setidentities(Identities::none());
+        }
+      }
+      else {
+        throw std::runtime_error("unrecognized Identities specialization");
+      }
+    }
+    identities_ = identities;
   }
 
   template <typename T, bool ISOPTION>
   void IndexedArrayOf<T, ISOPTION>::setidentities() {
-    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION>::setidentities()");
+    if (length() <= kMaxInt32) {
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
+      struct Error err = awkward_new_identities32(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
+    }
+    else {
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
+      struct Error err = awkward_new_identities64(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
+    }
   }
 
   template <typename T, bool ISOPTION>

@@ -188,6 +188,31 @@ namespace awkward {
     }
 
     template <>
+    Error awkward_identities32_from_indexedarray<int32_t>(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const int32_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identities32_from_indexedarray32(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth);
+    }
+    template <>
+    Error awkward_identities32_from_indexedarray<uint32_t>(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const uint32_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identities32_from_indexedarrayU32(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth);
+    }
+    template <>
+    Error awkward_identities32_from_indexedarray<int64_t>(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const int64_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identities32_from_indexedarray64(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth);
+    }
+    template <>
+    Error awkward_identities64_from_indexedarray<int32_t>(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const int32_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identities64_from_indexedarray32(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth);
+    }
+    template <>
+    Error awkward_identities64_from_indexedarray<uint32_t>(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const uint32_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identities64_from_indexedarrayU32(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth);
+    }
+    template <>
+    Error awkward_identities64_from_indexedarray<int64_t>(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const int64_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
+      return awkward_identities64_from_indexedarray64(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth);
+    }
+
+    template <>
     Error awkward_listarray_getitem_next_at_64<int32_t>(int64_t* tocarry, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at) {
       return awkward_listarray32_getitem_next_at_64(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, at);
     }
