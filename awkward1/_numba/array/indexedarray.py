@@ -215,3 +215,21 @@ def lower_getitem_int(context, builder, sig, args):
 
     else:
         return tpe.contenttpe.lower_getitem_int(context, builder, tpe.contenttpe.getitem_int()(tpe.contenttpe, tpe.indextpe.dtype), (proxyin.content, indexval))
+
+@numba.extending.lower_builtin(operator.getitem, IndexedArrayType, numba.types.slice2_type)
+def lower_getitem_range(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+
+    proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
+    proxyout.index = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.indextpe(tpe.indextpe, wheretpe), (proxyin.index, whereval))
+    proxyout.content = proxyin.content
+    if tpe.identitiestpe != numba.none:
+        proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, tpe.identitiestpe, wheretpe, proxyin.identities, whereval)
+
+    out = proxyout._getvalue()
+    if context.enable_nrt:
+        context.nrt.incref(builder, rettpe, out)
+    return out

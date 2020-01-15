@@ -178,3 +178,13 @@ def test_iter():
         return total
 
     assert f1(indexedarray4) == 3.3 + 4.4 + 5.5 + 5.5 + 6.6 + 7.7 + 8.8 + 9.9
+
+def test_getitem_range():
+    @numba.njit
+    def f1(q):
+        return q[-4:]
+
+    assert awkward1.tolist(f1(indexedarray1)) == [3.3, 0.0, 4.4, 8.8]
+    assert awkward1.tolist(f1(indexedarray2)) == [3.3, None, None, 8.8]
+    assert awkward1.tolist(f1(indexedarray3)) == [[], [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(f1(indexedarray4)) == [None, [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]
