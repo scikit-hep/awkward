@@ -233,3 +233,140 @@ def lower_getitem_range(context, builder, sig, args):
     if context.enable_nrt:
         context.nrt.incref(builder, rettpe, out)
     return out
+
+@numba.extending.lower_builtin(operator.getitem, IndexedArrayType, numba.types.StringLiteral)
+def lower_getitem_str(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
+    proxyout.index = proxyin.index
+    proxyout.content = tpe.contenttpe.lower_getitem_str(context, builder, rettpe.contenttpe(tpe.contenttpe, wheretpe), (proxyin.content, whereval))
+    if tpe.identitiestpe != numba.none:
+        proxyout.identities = proxyin.identities
+
+    out = proxyout._getvalue()
+    if context.enable_nrt:
+        context.nrt.incref(builder, rettpe, out)
+    return out
+
+@numba.extending.lower_builtin(operator.getitem, IndexedArrayType, numba.types.BaseTuple)
+def lower_getitem_tuple(context, builder, sig, args):
+    return content.lower_getitem_tuple(context, builder, sig, args)
+
+@numba.extending.lower_builtin(operator.getitem, IndexedArrayType, numba.types.Array)
+@numba.extending.lower_builtin(operator.getitem, IndexedArrayType, numba.types.List)
+@numba.extending.lower_builtin(operator.getitem, IndexedArrayType, numba.types.ArrayCompatible)
+@numba.extending.lower_builtin(operator.getitem, IndexedArrayType, numba.types.EllipsisType)
+@numba.extending.lower_builtin(operator.getitem, IndexedArrayType, type(numba.typeof(numpy.newaxis)))
+def lower_getitem_other(context, builder, sig, args):
+    return content.lower_getitem_other(context, builder, sig, args)
+
+def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval, advanced):
+    if len(wheretpe.types) == 0:
+        return arrayval
+
+    headtpe = wheretpe.types[0]
+    tailtpe = numba.types.Tuple(wheretpe.types[1:])
+    headval = numba.cgutils.unpack_tuple(builder, whereval)[0]
+    tailval = context.make_tuple(builder, tailtpe, numba.cgutils.unpack_tuple(builder, whereval)[1:])
+
+    proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+    lenindex = util.arraylen(context, builder, arraytpe.indextpe, proxyin.index, totpe=numba.int64)
+    lencontent = util.arraylen(context, builder, arraytpe.contenttpe, proxyin.content, totpe=numba.int64)
+
+    if isinstance(headtpe, (numba.types.Integer, numba.types.SliceType, numba.types.Array)):
+        if self.isoption:
+            # contenttpe = self.contenttpe.carry().getitem_next(wheretpe, isadvanced)
+            # return IndexedArrayType(self.indextpe, contenttpe, self.isoption, self.identitiestpe, self.parameters)
+            raise NotImplementedError("lower_getitem_next for ListOptionArray")
+
+        else:
+            # return self.contenttpe.carry().getitem_next(wheretpe, isadvanced)
+            if arraytpe.indexname == "32":
+                kernel = cpu.kernels.awkward_indexedarray32_getitem_nextcarry_64
+            elif arraytpe.indexname == "U32":
+                kernel = cpu.kernels.awkward_indexedarrayU32_getitem_nextcarry_64
+            elif arraytpe.indexname == "64":
+                kernel = cpu.kernels.awkward_indexedarray64_getitem_nextcarry_64
+            else:
+                raise AssertionError("unrecognized index type: {0}".format(arraytpe.indexname))
+
+            nextcarry = util.newindex64(context, builder, numba.int64, lenindex)
+            util.call(context, builder, kernel,
+                (util.arrayptr(context, builder, util.index64tpe, nextcarry),
+                 util.arrayptr(context, builder, arraytpe.indextpe, proxyin.index),
+                 context.get_constant(numba.int64, 0),
+                 lenindex),
+                "in {0}, indexing error".format(arraytpe.shortname))
+            nextcontenttpe = arraytpe.contenttpe.carry()
+            nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
+            return nextcontenttpe.lower_getitem_next(context, builder, nextconttnetpe, tailtpe, nextcontentval, tailval, advanced)
+
+    elif isinstance(headtpe, numba.types.StringLiteral):
+        # return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
+        raise NotImplementedError("str")
+
+    elif isinstance(headtpe, numba.types.EllipsisType):
+        raise NotImplementedError("ellipsis")
+
+    elif isinstance(headtpe, type(numba.typeof(numpy.newaxis))):
+        raise NotImplementedError("newaxis")
+
+    else:
+        raise AssertionError(headtpe)
+
+def lower_carry(context, builder, arraytpe, carrytpe, arrayval, carryval):
+    import awkward1._numba.identities
+
+    proxyin = numba.cgutils.create_struct_proxy(arraytpe)(context, builder, value=arrayval)
+
+    proxyout = numba.cgutils.create_struct_proxy(arraytpe)(context, builder)
+    proxyout.index = numba.targets.arrayobj.fancy_getitem_array(context, builder, arraytpe.indextpe(arraytpe.indextpe, carrytpe), (proxyin.index, carryval))
+    proxyout.content = proxyin.content
+    if arraytpe.identitiestpe != numba.none:
+        proxyout.identities = awkward1._numba.identities.lower_getitem_any(context, builder, arraytpe.identitiestpe, carrytpe, proxyin.identities, carryval)
+
+    return proxyout._getvalue()
+
+@numba.typing.templates.infer_getattr
+class type_methods(numba.typing.templates.AttributeTemplate):
+    key = IndexedArrayType
+
+    def generic_resolve(self, tpe, attr):
+        if attr == "index":
+            return tpe.indextpe
+
+        elif attr == "content":
+            return tpe.contenttpe
+
+        elif attr == "identities":
+            if tpe.identitiestpe == numba.none:
+                return numba.optional(identity.IdentitiesType(numba.int32[:, :]))
+            else:
+                return tpe.identitiestpe
+
+@numba.extending.lower_getattr(IndexedArrayType, "index")
+def lower_index(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe.indextpe, proxyin.index)
+    return proxyin.index
+
+@numba.extending.lower_getattr(IndexedArrayType, "content")
+def lower_content(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if context.enable_nrt:
+        context.nrt.incref(builder, tpe.contenttpe, proxyin.content)
+    return proxyin.content
+
+@numba.extending.lower_getattr(IndexedArrayType, "identities")
+def lower_identities(context, builder, tpe, val):
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+    if tpe.identitiestpe == numba.none:
+        return context.make_optional_none(builder, identity.IdentitiesType(numba.int32[:, :]))
+    else:
+        if context.enable_nrt:
+            context.nrt.incref(builder, tpe.identitiestpe, proxyin.identities)
+        return proxyin.identities
