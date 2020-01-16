@@ -701,7 +701,7 @@ ERROR awkward_unionarray_regular_index(I* toindex, const C* fromtags, int64_t ta
   std::vector<I> current;
   for (int64_t i = 0;  i < length;  i++) {
     C tag = fromtags[tagsoffset + i];
-    while (current.size() <= tag) {
+    while (current.size() <= (size_t)tag) {
       current.push_back(0);
     }
     toindex[(size_t)i] = current[(size_t)tag];

@@ -148,9 +148,9 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `ListOffsetArray`: the `JaggedArray` case with no unreachable data between reachable data (gaps).
       * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
-         * [X] Implement it in Numba as well.
       * [X] `IndexedArray` and `IndexedOptionArray`: the old `IndexedArray` and `IndexedMaskedArray`; the latter has option type.
-      * [ ] `UnionArray` (issue [#54](https://github.com/scikit-hep/awkward-1.0/issues/54)): same as the old version.
+      * [X] `UnionArray` (issue [#54](https://github.com/scikit-hep/awkward-1.0/issues/54)): same as the old version.
+         * [ ] Implement it in Numba as well.
       * [ ] `BitMaskedArray` (issue [#58](https://github.com/scikit-hep/awkward-1.0/issues/58)): for nullable data with a bit mask (for Arrow).
       * [ ] `UnmaskedArray` (issue [#59](https://github.com/scikit-hep/awkward-1.0/issues/59)): for optional type without actually having a mask.
       * [ ] `SlicedArray` (issue [#55](https://github.com/scikit-hep/awkward-1.0/issues/55)): lazy-slicing (from old `Table`) that can be applied to any type.
