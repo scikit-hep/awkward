@@ -149,12 +149,10 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
          * [X] Implement it in Numba as well.
+      * [X] `IndexedArray` and `IndexedOptionArray`: the old `IndexedArray` and `IndexedMaskedArray`; the latter has option type.
+      * [ ] `UnionArray` (issue [#54](https://github.com/scikit-hep/awkward-1.0/issues/54)): same as the old version.
       * [ ] `BitMaskedArray` (issue [#58](https://github.com/scikit-hep/awkward-1.0/issues/58)): for nullable data with a bit mask (for Arrow).
       * [ ] `UnmaskedArray` (issue [#59](https://github.com/scikit-hep/awkward-1.0/issues/59)): for optional type without actually having a mask.
-      * [X] `IndexedArray` and `IndexedOptionArray`: the old `IndexedArray` and `IndexedMaskedArray`; the latter has option type.
-         * [ ] Implement `Identities` for `IndexedArray` (issue [#52](https://github.com/scikit-hep/awkward-1.0/issues/52)).
-         * [ ] Implement Numba lowering for `IndexedArray` (issue [#53](https://github.com/scikit-hep/awkward-1.0/issues/53)).
-      * [ ] `UnionArray` (issue [#54](https://github.com/scikit-hep/awkward-1.0/issues/54)): same as the old version.
       * [ ] `SlicedArray` (issue [#55](https://github.com/scikit-hep/awkward-1.0/issues/55)): lazy-slicing (from old `Table`) that can be applied to any type.
       * [ ] `ChunkedArray` (issue [#56](https://github.com/scikit-hep/awkward-1.0/issues/56)): same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required.
       * [ ] `PyVirtualArray` (issue [#57](https://github.com/scikit-hep/awkward-1.0/issues/57)): same as old `VirtualArray`, but it only works in Python (passes _through_ C++).
