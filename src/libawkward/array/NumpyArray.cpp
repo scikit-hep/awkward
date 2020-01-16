@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
+#include <numeric>
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
@@ -624,16 +625,58 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: NumpyArray::flatten(axis != 0)");
+  const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t>& shape, int64_t axis) {
+    if (axis >= shape.size()) {
+      throw std::invalid_argument(std::string("cannot flatten Numpy shape if axis > shape.size()"));
     }
+    if (shape.size() == 1) {
+      return std::vector<ssize_t>();
+    }
+    else {
+      std::vector<ssize_t> out;
+      if (axis + 1 == shape.size()) {
+        out.emplace_back(std::accumulate(begin(shape), end(shape), 1, std::multiplies<ssize_t>()));
+      }
+      else {
+        const auto& indx = begin(shape) + axis;
+        if (indx > begin(shape)) {
+          out.insert(end(out), begin(shape), indx);
+        }
+        out.emplace_back(shape[axis]*shape[axis + 1]);
+        out.insert(end(out), indx + 2, end(shape));
+      }
+      return out;
+    }
+  }
+
+  const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t>& strides, int64_t axis) {
+    if (axis >= strides.size()) {
+      throw std::invalid_argument(std::string("cannot flatten Numpy strides if axis > strides.size()"));
+    }
+    if (strides.size() == 1) {
+      return std::vector<ssize_t>();
+    }
+    std::vector<ssize_t> out;
+    if (axis + 1 == strides.size()) {
+      out.emplace_back(strides[strides.size() - 1]);
+    }
+    else {
+      const auto indx = begin(strides) + axis;
+      if (indx > begin(strides)) {
+        out.insert(end(out), begin(strides), indx);
+      }
+      out.insert(end(out), indx + 1, end(strides));
+    }
+    return out;
+  }
+
+  const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
     if (shape_.size() <= 1) {
       // FIXME: the cut-off for flattenability depends on axis
       throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
     if (iscontiguous()) {
-      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_, axis), flatten_strides(strides_, axis), byteoffset_, itemsize_, format_);
     }
     else {
       return contiguous().flatten(axis);
