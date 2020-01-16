@@ -1520,6 +1520,8 @@ py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::
       .def_property_readonly("tags", &ak::UnionArrayOf<T, I>::tags)
       .def_property_readonly("index", &ak::UnionArrayOf<T, I>::index)
       .def_property_readonly("contents", &ak::UnionArrayOf<T, I>::contents)
+      .def_property_readonly("numcontents", &ak::UnionArrayOf<T, I>::numcontents)
+      .def("content", &ak::UnionArrayOf<T, I>::content)
   );
 }
 

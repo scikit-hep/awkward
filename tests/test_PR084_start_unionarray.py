@@ -19,3 +19,7 @@ def test_basic():
     assert numpy.asarray(array.index).dtype == numpy.dtype(numpy.int32)
     assert type(array.contents) is list
     assert [awkward1.tolist(x) for x in array.contents] == [[[1.1, 2.2, 3.3], [], [4.4, 5.5]], ["one", "two", "three", "four", "five"]]
+    assert array.numcontents == 2
+    assert awkward1.tolist(array.content(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(array.content(1)) == ["one", "two", "three", "four", "five"]
+    repr(array)

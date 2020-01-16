@@ -36,8 +36,29 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  int64_t UnionArrayOf<T, I>::numcontents() const {
+    return (int64_t)contents_.size();
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::content(int64_t index) const {
+    return contents_[(size_t)index];
+  }
+
+  template <typename T, typename I>
   const std::string UnionArrayOf<T, I>::classname() const {
-    throw std::runtime_error("UnionArray::classname");
+    if (std::is_same<T, uint8_t>::value) {
+      if (std::is_same<I, int32_t>::value) {
+        return "UnionArrayU8_32";
+      }
+      else if (std::is_same<I, uint32_t>::value) {
+        return "UnionArrayU8_U32";
+      }
+      else if (std::is_same<I, int64_t>::value) {
+        return "UnionArrayU8_64";
+      }
+    }
+    return "UnrecognizedUnionArray";
   }
 
   template <typename T, typename I>
@@ -52,17 +73,48 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Type> UnionArrayOf<T, I>::type() const {
-    throw std::runtime_error("UnionArray::type");
+    std::vector<std::shared_ptr<Type>> types;
+    for (auto item : contents_) {
+      types.push_back(item.get()->type());
+    }
+    return std::make_shared<UnionType>(parameters_, types);
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::astype(const std::shared_ptr<Type>& type) const {
-    throw std::runtime_error("UnionArray::astype");
+    if (UnionType* raw = dynamic_cast<UnionType*>(type.get())) {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (int64_t i = 0;  i < raw->numtypes();  i++) {
+        // FIXME: union equivalence could be defined much more flexibly than this, but do it later...
+        if (i >= contents_.size()) {
+          throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because the number of possibilities doesn't match"));
+        }
+        contents.push_back(contents_[(size_t)i].get()->astype(raw->type(i)));
+      }
+      return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents);
+    }
+    else {
+      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
+    }
   }
 
   template <typename T, typename I>
   const std::string UnionArrayOf<T, I>::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
-    throw std::runtime_error("UnionArray::tostring_part");
+    std::stringstream out;
+    out << indent << pre << "<" << classname() << ">\n";
+    if (identities_.get() != nullptr) {
+      out << identities_.get()->tostring_part(indent + std::string("    "), "", "\n");
+    }
+    if (!parameters_.empty()) {
+      out << parameters_tostring(indent + std::string("    "), "", "\n");
+    }
+    for (size_t i = 0;  i < contents_.size();  i++) {
+      out << indent << "    <content index=\"" << i << "\">\n";
+      out << contents_[i].get()->tostring_part(indent + std::string("        "), "", "\n");
+      out << indent << "    </content>\n";
+    }
+    out << indent << "</" << classname() << ">" << post;
+    return out.str();
   }
 
   template <typename T, typename I>
