@@ -277,13 +277,49 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
     lencontent = util.arraylen(context, builder, arraytpe.contenttpe, proxyin.content, totpe=numba.int64)
 
     if isinstance(headtpe, (numba.types.Integer, numba.types.SliceType, numba.types.Array)):
-        if self.isoption:
-            # contenttpe = self.contenttpe.carry().getitem_next(wheretpe, isadvanced)
-            # return IndexedArrayType(self.indextpe, contenttpe, self.isoption, self.identitiestpe, self.parameters)
-            raise NotImplementedError("lower_getitem_next for ListOptionArray")
+        if arraytpe.isoption:
+            if arraytpe.indexname == "32":
+                determine_numnull = cpu.kernels.awkward_indexedarray32_numnull
+                kernel = cpu.kernels.awkward_indexedarray32_getitem_nextcarry_outindex_64
+            elif arraytpe.indexname == "U32":
+                determine_numnull = cpu.kernels.awkward_indexedarrayU32_numnull
+                kernel = cpu.kernels.awkward_indexedarrayU32_getitem_nextcarry_outindex_64
+            elif arraytpe.indexname == "64":
+                determine_numnull = cpu.kernels.awkward_indexedarray64_numnull
+                kernel = cpu.kernels.awkward_indexedarray64_getitem_nextcarry_outindex_64
+            else:
+                raise AssertionError("unrecognized index type: {0}".format(arraytpe.indexname))
+            numnull = numba.cgutils.alloca_once(builder, context.get_value_type(numba.int64))
+            util.call(context, builder, determine_numnull,
+                (numnull,
+                 util.arrayptr(context, builder, arraytpe.indextpe, proxyin.index),
+                 context.get_constant(numba.int64, 0),
+                 lenindex),
+                "in {0}, indexing error".format(arraytpe.shortname))
+            lencarry = builder.sub(lenindex, builder.load(numnull))
+            nextcarry = util.newindex64(context, builder, numba.int64, lencarry)
+            outindex = util.newindex(arraytpe.indexname, context, builder, numba.int64, lenindex)
+            util.call(context, builder, kernel,
+                (util.arrayptr(context, builder, util.index64tpe, nextcarry),
+                 util.arrayptr(context, builder, util.indextpe(arraytpe.indexname), outindex),
+                 util.arrayptr(context, builder, arraytpe.indextpe, proxyin.index),
+                 context.get_constant(numba.int64, 0),
+                 lenindex,
+                 lencontent),
+                "in {0}, indexing error".format(arraytpe.shortname))
+            nextcontenttpe = arraytpe.contenttpe.carry()
+            nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
+            outret = nextcontenttpe.getitem_next(wheretpe, advanced is not None)
+            outval = nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, wheretpe, nextcontentval, whereval, advanced)
+            rettpe = IndexedArrayType(arraytpe.indextpe, outret, arraytpe.isoption, arraytpe.identitiestpe, arraytpe.parameters)
+            proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
+            proxyout.index = outindex
+            proxyout.content = outval
+            if arraytpe.identitiestpe != numba.none:
+                proxyout.identities = proxyin.identities
+            return proxyout._getvalue()
 
         else:
-            # return self.contenttpe.carry().getitem_next(wheretpe, isadvanced)
             if arraytpe.indexname == "32":
                 kernel = cpu.kernels.awkward_indexedarray32_getitem_nextcarry_64
             elif arraytpe.indexname == "U32":
@@ -298,11 +334,12 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
                 (util.arrayptr(context, builder, util.index64tpe, nextcarry),
                  util.arrayptr(context, builder, arraytpe.indextpe, proxyin.index),
                  context.get_constant(numba.int64, 0),
-                 lenindex),
+                 lenindex,
+                 lencontent),
                 "in {0}, indexing error".format(arraytpe.shortname))
             nextcontenttpe = arraytpe.contenttpe.carry()
             nextcontentval = arraytpe.contenttpe.lower_carry(context, builder, arraytpe.contenttpe, util.index64tpe, proxyin.content, nextcarry)
-            return nextcontenttpe.lower_getitem_next(context, builder, nextconttnetpe, tailtpe, nextcontentval, tailval, advanced)
+            return nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, wheretpe, nextcontentval, whereval, advanced)
 
     elif isinstance(headtpe, numba.types.StringLiteral):
         # return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
