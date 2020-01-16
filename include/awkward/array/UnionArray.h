@@ -17,6 +17,8 @@ namespace awkward {
   template <typename T, typename I>
   class UnionArrayOf: public Content {
   public:
+    static const IndexOf<I> regular_index(const IndexOf<T>& tags);
+
     UnionArrayOf<T, I>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T> tags, const IndexOf<I>& index, const std::vector<std::shared_ptr<Content>>& contents);
     const IndexOf<T> tags() const;
     const IndexOf<I> index() const;

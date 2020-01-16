@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <cstring>
+#include <vector>
 
 #include "awkward/cpu-kernels/getitem.h"
 
@@ -693,6 +694,29 @@ ERROR awkward_indexedarrayU32_getitem_carry_64(uint32_t* toindex, const uint32_t
 }
 ERROR awkward_indexedarray64_getitem_carry_64(int64_t* toindex, const int64_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
   return awkward_indexedarray_getitem_carry<int64_t, int64_t>(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry);
+}
+
+template <typename C, typename I>
+ERROR awkward_unionarray_regular_index(I* toindex, const C* fromtags, int64_t tagsoffset, int64_t length) {
+  std::vector<I> current;
+  for (int64_t i = 0;  i < length;  i++) {
+    C tag = fromtags[tagsoffset + i];
+    while (current.size() <= tag) {
+      current.push_back(0);
+    }
+    toindex[(size_t)i] = current[(size_t)tag];
+    current[(size_t)tag]++;
+  }
+  return success();
+}
+ERROR awkward_unionarrayU8_32_regular_index(int32_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length) {
+  return awkward_unionarray_regular_index<uint8_t, int32_t>(toindex, fromtags, tagsoffset, length);
+}
+ERROR awkward_unionarrayU8_U32_regular_index(uint32_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length) {
+  return awkward_unionarray_regular_index<uint8_t, uint32_t>(toindex, fromtags, tagsoffset, length);
+}
+ERROR awkward_unionarrayU8_64_regular_index(int64_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length) {
+  return awkward_unionarray_regular_index<uint8_t, int64_t>(toindex, fromtags, tagsoffset, length);
 }
 
 template <typename T, typename C, typename I>

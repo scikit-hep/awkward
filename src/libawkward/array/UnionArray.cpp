@@ -14,6 +14,19 @@
 
 namespace awkward {
   template <typename T, typename I>
+  const IndexOf<I> UnionArrayOf<T, I>::regular_index(const IndexOf<T>& tags) {
+    int64_t lentags = tags.length();
+    IndexOf<I> outindex(lentags);
+    struct Error err = util::awkward_unionarray_regular_index<T, I>(
+      outindex.ptr().get(),
+      tags.ptr().get(),
+      tags.offset(),
+      lentags);
+    util::handle_error(err, "UnionArray", nullptr);
+    return outindex;
+  }
+
+  template <typename T, typename I>
   UnionArrayOf<T, I>::UnionArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T> tags, const IndexOf<I>& index, const std::vector<std::shared_ptr<Content>>& contents)
       : Content(identities, parameters)
       , tags_(tags)

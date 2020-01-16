@@ -1517,6 +1517,7 @@ py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::
         return ak::UnionArrayOf<T, I>(unbox_identities_none(identities), dict2parameters(parameters), tags, index, out);
       }), py::arg("tags"), py::arg("index"), py::arg("contents"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
+      .def_static("regular_index", &ak::UnionArrayOf<T, I>::regular_index)
       .def_property_readonly("tags", &ak::UnionArrayOf<T, I>::tags)
       .def_property_readonly("index", &ak::UnionArrayOf<T, I>::index)
       .def_property_readonly("contents", &ak::UnionArrayOf<T, I>::contents)

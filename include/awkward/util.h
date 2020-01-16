@@ -97,6 +97,8 @@ namespace awkward {
     template <typename T>
     ERROR awkward_indexedarray_getitem_carry_64(T* toindex, const T* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry);
     template <typename T, typename I>
+    ERROR awkward_unionarray_regular_index(I* toindex, const T* fromtags, int64_t tagsoffset, int64_t length);
+    template <typename T, typename I>
     ERROR awkward_unionarray_project_64(int64_t* lenout, int64_t* tocarry, const T* fromtags, int64_t tagsoffset, const I* fromindex, int64_t indexoffset, int64_t length, int64_t which);
 
   }

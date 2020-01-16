@@ -509,6 +509,19 @@ namespace awkward {
     }
 
     template <>
+    Error awkward_unionarray_regular_index<uint8_t, int32_t>(int32_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length) {
+      return awkward_unionarrayU8_32_regular_index(toindex, fromtags, tagsoffset, length);
+    }
+    template <>
+    Error awkward_unionarray_regular_index<uint8_t, uint32_t>(uint32_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length) {
+      return awkward_unionarrayU8_U32_regular_index(toindex, fromtags, tagsoffset, length);
+    }
+    template <>
+    Error awkward_unionarray_regular_index<uint8_t, int64_t>(int64_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length) {
+      return awkward_unionarrayU8_64_regular_index(toindex, fromtags, tagsoffset, length);
+    }
+
+    template <>
     Error awkward_unionarray_project_64<uint8_t, int32_t>(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
       return awkward_unionarrayU8_32_project_64(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
     }
