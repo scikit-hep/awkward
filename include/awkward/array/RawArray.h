@@ -361,19 +361,19 @@ namespace awkward {
     }
 
     int64_t fieldindex(const std::string& key) const override {
-      throw std::invalid_argument("array contains no Records");
+      throw std::invalid_argument(std::string("key ") + util::quote(key, true) + std::string(" does not exist (data are not records)"));
     }
 
     const std::string key(int64_t fieldindex) const override {
-      throw std::invalid_argument("array contains no Records");
+      throw std::invalid_argument(std::string("fieldindex \"") + std::to_string(fieldindex) + std::string("\" does not exist (data are not records)"));
     }
 
     bool haskey(const std::string& key) const override {
-      throw std::invalid_argument("array contains no Records");
+      return false;
     }
 
     const std::vector<std::string> keys() const override {
-      throw std::invalid_argument("array contains no Records");
+      return std::vector<std::string>();
     }
 
     // operations

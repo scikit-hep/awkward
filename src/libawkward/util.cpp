@@ -40,10 +40,10 @@ namespace awkward {
           out = (int64_t)std::stoi(key);
         }
         catch (std::invalid_argument err) {
-          throw std::invalid_argument(std::string("key \"") + key + std::string("\" is not in Record"));
+          throw std::invalid_argument(std::string("key ") + quote(key, true) + std::string(" does not exist (not in record)"));
         }
         if (out >= numfields) {
-          throw std::invalid_argument(std::string("key interpreted as fieldindex ") + key + std::string(" for record with only " + std::to_string(numfields) + std::string(" fields")));
+          throw std::invalid_argument(std::string("key interpreted as fieldindex ") + key + std::string(" for records with only " + std::to_string(numfields) + std::string(" fields")));
         }
       }
       return out;
@@ -51,7 +51,7 @@ namespace awkward {
 
     const std::string key(const std::shared_ptr<RecordLookup>& recordlookup, int64_t fieldindex, int64_t numfields) {
       if (fieldindex >= numfields) {
-        throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields) + std::string(" fields")));
+        throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for records with only " + std::to_string(numfields) + std::string(" fields")));
       }
       if (recordlookup.get() != nullptr) {
         return recordlookup.get()->at((size_t)fieldindex);

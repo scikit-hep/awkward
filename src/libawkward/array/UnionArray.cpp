@@ -383,7 +383,7 @@ namespace awkward {
           }
         }
         if (!found) {
-          out.erase(out.begin() + j);
+          out.erase(out.begin() + (size_t)j);
         }
       }
     }

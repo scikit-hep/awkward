@@ -53,7 +53,6 @@ def test_basic():
     content2 = awkward1.Array([{"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2, "y": [1.1, 2.2]}]).layout
     content3 = awkward1.Array([{"x": 0.0, "y": "zero", "z": False}, {"x": 1.1, "y": "one", "z": True}, {"x": 2.2, "y": "two", "z": False}, {"x": 3.3, "y": "three", "z": True}, {"x": 4.4, "y": "four", "z": False}]).layout
     array2 = awkward1.layout.UnionArrayU8_32(tags, index, [content2, content3])
-    array3 = awkward1.layout.UnionArrayU8_32(tags, index, [content3, content2])
     assert awkward1.tolist(array2) == [{"x": 0.0, "y": "zero", "z": False}, {"x": 1.1, "y": "one", "z": True}, {"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2.2, "y": "two", "z": False}, {"x": 2, "y": [1.1, 2.2]}, {"x": 4.4, "y": "four", "z": False}, {"x": 3.3, "y": "three", "z": True}]
     assert awkward1.tolist(array2["x"]) == [0.0, 1.1, 0, 1, 2.2, 2, 4.4, 3.3]
     assert awkward1.tolist(array2["y"]) == ["zero", "one", [], [1.1], "two", [1.1, 2.2], "four", "three"]
@@ -64,9 +63,12 @@ def test_basic():
     assert str(err.value) == "in NumpyArray, too many dimensions in slice"
     with pytest.raises(ValueError) as err:
         array2["z"]
-    assert str(err.value) == "key \"z\" is not in Record"
+    assert str(err.value) == "key \"z\" does not exist (not in record)"
 
-    assert content2.keys() == ["x", "y"]
-    assert content3.keys() == ["x", "y", "z"]
-    assert array2.keys() == ["x", "y"]
-    assert array3.keys() == ["x", "y"]
+    array3 = awkward1.layout.UnionArrayU8_32(tags, index, [content3, content2])
+    array4 = awkward1.layout.UnionArrayU8_32(tags, index, [content0, content1, content2, content3])
+    assert set(content2.keys()) == set(["x", "y"])
+    assert set(content3.keys()) == set(["x", "y", "z"])
+    assert set(array2.keys()) == set(["x", "y"])
+    assert set(array3.keys()) == set(["x", "y"])
+    assert array4.keys() == []
