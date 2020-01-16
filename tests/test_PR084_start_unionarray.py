@@ -46,4 +46,6 @@ def test_basic():
     assert awkward1.tolist(array) == ["one", "two", [1.1, 2.2, 3.3], [], "three", [4.4, 5.5], "five", "four"]
     assert awkward1.tolist(array[1:-1]) == ["two", [1.1, 2.2, 3.3], [], "three", [4.4, 5.5], "five"]
     assert awkward1.tolist(array[2:-2]) == [[1.1, 2.2, 3.3], [], "three", [4.4, 5.5]]
-    # assert awkward1.tolist(array[::2]) == ["one", [1.1, 2.2, 3.3], "three", "five"]
+    assert awkward1.tolist(array[::2]) == ["one", [1.1, 2.2, 3.3], "three", "five"]
+    assert awkward1.tolist(array[::2, 1:]) == ["ne", [2.2, 3.3], "hree", "ive"]
+    assert awkward1.tolist(array[:, :-1]) == ["on", "tw", [1.1, 2.2], [], "thre", [4.4], "fiv", "fou"]

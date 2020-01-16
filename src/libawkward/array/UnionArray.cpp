@@ -253,7 +253,33 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("UnionArray::getitem_next");
+    if (head.get() == nullptr) {
+      return shallow_copy();
+    }
+    else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())) {
+      std::vector<std::shared_ptr<Content>> outcontents;
+      for (int64_t i = 0;  i < numcontents();  i++) {
+        std::shared_ptr<Content> projection = project(i);
+        outcontents.push_back(projection.get()->getitem_next(head, tail, advanced));
+      }
+      IndexOf<I> outindex = regular_index(tags_);
+      return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, outindex, outcontents);
+    }
+    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+      return Content::getitem_next(*ellipsis, tail, advanced);
+    }
+    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+      return Content::getitem_next(*newaxis, tail, advanced);
+    }
+    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+      return Content::getitem_next(*field, tail, advanced);
+    }
+    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+      return Content::getitem_next(*fields, tail, advanced);
+    }
+    else {
+      throw std::runtime_error("unrecognized slice type");
+    }
   }
 
   template <typename T, typename I>
