@@ -22,17 +22,17 @@ namespace awkward {
 
   template <typename T, typename I>
   const IndexOf<T> UnionArrayOf<T, I>::tags() const {
-    throw std::runtime_error("UnionArray::tags");
+    return tags_;
   }
 
   template <typename T, typename I>
   const IndexOf<I> UnionArrayOf<T, I>::index() const {
-    throw std::runtime_error("UnionArray::index");
+    return index_;
   }
 
   template <typename T, typename I>
   const std::vector<std::shared_ptr<Content>> UnionArrayOf<T, I>::contents() const {
-    throw std::runtime_error("UnionArray::content");
+    return contents_;
   }
 
   template <typename T, typename I>
