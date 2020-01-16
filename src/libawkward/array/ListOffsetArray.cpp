@@ -160,6 +160,7 @@ namespace awkward {
   template <typename T>
   void ListOffsetArrayOf<T>::tojson_part(ToJson& builder) const {
     int64_t len = length();
+    check_for_iteration();
     builder.beginlist();
     for (int64_t i = 0;  i < len;  i++) {
       getitem_at_nowrap(i).get()->tojson_part(builder);

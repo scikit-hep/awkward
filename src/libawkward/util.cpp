@@ -245,6 +245,48 @@ namespace awkward {
     }
 
     template <>
+    Error awkward_index_carry_64<int8_t>(int8_t* toindex, const int8_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
+      return awkward_index8_carry_64(toindex, fromindex, carry, fromindexoffset, lenfromindex, length);
+    }
+    template <>
+    Error awkward_index_carry_64<uint8_t>(uint8_t* toindex, const uint8_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
+      return awkward_indexU8_carry_64(toindex, fromindex, carry, fromindexoffset, lenfromindex, length);
+    }
+    template <>
+    Error awkward_index_carry_64<int32_t>(int32_t* toindex, const int32_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
+      return awkward_index32_carry_64(toindex, fromindex, carry, fromindexoffset, lenfromindex, length);
+    }
+    template <>
+    Error awkward_index_carry_64<uint32_t>(uint32_t* toindex, const uint32_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
+      return awkward_indexU32_carry_64(toindex, fromindex, carry, fromindexoffset, lenfromindex, length);
+    }
+    template <>
+    Error awkward_index_carry_64<int64_t>(int64_t* toindex, const int64_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
+      return awkward_index64_carry_64(toindex, fromindex, carry, fromindexoffset, lenfromindex, length);
+    }
+
+    template <>
+    Error awkward_index_carry_nocheck_64<int8_t>(int8_t* toindex, const int8_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length) {
+      return awkward_index8_carry_nocheck_64(toindex, fromindex, carry, fromindexoffset, length);
+    }
+    template <>
+    Error awkward_index_carry_nocheck_64<uint8_t>(uint8_t* toindex, const uint8_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length) {
+      return awkward_indexU8_carry_nocheck_64(toindex, fromindex, carry, fromindexoffset, length);
+    }
+    template <>
+    Error awkward_index_carry_nocheck_64<int32_t>(int32_t* toindex, const int32_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length) {
+      return awkward_index32_carry_nocheck_64(toindex, fromindex, carry, fromindexoffset, length);
+    }
+    template <>
+    Error awkward_index_carry_nocheck_64<uint32_t>(uint32_t* toindex, const uint32_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length) {
+      return awkward_indexU32_carry_nocheck_64(toindex, fromindex, carry, fromindexoffset, length);
+    }
+    template <>
+    Error awkward_index_carry_nocheck_64<int64_t>(int64_t* toindex, const int64_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length) {
+      return awkward_index64_carry_nocheck_64(toindex, fromindex, carry, fromindexoffset, length);
+    }
+
+    template <>
     Error awkward_listarray_getitem_next_at_64<int32_t>(int64_t* tocarry, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at) {
       return awkward_listarray32_getitem_next_at_64(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset, at);
     }

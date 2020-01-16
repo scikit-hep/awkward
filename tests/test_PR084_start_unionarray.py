@@ -23,3 +23,17 @@ def test_basic():
     assert awkward1.tolist(array.content(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert awkward1.tolist(array.content(1)) == ["one", "two", "three", "four", "five"]
     repr(array)
+
+    assert awkward1.tolist(array[0]) == "one"
+    assert awkward1.tolist(array[1]) == "two"
+    assert awkward1.tolist(array[2]) == [1.1, 2.2, 3.3]
+    assert awkward1.tolist(array[3]) == []
+    assert awkward1.tolist(array[4]) == "three"
+    assert awkward1.tolist(array[5]) == [4.4, 5.5]
+    assert awkward1.tolist(array[6]) == "four"
+    assert awkward1.tolist(array[7]) == "five"
+
+    assert awkward1.tolist(array) == ["one", "two", [1.1, 2.2, 3.3], [], "three", [4.4, 5.5], "four", "five"]
+    assert awkward1.tolist(array[1:-1]) == ["two", [1.1, 2.2, 3.3], [], "three", [4.4, 5.5], "four"]
+    assert awkward1.tolist(array[2:-2]) == [[1.1, 2.2, 3.3], [], "three", [4.4, 5.5]]
+    # assert awkward1.tolist(array[::2]) == ["one", [1.1, 2.2, 3.3], "three", "four"]

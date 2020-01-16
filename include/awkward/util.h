@@ -57,6 +57,10 @@ namespace awkward {
     template <typename T>
     ERROR awkward_identities64_from_indexedarray(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const T* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
     template <typename T>
+    ERROR awkward_index_carry_64(T* toindex, const T* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length);
+    template <typename T>
+    ERROR awkward_index_carry_nocheck_64(T* toindex, const T* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length);
+    template <typename T>
     ERROR awkward_listarray_getitem_next_at_64(int64_t* tocarry, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at);
     template <typename T>
     ERROR awkward_listarray_getitem_next_range_carrylength(int64_t* carrylength, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t start, int64_t stop, int64_t step);

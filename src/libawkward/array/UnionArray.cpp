@@ -119,47 +119,85 @@ namespace awkward {
 
   template <typename T, typename I>
   void UnionArrayOf<T, I>::tojson_part(ToJson& builder) const {
-    throw std::runtime_error("UnionArray::tojson_part");
+    int64_t len = length();
+    check_for_iteration();
+    builder.beginlist();
+    for (int64_t i = 0;  i < len;  i++) {
+      getitem_at_nowrap(i).get()->tojson_part(builder);
+    }
+    builder.endlist();
   }
 
   template <typename T, typename I>
   int64_t UnionArrayOf<T, I>::length() const {
-    throw std::runtime_error("UnionArray::length");
+    return tags_.length();
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::shallow_copy() const {
-    throw std::runtime_error("UnionArray::shallow_copy");
+    return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents_);
   }
 
   template <typename T, typename I>
   void UnionArrayOf<T, I>::check_for_iteration() const {
-    throw std::runtime_error("UnionArray::check_for_iteration");
+    if (index_.length() < tags_.length()) {
+      util::handle_error(failure("len(index) < len(tags)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+    if (identities_.get() != nullptr  &&  identities_.get()->length() < index_.length()) {
+      util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);
+    }
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_nothing() const {
-    throw std::runtime_error("UnionArray::getitem_nothing");
+    return getitem_range_nowrap(0, 0);
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_at(int64_t at) const {
-    throw std::runtime_error("UnionArray::getitem_at");
+    int64_t regular_at = at;
+    int64_t len = length();
+    if (regular_at < 0) {
+      regular_at += len;
+    }
+    if (!(0 <= regular_at  &&  regular_at < len)) {
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
+    }
+    return getitem_at_nowrap(regular_at);
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_at_nowrap(int64_t at) const {
-    throw std::runtime_error("UnionArray::getitem_at_nowrap");
+    size_t tag = (size_t)tags_.getitem_at_nowrap(at);
+    int64_t index = (int64_t)index_.getitem_at_nowrap(at);
+    if (!(0 <= tag  &&  tag < contents_.size())) {
+      util::handle_error(failure("not 0 <= tag[i] < numcontents", kSliceNone, at), classname(), identities_.get());
+    }
+    std::shared_ptr<Content> content = contents_[tag];
+    if (!(0 <= index  &&  index < content.get()->length())) {
+      util::handle_error(failure("index[i] > len(content(tag))", kSliceNone, at), classname(), identities_.get());
+    }
+    return content.get()->getitem_at_nowrap(index);
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_range(int64_t start, int64_t stop) const {
-    throw std::runtime_error("UnionArray::getitem_range");
+    int64_t regular_start = start;
+    int64_t regular_stop = stop;
+    awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), tags_.length());
+    if (identities_.get() != nullptr  &&  regular_stop > identities_.get()->length()) {
+      util::handle_error(failure("index out of range", kSliceNone, stop), identities_.get()->classname(), nullptr);
+    }
+    return getitem_range_nowrap(regular_start, regular_stop);
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    throw std::runtime_error("UnionArray::getitem_range_nowrap");
+    std::shared_ptr<Identities> identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_range_nowrap(start, stop);
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities, parameters_, tags_.getitem_range_nowrap(start, stop), index_.getitem_range_nowrap(start, stop), contents_);
   }
 
   template <typename T, typename I>
@@ -179,7 +217,33 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::carry(const Index64& carry) const {
-    throw std::runtime_error("UnionArray::carry");
+    int64_t lentags = tags_.length();
+    if (index_.length() < lentags) {
+      util::handle_error(failure("len(index) < len(tags)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+    int64_t lencarry = carry.length();
+    IndexOf<T> nexttags(lencarry);
+    struct Error err1 = util::awkward_index_carry_64<T>(
+      nexttags.ptr().get(),
+      tags_.ptr().get(),
+      carry.ptr().get(),
+      tags_.offset(),
+      lentags,
+      lencarry);
+    util::handle_error(err1, classname(), identities_.get());
+    IndexOf<I> nextindex(lencarry);
+    struct Error err2 = util::awkward_index_carry_nocheck_64<I>(
+      nextindex.ptr().get(),
+      index_.ptr().get(),
+      carry.ptr().get(),
+      index_.offset(),
+      lencarry);
+    util::handle_error(err2, classname(), identities_.get());
+    std::shared_ptr<Identities> identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_carry_64(carry);
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities, parameters_, nexttags, nextindex, contents_);
   }
 
   template <typename T, typename I>

@@ -74,6 +74,56 @@ ERROR awkward_indexU32_to_index64(int64_t* toptr, const uint32_t* fromptr, int64
   return success();
 }
 
+template <typename C, typename T>
+ERROR awkward_index_carry(C* toindex, const C* fromindex, const T* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    T j = carry[i];
+    if (j > lenfromindex) {
+      return failure("index out of range", kSliceNone, j);
+    }
+    toindex[i] = fromindex[(size_t)(fromindexoffset + j)];
+  }
+  return success();
+}
+ERROR awkward_index8_carry_64(int8_t* toindex, const int8_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
+  return awkward_index_carry<int8_t, int64_t>(toindex, fromindex, carry, fromindexoffset, lenfromindex, length);
+}
+ERROR awkward_indexU8_carry_64(uint8_t* toindex, const uint8_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
+  return awkward_index_carry<uint8_t, int64_t>(toindex, fromindex, carry, fromindexoffset, lenfromindex, length);
+}
+ERROR awkward_index32_carry_64(int32_t* toindex, const int32_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
+  return awkward_index_carry<int32_t, int64_t>(toindex, fromindex, carry, fromindexoffset, lenfromindex, length);
+}
+ERROR awkward_indexU32_carry_64(uint32_t* toindex, const uint32_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
+  return awkward_index_carry<uint32_t, int64_t>(toindex, fromindex, carry, fromindexoffset, lenfromindex, length);
+}
+ERROR awkward_index64_carry_64(int64_t* toindex, const int64_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
+  return awkward_index_carry<int64_t, int64_t>(toindex, fromindex, carry, fromindexoffset, lenfromindex, length);
+}
+
+template <typename C, typename T>
+ERROR awkward_index_carry_nocheck(C* toindex, const C* fromindex, const T* carry, int64_t fromindexoffset, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toindex[i] = fromindex[(size_t)(fromindexoffset + carry[i])];
+  }
+  return success();
+}
+ERROR awkward_index8_carry_nocheck_64(int8_t* toindex, const int8_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length) {
+  return awkward_index_carry_nocheck<int8_t, int64_t>(toindex, fromindex, carry, fromindexoffset, length);
+}
+ERROR awkward_indexU8_carry_nocheck_64(uint8_t* toindex, const uint8_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length) {
+  return awkward_index_carry_nocheck<uint8_t, int64_t>(toindex, fromindex, carry, fromindexoffset, length);
+}
+ERROR awkward_index32_carry_nocheck_64(int32_t* toindex, const int32_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length) {
+  return awkward_index_carry_nocheck<int32_t, int64_t>(toindex, fromindex, carry, fromindexoffset, length);
+}
+ERROR awkward_indexU32_carry_nocheck_64(uint32_t* toindex, const uint32_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length) {
+  return awkward_index_carry_nocheck<uint32_t, int64_t>(toindex, fromindex, carry, fromindexoffset, length);
+}
+ERROR awkward_index64_carry_nocheck_64(int64_t* toindex, const int64_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length) {
+  return awkward_index_carry_nocheck<int64_t, int64_t>(toindex, fromindex, carry, fromindexoffset, length);
+}
+
 template <typename T>
 ERROR awkward_slicearray_ravel(T* toptr, const T* fromptr, int64_t ndim, const int64_t* shape, const int64_t* strides) {
   if (ndim == 1) {
