@@ -243,12 +243,20 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_field(const std::string& key) const {
-    throw std::runtime_error("UnionArray::getitem_field");
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->getitem_field(key));
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities_, util::Parameters(), tags_, index_, contents);
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_fields(const std::vector<std::string>& keys) const {
-    throw std::runtime_error("UnionArray::getitem_fields");
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->getitem_fields(keys));
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities_, util::Parameters(), tags_, index_, contents);
   }
 
   template <typename T, typename I>
