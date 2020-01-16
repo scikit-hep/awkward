@@ -127,7 +127,7 @@ namespace awkward {
       std::vector<std::shared_ptr<Content>> contents;
       for (int64_t i = 0;  i < raw->numtypes();  i++) {
         // FIXME: union equivalence could be defined much more flexibly than this, but do it later...
-        if (i >= contents_.size()) {
+        if (i >= (int64_t)contents_.size()) {
           throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because the number of possibilities doesn't match"));
         }
         contents.push_back(contents_[(size_t)i].get()->astype(raw->type(i)));
@@ -323,62 +323,101 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::pair<int64_t, int64_t> UnionArrayOf<T, I>::minmax_depth() const {
-    throw std::runtime_error("UnionArray::minmax_depth");
+    if (contents_.empty()) {
+      return std::pair<int64_t, int64_t>(0, 0);
+    }
+    int64_t min = kMaxInt64;
+    int64_t max = 0;
+    for (auto content : contents_) {
+      std::pair<int64_t, int64_t> minmax = content.get()->minmax_depth();
+      if (minmax.first < min) {
+        min = minmax.first;
+      }
+      if (minmax.second > max) {
+        max = minmax.second;
+      }
+    }
+    return std::pair<int64_t, int64_t>(min, max);
   }
 
   template <typename T, typename I>
   int64_t UnionArrayOf<T, I>::numfields() const {
-    throw std::runtime_error("UnionArray::numfields");
+    return (int64_t)keys().size();
   }
 
   template <typename T, typename I>
   int64_t UnionArrayOf<T, I>::fieldindex(const std::string& key) const {
-    throw std::runtime_error("UnionArray::fieldindex");
+    throw std::invalid_argument("UnionArray breaks the one-to-one relationship between fieldindexes and keys");
   }
 
   template <typename T, typename I>
   const std::string UnionArrayOf<T, I>::key(int64_t fieldindex) const {
-    throw std::runtime_error("UnionArray::key");
+    throw std::invalid_argument("UnionArray breaks the one-to-one relationship between fieldindexes and keys");
   }
 
   template <typename T, typename I>
   bool UnionArrayOf<T, I>::haskey(const std::string& key) const {
-    throw std::runtime_error("UnionArray::haskey");
+    for (auto x : keys()) {
+      if (x == key) {
+        return true;
+      }
+    }
+    return false;
   }
 
   template <typename T, typename I>
   const std::vector<std::string> UnionArrayOf<T, I>::keys() const {
-    throw std::runtime_error("UnionArray::keys");
+    std::vector<std::string> out;
+    if (contents_.empty()) {
+      return out;
+    }
+    out = contents_[0].get()->keys();
+    for (size_t i = 1;  i < contents_.size();  i++) {
+      std::vector<std::string> tmp = contents_[i].get()->keys();
+      for (int64_t j = (int64_t)out.size() - 1;  j >= 0;  j--) {
+        bool found = false;
+        for (size_t k = 0;  k < tmp.size();  k++) {
+          if (tmp[k] == out[(size_t)j]) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          out.erase(out.begin() + j);
+        }
+      }
+    }
+    return out;
   }
 
   template <typename T, typename I>
   const Index64 UnionArrayOf<T, I>::count64() const {
-    throw std::runtime_error("UnionArray::count64");
+    throw std::runtime_error("FIXME: UnionArray::count64");
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::count(int64_t axis) const {
-    throw std::runtime_error("UnionArray::count");
+    throw std::runtime_error("FIXME: UnionArray::count");
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::flatten(int64_t axis) const {
-    throw std::runtime_error("UnionArray::flatten");
+    throw std::runtime_error("FIXME: UnionArray::flatten");
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("UnionArray::getitem_next(SliceAt)");
+    throw std::runtime_error("undefined operation: UnionArray::getitem_next(SliceAt)");
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("UnionArray::getitem_next(SliceRange)");
+    throw std::runtime_error("undefined operation: UnionArray::getitem_next(SliceRange)");
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("UnionArray::getitem_next(SliceArray64)");
+    throw std::runtime_error("undefined operation: UnionArray::getitem_next(SliceArray64)");
   }
 
   template class UnionArrayOf<uint8_t, int32_t>;
