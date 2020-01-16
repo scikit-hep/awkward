@@ -245,6 +245,31 @@ namespace awkward {
     }
 
     template <>
+    Error awkward_identities32_from_unionarray<uint8_t, int32_t>(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const uint8_t* fromtags, const int32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+      return awkward_identities32_from_unionarrayU8_32(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+    }
+    template <>
+    Error awkward_identities32_from_unionarray<uint8_t, uint32_t>(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const uint8_t* fromtags, const uint32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+      return awkward_identities32_from_unionarrayU8_U32(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+    }
+    template <>
+    Error awkward_identities32_from_unionarray<uint8_t, int64_t>(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const uint8_t* fromtags, const int64_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+      return awkward_identities32_from_unionarrayU8_64(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+    }
+    template <>
+    Error awkward_identities64_from_unionarray<uint8_t, int32_t>(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const uint8_t* fromtags, const int32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+      return awkward_identities64_from_unionarrayU8_32(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+    }
+    template <>
+    Error awkward_identities64_from_unionarray<uint8_t, uint32_t>(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const uint8_t* fromtags, const uint32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+      return awkward_identities64_from_unionarrayU8_U32(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+    }
+    template <>
+    Error awkward_identities64_from_unionarray<uint8_t, int64_t>(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const uint8_t* fromtags, const int64_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+      return awkward_identities64_from_unionarrayU8_64(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+    }
+
+    template <>
     Error awkward_index_carry_64<int8_t>(int8_t* toindex, const int8_t* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length) {
       return awkward_index8_carry_64(toindex, fromindex, carry, fromindexoffset, lenfromindex, length);
     }

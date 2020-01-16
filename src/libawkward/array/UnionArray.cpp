@@ -104,12 +104,98 @@ namespace awkward {
 
   template <typename T, typename I>
   void UnionArrayOf<T, I>::setidentities() {
-    throw std::runtime_error("UnionArray::setidentities");
+    if (length() <= kMaxInt32) {
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
+      struct Error err = awkward_new_identities32(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
+    }
+    else {
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
+      struct Error err = awkward_new_identities64(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
+    }
   }
 
   template <typename T, typename I>
   void UnionArrayOf<T, I>::setidentities(const std::shared_ptr<Identities>& identities) {
-    throw std::runtime_error("UnionArray::setidentities(identities)");
+    if (identities.get() == nullptr) {
+      for (auto content : contents_) {
+        content.get()->setidentities(identities);
+      }
+    }
+    else {
+      if (index_.length() < tags_.length()) {
+        util::handle_error(failure("len(index) < len(tags)", kSliceNone, kSliceNone), classname(), identities_.get());
+      }
+      if (length() != identities.get()->length()) {
+        util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
+      }
+      for (size_t which = 0;  which < contents_.size();  which++) {
+        std::shared_ptr<Content> content = contents_[which];
+        std::shared_ptr<Identities> bigidentities = identities;
+        if (content.get()->length() > kMaxInt32  ||  !std::is_same<I, int32_t>::value) {
+          bigidentities = identities.get()->to64();
+        }
+        if (Identities32* rawidentities = dynamic_cast<Identities32*>(bigidentities.get())) {
+          bool uniquecontents;
+          std::shared_ptr<Identities> subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content.get()->length());
+          Identities32* rawsubidentities = reinterpret_cast<Identities32*>(subidentities.get());
+          struct Error err = util::awkward_identities32_from_unionarray<T, I>(
+            &uniquecontents,
+            rawsubidentities->ptr().get(),
+            rawidentities->ptr().get(),
+            tags_.ptr().get(),
+            index_.ptr().get(),
+            rawidentities->offset(),
+            tags_.offset(),
+            index_.offset(),
+            content.get()->length(),
+            length(),
+            rawidentities->width(),
+            (int64_t)which);
+          util::handle_error(err, classname(), identities_.get());
+          if (uniquecontents) {
+            content.get()->setidentities(subidentities);
+          }
+          else {
+            content.get()->setidentities(Identities::none());
+          }
+        }
+        else if (Identities64* rawidentities = dynamic_cast<Identities64*>(bigidentities.get())) {
+          bool uniquecontents;
+          std::shared_ptr<Identities> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content.get()->length());
+          Identities64* rawsubidentities = reinterpret_cast<Identities64*>(subidentities.get());
+          struct Error err = util::awkward_identities64_from_unionarray<T, I>(
+            &uniquecontents,
+            rawsubidentities->ptr().get(),
+            rawidentities->ptr().get(),
+            tags_.ptr().get(),
+            index_.ptr().get(),
+            rawidentities->offset(),
+            tags_.offset(),
+            index_.offset(),
+            content.get()->length(),
+            length(),
+            rawidentities->width(),
+            (int64_t)which);
+          util::handle_error(err, classname(), identities_.get());
+          if (uniquecontents) {
+            content.get()->setidentities(subidentities);
+          }
+          else {
+            content.get()->setidentities(Identities::none());
+          }
+        }
+        else {
+          throw std::runtime_error("unrecognized Identities specialization");
+        }
+      }
+    }
+    identities_ = identities;
   }
 
   template <typename T, typename I>

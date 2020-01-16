@@ -174,3 +174,50 @@ ERROR awkward_identities64_from_indexedarrayU32(bool* uniquecontents, int64_t* t
 ERROR awkward_identities64_from_indexedarray64(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const int64_t* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
   return awkward_identities_from_indexedarray<int64_t, int64_t>(uniquecontents, toptr, fromptr, fromindex, fromptroffset, indexoffset, tolength, fromlength, fromwidth);
 }
+
+template <typename ID, typename T, typename I>
+ERROR awkward_identities_from_unionarray(bool* uniquecontents, ID* toptr, const ID* fromptr, const T* fromtags, const I* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  for (int64_t k = 0;  k < tolength*fromwidth;  k++) {
+    toptr[k] = -1;
+  }
+  for (int64_t i = 0;  i < fromlength;  i++) {
+    if (fromtags[tagsoffset + i] == which) {
+      I j = fromindex[indexoffset + i];
+      if (j >= tolength) {
+        return failure("max(index) > len(content)", i, j);
+      }
+      else if (j < 0) {
+        return failure("min(index) < 0", i, j);
+      }
+      else {
+        if (toptr[j*fromwidth] != -1) {
+          *uniquecontents = false;
+          return success();   // calling code won't use the (incomplete) toptr if there are any non-unique contents
+        }
+        for (int64_t k = 0;  k < fromwidth;  k++) {
+          toptr[j*fromwidth + k] = fromptr[fromptroffset + i*fromwidth + k];
+        }
+      }
+    }
+  }
+  *uniquecontents = true;
+  return success();
+}
+ERROR awkward_identities32_from_unionarrayU8_32(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const uint8_t* fromtags, const int32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int32_t, uint8_t, int32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+}
+ERROR awkward_identities32_from_unionarrayU8_U32(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const uint8_t* fromtags, const uint32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int32_t, uint8_t, uint32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+}
+ERROR awkward_identities32_from_unionarrayU8_64(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const uint8_t* fromtags, const int64_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int32_t, uint8_t, int64_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+}
+ERROR awkward_identities64_from_unionarrayU8_32(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const uint8_t* fromtags, const int32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int64_t, uint8_t, int32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+}
+ERROR awkward_identities64_from_unionarrayU8_U32(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const uint8_t* fromtags, const uint32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int64_t, uint8_t, uint32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+}
+ERROR awkward_identities64_from_unionarrayU8_64(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const uint8_t* fromtags, const int64_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int64_t, uint8_t, int64_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+}
