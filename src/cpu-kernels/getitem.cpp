@@ -694,3 +694,24 @@ ERROR awkward_indexedarrayU32_getitem_carry_64(uint32_t* toindex, const uint32_t
 ERROR awkward_indexedarray64_getitem_carry_64(int64_t* toindex, const int64_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
   return awkward_indexedarray_getitem_carry<int64_t, int64_t>(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry);
 }
+
+template <typename T, typename C, typename I>
+ERROR awkward_unionarray_project(int64_t* lenout, T* tocarry, const C* fromtags, int64_t tagsoffset, const I* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
+  *lenout = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    if (fromtags[tagsoffset + i] == which) {
+      tocarry[(size_t)(*lenout)] = fromindex[indexoffset + i];
+      *lenout = *lenout + 1;
+    }
+  }
+  return success();
+}
+ERROR awkward_unionarrayU8_32_project_64(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
+  return awkward_unionarray_project<int64_t, uint8_t, int32_t>(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
+}
+ERROR awkward_unionarrayU8_U32_project_64(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
+  return awkward_unionarray_project<int64_t, uint8_t, uint32_t>(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
+}
+ERROR awkward_unionarrayU8_64_project_64(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
+  return awkward_unionarray_project<int64_t, uint8_t, int64_t>(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
+}

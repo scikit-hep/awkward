@@ -1522,6 +1522,7 @@ py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::
       .def_property_readonly("contents", &ak::UnionArrayOf<T, I>::contents)
       .def_property_readonly("numcontents", &ak::UnionArrayOf<T, I>::numcontents)
       .def("content", &ak::UnionArrayOf<T, I>::content)
+      .def("project", &ak::UnionArrayOf<T, I>::project)
   );
 }
 

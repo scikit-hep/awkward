@@ -42,7 +42,35 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::content(int64_t index) const {
+    if (!(0 <= index  &&  index < numcontents())) {
+      throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" out of range for ") + classname() + std::string(" with ") + std::to_string(numcontents()) + std::string(" contents"));
+    }
     return contents_[(size_t)index];
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::project(int64_t index) const {
+    if (!(0 <= index  &&  index < numcontents())) {
+      throw std::invalid_argument(std::string("index ") + std::to_string(index) + std::string(" out of range for ") + classname() + std::string(" with ") + std::to_string(numcontents()) + std::string(" contents"));
+    }
+    int64_t lentags = tags_.length();
+    if (index_.length() < lentags) {
+      util::handle_error(failure("len(index) < len(tags)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+    int64_t lenout;
+    Index64 tmpcarry(lentags);
+    struct Error err = util::awkward_unionarray_project_64<T, I>(
+      &lenout,
+      tmpcarry.ptr().get(),
+      tags_.ptr().get(),
+      tags_.offset(),
+      index_.ptr().get(),
+      index_.offset(),
+      lentags,
+      index);
+    util::handle_error(err, classname(), identities_.get());
+    Index64 nextcarry(tmpcarry.ptr(), 0, lenout);
+    return contents_[(size_t)index].get()->carry(nextcarry);
   }
 
   template <typename T, typename I>

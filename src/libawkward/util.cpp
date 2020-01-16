@@ -507,5 +507,19 @@ namespace awkward {
     Error awkward_indexedarray_getitem_carry_64<int64_t>(int64_t* toindex, const int64_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry) {
       return awkward_indexedarray64_getitem_carry_64(toindex, fromindex, fromcarry, indexoffset, lenindex, lencarry);
     }
+
+    template <>
+    Error awkward_unionarray_project_64<uint8_t, int32_t>(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
+      return awkward_unionarrayU8_32_project_64(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
+    }
+    template <>
+    Error awkward_unionarray_project_64<uint8_t, uint32_t>(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
+      return awkward_unionarrayU8_U32_project_64(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
+    }
+    template <>
+    Error awkward_unionarray_project_64<uint8_t, int64_t>(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
+      return awkward_unionarrayU8_64_project_64(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
+    }
+
   }
 }
