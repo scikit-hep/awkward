@@ -206,3 +206,34 @@ def test_getitem_next():
 
     assert awkward1.tolist(f1(indexedarray3)) == [[], [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]
     assert awkward1.tolist(f1(indexedarray4)) == [None, [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]
+
+content2 = awkward1.Array([{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}, {"x": 4, "y": 4.4}]).layout
+index5 = awkward1.layout.Index64(numpy.array([3, 3, 0, 2, 1, 4, 0], dtype=numpy.int64))
+indexedarray5 = awkward1.layout.IndexedArray64(index5, content2)
+index6 = awkward1.layout.Index64(numpy.array([3, 3, -1, 2, -1, 4, 0], dtype=numpy.int64))
+indexedarray6 = awkward1.layout.IndexedOptionArray64(index6, content2)
+
+def test_getitem_str():
+    assert awkward1.tolist(indexedarray5) == [{"x": 3, "y": 3.3}, {"x": 3, "y": 3.3}, {"x": 0, "y": 0.0}, {"x": 2, "y": 2.2}, {"x": 1, "y": 1.1}, {"x": 4, "y": 4.4}, {"x": 0, "y": 0.0}]
+    assert awkward1.tolist(indexedarray6) == [{"x": 3, "y": 3.3}, {"x": 3, "y": 3.3}, None, {"x": 2, "y": 2.2}, None, {"x": 4, "y": 4.4}, {"x": 0, "y": 0.0}]
+
+    @numba.njit
+    def f1(q):
+        return q["y"]
+
+    assert awkward1.tolist(f1(indexedarray5)) == [3.3, 3.3, 0.0, 2.2, 1.1, 4.4, 0.0]
+    assert awkward1.tolist(f1(indexedarray6)) == [3.3, 3.3, None, 2.2, None, 4.4, 0.0]
+
+    @numba.njit
+    def f2(q):
+        return q["y", :]
+
+    assert awkward1.tolist(f2(indexedarray5)) == [3.3, 3.3, 0.0, 2.2, 1.1, 4.4, 0.0]
+    assert awkward1.tolist(f2(indexedarray6)) == [3.3, 3.3, None, 2.2, None, 4.4, 0.0]
+
+    @numba.njit
+    def f3(q):
+        return q[:, "y"]
+
+    assert awkward1.tolist(f2(indexedarray5)) == [3.3, 3.3, 0.0, 2.2, 1.1, 4.4, 0.0]
+    assert awkward1.tolist(f2(indexedarray6)) == [3.3, 3.3, None, 2.2, None, 4.4, 0.0]

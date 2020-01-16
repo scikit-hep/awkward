@@ -240,7 +240,7 @@ def lower_getitem_str(context, builder, sig, args):
     val, whereval = args
 
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
+    proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
     proxyout.index = proxyin.index
     proxyout.content = tpe.contenttpe.lower_getitem_str(context, builder, rettpe.contenttpe(tpe.contenttpe, wheretpe), (proxyin.content, whereval))
     if tpe.identitiestpe != numba.none:
@@ -342,8 +342,9 @@ def lower_getitem_next(context, builder, arraytpe, wheretpe, arrayval, whereval,
             return nextcontenttpe.lower_getitem_next(context, builder, nextcontenttpe, wheretpe, nextcontentval, whereval, advanced)
 
     elif isinstance(headtpe, numba.types.StringLiteral):
-        # return self.getitem_str(headtpe.literal_value).getitem_next(tailtpe, isadvanced)
-        raise NotImplementedError("str")
+        nexttpe = arraytpe.getitem_str(headtpe.literal_value)
+        nextval = lower_getitem_str(context, builder, nexttpe(arraytpe, headtpe), (arrayval, headval))
+        return lower_getitem_next(context, builder, nexttpe, tailtpe, nextval, tailval, advanced)
 
     elif isinstance(headtpe, numba.types.EllipsisType):
         raise NotImplementedError("ellipsis")
