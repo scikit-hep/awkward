@@ -203,21 +203,21 @@ ERROR awkward_identities_from_unionarray(bool* uniquecontents, ID* toptr, const 
   *uniquecontents = true;
   return success();
 }
-ERROR awkward_identities32_from_unionarrayU8_32(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const uint8_t* fromtags, const int32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
-  return awkward_identities_from_unionarray<int32_t, uint8_t, int32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+ERROR awkward_identities32_from_unionarray8_32(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const int8_t* fromtags, const int32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int32_t, int8_t, int32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
 }
-ERROR awkward_identities32_from_unionarrayU8_U32(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const uint8_t* fromtags, const uint32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
-  return awkward_identities_from_unionarray<int32_t, uint8_t, uint32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+ERROR awkward_identities32_from_unionarray8_U32(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const int8_t* fromtags, const uint32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int32_t, int8_t, uint32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
 }
-ERROR awkward_identities32_from_unionarrayU8_64(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const uint8_t* fromtags, const int64_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
-  return awkward_identities_from_unionarray<int32_t, uint8_t, int64_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+ERROR awkward_identities32_from_unionarray8_64(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const int8_t* fromtags, const int64_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int32_t, int8_t, int64_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
 }
-ERROR awkward_identities64_from_unionarrayU8_32(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const uint8_t* fromtags, const int32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
-  return awkward_identities_from_unionarray<int64_t, uint8_t, int32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+ERROR awkward_identities64_from_unionarray8_32(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const int8_t* fromtags, const int32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int64_t, int8_t, int32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
 }
-ERROR awkward_identities64_from_unionarrayU8_U32(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const uint8_t* fromtags, const uint32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
-  return awkward_identities_from_unionarray<int64_t, uint8_t, uint32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+ERROR awkward_identities64_from_unionarray8_U32(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const int8_t* fromtags, const uint32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int64_t, int8_t, uint32_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
 }
-ERROR awkward_identities64_from_unionarrayU8_64(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const uint8_t* fromtags, const int64_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
-  return awkward_identities_from_unionarray<int64_t, uint8_t, int64_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
+ERROR awkward_identities64_from_unionarray8_64(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const int8_t* fromtags, const int64_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
+  return awkward_identities_from_unionarray<int64_t, int8_t, int64_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
 }

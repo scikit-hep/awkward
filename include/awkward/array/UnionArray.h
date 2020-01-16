@@ -69,9 +69,9 @@ namespace awkward {
     const std::vector<std::shared_ptr<Content>> contents_;
   };
 
-  typedef UnionArrayOf<uint8_t, int32_t>  UnionArrayU8_32;
-  typedef UnionArrayOf<uint8_t, uint32_t> UnionArrayU8_U32;
-  typedef UnionArrayOf<uint8_t, int64_t>  UnionArrayU8_64;
+  typedef UnionArrayOf<int8_t, int32_t>  UnionArray8_32;
+  typedef UnionArrayOf<int8_t, uint32_t> UnionArray8_U32;
+  typedef UnionArrayOf<int8_t, int64_t>  UnionArray8_64;
 }
 
 #endif // AWKWARD_UNIONARRAY_H_

@@ -88,15 +88,15 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string UnionArrayOf<T, I>::classname() const {
-    if (std::is_same<T, uint8_t>::value) {
+    if (std::is_same<T, int8_t>::value) {
       if (std::is_same<I, int32_t>::value) {
-        return "UnionArrayU8_32";
+        return "UnionArray8_32";
       }
       else if (std::is_same<I, uint32_t>::value) {
-        return "UnionArrayU8_U32";
+        return "UnionArray8_U32";
       }
       else if (std::is_same<I, int64_t>::value) {
-        return "UnionArrayU8_64";
+        return "UnionArray8_64";
       }
     }
     return "UnrecognizedUnionArray";
@@ -506,7 +506,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: UnionArray::getitem_next(SliceArray64)");
   }
 
-  template class UnionArrayOf<uint8_t, int32_t>;
-  template class UnionArrayOf<uint8_t, uint32_t>;
-  template class UnionArrayOf<uint8_t, int64_t>;
+  template class UnionArrayOf<int8_t, int32_t>;
+  template class UnionArrayOf<int8_t, uint32_t>;
+  template class UnionArrayOf<int8_t, int64_t>;
 }

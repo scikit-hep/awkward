@@ -146,13 +146,13 @@ py::object box(std::shared_ptr<ak::Content> content) {
   else if (ak::IndexedOptionArray64* raw = dynamic_cast<ak::IndexedOptionArray64*>(content.get())) {
     return py::cast(*raw);
   }
-  else if (ak::UnionArrayU8_32* raw = dynamic_cast<ak::UnionArrayU8_32*>(content.get())) {
+  else if (ak::UnionArray8_32* raw = dynamic_cast<ak::UnionArray8_32*>(content.get())) {
     return py::cast(*raw);
   }
-  else if (ak::UnionArrayU8_U32* raw = dynamic_cast<ak::UnionArrayU8_U32*>(content.get())) {
+  else if (ak::UnionArray8_U32* raw = dynamic_cast<ak::UnionArray8_U32*>(content.get())) {
     return py::cast(*raw);
   }
-  else if (ak::UnionArrayU8_64* raw = dynamic_cast<ak::UnionArrayU8_64*>(content.get())) {
+  else if (ak::UnionArray8_64* raw = dynamic_cast<ak::UnionArray8_64*>(content.get())) {
     return py::cast(*raw);
   }
   else {
@@ -287,15 +287,15 @@ std::shared_ptr<ak::Content> unbox_content(py::handle obj) {
   }
   catch (py::cast_error err) { }
   try {
-    return obj.cast<ak::UnionArrayU8_32*>()->shallow_copy();
+    return obj.cast<ak::UnionArray8_32*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   try {
-    return obj.cast<ak::UnionArrayU8_U32*>()->shallow_copy();
+    return obj.cast<ak::UnionArray8_U32*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   try {
-    return obj.cast<ak::UnionArrayU8_64*>()->shallow_copy();
+    return obj.cast<ak::UnionArray8_64*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   throw std::invalid_argument("content argument must be a Content subtype");
@@ -1586,9 +1586,9 @@ PYBIND11_MODULE(layout, m) {
   make_IndexedArrayOf<int32_t, true>(m,  "IndexedOptionArray32");
   make_IndexedArrayOf<int64_t, true>(m,  "IndexedOptionArray64");
 
-  make_UnionArrayOf<uint8_t, int32_t>(m,  "UnionArrayU8_32");
-  make_UnionArrayOf<uint8_t, uint32_t>(m, "UnionArrayU8_U32");
-  make_UnionArrayOf<uint8_t, int64_t>(m,  "UnionArrayU8_64");
+  make_UnionArrayOf<int8_t, int32_t>(m,  "UnionArray8_32");
+  make_UnionArrayOf<int8_t, uint32_t>(m, "UnionArray8_U32");
+  make_UnionArrayOf<int8_t, int64_t>(m,  "UnionArray8_64");
 
   m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;

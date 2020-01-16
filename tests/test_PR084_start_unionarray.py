@@ -10,19 +10,19 @@ import awkward1
 def test_getitem():
     content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     content1 = awkward1.Array(["one", "two", "three", "four", "five"]).layout
-    tags = awkward1.layout.IndexU8(numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.uint8))
+    tags = awkward1.layout.Index8(numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
 
-    assert numpy.asarray(awkward1.layout.UnionArrayU8_32.regular_index(tags)).tolist() == [0, 1, 0, 1, 2, 2, 3, 4]
-    assert numpy.asarray(awkward1.layout.UnionArrayU8_32.regular_index(tags)).dtype == numpy.dtype(numpy.int32)
-    assert numpy.asarray(awkward1.layout.UnionArrayU8_U32.regular_index(tags)).tolist() == [0, 1, 0, 1, 2, 2, 3, 4]
-    assert numpy.asarray(awkward1.layout.UnionArrayU8_U32.regular_index(tags)).dtype == numpy.dtype(numpy.uint32)
-    assert numpy.asarray(awkward1.layout.UnionArrayU8_64.regular_index(tags)).tolist() == [0, 1, 0, 1, 2, 2, 3, 4]
-    assert numpy.asarray(awkward1.layout.UnionArrayU8_64.regular_index(tags)).dtype == numpy.dtype(numpy.int64)
+    assert numpy.asarray(awkward1.layout.UnionArray8_32.regular_index(tags)).tolist() == [0, 1, 0, 1, 2, 2, 3, 4]
+    assert numpy.asarray(awkward1.layout.UnionArray8_32.regular_index(tags)).dtype == numpy.dtype(numpy.int32)
+    assert numpy.asarray(awkward1.layout.UnionArray8_U32.regular_index(tags)).tolist() == [0, 1, 0, 1, 2, 2, 3, 4]
+    assert numpy.asarray(awkward1.layout.UnionArray8_U32.regular_index(tags)).dtype == numpy.dtype(numpy.uint32)
+    assert numpy.asarray(awkward1.layout.UnionArray8_64.regular_index(tags)).tolist() == [0, 1, 0, 1, 2, 2, 3, 4]
+    assert numpy.asarray(awkward1.layout.UnionArray8_64.regular_index(tags)).dtype == numpy.dtype(numpy.int64)
 
     index = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
-    array = awkward1.layout.UnionArrayU8_32(tags, index, [content0, content1])
+    array = awkward1.layout.UnionArray8_32(tags, index, [content0, content1])
     assert numpy.asarray(array.tags).tolist() == [1, 1, 0, 0, 1, 0, 1, 1]
-    assert numpy.asarray(array.tags).dtype == numpy.dtype(numpy.uint8)
+    assert numpy.asarray(array.tags).dtype == numpy.dtype(numpy.int8)
     assert numpy.asarray(array.index).tolist() == [0, 1, 0, 1, 2, 2, 4, 3]
     assert numpy.asarray(array.index).dtype == numpy.dtype(numpy.int32)
     assert type(array.contents) is list
@@ -52,7 +52,7 @@ def test_getitem():
 
     content2 = awkward1.Array([{"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2, "y": [1.1, 2.2]}]).layout
     content3 = awkward1.Array([{"x": 0.0, "y": "zero", "z": False}, {"x": 1.1, "y": "one", "z": True}, {"x": 2.2, "y": "two", "z": False}, {"x": 3.3, "y": "three", "z": True}, {"x": 4.4, "y": "four", "z": False}]).layout
-    array2 = awkward1.layout.UnionArrayU8_32(tags, index, [content2, content3])
+    array2 = awkward1.layout.UnionArray8_32(tags, index, [content2, content3])
     assert awkward1.tolist(array2) == [{"x": 0.0, "y": "zero", "z": False}, {"x": 1.1, "y": "one", "z": True}, {"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2.2, "y": "two", "z": False}, {"x": 2, "y": [1.1, 2.2]}, {"x": 4.4, "y": "four", "z": False}, {"x": 3.3, "y": "three", "z": True}]
     assert awkward1.tolist(array2["x"]) == [0.0, 1.1, 0, 1, 2.2, 2, 4.4, 3.3]
     assert awkward1.tolist(array2["y"]) == ["zero", "one", [], [1.1], "two", [1.1, 2.2], "four", "three"]
@@ -65,8 +65,8 @@ def test_getitem():
         array2["z"]
     assert str(err.value) == "key \"z\" does not exist (not in record)"
 
-    array3 = awkward1.layout.UnionArrayU8_32(tags, index, [content3, content2])
-    array4 = awkward1.layout.UnionArrayU8_32(tags, index, [content0, content1, content2, content3])
+    array3 = awkward1.layout.UnionArray8_32(tags, index, [content3, content2])
+    array4 = awkward1.layout.UnionArray8_32(tags, index, [content0, content1, content2, content3])
     assert set(content2.keys()) == set(["x", "y"])
     assert set(content3.keys()) == set(["x", "y", "z"])
     assert set(array2.keys()) == set(["x", "y"])
@@ -76,11 +76,39 @@ def test_getitem():
 def test_identities():
     content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     content1 = awkward1.Array(["one", "two", "three", "four", "five"]).layout
-    tags = awkward1.layout.IndexU8(numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.uint8))
+    tags = awkward1.layout.Index8(numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
     index = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
-    array = awkward1.layout.UnionArrayU8_32(tags, index, [content0, content1])
+    array = awkward1.layout.UnionArray8_32(tags, index, [content0, content1])
 
     array.setidentities()
     assert numpy.asarray(array.identities).tolist() == [[0], [1], [2], [3], [4], [5], [6], [7]]
     assert numpy.asarray(array.content(0).identities).tolist() == [[2], [3], [5]]
     assert numpy.asarray(array.content(1).identities).tolist() == [[0], [1], [4], [7], [6]]
+
+def test_fromiter():
+    builder = awkward1.layout.FillableArray()
+
+    builder.integer(0)
+    builder.integer(1)
+    builder.integer(2)
+    builder.beginlist()
+    builder.endlist()
+    builder.beginlist()
+    builder.real(1.1)
+    builder.endlist()
+    builder.beginlist()
+    builder.real(1.1)
+    builder.real(2.2)
+    builder.endlist()
+    builder.beginlist()
+    builder.real(1.1)
+    builder.real(2.2)
+    builder.real(3.3)
+    builder.endlist()
+
+    assert awkward1.tolist(builder.snapshot()) == [0, 1, 2, [], [1.1], [1.1, 2.2], [1.1, 2.2, 3.3]]
+
+    assert awkward1.tolist(awkward1.fromiter([0, 1, 2, [], [1.1], [1.1, 2.2], [1.1, 2.2, 3.3]])) == [0, 1, 2, [], [1.1], [1.1, 2.2], [1.1, 2.2, 3.3]]
+    assert awkward1.tolist(awkward1.fromiter([0, 1, 2, [], "zero", [1.1], "one", [1.1, 2.2], "two", [1.1, 2.2, 3.3], "three"])) == [0, 1, 2, [], "zero", [1.1], "one", [1.1, 2.2], "two", [1.1, 2.2, 3.3], "three"]
+    assert awkward1.tolist(awkward1.fromjson('[0, 1, 2, [], "zero", [1.1], "one", [1.1, 2.2], "two", [1.1, 2.2, 3.3], "three"]')) == [0, 1, 2, [], "zero", [1.1], "one", [1.1, 2.2], "two", [1.1, 2.2, 3.3], "three"]
+    assert awkward1.tojson(awkward1.fromjson('[0,1,2,[],"zero",[1.1],"one",[1.1,2.2],"two",[1.1,2.2,3.3],"three"]')) == '[0,1,2,[],"zero",[1.1],"one",[1.1,2.2],"two",[1.1,2.2,3.3],"three"]'

@@ -709,14 +709,14 @@ ERROR awkward_unionarray_regular_index(I* toindex, const C* fromtags, int64_t ta
   }
   return success();
 }
-ERROR awkward_unionarrayU8_32_regular_index(int32_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length) {
-  return awkward_unionarray_regular_index<uint8_t, int32_t>(toindex, fromtags, tagsoffset, length);
+ERROR awkward_unionarray8_32_regular_index(int32_t* toindex, const int8_t* fromtags, int64_t tagsoffset, int64_t length) {
+  return awkward_unionarray_regular_index<int8_t, int32_t>(toindex, fromtags, tagsoffset, length);
 }
-ERROR awkward_unionarrayU8_U32_regular_index(uint32_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length) {
-  return awkward_unionarray_regular_index<uint8_t, uint32_t>(toindex, fromtags, tagsoffset, length);
+ERROR awkward_unionarray8_U32_regular_index(uint32_t* toindex, const int8_t* fromtags, int64_t tagsoffset, int64_t length) {
+  return awkward_unionarray_regular_index<int8_t, uint32_t>(toindex, fromtags, tagsoffset, length);
 }
-ERROR awkward_unionarrayU8_64_regular_index(int64_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length) {
-  return awkward_unionarray_regular_index<uint8_t, int64_t>(toindex, fromtags, tagsoffset, length);
+ERROR awkward_unionarray8_64_regular_index(int64_t* toindex, const int8_t* fromtags, int64_t tagsoffset, int64_t length) {
+  return awkward_unionarray_regular_index<int8_t, int64_t>(toindex, fromtags, tagsoffset, length);
 }
 
 template <typename T, typename C, typename I>
@@ -730,12 +730,12 @@ ERROR awkward_unionarray_project(int64_t* lenout, T* tocarry, const C* fromtags,
   }
   return success();
 }
-ERROR awkward_unionarrayU8_32_project_64(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
-  return awkward_unionarray_project<int64_t, uint8_t, int32_t>(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
+ERROR awkward_unionarray8_32_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
+  return awkward_unionarray_project<int64_t, int8_t, int32_t>(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
 }
-ERROR awkward_unionarrayU8_U32_project_64(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
-  return awkward_unionarray_project<int64_t, uint8_t, uint32_t>(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
+ERROR awkward_unionarray8_U32_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
+  return awkward_unionarray_project<int64_t, int8_t, uint32_t>(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
 }
-ERROR awkward_unionarrayU8_64_project_64(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
-  return awkward_unionarray_project<int64_t, uint8_t, int64_t>(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
+ERROR awkward_unionarray8_64_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
+  return awkward_unionarray_project<int64_t, int8_t, int64_t>(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
 }

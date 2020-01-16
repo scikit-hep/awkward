@@ -98,13 +98,13 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_indexedarrayU32_getitem_carry_64(uint32_t* toindex, const uint32_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry);
   EXPORT_SYMBOL struct Error awkward_indexedarray64_getitem_carry_64(int64_t* toindex, const int64_t* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry);
 
-  EXPORT_SYMBOL struct Error awkward_unionarrayU8_32_regular_index(int32_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length);
-  EXPORT_SYMBOL struct Error awkward_unionarrayU8_U32_regular_index(uint32_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length);
-  EXPORT_SYMBOL struct Error awkward_unionarrayU8_64_regular_index(int64_t* toindex, const uint8_t* fromtags, int64_t tagsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_unionarray8_32_regular_index(int32_t* toindex, const int8_t* fromtags, int64_t tagsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_unionarray8_U32_regular_index(uint32_t* toindex, const int8_t* fromtags, int64_t tagsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_unionarray8_64_regular_index(int64_t* toindex, const int8_t* fromtags, int64_t tagsoffset, int64_t length);
 
-  EXPORT_SYMBOL struct Error awkward_unionarrayU8_32_project_64(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which);
-  EXPORT_SYMBOL struct Error awkward_unionarrayU8_U32_project_64(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which);
-  EXPORT_SYMBOL struct Error awkward_unionarrayU8_64_project_64(int64_t* lenout, int64_t* tocarry, const uint8_t* fromtags, int64_t tagsoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length, int64_t which);
+  EXPORT_SYMBOL struct Error awkward_unionarray8_32_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which);
+  EXPORT_SYMBOL struct Error awkward_unionarray8_U32_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which);
+  EXPORT_SYMBOL struct Error awkward_unionarray8_64_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length, int64_t which);
 
 }
 

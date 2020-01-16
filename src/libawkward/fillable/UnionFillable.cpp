@@ -13,6 +13,7 @@
 #include "awkward/fillable/ListFillable.h"
 #include "awkward/fillable/TupleFillable.h"
 #include "awkward/fillable/RecordFillable.h"
+#include "awkward/array/UnionArray.h"
 
 #include "awkward/fillable/UnionFillable.h"
 
@@ -50,9 +51,13 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> UnionFillable::snapshot() const {
-    Index8 types(types_.ptr(), 0, types_.length());
-    Index64 offsets(offsets_.ptr(), 0, offsets_.length());
-    throw std::runtime_error("UnionFillable::snapshot needs UnionArray");
+    Index8 tags(types_.ptr(), 0, types_.length());
+    Index64 index(offsets_.ptr(), 0, offsets_.length());
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->snapshot());
+    }
+    return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
   }
 
   bool UnionFillable::active() const {
