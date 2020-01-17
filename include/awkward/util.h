@@ -56,6 +56,14 @@ namespace awkward {
     ERROR awkward_identities32_from_indexedarray(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const T* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
     template <typename T>
     ERROR awkward_identities64_from_indexedarray(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const T* fromindex, int64_t fromptroffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
+    template <typename T, typename I>
+    ERROR awkward_identities32_from_unionarray(bool* uniquecontents, int32_t* toptr, const int32_t* fromptr, const T* fromtags, const I* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which);
+    template <typename T, typename I>
+    ERROR awkward_identities64_from_unionarray(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const T* fromtags, const I* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which);
+    template <typename T>
+    ERROR awkward_index_carry_64(T* toindex, const T* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t lenfromindex, int64_t length);
+    template <typename T>
+    ERROR awkward_index_carry_nocheck_64(T* toindex, const T* fromindex, const int64_t* carry, int64_t fromindexoffset, int64_t length);
     template <typename T>
     ERROR awkward_listarray_getitem_next_at_64(int64_t* tocarry, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at);
     template <typename T>
@@ -92,6 +100,10 @@ namespace awkward {
     ERROR awkward_indexedarray_getitem_nextcarry_64(int64_t* tocarry, const T* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
     template <typename T>
     ERROR awkward_indexedarray_getitem_carry_64(T* toindex, const T* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry);
+    template <typename T, typename I>
+    ERROR awkward_unionarray_regular_index(I* toindex, const T* fromtags, int64_t tagsoffset, int64_t length);
+    template <typename T, typename I>
+    ERROR awkward_unionarray_project_64(int64_t* lenout, int64_t* tocarry, const T* fromtags, int64_t tagsoffset, const I* fromindex, int64_t indexoffset, int64_t length, int64_t which);
 
   }
 }

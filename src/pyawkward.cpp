@@ -21,6 +21,7 @@
 #include "awkward/array/RecordArray.h"
 #include "awkward/array/Record.h"
 #include "awkward/array/IndexedArray.h"
+#include "awkward/array/UnionArray.h"
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/FillableArray.h"
 #include "awkward/type/Type.h"
@@ -143,6 +144,15 @@ py::object box(std::shared_ptr<ak::Content> content) {
     return py::cast(*raw);
   }
   else if (ak::IndexedOptionArray64* raw = dynamic_cast<ak::IndexedOptionArray64*>(content.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::UnionArray8_32* raw = dynamic_cast<ak::UnionArray8_32*>(content.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::UnionArray8_U32* raw = dynamic_cast<ak::UnionArray8_U32*>(content.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::UnionArray8_64* raw = dynamic_cast<ak::UnionArray8_64*>(content.get())) {
     return py::cast(*raw);
   }
   else {
@@ -274,6 +284,18 @@ std::shared_ptr<ak::Content> unbox_content(py::handle obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::IndexedOptionArray64*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::UnionArray8_32*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::UnionArray8_U32*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::UnionArray8_64*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   throw std::invalid_argument("content argument must be a Content subtype");
@@ -1482,6 +1504,29 @@ py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T
   );
 }
 
+/////////////////////////////////////////////////////////////// UnionArray
+
+template <typename T, typename I>
+py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::Content> make_UnionArrayOf(py::handle m, std::string name) {
+  return content_methods(py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::Content>(m, name.c_str())
+      .def(py::init([](ak::IndexOf<T>& tags, ak::IndexOf<I>& index, py::iterable contents, py::object identities, py::object parameters) -> ak::UnionArrayOf<T, I> {
+        std::vector<std::shared_ptr<ak::Content>> out;
+        for (auto content : contents) {
+          out.push_back(std::shared_ptr<ak::Content>(unbox_content(content)));
+        }
+        return ak::UnionArrayOf<T, I>(unbox_identities_none(identities), dict2parameters(parameters), tags, index, out);
+      }), py::arg("tags"), py::arg("index"), py::arg("contents"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
+
+      .def_static("regular_index", &ak::UnionArrayOf<T, I>::regular_index)
+      .def_property_readonly("tags", &ak::UnionArrayOf<T, I>::tags)
+      .def_property_readonly("index", &ak::UnionArrayOf<T, I>::index)
+      .def_property_readonly("contents", &ak::UnionArrayOf<T, I>::contents)
+      .def_property_readonly("numcontents", &ak::UnionArrayOf<T, I>::numcontents)
+      .def("content", &ak::UnionArrayOf<T, I>::content)
+      .def("project", &ak::UnionArrayOf<T, I>::project)
+  );
+}
+
 /////////////////////////////////////////////////////////////// module
 
 PYBIND11_MODULE(layout, m) {
@@ -1540,6 +1585,10 @@ PYBIND11_MODULE(layout, m) {
   make_IndexedArrayOf<int64_t, false>(m,  "IndexedArray64");
   make_IndexedArrayOf<int32_t, true>(m,  "IndexedOptionArray32");
   make_IndexedArrayOf<int64_t, true>(m,  "IndexedOptionArray64");
+
+  make_UnionArrayOf<int8_t, int32_t>(m,  "UnionArray8_32");
+  make_UnionArrayOf<int8_t, uint32_t>(m, "UnionArray8_U32");
+  make_UnionArrayOf<int8_t, int64_t>(m,  "UnionArray8_64");
 
   m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;

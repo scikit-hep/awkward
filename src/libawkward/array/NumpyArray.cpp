@@ -337,6 +337,7 @@ namespace awkward {
   }
 
   void NumpyArray::tojson_part(ToJson& builder) const {
+    check_for_iteration();
     if (parameter_equals("__class__", "\"char\"")) {
       tojson_string(builder);
     }
@@ -559,19 +560,19 @@ namespace awkward {
   int64_t NumpyArray::numfields() const { return -1; }
 
   int64_t NumpyArray::fieldindex(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
+    throw std::invalid_argument(std::string("key ") + util::quote(key, true) + std::string(" does not exist (data are not records)"));
   }
 
   const std::string NumpyArray::key(int64_t fieldindex) const {
-    throw std::invalid_argument("array contains no Records");
+    throw std::invalid_argument(std::string("fieldindex \"") + std::to_string(fieldindex) + std::string("\" does not exist (data are not records)"));
   }
 
   bool NumpyArray::haskey(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
+    return false;
   }
 
   const std::vector<std::string> NumpyArray::keys() const {
-    throw std::invalid_argument("array contains no Records");
+    return std::vector<std::string>();
   }
 
   const Index64 NumpyArray::count64() const {

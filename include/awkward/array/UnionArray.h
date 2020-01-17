@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_INDEXEDARRAY_H_
-#define AWKWARD_INDEXEDARRAY_H_
+#ifndef AWKWARD_UNIONARRAY_H_
+#define AWKWARD_UNIONARRAY_H_
 
 #include <cassert>
 #include <string>
@@ -14,13 +14,18 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  template <typename T, bool ISOPTION>
-  class IndexedArrayOf: public Content {
+  template <typename T, typename I>
+  class UnionArrayOf: public Content {
   public:
-    IndexedArrayOf<T, ISOPTION>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& index, const std::shared_ptr<Content>& content);
-    const IndexOf<T> index() const;
-    const std::shared_ptr<Content> content() const;
-    bool isoption() const;
+    static const IndexOf<I> regular_index(const IndexOf<T>& tags);
+
+    UnionArrayOf<T, I>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T> tags, const IndexOf<I>& index, const std::vector<std::shared_ptr<Content>>& contents);
+    const IndexOf<T> tags() const;
+    const IndexOf<I> index() const;
+    const std::vector<std::shared_ptr<Content>> contents() const;
+    int64_t numcontents() const;
+    const std::shared_ptr<Content> content(int64_t index) const;
+    const std::shared_ptr<Content> project(int64_t index) const;
 
     const std::string classname() const override;
     void setidentities() override;
@@ -59,15 +64,14 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;
 
   private:
-    const IndexOf<T> index_;
-    const std::shared_ptr<Content> content_;
+    const IndexOf<T> tags_;
+    const IndexOf<I> index_;
+    const std::vector<std::shared_ptr<Content>> contents_;
   };
 
-  typedef IndexedArrayOf<int32_t, false>  IndexedArray32;
-  typedef IndexedArrayOf<uint32_t, false> IndexedArrayU32;
-  typedef IndexedArrayOf<int64_t, false>  IndexedArray64;
-  typedef IndexedArrayOf<int32_t, true>   IndexedOptionArray32;
-  typedef IndexedArrayOf<int64_t, true>   IndexedOptionArray64;
+  typedef UnionArrayOf<int8_t, int32_t>  UnionArray8_32;
+  typedef UnionArrayOf<int8_t, uint32_t> UnionArray8_U32;
+  typedef UnionArrayOf<int8_t, int64_t>  UnionArray8_64;
 }
 
-#endif // AWKWARD_INDEXEDARRAY_H_
+#endif // AWKWARD_UNIONARRAY_H_
