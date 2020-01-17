@@ -18,6 +18,8 @@ def flatten(data, axis=0):
                 raise ValueError("cannot concatenate non-lists")
         else:
             return [flatten(x, axis - 1) for x in data]
+    elif isinstance(data, dict):
+        return {n: flatten(x, axis) for n, x in data.items()}   # does not reduce axis!
     else:
         raise ValueError("cannot flatten {0} objects".format(type(data)))
 
