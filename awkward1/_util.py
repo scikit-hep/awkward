@@ -61,6 +61,9 @@ key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 def minimally_touching_string(limit_length, layout, classes, functions):
     import awkward1.layout
 
+    if isinstance(layout, awkward1.layout.Record):
+        layout = layout.array
+
     if len(layout) == 0:
         return "[]"
 

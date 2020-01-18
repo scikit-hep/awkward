@@ -3,9 +3,10 @@
 import numpy
 
 import awkward1.layout
+import awkward1.nep13
 import awkward1.operations.convert
 
-class Array(object):
+class Array(awkward1.nep13.NDArrayOperatorsMixin):
     def __init__(self, data, type=None, classes=None, functions=None):
         if isinstance(data, awkward1.layout.Content):
             layout = data
@@ -76,6 +77,9 @@ class Array(object):
 
         return "<Array {0} type={1}>".format(value, type)
 
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        return awkward1.nep13.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+
 class Record(object):
     def __init__(self, data, type=None, classes=None, functions=None):
         # FIXME: more checks here
@@ -119,7 +123,7 @@ class Record(object):
         return awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
 
     def __repr__(self, limit_value=40, limit_total=85):
-        value = awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
+        value = awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._classes, self._functions)[1:-1]
 
         limit_type = limit_total - len(value) - len("<Record  type=>")
         type = repr(str(self.layout.type))
@@ -164,6 +168,9 @@ class FillableArray(object):
             type = type[:(limit_type - 4)] + "..." + type[-1]
 
         return "<FillableArray {0} type={1}>".format(value, type)
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        return awkward1.nep13.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
     def snapshot(self):
         return awkward1._util.wrap(self._fillablearray.snapshot(), self._classes, self._functions)
