@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-namespace = {}
+classes = {}
+functions = {}
 
 import awkward1.layout
 from awkward1.layout import Type

@@ -5,19 +5,34 @@ import re
 
 import numpy
 
-def wrap(content, namespace):
+def regular_classes(classes):
+    import awkward1
+    if classes is None:
+        return awkward1.classes
+    else:
+        return classes
+
+def regular_functions(functions):
+    import awkward1
+    if functions is None:
+        return awkward1.functions
+    else:
+        return functions
+
+def wrap(content, classes, functions):
     import awkward1.layout
+
     if isinstance(content, awkward1.layout.Content):
-        cls = namespace.get(content.type.parameters.get("__class__"))
+        cls = regular_classes(classes).get(content.type.parameters.get("__class__"))
         if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Array)):
             cls = awkward1.Array
-        return cls(content, namespace=namespace)
+        return cls(content, classes=classes, functions=functions)
 
     elif isinstance(content, awkward1.layout.Record):
-        cls = namespace.get(content.type.parameters.get("__class__"))
+        cls = regular_classes(classes).get(content.type.parameters.get("__class__"))
         if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Record)):
             cls = awkward1.Record
-        return cls(content, namespace=namespace)
+        return cls(content, classes=classes, functions=functions)
 
     else:
         return content
@@ -43,7 +58,7 @@ def key2index(keys, key):
 
 key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
-def minimally_touching_string(limit_length, layout, namespace):
+def minimally_touching_string(limit_length, layout, classes, functions):
     import awkward1.layout
 
     if len(layout) == 0:
@@ -52,16 +67,16 @@ def minimally_touching_string(limit_length, layout, namespace):
     def forward(x, space, brackets=True, wrap=True):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
-            cls = namespace.get(x.type.parameters.get("__class__"))
+            cls = regular_classes(classes).get(x.type.parameters.get("__class__"))
             if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
-                y = cls(x, namespace=namespace)
+                y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
-            cls = namespace.get(x.type.parameters.get("__class__"))
+            cls = regular_classes(classes).get(x.type.parameters.get("__class__"))
             if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
-                y = cls(x, namespace=namespace)
+                y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
@@ -94,16 +109,16 @@ def minimally_touching_string(limit_length, layout, namespace):
     def backward(x, space, brackets=True, wrap=True):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
-            cls = namespace.get(x.type.parameters.get("__class__"))
+            cls = regular_classes(classes).get(x.type.parameters.get("__class__"))
             if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
-                y = cls(x, namespace=namespace)
+                y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
-            cls = namespace.get(x.type.parameters.get("__class__"))
+            cls = regular_classes(classes).get(x.type.parameters.get("__class__"))
             if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
-                y = cls(x, namespace=namespace)
+                y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
                     done = True

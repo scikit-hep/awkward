@@ -6,7 +6,7 @@ import awkward1.layout
 import awkward1.operations.convert
 
 class Array(object):
-    def __init__(self, data, type=None, namespace=None):
+    def __init__(self, data, type=None, classes=None, functions=None):
         if isinstance(data, awkward1.layout.Content):
             layout = data
         elif isinstance(data, Array):
@@ -20,7 +20,8 @@ class Array(object):
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
 
-        self.namespace = namespace
+        self._classes = classes
+        self._functions = functions
 
         if type is not None:
             if not isinstance(type, awkward1.layout.ArrayType):
@@ -29,7 +30,7 @@ class Array(object):
                 raise TypeError("ArrayType length ({0}) is greater than layout length {1}".format(type.length, len(layout)))
             if type.length < len(layout):
                 layout = layout[:type.length]
-            cls = self._namespace.get(type.parameters.get("__class__"))
+            cls = awkward1._util.regular_classes(self._classes).get(type.parameters.get("__class__"))
             if cls is not None:
                 if not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Array):
                     raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Array".format(repr(type.parameters["__class__"])))
@@ -49,17 +50,6 @@ class Array(object):
         self._layout = layout
 
     @property
-    def namespace(self):
-        return self._namespace
-
-    @namespace.setter
-    def namespace(self, namespace):
-        if namespace is None:
-            self._namespace = awkward1.namespace
-        else:
-            self._namespace = namespace
-
-    @property
     def type(self):
         return awkward1.layout.ArrayType(self._layout.type, len(self._layout))
 
@@ -68,16 +58,16 @@ class Array(object):
 
     def __iter__(self):
         for x in self.layout:
-            yield awkward1._util.wrap(x, self._namespace)
+            yield awkward1._util.wrap(x, self._classes, self._functions)
 
     def __getitem__(self, where):
-        return awkward1._util.wrap(self.layout[where], self._namespace)
+        return awkward1._util.wrap(self.layout[where], self._classes, self._functions)
 
     def __str__(self, limit_value=85):
-        return awkward1._util.minimally_touching_string(limit_value, self._layout, self._namespace)
+        return awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
 
     def __repr__(self, limit_value=40, limit_total=85):
-        value = awkward1._util.minimally_touching_string(limit_value, self._layout, self._namespace)
+        value = awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
 
         limit_type = limit_total - len(value) - len("<Array  type=>")
         type = repr(str(self.type))
@@ -87,18 +77,19 @@ class Array(object):
         return "<Array {0} type={1}>".format(value, type)
 
 class Record(object):
-    def __init__(self, data, type=None, namespace=None):
+    def __init__(self, data, type=None, classes=None, functions=None):
         # FIXME: more checks here
         layout = data
         if not isinstance(layout, awkward1.layout.Record):
             raise TypeError("could not convert data into an awkward1.Record")
 
-        self.namespace = namespace
+        self._classes = classes
+        self._functions = functions
 
         if type is not None:
             if not isinstance(type, awkward1.layout.RecordType):
                 raise TypeError("type must be an awkward1.layout.RecordType")
-            cls = self._namespace.get(type.parameters.get("__class__"))
+            cls = awkward1._util.regular_classes(self._classes).get(type.parameters.get("__class__"))
             if cls is not None:
                 if not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Record):
                     raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Record".format(repr(type.parameters["__class__"])))
@@ -118,28 +109,17 @@ class Record(object):
         self._layout = layout
 
     @property
-    def namespace(self):
-        return self._namespace
-
-    @namespace.setter
-    def namespace(self, namespace):
-        if namespace is None:
-            self._namespace = awkward1.namespace
-        else:
-            self._namespace = namespace
-
-    @property
     def type(self):
         return self._layout.type
 
     def __getitem__(self, where):
-        return awkward1._util.wrap(self.layout[where], self._namespace)
+        return awkward1._util.wrap(self.layout[where], self._classes, self._functions)
 
     def __str__(self, limit_value=85):
-        return awkward1._util.minimally_touching_string(limit_value, self._layout, self._namespace)
+        return awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
 
     def __repr__(self, limit_value=40, limit_total=85):
-        value = awkward1._util.minimally_touching_string(limit_value, self._layout, self._namespace)
+        value = awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
 
         limit_type = limit_total - len(value) - len("<Record  type=>")
         type = repr(str(self.layout.type))
@@ -149,20 +129,10 @@ class Record(object):
         return "<Record {0} type={1}>".format(value, type)
 
 class FillableArray(object):
-    def __init__(self, namespace=None):
+    def __init__(self, classes=None, functions=None):
         self._fillablearray = awkward1.layout.FillableArray()
-        self.namespace = namespace
-
-    @property
-    def namespace(self):
-        return self._namespace
-
-    @namespace.setter
-    def namespace(self, namespace):
-        if namespace is None:
-            self._namespace = awkward1.namespace
-        else:
-            self._namespace = namespace
+        self._classes = classes
+        self._functions = functions
 
     @property
     def type(self):
@@ -173,11 +143,11 @@ class FillableArray(object):
         return len(self._fillablearray)
 
     def __getitem__(self, where):
-        return awkward1._util.wrap(self._fillablearray[where], self._namespace)
+        return awkward1._util.wrap(self._fillablearray[where], self._classes, self._functions)
 
     def __iter__(self):
         for x in self._fillablearray.snapshot():
-            yield awkward1._util.wrap(x, self._namespace)
+            yield awkward1._util.wrap(x, self._classes, self._functions)
 
     def __str__(self, limit_value=85, snapshot=None):
         if snapshot is None:
@@ -196,7 +166,7 @@ class FillableArray(object):
         return "<FillableArray {0} type={1}>".format(value, type)
 
     def snapshot(self):
-        return awkward1._util.wrap(self._fillablearray.snapshot(), self._namespace)
+        return awkward1._util.wrap(self._fillablearray.snapshot(), self._classes, self._functions)
 
     def null(self):
         self._fillablearray.null()
