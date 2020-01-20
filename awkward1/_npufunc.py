@@ -33,9 +33,7 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
     uniontypes = (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)
 
-    regulartypes = (awkward1.layout.RegularArray,)
-
-    listtypes = (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)
+    listtypes = (awkward1.layout.RegularArray, awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)
 
     optiontypes = (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)
 
@@ -51,20 +49,26 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
         if any(isinstance(x, unknowntypes) for x in inputs):
             return level([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
 
+        elif any(isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1 for x in inputs):
+            return level([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.regularize_shape() for x in inputs])
+
         elif any(isinstance(x, indexedtypes) for x in inputs):
             return level([x if not isinstance(x, indexedtypes) else x.project() for x in inputs])
 
         elif any(isinstance(x, uniontypes) for x in inputs):
             raise NotImplementedError("array_ufunc of UnionArray")
 
-        elif any(isinstance(x, regulartypes) for x in inputs):
-            raise NotImplementedError("array_ufunc of RegularArray")
-
         elif any(isinstance(x, listtypes) for x in inputs):
-            first = firstof(inputs, listtypes)
-            # FIXME: need a List*Array::compactoffsets() and a *Array::broadcast_to_offsets(offsets)
-            offsets = first.offsets
-            return awkward1.layout.ListOffsetArray64(offsets, level([x if not isinstance(x, listtypes) else x.content for x in inputs]))
+            if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
+                first = firstof(inputs, listtypes)
+                raise Exception
+
+
+            else:
+                first = firstof(inputs, listtypes)
+                # FIXME: need a List*Array::compactoffsets() and a *Array::broadcast_to_offsets(offsets)
+                offsets = first.offsets
+                return awkward1.layout.ListOffsetArray64(offsets, level([x if not isinstance(x, listtypes) else x.content for x in inputs]))
 
         elif any(isinstance(x, optiontypes) for x in inputs):
             mask = None

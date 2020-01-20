@@ -1285,6 +1285,7 @@ py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_Nu
       .def_property_readonly("iscontiguous", &ak::NumpyArray::iscontiguous)
       .def("contiguous", &ak::NumpyArray::contiguous)
       .def("become_contiguous", &ak::NumpyArray::become_contiguous)
+      .def("regularize_shape", &ak::NumpyArray::regularize_shape)
   );
 }
 
@@ -1312,6 +1313,8 @@ py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, 
         return ak::ListOffsetArrayOf<T>(unbox_identities_none(identities), dict2parameters(parameters), offsets, std::shared_ptr<ak::Content>(unbox_content(content)));
       }), py::arg("offsets"), py::arg("content"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
+      .def_property_readonly("starts", &ak::ListOffsetArrayOf<T>::starts)
+      .def_property_readonly("stops", &ak::ListOffsetArrayOf<T>::stops)
       .def_property_readonly("offsets", &ak::ListOffsetArrayOf<T>::offsets)
       .def_property_readonly("content", &ak::ListOffsetArrayOf<T>::content)
   );

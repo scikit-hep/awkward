@@ -3,10 +3,10 @@
 import numpy
 
 import awkward1.layout
-import awkward1.nep13
+import awkward1._npufunc
 import awkward1.operations.convert
 
-class Array(awkward1.nep13.NDArrayOperatorsMixin):
+class Array(awkward1._npufunc.NDArrayOperatorsMixin):
     def __init__(self, data, type=None, classes=None, functions=None):
         if isinstance(data, awkward1.layout.Content):
             layout = data
@@ -78,7 +78,7 @@ class Array(awkward1.nep13.NDArrayOperatorsMixin):
         return "<Array {0} type={1}>".format(value, type)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1.nep13.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._npufunc.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
 class Record(object):
     def __init__(self, data, type=None, classes=None, functions=None):
@@ -170,7 +170,7 @@ class FillableArray(object):
         return "<FillableArray {0} type={1}>".format(value, type)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1.nep13.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._npufunc.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
     def snapshot(self):
         return awkward1._util.wrap(self._fillablearray.snapshot(), self._classes, self._functions)

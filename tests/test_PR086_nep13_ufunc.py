@@ -39,3 +39,8 @@ def test_indexedoptionarray():
     dos = awkward1.layout.NumpyArray(numpy.array([6.6, 4.4, 4.4, 8.8, 0.0]))
     assert awkward1.tolist(uno + two) == [None, 8.8, 8.8, None, 8.8]
     assert awkward1.tolist(one + dos) == [8.8, None, 8.8, 8.8, 8.8]
+
+def test_regularize_shape():
+    array = awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(2, 3, 5))
+    assert isinstance(array.regularize_shape(), awkward1.layout.RegularArray)
+    assert awkward1.tolist(array.regularize_shape()) == awkward1.tolist(array)

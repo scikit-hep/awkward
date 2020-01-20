@@ -33,6 +33,8 @@ namespace awkward {
     ssize_t bytelength() const;
     uint8_t getbyte(ssize_t at) const;
 
+    const std::shared_ptr<Content> regularize_shape() const;
+
     bool isscalar() const override;
     const std::string classname() const override;
     void setidentities() override;

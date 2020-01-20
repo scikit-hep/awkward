@@ -17,10 +17,30 @@
 
 namespace awkward {
   template <typename T>
+  IndexOf<T> make_starts(const IndexOf<T>& offsets) {
+    return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
+  }
+
+  template <typename T>
+  IndexOf<T> make_stops(const IndexOf<T>& offsets) {
+    return IndexOf<T>(offsets.ptr(), offsets.offset() + 1, offsets.length() - 1);
+  }
+
+  template <typename T>
   ListOffsetArrayOf<T>::ListOffsetArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content)
       : Content(identities, parameters)
       , offsets_(offsets)
       , content_(content) { }
+
+  template <typename T>
+  const IndexOf<T> ListOffsetArrayOf<T>::starts() const {
+    return make_starts(offsets_);
+  }
+
+  template <typename T>
+  const IndexOf<T> ListOffsetArrayOf<T>::stops() const {
+    return make_stops(offsets_);
+  }
 
   template <typename T>
   const IndexOf<T> ListOffsetArrayOf<T>::offsets() const {
@@ -46,16 +66,6 @@ namespace awkward {
     else {
       return "UnrecognizedListOffsetArray";
     }
-  }
-
-  template <typename T>
-  IndexOf<T> make_starts(const IndexOf<T>& offsets) {
-    return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
-  }
-
-  template <typename T>
-  IndexOf<T> make_stops(const IndexOf<T>& offsets) {
-    return IndexOf<T>(offsets.ptr(), offsets.offset() + 1, offsets.length() - 1);
   }
 
   template <typename T>
