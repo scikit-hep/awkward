@@ -6,11 +6,13 @@
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ListType.h"
 #include "awkward/type/RegularType.h"
+#include "awkward/array/IndexedArray.h"
+#include "awkward/Index.h"
 
 #include "awkward/type/OptionType.h"
 
 namespace awkward {
-  OptionType::OptionType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type)
+  OptionType::OptionType(const util::Parameters& parameters, const std::shared_ptr<Type>& type)
       : Type(parameters)
       , type_(type) { }
 
@@ -42,7 +44,7 @@ namespace awkward {
 
   bool OptionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (OptionType* t = dynamic_cast<OptionType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       return type().get()->equal(t->type(), check_parameters);
@@ -68,16 +70,14 @@ namespace awkward {
     return type_.get()->haskey(key);
   }
 
-  const std::vector<std::string> OptionType::keyaliases(int64_t fieldindex) const {
-    return type_.get()->keyaliases(fieldindex);
-  }
-
-  const std::vector<std::string> OptionType::keyaliases(const std::string& key) const {
-    return type_.get()->keyaliases(key);
-  }
-
   const std::vector<std::string> OptionType::keys() const {
     return type_.get()->keys();
+  }
+
+  const std::shared_ptr<Content> OptionType::empty() const {
+    std::shared_ptr<Content> content = type_.get()->empty();
+    Index64 index(0);
+    return std::make_shared<IndexedOptionArray64>(Identities::none(), parameters_, index, content);
   }
 
   const std::shared_ptr<Type> OptionType::type() const {

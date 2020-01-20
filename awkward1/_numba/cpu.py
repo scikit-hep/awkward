@@ -25,7 +25,7 @@ class ErrorType(numba.types.Type):
 
 class Error(ctypes.Structure):
     _fields_ = [("str", ctypes.c_char_p),
-                ("location", ctypes.c_int64),
+                ("identity", ctypes.c_int64),
                 ("attempt", ctypes.c_int64),
                 ("extra", ctypes.c_int64)]
     numbatpe = ErrorType()
@@ -34,13 +34,16 @@ class Error(ctypes.Structure):
 class ErrorModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("str", numba.intp),
-                   ("location", numba.int64),
+                   ("identity", numba.int64),
                    ("attempt", numba.int64),
                    ("extra", numba.int64)]
         super(ErrorModel, self).__init__(dmm, fe_type, members)
 
 h2ctypes = {
     "bool": ctypes.c_uint8,
+    "bool *": ctypes.POINTER(ctypes.c_uint8),
+    "int8_t *": ctypes.POINTER(ctypes.c_int8),
+    "const int8_t *": ctypes.POINTER(ctypes.c_int8),
     "uint8_t *": ctypes.POINTER(ctypes.c_uint8),
     "const uint8_t *": ctypes.POINTER(ctypes.c_uint8),
     "int32_t": ctypes.c_int32,

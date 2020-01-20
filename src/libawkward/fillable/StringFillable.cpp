@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/type/PrimitiveType.h"
@@ -44,11 +44,11 @@ namespace awkward {
     content_.clear();
   }
 
-  const std::shared_ptr<Type> StringFillable::type() const {
-    Type::Parameters char_parameters;
+  const std::shared_ptr<Content> StringFillable::snapshot() const {
+    util::Parameters char_parameters;
     char_parameters["__class__"] = std::string("\"char\"");
 
-    Type::Parameters string_parameters;
+    util::Parameters string_parameters;
     string_parameters["__class__"] = std::string("\"string\"");
 
     if (encoding_ == nullptr) {
@@ -70,22 +70,12 @@ namespace awkward {
       char_parameters["encoding"] = std::string(quoted);
     }
 
-    return std::make_shared<ListType>(string_parameters, std::make_shared<PrimitiveType>(char_parameters, PrimitiveType::uint8));
-  }
-
-  const std::shared_ptr<Content> StringFillable::snapshot(const std::shared_ptr<Type>& type) const {
-    ListType* raw = dynamic_cast<ListType*>(type.get());
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
     std::vector<ssize_t> shape = { (ssize_t)content_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(uint8_t) };
     std::shared_ptr<Content> content;
-    if (raw == nullptr) {
-      content = std::make_shared<NumpyArray>(Identity::none(), Type::none(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B");
-    }
-    else {
-      content = std::make_shared<NumpyArray>(Identity::none(), raw->type(), content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B");
-    }
-    return std::make_shared<ListOffsetArray64>(Identity::none(), type, offsets, content);
+    content = std::make_shared<NumpyArray>(Identities::none(), char_parameters, content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B");
+    return std::make_shared<ListOffsetArray64>(Identities::none(), string_parameters, offsets, content);
   }
 
   bool StringFillable::active() const {

@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/array/RawArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
@@ -69,7 +69,7 @@ Slice slice(SliceItem* s1, SliceItem* s2, SliceItem* s3) {
 }
 
 int main(int, char**) {
-  RawArrayOf<double> rawdouble(Identity::none(), Type::none(), 10);
+  RawArrayOf<double> rawdouble(Identities::none(), util::Parameters(), 10);
   for (int i = 0;  i < 10;  i++) {
     *rawdouble.borrow(i) = 1.1*i;
   }
@@ -118,7 +118,7 @@ int main(int, char**) {
     return -1;
   }
 
-  std::shared_ptr<Content> listA(new ListOffsetArray32(Identity::none(), Type::none(), offsetsA, content));
+  std::shared_ptr<Content> listA(new ListOffsetArray32(Identities::none(), util::Parameters(), offsetsA, content));
   if (tostring(listA) != "[[0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]") {
     return -1;
   }
@@ -147,7 +147,7 @@ int main(int, char**) {
     return -1;
   }
 
-  std::shared_ptr<Content> listB(new ListOffsetArray32(Identity::none(), Type::none(), offsetsB, listA));
+  std::shared_ptr<Content> listB(new ListOffsetArray32(Identities::none(), util::Parameters(), offsetsB, listA));
   if (tostring(listB) != "[[[0, 1.1, 2.2], [], [3.3, 4.4]], [[5.5]], [], [[6.6, 7.7, 8.8, 9.9]]]") {
     return -1;
   }

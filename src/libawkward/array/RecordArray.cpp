@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"
@@ -11,162 +11,134 @@
 #include "awkward/array/RecordArray.h"
 
 namespace awkward {
-  RecordArray::RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup)
-      : Content(id, type)
+  RecordArray::RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup)
+      : Content(identities, parameters)
       , contents_(contents)
-      , lookup_(lookup)
-      , reverselookup_(reverselookup)
-      , length_(0) {
-    if (reverselookup_.get() == nullptr  &&  lookup_.get() == nullptr) { }
-    else if (reverselookup_.get() != nullptr  &&  lookup_.get() != nullptr) { }
-    else {
-      throw std::runtime_error("either 'lookup' and 'reverselookup' should both be None or neither should be");
-    }
-    if (contents_.empty()) {
-      throw std::runtime_error("this constructor can only be used with non-empty contents");
-    }
-    if (type_.get() != nullptr) {
-      checktype();
-    }
-  }
-
-  RecordArray::RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents)
-      : Content(id, type)
-      , contents_(contents)
-      , lookup_(nullptr)
-      , reverselookup_(nullptr)
+      , recordlookup_(recordlookup)
       , length_(0) {
     if (contents_.empty()) {
       throw std::runtime_error("this constructor can only be used with non-empty contents");
     }
-    if (type_.get() != nullptr) {
-      checktype();
+    if (recordlookup_.get() != nullptr  &&  recordlookup_.get()->size() != contents_.size()) {
+      throw std::runtime_error("recordlookup and contents must have the same length");
     }
   }
 
-  RecordArray::RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, int64_t length, bool istuple)
-      : Content(id, type)
+  RecordArray::RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents)
+      : Content(identities, parameters)
+      , contents_(contents)
+      , recordlookup_(nullptr)
+      , length_(0) {
+    if (contents_.empty()) {
+      throw std::runtime_error("this constructor can only be used with non-empty contents");
+    }
+  }
+
+  RecordArray::RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, int64_t length, bool istuple)
+      : Content(identities, parameters)
       , contents_()
-      , lookup_(istuple ? nullptr : new Lookup)
-      , reverselookup_(istuple ? nullptr : new ReverseLookup)
-      , length_(length) {
-    if (type_.get() != nullptr) {
-      checktype();
-    }
-  }
+      , recordlookup_(istuple ? nullptr : new util::RecordLookup)
+      , length_(length) { }
 
   const std::vector<std::shared_ptr<Content>> RecordArray::contents() const {
     return contents_;
   }
 
-  const std::shared_ptr<RecordArray::Lookup> RecordArray::lookup() const {
-    return lookup_;
-  }
-
-  const std::shared_ptr<RecordArray::ReverseLookup> RecordArray::reverselookup() const {
-    return reverselookup_;
+  const std::shared_ptr<util::RecordLookup> RecordArray::recordlookup() const {
+    return recordlookup_;
   }
 
   bool RecordArray::istuple() const {
-    return lookup_.get() == nullptr;
+    return recordlookup_.get() == nullptr;
   }
 
   const std::string RecordArray::classname() const {
     return "RecordArray";
   }
 
-  void RecordArray::setid() {
+  void RecordArray::setidentities() {
     int64_t len = length();
     if (len <= kMaxInt32) {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity32>(Identity::newref(), Identity::FieldLoc(), 1, len);
-      Identity32* rawid = reinterpret_cast<Identity32*>(newid.get());
-      struct Error err = awkward_new_identity32(rawid->ptr().get(), len);
-      util::handle_error(err, classname(), id_.get());
-      setid(newid);
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, len);
+      Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
+      struct Error err = awkward_new_identities32(rawidentities->ptr().get(), len);
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
     }
     else {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity64>(Identity::newref(), Identity::FieldLoc(), 1, len);
-      Identity64* rawid = reinterpret_cast<Identity64*>(newid.get());
-      struct Error err = awkward_new_identity64(rawid->ptr().get(), len);
-      util::handle_error(err, classname(), id_.get());
-      setid(newid);
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, len);
+      Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
+      struct Error err = awkward_new_identities64(rawidentities->ptr().get(), len);
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
     }
   }
 
-  void RecordArray::setid(const std::shared_ptr<Identity>& id) {
-    if (id.get() == nullptr) {
+  void RecordArray::setidentities(const std::shared_ptr<Identities>& identities) {
+    if (identities.get() == nullptr) {
       for (auto content : contents_) {
-        content.get()->setid(id);
+        content.get()->setidentities(identities);
       }
     }
     else {
-      if (length() != id.get()->length()) {
-        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
+      if (length() != identities.get()->length()) {
+        util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
       }
       if (istuple()) {
         for (size_t j = 0;  j < contents_.size();  j++) {
-          Identity::FieldLoc fieldloc(id.get()->fieldloc().begin(), id.get()->fieldloc().end());
-          fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width() - 1, std::to_string(j)));
-          contents_[j].get()->setid(id.get()->withfieldloc(fieldloc));
+          Identities::FieldLoc fieldloc(identities.get()->fieldloc().begin(), identities.get()->fieldloc().end());
+          fieldloc.push_back(std::pair<int64_t, std::string>(identities.get()->width() - 1, std::to_string(j)));
+          contents_[j].get()->setidentities(identities.get()->withfieldloc(fieldloc));
         }
       }
       else {
-        Identity::FieldLoc original = id.get()->fieldloc();
+        Identities::FieldLoc original = identities.get()->fieldloc();
         for (size_t j = 0;  j < contents_.size();  j++) {
-          Identity::FieldLoc fieldloc(original.begin(), original.end());
-          fieldloc.push_back(std::pair<int64_t, std::string>(id.get()->width() - 1, reverselookup_.get()->at(j)));
-          contents_[j].get()->setid(id.get()->withfieldloc(fieldloc));
+          Identities::FieldLoc fieldloc(original.begin(), original.end());
+          fieldloc.push_back(std::pair<int64_t, std::string>(identities.get()->width() - 1, recordlookup_.get()->at(j)));
+          contents_[j].get()->setidentities(identities.get()->withfieldloc(fieldloc));
         }
       }
     }
-    id_ = id;
+    identities_ = identities;
   }
 
   const std::shared_ptr<Type> RecordArray::type() const {
-    if (type_.get() != nullptr) {
-      return type_;
+    std::vector<std::shared_ptr<Type>> types;
+    for (auto item : contents_) {
+      types.push_back(item.get()->type());
     }
-    else {
-      std::vector<std::shared_ptr<Type>> types;
-      for (auto item : contents_) {
-        types.push_back(item.get()->type());
-      }
-      return std::make_shared<RecordType>(Type::Parameters(), types, lookup_, reverselookup_);
-    }
+    return std::make_shared<RecordType>(parameters_, types, recordlookup_);
   }
 
   const std::shared_ptr<Content> RecordArray::astype(const std::shared_ptr<Type>& type) const {
-    if (type.get() == nullptr  ||  dynamic_cast<RecordType*>(type.get()) == nullptr) {
-      if (contents_.empty()) {
-        return std::make_shared<RecordArray>(id_, type, length(), istuple());
+    if (RecordType* raw = dynamic_cast<RecordType*>(type.get())) {
+      std::vector<std::shared_ptr<Content>> contents;
+      if (raw->recordlookup().get() == nullptr) {
+        for (int64_t i = 0;  i < raw->numfields();  i++) {
+          if (i >= numfields()) {
+            throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because tuple lengths don't match"));
+          }
+          contents.push_back(contents_[(size_t)i].get()->astype(raw->field(i)));
+        }
       }
       else {
-        return std::make_shared<RecordArray>(id_, type, contents_, lookup_, reverselookup_);
-      }
-    }
-    RecordType* raw = dynamic_cast<RecordType*>(type.get());
-    std::vector<std::shared_ptr<Content>> contents;
-    if (raw->reverselookup().get() == nullptr) {
-      for (int64_t i = 0;  i < raw->numfields();  i++) {
-        if (i >= numfields()) {
-          throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
+        for (auto key : raw->keys()) {
+          if (!haskey(key)) {
+            throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because the array doesn't have key ") + util::quote(key, true));
+          }
+          contents.push_back(contents_[(size_t)fieldindex(key)].get()->astype(raw->field(key)));
         }
-        contents.push_back(contents_[(size_t)i].get()->astype(raw->field(i)));
+      }
+      if (contents.empty()) {
+        return std::make_shared<RecordArray>(identities_, type.get()->parameters(), length(), istuple());
+      }
+      else {
+        return std::make_shared<RecordArray>(identities_, type.get()->parameters(), contents, raw->recordlookup());
       }
     }
     else {
-      for (auto key : raw->keys()) {
-        if (!haskey(key)) {
-          throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
-        }
-        contents.push_back(contents_[(size_t)fieldindex(key)].get()->astype(raw->field(key)));
-      }
-    }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(id_, type, length(), istuple());
-    }
-    else {
-      return std::make_shared<RecordArray>(id_, type, contents, raw->lookup(), raw->reverselookup());
+      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
     }
   }
 
@@ -177,21 +149,16 @@ namespace awkward {
       out << " length=\"" << length_ << "\"";
     }
     out << ">\n";
-    if (id_.get() != nullptr) {
-      out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
+    if (identities_.get() != nullptr) {
+      out << identities_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
-    if (type_.get() != nullptr) {
-      out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
+    if (!parameters_.empty()) {
+      out << parameters_tostring(indent + std::string("    "), "", "\n");
     }
     for (size_t j = 0;  j < contents_.size();  j++) {
       out << indent << "    <field index=\"" << j << "\"";
       if (!istuple()) {
-        out << " key=\"" << reverselookup_.get()->at(j) << "\">";
-        for (auto pair : *lookup_.get()) {
-          if (pair.second == j  &&  pair.first != reverselookup_.get()->at(j)) {
-            out << "<alias>" << pair.first << "</alias>";
-          }
-        }
+        out << " key=\"" << recordlookup_.get()->at(j) << "\">";
       }
       else {
         out << ">";
@@ -207,13 +174,14 @@ namespace awkward {
   void RecordArray::tojson_part(ToJson& builder) const {
     int64_t rows = length();
     size_t cols = contents_.size();
-    std::shared_ptr<ReverseLookup> keys = reverselookup_;
+    std::shared_ptr<util::RecordLookup> keys = recordlookup_;
     if (istuple()) {
-      keys = std::make_shared<ReverseLookup>();
+      keys = std::make_shared<util::RecordLookup>();
       for (size_t j = 0;  j < cols;  j++) {
         keys.get()->push_back(std::to_string(j));
       }
     }
+    check_for_iteration();
     builder.beginlist();
     for (int64_t i = 0;  i < rows;  i++) {
       builder.beginrecord();
@@ -244,16 +212,16 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::shallow_copy() const {
     if (contents_.empty()) {
-      return std::make_shared<RecordArray>(id_, type_, length(), istuple());
+      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
     }
     else {
-      return std::make_shared<RecordArray>(id_, type_, contents_, lookup_, reverselookup_);
+      return std::make_shared<RecordArray>(identities_, parameters_, contents_, recordlookup_);
     }
   }
 
   void RecordArray::check_for_iteration() const {
-    if (id_.get() != nullptr  &&  id_.get()->length() < length()) {
-      util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+    if (identities_.get() != nullptr  &&  identities_.get()->length() < length()) {
+      util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);
     }
   }
 
@@ -268,7 +236,7 @@ namespace awkward {
       regular_at += len;
     }
     if (!(0 <= regular_at  &&  regular_at < len)) {
-      util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
     }
     return getitem_at_nowrap(regular_at);
   }
@@ -282,27 +250,27 @@ namespace awkward {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
-      return std::make_shared<RecordArray>(id_, type_, regular_stop - regular_start, istuple());
+      return std::make_shared<RecordArray>(identities_, parameters_, regular_stop - regular_start, istuple());
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range(start, stop));
       }
-      return std::make_shared<RecordArray>(id_, type_, contents, lookup_, reverselookup_);
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
     }
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     if (contents_.empty()) {
-      return std::make_shared<RecordArray>(id_, type_, stop - start, istuple());
+      return std::make_shared<RecordArray>(identities_, parameters_, stop - start, istuple());
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range_nowrap(start, stop));
       }
-      return std::make_shared<RecordArray>(id_, type_, contents, lookup_, reverselookup_);
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
     }
   }
 
@@ -311,7 +279,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(id_, type_, length(), istuple());
+    RecordArray out(identities_, parameters_, length(), istuple());
     if (istuple()) {
       for (auto key : keys) {
         out.append(field(key).get()->getitem_range_nowrap(0, length()));
@@ -327,22 +295,22 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::carry(const Index64& carry) const {
     if (contents_.empty()) {
-      std::shared_ptr<Identity> id(nullptr);
-      if (id_.get() != nullptr) {
-        id = id_.get()->getitem_carry_64(carry);
+      std::shared_ptr<Identities> identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->getitem_carry_64(carry);
       }
-      return std::make_shared<RecordArray>(id, type_, carry.length(), istuple());
+      return std::make_shared<RecordArray>(identities, parameters_, carry.length(), istuple());
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->carry(carry));
       }
-      std::shared_ptr<Identity> id(nullptr);
-      if (id_.get() != nullptr) {
-        id = id_.get()->getitem_carry_64(carry);
+      std::shared_ptr<Identities> identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->getitem_carry_64(carry);
       }
-      return std::make_shared<RecordArray>(id, type_, contents, lookup_, reverselookup_);
+      return std::make_shared<RecordArray>(identities, parameters_, contents, recordlookup_);
     }
   }
 
@@ -369,93 +337,50 @@ namespace awkward {
   }
 
   int64_t RecordArray::fieldindex(const std::string& key) const {
-    int64_t out = -1;
-    if (!istuple()) {
-      try {
-        out = (int64_t)lookup_.get()->at(key);
-      }
-      catch (std::out_of_range err) { }
-      if (out != -1  &&  out >= numfields()) {
-        throw std::invalid_argument(std::string("key \"") + key + std::string("\" points to fieldindex ") + std::to_string(out) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
-      }
-    }
-    if (out == -1) {
-      try {
-        out = (int64_t)std::stoi(key);
-      }
-      catch (std::invalid_argument err) {
-        throw std::invalid_argument(std::string("key \"") + key + std::string("\" is not in RecordArray"));
-      }
-      if (out >= numfields()) {
-        throw std::invalid_argument(std::string("key interpreted as fieldindex ") + key + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
-      }
-    }
-    return out;
+    return util::fieldindex(recordlookup_, key, numfields());
   }
 
   const std::string RecordArray::key(int64_t fieldindex) const {
-    if (fieldindex >= numfields()) {
-      throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
-    }
-    if (!istuple()) {
-      return reverselookup_.get()->at((size_t)fieldindex);
-    }
-    else {
-      return std::to_string(fieldindex);
-    }
+    return util::key(recordlookup_, fieldindex, numfields());
   }
 
   bool RecordArray::haskey(const std::string& key) const {
-    try {
-      fieldindex(key);
-    }
-    catch (std::invalid_argument err) {
-      return false;
-    }
-    return true;
-  }
-
-  const std::vector<std::string> RecordArray::keyaliases(int64_t fieldindex) const {
-    std::vector<std::string> out;
-    std::string _default = std::to_string(fieldindex);
-    bool has_default = false;
-    if (!istuple()) {
-      for (auto pair : *lookup_.get()) {
-        if (pair.second == fieldindex) {
-          out.push_back(pair.first);
-          if (pair.first == _default) {
-            has_default = true;
-          }
-        }
-      }
-    }
-    if (!has_default) {
-      out.push_back(_default);
-    }
-    return out;
-  }
-
-  const std::vector<std::string> RecordArray::keyaliases(const std::string& key) const {
-    return keyaliases(fieldindex(key));
+    return util::haskey(recordlookup_, key, numfields());
   }
 
   const std::vector<std::string> RecordArray::keys() const {
-    std::vector<std::string> out;
-    if (istuple()) {
-      int64_t cols = numfields();
-      for (int64_t j = 0;  j < cols;  j++) {
-        out.push_back(std::to_string(j));
-      }
+    return util::keys(recordlookup_, numfields());
+  }
+
+  const Index64 RecordArray::count64() const {
+    throw std::invalid_argument("RecordArray cannot be counted, because records are not lists");
+  }
+
+  const std::shared_ptr<Content> RecordArray::count(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: RecordArray::count(axis != 0)");
     }
-    else {
-      out.insert(out.end(), reverselookup_.get()->begin(), reverselookup_.get()->end());
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->count(axis));
     }
-    return out;
+    return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+  }
+
+  const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: RecordArray::flatten(axis != 0)");
+    }
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->flatten(axis));
+    }
+    return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
     if (fieldindex >= numfields()) {
-      throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for RecordArray with only " + std::to_string(numfields()) + std::string(" fields")));
+      throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields()) + std::string(" fields")));
     }
     return contents_[(size_t)fieldindex];
   }
@@ -479,77 +404,30 @@ namespace awkward {
     else {
       size_t cols = contents_.size();
       for (size_t j = 0;  j < cols;  j++) {
-        out.push_back(std::pair<std::string, std::shared_ptr<Content>>(reverselookup_.get()->at(j), contents_[j]));
+        out.push_back(std::pair<std::string, std::shared_ptr<Content>>(recordlookup_.get()->at(j), contents_[j]));
       }
     }
     return out;
   }
 
   const RecordArray RecordArray::astuple() const {
-    if (type_.get() == nullptr) {
-      return RecordArray(id_, Type::none(), contents_);
-    }
-    else {
-      RecordType* raw = dynamic_cast<RecordType*>(type_.get());
-      return RecordArray(id_, raw->astuple(), contents_);
-    }
+    return RecordArray(identities_, parameters_, contents_);
   }
 
   void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {
-    size_t j = contents_.size();
-    append(content);
-    setkey(j, key);
-    if (type_.get() != nullptr) {
-      if (RecordType* raw = dynamic_cast<RecordType*>(type_.get())) {
-        raw->setkey(j, key);
-      }
+    if (recordlookup_.get() == nullptr) {
+      recordlookup_ = util::init_recordlookup(numfields());
     }
+    contents_.push_back(content);
+    recordlookup_.get()->push_back(key);
   }
 
   void RecordArray::append(const std::shared_ptr<Content>& content) {
-    if (!istuple()) {
-      reverselookup_.get()->push_back(std::to_string(contents_.size()));
+    if (recordlookup_.get() == nullptr) {
+      contents_.push_back(content);
     }
-    contents_.push_back(content);
-    if (type_.get() != nullptr) {
-      if (RecordType* raw = dynamic_cast<RecordType*>(type_.get())) {
-        raw->append(content.get()->type());
-      }
-    }
-  }
-
-  void RecordArray::setkey(int64_t fieldindex, const std::string& fieldname) {
-    if (istuple()) {
-      lookup_ = std::make_shared<Lookup>();
-      reverselookup_ = std::make_shared<ReverseLookup>();
-      for (size_t j = 0;  j < contents_.size();  j++) {
-        reverselookup_.get()->push_back(std::to_string(j));
-      }
-    }
-    (*lookup_.get())[fieldname] = (size_t)fieldindex;
-    (*reverselookup_.get())[(size_t)fieldindex] = fieldname;
-  }
-
-  void RecordArray::checktype() const {
-    bool okay = false;
-    if (RecordType* raw = dynamic_cast<RecordType*>(type_.get())) {
-      if (raw->lookup().get() != nullptr  &&  lookup_.get() != nullptr  &&  raw->reverselookup().get() != nullptr  &&  reverselookup_.get() != nullptr) {
-        okay = *(raw->lookup().get()) == *(lookup_.get())  &&  *(raw->reverselookup().get()) == *(reverselookup_.get());
-      }
-      else {
-        okay = (raw->numfields() == numfields());
-      }
-      if (okay) {
-        for (size_t i = 0;  i < contents_.size();  i++) {
-          if (!contents_[i].get()->istypeptr(raw->field((int64_t)i).get())) {
-            okay = false;
-            break;
-          }
-        }
-      }
-    }
-    if (!okay) {
-        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
+    else {
+      append(content, std::to_string(numfields()));
     }
   }
 
@@ -571,7 +449,7 @@ namespace awkward {
       return out.get()->getitem_next(nexthead, nexttail, advanced);
     }
     else if (contents_.empty()) {
-      RecordArray out(Identity::none(), type_, length(), istuple());
+      RecordArray out(Identities::none(), parameters_, length(), istuple());
       return out.getitem_next(nexthead, nexttail, advanced);
     }
     else {
@@ -579,11 +457,11 @@ namespace awkward {
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_next(head, emptytail, advanced));
       }
-      std::shared_ptr<Type> type = Type::none();
-      if (head.get()->preserves_type(type_, advanced)) {
-        type = type_;
+      util::Parameters parameters;
+      if (head.get()->preserves_type(advanced)) {
+        parameters = parameters_;
       }
-      RecordArray out(Identity::none(), type, contents, lookup_, reverselookup_);
+      RecordArray out(Identities::none(), parameters, contents, recordlookup_);
       return out.getitem_next(nexthead, nexttail, advanced);
     }
   }

@@ -5,7 +5,7 @@
 #include "awkward/type/ArrayType.h"
 
 namespace awkward {
-  ArrayType::ArrayType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t length)
+  ArrayType::ArrayType(const util::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t length)
       : Type(parameters)
       , type_(type)
       , length_(length) { }
@@ -25,7 +25,7 @@ namespace awkward {
 
   bool ArrayType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (ArrayType* t = dynamic_cast<ArrayType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       return length_ == t->length_  &&  type_.get()->equal(t->type_, check_parameters);
@@ -51,16 +51,15 @@ namespace awkward {
     return type_.get()->haskey(key);
   }
 
-  const std::vector<std::string> ArrayType::keyaliases(int64_t fieldindex) const {
-    return type_.get()->keyaliases(fieldindex);
-  }
-
-  const std::vector<std::string> ArrayType::keyaliases(const std::string& key) const {
-    return type_.get()->keyaliases(key);
-  }
-
   const std::vector<std::string> ArrayType::keys() const {
     return type_.get()->keys();
+  }
+
+  const std::shared_ptr<Content> ArrayType::empty() const {
+    if (length_ != 0) {
+      throw std::invalid_argument(std::string("ArrayType with length ") + std::to_string(length_) + std::string(" does not describe an empty array"));
+    }
+    return type_.get()->empty();
   }
 
   int64_t ArrayType::length() const {

@@ -5,11 +5,12 @@
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
+#include "awkward/array/UnionArray.h"
 
 #include "awkward/type/UnionType.h"
 
 namespace awkward {
-  UnionType::UnionType(const Type::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
+  UnionType::UnionType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
       : Type(parameters)
       , types_(types) { }
 
@@ -40,7 +41,7 @@ namespace awkward {
 
   bool UnionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (UnionType* t = dynamic_cast<UnionType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       if (types_.size() != t->types_.size()) {
@@ -78,20 +79,22 @@ namespace awkward {
     throw std::runtime_error("FIXME: UnionType::haskey(key)");
   }
 
-  const std::vector<std::string> UnionType::keyaliases(int64_t fieldindex) const {
-    throw std::runtime_error("FIXME: UnionType::keyaliases(fieldindex)");
-  }
-
-  const std::vector<std::string> UnionType::keyaliases(const std::string& key) const {
-    throw std::runtime_error("FIXME: UnionType::keyaliases(key)");
-  }
-
   const std::vector<std::string> UnionType::keys() const {
     throw std::runtime_error("FIXME: UnionType::keys");
   }
 
   const std::vector<std::shared_ptr<Type>> UnionType::types() const {
     return types_;
+  }
+
+  const std::shared_ptr<Content> UnionType::empty() const {
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto type : types_) {
+      contents.push_back(type.get()->empty());
+    }
+    Index8 tags(0);
+    Index64 index(0);
+    return std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
   }
 
   const std::shared_ptr<Type> UnionType::type(int64_t index) const {

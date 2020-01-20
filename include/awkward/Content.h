@@ -6,24 +6,23 @@
 #include <cstdio>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Slice.h"
 #include "awkward/io/json.h"
 #include "awkward/type/Type.h"
+#include "awkward/Index.h"
 
 namespace awkward {
   class Content {
   public:
-    Content(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type);
+    Content(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters);
     virtual ~Content();
 
     virtual bool isscalar() const;
     virtual const std::string classname() const = 0;
-    virtual const std::shared_ptr<Identity> id() const;
-    virtual void setid() = 0;
-    virtual void setid(const std::shared_ptr<Identity>& id) = 0;
-    virtual bool isbare() const;
-    virtual bool istypeptr(Type* pointer) const;
+    virtual const std::shared_ptr<Identities> identities() const;
+    virtual void setidentities() = 0;
+    virtual void setidentities(const std::shared_ptr<Identities>& identities) = 0;
     virtual const std::shared_ptr<Type> type() const = 0;
     virtual const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const = 0;
     virtual const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
@@ -46,17 +45,25 @@ namespace awkward {
     virtual int64_t fieldindex(const std::string& key) const = 0;
     virtual const std::string key(int64_t fieldindex) const = 0;
     virtual bool haskey(const std::string& key) const = 0;
-    virtual const std::vector<std::string> keyaliases(int64_t fieldindex) const = 0;
-    virtual const std::vector<std::string> keyaliases(const std::string& key) const = 0;
     virtual const std::vector<std::string> keys() const = 0;
+
+    // operations
+    virtual const Index64 count64() const = 0;
+    virtual const std::shared_ptr<Content> count(int64_t axis) const = 0;
+    virtual const std::shared_ptr<Content> flatten(int64_t axis) const = 0;
 
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
     void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
 
-  protected:
-    virtual void checktype() const = 0;
+    const util::Parameters parameters() const;
+    void setparameters(const util::Parameters& parameters);
+    const std::string parameter(const std::string& key) const;
+    void setparameter(const std::string& key, const std::string& value);
+    bool parameter_equals(const std::string& key, const std::string& value) const;
+    bool parameters_equal(const util::Parameters& other) const;
 
+  protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const = 0;
     virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const = 0;
     virtual const std::shared_ptr<Content> getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& advanced) const;
@@ -66,10 +73,11 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
 
     const std::shared_ptr<Content> getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const;
+    const std::string parameters_tostring(const std::string& indent, const std::string& pre, const std::string& post) const;
 
   protected:
-    std::shared_ptr<Identity> id_;
-    const std::shared_ptr<Type> type_;
+    std::shared_ptr<Identities> identities_;
+    util::Parameters parameters_;
   };
 }
 

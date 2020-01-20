@@ -8,27 +8,23 @@
 #include <unordered_map>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Content.h"
 
 namespace awkward {
   class RecordArray: public Content {
   public:
-    typedef std::unordered_map<std::string, size_t> Lookup;
-    typedef std::vector<std::string> ReverseLookup;
-
-    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<Lookup>& lookup, const std::shared_ptr<ReverseLookup>& reverselookup);
-    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::vector<std::shared_ptr<Content>>& contents);
-    RecordArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, int64_t length, bool istuple);
+    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
+    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents);
+    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, int64_t length, bool istuple);
 
     const std::vector<std::shared_ptr<Content>> contents() const;
-    const std::shared_ptr<Lookup> lookup() const;
-    const std::shared_ptr<ReverseLookup> reverselookup() const;
+    const std::shared_ptr<util::RecordLookup> recordlookup() const;
     bool istuple() const;
 
     const std::string classname() const override;
-    void setid() override;
-    void setid(const std::shared_ptr<Identity>& id) override;
+    void setidentities() override;
+    void setidentities(const std::shared_ptr<Identities>& identities) override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> type() const override;
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
@@ -50,9 +46,12 @@ namespace awkward {
     int64_t fieldindex(const std::string& key) const override;
     const std::string key(int64_t fieldindex) const override;
     bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keyaliases(int64_t fieldindex) const override;
-    const std::vector<std::string> keyaliases(const std::string& key) const override;
     const std::vector<std::string> keys() const override;
+
+    // operations
+    const Index64 count64() const override;
+    const std::shared_ptr<Content> count(int64_t axis) const override;
+    const std::shared_ptr<Content> flatten(int64_t axis) const override;
 
     const std::shared_ptr<Content> field(int64_t fieldindex) const;
     const std::shared_ptr<Content> field(const std::string& key) const;
@@ -62,11 +61,8 @@ namespace awkward {
 
     void append(const std::shared_ptr<Content>& content, const std::string& key);
     void append(const std::shared_ptr<Content>& content);
-    void setkey(int64_t fieldindex, const std::string& key);
 
   protected:
-    void checktype() const override;
-
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;
@@ -75,8 +71,7 @@ namespace awkward {
 
   private:
     std::vector<std::shared_ptr<Content>> contents_;
-    std::shared_ptr<Lookup> lookup_;
-    std::shared_ptr<ReverseLookup> reverselookup_;
+    std::shared_ptr<util::RecordLookup> recordlookup_;
     int64_t length_;
   };
 }

@@ -7,20 +7,20 @@
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Index.h"
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Content.h"
 
 namespace awkward {
   template <typename T>
   class ListOffsetArrayOf: public Content {
   public:
-    ListOffsetArrayOf<T>(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content);
+    ListOffsetArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content);
     const IndexOf<T> offsets() const;
     const std::shared_ptr<Content> content() const;
 
     const std::string classname() const override;
-    void setid() override;
-    void setid(const std::shared_ptr<Identity>& id) override;
+    void setidentities() override;
+    void setidentities(const std::shared_ptr<Identities>& identities) override;
     const std::shared_ptr<Type> type() const override;
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
@@ -41,13 +41,14 @@ namespace awkward {
     int64_t fieldindex(const std::string& key) const override;
     const std::string key(int64_t fieldindex) const override;
     bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keyaliases(int64_t fieldindex) const override;
-    const std::vector<std::string> keyaliases(const std::string& key) const override;
     const std::vector<std::string> keys() const override;
 
-  protected:
-    void checktype() const override;
+    // operations
+    const Index64 count64() const override;
+    const std::shared_ptr<Content> count(int64_t axis) const override;
+    const std::shared_ptr<Content> flatten(int64_t axis) const override;
 
+  protected:
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;

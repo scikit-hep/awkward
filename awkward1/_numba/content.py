@@ -5,7 +5,7 @@ import operator
 import numpy
 import numba
 
-from .._numba import cpu, util, identity
+from .._numba import util
 
 class ContentType(numba.types.Type):
     @property
@@ -67,10 +67,10 @@ def lower_getitem_tuple(context, builder, sig, args):
 
     wheretpe, whereval = util.preprocess_slicetuple(context, builder, wheretpe, whereval)
 
-    nexttpe = awkward1._numba.array.regulararray.RegularArrayType(arraytpe, numba.none, numba.none)
+    nexttpe = awkward1._numba.array.regulararray.RegularArrayType(arraytpe, numba.none, ())
     outtpe = nexttpe.getitem_next(wheretpe, False)
     if outtpe.lower_getitem_nothing is None:
-        nexttpe = awkward1._numba.array.listarray.ListArrayType(util.index64tpe, util.index64tpe, arraytpe, numba.none, numba.none)
+        nexttpe = awkward1._numba.array.listarray.ListArrayType(util.index64tpe, util.index64tpe, arraytpe, numba.none, ())
         outtpe = nexttpe.getitem_next(wheretpe, False)
 
         length = util.arraylen(context, builder, arraytpe, arrayval, totpe=numba.int64)

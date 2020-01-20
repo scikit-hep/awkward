@@ -3,13 +3,14 @@
 #include <string>
 #include <sstream>
 
+#include "awkward/array/ListOffsetArray.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
 
 #include "awkward/type/ListType.h"
 
 namespace awkward {
-  ListType::ListType(const Type::Parameters& parameters, const std::shared_ptr<Type>& type)
+  ListType::ListType(const util::Parameters& parameters, const std::shared_ptr<Type>& type)
       : Type(parameters)
       , type_(type) { }
 
@@ -35,7 +36,7 @@ namespace awkward {
 
   bool ListType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
     if (ListType* t = dynamic_cast<ListType*>(other.get())) {
-      if (check_parameters  &&  !equal_parameters(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
         return false;
       }
       return type().get()->equal(t->type(), check_parameters);
@@ -61,16 +62,15 @@ namespace awkward {
     return type_.get()->haskey(key);
   }
 
-  const std::vector<std::string> ListType::keyaliases(int64_t fieldindex) const {
-    return type_.get()->keyaliases(fieldindex);
-  }
-
-  const std::vector<std::string> ListType::keyaliases(const std::string& key) const {
-    return type_.get()->keyaliases(key);
-  }
-
   const std::vector<std::string> ListType::keys() const {
     return type_.get()->keys();
+  }
+
+  const std::shared_ptr<Content> ListType::empty() const {
+    Index64 offsets(1);
+    offsets.ptr().get()[0] = 0;
+    std::shared_ptr<Content> content = type_.get()->empty();
+    return std::make_shared<ListOffsetArray64>(Identities::none(), parameters_, offsets, content);
   }
 
   const std::shared_ptr<Type> ListType::type() const {

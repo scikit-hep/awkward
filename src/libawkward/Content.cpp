@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <sstream>
+
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/EmptyArray.h"
@@ -8,9 +10,9 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  Content::Content(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type)
-      : id_(id)
-      , type_(type) { }
+  Content::Content(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters)
+      : identities_(identities)
+      , parameters_(parameters) { }
 
   Content::~Content() { }
 
@@ -18,16 +20,8 @@ namespace awkward {
     return false;
   }
 
-  const std::shared_ptr<Identity> Content::id() const {
-    return id_;
-  }
-
-  bool Content::isbare() const {
-    return type_.get() == nullptr;
-  }
-
-  bool Content::istypeptr(Type* pointer) const {
-    return type_.get() == pointer;
+  const std::shared_ptr<Identities> Content::identities() const {
+    return identities_;
   }
 
   const std::string Content::tostring() const {
@@ -62,8 +56,36 @@ namespace awkward {
     }
   }
 
+  const util::Parameters Content::parameters() const {
+    return parameters_;
+  }
+
+  void Content::setparameters(const util::Parameters& parameters) {
+    parameters_ = parameters;
+  }
+
+  const std::string Content::parameter(const std::string& key) const {
+    auto item = parameters_.find(key);
+    if (item == parameters_.end()) {
+      return "null";
+    }
+    return item->second;
+  }
+
+  void Content::setparameter(const std::string& key, const std::string& value) {
+    parameters_[key] = value;
+  }
+
+  bool Content::parameter_equals(const std::string& key, const std::string& value) const {
+    return util::parameter_equals(parameters_, key, value);
+  }
+
+  bool Content::parameters_equal(const util::Parameters& other) const {
+    return util::parameters_equal(parameters_, other);
+  }
+
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
-    std::shared_ptr<Content> next = std::make_shared<RegularArray>(Identity::none(), Type::none(), shallow_copy(), length());
+    std::shared_ptr<Content> next = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), shallow_copy(), length());
 
     std::shared_ptr<SliceItem> nexthead = where.head();
     Slice nexttail = where.tail();
@@ -134,7 +156,7 @@ namespace awkward {
   const std::shared_ptr<Content> Content::getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& advanced) const {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
-    return std::make_shared<RegularArray>(Identity::none(), Type::none(), getitem_next(nexthead, nexttail, advanced), 1);
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), getitem_next(nexthead, nexttail, advanced), 1);
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
@@ -150,11 +172,26 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const {
-    std::shared_ptr<Content> out = std::make_shared<RegularArray>(Identity::none(), Type::none(), outcontent, (int64_t)shape[shape.size() - 1]);
+    std::shared_ptr<Content> out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), outcontent, (int64_t)shape[shape.size() - 1]);
     for (int64_t i = (int64_t)shape.size() - 2;  i >= 0;  i--) {
-      out = std::make_shared<RegularArray>(Identity::none(), Type::none(), out, (int64_t)shape[(size_t)i]);
+      out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, (int64_t)shape[(size_t)i]);
     }
     return out;
+  }
+
+  const std::string Content::parameters_tostring(const std::string& indent, const std::string& pre, const std::string& post) const {
+    if (parameters_.empty()) {
+      return "";
+    }
+    else {
+      std::stringstream out;
+      out << indent << pre << "<parameters>\n";
+      for (auto pair : parameters_) {
+        out << indent << "    <param key=" << util::quote(pair.first, true) << ">" << pair.second << "</param>\n";
+      }
+      out << indent << "</parameters>" << post;
+      return out.str();
+    }
   }
 
 }

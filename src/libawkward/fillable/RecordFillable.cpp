@@ -2,10 +2,10 @@
 
 #include <stdexcept>
 
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Index.h"
 
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/Index.h"
 #include "awkward/array/RecordArray.h"
 #include "awkward/array/EmptyArray.h"
@@ -65,52 +65,25 @@ namespace awkward {
     nexttotry_ = 0;
   }
 
-  const std::shared_ptr<Type> RecordFillable::type() const {
+  const std::shared_ptr<Content> RecordFillable::snapshot() const {
     if (length_ == -1) {
-      return std::make_shared<UnknownType>(Type::Parameters());
+      return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
     }
-    else {
-      std::vector<std::shared_ptr<Type>> types;
-      std::shared_ptr<RecordType::Lookup> lookup = std::make_shared<RecordType::Lookup>();
-      std::shared_ptr<RecordType::ReverseLookup> reverselookup = std::make_shared<RecordType::ReverseLookup>();
-      for (size_t i = 0;  i < contents_.size();  i++) {
-        types.push_back(contents_[i].get()->type());
-        (*lookup.get())[keys_[i]] = i;
-        reverselookup.get()->push_back(keys_[i]);
-      }
-      Type::Parameters parameters;
-      if (nameptr_ != nullptr) {
-        parameters["__class__"] = util::quote(name_, true);
-      }
-      return std::make_shared<RecordType>(parameters, types, lookup, reverselookup);
+    util::Parameters parameters;
+    if (nameptr_ != nullptr) {
+      parameters["__class__"] = util::quote(name_, true);
     }
-  }
-
-  const std::shared_ptr<Content> RecordFillable::snapshot(const std::shared_ptr<Type>& type) const {
-    if (length_ == -1) {
-      return std::make_shared<EmptyArray>(Identity::none(), type);
-    }
-
-    RecordType* raw = dynamic_cast<RecordType*>(type.get());
     std::vector<std::shared_ptr<Content>> contents;
-    std::shared_ptr<RecordType::Lookup> lookup = std::make_shared<RecordType::Lookup>();
-    std::shared_ptr<RecordType::ReverseLookup> reverselookup = std::make_shared<RecordType::ReverseLookup>();
+    std::shared_ptr<util::RecordLookup> recordlookup = std::make_shared<util::RecordLookup>();
     for (size_t i = 0;  i < contents_.size();  i++) {
-      if (raw == nullptr) {
-        contents.push_back(contents_[i].get()->snapshot(Type::none()));
-      }
-      else {
-        contents.push_back(contents_[i].get()->snapshot(raw->field((int64_t)i)));
-      }
-      (*lookup.get())[keys_[i]] = i;
-      reverselookup.get()->push_back(keys_[i]);
+      contents.push_back(contents_[i].get()->snapshot());
+      recordlookup.get()->push_back(keys_[i]);
     }
-
     if (contents.empty()) {
-      return std::make_shared<RecordArray>(Identity::none(), type, length_, false);
+      return std::make_shared<RecordArray>(Identities::none(), parameters, length_, false);
     }
     else {
-      return std::make_shared<RecordArray>(Identity::none(), type, contents, lookup, reverselookup);
+      return std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
     }
   }
 
@@ -416,7 +389,6 @@ namespace awkward {
         if (contents_[i].get()->length() != length_ + 1) {
           throw std::invalid_argument(std::string("record field ") + util::quote(keys_[i], true) + std::string(" filled more than once"));
         }
-        i++;
       }
       length_++;
       begun_ = false;

@@ -9,36 +9,39 @@ def wrap(content, namespace):
     import awkward1.layout
     if isinstance(content, awkward1.layout.Content):
         cls = namespace.get(content.type.parameters.get("__class__"))
-        if cls is None:
+        if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Array)):
             cls = awkward1.Array
         return cls(content, namespace=namespace)
 
     elif isinstance(content, awkward1.layout.Record):
         cls = namespace.get(content.type.parameters.get("__class__"))
-        if cls is None:
+        if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Record)):
             cls = awkward1.Record
         return cls(content, namespace=namespace)
 
     else:
         return content
 
-def field2index(lookup, numfields, key):
-    if isinstance(key, (int, numbers.Integral, numpy.integer)):
-        attempt = key
+def key2index(keys, key):
+    if keys is None:
+        attempt = None
     else:
-        attempt = None if lookup is None else lookup.get(key)
+        try:
+            attempt = keys.index(key)
+        except ValueError:
+            attempt = None
 
     if attempt is None:
-        m = field2index._pattern.match(key)
+        m = key2index._pattern.match(key)
         if m is not None:
             attempt = m.group(0)
 
-    if attempt is None or attempt >= numfields:
-        raise ValueError("key {0} not found in Record".format(repr(key)))
+    if attempt is None:
+        raise ValueError("key {0} not found in record".format(repr(key)))
     else:
         return attempt
 
-field2index._pattern = re.compile(r"^[1-9][0-9]*$")
+key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
 def minimally_touching_string(limit_length, layout, namespace):
     import awkward1.layout
@@ -50,14 +53,14 @@ def minimally_touching_string(limit_length, layout, namespace):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
             cls = namespace.get(x.type.parameters.get("__class__"))
-            if cls is not None:
+            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
                 y = cls(x, namespace=namespace)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
             cls = namespace.get(x.type.parameters.get("__class__"))
-            if cls is not None:
+            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
                 y = cls(x, namespace=namespace)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
@@ -92,14 +95,14 @@ def minimally_touching_string(limit_length, layout, namespace):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
             cls = namespace.get(x.type.parameters.get("__class__"))
-            if cls is not None:
+            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
                 y = cls(x, namespace=namespace)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
             cls = namespace.get(x.type.parameters.get("__class__"))
-            if cls is not None:
+            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
                 y = cls(x, namespace=namespace)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space

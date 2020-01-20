@@ -4,23 +4,21 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
+#include "awkward/array/NumpyArray.h"
 
 #include "awkward/array/RegularArray.h"
 
 namespace awkward {
-  RegularArray::RegularArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<Content>& content, int64_t size)
-      : Content(id, type)
+  RegularArray::RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<Content>& content, int64_t size)
+      : Content(identities, parameters)
       , content_(content)
-      , size_(size) {
-    if (type_.get() != nullptr) {
-      checktype();
-    }
-  }
+      , size_(size) { }
 
   const std::shared_ptr<Content> RegularArray::content() const {
     return content_;
@@ -34,97 +32,96 @@ namespace awkward {
     return "RegularArray";
   }
 
-  void RegularArray::setid(const std::shared_ptr<Identity>& id) {
-    if (id.get() == nullptr) {
-      content_.get()->setid(id);
+  void RegularArray::setidentities(const std::shared_ptr<Identities>& identities) {
+    if (identities.get() == nullptr) {
+      content_.get()->setidentities(identities);
     }
     else {
-      if (length() != id.get()->length()) {
-        util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
+      if (length() != identities.get()->length()) {
+        util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
       }
-      std::shared_ptr<Identity> bigid = id;
+      std::shared_ptr<Identities> bigidentities = identities;
       if (content_.get()->length() > kMaxInt32) {
-        bigid = id.get()->to64();
+        bigidentities = identities.get()->to64();
       }
-      if (Identity32* rawid = dynamic_cast<Identity32*>(bigid.get())) {
-        std::shared_ptr<Identity> subid = std::make_shared<Identity32>(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        Identity32* rawsubid = reinterpret_cast<Identity32*>(subid.get());
-        struct Error err = awkward_identity32_from_regulararray(
-          rawsubid->ptr().get(),
-          rawid->ptr().get(),
-          rawid->offset(),
+      if (Identities32* rawidentities = dynamic_cast<Identities32*>(bigidentities.get())) {
+        std::shared_ptr<Identities> subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
+        Identities32* rawsubidentities = reinterpret_cast<Identities32*>(subidentities.get());
+        struct Error err = awkward_identities32_from_regulararray(
+          rawsubidentities->ptr().get(),
+          rawidentities->ptr().get(),
+          rawidentities->offset(),
           size_,
           content_.get()->length(),
           length(),
-          rawid->width());
-        util::handle_error(err, classname(), id_.get());
-        content_.get()->setid(subid);
+          rawidentities->width());
+        util::handle_error(err, classname(), identities_.get());
+        content_.get()->setidentities(subidentities);
       }
-      else if (Identity64* rawid = dynamic_cast<Identity64*>(bigid.get())) {
-        std::shared_ptr<Identity> subid = std::make_shared<Identity64>(Identity::newref(), rawid->fieldloc(), rawid->width() + 1, content_.get()->length());
-        Identity64* rawsubid = reinterpret_cast<Identity64*>(subid.get());
-        struct Error err = awkward_identity64_from_regulararray(
-          rawsubid->ptr().get(),
-          rawid->ptr().get(),
-          rawid->offset(),
+      else if (Identities64* rawidentities = dynamic_cast<Identities64*>(bigidentities.get())) {
+        std::shared_ptr<Identities> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width() + 1, content_.get()->length());
+        Identities64* rawsubidentities = reinterpret_cast<Identities64*>(subidentities.get());
+        struct Error err = awkward_identities64_from_regulararray(
+          rawsubidentities->ptr().get(),
+          rawidentities->ptr().get(),
+          rawidentities->offset(),
           size_,
           content_.get()->length(),
           length(),
-          rawid->width());
-        util::handle_error(err, classname(), id_.get());
-        content_.get()->setid(subid);
+          rawidentities->width());
+        util::handle_error(err, classname(), identities_.get());
+        content_.get()->setidentities(subidentities);
       }
       else {
-        throw std::runtime_error("unrecognized Identity specialization");
+        throw std::runtime_error("unrecognized Identities specialization");
       }
     }
-    id_ = id;
+    identities_ = identities;
   }
 
-  void RegularArray::setid() {
+  void RegularArray::setidentities() {
     if (length() < kMaxInt32) {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity32>(Identity::newref(), Identity::FieldLoc(), 1, length());
-      Identity32* rawid = reinterpret_cast<Identity32*>(newid.get());
-      struct Error err = awkward_new_identity32(rawid->ptr().get(), length());
-      util::handle_error(err, classname(), id_.get());
-      setid(newid);
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
+      struct Error err = awkward_new_identities32(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
     }
     else {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity64>(Identity::newref(), Identity::FieldLoc(), 1, length());
-      Identity64* rawid = reinterpret_cast<Identity64*>(newid.get());
-      struct Error err = awkward_new_identity64(rawid->ptr().get(), length());
-      util::handle_error(err, classname(), id_.get());
-      setid(newid);
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
+      struct Error err = awkward_new_identities64(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
     }
   }
 
   const std::shared_ptr<Type> RegularArray::type() const {
-    if (type_.get() != nullptr) {
-      return type_;
-    }
-    else {
-      return std::make_shared<RegularType>(Type::Parameters(), content_.get()->type(), size_);
-    }
+    return std::make_shared<RegularType>(parameters_, content_.get()->type(), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::astype(const std::shared_ptr<Type>& type) const {
-    std::shared_ptr<Type> inner = type;
-    if (inner.get() != nullptr) {
-      if (RegularType* raw = dynamic_cast<RegularType*>(inner.get())) {
-        inner = raw->type();
+    if (RegularType* raw = dynamic_cast<RegularType*>(type.get())) {
+      if (raw->size() == size_) {
+        return std::make_shared<RegularArray>(identities_, type.get()->parameters(), content_.get()->astype(raw->type()), size_);
+      }
+      else {
+        throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because sizes do not match"));
       }
     }
-    return std::make_shared<RegularArray>(id_, type, content_.get()->astype(inner), size_);
+    else {
+      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
+    }
   }
 
   const std::string RegularArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " size=\"" << size_ << "\">\n";
-    if (id_.get() != nullptr) {
-      out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
+    if (identities_.get() != nullptr) {
+      out << identities_.get()->tostring_part(indent + std::string("    "), "", "\n");
     }
-    if (type_.get() != nullptr) {
-      out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
+    if (!parameters_.empty()) {
+      out << parameters_tostring(indent + std::string("    "), "", "\n");
     }
     out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
     out << indent << "</" << classname() << ">" << post;
@@ -133,6 +130,7 @@ namespace awkward {
 
   void RegularArray::tojson_part(ToJson& builder) const {
     int64_t len = length();
+    check_for_iteration();
     builder.beginlist();
     for (int64_t i = 0;  i < len;  i++) {
       getitem_at_nowrap(i).get()->tojson_part(builder);
@@ -145,12 +143,12 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::shallow_copy() const {
-    return std::make_shared<RegularArray>(id_, type_, content_, size_);
+    return std::make_shared<RegularArray>(identities_, parameters_, content_, size_);
   }
 
   void RegularArray::check_for_iteration() const {
-    if (id_.get() != nullptr  && id_.get()->length() < length()) {
-      util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+    if (identities_.get() != nullptr  && identities_.get()->length() < length()) {
+      util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);
     }
   }
 
@@ -165,7 +163,7 @@ namespace awkward {
       regular_at += len;
     }
     if (!(0 <= regular_at  &&  regular_at < len)) {
-      util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
     }
     return getitem_at_nowrap(regular_at);
   }
@@ -178,30 +176,26 @@ namespace awkward {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
-    if (id_.get() != nullptr  &&  regular_stop > id_.get()->length()) {
-      util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
+    if (identities_.get() != nullptr  &&  regular_stop > identities_.get()->length()) {
+      util::handle_error(failure("index out of range", kSliceNone, stop), identities_.get()->classname(), nullptr);
     }
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    std::shared_ptr<Identity> id(nullptr);
-    if (id_.get() != nullptr) {
-      id = id_.get()->getitem_range_nowrap(start, stop);
+    std::shared_ptr<Identities> identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::make_shared<RegularArray>(id_, type_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_);
+    return std::make_shared<RegularArray>(identities_, parameters_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_field(const std::string& key) const {
-    return std::make_shared<RegularArray>(id_, Type::none(), content_.get()->getitem_field(key), size_);
+    return std::make_shared<RegularArray>(identities_, util::Parameters(), content_.get()->getitem_field(key), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
-    std::shared_ptr<Type> type = Type::none();
-    if (SliceFields(keys).preserves_type(type_, Index64(0))) {
-      type = type_;
-    }
-    return std::make_shared<RegularArray>(id_, type, content_.get()->getitem_fields(keys), size_);
+    return std::make_shared<RegularArray>(identities_, util::Parameters(), content_.get()->getitem_fields(keys), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::carry(const Index64& carry) const {
@@ -212,13 +206,13 @@ namespace awkward {
       carry.ptr().get(),
       carry.length(),
       size_);
-    util::handle_error(err, classname(), id_.get());
+    util::handle_error(err, classname(), identities_.get());
 
-    std::shared_ptr<Identity> id(nullptr);
-    if (id_.get() != nullptr) {
-      id = id_.get()->getitem_carry_64(carry);
+    std::shared_ptr<Identities> identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_carry_64(carry);
     }
-    return std::make_shared<RegularArray>(id, type_, content_.get()->carry(nextcarry), size_);
+    return std::make_shared<RegularArray>(identities, parameters_, content_.get()->carry(nextcarry), size_);
   }
 
   const std::pair<int64_t, int64_t> RegularArray::minmax_depth() const {
@@ -242,25 +236,45 @@ namespace awkward {
     return content_.get()->haskey(key);
   }
 
-  const std::vector<std::string> RegularArray::keyaliases(int64_t fieldindex) const {
-    return content_.get()->keyaliases(fieldindex);
-  }
-
-  const std::vector<std::string> RegularArray::keyaliases(const std::string& key) const {
-    return content_.get()->keyaliases(key);
-  }
-
   const std::vector<std::string> RegularArray::keys() const {
     return content_.get()->keys();
   }
 
-  void RegularArray::checktype() const {
-    bool okay = false;
-    if (RegularType* raw = dynamic_cast<RegularType*>(type_.get())) {
-      okay = (raw->type().get() == content_.get()->type().get()  &&  raw->size() == size_);
+  const Index64 RegularArray::count64() const {
+    int64_t len = length();
+    Index64 tocount(len);
+    struct Error err = awkward_regulararray_count(
+      tocount.ptr().get(),
+      size_,
+      len);
+    util::handle_error(err, classname(), identities_.get());
+    return tocount;
+  }
+
+  const std::shared_ptr<Content> RegularArray::count(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: RegularArray::count(axis != 0)");
     }
-    if (!okay) {
-        throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
+    Index64 tocount = count64();
+    std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
+    std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+#ifdef _MSC_VER
+    std::string format = "q";
+#else
+    std::string format = "l";
+#endif
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+  }
+
+  const std::shared_ptr<Content> RegularArray::flatten(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: RegularArray::flatten(axis != 0)");
+    }
+    if (content_.get()->length() % size_ != 0) {
+      return content_.get()->getitem_range_nowrap(0, length()*size_);
+    }
+    else {
+      return content_;
     }
   }
 
@@ -277,7 +291,7 @@ namespace awkward {
       at.at(),
       len,
       size_);
-    util::handle_error(err, classname(), id_.get());
+    util::handle_error(err, classname(), identities_.get());
 
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
     return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
@@ -318,18 +332,12 @@ namespace awkward {
       len,
       size_,
       nextsize);
-    util::handle_error(err, classname(), id_.get());
+    util::handle_error(err, classname(), identities_.get());
 
     std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
-    std::shared_ptr<Type> outtype = Type::none();
-    if (type_.get() != nullptr) {
-      RegularType* raw = dynamic_cast<RegularType*>(type_.get());
-      outtype = std::make_shared<RegularType>(Type::Parameters(), raw->type(), nextsize);
-    }
-
     if (advanced.length() == 0) {
-      return std::make_shared<RegularArray>(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize);
+      return std::make_shared<RegularArray>(identities_, parameters_, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize);
     }
     else {
       Index64 nextadvanced(len*nextsize);
@@ -339,9 +347,9 @@ namespace awkward {
         advanced.ptr().get(),
         len,
         nextsize);
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
 
-      return std::make_shared<RegularArray>(id_, outtype, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize);
+      return std::make_shared<RegularArray>(identities_, parameters_, nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), nextsize);
     }
   }
 
@@ -357,7 +365,7 @@ namespace awkward {
       flathead.ptr().get(),
       flathead.length(),
       size_);
-    util::handle_error(err, classname(), id_.get());
+    util::handle_error(err, classname(), identities_.get());
 
     if (advanced.length() == 0) {
       Index64 nextcarry(len*flathead.length());
@@ -370,7 +378,7 @@ namespace awkward {
         len,
         regular_flathead.length(),
         size_);
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
 
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
 
@@ -388,7 +396,7 @@ namespace awkward {
         len,
         regular_flathead.length(),
         size_);
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
 
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);

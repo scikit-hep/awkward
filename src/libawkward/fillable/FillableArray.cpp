@@ -23,11 +23,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> FillableArray::type() const {
-    return fillable_.get()->type();
+    return fillable_.get()->snapshot().get()->type();
   }
 
   const std::shared_ptr<Content> FillableArray::snapshot() const {
-    return fillable_.get()->snapshot(type());
+    return fillable_.get()->snapshot();
   }
 
   const std::shared_ptr<Content> FillableArray::getitem_at(int64_t at) const {

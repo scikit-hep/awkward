@@ -22,9 +22,7 @@ class Array(object):
 
         self.namespace = namespace
 
-        if type is None:
-            self._type = None
-        else:
+        if type is not None:
             if not isinstance(type, awkward1.layout.ArrayType):
                 raise TypeError("type must be an awkward1.layout.ArrayType")
             if type.length > len(layout):
@@ -37,7 +35,6 @@ class Array(object):
                     raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Array".format(repr(type.parameters["__class__"])))
                 self.__class__ = cls
             layout = layout.astype(type.type)
-            self._type = type
 
         self.layout = layout
 
@@ -64,13 +61,10 @@ class Array(object):
 
     @property
     def type(self):
-        if self._type is None:
-            return awkward1.layout.ArrayType(self._layout.type, len(self._layout))
-        else:
-            return self._type
+        return awkward1.layout.ArrayType(self._layout.type, len(self._layout))
 
     def __len__(self):
-        return len(self.layout)
+        return len(self._layout)
 
     def __iter__(self):
         for x in self.layout:
@@ -172,7 +166,8 @@ class FillableArray(object):
 
     @property
     def type(self):
-        return awkward1.layout.ArrayType(self._fillablearray.type, len(self._fillablearray))
+        tmp = self._fillablearray.snapshot()
+        return awkward1.layout.ArrayType(tmp.type, len(tmp))
 
     def __len__(self):
         return len(self._fillablearray)
@@ -229,6 +224,9 @@ class FillableArray(object):
 
     def begintuple(self):
         self._fillablearray.begintuple()
+
+    def index(self, i):
+        self._fillablearray.index(i)
 
     def endtuple(self):
         self._fillablearray.endtuple()

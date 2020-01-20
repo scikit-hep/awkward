@@ -12,17 +12,14 @@ namespace awkward {
     const std::shared_ptr<Content> array() const;
     int64_t at() const;
     const std::vector<std::shared_ptr<Content>> contents() const;
-    const std::shared_ptr<RecordArray::Lookup> lookup() const;
-    const std::shared_ptr<RecordArray::ReverseLookup> reverselookup() const;
+    const std::shared_ptr<util::RecordLookup> recordlookup() const;
     bool istuple() const;
 
     bool isscalar() const override;
     const std::string classname() const override;
-    const std::shared_ptr<Identity> id() const override;
-    void setid() override;
-    void setid(const std::shared_ptr<Identity>& id) override;
-    bool isbare() const override;
-    bool istypeptr(Type* pointer) const override;
+    const std::shared_ptr<Identities> identities() const override;
+    void setidentities() override;
+    void setidentities(const std::shared_ptr<Identities>& identities) override;
     const std::shared_ptr<Type> type() const override;
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
@@ -43,9 +40,12 @@ namespace awkward {
     int64_t fieldindex(const std::string& key) const override;
     const std::string key(int64_t fieldindex) const override;
     bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keyaliases(int64_t fieldindex) const override;
-    const std::vector<std::string> keyaliases(const std::string& key) const override;
     const std::vector<std::string> keys() const override;
+
+    // operations
+    const Index64 count64() const override;
+    const std::shared_ptr<Content> count(int64_t axis) const override;
+    const std::shared_ptr<Content> flatten(int64_t axis) const override;
 
     const std::shared_ptr<Content> field(int64_t fieldindex) const;
     const std::shared_ptr<Content> field(const std::string& key) const;
@@ -54,8 +54,6 @@ namespace awkward {
     const Record astuple() const;
 
   protected:
-    void checktype() const override;
-
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;

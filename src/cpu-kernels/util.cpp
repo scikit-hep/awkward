@@ -7,16 +7,16 @@
 struct Error success() {
   struct Error out;
   out.str = nullptr;
-  out.location = kSliceNone;
+  out.identity = kSliceNone;
   out.attempt = kSliceNone;
   out.extra = 0;
   return out;
 }
 
-struct Error failure(const char* str, int64_t location, int64_t attempt) {
+struct Error failure(const char* str, int64_t identity, int64_t attempt) {
   struct Error out;
   out.str = str;
-  out.location = location;
+  out.identity = identity;
   out.attempt = attempt;
   out.extra = 0;
   return out;

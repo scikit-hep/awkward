@@ -4,8 +4,9 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
@@ -15,9 +16,6 @@
 
 namespace awkward {
   const std::shared_ptr<Type> NumpyArray::unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape) {
-    if (type.get() == nullptr) {
-      return type;
-    }
     std::shared_ptr<Type> out = type;
     for (size_t i = 1;  i < shape.size();  i++) {
       if (RegularType* raw = dynamic_cast<RegularType*>(out.get())) {
@@ -25,29 +23,26 @@ namespace awkward {
           out = raw->type();
         }
         else {
-          throw std::invalid_argument(std::string("cannot assign type ") + type.get()->tostring() + std::string(" to NumpyArray"));
+          throw std::invalid_argument(std::string("NumpyArray cannot be converted to type ") + type.get()->tostring() + std::string(" because shape does not match sizes of RegularTypes"));
         }
       }
       else {
-        throw std::invalid_argument(std::string("cannot assign type ") + type.get()->tostring() + std::string(" to NumpyArray"));
+        throw std::invalid_argument(std::string("NumpyArray cannot be converted to type ") + type.get()->tostring() + std::string(" because shape does not match level of RegularType nesting"));
       }
     }
     return out;
   }
 
-  NumpyArray::NumpyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
-      : Content(id, type)
+  NumpyArray::NumpyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
+      : Content(identities, parameters)
       , ptr_(ptr)
       , shape_(shape)
       , strides_(strides)
       , byteoffset_(byteoffset)
       , itemsize_(itemsize)
       , format_(format) {
-    if (shape_.size() != strides_.size()) {
-      throw std::runtime_error("len(shape) must be equal to len(strides)");
-    }
-    if (type_.get() != nullptr) {
-      checktype();
+    if (shape.size() != strides.size()) {
+      throw std::runtime_error(std::string("len(shape), which is ") + std::to_string(shape.size()) + std::string(", must be equal to len(strides), which is ") + std::to_string(strides.size()));
     }
   }
 
@@ -117,28 +112,28 @@ namespace awkward {
     return "NumpyArray";
   }
 
-  void NumpyArray::setid(const std::shared_ptr<Identity>& id) {
-    if (id.get() != nullptr  &&  length() != id.get()->length()) {
-      util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
+  void NumpyArray::setidentities(const std::shared_ptr<Identities>& identities) {
+    if (identities.get() != nullptr  &&  length() != identities.get()->length()) {
+      util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
     }
-    id_ = id;
+    identities_ = identities;
   }
 
-  void NumpyArray::setid() {
+  void NumpyArray::setidentities() {
     assert(!isscalar());
     if (length() <= kMaxInt32) {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity32>(Identity::newref(), Identity::FieldLoc(), 1, length());
-      Identity32* rawid = reinterpret_cast<Identity32*>(newid.get());
-      struct Error err = awkward_new_identity32(rawid->ptr().get(), length());
-      util::handle_error(err, classname(), id_.get());
-      setid(newid);
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
+      struct Error err = awkward_new_identities32(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
     }
     else {
-      std::shared_ptr<Identity> newid = std::make_shared<Identity64>(Identity::newref(), Identity::FieldLoc(), 1, length());
-      Identity64* rawid = reinterpret_cast<Identity64*>(newid.get());
-      struct Error err = awkward_new_identity64(rawid->ptr().get(), length());
-      util::handle_error(err, classname(), id_.get());
-      setid(newid);
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
+      struct Error err = awkward_new_identities64(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
     }
   }
 
@@ -184,86 +179,71 @@ namespace awkward {
     }
   }
 
-  bool NumpyArray::istypeptr(Type* pointer) const {
-    Type* ptr = pointer;
-    if (ptr != nullptr) {
-      for (size_t i = 1;  i < shape_.size();  i++) {
-        if (RegularType* raw = dynamic_cast<RegularType*>(ptr)) {
-          ptr = raw->type().get();
-        }
-        else {
-          return false;
-        }
-      }
-    }
-    return ptr == type_.get();
-  }
-
   const std::shared_ptr<Type> NumpyArray::type() const {
     std::shared_ptr<Type> out;
-    if (type_.get() != nullptr) {
-      out = type_;
-    }
-    else if (format_.compare("d") == 0) {
-      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::float64);
+    if (format_.compare("d") == 0) {
+      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float64);
     }
     else if (format_.compare("f") == 0) {
-      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::float32);
+      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float32);
     }
 #ifdef _MSC_VER
     else if (format_.compare("q") == 0) {
 #else
     else if (format_.compare("l") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::int64);
+      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int64);
     }
 #ifdef _MSC_VER
     else if (format_.compare("Q") == 0) {
 #else
     else if (format_.compare("L") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::uint64);
+      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint64);
     }
 #ifdef _MSC_VER
     else if (format_.compare("l") == 0) {
 #else
     else if (format_.compare("i") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::int32);
+      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int32);
     }
 #ifdef _MSC_VER
     else if (format_.compare("L") == 0) {
 #else
     else if (format_.compare("I") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::uint32);
+      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint32);
     }
     else if (format_.compare("h") == 0) {
-      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::int16);
+      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int16);
     }
     else if (format_.compare("H") == 0) {
-      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::uint16);
+      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint16);
     }
     else if (format_.compare("b") == 0) {
-      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::int8);
+      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int8);
     }
     else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::uint8);
+      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint8);
     }
     else if (format_.compare("?") == 0) {
-      out = std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::boolean);
+      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::boolean);
     }
     else {
       throw std::invalid_argument(std::string("Numpy format \"") + format_ + std::string("\" cannot be expressed as a PrimitiveType"));
     }
     for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
-      out = std::make_shared<RegularType>(Type::Parameters(), out, (int64_t)shape_[i]);
+      out = std::make_shared<RegularType>(util::Parameters(), out, (int64_t)shape_[i]);
     }
     return out;
   }
 
   const std::shared_ptr<Content> NumpyArray::astype(const std::shared_ptr<Type>& type) const {
-    return std::make_shared<NumpyArray>(id_, unwrap_regulartype(type, shape_), ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
+    // FIXME: if the unwrapped_type does not match the format_, actually convert it!
+    // Maybe also change the shape_ if there's a different RegularType nesting (less strict than unwrap_regulartype).
+    std::shared_ptr<Type> unwrapped_type = unwrap_regulartype(type, shape_);
+    return std::make_shared<NumpyArray>(identities_, unwrapped_type.get()->parameters(), ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
 
   const std::string NumpyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
@@ -340,16 +320,16 @@ namespace awkward {
     }
     out << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0') << reinterpret_cast<ssize_t>(ptr_.get());
-    if (id_.get() == nullptr  &&  type_.get() == nullptr) {
+    if (identities_.get() == nullptr  &&  parameters_.empty()) {
       out << "\"/>" << post;
     }
     else {
       out << "\">\n";
-      if (id_.get() != nullptr) {
-        out << id_.get()->tostring_part(indent + std::string("    "), "", "\n");
+      if (identities_.get() != nullptr) {
+        out << identities_.get()->tostring_part(indent + std::string("    "), "", "\n");
       }
-      if (type_.get() != nullptr) {
-        out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
+      if (!parameters_.empty()) {
+        out << parameters_tostring(indent + std::string("    "), "", "\n");
       }
       out << indent << "</" << classname() << ">" << post;
     }
@@ -357,7 +337,8 @@ namespace awkward {
   }
 
   void NumpyArray::tojson_part(ToJson& builder) const {
-    if (type_.get() != nullptr  &&  type_.get()->parameter_equals("__class__", "\"char\"")) {
+    check_for_iteration();
+    if (parameter_equals("__class__", "\"char\"")) {
       tojson_string(builder);
     }
     else if (format_.compare("d") == 0) {
@@ -424,23 +405,23 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::shallow_copy() const {
-    return std::make_shared<NumpyArray>(id_, type_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
+    return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
 
   void NumpyArray::check_for_iteration() const {
-    if (id_.get() != nullptr  &&  id_.get()->length() < shape_[0]) {
-      util::handle_error(failure("len(id) < len(array)", kSliceNone, kSliceNone), id_.get()->classname(), nullptr);
+    if (identities_.get() != nullptr  &&  identities_.get()->length() < shape_[0]) {
+      util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);
     }
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_nothing() const {
     const std::vector<ssize_t> shape({ 0 });
     const std::vector<ssize_t> strides({ itemsize_ });
-    std::shared_ptr<Identity> id;
-    if (id_.get() != nullptr) {
-      id = id_.get()->getitem_range_nowrap(0, 0);
+    std::shared_ptr<Identities> identities;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_range_nowrap(0, 0);
     }
-    return std::make_shared<NumpyArray>(id, type_, ptr_, shape, strides, byteoffset_, itemsize_, format_);
+    return std::make_shared<NumpyArray>(identities, parameters_, ptr_, shape, strides, byteoffset_, itemsize_, format_);
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_at(int64_t at) const {
@@ -450,7 +431,7 @@ namespace awkward {
       regular_at += shape_[0];
     }
     if (regular_at < 0  ||  regular_at >= shape_[0]) {
-      util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
     }
     return getitem_at_nowrap(regular_at);
   }
@@ -459,14 +440,14 @@ namespace awkward {
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
     const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
     const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
-    std::shared_ptr<Identity> id;
-    if (id_.get() != nullptr) {
-      if (at >= id_.get()->length()) {
-        util::handle_error(failure("index out of range", kSliceNone, at), id_.get()->classname(), nullptr);
+    std::shared_ptr<Identities> identities;
+    if (identities_.get() != nullptr) {
+      if (at >= identities_.get()->length()) {
+        util::handle_error(failure("index out of range", kSliceNone, at), identities_.get()->classname(), nullptr);
       }
-      id = id_.get()->getitem_range_nowrap(at, at + 1);
+      identities = identities_.get()->getitem_range_nowrap(at, at + 1);
     }
-    return std::make_shared<NumpyArray>(id, type_, ptr_, shape, strides, byteoffset, itemsize_, format_);
+    return std::make_shared<NumpyArray>(identities, parameters_, ptr_, shape, strides, byteoffset, itemsize_, format_);
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_range(int64_t start, int64_t stop) const {
@@ -482,14 +463,14 @@ namespace awkward {
     std::vector<ssize_t> shape;
     shape.push_back((ssize_t)(stop - start));
     shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-    std::shared_ptr<Identity> id;
-    if (id_.get() != nullptr) {
-      if (stop > id_.get()->length()) {
-        util::handle_error(failure("index out of range", kSliceNone, stop), id_.get()->classname(), nullptr);
+    std::shared_ptr<Identities> identities;
+    if (identities_.get() != nullptr) {
+      if (stop > identities_.get()->length()) {
+        util::handle_error(failure("index out of range", kSliceNone, stop), identities_.get()->classname(), nullptr);
       }
-      id = id_.get()->getitem_range_nowrap(start, stop);
+      identities = identities_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::make_shared<NumpyArray>(id, type_, ptr_, shape, strides_, byteoffset, itemsize_, format_);
+    return std::make_shared<NumpyArray>(identities, parameters_, ptr_, shape, strides_, byteoffset, itemsize_, format_);
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_field(const std::string& key) const {
@@ -503,12 +484,12 @@ namespace awkward {
   const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
     assert(!isscalar());
 
-    if (!where.isadvanced()  &&  id_.get() == nullptr) {
+    if (!where.isadvanced()  &&  identities_.get() == nullptr) {
       std::vector<ssize_t> nextshape = { 1 };
       nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
       std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };
       nextstrides.insert(nextstrides.end(), strides_.begin(), strides_.end());
-      NumpyArray next(id_, type_, ptr_, nextshape, nextstrides, byteoffset_, itemsize_, format_);
+      NumpyArray next(identities_, parameters_, ptr_, nextshape, nextstrides, byteoffset_, itemsize_, format_);
 
       std::shared_ptr<SliceItem> nexthead = where.head();
       Slice nexttail = where.tail();
@@ -516,7 +497,7 @@ namespace awkward {
 
       std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
       std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
-      return std::make_shared<NumpyArray>(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+      return std::make_shared<NumpyArray>(out.identities_, out.parameters_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
 
     else {
@@ -526,7 +507,7 @@ namespace awkward {
       nextshape.insert(nextshape.end(), safe.shape_.begin(), safe.shape_.end());
       std::vector<ssize_t> nextstrides = { safe.shape_[0]*safe.strides_[0] };
       nextstrides.insert(nextstrides.end(), safe.strides_.begin(), safe.strides_.end());
-      NumpyArray next(safe.id_, safe.type_, safe.ptr_, nextshape, nextstrides, safe.byteoffset_, itemsize_, format_);
+      NumpyArray next(safe.identities_, safe.parameters_, safe.ptr_, nextshape, nextstrides, safe.byteoffset_, itemsize_, format_);
 
       std::shared_ptr<SliceItem> nexthead = where.head();
       Slice nexttail = where.tail();
@@ -537,7 +518,7 @@ namespace awkward {
 
       std::vector<ssize_t> outshape(out.shape_.begin() + 1, out.shape_.end());
       std::vector<ssize_t> outstrides(out.strides_.begin() + 1, out.strides_.end());
-      return std::make_shared<NumpyArray>(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+      return std::make_shared<NumpyArray>(out.identities_, out.parameters_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
   }
 
@@ -545,14 +526,14 @@ namespace awkward {
     assert(!isscalar());
     Index64 carry(shape_[0]);
     struct Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
-    util::handle_error(err, classname(), id_.get());
+    util::handle_error(err, classname(), identities_.get());
     return getitem_next(head, tail, carry, advanced, shape_[0], strides_[0], false).shallow_copy();
   }
 
   const std::shared_ptr<Content> NumpyArray::carry(const Index64& carry) const {
     assert(!isscalar());
 
-    std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*strides_[0])], util::array_deleter<uint8_t>());
     struct Error err = awkward_numpyarray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
       reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -560,16 +541,16 @@ namespace awkward {
       strides_[0],
       byteoffset_,
       carry.ptr().get());
-    util::handle_error(err, classname(), id_.get());
+    util::handle_error(err, classname(), identities_.get());
 
-    std::shared_ptr<Identity> id(nullptr);
-    if (id_.get() != nullptr) {
-      id = id_.get()->getitem_carry_64(carry);
+    std::shared_ptr<Identities> identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_carry_64(carry);
     }
 
     std::vector<ssize_t> shape = { (ssize_t)carry.length() };
     shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
-    return std::make_shared<NumpyArray>(id, type_, ptr, shape, strides_, 0, itemsize_, format_);
+    return std::make_shared<NumpyArray>(identities, parameters_, ptr, shape, strides_, 0, itemsize_, format_);
   }
 
   const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
@@ -579,84 +560,84 @@ namespace awkward {
   int64_t NumpyArray::numfields() const { return -1; }
 
   int64_t NumpyArray::fieldindex(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
+    throw std::invalid_argument(std::string("key ") + util::quote(key, true) + std::string(" does not exist (data are not records)"));
   }
 
   const std::string NumpyArray::key(int64_t fieldindex) const {
-    throw std::invalid_argument("array contains no Records");
+    throw std::invalid_argument(std::string("fieldindex \"") + std::to_string(fieldindex) + std::string("\" does not exist (data are not records)"));
   }
 
   bool NumpyArray::haskey(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
-  }
-
-  const std::vector<std::string> NumpyArray::keyaliases(int64_t fieldindex) const {
-    throw std::invalid_argument("array contains no Records");
-  }
-
-  const std::vector<std::string> NumpyArray::keyaliases(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
+    return false;
   }
 
   const std::vector<std::string> NumpyArray::keys() const {
-    throw std::invalid_argument("array contains no Records");
+    return std::vector<std::string>();
   }
 
-  void NumpyArray::checktype() const {
-    bool okay = false;
-    if (PrimitiveType* raw = dynamic_cast<PrimitiveType*>(type_.get())) {
-      if (format_.compare("d") == 0) {
-        okay = (raw->dtype() == PrimitiveType::float64);
-      }
-      else if (format_.compare("f") == 0) {
-        okay = (raw->dtype() == PrimitiveType::float32);
-      }
-#ifdef _MSC_VER
-      else if (format_.compare("q") == 0) {
-#else
-      else if (format_.compare("l") == 0) {
-#endif
-        okay = (raw->dtype() == PrimitiveType::int64);
-      }
-#ifdef _MSC_VER
-      else if (format_.compare("Q") == 0) {
-#else
-      else if (format_.compare("L") == 0) {
-#endif
-        okay = (raw->dtype() == PrimitiveType::uint64);
-      }
-#ifdef _MSC_VER
-      else if (format_.compare("l") == 0) {
-#else
-      else if (format_.compare("i") == 0) {
-#endif
-        okay = (raw->dtype() == PrimitiveType::int32);
-      }
-#ifdef _MSC_VER
-      else if (format_.compare("L") == 0) {
-#else
-      else if (format_.compare("I") == 0) {
-#endif
-        okay = (raw->dtype() == PrimitiveType::uint32);
-      }
-      else if (format_.compare("h") == 0) {
-        okay = (raw->dtype() == PrimitiveType::int16);
-      }
-      else if (format_.compare("H") == 0) {
-        okay = (raw->dtype() == PrimitiveType::uint16);
-      }
-      else if (format_.compare("b") == 0) {
-        okay = (raw->dtype() == PrimitiveType::int8);
-      }
-      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-        okay = (raw->dtype() == PrimitiveType::uint8);
-      }
-      else if (format_.compare("?") == 0) {
-        okay = (raw->dtype() == PrimitiveType::boolean);
-      }
+  const Index64 NumpyArray::count64() const {
+    if (shape_.size() <= 1) {
+      // FIXME: the cut-off for countability depends on axis
+      throw std::invalid_argument(std::string("NumpyArray cannot be counted because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
-    if (!okay) {
-      throw std::invalid_argument(std::string("cannot assign type ") + type_.get()->tostring() + std::string(" to ") + classname());
+    int64_t len = length();
+    Index64 tocount(len);
+    struct Error err = awkward_regulararray_count(
+      tocount.ptr().get(),
+      (int64_t)shape_[1],
+      len);
+    util::handle_error(err, classname(), identities_.get());
+    return tocount;
+  }
+
+  const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: NumpyArray::count(axis != 0)");
+    }
+    Index64 tocount = count64();
+    std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
+    std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+#ifdef _MSC_VER
+    std::string format = "q";
+#else
+    std::string format = "l";
+#endif
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+  }
+
+  const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
+    if (shape.size() == 1) {
+      return std::vector<ssize_t>();
+    }
+    else {
+      std::vector<ssize_t> out = { shape[0]*shape[1] };
+      out.insert(out.end(), shape.begin() + 2, shape.end());
+      return out;
+    }
+  }
+
+  const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t> strides) {
+    if (strides.size() == 1) {
+      return std::vector<ssize_t>();
+    }
+    else {
+      return std::vector<ssize_t>(strides.begin() + 1, strides.end());
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
+    if (axis != 0) {
+      throw std::runtime_error("FIXME: NumpyArray::flatten(axis != 0)");
+    }
+    if (shape_.size() <= 1) {
+      // FIXME: the cut-off for flattenability depends on axis
+      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    }
+    if (iscontiguous()) {
+      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    }
+    else {
+      return contiguous().flatten(axis);
     }
   }
 
@@ -680,26 +661,6 @@ namespace awkward {
     throw std::runtime_error("NumpyArray has its own getitem_next system");
   }
 
-  const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
-    if (shape.size() == 1) {
-      return std::vector<ssize_t>();
-    }
-    else {
-      std::vector<ssize_t> out = { shape[0]*shape[1] };
-      out.insert(out.end(), shape.begin() + 2, shape.end());
-      return out;
-    }
-  }
-
-  const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t> strides) {
-    if (strides.size() == 1) {
-      return std::vector<ssize_t>();
-    }
-    else {
-      return std::vector<ssize_t>(strides.begin() + 1, strides.end());
-    }
-  }
-
   bool NumpyArray::iscontiguous() const {
     ssize_t x = itemsize_;
     for (ssize_t i = ndim() - 1;  i >= 0;  i--) {
@@ -712,7 +673,7 @@ namespace awkward {
   void NumpyArray::become_contiguous() {
     if (!iscontiguous()) {
       NumpyArray x = contiguous();
-      id_ = x.id_;
+      identities_ = x.identities_;
       ptr_ = x.ptr_;
       shape_ = x.shape_;
       strides_ = x.strides_;
@@ -722,19 +683,19 @@ namespace awkward {
 
   const NumpyArray NumpyArray::contiguous() const {
     if (iscontiguous()) {
-      return NumpyArray(id_, type_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
+      return NumpyArray(identities_, parameters_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
     }
     else {
       Index64 bytepos(shape_[0]);
       struct Error err = awkward_numpyarray_contiguous_init_64(bytepos.ptr().get(), shape_[0], strides_[0]);
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
       return contiguous_next(bytepos);
     }
   }
 
   const NumpyArray NumpyArray::contiguous_next(const Index64& bytepos) const {
     if (iscontiguous()) {
-      std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*strides_[0])], awkward::util::array_deleter<uint8_t>());
+      std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*strides_[0])], util::array_deleter<uint8_t>());
       struct Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -742,12 +703,12 @@ namespace awkward {
         strides_[0],
         byteoffset_,
         bytepos.ptr().get());
-      util::handle_error(err, classname(), id_.get());
-      return NumpyArray(id_, type_, ptr, shape_, strides_, 0, itemsize_, format_);
+      util::handle_error(err, classname(), identities_.get());
+      return NumpyArray(identities_, parameters_, ptr, shape_, strides_, 0, itemsize_, format_);
     }
 
     else if (shape_.size() == 1) {
-      std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*itemsize_)], awkward::util::array_deleter<uint8_t>());
+      std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos.length()*itemsize_)], util::array_deleter<uint8_t>());
       struct Error err = awkward_numpyarray_contiguous_copy_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -755,13 +716,13 @@ namespace awkward {
         itemsize_,
         byteoffset_,
         bytepos.ptr().get());
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
       std::vector<ssize_t> strides = { itemsize_ };
-      return NumpyArray(id_, type_, ptr, shape_, strides, 0, itemsize_, format_);
+      return NumpyArray(identities_, parameters_, ptr, shape_, strides, 0, itemsize_, format_);
     }
 
     else {
-      NumpyArray next(id_, type_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+      NumpyArray next(identities_, parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
 
       Index64 nextbytepos(bytepos.length()*shape_[1]);
       struct Error err = awkward_numpyarray_contiguous_next_64(
@@ -770,18 +731,18 @@ namespace awkward {
         bytepos.length(),
         (int64_t)shape_[1],
         (int64_t)strides_[1]);
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
 
       NumpyArray out = next.contiguous_next(nextbytepos);
       std::vector<ssize_t> outstrides = { shape_[1]*out.strides_[0] };
       outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
-      return NumpyArray(out.id_, out.type_, out.ptr_, shape_, outstrides, out.byteoffset_, itemsize_, format_);
+      return NumpyArray(out.identities_, out.parameters_, out.ptr_, shape_, outstrides, out.byteoffset_, itemsize_, format_);
     }
   }
 
   const NumpyArray NumpyArray::getitem_bystrides(const std::shared_ptr<SliceItem>& head, const Slice& tail, int64_t length) const {
     if (head.get() == nullptr) {
-      return NumpyArray(id_, type_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
+      return NumpyArray(identities_, parameters_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
     }
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
       return getitem_bystrides(*at, tail, length);
@@ -808,17 +769,17 @@ namespace awkward {
 
   const NumpyArray NumpyArray::getitem_bystrides(const SliceAt& at, const Slice& tail, int64_t length) const {
     if (ndim() < 2) {
-      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     }
 
     int64_t i = at.at();
     if (i < 0) i += shape_[1];
     if (i < 0  ||  i >= shape_[1]) {
-      util::handle_error(failure("index out of range", kSliceNone, at.at()), classname(), id_.get());
+      util::handle_error(failure("index out of range", kSliceNone, at.at()), classname(), identities_.get());
     }
 
     ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)i)*strides_[1];
-    NumpyArray next(id_, type_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
+    NumpyArray next(identities_, parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
 
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -826,12 +787,12 @@ namespace awkward {
 
     std::vector<ssize_t> outshape = { (ssize_t)length };
     outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-    return NumpyArray(out.id_, out.type_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+    return NumpyArray(out.identities_, out.parameters_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
   }
 
   const NumpyArray NumpyArray::getitem_bystrides(const SliceRange& range, const Slice& tail, int64_t length) const {
     if (ndim() < 2) {
-      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     }
 
     int64_t start = range.start();
@@ -849,7 +810,7 @@ namespace awkward {
     int64_t lenhead = d + (m != 0 ? 1 : 0);
 
     ssize_t nextbyteoffset = byteoffset_ + ((ssize_t)start)*strides_[1];
-    NumpyArray next(id_, type_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
+    NumpyArray next(identities_, parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), nextbyteoffset, itemsize_, format_);
 
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -859,7 +820,7 @@ namespace awkward {
     outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
     std::vector<ssize_t> outstrides = { strides_[0], strides_[1]*((ssize_t)step) };
     outstrides.insert(outstrides.end(), out.strides_.begin() + 1, out.strides_.end());
-    return NumpyArray(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    return NumpyArray(out.identities_, out.parameters_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
   }
 
   const NumpyArray NumpyArray::getitem_bystrides(const SliceEllipsis& ellipsis, const Slice& tail, int64_t length) const {
@@ -892,12 +853,12 @@ namespace awkward {
     outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
     std::vector<ssize_t> outstrides = { out.strides_[0] };
     outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
-    return NumpyArray(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    return NumpyArray(out.identities_, out.parameters_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
   }
 
   const NumpyArray NumpyArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
     if (head.get() == nullptr) {
-      std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*stride)], awkward::util::array_deleter<uint8_t>());
+      std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*stride)], util::array_deleter<uint8_t>());
       struct Error err = awkward_numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
@@ -905,18 +866,18 @@ namespace awkward {
         stride,
         byteoffset_,
         carry.ptr().get());
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
 
-      std::shared_ptr<Identity> id(nullptr);
-      if (id_.get() != nullptr) {
-        id = id_.get()->getitem_carry_64(carry);
+      std::shared_ptr<Identities> identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->getitem_carry_64(carry);
       }
 
       std::vector<ssize_t> shape = { (ssize_t)carry.length() };
       shape.insert(shape.end(), shape_.begin() + 1, shape_.end());
       std::vector<ssize_t> strides = { (ssize_t)stride };
       strides.insert(strides.end(), strides_.begin() + 1, strides_.end());
-      return NumpyArray(id, type_, ptr, shape, strides, 0, itemsize_, format_);
+      return NumpyArray(identities, parameters_, ptr, shape, strides, 0, itemsize_, format_);
     }
 
     else if (SliceAt* at = dynamic_cast<SliceAt*>(head.get())) {
@@ -947,10 +908,10 @@ namespace awkward {
 
   const NumpyArray NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
     if (ndim() < 2) {
-      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     }
 
-    NumpyArray next(first ? id_ : Identity::none(), type_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    NumpyArray next(first ? identities_ : Identities::none(), parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
@@ -962,7 +923,7 @@ namespace awkward {
       regular_at += shape_[1];
     }
     if (!(0 <= regular_at  &&  regular_at < shape_[1])) {
-      util::handle_error(failure("index out of range", kSliceNone, at.at()), classname(), id_.get());
+      util::handle_error(failure("index out of range", kSliceNone, at.at()), classname(), identities_.get());
     }
 
     Index64 nextcarry(carry.length());
@@ -972,18 +933,18 @@ namespace awkward {
       carry.length(),
       shape_[1],   // because this is contiguous
       regular_at);
-    util::handle_error(err, classname(), id_.get());
+    util::handle_error(err, classname(), identities_.get());
 
     NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length, next.strides_[0], false);
 
     std::vector<ssize_t> outshape = { (ssize_t)length };
     outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-    return NumpyArray(out.id_, out.type_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+    return NumpyArray(out.identities_, out.parameters_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
   }
 
   const NumpyArray NumpyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
     if (ndim() < 2) {
-      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     }
 
     int64_t start = range.start();
@@ -1000,7 +961,7 @@ namespace awkward {
     int64_t m = numer % denom;
     int64_t lenhead = d + (m != 0 ? 1 : 0);
 
-    NumpyArray next(first ? id_ : Identity::none(), type_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    NumpyArray next(first ? identities_ : Identities::none(), parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
@@ -1014,14 +975,14 @@ namespace awkward {
         shape_[1],   // because this is contiguous
         start,
         step);
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
 
       NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*lenhead, next.strides_[0], false);
       std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
       outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
       std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
       outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
-      return NumpyArray(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+      return NumpyArray(out.identities_, out.parameters_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
 
     else {
@@ -1037,14 +998,14 @@ namespace awkward {
         shape_[1],   // because this is contiguous
         start,
         step);
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
 
       NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*lenhead, next.strides_[0], false);
       std::vector<ssize_t> outshape = { (ssize_t)length, (ssize_t)lenhead };
       outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
       std::vector<ssize_t> outstrides = { (ssize_t)lenhead*out.strides_[0] };
       outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
-      return NumpyArray(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+      return NumpyArray(out.identities_, out.parameters_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
   }
 
@@ -1077,15 +1038,15 @@ namespace awkward {
     outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
     std::vector<ssize_t> outstrides = { out.strides_[0] };
     outstrides.insert(outstrides.end(), out.strides_.begin(), out.strides_.end());
-    return NumpyArray(out.id_, out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+    return NumpyArray(out.identities_, out.parameters_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
   }
 
   const NumpyArray NumpyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
     if (ndim() < 2) {
-      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+      util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     }
 
-    NumpyArray next(first ? id_ : Identity::none(), type_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+    NumpyArray next(first ? identities_ : Identities::none(), parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
@@ -1094,7 +1055,7 @@ namespace awkward {
       flathead.ptr().get(),
       flathead.length(),
       shape_[1]);
-    util::handle_error(err, classname(), id_.get());
+    util::handle_error(err, classname(), identities_.get());
 
     if (advanced.length() == 0) {
       Index64 nextcarry(carry.length()*flathead.length());
@@ -1107,7 +1068,7 @@ namespace awkward {
         carry.length(),
         flathead.length(),
         shape_[1]);   // because this is contiguous
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
 
       NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, length*flathead.length(), next.strides_[0], false);
 
@@ -1122,7 +1083,7 @@ namespace awkward {
       for (auto x = arrayshape.rbegin();  x != arrayshape.rend();  ++x) {
         outstrides.insert(outstrides.begin(), ((ssize_t)(*x))*outstrides[0]);
       }
-      return NumpyArray(arrayshape.size() == 1 ? out.id_ : Identity::none(), out.type_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
+      return NumpyArray(arrayshape.size() == 1 ? out.identities_ : Identities::none(), out.parameters_, out.ptr_, outshape, outstrides, out.byteoffset_, itemsize_, format_);
     }
 
     else {
@@ -1134,13 +1095,13 @@ namespace awkward {
         flathead.ptr().get(),
         carry.length(),
         shape_[1]);   // because this is contiguous
-      util::handle_error(err, classname(), id_.get());
+      util::handle_error(err, classname(), identities_.get());
 
       NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, advanced, length*array.length(), next.strides_[0], false);
 
       std::vector<ssize_t> outshape = { (ssize_t)length };
       outshape.insert(outshape.end(), out.shape_.begin() + 1, out.shape_.end());
-      return NumpyArray(out.id_, out.type_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
+      return NumpyArray(out.identities_, out.parameters_, out.ptr_, outshape, out.strides_, out.byteoffset_, itemsize_, format_);
     }
   }
 
@@ -1163,7 +1124,7 @@ namespace awkward {
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
-        NumpyArray numpy(Identity::none(), Type::none(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        NumpyArray numpy(Identities::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
         numpy.tojson_boolean(builder);
       }
       builder.endlist();
@@ -1190,7 +1151,7 @@ namespace awkward {
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
-        NumpyArray numpy(Identity::none(), Type::none(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        NumpyArray numpy(Identities::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
         numpy.tojson_integer<T>(builder);
       }
       builder.endlist();
@@ -1217,7 +1178,7 @@ namespace awkward {
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
-        NumpyArray numpy(Identity::none(), Type::none(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        NumpyArray numpy(Identities::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
         numpy.tojson_real<T>(builder);
       }
       builder.endlist();
@@ -1239,7 +1200,7 @@ namespace awkward {
       builder.beginlist();
       for (int64_t i = 0;  i < length();  i++) {
         ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
-        NumpyArray numpy(Identity::none(), Type::none(), ptr_, shape, strides, byteoffset, itemsize_, format_);
+        NumpyArray numpy(Identities::none(), util::Parameters(), ptr_, shape, strides, byteoffset, itemsize_, format_);
         numpy.tojson_string(builder);
       }
       builder.endlist();

@@ -6,56 +6,48 @@
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ArrayType.h"
+#include "awkward/array/NumpyArray.h"
 
 #include "awkward/array/EmptyArray.h"
 
 namespace awkward {
-  EmptyArray::EmptyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type)
-      : Content(id, type) {
-    if (type_.get() != nullptr) {
-      checktype();
-    }
-  }
+  EmptyArray::EmptyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters)
+      : Content(identities, parameters) { }
 
   const std::string EmptyArray::classname() const {
     return "EmptyArray";
   }
 
-  void EmptyArray::setid(const std::shared_ptr<Identity>& id) {
-    if (id.get() != nullptr  &&  length() != id.get()->length()) {
-      util::handle_error(failure("content and its id must have the same length", kSliceNone, kSliceNone), classname(), id_.get());
+  void EmptyArray::setidentities(const std::shared_ptr<Identities>& identities) {
+    if (identities.get() != nullptr  &&  length() != identities.get()->length()) {
+      util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
     }
-    id_ = id;
+    identities_ = identities;
   }
 
-  void EmptyArray::setid() { }
+  void EmptyArray::setidentities() { }
 
   const std::shared_ptr<Type> EmptyArray::type() const {
-    if (type_.get() != nullptr) {
-      return type_;
-    }
-    else {
-      return std::make_shared<UnknownType>(Type::Parameters());
-    }
+    return std::make_shared<UnknownType>(parameters_);
   }
 
   const std::shared_ptr<Content> EmptyArray::astype(const std::shared_ptr<Type>& type) const {
-    return std::make_shared<EmptyArray>(id_, type);
+    return type.get()->empty();
   }
 
   const std::string EmptyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();
-    if (id_.get() == nullptr  &&  type_.get() == nullptr) {
+    if (identities_.get() == nullptr  &&  parameters_.empty()) {
       out << "/>" << post;
     }
     else {
       out << ">\n";
-      if (id_.get() != nullptr) {
-        out << id_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
+      if (identities_.get() != nullptr) {
+        out << identities_.get()->tostring_part(indent + std::string("    "), "", "\n") << indent << "</" << classname() << ">" << post;
       }
-      if (type_.get() != nullptr) {
-        out << indent << "    <type>" + type().get()->tostring() + "</type>\n";
+      if (!parameters_.empty()) {
+        out << parameters_tostring(indent + std::string("    "), "", "\n");
       }
       out << indent << "</" << classname() << ">" << post;
     }
@@ -63,6 +55,7 @@ namespace awkward {
   }
 
   void EmptyArray::tojson_part(ToJson& builder) const {
+    check_for_iteration();
     builder.beginlist();
     builder.endlist();
   }
@@ -72,7 +65,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::shallow_copy() const {
-    return std::make_shared<EmptyArray>(id_, type_);
+    return std::make_shared<EmptyArray>(identities_, parameters_);
   }
 
   void EmptyArray::check_for_iteration() const { }
@@ -82,12 +75,12 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_at(int64_t at) const {
-    util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+    util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_at_nowrap(int64_t at) const {
-    util::handle_error(failure("index out of range", kSliceNone, at), classname(), id_.get());
+    util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
@@ -118,43 +111,53 @@ namespace awkward {
   int64_t EmptyArray::numfields() const { return -1; }
 
   int64_t EmptyArray::fieldindex(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
+    throw std::invalid_argument(std::string("key ") + util::quote(key, true) + std::string(" does not exist (data might not be records)"));
   }
 
   const std::string EmptyArray::key(int64_t fieldindex) const {
-    throw std::invalid_argument("array contains no Records");
+    throw std::invalid_argument(std::string("fieldindex \"") + std::to_string(fieldindex) + std::string("\" does not exist (data might not be records)"));
   }
 
   bool EmptyArray::haskey(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
-  }
-
-  const std::vector<std::string> EmptyArray::keyaliases(int64_t fieldindex) const {
-    throw std::invalid_argument("array contains no Records");
-  }
-
-  const std::vector<std::string> EmptyArray::keyaliases(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
+    return false;
   }
 
   const std::vector<std::string> EmptyArray::keys() const {
-    throw std::invalid_argument("array contains no Records");
+    return std::vector<std::string>();
   }
 
-  void EmptyArray::checktype() const { }
+  const Index64 EmptyArray::count64() const {
+    return Index64(0);
+  }
+
+  const std::shared_ptr<Content> EmptyArray::count(int64_t axis) const {
+    Index64 tocount = count64();
+    std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
+    std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+#ifdef _MSC_VER
+    std::string format = "q";
+#else
+    std::string format = "l";
+#endif
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+  }
+
+  const std::shared_ptr<Content> EmptyArray::flatten(int64_t axis) const {
+    return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
+  }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), id_.get());
+    util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 

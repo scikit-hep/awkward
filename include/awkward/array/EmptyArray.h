@@ -15,11 +15,11 @@
 namespace awkward {
   class EmptyArray: public Content {
   public:
-    EmptyArray(const std::shared_ptr<Identity>& id, const std::shared_ptr<Type>& type);
+    EmptyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters);
 
     const std::string classname() const override;
-    void setid() override;
-    void setid(const std::shared_ptr<Identity>& id) override;
+    void setidentities() override;
+    void setidentities(const std::shared_ptr<Identities>& identities) override;
     const std::shared_ptr<Type> type() const override;
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
@@ -40,13 +40,14 @@ namespace awkward {
     int64_t fieldindex(const std::string& key) const override;
     const std::string key(int64_t fieldindex) const override;
     bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keyaliases(int64_t fieldindex) const override;
-    const std::vector<std::string> keyaliases(const std::string& key) const override;
     const std::vector<std::string> keys() const override;
 
-  protected:
-    void checktype() const override;
+    // operations
+    const Index64 count64() const override;
+    const std::shared_ptr<Content> count(int64_t axis) const override;
+    const std::shared_ptr<Content> flatten(int64_t axis) const override;
 
+  protected:
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;

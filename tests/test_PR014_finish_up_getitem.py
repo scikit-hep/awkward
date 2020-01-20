@@ -28,10 +28,10 @@ listarrayB64 = awkward1.layout.ListArray64(awkward1.layout.Index64(startsB), awk
 listarrayB32 = awkward1.layout.ListArray32(awkward1.layout.Index32(startsB), awkward1.layout.Index32(stopsB), listarrayA64)
 modelB = numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)
 
-listoffsetarrayB64.setid()
-listoffsetarrayB32.setid()
-listarrayB64.setid()
-listarrayB32.setid()
+listoffsetarrayB64.setidentities()
+listoffsetarrayB32.setidentities()
+listarrayB64.setidentities()
+listarrayB32.setidentities()
 
 def test_basic():
     assert awkward1.tolist(modelA) == awkward1.tolist(listoffsetarrayA64)

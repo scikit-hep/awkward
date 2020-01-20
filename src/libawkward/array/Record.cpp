@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "awkward/cpu-kernels/identity.h"
+#include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"
@@ -11,13 +11,9 @@
 
 namespace awkward {
   Record::Record(const RecordArray& array, int64_t at)
-      : Content(Identity::none(), Type::none())
+      : Content(Identities::none(), array.parameters())
       , array_(array)
-      , at_(at) {
-    if (type_.get() != nullptr) {
-      checktype();
-    }
-  }
+      , at_(at) { }
 
   const std::shared_ptr<Content> Record::array() const {
     return array_.shallow_copy();
@@ -35,16 +31,12 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<RecordArray::Lookup> Record::lookup() const {
-    return array_.lookup();
-  }
-
-  const std::shared_ptr<RecordArray::ReverseLookup> Record::reverselookup() const {
-    return array_.reverselookup();
+  const std::shared_ptr<util::RecordLookup> Record::recordlookup() const {
+    return array_.recordlookup();
   }
 
   bool Record::istuple() const {
-    return lookup().get() == nullptr;
+    return array_.istuple();
   }
 
   bool Record::isscalar() const {
@@ -55,60 +47,51 @@ namespace awkward {
     return "Record";
   }
 
-  const std::shared_ptr<Identity> Record::id() const {
-    std::shared_ptr<Identity> recid = array_.id();
-    if (recid.get() == nullptr) {
-      return recid;
+  const std::shared_ptr<Identities> Record::identities() const {
+    std::shared_ptr<Identities> recidentities = array_.identities();
+    if (recidentities.get() == nullptr) {
+      return recidentities;
     }
     else {
-      return recid.get()->getitem_range_nowrap(at_, at_ + 1);
+      return recidentities.get()->getitem_range_nowrap(at_, at_ + 1);
     }
   }
 
-  void Record::setid() {
-    throw std::runtime_error("undefined operation: Record::setid");
+  void Record::setidentities() {
+    throw std::runtime_error("undefined operation: Record::setidentities");
   }
 
-  void Record::setid(const std::shared_ptr<Identity>& id) {
-    throw std::runtime_error("undefined operation: Record::setid");
-  }
-
-  bool Record::isbare() const {
-    return array_.isbare();
-  }
-
-  bool Record::istypeptr(Type* pointer) const {
-    return array_.istypeptr(pointer);
+  void Record::setidentities(const std::shared_ptr<Identities>& identities) {
+    throw std::runtime_error("undefined operation: Record::setidentities");
   }
 
   const std::shared_ptr<Type> Record::type() const {
-    return array_.type();
+    std::shared_ptr<Type> out = array_.type();
+    out.get()->setparameters(parameters_);
+    return out;
   }
 
   const std::shared_ptr<Content> Record::astype(const std::shared_ptr<Type>& type) const {
-    if (type.get() == nullptr) {
-      if (array_.numfields() == 0) {
-        return std::make_shared<Record>(RecordArray(array_.id(), type, array_.length(), array_.istuple()), at_);
+    std::shared_ptr<Content> record = array_.astype(type);
+    if (RecordArray* raw = dynamic_cast<RecordArray*>(record.get())) {
+      if (raw->numfields() == 0) {
+        return std::make_shared<Record>(RecordArray(raw->identities(), raw->parameters(), raw->length(), raw->istuple()), at_);
       }
       else {
-        return std::make_shared<Record>(RecordArray(array_.id(), type, array_.contents(), array_.lookup(), array_.reverselookup()), at_);
+        return std::make_shared<Record>(RecordArray(raw->identities(), raw->parameters(), raw->contents(), raw->recordlookup()), at_);
       }
     }
     else {
-      std::shared_ptr<Content> record = array_.astype(type);
-      RecordArray* raw = dynamic_cast<RecordArray*>(record.get());
-      if (raw->numfields() == 0) {
-        return std::make_shared<Record>(RecordArray(raw->id(), raw->type(), raw->length(), raw->istuple()), at_);
-      }
-      else {
-        return std::make_shared<Record>(RecordArray(raw->id(), raw->type(), raw->contents(), raw->lookup(), raw->reverselookup()), at_);
-      }
+      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
     }
   }
 
   const std::string Record::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " at=\"" << at_ << "\">\n";
+    if (!parameters_.empty()) {
+      out << parameters_tostring(indent + std::string("    "), "", "\n");
+    }
     out << array_.tostring_part(indent + std::string("    "), "", "\n");
     out << indent << "</" << classname() << ">" << post;
     return out.str();
@@ -116,9 +99,9 @@ namespace awkward {
 
   void Record::tojson_part(ToJson& builder) const {
     size_t cols = (size_t)numfields();
-    std::shared_ptr<RecordArray::ReverseLookup> keys = array_.reverselookup();
+    std::shared_ptr<util::RecordLookup> keys = array_.recordlookup();
     if (istuple()) {
-      keys = std::make_shared<RecordArray::ReverseLookup>();
+      keys = std::make_shared<util::RecordLookup>();
       for (size_t j = 0;  j < cols;  j++) {
         keys.get()->push_back(std::to_string(j));
       }
@@ -141,8 +124,8 @@ namespace awkward {
   }
 
   void Record::check_for_iteration() const {
-    if (array_.id().get() != nullptr  &&  array_.id().get()->length() != 1) {
-      util::handle_error(failure("len(id) != 1 for scalar Record", kSliceNone, kSliceNone), array_.id().get()->classname(), nullptr);
+    if (array_.identities().get() != nullptr  &&  array_.identities().get()->length() != 1) {
+      util::handle_error(failure("len(identities) != 1 for scalar Record", kSliceNone, kSliceNone), array_.identities().get()->classname(), nullptr);
     }
   }
 
@@ -171,11 +154,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& keys) const {
-    std::shared_ptr<Type> type = Type::none();
-    if (type_.get() != nullptr  &&  type_.get()->numfields() != -1  &&  util::subset(keys, type_.get()->keys())) {
-      type = type_;
-    }
-    RecordArray out(array_.id(), type, length(), istuple());
+    RecordArray out(array_.identities(), parameters_, length(), istuple());
     if (istuple()) {
       for (auto key : keys) {
         out.append(array_.field(key));
@@ -194,7 +173,8 @@ namespace awkward {
   }
 
   const std::pair<int64_t, int64_t> Record::minmax_depth() const {
-    return array_.minmax_depth();
+    std::pair<int64_t, int64_t> out = array_.minmax_depth();
+    return std::pair<int64_t, int64_t>(out.first - 1, out.second - 1);
   }
 
   int64_t Record::numfields() const {
@@ -213,16 +193,20 @@ namespace awkward {
     return array_.haskey(key);
   }
 
-  const std::vector<std::string> Record::keyaliases(int64_t fieldindex) const {
-    return array_.keyaliases(fieldindex);
-  }
-
-  const std::vector<std::string> Record::keyaliases(const std::string& key) const {
-    return array_.keyaliases(key);
-  }
-
   const std::vector<std::string> Record::keys() const {
     return array_.keys();
+  }
+
+  const Index64 Record::count64() const {
+    throw std::invalid_argument("Record cannot be counted because it is not an array");
+  }
+
+  const std::shared_ptr<Content> Record::count(int64_t axis) const {
+    throw std::invalid_argument("Record cannot be counted because it is not an array");
+  }
+
+  const std::shared_ptr<Content> Record::flatten(int64_t axis) const {
+    throw std::invalid_argument("Record cannot be flattened because it is not an array");
   }
 
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
@@ -244,7 +228,7 @@ namespace awkward {
 
   const std::vector<std::pair<std::string, std::shared_ptr<Content>>> Record::fielditems() const {
     std::vector<std::pair<std::string, std::shared_ptr<Content>>> out;
-    std::shared_ptr<RecordArray::ReverseLookup> keys = array_.reverselookup();
+    std::shared_ptr<util::RecordLookup> keys = array_.recordlookup();
     if (istuple()) {
       int64_t cols = numfields();
       for (int64_t j = 0;  j < cols;  j++) {
@@ -263,8 +247,6 @@ namespace awkward {
   const Record Record::astuple() const {
     return Record(array_.astuple(), at_);
   }
-
-  void Record::checktype() const { }
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(at)");

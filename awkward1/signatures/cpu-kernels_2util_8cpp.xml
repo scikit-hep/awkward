@@ -32,12 +32,12 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/util.cpp" line="118" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="7" bodyend="14"/>
+        <location file="src/cpu-kernels/util.cpp" line="137" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="7" bodyend="14"/>
       </memberdef>
-      <memberdef kind="function" id="cpu-kernels_2util_8cpp_1a06d96ca5e0b2c7c68b2cc2ee9971d208" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="cpu-kernels_2util_8cpp_1a69d244cb4c4419fe8eb9391fc8c42506" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>struct Error</type>
         <definition>struct Error failure</definition>
-        <argsstring>(const char *str, int64_t location, int64_t attempt)</argsstring>
+        <argsstring>(const char *str, int64_t identity, int64_t attempt)</argsstring>
         <name>failure</name>
         <param>
           <type>const char *</type>
@@ -45,7 +45,7 @@
         </param>
         <param>
           <type>int64_t</type>
-          <declname>location</declname>
+          <declname>identity</declname>
         </param>
         <param>
           <type>int64_t</type>
@@ -57,7 +57,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/util.cpp" line="118" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="16" bodyend="23"/>
+        <location file="src/cpu-kernels/util.cpp" line="137" column="7" bodyfile="src/cpu-kernels/util.cpp" bodystart="16" bodyend="23"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

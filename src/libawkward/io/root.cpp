@@ -3,7 +3,7 @@
 #include <cstring>
 
 #include "awkward/Content.h"
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/fillable/GrowableBuffer.h"
 
@@ -55,7 +55,7 @@ namespace awkward {
       level0.setitem_at_nowrap(i + 1, levels[0].length());
     }
 
-    std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos_tocopy.length()*itemsize)], awkward::util::array_deleter<uint8_t>());
+    std::shared_ptr<void> ptr(new uint8_t[(size_t)(bytepos_tocopy.length()*itemsize)], util::array_deleter<uint8_t>());
     ssize_t offset = rawdata.byteoffset();
     uint8_t* toptr = reinterpret_cast<uint8_t*>(ptr.get());
     uint8_t* fromptr = reinterpret_cast<uint8_t*>(rawdata.ptr().get());
@@ -66,11 +66,11 @@ namespace awkward {
 
     std::vector<ssize_t> shape = { (ssize_t)bytepos_tocopy.length() };
     std::vector<ssize_t> strides = { (ssize_t)itemsize };
-    std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identity::none(), Type::none(), ptr, shape, strides, 0, (ssize_t)itemsize, format);
+    std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, (ssize_t)itemsize, format);
 
     for (int64_t i = depth - 1;  i >= 0;  i--) {
       Index64 index(levels[(size_t)i].ptr(), 0, levels[(size_t)i].length());
-      out = std::make_shared<ListOffsetArray64>(Identity::none(), Type::none(), index, out);
+      out = std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), index, out);
     }
     return out;
   }

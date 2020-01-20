@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/Identity.h"
+#include "awkward/Identities.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/fillable/OptionFillable.h"
@@ -31,14 +31,10 @@ namespace awkward {
     buffer_.clear();
   }
 
-  const std::shared_ptr<Type> BoolFillable::type() const {
-    return std::make_shared<PrimitiveType>(Type::Parameters(), PrimitiveType::boolean);
-  }
-
-  const std::shared_ptr<Content> BoolFillable::snapshot(const std::shared_ptr<Type>& type) const {
+  const std::shared_ptr<Content> BoolFillable::snapshot() const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(bool) };
-    return std::make_shared<NumpyArray>(Identity::none(), type, buffer_.ptr(), shape, strides, 0, sizeof(bool), "?");
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), buffer_.ptr(), shape, strides, 0, sizeof(bool), "?");
   }
 
   bool BoolFillable::active() const {

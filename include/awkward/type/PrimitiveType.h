@@ -23,7 +23,7 @@ namespace awkward {
       numtypes
     };
 
-    PrimitiveType(const Parameters& parameters, DType dtype);
+    PrimitiveType(const util::Parameters& parameters, DType dtype);
 
     std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> shallow_copy() const override;
@@ -32,9 +32,8 @@ namespace awkward {
     int64_t fieldindex(const std::string& key) const override;
     const std::string key(int64_t fieldindex) const override;
     bool haskey(const std::string& key) const override;
-    const std::vector<std::string> keyaliases(int64_t fieldindex) const override;
-    const std::vector<std::string> keyaliases(const std::string& key) const override;
     const std::vector<std::string> keys() const override;
+    const std::shared_ptr<Content> empty() const override;
 
   const DType dtype() const;
 

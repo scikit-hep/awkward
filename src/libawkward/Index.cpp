@@ -12,7 +12,7 @@
 namespace awkward {
   template <typename T>
   IndexOf<T>::IndexOf(int64_t length)
-      : ptr_(std::shared_ptr<T>(length == 0 ? nullptr : new T[(size_t)length], awkward::util::array_deleter<T>()))
+      : ptr_(std::shared_ptr<T>(length == 0 ? nullptr : new T[(size_t)length], util::array_deleter<T>()))
       , offset_(0)
       , length_(length) { }
 
@@ -141,11 +141,52 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Index> IndexOf<T>::deep_copy() const {
-    std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_], awkward::util::array_deleter<T>());
+    std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_], util::array_deleter<T>());
     if (length_ != 0) {
       memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*((size_t)length_));
     }
     return std::make_shared<IndexOf<T>>(ptr, 0, length_);
+  }
+
+  template <>
+  IndexOf<int64_t> IndexOf<int8_t>::to64() const {
+    std::shared_ptr<int64_t> ptr(length_ == 0 ? nullptr : new int64_t[(size_t)length_], util::array_deleter<int64_t>());
+    if (length_ != 0) {
+      awkward_index8_to_index64(ptr.get(), &ptr_.get()[(size_t)offset_], length_);
+    }
+    return IndexOf<int64_t>(ptr, 0, length_);
+  }
+
+  template <>
+  IndexOf<int64_t> IndexOf<uint8_t>::to64() const {
+    std::shared_ptr<int64_t> ptr(length_ == 0 ? nullptr : new int64_t[(size_t)length_], util::array_deleter<int64_t>());
+    if (length_ != 0) {
+      awkward_indexU8_to_index64(ptr.get(), &ptr_.get()[(size_t)offset_], length_);
+    }
+    return IndexOf<int64_t>(ptr, 0, length_);
+  }
+
+  template <>
+  IndexOf<int64_t> IndexOf<int32_t>::to64() const {
+    std::shared_ptr<int64_t> ptr(length_ == 0 ? nullptr : new int64_t[(size_t)length_], util::array_deleter<int64_t>());
+    if (length_ != 0) {
+      awkward_index32_to_index64(ptr.get(), &ptr_.get()[(size_t)offset_], length_);
+    }
+    return IndexOf<int64_t>(ptr, 0, length_);
+  }
+
+  template <>
+  IndexOf<int64_t> IndexOf<uint32_t>::to64() const {
+    std::shared_ptr<int64_t> ptr(length_ == 0 ? nullptr : new int64_t[(size_t)length_], util::array_deleter<int64_t>());
+    if (length_ != 0) {
+      awkward_indexU32_to_index64(ptr.get(), &ptr_.get()[(size_t)offset_], length_);
+    }
+    return IndexOf<int64_t>(ptr, 0, length_);
+  }
+
+  template <>
+  IndexOf<int64_t> IndexOf<int64_t>::to64() const {
+    return IndexOf<int64_t>(ptr_, offset_, length_);
   }
 
   template class IndexOf<int8_t>;

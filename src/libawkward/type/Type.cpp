@@ -16,64 +16,46 @@ namespace awkward {
     return std::shared_ptr<Type>(nullptr);
   }
 
-  Type::Type(const Type::Parameters& parameters)
+  Type::Type(const util::Parameters& parameters)
       : parameters_(parameters) { }
 
   Type::~Type() { }
 
-  const Type::Parameters Type::parameters() const {
+  const util::Parameters Type::parameters() const {
     return parameters_;
   }
 
-  void Type::setparameters(const Type::Parameters& parameters) {
+  void Type::setparameters(const util::Parameters& parameters) {
     parameters_ = parameters;
   }
 
-  std::string Type::parameter(const std::string& key) {
-    return parameters_[key];
+  const std::string Type::parameter(const std::string& key) const {
+    auto item = parameters_.find(key);
+    if (item == parameters_.end()) {
+      return "null";
+    }
+    return item->second;
   }
 
   void Type::setparameter(const std::string& key, const std::string& value) {
     parameters_[key] = value;
   }
 
-  bool Type::parameter_equals(const std::string& key, const std::string& value) {
-    auto item = parameters_.find(key);
-    if (item == parameters_.end()) {
-      return false;
-    }
-    else {
-      return item->second == value;
-    }
+  bool Type::parameter_equals(const std::string& key, const std::string& value) const {
+    return util::parameter_equals(parameters_, key, value);
   }
 
-  std::string Type::tostring() const {
+  bool Type::parameters_equal(const util::Parameters& other) const {
+    return util::parameters_equal(parameters_, other);
+  }
+
+  const std::string Type::tostring() const {
     return tostring_part("", "", "");
   };
 
   const std::string Type::compare(std::shared_ptr<Type> supertype) {
     // FIXME: better side-by-side comparison
     return tostring() + std::string(" versus ") + supertype.get()->tostring();
-  }
-
-  bool Type::equal_parameters(const Type::Parameters& other) const {
-    if (parameters_.size() != other.size()) {
-      return false;
-    }
-    for (auto pair : parameters_) {
-      auto other_value = other.find(pair.first);
-      if (other_value == other.end()) {
-        return false;
-      }
-      rj::Document mine;
-      rj::Document yours;
-      mine.Parse<rj::kParseNanAndInfFlag>(pair.second.c_str());
-      yours.Parse<rj::kParseNanAndInfFlag>(other_value->second.c_str());
-      if (mine != yours) {
-        return false;
-      }
-    }
-    return true;
   }
 
   bool Type::get_typestr(std::string& output) const {
