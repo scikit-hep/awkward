@@ -27,11 +27,50 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
         else:
             return x
 
+    unknowntypes = (awkward1.layout.EmptyArray,)
+
+    indexedtypes = (awkward1.layout.IndexedArray32, awkward1.layout.IndexedArrayU32, awkward1.layout.IndexedArray64)
+
+    uniontypes = (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)
+
+    regulartypes = (awkward1.layout.RegularArray,)
+
+    listtypes = (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)
+
+    optiontypes = (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)
+
+    recordtypes = (awkward1.layout.RecordArray,)
+
+    def firstof(inputs, types):
+        for x in inputs:
+            if isinstance(x, types):
+                return x
+        assert False
+
     def level(inputs):
-        if any(isinstance(x, awkward1.layout.ListOffsetArray64) for x in inputs):
-            assert all(isinstance(x, awkward1.layout.ListOffsetArray64) for x in inputs)   # FIXME: no!
-            offsets = inputs[0].offsets   # FIXME: no, no!
-            return awkward1.layout.ListOffsetArray64(offsets, level([x.content for x in inputs]))
+        if any(isinstance(x, unknowntypes) for x in inputs):
+            raise NotImplementedError("array_ufunc of EmptyArray")
+
+        elif any(isinstance(x, indexedtypes) for x in inputs):
+            raise NotImplementedError("array_ufunc of IndexedArray*")
+
+        elif any(isinstance(x, uniontypes) for x in inputs):
+            raise NotImplementedError("array_ufunc of UnionArray")
+
+        elif any(isinstance(x, regulartypes) for x in inputs):
+            raise NotImplementedError("array_ufunc of RegularArray")
+
+        elif any(isinstance(x, listtypes) for x in inputs):
+            first = firstof(inputs, listtypes)
+            # FIXME: need a List*Array::compactoffsets() and a *Array::toListOffsetArray(offsets)
+            offsets = first.offsets
+            return awkward1.layout.ListOffsetArray64(offsets, level([x if not isinstance(x, listtypes) else x.content for x in inputs]))
+
+        elif any(isinstance(x, optiontypes) for x in inputs):
+            raise NotImplementedError("array_ufunc of IndexedOptionArray*")
+
+        elif any(isinstance(x, recordtypes) for x in inputs):
+            raise NotImplementedError("array_ufunc of RecordArray")
 
         else:
             result = getattr(ufunc, method)(*inputs, **kwargs)
