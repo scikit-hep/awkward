@@ -49,7 +49,7 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
     def level(inputs):
         if any(isinstance(x, unknowntypes) for x in inputs):
-            raise NotImplementedError("array_ufunc of EmptyArray")
+            return level([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
 
         elif any(isinstance(x, indexedtypes) for x in inputs):
             raise NotImplementedError("array_ufunc of IndexedArray*")
