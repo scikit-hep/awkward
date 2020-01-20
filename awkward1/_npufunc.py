@@ -18,14 +18,23 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
     scalar = all(isinstance(x, (awkward1.highlevel.Record, awkward1.layout.Record)) for x in inputs)
 
     def unwrap(x):
-        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)):
-            return unwrap(x.layout)
+        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
+            return x.layout
+        elif isinstance(x, awkward1.highlevel.FillableArray):
+            return x.snapshot().layout
         elif isinstance(x, awkward1.layout.FillableArray):
-            return unwrap(x.snapshot())
+            return x.snapshot()
         elif isinstance(x, awkward1.layout.Record):
-            return unwrap(x.array)
-        else:
+            return x.array
+        elif isinstance(x, awkward1.layout.Content):
             return x
+        elif isinstance(x, numpy.ndarray):
+            if issubclass(x.dtype.type, numpy.number):
+                return awkward1.highlevel.Array(x).layout
+            else:
+                raise ValueError("numpy.ndarray with {0} cannot be used in {1}".format(repr(x.dtype), ufunc))
+        else:
+            return unwrap(numpy.array(x))
 
     unknowntypes = (awkward1.layout.EmptyArray,)
 
