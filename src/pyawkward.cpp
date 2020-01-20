@@ -1301,6 +1301,7 @@ py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content>
       .def_property_readonly("starts", &ak::ListArrayOf<T>::starts)
       .def_property_readonly("stops", &ak::ListArrayOf<T>::stops)
       .def_property_readonly("content", &ak::ListArrayOf<T>::content)
+      .def("compact_offsets64", &ak::ListArrayOf<T>::compact_offsets64)
   );
 }
 
@@ -1317,6 +1318,7 @@ py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, 
       .def_property_readonly("stops", &ak::ListOffsetArrayOf<T>::stops)
       .def_property_readonly("offsets", &ak::ListOffsetArrayOf<T>::offsets)
       .def_property_readonly("content", &ak::ListOffsetArrayOf<T>::content)
+      .def("compact_offsets64", &ak::ListOffsetArrayOf<T>::compact_offsets64)
   );
 }
 
@@ -1340,6 +1342,7 @@ py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> mak
 
       .def_property_readonly("size", &ak::RegularArray::size)
       .def_property_readonly("content", &ak::RegularArray::content)
+      .def("compact_offsets64", &ak::RegularArray::compact_offsets64)
   );
 }
 

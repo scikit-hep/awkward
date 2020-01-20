@@ -70,12 +70,15 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
         elif any(isinstance(x, listtypes) for x in inputs):
             if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
                 size = max([x.size for x in inputs if isinstance(x, awkward1.layout.RegularArray)])
+                for x in inputs:
+                    if isinstance(x, awkward1.layout.RegularArray):
+                        if size > 1 and x.size == 1:
+                            tmpindex = awkward1.layout.Index64(numpy.repeat(numpy.arange(len(x), dtype=numpy.int64), size))
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, awkward1.layout.RegularArray):
-                        if x.size == 1:
-                            index = awkward1.layout.Index64(numpy.repeat(numpy.arange(len(x), dtype=numpy.int64), size))
-                            nextinputs.append(awkward1.layout.IndexedArray64(index, x.content).project())
+                        if size > 1 and x.size == 1:
+                            nextinputs.append(awkward1.layout.IndexedArray64(tmpindex, x.content).project())
                         elif x.size == size:
                             nextinputs.append(x.content)
                         else:
@@ -86,9 +89,15 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
             else:
                 first = firstof(inputs, listtypes)
-                # FIXME: need a List*Array::compactoffsets() and a *Array::broadcast_to_offsets(offsets)
-                offsets = first.offsets
-                return awkward1.layout.ListOffsetArray64(offsets, level([x if not isinstance(x, listtypes) else x.content for x in inputs]))
+                offsets = first.compact_offsets64()
+
+                print(offsets)
+                raise Exception
+
+                nextinputs = []
+                for x in inputs:
+                    nextinputs.append(x.broadcast_tooffsets64(offsets))
+                return awkward1.layout.ListOffsetArray64(offsets, level(nextinputs))
 
         elif any(isinstance(x, optiontypes) for x in inputs):
             mask = None

@@ -18,6 +18,7 @@ namespace awkward {
     const IndexOf<T> starts() const;
     const IndexOf<T> stops() const;
     const std::shared_ptr<Content> content() const;
+    Index64 compact_offsets64() const;
 
     const std::string classname() const override;
     void setidentities() override;

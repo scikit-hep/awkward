@@ -28,6 +28,17 @@ namespace awkward {
     return size_;
   }
 
+  Index64 RegularArray::compact_offsets64() const {
+    int64_t len = length();
+    Index64 out(len + 1);
+    struct Error err = awkward_regulararray_compact_offsets64(
+      out.ptr().get(),
+      len,
+      size_);
+    util::handle_error(err, classname(), identities_.get());
+    return out;
+  }
+
   const std::string RegularArray::classname() const {
     return "RegularArray";
   }

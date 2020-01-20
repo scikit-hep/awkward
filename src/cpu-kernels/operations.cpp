@@ -42,7 +42,7 @@ ERROR awkward_indexedarray_count(int64_t* tocount, const int64_t* contentcount, 
   for (int64_t i = 0;  i < lenindex;  i++) {
     C j = fromindex[indexoffset + i];
     if (j >= lencontent) {
-      return failure("IndexedArray index out of range", i, j);
+      return failure("index out of range", i, j);
     }
     else if (j < 0) {
       tocount[i] = 0;
@@ -122,7 +122,7 @@ ERROR awkward_indexedarray_flatten_nextcarry(T* tocarry, const C* fromindex, int
   for (int64_t i = 0;  i < lenindex;  i++) {
     C j = fromindex[indexoffset + i];
     if (j >= lencontent) {
-      return failure("IndexedOptionArray index out of range", i, j);
+      return failure("index out of range", i, j);
     }
     else if (j >= 0) {
       tocarry[k] = j;
@@ -162,4 +162,58 @@ ERROR awkward_indexedarrayU32_andmask_8(uint32_t* toindex, const int8_t* mask, i
 }
 ERROR awkward_indexedarray64_andmask_8(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length) {
   return awkward_indexedarray_andmask<int64_t, int8_t>(toindex, mask, maskoffset, fromindex, indexoffset, length);
+}
+
+template <typename T>
+ERROR awkward_regulararray_compact_offsets(T* tooffsets, int64_t length, int64_t size) {
+  tooffsets[0] = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    tooffsets[i + 1] = tooffsets[i] + (i + 1)*size;
+  }
+  return success();
+}
+ERROR awkward_regulararray_compact_offsets64(int64_t* tooffsets, int64_t length, int64_t size) {
+  return awkward_regulararray_compact_offsets<int64_t>(tooffsets, length, size);
+}
+
+template <typename C, typename T>
+ERROR awkward_listarray_compact_offsets(T* tooffsets, const C* fromstarts, const C* fromstops, int64_t startsoffset, int64_t stopsoffset, int64_t length) {
+  tooffsets[0] = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    C start = fromstarts[startsoffset + i];
+    C stop = fromstops[stopsoffset + i];
+    if (stop < start) {
+      return failure("stops[i] < starts[i]", i, kSliceNone);
+    }
+    tooffsets[i + 1] = tooffsets[i] + (stop - start);
+  }
+  return success();
+}
+ERROR awkward_listarray32_compact_offsets64(int64_t* tooffsets, const int32_t* fromstarts, const int32_t* fromstops, int64_t startsoffset, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_compact_offsets<int32_t, int64_t>(tooffsets, fromstarts, fromstops, startsoffset, stopsoffset, length);
+}
+ERROR awkward_listarrayU32_compact_offsets64(int64_t* tooffsets, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t startsoffset, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_compact_offsets<uint32_t, int64_t>(tooffsets, fromstarts, fromstops, startsoffset, stopsoffset, length);
+}
+ERROR awkward_listarray64_compact_offsets64(int64_t* tooffsets, const int64_t* fromstarts, const int64_t* fromstops, int64_t startsoffset, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_compact_offsets<int64_t, int64_t>(tooffsets, fromstarts, fromstops, startsoffset, stopsoffset, length);
+}
+
+template <typename C, typename T>
+ERROR awkward_listoffsetarray_compact_offsets(T* tooffsets, const C* fromoffsets, int64_t offsetsoffset, int64_t length) {
+  int64_t diff = (int64_t)fromoffsets[0];
+  tooffsets[0] = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    tooffsets[i + 1] = fromoffsets[offsetsoffset + i + 1] - diff;
+  }
+  return success();
+}
+ERROR awkward_listoffsetarray32_compact_offsets64(int64_t* tooffsets, const int32_t* fromoffsets, int64_t offsetsoffset, int64_t length) {
+  return awkward_listoffsetarray_compact_offsets<int32_t, int64_t>(tooffsets, fromoffsets, offsetsoffset, length);
+}
+ERROR awkward_listoffsetarrayU32_compact_offsets64(int64_t* tooffsets, const uint32_t* fromoffsets, int64_t offsetsoffset, int64_t length) {
+  return awkward_listoffsetarray_compact_offsets<uint32_t, int64_t>(tooffsets, fromoffsets, offsetsoffset, length);
+}
+ERROR awkward_listoffsetarray64_compact_offsets64(int64_t* tooffsets, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t length) {
+  return awkward_listoffsetarray_compact_offsets<int64_t, int64_t>(tooffsets, fromoffsets, offsetsoffset, length);
 }

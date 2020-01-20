@@ -53,6 +53,20 @@ namespace awkward {
   }
 
   template <typename T>
+  Index64 ListOffsetArrayOf<T>::compact_offsets64() const {
+    // FIXME: if offsets_[0] == 0 and std::is_same<T, int64_t>::value, just return offsets_
+    int64_t len = offsets_.length() - 1;
+    Index64 out(len + 1);
+    struct Error err = util::awkward_listoffsetarray_compact_offsets64<T>(
+      out.ptr().get(),
+      offsets_.ptr().get(),
+      offsets_.offset(),
+      len);
+    util::handle_error(err, classname(), identities_.get());
+    return out;
+  }
+
+  template <typename T>
   const std::string ListOffsetArrayOf<T>::classname() const {
     if (std::is_same<T, int32_t>::value) {
       return "ListOffsetArray32";

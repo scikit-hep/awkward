@@ -51,3 +51,12 @@ def test_regulararray():
     assert awkward1.tolist(array * 2) == (numpy.arange(2*3*5).reshape(2, 3, 5) * 2).tolist()
     array2 = awkward1.Array(numpy.arange(2*1*5).reshape(2, 1, 5))
     assert awkward1.tolist(array + array2) == awkward1.tolist(numpy.arange(2*3*5).reshape(2, 3, 5) + numpy.arange(2*1*5).reshape(2, 1, 5))
+
+def test_listarray():
+    content = awkward1.layout.NumpyArray(numpy.arange(12, dtype=numpy.int64))
+    starts = awkward1.layout.Index64(numpy.array([3, 0, 999, 2, 6, 10], dtype=numpy.int64))
+    stops  = awkward1.layout.Index64(numpy.array([7, 3, 999, 4, 6, 12], dtype=numpy.int64))
+    one = awkward1.Array(awkward1.layout.ListArray64(starts, stops, content))
+    assert awkward1.tolist(one) == [[3, 4, 5, 6], [0, 1, 2], [], [2, 3], [], [10, 11]]
+    print(one.layout)
+    one + 100

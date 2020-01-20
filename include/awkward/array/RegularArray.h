@@ -18,6 +18,7 @@ namespace awkward {
     RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<Content>& content, int64_t size);
     const std::shared_ptr<Content> content() const;
     int64_t size() const;
+    Index64 compact_offsets64() const;
 
     const std::string classname() const override;
     void setidentities() override;

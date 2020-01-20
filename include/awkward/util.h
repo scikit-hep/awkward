@@ -106,7 +106,10 @@ namespace awkward {
     ERROR awkward_unionarray_regular_index(I* toindex, const T* fromtags, int64_t tagsoffset, int64_t length);
     template <typename T, typename I>
     ERROR awkward_unionarray_project_64(int64_t* lenout, int64_t* tocarry, const T* fromtags, int64_t tagsoffset, const I* fromindex, int64_t indexoffset, int64_t length, int64_t which);
-
+    template <typename T>
+    ERROR awkward_listarray_compact_offsets64(int64_t* tooffsets, const T* fromstarts, const T* fromstops, int64_t startsoffset, int64_t stopsoffset, int64_t length);
+    template <typename T>
+    ERROR awkward_listoffsetarray_compact_offsets64(int64_t* tooffsets, const T* fromoffsets, int64_t offsetsoffset, int64_t length);
   }
 }
 
