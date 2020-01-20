@@ -63,6 +63,9 @@ namespace awkward {
 
     // operations
     const Index64 count64() const override;
+    // FIXME: merge to the above?
+    const Index64 count64(int64_t axis) const;
+
     const std::shared_ptr<Content> count(int64_t axis) const override;
     const std::shared_ptr<Content> flatten(int64_t axis) const override;
 
@@ -89,6 +92,8 @@ namespace awkward {
     const NumpyArray getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
     const NumpyArray getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
     const NumpyArray getitem_next(const SliceArray64& array, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
+
+    const std::shared_ptr<Content> count(int64_t axis, const NumpyArray* tocarry) const;
 
   void tojson_boolean(ToJson& builder) const;
   template <typename T>

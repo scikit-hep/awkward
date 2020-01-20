@@ -590,19 +590,62 @@ namespace awkward {
     return tocount;
   }
 
-  const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: NumpyArray::count(axis != 0)");
+  const Index64 NumpyArray::count64(int64_t axis) const {
+    if (axis >= shape_.size() - 1  ||  shape_.size() <= 1) {
+      throw std::invalid_argument(std::string("NumpyArray cannot be counted in axis ") + std::to_string(axis) + std::string(" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
-    Index64 tocount = count64();
-    std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
-    std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+    int64_t len = (int64_t)shape_[0 + axis];
+    Index64 tocount(len);
+    struct Error err = awkward_regulararray_count(
+      tocount.ptr().get(),
+      (int64_t)shape_[1 + axis],
+      len);
+    util::handle_error(err, classname(), identities_.get());
+    return tocount;
+  }
+
+  const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
+    return count(axis, nullptr);
+  }
+
+  const std::shared_ptr<Content> NumpyArray::count(int64_t axis, const NumpyArray* tocarry) const {
+    std::shared_ptr<Content> content;
+
 #ifdef _MSC_VER
     std::string format = "q";
 #else
     std::string format = "l";
 #endif
-    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+
+    Index64 tocount = count64(axis);
+    std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
+    std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+
+    if(nullptr != tocarry) {
+      int64_t len = tocarry->length()*tocount.length();
+
+      Index64 tocarrycount(len);
+      shape.insert(end(shape), begin(tocarry->shape_), end(tocarry->shape_));
+      strides.insert(end(strides), begin(tocarry->strides_), end(tocarry->strides_));
+
+      struct Error err = awkward_regulararray_count(
+        tocarrycount.ptr().get(),
+        (int64_t)reinterpret_cast<int64_t*>(tocarry->byteptr())[0],
+        len);
+      util::handle_error(err, classname(), identities_.get());
+
+      content = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocarrycount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+    }
+    else {
+      content = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+    }
+
+    if (axis == 0) {
+      return content;
+    }
+    else {
+      return count(axis - 1, std::unique_ptr<NumpyArray>(new NumpyArray(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format)).get());
+    }
   }
 
   const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
