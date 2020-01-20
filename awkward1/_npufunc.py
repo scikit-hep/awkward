@@ -60,9 +60,20 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
         elif any(isinstance(x, listtypes) for x in inputs):
             if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
-                first = firstof(inputs, listtypes)
-                raise Exception
-
+                size = max([x.size for x in inputs if isinstance(x, awkward1.layout.RegularArray)])
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, awkward1.layout.RegularArray):
+                        if x.size == 1:
+                            index = awkward1.layout.Index64(numpy.repeat(numpy.arange(len(x), dtype=numpy.int64), size))
+                            nextinputs.append(awkward1.layout.IndexedArray64(index, x.content).project())
+                        elif x.size == size:
+                            nextinputs.append(x.content)
+                        else:
+                            raise ValueError("cannot broadcast RegularArray of size {0} with RegularArray of size {1}".format(x.size, size))
+                    else:
+                        nextinputs.append(x)
+                return awkward1.layout.RegularArray(level(nextinputs), size)
 
             else:
                 first = firstof(inputs, listtypes)

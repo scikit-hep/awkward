@@ -44,3 +44,10 @@ def test_regularize_shape():
     array = awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(2, 3, 5))
     assert isinstance(array.regularize_shape(), awkward1.layout.RegularArray)
     assert awkward1.tolist(array.regularize_shape()) == awkward1.tolist(array)
+
+def test_regulararray():
+    array = awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5))
+    assert awkward1.tolist(array + array) == (numpy.arange(2*3*5).reshape(2, 3, 5) * 2).tolist()
+    assert awkward1.tolist(array * 2) == (numpy.arange(2*3*5).reshape(2, 3, 5) * 2).tolist()
+    array2 = awkward1.Array(numpy.arange(2*1*5).reshape(2, 1, 5))
+    assert awkward1.tolist(array + array2) == awkward1.tolist(numpy.arange(2*3*5).reshape(2, 3, 5) + numpy.arange(2*1*5).reshape(2, 1, 5))
