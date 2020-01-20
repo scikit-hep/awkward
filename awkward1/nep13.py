@@ -47,9 +47,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 return x
         assert False
 
-    def allof(inputs, types):
-        return [x for x in inputs if isinstance(x, types)]
-
     def level(inputs):
         if any(isinstance(x, unknowntypes) for x in inputs):
             return level([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
@@ -70,7 +67,32 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
             return awkward1.layout.ListOffsetArray64(offsets, level([x if not isinstance(x, listtypes) else x.content for x in inputs]))
 
         elif any(isinstance(x, optiontypes) for x in inputs):
-            raise NotImplementedError("array_ufunc of IndexedOptionArray*")
+            mask = None
+            for x in inputs:
+                if isinstance(x, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)):
+                    m = numpy.asarray(x.index) < 0
+                    if mask is None:
+                        mask = m
+                    else:
+                        numpy.bitwise_or(mask, m, out=mask)
+            assert mask is not None
+            nextmask = awkward1.layout.Index8(mask.view(numpy.int8))
+            index = numpy.full(len(mask), -1, dtype=numpy.int64)
+            index[~mask] = numpy.arange(len(mask) - numpy.count_nonzero(mask), dtype=numpy.int64)
+            index = awkward1.layout.Index64(index)
+            if any(not isinstance(x, optiontypes) for x in inputs):
+                nextindex = numpy.arange(len(mask), dtype=numpy.int64)
+                nextindex[mask] = -1
+                nextindex = awkward1.layout.Index64(nextindex)
+
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, optiontypes):
+                    nextinputs.append(x.project(nextmask))
+                else:
+                    nextinputs.append(awkward1.layout.IndexedOptionArray64(nextindex, x).project(nextmask))
+
+            return awkward1.layout.IndexedOptionArray64(index, level(nextinputs))
 
         elif any(isinstance(x, recordtypes) for x in inputs):
             raise NotImplementedError("array_ufunc of RecordArray")
