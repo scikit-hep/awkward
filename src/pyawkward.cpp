@@ -1501,6 +1501,14 @@ py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T
       .def_property_readonly("index", &ak::IndexedArrayOf<T, ISOPTION>::index)
       .def_property_readonly("content", &ak::IndexedArrayOf<T, ISOPTION>::content)
       .def_property_readonly("isoption", &ak::IndexedArrayOf<T, ISOPTION>::isoption)
+      .def("project", [](ak::IndexedArrayOf<T, ISOPTION>& self, py::object mask) {
+        if (mask.is(py::none())) {
+          return box(self.project());
+        }
+        else {
+          return box(self.project(mask.cast<ak::Index8>()));
+        }
+      }, py::arg("mask") = py::none())
   );
 }
 

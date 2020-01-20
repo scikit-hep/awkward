@@ -100,6 +100,8 @@ namespace awkward {
     ERROR awkward_indexedarray_getitem_nextcarry_64(int64_t* tocarry, const T* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
     template <typename T>
     ERROR awkward_indexedarray_getitem_carry_64(T* toindex, const T* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry);
+    template <typename T>
+    ERROR awkward_indexedarray_andmask_8(T* toindex, const int8_t* mask, int64_t maskoffset, const T* fromindex, int64_t indexoffset, int64_t length);
     template <typename T, typename I>
     ERROR awkward_unionarray_regular_index(I* toindex, const T* fromtags, int64_t tagsoffset, int64_t length);
     template <typename T, typename I>

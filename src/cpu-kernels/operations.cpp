@@ -134,6 +134,32 @@ ERROR awkward_indexedarray_flatten_nextcarry(T* tocarry, const C* fromindex, int
 ERROR awkward_indexedarray32_flatten_nextcarry_64(int64_t* tocarry, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
   return awkward_indexedarray_flatten_nextcarry<int32_t, int64_t>(tocarry, fromindex, indexoffset, lenindex, lencontent);
 }
+ERROR awkward_indexedarrayU32_flatten_nextcarry_64(int64_t* tocarry, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  return awkward_indexedarray_flatten_nextcarry<uint32_t, int64_t>(tocarry, fromindex, indexoffset, lenindex, lencontent);
+}
 ERROR awkward_indexedarray64_flatten_nextcarry_64(int64_t* tocarry, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
   return awkward_indexedarray_flatten_nextcarry<int64_t, int64_t>(tocarry, fromindex, indexoffset, lenindex, lencontent);
+}
+
+template <typename C, typename M>
+ERROR awkward_indexedarray_andmask(C* toindex, const M* mask, int64_t maskoffset, const C* fromindex, int64_t indexoffset, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    M m = mask[maskoffset + i];
+    if (m) {
+      toindex[i] = -1;
+    }
+    else {
+      toindex[i] = fromindex[indexoffset + i];
+    }
+  }
+  return success();
+}
+ERROR awkward_indexedarray32_andmask_8(int32_t* toindex, const int8_t* mask, int64_t maskoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length) {
+  return awkward_indexedarray_andmask<int32_t, int8_t>(toindex, mask, maskoffset, fromindex, indexoffset, length);
+}
+ERROR awkward_indexedarrayU32_andmask_8(uint32_t* toindex, const int8_t* mask, int64_t maskoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length) {
+  return awkward_indexedarray_andmask<uint32_t, int8_t>(toindex, mask, maskoffset, fromindex, indexoffset, length);
+}
+ERROR awkward_indexedarray64_andmask_8(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length) {
+  return awkward_indexedarray_andmask<int64_t, int8_t>(toindex, mask, maskoffset, fromindex, indexoffset, length);
 }

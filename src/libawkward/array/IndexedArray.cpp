@@ -36,6 +36,62 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::project() const {
+    if (ISOPTION) {
+      int64_t numnull;
+      struct Error err1 = util::awkward_indexedarray_numnull<T>(
+        &numnull,
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length());
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 nextcarry(length() - numnull);
+      struct Error err2 = util::awkward_indexedarray_flatten_nextcarry_64<T>(
+        nextcarry.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length(),
+        content_.get()->length());
+      util::handle_error(err2, classname(), identities_.get());
+
+      return content_.get()->carry(nextcarry);
+    }
+    else {
+      Index64 nextcarry(length());
+      struct Error err = util::awkward_indexedarray_getitem_nextcarry_64<T>(
+        nextcarry.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length(),
+        content_.get()->length());
+      util::handle_error(err, classname(), identities_.get());
+
+      return content_.get()->carry(nextcarry);
+    }
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::project(const Index8& mask) const {
+    if (index_.length() != mask.length()) {
+      throw std::invalid_argument(std::string("mask length (") + std::to_string(mask.length()) + std::string(") is not equal to ") + classname() + std::string(" length (") + std::to_string(index_.length()) + std::string(")"));
+    }
+
+    IndexOf<T> nextindex(index_.length());
+    struct Error err = util::awkward_indexedarray_andmask_8<T>(
+      nextindex.ptr().get(),
+      mask.ptr().get(),
+      mask.offset(),
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length());
+    util::handle_error(err, classname(), identities_.get());
+
+    IndexedArrayOf<T, true> next(identities_, parameters_, nextindex, content_);
+    return next.project();
+  }
+
+  template <typename T, bool ISOPTION>
   const std::string IndexedArrayOf<T, ISOPTION>::classname() const {
     if (ISOPTION) {
       if (std::is_same<T, int32_t>::value) {

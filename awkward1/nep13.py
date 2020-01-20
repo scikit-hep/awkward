@@ -47,12 +47,15 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 return x
         assert False
 
+    def allof(inputs, types):
+        return [x for x in inputs if isinstance(x, types)]
+
     def level(inputs):
         if any(isinstance(x, unknowntypes) for x in inputs):
             return level([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
 
         elif any(isinstance(x, indexedtypes) for x in inputs):
-            raise NotImplementedError("array_ufunc of IndexedArray*")
+            return level([x if not isinstance(x, indexedtypes) else x.project() for x in inputs])
 
         elif any(isinstance(x, uniontypes) for x in inputs):
             raise NotImplementedError("array_ufunc of UnionArray")
@@ -62,7 +65,7 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
         elif any(isinstance(x, listtypes) for x in inputs):
             first = firstof(inputs, listtypes)
-            # FIXME: need a List*Array::compactoffsets() and a *Array::toListOffsetArray(offsets)
+            # FIXME: need a List*Array::compactoffsets() and a *Array::broadcast_to_offsets(offsets)
             offsets = first.offsets
             return awkward1.layout.ListOffsetArray64(offsets, level([x if not isinstance(x, listtypes) else x.content for x in inputs]))
 
