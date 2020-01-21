@@ -1321,6 +1321,444 @@
         </inbodydescription>
         <location file="src/cpu-kernels/identities.cpp" line="174" column="7" bodyfile="src/cpu-kernels/identities.cpp" bodystart="174" bodyend="176"/>
       </memberdef>
+      <memberdef kind="function" id="identities_8cpp_1af900d157ddc50306e82c7a967fc51a5f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename ID</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename I</type>
+          </param>
+        </templateparamlist>
+        <type>ERROR</type>
+        <definition>ERROR awkward_identities_from_unionarray</definition>
+        <argsstring>(bool *uniquecontents, ID *toptr, const ID *fromptr, const T *fromtags, const I *fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which)</argsstring>
+        <name>awkward_identities_from_unionarray</name>
+        <param>
+          <type>bool *</type>
+          <declname>uniquecontents</declname>
+        </param>
+        <param>
+          <type>ID *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const ID *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>fromtags</declname>
+        </param>
+        <param>
+          <type>const I *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tagsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>which</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identities.cpp" line="179" column="7" bodyfile="src/cpu-kernels/identities.cpp" bodystart="179" bodyend="205"/>
+      </memberdef>
+      <memberdef kind="function" id="identities_8cpp_1aab272991eafc8822b3a2d25e57232e05" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identities32_from_unionarray8_32</definition>
+        <argsstring>(bool *uniquecontents, int32_t *toptr, const int32_t *fromptr, const int8_t *fromtags, const int32_t *fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which)</argsstring>
+        <name>awkward_identities32_from_unionarray8_32</name>
+        <param>
+          <type>bool *</type>
+          <declname>uniquecontents</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>const int8_t *</type>
+          <declname>fromtags</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tagsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>which</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identities.cpp" line="206" column="7" bodyfile="src/cpu-kernels/identities.cpp" bodystart="206" bodyend="208"/>
+      </memberdef>
+      <memberdef kind="function" id="identities_8cpp_1a473c09178c414d952844d971b49fd07f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identities32_from_unionarray8_U32</definition>
+        <argsstring>(bool *uniquecontents, int32_t *toptr, const int32_t *fromptr, const int8_t *fromtags, const uint32_t *fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which)</argsstring>
+        <name>awkward_identities32_from_unionarray8_U32</name>
+        <param>
+          <type>bool *</type>
+          <declname>uniquecontents</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>const int8_t *</type>
+          <declname>fromtags</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tagsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>which</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identities.cpp" line="209" column="7" bodyfile="src/cpu-kernels/identities.cpp" bodystart="209" bodyend="211"/>
+      </memberdef>
+      <memberdef kind="function" id="identities_8cpp_1aaa4b6dc623cc19bc59d6d22341b493c1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identities32_from_unionarray8_64</definition>
+        <argsstring>(bool *uniquecontents, int32_t *toptr, const int32_t *fromptr, const int8_t *fromtags, const int64_t *fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which)</argsstring>
+        <name>awkward_identities32_from_unionarray8_64</name>
+        <param>
+          <type>bool *</type>
+          <declname>uniquecontents</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>const int8_t *</type>
+          <declname>fromtags</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tagsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>which</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identities.cpp" line="212" column="7" bodyfile="src/cpu-kernels/identities.cpp" bodystart="212" bodyend="214"/>
+      </memberdef>
+      <memberdef kind="function" id="identities_8cpp_1a6eac62916766f90de56b2e3b47a322cc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identities64_from_unionarray8_32</definition>
+        <argsstring>(bool *uniquecontents, int64_t *toptr, const int64_t *fromptr, const int8_t *fromtags, const int32_t *fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which)</argsstring>
+        <name>awkward_identities64_from_unionarray8_32</name>
+        <param>
+          <type>bool *</type>
+          <declname>uniquecontents</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>const int8_t *</type>
+          <declname>fromtags</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tagsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>which</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identities.cpp" line="215" column="7" bodyfile="src/cpu-kernels/identities.cpp" bodystart="215" bodyend="217"/>
+      </memberdef>
+      <memberdef kind="function" id="identities_8cpp_1aea925fc20b1b505ac890a915026de20b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identities64_from_unionarray8_U32</definition>
+        <argsstring>(bool *uniquecontents, int64_t *toptr, const int64_t *fromptr, const int8_t *fromtags, const uint32_t *fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which)</argsstring>
+        <name>awkward_identities64_from_unionarray8_U32</name>
+        <param>
+          <type>bool *</type>
+          <declname>uniquecontents</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>const int8_t *</type>
+          <declname>fromtags</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tagsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>which</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identities.cpp" line="218" column="7" bodyfile="src/cpu-kernels/identities.cpp" bodystart="218" bodyend="220"/>
+      </memberdef>
+      <memberdef kind="function" id="identities_8cpp_1a671f607c65705aca11451d8a81f9e2b5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_identities64_from_unionarray8_64</definition>
+        <argsstring>(bool *uniquecontents, int64_t *toptr, const int64_t *fromptr, const int8_t *fromtags, const int64_t *fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which)</argsstring>
+        <name>awkward_identities64_from_unionarray8_64</name>
+        <param>
+          <type>bool *</type>
+          <declname>uniquecontents</declname>
+        </param>
+        <param>
+          <type>int64_t *</type>
+          <declname>toptr</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromptr</declname>
+        </param>
+        <param>
+          <type>const int8_t *</type>
+          <declname>fromtags</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromptroffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tagsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>tolength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromlength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>fromwidth</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>which</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/identities.cpp" line="221" column="7" bodyfile="src/cpu-kernels/identities.cpp" bodystart="221" bodyend="223"/>
+      </memberdef>
       </sectiondef>
     <briefdescription>
     </briefdescription>
