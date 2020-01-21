@@ -239,6 +239,10 @@ namespace awkward {
     return content_.get()->keys();
   }
 
+  int64_t RegularArray::list_depth() const {
+    throw std::runtime_error("FIXME: RegularArray::list_depth() is not implemented");
+  }
+
   const Index64 RegularArray::count64() const {
     int64_t len = length();
     Index64 tocount(len);
@@ -266,14 +270,16 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::flatten(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: RegularArray::flatten(axis != 0)");
-    }
-    if (content_.get()->length() % size_ != 0) {
-      return content_.get()->getitem_range_nowrap(0, length()*size_);
+    if (axis == 0) {
+      if (content_.get()->length() % size_ != 0) {
+        return content_.get()->getitem_range_nowrap(0, length()*size_);
+      }
+      else {
+        return content_;
+      }
     }
     else {
-      return content_;
+      return std::make_shared<RegularArray>(identities_, parameters_, flatten(axis - 1), size_);
     }
   }
 

@@ -307,6 +307,11 @@ namespace awkward {
   }
 
   template <typename T>
+  int64_t ListOffsetArrayOf<T>::list_depth() const {
+    throw std::runtime_error("FIXME: ListOffsetArrayOf<T>::list_depth() is not implemented");
+  }
+
+  template <typename T>
   const Index64 ListOffsetArrayOf<T>::count64() const {
     IndexOf<T> starts = make_starts(offsets_);
     IndexOf<T> stops = make_stops(offsets_);
@@ -372,12 +377,17 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::flatten(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: ListOffsetArray::flatten(axis != 0)");
+    if (axis == 0) {
+      std::cout << "ListOffsetArrayOf<T>::flatten at axis 0!\n";
+      int64_t start = offsets_.getitem_at_nowrap(0);
+      int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
+      return content_.get()->getitem_range_nowrap(start, stop);
     }
-    int64_t start = offsets_.getitem_at_nowrap(0);
-    int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
-    return content_.get()->getitem_range_nowrap(start, stop);
+    else {
+      std::cout << "ListOffsetArrayOf<T>::flatten\n";
+      std::cout << tostring() << "\n";
+      return flatten(axis - 1);
+    }
   }
 
   template <typename T>

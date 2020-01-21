@@ -197,6 +197,10 @@ namespace awkward {
     return array_.keys();
   }
 
+  int64_t Record::list_depth() const {
+    throw std::runtime_error("FIXME: Record::list_depth() is not implemented");
+  }
+
   const Index64 Record::count64() const {
     throw std::invalid_argument("Record cannot be counted because it is not an array");
   }

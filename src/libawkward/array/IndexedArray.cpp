@@ -386,6 +386,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  int64_t IndexedArrayOf<T, ISOPTION>::list_depth() const {
+    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION>::list_depth() is not implemented");
+  }
+
+  template <typename T, bool ISOPTION>
   const Index64 IndexedArrayOf<T, ISOPTION>::count64() const {
     Index64 contentcount = content_.get()->count64();
     Index64 tocount(index_.length());

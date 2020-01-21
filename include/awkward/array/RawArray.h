@@ -376,6 +376,10 @@ namespace awkward {
       throw std::invalid_argument("array contains no Records");
     }
 
+    int64_t list_depth() const override {
+      throw std::runtime_error("FIXME: RawArrayOf<T>::list_depth() is not implemented");
+    }
+
     // operations
 
     const Index64 count64() const override {

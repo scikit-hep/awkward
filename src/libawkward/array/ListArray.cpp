@@ -334,6 +334,11 @@ namespace awkward {
   }
 
   template <typename T>
+  int64_t ListArrayOf<T>::list_depth() const {
+    throw std::runtime_error("FIXME: ListArrayOf<T>::list_depth() is not implemented");
+  }
+
+  template <typename T>
   const Index64 ListArrayOf<T>::count64() const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {

@@ -351,6 +351,10 @@ namespace awkward {
     return util::keys(recordlookup_, numfields());
   }
 
+  int64_t RecordArray::list_depth() const {
+    throw std::runtime_error("FIXME: RecordArray::list_depth() is not implemented");
+  }
+
   const Index64 RecordArray::count64() const {
     throw std::invalid_argument("RecordArray cannot be counted, because records are not lists");
   }
@@ -367,9 +371,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: RecordArray::flatten(axis != 0)");
-    }
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->flatten(axis));

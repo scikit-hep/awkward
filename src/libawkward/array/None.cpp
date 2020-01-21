@@ -113,6 +113,10 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::keys");
   }
 
+  int64_t None::list_depth() const {
+    throw std::runtime_error("FIXME: None::list_depth() is not implemented");
+  }
+
   const Index64 None::count64() const {
     throw std::runtime_error("undefined operation: None::count64");
   }

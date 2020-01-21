@@ -575,6 +575,10 @@ namespace awkward {
     throw std::invalid_argument("array contains no Records");
   }
 
+  int64_t NumpyArray::list_depth() const {
+    throw std::runtime_error("FIXME: NumpyArray::list_depth() is not implemented");
+  }
+
   const Index64 NumpyArray::count64() const {
     if (shape_.size() <= 1) {
       // FIXME: the cut-off for countability depends on axis
