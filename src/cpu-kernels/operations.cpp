@@ -224,8 +224,8 @@ ERROR awkward_listarray_broadcast_tooffsets(T* tocarry, const T* fromoffsets, in
   for (int64_t i = 0;  i < offsetslength;  i++) {
     int64_t start = (int64_t)fromstarts[startsoffset + i];
     int64_t stop = (int64_t)fromstops[stopsoffset + i];
-    if (stop >= lencontent) {
-      return failure("stops[i] >= len(content)", i, stop);
+    if (start != stop  &&  stop > lencontent) {
+      return failure("stops[i] > len(content)", i, stop);
     }
     int64_t count = (int64_t)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
     if (stop - start != count) {
