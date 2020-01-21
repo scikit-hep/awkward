@@ -235,6 +235,7 @@ namespace awkward {
     if (!parameters_.empty()) {
       out << parameters_tostring(indent + std::string("    "), "", "\n");
     }
+    // FIXME: you forgot to write out the tags and index!
     for (size_t i = 0;  i < contents_.size();  i++) {
       out << indent << "    <content index=\"" << i << "\">\n";
       out << contents_[i].get()->tostring_part(indent + std::string("        "), "", "\n");
