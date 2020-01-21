@@ -90,13 +90,16 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
             else:
                 first = firstof(inputs, listtypes)
                 offsets = first.compact_offsets64()
-
-                print(offsets)
-                raise Exception
-
                 nextinputs = []
                 for x in inputs:
-                    nextinputs.append(x.broadcast_tooffsets64(offsets))
+                    if isinstance(x, listtypes):
+                        nextinputs.append(x.broadcast_tooffsets64(offsets))
+                    else:
+                        raise ValueError("cannot broadcast lists with non-lists (try introducing a np.newaxis in the non-list)")
+
+                print("nextinputs[0]:\n", nextinputs[0])
+                print("nextinputs[1]:\n", nextinputs[1])
+
                 return awkward1.layout.ListOffsetArray64(offsets, level(nextinputs))
 
         elif any(isinstance(x, optiontypes) for x in inputs):

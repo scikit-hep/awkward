@@ -39,6 +39,10 @@ namespace awkward {
     return out;
   }
 
+  const std::shared_ptr<Content> RegularArray::broadcast_tooffsets64(const Index64& offsets) const {
+    throw std::runtime_error("FIXME: RegularArray::broadcast_tooffsets64");
+  }
+
   const std::string RegularArray::classname() const {
     return "RegularArray";
   }

@@ -55,6 +55,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::broadcast_tooffsets64(const Index64& offsets) const {
+    throw std::runtime_error("FIXME: ListArrayOf<T>::broadcast_tooffsets64");
+  }
+
+  template <typename T>
   const std::string ListArrayOf<T>::classname() const {
     if (std::is_same<T, int32_t>::value) {
       return "ListArray32";
