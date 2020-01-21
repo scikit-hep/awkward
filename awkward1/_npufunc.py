@@ -1,6 +1,10 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 import sys
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 import numpy
 
@@ -33,8 +37,10 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 return awkward1.highlevel.Array(x).layout
             else:
                 raise ValueError("numpy.ndarray with {0} cannot be used in {1}".format(repr(x.dtype), ufunc))
-        else:
+        elif isinstance(x, Iterable):
             return unwrap(numpy.array(x))
+        else:
+            return x
 
     unknowntypes = (awkward1.layout.EmptyArray,)
 
@@ -87,20 +93,19 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                         nextinputs.append(x)
                 return awkward1.layout.RegularArray(level(nextinputs), size)
 
-            else:
+            elif all(isinstance(x, listtypes) or not isinstance(x, awkward1.layout.Content) for x in inputs):
                 first = firstof(inputs, listtypes)
                 offsets = first.compact_offsets64()
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, listtypes):
-                        nextinputs.append(x.broadcast_tooffsets64(offsets))
+                        nextinputs.append(x.broadcast_tooffsets64(offsets).content)
                     else:
-                        raise ValueError("cannot broadcast lists with non-lists (try introducing a np.newaxis in the non-list)")
-
-                print("nextinputs[0]:\n", nextinputs[0])
-                print("nextinputs[1]:\n", nextinputs[1])
-
+                        nextinputs.append(x)
                 return awkward1.layout.ListOffsetArray64(offsets, level(nextinputs))
+
+            else:
+                raise ValueError("cannot broadcast lists with non-lists (try introducing a np.newaxis in the non-list)")
 
         elif any(isinstance(x, optiontypes) for x in inputs):
             mask = None

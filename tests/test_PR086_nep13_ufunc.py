@@ -57,6 +57,9 @@ def test_listarray():
     starts = awkward1.layout.Index64(numpy.array([3, 0, 999, 2, 6, 10], dtype=numpy.int64))
     stops  = awkward1.layout.Index64(numpy.array([7, 3, 999, 4, 6, 12], dtype=numpy.int64))
     one = awkward1.Array(awkward1.layout.ListArray64(starts, stops, content))
+    two = awkward1.Array([[100, 100, 100, 100], [200, 200, 200], [], [300, 300], [], [400, 400]])
     assert awkward1.tolist(one) == [[3, 4, 5, 6], [0, 1, 2], [], [2, 3], [], [10, 11]]
-    print(one.layout)
-    one + 100
+    assert awkward1.tolist(one + 100) == [[103, 104, 105, 106], [100, 101, 102], [], [102, 103], [], [110, 111]]
+    assert awkward1.tolist(one + two) == [[103, 104, 105, 106], [200, 201, 202], [], [302, 303], [], [410, 411]]
+    # print(one + numpy.array([100, 200, 300, 400, 500, 600])[:, numpy.newaxis])
+    # raise Exception
