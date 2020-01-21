@@ -217,3 +217,47 @@ ERROR awkward_listoffsetarrayU32_compact_offsets64(int64_t* tooffsets, const uin
 ERROR awkward_listoffsetarray64_compact_offsets64(int64_t* tooffsets, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t length) {
   return awkward_listoffsetarray_compact_offsets<int64_t, int64_t>(tooffsets, fromoffsets, offsetsoffset, length);
 }
+
+template <typename C, typename T>
+ERROR awkward_listarray_broadcast_tooffsets(T* tocarry, const T* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const C* fromstarts, int64_t startsoffset, const C* fromstops, int64_t stopsoffset, int64_t lencontent) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < offsetslength;  i++) {
+    int64_t start = (int64_t)fromstarts[startsoffset + i];
+    int64_t stop = (int64_t)fromstops[stopsoffset + i];
+    if (stop >= lencontent) {
+      return failure("stops[i] >= len(content)", i, stop);
+    }
+    int64_t count = (int64_t)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
+    if (stop - start != count) {
+      return failure("cannot broadcast nested list", i, kSliceNone);
+    }
+    for (int64_t j = start;  j < stop;  j++) {
+      tocarry[k] = (T)j;
+      k++;
+    }
+  }
+  return success();
+}
+ERROR awkward_listarray32_broadcast_tooffsets64(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const int32_t* fromstarts, int64_t startsoffset, const int32_t* fromstops, int64_t stopsoffset, int64_t lencontent) {
+  return awkward_listarray_broadcast_tooffsets<int32_t, int64_t>(tocarry, fromoffsets, offsetsoffset, offsetslength, fromstarts, startsoffset, fromstops, stopsoffset, lencontent);
+}
+ERROR awkward_listarrayU32_broadcast_tooffsets64(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const uint32_t* fromstarts, int64_t startsoffset, const uint32_t* fromstops, int64_t stopsoffset, int64_t lencontent) {
+  return awkward_listarray_broadcast_tooffsets<uint32_t, int64_t>(tocarry, fromoffsets, offsetsoffset, offsetslength, fromstarts, startsoffset, fromstops, stopsoffset, lencontent);
+}
+ERROR awkward_listarray64_broadcast_tooffsets64(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const int64_t* fromstarts, int64_t startsoffset, const int64_t* fromstops, int64_t stopsoffset, int64_t lencontent) {
+  return awkward_listarray_broadcast_tooffsets<int64_t, int64_t>(tocarry, fromoffsets, offsetsoffset, offsetslength, fromstarts, startsoffset, fromstops, stopsoffset, lencontent);
+}
+
+template <typename T>
+ERROR awkward_regulararray_broadcast_tooffsets(const T* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, int64_t size) {
+  for (int64_t i = 0;  i < offsetslength;  i++) {
+    int64_t count = (int64_t)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
+    if (size != count) {
+      return failure("cannot broadcast nested list", i, kSliceNone);
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_broadcast_tooffsets64(const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, int64_t size) {
+  return awkward_regulararray_broadcast_tooffsets<int64_t>(fromoffsets, offsetsoffset, offsetslength, size);
+}

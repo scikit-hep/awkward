@@ -11,6 +11,7 @@
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/ListOffsetArray.h"
 
 #include "awkward/array/RegularArray.h"
 
@@ -40,7 +41,26 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::broadcast_tooffsets64(const Index64& offsets) const {
-    throw std::runtime_error("FIXME: RegularArray::broadcast_tooffsets64");
+    if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
+      throw std::invalid_argument("broadcast_tooffsets64 can only be used with offsets that start at 0");
+    }
+    int64_t len = length();
+    if (offsets.length() - 1 > len) {
+      throw std::invalid_argument(std::string("cannot broadcast RegularArray of length ") + std::to_string(len) + (" to length ") + std::to_string(offsets.length() - 1));
+    }
+
+    struct Error err = awkward_regulararray_broadcast_tooffsets64(
+      offsets.ptr().get(),
+      offsets.offset(),
+      offsets.length(),
+      size_);
+    util::handle_error(err, classname(), identities_.get());
+
+    std::shared_ptr<Identities> identities;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_range_nowrap(0, offsets.length() - 1);
+    }
+    return std::make_shared<ListOffsetArray64>(identities, parameters_, offsets, content_);
   }
 
   const std::string RegularArray::classname() const {
