@@ -71,7 +71,7 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                     if length is None:
                         length = len(tagslist[-1])
                     elif length != len(tagslist[-1]):
-                        raise ValueError("cannot broadcast UnionArray of size {0} with UnionArray of size {1}".format(length, len(tagslist[-1])))
+                        raise ValueError("cannot broadcast UnionArray of length {0} with UnionArray of length {1}".format(length, len(tagslist[-1])))
 
             combos = numpy.stack(tagslist, axis=-1)
             combos = combos.view([(str(i), combos.dtype) for i in range(len(tagslist))]).reshape(length)
@@ -149,7 +149,7 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                         mask = m
                     else:
                         numpy.bitwise_or(mask, m, out=mask)
-            assert mask is not None
+
             nextmask = awkward1.layout.Index8(mask.view(numpy.int8))
             index = numpy.full(len(mask), -1, dtype=numpy.int64)
             index[~mask] = numpy.arange(len(mask) - numpy.count_nonzero(mask), dtype=numpy.int64)
@@ -169,7 +169,29 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
             return awkward1.layout.IndexedOptionArray64(index, level(nextinputs))
 
         elif any(isinstance(x, recordtypes) for x in inputs):
-            raise NotImplementedError("array_ufunc of RecordArray")
+            keys = None
+            length = None
+            istuple = True
+            for x in inputs:
+                if isinstance(x, recordtypes):
+                    if keys is None:
+                        keys = x.keys()
+                    elif set(keys) != set(x.keys()):
+                        raise ValueError("cannot broadcast records because keys don't match:\n    {0}\n    {1}".format(", ".join(sorted(keys)), ", ".join(sorted(x.keys()))))
+                    if length is None:
+                        length = len(x)
+                    elif length != len(x):
+                        raise ValueError("cannot broadcast RecordArray of length {0} with RecordArray of length {1}".format(length, len(x)))
+                    if not x.istuple:
+                        istuple = False
+
+            if len(keys) == 0:
+                return awkward1.layout.RecordArray(length, istuple)
+            else:
+                contents = []
+                for key in keys:
+                    contents.append(level([x if not isinstance(x, recordtypes) else x[key] for x in inputs]))
+                return awkward1.layout.RecordArray(contents, keys)
 
         else:
             result = getattr(ufunc, method)(*inputs, **kwargs)
