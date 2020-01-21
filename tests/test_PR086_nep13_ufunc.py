@@ -68,3 +68,20 @@ def test_listarray():
     assert awkward1.tolist(one + numpy.array([100, 200, 300, 400, 500, 600])[:, numpy.newaxis]) == [[103, 104, 105, 106], [200, 201, 202], [], [402, 403], [], [610, 611]]
     assert awkward1.tolist(numpy.array([100, 200, 300, 400, 500, 600])[:, numpy.newaxis] + one) == [[103, 104, 105, 106], [200, 201, 202], [], [402, 403], [], [610, 611]]
     assert awkward1.tolist(one + 100) == [[103, 104, 105, 106], [100, 101, 102], [], [102, 103], [], [110, 111]]
+
+def test_unionarray():
+    one0 = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3], dtype=numpy.float64))
+    one1 = awkward1.layout.NumpyArray(numpy.array([4, 5], dtype=numpy.int64))
+    onetags = awkward1.layout.Index8(numpy.array([0, 0, 0, 0, 1, 1], dtype=numpy.int8))
+    oneindex = awkward1.layout.Index64(numpy.array([0, 1, 2, 3, 0, 1], dtype=numpy.int64))
+    one = awkward1.Array(awkward1.layout.UnionArray8_64(onetags, oneindex, [one0, one1]))
+
+    two0 = awkward1.layout.NumpyArray(numpy.array([0, 100], dtype=numpy.int64))
+    two1 = awkward1.layout.NumpyArray(numpy.array([200.3, 300.3, 400.4, 500.5], dtype=numpy.float64))
+    twotags = awkward1.layout.Index8(numpy.array([0, 0, 1, 1, 1, 1], dtype=numpy.int8))
+    twoindex = awkward1.layout.Index64(numpy.array([0, 1, 0, 1, 2, 3], dtype=numpy.int64))
+    two = awkward1.Array(awkward1.layout.UnionArray8_64(twotags, twoindex, [two0, two1]))
+
+    assert awkward1.tolist(one) == [0.0, 1.1, 2.2, 3.3, 4, 5]
+    assert awkward1.tolist(two) == [0, 100, 200.3, 300.3, 400.4, 500.5]
+    assert awkward1.tolist(one + two) == [0.0, 101.1, 202.5, 303.6, 404.4, 505.5]

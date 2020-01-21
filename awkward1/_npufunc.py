@@ -14,10 +14,8 @@ import awkward1._util
 def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
     import awkward1.highlevel
 
-    if method != "__call__" or len(inputs) == 0:
+    if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
-    if "out" in kwargs:
-        raise NotImplementedError("in-place operations not supported")
 
     scalar = all(isinstance(x, (awkward1.highlevel.Record, awkward1.layout.Record)) for x in inputs)
 
@@ -65,7 +63,39 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
             return level([x if not isinstance(x, indexedtypes) else x.project() for x in inputs])
 
         elif any(isinstance(x, uniontypes) for x in inputs):
-            raise NotImplementedError("array_ufunc of UnionArray")
+            tagslist = []
+            length = None
+            for x in inputs:
+                if isinstance(x, uniontypes):
+                    tagslist.append(numpy.asarray(x.tags))
+                    if length is None:
+                        length = len(tagslist[-1])
+                    elif length != len(tagslist[-1]):
+                        raise ValueError("cannot broadcast UnionArray of size {0} with UnionArray of size {1}".format(length, len(tagslist[-1])))
+
+            combos = numpy.stack(tagslist, axis=-1)
+            combos = combos.view([(str(i), combos.dtype) for i in range(len(tagslist))]).reshape(length)
+
+            tags = numpy.empty(length, dtype=numpy.int8)
+            index = numpy.empty(length, dtype=numpy.int64)
+            contents = []
+            for tag, combo in enumerate(numpy.unique(combos)):
+                mask = (combos == combo)
+                tags[mask] = tag
+                index[mask] = numpy.arange(numpy.count_nonzero(mask))
+                nextinputs = []
+                for i, x in enumerate(inputs):
+                    if isinstance(x, uniontypes):
+                        nextinputs.append(x[mask].project(combo[str(i)]))
+                    elif isinstance(x, awkward1.layout.Content):
+                        nextinputs.append(x[mask])
+                    else:
+                        nextinputs.append(x)
+                contents.append(level(nextinputs))
+
+            tags = awkward1.layout.Index8(tags)
+            index = awkward1.layout.Index64(index)
+            return awkward1.layout.UnionArray8_64(tags, index, contents)
 
         elif any(isinstance(x, listtypes) for x in inputs):
             if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
