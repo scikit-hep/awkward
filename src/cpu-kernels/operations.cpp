@@ -222,12 +222,20 @@ template <typename C, typename T>
 ERROR awkward_listarray_broadcast_tooffsets(T* tocarry, const T* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const C* fromstarts, int64_t startsoffset, const C* fromstops, int64_t stopsoffset, int64_t lencontent) {
   int64_t k = 0;
   for (int64_t i = 0;  i < offsetslength;  i++) {
+    std::cout << "i " << i << std::endl;
+
     int64_t start = (int64_t)fromstarts[startsoffset + i];
     int64_t stop = (int64_t)fromstops[stopsoffset + i];
+
+    std::cout << "start " << start << " stop " << stop << " lencontent " << lencontent << std::endl;
+
     if (start != stop  &&  stop > lencontent) {
       return failure("stops[i] > len(content)", i, stop);
     }
     int64_t count = (int64_t)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
+
+    std::cout << "count " << count << " stop - start " << (stop - start) << std::endl;
+
     if (stop - start != count) {
       return failure("cannot broadcast nested list", i, kSliceNone);
     }
