@@ -54,12 +54,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
     recordtypes = (awkward1.layout.RecordArray,)
 
-    def firstof(inputs, types):
-        for x in inputs:
-            if isinstance(x, types):
-                return x
-        assert False
-
     def level(inputs):
         if any(isinstance(x, unknowntypes) for x in inputs):
             return level([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
@@ -94,7 +88,16 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 return awkward1.layout.RegularArray(level(nextinputs), size)
 
             elif all(isinstance(x, listtypes) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-                first = firstof(inputs, listtypes)
+                first = None
+                for x in inputs:
+                    if isinstance(x, listtypes) and not isinstance(x, awkward1.layout.RegularArray):
+                        first = x
+                        break
+                if first is None:
+                    for x in inputs:
+                        if isinstance(x, listtypes):
+                            first = x
+                            break
                 offsets = first.compact_offsets64()
                 nextinputs = []
                 for x in inputs:

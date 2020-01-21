@@ -51,6 +51,9 @@ def test_regulararray():
     assert awkward1.tolist(array * 2) == (numpy.arange(2*3*5).reshape(2, 3, 5) * 2).tolist()
     array2 = awkward1.Array(numpy.arange(2*1*5).reshape(2, 1, 5))
     assert awkward1.tolist(array + array2) == awkward1.tolist(numpy.arange(2*3*5).reshape(2, 3, 5) + numpy.arange(2*1*5).reshape(2, 1, 5))
+    array3 = awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5).tolist())
+    assert awkward1.tolist(array + array3) == awkward1.tolist(numpy.arange(2*3*5).reshape(2, 3, 5) + numpy.arange(2*3*5).reshape(2, 3, 5))
+    assert awkward1.tolist(array3 + array) == awkward1.tolist(numpy.arange(2*3*5).reshape(2, 3, 5) + numpy.arange(2*3*5).reshape(2, 3, 5))
 
 def test_listarray():
     content = awkward1.layout.NumpyArray(numpy.arange(12, dtype=numpy.int64))
@@ -61,5 +64,7 @@ def test_listarray():
     assert awkward1.tolist(one) == [[3, 4, 5, 6], [0, 1, 2], [], [2, 3], [], [10, 11]]
     assert awkward1.tolist(one + 100) == [[103, 104, 105, 106], [100, 101, 102], [], [102, 103], [], [110, 111]]
     assert awkward1.tolist(one + two) == [[103, 104, 105, 106], [200, 201, 202], [], [302, 303], [], [410, 411]]
-    # print(one + numpy.array([100, 200, 300, 400, 500, 600])[:, numpy.newaxis])
-    # raise Exception
+    assert awkward1.tolist(two + one) == [[103, 104, 105, 106], [200, 201, 202], [], [302, 303], [], [410, 411]]
+    assert awkward1.tolist(one + numpy.array([100, 200, 300, 400, 500, 600])[:, numpy.newaxis]) == [[103, 104, 105, 106], [200, 201, 202], [], [402, 403], [], [610, 611]]
+    assert awkward1.tolist(numpy.array([100, 200, 300, 400, 500, 600])[:, numpy.newaxis] + one) == [[103, 104, 105, 106], [200, 201, 202], [], [402, 403], [], [610, 611]]
+    assert awkward1.tolist(one + 100) == [[103, 104, 105, 106], [100, 101, 102], [], [102, 103], [], [110, 111]]

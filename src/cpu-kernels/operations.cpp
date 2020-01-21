@@ -168,7 +168,7 @@ template <typename T>
 ERROR awkward_regulararray_compact_offsets(T* tooffsets, int64_t length, int64_t size) {
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    tooffsets[i + 1] = tooffsets[i] + (i + 1)*size;
+    tooffsets[i + 1] = (i + 1)*size;
   }
   return success();
 }
@@ -228,12 +228,23 @@ ERROR awkward_listarray_broadcast_tooffsets(T* tocarry, const T* fromoffsets, in
       return failure("stops[i] > len(content)", i, stop);
     }
     int64_t count = (int64_t)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
-    if (stop - start != count) {
-      return failure("cannot broadcast nested list", i, kSliceNone);
+    if (count < 0) {
+      return failure("broadcast's offsets must be monotonically increasing", i, kSliceNone);
     }
-    for (int64_t j = start;  j < stop;  j++) {
-      tocarry[k] = (T)j;
-      k++;
+    if (stop - start == 1) {
+      for (int64_t j = 0;  j < count;  j++) {
+        tocarry[k] = (T)start;
+        k++;
+      }
+    }
+    else {
+      if (stop - start != count) {
+        return failure("cannot broadcast nested list", i, kSliceNone);
+      }
+      for (int64_t j = start;  j < stop;  j++) {
+        tocarry[k] = (T)j;
+        k++;
+      }
     }
   }
   return success();
@@ -250,8 +261,11 @@ ERROR awkward_listarray64_broadcast_tooffsets64(int64_t* tocarry, const int64_t*
 
 template <typename T>
 ERROR awkward_regulararray_broadcast_tooffsets(const T* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, int64_t size) {
-  for (int64_t i = 0;  i < offsetslength;  i++) {
+  for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     int64_t count = (int64_t)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
+    if (count < 0) {
+      return failure("broadcast's offsets must be monotonically increasing", i, kSliceNone);
+    }
     if (size != count) {
       return failure("cannot broadcast nested list", i, kSliceNone);
     }
@@ -260,4 +274,23 @@ ERROR awkward_regulararray_broadcast_tooffsets(const T* fromoffsets, int64_t off
 }
 ERROR awkward_regulararray_broadcast_tooffsets64(const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, int64_t size) {
   return awkward_regulararray_broadcast_tooffsets<int64_t>(fromoffsets, offsetsoffset, offsetslength, size);
+}
+
+template <typename T>
+ERROR awkward_regulararray_broadcast_tooffsets_size1(T* tocarry, const T* fromoffsets, int64_t offsetsoffset, int64_t offsetslength) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+    int64_t count = (int64_t)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
+    if (count < 0) {
+      return failure("broadcast's offsets must be monotonically increasing", i, kSliceNone);
+    }
+    for (int64_t j = 0;  j < count;  j++) {
+      tocarry[k] = (T)i;
+      k++;
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_broadcast_tooffsets64_size1(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength) {
+  return awkward_regulararray_broadcast_tooffsets_size1<int64_t>(tocarry, fromoffsets, offsetsoffset, offsetslength);
 }

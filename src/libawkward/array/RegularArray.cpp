@@ -49,18 +49,32 @@ namespace awkward {
       throw std::invalid_argument(std::string("cannot broadcast RegularArray of length ") + std::to_string(len) + (" to length ") + std::to_string(offsets.length() - 1));
     }
 
-    struct Error err = awkward_regulararray_broadcast_tooffsets64(
-      offsets.ptr().get(),
-      offsets.offset(),
-      offsets.length(),
-      size_);
-    util::handle_error(err, classname(), identities_.get());
-
     std::shared_ptr<Identities> identities;
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_range_nowrap(0, offsets.length() - 1);
     }
-    return std::make_shared<ListOffsetArray64>(identities, parameters_, offsets, content_);
+
+    if (size_ == 1) {
+      int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
+      Index64 nextcarry(carrylen);
+      struct Error err = awkward_regulararray_broadcast_tooffsets64_size1(
+        nextcarry.ptr().get(),
+        offsets.ptr().get(),
+        offsets.offset(),
+        offsets.length());
+      util::handle_error(err, classname(), identities_.get());
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+      return std::make_shared<ListOffsetArray64>(identities, parameters_, offsets, nextcontent);
+    }
+    else {
+      struct Error err = awkward_regulararray_broadcast_tooffsets64(
+        offsets.ptr().get(),
+        offsets.offset(),
+        offsets.length(),
+        size_);
+      util::handle_error(err, classname(), identities_.get());
+      return std::make_shared<ListOffsetArray64>(identities, parameters_, offsets, content_);
+    }
   }
 
   const std::string RegularArray::classname() const {
