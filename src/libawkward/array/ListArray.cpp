@@ -40,6 +40,53 @@ namespace awkward {
   }
 
   template <typename T>
+  Index64 ListArrayOf<T>::compact_offsets64() const {
+    int64_t len = starts_.length();
+    Index64 out(len + 1);
+    struct Error err = util::awkward_listarray_compact_offsets64<T>(
+      out.ptr().get(),
+      starts_.ptr().get(),
+      stops_.ptr().get(),
+      starts_.offset(),
+      stops_.offset(),
+      len);
+    util::handle_error(err, classname(), identities_.get());
+    return out;
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::broadcast_tooffsets64(const Index64& offsets) const {
+    if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
+      throw std::invalid_argument("broadcast_tooffsets64 can only be used with offsets that start at 0");
+    }
+    if (offsets.length() - 1 > starts_.length()) {
+      throw std::invalid_argument(std::string("cannot broadcast ListArray of length ") + std::to_string(starts_.length()) + (" to length ") + std::to_string(offsets.length() - 1));
+    }
+
+    int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
+    Index64 nextcarry(carrylen);
+    struct Error err = util::awkward_listarray_broadcast_tooffsets64<T>(
+      nextcarry.ptr().get(),
+      offsets.ptr().get(),
+      offsets.offset(),
+      offsets.length(),
+      starts_.ptr().get(),
+      starts_.offset(),
+      stops_.ptr().get(),
+      stops_.offset(),
+      content_.get()->length());
+    util::handle_error(err, classname(), identities_.get());
+
+    std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+
+    std::shared_ptr<Identities> identities;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_range_nowrap(0, offsets.length() - 1);
+    }
+    return std::make_shared<ListOffsetArray64>(identities, parameters_, offsets, nextcontent);
+  }
+
+  template <typename T>
   const std::string ListArrayOf<T>::classname() const {
     if (std::is_same<T, int32_t>::value) {
       return "ListArray32";

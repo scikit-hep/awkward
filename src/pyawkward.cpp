@@ -1285,6 +1285,7 @@ py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_Nu
       .def_property_readonly("iscontiguous", &ak::NumpyArray::iscontiguous)
       .def("contiguous", &ak::NumpyArray::contiguous)
       .def("become_contiguous", &ak::NumpyArray::become_contiguous)
+      .def("regularize_shape", &ak::NumpyArray::regularize_shape)
   );
 }
 
@@ -1300,6 +1301,8 @@ py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content>
       .def_property_readonly("starts", &ak::ListArrayOf<T>::starts)
       .def_property_readonly("stops", &ak::ListArrayOf<T>::stops)
       .def_property_readonly("content", &ak::ListArrayOf<T>::content)
+      .def("compact_offsets64", &ak::ListArrayOf<T>::compact_offsets64)
+      .def("broadcast_tooffsets64", &ak::ListArrayOf<T>::broadcast_tooffsets64)
   );
 }
 
@@ -1312,8 +1315,12 @@ py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, 
         return ak::ListOffsetArrayOf<T>(unbox_identities_none(identities), dict2parameters(parameters), offsets, std::shared_ptr<ak::Content>(unbox_content(content)));
       }), py::arg("offsets"), py::arg("content"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
+      .def_property_readonly("starts", &ak::ListOffsetArrayOf<T>::starts)
+      .def_property_readonly("stops", &ak::ListOffsetArrayOf<T>::stops)
       .def_property_readonly("offsets", &ak::ListOffsetArrayOf<T>::offsets)
       .def_property_readonly("content", &ak::ListOffsetArrayOf<T>::content)
+      .def("compact_offsets64", &ak::ListOffsetArrayOf<T>::compact_offsets64)
+      .def("broadcast_tooffsets64", &ak::ListOffsetArrayOf<T>::broadcast_tooffsets64)
   );
 }
 
@@ -1337,6 +1344,8 @@ py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> mak
 
       .def_property_readonly("size", &ak::RegularArray::size)
       .def_property_readonly("content", &ak::RegularArray::content)
+      .def("compact_offsets64", &ak::RegularArray::compact_offsets64)
+      .def("broadcast_tooffsets64", &ak::RegularArray::broadcast_tooffsets64)
   );
 }
 
@@ -1501,6 +1510,14 @@ py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T
       .def_property_readonly("index", &ak::IndexedArrayOf<T, ISOPTION>::index)
       .def_property_readonly("content", &ak::IndexedArrayOf<T, ISOPTION>::content)
       .def_property_readonly("isoption", &ak::IndexedArrayOf<T, ISOPTION>::isoption)
+      .def("project", [](ak::IndexedArrayOf<T, ISOPTION>& self, py::object mask) {
+        if (mask.is(py::none())) {
+          return box(self.project());
+        }
+        else {
+          return box(self.project(mask.cast<ak::Index8>()));
+        }
+      }, py::arg("mask") = py::none())
   );
 }
 

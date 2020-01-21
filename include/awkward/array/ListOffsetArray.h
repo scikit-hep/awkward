@@ -15,8 +15,12 @@ namespace awkward {
   class ListOffsetArrayOf: public Content {
   public:
     ListOffsetArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content);
+    const IndexOf<T> starts() const;
+    const IndexOf<T> stops() const;
     const IndexOf<T> offsets() const;
     const std::shared_ptr<Content> content() const;
+    Index64 compact_offsets64() const;
+    const std::shared_ptr<Content> broadcast_tooffsets64(const Index64& offsets) const;
 
     const std::string classname() const override;
     void setidentities() override;
