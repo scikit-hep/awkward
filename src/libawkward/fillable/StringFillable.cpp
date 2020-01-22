@@ -52,20 +52,20 @@ namespace awkward {
     string_parameters["__class__"] = std::string("\"string\"");
 
     if (encoding_ == nullptr) {
-      char_parameters["__str__"] = std::string("\"byte\"");
+      char_parameters["__typestr__"] = std::string("\"byte\"");
       char_parameters["encoding"] = std::string("null");
-      string_parameters["__str__"] = std::string("\"bytes\"");
+      string_parameters["__typestr__"] = std::string("\"bytes\"");
     }
     else {
       std::string quoted = util::quote(encoding_, true);
       std::string slashquoted = std::string("\\\"") + quoted.substr(1, quoted.length() - 2) + std::string("\\\"");
       if (std::string(encoding_) == std::string("utf-8")) {
-        char_parameters["__str__"] = std::string("\"utf8\"");
-      string_parameters["__str__"] = std::string("\"string\"");
+        char_parameters["__typestr__"] = std::string("\"utf8\"");
+      string_parameters["__typestr__"] = std::string("\"string\"");
       }
       else {
-        char_parameters["__str__"] = std::string("\"char[") + slashquoted + std::string("]\"");
-        string_parameters["__str__"] = std::string("\"string[") + slashquoted + std::string("]\"");
+        char_parameters["__typestr__"] = std::string("\"char[") + slashquoted + std::string("]\"");
+        string_parameters["__typestr__"] = std::string("\"string[") + slashquoted + std::string("]\"");
       }
       char_parameters["encoding"] = std::string(quoted);
     }

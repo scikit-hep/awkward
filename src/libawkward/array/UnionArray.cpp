@@ -235,6 +235,8 @@ namespace awkward {
     if (!parameters_.empty()) {
       out << parameters_tostring(indent + std::string("    "), "", "\n");
     }
+    out << tags_.tostring_part(indent + std::string("    "), "<tags>", "</tags>\n");
+    out << index_.tostring_part(indent + std::string("    "), "<index>", "</index>\n");
     for (size_t i = 0;  i < contents_.size();  i++) {
       out << indent << "    <content index=\"" << i << "\">\n";
       out << contents_[i].get()->tostring_part(indent + std::string("        "), "", "\n");

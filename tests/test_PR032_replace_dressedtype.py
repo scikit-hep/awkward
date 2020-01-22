@@ -41,7 +41,7 @@ def test_dress():
     ns = {"Dummy": Dummy}
 
     x = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    a = awkward1.Array(x, type=awkward1.layout.ArrayType(x.type, 5, {"__class__": "Dummy", "__str__": "D[5 * float64]"}), classes=ns)
+    a = awkward1.Array(x, type=awkward1.layout.ArrayType(x.type, 5, {"__class__": "Dummy", "__typestr__": "D[5 * float64]"}), classes=ns)
     assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
     x2 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5])).astype(awkward1.layout.PrimitiveType("float64", {"__class__": "Dummy"})))
@@ -52,7 +52,7 @@ def test_dress():
     assert repr(a2[2]) == "<Dummy [4.4, 5.5]>"
 
 def test_typestr():
-    t = awkward1.layout.PrimitiveType("float64", {"__str__": "something"})
+    t = awkward1.layout.PrimitiveType("float64", {"__typestr__": "something"})
     t2 = awkward1.layout.ListType(t)
 
     assert repr(t) == "something"

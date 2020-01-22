@@ -29,8 +29,8 @@ class CharBehavior(awkward1.highlevel.Array):
             yield x
 
 awkward1.classes["char"] = CharBehavior
-byte = awkward1.layout.PrimitiveType("uint8", {"__class__": "char", "__str__": "byte", "encoding": None})
-utf8 = awkward1.layout.PrimitiveType("uint8", {"__class__": "char", "__str__": "utf8", "encoding": "utf-8"})
+byte = awkward1.layout.PrimitiveType("uint8", {"__class__": "char", "__typestr__": "byte", "encoding": None})
+utf8 = awkward1.layout.PrimitiveType("uint8", {"__class__": "char", "__typestr__": "utf8", "encoding": "utf-8"})
 
 class StringBehavior(awkward1.highlevel.Array):
     def __iter__(self):
@@ -45,5 +45,5 @@ class StringBehavior(awkward1.highlevel.Array):
         raise NotImplementedError("return one boolean per string, not lists of booleans per character")
 
 awkward1.classes["string"] = StringBehavior
-bytestring = awkward1.layout.ListType(byte, {"__class__": "string", "__str__": "bytes"})
-string = awkward1.layout.ListType(utf8, {"__class__": "string", "__str__": "string"})
+bytestring = awkward1.layout.ListType(byte, {"__class__": "string", "__typestr__": "bytes"})
+string = awkward1.layout.ListType(utf8, {"__class__": "string", "__typestr__": "string"})
