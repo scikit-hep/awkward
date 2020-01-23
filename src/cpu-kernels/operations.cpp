@@ -231,20 +231,12 @@ ERROR awkward_listarray_broadcast_tooffsets(T* tocarry, const T* fromoffsets, in
     if (count < 0) {
       return failure("broadcast's offsets must be monotonically increasing", i, kSliceNone);
     }
-    if (stop - start == 1) {
-      for (int64_t j = 0;  j < count;  j++) {
-        tocarry[k] = (T)start;
-        k++;
-      }
+    if (stop - start != count) {
+      return failure("cannot broadcast nested list", i, kSliceNone);
     }
-    else {
-      if (stop - start != count) {
-        return failure("cannot broadcast nested list", i, kSliceNone);
-      }
-      for (int64_t j = start;  j < stop;  j++) {
-        tocarry[k] = (T)j;
-        k++;
-      }
+    for (int64_t j = start;  j < stop;  j++) {
+      tocarry[k] = (T)j;
+      k++;
     }
   }
   return success();
