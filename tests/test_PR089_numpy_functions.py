@@ -76,7 +76,15 @@ def test_implicit_broadcasting():
     assert awkward1.tolist(numpy.array([100, 200]) + lsarray) == awkward1.tolist(numpy.array([[[100]], [[200]]]) + nparray)
 
 def test_records_and_stuff():
-    pass
+    array = awkward1.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 100, "y": 10.0}])
+    record = awkward1._util.wrap(array.layout[-1], array._classes, array._functions)
+
+    # print(array)
+    # print(record)
+    #
+    #
+    #
+    # raise Exception
 
 def test_like_scalars_man():
     pass

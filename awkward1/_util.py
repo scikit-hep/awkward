@@ -62,7 +62,7 @@ def minimally_touching_string(limit_length, layout, classes, functions):
     import awkward1.layout
 
     if isinstance(layout, awkward1.layout.Record):
-        layout = layout.array
+        layout = layout.array[layout.at : layout.at + 1]
 
     if len(layout) == 0:
         return "[]"

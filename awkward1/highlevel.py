@@ -120,7 +120,7 @@ class Record(object):
         return awkward1._util.wrap(self.layout[where], self._classes, self._functions)
 
     def __str__(self, limit_value=85):
-        return awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
+        return awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._classes, self._functions)[1:-1]
 
     def __repr__(self, limit_value=40, limit_total=85):
         value = awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._classes, self._functions)[1:-1]
