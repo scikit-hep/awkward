@@ -55,18 +55,25 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 raise ValueError("cannot broadcast {0} of length {1} with {2} of length {3}".format(type(inputs[0]).__name__, length, type(x).__name__, len(x)))
 
     def apply(inputs):
-        # # handle implicit broadcasting
-        # if any(isinstance(x, listtypes) for x in inputs):
-        #     maxdepth = max(x.purelist_depth for x in inputs if isinstance(x, awkward1.layout.Content))
-        #     nextinputs = []
-        #     for x in inputs:
-        #         if x.purelist_depth < maxdepth:
-        #             # nextinputs.append(awkward1.layout.RegularArray(x, 1))
-        #             nextinputs.append(awkward1.layout.RegularArray(x, len(x)))
-        #         else:
-        #             nextinputs.append(x)
-        #     if any(x is not y for x, y in zip(inputs, nextinputs)):
-        #         return apply(nextinputs)
+        # print("inputs[1]", inputs[1], awkward1.tolist(inputs[1]), sep="\n", end="\n\n")
+
+        # handle implicit right-broadcasting (i.e. NumPy-like)
+        if any(isinstance(x, listtypes) for x in inputs):
+            maxdepth = max(x.purelist_depth for x in inputs if isinstance(x, awkward1.layout.Content))
+            if maxdepth > 0 and all(x.purelist_isregular for x in inputs if isinstance(x, awkward1.layout.Content)):
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, awkward1.layout.Content):
+                        while x.purelist_depth < maxdepth:
+                            x = awkward1.layout.RegularArray(x, 1)
+                    nextinputs.append(x)
+                if any(x is not y for x, y in zip(inputs, nextinputs)):
+                    return apply(nextinputs)
+            # elif maxdepth > 0:
+            #     print("inputs[0]", len(inputs[0]), inputs[0], awkward1.tolist(inputs[0]), sep="\n", end="\n\n")
+            #     print("inputs[1]", len(inputs[1]), inputs[1], awkward1.tolist(inputs[1]), sep="\n", end="\n\n")
+            #
+            #     raise Exception("HERE")
 
         # now all lengths must agree
         checklength([x for x in inputs if isinstance(x, awkward1.layout.Content)])
@@ -164,22 +171,26 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                         nextinputs.append(x)
                 return awkward1.layout.RegularArray(apply(nextinputs), maxsize)
 
-            elif all(isinstance(x, listtypes) or not isinstance(x, awkward1.layout.Content) for x in inputs):
+            elif True:   # all(isinstance(x, listtypes) or not isinstance(x, awkward1.layout.Content) for x in inputs):
                 first = None
                 for x in inputs:
                     if isinstance(x, listtypes) and not isinstance(x, awkward1.layout.RegularArray):
                         first = x
                         break
-                if first is None:
-                    for x in inputs:
-                        if isinstance(x, listtypes):
-                            first = x
-                            break
+                assert first is not None
+                # if first is None:
+                #     for x in inputs:
+                #         if isinstance(x, listtypes):
+                #             first = x
+                #             break
+
                 offsets = first.compact_offsets64()
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, listtypes):
                         nextinputs.append(x.broadcast_tooffsets64(offsets).content)
+                    elif isinstance(x, awkward1.layout.Content):
+                        nextinputs.append(awkward1.layout.RegularArray(x, 1))
                     else:
                         nextinputs.append(x)
                 return awkward1.layout.ListOffsetArray64(offsets, apply(nextinputs))
