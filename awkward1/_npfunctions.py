@@ -55,16 +55,10 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 raise ValueError("cannot broadcast {0} of length {1} with {2} of length {3}".format(type(inputs[0]).__name__, length, type(x).__name__, len(x)))
 
     def apply(inputs):
-        # print("--------------------------------------------")
-        # for i, x in enumerate(inputs):
-        #     if isinstance(x, (awkward1.layout.Content, awkward1.layout.Record)):
-        #         print("inputs[{0}]".format(i), x, awkward1.tolist(x), sep="\n")
-
         # handle implicit right-broadcasting (i.e. NumPy-like)
         if any(isinstance(x, listtypes) for x in inputs):
             maxdepth = max(x.purelist_depth for x in inputs if isinstance(x, awkward1.layout.Content))
             if maxdepth > 0 and all(x.purelist_isregular for x in inputs if isinstance(x, awkward1.layout.Content)):
-                # print("implicit right-broadcasting")
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, awkward1.layout.Content):
@@ -79,19 +73,15 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
         # the rest of this is one switch statement
         if any(isinstance(x, unknowntypes) for x in inputs):
-            # print("unknowntypes")
             return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
 
         elif any(isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1 for x in inputs):
-            # print("multidimensional NumPy")
             return apply([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.regularize_shape() for x in inputs])
 
         elif any(isinstance(x, indexedtypes) for x in inputs):
-            # print("indexedtypes")
             return apply([x if not isinstance(x, indexedtypes) else x.project() for x in inputs])
 
         elif any(isinstance(x, uniontypes) for x in inputs):
-            # print("uniontypes")
             tagslist = []
             length = None
             for x in inputs:
@@ -127,7 +117,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
             return awkward1.layout.UnionArray8_64(tags, index, contents)
 
         elif any(isinstance(x, optiontypes) for x in inputs):
-            # print("optiontypes")
             mask = None
             for x in inputs:
                 if isinstance(x, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)):
@@ -157,7 +146,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
         elif any(isinstance(x, listtypes) for x in inputs):
             if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
-                # print("listtypes all regular")
                 maxsize = max([x.size for x in inputs if isinstance(x, awkward1.layout.RegularArray)])
                 for x in inputs:
                     if isinstance(x, awkward1.layout.RegularArray):
@@ -177,7 +165,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 return awkward1.layout.RegularArray(apply(nextinputs), maxsize)
 
             else:
-                # print("listtypes some irregular")
                 for x in inputs:
                     if isinstance(x, listtypes) and not isinstance(x, awkward1.layout.RegularArray):
                         first = x
@@ -195,7 +182,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 return awkward1.layout.ListOffsetArray64(offsets, apply(nextinputs))
 
         elif any(isinstance(x, recordtypes) for x in inputs):
-            # print("recordtypes")
             keys = None
             length = None
             istuple = True
@@ -221,7 +207,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 return awkward1.layout.RecordArray(contents, keys)
 
         else:
-            # print("all NumPy")
             assert all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs)
             result = getattr(ufunc, method)(*inputs, **kwargs)
             return awkward1.layout.NumpyArray(result)
