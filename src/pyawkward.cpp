@@ -1229,6 +1229,7 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("keys", &T::keys)
           .def_property_readonly("purelist_isregular", &T::purelist_isregular)
           .def_property_readonly("purelist_depth", &T::purelist_depth)
+          .def("getitem_nothing", &T::getitem_nothing)
 
           // operations
           .def("count", [](T& self, int64_t axis) -> py::object {

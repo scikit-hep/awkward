@@ -47,21 +47,36 @@ def test_mixing_lists_and_none():
         for b in (b00, b01, b02, b10, b11, b12, b20, b21, b22):
             assert awkward1.tolist(a + b) == add(a, b)
 
-def test_right_broadcasting():
+def test_explicit_broadcasting():
     nparray = numpy.arange(2*3*5).reshape(2, 3, 5)
     lsarray = awkward1.Array(nparray.tolist())
     rgarray = awkward1.Array(nparray)
 
-    # print(awkward1.tolist(nparray + numpy.array([[[100]], [[200]]])))
-    # print(awkward1.tolist(nparray + numpy.array([100, 200])[:, numpy.newaxis, numpy.newaxis]))
-    # print(awkward1.tolist(lsarray + numpy.array([100, 200])))
+    assert awkward1.tolist(rgarray + numpy.array([[[100]], [[200]]])) == awkward1.tolist(nparray + numpy.array([[[100]], [[200]]]))
+    assert awkward1.tolist(lsarray + numpy.array([[[100]], [[200]]])) == awkward1.tolist(nparray + numpy.array([[[100]], [[200]]]))
 
-    # print(awkward1.tolist(nparray + numpy.array([[[100, 200, 300, 400, 500]]])))
-    # print(awkward1.tolist(nparray + numpy.array([100, 200, 300, 400, 500])[numpy.newaxis, numpy.newaxis, :]))
-    # print(awkward1.tolist(nparray + numpy.array([100, 200, 300, 400, 500])))
-    # print(awkward1.tolist(rgarray + numpy.array([[[100, 200, 300, 400, 500]]])))
+    assert awkward1.tolist(numpy.array([[[100]], [[200]]]) + rgarray) == awkward1.tolist(numpy.array([[[100]], [[200]]]) + nparray)
+    assert awkward1.tolist(numpy.array([[[100]], [[200]]]) + lsarray) == awkward1.tolist(numpy.array([[[100]], [[200]]]) + nparray)
 
+    assert awkward1.tolist(rgarray + numpy.array([[[100, 200, 300, 400, 500]]])) == awkward1.tolist(nparray + numpy.array([[[100, 200, 300, 400, 500]]]))
+    assert awkward1.tolist(lsarray + numpy.array([[[100, 200, 300, 400, 500]]])) == awkward1.tolist(nparray + numpy.array([[[100, 200, 300, 400, 500]]]))
+    assert awkward1.tolist(numpy.array([[[100, 200, 300, 400, 500]]]) + rgarray) == awkward1.tolist(numpy.array([[[100, 200, 300, 400, 500]]]) + nparray)
+    assert awkward1.tolist(numpy.array([[[100, 200, 300, 400, 500]]]) + lsarray) == awkward1.tolist(numpy.array([[[100, 200, 300, 400, 500]]]) + nparray)
 
-
-
-    # raise Exception
+# def test_implicit_broadcasting():
+#     # print(awkward1.tolist(nparray + numpy.array([[[100]], [[200]]])))
+#     # print(awkward1.tolist(nparray + numpy.array([100, 200])[:, numpy.newaxis, numpy.newaxis]))
+#     # print(awkward1.tolist(lsarray + numpy.array([100, 200])))
+#
+#     # print(awkward1.tolist(nparray + numpy.array([[[100, 200, 300, 400, 500]]])))
+#     # print(awkward1.tolist(nparray + numpy.array([100, 200, 300, 400, 500])[numpy.newaxis, numpy.newaxis, :]))
+#     # print(awkward1.tolist(nparray + numpy.array([100, 200, 300, 400, 500])))
+#     # print(awkward1.tolist(rgarray + numpy.array([[[100, 200, 300, 400, 500]]])))
+#
+#     raise Exception
+#
+# def test_records_and_stuff():
+#     pass
+#
+# def test_like_scalars_man():
+#     pass

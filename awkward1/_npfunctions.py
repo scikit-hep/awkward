@@ -17,8 +17,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
 
-    scalar = all(isinstance(x, (awkward1.highlevel.Record, awkward1.layout.Record)) for x in inputs)
-
     def unwrap(x):
         if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
             return x.layout
@@ -26,9 +24,7 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
             return x.snapshot().layout
         elif isinstance(x, awkward1.layout.FillableArray):
             return x.snapshot()
-        elif isinstance(x, awkward1.layout.Record):
-            return x.array
-        elif isinstance(x, awkward1.layout.Content):
+        elif isinstance(x, (awkward1.layout.Content, awkward1.layout.Record)):
             return x
         elif isinstance(x, numpy.ndarray):
             if issubclass(x.dtype.type, numpy.number):
@@ -168,7 +164,7 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                         nextinputs.append(x)
                 return awkward1.layout.RegularArray(apply(nextinputs), maxsize)
 
-            if all(isinstance(x, listtypes) or not isinstance(x, awkward1.layout.Content) for x in inputs):
+            elif all(isinstance(x, listtypes) or not isinstance(x, awkward1.layout.Content) for x in inputs):
                 first = None
                 for x in inputs:
                     if isinstance(x, listtypes) and not isinstance(x, awkward1.layout.RegularArray):
@@ -220,11 +216,21 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
             result = getattr(ufunc, method)(*inputs, **kwargs)
             return awkward1.layout.NumpyArray(result)
 
-    out = awkward1._util.wrap(apply([unwrap(x) for x in inputs]), classes, functions)
-    if scalar:
-        return out[0]
-    else:
-        return out
+    def pack(x):
+        if isinstance(x, awkward1.layout.Record):
+            return x.array[x.at : x.at + 1]
+        elif isinstance(x, awkward1.layout.Content):
+            return awkward1.layout.RegularArray(x, len(x))
+        else:
+            return x
+
+    def unpack(x):
+        if len(x) == 0:
+            return x.getitem_nothing()
+        else:
+            return x[0]
+
+    return awkward1._util.wrap(unpack(apply([pack(unwrap(x)) for x in inputs])), classes, functions)
 
 try:
     NDArrayOperatorsMixin = numpy.lib.mixins.NDArrayOperatorsMixin
