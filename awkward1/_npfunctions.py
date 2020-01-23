@@ -52,15 +52,15 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
     recordtypes = (awkward1.layout.RecordArray,)
 
-    def level(inputs):
+    def apply(inputs):
         if any(isinstance(x, unknowntypes) for x in inputs):
-            return level([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
+            return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
 
         elif any(isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1 for x in inputs):
-            return level([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.regularize_shape() for x in inputs])
+            return apply([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.regularize_shape() for x in inputs])
 
         elif any(isinstance(x, indexedtypes) for x in inputs):
-            return level([x if not isinstance(x, indexedtypes) else x.project() for x in inputs])
+            return apply([x if not isinstance(x, indexedtypes) else x.project() for x in inputs])
 
         elif any(isinstance(x, uniontypes) for x in inputs):
             tagslist = []
@@ -91,54 +91,11 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                         nextinputs.append(x[mask])
                     else:
                         nextinputs.append(x)
-                contents.append(level(nextinputs))
+                contents.append(apply(nextinputs))
 
             tags = awkward1.layout.Index8(tags)
             index = awkward1.layout.Index64(index)
             return awkward1.layout.UnionArray8_64(tags, index, contents)
-
-        elif any(isinstance(x, listtypes) for x in inputs):
-            if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
-                size = max([x.size for x in inputs if isinstance(x, awkward1.layout.RegularArray)])
-                for x in inputs:
-                    if isinstance(x, awkward1.layout.RegularArray):
-                        if size > 1 and x.size == 1:
-                            tmpindex = awkward1.layout.Index64(numpy.repeat(numpy.arange(len(x), dtype=numpy.int64), size))
-                nextinputs = []
-                for x in inputs:
-                    if isinstance(x, awkward1.layout.RegularArray):
-                        if size > 1 and x.size == 1:
-                            nextinputs.append(awkward1.layout.IndexedArray64(tmpindex, x.content).project())
-                        elif x.size == size:
-                            nextinputs.append(x.content)
-                        else:
-                            raise ValueError("cannot broadcast RegularArray of size {0} with RegularArray of size {1}".format(x.size, size))
-                    else:
-                        nextinputs.append(x)
-                return awkward1.layout.RegularArray(level(nextinputs), size)
-
-            elif all(isinstance(x, listtypes) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-                first = None
-                for x in inputs:
-                    if isinstance(x, listtypes) and not isinstance(x, awkward1.layout.RegularArray):
-                        first = x
-                        break
-                if first is None:
-                    for x in inputs:
-                        if isinstance(x, listtypes):
-                            first = x
-                            break
-                offsets = first.compact_offsets64()
-                nextinputs = []
-                for x in inputs:
-                    if isinstance(x, listtypes):
-                        nextinputs.append(x.broadcast_tooffsets64(offsets).content)
-                    else:
-                        nextinputs.append(x)
-                return awkward1.layout.ListOffsetArray64(offsets, level(nextinputs))
-
-            else:
-                raise ValueError("cannot broadcast lists with non-lists (try introducing a np.newaxis in the non-list)")
 
         elif any(isinstance(x, optiontypes) for x in inputs):
             mask = None
@@ -166,7 +123,50 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 else:
                     nextinputs.append(awkward1.layout.IndexedOptionArray64(nextindex, x).project(nextmask))
 
-            return awkward1.layout.IndexedOptionArray64(index, level(nextinputs))
+            return awkward1.layout.IndexedOptionArray64(index, apply(nextinputs))
+
+        elif any(isinstance(x, listtypes) for x in inputs):
+            if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
+                size = max([x.size for x in inputs if isinstance(x, awkward1.layout.RegularArray)])
+                for x in inputs:
+                    if isinstance(x, awkward1.layout.RegularArray):
+                        if size > 1 and x.size == 1:
+                            tmpindex = awkward1.layout.Index64(numpy.repeat(numpy.arange(len(x), dtype=numpy.int64), size))
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, awkward1.layout.RegularArray):
+                        if size > 1 and x.size == 1:
+                            nextinputs.append(awkward1.layout.IndexedArray64(tmpindex, x.content).project())
+                        elif x.size == size:
+                            nextinputs.append(x.content)
+                        else:
+                            raise ValueError("cannot broadcast RegularArray of size {0} with RegularArray of size {1}".format(x.size, size))
+                    else:
+                        nextinputs.append(x)
+                return awkward1.layout.RegularArray(apply(nextinputs), size)
+
+            elif all(isinstance(x, listtypes) or not isinstance(x, awkward1.layout.Content) for x in inputs):
+                first = None
+                for x in inputs:
+                    if isinstance(x, listtypes) and not isinstance(x, awkward1.layout.RegularArray):
+                        first = x
+                        break
+                if first is None:
+                    for x in inputs:
+                        if isinstance(x, listtypes):
+                            first = x
+                            break
+                offsets = first.compact_offsets64()
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, listtypes):
+                        nextinputs.append(x.broadcast_tooffsets64(offsets).content)
+                    else:
+                        nextinputs.append(x)
+                return awkward1.layout.ListOffsetArray64(offsets, apply(nextinputs))
+
+            else:
+                raise ValueError("cannot broadcast lists with non-lists (try introducing a np.newaxis in the non-list)")
 
         elif any(isinstance(x, recordtypes) for x in inputs):
             keys = None
@@ -190,14 +190,14 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
             else:
                 contents = []
                 for key in keys:
-                    contents.append(level([x if not isinstance(x, recordtypes) else x[key] for x in inputs]))
+                    contents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs]))
                 return awkward1.layout.RecordArray(contents, keys)
 
         else:
             result = getattr(ufunc, method)(*inputs, **kwargs)
             return awkward1.layout.NumpyArray(result)
 
-    out = awkward1._util.wrap(level([unwrap(x) for x in inputs]), classes, functions)
+    out = awkward1._util.wrap(apply([unwrap(x) for x in inputs]), classes, functions)
     if scalar:
         return out[0]
     else:
