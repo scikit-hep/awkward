@@ -5,6 +5,7 @@
 Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array#readme) in 2020.
 
    * The [original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now a little out-of-date.
+   * My [StrangeLoop talk](https://youtu.be/2NxWpU7NArk) on September 14, 2019.
    * My [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
    * My [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
    * My [CHEP 2019 proceedings](https://arxiv.org/abs/2001.06307) (to be published in _EPJ Web of Conferences_).
