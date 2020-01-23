@@ -55,8 +55,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 raise ValueError("cannot broadcast {0} of length {1} with {2} of length {3}".format(type(inputs[0]).__name__, length, type(x).__name__, len(x)))
 
     def apply(inputs):
-        # print("inputs[1]", inputs[1], awkward1.tolist(inputs[1]), sep="\n", end="\n\n")
-
         # handle implicit right-broadcasting (i.e. NumPy-like)
         if any(isinstance(x, listtypes) for x in inputs):
             maxdepth = max(x.purelist_depth for x in inputs if isinstance(x, awkward1.layout.Content))
@@ -69,11 +67,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                     nextinputs.append(x)
                 if any(x is not y for x, y in zip(inputs, nextinputs)):
                     return apply(nextinputs)
-            # elif maxdepth > 0:
-            #     print("inputs[0]", len(inputs[0]), inputs[0], awkward1.tolist(inputs[0]), sep="\n", end="\n\n")
-            #     print("inputs[1]", len(inputs[1]), inputs[1], awkward1.tolist(inputs[1]), sep="\n", end="\n\n")
-            #
-            #     raise Exception("HERE")
 
         # now all lengths must agree
         checklength([x for x in inputs if isinstance(x, awkward1.layout.Content)])
@@ -171,42 +164,21 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                         nextinputs.append(x)
                 return awkward1.layout.RegularArray(apply(nextinputs), maxsize)
 
-            elif True:   # all(isinstance(x, listtypes) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-                first = None
-                for x in inputs:
-                    if isinstance(x, listtypes) and not isinstance(x, awkward1.layout.RegularArray):
-                        first = x
-                        break
-                assert first is not None
-                # if first is None:
-                #     for x in inputs:
-                #         if isinstance(x, listtypes):
-                #             first = x
-                #             break
-
-                # print("inputs[0]", len(inputs[0]), inputs[0], awkward1.tolist(inputs[0]), sep="\n")
-                # print("inputs[1]", len(inputs[1]), inputs[1], awkward1.tolist(inputs[1]), sep="\n", end="\n\n")
-
-                offsets = first.compact_offsets64()
-
-                # print("offsets", offsets)
-
-                nextinputs = []
-                for x in inputs:
-                    if isinstance(x, listtypes):
-                        nextinputs.append(x.broadcast_tooffsets64(offsets).content)
-                    elif isinstance(x, awkward1.layout.Content):
-                        nextinputs.append(awkward1.layout.RegularArray(x, 1).broadcast_tooffsets64(offsets).content)
-                    else:
-                        nextinputs.append(x)
-
-                # print("nextinputs[0]", len(nextinputs[0]), nextinputs[0], awkward1.tolist(nextinputs[0]), sep="\n")
-                # print("nextinputs[1]", len(nextinputs[1]), nextinputs[1], awkward1.tolist(nextinputs[1]), sep="\n", end="\n\n")
-
-                return awkward1.layout.ListOffsetArray64(offsets, apply(nextinputs))
-
-            else:
-                raise ValueError("cannot broadcast lists with non-lists (try introducing a np.newaxis in the non-list)")
+            for x in inputs:
+                if isinstance(x, listtypes) and not isinstance(x, awkward1.layout.RegularArray):
+                    first = x
+                    break
+            offsets = first.compact_offsets64()
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, listtypes):
+                    nextinputs.append(x.broadcast_tooffsets64(offsets).content)
+                # handle implicit left-broadcasting (unlike NumPy)
+                elif isinstance(x, awkward1.layout.Content):
+                    nextinputs.append(awkward1.layout.RegularArray(x, 1).broadcast_tooffsets64(offsets).content)
+                else:
+                    nextinputs.append(x)
+            return awkward1.layout.ListOffsetArray64(offsets, apply(nextinputs))
 
         elif any(isinstance(x, recordtypes) for x in inputs):
             keys = None
