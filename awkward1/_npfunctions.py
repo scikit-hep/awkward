@@ -184,15 +184,25 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 #             first = x
                 #             break
 
+                # print("inputs[0]", len(inputs[0]), inputs[0], awkward1.tolist(inputs[0]), sep="\n")
+                # print("inputs[1]", len(inputs[1]), inputs[1], awkward1.tolist(inputs[1]), sep="\n", end="\n\n")
+
                 offsets = first.compact_offsets64()
+
+                # print("offsets", offsets)
+
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, listtypes):
                         nextinputs.append(x.broadcast_tooffsets64(offsets).content)
                     elif isinstance(x, awkward1.layout.Content):
-                        nextinputs.append(awkward1.layout.RegularArray(x, 1))
+                        nextinputs.append(awkward1.layout.RegularArray(x, 1).broadcast_tooffsets64(offsets).content)
                     else:
                         nextinputs.append(x)
+
+                # print("nextinputs[0]", len(nextinputs[0]), nextinputs[0], awkward1.tolist(nextinputs[0]), sep="\n")
+                # print("nextinputs[1]", len(nextinputs[1]), nextinputs[1], awkward1.tolist(nextinputs[1]), sep="\n", end="\n\n")
+
                 return awkward1.layout.ListOffsetArray64(offsets, apply(nextinputs))
 
             else:
