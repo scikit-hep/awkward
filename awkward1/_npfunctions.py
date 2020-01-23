@@ -226,6 +226,8 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
             result = getattr(ufunc, method)(*inputs, **kwargs)
             return awkward1.layout.NumpyArray(result)
 
+    isscalar = []
+
     def pack(inputs):
         maxlen = -1
         for x in inputs:
@@ -238,17 +240,26 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
             if isinstance(x, awkward1.layout.Record):
                 index = numpy.full(maxlen, x.at, dtype=numpy.int64)
                 nextinputs.append(awkward1.layout.RegularArray(x.array[index], maxlen))
+                isscalar.append(True)
             elif isinstance(x, awkward1.layout.Content):
                 nextinputs.append(awkward1.layout.RegularArray(x, len(x)))
+                isscalar.append(False)
             else:
                 nextinputs.append(x)
+                isscalar.append(True)
         return nextinputs
 
     def unpack(x):
-        if len(x) == 0:
-            return x.getitem_nothing()
+        if all(isscalar):
+            if len(x) == 0:
+                return x.getitem_nothing().getitem_nothing()
+            else:
+                return x[0][0]
         else:
-            return x[0]
+            if len(x) == 0:
+                return x.getitem_nothing()
+            else:
+                return x[0]
 
     return awkward1._util.wrap(unpack(apply(pack([unwrap(x) for x in inputs]))), classes, functions)
 

@@ -80,7 +80,7 @@ class Array(awkward1._npfunctions.NDArrayOperatorsMixin):
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
-class Record(object):
+class Record(awkward1._npfunctions.NDArrayOperatorsMixin):
     def __init__(self, data, type=None, classes=None, functions=None):
         # FIXME: more checks here
         layout = data
@@ -131,6 +131,9 @@ class Record(object):
             type = type[:(limit_type - 4)] + "..." + type[-1]
 
         return "<Record {0} type={1}>".format(value, type)
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
 class FillableArray(object):
     def __init__(self, classes=None, functions=None):

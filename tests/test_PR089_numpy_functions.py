@@ -82,3 +82,5 @@ def test_records():
     assert awkward1.tolist(array[0] + record) == [{"x": 101, "y": 201.1}, {"x": 102, "y": 202.2}, {"x": 103, "y": 203.3}]
 
     assert awkward1.tolist(array + record) == [[{"x": 101, "y": 201.1}, {"x": 102, "y": 202.2}, {"x": 103, "y": 203.3}], [], [{"x": 104, "y": 204.4}, {"x": 105, "y": 205.5}], [{"x": 200, "y": 400.0}]]
+
+    assert awkward1.tolist(record + record) == {"x": 200, "y": 400}
