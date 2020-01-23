@@ -46,3 +46,22 @@ def test_mixing_lists_and_none():
     for a in (a00, a01, a02, a10, a11, a12, a20, a21, a22):
         for b in (b00, b01, b02, b10, b11, b12, b20, b21, b22):
             assert awkward1.tolist(a + b) == add(a, b)
+
+def test_right_broadcasting():
+    nparray = numpy.arange(2*3*5).reshape(2, 3, 5)
+    lsarray = awkward1.Array(nparray.tolist())
+    rgarray = awkward1.Array(nparray)
+
+    # print(awkward1.tolist(nparray + numpy.array([[[100]], [[200]]])))
+    # print(awkward1.tolist(nparray + numpy.array([100, 200])[:, numpy.newaxis, numpy.newaxis]))
+    # print(awkward1.tolist(lsarray + numpy.array([100, 200])))
+
+    print(awkward1.tolist(nparray + numpy.array([[[100, 200, 300, 400, 500]]])))
+    print(awkward1.tolist(nparray + numpy.array([100, 200, 300, 400, 500])[numpy.newaxis, numpy.newaxis, :]))
+    print(awkward1.tolist(nparray + numpy.array([100, 200, 300, 400, 500])))
+    print(awkward1.tolist(rgarray + numpy.array([[[100, 200, 300, 400, 500]]])))
+
+
+
+
+    raise Exception

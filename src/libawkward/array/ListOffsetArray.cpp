@@ -336,6 +336,16 @@ namespace awkward {
   }
 
   template <typename T>
+  bool ListOffsetArrayOf<T>::purelist_isregular() const {
+    return false;
+  }
+
+  template <typename T>
+  int64_t ListOffsetArrayOf<T>::purelist_depth() const {
+    return content_.get()->purelist_depth() + 1;
+  }
+
+  template <typename T>
   const std::pair<int64_t, int64_t> ListOffsetArrayOf<T>::minmax_depth() const {
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);
