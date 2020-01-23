@@ -75,16 +75,10 @@ def test_implicit_broadcasting():
     assert awkward1.tolist(lsarray + numpy.array([100, 200])) == awkward1.tolist(nparray + numpy.array([[[100]], [[200]]]))
     assert awkward1.tolist(numpy.array([100, 200]) + lsarray) == awkward1.tolist(numpy.array([[[100]], [[200]]]) + nparray)
 
-def test_records_and_stuff():
-    array = awkward1.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 100, "y": 10.0}])
-    record = awkward1._util.wrap(array.layout[-1], array._classes, array._functions)
+def test_records():
+    array = awkward1.Array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [], [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}], [{"x": 100, "y": 200}]])
+    record = array[-1, -1]
 
-    # print(array)
-    # print(record)
-    #
-    #
-    #
-    # raise Exception
+    assert awkward1.tolist(array[0] + record) == [{"x": 101, "y": 201.1}, {"x": 102, "y": 202.2}, {"x": 103, "y": 203.3}]
 
-def test_like_scalars_man():
-    pass
+    assert awkward1.tolist(array + record) == [[{"x": 101, "y": 201.1}, {"x": 102, "y": 202.2}, {"x": 103, "y": 203.3}], [], [{"x": 104, "y": 204.4}, {"x": 105, "y": 205.5}], [{"x": 200, "y": 400.0}]]
