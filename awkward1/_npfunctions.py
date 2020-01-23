@@ -52,12 +52,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
     recordtypes = (awkward1.layout.RecordArray,)
 
-    print()
-    tmpinputs = [unwrap(x) for x in inputs]
-    print("inputs[0]", tmpinputs[0], awkward1.tolist(tmpinputs[0]), sep="\n")
-    print("inputs[1]", tmpinputs[1], awkward1.tolist(tmpinputs[1]), sep="\n")
-    print()
-
     def checklength(inputs):
         length = len(inputs[0])
         for x in inputs[1:]:
@@ -65,21 +59,21 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                 raise ValueError("cannot broadcast {0} of length {1} with {2} of length {3}".format(type(inputs[0]).__name__, length, type(x).__name__, len(x)))
 
     def apply(inputs):
-        # handle implicit broadcasting
-        if any(isinstance(x, listtypes) for x in inputs):
-            maxdepth = max(x.purelist_depth for x in inputs if isinstance(x, awkward1.layout.Content))
-            nextinputs = []
-            for x in inputs:
-                if x.purelist_depth < maxdepth:
-                    # nextinputs.append(awkward1.layout.RegularArray(x, 1))
-                    nextinputs.append(awkward1.layout.RegularArray(x, len(x)))
-                else:
-                    nextinputs.append(x)
-            if any(x is not y for x, y in zip(inputs, nextinputs)):
-                return apply(nextinputs)
+        # # handle implicit broadcasting
+        # if any(isinstance(x, listtypes) for x in inputs):
+        #     maxdepth = max(x.purelist_depth for x in inputs if isinstance(x, awkward1.layout.Content))
+        #     nextinputs = []
+        #     for x in inputs:
+        #         if x.purelist_depth < maxdepth:
+        #             # nextinputs.append(awkward1.layout.RegularArray(x, 1))
+        #             nextinputs.append(awkward1.layout.RegularArray(x, len(x)))
+        #         else:
+        #             nextinputs.append(x)
+        #     if any(x is not y for x, y in zip(inputs, nextinputs)):
+        #         return apply(nextinputs)
 
-        # # now all lengths must agree
-        # checklength([x for x in inputs if isinstance(x, awkward1.layout.Content)])
+        # now all lengths must agree
+        checklength([x for x in inputs if isinstance(x, awkward1.layout.Content)])
 
         # the rest of this is one switch statement
         if any(isinstance(x, unknowntypes) for x in inputs):
@@ -155,59 +149,24 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
             return awkward1.layout.IndexedOptionArray64(index, apply(nextinputs))
 
         elif any(isinstance(x, listtypes) for x in inputs):
-            # if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
-            #
-            #     print("HERE[0]", inputs[0], awkward1.tolist(inputs[0]), sep="\n")
-            #     print("HERE[1]", inputs[1], awkward1.tolist(inputs[1]), sep="\n")
-            #     print()
-            #
-            #     maxlen, maxsize = -1, -1
-            #     for x in inputs:
-            #         if isinstance(x, awkward1.layout.RegularArray):
-            #             if len(x) > maxlen:
-            #                 maxlen = len(x)
-            #                 maxsize = x.size
-            #
-            #     for x in inputs:
-            #         if isinstance(x, awkward1.layout.RegularArray):
-            #             if maxlen > 1 and len(x) == 1:
-            #                 tmpindex = awkward1.layout.Index64(numpy.zeros(maxlen, dtype=numpy.int64))
-            #
-            #     nextinputs = []
-            #     for x in inputs:
-            #         if isinstance(x, awkward1.layout.RegularArray):
-            #             if maxlen > 1 and len(x) == 1:
-            #                 nextinputs.append(awkward1.layout.IndexedArray64(tmpindex, x).project().content)
-            #             elif maxlen == len(x):
-            #                 nextinputs.append(x.content)
-            #             else:
-            #                 raise ValueError("cannot broadcast RegularArray of length {0} with RegularArray of length {1}".format(maxlen, len(x)))
-            #         else:
-            #             nextinputs.append(x)
-            #
-            #     print("THERE[0]", nextinputs[0], awkward1.tolist(nextinputs[0]), sep="\n")
-            #     print("THERE[1]", nextinputs[1], awkward1.tolist(nextinputs[1]), sep="\n")
-            #     print()
-            #
-            #     return awkward1.layout.RegularArray(apply(nextinputs), maxsize)
-            #
-            #     # maxsize = max([x.size for x in inputs if isinstance(x, awkward1.layout.RegularArray)])
-            #     # for x in inputs:
-            #     #     if isinstance(x, awkward1.layout.RegularArray):
-            #     #         if maxsize > 1 and x.size == 1:
-            #     #             tmpindex = awkward1.layout.Index64(numpy.repeat(numpy.arange(len(x), dtype=numpy.int64), maxsize))
-            #     # nextinputs = []
-            #     # for x in inputs:
-            #     #     if isinstance(x, awkward1.layout.RegularArray):
-            #     #         if maxsize > 1 and x.size == 1:
-            #     #             nextinputs.append(awkward1.layout.IndexedArray64(tmpindex, x.content).project())
-            #     #         elif x.size == maxsize:
-            #     #             nextinputs.append(x.content)
-            #     #         else:
-            #     #             raise ValueError("cannot broadcast RegularArray of size {0} with RegularArray of size {1}".format(x.size, maxsize))
-            #     #     else:
-            #     #         nextinputs.append(x)
-            #     # return awkward1.layout.RegularArray(apply(nextinputs), maxsize)
+            if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
+                maxsize = max([x.size for x in inputs if isinstance(x, awkward1.layout.RegularArray)])
+                for x in inputs:
+                    if isinstance(x, awkward1.layout.RegularArray):
+                        if maxsize > 1 and x.size == 1:
+                            tmpindex = awkward1.layout.Index64(numpy.repeat(numpy.arange(len(x), dtype=numpy.int64), maxsize))
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, awkward1.layout.RegularArray):
+                        if maxsize > 1 and x.size == 1:
+                            nextinputs.append(awkward1.layout.IndexedArray64(tmpindex, x.content).project())
+                        elif x.size == maxsize:
+                            nextinputs.append(x.content)
+                        else:
+                            raise ValueError("cannot broadcast RegularArray of size {0} with RegularArray of size {1}".format(x.size, maxsize))
+                    else:
+                        nextinputs.append(x)
+                return awkward1.layout.RegularArray(apply(nextinputs), maxsize)
 
             if all(isinstance(x, listtypes) or not isinstance(x, awkward1.layout.Content) for x in inputs):
                 first = None
@@ -221,11 +180,6 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
                             first = x
                             break
                 offsets = first.compact_offsets64()
-
-                print("offsets", offsets)
-                print("THERE[0]", inputs[0], awkward1.tolist(inputs[0]), sep="\n")
-                print("THERE[1]", inputs[1], awkward1.tolist(inputs[1]), sep="\n")
-
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, listtypes):

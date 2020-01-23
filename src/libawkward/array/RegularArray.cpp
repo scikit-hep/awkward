@@ -46,17 +46,7 @@ namespace awkward {
     }
 
     int64_t len = length();
-    if (offsets.length() - 1 != len  &&  len == 1) {
-      Index64 nextcarry(offsets.length() - 1);
-      struct Error err = awkward_regulararray_broadcast_zeros_64(
-        nextcarry.ptr().get(),
-        offsets.length() - 1);
-      util::handle_error(err, classname(), identities_.get());
-      std::shared_ptr<Content> next = carry(nextcarry);
-      RegularArray* raw = dynamic_cast<RegularArray*>(next.get());
-      return raw->broadcast_tooffsets64(offsets);
-    }
-    else if (offsets.length() - 1 != len) {
+    if (offsets.length() - 1 != len) {
       throw std::invalid_argument(std::string("cannot broadcast RegularArray of length ") + std::to_string(len) + (" to length ") + std::to_string(offsets.length() - 1));
     }
 

@@ -49,8 +49,6 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_listarrayU32_broadcast_tooffsets64(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const uint32_t* fromstarts, int64_t startsoffset, const uint32_t* fromstops, int64_t stopsoffset, int64_t lencontent);
   EXPORT_SYMBOL struct Error awkward_listarray64_broadcast_tooffsets64(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const int64_t* fromstarts, int64_t startsoffset, const int64_t* fromstops, int64_t stopsoffset, int64_t lencontent);
 
-  EXPORT_SYMBOL struct Error awkward_regulararray_broadcast_zeros_64(int64_t* tocarry, int64_t length);
-
   EXPORT_SYMBOL struct Error awkward_regulararray_broadcast_tooffsets64(const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, int64_t size);
 
   EXPORT_SYMBOL struct Error awkward_regulararray_broadcast_tooffsets64_size1(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength);

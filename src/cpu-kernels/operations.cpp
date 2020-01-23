@@ -252,17 +252,6 @@ ERROR awkward_listarray64_broadcast_tooffsets64(int64_t* tocarry, const int64_t*
 }
 
 template <typename T>
-ERROR awkward_regulararray_broadcast_zeros(T* tocarry, int64_t length) {
-  for (int64_t i = 0;  i < length;  i++) {
-    tocarry[i] = 0;
-  }
-  return success();
-}
-ERROR awkward_regulararray_broadcast_zeros_64(int64_t* tocarry, int64_t length) {
-  return awkward_regulararray_broadcast_zeros<int64_t>(tocarry, length);
-}
-
-template <typename T>
 ERROR awkward_regulararray_broadcast_tooffsets(const T* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, int64_t size) {
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     int64_t count = (int64_t)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);

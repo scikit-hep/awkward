@@ -56,12 +56,12 @@ def test_right_broadcasting():
     # print(awkward1.tolist(nparray + numpy.array([100, 200])[:, numpy.newaxis, numpy.newaxis]))
     # print(awkward1.tolist(lsarray + numpy.array([100, 200])))
 
-    print(awkward1.tolist(nparray + numpy.array([[[100, 200, 300, 400, 500]]])))
-    print(awkward1.tolist(nparray + numpy.array([100, 200, 300, 400, 500])[numpy.newaxis, numpy.newaxis, :]))
-    print(awkward1.tolist(nparray + numpy.array([100, 200, 300, 400, 500])))
-    print(awkward1.tolist(rgarray + numpy.array([[[100, 200, 300, 400, 500]]])))
+    # print(awkward1.tolist(nparray + numpy.array([[[100, 200, 300, 400, 500]]])))
+    # print(awkward1.tolist(nparray + numpy.array([100, 200, 300, 400, 500])[numpy.newaxis, numpy.newaxis, :]))
+    # print(awkward1.tolist(nparray + numpy.array([100, 200, 300, 400, 500])))
+    # print(awkward1.tolist(rgarray + numpy.array([[[100, 200, 300, 400, 500]]])))
 
 
 
 
-    raise Exception
+    # raise Exception
