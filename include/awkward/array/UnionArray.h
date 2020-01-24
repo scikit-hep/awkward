@@ -1,26 +1,31 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_LISTOFFSETARRAY_H_
-#define AWKWARD_LISTOFFSETARRAY_H_
+#ifndef AWKWARD_UNIONARRAY_H_
+#define AWKWARD_UNIONARRAY_H_
 
+#include <cassert>
+#include <string>
 #include <memory>
+#include <vector>
 
 #include "awkward/cpu-kernels/util.h"
+#include "awkward/Slice.h"
 #include "awkward/Index.h"
-#include "awkward/Identities.h"
 #include "awkward/Content.h"
 
 namespace awkward {
-  template <typename T>
-  class ListOffsetArrayOf: public Content {
+  template <typename T, typename I>
+  class UnionArrayOf: public Content {
   public:
-    ListOffsetArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content);
-    const IndexOf<T> starts() const;
-    const IndexOf<T> stops() const;
-    const IndexOf<T> offsets() const;
-    const std::shared_ptr<Content> content() const;
-    Index64 compact_offsets64() const;
-    const std::shared_ptr<Content> broadcast_tooffsets64(const Index64& offsets) const;
+    static const IndexOf<I> regular_index(const IndexOf<T>& tags);
+
+    UnionArrayOf<T, I>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T> tags, const IndexOf<I>& index, const std::vector<std::shared_ptr<Content>>& contents);
+    const IndexOf<T> tags() const;
+    const IndexOf<I> index() const;
+    const std::vector<std::shared_ptr<Content>> contents() const;
+    int64_t numcontents() const;
+    const std::shared_ptr<Content> content(int64_t index) const;
+    const std::shared_ptr<Content> project(int64_t index) const;
 
     const std::string classname() const override;
     void setidentities() override;
@@ -39,6 +44,7 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const override;
     const std::shared_ptr<Content> getitem_field(const std::string& key) const override;
     const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const override;
+    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> carry(const Index64& carry) const override;
     const std::pair<int64_t, int64_t> minmax_depth() const override;
     int64_t numfields() const override;
@@ -46,7 +52,6 @@ namespace awkward {
     const std::string key(int64_t fieldindex) const override;
     bool haskey(const std::string& key) const override;
     const std::vector<std::string> keys() const override;
-    int64_t list_depth() const override;
 
     // operations
     const Index64 count64() const override;
@@ -59,13 +64,14 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;
 
   private:
-    const IndexOf<T> offsets_;
-    const std::shared_ptr<Content> content_;
+    const IndexOf<T> tags_;
+    const IndexOf<I> index_;
+    const std::vector<std::shared_ptr<Content>> contents_;
   };
 
-  typedef ListOffsetArrayOf<int32_t>  ListOffsetArray32;
-  typedef ListOffsetArrayOf<uint32_t> ListOffsetArrayU32;
-  typedef ListOffsetArrayOf<int64_t>  ListOffsetArray64;
+  typedef UnionArrayOf<int8_t, int32_t>  UnionArray8_32;
+  typedef UnionArrayOf<int8_t, uint32_t> UnionArray8_U32;
+  typedef UnionArrayOf<int8_t, int64_t>  UnionArray8_64;
 }
 
-#endif // AWKWARD_LISTOFFSETARRAY_H_
+#endif // AWKWARD_UNIONARRAY_H_

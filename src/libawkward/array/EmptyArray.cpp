@@ -55,6 +55,7 @@ namespace awkward {
   }
 
   void EmptyArray::tojson_part(ToJson& builder) const {
+    check_for_iteration();
     builder.beginlist();
     builder.endlist();
   }
@@ -110,19 +111,19 @@ namespace awkward {
   int64_t EmptyArray::numfields() const { return -1; }
 
   int64_t EmptyArray::fieldindex(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
+    throw std::invalid_argument(std::string("key ") + util::quote(key, true) + std::string(" does not exist (data might not be records)"));
   }
 
   const std::string EmptyArray::key(int64_t fieldindex) const {
-    throw std::invalid_argument("array contains no Records");
+    throw std::invalid_argument(std::string("fieldindex \"") + std::to_string(fieldindex) + std::string("\" does not exist (data might not be records)"));
   }
 
   bool EmptyArray::haskey(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
+    return false;
   }
 
   const std::vector<std::string> EmptyArray::keys() const {
-    throw std::invalid_argument("array contains no Records");
+    return std::vector<std::string>();
   }
 
   int64_t EmptyArray::list_depth() const {

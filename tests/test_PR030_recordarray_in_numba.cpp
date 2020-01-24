@@ -16,32 +16,39 @@ int main(int, char**)
   ak::FillableArray myarray(ak::FillableOptions(1024, 2.0));
 
   // populate fillable array with lists
-  myarray.beginlist();
-  //myarray.boolean(true);
+  myarray.beginrecord();
+  myarray.field_check("one");
+  myarray.boolean(true);
+  myarray.field_check("two");
   myarray.integer(1);
+  myarray.field_check("three");
   myarray.real(1.1);
-  myarray.endlist();
+  myarray.endrecord();
   
-  myarray.beginlist();
-  //myarray.boolean(false);
+  myarray.beginrecord();
+  myarray.field_check("one");
+  myarray.boolean(false);
+  myarray.field_check("two");
   myarray.integer(2);
+  myarray.field_check("three");
   myarray.real(2.2);
-  myarray.endlist();
+  myarray.endrecord();
 
-  myarray.beginlist();
-  //myarray.boolean(true);
+  myarray.beginrecord();
+  myarray.field_check("one");
+  myarray.boolean(true);
+  myarray.field_check("two");
   myarray.integer(3);
+  myarray.field_check("three");
   myarray.real(3.3);
-  myarray.endlist();
+  myarray.endrecord();
 
   // take a snapshot 
-  //std::shared_ptr<ak::Content> array = builder.snapshot();
- 
-  // saving to compare fillable array to std vector
-  //std::vector<std::vector<std::vector<double>>> vector =
-  //{{{true, 1, 1.1}, {false, 2, 2.2}, {true, 3, 3.3}}, {}, {}, {}};
+  std::shared_ptr<ak::Content> array = myarray.snapshot();
 
-
+  // check output 
+  if (array.get()->tojson(false,1) != "[{\"one\":true,\"two\":1,\"three\":1.1},{\"one\":false,\"two\":2,\"three\":2.2},{\"one\":true,\"two\":3,\"three\":3.3}]")
+    {return -1;}
   return 0;
 }
 

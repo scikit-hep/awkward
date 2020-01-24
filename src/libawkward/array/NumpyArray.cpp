@@ -10,6 +10,7 @@
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
+#include "awkward/array/RegularArray.h"
 #include "awkward/util.h"
 
 #include "awkward/array/NumpyArray.h"
@@ -102,6 +103,23 @@ namespace awkward {
 
   uint8_t NumpyArray::getbyte(ssize_t at) const {
     return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
+  }
+
+  const std::shared_ptr<Content> NumpyArray::regularize_shape() const {
+    if (isscalar()) {
+      return shallow_copy();
+    }
+    NumpyArray contiguous_self = contiguous();
+    std::vector<ssize_t> flatshape({ 1 });
+    for (auto x : shape_) {
+      flatshape[0] = flatshape[0] * x;
+    }
+    std::vector<ssize_t> flatstrides({ itemsize_ });
+    std::shared_ptr<Content> out = std::make_shared<NumpyArray>(identities_, parameters_, contiguous_self.ptr(), flatshape, flatstrides, contiguous_self.byteoffset(), contiguous_self.itemsize(), contiguous_self.format());
+    for (int64_t i = (int64_t)shape_.size() - 1;  i > 0;  i--) {
+      out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, shape_[(size_t)i]);
+    }
+    return out;
   }
 
   bool NumpyArray::isscalar() const {
@@ -337,6 +355,7 @@ namespace awkward {
   }
 
   void NumpyArray::tojson_part(ToJson& builder) const {
+    check_for_iteration();
     if (parameter_equals("__class__", "\"char\"")) {
       tojson_string(builder);
     }
@@ -559,19 +578,19 @@ namespace awkward {
   int64_t NumpyArray::numfields() const { return -1; }
 
   int64_t NumpyArray::fieldindex(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
+    throw std::invalid_argument(std::string("key ") + util::quote(key, true) + std::string(" does not exist (data are not records)"));
   }
 
   const std::string NumpyArray::key(int64_t fieldindex) const {
-    throw std::invalid_argument("array contains no Records");
+    throw std::invalid_argument(std::string("fieldindex \"") + std::to_string(fieldindex) + std::string("\" does not exist (data are not records)"));
   }
 
   bool NumpyArray::haskey(const std::string& key) const {
-    throw std::invalid_argument("array contains no Records");
+    return false;
   }
 
   const std::vector<std::string> NumpyArray::keys() const {
-    throw std::invalid_argument("array contains no Records");
+    return std::vector<std::string>();
   }
 
   int64_t NumpyArray::list_depth() const {

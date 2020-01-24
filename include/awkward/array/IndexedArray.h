@@ -21,6 +21,8 @@ namespace awkward {
     const IndexOf<T> index() const;
     const std::shared_ptr<Content> content() const;
     bool isoption() const;
+    const std::shared_ptr<Content> project() const;
+    const std::shared_ptr<Content> project(const Index8& mask) const;
 
     const std::string classname() const override;
     void setidentities() override;
@@ -62,7 +64,6 @@ namespace awkward {
   private:
     const IndexOf<T> index_;
     const std::shared_ptr<Content> content_;
-    bool isoption_;
   };
 
   typedef IndexedArrayOf<int32_t, false>  IndexedArray32;

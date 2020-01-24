@@ -849,6 +849,39 @@
         </inbodydescription>
         <location file="src/cpu-kernels/operations.cpp" line="134" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="134" bodyend="136"/>
       </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1add9c840b9b395e777816e611e5277866" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_indexedarrayU32_flatten_nextcarry_64</definition>
+        <argsstring>(int64_t *tocarry, const uint32_t *fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent)</argsstring>
+        <name>awkward_indexedarrayU32_flatten_nextcarry_64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lenindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="137" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="137" bodyend="139"/>
+      </memberdef>
       <memberdef kind="function" id="operations_8cpp_1ac826742c2fa8e4a675374c52c6e37b5b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>ERROR</type>
         <definition>ERROR awkward_indexedarray64_flatten_nextcarry_64</definition>
@@ -880,7 +913,828 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/cpu-kernels/operations.cpp" line="137" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="137" bodyend="139"/>
+        <location file="src/cpu-kernels/operations.cpp" line="140" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="140" bodyend="142"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1acef47763436f33c38e60dc988ff67755" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+          <param>
+            <type>typename M</type>
+          </param>
+        </templateparamlist>
+        <type>ERROR</type>
+        <definition>ERROR awkward_indexedarray_andmask</definition>
+        <argsstring>(C *toindex, const M *mask, int64_t maskoffset, const C *fromindex, int64_t indexoffset, int64_t length)</argsstring>
+        <name>awkward_indexedarray_andmask</name>
+        <param>
+          <type>C *</type>
+          <declname>toindex</declname>
+        </param>
+        <param>
+          <type>const M *</type>
+          <declname>mask</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>maskoffset</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="145" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="145" bodyend="156"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1acaf8a4cc605874bbd36fa9365d05fc1c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_indexedarray32_andmask_8</definition>
+        <argsstring>(int32_t *toindex, const int8_t *mask, int64_t maskoffset, const int32_t *fromindex, int64_t indexoffset, int64_t length)</argsstring>
+        <name>awkward_indexedarray32_andmask_8</name>
+        <param>
+          <type>int32_t *</type>
+          <declname>toindex</declname>
+        </param>
+        <param>
+          <type>const int8_t *</type>
+          <declname>mask</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>maskoffset</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="157" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="157" bodyend="159"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1ae4d3dfb55e8fc5a29b8f531ebaa82729" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_indexedarrayU32_andmask_8</definition>
+        <argsstring>(uint32_t *toindex, const int8_t *mask, int64_t maskoffset, const uint32_t *fromindex, int64_t indexoffset, int64_t length)</argsstring>
+        <name>awkward_indexedarrayU32_andmask_8</name>
+        <param>
+          <type>uint32_t *</type>
+          <declname>toindex</declname>
+        </param>
+        <param>
+          <type>const int8_t *</type>
+          <declname>mask</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>maskoffset</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="160" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="160" bodyend="162"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1ad1622d93bab2b8cf164b18aa0d720483" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_indexedarray64_andmask_8</definition>
+        <argsstring>(int64_t *toindex, const int8_t *mask, int64_t maskoffset, const int64_t *fromindex, int64_t indexoffset, int64_t length)</argsstring>
+        <name>awkward_indexedarray64_andmask_8</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>toindex</declname>
+        </param>
+        <param>
+          <type>const int8_t *</type>
+          <declname>mask</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>maskoffset</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromindex</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>indexoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="163" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="163" bodyend="165"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a6c99da56efed8b7792860496665f4862" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>ERROR</type>
+        <definition>ERROR awkward_regulararray_compact_offsets</definition>
+        <argsstring>(T *tooffsets, int64_t length, int64_t size)</argsstring>
+        <name>awkward_regulararray_compact_offsets</name>
+        <param>
+          <type>T *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>size</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="168" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="168" bodyend="174"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1ad30386fc942b16e1e48c305b6f570025" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_regulararray_compact_offsets64</definition>
+        <argsstring>(int64_t *tooffsets, int64_t length, int64_t size)</argsstring>
+        <name>awkward_regulararray_compact_offsets64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>size</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="175" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="175" bodyend="177"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1af51ca2db5c5bf14584a6438ff1bfc679" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>ERROR</type>
+        <definition>ERROR awkward_listarray_compact_offsets</definition>
+        <argsstring>(T *tooffsets, const C *fromstarts, const C *fromstops, int64_t startsoffset, int64_t stopsoffset, int64_t length)</argsstring>
+        <name>awkward_listarray_compact_offsets</name>
+        <param>
+          <type>T *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="180" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="180" bodyend="191"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a5dde0b708653e8ce6442360ca7a64a7d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_listarray32_compact_offsets64</definition>
+        <argsstring>(int64_t *tooffsets, const int32_t *fromstarts, const int32_t *fromstops, int64_t startsoffset, int64_t stopsoffset, int64_t length)</argsstring>
+        <name>awkward_listarray32_compact_offsets64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="192" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="192" bodyend="194"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a4ba603b8735f8c09b6407de5a8655ab2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_listarrayU32_compact_offsets64</definition>
+        <argsstring>(int64_t *tooffsets, const uint32_t *fromstarts, const uint32_t *fromstops, int64_t startsoffset, int64_t stopsoffset, int64_t length)</argsstring>
+        <name>awkward_listarrayU32_compact_offsets64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="195" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="195" bodyend="197"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a5a135aacfc14ae13427ca3a8b297c18a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_listarray64_compact_offsets64</definition>
+        <argsstring>(int64_t *tooffsets, const int64_t *fromstarts, const int64_t *fromstops, int64_t startsoffset, int64_t stopsoffset, int64_t length)</argsstring>
+        <name>awkward_listarray64_compact_offsets64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="198" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="198" bodyend="200"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a219bdaa2016f63b625f9dbaa98c7e697" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>ERROR</type>
+        <definition>ERROR awkward_listoffsetarray_compact_offsets</definition>
+        <argsstring>(T *tooffsets, const C *fromoffsets, int64_t offsetsoffset, int64_t length)</argsstring>
+        <name>awkward_listoffsetarray_compact_offsets</name>
+        <param>
+          <type>T *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="203" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="203" bodyend="210"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1af3842856e03e55cf85a784d55f5455f8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_listoffsetarray32_compact_offsets64</definition>
+        <argsstring>(int64_t *tooffsets, const int32_t *fromoffsets, int64_t offsetsoffset, int64_t length)</argsstring>
+        <name>awkward_listoffsetarray32_compact_offsets64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="211" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="211" bodyend="213"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a368bb9cb0978dc89bb63c87992579af2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_listoffsetarrayU32_compact_offsets64</definition>
+        <argsstring>(int64_t *tooffsets, const uint32_t *fromoffsets, int64_t offsetsoffset, int64_t length)</argsstring>
+        <name>awkward_listoffsetarrayU32_compact_offsets64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="214" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="214" bodyend="216"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a4c3adb1f0b145329205487b1e8bb9884" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_listoffsetarray64_compact_offsets64</definition>
+        <argsstring>(int64_t *tooffsets, const int64_t *fromoffsets, int64_t offsetsoffset, int64_t length)</argsstring>
+        <name>awkward_listoffsetarray64_compact_offsets64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tooffsets</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="217" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="217" bodyend="219"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a7258895dbc7d4eab2cafda5c62107fab" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename C</type>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>ERROR</type>
+        <definition>ERROR awkward_listarray_broadcast_tooffsets</definition>
+        <argsstring>(T *tocarry, const T *fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const C *fromstarts, int64_t startsoffset, const C *fromstops, int64_t stopsoffset, int64_t lencontent)</argsstring>
+        <name>awkward_listarray_broadcast_tooffsets</name>
+        <param>
+          <type>T *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetslength</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>const C *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="222" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="222" bodyend="251"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a4c56b71067e4072f0d58ca586eb3b3ec" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_listarray32_broadcast_tooffsets64</definition>
+        <argsstring>(int64_t *tocarry, const int64_t *fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const int32_t *fromstarts, int64_t startsoffset, const int32_t *fromstops, int64_t stopsoffset, int64_t lencontent)</argsstring>
+        <name>awkward_listarray32_broadcast_tooffsets64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetslength</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>const int32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="252" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="252" bodyend="254"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a2fbc7d1acb9e6b7322f809d442418a39" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_listarrayU32_broadcast_tooffsets64</definition>
+        <argsstring>(int64_t *tocarry, const int64_t *fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const uint32_t *fromstarts, int64_t startsoffset, const uint32_t *fromstops, int64_t stopsoffset, int64_t lencontent)</argsstring>
+        <name>awkward_listarrayU32_broadcast_tooffsets64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetslength</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>const uint32_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="255" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="255" bodyend="257"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1aca67e3d5deaad6886af1e36bf09cb7c5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_listarray64_broadcast_tooffsets64</definition>
+        <argsstring>(int64_t *tocarry, const int64_t *fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const int64_t *fromstarts, int64_t startsoffset, const int64_t *fromstops, int64_t stopsoffset, int64_t lencontent)</argsstring>
+        <name>awkward_listarray64_broadcast_tooffsets64</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetslength</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstarts</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>startsoffset</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromstops</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>stopsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>lencontent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="258" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="258" bodyend="260"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a21c01cd19a257e757e4040c4372eac84" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>ERROR</type>
+        <definition>ERROR awkward_regulararray_broadcast_tooffsets</definition>
+        <argsstring>(const T *fromoffsets, int64_t offsetsoffset, int64_t offsetslength, int64_t size)</argsstring>
+        <name>awkward_regulararray_broadcast_tooffsets</name>
+        <param>
+          <type>const T *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetslength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>size</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="263" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="263" bodyend="274"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1ada95db6eaea8c87eb368186dc3cb3785" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_regulararray_broadcast_tooffsets64</definition>
+        <argsstring>(const int64_t *fromoffsets, int64_t offsetsoffset, int64_t offsetslength, int64_t size)</argsstring>
+        <name>awkward_regulararray_broadcast_tooffsets64</name>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetslength</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>size</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="275" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="275" bodyend="277"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1a1345f2f171177a56a758b52804aa9be5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>ERROR</type>
+        <definition>ERROR awkward_regulararray_broadcast_tooffsets_size1</definition>
+        <argsstring>(T *tocarry, const T *fromoffsets, int64_t offsetsoffset, int64_t offsetslength)</argsstring>
+        <name>awkward_regulararray_broadcast_tooffsets_size1</name>
+        <param>
+          <type>T *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const T *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetslength</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="280" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="280" bodyend="293"/>
+      </memberdef>
+      <memberdef kind="function" id="operations_8cpp_1aa51eed0d697af5e10d4d1e20c2760000" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ERROR</type>
+        <definition>ERROR awkward_regulararray_broadcast_tooffsets64_size1</definition>
+        <argsstring>(int64_t *tocarry, const int64_t *fromoffsets, int64_t offsetsoffset, int64_t offsetslength)</argsstring>
+        <name>awkward_regulararray_broadcast_tooffsets64_size1</name>
+        <param>
+          <type>int64_t *</type>
+          <declname>tocarry</declname>
+        </param>
+        <param>
+          <type>const int64_t *</type>
+          <declname>fromoffsets</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetsoffset</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>offsetslength</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/cpu-kernels/operations.cpp" line="294" column="7" bodyfile="src/cpu-kernels/operations.cpp" bodystart="294" bodyend="296"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

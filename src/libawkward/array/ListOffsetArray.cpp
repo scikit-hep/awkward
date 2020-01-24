@@ -17,10 +17,30 @@
 
 namespace awkward {
   template <typename T>
+  IndexOf<T> make_starts(const IndexOf<T>& offsets) {
+    return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
+  }
+
+  template <typename T>
+  IndexOf<T> make_stops(const IndexOf<T>& offsets) {
+    return IndexOf<T>(offsets.ptr(), offsets.offset() + 1, offsets.length() - 1);
+  }
+
+  template <typename T>
   ListOffsetArrayOf<T>::ListOffsetArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content)
       : Content(identities, parameters)
       , offsets_(offsets)
       , content_(content) { }
+
+  template <typename T>
+  const IndexOf<T> ListOffsetArrayOf<T>::starts() const {
+    return make_starts(offsets_);
+  }
+
+  template <typename T>
+  const IndexOf<T> ListOffsetArrayOf<T>::stops() const {
+    return make_stops(offsets_);
+  }
 
   template <typename T>
   const IndexOf<T> ListOffsetArrayOf<T>::offsets() const {
@@ -30,6 +50,55 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::content() const {
     return content_;
+  }
+
+  template <typename T>
+  Index64 ListOffsetArrayOf<T>::compact_offsets64() const {
+    // FIXME: if offsets_[0] == 0 and std::is_same<T, int64_t>::value, just return offsets_
+    int64_t len = offsets_.length() - 1;
+    Index64 out(len + 1);
+    struct Error err = util::awkward_listoffsetarray_compact_offsets64<T>(
+      out.ptr().get(),
+      offsets_.ptr().get(),
+      offsets_.offset(),
+      len);
+    util::handle_error(err, classname(), identities_.get());
+    return out;
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::broadcast_tooffsets64(const Index64& offsets) const {
+    if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
+      throw std::invalid_argument("broadcast_tooffsets64 can only be used with offsets that start at 0");
+    }
+    if (offsets.length() - 1 > offsets_.length() - 1) {
+      throw std::invalid_argument(std::string("cannot broadcast ListOffsetArray of length ") + std::to_string(offsets_.length() - 1) + (" to length ") + std::to_string(offsets.length() - 1));
+    }
+
+    IndexOf<T> starts = make_starts(offsets_);
+    IndexOf<T> stops = make_stops(offsets_);
+
+    int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
+    Index64 nextcarry(carrylen);
+    struct Error err = util::awkward_listarray_broadcast_tooffsets64<T>(
+      nextcarry.ptr().get(),
+      offsets.ptr().get(),
+      offsets.offset(),
+      offsets.length(),
+      starts.ptr().get(),
+      starts.offset(),
+      stops.ptr().get(),
+      stops.offset(),
+      content_.get()->length());
+    util::handle_error(err, classname(), identities_.get());
+
+    std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+
+    std::shared_ptr<Identities> identities;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_range_nowrap(0, offsets.length() - 1);
+    }
+    return std::make_shared<ListOffsetArray64>(identities, parameters_, offsets, nextcontent);
   }
 
   template <typename T>
@@ -46,16 +115,6 @@ namespace awkward {
     else {
       return "UnrecognizedListOffsetArray";
     }
-  }
-
-  template <typename T>
-  IndexOf<T> make_starts(const IndexOf<T>& offsets) {
-    return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
-  }
-
-  template <typename T>
-  IndexOf<T> make_stops(const IndexOf<T>& offsets) {
-    return IndexOf<T>(offsets.ptr(), offsets.offset() + 1, offsets.length() - 1);
   }
 
   template <typename T>
@@ -160,6 +219,7 @@ namespace awkward {
   template <typename T>
   void ListOffsetArrayOf<T>::tojson_part(ToJson& builder) const {
     int64_t len = length();
+    check_for_iteration();
     builder.beginlist();
     for (int64_t i = 0;  i < len;  i++) {
       getitem_at_nowrap(i).get()->tojson_part(builder);

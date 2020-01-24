@@ -102,7 +102,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/ListOffsetArray.cpp" line="52" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="52" bodyend="54"/>
+        <location file="src/libawkward/array/ListOffsetArray.cpp" line="20" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="20" bodyend="22"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1aa3d73a21953e0578aa577329c38dc0ed" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <templateparamlist>
@@ -124,7 +124,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/ListOffsetArray.cpp" line="57" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="57" bodyend="59"/>
+        <location file="src/libawkward/array/ListOffsetArray.cpp" line="25" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="25" bodyend="27"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

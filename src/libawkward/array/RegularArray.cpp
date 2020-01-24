@@ -11,6 +11,7 @@
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/ListOffsetArray.h"
 
 #include "awkward/array/RegularArray.h"
 
@@ -26,6 +27,54 @@ namespace awkward {
 
   int64_t RegularArray::size() const {
     return size_;
+  }
+
+  Index64 RegularArray::compact_offsets64() const {
+    int64_t len = length();
+    Index64 out(len + 1);
+    struct Error err = awkward_regulararray_compact_offsets64(
+      out.ptr().get(),
+      len,
+      size_);
+    util::handle_error(err, classname(), identities_.get());
+    return out;
+  }
+
+  const std::shared_ptr<Content> RegularArray::broadcast_tooffsets64(const Index64& offsets) const {
+    if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
+      throw std::invalid_argument("broadcast_tooffsets64 can only be used with offsets that start at 0");
+    }
+    int64_t len = length();
+    if (offsets.length() - 1 > len) {
+      throw std::invalid_argument(std::string("cannot broadcast RegularArray of length ") + std::to_string(len) + (" to length ") + std::to_string(offsets.length() - 1));
+    }
+
+    std::shared_ptr<Identities> identities;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_range_nowrap(0, offsets.length() - 1);
+    }
+
+    if (size_ == 1) {
+      int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
+      Index64 nextcarry(carrylen);
+      struct Error err = awkward_regulararray_broadcast_tooffsets64_size1(
+        nextcarry.ptr().get(),
+        offsets.ptr().get(),
+        offsets.offset(),
+        offsets.length());
+      util::handle_error(err, classname(), identities_.get());
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+      return std::make_shared<ListOffsetArray64>(identities, parameters_, offsets, nextcontent);
+    }
+    else {
+      struct Error err = awkward_regulararray_broadcast_tooffsets64(
+        offsets.ptr().get(),
+        offsets.offset(),
+        offsets.length(),
+        size_);
+      util::handle_error(err, classname(), identities_.get());
+      return std::make_shared<ListOffsetArray64>(identities, parameters_, offsets, content_);
+    }
   }
 
   const std::string RegularArray::classname() const {
@@ -130,6 +179,7 @@ namespace awkward {
 
   void RegularArray::tojson_part(ToJson& builder) const {
     int64_t len = length();
+    check_for_iteration();
     builder.beginlist();
     for (int64_t i = 0;  i < len;  i++) {
       getitem_at_nowrap(i).get()->tojson_part(builder);

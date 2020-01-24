@@ -181,6 +181,7 @@ namespace awkward {
         keys.get()->push_back(std::to_string(j));
       }
     }
+    check_for_iteration();
     builder.beginlist();
     for (int64_t i = 0;  i < rows;  i++) {
       builder.beginrecord();

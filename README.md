@@ -5,8 +5,12 @@
 Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array#readme) in 2020.
 
    * The [original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now a little out-of-date.
+   * My [StrangeLoop talk](https://youtu.be/2NxWpU7NArk) on September 14, 2019.
    * My [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
    * My [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
+   * My [CHEP 2019 proceedings](https://arxiv.org/abs/2001.06307) (to be published in _EPJ Web of Conferences_).
+   * [Demo for Coffea developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs/demos/2019-12-20-coffea-demo.ipynb) on December 20, 2019.
+   * [Demo for Numba developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs/demos/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
 
 ## Motivation for a new Awkward Array
 
@@ -138,7 +142,6 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] Implement appendable records.
       * [X] Test all (tested in mock [studies/fillable.py](tree/master/studies/fillable.py)).
    * [X] JSON → Awkward via header-only [RapidJSON](https://rapidjson.org) and `awkward.fromiter`.
-   * [ ] Explicit broadcasting functions for jagged and non-jagged arrays and scalars (issue [#66](https://github.com/scikit-hep/awkward-1.0/issues/66)).
    * [ ] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old; issue [#67](https://github.com/scikit-hep/awkward-1.0/issues/67)).
    * [ ] Full suite of array types:
       * [X] `EmptyArray`: 1-dimensional array with length 0 and unknown type (result of `UnknownFillable`, compatible with all types of arrays).
@@ -148,9 +151,9 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `ListOffsetArray`: the `JaggedArray` case with no unreachable data between reachable data (gaps).
       * [X] `RegularArray`: for building rectilinear, N-dimensional arrays of arbitrary contents, e.g. putting jagged dimensions inside fixed dimensions.
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
-         * [X] Implement it in Numba as well.
       * [X] `IndexedArray` and `IndexedOptionArray`: the old `IndexedArray` and `IndexedMaskedArray`; the latter has option type.
-      * [ ] `UnionArray` (issue [#54](https://github.com/scikit-hep/awkward-1.0/issues/54)): same as the old version.
+      * [X] `UnionArray` (issue [#54](https://github.com/scikit-hep/awkward-1.0/issues/54)): same as the old version.
+         * [ ] Implement it in Numba as well.
       * [ ] `BitMaskedArray` (issue [#58](https://github.com/scikit-hep/awkward-1.0/issues/58)): for nullable data with a bit mask (for Arrow).
       * [ ] `UnmaskedArray` (issue [#59](https://github.com/scikit-hep/awkward-1.0/issues/59)): for optional type without actually having a mask.
       * [ ] `SlicedArray` (issue [#55](https://github.com/scikit-hep/awkward-1.0/issues/55)): lazy-slicing (from old `Table`) that can be applied to any type.
@@ -160,7 +163,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
    * [ ] Translation to and from Apache Arrow and Parquet in C++ (issue [#68](https://github.com/scikit-hep/awkward-1.0/issues/68)).
    * [X] Layer 1 interface `Array`:
       * [X] Pass through to the layout classes in Python and Numba.
-      * [ ] Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before; issue [#60](https://github.com/scikit-hep/awkward-1.0/issues/60)).
+      * [X] Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before; issue [#60](https://github.com/scikit-hep/awkward-1.0/issues/60)).
       * [ ] Pass through other Numpy functions using [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html) (this would be new; issue [#61](https://github.com/scikit-hep/awkward-1.0/issues/61)).
       * [ ] `RecordArray` fields (not called "columns" anymore) through Layer 1 `__getattr__` (issue [#62](https://github.com/scikit-hep/awkward-1.0/issues/62)).
       * [X] Special Layer 1 `Record` type for `RecordArray` elements, supporting some methods and a visual representation based on `Identity` if available, all fields if `recordtype == "tuple"`, or the first field otherwise.

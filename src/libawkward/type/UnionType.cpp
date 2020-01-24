@@ -5,6 +5,7 @@
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
+#include "awkward/array/UnionArray.h"
 
 #include "awkward/type/UnionType.h"
 
@@ -91,7 +92,9 @@ namespace awkward {
     for (auto type : types_) {
       contents.push_back(type.get()->empty());
     }
-    throw std::runtime_error("UnionType::empty() needs UnionArray");
+    Index8 tags(0);
+    Index64 index(0);
+    return std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
   }
 
   const std::shared_ptr<Type> UnionType::type(int64_t index) const {
