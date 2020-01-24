@@ -11,6 +11,12 @@ import numpy
 import awkward1.layout
 import awkward1._util
 
+def array(layout):
+    raise NotImplementedError("FIXME")
+
+def array_function(func, types, args, kwargs, classes, functions):
+    raise NotImplementedError("FIXME")
+
 def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
     import awkward1.highlevel
 
@@ -42,9 +48,9 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
     uniontypes = (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)
 
-    listtypes = (awkward1.layout.RegularArray, awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)
-
     optiontypes = (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)
+
+    listtypes = (awkward1.layout.RegularArray, awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)
 
     recordtypes = (awkward1.layout.RecordArray,)
 

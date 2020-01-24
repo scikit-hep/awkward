@@ -15,14 +15,14 @@ class CharBehavior(awkward1.highlevel.Array):
         if encoding is None:
             return str(self.__bytes__())
         else:
-            return self.__bytes__().decode(encoding)
+            return self.__bytes__().decode(encoding, "surrogateescape")
 
     def __repr__(self):
         encoding = self.layout.type.parameters.get("encoding")
         if encoding is None:
             return repr(self.__bytes__())
         else:
-            return repr(self.__bytes__().decode(encoding))
+            return repr(self.__bytes__().decode(encoding, "surrogateescape"))
 
     def __iter__(self):
         for x in str(self):
