@@ -162,6 +162,7 @@ ERROR awkward_listoffsetarrayU32_flatten_nextcarry(uint32_t* tocarry, int64_t* t
 }
 ERROR awkward_listoffsetarray64_flatten_nextcarry(int64_t* tocarry, int64_t* tolen, const int64_t* fromoffsets, int64_t lenoffset, int64_t step) {
   return awkward_listoffsetarray_flatten_nextcarry<int64_t>(tocarry, tolen, fromoffsets, lenoffset, step);
+}
 
 template <typename C, typename M>
 ERROR awkward_indexedarray_andmask(C* toindex, const M* mask, int64_t maskoffset, const C* fromindex, int64_t indexoffset, int64_t length) {
