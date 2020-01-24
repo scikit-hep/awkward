@@ -576,7 +576,8 @@ namespace awkward {
   }
 
   int64_t NumpyArray::list_depth() const {
-    throw std::runtime_error("FIXME: NumpyArray::list_depth() is not implemented");
+    // NumpyArray is a leaf
+    return (int64_t)1;
   }
 
   const Index64 NumpyArray::count64() const {

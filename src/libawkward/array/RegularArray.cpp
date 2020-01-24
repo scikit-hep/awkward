@@ -279,7 +279,7 @@ namespace awkward {
       }
     }
     else {
-      return std::make_shared<RegularArray>(identities_, parameters_, flatten(axis - 1), size_);
+      return content_.get()->flatten(axis);
     }
   }
 

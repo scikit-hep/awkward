@@ -406,35 +406,37 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::flatten(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: ListArray::flatten(axis != 0)");
+    if (axis == 0) {
+      int64_t lenstarts = starts_.length();
+      if (stops_.length() < lenstarts) {
+        util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+      }
+
+      int64_t lenarray(0);
+      struct Error err1 = util::awkward_listarray_flatten_length(
+        &lenarray,
+        starts_.ptr().get(),
+        stops_.ptr().get(),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset());
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 indxarray(lenarray);
+      struct Error err2 = util::awkward_listarray_flatten_64<T>(
+        indxarray.ptr().get(),
+        starts_.ptr().get(),
+        stops_.ptr().get(),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset());
+      util::handle_error(err2, classname(), identities_.get());
+
+      return content_.get()->carry(indxarray);
     }
-    int64_t lenstarts = starts_.length();
-    if (stops_.length() < lenstarts) {
-      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+    else {
+      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_.get()->flatten(axis - 1));
     }
-
-    int64_t lenarray(0);
-    struct Error err1 = util::awkward_listarray_flatten_length(
-      &lenarray,
-      starts_.ptr().get(),
-      stops_.ptr().get(),
-      lenstarts,
-      starts_.offset(),
-      stops_.offset());
-    util::handle_error(err1, classname(), identities_.get());
-
-    Index64 indxarray(lenarray);
-    struct Error err2 = util::awkward_listarray_flatten_64<T>(
-      indxarray.ptr().get(),
-      starts_.ptr().get(),
-      stops_.ptr().get(),
-      lenstarts,
-      starts_.offset(),
-      stops_.offset());
-    util::handle_error(err2, classname(), identities_.get());
-
-    return content_.get()->carry(indxarray);
   }
 
   template <typename T>

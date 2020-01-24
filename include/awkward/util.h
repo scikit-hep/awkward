@@ -92,7 +92,8 @@ namespace awkward {
     ERROR awkward_indexedarray_getitem_nextcarry_64(int64_t* tocarry, const T* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
     template <typename T>
     ERROR awkward_indexedarray_getitem_carry_64(T* toindex, const T* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry);
-
+    template <typename T>
+    ERROR awkward_listoffsetarray_flatten_nextcarry(T* tocarry, int64_t* tolen, const T* fromoffsets, int64_t lenoffset, int64_t step);
   }
 }
 

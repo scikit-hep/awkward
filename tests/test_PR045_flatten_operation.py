@@ -135,14 +135,19 @@ def test_flatten_regular_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+    assert awkward1.tolist(listoffsetarray) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], []]
     regulararray = awkward1.layout.RegularArray(listoffsetarray, 2)
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 6, 10]))
+    listoffsetarray2 = awkward1.layout.ListOffsetArray64(offsets2, content)
+    assert awkward1.tolist(listoffsetarray2) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
+    regulararray2 = awkward1.layout.RegularArray(listoffsetarray2, 1)
+    assert awkward1.tolist(regulararray2) == [[[0.0, 1.1, 2.2]], [[3.3, 4.4, 5.5]], [[6.6, 7.7, 8.8, 9.9]]]
 
     assert awkward1.tolist(regulararray) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
     assert flatten(awkward1.tolist(regulararray)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], []]
     assert awkward1.tolist(regulararray.flatten()) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], []]
     assert flatten(awkward1.tolist(regulararray), 1) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
-    assert awkward1.tolist(regulararray.flatten(1)) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
-    ## FIXME: [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(regulararray.flatten(1)) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
 
     regulararray_f1 = awkward1.layout.RegularArray(listoffsetarray, 3)
     assert awkward1.tolist(regulararray_f1) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [[5.5], [6.6, 7.7, 8.8, 9.9], []]]
@@ -162,8 +167,7 @@ def test_flatten_regular_array():
     assert flatten(awkward1.tolist(regulararray_m1)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5]]
     assert awkward1.tolist(regulararray_m1.flatten()) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5]]
     assert flatten(awkward1.tolist(regulararray_m1), 1) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]
-    assert awkward1.tolist(regulararray_m1.flatten(1)) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]]
-    # FIXME:[[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]
+    assert awkward1.tolist(regulararray_m1.flatten(1)) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]
 
     regulararray_m2 = awkward1.layout.RegularArray(listoffsetarray[:-2], 2)
 
