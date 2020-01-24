@@ -47,3 +47,14 @@ class StringBehavior(awkward1.highlevel.Array):
 awkward1.classes["string"] = StringBehavior
 bytestring = awkward1.layout.ListType(byte, {"__class__": "string", "__typestr__": "bytes"})
 string = awkward1.layout.ListType(utf8, {"__class__": "string", "__typestr__": "string"})
+
+def string_equal(one, two):
+    offsets1 = numpy.asarray(one.compact_offsets64())
+    offsets2 = numpy.asarray(two.compact_offsets64())
+    counts1 = offsets1[1:] - offsets1[:-1]
+    counts2 = offsets2[1:] - offsets1[:-1]
+
+    # FIXME: this only checks string lengths! It is not correct!
+    return awkward1.layout.NumpyArray(counts1 == counts2)
+
+awkward1.functions[numpy.equal, "string", "string"] = string_equal

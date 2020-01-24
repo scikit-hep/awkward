@@ -140,3 +140,8 @@ def test_where():
     assert awkward1.tolist(awkward1.where(condition)[0]) == [5, 7, 9]
 
     assert awkward1.tolist(awkward1.where(condition, one, two)) == awkward1.tolist(numpy.where(numpy.asarray(condition), numpy.asarray(one), numpy.asarray(two)))
+
+def test_string_equal():
+    one = awkward1.Array(["one", "two", "three"])
+    two = awkward1.Array(["one", "two", "four"])
+    assert awkward1.tolist(one == two) == [True, True, False]

@@ -90,8 +90,14 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
         # now all lengths must agree
         checklength([x for x in inputs if isinstance(x, awkward1.layout.Content)])
 
+        signature = (ufunc,) + tuple(x.parameters.get("__class__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
+        custom = awkward1._util.regular_functions(functions).get(signature)
+
         # the rest of this is one switch statement
-        if any(isinstance(x, unknowntypes) for x in inputs):
+        if custom is not None:
+            return custom(*inputs, **kwargs)
+
+        elif any(isinstance(x, unknowntypes) for x in inputs):
             return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
 
         elif any(isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1 for x in inputs):
