@@ -84,3 +84,24 @@ def test_records():
     assert awkward1.tolist(array + record) == [[{"x": 101, "y": 201.1}, {"x": 102, "y": 202.2}, {"x": 103, "y": 203.3}], [], [{"x": 104, "y": 204.4}, {"x": 105, "y": 205.5}], [{"x": 200, "y": 400.0}]]
 
     assert awkward1.tolist(record + record) == {"x": 200, "y": 400}
+
+def test_tonumpy():
+    assert numpy.array_equal(awkward1.tonumpy(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])), numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    assert numpy.array_equal(awkward1.tonumpy(awkward1.Array(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))), numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    assert numpy.array_equal(awkward1.tonumpy(awkward1.Array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]])), numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+    assert numpy.array_equal(awkward1.tonumpy(awkward1.Array(numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))), numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+    assert numpy.array_equal(awkward1.tonumpy(awkward1.Array(["one", "two", "three"])), numpy.array(["one", "two", "three"]))
+    assert numpy.array_equal(awkward1.tonumpy(awkward1.Array([b"one", b"two", b"three"])), numpy.array([b"one", b"two", b"three"]))
+    assert numpy.array_equal(awkward1.tonumpy(awkward1.Array([])), numpy.array([]))
+
+    content0 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
+    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3], dtype=numpy.int64))
+    tags = awkward1.layout.Index8(numpy.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=numpy.int8))
+    index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=numpy.int64))
+    array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content0, content1]))
+    assert numpy.array_equal(awkward1.tonumpy(array), numpy.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5]))
+
+
+
+
+    # raise Exception

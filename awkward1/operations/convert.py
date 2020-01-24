@@ -44,20 +44,30 @@ def tonumpy(array):
     elif isinstance(array, numpy.ndarray):
         return array
 
-    elif isinstance(array, awkward1.behavior.string.CharBehavior):
-        if array.layout.parameters.get("encoding") is None:
-            return numpy.asarray(array.layout).view("S" + str(len(array)))[0]
-        else:
-            return tonumpy(array.__str__())
+    elif isinstance(array, awkward1.highlevel.Array):
+        return tonumpy(array.layout)
+
+    elif isinstance(array, awkward1.highlevel.Record):
+        out = array.layout
+        return tonumpy(out.array[out.at : out.at + 1])[0]
+
+    elif isinstance(array, awkward1.highlevel.FillableArray):
+        return tonumpy(array.snapshot().layout)
+
+    elif isinstance(array, awkward1.layout.FillableArray):
+        return tonumpy(array.snapshot())
 
     elif awkward1.operations.describe.parameters(array).get("__class__") == "char":
         if awkward1.operations.describe.parameters(array).get("encoding") is None:
-            return numpy.asarray(array.layout).view("S" + str(len(array)))[0]
+            return tonumpy(array.__bytes__())
         else:
             return tonumpy(array.__str__())
 
-    elif isinstance(array, awkward1.highlevel.Array):
-        return tonumpy(array.layout)
+    elif awkward1.operations.describe.parameters(array).get("__class__") == "string":
+        if awkward1.operations.describe.parameters(array.content).get("encoding") is None:
+            return numpy.array([awkward1.behavior.string.CharBehavior(array[i]).__bytes__() for i in range(len(array))])
+        else:
+            return numpy.array([awkward1.behavior.string.CharBehavior(array[i]).__str__() for i in range(len(array))])
 
     elif isinstance(array, awkward1.layout.EmptyArray):
         return numpy.array([])
@@ -68,8 +78,9 @@ def tonumpy(array):
             out = numpy.concatenate(contents)
         except:
             raise ValueError("cannot convert {0} into numpy.ndarray".format(array))
+        tags = numpy.asarray(array.tags)
         for tag, content in enumerate(contents):
-            mask = (array.tags == tag)
+            mask = (tags == tag)
             out[mask] = content
         return out
 
