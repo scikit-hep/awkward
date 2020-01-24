@@ -15,8 +15,20 @@ import awkward1._util
 def array(layout):
     return awkward1.operations.convert.tonumpy(layout)
 
-def array_function(func, types, args, kwargs, classes, functions):
-    raise NotImplementedError("FIXME")
+implemented = {}
+
+def array_function(func, types, args, kwargs):
+    function = implemented.get(func)
+    if function is None:
+        return NotImplemented
+    else:
+        return function(*args, **kwargs)
+
+def implements(numpy_function):
+    def decorator(function):
+        implemented[numpy_function] = function
+        return function
+    return decorator
 
 def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
     import awkward1.highlevel

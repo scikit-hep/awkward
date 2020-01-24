@@ -81,7 +81,7 @@ class Array(awkward1._npfunctions.NDArrayOperatorsMixin):
         return awkward1._npfunctions.array(self._layout)
 
     def __array_function__(self, func, types, args, kwargs):
-        return awkward1._npfunctions.array_function(func, types, args, kwargs, self._classes, self._functions)
+        return awkward1._npfunctions.array_function(func, types, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
@@ -182,7 +182,7 @@ class FillableArray(object):
         return awkward1._npfunctions.array(self._fillablearray.snapshot())
 
     def __array_function__(self, func, types, args, kwargs):
-        return awkward1._npfunctions.array_function(func, types, args, kwargs, self._classes, self._functions)
+        return awkward1._npfunctions.array_function(func, types, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)

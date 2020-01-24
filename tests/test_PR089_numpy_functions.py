@@ -130,3 +130,11 @@ def test_numpy_array():
 
     assert numpy.array_equal(numpy.asarray(awkward1.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}])), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", numpy.int64), ("y", numpy.float64)]))
     assert numpy.array_equal(numpy.asarray(awkward1.Array([(1, 1.1), (2, 2.2), (3, 3.3)])), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", numpy.int64), ("1", numpy.float64)]))
+
+def test_where():
+    one = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    two = awkward1.Array([  0, 100, 200, 300, 400, 500, 600, 700, 800, 900])
+    condition = awkward1.Array([False, False, False, False, False, True, False, True, False, True])
+
+    # print(numpy.where(condition, one, two))
+    # raise Exception
