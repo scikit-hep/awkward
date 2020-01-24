@@ -308,7 +308,7 @@ namespace awkward {
 
   template <typename T>
   int64_t ListOffsetArrayOf<T>::list_depth() const {
-    throw std::runtime_error("FIXME: ListOffsetArrayOf<T>::list_depth() is not implemented");
+    return content_.get()->list_depth() + (int64_t)1;
   }
 
   template <typename T>
@@ -384,7 +384,7 @@ namespace awkward {
     }
     else {
       if (axis > offsets_.length()) {
-        std::invalid_argument(std::string("ListOffsetArray cannot be flattened because aixis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(offsets_.length()) + std::string(" offsets length")); 
+        std::invalid_argument(std::string("ListOffsetArray cannot be flattened because aixis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(offsets_.length()) + std::string(" offsets length"));
       }
       // Calculate the indices and the their new lenght
       // FIXME: Calculate length first?

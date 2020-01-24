@@ -352,7 +352,8 @@ namespace awkward {
   }
 
   int64_t RecordArray::list_depth() const {
-    throw std::runtime_error("FIXME: RecordArray::list_depth() is not implemented");
+    // FIXME: find a specific one?
+    return contents_[0].get()->list_depth() + (int64_t)1;
   }
 
   const Index64 RecordArray::count64() const {

@@ -240,7 +240,7 @@ namespace awkward {
   }
 
   int64_t RegularArray::list_depth() const {
-    throw std::runtime_error("FIXME: RegularArray::list_depth() is not implemented");
+    return content_.get()->list_depth() + (int64_t)1;
   }
 
   const Index64 RegularArray::count64() const {

@@ -335,7 +335,7 @@ namespace awkward {
 
   template <typename T>
   int64_t ListArrayOf<T>::list_depth() const {
-    throw std::runtime_error("FIXME: ListArrayOf<T>::list_depth() is not implemented");
+    return content_.get()->list_depth() + (int64_t)1;
   }
 
   template <typename T>
