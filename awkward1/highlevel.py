@@ -3,10 +3,10 @@
 import numpy
 
 import awkward1.layout
-import awkward1._npufunc
+import awkward1._npfunctions
 import awkward1.operations.convert
 
-class Array(awkward1._npufunc.NDArrayOperatorsMixin):
+class Array(awkward1._npfunctions.NDArrayOperatorsMixin):
     def __init__(self, data, type=None, classes=None, functions=None):
         if isinstance(data, awkward1.layout.Content):
             layout = data
@@ -77,10 +77,16 @@ class Array(awkward1._npufunc.NDArrayOperatorsMixin):
 
         return "<Array {0} type={1}>".format(value, type)
 
-    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._npufunc.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+    def __array__(self):
+        return awkward1._npfunctions.array(self._layout)
 
-class Record(object):
+    def __array_function__(self, func, types, args, kwargs):
+        return awkward1._npfunctions.array_function(func, types, args, kwargs)
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+
+class Record(awkward1._npfunctions.NDArrayOperatorsMixin):
     def __init__(self, data, type=None, classes=None, functions=None):
         # FIXME: more checks here
         layout = data
@@ -120,7 +126,7 @@ class Record(object):
         return awkward1._util.wrap(self.layout[where], self._classes, self._functions)
 
     def __str__(self, limit_value=85):
-        return awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
+        return awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._classes, self._functions)[1:-1]
 
     def __repr__(self, limit_value=40, limit_total=85):
         value = awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._classes, self._functions)[1:-1]
@@ -131,6 +137,9 @@ class Record(object):
             type = type[:(limit_type - 4)] + "..." + type[-1]
 
         return "<Record {0} type={1}>".format(value, type)
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
 class FillableArray(object):
     def __init__(self, classes=None, functions=None):
@@ -169,8 +178,14 @@ class FillableArray(object):
 
         return "<FillableArray {0} type={1}>".format(value, type)
 
+    def __array__(self):
+        return awkward1._npfunctions.array(self._fillablearray.snapshot())
+
+    def __array_function__(self, func, types, args, kwargs):
+        return awkward1._npfunctions.array_function(func, types, args, kwargs)
+
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._npufunc.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
     def snapshot(self):
         return awkward1._util.wrap(self._fillablearray.snapshot(), self._classes, self._functions)

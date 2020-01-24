@@ -413,6 +413,16 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  bool IndexedArrayOf<T, ISOPTION>::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  template <typename T, bool ISOPTION>
+  int64_t IndexedArrayOf<T, ISOPTION>::purelist_depth() const {
+    return content_.get()->purelist_depth();
+  }
+
+  template <typename T, bool ISOPTION>
   const std::pair<int64_t, int64_t> IndexedArrayOf<T, ISOPTION>::minmax_depth() const {
     return content_.get()->minmax_depth();
   }

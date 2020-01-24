@@ -410,6 +410,32 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  bool UnionArrayOf<T, I>::purelist_isregular() const {
+    for (auto content : contents_) {
+      if (!content.get()->purelist_isregular()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  template <typename T, typename I>
+  int64_t UnionArrayOf<T, I>::purelist_depth() const {
+    bool first = true;
+    int64_t out = -1;
+    for (auto content : contents_) {
+      if (first) {
+        first = false;
+        out = content.get()->purelist_depth();
+      }
+      else if (out != content.get()->purelist_depth()) {
+        return -1;
+      }
+    }
+    return out;
+  }
+
+  template <typename T, typename I>
   const std::pair<int64_t, int64_t> UnionArrayOf<T, I>::minmax_depth() const {
     if (contents_.empty()) {
       return std::pair<int64_t, int64_t>(0, 0);

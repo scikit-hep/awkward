@@ -32,6 +32,94 @@ def fromiter(iterable, initial=1024, resize=2.0):
 def fromjson(source, initial=1024, resize=2.0, buffersize=65536):
     return awkward1._util.wrap(awkward1.layout.fromjson(source, initial=initial, resize=resize, buffersize=buffersize), awkward1.classes, awkward1.functions)
 
+def tonumpy(array):
+    import awkward1.highlevel
+
+    if isinstance(array, (bool, str, bytes, numbers.Number)):
+        return numpy.array([array])[0]
+
+    elif sys.version_info[0] < 3 and isinstance(array, unicode):
+        return numpy.array([array])[0]
+
+    elif isinstance(array, numpy.ndarray):
+        return array
+
+    elif isinstance(array, awkward1.highlevel.Array):
+        return tonumpy(array.layout)
+
+    elif isinstance(array, awkward1.highlevel.Record):
+        out = array.layout
+        return tonumpy(out.array[out.at : out.at + 1])[0]
+
+    elif isinstance(array, awkward1.highlevel.FillableArray):
+        return tonumpy(array.snapshot().layout)
+
+    elif isinstance(array, awkward1.layout.FillableArray):
+        return tonumpy(array.snapshot())
+
+    elif awkward1.operations.describe.parameters(array).get("__class__") == "char":
+        if awkward1.operations.describe.parameters(array).get("encoding") is None:
+            return tonumpy(array.__bytes__())
+        else:
+            return tonumpy(array.__str__())
+
+    elif awkward1.operations.describe.parameters(array).get("__class__") == "string":
+        if awkward1.operations.describe.parameters(array.content).get("encoding") is None:
+            return numpy.array([awkward1.behavior.string.CharBehavior(array[i]).__bytes__() for i in range(len(array))])
+        else:
+            return numpy.array([awkward1.behavior.string.CharBehavior(array[i]).__str__() for i in range(len(array))])
+
+    elif isinstance(array, awkward1.layout.EmptyArray):
+        return numpy.array([])
+
+    elif isinstance(array, (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)):
+        contents = [tonumpy(array.project(i)) for i in range(array.numcontents)]
+        try:
+            out = numpy.concatenate(contents)
+        except:
+            raise ValueError("cannot convert {0} into numpy.ndarray".format(array))
+        tags = numpy.asarray(array.tags)
+        for tag, content in enumerate(contents):
+            mask = (tags == tag)
+            out[mask] = content
+        return out
+
+    elif isinstance(array, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)):
+        content = tonumpy(array.project())
+        shape = list(content.shape)
+        shape[0] = len(array)
+        data = numpy.empty(shape, dtype=content.dtype)
+        mask0 = (numpy.asarray(array.index) < 0)
+        mask = numpy.broadcast_to(mask0.reshape((shape[0],) + (1,)*(len(shape) - 1)), shape)
+        data[~mask0] = content
+        return numpy.ma.MaskedArray(data, mask)
+
+    elif isinstance(array, awkward1.layout.RegularArray):
+        out = tonumpy(array.content)
+        head, tail = out.shape[0], out.shape[1:]
+        shape = (head // array.size, array.size) + tail
+        return out[:shape[0]*array.size].reshape(shape)
+
+    elif isinstance(array, (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)):
+        return tonumpy(array.toRegularArray())
+
+    elif isinstance(array, awkward1.layout.RecordArray):
+        if array.numfields == 0:
+            return numpy.empty(len(array), dtype=[])
+        contents = [tonumpy(array.field(i)) for i in range(array.numfields)]
+        if any(len(x.shape) != 1 for x in contents):
+            raise ValueError("cannot convert {0} into numpy.ndarray".format(array))
+        out = numpy.empty(len(contents[0]), dtype=[(str(n), x.dtype) for n, x in zip(array.keys(), contents)])
+        for n, x in zip(array.keys(), contents):
+            out[n] = x
+        return out
+
+    elif isinstance(array, awkward1.layout.NumpyArray):
+        return numpy.asarray(array)
+
+    else:
+        raise ValueError("cannot convert {0} into numpy.ndarray".format(array))
+
 def tolist(array):
     import awkward1.highlevel
 
@@ -40,6 +128,9 @@ def tolist(array):
 
     elif sys.version_info[0] < 3 and isinstance(array, unicode):
         return array
+
+    elif isinstance(array, numpy.ndarray):
+        return array.tolist()
 
     elif isinstance(array, awkward1.behavior.string.CharBehavior):
         if array.layout.parameters.get("encoding") is None:
@@ -68,9 +159,6 @@ def tolist(array):
     elif isinstance(array, awkward1.layout.Record):
         return {n: tolist(x) for n, x in array.fielditems()}
 
-    elif isinstance(array, numpy.ndarray):
-        return array.tolist()
-
     elif isinstance(array, awkward1.layout.FillableArray):
         return [tolist(x) for x in array.snapshot()]
 
@@ -89,6 +177,15 @@ def tojson(array, destination=None, pretty=False, maxdecimals=None, buffersize=6
     if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return json.dumps(array)
 
+    elif isinstance(array, bytes):
+        return json.dumps(array.decode("utf-8", "surrogateescape"))
+
+    elif sys.version_info[0] < 3 and isinstance(array, unicode):
+        return json.dumps(array)
+
+    elif isinstance(array, numpy.ndarray):
+        out = awkward1.layout.NumpyArray(array)
+
     elif isinstance(array, awkward1.highlevel.Array):
         out = array.layout
 
@@ -100,9 +197,6 @@ def tojson(array, destination=None, pretty=False, maxdecimals=None, buffersize=6
 
     elif isinstance(array, awkward1.layout.Record):
         out = array
-
-    elif isinstance(array, numpy.ndarray):
-        out = awkward1.layout.NumpyArray(array)
 
     elif isinstance(array, awkward1.layout.FillableArray):
         out = array.snapshot()
@@ -117,5 +211,29 @@ def tojson(array, destination=None, pretty=False, maxdecimals=None, buffersize=6
         return out.tojson(pretty=pretty, maxdecimals=maxdecimals)
     else:
         return out.tojson(destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize)
+
+def tolayout(array, allowrecord=True):
+    import awkward1.highlevel
+
+    if isinstance(array, awkward1.highlevel.Array):
+        return array.layout
+
+    elif allowrecord and isinstance(array, awkward1.highlevel.Record):
+        return array.layout
+
+    elif isinstance(array, awkward1.highlevel.FillableArray):
+        return array.snapshot().layout
+
+    elif isinstance(array, awkward1.layout.FillableArray):
+        return array.snapshot()
+
+    elif isinstance(array, awkward1.layout.Content):
+        return array
+
+    elif allowrecord and isinstance(array, awkward1.layout.Record):
+        return array
+
+    else:
+        raise TypeError("{0} cannot be converted into a layout".format(array))
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "json", "Iterable", "numpy", "awkward1")]

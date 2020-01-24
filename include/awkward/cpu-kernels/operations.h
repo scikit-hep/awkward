@@ -53,6 +53,10 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_regulararray_broadcast_tooffsets64_size1(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength);
 
+  EXPORT_SYMBOL struct Error awkward_listoffsetarray32_toRegularArray(int64_t* size, const int32_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength);
+  EXPORT_SYMBOL struct Error awkward_listoffsetarrayU32_toRegularArray(int64_t* size, const uint32_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength);
+  EXPORT_SYMBOL struct Error awkward_listoffsetarray64_toRegularArray(int64_t* size, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength);
+
 }
 
 #endif // AWKWARDCPU_GETITEM_H_

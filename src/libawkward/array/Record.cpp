@@ -172,6 +172,14 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::carry");
   }
 
+  bool Record::purelist_isregular() const {
+    return true;
+  }
+
+  int64_t Record::purelist_depth() const {
+    return 0;
+  }
+
   const std::pair<int64_t, int64_t> Record::minmax_depth() const {
     std::pair<int64_t, int64_t> out = array_.minmax_depth();
     return std::pair<int64_t, int64_t>(out.first - 1, out.second - 1);

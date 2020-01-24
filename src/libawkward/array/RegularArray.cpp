@@ -44,8 +44,9 @@ namespace awkward {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument("broadcast_tooffsets64 can only be used with offsets that start at 0");
     }
+
     int64_t len = length();
-    if (offsets.length() - 1 > len) {
+    if (offsets.length() - 1 != len) {
       throw std::invalid_argument(std::string("cannot broadcast RegularArray of length ") + std::to_string(len) + (" to length ") + std::to_string(offsets.length() - 1));
     }
 
@@ -262,6 +263,14 @@ namespace awkward {
       identities = identities_.get()->getitem_carry_64(carry);
     }
     return std::make_shared<RegularArray>(identities, parameters_, content_.get()->carry(nextcarry), size_);
+  }
+
+  bool RegularArray::purelist_isregular() const {
+    return content_.get()->purelist_isregular();
+  }
+
+  int64_t RegularArray::purelist_depth() const {
+    return content_.get()->purelist_depth() + 1;
   }
 
   const std::pair<int64_t, int64_t> RegularArray::minmax_depth() const {

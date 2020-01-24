@@ -1227,6 +1227,9 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("key", &T::key)
           .def("haskey", &T::haskey)
           .def("keys", &T::keys)
+          .def_property_readonly("purelist_isregular", &T::purelist_isregular)
+          .def_property_readonly("purelist_depth", &T::purelist_depth)
+          .def("getitem_nothing", &T::getitem_nothing)
 
           // operations
           .def("count", [](T& self, int64_t axis) -> py::object {
@@ -1303,6 +1306,7 @@ py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content>
       .def_property_readonly("content", &ak::ListArrayOf<T>::content)
       .def("compact_offsets64", &ak::ListArrayOf<T>::compact_offsets64)
       .def("broadcast_tooffsets64", &ak::ListArrayOf<T>::broadcast_tooffsets64)
+      .def("toRegularArray", &ak::ListArrayOf<T>::toRegularArray)
   );
 }
 
@@ -1321,6 +1325,7 @@ py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, 
       .def_property_readonly("content", &ak::ListOffsetArrayOf<T>::content)
       .def("compact_offsets64", &ak::ListOffsetArrayOf<T>::compact_offsets64)
       .def("broadcast_tooffsets64", &ak::ListOffsetArrayOf<T>::broadcast_tooffsets64)
+      .def("toRegularArray", &ak::ListOffsetArrayOf<T>::toRegularArray)
   );
 }
 
