@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
-#include <numeric>
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
