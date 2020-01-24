@@ -136,5 +136,7 @@ def test_where():
     two = awkward1.Array([  0, 100, 200, 300, 400, 500, 600, 700, 800, 900])
     condition = awkward1.Array([False, False, False, False, False, True, False, True, False, True])
 
-    # print(numpy.where(condition, one, two))
-    # raise Exception
+    assert isinstance(awkward1.where(condition)[0], awkward1.Array)
+    assert awkward1.tolist(awkward1.where(condition)[0]) == [5, 7, 9]
+
+    assert awkward1.tolist(awkward1.where(condition, one, two)) == awkward1.tolist(numpy.where(numpy.asarray(condition), numpy.asarray(one), numpy.asarray(two)))
