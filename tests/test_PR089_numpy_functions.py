@@ -143,5 +143,5 @@ def test_where():
 
 def test_string_equal():
     one = awkward1.Array(["one", "two", "three"])
-    two = awkward1.Array(["one", "two", "four"])
-    assert awkward1.tolist(one == two) == [True, True, False]
+    two = awkward1.Array(["ONE", "two", "four"])
+    assert awkward1.tolist(one == two) == [False, True, False]

@@ -49,12 +49,16 @@ bytestring = awkward1.layout.ListType(byte, {"__class__": "string", "__typestr__
 string = awkward1.layout.ListType(utf8, {"__class__": "string", "__typestr__": "string"})
 
 def string_equal(one, two):
-    offsets1 = numpy.asarray(one.compact_offsets64())
-    offsets2 = numpy.asarray(two.compact_offsets64())
-    counts1 = offsets1[1:] - offsets1[:-1]
-    counts2 = offsets2[1:] - offsets1[:-1]
+    # FIXME: this needs a much better implementation;
+    # It's here just to demonstrate overloading.
 
-    # FIXME: this only checks string lengths! It is not correct!
-    return awkward1.layout.NumpyArray(counts1 == counts2)
+    counts1 = numpy.asarray(one.count())
+    counts2 = numpy.asarray(two.count())
+    counts_equal = (counts1 == counts2)
+    contents_equal = numpy.empty_like(counts_equal)
+    for i, (x, y) in enumerate(zip(one, two)):
+        contents_equal[i] = numpy.array_equal(numpy.asarray(x), numpy.asarray(y))
+
+    return awkward1.layout.NumpyArray(counts_equal & contents_equal)
 
 awkward1.functions[numpy.equal, "string", "string"] = string_equal
