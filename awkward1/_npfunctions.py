@@ -9,10 +9,11 @@ except ImportError:
 import numpy
 
 import awkward1.layout
+import awkward1.operations.convert
 import awkward1._util
 
 def array(layout):
-    raise NotImplementedError("FIXME")
+    return awkward1.operations.convert.tonumpy(layout)
 
 def array_function(func, types, args, kwargs, classes, functions):
     raise NotImplementedError("FIXME")

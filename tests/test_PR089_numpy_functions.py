@@ -104,3 +104,29 @@ def test_tonumpy():
     assert awkward1.tonumpy(awkward1.Array([1.1, 2.2, None, None, 3.3])).tolist() == [1.1, 2.2, None, None, 3.3]
     assert awkward1.tonumpy(awkward1.Array([[1.1, 2.2], [None, None], [3.3, 4.4]])).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
     assert awkward1.tonumpy(awkward1.Array([[1.1, 2.2], None, [3.3, 4.4]])).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
+
+    assert numpy.array_equal(awkward1.tonumpy(awkward1.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}])), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", numpy.int64), ("y", numpy.float64)]))
+    assert numpy.array_equal(awkward1.tonumpy(awkward1.Array([(1, 1.1), (2, 2.2), (3, 3.3)])), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", numpy.int64), ("1", numpy.float64)]))
+
+def test_numpy_array():
+    assert numpy.array_equal(numpy.asarray(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])), numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    assert numpy.array_equal(numpy.asarray(awkward1.Array(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))), numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    assert numpy.array_equal(numpy.asarray(awkward1.Array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]])), numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+    assert numpy.array_equal(numpy.asarray(awkward1.Array(numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))), numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+    assert numpy.array_equal(numpy.asarray(awkward1.Array(["one", "two", "three"])), numpy.array(["one", "two", "three"]))
+    assert numpy.array_equal(numpy.asarray(awkward1.Array([b"one", b"two", b"three"])), numpy.array([b"one", b"two", b"three"]))
+    assert numpy.array_equal(numpy.asarray(awkward1.Array([])), numpy.array([]))
+
+    content0 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
+    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3], dtype=numpy.int64))
+    tags = awkward1.layout.Index8(numpy.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=numpy.int8))
+    index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=numpy.int64))
+    array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content0, content1]))
+    assert numpy.array_equal(numpy.asarray(array), numpy.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5]))
+
+    assert numpy.ma.asarray(awkward1.Array([1.1, 2.2, None, None, 3.3])).tolist() == [1.1, 2.2, None, None, 3.3]
+    assert numpy.ma.asarray(awkward1.Array([[1.1, 2.2], [None, None], [3.3, 4.4]])).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
+    assert numpy.ma.asarray(awkward1.Array([[1.1, 2.2], None, [3.3, 4.4]])).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
+
+    assert numpy.array_equal(numpy.asarray(awkward1.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}])), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", numpy.int64), ("y", numpy.float64)]))
+    assert numpy.array_equal(numpy.asarray(awkward1.Array([(1, 1.1), (2, 2.2), (3, 3.3)])), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", numpy.int64), ("1", numpy.float64)]))

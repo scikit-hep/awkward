@@ -109,8 +109,8 @@ def tonumpy(array):
         contents = [tonumpy(array.field(i)) for i in range(array.numfields)]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError("cannot convert {0} into numpy.ndarray".format(array))
-        out = numpy.empty(len(contents[0]), dtype=[(n, x.dtype) for n, x in zip(array.keys, contents)])
-        for n, x in zip(array.keys, contents):
+        out = numpy.empty(len(contents[0]), dtype=[(n, x.dtype) for n, x in zip(array.keys(), contents)])
+        for n, x in zip(array.keys(), contents):
             out[n] = x
         return out
 
