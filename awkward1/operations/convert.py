@@ -212,4 +212,28 @@ def tojson(array, destination=None, pretty=False, maxdecimals=None, buffersize=6
     else:
         return out.tojson(destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize)
 
+def tolayout(array, allowrecord=True):
+    import awkward1.highlevel
+
+    if isinstance(array, awkward1.highlevel.Array):
+        return array.layout
+
+    elif allowrecord and isinstance(array, awkward1.highlevel.Record):
+        return array.layout
+
+    elif isinstance(array, awkward1.highlevel.FillableArray):
+        return array.snapshot().layout
+
+    elif isinstance(array, awkward1.layout.FillableArray):
+        return array.snapshot()
+
+    elif isinstance(array, awkward1.layout.Content):
+        return array
+
+    elif allowrecord and isinstance(array, awkward1.layout.Record):
+        return array
+
+    else:
+        raise TypeError("{0} cannot be converted into a layout".format(array))
+
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "json", "Iterable", "numpy", "awkward1")]

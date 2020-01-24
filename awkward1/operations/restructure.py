@@ -12,6 +12,7 @@ import numpy
 import awkward1._util
 import awkward1.layout
 import awkward1._npfunctions
+import awkward1.operations.convert
 
 @awkward1._npfunctions.implements(numpy.where)
 def where(condition, *args):
