@@ -101,7 +101,6 @@ def test_tonumpy():
     array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content0, content1]))
     assert numpy.array_equal(awkward1.tonumpy(array), numpy.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5]))
 
-
-
-
-    # raise Exception
+    assert awkward1.tonumpy(awkward1.Array([1.1, 2.2, None, None, 3.3])).tolist() == [1.1, 2.2, None, None, 3.3]
+    assert awkward1.tonumpy(awkward1.Array([[1.1, 2.2], [None, None], [3.3, 4.4]])).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
+    assert awkward1.tonumpy(awkward1.Array([[1.1, 2.2], None, [3.3, 4.4]])).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]

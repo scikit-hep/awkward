@@ -85,11 +85,13 @@ def tonumpy(array):
         return out
 
     elif isinstance(array, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)):
-        content = toarray(array.project())
+        content = tonumpy(array.project())
         shape = list(content.shape)
         shape[0] = len(array)
         data = numpy.empty(shape, dtype=content.dtype)
-        mask = (array.index < 0)
+        mask0 = (numpy.asarray(array.index) < 0)
+        mask = numpy.broadcast_to(mask0.reshape((shape[0],) + (1,)*(len(shape) - 1)), shape)
+        data[~mask0] = content
         return numpy.ma.MaskedArray(data, mask)
 
     elif isinstance(array, awkward1.layout.RegularArray):
