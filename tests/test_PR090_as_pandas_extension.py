@@ -18,3 +18,9 @@ def test_basic():
 
     nparray[2] = 999
     assert dfarray.x[2] == 999
+
+# Not ready to do the full testing suite, yet.
+
+# pandas_tests_extension = pytest.importorskip("pandas.tests.extension")
+# class TestConstructors(pandas_tests_extension.base.BaseConstructorsTests):
+#     pass
