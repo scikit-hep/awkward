@@ -442,7 +442,7 @@ namespace awkward {
       int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
       return content_.get()->getitem_range_nowrap(start, stop);
     }
-    else {
+    else if (list_depth() == 2 ) {
       if (axis > offsets_.length()) {
         std::invalid_argument(std::string("ListOffsetArray cannot be flattened because aixis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(offsets_.length()) + std::string(" offsets length"));
       }
@@ -472,6 +472,9 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
 
       return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, nextoffsets, content_);
+    }
+    else {
+      return flatten(axis - 1);
     }
   }
 
