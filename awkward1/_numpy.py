@@ -12,9 +12,13 @@ import awkward1.layout
 import awkward1.operations.convert
 import awkward1._util
 
-def array(layout):
-    return awkward1.operations.convert.tonumpy(layout)
-
+def convert_to_array(layout, args, kwargs):
+    out = awkward1.operations.convert.tonumpy(layout)
+    if args == () and kwargs == {}:
+        return out
+    else:
+        return numpy.array(out, *args, **kwargs)
+    
 implemented = {}
 
 def array_function(func, types, args, kwargs):

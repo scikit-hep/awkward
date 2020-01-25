@@ -2,11 +2,12 @@
 
 import numpy
 
+import awkward1._numpy
+import awkward1._pandas
 import awkward1.layout
-import awkward1._npfunctions
 import awkward1.operations.convert
 
-class Array(awkward1._npfunctions.NDArrayOperatorsMixin):
+class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin):
     def __init__(self, data, type=None, classes=None, functions=None):
         if isinstance(data, awkward1.layout.Content):
             layout = data
@@ -77,16 +78,16 @@ class Array(awkward1._npfunctions.NDArrayOperatorsMixin):
 
         return "<Array {0} type={1}>".format(value, type)
 
-    def __array__(self):
-        return awkward1._npfunctions.array(self._layout)
+    def __array__(self, *args, **kwargs):
+        return awkward1._numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
-        return awkward1._npfunctions.array_function(func, types, args, kwargs)
+        return awkward1._numpy.array_function(func, types, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
-class Record(awkward1._npfunctions.NDArrayOperatorsMixin):
+class Record(awkward1._numpy.NDArrayOperatorsMixin):
     def __init__(self, data, type=None, classes=None, functions=None):
         # FIXME: more checks here
         layout = data
@@ -139,7 +140,7 @@ class Record(awkward1._npfunctions.NDArrayOperatorsMixin):
         return "<Record {0} type={1}>".format(value, type)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
 class FillableArray(object):
     def __init__(self, classes=None, functions=None):
@@ -178,14 +179,14 @@ class FillableArray(object):
 
         return "<FillableArray {0} type={1}>".format(value, type)
 
-    def __array__(self):
-        return awkward1._npfunctions.array(self._fillablearray.snapshot())
+    def __array__(self, *args, **kwargs):
+        return awkward1._numpy.convert_to_array(self._fillablearray.snapshot(), args, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
-        return awkward1._npfunctions.array_function(func, types, args, kwargs)
+        return awkward1._numpy.array_function(func, types, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
     def snapshot(self):
         return awkward1._util.wrap(self._fillablearray.snapshot(), self._classes, self._functions)

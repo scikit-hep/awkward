@@ -352,7 +352,7 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
         return ak::IndexOf<T>(
           std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr), pyobject_deleter<T>(array.ptr())),
           0,
-          (T)info.shape[0]);
+          (int64_t)info.shape[0]);
       }))
 
       .def("__repr__", &ak::IndexOf<T>::tostring)
