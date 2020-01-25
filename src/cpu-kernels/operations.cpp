@@ -254,20 +254,12 @@ ERROR awkward_listarray_broadcast_tooffsets(T* tocarry, const T* fromoffsets, in
     if (count < 0) {
       return failure("broadcast's offsets must be monotonically increasing", i, kSliceNone);
     }
-    if (stop - start == 1) {
-      for (int64_t j = 0;  j < count;  j++) {
-        tocarry[k] = (T)start;
-        k++;
-      }
+    if (stop - start != count) {
+      return failure("cannot broadcast nested list", i, kSliceNone);
     }
-    else {
-      if (stop - start != count) {
-        return failure("cannot broadcast nested list", i, kSliceNone);
-      }
-      for (int64_t j = start;  j < stop;  j++) {
-        tocarry[k] = (T)j;
-        k++;
-      }
+    for (int64_t j = start;  j < stop;  j++) {
+      tocarry[k] = (T)j;
+      k++;
     }
   }
   return success();
@@ -316,4 +308,34 @@ ERROR awkward_regulararray_broadcast_tooffsets_size1(T* tocarry, const T* fromof
 }
 ERROR awkward_regulararray_broadcast_tooffsets64_size1(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength) {
   return awkward_regulararray_broadcast_tooffsets_size1<int64_t>(tocarry, fromoffsets, offsetsoffset, offsetslength);
+}
+
+template <typename C>
+ERROR awkward_listoffsetarray_toRegularArray(int64_t* size, const C* fromoffsets, int64_t offsetsoffset, int64_t offsetslength) {
+  *size = -1;
+  for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+    int64_t count = (int64_t)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
+    if (count < 0) {
+      return failure("offsets must be monotonically increasing", i, kSliceNone);
+    }
+    if (*size == -1) {
+      *size = count;
+    }
+    else if (*size != count) {
+      return failure("cannot convert to RegularArray because subarray lengths are not regular", i, kSliceNone);
+    }
+  }
+  if (*size == -1) {
+    *size = 0;
+  }
+  return success();
+}
+ERROR awkward_listoffsetarray32_toRegularArray(int64_t* size, const int32_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength) {
+  return awkward_listoffsetarray_toRegularArray<int32_t>(size, fromoffsets, offsetsoffset, offsetslength);
+}
+ERROR awkward_listoffsetarrayU32_toRegularArray(int64_t* size, const uint32_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength) {
+  return awkward_listoffsetarray_toRegularArray<uint32_t>(size, fromoffsets, offsetsoffset, offsetslength);
+}
+ERROR awkward_listoffsetarray64_toRegularArray(int64_t* size, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength) {
+  return awkward_listoffsetarray_toRegularArray<int64_t>(size, fromoffsets, offsetsoffset, offsetslength);
 }

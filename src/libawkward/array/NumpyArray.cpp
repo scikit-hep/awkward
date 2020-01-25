@@ -571,6 +571,14 @@ namespace awkward {
     return std::make_shared<NumpyArray>(identities, parameters_, ptr, shape, strides_, 0, itemsize_, format_);
   }
 
+  bool NumpyArray::purelist_isregular() const {
+    return true;
+  }
+
+  int64_t NumpyArray::purelist_depth() const {
+    return (int64_t)shape_.size();
+  }
+
   const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
     return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
   }

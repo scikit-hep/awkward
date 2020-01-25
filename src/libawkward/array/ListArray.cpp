@@ -87,6 +87,14 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::toRegularArray() const {
+    Index64 offsets = compact_offsets64();
+    std::shared_ptr<Content> listoffsetarray64 = broadcast_tooffsets64(offsets);
+    ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(listoffsetarray64.get());
+    return raw->toRegularArray();
+  }
+
+  template <typename T>
   const std::string ListArrayOf<T>::classname() const {
     if (std::is_same<T, int32_t>::value) {
       return "ListArray32";
@@ -348,6 +356,16 @@ namespace awkward {
       identities = identities_.get()->getitem_carry_64(carry);
     }
     return std::make_shared<ListArrayOf<T>>(identities, parameters_, nextstarts, nextstops, content_);
+  }
+
+  template <typename T>
+  bool ListArrayOf<T>::purelist_isregular() const {
+    return false;
+  }
+
+  template <typename T>
+  int64_t ListArrayOf<T>::purelist_depth() const {
+    return content_.get()->purelist_depth() + 1;
   }
 
   template <typename T>

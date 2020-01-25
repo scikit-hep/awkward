@@ -23,13 +23,13 @@ def wrap(content, classes, functions):
     import awkward1.layout
 
     if isinstance(content, awkward1.layout.Content):
-        cls = regular_classes(classes).get(content.type.parameters.get("__class__"))
+        cls = regular_classes(classes).get(content.parameters.get("__class__"))
         if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Array)):
             cls = awkward1.Array
         return cls(content, classes=classes, functions=functions)
 
     elif isinstance(content, awkward1.layout.Record):
-        cls = regular_classes(classes).get(content.type.parameters.get("__class__"))
+        cls = regular_classes(classes).get(content.parameters.get("__class__"))
         if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Record)):
             cls = awkward1.Record
         return cls(content, classes=classes, functions=functions)
@@ -62,7 +62,7 @@ def minimally_touching_string(limit_length, layout, classes, functions):
     import awkward1.layout
 
     if isinstance(layout, awkward1.layout.Record):
-        layout = layout.array
+        layout = layout.array[layout.at : layout.at + 1]
 
     if len(layout) == 0:
         return "[]"
@@ -70,14 +70,14 @@ def minimally_touching_string(limit_length, layout, classes, functions):
     def forward(x, space, brackets=True, wrap=True):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
-            cls = regular_classes(classes).get(x.type.parameters.get("__class__"))
+            cls = regular_classes(classes).get(x.parameters.get("__class__"))
             if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
                 y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
-            cls = regular_classes(classes).get(x.type.parameters.get("__class__"))
+            cls = regular_classes(classes).get(x.parameters.get("__class__"))
             if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
                 y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:
@@ -112,14 +112,14 @@ def minimally_touching_string(limit_length, layout, classes, functions):
     def backward(x, space, brackets=True, wrap=True):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
-            cls = regular_classes(classes).get(x.type.parameters.get("__class__"))
+            cls = regular_classes(classes).get(x.parameters.get("__class__"))
             if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
                 y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
-            cls = regular_classes(classes).get(x.type.parameters.get("__class__"))
+            cls = regular_classes(classes).get(x.parameters.get("__class__"))
             if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
                 y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:

@@ -114,6 +114,8 @@ namespace awkward {
     ERROR awkward_listoffsetarray_compact_offsets64(int64_t* tooffsets, const T* fromoffsets, int64_t offsetsoffset, int64_t length);
     template <typename T>
     ERROR awkward_listarray_broadcast_tooffsets64(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const T* fromstarts, int64_t startsoffset, const T* fromstops, int64_t stopsoffset, int64_t lencontent);
+    template <typename T>
+    Error awkward_listoffsetarray_toRegularArray(int64_t* size, const T* fromoffsets, int64_t offsetsoffset, int64_t offsetslength);
 
   }
 }

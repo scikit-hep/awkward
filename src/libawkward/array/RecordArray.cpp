@@ -314,6 +314,14 @@ namespace awkward {
     }
   }
 
+  bool RecordArray::purelist_isregular() const {
+    return true;
+  }
+
+  int64_t RecordArray::purelist_depth() const {
+    return 1;
+  }
+
   const std::pair<int64_t, int64_t> RecordArray::minmax_depth() const {
     if (contents_.empty()) {
       return std::pair<int64_t, int64_t>(0, 0);

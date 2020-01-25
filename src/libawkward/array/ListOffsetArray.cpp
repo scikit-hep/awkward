@@ -102,6 +102,23 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::toRegularArray() const {
+    int64_t start = (int64_t)offsets_.getitem_at(0);
+    int64_t stop = (int64_t)offsets_.getitem_at(offsets_.length() - 1);
+    std::shared_ptr<Content> content = content_.get()->getitem_range_nowrap(start, stop);
+
+    int64_t size;
+    struct Error err = util::awkward_listoffsetarray_toRegularArray<T>(
+      &size,
+      offsets_.ptr().get(),
+      offsets_.offset(),
+      offsets_.length());
+    util::handle_error(err, classname(), identities_.get());
+
+    return std::make_shared<RegularArray>(identities_, parameters_, content, size);
+  }
+
+  template <typename T>
   const std::string ListOffsetArrayOf<T>::classname() const {
     if (std::is_same<T, int32_t>::value) {
       return "ListOffsetArray32";
@@ -333,6 +350,16 @@ namespace awkward {
       identities = identities_.get()->getitem_carry_64(carry);
     }
     return std::make_shared<ListArrayOf<T>>(identities, parameters_, nextstarts, nextstops, content_);
+  }
+
+  template <typename T>
+  bool ListOffsetArrayOf<T>::purelist_isregular() const {
+    return false;
+  }
+
+  template <typename T>
+  int64_t ListOffsetArrayOf<T>::purelist_depth() const {
+    return content_.get()->purelist_depth() + 1;
   }
 
   template <typename T>

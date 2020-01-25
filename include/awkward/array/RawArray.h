@@ -352,6 +352,14 @@ namespace awkward {
       return std::make_shared<RawArrayOf<T>>(identities, parameters_, ptr, 0, carry.length(), itemsize_);
     }
 
+    bool purelist_isregular() const override {
+      return true;
+    }
+
+    int64_t purelist_depth() const override {
+      return 1;
+    }
+
     const std::pair<int64_t, int64_t> minmax_depth() const override {
       return std::pair<int64_t, int64_t>(1, 1);
     }

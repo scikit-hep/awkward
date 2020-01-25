@@ -15,14 +15,14 @@ class CharBehavior(awkward1.highlevel.Array):
         if encoding is None:
             return str(self.__bytes__())
         else:
-            return self.__bytes__().decode(encoding)
+            return self.__bytes__().decode(encoding, "surrogateescape")
 
     def __repr__(self):
         encoding = self.layout.type.parameters.get("encoding")
         if encoding is None:
             return repr(self.__bytes__())
         else:
-            return repr(self.__bytes__().decode(encoding))
+            return repr(self.__bytes__().decode(encoding, "surrogateescape"))
 
     def __iter__(self):
         for x in str(self):
@@ -47,3 +47,18 @@ class StringBehavior(awkward1.highlevel.Array):
 awkward1.classes["string"] = StringBehavior
 bytestring = awkward1.layout.ListType(byte, {"__class__": "string", "__typestr__": "bytes"})
 string = awkward1.layout.ListType(utf8, {"__class__": "string", "__typestr__": "string"})
+
+def string_equal(one, two):
+    # FIXME: this needs a much better implementation;
+    # It's here just to demonstrate overloading.
+
+    counts1 = numpy.asarray(one.count())
+    counts2 = numpy.asarray(two.count())
+    counts_equal = (counts1 == counts2)
+    contents_equal = numpy.empty_like(counts_equal)
+    for i, (x, y) in enumerate(zip(one, two)):
+        contents_equal[i] = numpy.array_equal(numpy.asarray(x), numpy.asarray(y))
+
+    return awkward1.layout.NumpyArray(counts_equal & contents_equal)
+
+awkward1.functions[numpy.equal, "string", "string"] = string_equal

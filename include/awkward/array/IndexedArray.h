@@ -43,6 +43,8 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const override;
     const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> carry(const Index64& carry) const override;
+    bool purelist_isregular() const override;
+    int64_t purelist_depth() const override;
     const std::pair<int64_t, int64_t> minmax_depth() const override;
     int64_t numfields() const override;
     int64_t fieldindex(const std::string& key) const override;

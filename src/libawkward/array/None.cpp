@@ -89,6 +89,14 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::carry");
   }
 
+  bool None::purelist_isregular() const {
+    throw std::runtime_error("undefined operation: None::purelist_isregular");
+  }
+
+  int64_t None::purelist_depth() const {
+    throw std::runtime_error("undefined operation: None::purelist_depth");
+  }
+
   const std::pair<int64_t, int64_t> None::minmax_depth() const {
     throw std::runtime_error("undefined operation: None::minmax_depth");
   }
