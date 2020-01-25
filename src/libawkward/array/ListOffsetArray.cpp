@@ -501,7 +501,7 @@ namespace awkward {
       return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, nextoffsets, content_);
     }
     else {
-      return flatten(axis - 1);
+      return content_.get()->flatten(axis - 1);
     }
   }
 
