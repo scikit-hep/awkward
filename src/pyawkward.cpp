@@ -654,6 +654,7 @@ py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(py::handle
       .def("__repr__", &ak::Iterator::tostring)
       .def("__next__", next)
       .def("next", next)
+      .def("__iter__", [](py::object self) -> py::object { return self; })
   );
 }
 

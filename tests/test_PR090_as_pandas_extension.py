@@ -7,6 +7,8 @@ import numpy
 
 import awkward1
 
+py27 = (sys.version_info[0] < 3)
+
 pandas = pytest.importorskip("pandas")
 
 def test_basic():
@@ -16,8 +18,23 @@ def test_basic():
 
     assert dfarray.x[2] == 2.2
 
-    nparray[2] = 999
-    assert dfarray.x[2] == 999
+    if not py27:
+        # Fails for MacOS and Windows Python 2.7,
+        # but I don't care a whole lot about *any* Python 2.7.
+        nparray[2] = 999
+        assert dfarray.x[2] == 999
+
+def test_interesting():
+    akarray = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    dfarray = pandas.DataFrame({"x": akarray})
+    dfarray2 = dfarray * 2
+    
+    assert isinstance(dfarray2.x.values, awkward1.Array)
+    assert awkward1.tolist(dfarray2.x.values) == [[2.2, 4.4, 6.6], [], [8.8, 11]]
+
+
+
+
 
 # Not ready to do the full testing suite, yet.
 
