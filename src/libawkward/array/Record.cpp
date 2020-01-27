@@ -127,6 +127,17 @@ namespace awkward {
     return std::make_shared<Record>(array_, at_);
   }
 
+  const std::shared_ptr<Content> Record::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    std::shared_ptr<Content> out = array_.deep_copy(copyarrays, copyindexes, copyidentities);
+    RecordArray* raw = dynamic_cast<RecordArray*>(out.get());
+    if (raw->numfields() == 0) {
+      return std::make_shared<Record>(RecordArray(raw->identities(), raw->parameters(), raw->length(), raw->istuple()), at_);
+    }
+    else {
+      return std::make_shared<Record>(RecordArray(raw->identities(), raw->parameters(), raw->contents(), raw->recordlookup()), at_);
+    }
+  }
+
   void Record::check_for_iteration() const {
     if (array_.identities().get() != nullptr  &&  array_.identities().get()->length() != 1) {
       util::handle_error(failure("len(identities) != 1 for scalar Record", kSliceNone, kSliceNone), array_.identities().get()->classname(), nullptr);

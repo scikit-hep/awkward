@@ -32,6 +32,7 @@ namespace awkward {
     void nbytes_part(std::map<size_t, int64_t>& largest) const override;
     int64_t length() const override;
     const std::shared_ptr<Content> shallow_copy() const override;
+    const std::shared_ptr<Content> deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const override;
     void check_for_iteration() const override;
     const std::shared_ptr<Content> getitem_nothing() const override;
     const std::shared_ptr<Content> getitem_at(int64_t at) const override;

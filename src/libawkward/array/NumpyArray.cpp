@@ -441,6 +441,25 @@ namespace awkward {
     return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
 
+  const std::shared_ptr<Content> NumpyArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    std::shared_ptr<void> ptr = ptr_;
+    std::vector<ssize_t> shape = shape_;
+    std::vector<ssize_t> strides = strides_;
+    ssize_t byteoffset = byteoffset_;
+    if (copyarrays) {
+      NumpyArray tmp = contiguous();
+      ptr = tmp.ptr();
+      shape = tmp.shape();
+      strides = tmp.strides();
+      byteoffset = tmp.byteoffset();
+    }
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<NumpyArray>(identities, parameters_, ptr, shape, strides, byteoffset, itemsize_, format_);
+  }
+
   void NumpyArray::check_for_iteration() const {
     if (identities_.get() != nullptr  &&  identities_.get()->length() < shape_[0]) {
       util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);

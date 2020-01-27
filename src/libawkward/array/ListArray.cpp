@@ -260,6 +260,18 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    IndexOf<T> starts = copyindexes ? starts_.deep_copy() : starts_;
+    IndexOf<T> stops = copyindexes ? stops_.deep_copy() : stops_;
+    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<ListArrayOf<T>>(identities, parameters_, starts, stops, content);
+  }
+
+  template <typename T>
   void ListArrayOf<T>::check_for_iteration() const {
     if (stops_.length() < starts_.length()) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());

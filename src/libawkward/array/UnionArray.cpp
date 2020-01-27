@@ -278,6 +278,21 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    IndexOf<T> tags = copyindexes ? tags_.deep_copy() : tags_;
+    IndexOf<I> index = copyindexes ? index_.deep_copy() : index_;
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto x : contents_) {
+      contents.push_back(x.get()->deep_copy(copyarrays, copyindexes, copyidentities));
+    }
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities, parameters_, tags, index, contents);
+  }
+
+  template <typename T, typename I>
   void UnionArrayOf<T, I>::check_for_iteration() const {
     if (index_.length() < tags_.length()) {
       util::handle_error(failure("len(index) < len(tags)", kSliceNone, kSliceNone), classname(), identities_.get());

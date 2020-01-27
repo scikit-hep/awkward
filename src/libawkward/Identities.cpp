@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <cassert>
+#include <cstring>
 #include <atomic>
 #include <iomanip>
 #include <sstream>
@@ -148,6 +149,15 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Identities> IdentitiesOf<T>::shallow_copy() const {
     return std::make_shared<IdentitiesOf<T>>(ref_, fieldloc_, offset_, width_, length_, ptr_);
+  }
+
+  template <typename T>
+  const std::shared_ptr<Identities> IdentitiesOf<T>::deep_copy() const {
+    std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_], util::array_deleter<T>());
+    if (length_ != 0) {
+      memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*((size_t)length_));
+    }
+    return std::make_shared<IdentitiesOf<T>>(ref_, fieldloc_, 0, width_, length_, ptr);
   }
 
   template <typename T>

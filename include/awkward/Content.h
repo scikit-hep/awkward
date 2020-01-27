@@ -31,6 +31,7 @@ namespace awkward {
     virtual void nbytes_part(std::map<size_t, int64_t>& largest) const = 0;
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
+    virtual const std::shared_ptr<Content> deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const = 0;
     virtual void check_for_iteration() const = 0;
     virtual const std::shared_ptr<Content> getitem_nothing() const = 0;
     virtual const std::shared_ptr<Content> getitem_at(int64_t at) const = 0;

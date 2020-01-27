@@ -4,6 +4,7 @@
 #define AWKWARD_RAWARRAY_H_
 
 #include <cassert>
+#include <cstring>
 #include <vector>
 #include <string>
 #include <iomanip>
@@ -277,6 +278,21 @@ namespace awkward {
 
     const std::shared_ptr<Content> shallow_copy() const override {
       return std::make_shared<RawArrayOf<T>>(identities_, parameters_, ptr_, offset_, length_, itemsize_);
+    }
+
+    const std::shared_ptr<Content> deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const override {
+      std::shared_ptr<T> ptr = ptr_;
+      int64_t offset = offset_;
+      if (copyarrays) {
+        ptr = std::shared_ptr<T>(new T[(size_t)length_], util::array_deleter<T>());
+        memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*((size_t)length_));
+        offset = 0;
+      }
+      std::shared_ptr<Identities> identities = identities_;
+      if (copyidentities  &&  identities_.get() != nullptr) {
+        identities = identities_.get()->deep_copy();
+      }
+      return std::make_shared<RawArrayOf<T>>(identities, parameters_, ptr, offset, length_, itemsize_);
     }
 
     void check_for_iteration() const override {

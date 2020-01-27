@@ -59,6 +59,10 @@ namespace awkward {
     return std::make_shared<None>();
   }
 
+  const std::shared_ptr<Content> None::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    return std::make_shared<None>();
+  }
+
   void None::check_for_iteration() const { }
 
   const std::shared_ptr<Content> None::getitem_nothing() const {

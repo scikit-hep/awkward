@@ -91,8 +91,8 @@ class PandasMixin(PandasNotImportedYet):
         raise NotImplementedError
 
     def copy(self):
-        # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.copy.html
-        raise NotImplementedError
+        import awkward1.highlevel
+        return awkward1.highlevel.Array(self._layout.deep_copy(copyarrays=True, copyindexes=True, copyidentities=True))
 
     @classmethod
     def _concat_same_type(cls, to_concat):

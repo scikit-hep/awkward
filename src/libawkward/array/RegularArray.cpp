@@ -203,6 +203,15 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities_, parameters_, content_, size_);
   }
 
+  const std::shared_ptr<Content> RegularArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<RegularArray>(identities, parameters_, content, size_);
+  }
+
   void RegularArray::check_for_iteration() const {
     if (identities_.get() != nullptr  && identities_.get()->length() < length()) {
       util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);

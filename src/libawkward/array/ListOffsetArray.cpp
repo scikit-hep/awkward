@@ -264,6 +264,17 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    IndexOf<T> offsets = copyindexes ? offsets_.deep_copy() : offsets_;
+    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<ListOffsetArrayOf<T>>(identities, parameters_, offsets, content);
+  }
+
+  template <typename T>
   void ListOffsetArrayOf<T>::check_for_iteration() const {
     if (identities_.get() != nullptr  &&  identities_.get()->length() < offsets_.length() - 1) {
       util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);

@@ -74,6 +74,14 @@ namespace awkward {
     return std::make_shared<EmptyArray>(identities_, parameters_);
   }
 
+  const std::shared_ptr<Content> EmptyArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<EmptyArray>(identities, parameters_);
+  }
+
   void EmptyArray::check_for_iteration() const { }
 
   const std::shared_ptr<Content> EmptyArray::getitem_nothing() const {

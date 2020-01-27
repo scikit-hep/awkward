@@ -228,6 +228,23 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> RecordArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto x : contents_) {
+      contents.push_back(x.get()->deep_copy(copyarrays, copyindexes, copyidentities));
+    }
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    if (contents.empty()) {
+      return std::make_shared<RecordArray>(identities, parameters_, length(), istuple());
+    }
+    else {
+      return std::make_shared<RecordArray>(identities, parameters_, contents, recordlookup_);
+    }
+  }
+
   void RecordArray::check_for_iteration() const {
     if (identities_.get() != nullptr  &&  identities_.get()->length() < length()) {
       util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);

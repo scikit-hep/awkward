@@ -271,6 +271,17 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    IndexOf<T> index = copyindexes ? index_.deep_copy() : index_;
+    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities, parameters_, index, content);
+  }
+
+  template <typename T, bool ISOPTION>
   void IndexedArrayOf<T, ISOPTION>::check_for_iteration() const {
     if (identities_.get() != nullptr  &&  identities_.get()->length() < index_.length()) {
       util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);
