@@ -34,6 +34,8 @@ def test_interesting():
 
     akarray.nbytes == dfarray.x.nbytes
 
+    assert awkward1.tolist(akarray) == awkward1.tolist(akarray.copy())
+
 
 
 # Not ready to do the full testing suite, yet.

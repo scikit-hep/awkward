@@ -38,6 +38,18 @@ def get_dtype():
 class PandasNotImportedYet(object):
     pass
 
+def extra(defaults, args, kwargs):
+    out = []
+    for i in range(len(defaults)):
+        name, default = defaults[i]
+        if i < len(args):
+            out.append(args[i])
+        elif name in kwargs:
+            out.append(kwargs[name])
+        else:
+            out.append(default)
+    return out
+
 class PandasMixin(PandasNotImportedYet):
     # REQUIRED by Pandas:
 
@@ -83,7 +95,7 @@ class PandasMixin(PandasNotImportedYet):
         import awkward1.operations.structure
         return numpy.array(awkward1.operations.structure.isna(self))
 
-    def take(self, indices, allow_fill, fill_value):
+    def take(self, indices, *args, **kwargs):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.take.html
         # indices:
         # allow_fill:
