@@ -501,7 +501,26 @@ namespace awkward {
       return content_.get()->carry(indxarray);
     }
     else {
-      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_.get()->flatten(axis - 1));
+      int64_t lenstarts = starts_.length();
+      IndexOf<T> tostarts(lenstarts);
+      IndexOf<T> tostops(lenstarts);
+
+      Index64 count = count64();
+      int64_t clength = count.length();
+
+      struct Error err3 = util::awkward_listarray_transform_starts_stops_64<T>(
+        tostarts.ptr().get(),
+        tostops.ptr().get(),
+        count.ptr().get(),
+        starts_.ptr().get(),
+        stops_.ptr().get(),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset(),
+        clength);
+      util::handle_error(err3, classname(), identities_.get());
+
+      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, tostarts, tostops, content_.get()->flatten(axis - 1));
     }
   }
 
