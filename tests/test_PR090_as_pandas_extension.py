@@ -28,11 +28,11 @@ def test_interesting():
     akarray = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     dfarray = pandas.DataFrame({"x": akarray})
     dfarray2 = dfarray * 2
-    
+
     assert isinstance(dfarray2.x.values, awkward1.Array)
     assert awkward1.tolist(dfarray2.x.values) == [[2.2, 4.4, 6.6], [], [8.8, 11]]
 
-
+    akarray.nbytes == dfarray.x.nbytes
 
 
 

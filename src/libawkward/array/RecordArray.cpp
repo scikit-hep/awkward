@@ -194,6 +194,15 @@ namespace awkward {
     builder.endlist();
   }
 
+  void RecordArray::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    for (auto x : contents_) {
+      x.get()->nbytes_part(largest);
+    }
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
   int64_t RecordArray::length() const {
     if (contents_.empty()) {
       return length_;

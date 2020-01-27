@@ -29,6 +29,7 @@ namespace awkward {
     const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     void tojson_part(ToJson& builder) const override;
+    void nbytes_part(std::map<size_t, int64_t>& largest) const override;
     int64_t length() const override;
     const std::shared_ptr<Content> shallow_copy() const override;
     void check_for_iteration() const override;

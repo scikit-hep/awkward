@@ -1222,6 +1222,7 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("__iter__", &iter<T>)
           .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
           .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
+          .def_property_readonly("nbytes", &T::nbytes)
           .def_property_readonly("identity", &identity<T>)
           .def_property_readonly("numfields", &T::numfields)
           .def("fieldindex", &T::fieldindex)

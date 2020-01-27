@@ -60,6 +60,12 @@ namespace awkward {
     builder.endlist();
   }
 
+  void EmptyArray::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
   int64_t EmptyArray::length() const {
     return 0;
   }

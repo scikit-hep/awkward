@@ -4,6 +4,7 @@
 #define AWKWARD_INDEX_H_
 
 #include <string>
+#include <map>
 #include <memory>
 
 #include "awkward/cpu-kernels/util.h"
@@ -37,6 +38,7 @@ namespace awkward {
     void setitem_at_nowrap(int64_t at, T value) const;
     IndexOf<T> getitem_range(int64_t start, int64_t stop) const;
     IndexOf<T> getitem_range_nowrap(int64_t start, int64_t stop) const;
+    void nbytes_part(std::map<size_t, int64_t>& largest) const;
     const std::shared_ptr<Index> shallow_copy() const override;
     const std::shared_ptr<Index> deep_copy() const override;
     IndexOf<int64_t> to64() const override;

@@ -258,6 +258,16 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  void UnionArrayOf<T, I>::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    for (auto x : contents_) {
+      x.get()->nbytes_part(largest);
+    }
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
+  template <typename T, typename I>
   int64_t UnionArrayOf<T, I>::length() const {
     return tags_.length();
   }

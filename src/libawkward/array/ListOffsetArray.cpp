@@ -245,6 +245,15 @@ namespace awkward {
   }
 
   template <typename T>
+  void ListOffsetArrayOf<T>::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    offsets_.nbytes_part(largest);
+    content_.get()->nbytes_part(largest);
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
+  template <typename T>
   int64_t ListOffsetArrayOf<T>::length() const {
     return offsets_.length() - 1;
   }

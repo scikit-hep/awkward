@@ -47,6 +47,10 @@ namespace awkward {
     builder.null();
   }
 
+  void None::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    throw std::runtime_error("undefined operation: None::nbytes_part");
+  }
+
   int64_t None::length() const {
     return -1;
   }

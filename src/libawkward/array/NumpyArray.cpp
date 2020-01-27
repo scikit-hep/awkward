@@ -413,6 +413,21 @@ namespace awkward {
     }
   }
 
+  void NumpyArray::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    int64_t len = 1;
+    if (!shape_.empty()) {
+      len = shape_[0];
+    }
+    size_t x = (size_t)ptr_.get();
+    auto it = largest.find(x);
+    if (it == largest.end()  ||  it->second < itemsize_*len) {
+      largest[x] = itemsize_*len;
+    }
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
   int64_t NumpyArray::length() const {
     if (isscalar()) {
       return -1;   // just like Record, which is also a scalar

@@ -135,6 +135,15 @@ namespace awkward {
   }
 
   template <typename T>
+  void IndexOf<T>::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    size_t x = (size_t)ptr_.get();
+    auto it = largest.find(x);
+    if (it == largest.end()  ||  it->second < sizeof(T)*length_) {
+      largest[x] = sizeof(T)*length_;
+    }
+  }
+
+  template <typename T>
   const std::shared_ptr<Index> IndexOf<T>::shallow_copy() const {
     return std::make_shared<IndexOf<T>>(ptr_, offset_, length_);
   }

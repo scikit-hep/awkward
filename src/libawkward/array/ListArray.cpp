@@ -240,6 +240,16 @@ namespace awkward {
   }
 
   template <typename T>
+  void ListArrayOf<T>::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    starts_.nbytes_part(largest);
+    stops_.nbytes_part(largest);
+    content_.get()->nbytes_part(largest);
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
+  template <typename T>
   int64_t ListArrayOf<T>::length() const {
     return starts_.length();
   }

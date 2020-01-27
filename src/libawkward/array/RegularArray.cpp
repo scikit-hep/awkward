@@ -188,6 +188,13 @@ namespace awkward {
     builder.endlist();
   }
 
+  void RegularArray::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    content_.get()->nbytes_part(largest);
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
   int64_t RegularArray::length() const {
     return size_ == 0 ? 0 : content_.get()->length() / size_;   // floor of length / size
   }

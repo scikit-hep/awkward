@@ -137,6 +137,15 @@ namespace awkward {
   }
 
   template <typename T>
+  void IdentitiesOf<T>::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    size_t x = (size_t)ptr_.get();
+    auto it = largest.find(x);
+    if (it == largest.end()  ||  it->second < sizeof(T)*length_*width_) {
+      largest[x] = sizeof(T)*length_*width_;
+    }
+  }
+
+  template <typename T>
   const std::shared_ptr<Identities> IdentitiesOf<T>::shallow_copy() const {
     return std::make_shared<IdentitiesOf<T>>(ref_, fieldloc_, offset_, width_, length_, ptr_);
   }

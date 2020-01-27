@@ -115,6 +115,10 @@ namespace awkward {
     builder.endrecord();
   }
 
+  void Record::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    return array_.nbytes_part(largest);
+  }
+
   int64_t Record::length() const {
     return -1;   // just like NumpyArray with ndim == 0, which is also a scalar
   }

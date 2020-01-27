@@ -4,6 +4,7 @@
 #define AWKWARD_CONTENT_H_
 
 #include <cstdio>
+#include <map>
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Identities.h"
@@ -27,6 +28,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const = 0;
     virtual const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
     virtual void tojson_part(ToJson& builder) const = 0;
+    virtual void nbytes_part(std::map<size_t, int64_t>& largest) const = 0;
     virtual int64_t length() const = 0;
     virtual const std::shared_ptr<Content> shallow_copy() const = 0;
     virtual void check_for_iteration() const = 0;
@@ -57,6 +59,7 @@ namespace awkward {
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
     void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
+    int64_t nbytes() const;
 
     const util::Parameters parameters() const;
     void setparameters(const util::Parameters& parameters);

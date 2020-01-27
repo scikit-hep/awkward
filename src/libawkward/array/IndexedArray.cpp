@@ -252,6 +252,15 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  void IndexedArrayOf<T, ISOPTION>::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    index_.nbytes_part(largest);
+    content_.get()->nbytes_part(largest);
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
+  template <typename T, bool ISOPTION>
   int64_t IndexedArrayOf<T, ISOPTION>::length() const {
     return index_.length();
   }
