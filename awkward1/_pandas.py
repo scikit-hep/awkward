@@ -39,6 +39,26 @@ class PandasNotImportedYet(object):
     pass
 
 class PandasMixin(PandasNotImportedYet):
+    # REQUIRED by Pandas:
+
+    @classmethod
+    def _from_sequence(scalars, *args, **kwargs):
+        # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._from_sequence.html
+        # scalars:
+        # dtype:
+        # copy:
+        raise NotImplementedError
+
+    @classmethod
+    def _from_factorized(values, original):
+        # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._from_factorized.html
+        # values:
+        # original:
+        raise NotImplementedError
+
+    # __getitem__(self)
+    # __len__(self)
+
     @property
     def dtype(self):
         if isinstance(self, PandasNotImportedYet):
@@ -50,11 +70,81 @@ class PandasMixin(PandasNotImportedYet):
     def nbytes(self):
         return self._layout.nbytes
 
+    @property
+    def ndim(self):
+        return 1
+
+    @property
+    def shape(self):
+        return (len(self),)
+
     def isna(self):
+        # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.isna.html
         import awkward1.operations.structure
         return numpy.array(awkward1.operations.structure.isna(self))
 
+    def take(self, indices, allow_fill, fill_value):
+        # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.take.html
+        # indices:
+        # allow_fill:
+        # fill_value:
+        raise NotImplementedError
+
+    def copy(self):
+        # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.copy.html
+        raise NotImplementedError
+
     @classmethod
     def _concat_same_type(cls, to_concat):
+        # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._concat_same_type.html
         import awkward1.operations.structure
         return awkward1.operations.structure.concatenate(to_concat)
+
+    # RECOMMENDED for performance:
+
+    # def fillna(self, *args, **kwargs):
+    #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.fillna.html
+    #     # value:
+    #     # method:
+    #     # limit:
+    #     raise NotImplementedError
+    #
+    # def dropna(self):
+    #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.dropna.html
+    #     raise NotImplementedError
+    #
+    # def unique(self):
+    #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.unique.html
+    #     raise NotImplementedError
+    #
+    # def factorize(self, na_sentinel):
+    #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.factorize.html
+    #     # na_sentinel:
+    #     raise NotImplementedError
+    #
+    # def _values_for_factorize(self):
+    #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._values_for_factorize.html
+    #     raise NotImplementedError
+    #
+    # def argsort(self, ascending, *args, **kwargs):
+    #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.argsort.html
+    #     # ascending: bool, default True
+    #     # kind: {"quicksort", "mergesort", "heapsort"}, optional
+    #     raise NotImplementedError
+    #
+    # def _values_for_argsort(self):
+    #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._values_for_argsort.html
+    #     raise NotImplementedError
+    #
+    # def searchsorted(self, value, *args, **kwargs):
+    #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.isna.html
+    #     # value:
+    #     # side:
+    #     # sorter:
+    #     raise NotImplementedError
+    #
+    # def _reduce(self, name, *args, **kwargs):
+    #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._reduce.html
+    #     # name:
+    #     # skipna
+    #     raise NotImplementedError

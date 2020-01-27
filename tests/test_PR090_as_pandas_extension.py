@@ -38,6 +38,6 @@ def test_interesting():
 
 # Not ready to do the full testing suite, yet.
 
-# pandas_tests_extension = pytest.importorskip("pandas.tests.extension")
-# class TestConstructors(pandas_tests_extension.base.BaseConstructorsTests):
+# pandas_tests_extension_base = pytest.importorskip("pandas.tests.extension.base")
+# class TestConstructors(pandas_tests_extension_base.BaseConstructorsTests):
 #     pass
