@@ -18,13 +18,13 @@ def isna(array):
     import awkward1.highlevel
 
     def apply(layout):
-        if isinstance(layout, awkward1.layout.EmptyArray):
+        if isinstance(layout, awkward1._util.unknowntypes):
             return apply(awkward1.layout.NumpyArray(numpy.array([])))
 
-        elif isinstance(layout, (awkward1.layout.IndexedArray32, awkward1.layout.IndexedArrayU32, awkward1.layout.IndexedArray64)):
+        elif isinstance(layout, awkward1._util.indexedtypes):
             return apply(layout.project())
 
-        elif isinstance(layout, (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)):
+        elif isinstance(layout, awkward1._util.uniontypes):
             contents = [apply(layout.project(i)) for i in range(len(layout))]
             out = numpy.empty(len(layout), dtype=numpy.bool_)
             tags = numpy.asarray(layout.tags)
@@ -32,7 +32,7 @@ def isna(array):
                 out[tags == tag] = content
             return out
 
-        elif isinstance(layout, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)):
+        elif isinstance(layout, awkward1._util.optiontypes):
             index = numpy.asarray(layout.index)
             return (index < 0)
 
