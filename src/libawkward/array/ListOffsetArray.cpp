@@ -469,37 +469,6 @@ namespace awkward {
       int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
       return content_.get()->getitem_range_nowrap(start, stop);
     }
-    else if (list_depth() == 2 ) {
-      if (axis > offsets_.length()) {
-        std::invalid_argument(std::string("ListOffsetArray cannot be flattened because aixis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(offsets_.length()) + std::string(" offsets length"));
-      }
-      // Calculate the indices and the their new lenght
-      // FIXME: Calculate length first?
-      // Axis is treated as a step
-      IndexOf<T> tocount(offsets_.length());
-      int64_t tocountlen(0);
-      struct Error err1 = util::awkward_listoffsetarray_flatten_nextcarry<T>(
-        tocount.ptr().get(),
-        &tocountlen,
-        offsets_.ptr().get(),
-        offsets_.length(),
-        axis);
-      util::handle_error(err1, classname(), identities_.get());
-
-      // Trim the indices
-      // FIXME: (or fill them whith pre-calculated lenght?)
-      IndexOf<T> nextoffsets(tocountlen + 1);
-      tocountlen = 0;
-      struct Error err2 = util::awkward_listoffsetarray_flatten_nextcarry<T>(
-        nextoffsets.ptr().get(),
-        &tocountlen,
-        offsets_.ptr().get(),
-        offsets_.length(),
-        axis);
-      util::handle_error(err2, classname(), identities_.get());
-
-      return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, nextoffsets, content_);
-    }
     else {
       return content_.get()->flatten(axis - 1);
     }

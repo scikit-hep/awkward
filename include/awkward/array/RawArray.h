@@ -385,7 +385,7 @@ namespace awkward {
     }
 
     int64_t list_depth() const override {
-      throw std::runtime_error("FIXME: RawArrayOf<T>::list_depth() is not implemented");
+      return (int64_t)1;
     }
 
     // operations

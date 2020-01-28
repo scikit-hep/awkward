@@ -165,8 +165,8 @@ def test_flatten_regular_array():
                                                       [[3.3, 4.4],      [5.5], [6.6, 7.7, 8.8, 9.9], []]]
     assert flatten(awkward1.tolist(listarray), 2) == [[[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]],
                                                       [[3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]]
-    # FIXME assert awkward1.tolist(listarray.flatten(2)) == [[[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]],
-    #                                                  [[3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]]
+    assert awkward1.tolist(listarray.flatten(2)) == [[[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]],
+                                                      [[3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]]
     #assert flatten(awkward1.tolist(listarray), 3) == []
 
     ## From https://github.com/scikit-hep/awkward-array example:

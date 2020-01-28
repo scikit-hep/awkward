@@ -338,7 +338,21 @@ namespace awkward {
       }
     }
     else {
-      return content_.get()->flatten(axis);
+      Index64 count = count64();
+      Index64 ccount = content_.get()->count64();
+      Index64 offsets(length() + 1);
+      offsets.ptr().get()[0] = 0;
+      for (ssize_t i = 0; i < length(); i++) {
+        int64_t l = 0;
+        for (int64_t j = 0; j < count.ptr().get()[i]; j++) {
+          l += ccount.ptr().get()[j + i*size_];
+        }
+        offsets.ptr().get()[i + 1] = l + offsets.ptr().get()[i];
+      }
+
+      std::shared_ptr<Content> nextcontent = content_.get()->flatten(axis - 1);
+
+      return std::make_shared<ListOffsetArray64>(identities_, parameters_, offsets, nextcontent);
     }
   }
 

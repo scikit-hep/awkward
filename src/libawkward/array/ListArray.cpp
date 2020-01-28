@@ -500,7 +500,7 @@ namespace awkward {
 
       return content_.get()->carry(indxarray);
     }
-    else {
+    else if (axis == 1) {
       int64_t lenstarts = starts_.length();
       IndexOf<T> tostarts(lenstarts);
       IndexOf<T> tostops(lenstarts);
@@ -521,6 +521,9 @@ namespace awkward {
       util::handle_error(err3, classname(), identities_.get());
 
       return std::make_shared<ListArrayOf<T>>(identities_, parameters_, tostarts, tostops, content_.get()->flatten(axis - 1));
+    }
+    else {
+      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_.get()->flatten(axis - 1));
     }
   }
 

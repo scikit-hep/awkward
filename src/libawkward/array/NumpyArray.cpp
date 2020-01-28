@@ -602,8 +602,7 @@ namespace awkward {
   }
 
   int64_t NumpyArray::list_depth() const {
-    // NumpyArray is a leaf
-    return (int64_t)1;
+    return ndim();
   }
 
   const Index64 NumpyArray::count64() const {
