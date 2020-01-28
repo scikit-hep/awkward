@@ -112,8 +112,8 @@ rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
    * [X] **October 2019:** NumPy-compliant slicing; the Numba implementation. Feature parity will be maintained in Numba continuously.
    * [X] **November 2019:** Fillable arrays to create columnar data; high-level type objects; all list and record types.
    * [X] **December 2019:** The `awkward.Array` user interface; behavioral mix-ins, including the string type.
-   * [ ] **January 2020:** [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) and [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html); the rest of the array nodes: option and union types, indirection, chunking, and laziness.
-   * [ ] **February 2020:** The array operations: flattening, padding, concatenating, combinatorics, etc.
+   * [X] **January 2020:** [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) and [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html); the rest of the array nodes: option and union types, indirection.
+   * [ ] **February 2020:** The array operations: flattening, padding, concatenating, combinatorics, etc. and array types needed for [Uproot](https://github.com/scikit-hep/awkward-1.0/milestone/1) and [Arrow/Parquet](https://github.com/scikit-hep/awkward-1.0/milestone/3) (chunked, virtual, masked, etc.).
 
 **Updating dependent libraries:**
 
@@ -164,25 +164,25 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
    * [X] Layer 1 interface `Array`:
       * [X] Pass through to the layout classes in Python and Numba.
       * [X] Pass through Numpy ufuncs using [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) (as before; issue [#60](https://github.com/scikit-hep/awkward-1.0/issues/60)).
-      * [ ] Pass through other Numpy functions using [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html) (this would be new; issue [#61](https://github.com/scikit-hep/awkward-1.0/issues/61)).
-      * [ ] `RecordArray` fields (not called "columns" anymore) through Layer 1 `__getattr__` (issue [#62](https://github.com/scikit-hep/awkward-1.0/issues/62)).
+      * [X] Pass through other Numpy functions using [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html) (this would be new; issue [#61](https://github.com/scikit-hep/awkward-1.0/issues/61)).
+      * [X] `RecordArray` fields (not called "columns" anymore) through Layer 1 `__getattr__` (issue [#62](https://github.com/scikit-hep/awkward-1.0/issues/62)).
       * [X] Special Layer 1 `Record` type for `RecordArray` elements, supporting some methods and a visual representation based on `Identity` if available, all fields if `recordtype == "tuple"`, or the first field otherwise.
       * [X] Mechanism for adding user-defined `Methods` like `LorentzVector`, as before, but only on Layer 1.
          * [X] High-level classes for characters and strings.
-      * [ ] Inerhit from Pandas so that all Layer 1 arrays can be DataFrame columns (issue [#63](https://github.com/scikit-hep/awkward-1.0/issues/63)).
+      * [X] Inerhit from Pandas so that all Layer 1 arrays can be DataFrame columns (issue [#63](https://github.com/scikit-hep/awkward-1.0/issues/63)).
    * [ ] Full suite of operations:
       * [X] `awkward.tolist`: same as before.
       * [X] `awkward.fromiter`: same as before.
       * [X] `awkward.typeof`: reports the high-level type (accepting some non-awkward objects).
-      * [ ] `awkward.tonumpy` (issue [#65](https://github.com/scikit-hep/awkward-1.0/issues/65)): to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
+      * [X] `awkward.tonumpy` (issue [#65](https://github.com/scikit-hep/awkward-1.0/issues/65)): to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
       * [ ] `awkward.flatpandas` (issue [#80](https://github.com/scikit-hep/awkward-1.0/issues/80)): flattening jaggedness into `MultiIndex` rows and nested records into `MultiIndex` columns. This is distinct from the arrays' inheritance from Pandas, distinct from the natural ability to use any one of them as DataFrame columns.
       * [ ] `awkward.flatten`: same as old with an `axis` parameter (issue [#51](https://github.com/scikit-hep/awkward-1.0/issues/51)).
       * [ ] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporting an `axis` method (issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
       * [ ] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std` (addendum to issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
       * [ ] `awkward.argmin`, `awkward.argmax` (issue [#70](https://github.com/scikit-hep/awkward-1.0/issues/70)): return values and `None` instead of singleton and empty lists.
       * [ ] `awkward.argsort`, and `awkward.sort` (issue [#74](https://github.com/scikit-hep/awkward-1.0/issues/74)): same as old.
-      * [ ] `awkward.where` (issue [#75](https://github.com/scikit-hep/awkward-1.0/issues/75)): like `numpy.where`; old doesn't have this yet, but we'll need it.
-      * [ ] `awkward.concatenate` (issue [#76](https://github.com/scikit-hep/awkward-1.0/issues/76)): same as old, but supporting `axis` at any depth.
+      * [X] `awkward.where` (issue [#75](https://github.com/scikit-hep/awkward-1.0/issues/75)): like `numpy.where`; old doesn't have this yet, but we'll need it.
+      * [X] `awkward.concatenate` (issue [#76](https://github.com/scikit-hep/awkward-1.0/issues/76)): same as old, but supporting `axis` at any depth.
       * [ ] `awkward.zip` (issue [#77](https://github.com/scikit-hep/awkward-1.0/issues/77)): makes jagged tables; this is a naive version of `awkward.join` below.
       * [ ] `awkward.pad` (issue [#73](https://github.com/scikit-hep/awkward-1.0/issues/73)): same as old, but without the `clip` option (use slicing instead).
       * [ ] `awkward.fillna` (issue [#72](https://github.com/scikit-hep/awkward-1.0/issues/72)): same as old.
