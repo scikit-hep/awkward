@@ -1,22 +1,11 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-import inspect
-
 import numpy
 
 import awkward1._numpy
 import awkward1._pandas
 import awkward1.layout
 import awkward1.operations.convert
-
-def called_by_module(modulename):
-    frame = inspect.currentframe()
-    while frame is not None:
-        name = inspect.getmodule(frame).__name__
-        if name == modulename or name.startswith(modulename + "."):
-            return True
-        frame = frame.f_back
-    return True
 
 class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin):
     def __init__(self, data, type=None, classes=None, functions=None):
@@ -70,10 +59,6 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin)
         return len(self._layout)
 
     def __iter__(self):
-        # FIXME: use called_by_module("matplotlib") to ensure that we only iterate
-        # over the structure returned by awkward1._numpy.convert_to_array
-        # or raise an error explaining that data need to be flattened to be plotted.
-
         for x in self._layout:
             yield awkward1._util.wrap(x, self._classes, self._functions)
 
@@ -94,7 +79,7 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin)
         return "<Array {0} type={1}>".format(value, type)
 
     def __array__(self, *args, **kwargs):
-        if called_by_module("pandas"):
+        if awkward1._util.called_by_module("pandas"):
             try:
                 return awkward1._numpy.convert_to_array(self._layout, args, kwargs)
             except:

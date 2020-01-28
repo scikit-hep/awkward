@@ -420,8 +420,8 @@ namespace awkward {
     }
     size_t x = (size_t)ptr_.get();
     auto it = largest.find(x);
-    if (it == largest.end()  ||  it->second < itemsize_*len) {
-      largest[x] = itemsize_*len;
+    if (it == largest.end()  ||  it->second < (int64_t)(itemsize_*len)) {
+      largest[x] = (int64_t)(itemsize_*len);
     }
     if (identities_.get() != nullptr) {
       identities_.get()->nbytes_part(largest);

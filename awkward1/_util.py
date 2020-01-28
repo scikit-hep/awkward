@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+import inspect
 import numbers
 import re
 
@@ -50,6 +51,15 @@ def wrap(content, classes, functions):
 
     else:
         return content
+
+def called_by_module(modulename):
+    frame = inspect.currentframe()
+    while frame is not None:
+        name = inspect.getmodule(frame).__name__
+        if name == modulename or name.startswith(modulename + "."):
+            return True
+        frame = frame.f_back
+    return True
 
 def key2index(keys, key):
     if keys is None:

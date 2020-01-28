@@ -268,8 +268,8 @@ namespace awkward {
     void nbytes_part(std::map<size_t, int64_t>& largest) const override {
       size_t x = (size_t)ptr_.get();
       auto it = largest.find(x);
-      if (it == largest.end()  ||  it->second < sizeof(T)*length_) {
-        largest[x] = sizeof(T)*length_;
+      if (it == largest.end()  ||  it->second < (int64_t)(sizeof(T)*length_)) {
+        largest[x] = (int64_t)(sizeof(T)*length_);
       }
       if (identities_.get() != nullptr) {
         identities_.get()->nbytes_part(largest);
