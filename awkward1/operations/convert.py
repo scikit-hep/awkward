@@ -13,7 +13,7 @@ import numpy
 import awkward1._util
 import awkward1.layout
 
-def fromnumpy(array):
+def fromnumpy(array, highlevel=True):
     def recurse(array):
         if len(array.shape) == 0:
             return awkward1.layout.NumpyArray(array.reshape(1))
@@ -21,16 +21,28 @@ def fromnumpy(array):
             return awkward1.layout.NumpyArray(array)
         else:
             return awkward1.layout.RegularArray(recurse(array.reshape((-1,) + array.shape[2:])), array.shape[1])
-    return awkward1._util.wrap(recurse(array), awkward1.classes, awkward1.functions)
+    layout = recurse(array)
+    if highlevel:
+        return awkward1._util.wrap(layout, awkward1.classes, awkward1.functions)
+    else:
+        return layout
 
-def fromiter(iterable, initial=1024, resize=2.0):
+def fromiter(iterable, highlevel=True, initial=1024, resize=2.0):
     out = awkward1.layout.FillableArray(initial=initial, resize=resize)
     for x in iterable:
         out.fill(x)
-    return awkward1._util.wrap(out.snapshot(), awkward1.classes, awkward1.functions)
+    layout = out.snapshot()
+    if highlevel:
+        return awkward1._util.wrap(layout, awkward1.classes, awkward1.functions)
+    else:
+        return layout
 
-def fromjson(source, initial=1024, resize=2.0, buffersize=65536):
-    return awkward1._util.wrap(awkward1.layout.fromjson(source, initial=initial, resize=resize, buffersize=buffersize), awkward1.classes, awkward1.functions)
+def fromjson(source, highlevel=True, initial=1024, resize=2.0, buffersize=65536):
+    layout = awkward1.layout.fromjson(source, initial=initial, resize=resize, buffersize=buffersize)
+    if highlevel:
+        return awkward1._util.wrap(layout, awkward1.classes, awkward1.functions)
+    else:
+        return layout
 
 def tonumpy(array):
     import awkward1.highlevel

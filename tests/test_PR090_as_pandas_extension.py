@@ -36,6 +36,9 @@ def test_interesting():
 
     assert awkward1.tolist(akarray) == awkward1.tolist(akarray.copy())
 
+    assert awkward1.tolist(akarray.take([2, 0, 0, 1, -1, 2])) == [[4.4, 5.5], [1.1, 2.2, 3.3], [1.1, 2.2, 3.3], [], [4.4, 5.5], [4.4, 5.5]]
+    assert awkward1.tolist(akarray.take([2, 0, 0, 1, -1, 2], allow_fill=True)) == [[4.4, 5.5], [1.1, 2.2, 3.3], [1.1, 2.2, 3.3], [], None, [4.4, 5.5]]
+    assert awkward1.tolist(akarray.take([2, 0, 0, 1, -1, 2], allow_fill=True, fill_value=999)) == [[4.4, 5.5], [1.1, 2.2, 3.3], [1.1, 2.2, 3.3], [], 999, [1.1, 2.2, 3.3]]
 
 
 # Not ready to do the full testing suite, yet.
