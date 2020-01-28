@@ -69,10 +69,13 @@ def tonumpy(array):
         else:
             return numpy.array([awkward1.behavior.string.CharBehavior(array[i]).__str__() for i in range(len(array))])
 
-    elif isinstance(array, awkward1.layout.EmptyArray):
+    elif isinstance(array, awkward1._util.unknowntypes):
         return numpy.array([])
 
-    elif isinstance(array, (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)):
+    elif isinstance(array, awkward1._util.indexedtypes):
+        return tonumpy(array.project())
+
+    elif isinstance(array, awkward1._util.uniontypes):
         contents = [tonumpy(array.project(i)) for i in range(array.numcontents)]
         try:
             out = numpy.concatenate(contents)
@@ -84,7 +87,7 @@ def tonumpy(array):
             out[mask] = content
         return out
 
-    elif isinstance(array, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)):
+    elif isinstance(array, awkward1._util.optiontypes):
         content = tonumpy(array.project())
         shape = list(content.shape)
         shape[0] = len(array)
@@ -100,10 +103,10 @@ def tonumpy(array):
         shape = (head // array.size, array.size) + tail
         return out[:shape[0]*array.size].reshape(shape)
 
-    elif isinstance(array, (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)):
+    elif isinstance(array, awkward1._util.listtypes):
         return tonumpy(array.toRegularArray())
 
-    elif isinstance(array, awkward1.layout.RecordArray):
+    elif isinstance(array, awkward1._util.recordtypes):
         if array.numfields == 0:
             return numpy.empty(len(array), dtype=[])
         contents = [tonumpy(array.field(i)) for i in range(array.numfields)]
@@ -116,6 +119,9 @@ def tonumpy(array):
 
     elif isinstance(array, awkward1.layout.NumpyArray):
         return numpy.asarray(array)
+
+    elif isinstance(array, awkward1.layout.Content):
+        raise AssertionError("unrecognized Content type: {0}".format(type(array)))
 
     else:
         raise ValueError("cannot convert {0} into numpy.ndarray".format(array))
@@ -233,7 +239,27 @@ def tolayout(array, allowrecord=True):
     elif allowrecord and isinstance(array, awkward1.layout.Record):
         return array
 
+    elif isinstance(array, numpy.ma.MaskedArray):
+        mask = numpy.ma.getmaskarray(array).reshape(-1)
+        index = numpy.full(len(mask), -1, dtype=numpy.int64)
+        index[~mask] = numpy.arange(len(mask) - numpy.count_nonzero(mask), dtype=numpy.int64)
+        index = awkward1.layout.Index64(index)
+        data = numpy.ma.getdata(array)
+        out = awkward1.layout.IndexedOptionArray(index, awkward1.layout.NumpyArray(data.reshape(-1)))
+        for size in array.shape[:0:-1]:
+            out = awkward1.layout.RegularArray(out, size)
+        return out
+
+    elif isinstance(array, numpy.ndarray):
+        out = awkward1.layout.NumpyArray(array.reshape(-1))
+        for size in array.shape[:0:-1]:
+            out = awkward1.layout.RegularArray(out, size)
+        return out
+
+    elif isinstance(array, Iterable):
+        return awkward1.highlevel.Array(array).layout
+
     else:
-        raise TypeError("{0} cannot be converted into a layout".format(array))
+        raise TypeError("{0} cannot be converted into an Awkward Array".format(array))
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "json", "Iterable", "numpy", "awkward1")]
