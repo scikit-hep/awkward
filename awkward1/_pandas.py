@@ -25,19 +25,27 @@ AwkwardDtype = None
 def get_dtype():
     import awkward1.highlevel
     pandas = get_pandas()
+
     global AwkwardDtype
     if AwkwardDtype is None:
+        @pandas.api.extensions.register_extension_dtype
         class AwkwardDtype(pandas.api.extensions.ExtensionDtype):
             name = "awkward1"
             type = awkward1.highlevel.Array
             kind = "O"
             base = numpy.dtype("O")
+
             @classmethod
             def construct_from_string(cls, string):
                 if string == cls.name:
                     return cls()
                 else:
                     raise TypeError("cannot construct a {0} from {1}".format(cls, string))
+
+            @classmethod
+            def construct_array_type(cls):
+                return awkward1.highlevel.Array
+
     return AwkwardDtype
 
 class PandasNotImportedYet(object):
@@ -59,17 +67,17 @@ class PandasMixin(PandasNotImportedYet):
     # REQUIRED by Pandas:
 
     @classmethod
-    def _from_sequence(scalars, *args, **kwargs):
+    def _from_sequence(cls, scalars, *args, **kwargs):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._from_sequence.html
         dtype, copy = extra(args, kwargs, [
             ("dtype", None),
             ("copy", False)])
-        raise NotImplementedError
+        return awkward1._util.wrap(awkward1.operations.convert.fromiter(scalars), None, None)
 
     @classmethod
-    def _from_factorized(values, original):
+    def _from_factorized(cls, values, original):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._from_factorized.html
-        raise NotImplementedError
+        raise NotImplementedError("_from_factorized")
 
     # __getitem__(self)
     # __len__(self)

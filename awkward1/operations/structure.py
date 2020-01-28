@@ -16,10 +16,10 @@ import awkward1.operations.convert
 
 def isna(array):
     import awkward1.highlevel
-    
+
     def apply(layout):
         if isinstance(layout, awkward1.layout.EmptyArray):
-            return apply(awkward.layout.NumpyArray(numpy.array([])))
+            return apply(awkward1.layout.NumpyArray(numpy.array([])))
 
         elif isinstance(layout, (awkward1.layout.IndexedArray32, awkward1.layout.IndexedArrayU32, awkward1.layout.IndexedArray64)):
             return apply(layout.project())
