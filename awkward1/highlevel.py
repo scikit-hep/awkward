@@ -1,11 +1,16 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+import re
+import keyword
+
 import numpy
 
 import awkward1._numpy
 import awkward1._pandas
 import awkward1.layout
 import awkward1.operations.convert
+
+_dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin):
     def __init__(self, data, type=None, classes=None, functions=None):
@@ -64,6 +69,52 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin)
 
     def __getitem__(self, where):
         return awkward1._util.wrap(self._layout[where], self._classes, self._functions)
+
+    def __getattr__(self, where):
+        if where in dir(super(Array, self)):
+            return super(Array, self).__getattribute__(where)
+        else:
+            if where in self._layout.keys():
+                try:
+                    return self[where]
+                except Exception as err:
+                    raise AttributeError("while trying to get field {0}, an exception occurred:\n{1}: {2}".format(repr(where), type(err), str(err)))
+            else:
+                raise AttributeError("no field named {0}".format(repr(where)))
+
+    def __dir__(self):
+        return sorted(set(dir(super(Array, self)) + [x for x in self._layout.keys() if _dir_pattern.match(x) and not keyword.iskeyword(x)]))
+
+    @property
+    def i0(self):
+        return self["0"]
+    @property
+    def i1(self):
+        return self["1"]
+    @property
+    def i2(self):
+        return self["2"]
+    @property
+    def i3(self):
+        return self["3"]
+    @property
+    def i4(self):
+        return self["4"]
+    @property
+    def i5(self):
+        return self["5"]
+    @property
+    def i6(self):
+        return self["6"]
+    @property
+    def i7(self):
+        return self["7"]
+    @property
+    def i8(self):
+        return self["8"]
+    @property
+    def i9(self):
+        return self["9"]
 
     def __str__(self, limit_value=85):
         return awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
