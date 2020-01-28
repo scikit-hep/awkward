@@ -115,12 +115,27 @@ namespace awkward {
     builder.endrecord();
   }
 
+  void Record::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    return array_.nbytes_part(largest);
+  }
+
   int64_t Record::length() const {
     return -1;   // just like NumpyArray with ndim == 0, which is also a scalar
   }
 
   const std::shared_ptr<Content> Record::shallow_copy() const {
     return std::make_shared<Record>(array_, at_);
+  }
+
+  const std::shared_ptr<Content> Record::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    std::shared_ptr<Content> out = array_.deep_copy(copyarrays, copyindexes, copyidentities);
+    RecordArray* raw = dynamic_cast<RecordArray*>(out.get());
+    if (raw->numfields() == 0) {
+      return std::make_shared<Record>(RecordArray(raw->identities(), raw->parameters(), raw->length(), raw->istuple()), at_);
+    }
+    else {
+      return std::make_shared<Record>(RecordArray(raw->identities(), raw->parameters(), raw->contents(), raw->recordlookup()), at_);
+    }
   }
 
   void Record::check_for_iteration() const {

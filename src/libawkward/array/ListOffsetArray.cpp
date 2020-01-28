@@ -245,6 +245,15 @@ namespace awkward {
   }
 
   template <typename T>
+  void ListOffsetArrayOf<T>::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    offsets_.nbytes_part(largest);
+    content_.get()->nbytes_part(largest);
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
+  template <typename T>
   int64_t ListOffsetArrayOf<T>::length() const {
     return offsets_.length() - 1;
   }
@@ -252,6 +261,17 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::shallow_copy() const {
     return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets_, content_);
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    IndexOf<T> offsets = copyindexes ? offsets_.deep_copy() : offsets_;
+    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<ListOffsetArrayOf<T>>(identities, parameters_, offsets, content);
   }
 
   template <typename T>

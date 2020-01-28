@@ -252,6 +252,15 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  void IndexedArrayOf<T, ISOPTION>::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    index_.nbytes_part(largest);
+    content_.get()->nbytes_part(largest);
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
+  template <typename T, bool ISOPTION>
   int64_t IndexedArrayOf<T, ISOPTION>::length() const {
     return index_.length();
   }
@@ -259,6 +268,17 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::shallow_copy() const {
     return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, content_);
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    IndexOf<T> index = copyindexes ? index_.deep_copy() : index_;
+    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities, parameters_, index, content);
   }
 
   template <typename T, bool ISOPTION>

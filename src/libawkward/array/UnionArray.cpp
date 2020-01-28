@@ -258,6 +258,16 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  void UnionArrayOf<T, I>::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    for (auto x : contents_) {
+      x.get()->nbytes_part(largest);
+    }
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
+  template <typename T, typename I>
   int64_t UnionArrayOf<T, I>::length() const {
     return tags_.length();
   }
@@ -265,6 +275,21 @@ namespace awkward {
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::shallow_copy() const {
     return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents_);
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    IndexOf<T> tags = copyindexes ? tags_.deep_copy() : tags_;
+    IndexOf<I> index = copyindexes ? index_.deep_copy() : index_;
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto x : contents_) {
+      contents.push_back(x.get()->deep_copy(copyarrays, copyindexes, copyidentities));
+    }
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities, parameters_, tags, index, contents);
   }
 
   template <typename T, typename I>

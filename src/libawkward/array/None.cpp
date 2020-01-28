@@ -47,11 +47,19 @@ namespace awkward {
     builder.null();
   }
 
+  void None::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    throw std::runtime_error("undefined operation: None::nbytes_part");
+  }
+
   int64_t None::length() const {
     return -1;
   }
 
   const std::shared_ptr<Content> None::shallow_copy() const {
+    return std::make_shared<None>();
+  }
+
+  const std::shared_ptr<Content> None::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     return std::make_shared<None>();
   }
 

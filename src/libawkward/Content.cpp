@@ -56,6 +56,18 @@ namespace awkward {
     }
   }
 
+  int64_t Content::nbytes() const {
+    // FIXME: this is only accurate if all subintervals of allocated arrays are nested
+    // (which is likely, but not guaranteed). In general, it's <= the correct nbytes.
+    std::map<size_t, int64_t> largest;
+    nbytes_part(largest);
+    int64_t out = 0;
+    for (auto pair : largest) {
+      out += pair.second;
+    }
+    return out;
+  }
+
   const util::Parameters Content::parameters() const {
     return parameters_;
   }

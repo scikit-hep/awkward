@@ -240,6 +240,16 @@ namespace awkward {
   }
 
   template <typename T>
+  void ListArrayOf<T>::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    starts_.nbytes_part(largest);
+    stops_.nbytes_part(largest);
+    content_.get()->nbytes_part(largest);
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
+  template <typename T>
   int64_t ListArrayOf<T>::length() const {
     return starts_.length();
   }
@@ -247,6 +257,18 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::shallow_copy() const {
     return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_);
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    IndexOf<T> starts = copyindexes ? starts_.deep_copy() : starts_;
+    IndexOf<T> stops = copyindexes ? stops_.deep_copy() : stops_;
+    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<ListArrayOf<T>>(identities, parameters_, starts, stops, content);
   }
 
   template <typename T>

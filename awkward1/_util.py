@@ -1,9 +1,24 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+import inspect
 import numbers
 import re
 
 import numpy
+
+import awkward1.layout
+
+unknowntypes = (awkward1.layout.EmptyArray,)
+
+indexedtypes = (awkward1.layout.IndexedArray32, awkward1.layout.IndexedArrayU32, awkward1.layout.IndexedArray64)
+
+uniontypes = (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)
+
+optiontypes = (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)
+
+listtypes = (awkward1.layout.RegularArray, awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)
+
+recordtypes = (awkward1.layout.RecordArray,)
 
 def regular_classes(classes):
     import awkward1
@@ -36,6 +51,15 @@ def wrap(content, classes, functions):
 
     else:
         return content
+
+def called_by_module(modulename):
+    frame = inspect.currentframe()
+    while frame is not None:
+        name = inspect.getmodule(frame).__name__
+        if name == modulename or name.startswith(modulename + "."):
+            return True
+        frame = frame.f_back
+    return True
 
 def key2index(keys, key):
     if keys is None:

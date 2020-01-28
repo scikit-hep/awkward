@@ -194,6 +194,15 @@ namespace awkward {
     builder.endlist();
   }
 
+  void RecordArray::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    for (auto x : contents_) {
+      x.get()->nbytes_part(largest);
+    }
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
   int64_t RecordArray::length() const {
     if (contents_.empty()) {
       return length_;
@@ -216,6 +225,23 @@ namespace awkward {
     }
     else {
       return std::make_shared<RecordArray>(identities_, parameters_, contents_, recordlookup_);
+    }
+  }
+
+  const std::shared_ptr<Content> RecordArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto x : contents_) {
+      contents.push_back(x.get()->deep_copy(copyarrays, copyindexes, copyidentities));
+    }
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    if (contents.empty()) {
+      return std::make_shared<RecordArray>(identities, parameters_, length(), istuple());
+    }
+    else {
+      return std::make_shared<RecordArray>(identities, parameters_, contents, recordlookup_);
     }
   }
 

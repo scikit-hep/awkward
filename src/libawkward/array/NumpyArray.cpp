@@ -413,6 +413,21 @@ namespace awkward {
     }
   }
 
+  void NumpyArray::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    int64_t len = 1;
+    if (!shape_.empty()) {
+      len = shape_[0];
+    }
+    size_t x = (size_t)ptr_.get();
+    auto it = largest.find(x);
+    if (it == largest.end()  ||  it->second < (int64_t)(itemsize_*len)) {
+      largest[x] = (int64_t)(itemsize_*len);
+    }
+    if (identities_.get() != nullptr) {
+      identities_.get()->nbytes_part(largest);
+    }
+  }
+
   int64_t NumpyArray::length() const {
     if (isscalar()) {
       return -1;   // just like Record, which is also a scalar
@@ -424,6 +439,25 @@ namespace awkward {
 
   const std::shared_ptr<Content> NumpyArray::shallow_copy() const {
     return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
+  }
+
+  const std::shared_ptr<Content> NumpyArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    std::shared_ptr<void> ptr = ptr_;
+    std::vector<ssize_t> shape = shape_;
+    std::vector<ssize_t> strides = strides_;
+    ssize_t byteoffset = byteoffset_;
+    if (copyarrays) {
+      NumpyArray tmp = contiguous();
+      ptr = tmp.ptr();
+      shape = tmp.shape();
+      strides = tmp.strides();
+      byteoffset = tmp.byteoffset();
+    }
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<NumpyArray>(identities, parameters_, ptr, shape, strides, byteoffset, itemsize_, format_);
   }
 
   void NumpyArray::check_for_iteration() const {

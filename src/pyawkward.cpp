@@ -352,7 +352,7 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
         return ak::IndexOf<T>(
           std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr), pyobject_deleter<T>(array.ptr())),
           0,
-          (T)info.shape[0]);
+          (int64_t)info.shape[0]);
       }))
 
       .def("__repr__", &ak::IndexOf<T>::tostring)
@@ -654,6 +654,7 @@ py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(py::handle
       .def("__repr__", &ak::Iterator::tostring)
       .def("__next__", next)
       .def("next", next)
+      .def("__iter__", [](py::object self) -> py::object { return self; })
   );
 }
 
@@ -1221,6 +1222,8 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("__iter__", &iter<T>)
           .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
           .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
+          .def_property_readonly("nbytes", &T::nbytes)
+          .def("deep_copy", &T::deep_copy, py::arg("copyarrays") = true, py::arg("copyindexes") = true, py::arg("copyidentities") = true)
           .def_property_readonly("identity", &identity<T>)
           .def_property_readonly("numfields", &T::numfields)
           .def("fieldindex", &T::fieldindex)

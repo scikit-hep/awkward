@@ -2,11 +2,12 @@
 
 import numpy
 
+import awkward1._numpy
+import awkward1._pandas
 import awkward1.layout
-import awkward1._npfunctions
 import awkward1.operations.convert
 
-class Array(awkward1._npfunctions.NDArrayOperatorsMixin):
+class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin):
     def __init__(self, data, type=None, classes=None, functions=None):
         if isinstance(data, awkward1.layout.Content):
             layout = data
@@ -58,11 +59,11 @@ class Array(awkward1._npfunctions.NDArrayOperatorsMixin):
         return len(self._layout)
 
     def __iter__(self):
-        for x in self.layout:
+        for x in self._layout:
             yield awkward1._util.wrap(x, self._classes, self._functions)
 
     def __getitem__(self, where):
-        return awkward1._util.wrap(self.layout[where], self._classes, self._functions)
+        return awkward1._util.wrap(self._layout[where], self._classes, self._functions)
 
     def __str__(self, limit_value=85):
         return awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
@@ -77,16 +78,25 @@ class Array(awkward1._npfunctions.NDArrayOperatorsMixin):
 
         return "<Array {0} type={1}>".format(value, type)
 
-    def __array__(self):
-        return awkward1._npfunctions.array(self._layout)
+    def __array__(self, *args, **kwargs):
+        if awkward1._util.called_by_module("pandas"):
+            try:
+                return awkward1._numpy.convert_to_array(self._layout, args, kwargs)
+            except:
+                out = numpy.empty(len(self._layout), dtype="O")
+                for i, x in enumerate(self._layout):
+                    out[i] = awkward1._util.wrap(x, self._classes, self._functions)
+                return out
+        else:
+            return awkward1._numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
-        return awkward1._npfunctions.array_function(func, types, args, kwargs)
+        return awkward1._numpy.array_function(func, types, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
-class Record(awkward1._npfunctions.NDArrayOperatorsMixin):
+class Record(awkward1._numpy.NDArrayOperatorsMixin):
     def __init__(self, data, type=None, classes=None, functions=None):
         # FIXME: more checks here
         layout = data
@@ -123,7 +133,7 @@ class Record(awkward1._npfunctions.NDArrayOperatorsMixin):
         return self._layout.type
 
     def __getitem__(self, where):
-        return awkward1._util.wrap(self.layout[where], self._classes, self._functions)
+        return awkward1._util.wrap(self._layout[where], self._classes, self._functions)
 
     def __str__(self, limit_value=85):
         return awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._classes, self._functions)[1:-1]
@@ -132,14 +142,14 @@ class Record(awkward1._npfunctions.NDArrayOperatorsMixin):
         value = awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._classes, self._functions)[1:-1]
 
         limit_type = limit_total - len(value) - len("<Record  type=>")
-        type = repr(str(self.layout.type))
+        type = repr(str(self._layout.type))
         if len(type) > limit_type:
             type = type[:(limit_type - 4)] + "..." + type[-1]
 
         return "<Record {0} type={1}>".format(value, type)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
 class FillableArray(object):
     def __init__(self, classes=None, functions=None):
@@ -178,14 +188,14 @@ class FillableArray(object):
 
         return "<FillableArray {0} type={1}>".format(value, type)
 
-    def __array__(self):
-        return awkward1._npfunctions.array(self._fillablearray.snapshot())
+    def __array__(self, *args, **kwargs):
+        return awkward1._numpy.convert_to_array(self._fillablearray.snapshot(), args, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
-        return awkward1._npfunctions.array_function(func, types, args, kwargs)
+        return awkward1._numpy.array_function(func, types, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._npfunctions.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
     def snapshot(self):
         return awkward1._util.wrap(self._fillablearray.snapshot(), self._classes, self._functions)

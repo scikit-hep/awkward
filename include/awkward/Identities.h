@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <memory>
 
 #include "awkward/cpu-kernels/util.h"
@@ -31,7 +32,9 @@ namespace awkward {
     virtual const std::shared_ptr<Identities> to64() const = 0;
     virtual const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
     virtual const std::shared_ptr<Identities> getitem_range_nowrap(int64_t start, int64_t stop) const = 0;
+    virtual void nbytes_part(std::map<size_t, int64_t>& largest) const = 0;
     virtual const std::shared_ptr<Identities> shallow_copy() const = 0;
+    virtual const std::shared_ptr<Identities> deep_copy() const = 0;
     virtual const std::shared_ptr<Identities> getitem_carry_64(const Index64& carry) const = 0;
     virtual const std::shared_ptr<Identities> withfieldloc(const FieldLoc& fieldloc) const = 0;
     virtual int64_t value(int64_t row, int64_t col) const = 0;
@@ -59,7 +62,9 @@ namespace awkward {
     const std::shared_ptr<Identities> to64() const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Identities> getitem_range_nowrap(int64_t start, int64_t stop) const override;
+    void nbytes_part(std::map<size_t, int64_t>& largest) const override;
     const std::shared_ptr<Identities> shallow_copy() const override;
+    const std::shared_ptr<Identities> deep_copy() const override;
     const std::shared_ptr<Identities> getitem_carry_64(const Index64& carry) const override;
     const std::shared_ptr<Identities> withfieldloc(const FieldLoc& fieldloc) const override;
     int64_t value(int64_t row, int64_t col) const override;

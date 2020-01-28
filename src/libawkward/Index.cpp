@@ -135,17 +135,17 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Index> IndexOf<T>::shallow_copy() const {
-    return std::make_shared<IndexOf<T>>(ptr_, offset_, length_);
+  void IndexOf<T>::nbytes_part(std::map<size_t, int64_t>& largest) const {
+    size_t x = (size_t)ptr_.get();
+    auto it = largest.find(x);
+    if (it == largest.end()  ||  it->second < (int64_t)(sizeof(T)*length_)) {
+      largest[x] = (int64_t)(sizeof(T)*length_);
+    }
   }
 
   template <typename T>
-  const std::shared_ptr<Index> IndexOf<T>::deep_copy() const {
-    std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_], util::array_deleter<T>());
-    if (length_ != 0) {
-      memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*((size_t)length_));
-    }
-    return std::make_shared<IndexOf<T>>(ptr, 0, length_);
+  const std::shared_ptr<Index> IndexOf<T>::shallow_copy() const {
+    return std::make_shared<IndexOf<T>>(ptr_, offset_, length_);
   }
 
   template <>
@@ -187,6 +187,15 @@ namespace awkward {
   template <>
   IndexOf<int64_t> IndexOf<int64_t>::to64() const {
     return IndexOf<int64_t>(ptr_, offset_, length_);
+  }
+
+  template <typename T>
+  const IndexOf<T> IndexOf<T>::deep_copy() const {
+    std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_], util::array_deleter<T>());
+    if (length_ != 0) {
+      memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*((size_t)length_));
+    }
+    return IndexOf<T>(ptr, 0, length_);
   }
 
   template class IndexOf<int8_t>;
