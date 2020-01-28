@@ -488,6 +488,12 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::simplify(bool recursive, bool tocontiguous) const {
+    std::shared_ptr<Content> content = recursive ? content_.get()->simplify(recursive, tocontiguous) : content_;
+    return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets_, content);
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     assert(advanced.length() == 0);
     int64_t lenstarts = offsets_.length() - 1;

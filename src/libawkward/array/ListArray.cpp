@@ -521,6 +521,20 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::simplify(bool recursive, bool tocontiguous) const {
+    std::shared_ptr<Content> content = recursive ? content_.get()->simplify(recursive, tocontiguous) : content_;
+    std::shared_ptr<Content> out = std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content);
+    if (tocontiguous) {
+      ListArrayOf<T>* raw = dynamic_cast<ListArrayOf<T>*>(out.get());
+      Index64 offsets = raw->compact_offsets64();
+      return raw->broadcast_tooffsets64(offsets);
+    }
+    else {
+      return out;
+    }
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {

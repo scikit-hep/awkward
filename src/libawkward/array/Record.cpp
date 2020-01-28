@@ -232,6 +232,25 @@ namespace awkward {
     throw std::invalid_argument("Record cannot be flattened because it is not an array");
   }
 
+  const std::shared_ptr<Content> Record::simplify(bool recursive, bool tocontiguous) const {
+    if (recursive) {
+      std::shared_ptr<Content> out = array_.simplify(recursive, tocontiguous);
+      RecordArray* raw = dynamic_cast<RecordArray*>(out.get());
+      if (raw->numfields() == 0) {
+
+      }
+      if (raw->numfields() == 0) {
+        return std::make_shared<Record>(RecordArray(raw->identities(), raw->parameters(), raw->length(), raw->istuple()), at_);
+      }
+      else {
+        return std::make_shared<Record>(RecordArray(raw->identities(), raw->parameters(), raw->contents(), raw->recordlookup()), at_);
+      }
+    }
+    else {
+      return shallow_copy();
+    }
+  }
+
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
     return array_.field(fieldindex).get()->getitem_at_nowrap(at_);
   }

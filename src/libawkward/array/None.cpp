@@ -141,6 +141,10 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::flatten");
   }
 
+  const std::shared_ptr<Content> None::simplify(bool recursive, bool tocontiguous) const {
+    throw std::runtime_error("undefined operation: None::simplify");
+  }
+
   const std::shared_ptr<Content> None::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: None::getitem_next(SliceAt)");
   }

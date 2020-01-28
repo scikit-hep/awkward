@@ -425,6 +425,10 @@ namespace awkward {
       throw std::invalid_argument("RawArray cannot be flattened because it is one-dimentional");
     }
 
+    const std::shared_ptr<Content> simplify(bool recursive, bool tocontiguous) const override {
+      return shallow_copy();
+    }
+
   protected:
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
       return getitem_at(at.at());

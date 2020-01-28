@@ -398,7 +398,12 @@ namespace awkward {
     for (auto content : contents_) {
       contents.push_back(content.get()->count(axis));
     }
-    return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    if (contents.empty()) {
+      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+    }
+    else {
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {
@@ -409,7 +414,30 @@ namespace awkward {
     for (auto content : contents_) {
       contents.push_back(content.get()->flatten(axis));
     }
-    return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    if (contents.empty()) {
+      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+    }
+    else {
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    }
+  }
+
+  const std::shared_ptr<Content> RecordArray::simplify(bool recursive, bool tocontiguous) const {
+    if (recursive) {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->simplify(recursive, tocontiguous));
+      }
+      if (contents.empty()) {
+        return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+      }
+      else {
+        return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+      }
+    }
+    else {
+      return shallow_copy();
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {

@@ -701,6 +701,15 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> NumpyArray::simplify(bool recursive, bool tocontiguous) const {
+    if (tocontiguous) {
+      return contiguous().shallow_copy();
+    }
+    else {
+      return shallow_copy();
+    }
+  }
+
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("NumpyArray has its own getitem_next system");
   }
