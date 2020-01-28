@@ -118,6 +118,16 @@ def minimally_touching_string(limit_length, layout, classes, functions):
                     sp = ", "
                 if brackets:
                     yield "]"
+            elif isinstance(x, awkward1.layout.Record) and x.istuple:
+                yield space + "("
+                sp = ""
+                for i in range(x.numfields):
+                    key = sp
+                    for token in forward(x[str(i)], ""):
+                        yield key + token
+                        key = ""
+                    sp = ", "
+                yield ")"
             elif isinstance(x, awkward1.layout.Record):
                 yield space + "{"
                 sp = ""
@@ -160,6 +170,19 @@ def minimally_touching_string(limit_length, layout, classes, functions):
                     sp = ", "
                 if brackets:
                     yield "["
+            elif isinstance(x, awkward1.layout.Record) and x.istuple:
+                yield ")" + space
+                for i in range(x.numfields - 1, -1, -1):
+                    last = None
+                    for token in backward(x[str(i)], ""):
+                        if last is not None:
+                            yield last
+                        last = token
+                    if last is not None:
+                        yield last
+                    if i != 0:
+                        yield ", "
+                yield "("
             elif isinstance(x, awkward1.layout.Record):
                 yield "}" + space
                 keys = x.keys()
