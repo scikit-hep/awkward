@@ -489,35 +489,75 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::flatten(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: ListArray::flatten(axis != 0)");
+    if (axis < 0) {
+      std::pair<int64_t, int64_t> minmax = minmax_depth();
+      int64_t mindepth = minmax.first;
+      int64_t maxdepth = minmax.second;
+      int64_t depth = purelist_depth();
+      if (mindepth == depth  &&  maxdepth == depth) {
+        if (depth - 1 + axis < 0) {
+          throw std::invalid_argument(std::string("ListArrayOf<T> cannot be flattened in axis ") + std::to_string(axis) + std::string(" because its depth is ") + std::to_string(depth));
+        }
+        return flatten(depth - 1 + axis);
+      }
+      else {
+        return content_.get()->flatten(axis);
+      }
     }
-    int64_t lenstarts = starts_.length();
-    if (stops_.length() < lenstarts) {
-      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+    else if (axis == 0) {
+      int64_t lenstarts = starts_.length();
+      if (stops_.length() < lenstarts) {
+        util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+      }
+
+      int64_t lenarray(0);
+      struct Error err1 = util::awkward_listarray_flatten_length(
+        &lenarray,
+        starts_.ptr().get(),
+        stops_.ptr().get(),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset());
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 indxarray(lenarray);
+      struct Error err2 = util::awkward_listarray_flatten_64<T>(
+        indxarray.ptr().get(),
+        starts_.ptr().get(),
+        stops_.ptr().get(),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset());
+      util::handle_error(err2, classname(), identities_.get());
+
+      return content_.get()->carry(indxarray);
     }
+    else if (axis == 1) {
+      int64_t lenstarts = starts_.length();
+      IndexOf<T> tostarts(lenstarts);
+      IndexOf<T> tostops(lenstarts);
 
-    int64_t lenarray(0);
-    struct Error err1 = util::awkward_listarray_flatten_length(
-      &lenarray,
-      starts_.ptr().get(),
-      stops_.ptr().get(),
-      lenstarts,
-      starts_.offset(),
-      stops_.offset());
-    util::handle_error(err1, classname(), identities_.get());
+      Index64 count = count64();
+      int64_t clength = count.length();
+      if (clength != lenstarts) {
+        throw std::runtime_error("scale index length must be equal to start and stop length");
+      }
+      struct Error err3 = util::awkward_listarray_flatten_scale_64<T>(
+        tostarts.ptr().get(),
+        tostops.ptr().get(),
+        count.ptr().get(),
+        starts_.ptr().get(),
+        stops_.ptr().get(),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset());
+      util::handle_error(err3, classname(), identities_.get());
 
-    Index64 indxarray(lenarray);
-    struct Error err2 = util::awkward_listarray_flatten_64<T>(
-      indxarray.ptr().get(),
-      starts_.ptr().get(),
-      stops_.ptr().get(),
-      lenstarts,
-      starts_.offset(),
-      stops_.offset());
-    util::handle_error(err2, classname(), identities_.get());
-
-    return content_.get()->carry(indxarray);
+      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, tostarts, tostops, content_.get()->flatten(axis - 1));
+    }
+    else {
+      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_.get()->flatten(axis - 1));
+    }
   }
 
   template <typename T>

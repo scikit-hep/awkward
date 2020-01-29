@@ -479,12 +479,29 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::flatten(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: ListOffsetArray::flatten(axis != 0)");
+    if (axis < 0) {
+      std::pair<int64_t, int64_t> minmax = minmax_depth();
+      int64_t mindepth = minmax.first;
+      int64_t maxdepth = minmax.second;
+      int64_t depth = purelist_depth();
+      if (mindepth == depth  &&  maxdepth == depth) {
+        if (depth - 1 + axis < 0) {
+          throw std::invalid_argument(std::string("ListOffsetArrayOf<T> cannot be flattened in axis ") + std::to_string(axis) + std::string(" because its depth is ") + std::to_string(depth));
+        }
+        return flatten(depth - 1 + axis);
+      }
+      else {
+        return content_.get()->flatten(axis);
+      }
     }
-    int64_t start = offsets_.getitem_at_nowrap(0);
-    int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
-    return content_.get()->getitem_range_nowrap(start, stop);
+    else if (axis == 0) {
+      int64_t start = offsets_.getitem_at_nowrap(0);
+      int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
+      return content_.get()->getitem_range_nowrap(start, stop);
+    }
+    else {
+      return content_.get()->flatten(axis - 1);
+    }
   }
 
   template <typename T>

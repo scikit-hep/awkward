@@ -341,14 +341,45 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::flatten(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: RegularArray::flatten(axis != 0)");
+    if (axis < 0) {
+      std::pair<int64_t, int64_t> minmax = minmax_depth();
+      int64_t mindepth = minmax.first;
+      int64_t maxdepth = minmax.second;
+      int64_t depth = purelist_depth();
+      if (mindepth == depth  &&  maxdepth == depth) {
+        if (depth - 1 + axis < 0) {
+          throw std::invalid_argument(std::string("RegularArray cannot be flattened in axis ") + std::to_string(axis) + std::string(" because its depth is ") + std::to_string(depth));
+        }
+        return flatten(depth - 1 + axis);
+      }
+      else {
+        return content_.get()->flatten(axis);
+      }
     }
-    if (content_.get()->length() % size_ != 0) {
-      return content_.get()->getitem_range_nowrap(0, length()*size_);
+    else if (axis == 0) {
+      if (content_.get()->length() % size_ != 0) {
+        return content_.get()->getitem_range_nowrap(0, length()*size_);
+      }
+      else {
+        return content_;
+      }
     }
     else {
-      return content_;
+      Index64 count = count64();
+      Index64 ccount = content_.get()->count64();
+      Index64 offsets(length() + 1);
+      offsets.ptr().get()[0] = 0;
+      for (ssize_t i = 0; i < length(); i++) {
+        int64_t l = 0;
+        for (int64_t j = 0; j < count.ptr().get()[i]; j++) {
+          l += ccount.ptr().get()[j + i*size_];
+        }
+        offsets.ptr().get()[i + 1] = l + offsets.ptr().get()[i];
+      }
+
+      std::shared_ptr<Content> nextcontent = content_.get()->flatten(axis - 1);
+
+      return std::make_shared<ListOffsetArray64>(identities_, parameters_, offsets, nextcontent);
     }
   }
 
