@@ -603,6 +603,29 @@ namespace awkward {
         mycontentlength);
       util::handle_error(err2, classname(), identities_.get());
     }
+    else if (std::is_same<T, uint32_t>::value) {
+      struct Error err2 = awkward_indexedarray_fill_to64_fromU32(
+        index.ptr().get(),
+        theirlength,
+        reinterpret_cast<uint32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength,
+        mycontentlength);
+      util::handle_error(err2, classname(), identities_.get());
+    }
+    if (std::is_same<T, int64_t>::value) {
+      struct Error err2 = awkward_indexedarray_fill_to64_from64(
+        index.ptr().get(),
+        theirlength,
+        reinterpret_cast<int64_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength,
+        mycontentlength);
+      util::handle_error(err2, classname(), identities_.get());
+    }
+    else {
+      throw std::runtime_error("unrecognized IndexedArray specialization");
+    }
 
     return std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(Identities::none(), util::Parameters(), index, content);
   }
@@ -648,7 +671,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized ListArray specialization");
+      throw std::runtime_error("unrecognized IndexedArray specialization");
     }
 
     int64_t mycontentlength = content_.get()->length();
