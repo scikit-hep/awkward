@@ -12,6 +12,7 @@
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/EmptyArray.h"
+#include "awkward/array/IndexedArray.h"
 #include "awkward/util.h"
 
 #include "awkward/array/NumpyArray.h"
@@ -748,6 +749,21 @@ namespace awkward {
     if (dynamic_cast<EmptyArray*>(other.get())) {
       return true;
     }
+    else if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
 
     if (ndim() == 0) {
       return false;
@@ -786,6 +802,21 @@ namespace awkward {
   const std::shared_ptr<Content> NumpyArray::merge(const std::shared_ptr<Content>& other) const {
     if (dynamic_cast<EmptyArray*>(other.get())) {
       return shallow_copy();
+    }
+    else if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
     }
 
     if (ndim() == 0) {

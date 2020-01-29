@@ -21,6 +21,8 @@
 #include "awkward/util.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
+#include "awkward/array/EmptyArray.h"
+#include "awkward/array/IndexedArray.h"
 
 namespace awkward {
   void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
@@ -426,6 +428,25 @@ namespace awkward {
     }
 
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override {
+      if (dynamic_cast<EmptyArray*>(other.get())) {
+        return true;
+      }
+      else if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
+        return mergeable(rawother->content(), mergebool);
+      }
+      else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(other.get())) {
+        return mergeable(rawother->content(), mergebool);
+      }
+      else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(other.get())) {
+        return mergeable(rawother->content(), mergebool);
+      }
+      else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(other.get())) {
+        return mergeable(rawother->content(), mergebool);
+      }
+      else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+        return mergeable(rawother->content(), mergebool);
+      }
+
       if (RawArrayOf<T>* rawother = dynamic_cast<RawArrayOf<T>*>(other.get())) {
         return true;
       }
@@ -435,6 +456,25 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override {
+      if (dynamic_cast<EmptyArray*>(other.get())) {
+        return shallow_copy();
+      }
+      else if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy());
+      }
+      else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy());
+      }
+      else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy());
+      }
+      else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy());
+      }
+      else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy());
+      }
+
       if (RawArrayOf<T>* rawother = dynamic_cast<RawArrayOf<T>*>(other.get())) {
         std::shared_ptr<T> ptr = std::shared_ptr<T>(new T[(size_t)(length_ + rawother->length())], util::array_deleter<T>());
         memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*((size_t)length_));
