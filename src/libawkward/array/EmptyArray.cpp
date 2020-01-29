@@ -134,10 +134,6 @@ namespace awkward {
     return std::vector<std::string>();
   }
 
-  int64_t EmptyArray::list_depth() const {
-    throw std::runtime_error("FIXME: EmptyArray::list_depth() is not implemented");
-  }
-
   const Index64 EmptyArray::count64() const {
     return Index64(0);
   }

@@ -360,11 +360,6 @@ namespace awkward {
     return util::keys(recordlookup_, numfields());
   }
 
-  int64_t RecordArray::list_depth() const {
-    // FIXME: find a specific one?
-    return contents_[0].get()->list_depth() + (int64_t)1;
-  }
-
   const Index64 RecordArray::count64() const {
     throw std::invalid_argument("RecordArray cannot be counted, because records are not lists");
   }

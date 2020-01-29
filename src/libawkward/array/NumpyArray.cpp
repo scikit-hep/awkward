@@ -601,10 +601,6 @@ namespace awkward {
     return std::vector<std::string>();
   }
 
-  int64_t NumpyArray::list_depth() const {
-    return ndim();
-  }
-
   const Index64 NumpyArray::count64() const {
     if (shape_.size() <= 1) {
       // FIXME: the cut-off for countability depends on axis

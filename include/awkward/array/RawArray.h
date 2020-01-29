@@ -384,10 +384,6 @@ namespace awkward {
       return std::vector<std::string>();
     }
 
-    int64_t list_depth() const override {
-      return (int64_t)1;
-    }
-
     // operations
 
     const Index64 count64() const override {

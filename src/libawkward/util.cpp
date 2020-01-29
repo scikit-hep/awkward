@@ -559,19 +559,6 @@ namespace awkward {
     }
 
     template <>
-    Error awkward_listoffsetarray_flatten_nextcarry<int32_t>(int32_t* tocarry, int64_t* tolen, const int32_t* fromoffsets, int64_t lenoffset, int64_t step) {
-      return awkward_listoffsetarray32_flatten_nextcarry(tocarry, tolen, fromoffsets, lenoffset, step);
-    }
-    template <>
-    Error awkward_listoffsetarray_flatten_nextcarry<uint32_t>(uint32_t* tocarry, int64_t* tolen, const uint32_t* fromoffsets, int64_t lenoffset, int64_t step) {
-      return awkward_listoffsetarrayU32_flatten_nextcarry(tocarry, tolen, fromoffsets, lenoffset, step);
-    }
-    template <>
-    Error awkward_listoffsetarray_flatten_nextcarry<int64_t>(int64_t* tocarry, int64_t* tolen, const int64_t* fromoffsets, int64_t lenoffset, int64_t step) {
-      return awkward_listoffsetarray64_flatten_nextcarry(tocarry, tolen, fromoffsets, lenoffset, step);
-    }
-
-    template <>
     Error awkward_indexedarray_andmask_8<int32_t>(int32_t* toindex, const int8_t* mask, int64_t maskoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length) {
       return awkward_indexedarray32_andmask_8(toindex, mask, maskoffset, fromindex, indexoffset, length);
     }

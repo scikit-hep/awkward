@@ -394,11 +394,6 @@ namespace awkward {
   }
 
   template <typename T>
-  int64_t ListOffsetArrayOf<T>::list_depth() const {
-    return content_.get()->list_depth() + (int64_t)1;
-  }
-
-  template <typename T>
   const Index64 ListOffsetArrayOf<T>::count64() const {
     IndexOf<T> starts = make_starts(offsets_);
     IndexOf<T> stops = make_stops(offsets_);

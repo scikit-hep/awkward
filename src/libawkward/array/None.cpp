@@ -121,10 +121,6 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::keys");
   }
 
-  int64_t None::list_depth() const {
-    return -1;
-  }
-
   const Index64 None::count64() const {
     throw std::runtime_error("undefined operation: None::count64");
   }

@@ -48,7 +48,6 @@ namespace awkward {
     virtual const std::string key(int64_t fieldindex) const = 0;
     virtual bool haskey(const std::string& key) const = 0;
     virtual const std::vector<std::string> keys() const = 0;
-    virtual int64_t list_depth() const = 0;
 
     // operations
     virtual const Index64 count64() const = 0;

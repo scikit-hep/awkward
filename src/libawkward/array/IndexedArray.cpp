@@ -453,11 +453,6 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  int64_t IndexedArrayOf<T, ISOPTION>::list_depth() const {
-    return content_.get()->list_depth() + (int64_t)1;
-  }
-
-  template <typename T, bool ISOPTION>
   const Index64 IndexedArrayOf<T, ISOPTION>::count64() const {
     Index64 contentcount = content_.get()->count64();
     Index64 tocount(index_.length());

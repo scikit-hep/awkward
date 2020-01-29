@@ -167,29 +167,6 @@ ERROR awkward_indexedarray64_flatten_nextcarry_64(int64_t* tocarry, const int64_
   return awkward_indexedarray_flatten_nextcarry<int64_t, int64_t>(tocarry, fromindex, indexoffset, lenindex, lencontent);
 }
 
-template <typename C>
-ERROR awkward_listoffsetarray_flatten_nextcarry(C* tocarry, int64_t* tolen, const C* fromoffsets, int64_t lenoffset, int64_t step) {
-  int64_t k = 0;
-  tocarry[k] = fromoffsets[k];
-  for(int64_t i = 0; i < lenoffset - 1 - step; i += 1 + step) {
-    C start = fromoffsets[i];
-    C next = fromoffsets[i + 1 + step];
-    if(start != next)
-      tocarry[++k] = next;
-  }
-  *tolen = k;
-  return success();
-}
-ERROR awkward_listoffsetarray32_flatten_nextcarry(int32_t* tocarry, int64_t* tolen, const int32_t* fromoffsets, int64_t lenoffset, int64_t step) {
-  return awkward_listoffsetarray_flatten_nextcarry<int32_t>(tocarry, tolen, fromoffsets, lenoffset, step);
-}
-ERROR awkward_listoffsetarrayU32_flatten_nextcarry(uint32_t* tocarry, int64_t* tolen, const uint32_t* fromoffsets, int64_t lenoffset, int64_t step) {
-  return awkward_listoffsetarray_flatten_nextcarry<uint32_t>(tocarry, tolen, fromoffsets, lenoffset, step);
-}
-ERROR awkward_listoffsetarray64_flatten_nextcarry(int64_t* tocarry, int64_t* tolen, const int64_t* fromoffsets, int64_t lenoffset, int64_t step) {
-  return awkward_listoffsetarray_flatten_nextcarry<int64_t>(tocarry, tolen, fromoffsets, lenoffset, step);
-}
-
 template <typename C, typename M>
 ERROR awkward_indexedarray_andmask(C* toindex, const M* mask, int64_t maskoffset, const C* fromindex, int64_t indexoffset, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {

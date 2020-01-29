@@ -400,11 +400,6 @@ namespace awkward {
   }
 
   template <typename T>
-  int64_t ListArrayOf<T>::list_depth() const {
-    return content_.get()->list_depth() + (int64_t)1;
-  }
-
-  template <typename T>
   const Index64 ListArrayOf<T>::count64() const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {

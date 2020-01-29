@@ -505,11 +505,6 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  int64_t UnionArrayOf<T, I>::list_depth() const {
-    throw std::runtime_error("FIXME: UnionArray::list_depth");
-  }
-
-  template <typename T, typename I>
   const Index64 UnionArrayOf<T, I>::count64() const {
     throw std::runtime_error("FIXME: UnionArray::count64");
   }

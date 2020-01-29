@@ -298,10 +298,6 @@ namespace awkward {
     return content_.get()->keys();
   }
 
-  int64_t RegularArray::list_depth() const {
-    return content_.get()->list_depth() + (int64_t)1;
-  }
-
   const Index64 RegularArray::count64() const {
     int64_t len = length();
     Index64 tocount(len);
