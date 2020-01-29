@@ -473,6 +473,9 @@ namespace awkward {
       int64_t maxdepth = minmax.second;
       int64_t depth = purelist_depth();
       if (mindepth == depth  &&  maxdepth == depth) {
+        if (depth - 1 + axis < 0) {
+          throw std::invalid_argument(std::string("ListArrayOf<T> cannot be flattened in axis ") + std::to_string(axis) + std::string(" because its depth is ") + std::to_string(depth));
+        }
         return flatten(depth - 1 + axis);
       }
       else {

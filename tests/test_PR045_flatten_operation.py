@@ -68,6 +68,9 @@ def test_flatten_list_offset_array():
     assert awkward1.tolist(array.flatten()) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     assert awkward1.tolist(array.flatten(-1)) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
 
+    # ValueError: ListOffsetArrayOf<T> cannot be flattened in axis -2 because its depth is 2
+    # assert awkward1.tolist(array.flatten(-2)) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+
     array2 = array[2:-1]
     assert awkward1.tolist(array2.flatten()) == [3.3, 4.4, 5.5]
 
@@ -85,7 +88,9 @@ def test_flatten_numpy_array():
     array2 = awkward1.layout.NumpyArray(numpy.arange(1*6*5, dtype=numpy.int64).reshape(1, 6, 5))
     assert awkward1.tolist(array2.flatten()) == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
     assert awkward1.tolist(array2.flatten(1)) == [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]]
-    ##assert awkward1.tolist(array2.flatten(2)) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+
+    # ValueError: NumpyArray cannot be flattened because axis is 2 exeeds its 3 dimensions
+    # assert awkward1.tolist(array2.flatten(2)) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
 
     array3 = array[:, 1::2, :3]
     print(awkward1.tolist(array3))
@@ -154,8 +159,13 @@ def test_flatten_regular_array():
     assert awkward1.tolist(regulararray.flatten(1)) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
     assert awkward1.tolist(regulararray.flatten(-1)) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
     assert awkward1.tolist(regulararray.flatten(-2)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], []]
+
+    # ValueError: RegularArray cannot be flattened in axis -3 because its depth is 3
+    # assert awkward1.tolist(regulararray.flatten(-3)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], []]
+
     # cannot concatenate non-lists
     # assert flatten(awkward1.tolist(regulararray), 2) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
+
     # NumpyArray cannot be flattened because it has 1 dimensions:
     # assert awkward1.tolist(regulararray.flatten(2)) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
 
@@ -177,16 +187,14 @@ def test_flatten_regular_array():
                                                       [[3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]]
     assert awkward1.tolist(listarray.flatten(2)) == [[[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]],
                                                       [[3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]]
-    #assert flatten(awkward1.tolist(listarray), 3) == []
+    assert awkward1.tolist(listarray.flatten(-1)) == [[[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]],
+                                                      [[3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]]
+    assert awkward1.tolist(listarray.flatten(-2)) == [[[0.0, 1.1, 2.2], [],    [3.3, 4.4],           [5.5]],
+                                                      [[3.3, 4.4],      [5.5], [6.6, 7.7, 8.8, 9.9], []]]
+    assert awkward1.tolist(listarray.flatten(-3)) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
 
-    ## From https://github.com/scikit-hep/awkward-array example:
-    ## array:  [[[1.1 2.2] [3.3]] [] [[4.4 5.5]] [[6.6 7.7 8.8] [] [9.9]]]
-    ## axis 0: [[1.1 2.2] [3.3] [4.4 5.5] [6.6 7.7 8.8] [] [9.9]]
-    ## axis 1: [[1.1 2.2 3.3] [] [4.4 5.5] [6.6 7.7 8.8 9.9]]
-
-    ## array:  [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
-    ## axis 0: [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], []]
-    ## axis 1: [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
+    # ValueError: ListArrayOf<T> cannot be flattened in axis -4 because its depth is 4
+    # assert awkward1.tolist(listarray.flatten(-4)) == []
 
     regulararray_m1 = awkward1.layout.RegularArray(listoffsetarray[:-1], 2)
 
@@ -206,8 +214,10 @@ def test_flatten_regular_array():
     stops   = awkward1.layout.Index64(numpy.array([3, 3, 6, 8, 9]))
     listarray   = awkward1.layout.ListArray64(starts, stops, content)
     regulararray_m3 = awkward1.layout.RegularArray(listarray, 1)
+
     assert awkward1.tolist(regulararray_m3) == [[[0.0, 1.1, 2.2]], [[]], [[4.4, 5.5]], [[5.5, 6.6, 7.7]], [[8.8]]]
     assert flatten(awkward1.tolist(regulararray_m3)) == [[0.0, 1.1, 2.2], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
     assert awkward1.tolist(regulararray_m3.flatten()) == [[0.0, 1.1, 2.2], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
     assert flatten(awkward1.tolist(regulararray_m3), 1) == [[0.0, 1.1, 2.2], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
     assert awkward1.tolist(regulararray_m3.flatten(1)) == [[0.0, 1.1, 2.2], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
+    assert awkward1.tolist(regulararray_m3.flatten(-1)) == [[0.0, 1.1, 2.2], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]

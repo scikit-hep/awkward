@@ -689,6 +689,9 @@ namespace awkward {
       int64_t mindepth = minmax.first;
       int64_t depth = purelist_depth();
       if (mindepth == depth) {
+        if (ndim() - 1 + axis < 0) {
+          throw std::invalid_argument(std::string("NumpyArray cannot be flattened in axis ") + std::to_string(axis) + std::string(" because it exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
+        }
         return flatten(ndim() - 1 + axis);
       }
     }
@@ -696,7 +699,7 @@ namespace awkward {
       throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
     if (axis >= shape_.size() - 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because aixis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
+      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because axis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
     if (iscontiguous()) {
       return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_, axis), flatten_strides(strides_, axis), byteoffset_, itemsize_, format_);
