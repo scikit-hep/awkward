@@ -52,7 +52,7 @@ def test_numpyarray_merge():
                     (numpy.uint64, numpy.double, numpy.double),
                     (numpy.uint64, numpy.float,  numpy.double),
                     (numpy.uint64, numpy.int64,  numpy.int64),
-                    (numpy.uint64, numpy.uint64, numpy.int64),
+                    (numpy.uint64, numpy.uint64, numpy.uint64),
                     (numpy.uint64, numpy.int32,  numpy.int64),
                     (numpy.uint64, numpy.uint32, numpy.int64),
                     (numpy.uint64, numpy.int16,  numpy.int64),

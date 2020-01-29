@@ -364,11 +364,20 @@ ERROR awkward_numpyarray_fill_todouble_fromU8(double* toptr, int64_t tooffset, c
 ERROR awkward_numpyarray_fill_todouble_frombool(double* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) {
   return awkward_numpyarray_fill_frombool<double>(toptr, tooffset, fromptr, fromoffset, length);
 }
+ERROR awkward_numpyarray_fill_toU64_fromU64(uint64_t* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) {
+  return awkward_numpyarray_fill<uint64_t, uint64_t>(toptr, tooffset, fromptr, fromoffset, length);
+}
 ERROR awkward_numpyarray_fill_to64_from64(int64_t* toptr, int64_t tooffset, const int64_t* fromptr, int64_t fromoffset, int64_t length) {
   return awkward_numpyarray_fill<int64_t, int64_t>(toptr, tooffset, fromptr, fromoffset, length);
 }
 ERROR awkward_numpyarray_fill_to64_fromU64(int64_t* toptr, int64_t tooffset, const uint64_t* fromptr, int64_t fromoffset, int64_t length) {
-  return awkward_numpyarray_fill<uint64_t, int64_t>(toptr, tooffset, fromptr, fromoffset, length);
+  for (int64_t i = 0;  i < length;  i++) {
+    if (fromptr[fromoffset + i] > kMaxInt64) {
+      return failure("uint64 value too large for int64 output", i, kSliceNone);
+    }
+    toptr[tooffset + i] = fromptr[fromoffset + i];
+  }
+  return success();
 }
 ERROR awkward_numpyarray_fill_to64_from32(int64_t* toptr, int64_t tooffset, const int32_t* fromptr, int64_t fromoffset, int64_t length) {
   return awkward_numpyarray_fill<int32_t, int64_t>(toptr, tooffset, fromptr, fromoffset, length);
