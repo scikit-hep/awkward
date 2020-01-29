@@ -546,17 +546,20 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::simplify(bool recursive, bool tocontiguous) const {
-    bool no_unions = true;
+    int64_t cases = 0;
     for (auto x : contents_) {
-      if (dynamic_cast<UnionArrayOf<int8_t, int32_t>*>(x.get())  ||
-          dynamic_cast<UnionArrayOf<int8_t, uint32_t>*>(x.get())  ||
-          dynamic_cast<UnionArrayOf<int8_t, int64_t>*>(x.get())) {
-        no_unions = false;
-        break;
+      if (UnionArrayOf<int8_t, int32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int32_t>*>(x.get())) {
+        cases += rawcontent->numcontents();
+      }
+      else if (UnionArrayOf<int8_t, uint32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, uint32_t>*>(x.get())) {
+        cases += rawcontent->numcontents();
+      }
+      else if (UnionArrayOf<int8_t, int64_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int64_t>*>(x.get())) {
+        cases += rawcontent->numcontents();
       }
     }
 
-    if (no_unions) {
+    if (cases == 0  ||  cases > kMaxInt8) {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto x : contents_) {
         contents.push_back(recursive ? x.get()->simplify(recursive, tocontiguous) : x);
