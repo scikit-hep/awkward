@@ -248,6 +248,8 @@ def test_listoffsetarray_merge():
         assert awkward1.tolist(regulararray.merge(array1)) == [[1, 2], [3, 4], [5, 6], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
 def test_recordarray_merge():
+    emptyarray = awkward1.layout.EmptyArray()
+
     arrayr1 = awkward1.Array([{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}]).layout
     arrayr2 = awkward1.Array([{"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}]).layout
     arrayr3 = awkward1.Array([{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}]).layout
@@ -265,17 +267,65 @@ def test_recordarray_merge():
     arrayt7 = awkward1.Array([(0,), (1,), (2,)]).layout
 
     assert arrayr1.mergeable(arrayr2)
+    assert arrayr2.mergeable(arrayr1)
     assert not arrayr1.mergeable(arrayr3)
     assert arrayr1.mergeable(arrayr4)
+    assert arrayr4.mergeable(arrayr1)
     assert not arrayr1.mergeable(arrayr5)
     assert not arrayr1.mergeable(arrayr6)
     assert arrayr5.mergeable(arrayr6)
+    assert arrayr6.mergeable(arrayr5)
     assert not arrayr1.mergeable(arrayr7)
 
     assert arrayt1.mergeable(arrayt2)
+    assert arrayt2.mergeable(arrayt1)
     assert not arrayt1.mergeable(arrayt3)
     assert not arrayt1.mergeable(arrayt4)
     assert not arrayt1.mergeable(arrayt5)
     assert not arrayt1.mergeable(arrayt6)
     assert not arrayt5.mergeable(arrayt6)
     assert not arrayt1.mergeable(arrayt7)
+
+    assert awkward1.tolist(arrayr1.merge(arrayr2)) == [{"x": 0.0, "y": []}, {"x": 1.0, "y": [1.0, 1.0]}, {"x": 2.0, "y": [2.0, 2.0]}, {"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}]
+    assert awkward1.tolist(arrayr2.merge(arrayr1)) == [{"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}, {"x": 0.0, "y": []}, {"x": 1.0, "y": [1.0, 1.0]}, {"x": 2.0, "y": [2.0, 2.0]}]
+
+    assert awkward1.tolist(arrayr1.merge(arrayr4)) == [{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}, {"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}]
+    assert awkward1.tolist(arrayr4.merge(arrayr1)) == [{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}, {"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}]
+
+    assert awkward1.tolist(arrayr5.merge(arrayr6)) == [{"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}, {"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}]
+    assert awkward1.tolist(arrayr6.merge(arrayr5)) == [{"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}, {"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}]
+
+    assert awkward1.tolist(arrayt1.merge(arrayt2)) == [(0.0, []), (1.0, [1.1]), (2.0, [2.0, 2.0]), (2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])]
+    assert awkward1.tolist(arrayt2.merge(arrayt1)) == [(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0]), (0.0, []), (1.0, [1.1]), (2.0, [2.0, 2.0])]
+
+    assert awkward1.tolist(arrayr1.merge(emptyarray)) == awkward1.tolist(arrayr1)
+    assert awkward1.tolist(arrayr2.merge(emptyarray)) == awkward1.tolist(arrayr2)
+    assert awkward1.tolist(arrayr3.merge(emptyarray)) == awkward1.tolist(arrayr3)
+    assert awkward1.tolist(arrayr4.merge(emptyarray)) == awkward1.tolist(arrayr4)
+    assert awkward1.tolist(arrayr5.merge(emptyarray)) == awkward1.tolist(arrayr5)
+    assert awkward1.tolist(arrayr6.merge(emptyarray)) == awkward1.tolist(arrayr6)
+    assert awkward1.tolist(arrayr7.merge(emptyarray)) == awkward1.tolist(arrayr7)
+
+    assert awkward1.tolist(emptyarray.merge(arrayr1)) == awkward1.tolist(arrayr1)
+    assert awkward1.tolist(emptyarray.merge(arrayr2)) == awkward1.tolist(arrayr2)
+    assert awkward1.tolist(emptyarray.merge(arrayr3)) == awkward1.tolist(arrayr3)
+    assert awkward1.tolist(emptyarray.merge(arrayr4)) == awkward1.tolist(arrayr4)
+    assert awkward1.tolist(emptyarray.merge(arrayr5)) == awkward1.tolist(arrayr5)
+    assert awkward1.tolist(emptyarray.merge(arrayr6)) == awkward1.tolist(arrayr6)
+    assert awkward1.tolist(emptyarray.merge(arrayr7)) == awkward1.tolist(arrayr7)
+
+    assert awkward1.tolist(arrayt1.merge(emptyarray)) == awkward1.tolist(arrayt1)
+    assert awkward1.tolist(arrayt2.merge(emptyarray)) == awkward1.tolist(arrayt2)
+    assert awkward1.tolist(arrayt3.merge(emptyarray)) == awkward1.tolist(arrayt3)
+    assert awkward1.tolist(arrayt4.merge(emptyarray)) == awkward1.tolist(arrayt4)
+    assert awkward1.tolist(arrayt5.merge(emptyarray)) == awkward1.tolist(arrayt5)
+    assert awkward1.tolist(arrayt6.merge(emptyarray)) == awkward1.tolist(arrayt6)
+    assert awkward1.tolist(arrayt7.merge(emptyarray)) == awkward1.tolist(arrayt7)
+
+    assert awkward1.tolist(emptyarray.merge(arrayt1)) == awkward1.tolist(arrayt1)
+    assert awkward1.tolist(emptyarray.merge(arrayt2)) == awkward1.tolist(arrayt2)
+    assert awkward1.tolist(emptyarray.merge(arrayt3)) == awkward1.tolist(arrayt3)
+    assert awkward1.tolist(emptyarray.merge(arrayt4)) == awkward1.tolist(arrayt4)
+    assert awkward1.tolist(emptyarray.merge(arrayt5)) == awkward1.tolist(arrayt5)
+    assert awkward1.tolist(emptyarray.merge(arrayt6)) == awkward1.tolist(arrayt6)
+    assert awkward1.tolist(emptyarray.merge(arrayt7)) == awkward1.tolist(arrayt7)

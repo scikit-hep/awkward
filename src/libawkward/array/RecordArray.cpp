@@ -463,7 +463,44 @@ namespace awkward {
       return shallow_copy();
     }
 
-    throw std::runtime_error("FIXME: RecordArray::merge");
+    if (RecordArray* rawother = dynamic_cast<RecordArray*>(other.get())) {
+      int64_t mylength = length();
+      int64_t theirlength = rawother->length();
+
+      if (istuple() == rawother->istuple()  &&  numfields() == 0  &&  rawother->numfields() == 0) {
+        return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), mylength + theirlength, istuple());
+      }
+      if (istuple()  &&  rawother->istuple()) {
+        if (numfields() == rawother->numfields()) {
+          std::vector<std::shared_ptr<Content>> contents;
+          for (int64_t i = 0;  i < numfields();  i++) {
+            std::shared_ptr<Content> mine = field(i).get()->getitem_range_nowrap(0, mylength);
+            std::shared_ptr<Content> theirs = rawother->field(i).get()->getitem_range_nowrap(0, theirlength);
+            contents.push_back(mine.get()->merge(theirs));
+          }
+          return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_);
+        }
+      }
+      else if (!istuple()  &&  !rawother->istuple()) {
+        std::vector<std::string> self_keys = keys();
+        std::vector<std::string> other_keys = rawother->keys();
+        std::sort(self_keys.begin(), self_keys.end());
+        std::sort(other_keys.begin(), other_keys.end());
+        if (self_keys == other_keys) {
+          std::vector<std::shared_ptr<Content>> contents;
+          for (auto key : keys()) {
+            std::shared_ptr<Content> mine = field(key).get()->getitem_range_nowrap(0, mylength);
+            std::shared_ptr<Content> theirs = rawother->field(key).get()->getitem_range_nowrap(0, theirlength);
+            contents.push_back(mine.get()->merge(theirs));
+          }
+          return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_);
+        }
+      }
+      throw std::invalid_argument("cannot merge records or tuples with different fields");
+    }
+    else {
+      throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
