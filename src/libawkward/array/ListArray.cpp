@@ -95,6 +95,12 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::toListOffsetArray64() const {
+    Index64 offsets = compact_offsets64();
+    return broadcast_tooffsets64(offsets);
+  }
+
+  template <typename T>
   const std::string ListArrayOf<T>::classname() const {
     if (std::is_same<T, int32_t>::value) {
       return "ListArray32";

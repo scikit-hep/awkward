@@ -435,7 +435,15 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override {
-      throw std::runtime_error("RawArrayOf<T>::merge");
+      if (RawArrayOf<T>* rawother = dynamic_cast<RawArrayOf<T>*>(other.get())) {
+        std::shared_ptr<T> ptr = std::shared_ptr<T>(new T[(size_t)(length_ + rawother->length())], util::array_deleter<T>());
+        memcpy(ptr.get(), &ptr_.get()[(size_t)offset_], sizeof(T)*((size_t)length_));
+        memcpy(&ptr.get()[(size_t)length_], &rawother->ptr().get()[(size_t)rawother->offset()], sizeof(T)*((size_t)rawother->length()));
+        return std::make_shared<RawArrayOf<T>>(Identities::none(), util::Parameters(), ptr, 0, length_ + rawother->length(), itemsize_);
+      }
+      else {
+        throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
+      }
     }
 
   protected:

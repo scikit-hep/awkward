@@ -1028,7 +1028,7 @@ namespace awkward {
     }
 
     else {
-      throw std::invalid_argument(std::string("cannot merge Numpy format \"") + format_ + std::string("\" with format \"") + rawother->format() + std::string("\""));
+      throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
     }
   }
 

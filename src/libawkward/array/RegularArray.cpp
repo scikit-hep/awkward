@@ -11,6 +11,7 @@
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
 
 #include "awkward/array/RegularArray.h"
@@ -76,6 +77,15 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
       return std::make_shared<ListOffsetArray64>(identities, parameters_, offsets, content_);
     }
+  }
+
+  const std::shared_ptr<Content> RegularArray::toRegularArray() const {
+    return shallow_copy();
+  }
+
+  const std::shared_ptr<Content> RegularArray::toListOffsetArray64() const {
+    Index64 offsets = compact_offsets64();
+    return broadcast_tooffsets64(offsets);
   }
 
   const std::string RegularArray::classname() const {
@@ -353,11 +363,64 @@ namespace awkward {
   }
 
   bool RegularArray::mergeable(const std::shared_ptr<Content>& other) const {
-    throw std::runtime_error("FIXME: RegularArray::mergeable");
+    if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
+      if (size_ == rawother->size()) {
+        return true;
+      }
+    }
+    else if (ListArray32* rawother = dynamic_cast<ListArray32*>(other.get())) {
+      return true;
+    }
+    else if (ListArrayU32* rawother = dynamic_cast<ListArrayU32*>(other.get())) {
+      return true;
+    }
+    else if (ListArray64* rawother = dynamic_cast<ListArray64*>(other.get())) {
+      return true;
+    }
+    else if (ListOffsetArray32* rawother = dynamic_cast<ListOffsetArray32*>(other.get())) {
+      return true;
+    }
+    else if (ListOffsetArrayU32* rawother = dynamic_cast<ListOffsetArrayU32*>(other.get())) {
+      return true;
+    }
+    else if (ListOffsetArray64* rawother = dynamic_cast<ListOffsetArray64*>(other.get())) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   const std::shared_ptr<Content> RegularArray::merge(const std::shared_ptr<Content>& other) const {
-    throw std::runtime_error("FIXME: RegularArray::merge");
+    if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
+      if (size_ == rawother->size()) {
+        std::shared_ptr<Content> mine = content_.get()->getitem_range_nowrap(0, size_*length());
+        std::shared_ptr<Content> theirs = rawother->content().get()->getitem_range_nowrap(0, rawother->size()*rawother->length());
+        std::shared_ptr<Content> content = mine.get()->merge(theirs);
+        return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), content, size_);
+      }
+    }
+    else if (ListArray32* rawother = dynamic_cast<ListArray32*>(other.get())) {
+      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
+    }
+    else if (ListArrayU32* rawother = dynamic_cast<ListArrayU32*>(other.get())) {
+      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
+    }
+    else if (ListArray64* rawother = dynamic_cast<ListArray64*>(other.get())) {
+      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
+    }
+    else if (ListOffsetArray32* rawother = dynamic_cast<ListOffsetArray32*>(other.get())) {
+      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
+    }
+    else if (ListOffsetArrayU32* rawother = dynamic_cast<ListOffsetArrayU32*>(other.get())) {
+      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
+    }
+    else if (ListOffsetArray64* rawother = dynamic_cast<ListOffsetArray64*>(other.get())) {
+      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
+    }
+    else {
+      throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
+    }
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

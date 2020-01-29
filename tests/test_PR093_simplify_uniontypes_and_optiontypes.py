@@ -142,3 +142,10 @@ def test_numpyarray_merge():
         three = one.merge(two)
         assert numpy.asarray(three).dtype == numpy.dtype(z)
         assert awkward1.tolist(three) == awkward1.tolist(numpy.concatenate([numpy.asarray(one), numpy.asarray(two)]))
+
+def test_regulararray_merge():
+    np1 = numpy.arange(2*7*5).reshape(2, 7, 5)
+    np2 = numpy.arange(3*7*5).reshape(3, 7, 5)
+    ak1 = awkward1.Array(np1).layout
+    ak2 = awkward1.Array(np2).layout
+    assert awkward1.tolist(ak1.merge(ak2)) == awkward1.tolist(numpy.concatenate([np1, np2]))
