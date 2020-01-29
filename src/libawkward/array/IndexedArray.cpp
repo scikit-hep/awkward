@@ -5,11 +5,13 @@
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/Slice.h"
 #include "awkward/array/None.h"
+#include "awkward/array/EmptyArray.h"
 
 #include "awkward/array/IndexedArray.h"
 
@@ -552,46 +554,155 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   bool IndexedArrayOf<T, ISOPTION>::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
-    throw std::runtime_error("FIXME: IndexedArray::mergeable");
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return true;
+    }
+
+    if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else {
+      return content_.get()->mergeable(other, mergebool);
+    }
   }
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::merge(const std::shared_ptr<Content>& other) const {
-    throw std::runtime_error("FIXME: IndexedArray::merge");
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return shallow_copy();
+    }
 
-    // std::shared_ptr<Content> content = recursive ? content_.get()->simplify(recursive, tocontiguous) : content_;
-    // if (IndexedArrayOf<int32_t, false>* rawcontent = dynamic_cast<IndexedArrayOf<int32_t, false>*>(content.get())) {
-    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int32_t, false>");
-    // }
-    // else if (IndexedArrayOf<uint32_t, false>* rawcontent = dynamic_cast<IndexedArrayOf<uint32_t, false>*>(content.get())) {
-    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<uint32_t, false>");
-    // }
-    // else if (IndexedArrayOf<int64_t, false>* rawcontent = dynamic_cast<IndexedArrayOf<int64_t, false>*>(content.get())) {
-    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int64_t, false>");
-    // }
-    // else if (IndexedArrayOf<int32_t, true>* rawcontent = dynamic_cast<IndexedArrayOf<int32_t, true>*>(content.get())) {
-    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int32_t, true>");
-    // }
-    // else if (IndexedArrayOf<uint32_t, true>* rawcontent = dynamic_cast<IndexedArrayOf<uint32_t, true>*>(content.get())) {
-    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<uint32_t, true>");
-    // }
-    // else if (IndexedArrayOf<int64_t, true>* rawcontent = dynamic_cast<IndexedArrayOf<int64_t, true>*>(content.get())) {
-    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int64_t, true>");
-    // }
-    // else if (tocontiguous  &&  !ISOPTION) {
-    //   Index64 nextcarry(index_.length());
-    //   struct Error err = util::awkward_indexedarray_getitem_nextcarry_64<T>(
-    //     nextcarry.ptr().get(),
-    //     index_.ptr().get(),
-    //     index_.offset(),
-    //     index_.length(),
-    //     content_.get()->length());
-    //   util::handle_error(err, classname(), identities_.get());
-    //   return content.get()->carry(nextcarry);
-    // }
-    // else {
-    //   return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, content);
-    // }
+    int64_t mylength = length();
+    int64_t theirlength = other.get()->length();
+    Index64 index(mylength + theirlength);
+
+    if (std::is_same<T, int32_t>::value) {
+      struct Error err = awkward_indexarray_fill_to64_from32(
+        index.ptr().get(),
+        0,
+        reinterpret_cast<int32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength,
+        0);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<T, uint32_t>::value) {
+      struct Error err = awkward_indexarray_fill_to64_fromU32(
+        index.ptr().get(),
+        0,
+        reinterpret_cast<uint32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength,
+        0);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      struct Error err = awkward_indexarray_fill_to64_from64(
+        index.ptr().get(),
+        0,
+        reinterpret_cast<int64_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength,
+        0);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else {
+      throw std::runtime_error("unrecognized ListArray specialization");
+    }
+
+    int64_t mycontentlength = content_.get()->length();
+    std::shared_ptr<Content> content;
+    bool other_isoption = false;
+    if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
+      content = content_.get()->merge(rawother->content());
+      Index32 other_index = rawother->index();
+      struct Error err = awkward_indexarray_fill_to64_from32(
+        index.ptr().get(),
+        mylength,
+        other_index.ptr().get(),
+        other_index.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+    }
+    else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(other.get())) {
+      content = content_.get()->merge(rawother->content());
+      IndexU32 other_index = rawother->index();
+      struct Error err = awkward_indexarray_fill_to64_fromU32(
+        index.ptr().get(),
+        mylength,
+        other_index.ptr().get(),
+        other_index.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+    }
+    else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(other.get())) {
+      content = content_.get()->merge(rawother->content());
+      Index64 other_index = rawother->index();
+      struct Error err = awkward_indexarray_fill_to64_from64(
+        index.ptr().get(),
+        mylength,
+        other_index.ptr().get(),
+        other_index.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+    }
+    else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(other.get())) {
+      content = content_.get()->merge(rawother->content());
+      Index32 other_index = rawother->index();
+      struct Error err = awkward_indexarray_fill_to64_from32(
+        index.ptr().get(),
+        mylength,
+        other_index.ptr().get(),
+        other_index.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+      other_isoption = true;
+    }
+    else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      content = content_.get()->merge(rawother->content());
+      Index64 other_index = rawother->index();
+      struct Error err = awkward_indexarray_fill_to64_from64(
+        index.ptr().get(),
+        mylength,
+        other_index.ptr().get(),
+        other_index.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+      other_isoption = true;
+    }
+    else {
+      content = content_.get()->merge(other);
+      struct Error err = awkward_indexarray_fill_to64_count(
+        index.ptr().get(),
+        mylength,
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+    }
+
+    if (ISOPTION  ||  other_isoption) {
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content);
+    }
+    else {
+      return std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), index, content);
+    }
   }
 
   template <typename T, bool ISOPTION>
