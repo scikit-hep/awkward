@@ -152,6 +152,8 @@ def test_flatten_regular_array():
     assert awkward1.tolist(regulararray.flatten()) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], []]
     assert flatten(awkward1.tolist(regulararray), 1) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
     assert awkward1.tolist(regulararray.flatten(1)) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(regulararray.flatten(-1)) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(regulararray.flatten(-2)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], []]
     # cannot concatenate non-lists
     # assert flatten(awkward1.tolist(regulararray), 2) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]
     # NumpyArray cannot be flattened because it has 1 dimensions:
