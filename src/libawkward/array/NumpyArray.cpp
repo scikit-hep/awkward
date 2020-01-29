@@ -685,16 +685,58 @@ namespace awkward {
     }
   }
 
+  const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t>& shape, int64_t axis) {
+    if (shape.size() == 1) {
+      return std::vector<ssize_t>();
+    }
+    else {
+      std::vector<ssize_t> out;
+      const auto& indx = begin(shape) + axis;
+      if (indx > begin(shape)) {
+        out.insert(end(out), begin(shape), indx);
+      }
+      out.emplace_back(shape[axis]*shape[axis + 1]);
+      out.insert(end(out), indx + 2, end(shape));
+      return out;
+    }
+  }
+
+  const std::vector<ssize_t> flatten_strides(const std::vector<ssize_t>& strides, int64_t axis) {
+    if (strides.size() == 1) {
+      return std::vector<ssize_t>();
+    }
+    else {
+      std::vector<ssize_t> out;
+      const auto indx = begin(strides) + axis;
+      if (indx > begin(strides)) {
+        out.insert(end(out), begin(strides), indx);
+      }
+      out.insert(end(out), indx + 1, end(strides));
+      return out;
+    }
+  }
+
   const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: NumpyArray::flatten(axis != 0)");
+    if (axis < 0) {
+      std::pair<int64_t, int64_t> minmax = minmax_depth();
+      assert(minmax.first == minmax.second);
+      int64_t mindepth = minmax.first;
+      int64_t depth = purelist_depth();
+      if (mindepth == depth) {
+        if (ndim() - 1 + axis < 0) {
+          throw std::invalid_argument(std::string("NumpyArray cannot be flattened in axis ") + std::to_string(axis) + std::string(" because it exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
+        }
+        return flatten(ndim() - 1 + axis);
+      }
     }
     if (shape_.size() <= 1) {
-      // FIXME: the cut-off for flattenability depends on axis
       throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
+    if (axis >= shape_.size() - 1) {
+      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because axis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
+    }
     if (iscontiguous()) {
-      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_), flatten_strides(strides_), byteoffset_, itemsize_, format_);
+      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_, axis), flatten_strides(strides_, axis), byteoffset_, itemsize_, format_);
     }
     else {
       return contiguous().flatten(axis);

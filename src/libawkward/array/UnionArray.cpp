@@ -541,7 +541,11 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: UnionArray::flatten");
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.emplace_back(content.get()->flatten(axis));
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents);
   }
 
   template <typename T, typename I>
