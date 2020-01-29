@@ -246,3 +246,36 @@ def test_listoffsetarray_merge():
 
         assert awkward1.tolist(array1.merge(regulararray)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [1, 2], [3, 4], [5, 6]]
         assert awkward1.tolist(regulararray.merge(array1)) == [[1, 2], [3, 4], [5, 6], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+def test_recordarray_merge():
+    arrayr1 = awkward1.Array([{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}]).layout
+    arrayr2 = awkward1.Array([{"x": 2.2, "y": [2.2, 2.2]}, {"x": 1.1, "y": [1.1, 1.1]}, {"x": 0.0, "y": [0.0, 0.0]}]).layout
+    arrayr3 = awkward1.Array([{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}]).layout
+    arrayr4 = awkward1.Array([{"y": [], "x": 0}, {"y": [1, 1], "x": 1}, {"y": [2, 2], "x": 2}]).layout
+    arrayr5 = awkward1.Array([{"x": 0, "y": [], "z": 0}, {"x": 1, "y": [1, 1], "z": 1}, {"x": 2, "y": [2, 2], "z": 2}]).layout
+    arrayr6 = awkward1.Array([{"z": 0, "x": 0, "y": []}, {"z": 1, "x": 1, "y": [1, 1]}, {"z": 2, "x": 2, "y": [2, 2]}]).layout
+    arrayr7 = awkward1.Array([{"x": 0}, {"x": 1}, {"x": 2}]).layout
+
+    arrayt1 = awkward1.Array([(0, []), (1, [1.1]), (2, [2, 2])]).layout
+    arrayt2 = awkward1.Array([(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])]).layout
+    arrayt3 = awkward1.Array([(0, 0.0), (1, 1.1), (2, 2.2)]).layout
+    arrayt4 = awkward1.Array([([], 0), ([1.1], 1), ([2.2, 2.2], 2)]).layout
+    arrayt5 = awkward1.Array([(0, [], 0), (1, [1], 1), (2, [2, 2], 2)]).layout
+    arrayt6 = awkward1.Array([(0, 0, []), (1, 1, [1]), (2, 2, [2, 2])]).layout
+    arrayt7 = awkward1.Array([(0,), (1,), (2,)]).layout
+
+    assert arrayr1.mergeable(arrayr2)
+    assert not arrayr1.mergeable(arrayr3)
+    assert arrayr1.mergeable(arrayr4)
+    assert not arrayr1.mergeable(arrayr5)
+    assert not arrayr1.mergeable(arrayr6)
+    assert arrayr5.mergeable(arrayr6)
+    assert not arrayr1.mergeable(arrayr7)
+
+    assert arrayt1.mergeable(arrayt2)
+    assert not arrayt1.mergeable(arrayt3)
+    assert not arrayt1.mergeable(arrayt4)
+    assert not arrayt1.mergeable(arrayt5)
+    assert not arrayt1.mergeable(arrayt6)
+    assert not arrayt5.mergeable(arrayt6)
+    assert not arrayt1.mergeable(arrayt7)

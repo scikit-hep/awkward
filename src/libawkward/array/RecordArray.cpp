@@ -1,12 +1,14 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
+#include <algorithm>
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/Record.h"
+#include "awkward/array/EmptyArray.h"
 
 #include "awkward/array/RecordArray.h"
 
@@ -420,10 +422,47 @@ namespace awkward {
   }
 
   bool RecordArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
-    throw std::runtime_error("FIXME: RecordArray::mergeable");
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return true;
+    }
+
+    if (RecordArray* rawother = dynamic_cast<RecordArray*>(other.get())) {
+      if (istuple()  &&  rawother->istuple()) {
+        if (numfields() == rawother->numfields()) {
+          for (int64_t i = 0;  i < numfields();  i++) {
+            if (!field(i).get()->mergeable(rawother->field(i), mergebool)) {
+              return false;
+            }
+          }
+          return true;
+        }
+      }
+      else if (!istuple()  &&  !rawother->istuple()) {
+        std::vector<std::string> self_keys = keys();
+        std::vector<std::string> other_keys = rawother->keys();
+        std::sort(self_keys.begin(), self_keys.end());
+        std::sort(other_keys.begin(), other_keys.end());
+        if (self_keys == other_keys) {
+          for (auto key : self_keys) {
+            if (!field(key).get()->mergeable(rawother->field(key), mergebool)) {
+              return false;
+            }
+          }
+          return true;
+        }
+      }
+      return false;
+    }
+    else {
+      return false;
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::merge(const std::shared_ptr<Content>& other) const {
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return shallow_copy();
+    }
+
     throw std::runtime_error("FIXME: RecordArray::merge");
   }
 
