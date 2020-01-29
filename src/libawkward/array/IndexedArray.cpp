@@ -579,6 +579,35 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reverse_merge(const std::shared_ptr<Content>& other) {
+    int64_t theirlength = other.get()->length();
+    int64_t mylength = length();
+    Index64 index(theirlength + mylength);
+
+    std::shared_ptr<Content> content = other.get()->merge(content_);
+    struct Error err1 = awkward_indexedarray_fill_to64_count(
+      index.ptr().get(),
+      0,
+      theirlength,
+      0);
+    util::handle_error(err1, classname(), identities_.get());
+
+    int64_t mycontentlength = content_.get()->length();
+    if (std::is_same<T, int32_t>::value) {
+      struct Error err2 = awkward_indexedarray_fill_to64_from32(
+        index.ptr().get(),
+        theirlength,
+        reinterpret_cast<int32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength,
+        mycontentlength);
+      util::handle_error(err2, classname(), identities_.get());
+    }
+
+    return std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(Identities::none(), util::Parameters(), index, content);
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::merge(const std::shared_ptr<Content>& other) const {
     if (dynamic_cast<EmptyArray*>(other.get())) {
       return shallow_copy();
@@ -589,7 +618,7 @@ namespace awkward {
     Index64 index(mylength + theirlength);
 
     if (std::is_same<T, int32_t>::value) {
-      struct Error err = awkward_indexarray_fill_to64_from32(
+      struct Error err = awkward_indexedarray_fill_to64_from32(
         index.ptr().get(),
         0,
         reinterpret_cast<int32_t*>(index_.ptr().get()),
@@ -599,7 +628,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<T, uint32_t>::value) {
-      struct Error err = awkward_indexarray_fill_to64_fromU32(
+      struct Error err = awkward_indexedarray_fill_to64_fromU32(
         index.ptr().get(),
         0,
         reinterpret_cast<uint32_t*>(index_.ptr().get()),
@@ -609,7 +638,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<T, int64_t>::value) {
-      struct Error err = awkward_indexarray_fill_to64_from64(
+      struct Error err = awkward_indexedarray_fill_to64_from64(
         index.ptr().get(),
         0,
         reinterpret_cast<int64_t*>(index_.ptr().get()),
@@ -628,7 +657,7 @@ namespace awkward {
     if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
       content = content_.get()->merge(rawother->content());
       Index32 other_index = rawother->index();
-      struct Error err = awkward_indexarray_fill_to64_from32(
+      struct Error err = awkward_indexedarray_fill_to64_from32(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -640,7 +669,7 @@ namespace awkward {
     else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(other.get())) {
       content = content_.get()->merge(rawother->content());
       IndexU32 other_index = rawother->index();
-      struct Error err = awkward_indexarray_fill_to64_fromU32(
+      struct Error err = awkward_indexedarray_fill_to64_fromU32(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -652,7 +681,7 @@ namespace awkward {
     else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(other.get())) {
       content = content_.get()->merge(rawother->content());
       Index64 other_index = rawother->index();
-      struct Error err = awkward_indexarray_fill_to64_from64(
+      struct Error err = awkward_indexedarray_fill_to64_from64(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -664,7 +693,7 @@ namespace awkward {
     else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(other.get())) {
       content = content_.get()->merge(rawother->content());
       Index32 other_index = rawother->index();
-      struct Error err = awkward_indexarray_fill_to64_from32(
+      struct Error err = awkward_indexedarray_fill_to64_from32(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -677,7 +706,7 @@ namespace awkward {
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
       content = content_.get()->merge(rawother->content());
       Index64 other_index = rawother->index();
-      struct Error err = awkward_indexarray_fill_to64_from64(
+      struct Error err = awkward_indexedarray_fill_to64_from64(
         index.ptr().get(),
         mylength,
         other_index.ptr().get(),
@@ -689,7 +718,7 @@ namespace awkward {
     }
     else {
       content = content_.get()->merge(other);
-      struct Error err = awkward_indexarray_fill_to64_count(
+      struct Error err = awkward_indexedarray_fill_to64_count(
         index.ptr().get(),
         mylength,
         theirlength,

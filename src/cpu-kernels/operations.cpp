@@ -446,30 +446,30 @@ ERROR awkward_listarray_fill_to64_from64(int64_t* tostarts, int64_t tostartsoffs
 }
 
 template <typename FROM, typename TO>
-ERROR awkward_indexarray_fill(TO* toindex, int64_t toindexoffset, const FROM* fromindex, int64_t fromindexoffset, int64_t length, int64_t base) {
+ERROR awkward_indexedarray_fill(TO* toindex, int64_t toindexoffset, const FROM* fromindex, int64_t fromindexoffset, int64_t length, int64_t base) {
   for (int64_t i = 0;  i < length;  i++) {
     FROM from = fromindex[fromindexoffset + i];
     toindex[toindexoffset + i] = from < 0 ? -1 : (TO)(from + base);
   }
   return success();
 }
-ERROR awkward_indexarray_fill_to64_from32(int64_t* toindex, int64_t toindexoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t base) {
-  return awkward_indexarray_fill<int32_t, int64_t>(toindex, toindexoffset, fromindex, fromindexoffset, length, base);
+ERROR awkward_indexedarray_fill_to64_from32(int64_t* toindex, int64_t toindexoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t base) {
+  return awkward_indexedarray_fill<int32_t, int64_t>(toindex, toindexoffset, fromindex, fromindexoffset, length, base);
 }
-ERROR awkward_indexarray_fill_to64_fromU32(int64_t* toindex, int64_t toindexoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t base) {
-  return awkward_indexarray_fill<uint32_t, int64_t>(toindex, toindexoffset, fromindex, fromindexoffset, length, base);
+ERROR awkward_indexedarray_fill_to64_fromU32(int64_t* toindex, int64_t toindexoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t base) {
+  return awkward_indexedarray_fill<uint32_t, int64_t>(toindex, toindexoffset, fromindex, fromindexoffset, length, base);
 }
-ERROR awkward_indexarray_fill_to64_from64(int64_t* toindex, int64_t toindexoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t base) {
-  return awkward_indexarray_fill<int64_t, int64_t>(toindex, toindexoffset, fromindex, fromindexoffset, length, base);
+ERROR awkward_indexedarray_fill_to64_from64(int64_t* toindex, int64_t toindexoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t base) {
+  return awkward_indexedarray_fill<int64_t, int64_t>(toindex, toindexoffset, fromindex, fromindexoffset, length, base);
 }
 
 template <typename TO>
-ERROR awkward_indexarray_fill_count(TO* toindex, int64_t toindexoffset, int64_t length, int64_t base){
+ERROR awkward_indexedarray_fill_count(TO* toindex, int64_t toindexoffset, int64_t length, int64_t base){
   for (int64_t i = 0;  i < length;  i++) {
     toindex[toindexoffset + i] = i + base;
   }
   return success();
 }
-ERROR awkward_indexarray_fill_to64_count(int64_t* toindex, int64_t toindexoffset, int64_t length, int64_t base) {
-  return awkward_indexarray_fill_count(toindex, toindexoffset, length, base);
+ERROR awkward_indexedarray_fill_to64_count(int64_t* toindex, int64_t toindexoffset, int64_t length, int64_t base) {
+  return awkward_indexedarray_fill_count(toindex, toindexoffset, length, base);
 }
