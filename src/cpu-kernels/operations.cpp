@@ -426,3 +426,21 @@ ERROR awkward_numpyarray_fill_to64_frombool(int64_t* toptr, int64_t tooffset, co
 ERROR awkward_numpyarray_fill_tobool_frombool(bool* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) {
   return awkward_numpyarray_fill_frombool<bool>(toptr, tooffset, fromptr, fromoffset, length);
 }
+
+template <typename FROM, typename TO>
+ERROR awkward_listarray_fill(TO* tostarts, int64_t tostartsoffset, TO* tostops, int64_t tostopsoffset, const FROM* fromstarts, int64_t fromstartsoffset, const FROM* fromstops, int64_t fromstopsoffset, int64_t length, int64_t base) {
+  for (int64_t i = 0;  i < length;  i++) {
+    tostarts[tostartsoffset + i] = (TO)fromstarts[fromstartsoffset + i] + base;
+    tostops[tostopsoffset + i] = (TO)fromstops[fromstopsoffset + i] + base;
+  }
+  return success();
+}
+ERROR awkward_listarray_fill_to64_from32(int64_t* tostarts, int64_t tostartsoffset, int64_t* tostops, int64_t tostopsoffset, const int32_t* fromstarts, int64_t fromstartsoffset, const int32_t* fromstops, int64_t fromstopsoffset, int64_t length, int64_t base) {
+  return awkward_listarray_fill<int32_t, int64_t>(tostarts, tostartsoffset, tostops, tostopsoffset, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, length, base);
+}
+ERROR awkward_listarray_fill_to64_fromU32(int64_t* tostarts, int64_t tostartsoffset, int64_t* tostops, int64_t tostopsoffset, const uint32_t* fromstarts, int64_t fromstartsoffset, const uint32_t* fromstops, int64_t fromstopsoffset, int64_t length, int64_t base) {
+  return awkward_listarray_fill<uint32_t, int64_t>(tostarts, tostartsoffset, tostops, tostopsoffset, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, length, base);
+}
+ERROR awkward_listarray_fill_to64_from64(int64_t* tostarts, int64_t tostartsoffset, int64_t* tostops, int64_t tostopsoffset, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset, int64_t length, int64_t base) {
+  return awkward_listarray_fill<int64_t, int64_t>(tostarts, tostartsoffset, tostops, tostopsoffset, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, length, base);
+}

@@ -55,7 +55,7 @@ def wrap(content, classes, functions):
 def called_by_module(modulename):
     frame = inspect.currentframe()
     while frame is not None:
-        name = getattr(inspect.getmodule(frame), '__name__', None)
+        name = getattr(inspect.getmodule(frame), "__name__", None)
         if name is not None and (name == modulename or name.startswith(modulename + ".")):
             return True
         frame = frame.f_back

@@ -429,26 +429,16 @@ namespace awkward {
         return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), content, size_);
       }
       else {
-        return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
+        return toListOffsetArray64().get()->merge(other);
       }
     }
-    else if (ListArray32* rawother = dynamic_cast<ListArray32*>(other.get())) {
-      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
-    }
-    else if (ListArrayU32* rawother = dynamic_cast<ListArrayU32*>(other.get())) {
-      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
-    }
-    else if (ListArray64* rawother = dynamic_cast<ListArray64*>(other.get())) {
-      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
-    }
-    else if (ListOffsetArray32* rawother = dynamic_cast<ListOffsetArray32*>(other.get())) {
-      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
-    }
-    else if (ListOffsetArrayU32* rawother = dynamic_cast<ListOffsetArrayU32*>(other.get())) {
-      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
-    }
-    else if (ListOffsetArray64* rawother = dynamic_cast<ListOffsetArray64*>(other.get())) {
-      return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
+    else if (dynamic_cast<ListArray32*>(other.get())  ||
+             dynamic_cast<ListArrayU32*>(other.get())  ||
+             dynamic_cast<ListArray64*>(other.get())  ||
+             dynamic_cast<ListOffsetArray32*>(other.get())  ||
+             dynamic_cast<ListOffsetArrayU32*>(other.get())  ||
+             dynamic_cast<ListOffsetArray64*>(other.get())) {
+      return toListOffsetArray64().get()->merge(other);
     }
     else {
       throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
