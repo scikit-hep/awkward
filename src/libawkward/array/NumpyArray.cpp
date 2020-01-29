@@ -701,12 +701,284 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::simplify(bool recursive, bool tocontiguous) const {
-    if (tocontiguous) {
-      return contiguous().shallow_copy();
+  const std::shared_ptr<Content> NumpyArray::merge(const std::shared_ptr<Content>& other) const {
+    if (ndim() == 0) {
+      throw std::invalid_argument("cannot merge Numpy scalars");
     }
+
+    NumpyArray contiguous_self = contiguous();
+    if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
+      if (ndim() != rawother->ndim()) {
+        throw std::invalid_argument("cannot merge arrays with different shapes");
+      }
+
+      NumpyArray contiguous_other = rawother->contiguous();
+
+      int64_t itemsize;
+      std::string format;
+      if (format_.compare("d") == 0  ||  format_.compare("f") == 0  ||  rawother->format().compare("d") == 0  ||  rawother->format().compare("f") == 0) {
+        itemsize = 8;
+        format = "d";
+      }
+      else if (format_.compare("q") == 0  ||  format_.compare("Q") == 0  ||  format_.compare("l") == 0  ||  format_.compare("L") == 0  ||  format_.compare("i") == 0  ||  format_.compare("I") == 0  ||  format_.compare("h") == 0  ||  format_.compare("H") == 0  ||  format_.compare("b") == 0  ||  format_.compare("B") == 0  ||  format_.compare("c") == 0  ||  rawother->format().compare("q") == 0  ||  rawother->format().compare("Q") == 0  ||  rawother->format().compare("l") == 0  ||  rawother->format().compare("L") == 0  ||  rawother->format().compare("i") == 0  ||  rawother->format().compare("I") == 0  ||  rawother->format().compare("h") == 0  ||  rawother->format().compare("H") == 0  ||  rawother->format().compare("b") == 0  ||  rawother->format().compare("B") == 0  ||  rawother->format().compare("c") == 0) {
+        itemsize = 8;
+#ifdef _MSC_VER
+        format = "q";
+#else
+        format = "l";
+#endif
+      }
+      else if (format_.compare("?") == 0  &&  rawother->format().compare("?") == 0) {
+        itemsize = 1;
+        format = "?";
+      }
+      else {
+        throw std::invalid_argument(std::string("cannot merge Numpy format \"") + format_ + std::string("\" with \"") + rawother->format() + std::string("\""));
+      }
+
+      std::vector<ssize_t> other_shape = rawother->shape();
+      std::vector<ssize_t> shape;
+      std::vector<ssize_t> strides;
+      shape.push_back(shape_[0] + other_shape[0]);
+      strides.push_back(itemsize);
+      int64_t self_flatlength = shape_[0];
+      int64_t other_flatlength = other_shape[0];
+      for (int64_t i = ((int64_t)shape_.size()) - 1;  i > 0;  i--) {
+        if (shape_[(size_t)i] != other_shape[(size_t)i]) {
+          throw std::invalid_argument("cannot merge arrays with different shapes");
+        }
+        shape.insert(shape.begin() + 1, shape_[(size_t)i]);
+        strides.insert(strides.begin(), strides[0]*shape_[(size_t)i]);
+        self_flatlength *= (int64_t)shape_[(size_t)i];
+        other_flatlength *= (int64_t)shape_[(size_t)i];
+      }
+
+      std::shared_ptr<void> ptr(new uint8_t[(size_t)(itemsize*(self_flatlength + other_flatlength))], util::array_deleter<uint8_t>());
+
+      int64_t self_offset = contiguous_self.byteoffset() / contiguous_self.itemsize();
+      int64_t other_offset = contiguous_other.byteoffset() / contiguous_other.itemsize();
+
+      struct Error err;
+      if (format.compare("d") == 0) {
+        if (format_.compare("d") == 0) {
+          err = awkward_numpyarray_fill_todouble_fromdouble(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<double*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else if (format_.compare("f") == 0) {
+          err = awkward_numpyarray_fill_todouble_fromfloat(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<float*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+#ifdef _MSC_VER
+        else if (format_.compare("q") == 0) {
+#else
+        else if (format_.compare("l") == 0) {
+#endif
+          err = awkward_numpyarray_fill_todouble_from64(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<int64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (format_.compare("Q") == 0) {
+#else
+          else if (format_.compare("L") == 0) {
+#endif
+          err = awkward_numpyarray_fill_todouble_fromU64(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (format_.compare("l") == 0) {
+#else
+          else if (format_.compare("i") == 0) {
+#endif
+          err = awkward_numpyarray_fill_todouble_from32(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<int32_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (format_.compare("L") == 0) {
+#else
+          else if (format_.compare("I") == 0) {
+#endif
+          err = awkward_numpyarray_fill_todouble_fromU32(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else if (format_.compare("h") == 0) {
+          err = awkward_numpyarray_fill_todouble_from16(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<int16_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else if (format_.compare("H") == 0) {
+          err = awkward_numpyarray_fill_todouble_fromU16(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else if (format_.compare("b") == 0) {
+          err = awkward_numpyarray_fill_todouble_from8(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<int8_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+          err = awkward_numpyarray_fill_todouble_fromU8(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else if (format_.compare("?") == 0) {
+          err = awkward_numpyarray_fill_todouble_frombool(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<bool*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else {
+          throw std::invalid_argument(std::string("cannot merge Numpy format \"") + format_ + std::string("\" with \"") + rawother->format() + std::string("\""));
+        }
+        util::handle_error(err, classname(), nullptr);
+
+        if (rawother->format().compare("d") == 0) {
+          err = awkward_numpyarray_fill_todouble_fromdouble(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<double*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else if (rawother->format().compare("f") == 0) {
+          err = awkward_numpyarray_fill_todouble_fromfloat(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<float*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+#ifdef _MSC_VER
+        else if (rawother->format().compare("q") == 0) {
+#else
+        else if (rawother->format().compare("l") == 0) {
+#endif
+          err = awkward_numpyarray_fill_todouble_from64(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<int64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (rawother->format().compare("Q") == 0) {
+#else
+          else if (rawother->format().compare("L") == 0) {
+#endif
+          err = awkward_numpyarray_fill_todouble_fromU64(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (rawother->format().compare("l") == 0) {
+#else
+          else if (rawother->format().compare("i") == 0) {
+#endif
+          err = awkward_numpyarray_fill_todouble_from32(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<int32_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (rawother->format().compare("L") == 0) {
+#else
+          else if (rawother->format().compare("I") == 0) {
+#endif
+          err = awkward_numpyarray_fill_todouble_fromU32(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else if (rawother->format().compare("h") == 0) {
+          err = awkward_numpyarray_fill_todouble_from16(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<int16_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else if (rawother->format().compare("H") == 0) {
+          err = awkward_numpyarray_fill_todouble_fromU16(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else if (rawother->format().compare("b") == 0) {
+          err = awkward_numpyarray_fill_todouble_from8(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<int8_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else if (rawother->format().compare("B") == 0  ||  format_.compare("c") == 0) {
+          err = awkward_numpyarray_fill_todouble_fromU8(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else if (rawother->format().compare("?") == 0) {
+          err = awkward_numpyarray_fill_todouble_frombool(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<bool*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else {
+          throw std::invalid_argument(std::string("cannot merge Numpy format \"") + format_ + std::string("\" with \"") + rawother->format() + std::string("\""));
+        }
+        util::handle_error(err, classname(), nullptr);
+      }
+
+      else if (itemsize == 8) {
+#ifdef _MSC_VER
+        if (format_.compare("q") == 0) {
+#else
+        if (format_.compare("l") == 0) {
+#endif
+          err = awkward_numpyarray_fill_to64_from64(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<int64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (format_.compare("Q") == 0) {
+#else
+          else if (format_.compare("L") == 0) {
+#endif
+          err = awkward_numpyarray_fill_to64_fromU64(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (format_.compare("l") == 0) {
+#else
+          else if (format_.compare("i") == 0) {
+#endif
+          err = awkward_numpyarray_fill_to64_from32(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<int32_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (format_.compare("L") == 0) {
+#else
+          else if (format_.compare("I") == 0) {
+#endif
+          err = awkward_numpyarray_fill_to64_fromU32(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else if (format_.compare("h") == 0) {
+          err = awkward_numpyarray_fill_to64_from16(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<int16_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else if (format_.compare("H") == 0) {
+          err = awkward_numpyarray_fill_to64_fromU16(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else if (format_.compare("b") == 0) {
+          err = awkward_numpyarray_fill_to64_from8(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<int8_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+          err = awkward_numpyarray_fill_to64_fromU8(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else if (format_.compare("?") == 0) {
+          err = awkward_numpyarray_fill_to64_frombool(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<bool*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        }
+        else {
+          throw std::invalid_argument(std::string("cannot merge Numpy format \"") + format_ + std::string("\" with \"") + rawother->format() + std::string("\""));
+        }
+        util::handle_error(err, classname(), nullptr);
+
+#ifdef _MSC_VER
+        if (rawother->format().compare("q") == 0) {
+#else
+        if (rawother->format().compare("l") == 0) {
+#endif
+          err = awkward_numpyarray_fill_to64_from64(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<int64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (rawother->format().compare("Q") == 0) {
+#else
+          else if (rawother->format().compare("L") == 0) {
+#endif
+          err = awkward_numpyarray_fill_to64_fromU64(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (rawother->format().compare("l") == 0) {
+#else
+          else if (rawother->format().compare("i") == 0) {
+#endif
+          err = awkward_numpyarray_fill_to64_from32(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<int32_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+#ifdef _MSC_VER
+          else if (rawother->format().compare("L") == 0) {
+#else
+          else if (rawother->format().compare("I") == 0) {
+#endif
+          err = awkward_numpyarray_fill_to64_fromU32(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<uint32_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else if (rawother->format().compare("h") == 0) {
+          err = awkward_numpyarray_fill_to64_from16(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<int16_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else if (rawother->format().compare("H") == 0) {
+          err = awkward_numpyarray_fill_to64_fromU16(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<uint16_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else if (rawother->format().compare("b") == 0) {
+          err = awkward_numpyarray_fill_to64_from8(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<int8_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else if (rawother->format().compare("B") == 0  ||  format_.compare("c") == 0) {
+          err = awkward_numpyarray_fill_to64_fromU8(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<uint8_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else if (rawother->format().compare("?") == 0) {
+          err = awkward_numpyarray_fill_to64_frombool(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<bool*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        }
+        else {
+          throw std::invalid_argument(std::string("cannot merge Numpy format \"") + format_ + std::string("\" with \"") + rawother->format() + std::string("\""));
+        }
+        util::handle_error(err, classname(), nullptr);
+      }
+
+      else {
+        err = awkward_numpyarray_fill_tobool_frombool(reinterpret_cast<bool*>(ptr.get()), 0, reinterpret_cast<bool*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
+        util::handle_error(err, classname(), nullptr);
+        err = awkward_numpyarray_fill_tobool_frombool(reinterpret_cast<bool*>(ptr.get()), self_flatlength, reinterpret_cast<bool*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
+        util::handle_error(err, classname(), nullptr);
+      }
+
+      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
+    }
+
     else {
-      return shallow_copy();
+      throw std::invalid_argument(std::string("cannot merge Numpy format \"") + format_ + std::string("\" with format \"") + rawother->format() + std::string("\""));
     }
   }
 

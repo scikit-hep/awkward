@@ -56,7 +56,7 @@ namespace awkward {
     virtual const Index64 count64() const = 0;
     virtual const std::shared_ptr<Content> count(int64_t axis) const = 0;
     virtual const std::shared_ptr<Content> flatten(int64_t axis) const = 0;
-    virtual const std::shared_ptr<Content> simplify(bool recursive, bool tocontiguous) const = 0;
+    virtual const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const = 0;
 
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;

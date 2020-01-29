@@ -1241,9 +1241,9 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("flatten", [](T& self, int64_t axis) -> py::object {
             return box(self.flatten(axis));
           }, py::arg("axis") = 0)
-          .def("simplify", [](T& self, bool recursive, bool tocompact) -> py::object {
-            return box(self.simplify(recursive, tocompact));
-          }, py::arg("recursive") = false, py::arg("tocompact") = false)
+          .def("merge", [](T& self, py::object other) -> py::object {
+            return box(self.merge(unbox_content(other)));
+          })
 
   ;
 }

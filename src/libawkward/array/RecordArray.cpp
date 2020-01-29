@@ -422,22 +422,8 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::simplify(bool recursive, bool tocontiguous) const {
-    if (recursive) {
-      std::vector<std::shared_ptr<Content>> contents;
-      for (auto content : contents_) {
-        contents.push_back(content.get()->simplify(recursive, tocontiguous));
-      }
-      if (contents.empty()) {
-        return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
-      }
-      else {
-        return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
-      }
-    }
-    else {
-      return shallow_copy();
-    }
+  const std::shared_ptr<Content> RecordArray::merge(const std::shared_ptr<Content>& other) const {
+    throw std::runtime_error("FIXME: RecordArray::merge");
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {

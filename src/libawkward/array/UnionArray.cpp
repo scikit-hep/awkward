@@ -545,50 +545,52 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::simplify(bool recursive, bool tocontiguous) const {
-    int64_t cases = 0;
-    for (auto x : contents_) {
-      if (UnionArrayOf<int8_t, int32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int32_t>*>(x.get())) {
-        cases += rawcontent->numcontents();
-      }
-      else if (UnionArrayOf<int8_t, uint32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, uint32_t>*>(x.get())) {
-        cases += rawcontent->numcontents();
-      }
-      else if (UnionArrayOf<int8_t, int64_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int64_t>*>(x.get())) {
-        cases += rawcontent->numcontents();
-      }
-    }
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::merge(const std::shared_ptr<Content>& other) const {
+    throw std::runtime_error("FIXME: UnionArray::merge");
 
-    if (cases == 0  ||  cases > kMaxInt8) {
-      std::vector<std::shared_ptr<Content>> contents;
-      for (auto x : contents_) {
-        contents.push_back(recursive ? x.get()->simplify(recursive, tocontiguous) : x);
-      }
-      return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents);
-    }
-
-    else {
-      int64_t len = length();
-      int64_t tag = 0;
-      Index8 tags(len);
-      Index64 index(len);
-      std::vector<std::shared_ptr<Content>> contents;
-      for (auto x : contents_) {
-        if (UnionArrayOf<int8_t, int32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int32_t>*>(x.get())) {
-          throw std::runtime_error("FIXME: UnionArray::simplify with content UnionArrayOf<int8_t, int32_t>");
-        }
-        else if (UnionArrayOf<int8_t, uint32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, uint32_t>*>(x.get())) {
-          throw std::runtime_error("FIXME: UnionArray::simplify with content UnionArrayOf<int8_t, uint32_t>");
-        }
-        else if (UnionArrayOf<int8_t, int64_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int64_t>*>(x.get())) {
-          throw std::runtime_error("FIXME: UnionArray::simplify with content UnionArrayOf<int8_t, int64_t>");
-        }
-        else {
-          throw std::runtime_error("FIXME: UnionArray::simplify with other content");
-        }
-      }
-      return std::make_shared<UnionArrayOf<int8_t, int64_t>>(identities_, parameters_, tags, index, contents);
-    }
+    // int64_t cases = 0;
+    // for (auto x : contents_) {
+    //   if (UnionArrayOf<int8_t, int32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int32_t>*>(x.get())) {
+    //     cases += rawcontent->numcontents();
+    //   }
+    //   else if (UnionArrayOf<int8_t, uint32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, uint32_t>*>(x.get())) {
+    //     cases += rawcontent->numcontents();
+    //   }
+    //   else if (UnionArrayOf<int8_t, int64_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int64_t>*>(x.get())) {
+    //     cases += rawcontent->numcontents();
+    //   }
+    // }
+    //
+    // if (cases == 0  ||  cases > kMaxInt8) {
+    //   std::vector<std::shared_ptr<Content>> contents;
+    //   for (auto x : contents_) {
+    //     contents.push_back(recursive ? x.get()->simplify(recursive, tocontiguous) : x);
+    //   }
+    //   return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents);
+    // }
+    //
+    // else {
+    //   int64_t len = length();
+    //   int64_t tag = 0;
+    //   Index8 tags(len);
+    //   Index64 index(len);
+    //   std::vector<std::shared_ptr<Content>> contents;
+    //   for (auto x : contents_) {
+    //     if (UnionArrayOf<int8_t, int32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int32_t>*>(x.get())) {
+    //       throw std::runtime_error("FIXME: UnionArray::simplify with content UnionArrayOf<int8_t, int32_t>");
+    //     }
+    //     else if (UnionArrayOf<int8_t, uint32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, uint32_t>*>(x.get())) {
+    //       throw std::runtime_error("FIXME: UnionArray::simplify with content UnionArrayOf<int8_t, uint32_t>");
+    //     }
+    //     else if (UnionArrayOf<int8_t, int64_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int64_t>*>(x.get())) {
+    //       throw std::runtime_error("FIXME: UnionArray::simplify with content UnionArrayOf<int8_t, int64_t>");
+    //     }
+    //     else {
+    //       throw std::runtime_error("FIXME: UnionArray::simplify with other content");
+    //     }
+    //   }
+    //   return std::make_shared<UnionArrayOf<int8_t, int64_t>>(identities_, parameters_, tags, index, contents);
+    // }
   }
 
   template <typename T, typename I>

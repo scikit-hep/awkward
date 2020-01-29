@@ -488,9 +488,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::simplify(bool recursive, bool tocontiguous) const {
-    std::shared_ptr<Content> content = recursive ? content_.get()->simplify(recursive, tocontiguous) : content_;
-    return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets_, content);
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::merge(const std::shared_ptr<Content>& other) const {
+    throw std::runtime_error("FIXME: ListOffsetArray::merge");
   }
 
   template <typename T>

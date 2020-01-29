@@ -425,8 +425,8 @@ namespace awkward {
       throw std::invalid_argument("RawArray cannot be flattened because it is one-dimentional");
     }
 
-    const std::shared_ptr<Content> simplify(bool recursive, bool tocontiguous) const override {
-      return shallow_copy();
+    const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override {
+      throw std::runtime_error("RawArrayOf<T>::merge");
     }
 
   protected:

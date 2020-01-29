@@ -537,40 +537,42 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::simplify(bool recursive, bool tocontiguous) const {
-    std::shared_ptr<Content> content = recursive ? content_.get()->simplify(recursive, tocontiguous) : content_;
-    if (IndexedArrayOf<int32_t, false>* rawcontent = dynamic_cast<IndexedArrayOf<int32_t, false>*>(content.get())) {
-      throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int32_t, false>");
-    }
-    else if (IndexedArrayOf<uint32_t, false>* rawcontent = dynamic_cast<IndexedArrayOf<uint32_t, false>*>(content.get())) {
-      throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<uint32_t, false>");
-    }
-    else if (IndexedArrayOf<int64_t, false>* rawcontent = dynamic_cast<IndexedArrayOf<int64_t, false>*>(content.get())) {
-      throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int64_t, false>");
-    }
-    else if (IndexedArrayOf<int32_t, true>* rawcontent = dynamic_cast<IndexedArrayOf<int32_t, true>*>(content.get())) {
-      throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int32_t, true>");
-    }
-    else if (IndexedArrayOf<uint32_t, true>* rawcontent = dynamic_cast<IndexedArrayOf<uint32_t, true>*>(content.get())) {
-      throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<uint32_t, true>");
-    }
-    else if (IndexedArrayOf<int64_t, true>* rawcontent = dynamic_cast<IndexedArrayOf<int64_t, true>*>(content.get())) {
-      throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int64_t, true>");
-    }
-    else if (tocontiguous  &&  !ISOPTION) {
-      Index64 nextcarry(index_.length());
-      struct Error err = util::awkward_indexedarray_getitem_nextcarry_64<T>(
-        nextcarry.ptr().get(),
-        index_.ptr().get(),
-        index_.offset(),
-        index_.length(),
-        content_.get()->length());
-      util::handle_error(err, classname(), identities_.get());
-      return content.get()->carry(nextcarry);
-    }
-    else {
-      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, content);
-    }
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::merge(const std::shared_ptr<Content>& other) const {
+    throw std::runtime_error("FIXME: IndexedArray::merge");
+
+    // std::shared_ptr<Content> content = recursive ? content_.get()->simplify(recursive, tocontiguous) : content_;
+    // if (IndexedArrayOf<int32_t, false>* rawcontent = dynamic_cast<IndexedArrayOf<int32_t, false>*>(content.get())) {
+    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int32_t, false>");
+    // }
+    // else if (IndexedArrayOf<uint32_t, false>* rawcontent = dynamic_cast<IndexedArrayOf<uint32_t, false>*>(content.get())) {
+    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<uint32_t, false>");
+    // }
+    // else if (IndexedArrayOf<int64_t, false>* rawcontent = dynamic_cast<IndexedArrayOf<int64_t, false>*>(content.get())) {
+    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int64_t, false>");
+    // }
+    // else if (IndexedArrayOf<int32_t, true>* rawcontent = dynamic_cast<IndexedArrayOf<int32_t, true>*>(content.get())) {
+    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int32_t, true>");
+    // }
+    // else if (IndexedArrayOf<uint32_t, true>* rawcontent = dynamic_cast<IndexedArrayOf<uint32_t, true>*>(content.get())) {
+    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<uint32_t, true>");
+    // }
+    // else if (IndexedArrayOf<int64_t, true>* rawcontent = dynamic_cast<IndexedArrayOf<int64_t, true>*>(content.get())) {
+    //   throw std::runtime_error("FIXME: IndexedArray::simplify with content IndexedArrayOf<int64_t, true>");
+    // }
+    // else if (tocontiguous  &&  !ISOPTION) {
+    //   Index64 nextcarry(index_.length());
+    //   struct Error err = util::awkward_indexedarray_getitem_nextcarry_64<T>(
+    //     nextcarry.ptr().get(),
+    //     index_.ptr().get(),
+    //     index_.offset(),
+    //     index_.length(),
+    //     content_.get()->length());
+    //   util::handle_error(err, classname(), identities_.get());
+    //   return content.get()->carry(nextcarry);
+    // }
+    // else {
+    //   return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, content);
+    // }
   }
 
   template <typename T, bool ISOPTION>

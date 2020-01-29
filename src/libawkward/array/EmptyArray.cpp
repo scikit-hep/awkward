@@ -168,8 +168,8 @@ namespace awkward {
     return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
   }
 
-  const std::shared_ptr<Content> EmptyArray::simplify(bool recursive, bool tocontiguous) const {
-    return shallow_copy();
+  const std::shared_ptr<Content> EmptyArray::merge(const std::shared_ptr<Content>& other) const {
+    return other;
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

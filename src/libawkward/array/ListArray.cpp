@@ -521,17 +521,33 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::simplify(bool recursive, bool tocontiguous) const {
-    std::shared_ptr<Content> content = recursive ? content_.get()->simplify(recursive, tocontiguous) : content_;
-    std::shared_ptr<Content> out = std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content);
-    if (tocontiguous) {
-      ListArrayOf<T>* raw = dynamic_cast<ListArrayOf<T>*>(out.get());
-      Index64 offsets = raw->compact_offsets64();
-      return raw->broadcast_tooffsets64(offsets);
-    }
-    else {
-      return out;
-    }
+  const std::shared_ptr<Content> ListArrayOf<T>::merge(const std::shared_ptr<Content>& other) const {
+    throw std::runtime_error("FIXME: ListArray::merge");
+
+    // if (EmptyArray* rawother = dynamic_cast<EmptyArray*>(other.get())) {
+    //   throw std::runtime_error("FIXME: ListArray::merge of EmptyArray");
+    // }
+    // else if (ListArrayOf<int32_t>* rawother = dynamic_cast<ListArrayOf<int32_t>*>(other.get())) {
+    //   throw std::runtime_error("FIXME: ListArray::merge of ListArray32");
+    // }
+    // else if (ListArrayOf<uint32_t>* rawother = dynamic_cast<ListArrayOf<uint32_t>*>(other.get())) {
+    //   throw std::runtime_error("FIXME: ListArray::merge of ListArrayU32");
+    // }
+    // else if (ListArrayOf<int64_t>* rawother = dynamic_cast<ListArrayOf<int64_t>*>(other.get())) {
+    //   throw std::runtime_error("FIXME: ListArray::merge of ListArray64");
+    // }
+    // else if (ListOffsetArrayOf<int32_t>* rawother = dynamic_cast<ListOffsetArrayOf<int32_t>*>(other.get())) {
+    //   throw std::runtime_error("FIXME: ListArray::merge of ListOffsetArray32");
+    // }
+    // else if (ListOffsetArrayOf<uint32_t>* rawother = dynamic_cast<ListOffsetArrayOf<uint32_t>*>(other.get())) {
+    //   throw std::runtime_error("FIXME: ListArray::merge of ListOffsetArrayU32");
+    // }
+    // else if (ListOffsetArrayOf<int64_t>* rawother = dynamic_cast<ListOffsetArrayOf<int64_t>*>(other.get())) {
+    //   throw std::runtime_error("FIXME: ListArray::merge of ListOffsetArray64");
+    // }
+    // else {
+    //   raise std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
+    // }
   }
 
   template <typename T>
