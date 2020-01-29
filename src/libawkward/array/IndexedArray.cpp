@@ -723,7 +723,7 @@ namespace awkward {
         mylength,
         theirlength,
         mycontentlength);
-      util::handle_error(err, rawother->classname(), rawother->identities().get());
+      util::handle_error(err, classname(), identities_.get());
     }
 
     if (ISOPTION  ||  other_isoption) {

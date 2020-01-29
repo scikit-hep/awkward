@@ -464,7 +464,7 @@ ERROR awkward_indexedarray_fill_to64_from64(int64_t* toindex, int64_t toindexoff
 }
 
 template <typename TO>
-ERROR awkward_indexedarray_fill_count(TO* toindex, int64_t toindexoffset, int64_t length, int64_t base){
+ERROR awkward_indexedarray_fill_count(TO* toindex, int64_t toindexoffset, int64_t length, int64_t base) {
   for (int64_t i = 0;  i < length;  i++) {
     toindex[toindexoffset + i] = i + base;
   }

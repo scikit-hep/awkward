@@ -329,3 +329,14 @@ def test_recordarray_merge():
     assert awkward1.tolist(emptyarray.merge(arrayt5)) == awkward1.tolist(arrayt5)
     assert awkward1.tolist(emptyarray.merge(arrayt6)) == awkward1.tolist(arrayt6)
     assert awkward1.tolist(emptyarray.merge(arrayt7)) == awkward1.tolist(arrayt7)
+
+def test_indexedarray_merge():
+    emptyarray = awkward1.layout.EmptyArray()
+
+    content1 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content2 = awkward1.Array([[1, 2], [], [3, 4]]).layout
+    index1 = awkward1.layout.Index64(numpy.array([2, 0, -1, 0, 1, 2], dtype=numpy.int64))
+    indexedarray1 = awkward1.layout.IndexedOptionArray64(index1, content1)
+    assert awkward1.tolist(indexedarray1) == [[4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+    assert awkward1.tolist(indexedarray1.merge(content2)) == [[4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5], [1.0, 2.0], [], [3.0, 4.0]]
