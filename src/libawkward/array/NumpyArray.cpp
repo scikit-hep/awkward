@@ -701,7 +701,7 @@ namespace awkward {
     }
   }
 
-  bool NumpyArray::mergeable(const std::shared_ptr<Content>& other) const {
+  bool NumpyArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
     if (ndim() == 0) {
       return false;
     }
@@ -712,6 +712,10 @@ namespace awkward {
       }
 
       std::string other_format = rawother->format();
+
+      if (!mergebool  &&  ((format_.compare("?") == 0  &&  other_format.compare("?") != 0)  ||  (format_.compare("?") != 0  &&  other_format.compare("?") == 0))) {
+        return false;
+      }
 
       if (!(format_.compare("d") == 0  ||  format_.compare("f") == 0  ||  format_.compare("q") == 0  ||  format_.compare("Q") == 0  ||  format_.compare("l") == 0  ||  format_.compare("L") == 0  ||  format_.compare("i") == 0  ||  format_.compare("I") == 0  ||  format_.compare("h") == 0  ||  format_.compare("H") == 0  ||  format_.compare("b") == 0  ||  format_.compare("B") == 0  ||  format_.compare("c") == 0  ||  format_.compare("?") == 0  ||
           other_format.compare("d") == 0  ||  other_format.compare("f") == 0  ||  other_format.compare("q") == 0  ||  other_format.compare("Q") == 0  ||  other_format.compare("l") == 0  ||  other_format.compare("L") == 0  ||  other_format.compare("i") == 0  ||  other_format.compare("I") == 0  ||  other_format.compare("h") == 0  ||  other_format.compare("H") == 0  ||  other_format.compare("b") == 0  ||  other_format.compare("B") == 0  ||  other_format.compare("c") == 0  ||  other_format.compare("?") == 0)) {

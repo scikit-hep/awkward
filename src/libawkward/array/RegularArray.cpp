@@ -362,29 +362,27 @@ namespace awkward {
     }
   }
 
-  bool RegularArray::mergeable(const std::shared_ptr<Content>& other) const {
+  bool RegularArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
     if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
-      if (size_ == rawother->size()) {
-        return true;
-      }
+      return content_.get()->mergeable(rawother->content(), mergebool);
     }
     else if (ListArray32* rawother = dynamic_cast<ListArray32*>(other.get())) {
-      return true;
+      return content_.get()->mergeable(rawother->content(), mergebool);
     }
     else if (ListArrayU32* rawother = dynamic_cast<ListArrayU32*>(other.get())) {
-      return true;
+      return content_.get()->mergeable(rawother->content(), mergebool);
     }
     else if (ListArray64* rawother = dynamic_cast<ListArray64*>(other.get())) {
-      return true;
+      return content_.get()->mergeable(rawother->content(), mergebool);
     }
     else if (ListOffsetArray32* rawother = dynamic_cast<ListOffsetArray32*>(other.get())) {
-      return true;
+      return content_.get()->mergeable(rawother->content(), mergebool);
     }
     else if (ListOffsetArrayU32* rawother = dynamic_cast<ListOffsetArrayU32*>(other.get())) {
-      return true;
+      return content_.get()->mergeable(rawother->content(), mergebool);
     }
     else if (ListOffsetArray64* rawother = dynamic_cast<ListOffsetArray64*>(other.get())) {
-      return true;
+      return content_.get()->mergeable(rawother->content(), mergebool);
     }
     else {
       return false;
@@ -398,6 +396,9 @@ namespace awkward {
         std::shared_ptr<Content> theirs = rawother->content().get()->getitem_range_nowrap(0, rawother->size()*rawother->length());
         std::shared_ptr<Content> content = mine.get()->merge(theirs);
         return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), content, size_);
+      }
+      else {
+        return toListOffsetArray64().get()->merge(rawother->toListOffsetArray64());
       }
     }
     else if (ListArray32* rawother = dynamic_cast<ListArray32*>(other.get())) {

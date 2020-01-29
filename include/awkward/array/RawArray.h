@@ -425,7 +425,7 @@ namespace awkward {
       throw std::invalid_argument("RawArray cannot be flattened because it is one-dimentional");
     }
 
-    bool mergeable(const std::shared_ptr<Content>& other) const override {
+    bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override {
       if (RawArrayOf<T>* rawother = dynamic_cast<RawArrayOf<T>*>(other.get())) {
         return true;
       }

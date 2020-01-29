@@ -527,7 +527,7 @@ namespace awkward {
   }
 
   template <typename T>
-  bool ListArrayOf<T>::mergeable(const std::shared_ptr<Content>& other) const {
+  bool ListArrayOf<T>::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
     throw std::runtime_error("FIXME: ListArray::mergeable");
   }
 

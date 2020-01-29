@@ -1241,6 +1241,9 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("flatten", [](T& self, int64_t axis) -> py::object {
             return box(self.flatten(axis));
           }, py::arg("axis") = 0)
+          .def("mergeable", [](T& self, py::object other, bool mergebool) -> bool {
+            return self.mergeable(unbox_content(other), mergebool);
+          }, py::arg("other"), py::arg("mergebool") = false)
           .def("merge", [](T& self, py::object other) -> py::object {
             return box(self.merge(unbox_content(other)));
           })

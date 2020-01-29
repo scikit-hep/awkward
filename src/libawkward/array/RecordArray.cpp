@@ -422,7 +422,7 @@ namespace awkward {
     }
   }
 
-  bool RecordArray::mergeable(const std::shared_ptr<Content>& other) const {
+  bool RecordArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
     throw std::runtime_error("FIXME: RecordArray::mergeable");
   }
 

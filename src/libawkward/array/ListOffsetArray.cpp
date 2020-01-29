@@ -499,7 +499,7 @@ namespace awkward {
   }
 
   template <typename T>
-  bool ListOffsetArrayOf<T>::mergeable(const std::shared_ptr<Content>& other) const {
+  bool ListOffsetArrayOf<T>::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
     throw std::runtime_error("FIXME: ListOffsetArray::mergeable");
   }
 
