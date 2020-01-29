@@ -689,7 +689,7 @@ namespace awkward {
       int64_t mindepth = minmax.first;
       int64_t depth = purelist_depth();
       if (mindepth == depth) {
-        return flatten(-axis);
+        return flatten(ndim() - 1 + axis);
       }
     }
     if (shape_.size() <= 1) {
