@@ -568,7 +568,30 @@ namespace awkward {
 
   template <typename T>
   bool ListArrayOf<T>::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
-    throw std::runtime_error("FIXME: ListArray::mergeable");
+    if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListArray32* rawother = dynamic_cast<ListArray32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListArrayU32* rawother = dynamic_cast<ListArrayU32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListArray64* rawother = dynamic_cast<ListArray64*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListOffsetArray32* rawother = dynamic_cast<ListOffsetArray32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListOffsetArrayU32* rawother = dynamic_cast<ListOffsetArrayU32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListOffsetArray64* rawother = dynamic_cast<ListOffsetArray64*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else {
+      return false;
+    }
   }
 
   template <typename T>
@@ -752,31 +775,6 @@ namespace awkward {
     }
 
     return std::make_shared<ListArray64>(Identities::none(), util::Parameters(), starts, stops, content);
-
-    // if (EmptyArray* rawother = dynamic_cast<EmptyArray*>(other.get())) {
-    //   throw std::runtime_error("FIXME: ListArray::merge of EmptyArray");
-    // }
-    // else if (ListArrayOf<int32_t>* rawother = dynamic_cast<ListArrayOf<int32_t>*>(other.get())) {
-    //   throw std::runtime_error("FIXME: ListArray::merge of ListArray32");
-    // }
-    // else if (ListArrayOf<uint32_t>* rawother = dynamic_cast<ListArrayOf<uint32_t>*>(other.get())) {
-    //   throw std::runtime_error("FIXME: ListArray::merge of ListArrayU32");
-    // }
-    // else if (ListArrayOf<int64_t>* rawother = dynamic_cast<ListArrayOf<int64_t>*>(other.get())) {
-    //   throw std::runtime_error("FIXME: ListArray::merge of ListArray64");
-    // }
-    // else if (ListOffsetArrayOf<int32_t>* rawother = dynamic_cast<ListOffsetArrayOf<int32_t>*>(other.get())) {
-    //   throw std::runtime_error("FIXME: ListArray::merge of ListOffsetArray32");
-    // }
-    // else if (ListOffsetArrayOf<uint32_t>* rawother = dynamic_cast<ListOffsetArrayOf<uint32_t>*>(other.get())) {
-    //   throw std::runtime_error("FIXME: ListArray::merge of ListOffsetArrayU32");
-    // }
-    // else if (ListOffsetArrayOf<int64_t>* rawother = dynamic_cast<ListOffsetArrayOf<int64_t>*>(other.get())) {
-    //   throw std::runtime_error("FIXME: ListArray::merge of ListOffsetArray64");
-    // }
-    // else {
-    //   raise std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
-    // }
   }
 
   template <typename T>

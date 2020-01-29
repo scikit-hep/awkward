@@ -5,6 +5,7 @@
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/ListType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -517,12 +518,216 @@ namespace awkward {
 
   template <typename T>
   bool ListOffsetArrayOf<T>::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
-    throw std::runtime_error("FIXME: ListOffsetArray::mergeable");
+    if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListArray32* rawother = dynamic_cast<ListArray32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListArrayU32* rawother = dynamic_cast<ListArrayU32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListArray64* rawother = dynamic_cast<ListArray64*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListOffsetArray32* rawother = dynamic_cast<ListOffsetArray32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListOffsetArrayU32* rawother = dynamic_cast<ListOffsetArrayU32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ListOffsetArray64* rawother = dynamic_cast<ListOffsetArray64*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else {
+      return false;
+    }
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::merge(const std::shared_ptr<Content>& other) const {
-    throw std::runtime_error("FIXME: ListOffsetArray::merge");
+    int64_t mylength = length();
+    int64_t theirlength = other.get()->length();
+    Index64 starts(mylength + theirlength);
+    Index64 stops(mylength + theirlength);
+
+    IndexOf<T> self_starts = make_starts(offsets_);
+    IndexOf<T> self_stops = make_stops(offsets_);
+
+    if (std::is_same<T, int32_t>::value) {
+      struct Error err = awkward_listarray_fill_to64_from32(
+        starts.ptr().get(),
+        0,
+        stops.ptr().get(),
+        0,
+        reinterpret_cast<int32_t*>(self_starts.ptr().get()),
+        self_starts.offset(),
+        reinterpret_cast<int32_t*>(self_stops.ptr().get()),
+        self_stops.offset(),
+        mylength,
+        0);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<T, uint32_t>::value) {
+      struct Error err = awkward_listarray_fill_to64_fromU32(
+        starts.ptr().get(),
+        0,
+        stops.ptr().get(),
+        0,
+        reinterpret_cast<uint32_t*>(self_starts.ptr().get()),
+        self_starts.offset(),
+        reinterpret_cast<uint32_t*>(self_stops.ptr().get()),
+        self_stops.offset(),
+        mylength,
+        0);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      struct Error err = awkward_listarray_fill_to64_from64(
+        starts.ptr().get(),
+        0,
+        stops.ptr().get(),
+        0,
+        reinterpret_cast<int64_t*>(self_starts.ptr().get()),
+        self_starts.offset(),
+        reinterpret_cast<int64_t*>(self_stops.ptr().get()),
+        self_stops.offset(),
+        mylength,
+        0);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else {
+      throw std::runtime_error("unrecognized ListOffsetArray specialization");
+    }
+
+    int64_t mycontentlength = content_.get()->length();
+    std::shared_ptr<Content> content;
+    if (ListArray32* rawother = dynamic_cast<ListArray32*>(other.get())) {
+      content = content_.get()->merge(rawother->content());
+      Index32 other_starts = rawother->starts();
+      Index32 other_stops = rawother->stops();
+      struct Error err = awkward_listarray_fill_to64_from32(
+        starts.ptr().get(),
+        mylength,
+        stops.ptr().get(),
+        mylength,
+        other_starts.ptr().get(),
+        other_starts.offset(),
+        other_stops.ptr().get(),
+        other_stops.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+    }
+    else if (ListArrayU32* rawother = dynamic_cast<ListArrayU32*>(other.get())) {
+      content = content_.get()->merge(rawother->content());
+      IndexU32 other_starts = rawother->starts();
+      IndexU32 other_stops = rawother->stops();
+      struct Error err = awkward_listarray_fill_to64_fromU32(
+        starts.ptr().get(),
+        mylength,
+        stops.ptr().get(),
+        mylength,
+        other_starts.ptr().get(),
+        other_starts.offset(),
+        other_stops.ptr().get(),
+        other_stops.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+    }
+    else if (ListArray64* rawother = dynamic_cast<ListArray64*>(other.get())) {
+      content = content_.get()->merge(rawother->content());
+      Index64 other_starts = rawother->starts();
+      Index64 other_stops = rawother->stops();
+      struct Error err = awkward_listarray_fill_to64_from64(
+        starts.ptr().get(),
+        mylength,
+        stops.ptr().get(),
+        mylength,
+        other_starts.ptr().get(),
+        other_starts.offset(),
+        other_stops.ptr().get(),
+        other_stops.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+    }
+    else if (ListOffsetArray32* rawother = dynamic_cast<ListOffsetArray32*>(other.get())) {
+      content = content_.get()->merge(rawother->content());
+      Index32 other_starts = rawother->starts();
+      Index32 other_stops = rawother->stops();
+      struct Error err = awkward_listarray_fill_to64_from32(
+        starts.ptr().get(),
+        mylength,
+        stops.ptr().get(),
+        mylength,
+        other_starts.ptr().get(),
+        other_starts.offset(),
+        other_stops.ptr().get(),
+        other_stops.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+    }
+    else if (ListOffsetArrayU32* rawother = dynamic_cast<ListOffsetArrayU32*>(other.get())) {
+      content = content_.get()->merge(rawother->content());
+      IndexU32 other_starts = rawother->starts();
+      IndexU32 other_stops = rawother->stops();
+      struct Error err = awkward_listarray_fill_to64_fromU32(
+        starts.ptr().get(),
+        mylength,
+        stops.ptr().get(),
+        mylength,
+        other_starts.ptr().get(),
+        other_starts.offset(),
+        other_stops.ptr().get(),
+        other_stops.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+    }
+    else if (ListOffsetArray64* rawother = dynamic_cast<ListOffsetArray64*>(other.get())) {
+      content = content_.get()->merge(rawother->content());
+      Index64 other_starts = rawother->starts();
+      Index64 other_stops = rawother->stops();
+      struct Error err = awkward_listarray_fill_to64_from64(
+        starts.ptr().get(),
+        mylength,
+        stops.ptr().get(),
+        mylength,
+        other_starts.ptr().get(),
+        other_starts.offset(),
+        other_stops.ptr().get(),
+        other_stops.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+    }
+    else if (RegularArray* rawregulararray = dynamic_cast<RegularArray*>(other.get())) {
+      std::shared_ptr<Content> listoffsetarray = rawregulararray->toListOffsetArray64();
+      ListOffsetArray64* rawother = dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
+      content = content_.get()->merge(rawother->content());
+      Index64 other_starts = rawother->starts();
+      Index64 other_stops = rawother->stops();
+      struct Error err = awkward_listarray_fill_to64_from64(
+        starts.ptr().get(),
+        mylength,
+        stops.ptr().get(),
+        mylength,
+        other_starts.ptr().get(),
+        other_starts.offset(),
+        other_stops.ptr().get(),
+        other_stops.offset(),
+        theirlength,
+        mycontentlength);
+      util::handle_error(err, rawother->classname(), rawother->identities().get());
+    }
+    else {
+      throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
+    }
+
+    return std::make_shared<ListArray64>(Identities::none(), util::Parameters(), starts, stops, content);
   }
 
   template <typename T>

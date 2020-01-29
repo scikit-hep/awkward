@@ -176,16 +176,54 @@ def test_listarray_merge():
         assert awkward1.tolist(array1.merge(array2)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [3, 4, 5, 6], [], [1, 2, 3]]
         assert awkward1.tolist(array2.merge(array1)) == [[3, 4, 5, 6], [], [1, 2, 3], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
-    # regulararray = awkward1.layout.RegularArray(content2, 2)
-    # assert awkward1.tolist(regulararray) == [[1, 2], [3, 4], [5, 6]]
-    #
-    # for (dtype1, Index1, ListArray1) in [
-    #         (numpy.int32, awkward1.layout.Index32, awkward1.layout.ListArray32),
-    #         (numpy.uint32, awkward1.layout.IndexU32, awkward1.layout.ListArrayU32),
-    #         (numpy.int64, awkward1.layout.Index64, awkward1.layout.ListArray64)]:
-    #     starts1 = Index1(numpy.array([0, 3, 3], dtype=dtype1))
-    #     stops1  = Index1(numpy.array([3, 3, 5], dtype=dtype1))
-    #     array1 = ListArray1(starts1, stops1, content1)
-    #
-    #     assert awkward1.tolist(array1.merge(regulararray)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [1, 2], [3, 4], [5, 6]]
-    #     assert awkward1.tolist(regulararray.merge(array1)) == [[1, 2], [3, 4], [5, 6], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    regulararray = awkward1.layout.RegularArray(content2, 2)
+    assert awkward1.tolist(regulararray) == [[1, 2], [3, 4], [5, 6]]
+
+    for (dtype1, Index1, ListArray1) in [
+            (numpy.int32, awkward1.layout.Index32, awkward1.layout.ListArray32),
+            (numpy.uint32, awkward1.layout.IndexU32, awkward1.layout.ListArrayU32),
+            (numpy.int64, awkward1.layout.Index64, awkward1.layout.ListArray64)]:
+        starts1 = Index1(numpy.array([0, 3, 3], dtype=dtype1))
+        stops1  = Index1(numpy.array([3, 3, 5], dtype=dtype1))
+        array1 = ListArray1(starts1, stops1, content1)
+
+        assert awkward1.tolist(array1.merge(regulararray)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [1, 2], [3, 4], [5, 6]]
+        assert awkward1.tolist(regulararray.merge(array1)) == [[1, 2], [3, 4], [5, 6], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+def test_listoffsetarray_merge():
+    content1 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    content2 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5, 6, 7]))
+
+    for (dtype1, Index1, ListOffsetArray1), (dtype2, Index2, ListOffsetArray2) in [
+            ((numpy.int32, awkward1.layout.Index32, awkward1.layout.ListOffsetArray32),    (numpy.int32, awkward1.layout.Index32, awkward1.layout.ListOffsetArray32)),
+            ((numpy.int32, awkward1.layout.Index32, awkward1.layout.ListOffsetArray32),    (numpy.uint32, awkward1.layout.IndexU32, awkward1.layout.ListOffsetArrayU32)),
+            ((numpy.int32, awkward1.layout.Index32, awkward1.layout.ListOffsetArray32),    (numpy.int64, awkward1.layout.Index64, awkward1.layout.ListOffsetArray64)),
+            ((numpy.uint32, awkward1.layout.IndexU32, awkward1.layout.ListOffsetArrayU32), (numpy.int32, awkward1.layout.Index32, awkward1.layout.ListOffsetArray32)),
+            ((numpy.uint32, awkward1.layout.IndexU32, awkward1.layout.ListOffsetArrayU32), (numpy.uint32, awkward1.layout.IndexU32, awkward1.layout.ListOffsetArrayU32)),
+            ((numpy.uint32, awkward1.layout.IndexU32, awkward1.layout.ListOffsetArrayU32), (numpy.int64, awkward1.layout.Index64, awkward1.layout.ListOffsetArray64)),
+            ((numpy.int64, awkward1.layout.Index64, awkward1.layout.ListOffsetArray64),    (numpy.int32, awkward1.layout.Index32, awkward1.layout.ListOffsetArray32)),
+            ((numpy.int64, awkward1.layout.Index64, awkward1.layout.ListOffsetArray64),    (numpy.uint32, awkward1.layout.IndexU32, awkward1.layout.ListOffsetArrayU32)),
+            ((numpy.int64, awkward1.layout.Index64, awkward1.layout.ListOffsetArray64),    (numpy.int64, awkward1.layout.Index64, awkward1.layout.ListOffsetArray64))]:
+        offsets1 = Index1(numpy.array([0, 3, 3, 5], dtype=dtype1))
+        offsets2 = Index2(numpy.array([1, 3, 3, 3, 5], dtype=dtype2))
+        array1 = ListOffsetArray1(offsets1, content1)
+        array2 = ListOffsetArray2(offsets2, content2)
+        assert awkward1.tolist(array1) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        assert awkward1.tolist(array2) == [[2, 3], [], [], [4, 5]]
+
+        assert awkward1.tolist(array1.merge(array2)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [2, 3], [], [], [4, 5]]
+        assert awkward1.tolist(array2.merge(array1)) == [[2, 3], [], [], [4, 5], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+    regulararray = awkward1.layout.RegularArray(content2, 2)
+    assert awkward1.tolist(regulararray) == [[1, 2], [3, 4], [5, 6]]
+
+    for (dtype1, Index1, ListArray1) in [
+            (numpy.int32, awkward1.layout.Index32, awkward1.layout.ListArray32),
+            (numpy.uint32, awkward1.layout.IndexU32, awkward1.layout.ListArrayU32),
+            (numpy.int64, awkward1.layout.Index64, awkward1.layout.ListArray64)]:
+        starts1 = Index1(numpy.array([0, 3, 3], dtype=dtype1))
+        stops1  = Index1(numpy.array([3, 3, 5], dtype=dtype1))
+        array1 = ListArray1(starts1, stops1, content1)
+
+        assert awkward1.tolist(array1.merge(regulararray)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [1, 2], [3, 4], [5, 6]]
+        assert awkward1.tolist(regulararray.merge(array1)) == [[1, 2], [3, 4], [5, 6], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
