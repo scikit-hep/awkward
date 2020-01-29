@@ -517,8 +517,10 @@ namespace awkward {
 
       Index64 count = count64();
       int64_t clength = count.length();
-
-      struct Error err3 = util::awkward_listarray_transform_starts_stops_64<T>(
+      if (clength != lenstarts) {
+        throw std::runtime_error("scale index length must be equal to start and stop length");
+      }
+      struct Error err3 = util::awkward_listarray_flatten_scale_64<T>(
         tostarts.ptr().get(),
         tostops.ptr().get(),
         count.ptr().get(),
