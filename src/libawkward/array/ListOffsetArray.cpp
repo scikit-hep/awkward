@@ -465,7 +465,7 @@ namespace awkward {
       int64_t maxdepth = minmax.second;
       int64_t depth = purelist_depth();
       if (mindepth == depth  &&  maxdepth == depth) {
-        return flatten(-axis);
+        return flatten(depth - 1 + axis);
       }
       else {
         return content_.get()->flatten(axis);
