@@ -528,8 +528,7 @@ namespace awkward {
         stops_.ptr().get(),
         lenstarts,
         starts_.offset(),
-        stops_.offset(),
-        clength);
+        stops_.offset());
       util::handle_error(err3, classname(), identities_.get());
 
       return std::make_shared<ListArrayOf<T>>(identities_, parameters_, tostarts, tostops, content_.get()->flatten(axis - 1));
