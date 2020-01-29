@@ -122,7 +122,7 @@ namespace awkward {
   }
 
   int64_t None::list_depth() const {
-    throw std::runtime_error("FIXME: None::list_depth() is not implemented");
+    return -1;
   }
 
   const Index64 None::count64() const {

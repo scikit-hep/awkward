@@ -687,6 +687,15 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
+    if (axis < 0) {
+      std::pair<int64_t, int64_t> minmax = minmax_depth();
+      assert(minmax.first == minmax.second);
+      int64_t mindepth = minmax.first;
+      int64_t depth = purelist_depth();
+      if (mindepth == depth) {
+        return flatten(-axis);
+      }
+    }
     if (shape_.size() <= 1) {
       throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
