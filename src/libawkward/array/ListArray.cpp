@@ -13,6 +13,7 @@
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/EmptyArray.h"
 
 #include "awkward/array/ListArray.h"
 
@@ -568,6 +569,10 @@ namespace awkward {
 
   template <typename T>
   bool ListArrayOf<T>::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return true;
+    }
+
     if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
     }
@@ -596,6 +601,10 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::merge(const std::shared_ptr<Content>& other) const {
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return shallow_copy();
+    }
+
     int64_t mylength = length();
     int64_t theirlength = other.get()->length();
     Index64 starts(mylength + theirlength);

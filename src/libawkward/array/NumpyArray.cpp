@@ -11,6 +11,7 @@
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/EmptyArray.h"
 #include "awkward/util.h"
 
 #include "awkward/array/NumpyArray.h"
@@ -744,6 +745,10 @@ namespace awkward {
   }
 
   bool NumpyArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return true;
+    }
+
     if (ndim() == 0) {
       return false;
     }
@@ -779,6 +784,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::merge(const std::shared_ptr<Content>& other) const {
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return shallow_copy();
+    }
+
     if (ndim() == 0) {
       throw std::invalid_argument("cannot merge Numpy scalars");
     }

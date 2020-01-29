@@ -13,6 +13,7 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/array/EmptyArray.h"
 
 #include "awkward/array/RegularArray.h"
 
@@ -394,6 +395,10 @@ namespace awkward {
   }
 
   bool RegularArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return true;
+    }
+
     if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
     }
@@ -421,6 +426,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::merge(const std::shared_ptr<Content>& other) const {
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return shallow_copy();
+    }
+
     if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
       if (size_ == rawother->size()) {
         std::shared_ptr<Content> mine = content_.get()->getitem_range_nowrap(0, size_*length());

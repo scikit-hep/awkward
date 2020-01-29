@@ -8,6 +8,8 @@ import numpy
 import awkward1
 
 def test_numpyarray_merge():
+    emptyarray = awkward1.layout.EmptyArray()
+
     np1 = numpy.arange(2*7*5).reshape(2, 7, 5)
     np2 = numpy.arange(3*7*5).reshape(3, 7, 5)
     ak1 = awkward1.layout.NumpyArray(np1)
@@ -142,15 +144,24 @@ def test_numpyarray_merge():
         three = one.merge(two)
         assert numpy.asarray(three).dtype == numpy.dtype(z)
         assert awkward1.tolist(three) == awkward1.tolist(numpy.concatenate([numpy.asarray(one), numpy.asarray(two)]))
+        assert awkward1.tolist(one.merge(emptyarray)) == awkward1.tolist(one)
+        assert awkward1.tolist(emptyarray.merge(one)) == awkward1.tolist(one)
 
 def test_regulararray_merge():
+    emptyarray = awkward1.layout.EmptyArray()
+
     np1 = numpy.arange(2*7*5).reshape(2, 7, 5)
     np2 = numpy.arange(3*7*5).reshape(3, 7, 5)
     ak1 = awkward1.Array(np1).layout
     ak2 = awkward1.Array(np2).layout
+
     assert awkward1.tolist(ak1.merge(ak2)) == awkward1.tolist(numpy.concatenate([np1, np2]))
+    assert awkward1.tolist(ak1.merge(emptyarray)) == awkward1.tolist(ak1)
+    assert awkward1.tolist(emptyarray.merge(ak1)) == awkward1.tolist(ak1)
 
 def test_listarray_merge():
+    emptyarray = awkward1.layout.EmptyArray()
+
     content1 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     content2 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5, 6, 7]))
 
@@ -175,9 +186,13 @@ def test_listarray_merge():
 
         assert awkward1.tolist(array1.merge(array2)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [3, 4, 5, 6], [], [1, 2, 3]]
         assert awkward1.tolist(array2.merge(array1)) == [[3, 4, 5, 6], [], [1, 2, 3], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        assert awkward1.tolist(array1.merge(emptyarray)) == awkward1.tolist(array1)
+        assert awkward1.tolist(emptyarray.merge(array1)) == awkward1.tolist(array1)
 
     regulararray = awkward1.layout.RegularArray(content2, 2)
     assert awkward1.tolist(regulararray) == [[1, 2], [3, 4], [5, 6]]
+    assert awkward1.tolist(regulararray.merge(emptyarray)) == awkward1.tolist(regulararray)
+    assert awkward1.tolist(emptyarray.merge(regulararray)) == awkward1.tolist(regulararray)
 
     for (dtype1, Index1, ListArray1) in [
             (numpy.int32, awkward1.layout.Index32, awkward1.layout.ListArray32),
@@ -191,6 +206,8 @@ def test_listarray_merge():
         assert awkward1.tolist(regulararray.merge(array1)) == [[1, 2], [3, 4], [5, 6], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
 def test_listoffsetarray_merge():
+    emptyarray = awkward1.layout.EmptyArray()
+
     content1 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     content2 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5, 6, 7]))
 
@@ -213,6 +230,8 @@ def test_listoffsetarray_merge():
 
         assert awkward1.tolist(array1.merge(array2)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [2, 3], [], [], [4, 5]]
         assert awkward1.tolist(array2.merge(array1)) == [[2, 3], [], [], [4, 5], [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        assert awkward1.tolist(array1.merge(emptyarray)) == awkward1.tolist(array1)
+        assert awkward1.tolist(emptyarray.merge(array1)) == awkward1.tolist(array1)
 
     regulararray = awkward1.layout.RegularArray(content2, 2)
     assert awkward1.tolist(regulararray) == [[1, 2], [3, 4], [5, 6]]
