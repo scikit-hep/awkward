@@ -168,6 +168,10 @@ namespace awkward {
     return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
   }
 
+  bool EmptyArray::mergeable(const std::shared_ptr<Content>& other) const {
+    return true;
+  }
+
   const std::shared_ptr<Content> EmptyArray::merge(const std::shared_ptr<Content>& other) const {
     return other;
   }

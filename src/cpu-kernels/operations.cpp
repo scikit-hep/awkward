@@ -320,14 +320,14 @@ ERROR awkward_listoffsetarray64_toRegularArray(int64_t* size, const int64_t* fro
 template <typename FROM, typename TO>
 ERROR awkward_numpyarray_fill(TO* toptr, int64_t tooffset, const FROM* fromptr, int64_t fromoffset, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
-    toptr[tooffset + i] = fromptr[fromoffset + i];
+    toptr[tooffset + i] = (TO)fromptr[fromoffset + i];
   }
   return success();
 }
 template <typename TO>
 ERROR awkward_numpyarray_fill_frombool(TO* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
-    toptr[tooffset + i] = (fromptr[fromoffset + i] != 0);
+    toptr[tooffset + i] = (TO)(fromptr[fromoffset + i] != 0);
   }
   return success();
 }

@@ -701,34 +701,36 @@ namespace awkward {
     }
   }
 
-  // bool NumpyArray::mergeable(const std::shared_ptr<Content>& other) const {
-  //   if (ndim() == 0) {
-  //     return false;
-  //   }
-  //
-  //   if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
-  //     if (ndim() != rawother->ndim()) {
-  //       return false;
-  //     }
-  //
-  //     std::string other_format = rawother->format();
-  //
-  //     if (format_.compare("d") == 0  ||  format_.compare("f") == 0  ||  format_.compare("q") == 0  ||  format_.compare("Q") == 0  ||  format_.compare("l") == 0  ||  format_.compare("L") == 0  ||  format_.compare("i") == 0  ||  format_.compare("I") == 0  ||  format_.compare("h") == 0  ||  format_.compare("H") == 0  ||  format_.compare("b") == 0  ||  format_.compare("B") == 0  ||  format_.compare("c") == 0  ||  format_.compare("?") == 0  ||
-  //         other_format.compare("d") == 0  ||  other_format.compare("f") == 0  ||  other_format.compare("q") == 0  ||  other_format.compare("Q") == 0  ||  other_format.compare("l") == 0  ||  other_format.compare("L") == 0  ||  other_format.compare("i") == 0  ||  other_format.compare("I") == 0  ||  other_format.compare("h") == 0  ||  other_format.compare("H") == 0  ||  other_format.compare("b") == 0  ||  other_format.compare("B") == 0  ||  other_format.compare("c") == 0  ||  other_format.compare("?") == 0) { }
-  //     else {
-  //       return false;
-  //     }
-  //
-  //     std::vector<ssize_t> other_shape = rawother->shape();
-  //     for (int64_t i = ((int64_t)shape_.size()) - 1;  i > 0;  i--) {
-  //       if (shape_[(size_t)i] != other_shape[(size_t)i]) {
-  //         return false;
-  //       }
-  //     }
-  //
-  //     return true;
-  //   }
-  // }
+  bool NumpyArray::mergeable(const std::shared_ptr<Content>& other) const {
+    if (ndim() == 0) {
+      return false;
+    }
+
+    if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
+      if (ndim() != rawother->ndim()) {
+        return false;
+      }
+
+      std::string other_format = rawother->format();
+
+      if (!(format_.compare("d") == 0  ||  format_.compare("f") == 0  ||  format_.compare("q") == 0  ||  format_.compare("Q") == 0  ||  format_.compare("l") == 0  ||  format_.compare("L") == 0  ||  format_.compare("i") == 0  ||  format_.compare("I") == 0  ||  format_.compare("h") == 0  ||  format_.compare("H") == 0  ||  format_.compare("b") == 0  ||  format_.compare("B") == 0  ||  format_.compare("c") == 0  ||  format_.compare("?") == 0  ||
+          other_format.compare("d") == 0  ||  other_format.compare("f") == 0  ||  other_format.compare("q") == 0  ||  other_format.compare("Q") == 0  ||  other_format.compare("l") == 0  ||  other_format.compare("L") == 0  ||  other_format.compare("i") == 0  ||  other_format.compare("I") == 0  ||  other_format.compare("h") == 0  ||  other_format.compare("H") == 0  ||  other_format.compare("b") == 0  ||  other_format.compare("B") == 0  ||  other_format.compare("c") == 0  ||  other_format.compare("?") == 0)) {
+        return false;
+      }
+
+      std::vector<ssize_t> other_shape = rawother->shape();
+      for (int64_t i = ((int64_t)shape_.size()) - 1;  i > 0;  i--) {
+        if (shape_[(size_t)i] != other_shape[(size_t)i]) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
 
   const std::shared_ptr<Content> NumpyArray::merge(const std::shared_ptr<Content>& other) const {
     if (ndim() == 0) {
@@ -743,7 +745,7 @@ namespace awkward {
 
       std::string other_format = rawother->format();
 
-      int64_t itemsize;
+      ssize_t itemsize;
       std::string format;
       if (format_.compare("d") == 0  ||  format_.compare("f") == 0  ||  other_format.compare("d") == 0  ||  other_format.compare("f") == 0) {
         itemsize = 8;

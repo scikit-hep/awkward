@@ -537,6 +537,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  bool IndexedArrayOf<T, ISOPTION>::mergeable(const std::shared_ptr<Content>& other) const {
+    throw std::runtime_error("FIXME: IndexedArray::mergeable");
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::merge(const std::shared_ptr<Content>& other) const {
     throw std::runtime_error("FIXME: IndexedArray::merge");
 

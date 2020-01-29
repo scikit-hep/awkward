@@ -141,6 +141,10 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::flatten");
   }
 
+  bool None::mergeable(const std::shared_ptr<Content>& other) const {
+    throw std::runtime_error("undefined operation: None::mergeable");
+  }
+
   const std::shared_ptr<Content> None::merge(const std::shared_ptr<Content>& other) const {
     throw std::runtime_error("undefined operation: None::merge");
   }

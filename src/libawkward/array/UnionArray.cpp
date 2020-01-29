@@ -545,6 +545,11 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  bool UnionArrayOf<T, I>::mergeable(const std::shared_ptr<Content>& other) const {
+    throw std::runtime_error("FIXME: UnionArray::mergeable");
+  }
+
+  template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::merge(const std::shared_ptr<Content>& other) const {
     throw std::runtime_error("FIXME: UnionArray::merge");
 

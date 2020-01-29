@@ -352,6 +352,10 @@ namespace awkward {
     }
   }
 
+  bool RegularArray::mergeable(const std::shared_ptr<Content>& other) const {
+    throw std::runtime_error("FIXME: RegularArray::mergeable");
+  }
+
   const std::shared_ptr<Content> RegularArray::merge(const std::shared_ptr<Content>& other) const {
     throw std::runtime_error("FIXME: RegularArray::merge");
   }
