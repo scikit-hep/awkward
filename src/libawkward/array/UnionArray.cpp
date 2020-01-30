@@ -557,6 +557,80 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::reverse_merge(const std::shared_ptr<Content>& other) const {
+    int64_t theirlength = other.get()->length();
+    int64_t mylength = length();
+    Index8 tags(theirlength + mylength);
+    Index64 index(theirlength + mylength);
+
+    std::vector<std::shared_ptr<Content>> contents({ other });
+    contents.insert(contents.end(), contents_.begin(), contents_.end());
+
+    struct Error err1 = awkward_unionarray_filltags_to8_const(
+      tags.ptr().get(),
+      0,
+      theirlength,
+      0);
+    util::handle_error(err1, classname(), identities_.get());
+    struct Error err2 = awkward_unionarray_fillindex_to64_count(
+      index.ptr().get(),
+      0,
+      theirlength);
+    util::handle_error(err2, classname(), identities_.get());
+
+    if (std::is_same<T, int8_t>::value) {
+      struct Error err = awkward_unionarray_filltags_to8_from8(
+        tags.ptr().get(),
+        theirlength,
+        reinterpret_cast<int8_t*>(tags_.ptr().get()),
+        tags_.offset(),
+        mylength,
+        1);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else {
+      throw std::runtime_error("unrecognized UnionArray specialization");
+    }
+
+    if (std::is_same<I, int32_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_from32(
+        index.ptr().get(),
+        theirlength,
+        reinterpret_cast<int32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<I, uint32_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_fromU32(
+        index.ptr().get(),
+        theirlength,
+        reinterpret_cast<uint32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<I, int64_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_from64(
+        index.ptr().get(),
+        theirlength,
+        reinterpret_cast<int64_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else {
+      throw std::runtime_error("unrecognized UnionArray specialization");
+    }
+
+    if (contents.size() > kMaxInt8) {
+      throw std::runtime_error("FIXME: handle UnionArray with more than 127 contents");
+    }
+
+    return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
+  }
+
+  template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::merge(const std::shared_ptr<Content>& other) const {
     if (dynamic_cast<EmptyArray*>(other.get())) {
       return shallow_copy();
@@ -683,7 +757,7 @@ namespace awkward {
         mylength,
         theirlength,
         numcontents());
-      util::handle_error(err1, rawother->classname(), rawother->identities().get());
+      util::handle_error(err1, classname(), identities_.get());
       struct Error err2 = awkward_unionarray_fillindex_to64_count(
         index.ptr().get(),
         mylength,
@@ -696,50 +770,6 @@ namespace awkward {
     }
 
     return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
-
-    // int64_t cases = 0;
-    // for (auto x : contents_) {
-    //   if (UnionArrayOf<int8_t, int32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int32_t>*>(x.get())) {
-    //     cases += rawcontent->numcontents();
-    //   }
-    //   else if (UnionArrayOf<int8_t, uint32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, uint32_t>*>(x.get())) {
-    //     cases += rawcontent->numcontents();
-    //   }
-    //   else if (UnionArrayOf<int8_t, int64_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int64_t>*>(x.get())) {
-    //     cases += rawcontent->numcontents();
-    //   }
-    // }
-    //
-    // if (cases == 0  ||  cases > kMaxInt8) {
-    //   std::vector<std::shared_ptr<Content>> contents;
-    //   for (auto x : contents_) {
-    //     contents.push_back(recursive ? x.get()->simplify(recursive, tocontiguous) : x);
-    //   }
-    //   return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents);
-    // }
-    //
-    // else {
-    //   int64_t len = length();
-    //   int64_t tag = 0;
-    //   Index8 tags(len);
-    //   Index64 index(len);
-    //   std::vector<std::shared_ptr<Content>> contents;
-    //   for (auto x : contents_) {
-    //     if (UnionArrayOf<int8_t, int32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int32_t>*>(x.get())) {
-    //       throw std::runtime_error("FIXME: UnionArray::simplify with content UnionArrayOf<int8_t, int32_t>");
-    //     }
-    //     else if (UnionArrayOf<int8_t, uint32_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, uint32_t>*>(x.get())) {
-    //       throw std::runtime_error("FIXME: UnionArray::simplify with content UnionArrayOf<int8_t, uint32_t>");
-    //     }
-    //     else if (UnionArrayOf<int8_t, int64_t>* rawcontent = dynamic_cast<UnionArrayOf<int8_t, int64_t>*>(x.get())) {
-    //       throw std::runtime_error("FIXME: UnionArray::simplify with content UnionArrayOf<int8_t, int64_t>");
-    //     }
-    //     else {
-    //       throw std::runtime_error("FIXME: UnionArray::simplify with other content");
-    //     }
-    //   }
-    //   return std::make_shared<UnionArrayOf<int8_t, int64_t>>(identities_, parameters_, tags, index, contents);
-    // }
   }
 
   template <typename T, typename I>

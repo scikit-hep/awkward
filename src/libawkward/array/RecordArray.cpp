@@ -10,6 +10,7 @@
 #include "awkward/array/Record.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
+#include "awkward/array/UnionArray.h"
 
 #include "awkward/array/RecordArray.h"
 
@@ -491,6 +492,15 @@ namespace awkward {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnionArray8_U32* rawother = dynamic_cast<UnionArray8_U32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnionArray8_64* rawother = dynamic_cast<UnionArray8_64*>(other.get())) {
       return rawother->reverse_merge(shallow_copy());
     }
 

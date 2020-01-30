@@ -12,6 +12,7 @@
 #include "awkward/Slice.h"
 #include "awkward/array/None.h"
 #include "awkward/array/EmptyArray.h"
+#include "awkward/array/UnionArray.h"
 
 #include "awkward/array/IndexedArray.h"
 
@@ -579,7 +580,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reverse_merge(const std::shared_ptr<Content>& other) {
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reverse_merge(const std::shared_ptr<Content>& other) const {
     int64_t theirlength = other.get()->length();
     int64_t mylength = length();
     Index64 index(theirlength + mylength);
@@ -634,6 +635,15 @@ namespace awkward {
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::merge(const std::shared_ptr<Content>& other) const {
     if (dynamic_cast<EmptyArray*>(other.get())) {
       return shallow_copy();
+    }
+    else if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnionArray8_U32* rawother = dynamic_cast<UnionArray8_U32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnionArray8_64* rawother = dynamic_cast<UnionArray8_64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
     }
 
     int64_t mylength = length();

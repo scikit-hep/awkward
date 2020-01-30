@@ -348,9 +348,15 @@ def test_unionarray_merge():
 
     one = awkward1.Array([0.0, 1.1, 2.2, [], [1], [2, 2]]).layout
     two = awkward1.Array([{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]).layout
+    three = awkward1.Array(["one", "two", "three"]).layout
 
     assert awkward1.tolist(one.merge(two)) == [0.0, 1.1, 2.2, [], [1], [2, 2], {"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]
     assert awkward1.tolist(two.merge(one)) == [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}, 0.0, 1.1, 2.2, [], [1], [2, 2]]
 
     assert awkward1.tolist(one.merge(emptyarray)) == [0.0, 1.1, 2.2, [], [1], [2, 2]]
     assert awkward1.tolist(emptyarray.merge(one)) == [0.0, 1.1, 2.2, [], [1], [2, 2]]
+
+    assert awkward1.tolist(one.merge(three)) == [0.0, 1.1, 2.2, [], [1], [2, 2], "one", "two", "three"]
+    assert awkward1.tolist(two.merge(three)) == [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}, "one", "two", "three"]
+    assert awkward1.tolist(three.merge(one)) == ["one", "two", "three", 0.0, 1.1, 2.2, [], [1], [2, 2]]
+    assert awkward1.tolist(three.merge(two)) == ["one", "two", "three", {"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]
