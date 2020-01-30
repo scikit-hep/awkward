@@ -553,7 +553,11 @@ namespace awkward {
 
   template <typename T, typename I>
   bool UnionArrayOf<T, I>::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
-    throw std::runtime_error("FIXME: UnionArray::mergeable");
+    if (!parameters_equal(other.get()->parameters())) {
+      return false;
+    }
+
+    return true;
   }
 
   template <typename T, typename I>
@@ -632,6 +636,10 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::merge(const std::shared_ptr<Content>& other) const {
+    if (!parameters_equal(other.get()->parameters())) {
+      return merge_as_union(other);
+    }
+
     if (dynamic_cast<EmptyArray*>(other.get())) {
       return shallow_copy();
     }

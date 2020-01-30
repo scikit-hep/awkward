@@ -360,3 +360,10 @@ def test_unionarray_merge():
     assert awkward1.tolist(two.merge(three)) == [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}, "one", "two", "three"]
     assert awkward1.tolist(three.merge(one)) == ["one", "two", "three", 0.0, 1.1, 2.2, [], [1], [2, 2]]
     assert awkward1.tolist(three.merge(two)) == ["one", "two", "three", {"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]
+
+def test_merge_parameters():
+    one = awkward1.Array([[121, 117, 99, 107, 121], [115, 116, 117, 102, 102]]).layout
+    two = awkward1.Array(["good", "stuff"]).layout
+
+    assert awkward1.tolist(one.merge(two)) == [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102], "good", "stuff"]
+    assert awkward1.tolist(two.merge(one)) == ["good", "stuff", [121, 117, 99, 107, 121], [115, 116, 117, 102, 102]]

@@ -571,7 +571,14 @@ namespace awkward {
 
   template <typename T>
   bool ListArrayOf<T>::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
-    if (dynamic_cast<EmptyArray*>(other.get())) {
+    if (!parameters_equal(other.get()->parameters())) {
+      return false;
+    }
+
+    if (dynamic_cast<EmptyArray*>(other.get())  ||
+        dynamic_cast<UnionArray8_32*>(other.get())  ||
+        dynamic_cast<UnionArray8_U32*>(other.get())  ||
+        dynamic_cast<UnionArray8_64*>(other.get())) {
       return true;
     }
     else if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
@@ -618,6 +625,10 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::merge(const std::shared_ptr<Content>& other) const {
+    if (!parameters_equal(other.get()->parameters())) {
+      return merge_as_union(other);
+    }
+
     if (dynamic_cast<EmptyArray*>(other.get())) {
       return shallow_copy();
     }

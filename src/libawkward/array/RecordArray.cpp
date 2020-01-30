@@ -424,7 +424,14 @@ namespace awkward {
   }
 
   bool RecordArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
-    if (dynamic_cast<EmptyArray*>(other.get())) {
+    if (!parameters_equal(other.get()->parameters())) {
+      return false;
+    }
+
+    if (dynamic_cast<EmptyArray*>(other.get())  ||
+        dynamic_cast<UnionArray8_32*>(other.get())  ||
+        dynamic_cast<UnionArray8_U32*>(other.get())  ||
+        dynamic_cast<UnionArray8_64*>(other.get())) {
       return true;
     }
     else if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
@@ -476,6 +483,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::merge(const std::shared_ptr<Content>& other) const {
+    if (!parameters_equal(other.get()->parameters())) {
+      return merge_as_union(other);
+    }
+
     if (dynamic_cast<EmptyArray*>(other.get())) {
       return shallow_copy();
     }
