@@ -473,3 +473,53 @@ ERROR awkward_indexedarray_fill_count(TO* toindex, int64_t toindexoffset, int64_
 ERROR awkward_indexedarray_fill_to64_count(int64_t* toindex, int64_t toindexoffset, int64_t length, int64_t base) {
   return awkward_indexedarray_fill_count(toindex, toindexoffset, length, base);
 }
+
+template <typename FROM, typename TO>
+ERROR awkward_unionarray_filltags(TO* totags, int64_t totagsoffset, const FROM* fromtags, int64_t fromtagsoffset, int64_t length, int64_t base) {
+  for (int64_t i = 0;  i < length;  i++) {
+    totags[totagsoffset + i] = (TO)(fromtags[fromtagsoffset + i] + base);
+  }
+  return success();
+}
+ERROR awkward_unionarray_filltags_to8_from8(int8_t* totags, int64_t totagsoffset, const int8_t* fromtags, int64_t fromtagsoffset, int64_t length, int64_t base) {
+  return awkward_unionarray_filltags<int8_t, int8_t>(totags, totagsoffset, fromtags, fromtagsoffset, length, base);
+}
+
+template <typename FROM, typename TO>
+ERROR awkward_unionarray_fillindex(TO* toindex, int64_t toindexoffset, const FROM* fromindex, int64_t fromindexoffset, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toindex[toindexoffset + i] = (TO)fromindex[fromindexoffset + i];
+  }
+  return success();
+}
+ERROR awkward_unionarray_fillindex_to64_from32(int64_t* toindex, int64_t toindexoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t length) {
+  return awkward_unionarray_fillindex<int32_t, int64_t>(toindex, toindexoffset, fromindex, fromindexoffset, length);
+}
+ERROR awkward_unionarray_fillindex_to64_fromU32(int64_t* toindex, int64_t toindexoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t length) {
+  return awkward_unionarray_fillindex<uint32_t, int64_t>(toindex, toindexoffset, fromindex, fromindexoffset, length);
+}
+ERROR awkward_unionarray_fillindex_to64_from64(int64_t* toindex, int64_t toindexoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t length) {
+  return awkward_unionarray_fillindex<int64_t, int64_t>(toindex, toindexoffset, fromindex, fromindexoffset, length);
+}
+
+template <typename TO>
+ERROR awkward_unionarray_filltags_const(TO* totags, int64_t totagsoffset, int64_t length, int64_t base) {
+  for (int64_t i = 0;  i < length;  i++) {
+    totags[totagsoffset + i] = (TO)base;
+  }
+  return success();
+}
+ERROR awkward_unionarray_filltags_to8_const(int8_t* totags, int64_t totagsoffset, int64_t length, int64_t base) {
+  return awkward_unionarray_filltags_const<int8_t>(totags, totagsoffset, length, base);
+}
+
+template <typename TO>
+ERROR awkward_unionarray_fillindex_count(TO* toindex, int64_t toindexoffset, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toindex[toindexoffset + i] = (TO)i;
+  }
+  return success();
+}
+ERROR awkward_unionarray_fillindex_to64_count(int64_t* toindex, int64_t toindexoffset, int64_t length) {
+  return awkward_unionarray_fillindex_count<int64_t>(toindex, toindexoffset, length);
+}

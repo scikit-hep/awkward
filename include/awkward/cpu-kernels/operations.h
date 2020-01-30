@@ -94,6 +94,16 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_indexedarray_fill_to64_count(int64_t* toindex, int64_t toindexoffset, int64_t length, int64_t base);
 
+  EXPORT_SYMBOL struct Error awkward_unionarray_filltags_to8_from8(int8_t* totags, int64_t totagsoffset, const int8_t* fromtags, int64_t fromtagsoffset, int64_t length, int64_t base);
+
+  EXPORT_SYMBOL struct Error awkward_unionarray_fillindex_to64_from32(int64_t* toindex, int64_t toindexoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_unionarray_fillindex_to64_fromU32(int64_t* toindex, int64_t toindexoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_unionarray_fillindex_to64_from64(int64_t* toindex, int64_t toindexoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t length);
+
+  EXPORT_SYMBOL struct Error awkward_unionarray_filltags_to8_const(int8_t* totags, int64_t totagsoffset, int64_t length, int64_t base);
+
+  EXPORT_SYMBOL struct Error awkward_unionarray_fillindex_to64_count(int64_t* toindex, int64_t toindexoffset, int64_t length);
+
 }
 
 #endif // AWKWARDCPU_GETITEM_H_

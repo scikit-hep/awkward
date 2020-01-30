@@ -342,3 +342,15 @@ def test_indexedarray_merge():
     assert awkward1.tolist(indexedarray1.merge(content2)) == [[4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5], [1.0, 2.0], [], [3.0, 4.0]]
     assert awkward1.tolist(content2.merge(indexedarray1)) == [[1.0, 2.0], [], [3.0, 4.0], [4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert awkward1.tolist(indexedarray1.merge(indexedarray1)) == [[4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5], [4.4, 5.5], [1.1, 2.2, 3.3], None, [1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+def test_unionarray_merge():
+    emptyarray = awkward1.layout.EmptyArray()
+
+    one = awkward1.Array([0.0, 1.1, 2.2, [], [1], [2, 2]]).layout
+    two = awkward1.Array([{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]).layout
+
+    assert awkward1.tolist(one.merge(two)) == [0.0, 1.1, 2.2, [], [1], [2, 2], {"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}]
+    assert awkward1.tolist(two.merge(one)) == [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}, 0.0, 1.1, 2.2, [], [1], [2, 2]]
+
+    assert awkward1.tolist(one.merge(emptyarray)) == [0.0, 1.1, 2.2, [], [1], [2, 2]]
+    assert awkward1.tolist(emptyarray.merge(one)) == [0.0, 1.1, 2.2, [], [1], [2, 2]]

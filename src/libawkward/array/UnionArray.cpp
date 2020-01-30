@@ -5,10 +5,13 @@
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/UnionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/Slice.h"
+#include "awkward/array/EmptyArray.h"
+#include "awkward/array/IndexedArray.h"
 
 #include "awkward/array/UnionArray.h"
 
@@ -555,7 +558,144 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::merge(const std::shared_ptr<Content>& other) const {
-    throw std::runtime_error("FIXME: UnionArray::merge");
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return shallow_copy();
+    }
+
+    int64_t mylength = length();
+    int64_t theirlength = other.get()->length();
+    Index8 tags(mylength + theirlength);
+    Index64 index(mylength + theirlength);
+
+    if (std::is_same<T, int8_t>::value) {
+      struct Error err = awkward_unionarray_filltags_to8_from8(
+        tags.ptr().get(),
+        0,
+        reinterpret_cast<int8_t*>(tags_.ptr().get()),
+        tags_.offset(),
+        mylength,
+        0);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else {
+      throw std::runtime_error("unrecognized UnionArray specialization");
+    }
+
+    if (std::is_same<I, int32_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_from32(
+        index.ptr().get(),
+        0,
+        reinterpret_cast<int32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<I, uint32_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_fromU32(
+        index.ptr().get(),
+        0,
+        reinterpret_cast<uint32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<I, int64_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_from64(
+        index.ptr().get(),
+        0,
+        reinterpret_cast<int64_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else {
+      throw std::runtime_error("unrecognized UnionArray specialization");
+    }
+
+    std::vector<std::shared_ptr<Content>> contents(contents_.begin(), contents_.end());
+    if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
+      std::vector<std::shared_ptr<Content>> other_contents = rawother->contents();
+      contents.insert(contents.end(), other_contents.begin(), other_contents.end());
+      Index8 other_tags = rawother->tags();
+      struct Error err1 = awkward_unionarray_filltags_to8_from8(
+        tags.ptr().get(),
+        mylength,
+        other_tags.ptr().get(),
+        other_tags.offset(),
+        theirlength,
+        numcontents());
+      util::handle_error(err1, rawother->classname(), rawother->identities().get());
+      Index32 other_index = rawother->index();
+      struct Error err2 = awkward_unionarray_fillindex_to64_from32(
+        index.ptr().get(),
+        mylength,
+        other_index.ptr().get(),
+        other_index.offset(),
+        theirlength);
+      util::handle_error(err2, rawother->classname(), rawother->identities().get());
+    }
+    else if (UnionArray8_U32* rawother = dynamic_cast<UnionArray8_U32*>(other.get())) {
+      std::vector<std::shared_ptr<Content>> other_contents = rawother->contents();
+      contents.insert(contents.end(), other_contents.begin(), other_contents.end());
+      Index8 other_tags = rawother->tags();
+      struct Error err1 = awkward_unionarray_filltags_to8_from8(
+        tags.ptr().get(),
+        mylength,
+        other_tags.ptr().get(),
+        other_tags.offset(),
+        theirlength,
+        numcontents());
+      util::handle_error(err1, rawother->classname(), rawother->identities().get());
+      IndexU32 other_index = rawother->index();
+      struct Error err2 = awkward_unionarray_fillindex_to64_fromU32(
+        index.ptr().get(),
+        mylength,
+        other_index.ptr().get(),
+        other_index.offset(),
+        theirlength);
+      util::handle_error(err2, rawother->classname(), rawother->identities().get());
+    }
+    else if (UnionArray8_64* rawother = dynamic_cast<UnionArray8_64*>(other.get())) {
+      std::vector<std::shared_ptr<Content>> other_contents = rawother->contents();
+      contents.insert(contents.end(), other_contents.begin(), other_contents.end());
+      Index8 other_tags = rawother->tags();
+      struct Error err1 = awkward_unionarray_filltags_to8_from8(
+        tags.ptr().get(),
+        mylength,
+        other_tags.ptr().get(),
+        other_tags.offset(),
+        theirlength,
+        numcontents());
+      util::handle_error(err1, rawother->classname(), rawother->identities().get());
+      Index64 other_index = rawother->index();
+      struct Error err2 = awkward_unionarray_fillindex_to64_from64(
+        index.ptr().get(),
+        mylength,
+        other_index.ptr().get(),
+        other_index.offset(),
+        theirlength);
+      util::handle_error(err2, rawother->classname(), rawother->identities().get());
+    }
+    else {
+      contents.push_back(other);
+      struct Error err1 = awkward_unionarray_filltags_to8_const(
+        tags.ptr().get(),
+        mylength,
+        theirlength,
+        numcontents());
+      util::handle_error(err1, rawother->classname(), rawother->identities().get());
+      struct Error err2 = awkward_unionarray_fillindex_to64_count(
+        index.ptr().get(),
+        mylength,
+        theirlength);
+      util::handle_error(err2, classname(), identities_.get());
+    }
+
+    if (contents.size() > kMaxInt8) {
+      throw std::runtime_error("FIXME: handle UnionArray with more than 127 contents");
+    }
+
+    return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
 
     // int64_t cases = 0;
     // for (auto x : contents_) {
