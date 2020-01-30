@@ -9,7 +9,19 @@ import awkward1._util
 import awkward1.operations.convert
 import awkward1.operations.structure
 
-# Don't import 'pandas' until an Awkward Array is used in Pandas (when its 'dtype' is first accessed).
+# Don't import 'pandas' until an Awkward Array is used in Pandas or register() is called.
+def register():
+    global AwkwardDtype
+    try:
+        pandas = get_pandas()
+    except ImportError:
+        pass
+    else:
+        if AwkwardDtype is None:
+            get_dtype()
+        if issubclass(PandasMixin, PandasNotImportedYet):
+            PandasMixin.__bases__ = (pandas.api.extensions.ExtensionArray,)
+
 checked_version = False
 def get_pandas():
     import pandas
@@ -63,12 +75,40 @@ def extra(args, kwargs, defaults):
             out.append(default)
     return out
 
+class NoFields(object):
+    def __str__(self):
+        return "(no fields)"
+    def __eq__(self, other):
+        return other is NoFields or isinstance(other, NoFields)
+    def __hash__(self):
+        return hash(NoFields)
+
 class PandasMixin(PandasNotImportedYet):
+    @property
+    def _typ(self):
+        register()
+        return "dataframe"
+
+    @property
+    def columns(self):
+        if self.layout.numfields >= 0:
+            return self.layout.keys()
+        else:
+            return [NoFields()]
+
+    def _ixs(self, i, axis):
+        register()
+        if self.layout.numfields >= 0:
+            return get_pandas().Series(self[str(i)])
+        else:
+            return get_pandas().Series(self)
+
     # REQUIRED by Pandas:
 
     @classmethod
     def _from_sequence(cls, scalars, *args, **kwargs):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._from_sequence.html
+        register()
         dtype, copy = extra(args, kwargs, [
             ("dtype", None),
             ("copy", False)])
@@ -77,6 +117,7 @@ class PandasMixin(PandasNotImportedYet):
     @classmethod
     def _from_factorized(cls, values, original):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._from_factorized.html
+        register()
         raise NotImplementedError("_from_factorized")
 
     # __getitem__(self)
@@ -85,10 +126,8 @@ class PandasMixin(PandasNotImportedYet):
     @property
     def dtype(self):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.dtype.html
-        if isinstance(self, PandasNotImportedYet):
-            pandas = get_pandas()
-            PandasMixin.__bases__ = (pandas.api.extensions.ExtensionArray,)
-        return get_dtype()()
+        register()
+        return AwkwardDtype()
 
     @property
     def nbytes(self):
@@ -107,6 +146,7 @@ class PandasMixin(PandasNotImportedYet):
 
     def isna(self):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.isna.html
+        register()
         return numpy.array(awkward1.operations.structure.isna(self))
 
     def take(self, indices, *args, **kwargs):
@@ -114,6 +154,7 @@ class PandasMixin(PandasNotImportedYet):
         allow_fill, fill_value = extra(args, kwargs, [
             ("allow_fill", False),
             ("fill_value", None)])
+        register()
 
         if allow_fill:
             indices = numpy.asarray(indices, dtype=numpy.int64)
@@ -143,6 +184,7 @@ class PandasMixin(PandasNotImportedYet):
     @classmethod
     def _concat_same_type(cls, to_concat):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._concat_same_type.html
+        register()
         return awkward1.operations.structure.concatenate(to_concat)
 
     # RECOMMENDED for performance:
@@ -153,22 +195,27 @@ class PandasMixin(PandasNotImportedYet):
     #         ("value", None),
     #         ("method", None),
     #         ("limit", None)])
+    #     register()
     #     raise NotImplementedError
     #
     # def dropna(self):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.dropna.html
+    #     register()
     #     raise NotImplementedError
     #
     # def unique(self):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.unique.html
+    #     register()
     #     raise NotImplementedError
     #
     # def factorize(self, na_sentinel):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.factorize.html
+    #     register()
     #     raise NotImplementedError
     #
     # def _values_for_factorize(self):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._values_for_factorize.html
+    #     register()
     #     raise NotImplementedError
     #
     # def argsort(self, *args, **kwargs):
@@ -176,10 +223,12 @@ class PandasMixin(PandasNotImportedYet):
     #     ascending, kind= extra(args, kwargs, [
     #         ("ascending", True),
     #         ("kind", "quicksort")])   # "quicksort", "mergesort", "heapsort"
+    #     register()
     #     raise NotImplementedError
     #
     # def _values_for_argsort(self):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._values_for_argsort.html
+    #     register()
     #     raise NotImplementedError
     #
     # def searchsorted(self, value, *args, **kwargs):
@@ -187,10 +236,12 @@ class PandasMixin(PandasNotImportedYet):
     #     side, sorter = extra(args, kwargs, [
     #         ("side", "left"),
     #         ("sorter", None)])
+    #     register()
     #     raise NotImplementedError
     #
     # def _reduce(self, name, *args, **kwargs):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._reduce.html
     #     skipna = extra(args, kwargs, [
     #         ("skipna", True)])
+    #     register()
     #     raise NotImplementedError

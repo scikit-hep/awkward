@@ -2,6 +2,10 @@
 
 import re
 import keyword
+try:
+    from collections.abc import Sequence
+except:
+    from collections import Sequence
 
 import numpy
 
@@ -12,7 +16,7 @@ import awkward1.operations.convert
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
-class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin):
+class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin, Sequence):
     def __init__(self, data, type=None, classes=None, functions=None):
         if isinstance(data, awkward1.layout.Content):
             layout = data
@@ -202,7 +206,7 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
-class FillableArray(object):
+class FillableArray(Sequence):
     def __init__(self, classes=None, functions=None):
         self._fillablearray = awkward1.layout.FillableArray()
         self._classes = classes
