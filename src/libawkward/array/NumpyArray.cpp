@@ -690,7 +690,7 @@ namespace awkward {
       return std::vector<ssize_t>();
     }
     else {
-      ssize_t offset(axis);
+      ssize_t offset = (ssize_t)axis;
       std::vector<ssize_t> out;
       const auto& indx = std::begin(shape) + offset;
       if (indx > std::begin(shape)) {
@@ -707,7 +707,7 @@ namespace awkward {
       return std::vector<ssize_t>();
     }
     else {
-      ssize_t offset(axis);
+      ssize_t offset = (ssize_t)axis;
       std::vector<ssize_t> out;
       const auto& indx = std::begin(strides) + offset;
       if (indx > std::begin(strides)) {
