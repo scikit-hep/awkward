@@ -193,4 +193,13 @@ def as_array(request):
     return request.param
 
 class TestConstructors(pandas_tests_extension_base.BaseConstructorsTests):
-        pass
+    # old version of the test
+    def test_from_dtype(self, data):
+        dtype = data.dtype
+
+        expected = pandas.Series(data)
+        result = pandas.Series(list(data), dtype=dtype)
+        self.assert_series_equal(result, expected)
+
+        result = pandas.Series(list(data), dtype=str(dtype))
+        self.assert_series_equal(result, expected)
