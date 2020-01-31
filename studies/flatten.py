@@ -230,15 +230,15 @@ class ListArray(Content):
 
     @staticmethod
     def random(minlen=0):
+        content = Content.random()
         length = random_length(minlen)
-        content_length = random_length(minlen)
-        if content_length == 0:
+        if len(content) == 0:
             starts = [random.randint(0, 10) for i in range(length)]
             stops = list(starts)
         else:
-            starts = [random.randint(0, content_length - 1) for i in range(length)]
-            stops = [x + min(random_length(), content_length - x) for x in starts]
-        return ListArray(starts, stops, Content.random(content_length))
+            starts = [random.randint(0, len(content) - 1) for i in range(length)]
+            stops = [x + min(random_length(), len(content) - x) for x in starts]
+        return ListArray(starts, stops, content)
         
     def __len__(self):
         return len(self.starts)
@@ -283,6 +283,14 @@ class ListOffsetArray(Content):
                 assert stop <= len(content)
         self.offsets = offsets
         self.content = content
+
+    @staticmethod
+    def random(minlen=0):
+        counts = [random_length() for i in range(random_length(minlen))]
+        offsets = [random_length()]
+        for i in range(len(counts)):
+            offsets[i + 1] = offsets[i] + counts[i]
+        return ListOffsetArray(offsets, Content.random(offsets[-1]))
         
     def __len__(self):
         return len(self.offsets) - 1
@@ -319,6 +327,18 @@ class IndexedArray(Content):
         self.index = index
         self.content = content
 
+    @staticmethod
+    def random(minlen=0):
+        if minlen == 0:
+            content = Content.random()
+        else:
+            content = Content.random(1)
+        if len(content) == 0:
+            index = []
+        else:
+            index = [random.randint(0, len(content) - 1) for i in range(random_length(minlen))]
+        return IndexedArray(index, content)
+
     def __len__(self):
         return len(self.index)
 
@@ -352,6 +372,17 @@ class IndexedOptionArray(Content):
             assert x < len(content)   # index[i] may be negative
         self.index = index
         self.content = content
+
+    @staticmethod
+    def random(minlen=0):
+        content = Content.random()
+        index = []
+        for i in range(random_length(minlen)):
+            if len(content) == 0 or random.randint(0, 4) == 0:
+                index.append(-random_length(1))   # a random number, but not necessarily -1
+            else:
+                index.append(random.randint(0, len(content) - 1))
+        return IndexedOptionArray(index, content)
 
     def __len__(self):
         return len(self.index)
@@ -398,6 +429,22 @@ class RecordArray(Content):
         self.contents = contents
         self.recordlookup = recordlookup
         self.length = length
+
+    # @staticmethod
+    # def random(minlen=0):
+    #     length = random_length(minlen)
+        
+
+
+
+    #     content = Content.random()
+    #     index = []
+    #     for i in range(random_length(minlen)):
+    #         if len(content) == 0 or random.randint(0, 4) == 0:
+    #             index.append(-random_length(1))   # a random number, but not necessarily -1
+    #         else:
+    #             index.append(random.randint(0, len(content) - 1))
+    #     return IndexedOptionArray(index, content)
 
     def __len__(self):
         if len(self.contents) == 0:
