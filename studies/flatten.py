@@ -18,7 +18,7 @@ class Content:
 
     def __repr__(self):
         return self.tostring_part("", "", "").rstrip()
-
+    
 ################################################################ RawArray
 
 class RawArray(Content):
@@ -33,7 +33,7 @@ class RawArray(Content):
         if isinstance(where, int):
             assert 0 <= where < len(self)
             return self.ptr[where]
-        elif isinstance(where, slice):
+        elif isinstance(where, slice) and where.step == 1:
             return RawArray(self.ptr[where])
         else:
             raise AssertionError(where)
@@ -43,6 +43,9 @@ class RawArray(Content):
         out += indent + "    <ptr>" + " ".join(repr(x) for x in self.ptr) + "</ptr>\n"
         out += indent + "</RawArray>" + post
         return out
+
+    def constructor(self):
+        return "RawArray(" + repr(self.ptr) + ")"
 
 ################################################################ NumpyArray
 
@@ -58,25 +61,39 @@ class NumpyArray(Content):
         assert len(strides) == len(shape)
         for x in shape:
             assert isinstance(x, int)
+            assert x >= 0
         for x in strides:
             assert isinstance(x, int)
+            # strides can be negative or zero!
         assert isinstance(offset, int)
-        assert 0 <= offset < len(ptr)
-        assert offset + shape[0]*strides[0] <= len(ptr)
+        if any(x == 0 for x in shape):
+            assert offset == len(ptr)
+        else:
+            assert 0 <= offset < len(ptr)
+        assert shape[0]*strides[0] + offset <= len(ptr)
         self.ptr = ptr
         self.shape = shape
         self.strides = strides
         self.offset = offset
 
+    def constructor(self):
+        return "NumpyArray(" + repr(self.ptr) + ", " + repr(self.shape) + ", " + repr(self.strides) + ", " + repr(self.offset) + ")"
+
     def __len__(self):
-        return len(self.ptr)
+        return self.shape[0]
 
     def __getitem__(self, where):
         if isinstance(where, int):
             assert 0 <= where < len(self)
-            return self.ptr[offset + strides[0]*where]
-        elif isinstance(where, slice):
-            return NumpyArray(self.ptr[where])
+            offset = self.offset + self.strides[0]*where
+            if len(self.shape) == 1:
+                return self.ptr[offset]
+            else:
+                return NumpyArray(self.ptr, self.shape[1:], self.strides[1:], offset)
+        elif isinstance(where, slice) and where.step == 1:
+            offset = self.offset + self.strides[0]*where.start
+            shape = [where.stop - where.start] + self.shape[1:]
+            return NumpyArray(self.ptr, shape, self.strides, offset)
         else:
             raise AssertionError(where)
 
@@ -85,6 +102,7 @@ class NumpyArray(Content):
         out += indent + "    <ptr>" + " ".join(str(x) for x in self.ptr) + "</ptr>\n"
         out += indent + "    <shape>" + " ".join(str(x) for x in self.shape) + "</shape>\n"
         out += indent + "    <strides>" + " ".join(str(x) for x in self.strides) + "</strides>\n"
+        out += indent + "    <offset>" + str(self.offset) + "</offset>\n"
         out += indent + "</NumpyArray>" + post
         return out
 
@@ -100,13 +118,16 @@ class EmptyArray(Content):
     def __getitem__(self, where):
         if isinstance(where, int):
             assert False
-        elif isinstance(where, slice):
+        elif isinstance(where, slice) and where.step == 1:
             return EmptyArray()
         else:
             raise AssertionError(where)
 
     def tostring_part(self, indent, pre, post):
         return indent + pre + "<EmptyArray/>" + post
+
+    def constructor(self):
+        return "EmptyArray()"
 
 ################################################################ RegularArray
 
@@ -124,7 +145,7 @@ class RegularArray(Content):
     def __getitem__(self, where):
         if isinstance(where, int):
             return self.content[(where)*size:(where + 1)*size]
-        elif isinstance(where, slice):
+        elif isinstance(where, slice) and where.step == 1:
             start = where.start
             stop = where.stop
             return RegularArray(self.content[where.start*size:where.stop*size],
@@ -138,6 +159,9 @@ class RegularArray(Content):
         out += indent + "    <size>" + str(self.size) + "</size>\n"
         out += indent + "</RegularArray>" + post
         return out
+
+    def constructor(self):
+        return "RegularArray(" + self.content.constructor() + ", " + repr(self.size) + ")"
 
 ################################################################ ListArray
 
@@ -167,7 +191,7 @@ class ListArray(Content):
         if isinstance(where, int):
             assert 0 <= where < len(self)
             return self.content[self.starts[where]:self.stops[where]]
-        elif isinstance(where, slice):
+        elif isinstance(where, slice) and where.step == 1:
             return ListArray(self.starts[where.start:where.stop],
                              self.stops[where.start:where.stop],
                              self.content)
@@ -180,6 +204,9 @@ class ListArray(Content):
         out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
         out += indent + "</ListArray>" + post
         return out
+
+    def constructor(self):
+        return "ListArray(" + repr(self.starts) + ", " + repr(self.stops) + ", " + self.content.constructor() + ")"
 
 ################################################################ ListOffsetArray
 
@@ -207,7 +234,7 @@ class ListOffsetArray(Content):
         if isinstance(where, int):
             assert 0 <= where < len(self)
             return self.content[self.offsets[where]:self.offsets[where + 1]]
-        elif isinstance(where, slice):
+        elif isinstance(where, slice) and where.step == 1:
             return ListOffsetArray(self.offsets[where.start:where.stop + 1],
                                    self.content)
         else:
@@ -219,6 +246,9 @@ class ListOffsetArray(Content):
         out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
         out += indent + "</ListOffsetArray>" + post
         return out
+
+    def constructor(self):
+        return "ListOffsetArray(" + repr(self.offsets) + ", " + self.content.constructor() + ")"
 
 ################################################################ IndexedArray
 
@@ -239,7 +269,7 @@ class IndexedArray(Content):
         if isinstance(where, int):
             assert 0 <= where < len(self)
             return self.content[self.index[where]]
-        elif isinstance(where, slice):
+        elif isinstance(where, slice) and where.step == 1:
             return IndexedArray(self.index[where.start:where.stop])
         else:
             raise AssertionError(where)
@@ -250,6 +280,9 @@ class IndexedArray(Content):
         out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
         out += indent + "</IndexedArray>\n"
         return out
+
+    def constructor(self):
+        return "IndexedArray(" + repr(self.index) + ", " + self.content.constructor() + ")"
 
 ################################################################ IndexedOptionArray
 
@@ -273,7 +306,7 @@ class IndexedOptionArray(Content):
                 return None
             else:
                 return self.content[self.index[where]]
-        elif isinstance(where, slice):
+        elif isinstance(where, slice) and where.step == 1:
             return IndexedOptionArray(self.index[where.start:where.stop])
         else:
             raise AssertionError(where)
@@ -284,6 +317,9 @@ class IndexedOptionArray(Content):
         out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
         out += indent + "</IndexedOptionArray>\n"
         return out
+
+    def constructor(self):
+        return "IndexedOptionArray(" + repr(self.index) + ", " + self.content.constructor() + ")"
 
 ################################################################ RecordArray
 
@@ -320,7 +356,7 @@ class RecordArray(Content):
                 return tuple(record)
             else:
                 return dict(zip(self.recordlookup, record))
-        elif isinstance(where, slice):
+        elif isinstance(where, slice) and where.step == 1:
             return RecordArray([x[where] for x in self.contents], self.recordlookup, self.length)
         else:
             raise AssertionError(where)
@@ -337,6 +373,9 @@ class RecordArray(Content):
                 out += content.tostring_part(indent + "    ", "<content i=\"" + str(i) + "\" key=\"" + repr(key) + "\">", "</content>\n")
         out += indent + "</RecordArray>" + post
         return out
+
+    def constructor(self):
+        return "RecordArray([" + ", ".join(x.constructor() for x in self.contents) + "], " + repr(self.recordlookup) + ", " + repr(self.length) + ")"
 
 ################################################################ UnionArray
 
@@ -363,7 +402,7 @@ class UnionArray(Content):
         if isinstance(where, int):
             assert 0 <= where < len(self)
             return self.contents[self.tags[where]][self.index[where]]
-        elif isinstance(where, slice):
+        elif isinstance(where, slice) and where.step == 1:
             return UnionArray(self.tags[where], self.index[where], self.contents)
         else:
             raise AssertionError(where)
@@ -376,6 +415,9 @@ class UnionArray(Content):
             out += content.tostring_part(indent + "    ", "<content i=\"" + str(i) + "\">", "</content>\n")
         out += indent + "</UnionArray>" + post
         return out
+
+    def constructor(self):
+        return "UnionArray(" + repr(self.tags) + ", " + repr(self.index) + ", [" + ", ".join(x.constructor() for x in self.contents) + "])"
 
 ################################################################ SlicedArray
 # (Does not exist, but part of the Uproot Milestone.)
@@ -412,14 +454,26 @@ class UnionArray(Content):
 
 ################################################################ random data
 
+def random_number():
+    return round(random.gauss(5, 3), 1)
+
 def random_length(minlen=0, maxlen=None):
     if maxlen is None:
         return minlen + int(math.floor(random.expovariate(0.1)))
     else:
         return random.randint(minlen, maxlen)
 
-def random_number():
-    return round(random.gauss(5, 3), 1)
-
 def random_RawArray(minlen=0, maxlen=None):
     return RawArray([random_number() for i in range(random_length(minlen, maxlen))])
+
+def random_NumpyArray(minlen=0, maxlen=None):
+    shape = [random_length(minlen, maxlen)]
+    for i in range(random_length(0, 2)):
+        shape.append(random_length(1, 3))
+    strides = [1]
+    for x in shape[:0:-1]:
+        skip = random_length(0, 2)
+        strides.insert(0, x*strides[0] + skip)
+    offset = random_length()
+    ptr = [random_number() for i in range(shape[0]*strides[0] + offset)]
+    return NumpyArray(ptr, shape, strides, offset)
