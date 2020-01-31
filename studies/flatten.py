@@ -40,7 +40,7 @@ class NumpyArray(Content):
 
     def tostring_part(self, indent, pre, post):
         out = indent + pre + "<NumpyArray>\n"
-        out += indent + "    " + " ".join(repr(x) for x in self.data) + "\n"
+        out += indent + "    " + " ".join(str(x) for x in self.data) + "\n"
         out += indent + "</NumpyArray>" + post
         return out
 
@@ -132,7 +132,7 @@ class ListArray(Content):
 
     def tostring_part(self, indent, pre, post):
         out = indent + pre + "<ListArray>\n"
-        out += indent + "    <offsets>" + " ".join(repr(x) for x in self.offsets) + "</offsets>\n"
+        out += indent + "    <offsets>" + " ".join(str(x) for x in self.offsets) + "</offsets>\n"
         out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
         out += indent + "</ListArray>" + post
         return out
@@ -171,14 +171,75 @@ class ListOffsetArray(Content):
 
     def tostring_part(self, indent, pre, post):
         out = indent + pre + "<ListOffsetArray>\n"
-        out += indent + "    <offsets>" + " ".join(repr(x) for x in self.offsets) + "</offsets>\n"
+        out += indent + "    <offsets>" + " ".join(str(x) for x in self.offsets) + "</offsets>\n"
         out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
         out += indent + "</ListOffsetArray>" + post
         return out
 
 ################################################################ IndexedArray
 
+class IndexedArray(Content):
+    def __init__(self, index, content):
+        assert isinstance(index, list)
+        assert isinstance(content, Content)
+        for x in index:
+            assert isinstance(x, int)
+            assert 0 <= x < len(content)   # index[i] may not be negative
+        self.index = index
+        self.content = content
+
+    def __len__(self):
+        return len(self.index)
+
+    def __getitem__(self, where):
+        if isinstance(where, int):
+            assert 0 <= where < len(self)
+            return self.content[self.index[where]]
+        elif isinstance(where, slice):
+            return IndexedArray(self.index[where.start:where.stop])
+        else:
+            raise AssertionError(where)
+
+    def tostring_part(self, indent, pre, post):
+        out = indent + pre + "<IndexedArray>\n"
+        out += indent + "    <index>" + " ".join(str(x) for x in self.index) + "</index>\n"
+        out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
+        out += indent + "</IndexedArray>\n"
+        return out
+
 ################################################################ IndexedOptionArray
+
+class IndexedOptionArray(Content):
+    def __init__(self, index, content):
+        assert isinstance(index, list)
+        assert isinstance(content, Content)
+        for x in index:
+            assert isinstance(x, int)
+            assert x < len(content)   # index[i] may be negative
+        self.index = index
+        self.content = content
+
+    def __len__(self):
+        return len(self.index)
+
+    def __getitem__(self, where):
+        if isinstance(where, int):
+            assert 0 <= where < len(self)
+            if self.index[where] < 0:
+                return None
+            else:
+                return self.content[self.index[where]]
+        elif isinstance(where, slice):
+            return IndexedOptionArray(self.index[where.start:where.stop])
+        else:
+            raise AssertionError(where)
+
+    def tostring_part(self, indent, pre, post):
+        out = indent + pre + "<IndexedOptionArray>\n"
+        out += indent + "    <index>" + " ".join(str(x) for x in self.index) + "</index>\n"
+        out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
+        out += indent + "</IndexedOptionArray>\n"
+        return out
 
 ################################################################ RecordArray
 
@@ -244,8 +305,8 @@ class UnionArray(Content):
 
     def tostring_part(self, indent, pre, post):
         out = indent + pre + "<UnionArray>\n"
-        out += indent + "    <tags>" + " ".join(repr(x) for x in self.tags) + "</tags>\n"
-        out += indent + "    <offsets>" + " ".join(repr(x) for x in self.offsets) + "</offsets>\n"
+        out += indent + "    <tags>" + " ".join(str(x) for x in self.tags) + "</tags>\n"
+        out += indent + "    <offsets>" + " ".join(str(x) for x in self.offsets) + "</offsets>\n"
         for i, content in enumerate(self.contents):
             out += content.tostring_part(indent + "    ", "<content i=\"{}\">".format(i), "</content>\n")
         out += indent + "</UnionArray>" + post
@@ -272,7 +333,7 @@ class OptionArray(Content):
 
     def tostring_part(self, indent, pre, post):
         out = indent + pre + "<OptionArray>\n"
-        out += indent + "    <offsets>" + " ".join(repr(x) for x in self.offsets) + "</offsets>\n"
+        out += indent + "    <offsets>" + " ".join(str(x) for x in self.offsets) + "</offsets>\n"
         out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
         out += indent + "</OptionArray>" + post
         return out
