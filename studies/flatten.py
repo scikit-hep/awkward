@@ -20,12 +20,15 @@ class Content:
         return self.tostring_part("", "", "").rstrip()
 
     @staticmethod
-    def random(minlen=0):
-        choices = [x for x in globals().values() if isinstance(x, type) and issubclass(x, Content) and "random" in x.__dict__]
-        if minlen != 0:
-            choices.remove(EmptyArray)
-        cls = random.choice(choices)
-        return cls.random(minlen)
+    def random(minlen=0, raw=False):
+        if raw:
+            return RawArray.random(minlen, raw)
+        else:
+            choices = [x for x in globals().values() if isinstance(x, type) and issubclass(x, Content) and "random" in x.__dict__]
+            if minlen != 0:
+                choices.remove(EmptyArray)
+            cls = random.choice(choices)
+            return cls.random(minlen, raw)
 
 def random_number():
     return round(random.gauss(5, 3), 1)
@@ -44,7 +47,7 @@ class RawArray(Content):
         self.ptr = ptr
 
     @staticmethod
-    def random(minlen=0):
+    def random(minlen=0, raw=False):
         return RawArray([random_number() for i in range(random_length(minlen))])
 
     def __len__(self):
@@ -89,23 +92,27 @@ class NumpyArray(Content):
         assert isinstance(offset, int)
         if all(x != 0 for x in shape):
             assert 0 <= offset < len(ptr)
-            assert shape[0]*strides[0] + offset <= len(ptr)
+            assert shape[0] * strides[0] + offset <= len(ptr)
         self.ptr = ptr
         self.shape = shape
         self.strides = strides
         self.offset = offset
 
+    @classmethod
+    def onedim(cls, data):
+        return cls(data, [len(data)], [1], 0)
+
     @staticmethod
-    def random(minlen=0):
+    def random(minlen=0, raw=False):
         shape = [random_length(minlen)]
         for i in range(random_length(0, 2)):
             shape.append(random_length(1, 3))
         strides = [1]
         for x in shape[:0:-1]:
             skip = random_length(0, 2)
-            strides.insert(0, x*strides[0] + skip)
+            strides.insert(0, x * strides[0] + skip)
         offset = random_length()
-        ptr = [random_number() for i in range(shape[0]*strides[0] + offset)]
+        ptr = [random_number() for i in range(shape[0] * strides[0] + offset)]
         return NumpyArray(ptr, shape, strides, offset)
 
     def __len__(self):
@@ -114,13 +121,13 @@ class NumpyArray(Content):
     def __getitem__(self, where):
         if isinstance(where, int):
             assert 0 <= where < len(self)
-            offset = self.offset + self.strides[0]*where
+            offset = self.offset + self.strides[0] * where
             if len(self.shape) == 1:
                 return self.ptr[offset]
             else:
                 return NumpyArray(self.ptr, self.shape[1:], self.strides[1:], offset)
         elif isinstance(where, slice) and where.step is None:
-            offset = self.offset + self.strides[0]*where.start
+            offset = self.offset + self.strides[0] * where.start
             shape = [where.stop - where.start] + self.shape[1:]
             return NumpyArray(self.ptr, shape, self.strides, offset)
         else:
@@ -145,7 +152,7 @@ class EmptyArray(Content):
         pass
 
     @staticmethod
-    def random(minlen=0):
+    def random(minlen=0, raw=False):
         assert minlen == 0
         return EmptyArray()
 
@@ -177,19 +184,19 @@ class RegularArray(Content):
         self.size = size
 
     @staticmethod
-    def random(minlen=0):
+    def random(minlen=0, raw=False):
         size = random_length(1, 5)
-        return RegularArray(Content.random(random_length(minlen) * size), size)
+        return RegularArray(Content.random(random_length(minlen) * size, raw), size)
 
     def __len__(self):
         return len(self.content) // self.size   # floor division
 
     def __getitem__(self, where):
         if isinstance(where, int):
-            return self.content[(where)*self.size:(where + 1)*self.size]
+            return self.content[(where) * self.size:(where + 1) * self.size]
         elif isinstance(where, slice) and where.step is None:
-            start = where.start*self.size
-            stop = where.stop*self.size
+            start = where.start * self.size
+            stop = where.stop * self.size
             return RegularArray(self.content[start:stop], self.size)
         else:
             raise AssertionError(where)
@@ -226,8 +233,8 @@ class ListArray(Content):
         self.content = content
 
     @staticmethod
-    def random(minlen=0):
-        content = Content.random()
+    def random(minlen=0, raw=False):
+        content = Content.random(0, raw)
         length = random_length(minlen)
         if len(content) == 0:
             starts = [random.randint(0, 10) for i in range(length)]
@@ -282,12 +289,12 @@ class ListOffsetArray(Content):
         self.content = content
 
     @staticmethod
-    def random(minlen=0):
+    def random(minlen=0, raw=False):
         counts = [random_length() for i in range(random_length(minlen))]
         offsets = [random_length()]
         for x in counts:
             offsets.append(offsets[-1] + x)
-        return ListOffsetArray(offsets, Content.random(offsets[-1]))
+        return ListOffsetArray(offsets, Content.random(offsets[-1], raw))
         
     def __len__(self):
         return len(self.offsets) - 1
@@ -327,11 +334,11 @@ class IndexedArray(Content):
         self.content = content
 
     @staticmethod
-    def random(minlen=0):
+    def random(minlen=0, raw=False):
         if minlen == 0:
-            content = Content.random()
+            content = Content.random(0, raw)
         else:
-            content = Content.random(1)
+            content = Content.random(1, raw)
         if len(content) == 0:
             index = []
         else:
@@ -373,8 +380,8 @@ class IndexedOptionArray(Content):
         self.content = content
 
     @staticmethod
-    def random(minlen=0):
-        content = Content.random()
+    def random(minlen=0, raw=False):
+        content = Content.random(0, raw)
         index = []
         for i in range(random_length(minlen)):
             if len(content) == 0 or random.randint(0, 4) == 0:
@@ -430,11 +437,11 @@ class RecordArray(Content):
         self.length = length
 
     @staticmethod
-    def random(minlen=0):
+    def random(minlen=0, raw=False):
         length = random_length(minlen)
         contents = []
         for i in range(random.randint(0, 2)):
-            contents.append(Content.random(length))
+            contents.append(Content.random(length, raw))
         if len(contents) != 0:
             length = None
         if random.randint(0, 1) == 0:
@@ -497,15 +504,15 @@ class UnionArray(Content):
         self.contents = contents
 
     @staticmethod
-    def random(minlen=0):
+    def random(minlen=0, raw=False):
         contents = []
         unshuffled_tags = []
         unshuffled_index = []
         for i in range(random.randint(1, 3)):
             if minlen == 0:
-                contents.append(Content.random())
+                contents.append(Content.random(0, raw))
             else:
-                contents.append(Content.random(1))
+                contents.append(Content.random(1, raw))
             if len(contents[-1]) != 0:
                 thisindex = [random.randint(0, len(contents[-1]) - 1) for i in range(random_length(minlen))]
                 unshuffled_tags.extend([i] * len(thisindex))
@@ -572,3 +579,117 @@ class UnionArray(Content):
 
 ################################################################ AmorphousChunkedArray
 # (Does not exist.)
+
+################################################################ test iter
+
+# for x in range(100):
+#     q = list(Content.random())
+
+################################################################ test count
+
+def count(data, axis=0):
+    if axis < 0:
+        raise NotImplementedError("axis < 0 is much harder for untyped data...")
+    if isinstance(data, (list, Content)):
+        if axis == 0:
+            if all(isinstance(x, list) for x in data):
+                return [len(x) for x in data]
+            else:
+                raise ValueError("cannot count the lengths of non-lists")
+        else:
+            return [count(x, axis - 1) for x in data]
+    else:
+        raise ValueError("cannot count {0} objects".format(type(data)))
+
+def RawArray_count(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    elif axis == 0:
+        raise ValueError("cannot count the lengths of non-lists")
+    else:
+        raise IndexError("axis > depth of structure")
+
+RawArray.count = RawArray_count
+
+def NumpyArray_count(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    elif axis == 0:
+        if len(self.shape) == 1:
+            raise ValueError("cannot count the lengths of non-lists")
+        else:
+            return NumpyArray.onedim([self.shape[1]] * self.shape[0])
+    else:
+        if len(self.shape) == 1:
+            raise IndexError("axis > depth of structure")
+        else:
+            ### Awkward solution
+            # content = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
+            # index = [0] * self.shape[0] * self.shape[1]
+            # return RegularArray(IndexedArray(index, content), self.shape[1])
+
+            ### pure NumPy solution
+            next = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
+            shape = [self.shape[0]] + next.shape
+            strides = [0] + next.strides   # a good use for stride == 0
+            return NumpyArray(next.ptr, shape, strides, next.offset)
+
+NumpyArray.count = NumpyArray_count
+
+def EmptyArray_count(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        return EmptyArray()
+
+EmptyArray.count = EmptyArray_count
+
+
+RegularArray
+ListArray
+ListOffsetArray
+IndexedArray
+IndexedOptionArray
+RecordArray
+UnionArray
+
+# SlicedArray
+# ChunkedArray
+# PyVirtualArray
+
+# UnmaskedArray
+# ByteMaskedArray
+# BitMaskedArray
+
+# RedirectArray
+# SparseUnionArray
+# SparseArray
+# RegularChunkedArray
+# AmorphousChunkedArray
+
+################################################################ test flatten
+
+# RawArray
+# NumpyArray
+# EmptyArray
+# RegularArray
+# ListArray
+# ListOffsetArray
+# IndexedArray
+# IndexedOptionArray
+# RecordArray
+# UnionArray
+
+# # SlicedArray
+# # ChunkedArray
+# # PyVirtualArray
+
+# # UnmaskedArray
+# # ByteMaskedArray
+# # BitMaskedArray
+
+# # RedirectArray
+# # SparseUnionArray
+# # SparseArray
+# # RegularChunkedArray
+# # AmorphousChunkedArray
