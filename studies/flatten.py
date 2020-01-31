@@ -288,8 +288,8 @@ class ListOffsetArray(Content):
     def random(minlen=0):
         counts = [random_length() for i in range(random_length(minlen))]
         offsets = [random_length()]
-        for i in range(len(counts)):
-            offsets[i + 1] = offsets[i] + counts[i]
+        for x in counts:
+            offsets.append(offsets[-1] + x)
         return ListOffsetArray(offsets, Content.random(offsets[-1]))
         
     def __len__(self):
@@ -430,21 +430,19 @@ class RecordArray(Content):
         self.recordlookup = recordlookup
         self.length = length
 
-    # @staticmethod
-    # def random(minlen=0):
-    #     length = random_length(minlen)
-        
-
-
-
-    #     content = Content.random()
-    #     index = []
-    #     for i in range(random_length(minlen)):
-    #         if len(content) == 0 or random.randint(0, 4) == 0:
-    #             index.append(-random_length(1))   # a random number, but not necessarily -1
-    #         else:
-    #             index.append(random.randint(0, len(content) - 1))
-    #     return IndexedOptionArray(index, content)
+    @staticmethod
+    def random(minlen=0):
+        length = random_length(minlen)
+        contents = []
+        for i in range(random.randint(0, 2)):
+            contents.append(Content.random(length))
+        if len(contents) != 0:
+            length = None
+        if random.randint(0, 1) == 0:
+            recordlookup = None
+        else:
+            recordlookup = ["x" + str(i) for i in range(len(contents))]
+        return RecordArray(contents, recordlookup, length)
 
     def __len__(self):
         if len(self.contents) == 0:
@@ -484,7 +482,7 @@ class RecordArray(Content):
 ################################################################ UnionArray
 
 class UnionArray(Content):
-    def __init__(self, tags, offsets, contents):
+    def __init__(self, tags, index, contents):
         assert isinstance(tags, list)
         assert isinstance(index, list)
         assert isinstance(contents, list)
@@ -496,8 +494,28 @@ class UnionArray(Content):
             assert isinstance(x, int)
             assert 0 <= x < len(contents[tags[i]])
         self.tags = tags
-        self.offsets = offsets
+        self.index = index
         self.contents = contents
+
+    @staticmethod
+    def random(minlen=0):
+        contents = []
+        unshuffled_tags = []
+        unshuffled_index = []
+        for i in range(random.randint(1, 3)):
+            if minlen == 0:
+                contents.append(Content.random())
+            else:
+                contents.append(Content.random(1))
+            if len(contents[-1]) != 0:
+                thisindex = [random.randint(0, len(contents[-1]) - 1) for i in range(random_length(minlen))]
+                unshuffled_tags.extend([i] * len(thisindex))
+                unshuffled_index.extend(thisindex)
+        permutation = list(range(len(unshuffled_tags)))
+        random.shuffle(permutation)
+        tags = [unshuffled_tags[i] for i in permutation]
+        index = [unshuffled_index[i] for i in permutation]
+        return UnionArray(tags, index, contents)
 
     def __len__(self):
         return len(self.tags)
@@ -514,7 +532,7 @@ class UnionArray(Content):
     def tostring_part(self, indent, pre, post):
         out = indent + pre + "<UnionArray>\n"
         out += indent + "    <tags>" + " ".join(str(x) for x in self.tags) + "</tags>\n"
-        out += indent + "    <offsets>" + " ".join(str(x) for x in self.offsets) + "</offsets>\n"
+        out += indent + "    <index>" + " ".join(str(x) for x in self.index) + "</index>\n"
         for i, content in enumerate(self.contents):
             out += content.tostring_part(indent + "    ", "<content i=\"" + str(i) + "\">", "</content>\n")
         out += indent + "</UnionArray>" + post
