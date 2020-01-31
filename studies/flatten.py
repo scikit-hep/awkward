@@ -1,3 +1,6 @@
+import math
+import random
+
 ################################################################ Content
 
 class Content:
@@ -16,31 +19,72 @@ class Content:
     def __repr__(self):
         return self.tostring_part("", "", "").rstrip()
 
-################################################################ NumpyArray
-# (RawArray has the same logic.)
+################################################################ RawArray
 
-class NumpyArray(Content):
-    def __init__(self, data):
-        assert isinstance(data, list)
-        for x in data:
-            assert isinstance(x, (bool, int, float))
-        self.data = data
+class RawArray(Content):
+    def __init__(self, ptr):
+        assert isinstance(ptr, list)
+        self.ptr = ptr
 
     def __len__(self):
-        return len(self.data)
+        return len(self.ptr)
 
     def __getitem__(self, where):
         if isinstance(where, int):
             assert 0 <= where < len(self)
-            return self.data[where]
+            return self.ptr[where]
         elif isinstance(where, slice):
-            return NumpyArray(self.data[where])
+            return RawArray(self.ptr[where])
+        else:
+            raise AssertionError(where)
+
+    def tostring_part(self, indent, pre, post):
+        out = indent + pre + "<RawArray>\n"
+        out += indent + "    <ptr>" + " ".join(repr(x) for x in self.ptr) + "</ptr>\n"
+        out += indent + "</RawArray>" + post
+        return out
+
+################################################################ NumpyArray
+
+class NumpyArray(Content):
+    def __init__(self, ptr, shape, strides, offset):
+        # ignoring the distinction between bytes and elements; i.e. itemsize == 1
+        assert isinstance(ptr, list)
+        assert isinstance(shape, list)
+        assert isinstance(strides, list)
+        for x in ptr:
+            assert isinstance(x, (bool, int, float))
+        assert len(shape) > 0
+        assert len(strides) == len(shape)
+        for x in shape:
+            assert isinstance(x, int)
+        for x in strides:
+            assert isinstance(x, int)
+        assert isinstance(offset, int)
+        assert 0 <= offset < len(ptr)
+        assert offset + shape[0]*strides[0] <= len(ptr)
+        self.ptr = ptr
+        self.shape = shape
+        self.strides = strides
+        self.offset = offset
+
+    def __len__(self):
+        return len(self.ptr)
+
+    def __getitem__(self, where):
+        if isinstance(where, int):
+            assert 0 <= where < len(self)
+            return self.ptr[offset + strides[0]*where]
+        elif isinstance(where, slice):
+            return NumpyArray(self.ptr[where])
         else:
             raise AssertionError(where)
 
     def tostring_part(self, indent, pre, post):
         out = indent + pre + "<NumpyArray>\n"
-        out += indent + "    " + " ".join(str(x) for x in self.data) + "\n"
+        out += indent + "    <ptr>" + " ".join(str(x) for x in self.ptr) + "</ptr>\n"
+        out += indent + "    <shape>" + " ".join(str(x) for x in self.shape) + "</shape>\n"
+        out += indent + "    <strides>" + " ".join(str(x) for x in self.strides) + "</strides>\n"
         out += indent + "</NumpyArray>" + post
         return out
 
@@ -278,15 +322,60 @@ class RecordArray(Content):
                 return dict(zip(self.recordlookup, record))
         elif isinstance(where, slice):
             return RecordArray([x[where] for x in self.contents], self.recordlookup, self.length)
+        else:
+            raise AssertionError(where)
 
-    # def tostring_part(self, indent, pre, post):
-    #     out = indent + pre + "<TupleArray>\n"
-    #     for i, content in enumerate(self.contents):
-    #         out += content.tostring_part(indent + "    ", "<content i=\"{}\">".format(i), "</content>\n")
-    #     out += indent + "</TupleArray>" + post
-    #     return out
+    def tostring_part(self, indent, pre, post):
+        out = indent + pre + "<RecordArray>\n"
+        if len(self.contents) == 0:
+            out += indent + "    <length>" + str(self.length) + "</length>\n"
+        if self.recordlookup is None:
+            for i, content in enumerate(self.contents):
+                out += content.tostring_part(indent + "    ", "<content i=\"" + str(i) + "\">", "</content>\n")
+        else:
+            for i, (key, content) in enumerate(zip(self.recordlookup, self.contents)):
+                out += content.tostring_part(indent + "    ", "<content i=\"" + str(i) + "\" key=\"" + repr(key) + "\">", "</content>\n")
+        out += indent + "</RecordArray>" + post
+        return out
 
 ################################################################ UnionArray
+
+class UnionArray(Content):
+    def __init__(self, tags, offsets, contents):
+        assert isinstance(tags, list)
+        assert isinstance(index, list)
+        assert isinstance(contents, list)
+        assert len(index) >= len(tags)   # usually ==
+        for x in tags:
+            assert isinstance(x, int)
+            assert 0 <= x < len(contents)
+        for i, x in enumerate(index):
+            assert isinstance(x, int)
+            assert 0 <= x < len(contents[tags[i]])
+        self.tags = tags
+        self.offsets = offsets
+        self.contents = contents
+
+    def __len__(self):
+        return len(self.tags)
+
+    def __getitem__(self, where):
+        if isinstance(where, int):
+            assert 0 <= where < len(self)
+            return self.contents[self.tags[where]][self.index[where]]
+        elif isinstance(where, slice):
+            return UnionArray(self.tags[where], self.index[where], self.contents)
+        else:
+            raise AssertionError(where)
+
+    def tostring_part(self, indent, pre, post):
+        out = indent + pre + "<UnionArray>\n"
+        out += indent + "    <tags>" + " ".join(str(x) for x in self.tags) + "</tags>\n"
+        out += indent + "    <offsets>" + " ".join(str(x) for x in self.offsets) + "</offsets>\n"
+        for i, content in enumerate(self.contents):
+            out += content.tostring_part(indent + "    ", "<content i=\"" + str(i) + "\">", "</content>\n")
+        out += indent + "</UnionArray>" + post
+        return out
 
 ################################################################ SlicedArray
 # (Does not exist, but part of the Uproot Milestone.)
@@ -321,63 +410,16 @@ class RecordArray(Content):
 ################################################################ AmorphousChunkedArray
 # (Does not exist.)
 
+################################################################ random data
 
+def random_length(minlen=0, maxlen=None):
+    if maxlen is None:
+        return minlen + int(math.floor(random.expovariate(0.1)))
+    else:
+        return random.randint(minlen, maxlen)
 
+def random_number():
+    return round(random.gauss(5, 3), 1)
 
-    
-# HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE HERE
-
-
-class UnionArray(Content):
-    def __init__(self, tags, offsets, contents):
-        assert isinstance(tags, list)
-        assert isinstance(offsets, list)
-        assert all(isinstance(x, Content) for x in contents)
-        self.tags = tags
-        self.offsets = offsets
-        self.contents = contents
-
-    def __len__(self):
-        return len(self.tags)
-
-    def __getitem__(self, where):
-        if isinstance(where, int):
-            return self.contents[self.tags[where]][self.offsets[where]]
-        else:
-            return UnionArray(self.tags[where], self.offsets[where], self.contents)
-
-    def tostring_part(self, indent, pre, post):
-        out = indent + pre + "<UnionArray>\n"
-        out += indent + "    <tags>" + " ".join(str(x) for x in self.tags) + "</tags>\n"
-        out += indent + "    <offsets>" + " ".join(str(x) for x in self.offsets) + "</offsets>\n"
-        for i, content in enumerate(self.contents):
-            out += content.tostring_part(indent + "    ", "<content i=\"{}\">".format(i), "</content>\n")
-        out += indent + "</UnionArray>" + post
-        return out
-
-class OptionArray(Content):
-    def __init__(self, offsets, content):
-        assert isinstance(offsets, list)
-        assert isinstance(content, Content)
-        self.offsets = offsets
-        self.content = content
-
-    def __len__(self):
-        return len(self.offsets)
-
-    def __getitem__(self, where):
-        if isinstance(where, int):
-            if self.offsets[where] == -1:
-                return None
-            else:
-                return self.content[self.offsets[where]]
-        else:
-            return OptionArray(self.offsets[where], self.content)
-
-    def tostring_part(self, indent, pre, post):
-        out = indent + pre + "<OptionArray>\n"
-        out += indent + "    <offsets>" + " ".join(str(x) for x in self.offsets) + "</offsets>\n"
-        out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
-        out += indent + "</OptionArray>" + post
-        return out
-
+def random_RawArray(minlen=0, maxlen=None):
+    return RawArray([random_number() for i in range(random_length(minlen, maxlen))])
