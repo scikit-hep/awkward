@@ -124,8 +124,8 @@ ERROR awkward_listarray_flatten_scale(C* tostarts, C* tostops, const T* scale, c
     if (start < 0  ||  stop < 0) {
       return failure("all start and stop values must be non-negative", kSliceNone, i);
     }
-    tostarts[i] = start * scale[i];
-    tostops[i] = stop * scale[i];
+    tostarts[i] = (C)(start * scale[i]);
+    tostops[i] = (C)(stop * scale[i]);
   }
   return success();
 }

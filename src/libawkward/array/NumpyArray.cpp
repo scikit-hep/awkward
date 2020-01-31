@@ -690,13 +690,14 @@ namespace awkward {
       return std::vector<ssize_t>();
     }
     else {
+      ssize_t offset = (ssize_t)axis;
       std::vector<ssize_t> out;
-      const auto& indx = begin(shape) + axis;
-      if (indx > begin(shape)) {
-        out.insert(end(out), begin(shape), indx);
+      const auto& indx = std::begin(shape) + offset;
+      if (indx > std::begin(shape)) {
+        out.insert(std::end(out), std::begin(shape), indx);
       }
-      out.emplace_back(shape[axis]*shape[axis + 1]);
-      out.insert(end(out), indx + 2, end(shape));
+      out.emplace_back(shape[offset]*shape[offset + 1]);
+      out.insert(std::end(out), indx + 2, std::end(shape));
       return out;
     }
   }
@@ -706,12 +707,13 @@ namespace awkward {
       return std::vector<ssize_t>();
     }
     else {
+      ssize_t offset = (ssize_t)axis;
       std::vector<ssize_t> out;
-      const auto indx = begin(strides) + axis;
-      if (indx > begin(strides)) {
-        out.insert(end(out), begin(strides), indx);
+      const auto& indx = std::begin(strides) + offset;
+      if (indx > std::begin(strides)) {
+        out.insert(std::end(out), std::begin(strides), indx);
       }
-      out.insert(end(out), indx + 1, end(strides));
+      out.insert(std::end(out), indx + 1, std::end(strides));
       return out;
     }
   }
@@ -723,10 +725,11 @@ namespace awkward {
       int64_t mindepth = minmax.first;
       int64_t depth = purelist_depth();
       if (mindepth == depth) {
-        if (ndim() - 1 + axis < 0) {
+        int64_t toaxis = axis - 1 + (int64_t)ndim();
+        if (toaxis < 0) {
           throw std::invalid_argument(std::string("NumpyArray cannot be flattened in axis ") + std::to_string(axis) + std::string(" because it exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
         }
-        return flatten(ndim() - 1 + axis);
+        return flatten(toaxis);
       }
     }
     if (shape_.size() <= 1) {
