@@ -20,15 +20,16 @@ class Content:
         return self.tostring_part("", "", "").rstrip()
 
     @staticmethod
-    def random(minlen=0, raw=False):
-        if raw:
-            return RawArray.random(minlen, raw)
+    def random(minlen=0, choices=None):
+        if choices is None:
+            choices = [x for x in globals().values() if isinstance(x, type) and issubclass(x, Content)]
         else:
-            choices = [x for x in globals().values() if isinstance(x, type) and issubclass(x, Content) and "random" in x.__dict__]
-            if minlen != 0:
-                choices.remove(EmptyArray)
-            cls = random.choice(choices)
-            return cls.random(minlen, raw)
+            choices = list(choices)
+        if minlen != 0 and EmptyArray in choices:
+            choices.remove(EmptyArray)
+        assert len(choices) > 0
+        cls = random.choice(choices)
+        return cls.random(minlen, choices)
 
 def random_number():
     return round(random.gauss(5, 3), 1)
@@ -47,7 +48,7 @@ class RawArray(Content):
         self.ptr = ptr
 
     @staticmethod
-    def random(minlen=0, raw=False):
+    def random(minlen=0, choices=None):
         return RawArray([random_number() for i in range(random_length(minlen))])
 
     def __len__(self):
@@ -103,7 +104,7 @@ class NumpyArray(Content):
         return cls(data, [len(data)], [1], 0)
 
     @staticmethod
-    def random(minlen=0, raw=False):
+    def random(minlen=0, choices=None):
         shape = [random_length(minlen)]
         for i in range(random_length(0, 2)):
             shape.append(random_length(1, 3))
@@ -152,7 +153,7 @@ class EmptyArray(Content):
         pass
 
     @staticmethod
-    def random(minlen=0, raw=False):
+    def random(minlen=0, choices=None):
         assert minlen == 0
         return EmptyArray()
 
@@ -184,9 +185,9 @@ class RegularArray(Content):
         self.size = size
 
     @staticmethod
-    def random(minlen=0, raw=False):
+    def random(minlen=0, choices=None):
         size = random_length(1, 5)
-        return RegularArray(Content.random(random_length(minlen) * size, raw), size)
+        return RegularArray(Content.random(random_length(minlen) * size, choices), size)
 
     def __len__(self):
         return len(self.content) // self.size   # floor division
@@ -233,8 +234,8 @@ class ListArray(Content):
         self.content = content
 
     @staticmethod
-    def random(minlen=0, raw=False):
-        content = Content.random(0, raw)
+    def random(minlen=0, choices=None):
+        content = Content.random(0, choices)
         length = random_length(minlen)
         if len(content) == 0:
             starts = [random.randint(0, 10) for i in range(length)]
@@ -289,12 +290,12 @@ class ListOffsetArray(Content):
         self.content = content
 
     @staticmethod
-    def random(minlen=0, raw=False):
+    def random(minlen=0, choices=None):
         counts = [random_length() for i in range(random_length(minlen))]
         offsets = [random_length()]
         for x in counts:
             offsets.append(offsets[-1] + x)
-        return ListOffsetArray(offsets, Content.random(offsets[-1], raw))
+        return ListOffsetArray(offsets, Content.random(offsets[-1], choices))
         
     def __len__(self):
         return len(self.offsets) - 1
@@ -334,11 +335,11 @@ class IndexedArray(Content):
         self.content = content
 
     @staticmethod
-    def random(minlen=0, raw=False):
+    def random(minlen=0, choices=None):
         if minlen == 0:
-            content = Content.random(0, raw)
+            content = Content.random(0, choices)
         else:
-            content = Content.random(1, raw)
+            content = Content.random(1, choices)
         if len(content) == 0:
             index = []
         else:
@@ -380,8 +381,8 @@ class IndexedOptionArray(Content):
         self.content = content
 
     @staticmethod
-    def random(minlen=0, raw=False):
-        content = Content.random(0, raw)
+    def random(minlen=0, choices=None):
+        content = Content.random(0, choices)
         index = []
         for i in range(random_length(minlen)):
             if len(content) == 0 or random.randint(0, 4) == 0:
@@ -437,11 +438,11 @@ class RecordArray(Content):
         self.length = length
 
     @staticmethod
-    def random(minlen=0, raw=False):
+    def random(minlen=0, choices=None):
         length = random_length(minlen)
         contents = []
         for i in range(random.randint(0, 2)):
-            contents.append(Content.random(length, raw))
+            contents.append(Content.random(length, choices))
         if len(contents) != 0:
             length = None
         if random.randint(0, 1) == 0:
@@ -504,15 +505,15 @@ class UnionArray(Content):
         self.contents = contents
 
     @staticmethod
-    def random(minlen=0, raw=False):
+    def random(minlen=0, choices=None):
         contents = []
         unshuffled_tags = []
         unshuffled_index = []
         for i in range(random.randint(1, 3)):
             if minlen == 0:
-                contents.append(Content.random(0, raw))
+                contents.append(Content.random(0, choices))
             else:
-                contents.append(Content.random(1, raw))
+                contents.append(Content.random(1, choices))
             if len(contents[-1]) != 0:
                 thisindex = [random.randint(0, len(contents[-1]) - 1) for i in range(random_length(minlen))]
                 unshuffled_tags.extend([i] * len(thisindex))
@@ -644,11 +645,46 @@ def EmptyArray_count(self, axis=0):
 
 EmptyArray.count = EmptyArray_count
 
+def RegularArray_count(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    elif axis == 0:
+        return NumpyArray.onedim([self.size] * len(self))
+    else:
+        return RegularArray(self.content.count(axis - 1), self.size)
 
-RegularArray
-ListArray
-ListOffsetArray
-IndexedArray
+RegularArray.count = RegularArray_count
+
+def ListArray_count(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    elif axis == 0:
+        out = [self.stops[i] - self.starts[i] for i in range(len(self.starts))]
+        return NumpyArray.onedim(out)
+    else:
+        return ListArray(self.starts, self.stops, self.content.count(axis - 1))
+
+ListArray.count = ListArray_count
+
+def ListOffsetArray_count(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    elif axis == 0:
+        out = [self.offsets[i + 1] - self.offsets[i] for i in range(len(self.offsets) - 1)]
+        return NumpyArray.onedim(out)
+    else:
+        return ListOffsetArray(self.offsets, self.content.count(axis - 1))
+
+ListOffsetArray.count = ListOffsetArray_count
+
+def IndexedArray_count(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        return IndexedArray(self.index, self.content.count(axis))
+
+IndexedArray.count = IndexedArray_count
+
 IndexedOptionArray
 RecordArray
 UnionArray
