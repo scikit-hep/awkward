@@ -54,7 +54,7 @@ class RawArray(Content):
         if isinstance(where, int):
             assert 0 <= where < len(self)
             return self.ptr[where]
-        elif isinstance(where, slice) and where.step == 1:
+        elif isinstance(where, slice) and where.step is None:
             return RawArray(self.ptr[where])
         else:
             raise AssertionError(where)
@@ -87,9 +87,7 @@ class NumpyArray(Content):
             assert isinstance(x, int)
             # strides can be negative or zero!
         assert isinstance(offset, int)
-        if any(x == 0 for x in shape):
-            assert offset == len(ptr)
-        else:
+        if all(x != 0 for x in shape):
             assert 0 <= offset < len(ptr)
         assert shape[0]*strides[0] + offset <= len(ptr)
         self.ptr = ptr
@@ -121,7 +119,7 @@ class NumpyArray(Content):
                 return self.ptr[offset]
             else:
                 return NumpyArray(self.ptr, self.shape[1:], self.strides[1:], offset)
-        elif isinstance(where, slice) and where.step == 1:
+        elif isinstance(where, slice) and where.step is None:
             offset = self.offset + self.strides[0]*where.start
             shape = [where.stop - where.start] + self.shape[1:]
             return NumpyArray(self.ptr, shape, self.strides, offset)
@@ -157,7 +155,7 @@ class EmptyArray(Content):
     def __getitem__(self, where):
         if isinstance(where, int):
             assert False
-        elif isinstance(where, slice) and where.step == 1:
+        elif isinstance(where, slice) and where.step is None:
             return EmptyArray()
         else:
             raise AssertionError(where)
@@ -189,11 +187,10 @@ class RegularArray(Content):
     def __getitem__(self, where):
         if isinstance(where, int):
             return self.content[(where)*self.size:(where + 1)*self.size]
-        elif isinstance(where, slice) and where.step == 1:
-            start = where.start
-            stop = where.stop
-            return RegularArray(self.content[where.start*self.size:where.stop*self.size],
-                                self.size)
+        elif isinstance(where, slice) and where.step is None:
+            start = where.start*self.size
+            stop = where.stop*self.size
+            return RegularArray(self.content[start:stop], self.size)
         else:
             raise AssertionError(where)
 
@@ -247,10 +244,10 @@ class ListArray(Content):
         if isinstance(where, int):
             assert 0 <= where < len(self)
             return self.content[self.starts[where]:self.stops[where]]
-        elif isinstance(where, slice) and where.step == 1:
-            return ListArray(self.starts[where.start:where.stop],
-                             self.stops[where.start:where.stop],
-                             self.content)
+        elif isinstance(where, slice) and where.step is None:
+            starts = self.starts[where.start:where.stop]
+            stops = self.stops[where.start:where.stop]
+            return ListArray(starts, stops, self.content)
         else:
             raise AssertionError(where)
 
@@ -299,9 +296,11 @@ class ListOffsetArray(Content):
         if isinstance(where, int):
             assert 0 <= where < len(self)
             return self.content[self.offsets[where]:self.offsets[where + 1]]
-        elif isinstance(where, slice) and where.step == 1:
-            return ListOffsetArray(self.offsets[where.start:where.stop + 1],
-                                   self.content)
+        elif isinstance(where, slice) and where.step is None:
+            offsets = self.offsets[where.start : where.stop + 1]
+            if len(offsets) == 0:
+                offsets = [0]
+            return ListOffsetArray(offsets, self.content)
         else:
             raise AssertionError(where)
 
@@ -346,8 +345,8 @@ class IndexedArray(Content):
         if isinstance(where, int):
             assert 0 <= where < len(self)
             return self.content[self.index[where]]
-        elif isinstance(where, slice) and where.step == 1:
-            return IndexedArray(self.index[where.start:where.stop])
+        elif isinstance(where, slice) and where.step is None:
+            return IndexedArray(self.index[where.start:where.stop], self.content)
         else:
             raise AssertionError(where)
 
@@ -394,8 +393,8 @@ class IndexedOptionArray(Content):
                 return None
             else:
                 return self.content[self.index[where]]
-        elif isinstance(where, slice) and where.step == 1:
-            return IndexedOptionArray(self.index[where.start:where.stop])
+        elif isinstance(where, slice) and where.step is None:
+            return IndexedOptionArray(self.index[where.start:where.stop], self.content)
         else:
             raise AssertionError(where)
 
@@ -458,7 +457,7 @@ class RecordArray(Content):
                 return tuple(record)
             else:
                 return dict(zip(self.recordlookup, record))
-        elif isinstance(where, slice) and where.step == 1:
+        elif isinstance(where, slice) and where.step is None:
             return RecordArray([x[where] for x in self.contents], self.recordlookup, self.length)
         else:
             raise AssertionError(where)
@@ -524,7 +523,7 @@ class UnionArray(Content):
         if isinstance(where, int):
             assert 0 <= where < len(self)
             return self.contents[self.tags[where]][self.index[where]]
-        elif isinstance(where, slice) and where.step == 1:
+        elif isinstance(where, slice) and where.step is None:
             return UnionArray(self.tags[where], self.index[where], self.contents)
         else:
             raise AssertionError(where)

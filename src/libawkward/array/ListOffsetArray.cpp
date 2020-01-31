@@ -335,7 +335,13 @@ namespace awkward {
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_range_nowrap(start, stop);
     }
-    return std::make_shared<ListOffsetArrayOf<T>>(identities, parameters_, offsets_.getitem_range_nowrap(start, stop + 1), content_);
+    IndexOf<T> offsets = offsets_.getitem_range_nowrap(start, stop + 1);
+    if (offsets.length() == 0) {
+      IndexOf<T> offsets2(1);
+      offsets2.ptr().get()[0] = 0;
+      return std::make_shared<ListOffsetArrayOf<T>>(identities, parameters_, offsets2, content_);
+    }
+    return std::make_shared<ListOffsetArrayOf<T>>(identities, parameters_, offsets, content_);
   }
 
   template <typename T>
