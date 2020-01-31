@@ -468,7 +468,14 @@ class RecordArray(Content):
             else:
                 return dict(zip(self.recordlookup, record))
         elif isinstance(where, slice) and where.step is None:
-            return RecordArray([x[where] for x in self.contents], self.recordlookup, self.length)
+            if len(self.contents) == 0:
+                start = min(max(where.start, 0), self.length)
+                stop = min(max(where.stop, 0), self.length)
+                if stop < start:
+                    stop = start
+                return RecordArray([], self.recordlookup, stop - start)
+            else:
+                return RecordArray([x[where] for x in self.contents], self.recordlookup, self.length)
         else:
             raise AssertionError(where)
 
@@ -628,7 +635,7 @@ def NumpyArray_count(self, axis=0):
         raise NotImplementedError
     else:
         if len(self.shape) == 1:
-            raise ValueError("axis > list depth of structure")
+            raise IndexError("axis > list depth of structure")
         if axis == 0:
             return NumpyArray.onedim([self.shape[1]] * self.shape[0])
         else:
@@ -726,19 +733,18 @@ def UnionArray_count(self, axis=0):
 
 UnionArray.count = UnionArray_count
 
-# SlicedArray
-# ChunkedArray
-# PyVirtualArray
-
-# UnmaskedArray
-# ByteMaskedArray
-# BitMaskedArray
-
-# RedirectArray
-# SparseUnionArray
-# SparseArray
-# RegularChunkedArray
-# AmorphousChunkedArray
+for i in range(10):
+    print("i =", i)
+    array = Content.random()
+    for axis in range(5):
+        print("axis =", axis)
+        try:
+            rowwise = count(array, axis)
+            columnar = array.count(axis)
+        except IndexError:
+            break
+        columnar = list(columnar)
+        assert rowwise == columnar
 
 ################################################################ test flatten
 
@@ -753,14 +759,13 @@ UnionArray.count = UnionArray_count
 # RecordArray
 # UnionArray
 
+# ### Don't worry about the not-implemented-yet ones
 # # SlicedArray
 # # ChunkedArray
 # # PyVirtualArray
-
 # # UnmaskedArray
 # # ByteMaskedArray
 # # BitMaskedArray
-
 # # RedirectArray
 # # SparseUnionArray
 # # SparseArray
