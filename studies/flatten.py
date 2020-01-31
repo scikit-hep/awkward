@@ -89,7 +89,7 @@ class NumpyArray(Content):
         assert isinstance(offset, int)
         if all(x != 0 for x in shape):
             assert 0 <= offset < len(ptr)
-        assert shape[0]*strides[0] + offset <= len(ptr)
+            assert shape[0]*strides[0] + offset <= len(ptr)
         self.ptr = ptr
         self.shape = shape
         self.strides = strides
