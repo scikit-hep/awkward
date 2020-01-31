@@ -596,33 +596,28 @@ def count(data, axis=0):
             if all(isinstance(x, list) for x in data):
                 return [len(x) for x in data]
             else:
-                raise ValueError("cannot count the lengths of non-lists")
+                raise IndexError("axis > list depth of structure")
         else:
             return [count(x, axis - 1) for x in data]
     else:
-        raise ValueError("cannot count {0} objects".format(type(data)))
+        raise NotImplementedError("cannot count {0} objects".format(type(data)))
 
 def RawArray_count(self, axis=0):
     if axis < 0:
         raise NotImplementedError
-    elif axis == 0:
-        raise ValueError("cannot count the lengths of non-lists")
     else:
-        raise IndexError("axis > depth of structure")
+        raise IndexError("axis > list depth of structure")
 
 RawArray.count = RawArray_count
 
 def NumpyArray_count(self, axis=0):
     if axis < 0:
         raise NotImplementedError
-    elif axis == 0:
-        if len(self.shape) == 1:
-            raise ValueError("cannot count the lengths of non-lists")
-        else:
-            return NumpyArray.onedim([self.shape[1]] * self.shape[0])
     else:
         if len(self.shape) == 1:
-            raise IndexError("axis > depth of structure")
+            raise ValueError("axis > list depth of structure")
+        if axis == 0:
+            return NumpyArray.onedim([self.shape[1]] * self.shape[0])
         else:
             ### Awkward solution
             # content = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
