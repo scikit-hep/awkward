@@ -543,7 +543,12 @@ namespace awkward {
   const std::shared_ptr<Content> UnionArrayOf<T, I>::flatten(int64_t axis) const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {
+      int64_t lenght = content.get()->length();
       contents.emplace_back(content.get()->flatten(axis));
+      int64_t tolenght = contents.back().get()->length();
+      if (lenght != tolenght) {
+        return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents_);
+      }
     }
     return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents);
   }
