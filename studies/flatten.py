@@ -18,13 +18,34 @@ class Content:
 
     def __repr__(self):
         return self.tostring_part("", "", "").rstrip()
-    
+
+    @staticmethod
+    def random(minlen=0):
+        choices = [x for x in globals().values() if isinstance(x, type) and issubclass(x, Content) and "random" in x.__dict__]
+        if minlen != 0:
+            choices.remove(EmptyArray)
+        cls = random.choice(choices)
+        return cls.random(minlen)
+
+def random_number():
+    return round(random.gauss(5, 3), 1)
+
+def random_length(minlen=0, maxlen=None):
+    if maxlen is None:
+        return minlen + int(math.floor(random.expovariate(0.1)))
+    else:
+        return random.randint(minlen, maxlen)
+        
 ################################################################ RawArray
 
 class RawArray(Content):
     def __init__(self, ptr):
         assert isinstance(ptr, list)
         self.ptr = ptr
+
+    @staticmethod
+    def random(minlen=0):
+        return RawArray([random_number() for i in range(random_length(minlen))])
 
     def __len__(self):
         return len(self.ptr)
@@ -76,8 +97,18 @@ class NumpyArray(Content):
         self.strides = strides
         self.offset = offset
 
-    def constructor(self):
-        return "NumpyArray(" + repr(self.ptr) + ", " + repr(self.shape) + ", " + repr(self.strides) + ", " + repr(self.offset) + ")"
+    @staticmethod
+    def random(minlen=0):
+        shape = [random_length(minlen)]
+        for i in range(random_length(0, 2)):
+            shape.append(random_length(1, 3))
+        strides = [1]
+        for x in shape[:0:-1]:
+            skip = random_length(0, 2)
+            strides.insert(0, x*strides[0] + skip)
+        offset = random_length()
+        ptr = [random_number() for i in range(shape[0]*strides[0] + offset)]
+        return NumpyArray(ptr, shape, strides, offset)
 
     def __len__(self):
         return self.shape[0]
@@ -106,11 +137,19 @@ class NumpyArray(Content):
         out += indent + "</NumpyArray>" + post
         return out
 
+    def constructor(self):
+        return "NumpyArray(" + repr(self.ptr) + ", " + repr(self.shape) + ", " + repr(self.strides) + ", " + repr(self.offset) + ")"
+
 ################################################################ EmptyArray
 
 class EmptyArray(Content):
     def __init__(self):
         pass
+
+    @staticmethod
+    def random(minlen=0):
+        assert minlen == 0
+        return EmptyArray()
 
     def __len__(self):
         return 0
@@ -139,16 +178,21 @@ class RegularArray(Content):
         self.content = content
         self.size = size
 
+    @staticmethod
+    def random(minlen=0):
+        size = random_length(1, 5)
+        return RegularArray(Content.random(random_length(minlen) * size), size)
+
     def __len__(self):
-        return len(self.content) // size   # floor division
+        return len(self.content) // self.size   # floor division
 
     def __getitem__(self, where):
         if isinstance(where, int):
-            return self.content[(where)*size:(where + 1)*size]
+            return self.content[(where)*self.size:(where + 1)*self.size]
         elif isinstance(where, slice) and where.step == 1:
             start = where.start
             stop = where.stop
-            return RegularArray(self.content[where.start*size:where.stop*size],
+            return RegularArray(self.content[where.start*self.size:where.stop*self.size],
                                 self.size)
         else:
             raise AssertionError(where)
@@ -183,6 +227,18 @@ class ListArray(Content):
         self.starts = starts
         self.stops = stops
         self.content = content
+
+    @staticmethod
+    def random(minlen=0):
+        length = random_length(minlen)
+        content_length = random_length(minlen)
+        if content_length == 0:
+            starts = [random.randint(0, 10) for i in range(length)]
+            stops = list(starts)
+        else:
+            starts = [random.randint(0, content_length - 1) for i in range(length)]
+            stops = [x + min(random_length(), content_length - x) for x in starts]
+        return ListArray(starts, stops, Content.random(content_length))
         
     def __len__(self):
         return len(self.starts)
@@ -200,7 +256,8 @@ class ListArray(Content):
 
     def tostring_part(self, indent, pre, post):
         out = indent + pre + "<ListArray>\n"
-        out += indent + "    <offsets>" + " ".join(str(x) for x in self.offsets) + "</offsets>\n"
+        out += indent + "    <starts>" + " ".join(str(x) for x in self.starts) + "</starts>\n"
+        out += indent + "    <stops>" + " ".join(str(x) for x in self.stops) + "</stops>\n"
         out += self.content.tostring_part(indent + "    ", "<content>", "</content>\n")
         out += indent + "</ListArray>" + post
         return out
@@ -451,29 +508,3 @@ class UnionArray(Content):
 
 ################################################################ AmorphousChunkedArray
 # (Does not exist.)
-
-################################################################ random data
-
-def random_number():
-    return round(random.gauss(5, 3), 1)
-
-def random_length(minlen=0, maxlen=None):
-    if maxlen is None:
-        return minlen + int(math.floor(random.expovariate(0.1)))
-    else:
-        return random.randint(minlen, maxlen)
-
-def random_RawArray(minlen=0, maxlen=None):
-    return RawArray([random_number() for i in range(random_length(minlen, maxlen))])
-
-def random_NumpyArray(minlen=0, maxlen=None):
-    shape = [random_length(minlen, maxlen)]
-    for i in range(random_length(0, 2)):
-        shape.append(random_length(1, 3))
-    strides = [1]
-    for x in shape[:0:-1]:
-        skip = random_length(0, 2)
-        strides.insert(0, x*strides[0] + skip)
-    offset = random_length()
-    ptr = [random_number() for i in range(shape[0]*strides[0] + offset)]
-    return NumpyArray(ptr, shape, strides, offset)
