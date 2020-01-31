@@ -632,16 +632,19 @@ def NumpyArray_count(self, axis=0):
         if axis == 0:
             return NumpyArray.onedim([self.shape[1]] * self.shape[0])
         else:
-            ### Awkward solution
-            # content = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
-            # index = [0] * self.shape[0] * self.shape[1]
-            # return RegularArray(IndexedArray(index, content), self.shape[1])
+            if self.shape[0] == 0:
+                return NumpyArray.onedim([])
+            else:
+                ### Awkward solution
+                # content = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
+                # index = [0] * self.shape[0] * self.shape[1]
+                # return RegularArray(IndexedArray(index, content), self.shape[1])
 
-            ### pure NumPy solution
-            next = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
-            shape = [self.shape[0]] + next.shape
-            strides = [0] + next.strides   # a good use for stride == 0
-            return NumpyArray(next.ptr, shape, strides, next.offset)
+                ### pure NumPy solution
+                next = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
+                shape = [self.shape[0]] + next.shape
+                strides = [0] + next.strides   # a good use for stride == 0
+                return NumpyArray(next.ptr, shape, strides, next.offset)
 
 NumpyArray.count = NumpyArray_count
 
@@ -712,10 +715,16 @@ def RecordArray_count(self, axis=0):
 
 RecordArray.count = RecordArray_count
 
+def UnionArray_count(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        contents = []
+        for x in self.contents:
+            contents.append(x.count(axis))
+        return UnionArray(self.tags, self.index, contents)
 
-
-
-UnionArray
+UnionArray.count = UnionArray_count
 
 # SlicedArray
 # ChunkedArray
