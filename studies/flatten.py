@@ -243,6 +243,49 @@ class IndexedOptionArray(Content):
 
 ################################################################ RecordArray
 
+class RecordArray(Content):
+    def __init__(self, contents, recordlookup, length):
+        assert isinstance(contents, list)
+        if len(contents) == 0:
+            assert isinstance(length, int)
+            assert length >= 0
+        else:
+            assert length is None
+            for x in contents:
+                assert isinstance(x, Content)
+        assert recordlookup is None or isinstance(recordlookup, list)
+        if isinstance(recordlookup, list):
+            assert len(recordlookup) == len(contents)
+            for x in recordlookup:
+                assert isinstance(x, str)
+        self.contents = contents
+        self.recordlookup = recordlookup
+        self.length = length
+
+    def __len__(self):
+        if len(self.contents) == 0:
+            return self.length
+        else:
+            return min(len(x) for x in self.contents)
+
+    def __getitem__(self, where):
+        if isinstance(where, int):
+            assert 0 <= where < len(self)
+            record = [x[where] for x in self.contents]
+            if self.recordlookup is None:
+                return tuple(record)
+            else:
+                return dict(zip(self.recordlookup, record))
+        elif isinstance(where, slice):
+            return RecordArray([x[where] for x in self.contents], self.recordlookup, self.length)
+
+    # def tostring_part(self, indent, pre, post):
+    #     out = indent + pre + "<TupleArray>\n"
+    #     for i, content in enumerate(self.contents):
+    #         out += content.tostring_part(indent + "    ", "<content i=\"{}\">".format(i), "</content>\n")
+    #     out += indent + "</TupleArray>" + post
+    #     return out
+
 ################################################################ UnionArray
 
 ################################################################ SlicedArray
@@ -338,25 +381,3 @@ class OptionArray(Content):
         out += indent + "</OptionArray>" + post
         return out
 
-class TupleArray(Content):
-    def __init__(self, contents):
-        assert len(contents) != 0
-        assert all(isinstance(x, Content) for x in contents)
-        assert all(isinstance(x, EmptyArray) or len(contents[0]) == len(x) for x in contents)
-        self.contents = contents
-
-    def __len__(self):
-        return len(self.contents[0])
-
-    def __getitem__(self, where):
-        if isinstance(where, int):
-            return tuple(x[where] for x in self.contents)
-        else:
-            return TupleArray([x[where] for x in self.contents])
-
-    def tostring_part(self, indent, pre, post):
-        out = indent + pre + "<TupleArray>\n"
-        for i, content in enumerate(self.contents):
-            out += content.tostring_part(indent + "    ", "<content i=\"{}\">".format(i), "</content>\n")
-        out += indent + "</TupleArray>" + post
-        return out
