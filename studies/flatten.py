@@ -10,6 +10,8 @@ class Content:
                 return list(x)
             elif isinstance(x, tuple):
                 return tuple(convert(y) for y in x)
+            elif isinstance(x, dict):
+                return {n: convert(y) for n, y in x.items()}
             else:
                 return x
 
@@ -591,6 +593,7 @@ class UnionArray(Content):
 def count(data, axis=0):
     if axis < 0:
         raise NotImplementedError("axis < 0 is much harder for untyped data...")
+
     if isinstance(data, (list, Content)):
         if axis == 0:
             if all(isinstance(x, list) for x in data):
@@ -599,8 +602,18 @@ def count(data, axis=0):
                 raise IndexError("axis > list depth of structure")
         else:
             return [count(x, axis - 1) for x in data]
+
+    elif isinstance(data, tuple):
+        return tuple(count(x, axis) for x in data)
+
+    elif isinstance(data, dict):
+        return {n: count(x, axis) for n, x in data.items()}
+
+    elif isinstance(data, (bool, int, float)):
+        raise IndexError("axis > list depth of structure")
+
     else:
-        raise NotImplementedError("cannot count {0} objects".format(type(data)))
+        raise NotImplementedError(repr(data))
 
 def RawArray_count(self, axis=0):
     if axis < 0:
@@ -680,8 +693,28 @@ def IndexedArray_count(self, axis=0):
 
 IndexedArray.count = IndexedArray_count
 
-IndexedOptionArray
-RecordArray
+def IndexedOptionArray_count(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        return IndexedOptionArray(self.index, self.content.count(axis))
+
+IndexedOptionArray.count = IndexedOptionArray_count
+
+def RecordArray_count(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        contents = []
+        for x in self.contents:
+            contents.append(x.count(axis))
+        return RecordArray(contents, self.recordlookup, self.length)
+
+RecordArray.count = RecordArray_count
+
+
+
+
 UnionArray
 
 # SlicedArray
