@@ -3,6 +3,7 @@
   <compounddef id="Identities_8cpp" kind="file" language="C++">
     <compoundname>Identities.cpp</compoundname>
     <includes local="no">cassert</includes>
+    <includes local="no">cstring</includes>
     <includes local="no">atomic</includes>
     <includes local="no">iomanip</includes>
     <includes local="no">sstream</includes>
@@ -12,16 +13,16 @@
     <includes local="yes">awkward/Slice.h</includes>
     <includes local="yes">awkward/Identities.h</includes>
     <incdepgraph>
-      <node id="3">
+      <node id="4">
         <label>atomic</label>
       </node>
-      <node id="4">
+      <node id="5">
         <label>iomanip</label>
       </node>
       <node id="2">
         <label>cassert</label>
       </node>
-      <node id="8">
+      <node id="9">
         <label>awkward/cpu-kernels/getitem.h</label>
       </node>
       <node id="1">
@@ -45,21 +46,26 @@
         </childnode>
         <childnode refid="10" relation="include">
         </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
       </node>
-      <node id="7">
+      <node id="8">
         <label>awkward/cpu-kernels/identities.h</label>
       </node>
-      <node id="5">
+      <node id="6">
         <label>sstream</label>
       </node>
-      <node id="9">
+      <node id="10">
         <label>awkward/Slice.h</label>
       </node>
-      <node id="10">
+      <node id="11">
         <label>awkward/Identities.h</label>
       </node>
-      <node id="6">
+      <node id="7">
         <label>type_traits</label>
+      </node>
+      <node id="3">
+        <label>cstring</label>
       </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>
@@ -76,7 +82,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/Identities.cpp" line="16" column="15" bodyfile="src/libawkward/Identities.cpp" bodystart="16" bodyend="-1"/>
+        <location file="src/libawkward/Identities.cpp" line="17" column="15" bodyfile="src/libawkward/Identities.cpp" bodystart="17" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

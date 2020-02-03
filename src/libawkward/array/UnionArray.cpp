@@ -5,10 +5,13 @@
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/UnionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/Slice.h"
+#include "awkward/array/EmptyArray.h"
+#include "awkward/array/IndexedArray.h"
 
 #include "awkward/array/UnionArray.h"
 
@@ -84,6 +87,219 @@ namespace awkward {
     util::handle_error(err, classname(), identities_.get());
     Index64 nextcarry(tmpcarry.ptr(), 0, lenout);
     return contents_[(size_t)index].get()->carry(nextcarry);
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::simplify(bool mergebool) const {
+    int64_t len = length();
+    if (index_.length() < len) {
+      util::handle_error(failure("len(index) < len(tags)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+    Index8 tags(len);
+    Index64 index(len);
+    std::vector<std::shared_ptr<Content>> contents;
+
+    for (size_t i = 0;  i < contents_.size();  i++) {
+      if (UnionArray8_32* rawcontent = dynamic_cast<UnionArray8_32*>(contents_[i].get())) {
+        Index8 innertags = rawcontent->tags();
+        Index32 innerindex = rawcontent->index();
+        std::vector<std::shared_ptr<Content>> innercontents = rawcontent->contents();
+        for (size_t j = 0;  j < innercontents.size();  j++) {
+          bool unmerged = true;
+          for (size_t k = 0;  k < contents.size();  k++) {
+            if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
+              struct Error err = util::awkward_unionarray_simplify8_32_to8_64<T, I>(
+                tags.ptr().get(),
+                index.ptr().get(),
+                tags_.ptr().get(),
+                tags_.offset(),
+                index_.ptr().get(),
+                index_.offset(),
+                innertags.ptr().get(),
+                innertags.offset(),
+                innerindex.ptr().get(),
+                innerindex.offset(),
+                (int64_t)k,
+                (int64_t)j,
+                (int64_t)i,
+                len,
+                contents[k].get()->length());
+              util::handle_error(err, classname(), identities_.get());
+              contents[k] = contents[k].get()->merge(innercontents[j]);
+              unmerged = false;
+              break;
+            }
+          }
+          if (unmerged) {
+            struct Error err = util::awkward_unionarray_simplify8_32_to8_64<T, I>(
+              tags.ptr().get(),
+              index.ptr().get(),
+              tags_.ptr().get(),
+              tags_.offset(),
+              index_.ptr().get(),
+              index_.offset(),
+              innertags.ptr().get(),
+              innertags.offset(),
+              innerindex.ptr().get(),
+              innerindex.offset(),
+              (int64_t)contents.size(),
+              (int64_t)j,
+              (int64_t)i,
+              len,
+              0);
+            util::handle_error(err, classname(), identities_.get());
+            contents.push_back(innercontents[j]);
+          }
+        }
+      }
+      else if (UnionArray8_U32* rawcontent = dynamic_cast<UnionArray8_U32*>(contents_[i].get())) {
+        Index8 innertags = rawcontent->tags();
+        IndexU32 innerindex = rawcontent->index();
+        std::vector<std::shared_ptr<Content>> innercontents = rawcontent->contents();
+        for (size_t j = 0;  j < innercontents.size();  j++) {
+          bool unmerged = true;
+          for (size_t k = 0;  k < contents.size();  k++) {
+            if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
+              struct Error err = util::awkward_unionarray_simplify8_U32_to8_64<T, I>(
+                tags.ptr().get(),
+                index.ptr().get(),
+                tags_.ptr().get(),
+                tags_.offset(),
+                index_.ptr().get(),
+                index_.offset(),
+                innertags.ptr().get(),
+                innertags.offset(),
+                innerindex.ptr().get(),
+                innerindex.offset(),
+                (int64_t)k,
+                (int64_t)j,
+                (int64_t)i,
+                len,
+                contents[k].get()->length());
+              util::handle_error(err, classname(), identities_.get());
+              contents[k] = contents[k].get()->merge(innercontents[j]);
+              unmerged = false;
+              break;
+            }
+          }
+          if (unmerged) {
+            struct Error err = util::awkward_unionarray_simplify8_U32_to8_64<T, I>(
+              tags.ptr().get(),
+              index.ptr().get(),
+              tags_.ptr().get(),
+              tags_.offset(),
+              index_.ptr().get(),
+              index_.offset(),
+              innertags.ptr().get(),
+              innertags.offset(),
+              innerindex.ptr().get(),
+              innerindex.offset(),
+              (int64_t)contents.size(),
+              (int64_t)j,
+              (int64_t)i,
+              len,
+              0);
+            util::handle_error(err, classname(), identities_.get());
+            contents.push_back(innercontents[j]);
+          }
+        }
+      }
+      else if (UnionArray8_64* rawcontent = dynamic_cast<UnionArray8_64*>(contents_[i].get())) {
+        Index8 innertags = rawcontent->tags();
+        Index64 innerindex = rawcontent->index();
+        std::vector<std::shared_ptr<Content>> innercontents = rawcontent->contents();
+        for (size_t j = 0;  j < innercontents.size();  j++) {
+          bool unmerged = true;
+          for (size_t k = 0;  k < contents.size();  k++) {
+            if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
+              struct Error err = util::awkward_unionarray_simplify8_64_to8_64<T, I>(
+                tags.ptr().get(),
+                index.ptr().get(),
+                tags_.ptr().get(),
+                tags_.offset(),
+                index_.ptr().get(),
+                index_.offset(),
+                innertags.ptr().get(),
+                innertags.offset(),
+                innerindex.ptr().get(),
+                innerindex.offset(),
+                (int64_t)k,
+                (int64_t)j,
+                (int64_t)i,
+                len,
+                contents[k].get()->length());
+              util::handle_error(err, classname(), identities_.get());
+              contents[k] = contents[k].get()->merge(innercontents[j]);
+              unmerged = false;
+              break;
+            }
+          }
+          if (unmerged) {
+            struct Error err = util::awkward_unionarray_simplify8_64_to8_64<T, I>(
+              tags.ptr().get(),
+              index.ptr().get(),
+              tags_.ptr().get(),
+              tags_.offset(),
+              index_.ptr().get(),
+              index_.offset(),
+              innertags.ptr().get(),
+              innertags.offset(),
+              innerindex.ptr().get(),
+              innerindex.offset(),
+              (int64_t)contents.size(),
+              (int64_t)j,
+              (int64_t)i,
+              len,
+              0);
+            util::handle_error(err, classname(), identities_.get());
+            contents.push_back(innercontents[j]);
+          }
+        }
+      }
+      else {
+        bool unmerged = true;
+        for (size_t k = 0;  k < contents.size();  k++) {
+          if (contents[k].get()->mergeable(contents_[i], mergebool)) {
+            struct Error err = util::awkward_unionarray_simplify_one_to8_64<T, I>(
+              tags.ptr().get(),
+              index.ptr().get(),
+              tags_.ptr().get(),
+              tags_.offset(),
+              index_.ptr().get(),
+              index_.offset(),
+              (int64_t)k,
+              (int64_t)i,
+              len,
+              contents[k].get()->length());
+            util::handle_error(err, classname(), identities_.get());
+            contents[k] = contents[k].get()->merge(contents_[i]);
+            unmerged = false;
+            break;
+          }
+        }
+        if (unmerged) {
+          struct Error err = util::awkward_unionarray_simplify_one_to8_64<T, I>(
+            tags.ptr().get(),
+            index.ptr().get(),
+            tags_.ptr().get(),
+            tags_.offset(),
+            index_.ptr().get(),
+            index_.offset(),
+            (int64_t)contents.size(),
+            (int64_t)i,
+            len,
+            0);
+          util::handle_error(err, classname(), identities_.get());
+          contents.push_back(contents_[i]);
+        }
+      }
+    }
+
+    if (contents.size() > kMaxInt8) {
+      throw std::runtime_error("FIXME: handle UnionArray with more than 127 contents");
+    }
+
+    return std::make_shared<UnionArray8_64>(identities_, parameters_, tags, index, contents);
   }
 
   template <typename T, typename I>
@@ -546,6 +762,235 @@ namespace awkward {
       contents.emplace_back(content.get()->flatten(axis));
     }
     return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents);
+  }
+
+  template <typename T, typename I>
+  bool UnionArrayOf<T, I>::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+    if (!parameters_equal(other.get()->parameters())) {
+      return false;
+    }
+
+    return true;
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::reverse_merge(const std::shared_ptr<Content>& other) const {
+    int64_t theirlength = other.get()->length();
+    int64_t mylength = length();
+    Index8 tags(theirlength + mylength);
+    Index64 index(theirlength + mylength);
+
+    std::vector<std::shared_ptr<Content>> contents({ other });
+    contents.insert(contents.end(), contents_.begin(), contents_.end());
+
+    struct Error err1 = awkward_unionarray_filltags_to8_const(
+      tags.ptr().get(),
+      0,
+      theirlength,
+      0);
+    util::handle_error(err1, classname(), identities_.get());
+    struct Error err2 = awkward_unionarray_fillindex_to64_count(
+      index.ptr().get(),
+      0,
+      theirlength);
+    util::handle_error(err2, classname(), identities_.get());
+
+    if (std::is_same<T, int8_t>::value) {
+      struct Error err = awkward_unionarray_filltags_to8_from8(
+        tags.ptr().get(),
+        theirlength,
+        reinterpret_cast<int8_t*>(tags_.ptr().get()),
+        tags_.offset(),
+        mylength,
+        1);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else {
+      throw std::runtime_error("unrecognized UnionArray specialization");
+    }
+
+    if (std::is_same<I, int32_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_from32(
+        index.ptr().get(),
+        theirlength,
+        reinterpret_cast<int32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<I, uint32_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_fromU32(
+        index.ptr().get(),
+        theirlength,
+        reinterpret_cast<uint32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<I, int64_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_from64(
+        index.ptr().get(),
+        theirlength,
+        reinterpret_cast<int64_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else {
+      throw std::runtime_error("unrecognized UnionArray specialization");
+    }
+
+    if (contents.size() > kMaxInt8) {
+      throw std::runtime_error("FIXME: handle UnionArray with more than 127 contents");
+    }
+
+    return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::merge(const std::shared_ptr<Content>& other) const {
+    if (!parameters_equal(other.get()->parameters())) {
+      return merge_as_union(other);
+    }
+
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return shallow_copy();
+    }
+
+    int64_t mylength = length();
+    int64_t theirlength = other.get()->length();
+    Index8 tags(mylength + theirlength);
+    Index64 index(mylength + theirlength);
+
+    if (std::is_same<T, int8_t>::value) {
+      struct Error err = awkward_unionarray_filltags_to8_from8(
+        tags.ptr().get(),
+        0,
+        reinterpret_cast<int8_t*>(tags_.ptr().get()),
+        tags_.offset(),
+        mylength,
+        0);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else {
+      throw std::runtime_error("unrecognized UnionArray specialization");
+    }
+
+    if (std::is_same<I, int32_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_from32(
+        index.ptr().get(),
+        0,
+        reinterpret_cast<int32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<I, uint32_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_fromU32(
+        index.ptr().get(),
+        0,
+        reinterpret_cast<uint32_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else if (std::is_same<I, int64_t>::value) {
+      struct Error err = awkward_unionarray_fillindex_to64_from64(
+        index.ptr().get(),
+        0,
+        reinterpret_cast<int64_t*>(index_.ptr().get()),
+        index_.offset(),
+        mylength);
+      util::handle_error(err, classname(), identities_.get());
+    }
+    else {
+      throw std::runtime_error("unrecognized UnionArray specialization");
+    }
+
+    std::vector<std::shared_ptr<Content>> contents(contents_.begin(), contents_.end());
+    if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
+      std::vector<std::shared_ptr<Content>> other_contents = rawother->contents();
+      contents.insert(contents.end(), other_contents.begin(), other_contents.end());
+      Index8 other_tags = rawother->tags();
+      struct Error err1 = awkward_unionarray_filltags_to8_from8(
+        tags.ptr().get(),
+        mylength,
+        other_tags.ptr().get(),
+        other_tags.offset(),
+        theirlength,
+        numcontents());
+      util::handle_error(err1, rawother->classname(), rawother->identities().get());
+      Index32 other_index = rawother->index();
+      struct Error err2 = awkward_unionarray_fillindex_to64_from32(
+        index.ptr().get(),
+        mylength,
+        other_index.ptr().get(),
+        other_index.offset(),
+        theirlength);
+      util::handle_error(err2, rawother->classname(), rawother->identities().get());
+    }
+    else if (UnionArray8_U32* rawother = dynamic_cast<UnionArray8_U32*>(other.get())) {
+      std::vector<std::shared_ptr<Content>> other_contents = rawother->contents();
+      contents.insert(contents.end(), other_contents.begin(), other_contents.end());
+      Index8 other_tags = rawother->tags();
+      struct Error err1 = awkward_unionarray_filltags_to8_from8(
+        tags.ptr().get(),
+        mylength,
+        other_tags.ptr().get(),
+        other_tags.offset(),
+        theirlength,
+        numcontents());
+      util::handle_error(err1, rawother->classname(), rawother->identities().get());
+      IndexU32 other_index = rawother->index();
+      struct Error err2 = awkward_unionarray_fillindex_to64_fromU32(
+        index.ptr().get(),
+        mylength,
+        other_index.ptr().get(),
+        other_index.offset(),
+        theirlength);
+      util::handle_error(err2, rawother->classname(), rawother->identities().get());
+    }
+    else if (UnionArray8_64* rawother = dynamic_cast<UnionArray8_64*>(other.get())) {
+      std::vector<std::shared_ptr<Content>> other_contents = rawother->contents();
+      contents.insert(contents.end(), other_contents.begin(), other_contents.end());
+      Index8 other_tags = rawother->tags();
+      struct Error err1 = awkward_unionarray_filltags_to8_from8(
+        tags.ptr().get(),
+        mylength,
+        other_tags.ptr().get(),
+        other_tags.offset(),
+        theirlength,
+        numcontents());
+      util::handle_error(err1, rawother->classname(), rawother->identities().get());
+      Index64 other_index = rawother->index();
+      struct Error err2 = awkward_unionarray_fillindex_to64_from64(
+        index.ptr().get(),
+        mylength,
+        other_index.ptr().get(),
+        other_index.offset(),
+        theirlength);
+      util::handle_error(err2, rawother->classname(), rawother->identities().get());
+    }
+    else {
+      contents.push_back(other);
+      struct Error err1 = awkward_unionarray_filltags_to8_const(
+        tags.ptr().get(),
+        mylength,
+        theirlength,
+        numcontents());
+      util::handle_error(err1, classname(), identities_.get());
+      struct Error err2 = awkward_unionarray_fillindex_to64_count(
+        index.ptr().get(),
+        mylength,
+        theirlength);
+      util::handle_error(err2, classname(), identities_.get());
+    }
+
+    if (contents.size() > kMaxInt8) {
+      throw std::runtime_error("FIXME: handle UnionArray with more than 127 contents");
+    }
+
+    return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
   }
 
   template <typename T, typename I>

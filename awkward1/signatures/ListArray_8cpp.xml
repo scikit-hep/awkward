@@ -14,6 +14,9 @@
     <includes local="yes">awkward/array/ListOffsetArray.h</includes>
     <includes local="yes">awkward/array/RegularArray.h</includes>
     <includes local="yes">awkward/array/NumpyArray.h</includes>
+    <includes local="yes">awkward/array/EmptyArray.h</includes>
+    <includes local="yes">awkward/array/IndexedArray.h</includes>
+    <includes local="yes">awkward/array/UnionArray.h</includes>
     <includes local="yes">awkward/array/ListArray.h</includes>
     <incdepgraph>
       <node id="6">
@@ -57,6 +60,12 @@
         </childnode>
         <childnode refid="14" relation="include">
         </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+        <childnode refid="17" relation="include">
+        </childnode>
       </node>
       <node id="9">
         <label>awkward/type/UnknownType.h</label>
@@ -73,17 +82,26 @@
       <node id="11">
         <label>awkward/array/ListOffsetArray.h</label>
       </node>
+      <node id="16">
+        <label>awkward/array/UnionArray.h</label>
+      </node>
       <node id="2">
         <label>sstream</label>
       </node>
-      <node id="14">
+      <node id="17">
         <label>awkward/array/ListArray.h</label>
+      </node>
+      <node id="15">
+        <label>awkward/array/IndexedArray.h</label>
       </node>
       <node id="10">
         <label>awkward/Slice.h</label>
       </node>
       <node id="3">
         <label>type_traits</label>
+      </node>
+      <node id="14">
+        <label>awkward/array/EmptyArray.h</label>
       </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>

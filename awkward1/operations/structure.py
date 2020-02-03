@@ -118,7 +118,7 @@ def atleast_1d(*arrays):
     return numpy.atleast_1d(*[awkward1.operations.convert.tonumpy(x) for x in arrays])
 
 @awkward1._numpy.implements(numpy.concatenate)
-def concatenate(arrays, axis=0):
+def concatenate(arrays, axis=0, mergebool=True):
     import awkward1.highlevel
 
     if axis != 0:
@@ -126,21 +126,21 @@ def concatenate(arrays, axis=0):
 
     contents = [awkward1.operations.convert.tolayout(x, allowrecord=False) for x in arrays]
 
-    tags = numpy.empty(sum(len(x) for x in contents), dtype=numpy.int8)
-    index = numpy.empty(len(tags), dtype=numpy.int64)
-    start = 0
-    for tag, x in enumerate(contents):
-        tags[start : start + len(x)] = tag
-        index[start : start + len(x)] = numpy.arange(len(x), dtype=numpy.int64)
-        start += len(x)
+    if len(contents) == 0:
+        raise ValueError("need at least one array to concatenate")
+    out = contents[0]
+    for x in contents[1:]:
+        if not out.mergeable(x, mergebool=mergebool):
+            out = out.merge_as_union(x)
+        else:
+            out = out.merge(x)
+        if isinstance(out, awkward1._util.uniontypes):
+            out = out.simplify(mergebool=mergebool)
 
-    tags = awkward1.layout.Index8(tags)
-    index = awkward1.layout.Index64(index)
-    out = awkward1.layout.UnionArray8_64(tags, index, contents)
-    return awkward1.highlevel.Array(out)
+    return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(arrays), functions=awkward1._util.combine_functions(arrays))
 
 @awkward1._numpy.implements(numpy.where)
-def where(condition, *args):
+def where(condition, *args, **kwargs):
     import awkward1.highlevel
 
     condition = awkward1.operations.convert.tonumpy(condition)
@@ -158,6 +158,8 @@ def where(condition, *args):
 
         x = awkward1.operations.convert.tolayout(args[0], allowrecord=False)
         y = awkward1.operations.convert.tolayout(args[1], allowrecord=False)
+        mergebool, = awkward1._util.extra((), kwargs, [
+            ("mergebool", True)])
 
         tags = (condition == 0)
         assert tags.itemsize == 1
@@ -166,8 +168,10 @@ def where(condition, *args):
 
         tags = awkward1.layout.Index8(tags.view(numpy.int8))
         index = awkward1.layout.Index64(index)
-        # FIXME: call "simplify" when it exists
-        return awkward1.highlevel.Array(awkward1.layout.UnionArray8_64(tags, index, [x, y]))
+        tmp = awkward1.layout.UnionArray8_64(tags, index, [x, y])
+        out = tmp.simplify(mergebool=mergebool)
+
+        return awkward1._util.wrap(out, classes=awkward1._util.combine_classes((condition,) + args), functions=awkward1._util.combine_functions((condition,) + args))
 
     else:
         raise TypeError("where() takes from 1 to 3 positional arguments but {0} were given".format(len(args) + 1))

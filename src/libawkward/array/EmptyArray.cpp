@@ -168,6 +168,14 @@ namespace awkward {
     return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
   }
 
+  bool EmptyArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+    return true;
+  }
+
+  const std::shared_ptr<Content> EmptyArray::merge(const std::shared_ptr<Content>& other) const {
+    return other;
+  }
+
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy

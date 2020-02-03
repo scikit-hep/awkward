@@ -34,6 +34,26 @@ def regular_functions(functions):
     else:
         return functions
 
+def combine_classes(arrays):
+    classes = None
+    for x in arrays:
+        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x._classes is not None:
+            if classes is None:
+                classes = dict(x._classes)
+            else:
+                classes.update(x._classes)
+    return classes
+
+def combine_functions(arrays):
+    functions = None
+    for x in arrays:
+        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x._functions is not None:
+            if functions is None:
+                functions = dict(x._functions)
+            else:
+                functions.update(x._functions)
+    return functions
+
 def wrap(content, classes, functions):
     import awkward1.layout
 
@@ -52,10 +72,22 @@ def wrap(content, classes, functions):
     else:
         return content
 
+def extra(args, kwargs, defaults):
+    out = []
+    for i in range(len(defaults)):
+        name, default = defaults[i]
+        if i < len(args):
+            out.append(args[i])
+        elif name in kwargs:
+            out.append(kwargs[name])
+        else:
+            out.append(default)
+    return out
+
 def called_by_module(modulename):
     frame = inspect.currentframe()
     while frame is not None:
-        name = getattr(inspect.getmodule(frame), '__name__', None)
+        name = getattr(inspect.getmodule(frame), "__name__", None)
         if name is not None and (name == modulename or name.startswith(modulename + ".")):
             return True
         frame = frame.f_back

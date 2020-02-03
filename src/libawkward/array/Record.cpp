@@ -232,6 +232,14 @@ namespace awkward {
     throw std::invalid_argument("Record cannot be flattened because it is not an array");
   }
 
+  bool Record::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+    throw std::invalid_argument("Record cannot be merged because it is not an array");
+  }
+
+  const std::shared_ptr<Content> Record::merge(const std::shared_ptr<Content>& other) const {
+    throw std::invalid_argument("Record cannot be merged because it is not an array");
+  }
+
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
     return array_.field(fieldindex).get()->getitem_at_nowrap(at_);
   }

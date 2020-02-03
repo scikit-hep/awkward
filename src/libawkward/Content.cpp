@@ -2,9 +2,11 @@
 
 #include <sstream>
 
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/EmptyArray.h"
+#include "awkward/array/UnionArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -94,6 +96,41 @@ namespace awkward {
 
   bool Content::parameters_equal(const util::Parameters& other) const {
     return util::parameters_equal(parameters_, other);
+  }
+  
+  const std::shared_ptr<Content> Content::merge_as_union(const std::shared_ptr<Content>& other) const {
+    int64_t mylength = length();
+    int64_t theirlength = other.get()->length();
+    Index8 tags(mylength + theirlength);
+    Index64 index(mylength + theirlength);
+
+    std::vector<std::shared_ptr<Content>> contents({ shallow_copy(), other });
+
+    struct Error err1 = awkward_unionarray_filltags_to8_const(
+      tags.ptr().get(),
+      0,
+      mylength,
+      0);
+    util::handle_error(err1, classname(), identities_.get());
+    struct Error err2 = awkward_unionarray_fillindex_to64_count(
+      index.ptr().get(),
+      0,
+      mylength);
+    util::handle_error(err2, classname(), identities_.get());
+
+    struct Error err3 = awkward_unionarray_filltags_to8_const(
+      tags.ptr().get(),
+      mylength,
+      theirlength,
+      1);
+    util::handle_error(err3, classname(), identities_.get());
+    struct Error err4 = awkward_unionarray_fillindex_to64_count(
+      index.ptr().get(),
+      mylength,
+      theirlength);
+    util::handle_error(err4, classname(), identities_.get());
+
+    return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
   }
 
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {

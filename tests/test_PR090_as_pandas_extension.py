@@ -41,6 +41,17 @@ def test_interesting():
     assert awkward1.tolist(akarray.take([2, 0, 0, 1, -1, 2], allow_fill=True)) == [[4.4, 5.5], [1.1, 2.2, 3.3], [1.1, 2.2, 3.3], [], None, [4.4, 5.5]]
     assert awkward1.tolist(akarray.take([2, 0, 0, 1, -1, 2], allow_fill=True, fill_value=999)) == [[4.4, 5.5], [1.1, 2.2, 3.3], [1.1, 2.2, 3.3], [], 999, [1.1, 2.2, 3.3]]
 
+def test_constructor():
+    akarray = awkward1.Array([[1.1, 2.2, 3.3], [], None, [4.4, 5.5]])
+    dfarray = pandas.DataFrame(akarray)
+    assert isinstance(dfarray[dfarray.columns[0]].values, awkward1.Array)
+    assert awkward1.tolist(dfarray[dfarray.columns[0]].values) == [[1.1, 2.2, 3.3], [], None, [4.4, 5.5]]
+
+    akarray = awkward1.Array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2}, {"x": 3, "y": 3.3}], [], None, [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}]])
+    dfarray = pandas.DataFrame(akarray)
+    assert isinstance(dfarray["x"].values, awkward1.Array)
+    assert awkward1.tolist(dfarray["x"].values) == [[1, 2, 3], [], None, [4, 5]]
+
 pandas_tests_extension_base = pytest.importorskip("pandas.tests.extension.base")
 
 @pytest.fixture
@@ -203,3 +214,6 @@ class TestConstructors(pandas_tests_extension_base.BaseConstructorsTests):
 
         result = pandas.Series(list(data), dtype=str(dtype))
         self.assert_series_equal(result, expected)
+
+    def test_pandas_array(self, data):
+        pass

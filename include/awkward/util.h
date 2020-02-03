@@ -103,7 +103,15 @@ namespace awkward {
     template <typename T>
     ERROR awkward_indexedarray_getitem_carry_64(T* toindex, const T* fromindex, const int64_t* fromcarry, int64_t indexoffset, int64_t lenindex, int64_t lencarry);
     template <typename T>
-    ERROR awkward_indexedarray_andmask_8(T* toindex, const int8_t* mask, int64_t maskoffset, const T* fromindex, int64_t indexoffset, int64_t length);
+    ERROR awkward_indexedarray_overlay_mask8_to64(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const T* fromindex, int64_t indexoffset, int64_t length);
+    template <typename T>
+    ERROR awkward_indexedarray_mask8(int8_t* tomask, const T* fromindex, int64_t indexoffset, int64_t length);
+    template <typename T>
+    ERROR awkward_indexedarray_simplify32_to64(int64_t* toindex, const T* outerindex, int64_t outeroffset, int64_t outerlength, const int32_t* innerindex, int64_t inneroffset, int64_t innerlength);
+    template <typename T>
+    ERROR awkward_indexedarray_simplifyU32_to64(int64_t* toindex, const T* outerindex, int64_t outeroffset, int64_t outerlength, const uint32_t* innerindex, int64_t inneroffset, int64_t innerlength);
+    template <typename T>
+    ERROR awkward_indexedarray_simplify64_to64(int64_t* toindex, const T* outerindex, int64_t outeroffset, int64_t outerlength, const int64_t* innerindex, int64_t inneroffset, int64_t innerlength);
     template <typename T, typename I>
     ERROR awkward_unionarray_regular_index(I* toindex, const T* fromtags, int64_t tagsoffset, int64_t length);
     template <typename T, typename I>
@@ -116,6 +124,14 @@ namespace awkward {
     ERROR awkward_listarray_broadcast_tooffsets64(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const T* fromstarts, int64_t startsoffset, const T* fromstops, int64_t stopsoffset, int64_t lencontent);
     template <typename T>
     Error awkward_listoffsetarray_toRegularArray(int64_t* size, const T* fromoffsets, int64_t offsetsoffset, int64_t offsetslength);
+    template <typename T, typename I>
+    Error awkward_unionarray_simplify8_32_to8_64(int8_t* totags, int64_t* toindex, const T* outertags, int64_t outertagsoffset, const I* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base);
+    template <typename T, typename I>
+    Error awkward_unionarray_simplify8_U32_to8_64(int8_t* totags, int64_t* toindex, const T* outertags, int64_t outertagsoffset, const I* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const uint32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base);
+    template <typename T, typename I>
+    Error awkward_unionarray_simplify8_64_to8_64(int8_t* totags, int64_t* toindex, const T* outertags, int64_t outertagsoffset, const I* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int64_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base);
+    template <typename T, typename I>
+    Error awkward_unionarray_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const T* fromtags, int64_t fromtagsoffset, const I* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
 
   }
 }
