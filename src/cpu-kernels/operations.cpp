@@ -164,8 +164,8 @@ ERROR awkward_indexedarray64_flatten_nextcarry_64(int64_t* tocarry, const int64_
   return awkward_indexedarray_flatten_nextcarry<int64_t, int64_t>(tocarry, fromindex, indexoffset, lenindex, lencontent);
 }
 
-template <typename C, typename M>
-ERROR awkward_indexedarray_andmask(C* toindex, const M* mask, int64_t maskoffset, const C* fromindex, int64_t indexoffset, int64_t length) {
+template <typename C, typename M, typename TO>
+ERROR awkward_indexedarray_overlay_mask(TO* toindex, const M* mask, int64_t maskoffset, const C* fromindex, int64_t indexoffset, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     M m = mask[maskoffset + i];
     if (m) {
@@ -177,14 +177,42 @@ ERROR awkward_indexedarray_andmask(C* toindex, const M* mask, int64_t maskoffset
   }
   return success();
 }
-ERROR awkward_indexedarray32_andmask_8(int32_t* toindex, const int8_t* mask, int64_t maskoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length) {
-  return awkward_indexedarray_andmask<int32_t, int8_t>(toindex, mask, maskoffset, fromindex, indexoffset, length);
+ERROR awkward_indexedarray32_overlay_mask8_to64(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length) {
+  return awkward_indexedarray_overlay_mask<int32_t, int8_t, int64_t>(toindex, mask, maskoffset, fromindex, indexoffset, length);
 }
-ERROR awkward_indexedarrayU32_andmask_8(uint32_t* toindex, const int8_t* mask, int64_t maskoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length) {
-  return awkward_indexedarray_andmask<uint32_t, int8_t>(toindex, mask, maskoffset, fromindex, indexoffset, length);
+ERROR awkward_indexedarrayU32_overlay_mask8_to64(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length) {
+  return awkward_indexedarray_overlay_mask<uint32_t, int8_t, int64_t>(toindex, mask, maskoffset, fromindex, indexoffset, length);
 }
-ERROR awkward_indexedarray64_andmask_8(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length) {
-  return awkward_indexedarray_andmask<int64_t, int8_t>(toindex, mask, maskoffset, fromindex, indexoffset, length);
+ERROR awkward_indexedarray64_overlay_mask8_to64(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length) {
+  return awkward_indexedarray_overlay_mask<int64_t, int8_t, int64_t>(toindex, mask, maskoffset, fromindex, indexoffset, length);
+}
+
+template <typename C, typename M>
+ERROR awkward_indexedarray_mask(M* tomask, const C* fromindex, int64_t indexoffset, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    tomask[i] = (fromindex[indexoffset + i] < 0);
+  }
+  return success();
+}
+ERROR awkward_indexedarray32_mask8(int8_t* tomask, const int32_t* fromindex, int64_t indexoffset, int64_t length) {
+  return awkward_indexedarray_mask<int32_t, int8_t>(tomask, fromindex, indexoffset, length);
+}
+ERROR awkward_indexedarrayU32_mask8(int8_t* tomask, const uint32_t* fromindex, int64_t indexoffset, int64_t length) {
+  return awkward_indexedarray_mask<uint32_t, int8_t>(tomask, fromindex, indexoffset, length);
+}
+ERROR awkward_indexedarray64_mask8(int8_t* tomask, const int64_t* fromindex, int64_t indexoffset, int64_t length) {
+  return awkward_indexedarray_mask<int64_t, int8_t>(tomask, fromindex, indexoffset, length);
+}
+
+template <typename M>
+ERROR awkward_zero_mask(M* tomask, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    tomask[i] = 0;
+  }
+  return success();
+}
+ERROR awkward_zero_mask8(int8_t* tomask, int64_t length) {
+  return awkward_zero_mask<int8_t>(tomask, length);
 }
 
 template <typename T>

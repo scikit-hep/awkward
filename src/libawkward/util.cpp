@@ -559,16 +559,29 @@ namespace awkward {
     }
 
     template <>
-    Error awkward_indexedarray_andmask_8<int32_t>(int32_t* toindex, const int8_t* mask, int64_t maskoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length) {
-      return awkward_indexedarray32_andmask_8(toindex, mask, maskoffset, fromindex, indexoffset, length);
+    Error awkward_indexedarray_overlay_mask8_to64<int32_t>(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length) {
+      return awkward_indexedarray32_overlay_mask8_to64(toindex, mask, maskoffset, fromindex, indexoffset, length);
     }
     template <>
-    Error awkward_indexedarray_andmask_8<uint32_t>(uint32_t* toindex, const int8_t* mask, int64_t maskoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length) {
-      return awkward_indexedarrayU32_andmask_8(toindex, mask, maskoffset, fromindex, indexoffset, length);
+    Error awkward_indexedarray_overlay_mask8_to64<uint32_t>(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length) {
+      return awkward_indexedarrayU32_overlay_mask8_to64(toindex, mask, maskoffset, fromindex, indexoffset, length);
     }
     template <>
-    Error awkward_indexedarray_andmask_8<int64_t>(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length) {
-      return awkward_indexedarray64_andmask_8(toindex, mask, maskoffset, fromindex, indexoffset, length);
+    Error awkward_indexedarray_overlay_mask8_to64<int64_t>(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length) {
+      return awkward_indexedarray64_overlay_mask8_to64(toindex, mask, maskoffset, fromindex, indexoffset, length);
+    }
+
+    template <>
+    Error awkward_indexedarray_mask8<int32_t>(int8_t* tomask, const int32_t* fromindex, int64_t indexoffset, int64_t length) {
+      return awkward_indexedarray32_mask8(tomask, fromindex, indexoffset, length);
+    }
+    template <>
+    Error awkward_indexedarray_mask8<uint32_t>(int8_t* tomask, const uint32_t* fromindex, int64_t indexoffset, int64_t length) {
+      return awkward_indexedarrayU32_mask8(tomask, fromindex, indexoffset, length);
+    }
+    template <>
+    Error awkward_indexedarray_mask8<int64_t>(int8_t* tomask, const int64_t* fromindex, int64_t indexoffset, int64_t length) {
+      return awkward_indexedarray64_mask8(tomask, fromindex, indexoffset, length);
     }
 
     template <>

@@ -1532,6 +1532,7 @@ py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T
           return box(self.project(mask.cast<ak::Index8>()));
         }
       }, py::arg("mask") = py::none())
+      .def("bytemask", &ak::IndexedArrayOf<T, ISOPTION>::bytemask)
   );
 }
 

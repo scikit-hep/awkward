@@ -367,3 +367,11 @@ def test_merge_parameters():
 
     assert awkward1.tolist(one.merge(two)) == [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102], "good", "stuff"]
     assert awkward1.tolist(two.merge(one)) == ["good", "stuff", [121, 117, 99, 107, 121], [115, 116, 117, 102, 102]]
+
+def test_bytemask():
+    array = awkward1.Array(["one", "two", None, "three", None, None, "four"]).layout
+    assert numpy.asarray(array.bytemask()).tolist() == [0, 0, 1, 0, 1, 1, 0]
+
+    index2 = awkward1.layout.Index64(numpy.array([2, 2, 1, 5, 0], dtype=numpy.int64))
+    array2 = awkward1.layout.IndexedArray64(index2, array)
+    assert numpy.asarray(array2.bytemask()).tolist() == [0, 0, 0, 0, 0]

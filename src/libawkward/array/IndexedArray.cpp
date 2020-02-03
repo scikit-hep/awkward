@@ -80,8 +80,8 @@ namespace awkward {
       throw std::invalid_argument(std::string("mask length (") + std::to_string(mask.length()) + std::string(") is not equal to ") + classname() + std::string(" length (") + std::to_string(index_.length()) + std::string(")"));
     }
 
-    IndexOf<T> nextindex(index_.length());
-    struct Error err = util::awkward_indexedarray_andmask_8<T>(
+    Index64 nextindex(index_.length());
+    struct Error err = util::awkward_indexedarray_overlay_mask8_to64<T>(
       nextindex.ptr().get(),
       mask.ptr().get(),
       mask.offset(),
@@ -90,9 +90,36 @@ namespace awkward {
       index_.length());
     util::handle_error(err, classname(), identities_.get());
 
-    IndexedArrayOf<T, true> next(identities_, parameters_, nextindex, content_);
+    IndexedOptionArray64 next(identities_, parameters_, nextindex, content_);
     return next.project();
   }
+
+  template <typename T, bool ISOPTION>
+  const Index8 IndexedArrayOf<T, ISOPTION>::bytemask() const {
+    if (ISOPTION) {
+      Index8 out(index_.length());
+      struct Error err = util::awkward_indexedarray_mask8(
+        out.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length());
+      util::handle_error(err, classname(), identities_.get());
+      return out;
+    }
+    else {
+      Index8 out(index_.length());
+      struct Error err = awkward_zero_mask8(
+        out.ptr().get(),
+        index_.length());
+      util::handle_error(err, classname(), identities_.get());
+      return out;
+    }
+  }
+
+  // template <typename T, bool ISOPTION>
+  // const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::simplify() const {
+  //
+  // }
 
   template <typename T, bool ISOPTION>
   const std::string IndexedArrayOf<T, ISOPTION>::classname() const {
