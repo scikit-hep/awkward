@@ -1247,6 +1247,9 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("merge", [](T& self, py::object other) -> py::object {
             return box(self.merge(unbox_content(other)));
           })
+          .def("merge_as_union", [](T& self, py::object other) -> py::object {
+            return box(self.merge_as_union(unbox_content(other)));
+          })
 
   ;
 }
@@ -1559,9 +1562,10 @@ py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::
       .def_property_readonly("numcontents", &ak::UnionArrayOf<T, I>::numcontents)
       .def("content", &ak::UnionArrayOf<T, I>::content)
       .def("project", &ak::UnionArrayOf<T, I>::project)
-      .def("simplify", [](ak::UnionArrayOf<T, I>& self) {
-        return box(self.simplify());
-      })
+      .def("simplify", [](ak::UnionArrayOf<T, I>& self, bool mergebool) -> py::object {
+        return box(self.simplify(mergebool));
+      }, py::arg("mergebool") = false)
+
   );
 }
 

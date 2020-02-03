@@ -600,3 +600,12 @@ def test_unionarray_simplify():
     index1 = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 3, 4, 5, 3, 6, 4], dtype=numpy.int32))
     outer = awkward1.layout.UnionArray8_32(tags1, index1, [inner, one])
     assert awkward1.tolist(outer) == [5, 4, [], 1.1, [1], 3, 2.2, [2, 2], [3, 3, 3], 2, 3.3, 1]
+
+def test_concatenate():
+    one = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]])
+    three = awkward1.Array([True, False, False, True, True])
+
+    assert awkward1.tolist(awkward1.concatenate([one, two, three])) == [1.1, 2.2, 3.3, 4.4, 5.5, [], [1], [2, 2], [3, 3, 3], 1.0, 0.0, 0.0, 1.0, 1.0]
+    assert isinstance(awkward1.concatenate([one, two, three]).layout, awkward1.layout.UnionArray8_64)
+    assert len(awkward1.concatenate([one, two, three]).layout.contents) == 2

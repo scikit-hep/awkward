@@ -90,7 +90,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::simplify() const {
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::simplify(bool mergebool) const {
     int64_t len = length();
     if (index_.length() < len) {
       util::handle_error(failure("len(index) < len(tags)", kSliceNone, kSliceNone), classname(), identities_.get());
@@ -107,7 +107,7 @@ namespace awkward {
         for (size_t j = 0;  j < innercontents.size();  j++) {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
-            if (contents[k].get()->mergeable(innercontents[j], false)) {
+            if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
               struct Error err = util::awkward_unionarray_simplify8_32_to8_64<T, I>(
                 tags.ptr().get(),
                 index.ptr().get(),
@@ -159,7 +159,7 @@ namespace awkward {
         for (size_t j = 0;  j < innercontents.size();  j++) {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
-            if (contents[k].get()->mergeable(innercontents[j], false)) {
+            if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
               struct Error err = util::awkward_unionarray_simplify8_U32_to8_64<T, I>(
                 tags.ptr().get(),
                 index.ptr().get(),
@@ -211,7 +211,7 @@ namespace awkward {
         for (size_t j = 0;  j < innercontents.size();  j++) {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
-            if (contents[k].get()->mergeable(innercontents[j], false)) {
+            if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
               struct Error err = util::awkward_unionarray_simplify8_64_to8_64<T, I>(
                 tags.ptr().get(),
                 index.ptr().get(),
@@ -259,7 +259,7 @@ namespace awkward {
       else {
         bool unmerged = true;
         for (size_t k = 0;  k < contents.size();  k++) {
-          if (contents[k].get()->mergeable(contents_[i], false)) {
+          if (contents[k].get()->mergeable(contents_[i], mergebool)) {
             struct Error err = util::awkward_unionarray_simplify_one_to8_64<T, I>(
               tags.ptr().get(),
               index.ptr().get(),

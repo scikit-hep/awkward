@@ -126,18 +126,18 @@ def concatenate(arrays, axis=0):
 
     contents = [awkward1.operations.convert.tolayout(x, allowrecord=False) for x in arrays]
 
-    tags = numpy.empty(sum(len(x) for x in contents), dtype=numpy.int8)
-    index = numpy.empty(len(tags), dtype=numpy.int64)
-    start = 0
-    for tag, x in enumerate(contents):
-        tags[start : start + len(x)] = tag
-        index[start : start + len(x)] = numpy.arange(len(x), dtype=numpy.int64)
-        start += len(x)
+    if len(contents) == 0:
+        raise ValueError("need at least one array to concatenate")
+    out = contents[0]
+    for x in contents[1:]:
+        if not out.mergeable(x, mergebool=True):   # NumPy concatenates booleans and numbers
+            out = out.merge_as_union(x)
+        else:
+            out = out.merge(x)
+        if isinstance(out, awkward1._util.uniontypes):
+            out = out.simplify(mergebool=True)     # NumPy concatenates booleans and numbers
 
-    tags = awkward1.layout.Index8(tags)
-    index = awkward1.layout.Index64(index)
-    out = awkward1.layout.UnionArray8_64(tags, index, contents)
-    return awkward1.highlevel.Array(out)
+    return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(arrays), functions=awkward1._util.combine_functions(arrays))
 
 @awkward1._numpy.implements(numpy.where)
 def where(condition, *args):
