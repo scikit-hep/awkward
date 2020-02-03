@@ -215,6 +215,50 @@ ERROR awkward_zero_mask8(int8_t* tomask, int64_t length) {
   return awkward_zero_mask<int8_t>(tomask, length);
 }
 
+template <typename OUT, typename IN, typename TO>
+ERROR awkward_indexedarray_simplify(TO* toindex, const OUT* outerindex, int64_t outeroffset, int64_t outerlength, const IN* innerindex, int64_t inneroffset, int64_t innerlength) {
+  for (int64_t i = 0;  i < outerlength;  i++) {
+    OUT j = outerindex[outeroffset + i];
+    if (j < 0) {
+      toindex[i] = -1;
+    }
+    else if (j >= innerlength) {
+      return failure("index out of range", i, j);
+    }
+    else {
+      toindex[i] = j;
+    }
+  }
+  return success();
+}
+ERROR awkward_indexedarray32_simplify32_to64(int64_t* toindex, const int32_t* outerindex, int64_t outeroffset, int64_t outerlength, const int32_t* innerindex, int64_t inneroffset, int64_t innerlength) {
+  return awkward_indexedarray_simplify<int32_t, int32_t, int64_t>(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength);
+}
+ERROR awkward_indexedarray32_simplifyU32_to64(int64_t* toindex, const int32_t* outerindex, int64_t outeroffset, int64_t outerlength, const uint32_t* innerindex, int64_t inneroffset, int64_t innerlength) {
+  return awkward_indexedarray_simplify<int32_t, uint32_t, int64_t>(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength);
+}
+ERROR awkward_indexedarray32_simplify64_to64(int64_t* toindex, const int32_t* outerindex, int64_t outeroffset, int64_t outerlength, const int64_t* innerindex, int64_t inneroffset, int64_t innerlength) {
+  return awkward_indexedarray_simplify<int32_t, int64_t, int64_t>(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength);
+}
+ERROR awkward_indexedarrayU32_simplify32_to64(int64_t* toindex, const uint32_t* outerindex, int64_t outeroffset, int64_t outerlength, const int32_t* innerindex, int64_t inneroffset, int64_t innerlength) {
+  return awkward_indexedarray_simplify<uint32_t, int32_t, int64_t>(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength);
+}
+ERROR awkward_indexedarrayU32_simplifyU32_to64(int64_t* toindex, const uint32_t* outerindex, int64_t outeroffset, int64_t outerlength, const uint32_t* innerindex, int64_t inneroffset, int64_t innerlength) {
+  return awkward_indexedarray_simplify<uint32_t, uint32_t, int64_t>(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength);
+}
+ERROR awkward_indexedarrayU32_simplify64_to64(int64_t* toindex, const uint32_t* outerindex, int64_t outeroffset, int64_t outerlength, const int64_t* innerindex, int64_t inneroffset, int64_t innerlength) {
+  return awkward_indexedarray_simplify<uint32_t, int64_t, int64_t>(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength);
+}
+ERROR awkward_indexedarray64_simplify32_to64(int64_t* toindex, const int64_t* outerindex, int64_t outeroffset, int64_t outerlength, const int32_t* innerindex, int64_t inneroffset, int64_t innerlength) {
+  return awkward_indexedarray_simplify<int64_t, int32_t, int64_t>(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength);
+}
+ERROR awkward_indexedarray64_simplifyU32_to64(int64_t* toindex, const int64_t* outerindex, int64_t outeroffset, int64_t outerlength, const uint32_t* innerindex, int64_t inneroffset, int64_t innerlength) {
+  return awkward_indexedarray_simplify<int64_t, uint32_t, int64_t>(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength);
+}
+ERROR awkward_indexedarray64_simplify64_to64(int64_t* toindex, const int64_t* outerindex, int64_t outeroffset, int64_t outerlength, const int64_t* innerindex, int64_t inneroffset, int64_t innerlength) {
+  return awkward_indexedarray_simplify<int64_t, int64_t, int64_t>(toindex, outerindex, outeroffset, outerlength, innerindex, inneroffset, innerlength);
+}
+
 template <typename T>
 ERROR awkward_regulararray_compact_offsets(T* tooffsets, int64_t length, int64_t size) {
   tooffsets[0] = 0;

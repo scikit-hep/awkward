@@ -116,10 +116,159 @@ namespace awkward {
     }
   }
 
-  // template <typename T, bool ISOPTION>
-  // const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::simplify() const {
-  //
-  // }
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::simplify() const {
+    if (ISOPTION) {
+      if (IndexedArray32* rawcontent = dynamic_cast<IndexedArray32*>(content_.get())) {
+        Index32 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify32_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (IndexedArrayU32* rawcontent = dynamic_cast<IndexedArrayU32*>(content_.get())) {
+        IndexU32 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplifyU32_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (IndexedArray64* rawcontent = dynamic_cast<IndexedArray64*>(content_.get())) {
+        Index64 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify64_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (IndexedOptionArray32* rawcontent = dynamic_cast<IndexedOptionArray32*>(content_.get())) {
+        Index32 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify32_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (IndexedOptionArray64* rawcontent = dynamic_cast<IndexedOptionArray64*>(content_.get())) {
+        Index64 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify64_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else {
+        return shallow_copy();
+      }
+    }
+    else {
+      if (IndexedArray32* rawcontent = dynamic_cast<IndexedArray32*>(content_.get())) {
+        Index32 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify32_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (IndexedArrayU32* rawcontent = dynamic_cast<IndexedArrayU32*>(content_.get())) {
+        IndexU32 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplifyU32_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (IndexedArray64* rawcontent = dynamic_cast<IndexedArray64*>(content_.get())) {
+        Index64 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify64_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (IndexedOptionArray32* rawcontent = dynamic_cast<IndexedOptionArray32*>(content_.get())) {
+        Index32 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify32_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (IndexedOptionArray64* rawcontent = dynamic_cast<IndexedOptionArray64*>(content_.get())) {
+        Index64 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify64_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else {
+        return shallow_copy();
+      }
+    }
+  }
 
   template <typename T, bool ISOPTION>
   const std::string IndexedArrayOf<T, ISOPTION>::classname() const {

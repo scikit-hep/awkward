@@ -106,6 +106,12 @@ namespace awkward {
     ERROR awkward_indexedarray_overlay_mask8_to64(int64_t* toindex, const int8_t* mask, int64_t maskoffset, const T* fromindex, int64_t indexoffset, int64_t length);
     template <typename T>
     ERROR awkward_indexedarray_mask8(int8_t* tomask, const T* fromindex, int64_t indexoffset, int64_t length);
+    template <typename T>
+    ERROR awkward_indexedarray_simplify32_to64(int64_t* toindex, const T* outerindex, int64_t outeroffset, int64_t outerlength, const int32_t* innerindex, int64_t inneroffset, int64_t innerlength);
+    template <typename T>
+    ERROR awkward_indexedarray_simplifyU32_to64(int64_t* toindex, const T* outerindex, int64_t outeroffset, int64_t outerlength, const uint32_t* innerindex, int64_t inneroffset, int64_t innerlength);
+    template <typename T>
+    ERROR awkward_indexedarray_simplify64_to64(int64_t* toindex, const T* outerindex, int64_t outeroffset, int64_t outerlength, const int64_t* innerindex, int64_t inneroffset, int64_t innerlength);
     template <typename T, typename I>
     ERROR awkward_unionarray_regular_index(I* toindex, const T* fromtags, int64_t tagsoffset, int64_t length);
     template <typename T, typename I>
