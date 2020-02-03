@@ -118,7 +118,7 @@ def atleast_1d(*arrays):
     return numpy.atleast_1d(*[awkward1.operations.convert.tonumpy(x) for x in arrays])
 
 @awkward1._numpy.implements(numpy.concatenate)
-def concatenate(arrays, axis=0):
+def concatenate(arrays, axis=0, mergebool=True):
     import awkward1.highlevel
 
     if axis != 0:
@@ -130,17 +130,17 @@ def concatenate(arrays, axis=0):
         raise ValueError("need at least one array to concatenate")
     out = contents[0]
     for x in contents[1:]:
-        if not out.mergeable(x, mergebool=True):   # NumPy concatenates booleans and numbers
+        if not out.mergeable(x, mergebool=mergebool):
             out = out.merge_as_union(x)
         else:
             out = out.merge(x)
         if isinstance(out, awkward1._util.uniontypes):
-            out = out.simplify(mergebool=True)     # NumPy concatenates booleans and numbers
+            out = out.simplify(mergebool=mergebool)
 
     return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(arrays), functions=awkward1._util.combine_functions(arrays))
 
 @awkward1._numpy.implements(numpy.where)
-def where(condition, *args):
+def where(condition, *args, mergebool=True):
     import awkward1.highlevel
 
     condition = awkward1.operations.convert.tonumpy(condition)
@@ -166,8 +166,10 @@ def where(condition, *args):
 
         tags = awkward1.layout.Index8(tags.view(numpy.int8))
         index = awkward1.layout.Index64(index)
-        # FIXME: call "simplify" when it exists
-        return awkward1.highlevel.Array(awkward1.layout.UnionArray8_64(tags, index, [x, y]))
+        tmp = awkward1.layout.UnionArray8_64(tags, index, [x, y])
+        out = tmp.simplify(mergebool=mergebool)
+
+        return awkward1._util.wrap(out, classes=awkward1._util.combine_classes((condition,) + args), functions=awkward1._util.combine_functions((condition,) + args))
 
     else:
         raise TypeError("where() takes from 1 to 3 positional arguments but {0} were given".format(len(args) + 1))

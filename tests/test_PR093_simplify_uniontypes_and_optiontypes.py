@@ -609,3 +609,12 @@ def test_concatenate():
     assert awkward1.tolist(awkward1.concatenate([one, two, three])) == [1.1, 2.2, 3.3, 4.4, 5.5, [], [1], [2, 2], [3, 3, 3], 1.0, 0.0, 0.0, 1.0, 1.0]
     assert isinstance(awkward1.concatenate([one, two, three]).layout, awkward1.layout.UnionArray8_64)
     assert len(awkward1.concatenate([one, two, three]).layout.contents) == 2
+
+def test_where():
+    condition = awkward1.Array([True, False, True, False, True])
+    one = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    two = awkward1.Array([False, False, False, True, True])
+    three = awkward1.Array([[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]])
+
+    assert awkward1.tolist(awkward1.where(condition, one, two)) == [1.1, 0.0, 3.3, 1.0, 5.5]
+    assert awkward1.tolist(awkward1.where(condition, one, three)) == [1.1, [1], 3.3, [3, 3, 3], 5.5]
