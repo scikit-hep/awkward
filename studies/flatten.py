@@ -41,7 +41,7 @@ def random_length(minlen=0, maxlen=None):
         return minlen + int(math.floor(random.expovariate(0.1)))
     else:
         return random.randint(minlen, maxlen)
-        
+
 ################################################################ RawArray
 
 class RawArray(Content):
@@ -246,7 +246,7 @@ class ListArray(Content):
             starts = [random.randint(0, len(content) - 1) for i in range(length)]
             stops = [x + min(random_length(), len(content) - x) for x in starts]
         return ListArray(starts, stops, content)
-        
+
     def __len__(self):
         return len(self.starts)
 
@@ -298,7 +298,7 @@ class ListOffsetArray(Content):
         for x in counts:
             offsets.append(offsets[-1] + x)
         return ListOffsetArray(offsets, Content.random(offsets[-1], choices))
-        
+
     def __len__(self):
         return len(self.offsets) - 1
 
@@ -734,7 +734,7 @@ def UnionArray_count(self, axis=0):
 UnionArray.count = UnionArray_count
 
 for i in range(10):
-    print("i =", i)
+    print("count i =", i)
     array = Content.random()
     for axis in range(5):
         print("axis =", axis)
@@ -747,17 +747,166 @@ for i in range(10):
         assert rowwise == columnar
 
 ################################################################ test flatten
+def flatten(data, axis=0):
+    if axis < 0:
+        raise NotImplementedError("axis < 0 is much harder for untyped data...")
+    if isinstance(data, (list, Content)):
+        if axis == 0:
+            if all(isinstance(x, list) for x in data):
+                return sum(data, [])
+            else:
+                raise IndexError("cannot concatenate non-lists")
+        else:
+            return [flatten(x, axis - 1) for x in data]
+
+    elif isinstance(data, tuple):
+        return tuple(flatten(x, axis) for x in data)
+
+    elif isinstance(data, dict):
+        return {n: flatten(x, axis) for n, x in data.items()}   # does not reduce axis!
+
+    elif isinstance(data, (bool, int, float)):
+        raise IndexError("axis > list depth of structure")
+
+    else:
+        raise NotImplementedError(repr(data))
+
+    if axis < 0:
+        raise NotImplementedError("axis < 0 is much harder for untyped data...")
 
 # RawArray
+def RawArray_flatten(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        raise IndexError("axis > list depth of structure")
+
+RawArray.flatten = RawArray_flatten
+
 # NumpyArray
+def NumpyArray_flatten(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        if len(self.shape) == 1:
+            raise IndexError("axis > list depth of structure")
+        if axis == 0:
+            return NumpyArray.onedim([self.shape[1]] * self.shape[0])
+        else:
+            if self.shape[0] == 0:
+                return NumpyArray.onedim([])
+            else:
+                ### Awkward solution
+                # content = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
+                # index = [0] * self.shape[0] * self.shape[1]
+                # return RegularArray(IndexedArray(index, content), self.shape[1])
+
+                ### pure NumPy solution
+                next = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).flatten(axis - 1)
+                shape = [self.shape[0]] + next.shape
+                strides = [0] + next.strides   # a good use for stride == 0
+                return NumpyArray(next.ptr, shape, strides, next.offset)
+
+NumpyArray.flatten = NumpyArray_flatten
+
 # EmptyArray
+def EmptyArray_flatten(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        return EmptyArray()
+
+EmptyArray.flatten = EmptyArray_flatten
+
 # RegularArray
+def RegularArray_flatten(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    elif axis == 0:
+        return NumpyArray.onedim([self.size] * len(self))
+    else:
+        return RegularArray(self.content.flatten(axis - 1), self.size)
+
+RegularArray.flatten = RegularArray_flatten
+
 # ListArray
+def ListArray_flatten(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    elif axis == 0:
+        out = [self.stops[i] - self.starts[i] for i in range(len(self.starts))]
+        return NumpyArray.onedim(out)
+    else:
+        return ListArray(self.starts, self.stops, self.content.flatten(axis - 1))
+
+ListArray.flatten = ListArray_flatten
+
 # ListOffsetArray
+def ListOffsetArray_flatten(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    elif axis == 0:
+        out = [self.offsets[i + 1] - self.offsets[i] for i in range(len(self.offsets) - 1)]
+        return NumpyArray.onedim(out)
+    else:
+        return ListOffsetArray(self.offsets, self.content.flatten(axis - 1))
+
+ListOffsetArray.flatten = ListOffsetArray_flatten
+
 # IndexedArray
+def IndexedArray_flatten(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        return IndexedArray(self.index, self.content.flatten(axis))
+
+IndexedArray.flatten = IndexedArray_flatten
+
 # IndexedOptionArray
+def IndexedOptionArray_flatten(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        return IndexedOptionArray(self.index, self.content.flatten(axis))
+
+IndexedOptionArray.flatten = IndexedOptionArray_flatten
+
 # RecordArray
+def RecordArray_flatten(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        contents = []
+        for x in self.contents:
+            contents.append(x.flatten(axis))
+        return RecordArray(contents, self.recordlookup, self.length)
+
+RecordArray.flatten = RecordArray_flatten
+
 # UnionArray
+def UnionArray_flatten(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        contents = []
+        for x in self.contents:
+            contents.append(x.flatten(axis))
+        return UnionArray(self.tags, self.index, contents)
+
+UnionArray.flatten = UnionArray_flatten
+
+for i in range(10):
+    print("flatten i =", i)
+    array = Content.random()
+    for axis in range(5):
+        print("axis =", axis)
+        try:
+            rowwise = flatten(array, axis)
+            columnar = array.flatten(axis)
+        except IndexError:
+            break
+        columnar = list(columnar)
+        assert rowwise == columnar
 
 # ### Don't worry about the not-implemented-yet ones
 # # SlicedArray
