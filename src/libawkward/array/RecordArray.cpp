@@ -272,7 +272,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_at_nowrap(int64_t at) const {
-    return std::make_shared<Record>(*this, at);
+    return std::make_shared<Record>(std::dynamic_pointer_cast<RecordArray>(shallow_copy()), at);
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range(int64_t start, int64_t stop) const {
@@ -587,8 +587,8 @@ namespace awkward {
     return out;
   }
 
-  const RecordArray RecordArray::astuple() const {
-    return RecordArray(identities_, parameters_, contents_);
+  const std::shared_ptr<RecordArray> RecordArray::astuple() const {
+    return std::make_shared<RecordArray>(identities_, parameters_, contents_);
   }
 
   void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {

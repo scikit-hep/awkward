@@ -8,8 +8,8 @@
 namespace awkward {
   class Record: public Content {
   public:
-    Record(const RecordArray& array, int64_t at);
-    const std::shared_ptr<Content> array() const;
+    Record(const std::shared_ptr<RecordArray>& array, int64_t at);
+    const std::shared_ptr<RecordArray> array() const;
     int64_t at() const;
     const std::vector<std::shared_ptr<Content>> contents() const;
     const std::shared_ptr<util::RecordLookup> recordlookup() const;
@@ -57,7 +57,7 @@ namespace awkward {
     const std::shared_ptr<Content> field(const std::string& key) const;
     const std::vector<std::shared_ptr<Content>> fields() const;
     const std::vector<std::pair<std::string, std::shared_ptr<Content>>> fielditems() const;
-    const Record astuple() const;
+    const std::shared_ptr<Record> astuple() const;
 
   protected:
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
@@ -67,7 +67,7 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override;
 
   private:
-    RecordArray array_;
+    std::shared_ptr<RecordArray> array_;
     int64_t at_;
   };
 }
