@@ -595,3 +595,23 @@ ERROR awkward_unionarray_fillindex_count(TO* toindex, int64_t toindexoffset, int
 ERROR awkward_unionarray_fillindex_to64_count(int64_t* toindex, int64_t toindexoffset, int64_t length) {
   return awkward_unionarray_fillindex_count<int64_t>(toindex, toindexoffset, length);
 }
+
+template <typename FROMTAGS, typename FROMINDEX, typename TOTAGS, typename TOINDEX>
+ERROR awkward_unionarray_simplify_one(TOTAGS* totags, TOINDEX* toindex, const FROMTAGS* fromtags, int64_t fromtagsoffset, const FROMINDEX* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base) {
+  for (int64_t i = 0;  i < length;  i++) {
+    if (fromtags[fromtagsoffset + i] == fromwhich) {
+      totags[i] = towhich;
+      toindex[i] = (TOINDEX)(fromindex[fromindexoffset + i] + base);
+    }
+  }
+  return success();
+}
+ERROR awkward_unionarray8_32_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify_one<int8_t, int32_t, int8_t, int64_t>(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, towhich, fromwhich, length, base);
+}
+ERROR awkward_unionarray8_U32_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify_one<int8_t, uint32_t, int8_t, int64_t>(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, towhich, fromwhich, length, base);
+}
+ERROR awkward_unionarray8_64_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify_one<int8_t, int64_t, int8_t, int64_t>(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, towhich, fromwhich, length, base);
+}

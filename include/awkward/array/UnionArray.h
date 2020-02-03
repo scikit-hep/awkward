@@ -26,6 +26,7 @@ namespace awkward {
     int64_t numcontents() const;
     const std::shared_ptr<Content> content(int64_t index) const;
     const std::shared_ptr<Content> project(int64_t index) const;
+    const std::shared_ptr<Content> simplify() const;
 
     const std::string classname() const override;
     void setidentities() override;

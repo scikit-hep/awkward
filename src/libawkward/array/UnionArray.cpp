@@ -90,6 +90,72 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::simplify() const {
+    int64_t len = length();
+    if (index_.length() < len) {
+      util::handle_error(failure("len(index) < len(tags)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+    Index8 tags(len);
+    Index64 index(len);
+    std::vector<std::shared_ptr<Content>> contents;
+
+    for (size_t i = 0;  i < contents_.size();  i++) {
+      if (UnionArray8_32* rawcontent = dynamic_cast<UnionArray8_32*>(contents_[i].get())) {
+        throw std::runtime_error("FIXME");
+      }
+      else if (UnionArray8_U32* rawcontent = dynamic_cast<UnionArray8_U32*>(contents_[i].get())) {
+        throw std::runtime_error("FIXME");
+      }
+      else if (UnionArray8_64* rawcontent = dynamic_cast<UnionArray8_64*>(contents_[i].get())) {
+        throw std::runtime_error("FIXME");
+      }
+      else {
+        bool unmerged = true;
+        for (size_t j = 0;  j < contents.size();  j++) {
+          if (contents[j].get()->mergeable(contents_[i], false)) {
+            struct Error err = util::awkward_unionarray_simplify_one_to8_64<T, I>(
+              tags.ptr().get(),
+              index.ptr().get(),
+              tags_.ptr().get(),
+              tags_.offset(),
+              index_.ptr().get(),
+              index_.offset(),
+              (int64_t)j,
+              (int64_t)i,
+              len,
+              contents[j].get()->length());
+            util::handle_error(err, classname(), identities_.get());
+            contents[j] = contents[j].get()->merge(contents_[i]);
+            unmerged = false;
+            break;
+          }
+        }
+        if (unmerged) {
+          struct Error err = util::awkward_unionarray_simplify_one_to8_64<T, I>(
+            tags.ptr().get(),
+            index.ptr().get(),
+            tags_.ptr().get(),
+            tags_.offset(),
+            index_.ptr().get(),
+            index_.offset(),
+            (int64_t)contents.size(),
+            (int64_t)i,
+            len,
+            0);
+          util::handle_error(err, classname(), identities_.get());
+          contents.push_back(contents_[i]);
+        }
+      }
+    }
+
+    if (contents.size() > kMaxInt8) {
+      throw std::runtime_error("FIXME: handle UnionArray with more than 127 contents");
+    }
+
+    return std::make_shared<UnionArray8_64>(identities_, parameters_, tags, index, contents);
+  }
+
+  template <typename T, typename I>
   const std::string UnionArrayOf<T, I>::classname() const {
     if (std::is_same<T, int8_t>::value) {
       if (std::is_same<I, int32_t>::value) {

@@ -560,3 +560,16 @@ def test_indexedarray_simplify_more():
     assert awkward1.tolist(array.simplify()) == [6.6, None, None, None]
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+def test_unionarray_simplify():
+    one = awkward1.Array([5, 4, 3, 2, 1]).layout
+    two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]]).layout
+    three = awkward1.Array([1.1, 2.2, 3.3]).layout
+    tags  =  awkward1.layout.Index8(numpy.array([0, 0, 1, 2, 1, 0, 2, 1, 1, 0, 2, 0], dtype=numpy.int8))
+    index = awkward1.layout.Index64(numpy.array([0, 1, 0, 0, 1, 2, 1, 2, 3, 3, 2, 4], dtype=numpy.int64))
+    array = awkward1.layout.UnionArray8_64(tags, index, [one, two, three])
+
+    assert awkward1.tolist(array) == [5, 4, [], 1.1, [1], 3, 2.2, [2, 2], [3, 3, 3], 2, 3.3, 1]
+    assert awkward1.tolist(array.simplify()) == [5.0, 4.0, [], 1.1, [1], 3.0, 2.2, [2, 2], [3, 3, 3], 2.0, 3.3, 1.0]
+    assert len(array.contents) == 3
+    assert len(array.simplify().contents) == 2

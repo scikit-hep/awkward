@@ -120,6 +120,10 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_unionarray_fillindex_to64_count(int64_t* toindex, int64_t toindexoffset, int64_t length);
 
+  EXPORT_SYMBOL struct Error awkward_unionarray8_32_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
+  EXPORT_SYMBOL struct Error awkward_unionarray8_U32_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
+  EXPORT_SYMBOL struct Error awkward_unionarray8_64_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
+
 }
 
 #endif // AWKWARDCPU_GETITEM_H_
