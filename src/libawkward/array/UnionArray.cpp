@@ -101,18 +101,165 @@ namespace awkward {
 
     for (size_t i = 0;  i < contents_.size();  i++) {
       if (UnionArray8_32* rawcontent = dynamic_cast<UnionArray8_32*>(contents_[i].get())) {
-        throw std::runtime_error("FIXME");
+        Index8 innertags = rawcontent->tags();
+        Index32 innerindex = rawcontent->index();
+        std::vector<std::shared_ptr<Content>> innercontents = rawcontent->contents();
+        for (size_t j = 0;  j < innercontents.size();  j++) {
+          bool unmerged = true;
+          for (size_t k = 0;  k < contents.size();  k++) {
+            if (contents[k].get()->mergeable(innercontents[j], false)) {
+              struct Error err = util::awkward_unionarray_simplify8_32_to8_64<T, I>(
+                tags.ptr().get(),
+                index.ptr().get(),
+                tags_.ptr().get(),
+                tags_.offset(),
+                index_.ptr().get(),
+                index_.offset(),
+                innertags.ptr().get(),
+                innertags.offset(),
+                innerindex.ptr().get(),
+                innerindex.offset(),
+                (int64_t)k,
+                (int64_t)j,
+                (int64_t)i,
+                len,
+                contents[k].get()->length());
+              util::handle_error(err, classname(), identities_.get());
+              contents[k] = contents[k].get()->merge(innercontents[j]);
+              unmerged = false;
+              break;
+            }
+          }
+          if (unmerged) {
+            struct Error err = util::awkward_unionarray_simplify8_32_to8_64<T, I>(
+              tags.ptr().get(),
+              index.ptr().get(),
+              tags_.ptr().get(),
+              tags_.offset(),
+              index_.ptr().get(),
+              index_.offset(),
+              innertags.ptr().get(),
+              innertags.offset(),
+              innerindex.ptr().get(),
+              innerindex.offset(),
+              (int64_t)contents.size(),
+              (int64_t)j,
+              (int64_t)i,
+              len,
+              0);
+            util::handle_error(err, classname(), identities_.get());
+            contents.push_back(innercontents[j]);
+          }
+        }
       }
       else if (UnionArray8_U32* rawcontent = dynamic_cast<UnionArray8_U32*>(contents_[i].get())) {
-        throw std::runtime_error("FIXME");
+        Index8 innertags = rawcontent->tags();
+        IndexU32 innerindex = rawcontent->index();
+        std::vector<std::shared_ptr<Content>> innercontents = rawcontent->contents();
+        for (size_t j = 0;  j < innercontents.size();  j++) {
+          bool unmerged = true;
+          for (size_t k = 0;  k < contents.size();  k++) {
+            if (contents[k].get()->mergeable(innercontents[j], false)) {
+              struct Error err = util::awkward_unionarray_simplify8_U32_to8_64<T, I>(
+                tags.ptr().get(),
+                index.ptr().get(),
+                tags_.ptr().get(),
+                tags_.offset(),
+                index_.ptr().get(),
+                index_.offset(),
+                innertags.ptr().get(),
+                innertags.offset(),
+                innerindex.ptr().get(),
+                innerindex.offset(),
+                (int64_t)k,
+                (int64_t)j,
+                (int64_t)i,
+                len,
+                contents[k].get()->length());
+              util::handle_error(err, classname(), identities_.get());
+              contents[k] = contents[k].get()->merge(innercontents[j]);
+              unmerged = false;
+              break;
+            }
+          }
+          if (unmerged) {
+            struct Error err = util::awkward_unionarray_simplify8_U32_to8_64<T, I>(
+              tags.ptr().get(),
+              index.ptr().get(),
+              tags_.ptr().get(),
+              tags_.offset(),
+              index_.ptr().get(),
+              index_.offset(),
+              innertags.ptr().get(),
+              innertags.offset(),
+              innerindex.ptr().get(),
+              innerindex.offset(),
+              (int64_t)contents.size(),
+              (int64_t)j,
+              (int64_t)i,
+              len,
+              0);
+            util::handle_error(err, classname(), identities_.get());
+            contents.push_back(innercontents[j]);
+          }
+        }
       }
       else if (UnionArray8_64* rawcontent = dynamic_cast<UnionArray8_64*>(contents_[i].get())) {
-        throw std::runtime_error("FIXME");
+        Index8 innertags = rawcontent->tags();
+        Index64 innerindex = rawcontent->index();
+        std::vector<std::shared_ptr<Content>> innercontents = rawcontent->contents();
+        for (size_t j = 0;  j < innercontents.size();  j++) {
+          bool unmerged = true;
+          for (size_t k = 0;  k < contents.size();  k++) {
+            if (contents[k].get()->mergeable(innercontents[j], false)) {
+              struct Error err = util::awkward_unionarray_simplify8_64_to8_64<T, I>(
+                tags.ptr().get(),
+                index.ptr().get(),
+                tags_.ptr().get(),
+                tags_.offset(),
+                index_.ptr().get(),
+                index_.offset(),
+                innertags.ptr().get(),
+                innertags.offset(),
+                innerindex.ptr().get(),
+                innerindex.offset(),
+                (int64_t)k,
+                (int64_t)j,
+                (int64_t)i,
+                len,
+                contents[k].get()->length());
+              util::handle_error(err, classname(), identities_.get());
+              contents[k] = contents[k].get()->merge(innercontents[j]);
+              unmerged = false;
+              break;
+            }
+          }
+          if (unmerged) {
+            struct Error err = util::awkward_unionarray_simplify8_64_to8_64<T, I>(
+              tags.ptr().get(),
+              index.ptr().get(),
+              tags_.ptr().get(),
+              tags_.offset(),
+              index_.ptr().get(),
+              index_.offset(),
+              innertags.ptr().get(),
+              innertags.offset(),
+              innerindex.ptr().get(),
+              innerindex.offset(),
+              (int64_t)contents.size(),
+              (int64_t)j,
+              (int64_t)i,
+              len,
+              0);
+            util::handle_error(err, classname(), identities_.get());
+            contents.push_back(innercontents[j]);
+          }
+        }
       }
       else {
         bool unmerged = true;
-        for (size_t j = 0;  j < contents.size();  j++) {
-          if (contents[j].get()->mergeable(contents_[i], false)) {
+        for (size_t k = 0;  k < contents.size();  k++) {
+          if (contents[k].get()->mergeable(contents_[i], false)) {
             struct Error err = util::awkward_unionarray_simplify_one_to8_64<T, I>(
               tags.ptr().get(),
               index.ptr().get(),
@@ -120,12 +267,12 @@ namespace awkward {
               tags_.offset(),
               index_.ptr().get(),
               index_.offset(),
-              (int64_t)j,
+              (int64_t)k,
               (int64_t)i,
               len,
-              contents[j].get()->length());
+              contents[k].get()->length());
             util::handle_error(err, classname(), identities_.get());
-            contents[j] = contents[j].get()->merge(contents_[i]);
+            contents[k] = contents[k].get()->merge(contents_[i]);
             unmerged = false;
             break;
           }

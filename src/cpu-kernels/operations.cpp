@@ -596,6 +596,47 @@ ERROR awkward_unionarray_fillindex_to64_count(int64_t* toindex, int64_t toindexo
   return awkward_unionarray_fillindex_count<int64_t>(toindex, toindexoffset, length);
 }
 
+template <typename OUTERTAGS, typename OUTERINDEX, typename INNERTAGS, typename INNERINDEX, typename TOTAGS, typename TOINDEX>
+ERROR awkward_unionarray_simplify(TOTAGS* totags, TOINDEX* toindex, const OUTERTAGS* outertags, int64_t outertagsoffset, const OUTERINDEX* outerindex, int64_t outerindexoffset, const INNERTAGS* innertags, int64_t innertagsoffset, const INNERINDEX* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base) {
+  for (int64_t i = 0;  i < length;  i++) {
+    if (outertags[outertagsoffset + i] == outerwhich) {
+      OUTERINDEX j = outerindex[outerindexoffset + i];
+      if (innertags[innertagsoffset + j] == innerwhich) {
+        totags[i] = towhich;
+        toindex[i] = (TOINDEX)(innerindex[innerindexoffset + j] + base);
+      }
+    }
+  }
+  return success();
+}
+ERROR awkward_unionarray8_32_simplify8_32_to8_64(int8_t* totags, int64_t* toindex, const int8_t* outertags, int64_t outertagsoffset, const int32_t* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify<int8_t, int32_t, int8_t, int32_t, int8_t, int64_t>(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base);
+}
+ERROR awkward_unionarray8_32_simplify8_U32_to8_64(int8_t* totags, int64_t* toindex, const int8_t* outertags, int64_t outertagsoffset, const int32_t* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const uint32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify<int8_t, int32_t, int8_t, uint32_t, int8_t, int64_t>(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base);
+}
+ERROR awkward_unionarray8_32_simplify8_64_to8_64(int8_t* totags, int64_t* toindex, const int8_t* outertags, int64_t outertagsoffset, const int32_t* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int64_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify<int8_t, int32_t, int8_t, int64_t, int8_t, int64_t>(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base);
+}
+ERROR awkward_unionarray8_U32_simplify8_32_to8_64(int8_t* totags, int64_t* toindex, const int8_t* outertags, int64_t outertagsoffset, const uint32_t* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify<int8_t, uint32_t, int8_t, int32_t, int8_t, int64_t>(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base);
+}
+ERROR awkward_unionarray8_U32_simplify8_U32_to8_64(int8_t* totags, int64_t* toindex, const int8_t* outertags, int64_t outertagsoffset, const uint32_t* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const uint32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify<int8_t, uint32_t, int8_t, uint32_t, int8_t, int64_t>(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base);
+}
+ERROR awkward_unionarray8_U32_simplify8_64_to8_64(int8_t* totags, int64_t* toindex, const int8_t* outertags, int64_t outertagsoffset, const uint32_t* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int64_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify<int8_t, uint32_t, int8_t, int64_t, int8_t, int64_t>(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base);
+}
+ERROR awkward_unionarray8_64_simplify8_32_to8_64(int8_t* totags, int64_t* toindex, const int8_t* outertags, int64_t outertagsoffset, const int64_t* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify<int8_t, int64_t, int8_t, int32_t, int8_t, int64_t>(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base);
+}
+ERROR awkward_unionarray8_64_simplify8_U32_to8_64(int8_t* totags, int64_t* toindex, const int8_t* outertags, int64_t outertagsoffset, const int64_t* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const uint32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify<int8_t, int64_t, int8_t, uint32_t, int8_t, int64_t>(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base);
+}
+ERROR awkward_unionarray8_64_simplify8_64_to8_64(int8_t* totags, int64_t* toindex, const int8_t* outertags, int64_t outertagsoffset, const int64_t* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int64_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base) {
+  return awkward_unionarray_simplify<int8_t, int64_t, int8_t, int64_t, int8_t, int64_t>(totags, toindex, outertags, outertagsoffset, outerindex, outerindexoffset, innertags, innertagsoffset, innerindex, innerindexoffset, towhich, innerwhich, outerwhich, length, base);
+}
+
 template <typename FROMTAGS, typename FROMINDEX, typename TOTAGS, typename TOINDEX>
 ERROR awkward_unionarray_simplify_one(TOTAGS* totags, TOINDEX* toindex, const FROMTAGS* fromtags, int64_t fromtagsoffset, const FROMINDEX* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base) {
   for (int64_t i = 0;  i < length;  i++) {

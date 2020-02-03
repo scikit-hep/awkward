@@ -561,7 +561,7 @@ def test_indexedarray_simplify_more():
     assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
     assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
 
-def test_unionarray_simplify():
+def test_unionarray_simplify_one():
     one = awkward1.Array([5, 4, 3, 2, 1]).layout
     two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]]).layout
     three = awkward1.Array([1.1, 2.2, 3.3]).layout
@@ -573,3 +573,30 @@ def test_unionarray_simplify():
     assert awkward1.tolist(array.simplify()) == [5.0, 4.0, [], 1.1, [1], 3.0, 2.2, [2, 2], [3, 3, 3], 2.0, 3.3, 1.0]
     assert len(array.contents) == 3
     assert len(array.simplify().contents) == 2
+
+def test_unionarray_simplify():
+    one = awkward1.Array([5, 4, 3, 2, 1]).layout
+    two = awkward1.Array([[], [1], [2, 2], [3, 3, 3]]).layout
+    three = awkward1.Array([1.1, 2.2, 3.3]).layout
+
+    tags2  =  awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 0, 1], dtype=numpy.int8))
+    index2 = awkward1.layout.Index32(numpy.array([0, 0, 1, 1, 2, 3, 2], dtype=numpy.int32))
+    inner = awkward1.layout.UnionArray8_32(tags2, index2, [two, three])
+    tags1  =  awkward1.layout.Index8(numpy.array([0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0], dtype=numpy.int8))
+    index1 = awkward1.layout.Index64(numpy.array([0, 1, 0, 1, 2, 2, 3, 4, 5, 3, 6, 4], dtype=numpy.int64))
+    outer = awkward1.layout.UnionArray8_64(tags1, index1, [one, inner])
+    assert awkward1.tolist(outer) == [5, 4, [], 1.1, [1], 3, 2.2, [2, 2], [3, 3, 3], 2, 3.3, 1]
+
+    assert awkward1.tolist(outer.simplify()) == [5.0, 4.0, [], 1.1, [1], 3.0, 2.2, [2, 2], [3, 3, 3], 2.0, 3.3, 1.0]
+    assert isinstance(outer.content(1), awkward1.layout.UnionArray8_32)
+    assert isinstance(outer.simplify().content(0), awkward1.layout.NumpyArray)
+    assert isinstance(outer.simplify().content(1), awkward1.layout.ListOffsetArray64)
+    assert len(outer.simplify().contents) == 2
+
+    tags2  =  awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 0, 1], dtype=numpy.int8))
+    index2 = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 3, 2], dtype=numpy.int64))
+    inner = awkward1.layout.UnionArray8_64(tags2, index2, [two, three])
+    tags1  =  awkward1.layout.Index8(numpy.array([1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1], dtype=numpy.int8))
+    index1 = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 3, 4, 5, 3, 6, 4], dtype=numpy.int32))
+    outer = awkward1.layout.UnionArray8_32(tags1, index1, [inner, one])
+    assert awkward1.tolist(outer) == [5, 4, [], 1.1, [1], 3, 2.2, [2, 2], [3, 3, 3], 2, 3.3, 1]
