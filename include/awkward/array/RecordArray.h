@@ -63,7 +63,7 @@ namespace awkward {
     const std::shared_ptr<Content> field(const std::string& key) const;
     const std::vector<std::shared_ptr<Content>> fields() const;
     const std::vector<std::pair<std::string, std::shared_ptr<Content>>> fielditems() const;
-    const RecordArray astuple() const;
+    const std::shared_ptr<RecordArray> astuple() const;
 
     void append(const std::shared_ptr<Content>& content, const std::string& key);
     void append(const std::shared_ptr<Content>& content);

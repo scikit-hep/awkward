@@ -1439,7 +1439,7 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         return out;
       })
       .def_property_readonly("astuple", [](ak::RecordArray& self) -> py::object {
-        return box(self.astuple().shallow_copy());
+        return box(self.astuple());
       })
 
       .def("append", [](ak::RecordArray& self, py::object content, py::object key) -> void {
@@ -1456,7 +1456,9 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
 
 py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, std::string name) {
   return py::class_<ak::Record, std::shared_ptr<ak::Record>>(m, name.c_str())
-      .def(py::init<ak::RecordArray, int64_t>())
+      .def(py::init([](std::shared_ptr<ak::RecordArray> recordarray, int64_t at) -> ak::Record {
+        return ak::Record(recordarray, at);
+      }), py::arg("recordarray"), py::arg("at"))
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("identities", [](ak::Record& self) -> py::object { return box(self.identities()); })
       .def("__getitem__", &getitem<ak::Record>)
@@ -1508,7 +1510,7 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
         return out;
       })
       .def_property_readonly("astuple", [](ak::Record& self) -> py::object {
-        return box(self.astuple().shallow_copy());
+        return box(self.astuple());
       })
      .def_property_readonly("identity", &identity<ak::Record>)
 
