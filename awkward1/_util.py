@@ -72,6 +72,18 @@ def wrap(content, classes, functions):
     else:
         return content
 
+def extra(args, kwargs, defaults):
+    out = []
+    for i in range(len(defaults)):
+        name, default = defaults[i]
+        if i < len(args):
+            out.append(args[i])
+        elif name in kwargs:
+            out.append(kwargs[name])
+        else:
+            out.append(default)
+    return out
+
 def called_by_module(modulename):
     frame = inspect.currentframe()
     while frame is not None:

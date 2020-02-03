@@ -140,7 +140,7 @@ def concatenate(arrays, axis=0, mergebool=True):
     return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(arrays), functions=awkward1._util.combine_functions(arrays))
 
 @awkward1._numpy.implements(numpy.where)
-def where(condition, *args, mergebool=True):
+def where(condition, *args, **kwargs):
     import awkward1.highlevel
 
     condition = awkward1.operations.convert.tonumpy(condition)
@@ -158,6 +158,8 @@ def where(condition, *args, mergebool=True):
 
         x = awkward1.operations.convert.tolayout(args[0], allowrecord=False)
         y = awkward1.operations.convert.tolayout(args[1], allowrecord=False)
+        mergebool, = awkward1._util.extra((), kwargs, [
+            ("mergebool", True)])
 
         tags = (condition == 0)
         assert tags.itemsize == 1

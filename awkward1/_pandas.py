@@ -63,18 +63,6 @@ def get_dtype():
 class PandasNotImportedYet(object):
     pass
 
-def extra(args, kwargs, defaults):
-    out = []
-    for i in range(len(defaults)):
-        name, default = defaults[i]
-        if i < len(args):
-            out.append(args[i])
-        elif name in kwargs:
-            out.append(kwargs[name])
-        else:
-            out.append(default)
-    return out
-
 class NoFields(object):
     def __str__(self):
         return "(no fields)"
@@ -109,7 +97,7 @@ class PandasMixin(PandasNotImportedYet):
     def _from_sequence(cls, scalars, *args, **kwargs):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._from_sequence.html
         register()
-        dtype, copy = extra(args, kwargs, [
+        dtype, copy = awkward1._util.extra(args, kwargs, [
             ("dtype", None),
             ("copy", False)])
         return awkward1._util.wrap(awkward1.operations.convert.fromiter(scalars), None, None)
@@ -151,7 +139,7 @@ class PandasMixin(PandasNotImportedYet):
 
     def take(self, indices, *args, **kwargs):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.take.html
-        allow_fill, fill_value = extra(args, kwargs, [
+        allow_fill, fill_value = awkward1._util.extra(args, kwargs, [
             ("allow_fill", False),
             ("fill_value", None)])
         register()
@@ -191,7 +179,7 @@ class PandasMixin(PandasNotImportedYet):
 
     # def fillna(self, *args, **kwargs):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.fillna.html
-    #     value, method, limit = extra(args, kwargs, [
+    #     value, method, limit = awkward1._util.extra(args, kwargs, [
     #         ("value", None),
     #         ("method", None),
     #         ("limit", None)])
@@ -220,7 +208,7 @@ class PandasMixin(PandasNotImportedYet):
     #
     # def argsort(self, *args, **kwargs):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.argsort.html
-    #     ascending, kind= extra(args, kwargs, [
+    #     ascending, kind = awkward1._util.extra(args, kwargs, [
     #         ("ascending", True),
     #         ("kind", "quicksort")])   # "quicksort", "mergesort", "heapsort"
     #     register()
@@ -233,7 +221,7 @@ class PandasMixin(PandasNotImportedYet):
     #
     # def searchsorted(self, value, *args, **kwargs):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.searchsorted.html
-    #     side, sorter = extra(args, kwargs, [
+    #     side, sorter = awkward1._util.extra(args, kwargs, [
     #         ("side", "left"),
     #         ("sorter", None)])
     #     register()
@@ -241,7 +229,7 @@ class PandasMixin(PandasNotImportedYet):
     #
     # def _reduce(self, name, *args, **kwargs):
     #     # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._reduce.html
-    #     skipna = extra(args, kwargs, [
+    #     skipna, = awkward1._util.extra(args, kwargs, [
     #         ("skipna", True)])
     #     register()
     #     raise NotImplementedError
