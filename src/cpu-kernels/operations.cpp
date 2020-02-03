@@ -602,7 +602,7 @@ ERROR awkward_unionarray_simplify(TOTAGS* totags, TOINDEX* toindex, const OUTERT
     if (outertags[outertagsoffset + i] == outerwhich) {
       OUTERINDEX j = outerindex[outerindexoffset + i];
       if (innertags[innertagsoffset + j] == innerwhich) {
-        totags[i] = towhich;
+        totags[i] = (TOTAGS)towhich;
         toindex[i] = (TOINDEX)(innerindex[innerindexoffset + j] + base);
       }
     }
@@ -641,7 +641,7 @@ template <typename FROMTAGS, typename FROMINDEX, typename TOTAGS, typename TOIND
 ERROR awkward_unionarray_simplify_one(TOTAGS* totags, TOINDEX* toindex, const FROMTAGS* fromtags, int64_t fromtagsoffset, const FROMINDEX* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base) {
   for (int64_t i = 0;  i < length;  i++) {
     if (fromtags[fromtagsoffset + i] == fromwhich) {
-      totags[i] = towhich;
+      totags[i] = (TOTAGS)towhich;
       toindex[i] = (TOINDEX)(fromindex[fromindexoffset + i] + base);
     }
   }
