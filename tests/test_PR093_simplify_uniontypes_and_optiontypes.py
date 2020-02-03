@@ -375,3 +375,188 @@ def test_bytemask():
     index2 = awkward1.layout.Index64(numpy.array([2, 2, 1, 5, 0], dtype=numpy.int64))
     array2 = awkward1.layout.IndexedArray64(index2, array)
     assert numpy.asarray(array2.bytemask()).tolist() == [0, 0, 0, 0, 0]
+
+def test_indexedarray_simplify():
+    array = awkward1.Array(["one", "two", None, "three", None, None, "four", "five"]).layout
+    assert numpy.asarray(array.index).tolist() == [0, 1, -1, 2, -1, -1, 3, 4]
+
+    index2 = awkward1.layout.Index64(numpy.array([2, 2, 1, 6, 5], dtype=numpy.int64))
+    array2 = awkward1.layout.IndexedArray64(index2, array)
+    assert awkward1.tolist(array2.simplify()) == awkward1.tolist(array2) == [None, None, "two", "four", None]
+
+def test_indexedarray_simplify_more():
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+
+    index1_32 = awkward1.layout.Index32(numpy.array([6, 5, 4, 3, 2, 1, 0], dtype=numpy.int32))
+    index1_U32 = awkward1.layout.IndexU32(numpy.array([6, 5, 4, 3, 2, 1, 0], dtype=numpy.uint32))
+    index1_64 = awkward1.layout.Index64(numpy.array([6, 5, 4, 3, 2, 1, 0], dtype=numpy.int64))
+    index2_32 = awkward1.layout.Index32(numpy.array([0, 2, 4, 6], dtype=numpy.int32))
+    index2_U32 = awkward1.layout.IndexU32(numpy.array([0, 2, 4, 6], dtype=numpy.uint32))
+    index2_64 = awkward1.layout.Index64(numpy.array([0, 2, 4, 6], dtype=numpy.int64))
+
+    array = awkward1.layout.IndexedArray32(index2_32, awkward1.layout.IndexedArray32(index1_32, content))
+    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArray32(index2_32, awkward1.layout.IndexedArrayU32(index1_U32, content))
+    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArray32(index2_32, awkward1.layout.IndexedArray64(index1_64, content))
+    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArrayU32(index2_U32, awkward1.layout.IndexedArray32(index1_32, content))
+    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArrayU32(index2_U32, awkward1.layout.IndexedArrayU32(index1_U32, content))
+    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArrayU32(index2_U32, awkward1.layout.IndexedArray64(index1_64, content))
+    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArray64(index2_64, awkward1.layout.IndexedArray32(index1_32, content))
+    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArray64(index2_64, awkward1.layout.IndexedArrayU32(index1_U32, content))
+    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArray64(index2_64, awkward1.layout.IndexedArray64(index1_64, content))
+    assert awkward1.tolist(array) == [6.6, 4.4, 2.2, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    index1_32 = awkward1.layout.Index32(numpy.array([6, 5, -1, 3, -1, 1, 0], dtype=numpy.int32))
+    index1_64 = awkward1.layout.Index64(numpy.array([6, 5, -1, 3, -1, 1, 0], dtype=numpy.int64))
+    index2_32 = awkward1.layout.Index32(numpy.array([0, 2, 4, 6], dtype=numpy.int32))
+    index2_U32 = awkward1.layout.IndexU32(numpy.array([0, 2, 4, 6], dtype=numpy.uint32))
+    index2_64 = awkward1.layout.Index64(numpy.array([0, 2, 4, 6], dtype=numpy.int64))
+
+    array = awkward1.layout.IndexedArray32(index2_32, awkward1.layout.IndexedOptionArray32(index1_32, content))
+    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArray32(index2_32, awkward1.layout.IndexedOptionArray64(index1_64, content))
+    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArrayU32(index2_U32, awkward1.layout.IndexedOptionArray32(index1_32, content))
+    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArrayU32(index2_U32, awkward1.layout.IndexedOptionArray64(index1_64, content))
+    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArray64(index2_64, awkward1.layout.IndexedOptionArray32(index1_32, content))
+    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedArray64(index2_64, awkward1.layout.IndexedOptionArray64(index1_64, content))
+    assert awkward1.tolist(array) == [6.6, None, None, 0.0]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    index1_32 = awkward1.layout.Index32(numpy.array([6, 5, 4, 3, 2, 1, 0], dtype=numpy.int32))
+    index1_U32 = awkward1.layout.IndexU32(numpy.array([6, 5, 4, 3, 2, 1, 0], dtype=numpy.uint32))
+    index1_64 = awkward1.layout.Index64(numpy.array([6, 5, 4, 3, 2, 1, 0], dtype=numpy.int64))
+    index2_32 = awkward1.layout.Index32(numpy.array([0, -1, 4, -1], dtype=numpy.int32))
+    index2_64 = awkward1.layout.Index64(numpy.array([0, -1, 4, -1], dtype=numpy.int64))
+
+    array = awkward1.layout.IndexedOptionArray32(index2_32, awkward1.layout.IndexedArray32(index1_32, content))
+    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedOptionArray32(index2_32, awkward1.layout.IndexedArrayU32(index1_U32, content))
+    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedOptionArray32(index2_32, awkward1.layout.IndexedArray64(index1_64, content))
+    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedOptionArray64(index2_64, awkward1.layout.IndexedArray32(index1_32, content))
+    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedOptionArray64(index2_64, awkward1.layout.IndexedArrayU32(index1_U32, content))
+    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedOptionArray64(index2_64, awkward1.layout.IndexedArray64(index1_64, content))
+    assert awkward1.tolist(array) == [6.6, None, 2.2, None]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    index1_32 = awkward1.layout.Index32(numpy.array([6, 5, -1, 3, -1, 1, 0], dtype=numpy.int32))
+    index1_64 = awkward1.layout.Index64(numpy.array([6, 5, -1, 3, -1, 1, 0], dtype=numpy.int64))
+    index2_32 = awkward1.layout.Index32(numpy.array([0, -1, 4, -1], dtype=numpy.int32))
+    index2_64 = awkward1.layout.Index64(numpy.array([0, -1, 4, -1], dtype=numpy.int64))
+
+    array = awkward1.layout.IndexedOptionArray32(index2_32, awkward1.layout.IndexedOptionArray32(index1_32, content))
+    assert awkward1.tolist(array) == [6.6, None, None, None]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, None, None]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedOptionArray32(index2_32, awkward1.layout.IndexedOptionArray64(index1_64, content))
+    assert awkward1.tolist(array) == [6.6, None, None, None]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, None, None]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedOptionArray64(index2_64, awkward1.layout.IndexedOptionArray32(index1_32, content))
+    assert awkward1.tolist(array) == [6.6, None, None, None]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, None, None]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)
+
+    array = awkward1.layout.IndexedOptionArray64(index2_64, awkward1.layout.IndexedOptionArray64(index1_64, content))
+    assert awkward1.tolist(array) == [6.6, None, None, None]
+    assert awkward1.tolist(array.simplify()) == [6.6, None, None, None]
+    assert isinstance(array.simplify(), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify().content, awkward1.layout.NumpyArray)

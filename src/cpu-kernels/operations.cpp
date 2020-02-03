@@ -226,7 +226,7 @@ ERROR awkward_indexedarray_simplify(TO* toindex, const OUT* outerindex, int64_t 
       return failure("index out of range", i, j);
     }
     else {
-      toindex[i] = j;
+      toindex[i] = innerindex[inneroffset + j];
     }
   }
   return success();
