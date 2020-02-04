@@ -10,6 +10,8 @@
 #include "awkward/type/UnknownType.h"
 #include "awkward/Slice.h"
 
+#include "awkward/array/NumpyArray.h"
+#include "awkward/array/RegularArray.h"
 #include "awkward/array/UnionArray.h"
 
 namespace awkward {
@@ -531,17 +533,34 @@ namespace awkward {
 
   template <typename T, typename I>
   const Index64 UnionArrayOf<T, I>::count64() const {
-    throw std::runtime_error("FIXME: UnionArray::count64");
+    int64_t len = contents_.size();
+    Index64 tocount(len);
+    int64_t indx(0);
+    for (auto content : contents_) {
+      Index64 toappend = content.get()->count64();
+      tocount.ptr().get()[indx++] = toappend.length();
+    }
+    return tocount;
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::count(int64_t axis) const {
-    throw std::runtime_error("FIXME: UnionArray::count");
+    int64_t toaxis = axis_wrap(axis);
+
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.emplace_back(content.get()->count(toaxis));
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(Identities::none(), util::Parameters(), tags_, index_, contents);
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: UnionArray::flatten");
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.emplace_back(content.get()->flatten(axis));
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents);
   }
 
   template <typename T, typename I>

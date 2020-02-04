@@ -81,6 +81,8 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const;
     const std::string parameters_tostring(const std::string& indent, const std::string& pre, const std::string& post) const;
 
+    const int64_t axis_wrap(int64_t axis) const;
+
   protected:
     std::shared_ptr<Identities> identities_;
     util::Parameters parameters_;
