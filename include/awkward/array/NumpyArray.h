@@ -40,6 +40,10 @@ namespace awkward {
     void* byteptr(ssize_t at) const;
     ssize_t bytelength() const;
     uint8_t getbyte(ssize_t at) const;
+    template <typename T>
+    T getscalar(ssize_t at) const {
+      return *reinterpret_cast<T*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
+    }
     const std::shared_ptr<Content> toRegularArray() const;
 
     bool isscalar() const override;
