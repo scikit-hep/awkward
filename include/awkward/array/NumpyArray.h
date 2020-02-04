@@ -5,7 +5,9 @@
 
 #include <cassert>
 #include <string>
+#include <unordered_map>
 #include <memory>
+#include <typeindex>
 #include <vector>
 
 #include "awkward/cpu-kernels/util.h"
@@ -16,8 +18,14 @@ namespace awkward {
   class NumpyArray: public Content {
   public:
     static const std::shared_ptr<Type> unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape);
+    static const std::unordered_map<std::type_index, std::string> format_map;
 
     NumpyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format);
+    NumpyArray(const Index8 count);
+    NumpyArray(const IndexU8 count);
+    NumpyArray(const Index32 count);
+    NumpyArray(const IndexU32 count);
+    NumpyArray(const Index64 count);
 
     const std::shared_ptr<void> ptr() const;
     const std::vector<ssize_t> shape() const;
@@ -113,38 +121,6 @@ namespace awkward {
     const ssize_t itemsize_;
     const std::string format_;
   };
-
-  template <typename T>
-  const std::shared_ptr<Content> numpyarray_onedim(const IndexOf<T> count) {
-    std::vector<ssize_t> shape({ (ssize_t)count.length() });
-    std::vector<ssize_t> strides({ (ssize_t)sizeof(T) });
-    std::string format;
-  #ifdef _MSC_VER
-    if (std::is_same<T, int32_t>::value) {
-      format = "l";
-    }
-    else if (std::is_same<T, uint32_t>::value) {
-      format = "L";
-    }
-    else if (std::is_same<T, int64_t>::value) {
-      format = "q";
-    }
-  #else
-    if (std::is_same<T, int32_t>::value) {
-      format = "i";
-    }
-    else if (std::is_same<T, uint32_t>::value) {
-      format = "I";
-    }
-    else if (std::is_same<T, int64_t>::value) {
-      format = "l";
-    }
-  #endif
-    else {
-      throw std::runtime_error("unrecognized NumpyArray specialization");
-    }
-    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), count.ptr(), shape, strides, 0, sizeof(T), format);
-  }
 }
 
 #endif // AWKWARD_NUMPYARRAY_H_

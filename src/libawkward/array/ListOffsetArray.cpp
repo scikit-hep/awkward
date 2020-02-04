@@ -442,7 +442,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::count(int64_t axis) const {
-    int64_t toaxis = axis_wrap(axis);
+    int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == 0) {
       int64_t len = offsets_.length() - 1;
       IndexOf<T> tocount(len);
@@ -452,7 +452,7 @@ namespace awkward {
         len);
       util::handle_error(err, classname(), identities_.get());
 
-      return awkward::numpyarray_onedim<T>(tocount);
+      return std::make_shared<NumpyArray>(tocount);
     }
     else {
       return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), util::Parameters(), offsets_, content_.get()->count(toaxis - 1));
@@ -461,7 +461,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::flatten(int64_t axis) const {
-    int64_t toaxis = axis_wrap(axis);
+    int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == 0) {
       int64_t start = offsets_.getitem_at_nowrap(0);
       int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);

@@ -38,6 +38,20 @@ namespace awkward {
     return out;
   }
 
+  const std::unordered_map<std::type_index, std::string> NumpyArray::format_map = {
+    { typeid(int8_t), "b"},
+    { typeid(uint8_t), "B"},
+ #ifdef _MSC_VER
+    { typeid(int32_t), "l"},
+    { typeid(uint32_t), "L"},
+    { typeid(int64_t), "q"}
+ #else
+    { typeid(int32_t), "i"},
+    { typeid(uint32_t), "I"},
+    { typeid(int64_t), "l"}
+ #endif
+ };
+
   NumpyArray::NumpyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
       : Content(identities, parameters)
       , ptr_(ptr)
@@ -49,6 +63,26 @@ namespace awkward {
     if (shape.size() != strides.size()) {
       throw std::runtime_error(std::string("len(shape), which is ") + std::to_string(shape.size()) + std::string(", must be equal to len(strides), which is ") + std::to_string(strides.size()));
     }
+  }
+
+  NumpyArray::NumpyArray(const Index8 count)
+    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }), 0, sizeof(int8_t), format_map.at(std::type_index(typeid(int8_t)))) {
+  }
+
+  NumpyArray::NumpyArray(const IndexU8 count)
+    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }), 0, sizeof(uint8_t), format_map.at(std::type_index(typeid(uint8_t)))) {
+  }
+
+  NumpyArray::NumpyArray(const Index32 count)
+    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }), 0, sizeof(int32_t), format_map.at(std::type_index(typeid(int32_t)))) {
+  }
+
+  NumpyArray::NumpyArray(const IndexU32 count)
+    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }), 0, sizeof(uint32_t), format_map.at(std::type_index(typeid(uint32_t)))) {
+  }
+
+  NumpyArray::NumpyArray(const Index64 count)
+    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }), 0, sizeof(int64_t), format_map.at(std::type_index(typeid(int64_t)))) {
   }
 
   const std::shared_ptr<void> NumpyArray::ptr() const {
@@ -659,7 +693,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
-    int64_t toaxis = axis_wrap(axis);
+    int64_t toaxis = axis_wrap_if_negative(axis);
     ssize_t offset = (ssize_t)toaxis;
     if (offset > ndim()) {
       throw std::invalid_argument(std::string("NumpyArray cannot be counted in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
@@ -764,7 +798,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
-    int64_t toaxis = axis_wrap(axis);
+    int64_t toaxis = axis_wrap_if_negative(axis);
     if (shape_.size() <= 1) {
       throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }

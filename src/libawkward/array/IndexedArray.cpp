@@ -668,13 +668,13 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::count(int64_t axis) const {
-    int64_t toaxis = axis_wrap(axis);
+    int64_t toaxis = axis_wrap_if_negative(axis);
     return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), util::Parameters(), index_, content_.get()->count(toaxis));
   }
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::flatten(int64_t axis) const {
-    int64_t toaxis = axis_wrap(axis);
+    int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == 0) {
       if (ISOPTION) {
         int64_t numnull;

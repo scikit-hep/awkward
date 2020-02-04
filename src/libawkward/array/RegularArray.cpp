@@ -344,7 +344,7 @@ namespace awkward {
 #else
     std::string format = "l";
 #endif
-    int64_t toaxis = axis_wrap(axis);
+    int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == 0) {
       Index64 tocount = count64();
       std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
@@ -358,7 +358,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::flatten(int64_t axis) const {
-    int64_t toaxis = axis_wrap(axis);
+    int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == 0) {
       if (content_.get()->length() % size_ != 0) {
         return content_.get()->getitem_range_nowrap(0, length()*size_);

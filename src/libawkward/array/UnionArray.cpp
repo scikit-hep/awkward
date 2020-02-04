@@ -761,7 +761,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::count(int64_t axis) const {
-    int64_t toaxis = axis_wrap(axis);
+    int64_t toaxis = axis_wrap_if_negative(axis);
 
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {

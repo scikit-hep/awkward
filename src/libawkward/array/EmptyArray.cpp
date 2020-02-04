@@ -155,7 +155,7 @@ namespace awkward {
   const std::shared_ptr<Content> EmptyArray::count(int64_t axis) const {
     Index64 tocount = count64();
 
-    return awkward::numpyarray_onedim<int64_t>(tocount);
+    return std::make_shared<NumpyArray>(tocount);
   }
 
   const std::shared_ptr<Content> EmptyArray::flatten(int64_t axis) const {
