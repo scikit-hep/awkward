@@ -140,7 +140,47 @@ namespace awkward {
   }
 
   uint8_t NumpyArray::getbyte(ssize_t at) const {
-    return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
+    return *reinterpret_cast<uint8_t*>(byteptr());
+  }
+
+  int8_t NumpyArray::getint8(ssize_t at) const  {
+    return *reinterpret_cast<int8_t*>(byteptr());
+  }
+
+  uint8_t NumpyArray::getuint8(ssize_t at) const {
+    return *reinterpret_cast<uint8_t*>(byteptr());
+  }
+
+  int16_t NumpyArray::getint16(ssize_t at) const {
+    return *reinterpret_cast<int16_t*>(byteptr());
+  }
+
+  uint16_t NumpyArray::getuint16(ssize_t at) const {
+    return *reinterpret_cast<uint16_t*>(byteptr());
+  }
+
+  int32_t NumpyArray::getint32(ssize_t at) const {
+    return *reinterpret_cast<int32_t*>(byteptr());
+  }
+
+  uint32_t NumpyArray::getuint32(ssize_t at) const {
+    return *reinterpret_cast<uint32_t*>(byteptr());
+  }
+
+  int64_t NumpyArray::getint64(ssize_t at) const {
+    return *reinterpret_cast<int64_t*>(byteptr());
+  }
+
+  uint64_t NumpyArray::getuint64(ssize_t at) const {
+    return *reinterpret_cast<uint64_t*>(byteptr());
+  }
+
+  float_t NumpyArray::getfloat(ssize_t at) const {
+    return *reinterpret_cast<float*>(byteptr());
+  }
+
+  double_t NumpyArray::getdouble(ssize_t at) const {
+    return *reinterpret_cast<double*>(byteptr());
   }
 
   const std::shared_ptr<Content> NumpyArray::toRegularArray() const {
