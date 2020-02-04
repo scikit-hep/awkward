@@ -608,6 +608,14 @@ namespace awkward {
     return std::make_shared<NumpyArray>(identities, parameters_, ptr, shape, strides_, 0, itemsize_, format_);
   }
 
+  const std::shared_ptr<Content> NumpyArray::setitem_field(const std::shared_ptr<Content>& what) const {
+    throw std::runtime_error("NumpyArray::setitem_field(what)");
+  }
+
+  const std::shared_ptr<Content> NumpyArray::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
+    throw std::runtime_error("NumpyArray::setitem_field(where, what)");
+  }
+
   bool NumpyArray::purelist_isregular() const {
     return true;
   }

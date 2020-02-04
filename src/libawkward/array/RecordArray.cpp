@@ -344,6 +344,14 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> RecordArray::setitem_field(const std::shared_ptr<Content>& what) const {
+    throw std::runtime_error("RecordArray::setitem_field(what)");
+  }
+
+  const std::shared_ptr<Content> RecordArray::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
+    throw std::runtime_error("RecordArray::setitem_field(where, what)");
+  }
+
   bool RecordArray::purelist_isregular() const {
     return true;
   }

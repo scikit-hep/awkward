@@ -118,6 +118,14 @@ namespace awkward {
     return shallow_copy();
   }
 
+  const std::shared_ptr<Content> EmptyArray::setitem_field(const std::shared_ptr<Content>& what) const {
+    throw std::runtime_error("EmptyArray::setitem_field(what)");
+  }
+
+  const std::shared_ptr<Content> EmptyArray::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
+    throw std::runtime_error("EmptyArray::setitem_field(where, what)");
+  }
+
   bool EmptyArray::purelist_isregular() const {
     return true;
   }
