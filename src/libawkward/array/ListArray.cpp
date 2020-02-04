@@ -550,10 +550,10 @@ namespace awkward {
         stops_.offset());
       util::handle_error(err3, classname(), identities_.get());
 
-      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, tostarts, tostops, content_.get()->flatten(axis - 1));
+      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, tostarts, tostops, content_.get()->flatten(toaxis - 1));
     }
     else {
-      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_.get()->flatten(axis - 1));
+      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_.get()->flatten(toaxis - 1));
     }
   }
 
