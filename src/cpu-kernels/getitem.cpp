@@ -745,3 +745,16 @@ ERROR awkward_unionarray8_U32_project_64(int64_t* lenout, int64_t* tocarry, cons
 ERROR awkward_unionarray8_64_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
   return awkward_unionarray_project<int64_t, int8_t, int64_t>(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
 }
+
+template <typename T>
+ERROR awkward_regulararray_broadcast_carry(T* tocarry, int64_t size, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    for (int64_t j = 0;  j < size;  j++) {
+      tocarry[i*size + j] = i;
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_broadcast_carry_64(int64_t* tocarry, int64_t size, int64_t length) {
+  return awkward_regulararray_broadcast_carry<int64_t>(tocarry, size, length);
+}

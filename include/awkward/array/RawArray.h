@@ -382,11 +382,11 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
-      throw std::runtime_error("RawArray::setitem_field(what)");
+      throw std::invalid_argument("cannot assign field to array of non-records");
     }
 
     const std::shared_ptr<Content> setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
-      throw std::runtime_error("RawArray::setitem_field(where, what)");
+      throw std::invalid_argument("cannot assign field to array of non-records");
     }
 
     bool purelist_isregular() const override {

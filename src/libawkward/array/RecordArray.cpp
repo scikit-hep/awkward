@@ -44,6 +44,18 @@ namespace awkward {
       , recordlookup_(istuple ? nullptr : new util::RecordLookup)
       , length_(length) { }
 
+  RecordArray::RecordArray(const std::shared_ptr<Content>& content, const std::string& key)
+      : Content(Identities::none(), util::Parameters())
+      , contents_({ content })
+      , recordlookup_(new util::RecordLookup({ key }))
+      , length_(0) { }
+
+  RecordArray::RecordArray(const std::shared_ptr<Content>& content)
+      : Content(Identities::none(), util::Parameters())
+      , contents_({ content })
+      , recordlookup_(nullptr)
+      , length_(0) { }
+
   const std::vector<std::shared_ptr<Content>> RecordArray::contents() const {
     return contents_;
   }
@@ -349,7 +361,7 @@ namespace awkward {
       throw std::invalid_argument("where must be non-negative");
     }
     if (what.get()->length() != length()) {
-      throw std::invalid_argument(std::string("array of length ") + std::to_string(what.get()->length()) + std::string(" cannot be assigned to RecordArray of length ") + std::to_string(length()));
+      throw std::invalid_argument(std::string("array of length ") + std::to_string(what.get()->length()) + std::string(" cannot be assigned to record array of length ") + std::to_string(length()));
     }
     std::vector<std::shared_ptr<Content>> contents;
     for (size_t i = 0;  i < contents_.size();  i++) {
@@ -379,7 +391,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> RecordArray::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
     if (what.get()->length() != length()) {
-      throw std::invalid_argument(std::string("array of length ") + std::to_string(what.get()->length()) + std::string(" cannot be assigned to RecordArray of length ") + std::to_string(length()));
+      throw std::invalid_argument(std::string("array of length ") + std::to_string(what.get()->length()) + std::string(" cannot be assigned to record array of length ") + std::to_string(length()));
     }
     std::vector<std::shared_ptr<Content>> contents(contents_.begin(), contents_.end());
     contents.push_back(what);

@@ -1309,11 +1309,11 @@ py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_Nu
       .def_property_readonly("ndim", &ak::NumpyArray::ndim)
       .def_property_readonly("isscalar", &ak::NumpyArray::isscalar)
       .def_property_readonly("isempty", &ak::NumpyArray::isempty)
+      .def("toRegularArray", &ak::NumpyArray::toRegularArray)
 
       .def_property_readonly("iscontiguous", &ak::NumpyArray::iscontiguous)
       .def("contiguous", &ak::NumpyArray::contiguous)
       .def("become_contiguous", &ak::NumpyArray::become_contiguous)
-      .def("regularize_shape", &ak::NumpyArray::regularize_shape)
   );
 }
 

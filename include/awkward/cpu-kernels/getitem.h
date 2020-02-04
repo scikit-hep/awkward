@@ -108,6 +108,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_unionarray8_U32_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which);
   EXPORT_SYMBOL struct Error awkward_unionarray8_64_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length, int64_t which);
 
+  EXPORT_SYMBOL struct Error awkward_regulararray_broadcast_carry_64(int64_t* tocarry, int64_t size, int64_t length);
+
 }
 
 #endif // AWKWARDCPU_GETITEM_H_

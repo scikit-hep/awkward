@@ -167,11 +167,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("Record::setitem_field(what)");
+    throw std::runtime_error("undefined operation: Record::setitem_field(what)");
   }
 
   const std::shared_ptr<Content> Record::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("Record::setitem_field(where, what)");
+    throw std::runtime_error("undefined operation: Record::setitem_field(where, what)");
   }
 
   bool Record::purelist_isregular() const {

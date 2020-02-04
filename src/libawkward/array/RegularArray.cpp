@@ -294,12 +294,67 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities, parameters_, content_.get()->carry(nextcarry), size_);
   }
 
+  const std::shared_ptr<RegularArray> setitem_broadcast(const RegularArray& self, const std::shared_ptr<Content>& other) {
+    if (self.length() != other.get()->length()) {
+      throw std::invalid_argument(std::string("array of length ") + std::to_string(other.get()->length()) + std::string(" cannot be assigned to record array of length ") + std::to_string(self.length()));
+    }
+
+    std::shared_ptr<Content> regular_other = other;
+    if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) { }
+    else if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
+      regular_other = rawother->toRegularArray();
+    }
+    else if (ListOffsetArray32* rawother = dynamic_cast<ListOffsetArray32*>(other.get())) {
+      regular_other = rawother->toRegularArray();
+    }
+    else if (ListOffsetArrayU32* rawother = dynamic_cast<ListOffsetArrayU32*>(other.get())) {
+      regular_other = rawother->toRegularArray();
+    }
+    else if (ListOffsetArray64* rawother = dynamic_cast<ListOffsetArray64*>(other.get())) {
+      regular_other = rawother->toRegularArray();
+    }
+    else if (ListArray32* rawother = dynamic_cast<ListArray32*>(other.get())) {
+      regular_other = rawother->toRegularArray();
+    }
+    else if (ListArrayU32* rawother = dynamic_cast<ListArrayU32*>(other.get())) {
+      regular_other = rawother->toRegularArray();
+    }
+    else if (ListArray64* rawother = dynamic_cast<ListArray64*>(other.get())) {
+      regular_other = rawother->toRegularArray();
+    }
+    else {
+      throw std::invalid_argument(std::string("cannot broadcast ") + other.get()->classname() + std::string(" to fit into regular arrays of size ") + std::to_string(self.size()));
+    }
+
+    RegularArray* rawother = dynamic_cast<RegularArray*>(regular_other.get());
+    if (rawother->size() > 1  ||  self.size() == rawother->size()) {
+      if (self.size() != rawother->size()) {
+        throw std::invalid_argument(std::string("regular arrays of size ") + std::to_string(rawother->size()) + std::string(" cannot be assigned to regular arrays of size ") + std::to_string(self.size()));
+      }
+      return std::dynamic_pointer_cast<RegularArray>(regular_other);
+    }
+    else {
+      Index64 nextcarry(self.length()*self.size());
+      struct Error err = awkward_regulararray_broadcast_carry_64(
+        nextcarry.ptr().get(),
+        self.size(),
+        self.length());
+      util::handle_error(err, self.classname(), self.identities().get());
+      std::shared_ptr<Content> content = rawother->content().get()->carry(nextcarry);
+      return std::make_shared<RegularArray>(rawother->identities(), rawother->parameters(), content, self.size());
+    }
+  }
+
   const std::shared_ptr<Content> RegularArray::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("RegularArray::setitem_field(what)");
+    std::shared_ptr<Content> mine = content_.get()->getitem_range_nowrap(0, length());
+    std::shared_ptr<Content> theirs = setitem_broadcast(*this, what).get()->content();
+    return std::make_shared<RegularArray>(identities_, parameters_, mine.get()->setitem_field(where, theirs), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("RegularArray::setitem_field(where, what)");
+    std::shared_ptr<Content> mine = content_.get()->getitem_range_nowrap(0, length()*size_);
+    std::shared_ptr<Content> theirs = setitem_broadcast(*this, what).get()->content();
+    return std::make_shared<RegularArray>(identities_, parameters_, mine.get()->setitem_field(where, theirs), size_);
   }
 
   bool RegularArray::purelist_isregular() const {

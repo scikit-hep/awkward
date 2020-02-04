@@ -108,7 +108,7 @@ namespace awkward {
     return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
   }
 
-  const std::shared_ptr<Content> NumpyArray::regularize_shape() const {
+  const std::shared_ptr<Content> NumpyArray::toRegularArray() const {
     if (isscalar()) {
       return shallow_copy();
     }
@@ -609,11 +609,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("NumpyArray::setitem_field(what)");
+    throw std::invalid_argument("cannot assign field to array of non-records");
   }
 
   const std::shared_ptr<Content> NumpyArray::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("NumpyArray::setitem_field(where, what)");
+    throw std::invalid_argument("cannot assign field to array of non-records");
   }
 
   bool NumpyArray::purelist_isregular() const {
