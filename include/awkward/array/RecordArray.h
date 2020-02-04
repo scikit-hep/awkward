@@ -56,12 +56,14 @@ namespace awkward {
     const Index64 count64() const override;
     const std::shared_ptr<Content> count(int64_t axis) const override;
     const std::shared_ptr<Content> flatten(int64_t axis) const override;
+    bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
+    const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
 
     const std::shared_ptr<Content> field(int64_t fieldindex) const;
     const std::shared_ptr<Content> field(const std::string& key) const;
     const std::vector<std::shared_ptr<Content>> fields() const;
     const std::vector<std::pair<std::string, std::shared_ptr<Content>>> fielditems() const;
-    const RecordArray astuple() const;
+    const std::shared_ptr<RecordArray> astuple() const;
 
     void append(const std::shared_ptr<Content>& content, const std::string& key);
     void append(const std::shared_ptr<Content>& content);

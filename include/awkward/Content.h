@@ -56,6 +56,8 @@ namespace awkward {
     virtual const Index64 count64() const = 0;
     virtual const std::shared_ptr<Content> count(int64_t axis) const = 0;
     virtual const std::shared_ptr<Content> flatten(int64_t axis) const = 0;
+    virtual bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const = 0;
+    virtual const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const = 0;
 
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
@@ -68,6 +70,7 @@ namespace awkward {
     void setparameter(const std::string& key, const std::string& value);
     bool parameter_equals(const std::string& key, const std::string& value) const;
     bool parameters_equal(const util::Parameters& other) const;
+    const std::shared_ptr<Content> merge_as_union(const std::shared_ptr<Content>& other) const;
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const = 0;

@@ -1,12 +1,16 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
+#include <algorithm>
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/Record.h"
+#include "awkward/array/EmptyArray.h"
+#include "awkward/array/IndexedArray.h"
+#include "awkward/array/UnionArray.h"
 
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/RecordArray.h"
@@ -269,7 +273,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_at_nowrap(int64_t at) const {
-    return std::make_shared<Record>(*this, at);
+    return std::make_shared<Record>(std::dynamic_pointer_cast<RecordArray>(shallow_copy()), at);
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_range(int64_t start, int64_t stop) const {
@@ -405,7 +409,12 @@ namespace awkward {
     for (auto content : contents_) {
       contents.push_back(content.get()->count(toaxis));
     }
-    return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_);
+    if (contents.empty()) {
+      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+    }
+    else {
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {
@@ -413,7 +422,144 @@ namespace awkward {
     for (auto content : contents_) {
       contents.push_back(content.get()->flatten(axis));
     }
-    return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    if (contents.empty()) {
+      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+    }
+    else {
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    }
+  }
+
+  bool RecordArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+    if (!parameters_equal(other.get()->parameters())) {
+      return false;
+    }
+
+    if (dynamic_cast<EmptyArray*>(other.get())  ||
+        dynamic_cast<UnionArray8_32*>(other.get())  ||
+        dynamic_cast<UnionArray8_U32*>(other.get())  ||
+        dynamic_cast<UnionArray8_64*>(other.get())) {
+      return true;
+    }
+    else if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+
+    if (RecordArray* rawother = dynamic_cast<RecordArray*>(other.get())) {
+      if (istuple()  &&  rawother->istuple()) {
+        if (numfields() == rawother->numfields()) {
+          for (int64_t i = 0;  i < numfields();  i++) {
+            if (!field(i).get()->mergeable(rawother->field(i), mergebool)) {
+              return false;
+            }
+          }
+          return true;
+        }
+      }
+      else if (!istuple()  &&  !rawother->istuple()) {
+        std::vector<std::string> self_keys = keys();
+        std::vector<std::string> other_keys = rawother->keys();
+        std::sort(self_keys.begin(), self_keys.end());
+        std::sort(other_keys.begin(), other_keys.end());
+        if (self_keys == other_keys) {
+          for (auto key : self_keys) {
+            if (!field(key).get()->mergeable(rawother->field(key), mergebool)) {
+              return false;
+            }
+          }
+          return true;
+        }
+      }
+      return false;
+    }
+    else {
+      return false;
+    }
+  }
+
+  const std::shared_ptr<Content> RecordArray::merge(const std::shared_ptr<Content>& other) const {
+    if (!parameters_equal(other.get()->parameters())) {
+      return merge_as_union(other);
+    }
+
+    if (dynamic_cast<EmptyArray*>(other.get())) {
+      return shallow_copy();
+    }
+    else if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnionArray8_U32* rawother = dynamic_cast<UnionArray8_U32*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnionArray8_64* rawother = dynamic_cast<UnionArray8_64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+
+    if (RecordArray* rawother = dynamic_cast<RecordArray*>(other.get())) {
+      int64_t mylength = length();
+      int64_t theirlength = rawother->length();
+
+      if (istuple() == rawother->istuple()  &&  numfields() == 0  &&  rawother->numfields() == 0) {
+        return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), mylength + theirlength, istuple());
+      }
+      if (istuple()  &&  rawother->istuple()) {
+        if (numfields() == rawother->numfields()) {
+          std::vector<std::shared_ptr<Content>> contents;
+          for (int64_t i = 0;  i < numfields();  i++) {
+            std::shared_ptr<Content> mine = field(i).get()->getitem_range_nowrap(0, mylength);
+            std::shared_ptr<Content> theirs = rawother->field(i).get()->getitem_range_nowrap(0, theirlength);
+            contents.push_back(mine.get()->merge(theirs));
+          }
+          return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_);
+        }
+      }
+      else if (!istuple()  &&  !rawother->istuple()) {
+        std::vector<std::string> self_keys = keys();
+        std::vector<std::string> other_keys = rawother->keys();
+        std::sort(self_keys.begin(), self_keys.end());
+        std::sort(other_keys.begin(), other_keys.end());
+        if (self_keys == other_keys) {
+          std::vector<std::shared_ptr<Content>> contents;
+          for (auto key : keys()) {
+            std::shared_ptr<Content> mine = field(key).get()->getitem_range_nowrap(0, mylength);
+            std::shared_ptr<Content> theirs = rawother->field(key).get()->getitem_range_nowrap(0, theirlength);
+            contents.push_back(mine.get()->merge(theirs));
+          }
+          return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_);
+        }
+      }
+      throw std::invalid_argument("cannot merge records or tuples with different fields");
+    }
+    else {
+      throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
@@ -448,8 +594,8 @@ namespace awkward {
     return out;
   }
 
-  const RecordArray RecordArray::astuple() const {
-    return RecordArray(identities_, parameters_, contents_);
+  const std::shared_ptr<RecordArray> RecordArray::astuple() const {
+    return std::make_shared<RecordArray>(identities_, parameters_, contents_);
   }
 
   void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {
