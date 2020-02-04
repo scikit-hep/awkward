@@ -37,12 +37,9 @@ namespace awkward {
     const std::vector<std::pair<std::string, std::shared_ptr<Type>>> fielditems() const;
     const std::shared_ptr<Type> astuple() const;
 
-    void append(const std::shared_ptr<Type>& type, const std::string& key);
-    void append(const std::shared_ptr<Type>& type);
-
   private:
-    std::vector<std::shared_ptr<Type>> types_;
-    std::shared_ptr<util::RecordLookup> recordlookup_;
+    const std::vector<std::shared_ptr<Type>> types_;
+    const std::shared_ptr<util::RecordLookup> recordlookup_;
   };
 }
 

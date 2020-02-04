@@ -205,21 +205,4 @@ namespace awkward {
     return std::make_shared<RecordType>(parameters_, types_, std::shared_ptr<util::RecordLookup>(nullptr));
   }
 
-  void RecordType::append(const std::shared_ptr<Type>& type, const std::string& key) {
-    if (recordlookup_.get() == nullptr) {
-      recordlookup_ = util::init_recordlookup(numfields());
-    }
-    types_.push_back(type);
-    recordlookup_.get()->push_back(key);
-  }
-
-  void RecordType::append(const std::shared_ptr<Type>& type) {
-    if (recordlookup_.get() == nullptr) {
-      types_.push_back(type);
-    }
-    else {
-      append(type, std::to_string(numfields()));
-    }
-  }
-
 }

@@ -1124,14 +1124,6 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         }
         return out;
       })
-      .def("append", [](ak::RecordType& self, py::object type, py::object key) -> void {
-        if (key.is(py::none())) {
-          self.append(unbox_type(type));
-        }
-        else {
-          self.append(unbox_type(type), key.cast<std::string>());
-        }
-      }, py::arg("type"), py::arg("key") = py::none())
       .def(py::pickle([](const ak::RecordType& self) {
         py::tuple pytypes((size_t)self.numfields());
         for (int64_t i = 0;  i < self.numfields();  i++) {
@@ -1462,15 +1454,6 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
       .def_property_readonly("astuple", [](ak::RecordArray& self) -> py::object {
         return box(self.astuple());
       })
-
-      .def("append", [](ak::RecordArray& self, py::object content, py::object key) -> void {
-        if (key.is(py::none())) {
-          self.append(unbox_content(content));
-        }
-        else {
-          self.append(unbox_content(content), key.cast<std::string>());
-        }
-      }, py::arg("content"), py::arg("key") = py::none())
 
   );
 }

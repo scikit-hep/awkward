@@ -309,18 +309,18 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(identities_, parameters_, length(), istuple());
-    if (istuple()) {
-      for (auto key : keys) {
-        out.append(field(key).get()->getitem_range_nowrap(0, length()));
+    std::vector<std::shared_ptr<Content>> contents;
+    std::shared_ptr<util::RecordLookup> recordlookup(nullptr);
+    if (recordlookup_.get() != nullptr) {
+      recordlookup = std::make_shared<util::RecordLookup>();
+    }
+    for (auto key : keys) {
+      contents.push_back(field(key).get()->getitem_range_nowrap(0, length()));
+      if (recordlookup.get() != nullptr) {
+        recordlookup.get()->push_back(key);
       }
     }
-    else {
-      for (auto key : keys) {
-        out.append(field(key).get()->getitem_range_nowrap(0, length()), key);
-      }
-    }
-    return out.shallow_copy();
+    return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup);
   }
 
   const std::shared_ptr<Content> RecordArray::carry(const Index64& carry) const {
@@ -641,23 +641,6 @@ namespace awkward {
 
   const std::shared_ptr<RecordArray> RecordArray::astuple() const {
     return std::make_shared<RecordArray>(identities_, parameters_, contents_);
-  }
-
-  void RecordArray::append(const std::shared_ptr<Content>& content, const std::string& key) {
-    if (recordlookup_.get() == nullptr) {
-      recordlookup_ = util::init_recordlookup(numfields());
-    }
-    contents_.push_back(content);
-    recordlookup_.get()->push_back(key);
-  }
-
-  void RecordArray::append(const std::shared_ptr<Content>& content) {
-    if (recordlookup_.get() == nullptr) {
-      contents_.push_back(content);
-    }
-    else {
-      append(content, std::to_string(numfields()));
-    }
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
