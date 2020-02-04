@@ -668,27 +668,14 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::count(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: IndexedArray::count(axis != 0)");
-    }
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, content_.get()->count(axis));
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), util::Parameters(), index_, content_.get()->count(toaxis));
   }
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::flatten(int64_t axis) const {
-    if (axis < 0) {
-      std::pair<int64_t, int64_t> minmax = minmax_depth();
-      int64_t mindepth = minmax.first;
-      int64_t maxdepth = minmax.second;
-      int64_t depth = purelist_depth();
-      if (mindepth == depth  &&  maxdepth == depth) {
-        return flatten(-axis);
-      }
-      else {
-        return content_.get()->flatten(axis);
-      }
-    }
-    else if (axis == 0) {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == 0) {
       if (ISOPTION) {
         int64_t numnull;
         struct Error err1 = util::awkward_indexedarray_numnull<T>(
@@ -708,7 +695,7 @@ namespace awkward {
           util::handle_error(err2, classname(), identities_.get());
 
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-        return next.get()->flatten(axis);
+        return next.get()->flatten(toaxis);
       }
       else {
         Index64 nextcarry(length());
@@ -721,11 +708,11 @@ namespace awkward {
         util::handle_error(err, classname(), identities_.get());
 
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-        return next.get()->flatten(axis);
+        return next.get()->flatten(toaxis);
       }
     }
     else {
-      return content_.get()->flatten(axis - 1);
+      return content_.get()->flatten(toaxis - 1);
     }
   }
 

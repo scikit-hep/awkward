@@ -5,7 +5,9 @@
 
 #include <cassert>
 #include <string>
+#include <unordered_map>
 #include <memory>
+#include <typeindex>
 #include <vector>
 
 #include "awkward/cpu-kernels/util.h"
@@ -16,8 +18,14 @@ namespace awkward {
   class NumpyArray: public Content {
   public:
     static const std::shared_ptr<Type> unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape);
+    static const std::unordered_map<std::type_index, std::string> format_map;
 
     NumpyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format);
+    NumpyArray(const Index8 count);
+    NumpyArray(const IndexU8 count);
+    NumpyArray(const Index32 count);
+    NumpyArray(const IndexU32 count);
+    NumpyArray(const Index64 count);
 
     const std::shared_ptr<void> ptr() const;
     const std::vector<ssize_t> shape() const;

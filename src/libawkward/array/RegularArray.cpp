@@ -339,37 +339,27 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::count(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: RegularArray::count(axis != 0)");
-    }
-    Index64 tocount = count64();
-    std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
-    std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
 #ifdef _MSC_VER
     std::string format = "q";
 #else
     std::string format = "l";
 #endif
-    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == 0) {
+      Index64 tocount = count64();
+      std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
+      std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+
+      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+    }
+    else {
+      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), content_.get()->count(toaxis - 1), size_);
+    }
   }
 
   const std::shared_ptr<Content> RegularArray::flatten(int64_t axis) const {
-    if (axis < 0) {
-      std::pair<int64_t, int64_t> minmax = minmax_depth();
-      int64_t mindepth = minmax.first;
-      int64_t maxdepth = minmax.second;
-      int64_t depth = purelist_depth();
-      if (mindepth == depth  &&  maxdepth == depth) {
-        if (depth - 1 + axis < 0) {
-          throw std::invalid_argument(std::string("RegularArray cannot be flattened in axis ") + std::to_string(axis) + std::string(" because its depth is ") + std::to_string(depth));
-        }
-        return flatten(depth - 1 + axis);
-      }
-      else {
-        return content_.get()->flatten(axis);
-      }
-    }
-    else if (axis == 0) {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == 0) {
       if (content_.get()->length() % size_ != 0) {
         return content_.get()->getitem_range_nowrap(0, length()*size_);
       }
@@ -390,7 +380,7 @@ namespace awkward {
         offsets.ptr().get()[i + 1] = l + offsets.ptr().get()[i];
       }
 
-      std::shared_ptr<Content> nextcontent = content_.get()->flatten(axis - 1);
+      std::shared_ptr<Content> nextcontent = content_.get()->flatten(toaxis - 1);
 
       return std::make_shared<ListOffsetArray64>(identities_, parameters_, offsets, nextcontent);
     }

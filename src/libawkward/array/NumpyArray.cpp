@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <iomanip>
+#include <numeric>
 #include <sstream>
 #include <stdexcept>
 
@@ -37,6 +38,20 @@ namespace awkward {
     return out;
   }
 
+  const std::unordered_map<std::type_index, std::string> NumpyArray::format_map = {
+    { typeid(int8_t), "b"},
+    { typeid(uint8_t), "B"},
+ #ifdef _MSC_VER
+    { typeid(int32_t), "l"},
+    { typeid(uint32_t), "L"},
+    { typeid(int64_t), "q"}
+ #else
+    { typeid(int32_t), "i"},
+    { typeid(uint32_t), "I"},
+    { typeid(int64_t), "l"}
+ #endif
+ };
+
   NumpyArray::NumpyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
       : Content(identities, parameters)
       , ptr_(ptr)
@@ -48,6 +63,26 @@ namespace awkward {
     if (shape.size() != strides.size()) {
       throw std::runtime_error(std::string("len(shape), which is ") + std::to_string(shape.size()) + std::string(", must be equal to len(strides), which is ") + std::to_string(strides.size()));
     }
+  }
+
+  NumpyArray::NumpyArray(const Index8 count)
+    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }), 0, sizeof(int8_t), format_map.at(std::type_index(typeid(int8_t)))) {
+  }
+
+  NumpyArray::NumpyArray(const IndexU8 count)
+    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }), 0, sizeof(uint8_t), format_map.at(std::type_index(typeid(uint8_t)))) {
+  }
+
+  NumpyArray::NumpyArray(const Index32 count)
+    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }), 0, sizeof(int32_t), format_map.at(std::type_index(typeid(int32_t)))) {
+  }
+
+  NumpyArray::NumpyArray(const IndexU32 count)
+    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }), 0, sizeof(uint32_t), format_map.at(std::type_index(typeid(uint32_t)))) {
+  }
+
+  NumpyArray::NumpyArray(const Index64 count)
+    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }), 0, sizeof(int64_t), format_map.at(std::type_index(typeid(int64_t)))) {
   }
 
   const std::shared_ptr<void> NumpyArray::ptr() const {
@@ -75,7 +110,7 @@ namespace awkward {
   }
 
   ssize_t NumpyArray::ndim() const {
-    return shape_.size();
+    return (ssize_t)shape_.size();
   }
 
   bool NumpyArray::isempty() const {
@@ -254,7 +289,7 @@ namespace awkward {
     else {
       throw std::invalid_argument(std::string("Numpy format \"") + format_ + std::string("\" cannot be expressed as a PrimitiveType"));
     }
-    for (ssize_t i = shape_.size() - 1;  i > 0;  i--) {
+    for (std::size_t i = shape_.size() - 1;  i > 0;  i--) {
       out = std::make_shared<RegularType>(util::Parameters(), out, (int64_t)shape_[i]);
     }
     return out;
@@ -271,7 +306,7 @@ namespace awkward {
     assert(!isscalar());
     std::stringstream out;
     out << indent << pre << "<" << classname() << " format=" << util::quote(format_, true) << " shape=\"";
-    for (ssize_t i = 0;  i < ndim();  i++) {
+    for (std::size_t i = 0;  i < ndim();  i++) {
       if (i != 0) {
         out << " ";
       }
@@ -280,7 +315,7 @@ namespace awkward {
     out << "\" ";
     if (!iscontiguous()) {
       out << "strides=\"";
-      for (ssize_t i = 0;  i < ndim();  i++) {
+      for (std::size_t i = 0;  i < ndim();  i++) {
         if (i != 0) {
           out << ", ";
         }
@@ -639,9 +674,13 @@ namespace awkward {
   }
 
   const Index64 NumpyArray::count64() const {
-    if (shape_.size() <= 1) {
-      // FIXME: the cut-off for countability depends on axis
+    if (ndim() < 1) {
       throw std::invalid_argument(std::string("NumpyArray cannot be counted because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    }
+    else if (ndim() == 1) {
+      Index64 tocount(1);
+      tocount.ptr().get()[0] = length();
+      return tocount;
     }
     int64_t len = length();
     Index64 tocount(len);
@@ -654,18 +693,55 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: NumpyArray::count(axis != 0)");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    ssize_t offset = (ssize_t)toaxis;
+    if (offset > ndim()) {
+      throw std::invalid_argument(std::string("NumpyArray cannot be counted in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
-    Index64 tocount = count64();
-    std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
-    std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+
 #ifdef _MSC_VER
     std::string format = "q";
 #else
     std::string format = "l";
 #endif
-    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+    if (offset == 0) {
+      Index64 tocount = count64();
+      std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
+      std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+
+      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+    }
+    else if (offset + 1 == ndim()) {
+      Index64 tocount(1);
+      tocount.ptr().get()[0] = std::accumulate(std::begin(shape_), std::end(shape_), 1, std::multiplies<ssize_t>());
+      std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
+      std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+
+      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+    }
+    else {
+      // From studies/flatten.py:
+      // # content = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
+      // # index = [0] * self.shape[0] * self.shape[1]
+      // # return RegularArray(IndexedArray(index, content), self.shape[1])
+
+      std::vector<ssize_t> nextshape = std::vector<ssize_t>(std::begin(shape_) + 1, std::end(shape_));
+      std::vector<ssize_t> nextstrides = std::vector<ssize_t>(std::begin(strides_) + 1, std::end(strides_));
+
+      std::shared_ptr<Content> content = (NumpyArray(identities_, parameters_, ptr_, nextshape, nextstrides, byteoffset_, itemsize_, format_)).count(offset - 1);
+
+      int64_t len = shape_[0]*shape_[1];
+      Index64 tocount(len);
+      struct Error err = awkward_regulararray_count(
+        tocount.ptr().get(),
+        (int64_t)0,
+        len);
+      util::handle_error(err, classname(), identities_.get());
+
+      std::shared_ptr<IndexedArray64> indexed = std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), tocount, content);
+
+      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), indexed, shape_[1]);
+    }
   }
 
   const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
@@ -722,30 +798,18 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
-    if (axis < 0) {
-      std::pair<int64_t, int64_t> minmax = minmax_depth();
-      assert(minmax.first == minmax.second);
-      int64_t mindepth = minmax.first;
-      int64_t depth = purelist_depth();
-      if (mindepth == depth) {
-        int64_t toaxis = axis - 1 + (int64_t)ndim();
-        if (toaxis < 0) {
-          throw std::invalid_argument(std::string("NumpyArray cannot be flattened in axis ") + std::to_string(axis) + std::string(" because it exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
-        }
-        return flatten(toaxis);
-      }
-    }
+    int64_t toaxis = axis_wrap_if_negative(axis);
     if (shape_.size() <= 1) {
       throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
-    if (axis >= shape_.size() - 1) {
+    if (toaxis >= shape_.size() - 1) {
       throw std::invalid_argument(std::string("NumpyArray cannot be flattened because axis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
     if (iscontiguous()) {
-      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_, axis), flatten_strides(strides_, axis), byteoffset_, itemsize_, format_);
+      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_, toaxis), flatten_strides(strides_, toaxis), byteoffset_, itemsize_, format_);
     }
     else {
-      return contiguous().flatten(axis);
+      return contiguous().flatten(toaxis);
     }
   }
 

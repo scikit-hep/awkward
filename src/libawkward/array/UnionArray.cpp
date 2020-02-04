@@ -13,6 +13,8 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 
+#include "awkward/array/NumpyArray.h"
+#include "awkward/array/RegularArray.h"
 #include "awkward/array/UnionArray.h"
 
 namespace awkward {
@@ -747,12 +749,27 @@ namespace awkward {
 
   template <typename T, typename I>
   const Index64 UnionArrayOf<T, I>::count64() const {
-    throw std::runtime_error("FIXME: UnionArray::count64");
+    int64_t len = contents_.size();
+    Index64 tocount(len);
+    int64_t indx(0);
+    for (auto content : contents_) {
+      Index64 toappend = content.get()->count64();
+      tocount.ptr().get()[indx++] = toappend.length();
+    }
+    return tocount;
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::count(int64_t axis) const {
-    throw std::runtime_error("FIXME: UnionArray::count");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.emplace_back(content.get()->count(toaxis));
+    }
+    UnionArrayOf<T, I>unionarray(Identities::none(), util::Parameters(), tags_, index_, contents);
+
+    return unionarray.simplify(true);
   }
 
   template <typename T, typename I>

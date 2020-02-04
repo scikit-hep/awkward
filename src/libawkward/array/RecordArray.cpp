@@ -12,6 +12,7 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
 
+#include "awkward/array/NumpyArray.h"
 #include "awkward/array/RecordArray.h"
 
 namespace awkward {
@@ -391,16 +392,22 @@ namespace awkward {
   }
 
   const Index64 RecordArray::count64() const {
-    throw std::invalid_argument("RecordArray cannot be counted, because records are not lists");
+    int64_t len = (int64_t)contents_.size();
+    Index64 tocount(len);
+    int64_t indx(0);
+    for (auto content : contents_) {
+      Index64 toappend = content.get()->count64();
+      tocount.ptr().get()[indx++] = toappend.length();
+    }
+    return tocount;
   }
 
   const std::shared_ptr<Content> RecordArray::count(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: RecordArray::count(axis != 0)");
-    }
+    int64_t toaxis = axis_wrap_if_negative(axis);
+
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {
-      contents.push_back(content.get()->count(axis));
+      contents.push_back(content.get()->count(toaxis));
     }
     if (contents.empty()) {
       return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());

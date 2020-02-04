@@ -97,7 +97,7 @@ namespace awkward {
   bool Content::parameters_equal(const util::Parameters& other) const {
     return util::parameters_equal(parameters_, other);
   }
-  
+
   const std::shared_ptr<Content> Content::merge_as_union(const std::shared_ptr<Content>& other) const {
     int64_t mylength = length();
     int64_t theirlength = other.get()->length();
@@ -243,4 +243,15 @@ namespace awkward {
     }
   }
 
+  const int64_t Content::axis_wrap_if_negative(int64_t axis) const {
+    int64_t mindepth = minmax_depth().first;
+    int64_t maxdepth = minmax_depth().second;
+    int64_t depth = purelist_depth();
+    if (axis < 0  &&  mindepth == depth  &&  maxdepth == depth) {
+      return (depth - 1 + axis);
+    }
+    else {
+      return axis;
+    }
+  }
 }

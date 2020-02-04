@@ -450,75 +450,37 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::count(int64_t axis) const {
-    if (axis != 0) {
-      throw std::runtime_error("FIXME: ListArray::count(axis != 0)");
-    }
-    int64_t lenstarts = starts_.length();
-    if (stops_.length() < lenstarts) {
-      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
-    }
-    IndexOf<T> tocount(starts_.length());
-    struct Error err = util::awkward_listarray_count(
-      tocount.ptr().get(),
-      starts_.ptr().get(),
-      stops_.ptr().get(),
-      lenstarts,
-      starts_.offset(),
-      stops_.offset());
-    util::handle_error(err, classname(), identities_.get());
-    std::vector<ssize_t> shape({ (ssize_t)lenstarts });
-    std::vector<ssize_t> strides({ (ssize_t)sizeof(T) });
-    std::string format;
-#ifdef _MSC_VER
-    if (std::is_same<T, int32_t>::value) {
-      format = "l";
-    }
-    else if (std::is_same<T, uint32_t>::value) {
-      format = "L";
-    }
-    else if (std::is_same<T, int64_t>::value) {
-      format = "q";
-    }
-#else
-    if (std::is_same<T, int32_t>::value) {
-      format = "i";
-    }
-    else if (std::is_same<T, uint32_t>::value) {
-      format = "I";
-    }
-    else if (std::is_same<T, int64_t>::value) {
-      format = "l";
-    }
-#endif
-    else {
-      throw std::runtime_error("unrecognized ListArray specialization");
-    }
-    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(T), format);
-  }
-
-  template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::flatten(int64_t axis) const {
-    if (axis < 0) {
-      std::pair<int64_t, int64_t> minmax = minmax_depth();
-      int64_t mindepth = minmax.first;
-      int64_t maxdepth = minmax.second;
-      int64_t depth = purelist_depth();
-      if (mindepth == depth  &&  maxdepth == depth) {
-        if (depth - 1 + axis < 0) {
-          throw std::invalid_argument(std::string("ListArrayOf<T> cannot be flattened in axis ") + std::to_string(axis) + std::string(" because its depth is ") + std::to_string(depth));
-        }
-        return flatten(depth - 1 + axis);
-      }
-      else {
-        return content_.get()->flatten(axis);
-      }
-    }
-    else if (axis == 0) {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == 0) {
       int64_t lenstarts = starts_.length();
       if (stops_.length() < lenstarts) {
         util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
       }
+      IndexOf<T> tocount(lenstarts);
+      struct Error err = util::awkward_listarray_count(
+        tocount.ptr().get(),
+        starts_.ptr().get(),
+        stops_.ptr().get(),
+        lenstarts,
+        starts_.offset(),
+        stops_.offset());
+      util::handle_error(err, classname(), identities_.get());
 
+      return std::make_shared<NumpyArray>(tocount);
+    }
+    else {
+      return std::make_shared<ListArrayOf<T>>(Identities::none(), util::Parameters(), starts_, stops_, content_.get()->count(toaxis - 1));
+    }
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::flatten(int64_t axis) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == 0) {
+      int64_t lenstarts = starts_.length();
+      if (stops_.length() < lenstarts) {
+        util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+      }
       int64_t lenarray(0);
       struct Error err1 = util::awkward_listarray_flatten_length(
         &lenarray,
@@ -541,7 +503,7 @@ namespace awkward {
 
       return content_.get()->carry(indxarray);
     }
-    else if (axis == 1) {
+    else if (toaxis == 1) {
       int64_t lenstarts = starts_.length();
       IndexOf<T> tostarts(lenstarts);
       IndexOf<T> tostops(lenstarts);
@@ -562,10 +524,10 @@ namespace awkward {
         stops_.offset());
       util::handle_error(err3, classname(), identities_.get());
 
-      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, tostarts, tostops, content_.get()->flatten(axis - 1));
+      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, tostarts, tostops, content_.get()->flatten(toaxis - 1));
     }
     else {
-      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_.get()->flatten(axis - 1));
+      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_.get()->flatten(toaxis - 1));
     }
   }
 

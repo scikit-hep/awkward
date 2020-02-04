@@ -30,6 +30,32 @@ ERROR awkward_listarray64_count_64(int64_t* tocount, const int64_t* fromstarts, 
   return awkward_listarray_count<int64_t, int64_t>(tocount, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
 }
 
+template <typename T, typename C>
+ERROR awkward_listoffsetarray_count(T* tocount, const C* fromoffsets, int64_t lenoffsets) {
+  for (int64_t i = 0;  i < lenoffsets;  i++) {
+    tocount[i] = fromoffsets[i + 1] - fromoffsets[i];
+  }
+  return success();
+}
+ERROR awkward_listoffsetarray32_count(int32_t* tocount, const int32_t* fromoffsets, int64_t lenoffsets) {
+  return awkward_listoffsetarray_count<int32_t, int32_t>(tocount, fromoffsets, lenoffsets);
+}
+ERROR awkward_listoffsetarrayU32_count(uint32_t* tocount, const uint32_t* fromoffsets, int64_t lenoffsets) {
+  return awkward_listoffsetarray_count<uint32_t, uint32_t>(tocount, fromoffsets, lenoffsets);
+}
+ERROR awkward_listoffsetarray64_count(int64_t* tocount, const int64_t* fromoffsets, int64_t lenoffsets) {
+  return awkward_listoffsetarray_count<int64_t, int64_t>(tocount, fromoffsets, lenoffsets);
+}
+ERROR awkward_listoffsetarray32_count_64(int64_t* tocount, const int32_t* fromoffsets, int64_t lenoffsets) {
+  return awkward_listoffsetarray_count<int64_t, int32_t>(tocount, fromoffsets, lenoffsets);
+}
+ERROR awkward_listoffsetarrayU32_count_64(int64_t* tocount, const uint32_t* fromoffsets, int64_t lenoffsets) {
+  return awkward_listoffsetarray_count<int64_t, uint32_t>(tocount, fromoffsets, lenoffsets);
+}
+ERROR awkward_listoffsetarray64_count_64(int64_t* tocount, const int64_t* fromoffsets, int64_t lenoffsets) {
+  return awkward_listoffsetarray_count<int64_t, int64_t>(tocount, fromoffsets, lenoffsets);
+}
+
 ERROR awkward_regulararray_count(int64_t* tocount, int64_t size, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     tocount[i] = size;
