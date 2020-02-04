@@ -43,14 +43,20 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
     inputs = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=True) for x in inputs]
 
     def getfunction(inputs):
-        signature = (ufunc,) + tuple(x.parameters.get("__class__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
-        custom = awkward1._util.regular_functions(functions).get(signature)
+        signature = (ufunc,) + tuple(x.parameters.get("__record__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
+        custom = awkward1._util.overload(functions, signature)
         if custom is not None:
             return lambda: custom(*inputs, **kwargs)
-        elif all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
+
+        signature = (ufunc,) + tuple(x.parameters.get("__array__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
+        custom = awkward1._util.overload(functions, signature)
+        if custom is not None:
+            return lambda: custom(*inputs, **kwargs)
+
+        if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
             return lambda: awkward1.layout.NumpyArray(getattr(ufunc, method)(*inputs, **kwargs))
-        else:
-            return None
+
+        return None
 
     return awkward1._util.wrap(awkward1._util.broadcast_and_apply(inputs, getfunction), classes, functions)
 

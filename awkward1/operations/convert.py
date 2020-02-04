@@ -69,13 +69,13 @@ def tonumpy(array):
     elif isinstance(array, awkward1.layout.FillableArray):
         return tonumpy(array.snapshot())
 
-    elif awkward1.operations.describe.parameters(array).get("__class__") == "char":
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "char":
         if awkward1.operations.describe.parameters(array).get("encoding") is None:
             return tonumpy(array.__bytes__())
         else:
             return tonumpy(array.__str__())
 
-    elif awkward1.operations.describe.parameters(array).get("__class__") == "string":
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "string":
         if awkward1.operations.describe.parameters(array.content).get("encoding") is None:
             return numpy.array([awkward1.behavior.string.CharBehavior(array[i]).__bytes__() for i in range(len(array))])
         else:
@@ -156,7 +156,7 @@ def tolist(array):
         else:
             return array.__str__()
 
-    elif awkward1.operations.describe.parameters(array).get("__class__") == "char":
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "char":
         if awkward1.operations.describe.parameters(array).get("encoding") is None:
             return awkward1.behavior.string.CharBehavior(array).__bytes__()
         else:

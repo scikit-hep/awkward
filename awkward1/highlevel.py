@@ -17,7 +17,7 @@ import awkward1.operations.convert
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin, Sequence):
-    def __init__(self, data, type=None, classes=None, functions=None):
+    def __init__(self, data, classes=None, functions=None):
         if isinstance(data, awkward1.layout.Content):
             layout = data
         elif isinstance(data, Array):
@@ -31,25 +31,12 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
 
-        self._classes = classes
-        self._functions = functions
-
-        if type is not None:
-            if not isinstance(type, awkward1.layout.ArrayType):
-                raise TypeError("type must be an awkward1.layout.ArrayType")
-            if type.length > len(layout):
-                raise TypeError("ArrayType length ({0}) is greater than layout length {1}".format(type.length, len(layout)))
-            if type.length < len(layout):
-                layout = layout[:type.length]
-            cls = awkward1._util.regular_classes(self._classes).get(type.parameters.get("__class__"))
-            if cls is not None:
-                if not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Array):
-                    raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Array".format(repr(type.parameters["__class__"])))
-                self.__class__ = cls
-            layout = layout.astype(type.type)
+        self.__class__ = awkward1._util.arrayclass(classes, layout.parameters)
 
         self.layout = layout
-
+        self._classes = classes
+        self._functions = functions
+        
     @property
     def layout(self):
         return self._layout
@@ -157,26 +144,17 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
         return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
 
 class Record(awkward1._numpy.NDArrayOperatorsMixin):
-    def __init__(self, data, type=None, classes=None, functions=None):
+    def __init__(self, data, classes=None, functions=None):
         # FIXME: more checks here
         layout = data
         if not isinstance(layout, awkward1.layout.Record):
             raise TypeError("could not convert data into an awkward1.Record")
 
-        self._classes = classes
-        self._functions = functions
-
-        if type is not None:
-            if not isinstance(type, awkward1.layout.RecordType):
-                raise TypeError("type must be an awkward1.layout.RecordType")
-            cls = awkward1._util.regular_classes(self._classes).get(type.parameters.get("__class__"))
-            if cls is not None:
-                if not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Record):
-                    raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Record".format(repr(type.parameters["__class__"])))
-                self.__class__ = cls
-            layout = layout.astype(type)
+        self.__class__ = awkward1._util.recordclass(classes, layout.parameters)
 
         self.layout = layout
+        self._classes = classes
+        self._functions = functions
 
     @property
     def layout(self):

@@ -20,19 +20,32 @@ listtypes = (awkward1.layout.RegularArray, awkward1.layout.ListArray32, awkward1
 
 recordtypes = (awkward1.layout.RecordArray,)
 
-def regular_classes(classes):
+def arrayclass(classes, parameters):
     import awkward1
     if classes is None:
-        return awkward1.classes
-    else:
-        return classes
+        classes = awkward1.classes
+    cls = classes.get(parameters.get("__array__"))
+    if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
+        return cls
+    cls = classes.get(("array", parameters.get("__record__")))
+    if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
+        return cls
+    return awkward1.highlevel.Array
 
-def regular_functions(functions):
+def recordclass(classes, parameters):
+    import awkward1
+    if classes is None:
+        classes = awkward1.classes
+    cls = classes.get(parameters.get("__record__"))
+    if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Record):
+        return cls
+    return awkward1.highlevel.Record
+
+def overload(functions, signature):
     import awkward1
     if functions is None:
-        return awkward1.functions
-    else:
-        return functions
+        functions = awkward1.functions
+    return functions.get(signature)
 
 def combine_classes(*arrays):
     classes = None
@@ -55,19 +68,13 @@ def combine_functions(*arrays):
     return functions
 
 def wrap(content, classes, functions):
-    import awkward1.layout
+    import awkward1.highlevel
 
     if isinstance(content, awkward1.layout.Content):
-        cls = regular_classes(classes).get(content.parameters.get("__class__"))
-        if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Array)):
-            cls = awkward1.Array
-        return cls(content, classes=classes, functions=functions)
+        return awkward1.highlevel.Array(content, classes=classes, functions=functions)
 
     elif isinstance(content, awkward1.layout.Record):
-        cls = regular_classes(classes).get(content.parameters.get("__class__"))
-        if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Record)):
-            cls = awkward1.Record
-        return cls(content, classes=classes, functions=functions)
+        return awkward1.highlevel.Record(content, classes=classes, functions=functions)
 
     else:
         return content
@@ -330,15 +337,15 @@ def minimally_touching_string(limit_length, layout, classes, functions):
     def forward(x, space, brackets=True, wrap=True):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
-            cls = regular_classes(classes).get(x.parameters.get("__class__"))
-            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
+            cls = arrayclass(classes, x.parameters)
+            if cls is not awkward1.highlevel.Array:
                 y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
-            cls = regular_classes(classes).get(x.parameters.get("__class__"))
-            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
+            cls = recordclass(classes, x.parameters)
+            if cls is not awkward1.highlevel.Record:
                 y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
@@ -382,15 +389,15 @@ def minimally_touching_string(limit_length, layout, classes, functions):
     def backward(x, space, brackets=True, wrap=True):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
-            cls = regular_classes(classes).get(x.parameters.get("__class__"))
-            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
+            cls = arrayclass(classes, x.parameters)
+            if cls is not awkward1.highlevel.Array:
                 y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
-            cls = regular_classes(classes).get(x.parameters.get("__class__"))
-            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
+            cls = recordclass(classes, x.parameters)
+            if cls is not awkward1.highlevel.Record:
                 y = cls(x, classes=classes, functions=functions)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space

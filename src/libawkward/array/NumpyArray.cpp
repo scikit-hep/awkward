@@ -434,7 +434,7 @@ namespace awkward {
 
   void NumpyArray::tojson_part(ToJson& builder) const {
     check_for_iteration();
-    if (parameter_equals("__class__", "\"char\"")) {
+    if (parameter_equals("__array__", "\"char\"")) {
       tojson_string(builder);
     }
     else if (format_.compare("d") == 0) {

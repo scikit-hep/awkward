@@ -53,12 +53,14 @@ def test_dress():
     ns = {"Dummy": Dummy}
 
     x = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    a = awkward1.Array(x, type=awkward1.layout.ArrayType(x.type, 5, {"__class__": "Dummy", "__typestr__": "D[5 * float64]"}), classes=ns)
+    x.setparameter("__array__", "Dummy")
+    x.setparameter("__typestr__", "D[5 * float64]")
+    a = awkward1.Array(x, classes=ns)
     assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
-    x2 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"__class__": "Dummy"}))
+    x2 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"__array__": "Dummy"}))
     a2 = awkward1.Array(x2, classes=ns)
-    assert repr(a2) == "<Array [<Dummy [1.1, 2.2, 3.3]>, ... ] type='3 * var * float64[parameters={\"__cl...'>"
+    assert repr(a2) == "<Array [<Dummy [1.1, 2.2, 3.3]>, ... ] type='3 * var * float64[parameters={\"__ar...'>"
     assert repr(a2[0]) == "<Dummy [1.1, 2.2, 3.3]>"
     assert repr(a2[1]) == "<Dummy []>"
     assert repr(a2[2]) == "<Dummy [4.4, 5.5]>"
@@ -69,7 +71,7 @@ class D(awkward1.highlevel.Array):
     pass
 
 def test_numpyarray():
-    array1 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5), parameters={"__class__": "D", "__typestr__": "D[int64]"})
+    array1 = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5), parameters={"__record__": "D", "__typestr__": "D[int64]"})
 
     @numba.njit
     def f1(q):
@@ -83,7 +85,7 @@ def test_numpyarray():
     assert array2[-1, -1, -1] == 29
 
 def test_regulararray():
-    array1 = awkward1.layout.RegularArray(awkward1.layout.NumpyArray(numpy.arange(10, dtype=numpy.int64)), 5, parameters={"__class__": "D", "__typestr__": "D[5 * int64]"})
+    array1 = awkward1.layout.RegularArray(awkward1.layout.NumpyArray(numpy.arange(10, dtype=numpy.int64)), 5, parameters={"__record__": "D", "__typestr__": "D[5 * int64]"})
 
     @numba.njit
     def f1(q):
@@ -94,7 +96,7 @@ def test_regulararray():
     assert repr(array2.type) == "D[5 * int64]"
 
 def test_listoffsetarray():
-    array1 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64)), parameters={"__class__": "D", "__typestr__": "D[var * int64]"})
+    array1 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64)), parameters={"__record__": "D", "__typestr__": "D[var * int64]"})
 
     @numba.njit
     def f1(q):
@@ -105,7 +107,7 @@ def test_listoffsetarray():
     assert repr(array2.type) == "D[var * int64]"
 
 def test_listarray():
-    array1 = awkward1.layout.ListArray64(awkward1.layout.Index64(numpy.array([0, 3, 3], dtype=numpy.int64)), awkward1.layout.Index64(numpy.array([3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64)), parameters={"__class__": "D", "__typestr__": "D[var * int64]"})
+    array1 = awkward1.layout.ListArray64(awkward1.layout.Index64(numpy.array([0, 3, 3], dtype=numpy.int64)), awkward1.layout.Index64(numpy.array([3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64)), parameters={"__record__": "D", "__typestr__": "D[var * int64]"})
 
     @numba.njit
     def f1(q):
@@ -118,7 +120,7 @@ def test_listarray():
 def test_recordarray():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3], dtype=numpy.int64))
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3], dtype=numpy.float64))
-    array1 = awkward1.layout.RecordArray({"one": content1, "two": content2}, parameters={"__class__": "D", "__typestr__": "D[{\"one\": int64, \"two\": float64}]"})
+    array1 = awkward1.layout.RecordArray({"one": content1, "two": content2}, parameters={"__record__": "D", "__typestr__": "D[{\"one\": int64, \"two\": float64}]"})
 
     @numba.njit
     def f1(q):

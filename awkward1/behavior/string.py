@@ -5,6 +5,7 @@ import codecs
 import numpy
 
 import awkward1.highlevel
+import awkward1.operations.convert
 
 class CharBehavior(awkward1.highlevel.Array):
     def __bytes__(self):
@@ -29,8 +30,8 @@ class CharBehavior(awkward1.highlevel.Array):
             yield x
 
 awkward1.classes["char"] = CharBehavior
-byte = awkward1.layout.PrimitiveType("uint8", {"__class__": "char", "__typestr__": "byte", "encoding": None})
-utf8 = awkward1.layout.PrimitiveType("uint8", {"__class__": "char", "__typestr__": "utf8", "encoding": "utf-8"})
+byte = awkward1.layout.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "byte", "encoding": None})
+utf8 = awkward1.layout.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "utf8", "encoding": "utf-8"})
 
 class StringBehavior(awkward1.highlevel.Array):
     def __iter__(self):
@@ -41,12 +42,9 @@ class StringBehavior(awkward1.highlevel.Array):
             for x in super(StringBehavior, self).__iter__():
                 yield x.__str__()
 
-    def __eq__(self, other):
-        raise NotImplementedError("return one boolean per string, not lists of booleans per character")
-
 awkward1.classes["string"] = StringBehavior
-bytestring = awkward1.layout.ListType(byte, {"__class__": "string", "__typestr__": "bytes"})
-string = awkward1.layout.ListType(utf8, {"__class__": "string", "__typestr__": "string"})
+bytestring = awkward1.layout.ListType(byte, {"__array__": "string", "__typestr__": "bytes"})
+string = awkward1.layout.ListType(utf8, {"__array__": "string", "__typestr__": "string"})
 
 def string_equal(one, two):
     # FIXME: this needs a much better implementation;

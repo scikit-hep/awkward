@@ -13,7 +13,7 @@ class Point(awkward1.Record):
 
 def test():
     array = awkward1.Array([[{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.0, 0.2]}], [], [{"x": 3, "y": [3.0, 0.3, 3.3]}]])
-    array.layout.content.setparameter("__class__", "Point")
+    array.layout.content.setparameter("__record__", "Point")
     array.layout.content.setparameter("__typestr__", "P")
     awkward1.classes["Point"] = Point
     assert repr(array[0, 0]) == "<1 [1.1]>"
