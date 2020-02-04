@@ -767,7 +767,9 @@ namespace awkward {
     for (auto content : contents_) {
       contents.emplace_back(content.get()->count(toaxis));
     }
-    return std::make_shared<UnionArrayOf<T, I>>(Identities::none(), util::Parameters(), tags_, index_, contents);
+    UnionArrayOf<T, I>unionarray(Identities::none(), util::Parameters(), tags_, index_, contents);
+
+    return unionarray.simplify(true);
   }
 
   template <typename T, typename I>
