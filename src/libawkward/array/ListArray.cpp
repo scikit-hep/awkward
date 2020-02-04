@@ -456,7 +456,7 @@ namespace awkward {
       if (stops_.length() < lenstarts) {
         util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
       }
-      IndexOf<T> tocount(starts_.length());
+      IndexOf<T> tocount(lenstarts);
       struct Error err = util::awkward_listarray_count(
         tocount.ptr().get(),
         starts_.ptr().get(),
@@ -465,34 +465,8 @@ namespace awkward {
         starts_.offset(),
         stops_.offset());
       util::handle_error(err, classname(), identities_.get());
-      std::vector<ssize_t> shape({ (ssize_t)lenstarts });
-      std::vector<ssize_t> strides({ (ssize_t)sizeof(T) });
-      std::string format;
-#ifdef _MSC_VER
-      if (std::is_same<T, int32_t>::value) {
-        format = "l";
-      }
-      else if (std::is_same<T, uint32_t>::value) {
-        format = "L";
-      }
-      else if (std::is_same<T, int64_t>::value) {
-        format = "q";
-      }
-#else
-      if (std::is_same<T, int32_t>::value) {
-        format = "i";
-      }
-      else if (std::is_same<T, uint32_t>::value) {
-        format = "I";
-      }
-      else if (std::is_same<T, int64_t>::value) {
-        format = "l";
-      }
-#endif
-      else {
-        throw std::runtime_error("unrecognized ListArray specialization");
-      }
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(T), format);
+
+      return awkward::numpyarray_onedim<T>(tocount);
     }
     else {
       return std::make_shared<ListArrayOf<T>>(Identities::none(), util::Parameters(), starts_, stops_, content_.get()->count(toaxis - 1));

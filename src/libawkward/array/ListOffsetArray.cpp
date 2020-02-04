@@ -452,7 +452,7 @@ namespace awkward {
         len);
       util::handle_error(err, classname(), identities_.get());
 
-      return awkward::numpyarray_onedim<T>(tocount, len);
+      return awkward::numpyarray_onedim<T>(tocount);
     }
     else {
       return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), util::Parameters(), offsets_, content_.get()->count(toaxis - 1));

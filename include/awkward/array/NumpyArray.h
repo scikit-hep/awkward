@@ -115,8 +115,8 @@ namespace awkward {
   };
 
   template <typename T>
-  const std::shared_ptr<Content> numpyarray_onedim(const IndexOf<T> count, const ssize_t length) {
-    std::vector<ssize_t> shape({ (ssize_t)length });
+  const std::shared_ptr<Content> numpyarray_onedim(const IndexOf<T> count) {
+    std::vector<ssize_t> shape({ (ssize_t)count.length() });
     std::vector<ssize_t> strides({ (ssize_t)sizeof(T) });
     std::string format;
   #ifdef _MSC_VER
