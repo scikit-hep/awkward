@@ -65,24 +65,24 @@ namespace awkward {
     }
   }
 
-  NumpyArray::NumpyArray(const Index8 count)
-    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }), 0, sizeof(int8_t), format_map.at(std::type_index(typeid(int8_t)))) {
+  NumpyArray::NumpyArray(const Index8 index)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }), 0, sizeof(int8_t), format_map.at(std::type_index(typeid(int8_t)))) {
   }
 
-  NumpyArray::NumpyArray(const IndexU8 count)
-    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }), 0, sizeof(uint8_t), format_map.at(std::type_index(typeid(uint8_t)))) {
+  NumpyArray::NumpyArray(const IndexU8 index)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }), 0, sizeof(uint8_t), format_map.at(std::type_index(typeid(uint8_t)))) {
   }
 
-  NumpyArray::NumpyArray(const Index32 count)
-    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }), 0, sizeof(int32_t), format_map.at(std::type_index(typeid(int32_t)))) {
+  NumpyArray::NumpyArray(const Index32 index)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }), 0, sizeof(int32_t), format_map.at(std::type_index(typeid(int32_t)))) {
   }
 
-  NumpyArray::NumpyArray(const IndexU32 count)
-    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }), 0, sizeof(uint32_t), format_map.at(std::type_index(typeid(uint32_t)))) {
+  NumpyArray::NumpyArray(const IndexU32 index)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }), 0, sizeof(uint32_t), format_map.at(std::type_index(typeid(uint32_t)))) {
   }
 
-  NumpyArray::NumpyArray(const Index64 count)
-    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }), 0, sizeof(int64_t), format_map.at(std::type_index(typeid(int64_t)))) {
+  NumpyArray::NumpyArray(const Index64 index)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }), 0, sizeof(int64_t), format_map.at(std::type_index(typeid(int64_t)))) {
   }
 
   const std::shared_ptr<void> NumpyArray::ptr() const {

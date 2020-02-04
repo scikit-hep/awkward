@@ -21,11 +21,11 @@ namespace awkward {
     static const std::unordered_map<std::type_index, std::string> format_map;
 
     NumpyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format);
-    NumpyArray(const Index8 count);
-    NumpyArray(const IndexU8 count);
-    NumpyArray(const Index32 count);
-    NumpyArray(const IndexU32 count);
-    NumpyArray(const Index64 count);
+    NumpyArray(const Index8 index);
+    NumpyArray(const IndexU8 index);
+    NumpyArray(const Index32 index);
+    NumpyArray(const IndexU32 index);
+    NumpyArray(const Index64 index);
 
     const std::shared_ptr<void> ptr() const;
     const std::vector<ssize_t> shape() const;
