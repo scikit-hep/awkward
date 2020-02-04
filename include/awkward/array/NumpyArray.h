@@ -40,8 +40,7 @@ namespace awkward {
     void* byteptr(ssize_t at) const;
     ssize_t bytelength() const;
     uint8_t getbyte(ssize_t at) const;
-
-    const std::shared_ptr<Content> regularize_shape() const;
+    const std::shared_ptr<Content> toRegularArray() const;
 
     bool isscalar() const override;
     const std::string classname() const override;

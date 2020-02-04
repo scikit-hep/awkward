@@ -1124,14 +1124,6 @@ py::class_<ak::RecordType, std::shared_ptr<ak::RecordType>, ak::Type> make_Recor
         }
         return out;
       })
-      .def("append", [](ak::RecordType& self, py::object type, py::object key) -> void {
-        if (key.is(py::none())) {
-          self.append(unbox_type(type));
-        }
-        else {
-          self.append(unbox_type(type), key.cast<std::string>());
-        }
-      }, py::arg("type"), py::arg("key") = py::none())
       .def(py::pickle([](const ak::RecordType& self) {
         py::tuple pytypes((size_t)self.numfields());
         for (int64_t i = 0;  i < self.numfields();  i++) {
@@ -1296,11 +1288,11 @@ py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_Nu
       .def_property_readonly("ndim", &ak::NumpyArray::ndim)
       .def_property_readonly("isscalar", &ak::NumpyArray::isscalar)
       .def_property_readonly("isempty", &ak::NumpyArray::isempty)
+      .def("toRegularArray", &ak::NumpyArray::toRegularArray)
 
       .def_property_readonly("iscontiguous", &ak::NumpyArray::iscontiguous)
       .def("contiguous", &ak::NumpyArray::contiguous)
       .def("become_contiguous", &ak::NumpyArray::become_contiguous)
-      .def("regularize_shape", &ak::NumpyArray::regularize_shape)
   );
 }
 
@@ -1413,6 +1405,28 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
 
       .def_property_readonly("istuple", &ak::RecordArray::istuple)
       .def_property_readonly("contents", &ak::RecordArray::contents)
+      .def("setitem_field", [](ak::RecordArray& self, py::object where, py::object what) -> py::object {
+        std::shared_ptr<ak::Content> mywhat = unbox_content(what);
+        if (where.is(py::none())) {
+          return box(self.setitem_field(self.numfields(), mywhat));
+        }
+        else {
+          try {
+            std::string mywhere = where.cast<std::string>();
+            return box(self.setitem_field(mywhere, mywhat));
+          }
+          catch (py::cast_error err) {
+            try {
+              int64_t mywhere = where.cast<int64_t>();
+              return box(self.setitem_field(mywhere, mywhat));
+            }
+            catch (py::cast_error err) {
+              throw std::invalid_argument("where must be None, int, or str");
+            }
+          }
+        }
+      }, py::arg("where"), py::arg("what"))
+
       .def("field", [](ak::RecordArray& self, int64_t fieldindex) -> std::shared_ptr<ak::Content> {
         return self.field(fieldindex);
       })
@@ -1441,15 +1455,6 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
       .def_property_readonly("astuple", [](ak::RecordArray& self) -> py::object {
         return box(self.astuple());
       })
-
-      .def("append", [](ak::RecordArray& self, py::object content, py::object key) -> void {
-        if (key.is(py::none())) {
-          self.append(unbox_content(content));
-        }
-        else {
-          self.append(unbox_content(content), key.cast<std::string>());
-        }
-      }, py::arg("content"), py::arg("key") = py::none())
 
   );
 }

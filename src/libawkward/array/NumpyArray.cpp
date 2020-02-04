@@ -143,7 +143,7 @@ namespace awkward {
     return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
   }
 
-  const std::shared_ptr<Content> NumpyArray::regularize_shape() const {
+  const std::shared_ptr<Content> NumpyArray::toRegularArray() const {
     if (isscalar()) {
       return shallow_copy();
     }

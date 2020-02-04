@@ -7,6 +7,7 @@
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/RegularArray.h"
 
 #include "awkward/array/EmptyArray.h"
 

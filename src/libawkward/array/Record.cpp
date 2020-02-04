@@ -158,18 +158,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& keys) const {
-    RecordArray out(array_.get()->identities(), parameters_, length(), istuple());
-    if (istuple()) {
-      for (auto key : keys) {
-        out.append(array_.get()->field(key));
-      }
-    }
-    else {
-      for (auto key : keys) {
-        out.append(array_.get()->field(key), key);
-      }
-    }
-    return out.getitem_at_nowrap(at_);
+    std::shared_ptr<Content> recordarray = array_.get()->getitem_fields(keys);
+    return recordarray.get()->getitem_at_nowrap(at_);
   }
 
   const std::shared_ptr<Content> Record::carry(const Index64& carry) const {

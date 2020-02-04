@@ -17,10 +17,14 @@ namespace awkward {
     RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
     RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents);
     RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, int64_t length, bool istuple);
+    RecordArray(const std::shared_ptr<Content>& content, const std::string& key);
+    RecordArray(const std::shared_ptr<Content>& content);
 
     const std::vector<std::shared_ptr<Content>> contents() const;
     const std::shared_ptr<util::RecordLookup> recordlookup() const;
     bool istuple() const;
+    const std::shared_ptr<Content> setitem_field(int64_t where, const std::shared_ptr<Content>& what) const;
+    const std::shared_ptr<Content> setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const;
 
     const std::string classname() const override;
     void setidentities() override;
@@ -65,9 +69,6 @@ namespace awkward {
     const std::vector<std::pair<std::string, std::shared_ptr<Content>>> fielditems() const;
     const std::shared_ptr<RecordArray> astuple() const;
 
-    void append(const std::shared_ptr<Content>& content, const std::string& key);
-    void append(const std::shared_ptr<Content>& content);
-
   protected:
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
@@ -76,8 +77,8 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override;
 
   private:
-    std::vector<std::shared_ptr<Content>> contents_;
-    std::shared_ptr<util::RecordLookup> recordlookup_;
+    const std::vector<std::shared_ptr<Content>> contents_;
+    const std::shared_ptr<util::RecordLookup> recordlookup_;
     int64_t length_;
   };
 }
