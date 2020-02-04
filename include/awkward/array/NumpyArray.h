@@ -113,6 +113,38 @@ namespace awkward {
     const ssize_t itemsize_;
     const std::string format_;
   };
+
+  template <typename T>
+  const std::shared_ptr<Content> numpyarray_onedim(const IndexOf<T> count, const ssize_t length) {
+    std::vector<ssize_t> shape({ (ssize_t)length });
+    std::vector<ssize_t> strides({ (ssize_t)sizeof(T) });
+    std::string format;
+  #ifdef _MSC_VER
+    if (std::is_same<T, int32_t>::value) {
+      format = "l";
+    }
+    else if (std::is_same<T, uint32_t>::value) {
+      format = "L";
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      format = "q";
+    }
+  #else
+    if (std::is_same<T, int32_t>::value) {
+      format = "i";
+    }
+    else if (std::is_same<T, uint32_t>::value) {
+      format = "I";
+    }
+    else if (std::is_same<T, int64_t>::value) {
+      format = "l";
+    }
+  #endif
+    else {
+      throw std::runtime_error("unrecognized NumpyArray specialization");
+    }
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), count.ptr(), shape, strides, 0, sizeof(T), format);
+  }
 }
 
 #endif // AWKWARD_NUMPYARRAY_H_

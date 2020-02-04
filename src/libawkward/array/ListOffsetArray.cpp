@@ -452,34 +452,7 @@ namespace awkward {
         len);
       util::handle_error(err, classname(), identities_.get());
 
-      std::vector<ssize_t> shape({ (ssize_t)len });
-      std::vector<ssize_t> strides({ (ssize_t)sizeof(T) });
-      std::string format;
-#ifdef _MSC_VER
-      if (std::is_same<T, int32_t>::value) {
-        format = "l";
-      }
-      else if (std::is_same<T, uint32_t>::value) {
-        format = "L";
-      }
-      else if (std::is_same<T, int64_t>::value) {
-        format = "q";
-      }
-#else
-      if (std::is_same<T, int32_t>::value) {
-        format = "i";
-      }
-      else if (std::is_same<T, uint32_t>::value) {
-        format = "I";
-      }
-      else if (std::is_same<T, int64_t>::value) {
-        format = "l";
-      }
-#endif
-      else {
-        throw std::runtime_error("unrecognized ListArray specialization");
-      }
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(T), format);
+      return awkward::numpyarray_onedim<T>(tocount, len);
     }
     else {
       return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), util::Parameters(), offsets_, content_.get()->count(toaxis - 1));
