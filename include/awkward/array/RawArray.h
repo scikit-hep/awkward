@@ -381,14 +381,6 @@ namespace awkward {
       return std::make_shared<RawArrayOf<T>>(identities, parameters_, ptr, 0, carry.length(), itemsize_);
     }
 
-    const std::shared_ptr<Content> setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
-      throw std::invalid_argument("cannot assign field to array of non-records");
-    }
-
-    const std::shared_ptr<Content> setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
-      throw std::invalid_argument("cannot assign field to array of non-records");
-    }
-
     bool purelist_isregular() const override {
       return true;
     }

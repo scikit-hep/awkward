@@ -230,7 +230,7 @@ def tojson(array, destination=None, pretty=False, maxdecimals=None, buffersize=6
     else:
         return out.tojson(destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize)
 
-def tolayout(array, allowrecord=True):
+def tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,)):
     import awkward1.highlevel
 
     if isinstance(array, awkward1.highlevel.Array):
@@ -263,6 +263,8 @@ def tolayout(array, allowrecord=True):
         return out
 
     elif isinstance(array, numpy.ndarray):
+        if not issubclass(array.dtype.type, numpytype):
+            raise ValueError("NumPy {0} not allowed".format(repr(array.dtype)))
         out = awkward1.layout.NumpyArray(array.reshape(-1))
         for size in array.shape[:0:-1]:
             out = awkward1.layout.RegularArray(out, size)
@@ -271,7 +273,10 @@ def tolayout(array, allowrecord=True):
     elif isinstance(array, Iterable):
         return awkward1.highlevel.Array(array).layout
 
-    else:
+    elif not allowother:
         raise TypeError("{0} cannot be converted into an Awkward Array".format(array))
+
+    else:
+        return array
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "json", "Iterable", "numpy", "awkward1")]

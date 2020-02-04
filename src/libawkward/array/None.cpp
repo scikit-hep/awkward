@@ -97,14 +97,6 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::carry");
   }
 
-  const std::shared_ptr<Content> None::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("undefined operation: None::setitem_field(what)");
-  }
-
-  const std::shared_ptr<Content> None::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("undefined operation: None::setitem_field(where, what)");
-  }
-
   bool None::purelist_isregular() const {
     throw std::runtime_error("undefined operation: None::purelist_isregular");
   }

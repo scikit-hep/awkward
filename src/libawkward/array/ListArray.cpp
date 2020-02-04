@@ -390,16 +390,6 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("ListArray::setitem_field(what)");
-  }
-
-  template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("ListArray::setitem_field(where, what)");
-  }
-
-  template <typename T>
   bool ListArrayOf<T>::purelist_isregular() const {
     return false;
   }

@@ -612,16 +612,6 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("IndexedArray::setitem_field(what)");
-  }
-
-  template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("IndexedArray::setitem_field(where, what)");
-  }
-
-  template <typename T, bool ISOPTION>
   bool IndexedArrayOf<T, ISOPTION>::purelist_isregular() const {
     return content_.get()->purelist_isregular();
   }

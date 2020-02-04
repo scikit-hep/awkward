@@ -1211,27 +1211,6 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           })
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
-          .def("setitem_field", [](T& self, py::object where, py::object what) -> py::object {
-            std::shared_ptr<ak::Content> mywhat = unbox_content(what);
-            if (where.is(py::none())) {
-              return box(self.setitem_field(self.numfields(), mywhat));
-            }
-            else {
-              try {
-                std::string mywhere = where.cast<std::string>();
-                return box(self.setitem_field(mywhere, mywhat));
-              }
-              catch (py::cast_error err) {
-                try {
-                  int64_t mywhere = where.cast<int64_t>();
-                  return box(self.setitem_field(mywhere, mywhat));
-                }
-                catch (py::cast_error err) {
-                  throw std::invalid_argument("where must be None, int, or str");
-                }
-              }
-            }
-          }, py::arg("where"), py::arg("what"))
           .def("__iter__", &iter<T>)
           .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
           .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
@@ -1426,6 +1405,28 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
 
       .def_property_readonly("istuple", &ak::RecordArray::istuple)
       .def_property_readonly("contents", &ak::RecordArray::contents)
+      .def("setitem_field", [](ak::RecordArray& self, py::object where, py::object what) -> py::object {
+        std::shared_ptr<ak::Content> mywhat = unbox_content(what);
+        if (where.is(py::none())) {
+          return box(self.setitem_field(self.numfields(), mywhat));
+        }
+        else {
+          try {
+            std::string mywhere = where.cast<std::string>();
+            return box(self.setitem_field(mywhere, mywhat));
+          }
+          catch (py::cast_error err) {
+            try {
+              int64_t mywhere = where.cast<int64_t>();
+              return box(self.setitem_field(mywhere, mywhat));
+            }
+            catch (py::cast_error err) {
+              throw std::invalid_argument("where must be None, int, or str");
+            }
+          }
+        }
+      }, py::arg("where"), py::arg("what"))
+
       .def("field", [](ak::RecordArray& self, int64_t fieldindex) -> std::shared_ptr<ak::Content> {
         return self.field(fieldindex);
       })

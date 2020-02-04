@@ -34,9 +34,9 @@ def regular_functions(functions):
     else:
         return functions
 
-def combine_classes(arrays):
+def combine_classes(*arrays):
     classes = None
-    for x in arrays:
+    for x in arrays[::-1]:
         if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x._classes is not None:
             if classes is None:
                 classes = dict(x._classes)
@@ -44,9 +44,9 @@ def combine_classes(arrays):
                 classes.update(x._classes)
     return classes
 
-def combine_functions(arrays):
+def combine_functions(*arrays):
     functions = None
-    for x in arrays:
+    for x in arrays[::-1]:
         if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x._functions is not None:
             if functions is None:
                 functions = dict(x._functions)
@@ -148,7 +148,7 @@ def broadcast_and_apply(inputs, getfunction):
             return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
 
         elif any(isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1 for x in inputs):
-            return apply([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.regularize_shape() for x in inputs])
+            return apply([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.toRegularArray() for x in inputs])
 
         elif any(isinstance(x, indexedtypes) for x in inputs):
             return apply([x if not isinstance(x, indexedtypes) else x.project() for x in inputs])
@@ -227,9 +227,9 @@ def broadcast_and_apply(inputs, getfunction):
                 for x in inputs:
                     if isinstance(x, awkward1.layout.RegularArray):
                         if maxsize > 1 and x.size == 1:
-                            nextinputs.append(awkward1.layout.IndexedArray64(tmpindex, x.content).project())
+                            nextinputs.append(awkward1.layout.IndexedArray64(tmpindex, x.content[:len(x)*x.size]).project())
                         elif x.size == maxsize:
-                            nextinputs.append(x.content)
+                            nextinputs.append(x.content[:len(x)*x.size])
                         else:
                             raise ValueError("cannot broadcast RegularArray of size {0} with RegularArray of size {1}".format(x.size, maxsize))
                     else:

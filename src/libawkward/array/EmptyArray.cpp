@@ -119,14 +119,6 @@ namespace awkward {
     return shallow_copy();
   }
 
-  const std::shared_ptr<Content> EmptyArray::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
-    throw std::invalid_argument("cannot assign field to array of non-records");
-  }
-
-  const std::shared_ptr<Content> EmptyArray::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
-    throw std::invalid_argument("cannot assign field to array of non-records");
-  }
-
   bool EmptyArray::purelist_isregular() const {
     return true;
   }

@@ -14,6 +14,22 @@ import awkward1.layout
 import awkward1._numpy
 import awkward1.operations.convert
 
+def withfield(base, what, where=None):
+    base = awkward1.operations.convert.tolayout(base, allowrecord=True, allowother=False)
+    what = awkward1.operations.convert.tolayout(what, allowrecord=True, allowother=True)
+
+    def getfunction(inputs):
+        base, what = inputs
+        if isinstance(base, awkward1.layout.RecordArray):
+            if not isinstance(what, awkward1.layout.Content):
+                what = awkward1.layout.NumpyArray(numpy.lib.stride_tricks.as_strided([what], shape=(len(base),), strides=(0,)))
+            return lambda: base.setitem_field(where, what)
+        else:
+            return None
+
+    out = awkward1._util.broadcast_and_apply([base, what], getfunction)
+    return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(base, what), functions=awkward1._util.combine_functions(base, what))
+
 def isna(array):
     import awkward1.highlevel
 
@@ -39,7 +55,8 @@ def isna(array):
         else:
             return numpy.zeros(len(layout), dtype=numpy.bool_)
 
-    return awkward1.highlevel.Array(apply(awkward1.operations.convert.tolayout(array, allowrecord=False)))
+    out = apply(awkward1.operations.convert.tolayout(array, allowrecord=False))
+    return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(array), functions=awkward1._util.combine_functions(array))
 
 def notna(array):
     return ~isna(array)
@@ -137,7 +154,7 @@ def concatenate(arrays, axis=0, mergebool=True):
         if isinstance(out, awkward1._util.uniontypes):
             out = out.simplify(mergebool=mergebool)
 
-    return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(arrays), functions=awkward1._util.combine_functions(arrays))
+    return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(*arrays), functions=awkward1._util.combine_functions(*arrays))
 
 @awkward1._numpy.implements(numpy.where)
 def where(condition, *args, **kwargs):
@@ -171,7 +188,7 @@ def where(condition, *args, **kwargs):
         tmp = awkward1.layout.UnionArray8_64(tags, index, [x, y])
         out = tmp.simplify(mergebool=mergebool)
 
-        return awkward1._util.wrap(out, classes=awkward1._util.combine_classes((condition,) + args), functions=awkward1._util.combine_functions((condition,) + args))
+        return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(*((condition,) + args)), functions=awkward1._util.combine_functions(*((condition,) + args)))
 
     else:
         raise TypeError("where() takes from 1 to 3 positional arguments but {0} were given".format(len(args) + 1))

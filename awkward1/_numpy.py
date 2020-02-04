@@ -40,24 +40,7 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
 
-    def unwrap(x):
-        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
-            return x.layout
-        elif isinstance(x, awkward1.highlevel.FillableArray):
-            return x.snapshot().layout
-        elif isinstance(x, awkward1.layout.FillableArray):
-            return x.snapshot()
-        elif isinstance(x, (awkward1.layout.Content, awkward1.layout.Record)):
-            return x
-        elif isinstance(x, numpy.ndarray):
-            if issubclass(x.dtype.type, numpy.number):
-                return awkward1.highlevel.Array(x).layout
-            else:
-                raise ValueError("numpy.ndarray with {0} cannot be used in {1}".format(repr(x.dtype), ufunc))
-        elif isinstance(x, Iterable):
-            return unwrap(numpy.array(x))
-        else:
-            return x
+    inputs = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=True) for x in inputs]
 
     def getfunction(inputs):
         signature = (ufunc,) + tuple(x.parameters.get("__class__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
@@ -69,7 +52,7 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
         else:
             return None
 
-    return awkward1._util.wrap(awkward1._util.broadcast_and_apply([unwrap(x) for x in inputs], getfunction), classes, functions)
+    return awkward1._util.wrap(awkward1._util.broadcast_and_apply(inputs, getfunction), classes, functions)
 
 try:
     NDArrayOperatorsMixin = numpy.lib.mixins.NDArrayOperatorsMixin

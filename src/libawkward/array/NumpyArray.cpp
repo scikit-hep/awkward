@@ -608,14 +608,6 @@ namespace awkward {
     return std::make_shared<NumpyArray>(identities, parameters_, ptr, shape, strides_, 0, itemsize_, format_);
   }
 
-  const std::shared_ptr<Content> NumpyArray::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
-    throw std::invalid_argument("cannot assign field to array of non-records");
-  }
-
-  const std::shared_ptr<Content> NumpyArray::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
-    throw std::invalid_argument("cannot assign field to array of non-records");
-  }
-
   bool NumpyArray::purelist_isregular() const {
     return true;
   }
