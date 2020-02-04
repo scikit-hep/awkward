@@ -41,7 +41,7 @@ def isna(array):
             return apply(layout.project())
 
         elif isinstance(layout, awkward1._util.uniontypes):
-            contents = [apply(layout.project(i)) for i in range(len(layout))]
+            contents = [apply(layout.project(i)) for i in range(layout.numcontents)]
             out = numpy.empty(len(layout), dtype=numpy.bool_)
             tags = numpy.asarray(layout.tags)
             for tag, content in enumerate(contents):
