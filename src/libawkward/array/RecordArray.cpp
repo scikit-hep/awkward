@@ -344,12 +344,56 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::setitem_field(const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("RecordArray::setitem_field(what)");
+  const std::shared_ptr<Content> RecordArray::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
+    if (where < 0) {
+      throw std::invalid_argument("where must be non-negative");
+    }
+    if (what.get()->length() != length()) {
+      throw std::invalid_argument(std::string("array of length ") + std::to_string(what.get()->length()) + std::string(" cannot be assigned to RecordArray of length ") + std::to_string(length()));
+    }
+    std::vector<std::shared_ptr<Content>> contents;
+    for (size_t i = 0;  i < contents_.size();  i++) {
+      if (where == (int64_t)i) {
+        contents.push_back(what);
+      }
+      contents.push_back(contents_[i]);
+    }
+    if (where >= numfields()) {
+      contents.push_back(what);
+    }
+    std::shared_ptr<util::RecordLookup> recordlookup(nullptr);
+    if (recordlookup_.get() != nullptr) {
+      recordlookup = std::make_shared<util::RecordLookup>();
+      for (size_t i = 0;  i < contents_.size();  i++) {
+        if (where == (int64_t)i) {
+          recordlookup.get()->push_back(std::to_string(where));
+        }
+        recordlookup.get()->push_back(recordlookup_.get()->at(i));
+      }
+      if (where >= numfields()) {
+        recordlookup.get()->push_back(std::to_string(where));
+      }
+    }
+    return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup);
   }
 
   const std::shared_ptr<Content> RecordArray::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
-    throw std::runtime_error("RecordArray::setitem_field(where, what)");
+    if (what.get()->length() != length()) {
+      throw std::invalid_argument(std::string("array of length ") + std::to_string(what.get()->length()) + std::string(" cannot be assigned to RecordArray of length ") + std::to_string(length()));
+    }
+    std::vector<std::shared_ptr<Content>> contents(contents_.begin(), contents_.end());
+    contents.push_back(what);
+    std::shared_ptr<util::RecordLookup> recordlookup;
+    if (recordlookup_.get() != nullptr) {
+      recordlookup = std::make_shared<util::RecordLookup>();
+      recordlookup.get()->insert(recordlookup.get()->end(), recordlookup_.get()->begin(), recordlookup_.get()->end());
+      recordlookup.get()->push_back(where);
+    }
+    else {
+      recordlookup = util::init_recordlookup(numfields());
+      recordlookup.get()->push_back(where);
+    }
+    return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup);
   }
 
   bool RecordArray::purelist_isregular() const {

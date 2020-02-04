@@ -118,7 +118,7 @@ namespace awkward {
     return shallow_copy();
   }
 
-  const std::shared_ptr<Content> EmptyArray::setitem_field(const std::shared_ptr<Content>& what) const {
+  const std::shared_ptr<Content> EmptyArray::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
     throw std::runtime_error("EmptyArray::setitem_field(what)");
   }
 

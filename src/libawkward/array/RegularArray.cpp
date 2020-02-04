@@ -294,7 +294,7 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities, parameters_, content_.get()->carry(nextcarry), size_);
   }
 
-  const std::shared_ptr<Content> RegularArray::setitem_field(const std::shared_ptr<Content>& what) const {
+  const std::shared_ptr<Content> RegularArray::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
     throw std::runtime_error("RegularArray::setitem_field(what)");
   }
 

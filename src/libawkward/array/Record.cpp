@@ -176,7 +176,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::carry");
   }
 
-  const std::shared_ptr<Content> Record::setitem_field(const std::shared_ptr<Content>& what) const {
+  const std::shared_ptr<Content> Record::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
     throw std::runtime_error("Record::setitem_field(what)");
   }
 

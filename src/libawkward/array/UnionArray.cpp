@@ -651,7 +651,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::setitem_field(const std::shared_ptr<Content>& what) const {
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
     throw std::runtime_error("UnionArray::setitem_field(what)");
   }
 

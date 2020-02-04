@@ -97,7 +97,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::carry");
   }
 
-  const std::shared_ptr<Content> None::setitem_field(const std::shared_ptr<Content>& what) const {
+  const std::shared_ptr<Content> None::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
     throw std::runtime_error("undefined operation: None::setitem_field(what)");
   }
 

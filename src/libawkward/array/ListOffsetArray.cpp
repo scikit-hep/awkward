@@ -388,7 +388,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::setitem_field(const std::shared_ptr<Content>& what) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
     throw std::runtime_error("ListOffsetArray::setitem_field(what)");
   }
 
