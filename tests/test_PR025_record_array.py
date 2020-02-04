@@ -13,11 +13,7 @@ def test_basic():
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
-    recordarray = awkward1.layout.RecordArray(0)
-    recordarray.append(content1, "one")
-    recordarray.append(listoffsetarray, "two")
-    recordarray.append(content2)
-    recordarray.append(content1, "wonky")
+    recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray, "2": content2, "wonky": content1})
     assert awkward1.tolist(recordarray.field(0)) == [1, 2, 3, 4, 5]
     assert awkward1.tolist(recordarray.field("two")) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert awkward1.tolist(recordarray.field("wonky")) == [1, 2, 3, 4, 5]
@@ -62,9 +58,7 @@ def test_scalar_record():
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
-    recordarray = awkward1.layout.RecordArray(0)
-    recordarray.append(content1, "one")
-    recordarray.append(listoffsetarray, "two")
+    recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
 
     str(recordarray)
     str(recordarray[2])
@@ -86,9 +80,7 @@ def test_type():
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=numpy.float64))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
-    recordarray = awkward1.layout.RecordArray(0, True)
-    recordarray.append(content1)
-    recordarray.append(listoffsetarray)
+    recordarray = awkward1.layout.RecordArray([content1, listoffsetarray])
     assert str(awkward1.typeof(recordarray)) == '(int64, var * float64)'
 
     assert awkward1.typeof(recordarray) == awkward1.layout.RecordType((
@@ -98,9 +90,7 @@ def test_type():
         (awkward1.layout.PrimitiveType("int64"),
         awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))))
 
-    recordarray = awkward1.layout.RecordArray(0, True)
-    recordarray.append(content1, "one")
-    recordarray.append(listoffsetarray, "two")
+    recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
     assert str(awkward1.typeof(recordarray)) in ('{"one": int64, "two": var * float64}', '{"two": var * float64, "one": int64}')
 
     assert str(awkward1.layout.RecordType(
