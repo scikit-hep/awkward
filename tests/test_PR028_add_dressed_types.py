@@ -8,7 +8,7 @@ import pytest
 import numpy
 
 import awkward1
-import awkward1.behavior.string
+import awkward1.behaviors.string
 
 py27 = (sys.version_info[0] < 3)
 
@@ -35,7 +35,7 @@ class Dummy(awkward1.highlevel.Array):
 
 def test_string1():
     a = awkward1.Array(numpy.array([ord(x) for x in "hey there"], dtype=numpy.uint8))
-    a.__class__ = awkward1.behavior.string.CharBehavior
+    a.__class__ = awkward1.behaviors.string.CharBehavior
     assert str(a) == str(b"hey there")
     assert repr(a) == repr(b"hey there")
 
@@ -45,7 +45,7 @@ def test_string2():
     a = awkward1.Array(listoffsetarray)
 
     assert isinstance(a, awkward1.Array)
-    assert not isinstance(a, awkward1.behavior.string.StringBehavior)
+    assert not isinstance(a, awkward1.behaviors.string.StringBehavior)
     assert awkward1.tolist(a) == [[104, 101, 121], [], [116, 104, 101, 114, 101]]
 
     assert repr(a.type) == "3 * var * uint8"
