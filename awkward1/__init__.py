@@ -31,6 +31,6 @@ from awkward1.operations.convert import *
 from awkward1.operations.describe import *
 from awkward1.operations.structure import *
 
-from awkward1.behavior.string import *
+from awkward1.behaviors.string import *
 
 __version__ = awkward1.layout.__version__
