@@ -59,7 +59,5 @@ def test_behaviors():
 
     array3 = awkward1.Array(recordarray2, behavior=behavior)
     assert type(array3) is awkward1.Array
-    # print(array3["outer"])
-    #
-    #
-    # raise Exception
+    assert type(array3["outer"]) is DeepDummyArray
+    assert repr(array3["outer"]) == "<DeepDummyArray <DummyArray <1.1> <2.2> <3.3>> <DummyArray > <DummyArray <4.4> <5.5>>>"
