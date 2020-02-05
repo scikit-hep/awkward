@@ -29,7 +29,7 @@ class CharBehavior(awkward1.highlevel.Array):
         for x in str(self):
             yield x
 
-awkward1.classes["char"] = CharBehavior
+awkward1.behavior["char"] = CharBehavior
 byte = awkward1.layout.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "byte", "encoding": None})
 utf8 = awkward1.layout.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "utf8", "encoding": "utf-8"})
 
@@ -42,7 +42,7 @@ class StringBehavior(awkward1.highlevel.Array):
             for x in super(StringBehavior, self).__iter__():
                 yield x.__str__()
 
-awkward1.classes["string"] = StringBehavior
+awkward1.behavior["string"] = StringBehavior
 bytestring = awkward1.layout.ListType(byte, {"__array__": "string", "__typestr__": "bytes"})
 string = awkward1.layout.ListType(utf8, {"__array__": "string", "__typestr__": "string"})
 
@@ -59,4 +59,4 @@ def string_equal(one, two):
 
     return awkward1.layout.NumpyArray(counts_equal & contents_equal)
 
-awkward1.functions[numpy.equal, "string", "string"] = string_equal
+awkward1.behavior[numpy.equal, "string", "string"] = string_equal

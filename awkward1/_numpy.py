@@ -34,7 +34,7 @@ def implements(numpy_function):
         return function
     return decorator
 
-def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
+def array_ufunc(ufunc, method, inputs, kwargs, behavior):
     import awkward1.highlevel
 
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
@@ -44,12 +44,12 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
     def getfunction(inputs):
         signature = (ufunc,) + tuple(x.parameters.get("__record__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
-        custom = awkward1._util.overload(functions, signature)
+        custom = awkward1._util.overload(behavior, signature)
         if custom is not None:
             return lambda: custom(*inputs, **kwargs)
 
         signature = (ufunc,) + tuple(x.parameters.get("__array__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
-        custom = awkward1._util.overload(functions, signature)
+        custom = awkward1._util.overload(behavior, signature)
         if custom is not None:
             return lambda: custom(*inputs, **kwargs)
 
@@ -58,7 +58,7 @@ def array_ufunc(ufunc, method, inputs, kwargs, classes, functions):
 
         return None
 
-    return awkward1._util.wrap(awkward1._util.broadcast_and_apply(inputs, getfunction), classes, functions)
+    return awkward1._util.wrap(awkward1._util.broadcast_and_apply(inputs, getfunction), behavior)
 
 try:
     NDArrayOperatorsMixin = numpy.lib.mixins.NDArrayOperatorsMixin

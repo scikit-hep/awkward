@@ -100,7 +100,7 @@ class PandasMixin(PandasNotImportedYet):
         dtype, copy = awkward1._util.extra(args, kwargs, [
             ("dtype", None),
             ("copy", False)])
-        return awkward1._util.wrap(awkward1.operations.convert.fromiter(scalars), None, None)
+        return awkward1.operations.convert.fromiter(scalars)
 
     @classmethod
     def _from_factorized(cls, values, original):
@@ -149,7 +149,7 @@ class PandasMixin(PandasNotImportedYet):
             if fill_value is None:
                 index = awkward1.layout.Index64(indices)
                 layout = awkward1.layout.IndexedOptionArray64(index, self.layout, parameters=self.layout.parameters)
-                return awkward1._util.wrap(layout, self._classes, self._functions)
+                return awkward1._util.wrap(layout, awkward1._util.behaviorof(self))
 
             else:
                 tags = (indices >= 0).view(numpy.int8)
@@ -160,14 +160,14 @@ class PandasMixin(PandasNotImportedYet):
                 tags = awkward1.layout.Index8(tags)
                 index = awkward1.layout.Index64(index)
                 layout = awkward1.layout.UnionArray8_64(tags, index, [content0, content1])
-                return awkward1._util.wrap(layout, self._classes, self._functions)
+                return awkward1._util.wrap(layout, awkward1._util.behaviorof(self))
 
         else:
             return self[indices]
 
     def copy(self):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.copy.html
-        return awkward1._util.wrap(self._layout.deep_copy(copyarrays=True, copyindexes=True, copyidentities=True), self._classes, self._functions)
+        return awkward1._util.wrap(self._layout.deep_copy(copyarrays=True, copyindexes=True, copyidentities=True), awkward1._util.behaviorof(self))
 
     @classmethod
     def _concat_same_type(cls, to_concat):
