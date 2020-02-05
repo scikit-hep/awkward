@@ -27,9 +27,11 @@ def arrayclass(behavior, parameters):
     cls = behavior.get(parameters.get("__array__"))
     if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
         return cls
-    cls = behavior.get(("array", parameters.get("__record__")))
-    if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
-        return cls
+    rec = parameters.get("__record__")
+    if rec is not None:
+        cls = behavior.get(("array", rec))
+        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
+            return cls
     return awkward1.highlevel.Array
 
 def recordclass(behavior, parameters):
