@@ -47,45 +47,32 @@ bytestring = awkward1.layout.ListType(byte, {"__array__": "string", "__typestr__
 string = awkward1.layout.ListType(utf8, {"__array__": "string", "__typestr__": "string"})
 
 def string_equal(one, two):
-    # FIXME: this needs a much better implementation;
-    # It's here just to demonstrate overloading.
-    
+    # first condition: string lengths must be the same
     counts1 = numpy.asarray(one.count())
     counts2 = numpy.asarray(two.count())
 
-    # out = (counts1 == counts2)
+    out = (counts1 == counts2)
 
-    # print("out", out)
+    # only compare characters in strings that are possibly equal (same length)
+    possible = numpy.logical_and(out, counts1)
+    possible_counts = counts1[possible]
 
-    # possible = numpy.logical_and(out, counts1)
-    # numpossible = numpy.count_nonzero(possible)
+    chars1 = numpy.asarray(one[possible].flatten())
+    chars2 = numpy.asarray(two[possible].flatten())
+    samechars = (chars1 == chars2)
 
-    # print("possible", possible)
-    # print("counts1", counts1)
-    # print("counts1[possible]", counts1[possible])
+    # ufunc.reduceat requires a weird "offsets" that
+    #    (a) lacks a final value (end of array is taken as boundary)
+    #    (b) starts with a zero, which cumsum does not provide
+    offsets = numpy.empty(len(possible_counts), dtype=numpy.int64)
+    offsets[0] = 0
+    numpy.cumsum(possible_counts[:-1], out=offsets[1:])
 
-    # offsets = numpy.empty(numpossible, dtype=numpy.int64)
-    # offsets[0] = 0
-    # print(numpy.cumsum(counts1[possible]))
+    reduced = numpy.bitwise_and.reduceat(samechars, offsets)
 
-    # print("offsets", offsets)
+    # update strings of the same length with a verdict about their characters
+    out[possible] = reduced
 
-    # # chars1 = one[possible].flatten()
-    # # chars2 = two[possible].flatten()
-    # # samechars = (chars1 == chars2)
-
-    # # print("samechars", samechars)
-
-
-
-
-    # raise Exception
-    
-    counts_equal = (counts1 == counts2)
-    contents_equal = numpy.empty_like(counts_equal)
-    for i, (x, y) in enumerate(zip(one, two)):
-        contents_equal[i] = numpy.array_equal(numpy.asarray(x), numpy.asarray(y))
-
-    return awkward1.layout.NumpyArray(counts_equal & contents_equal)
+    return awkward1.layout.NumpyArray(out)
 
 awkward1.behavior[numpy.equal, "string", "string"] = string_equal

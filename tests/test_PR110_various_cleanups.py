@@ -74,3 +74,15 @@ def test_count():
 
 def test_flatten():
     assert awkward1.tolist(awkward1.flatten(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]), axis=0)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+# def test_string_equal():
+#     trials = [
+#         (["one", "two", "", "three", "four", "", "five", "six", ""],
+#          ["one", "two", "", "three", "four", "", "five", "six", ""]),
+#         ]
+
+#     one = awkward1.Array(["one", "two", "", "three", "four", "", "five", "six", ""])
+#     two = awkward1.Array(["one", "TWO", "", "three", "foUr", "", "five", "six", ""])
+#     print(one == two)
+
+#     raise Exception
