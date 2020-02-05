@@ -49,9 +49,38 @@ string = awkward1.layout.ListType(utf8, {"__array__": "string", "__typestr__": "
 def string_equal(one, two):
     # FIXME: this needs a much better implementation;
     # It's here just to demonstrate overloading.
-
+    
     counts1 = numpy.asarray(one.count())
     counts2 = numpy.asarray(two.count())
+
+    # out = (counts1 == counts2)
+
+    # print("out", out)
+
+    # possible = numpy.logical_and(out, counts1)
+    # numpossible = numpy.count_nonzero(possible)
+
+    # print("possible", possible)
+    # print("counts1", counts1)
+    # print("counts1[possible]", counts1[possible])
+
+    # offsets = numpy.empty(numpossible, dtype=numpy.int64)
+    # offsets[0] = 0
+    # print(numpy.cumsum(counts1[possible]))
+
+    # print("offsets", offsets)
+
+    # # chars1 = one[possible].flatten()
+    # # chars2 = two[possible].flatten()
+    # # samechars = (chars1 == chars2)
+
+    # # print("samechars", samechars)
+
+
+
+
+    # raise Exception
+    
     counts_equal = (counts1 == counts2)
     contents_equal = numpy.empty_like(counts_equal)
     for i, (x, y) in enumerate(zip(one, two)):
