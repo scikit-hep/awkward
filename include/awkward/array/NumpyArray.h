@@ -91,6 +91,7 @@ namespace awkward {
     const std::shared_ptr<Content> flatten(int64_t axis) const override;
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
+    const std::shared_ptr<Content> equal(const std::shared_ptr<Content>& other, int64_t axis) const override;
 
     bool iscontiguous() const;
     void become_contiguous();

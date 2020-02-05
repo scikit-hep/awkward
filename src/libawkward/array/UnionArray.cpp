@@ -1031,6 +1031,11 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::equal(const std::shared_ptr<Content>& other, int64_t axis) const {
+    throw std::runtime_error("FIXME: UnionArray::equal");
+  }
+
+  template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: UnionArray::getitem_next(SliceAt)");
   }

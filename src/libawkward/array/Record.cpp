@@ -223,6 +223,10 @@ namespace awkward {
     throw std::invalid_argument("Record cannot be merged because it is not an array");
   }
 
+  const std::shared_ptr<Content> Record::equal(const std::shared_ptr<Content>& other, int64_t axis) const {
+    throw std::runtime_error("FIXME: Record::equal");
+  }
+
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
     return array_.get()->field(fieldindex).get()->getitem_at_nowrap(at_);
   }

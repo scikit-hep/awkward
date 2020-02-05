@@ -1250,6 +1250,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> NumpyArray::equal(const std::shared_ptr<Content>& other, int64_t axis) const {
+    throw std::runtime_error("FIXME: NumpyArray::equal");
+  }
+
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("NumpyArray has its own getitem_next system");
   }
