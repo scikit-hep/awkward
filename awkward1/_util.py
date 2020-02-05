@@ -293,41 +293,40 @@ def broadcast_and_apply(inputs, getfunction):
             raise ValueError("cannot broadcast: {0}".format(", ".join(type(x) for x in inputs)))
 
     isscalar = []
+    return broadcast_unpack(apply(broadcast_pack(inputs, isscalar), 0), isscalar)
 
-    def pack(inputs):
-        maxlen = -1
-        for x in inputs:
-            if isinstance(x, awkward1.layout.Content):
-                maxlen = max(maxlen, len(x))
-        if maxlen < 0:
-            maxlen = 1
-        nextinputs = []
-        for x in inputs:
-            if isinstance(x, awkward1.layout.Record):
-                index = numpy.full(maxlen, x.at, dtype=numpy.int64)
-                nextinputs.append(awkward1.layout.RegularArray(x.array[index], maxlen))
-                isscalar.append(True)
-            elif isinstance(x, awkward1.layout.Content):
-                nextinputs.append(awkward1.layout.RegularArray(x, len(x)))
-                isscalar.append(False)
-            else:
-                nextinputs.append(x)
-                isscalar.append(True)
-        return nextinputs
-
-    def unpack(x):
-        if all(isscalar):
-            if len(x) == 0:
-                return x.getitem_nothing().getitem_nothing()
-            else:
-                return x[0][0]
+def broadcast_pack(inputs, isscalar):
+    maxlen = -1
+    for x in inputs:
+        if isinstance(x, awkward1.layout.Content):
+            maxlen = max(maxlen, len(x))
+    if maxlen < 0:
+        maxlen = 1
+    nextinputs = []
+    for x in inputs:
+        if isinstance(x, awkward1.layout.Record):
+            index = numpy.full(maxlen, x.at, dtype=numpy.int64)
+            nextinputs.append(awkward1.layout.RegularArray(x.array[index], maxlen))
+            isscalar.append(True)
+        elif isinstance(x, awkward1.layout.Content):
+            nextinputs.append(awkward1.layout.RegularArray(x, len(x)))
+            isscalar.append(False)
         else:
-            if len(x) == 0:
-                return x.getitem_nothing()
-            else:
-                return x[0]
+            nextinputs.append(x)
+            isscalar.append(True)
+    return nextinputs
 
-    return unpack(apply(pack(inputs), 0))
+def broadcast_unpack(x, isscalar):
+    if all(isscalar):
+        if len(x) == 0:
+            return x.getitem_nothing().getitem_nothing()
+        else:
+            return x[0][0]
+    else:
+        if len(x) == 0:
+            return x.getitem_nothing()
+        else:
+            return x[0]
 
 def minimally_touching_string(limit_length, layout, behavior):
     import awkward1.layout

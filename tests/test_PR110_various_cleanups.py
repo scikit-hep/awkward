@@ -61,3 +61,7 @@ def test_behaviors():
     assert type(array3) is awkward1.Array
     assert type(array3["outer"]) is DeepDummyArray
     assert repr(array3["outer"]) == "<DeepDummyArray <DummyArray <1.1> <2.2> <3.3>> <DummyArray > <DummyArray <4.4> <5.5>>>"
+
+# def test_array_equal():
+#     print(awkward1.array_equal(awkward1.Array([1, 2, 3]), awkward1.Array([1, 2, 3]), 0))
+#     raise Exception

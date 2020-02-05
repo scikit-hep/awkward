@@ -194,15 +194,245 @@ def where(condition, *args, **kwargs):
         raise TypeError("where() takes from 1 to 3 positional arguments but {0} were given".format(len(args) + 1))
 
 def array_equal(one, two, axis):
-    def apply(one, two, depth):
+    behavior = awkward1._util.behaviorof(one, two)
+
+    one = awkward1.operations.convert.tolayout(one, allowrecord=True, allowother=True)
+    two = awkward1.operations.convert.tolayout(two, allowrecord=True, allowother=True)
+
+    # I need to do it out in cases now now at least, until I understand how to coalesce them.
+    def apply(inputs, depth):
+        one, two = inputs
+
         if isinstance(one, awkward1._util.unknowntypes):
-            if isinstance(two, awkward1_.util.unknowntypes):
-                return 
+            if isinstance(two, awkward1._util.unknowntypes):
+                raise NotImplementedError
 
+            elif isinstance(two, awkward1.layout.NumpyArray) and two.ndim > 1:
+                raise NotImplementedError
 
+            elif isinstance(two, awkward1._util.indexedtypes):
+                raise NotImplementedError
 
+            elif isinstance(two, awkward1._util.uniontypes):
+                raise NotImplementedError
 
+            elif isinstance(two, awkward1._util.optiontypes):
+                raise NotImplementedError
 
+            elif isinstance(two, awkward1._util.listtypes):
+                raise NotImplementedError
 
+            elif isinstance(two, awkward1._util.recordtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray):
+                raise NotImplementedError
+
+            else:
+                raise AssertionError(two)
+
+        elif isinstance(one, awkward1.layout.NumpyArray) and one.ndim > 1:
+            if isinstance(two, awkward1._util.unknowntypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray) and two.ndim > 1:
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.indexedtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.uniontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.optiontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.listtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.recordtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray):
+                raise NotImplementedError
+
+            else:
+                raise AssertionError(two)
+
+        elif isinstance(one, awkward1._util.indexedtypes):
+            if isinstance(two, awkward1._util.unknowntypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray) and two.ndim > 1:
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.indexedtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.uniontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.optiontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.listtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.recordtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray):
+                raise NotImplementedError
+
+            else:
+                raise AssertionError(two)
+
+        elif isinstance(one, awkward1._util.uniontypes):
+            if isinstance(two, awkward1._util.unknowntypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray) and two.ndim > 1:
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.indexedtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.uniontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.optiontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.listtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.recordtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray):
+                raise NotImplementedError
+
+            else:
+                raise AssertionError(two)
+
+        elif isinstance(one, awkward1._util.optiontypes):
+            if isinstance(two, awkward1._util.unknowntypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray) and two.ndim > 1:
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.indexedtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.uniontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.optiontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.listtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.recordtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray):
+                raise NotImplementedError
+
+            else:
+                raise AssertionError(two)
+
+        elif isinstance(one, awkward1._util.listtypes):
+            if isinstance(two, awkward1._util.unknowntypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray) and two.ndim > 1:
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.indexedtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.uniontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.optiontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.listtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.recordtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray):
+                raise NotImplementedError
+
+            else:
+                raise AssertionError(two)
+
+        elif isinstance(one, awkward1._util.recordtypes):
+            if isinstance(two, awkward1._util.unknowntypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray) and two.ndim > 1:
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.indexedtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.uniontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.optiontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.listtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.recordtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray):
+                raise NotImplementedError
+
+            else:
+                raise AssertionError(two)
+
+        elif isinstance(one, awkward1.layout.NumpyArray):
+            if isinstance(two, awkward1._util.unknowntypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray) and two.ndim > 1:
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.indexedtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.uniontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.optiontypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.listtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1._util.recordtypes):
+                raise NotImplementedError
+
+            elif isinstance(two, awkward1.layout.NumpyArray):
+                raise NotImplementedError
+
+            else:
+                raise AssertionError(two)
+
+        else:
+            raise AssertionError(two)
+
+    isscalar = []
+    out = awkward1._util.broadcast_unpack(apply(awkward1._util.broadcast_pack([one, two], isscalar), 0), isscalar)
+
+    return awkward1._util.wrap(out, behavior)
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "Iterable", "numpy", "awkward1")]
