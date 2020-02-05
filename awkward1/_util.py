@@ -20,25 +20,32 @@ listtypes = (awkward1.layout.RegularArray, awkward1.layout.ListArray32, awkward1
 
 recordtypes = (awkward1.layout.RecordArray,)
 
-def arrayclass(behavior, parameters):
+def arrayclass(layout, behavior):
     import awkward1
     if behavior is None:
         behavior = awkward1.behavior
-    cls = behavior.get(parameters.get("__array__"))
-    if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
-        return cls
-    rec = parameters.get("__record__")
-    if rec is not None:
-        cls = behavior.get(("array", rec))
+    arr = layout.parameter("__array__")
+    if isinstance(arr, str):
+        cls = behavior.get(arr)
+        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
+            return cls
+    rec = layout.parameter("__record__")
+    if isinstance(rec, str):
+        cls = behavior.get((".", rec))
+        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
+            return cls
+    deeprec = layout.purelist_parameter("__record__")
+    if isinstance(deeprec, str):
+        cls = behavior.get(("*", deeprec))
         if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
             return cls
     return awkward1.highlevel.Array
 
-def recordclass(behavior, parameters):
+def recordclass(layout, behavior):
     import awkward1
     if behavior is None:
         behavior = awkward1.behavior
-    cls = behavior.get(parameters.get("__record__"))
+    cls = behavior.get(layout.parameter("__record__"))
     if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Record):
         return cls
     return awkward1.highlevel.Record
@@ -329,14 +336,14 @@ def minimally_touching_string(limit_length, layout, behavior):
     def forward(x, space, brackets=True, wrap=True):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
-            cls = arrayclass(behavior, x.parameters)
+            cls = arrayclass(x, behavior)
             if cls is not awkward1.highlevel.Array:
                 y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
-            cls = recordclass(behavior, x.parameters)
+            cls = recordclass(x, behavior)
             if cls is not awkward1.highlevel.Record:
                 y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:
@@ -381,14 +388,14 @@ def minimally_touching_string(limit_length, layout, behavior):
     def backward(x, space, brackets=True, wrap=True):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
-            cls = arrayclass(behavior, x.parameters)
+            cls = arrayclass(x, behavior)
             if cls is not awkward1.highlevel.Array:
                 y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
-            cls = recordclass(behavior, x.parameters)
+            cls = recordclass(x, behavior)
             if cls is not awkward1.highlevel.Record:
                 y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:

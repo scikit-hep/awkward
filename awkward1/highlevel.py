@@ -31,11 +31,11 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
 
-        self.__class__ = awkward1._util.arrayclass(behavior, layout.parameters)
+        self.__class__ = awkward1._util.arrayclass(layout, behavior)
 
         self.layout = layout
         self._behavior = behavior
-        
+
     @property
     def layout(self):
         return self._layout
@@ -149,7 +149,7 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
         if not isinstance(layout, awkward1.layout.Record):
             raise TypeError("could not convert data into an awkward1.Record")
 
-        self.__class__ = awkward1._util.recordclass(behavior, layout.parameters)
+        self.__class__ = awkward1._util.recordclass(layout, behavior)
 
         self.layout = layout
         self._behavior = behavior

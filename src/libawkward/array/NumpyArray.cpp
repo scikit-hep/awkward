@@ -683,6 +683,10 @@ namespace awkward {
     return std::make_shared<NumpyArray>(identities, parameters_, ptr, shape, strides_, 0, itemsize_, format_);
   }
 
+  const std::string NumpyArray::purelist_parameter(const std::string& key) const {
+    return parameter(key);
+  }
+
   bool NumpyArray::purelist_isregular() const {
     return true;
   }

@@ -97,6 +97,10 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::carry");
   }
 
+  const std::string None::purelist_parameter(const std::string& key) const {
+    throw std::runtime_error("undefined operation: None::purelist_parameter");
+  }
+
   bool None::purelist_isregular() const {
     throw std::runtime_error("undefined operation: None::purelist_isregular");
   }

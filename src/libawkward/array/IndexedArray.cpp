@@ -612,6 +612,17 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::string IndexedArrayOf<T, ISOPTION>::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  template <typename T, bool ISOPTION>
   bool IndexedArrayOf<T, ISOPTION>::purelist_isregular() const {
     return content_.get()->purelist_isregular();
   }

@@ -409,6 +409,10 @@ namespace awkward {
     }
   }
 
+  const std::string RecordArray::purelist_parameter(const std::string& key) const {
+    return parameter(key);
+  }
+
   bool RecordArray::purelist_isregular() const {
     return true;
   }

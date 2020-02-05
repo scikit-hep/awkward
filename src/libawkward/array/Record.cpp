@@ -166,6 +166,10 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::carry");
   }
 
+  const std::string Record::purelist_parameter(const std::string& key) const {
+    return parameter(key);
+  }
+
   bool Record::purelist_isregular() const {
     return true;
   }

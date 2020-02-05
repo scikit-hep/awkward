@@ -119,6 +119,10 @@ namespace awkward {
     return shallow_copy();
   }
 
+  const std::string EmptyArray::purelist_parameter(const std::string& key) const {
+    return parameter(key);
+  }
+
   bool EmptyArray::purelist_isregular() const {
     return true;
   }

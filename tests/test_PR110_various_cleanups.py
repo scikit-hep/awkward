@@ -25,10 +25,15 @@ class DummyArray(awkward1.Array):
     def __repr__(self):
         return "<DummyArray {0}>".format(" ".join(repr(x) for x in self))
 
+class DeepDummyArray(awkward1.Array):
+    def __repr__(self):
+        return "<DeepDummyArray {0}>".format(" ".join(repr(x) for x in self))
+
 def test_behaviors():
     behavior = {}
     behavior["Dummy"] = DummyRecord
-    behavior["array", "Dummy"] = DummyArray
+    behavior[".", "Dummy"] = DummyArray
+    behavior["*", "Dummy"] = DeepDummyArray
 
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     recordarray = awkward1.layout.RecordArray({"x": content})
@@ -42,8 +47,19 @@ def test_behaviors():
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, recordarray)
 
     array2 = awkward1.Array(listoffsetarray, behavior=behavior)
-    print(repr(array2))
+
+    assert array2.layout.parameter("__record__") is None
+    assert array2.layout.purelist_parameter("__record__") == "Dummy"
+
+    assert repr(array2) == "<DeepDummyArray <DummyArray <1.1> <2.2> <3.3>> <DummyArray > <DummyArray <4.4> <5.5>>>"
     assert repr(array2[0]) == "<DummyArray <1.1> <2.2> <3.3>>"
     assert repr(array2[0, 0]) == "<1.1>"
 
+    recordarray2 = awkward1.layout.RecordArray({"outer": listoffsetarray})
+
+    array3 = awkward1.Array(recordarray2, behavior=behavior)
+    assert type(array3) is awkward1.Array
+    # print(array3["outer"])
+    #
+    #
     # raise Exception
