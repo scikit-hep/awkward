@@ -3,10 +3,13 @@
 import inspect
 import numbers
 import re
+import sys
 
 import numpy
 
 import awkward1.layout
+
+py27 = (sys.version_info[0] < 3)
 
 unknowntypes = (awkward1.layout.EmptyArray,)
 
@@ -25,17 +28,17 @@ def arrayclass(layout, behavior):
     if behavior is None:
         behavior = awkward1.behavior
     arr = layout.parameter("__array__")
-    if isinstance(arr, str):
+    if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
         cls = behavior.get(arr)
         if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
             return cls
     rec = layout.parameter("__record__")
-    if isinstance(rec, str):
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
         cls = behavior.get((".", rec))
         if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
             return cls
     deeprec = layout.purelist_parameter("__record__")
-    if isinstance(deeprec, str):
+    if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
         cls = behavior.get(("*", deeprec))
         if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
             return cls
@@ -45,9 +48,11 @@ def recordclass(layout, behavior):
     import awkward1
     if behavior is None:
         behavior = awkward1.behavior
-    cls = behavior.get(layout.parameter("__record__"))
-    if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Record):
-        return cls
+    rec = layout.parameter("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        cls = behavior.get(rec)
+        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Record):
+            return cls
     return awkward1.highlevel.Record
 
 def overload(behavior, signature):
