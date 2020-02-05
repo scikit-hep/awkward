@@ -175,8 +175,8 @@ namespace awkward {
     return other;
   }
 
-  const std::shared_ptr<Content> EmptyArray::equal(const std::shared_ptr<Content>& other, int64_t axis) const {
-    throw std::runtime_error("FIXME: EmptyArray::equal");
+  const std::shared_ptr<Content> EmptyArray::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: EmptyArray::equal_part");
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

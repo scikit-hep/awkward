@@ -953,8 +953,8 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::equal(const std::shared_ptr<Content>& other, int64_t axis) const {
-    throw std::runtime_error("FIXME: IndexedArray::equal");
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: IndexedArray::equal_part");
   }
 
   template <typename T, bool ISOPTION>

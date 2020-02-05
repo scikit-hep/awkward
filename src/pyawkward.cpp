@@ -1231,6 +1231,7 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("tojson", &tojson_string<T>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
           .def("tojson", &tojson_file<T>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
           .def_property_readonly("nbytes", &T::nbytes)
+          .def("equal", &T::equal)
           .def("deep_copy", &T::deep_copy, py::arg("copyarrays") = true, py::arg("copyindexes") = true, py::arg("copyidentities") = true)
           .def_property_readonly("identity", &identity<T>)
           .def_property_readonly("numfields", &T::numfields)

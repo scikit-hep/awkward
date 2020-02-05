@@ -812,8 +812,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::equal(const std::shared_ptr<Content>& other, int64_t axis) const {
-    throw std::runtime_error("FIXME: ListArray::equal");
+  const std::shared_ptr<Content> ListArrayOf<T>::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: ListArray::equal_part");
   }
 
   template <typename T>

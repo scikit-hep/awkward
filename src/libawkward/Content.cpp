@@ -70,6 +70,11 @@ namespace awkward {
     return out;
   }
 
+  const std::shared_ptr<Content> Content::equal(const std::shared_ptr<Content>& other, int64_t axis) const {
+    return equal_part(other, axis, 0);
+  }
+
+
   const util::Parameters Content::parameters() const {
     return parameters_;
   }

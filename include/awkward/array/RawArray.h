@@ -491,8 +491,8 @@ namespace awkward {
     }
 
 
-    const std::shared_ptr<Content> equal(const std::shared_ptr<Content>& other, int64_t axis) const {
-      throw std::runtime_error("FIXME: RawArray::equal");
+    const std::shared_ptr<Content> equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
+      throw std::runtime_error("FIXME: RawArray::equal_part");
     }
 
   protected:

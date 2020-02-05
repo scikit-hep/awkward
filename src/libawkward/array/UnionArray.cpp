@@ -1031,8 +1031,8 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::equal(const std::shared_ptr<Content>& other, int64_t axis) const {
-    throw std::runtime_error("FIXME: UnionArray::equal");
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: UnionArray::equal_part");
   }
 
   template <typename T, typename I>

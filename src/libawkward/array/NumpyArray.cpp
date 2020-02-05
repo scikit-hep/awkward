@@ -66,24 +66,34 @@ namespace awkward {
   }
 
   NumpyArray::NumpyArray(const Index8 index)
-    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }), 0, sizeof(int8_t), format_map.at(std::type_index(typeid(int8_t)))) {
-  }
+    : NumpyArray(index, format_map.at(std::type_index(typeid(int8_t)))) { }
 
   NumpyArray::NumpyArray(const IndexU8 index)
-    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }), 0, sizeof(uint8_t), format_map.at(std::type_index(typeid(uint8_t)))) {
-  }
+    : NumpyArray(index, format_map.at(std::type_index(typeid(uint8_t)))) { }
 
   NumpyArray::NumpyArray(const Index32 index)
-    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }), 0, sizeof(int32_t), format_map.at(std::type_index(typeid(int32_t)))) {
-  }
+    : NumpyArray(index, format_map.at(std::type_index(typeid(int32_t)))) { }
 
   NumpyArray::NumpyArray(const IndexU32 index)
-    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }), 0, sizeof(uint32_t), format_map.at(std::type_index(typeid(uint32_t)))) {
-  }
+    : NumpyArray(index, format_map.at(std::type_index(typeid(uint32_t)))) { }
 
   NumpyArray::NumpyArray(const Index64 index)
-    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }), 0, sizeof(int64_t), format_map.at(std::type_index(typeid(int64_t)))) {
-  }
+    : NumpyArray(index, format_map.at(std::type_index(typeid(int64_t)))) { }
+
+  NumpyArray::NumpyArray(const Index8 index, const std::string& format)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }), 0, sizeof(int8_t), format) { }
+
+  NumpyArray::NumpyArray(const IndexU8 index, const std::string& format)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }), 0, sizeof(uint8_t), format) { }
+
+  NumpyArray::NumpyArray(const Index32 index, const std::string& format)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }), 0, sizeof(int32_t), format) { }
+
+  NumpyArray::NumpyArray(const IndexU32 index, const std::string& format)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }), 0, sizeof(uint32_t), format) { }
+
+  NumpyArray::NumpyArray(const Index64 index, const std::string& format)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }), 0, sizeof(int64_t), format) { }
 
   const std::shared_ptr<void> NumpyArray::ptr() const {
     return ptr_;
@@ -1250,8 +1260,8 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::equal(const std::shared_ptr<Content>& other, int64_t axis) const {
-    throw std::runtime_error("FIXME: NumpyArray::equal");
+  const std::shared_ptr<Content> NumpyArray::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: NumpyArray::equal_part");
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

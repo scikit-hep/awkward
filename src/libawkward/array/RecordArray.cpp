@@ -630,8 +630,8 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::equal(const std::shared_ptr<Content>& other, int64_t axis) const {
-    throw std::runtime_error("FIXME: RecordArray::equal");
+  const std::shared_ptr<Content> RecordArray::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: RecordArray::equal_part");
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {

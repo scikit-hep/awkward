@@ -756,8 +756,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::equal(const std::shared_ptr<Content>& other, int64_t axis) const {
-    throw std::runtime_error("FIXME: ListOffsetArray::equal");
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: ListOffsetArray::equal_part");
   }
 
   template <typename T>
