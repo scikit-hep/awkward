@@ -23,7 +23,7 @@ def withfield(base, what, where=None):
         if isinstance(base, awkward1.layout.RecordArray):
             if not isinstance(what, awkward1.layout.Content):
                 what = awkward1.layout.NumpyArray(numpy.lib.stride_tricks.as_strided([what], shape=(len(base),), strides=(0,)))
-            return lambda: base.setitem_field(where, what)
+            return lambda depth: base.setitem_field(where, what)
         else:
             return None
 
@@ -192,5 +192,17 @@ def where(condition, *args, **kwargs):
 
     else:
         raise TypeError("where() takes from 1 to 3 positional arguments but {0} were given".format(len(args) + 1))
+
+def array_equal(one, two, axis):
+    def apply(one, two, depth):
+        if isinstance(one, awkward1._util.unknowntypes):
+            if isinstance(two, awkward1_.util.unknowntypes):
+                return 
+
+
+
+
+
+
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "Iterable", "numpy", "awkward1")]

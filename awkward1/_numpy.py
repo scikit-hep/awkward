@@ -46,15 +46,15 @@ def array_ufunc(ufunc, method, inputs, kwargs, behavior):
         signature = (ufunc,) + tuple(x.parameters.get("__record__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
         custom = awkward1._util.overload(behavior, signature)
         if custom is not None:
-            return lambda: custom(*inputs, **kwargs)
+            return lambda depth: custom(*inputs, **kwargs)
 
         signature = (ufunc,) + tuple(x.parameters.get("__array__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
         custom = awkward1._util.overload(behavior, signature)
         if custom is not None:
-            return lambda: custom(*inputs, **kwargs)
+            return lambda depth: custom(*inputs, **kwargs)
 
         if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-            return lambda: awkward1.layout.NumpyArray(getattr(ufunc, method)(*inputs, **kwargs))
+            return lambda depth: awkward1.layout.NumpyArray(getattr(ufunc, method)(*inputs, **kwargs))
 
         return None
 

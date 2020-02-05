@@ -1261,6 +1261,29 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
+    // if (length() != other.get()->length()) {
+    //   throw std::invalid_argument("cannot compare equality for arrays of different lengths");
+    // }
+    //
+    // if (shape_.size() == 0) {
+    //   // probably won't ever need this...
+    //   throw std::invalid_argument("undefined operation: 'equal' on NumpyArray scalar");
+    // }
+    // else if (shape_.size() == 1) {
+    //   std::shared_ptr<NumpyArray> othernumpy;
+    //   if (std::shared_ptr<NumpyArray> specific = std::dynamic_pointer_cast<NumpyArray>(other)) {
+    //     othernumpy = specific;
+    //   }
+    //   else if (std::shared_ptr<IndexedArray32> specific = std::dynamic_pointer_cast<Index)
+    //
+    //
+    //
+    //
+    // }
+    // else {
+    //   std::shared_ptr<Content> next = toRegularArray();
+    //   return next.get()->equal_part(other, axis, depth);
+    // }
     throw std::runtime_error("FIXME: NumpyArray::equal_part");
   }
 

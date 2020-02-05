@@ -132,7 +132,7 @@ def broadcast_and_apply(inputs, getfunction):
             if len(x) != length:
                 raise ValueError("cannot broadcast {0} of length {1} with {2} of length {3}".format(type(inputs[0]).__name__, length, type(x).__name__, len(x)))
 
-    def apply(inputs):
+    def apply(inputs, depth):
         # handle implicit right-broadcasting (i.e. NumPy-like)
         if any(isinstance(x, listtypes) for x in inputs):
             maxdepth = max(x.purelist_depth for x in inputs if isinstance(x, awkward1.layout.Content))
@@ -144,7 +144,7 @@ def broadcast_and_apply(inputs, getfunction):
                             x = awkward1.layout.RegularArray(x, 1)
                     nextinputs.append(x)
                 if any(x is not y for x, y in zip(inputs, nextinputs)):
-                    return apply(nextinputs)
+                    return apply(nextinputs, depth)
 
         # now all lengths must agree
         checklength([x for x in inputs if isinstance(x, awkward1.layout.Content)])
@@ -153,16 +153,16 @@ def broadcast_and_apply(inputs, getfunction):
 
         # the rest of this is one switch statement
         if function is not None:
-            return function()
+            return function(depth)
 
         elif any(isinstance(x, unknowntypes) for x in inputs):
-            return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
+            return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs], depth)
 
         elif any(isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1 for x in inputs):
-            return apply([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.toRegularArray() for x in inputs])
+            return apply([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.toRegularArray() for x in inputs], depth)
 
         elif any(isinstance(x, indexedtypes) for x in inputs):
-            return apply([x if not isinstance(x, indexedtypes) else x.project() for x in inputs])
+            return apply([x if not isinstance(x, indexedtypes) else x.project() for x in inputs], depth)
 
         elif any(isinstance(x, uniontypes) for x in inputs):
             tagslist = []
@@ -193,11 +193,11 @@ def broadcast_and_apply(inputs, getfunction):
                         nextinputs.append(x[mask])
                     else:
                         nextinputs.append(x)
-                contents.append(apply(nextinputs))
+                contents.append(apply(nextinputs, depth))
 
             tags = awkward1.layout.Index8(tags)
             index = awkward1.layout.Index64(index)
-            return awkward1.layout.UnionArray8_64(tags, index, contents)
+            return awkward1.layout.UnionArray8_64(tags, index, contents).simplify()
 
         elif any(isinstance(x, optiontypes) for x in inputs):
             mask = None
@@ -225,7 +225,7 @@ def broadcast_and_apply(inputs, getfunction):
                 else:
                     nextinputs.append(awkward1.layout.IndexedOptionArray64(nextindex, x).project(nextmask))
 
-            return awkward1.layout.IndexedOptionArray64(index, apply(nextinputs))
+            return awkward1.layout.IndexedOptionArray64(index, apply(nextinputs, depth)).simplify()
 
         elif any(isinstance(x, listtypes) for x in inputs):
             if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
@@ -245,7 +245,7 @@ def broadcast_and_apply(inputs, getfunction):
                             raise ValueError("cannot broadcast RegularArray of size {0} with RegularArray of size {1}".format(x.size, maxsize))
                     else:
                         nextinputs.append(x)
-                return awkward1.layout.RegularArray(apply(nextinputs), maxsize)
+                return awkward1.layout.RegularArray(apply(nextinputs, depth + 1), maxsize)
 
             else:
                 for x in inputs:
@@ -262,7 +262,7 @@ def broadcast_and_apply(inputs, getfunction):
                         nextinputs.append(awkward1.layout.RegularArray(x, 1).broadcast_tooffsets64(offsets).content)
                     else:
                         nextinputs.append(x)
-                return awkward1.layout.ListOffsetArray64(offsets, apply(nextinputs))
+                return awkward1.layout.ListOffsetArray64(offsets, apply(nextinputs, depth + 1))
 
         elif any(isinstance(x, recordtypes) for x in inputs):
             keys = None
@@ -286,7 +286,7 @@ def broadcast_and_apply(inputs, getfunction):
             else:
                 contents = []
                 for key in keys:
-                    contents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs]))
+                    contents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs], depth))
                 return awkward1.layout.RecordArray(contents, keys)
 
         else:
@@ -327,7 +327,7 @@ def broadcast_and_apply(inputs, getfunction):
             else:
                 return x[0]
 
-    return unpack(apply(pack(inputs)))
+    return unpack(apply(pack(inputs), 0))
 
 def minimally_touching_string(limit_length, layout, behavior):
     import awkward1.layout
