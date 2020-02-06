@@ -1259,9 +1259,95 @@ namespace awkward {
       throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
     }
   }
-  
+
   const std::shared_ptr<SliceItem> NumpyArray::asslice() const {
-    throw std::runtime_error("FIXME: NumpyArray::asslice");
+    if (ndim() != 1) {
+      throw std::invalid_argument("regular dimensions cannot be mixed with var dimensions in slice (try ak.tonumpy or ak.tojagged)");
+    }
+#ifdef _MSC_VER
+    if (format_.compare("q") == 0) {
+#else
+    if (format_.compare("l") == 0) {
+#endif
+      int64_t* raw = reinterpret_cast<int64_t*>(ptr_.get());
+      std::shared_ptr<int64_t> ptr(ptr_, raw);
+      std::vector<int64_t> shape({ (int64_t)shape_[0] });
+      std::vector<int64_t> strides({ (int64_t)strides_[0] / (int64_t)itemsize_ });
+      return std::make_shared<SliceArray64>(Index64(ptr, (int64_t)byteoffset_ / (int64_t)itemsize_, length()), shape, strides);
+    }
+    else if (format_.compare("q") == 0  ||  format_.compare("Q") == 0  ||  format_.compare("l") == 0  ||  format_.compare("L") == 0  ||  format_.compare("i") == 0  ||  format_.compare("I") == 0  ||  format_.compare("h") == 0  ||  format_.compare("H") == 0  ||  format_.compare("b") == 0  ||  format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+      NumpyArray contiguous_self = contiguous();
+      int64_t offset = (int64_t)contiguous_self.byteoffset() / (int64_t)itemsize_;
+      Index64 index(length());
+      struct Error err;
+#ifdef _MSC_VER
+      if (format_.compare("Q") == 0) {
+#else
+      if (format_.compare("L") == 0) {
+#endif
+        err = awkward_numpyarray_fill_to64_fromU64(index.ptr().get(), 0, reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("l") == 0) {
+#else
+      else if (format_.compare("i") == 0) {
+#endif
+        err = awkward_numpyarray_fill_to64_from32(index.ptr().get(), 0, reinterpret_cast<int32_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+#ifdef _MSC_VER
+      else if (format_.compare("L") == 0) {
+#else
+      else if (format_.compare("I") == 0) {
+#endif
+        err = awkward_numpyarray_fill_to64_fromU32(index.ptr().get(), 0, reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+      else if (format_.compare("h") == 0) {
+        err = awkward_numpyarray_fill_to64_from16(index.ptr().get(), 0, reinterpret_cast<int16_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+      else if (format_.compare("H") == 0) {
+        err = awkward_numpyarray_fill_to64_fromU16(index.ptr().get(), 0, reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+      else if (format_.compare("b") == 0) {
+        err = awkward_numpyarray_fill_to64_from8(index.ptr().get(), 0, reinterpret_cast<int8_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+        err = awkward_numpyarray_fill_to64_fromU8(index.ptr().get(), 0, reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+      else {
+        throw std::runtime_error("oops: check format_.compare cases above");
+      }
+      util::handle_error(err, classname(), identities_.get());
+
+      std::vector<int64_t> shape({ (int64_t)shape_[0] });
+      std::vector<int64_t> strides({ 1 });
+      return std::make_shared<SliceArray64>(index, shape, strides);
+    }
+    else if (format_.compare("?") == 0) {
+      int64_t numtrue;
+      struct Error err1 = awkward_numpyarray_getitem_boolean_numtrue(
+        &numtrue,
+        reinterpret_cast<int8_t*>(ptr_.get()),
+        (int64_t)byteoffset_,
+        (int64_t)shape_[0],
+        (int64_t)strides_[0]);
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 index(numtrue);
+      struct Error err2 = awkward_numpyarray_getitem_boolean_nonzero_64(
+        index.ptr().get(),
+        reinterpret_cast<int8_t*>(ptr_.get()),
+        (int64_t)byteoffset_,
+        (int64_t)shape_[0],
+        (int64_t)strides_[0]);
+      util::handle_error(err2, classname(), identities_.get());
+
+      std::vector<int64_t> shape({ numtrue });
+      std::vector<int64_t> strides({ 1 });
+      return std::make_shared<SliceArray64>(index, shape, strides);
+    }
+    else {
+      throw std::invalid_argument("only arrays of integers or booleans may be used as a slice");
+    }
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

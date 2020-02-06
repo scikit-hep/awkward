@@ -618,6 +618,14 @@ ak::Slice toslice(py::object obj) {
       toslice_part(out, x.cast<py::object>());
     }
   }
+  else if (py::isinstance<ak::Content>(obj)) {
+    std::shared_ptr<ak::Content> array = unbox_content(obj);
+    out.append(array.get()->asslice());
+  }
+  else if (py::isinstance(obj, py::module::import("awkward1").attr("Array"))) {
+    std::shared_ptr<ak::Content> array = unbox_content(obj.attr("layout"));
+    out.append(array.get()->asslice());
+  }
   else {
     toslice_part(out, obj);
   }

@@ -44,6 +44,9 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_numpyarray_getitem_next_array_64(int64_t* nextcarryptr, int64_t* nextadvancedptr, const int64_t* carryptr, const int64_t* flatheadptr, int64_t lencarry, int64_t lenflathead, int64_t skip);
   EXPORT_SYMBOL struct Error awkward_numpyarray_getitem_next_array_advanced_64(int64_t* nextcarryptr, const int64_t* carryptr, const int64_t* advancedptr, const int64_t* flatheadptr, int64_t lencarry, int64_t skip);
 
+  EXPORT_SYMBOL struct Error awkward_numpyarray_getitem_boolean_numtrue(int64_t* numtrue, const int8_t* fromptr, int64_t byteoffset, int64_t length, int64_t stride);
+  EXPORT_SYMBOL struct Error awkward_numpyarray_getitem_boolean_nonzero_64(int64_t* toptr, const int8_t* fromptr, int64_t byteoffset, int64_t length, int64_t stride);
+
   EXPORT_SYMBOL struct Error awkward_listarray32_getitem_next_at_64(int64_t* tocarry, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at);
   EXPORT_SYMBOL struct Error awkward_listarrayU32_getitem_next_at_64(int64_t* tocarry, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at);
   EXPORT_SYMBOL struct Error awkward_listarray64_getitem_next_at_64(int64_t* tocarry, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at);

@@ -285,6 +285,30 @@ ERROR awkward_numpyarray_getitem_next_array_advanced_64(int64_t* nextcarryptr, c
   return awkward_numpyarray_getitem_next_array_advanced(nextcarryptr, carryptr, advancedptr, flatheadptr, lencarry, skip);
 }
 
+ERROR awkward_numpyarray_getitem_boolean_numtrue(int64_t* numtrue, const int8_t* fromptr, int64_t byteoffset, int64_t length, int64_t stride) {
+  *numtrue = 0;
+  for (int64_t i = 0;  i < length;  i += stride) {
+    *numtrue = *numtrue + (fromptr[byteoffset + i] != 0);
+  }
+  return success();
+}
+
+template <typename T>
+ERROR awkward_numpyarray_getitem_boolean_nonzero(T* toptr, const int8_t* fromptr, int64_t byteoffset, int64_t length, int64_t stride) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < length;  i += stride) {
+    if (fromptr[byteoffset + i] != 0) {
+      toptr[k] = i;
+      k++;
+    }
+  }
+  return success();
+}
+
+ERROR awkward_numpyarray_getitem_boolean_nonzero_64(int64_t* toptr, const int8_t* fromptr, int64_t byteoffset, int64_t length, int64_t stride) {
+  return awkward_numpyarray_getitem_boolean_nonzero<int64_t>(toptr, fromptr, byteoffset, length, stride);
+}
+
 template <typename C, typename T>
 ERROR awkward_listarray_getitem_next_at(T* tocarry, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at) {
   for (int64_t i = 0;  i < lenstarts;  i++) {

@@ -954,7 +954,12 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<SliceItem> IndexedArrayOf<T, ISOPTION>::asslice() const {
-    throw std::runtime_error("FIXME: IndexedArray::asslice");
+    if (ISOPTION) {
+      throw std::runtime_error("FIXME: IndexedOptionArray::asslice");
+    }
+    else {
+      return project().get()->asslice();
+    }
   }
 
   template <typename T, bool ISOPTION>
