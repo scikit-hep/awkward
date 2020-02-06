@@ -733,18 +733,18 @@ def UnionArray_count(self, axis=0):
 
 UnionArray.count = UnionArray_count
 
-for i in range(10):
-    print("count i =", i)
-    array = Content.random()
-    for axis in range(5):
-        print("axis =", axis)
-        try:
-            rowwise = count(array, axis)
-            columnar = array.count(axis)
-        except IndexError:
-            break
-        columnar = list(columnar)
-        assert rowwise == columnar
+#for i in range(10):
+#    print("count i =", i)
+#    array = Content.random()
+#    for axis in range(5):
+#        print("axis =", axis)
+#        try:
+#            rowwise = count(array, axis)
+#            columnar = array.count(axis)
+#        except IndexError:
+#            break
+#        columnar = list(columnar)
+#        assert rowwise == columnar
 
 ################################################################ test flatten
 def flatten(data, axis=0):
@@ -783,29 +783,56 @@ def RawArray_flatten(self, axis=0):
 
 RawArray.flatten = RawArray_flatten
 
+def count_strides(array):
+    strides = []
+    def recurse(array):
+        if isinstance(array, Content):
+            strides.append(array.__len__())
+            return count_strides(array.__getitem__(0))
+        else:
+            return array
+
+    recurse(array)
+
+    return strides
+
+
+def compact_array(array, depth=-1):
+    data_items = []
+
+    def recurse(array, index, depth):
+        if isinstance(array, Content) and array.__len__() > 0:
+            if depth != 0:
+                for it in range(array.__len__()):
+                    recurse(array.__getitem__(it), it, depth - 1)
+        else:
+            data_items.append(array)
+
+    recurse(array, 0, depth)
+
+    return data_items
+
+def compact_data(array, len, toptr, depth):
+    if isinstance(array, Content):
+        toptr.append(array)
+        return compact_data(array, array.__len__(), toptr, depth - 1)
+    else:
+        return toptr.append(array)
+
 # NumpyArray
 def NumpyArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     else:
-        if len(self.shape) == 1:
-            raise IndexError("axis > list depth of structure")
-        if axis == 0:
-            return NumpyArray.onedim([self.shape[1]] * self.shape[0])
-        else:
-            if self.shape[0] == 0:
-                return NumpyArray.onedim([])
-            else:
-                ### Awkward solution
-                # content = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
-                # index = [0] * self.shape[0] * self.shape[1]
-                # return RegularArray(IndexedArray(index, content), self.shape[1])
+        if self.shape[0] == 0:
+            return NumpyArray.onedim([])
 
-                ### pure NumPy solution
-                next = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).flatten(axis - 1)
-                shape = [self.shape[0]] + next.shape
-                strides = [0] + next.strides   # a good use for stride == 0
-                return NumpyArray(next.ptr, shape, strides, next.offset)
+        compact_ptr = compact_array(array, len(self.shape))
+
+        shape = self.shape[:axis] + [int(self.shape[axis])*int(self.shape[axis + 1])] + self.shape[axis + 2:]
+        strides = self.strides[:axis] + self.strides[axis + 1:]
+
+        return NumpyArray(compact_ptr, shape, strides, 0)
 
 NumpyArray.flatten = NumpyArray_flatten
 
@@ -897,13 +924,16 @@ UnionArray.flatten = UnionArray_flatten
 
 for i in range(10):
     print("flatten i =", i)
-    array = Content.random()
+    #array = Content.random()
+    array = NumpyArray.random()
     for axis in range(5):
         print("axis =", axis)
         try:
             rowwise = flatten(array, axis)
             columnar = array.flatten(axis)
+            columnar.tostring_part("", "", "")
         except IndexError:
+            print("IndexError")
             break
         columnar = list(columnar)
         assert rowwise == columnar
