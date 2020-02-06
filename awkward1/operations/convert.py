@@ -13,7 +13,7 @@ import numpy
 import awkward1._util
 import awkward1.layout
 
-def fromnumpy(array, highlevel=True):
+def fromnumpy(array, highlevel=True, behavior=None):
     def recurse(array):
         if len(array.shape) == 0:
             return awkward1.layout.NumpyArray(array.reshape(1))
@@ -23,24 +23,24 @@ def fromnumpy(array, highlevel=True):
             return awkward1.layout.RegularArray(recurse(array.reshape((-1,) + array.shape[2:])), array.shape[1])
     layout = recurse(array)
     if highlevel:
-        return awkward1._util.wrap(layout, awkward1.classes, awkward1.functions)
+        return awkward1._util.wrap(layout, behavior)
     else:
         return layout
 
-def fromiter(iterable, highlevel=True, initial=1024, resize=2.0):
+def fromiter(iterable, highlevel=True, behavior=None, initial=1024, resize=2.0):
     out = awkward1.layout.FillableArray(initial=initial, resize=resize)
     for x in iterable:
         out.fill(x)
     layout = out.snapshot()
     if highlevel:
-        return awkward1._util.wrap(layout, awkward1.classes, awkward1.functions)
+        return awkward1._util.wrap(layout, behavior)
     else:
         return layout
 
-def fromjson(source, highlevel=True, initial=1024, resize=2.0, buffersize=65536):
+def fromjson(source, highlevel=True, behavior=None, initial=1024, resize=2.0, buffersize=65536):
     layout = awkward1.layout.fromjson(source, initial=initial, resize=resize, buffersize=buffersize)
     if highlevel:
-        return awkward1._util.wrap(layout, awkward1.classes, awkward1.functions)
+        return awkward1._util.wrap(layout, behavior)
     else:
         return layout
 
@@ -69,17 +69,17 @@ def tonumpy(array):
     elif isinstance(array, awkward1.layout.FillableArray):
         return tonumpy(array.snapshot())
 
-    elif awkward1.operations.describe.parameters(array).get("__class__") == "char":
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "char":
         if awkward1.operations.describe.parameters(array).get("encoding") is None:
             return tonumpy(array.__bytes__())
         else:
             return tonumpy(array.__str__())
 
-    elif awkward1.operations.describe.parameters(array).get("__class__") == "string":
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "string":
         if awkward1.operations.describe.parameters(array.content).get("encoding") is None:
-            return numpy.array([awkward1.behavior.string.CharBehavior(array[i]).__bytes__() for i in range(len(array))])
+            return numpy.array([awkward1.behaviors.string.CharBehavior(array[i]).__bytes__() for i in range(len(array))])
         else:
-            return numpy.array([awkward1.behavior.string.CharBehavior(array[i]).__str__() for i in range(len(array))])
+            return numpy.array([awkward1.behaviors.string.CharBehavior(array[i]).__str__() for i in range(len(array))])
 
     elif isinstance(array, awkward1._util.unknowntypes):
         return numpy.array([])
@@ -150,17 +150,17 @@ def tolist(array):
     elif isinstance(array, numpy.ndarray):
         return array.tolist()
 
-    elif isinstance(array, awkward1.behavior.string.CharBehavior):
+    elif isinstance(array, awkward1.behaviors.string.CharBehavior):
         if array.layout.parameters.get("encoding") is None:
             return array.__bytes__()
         else:
             return array.__str__()
 
-    elif awkward1.operations.describe.parameters(array).get("__class__") == "char":
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "char":
         if awkward1.operations.describe.parameters(array).get("encoding") is None:
-            return awkward1.behavior.string.CharBehavior(array).__bytes__()
+            return awkward1.behaviors.string.CharBehavior(array).__bytes__()
         else:
-            return awkward1.behavior.string.CharBehavior(array).__str__()
+            return awkward1.behaviors.string.CharBehavior(array).__str__()
 
     elif isinstance(array, awkward1.highlevel.Array):
         return [tolist(x) for x in array]
@@ -270,8 +270,11 @@ def tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,
             out = awkward1.layout.RegularArray(out, size)
         return out
 
+    elif isinstance(array, str) or (awkward1._util.py27 and isinstance(array, unicode)):
+        return fromiter([array], highlevel=False)
+
     elif isinstance(array, Iterable):
-        return awkward1.highlevel.Array(array).layout
+        return fromiter(array, highlevel=False)
 
     elif not allowother:
         raise TypeError("{0} cannot be converted into an Awkward Array".format(array))

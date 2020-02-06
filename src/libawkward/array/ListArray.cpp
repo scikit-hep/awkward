@@ -390,6 +390,17 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::string ListArrayOf<T>::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  template <typename T>
   bool ListArrayOf<T>::purelist_isregular() const {
     return false;
   }

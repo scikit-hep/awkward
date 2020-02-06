@@ -856,6 +856,20 @@ void setparameter(T& self, std::string& key, py::object value) {
   self.setparameter(key, valuestr.cast<std::string>());
 }
 
+template <typename T>
+py::object parameter(T& self, std::string& key) {
+  std::string cppvalue = self.parameter(key);
+  py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(), cppvalue.length(), "surrogateescape"));
+  return py::module::import("json").attr("loads")(pyvalue);
+}
+
+template <typename T>
+py::object purelist_parameter(T& self, std::string& key) {
+  std::string cppvalue = self.purelist_parameter(key);
+  py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(), cppvalue.length(), "surrogateescape"));
+  return py::module::import("json").attr("loads")(pyvalue);
+}
+
 py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(py::handle m, std::string name) {
   return (py::class_<ak::Type, std::shared_ptr<ak::Type>>(m, name.c_str())
       .def("__eq__", [](std::shared_ptr<ak::Type> self, std::shared_ptr<ak::Type> other) -> bool {
@@ -1203,6 +1217,8 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           })
           .def_property("parameters", &getparameters<T>, &setparameters<T>)
           .def("setparameter", &setparameter<T>)
+          .def("parameter", &parameter<T>)
+          .def("purelist_parameter", &purelist_parameter<T>)
           .def_property_readonly("type", [](T& self) -> py::object {
             return box(self.type());
           })
@@ -1472,6 +1488,8 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
       })
       .def_property("parameters", &getparameters<ak::Record>, &setparameters<ak::Record>)
       .def("setparameter", &setparameter<ak::Record>)
+      .def("parameter", &parameter<ak::Record>)
+      .def("purelist_parameter", &purelist_parameter<ak::Record>)
       .def_property_readonly("type", [](ak::Record& self) -> py::object {
         return box(self.type());
       })

@@ -8,7 +8,7 @@ import pytest
 import numpy
 
 import awkward1
-import awkward1.behavior.string
+import awkward1.behaviors.string
 
 py27 = (sys.version_info[0] < 3)
 
@@ -35,7 +35,7 @@ class Dummy(awkward1.highlevel.Array):
 
 def test_string1():
     a = awkward1.Array(numpy.array([ord(x) for x in "hey there"], dtype=numpy.uint8))
-    a.__class__ = awkward1.behavior.string.CharBehavior
+    a.__class__ = awkward1.behaviors.string.CharBehavior
     assert str(a) == str(b"hey there")
     assert repr(a) == repr(b"hey there")
 
@@ -45,7 +45,7 @@ def test_string2():
     a = awkward1.Array(listoffsetarray)
 
     assert isinstance(a, awkward1.Array)
-    assert not isinstance(a, awkward1.behavior.string.StringBehavior)
+    assert not isinstance(a, awkward1.behaviors.string.StringBehavior)
     assert awkward1.tolist(a) == [[104, 101, 121], [], [116, 104, 101, 114, 101]]
 
     assert repr(a.type) == "3 * var * uint8"
@@ -80,11 +80,11 @@ def test_string2():
         assert repr(a[2]) == "'there'"
 
 def test_accepts():
-    dressed1 = awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"), {"__class__": "Dummy"})
+    dressed1 = awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"), {"__record__": "Dummy"})
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
     listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5])), content).astype(dressed1)
 
-    dressed2 = awkward1.layout.PrimitiveType("float64", {"__class__": "Dummy"})
+    dressed2 = awkward1.layout.PrimitiveType("float64", {"__record__": "Dummy"})
     with pytest.raises(ValueError):
         awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5])), content).astype(dressed2)
 
@@ -98,11 +98,11 @@ def test_type_propagation():
     assert awkward1.tolist(array) == [[{"one": 1, "two": [1.0, 1.1]}, {"one": 2, "two": [2.0]}, {"one": 3, "two": [3.0, 3.1, 3.2]}], [], [{"one": 4, "two": []}, {"one": 5, "two": [5.0, 5.1, 5.2, 5.3]}]]
     assert repr(array.type) in ('3 * var * {"one": int64, "two": var * float64}', '3 * var * {"two": var * float64, "one": int64}')
 
-    dfloat64 = awkward1.layout.PrimitiveType("float64", {"__class__": "D", "__typestr__": "D[float64]"})
-    dvarfloat64 = awkward1.layout.ListType(dfloat64, {"__class__": "D", "__typestr__": "D[var * D[float64]]"})
-    dint64 = awkward1.layout.PrimitiveType("int64", {"__class__": "D", "__typestr__": "D[int64]"})
-    drec = awkward1.layout.RecordType(collections.OrderedDict([("one", dint64), ("two", dvarfloat64)]), {"__class__": "D", "__typestr__": "D[{\"one\": D[int64], \"two\": D[var * D[float64]]}]"})
-    dvarrec = awkward1.layout.ListType(drec, {"__class__": "D", "__typestr__": "D[var * D[{\"one\": D[int64], \"two\": D[var * D[float64]]}]]"})
+    dfloat64 = awkward1.layout.PrimitiveType("float64", {"__record__": "D", "__typestr__": "D[float64]"})
+    dvarfloat64 = awkward1.layout.ListType(dfloat64, {"__record__": "D", "__typestr__": "D[var * D[float64]]"})
+    dint64 = awkward1.layout.PrimitiveType("int64", {"__record__": "D", "__typestr__": "D[int64]"})
+    drec = awkward1.layout.RecordType(collections.OrderedDict([("one", dint64), ("two", dvarfloat64)]), {"__record__": "D", "__typestr__": "D[{\"one\": D[int64], \"two\": D[var * D[float64]]}]"})
+    dvarrec = awkward1.layout.ListType(drec, {"__record__": "D", "__typestr__": "D[var * D[{\"one\": D[int64], \"two\": D[var * D[float64]]}]]"})
 
     array = awkward1.Array(array.layout.astype(dvarrec))
 

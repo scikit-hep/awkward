@@ -3,10 +3,15 @@
 import inspect
 import numbers
 import re
+import sys
+import os
 
 import numpy
 
 import awkward1.layout
+
+py27 = (sys.version_info[0] < 3)
+win  = (os.name == "nt")
 
 unknowntypes = (awkward1.layout.EmptyArray,)
 
@@ -20,54 +25,62 @@ listtypes = (awkward1.layout.RegularArray, awkward1.layout.ListArray32, awkward1
 
 recordtypes = (awkward1.layout.RecordArray,)
 
-def regular_classes(classes):
+def arrayclass(layout, behavior):
     import awkward1
-    if classes is None:
-        return awkward1.classes
-    else:
-        return classes
+    if behavior is None:
+        behavior = awkward1.behavior
+    arr = layout.parameter("__array__")
+    if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
+        cls = behavior.get(arr)
+        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
+            return cls
+    rec = layout.parameter("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        cls = behavior.get((".", rec))
+        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
+            return cls
+    deeprec = layout.purelist_parameter("__record__")
+    if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
+        cls = behavior.get(("*", deeprec))
+        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
+            return cls
+    return awkward1.highlevel.Array
 
-def regular_functions(functions):
+def recordclass(layout, behavior):
     import awkward1
-    if functions is None:
-        return awkward1.functions
-    else:
-        return functions
+    if behavior is None:
+        behavior = awkward1.behavior
+    rec = layout.parameter("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        cls = behavior.get(rec)
+        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Record):
+            return cls
+    return awkward1.highlevel.Record
 
-def combine_classes(*arrays):
-    classes = None
+def overload(behavior, signature):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    return behavior.get(signature)
+
+def behaviorof(*arrays):
+    behavior = None
     for x in arrays[::-1]:
-        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x._classes is not None:
-            if classes is None:
-                classes = dict(x._classes)
+        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x._behavior is not None:
+            if behavior is None:
+                behavrio = dict(x._behavior)
             else:
-                classes.update(x._classes)
-    return classes
+                behavior.update(x._behavior)
+    return behavior
 
-def combine_functions(*arrays):
-    functions = None
-    for x in arrays[::-1]:
-        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x._functions is not None:
-            if functions is None:
-                functions = dict(x._functions)
-            else:
-                functions.update(x._functions)
-    return functions
-
-def wrap(content, classes, functions):
-    import awkward1.layout
+def wrap(content, behavior):
+    import awkward1.highlevel
 
     if isinstance(content, awkward1.layout.Content):
-        cls = regular_classes(classes).get(content.parameters.get("__class__"))
-        if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Array)):
-            cls = awkward1.Array
-        return cls(content, classes=classes, functions=functions)
+        return awkward1.highlevel.Array(content, behavior=behavior)
 
     elif isinstance(content, awkward1.layout.Record):
-        cls = regular_classes(classes).get(content.parameters.get("__class__"))
-        if cls is None or (isinstance(cls, type) and not issubclass(cls, awkward1.Record)):
-            cls = awkward1.Record
-        return cls(content, classes=classes, functions=functions)
+        return awkward1.highlevel.Record(content, behavior=behavior)
 
     else:
         return content
@@ -121,7 +134,7 @@ def broadcast_and_apply(inputs, getfunction):
             if len(x) != length:
                 raise ValueError("cannot broadcast {0} of length {1} with {2} of length {3}".format(type(inputs[0]).__name__, length, type(x).__name__, len(x)))
 
-    def apply(inputs):
+    def apply(inputs, depth):
         # handle implicit right-broadcasting (i.e. NumPy-like)
         if any(isinstance(x, listtypes) for x in inputs):
             maxdepth = max(x.purelist_depth for x in inputs if isinstance(x, awkward1.layout.Content))
@@ -133,7 +146,7 @@ def broadcast_and_apply(inputs, getfunction):
                             x = awkward1.layout.RegularArray(x, 1)
                     nextinputs.append(x)
                 if any(x is not y for x, y in zip(inputs, nextinputs)):
-                    return apply(nextinputs)
+                    return apply(nextinputs, depth)
 
         # now all lengths must agree
         checklength([x for x in inputs if isinstance(x, awkward1.layout.Content)])
@@ -142,16 +155,16 @@ def broadcast_and_apply(inputs, getfunction):
 
         # the rest of this is one switch statement
         if function is not None:
-            return function()
+            return function(depth)
 
         elif any(isinstance(x, unknowntypes) for x in inputs):
-            return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs])
+            return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs], depth)
 
         elif any(isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1 for x in inputs):
-            return apply([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.toRegularArray() for x in inputs])
+            return apply([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.toRegularArray() for x in inputs], depth)
 
         elif any(isinstance(x, indexedtypes) for x in inputs):
-            return apply([x if not isinstance(x, indexedtypes) else x.project() for x in inputs])
+            return apply([x if not isinstance(x, indexedtypes) else x.project() for x in inputs], depth)
 
         elif any(isinstance(x, uniontypes) for x in inputs):
             tagslist = []
@@ -182,11 +195,11 @@ def broadcast_and_apply(inputs, getfunction):
                         nextinputs.append(x[mask])
                     else:
                         nextinputs.append(x)
-                contents.append(apply(nextinputs))
+                contents.append(apply(nextinputs, depth))
 
             tags = awkward1.layout.Index8(tags)
             index = awkward1.layout.Index64(index)
-            return awkward1.layout.UnionArray8_64(tags, index, contents)
+            return awkward1.layout.UnionArray8_64(tags, index, contents).simplify()
 
         elif any(isinstance(x, optiontypes) for x in inputs):
             mask = None
@@ -214,7 +227,7 @@ def broadcast_and_apply(inputs, getfunction):
                 else:
                     nextinputs.append(awkward1.layout.IndexedOptionArray64(nextindex, x).project(nextmask))
 
-            return awkward1.layout.IndexedOptionArray64(index, apply(nextinputs))
+            return awkward1.layout.IndexedOptionArray64(index, apply(nextinputs, depth)).simplify()
 
         elif any(isinstance(x, listtypes) for x in inputs):
             if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
@@ -234,7 +247,7 @@ def broadcast_and_apply(inputs, getfunction):
                             raise ValueError("cannot broadcast RegularArray of size {0} with RegularArray of size {1}".format(x.size, maxsize))
                     else:
                         nextinputs.append(x)
-                return awkward1.layout.RegularArray(apply(nextinputs), maxsize)
+                return awkward1.layout.RegularArray(apply(nextinputs, depth + 1), maxsize)
 
             else:
                 for x in inputs:
@@ -251,7 +264,7 @@ def broadcast_and_apply(inputs, getfunction):
                         nextinputs.append(awkward1.layout.RegularArray(x, 1).broadcast_tooffsets64(offsets).content)
                     else:
                         nextinputs.append(x)
-                return awkward1.layout.ListOffsetArray64(offsets, apply(nextinputs))
+                return awkward1.layout.ListOffsetArray64(offsets, apply(nextinputs, depth + 1))
 
         elif any(isinstance(x, recordtypes) for x in inputs):
             keys = None
@@ -275,50 +288,49 @@ def broadcast_and_apply(inputs, getfunction):
             else:
                 contents = []
                 for key in keys:
-                    contents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs]))
+                    contents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs], depth))
                 return awkward1.layout.RecordArray(contents, keys)
 
         else:
             raise ValueError("cannot broadcast: {0}".format(", ".join(type(x) for x in inputs)))
 
     isscalar = []
+    return broadcast_unpack(apply(broadcast_pack(inputs, isscalar), 0), isscalar)
 
-    def pack(inputs):
-        maxlen = -1
-        for x in inputs:
-            if isinstance(x, awkward1.layout.Content):
-                maxlen = max(maxlen, len(x))
-        if maxlen < 0:
-            maxlen = 1
-        nextinputs = []
-        for x in inputs:
-            if isinstance(x, awkward1.layout.Record):
-                index = numpy.full(maxlen, x.at, dtype=numpy.int64)
-                nextinputs.append(awkward1.layout.RegularArray(x.array[index], maxlen))
-                isscalar.append(True)
-            elif isinstance(x, awkward1.layout.Content):
-                nextinputs.append(awkward1.layout.RegularArray(x, len(x)))
-                isscalar.append(False)
-            else:
-                nextinputs.append(x)
-                isscalar.append(True)
-        return nextinputs
-
-    def unpack(x):
-        if all(isscalar):
-            if len(x) == 0:
-                return x.getitem_nothing().getitem_nothing()
-            else:
-                return x[0][0]
+def broadcast_pack(inputs, isscalar):
+    maxlen = -1
+    for x in inputs:
+        if isinstance(x, awkward1.layout.Content):
+            maxlen = max(maxlen, len(x))
+    if maxlen < 0:
+        maxlen = 1
+    nextinputs = []
+    for x in inputs:
+        if isinstance(x, awkward1.layout.Record):
+            index = numpy.full(maxlen, x.at, dtype=numpy.int64)
+            nextinputs.append(awkward1.layout.RegularArray(x.array[index], maxlen))
+            isscalar.append(True)
+        elif isinstance(x, awkward1.layout.Content):
+            nextinputs.append(awkward1.layout.RegularArray(x, len(x)))
+            isscalar.append(False)
         else:
-            if len(x) == 0:
-                return x.getitem_nothing()
-            else:
-                return x[0]
+            nextinputs.append(x)
+            isscalar.append(True)
+    return nextinputs
 
-    return unpack(apply(pack(inputs)))
+def broadcast_unpack(x, isscalar):
+    if all(isscalar):
+        if len(x) == 0:
+            return x.getitem_nothing().getitem_nothing()
+        else:
+            return x[0][0]
+    else:
+        if len(x) == 0:
+            return x.getitem_nothing()
+        else:
+            return x[0]
 
-def minimally_touching_string(limit_length, layout, classes, functions):
+def minimally_touching_string(limit_length, layout, behavior):
     import awkward1.layout
 
     if isinstance(layout, awkward1.layout.Record):
@@ -330,16 +342,16 @@ def minimally_touching_string(limit_length, layout, classes, functions):
     def forward(x, space, brackets=True, wrap=True):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
-            cls = regular_classes(classes).get(x.parameters.get("__class__"))
-            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
-                y = cls(x, classes=classes, functions=functions)
+            cls = arrayclass(x, behavior)
+            if cls is not awkward1.highlevel.Array:
+                y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
-            cls = regular_classes(classes).get(x.parameters.get("__class__"))
-            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
-                y = cls(x, classes=classes, functions=functions)
+            cls = recordclass(x, behavior)
+            if cls is not awkward1.highlevel.Record:
+                y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
@@ -382,16 +394,16 @@ def minimally_touching_string(limit_length, layout, classes, functions):
     def backward(x, space, brackets=True, wrap=True):
         done = False
         if wrap and isinstance(x, awkward1.layout.Content):
-            cls = regular_classes(classes).get(x.parameters.get("__class__"))
-            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Array):
-                y = cls(x, classes=classes, functions=functions)
+            cls = arrayclass(x, behavior)
+            if cls is not awkward1.highlevel.Array:
+                y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
                     done = True
         if wrap and isinstance(x, awkward1.layout.Record):
-            cls = regular_classes(classes).get(x.parameters.get("__class__"))
-            if cls is not None and isinstance(cls, type) and issubclass(cls, awkward1.Record):
-                y = cls(x, classes=classes, functions=functions)
+            cls = recordclass(x, behavior)
+            if cls is not awkward1.highlevel.Record:
+                y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
                     done = True

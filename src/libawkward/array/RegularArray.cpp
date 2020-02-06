@@ -294,6 +294,16 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities, parameters_, content_.get()->carry(nextcarry), size_);
   }
 
+  const std::string RegularArray::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
   bool RegularArray::purelist_isregular() const {
     return content_.get()->purelist_isregular();
   }

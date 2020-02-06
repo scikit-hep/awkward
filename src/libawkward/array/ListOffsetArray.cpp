@@ -388,6 +388,17 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::string ListOffsetArrayOf<T>::purelist_parameter(const std::string& key) const {
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
+  }
+
+  template <typename T>
   bool ListOffsetArrayOf<T>::purelist_isregular() const {
     return false;
   }

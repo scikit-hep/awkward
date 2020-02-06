@@ -46,10 +46,10 @@ namespace awkward {
 
   const std::shared_ptr<Content> StringFillable::snapshot() const {
     util::Parameters char_parameters;
-    char_parameters["__class__"] = std::string("\"char\"");
+    char_parameters["__array__"] = std::string("\"char\"");
 
     util::Parameters string_parameters;
-    string_parameters["__class__"] = std::string("\"string\"");
+    string_parameters["__array__"] = std::string("\"string\"");
 
     if (encoding_ == nullptr) {
       char_parameters["__typestr__"] = std::string("\"byte\"");

@@ -23,12 +23,12 @@ def withfield(base, what, where=None):
         if isinstance(base, awkward1.layout.RecordArray):
             if not isinstance(what, awkward1.layout.Content):
                 what = awkward1.layout.NumpyArray(numpy.lib.stride_tricks.as_strided([what], shape=(len(base),), strides=(0,)))
-            return lambda: base.setitem_field(where, what)
+            return lambda depth: base.setitem_field(where, what)
         else:
             return None
 
     out = awkward1._util.broadcast_and_apply([base, what], getfunction)
-    return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(base, what), functions=awkward1._util.combine_functions(base, what))
+    return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(base, what))
 
 def isna(array):
     import awkward1.highlevel
@@ -41,7 +41,7 @@ def isna(array):
             return apply(layout.project())
 
         elif isinstance(layout, awkward1._util.uniontypes):
-            contents = [apply(layout.project(i)) for i in range(len(layout))]
+            contents = [apply(layout.project(i)) for i in range(layout.numcontents)]
             out = numpy.empty(len(layout), dtype=numpy.bool_)
             tags = numpy.asarray(layout.tags)
             for tag, content in enumerate(contents):
@@ -56,7 +56,7 @@ def isna(array):
             return numpy.zeros(len(layout), dtype=numpy.bool_)
 
     out = apply(awkward1.operations.convert.tolayout(array, allowrecord=False))
-    return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(array), functions=awkward1._util.combine_functions(array))
+    return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
 
 def notna(array):
     return ~isna(array)
@@ -154,7 +154,7 @@ def concatenate(arrays, axis=0, mergebool=True):
         if isinstance(out, awkward1._util.uniontypes):
             out = out.simplify(mergebool=mergebool)
 
-    return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(*arrays), functions=awkward1._util.combine_functions(*arrays))
+    return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*arrays))
 
 @awkward1._numpy.implements(numpy.where)
 def where(condition, *args, **kwargs):
@@ -188,9 +188,19 @@ def where(condition, *args, **kwargs):
         tmp = awkward1.layout.UnionArray8_64(tags, index, [x, y])
         out = tmp.simplify(mergebool=mergebool)
 
-        return awkward1._util.wrap(out, classes=awkward1._util.combine_classes(*((condition,) + args)), functions=awkward1._util.combine_functions(*((condition,) + args)))
+        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*((condition,) + args)))
 
     else:
         raise TypeError("where() takes from 1 to 3 positional arguments but {0} were given".format(len(args) + 1))
+
+def count(array, axis=0):
+    behavior = awkward1._util.behaviorof(array)
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
+    return awkward1._util.wrap(layout.count(axis), behavior)
+
+def flatten(array, axis=0):
+    behavior = awkward1._util.behaviorof(array)
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
+    return awkward1._util.wrap(layout.flatten(axis), behavior)
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "Iterable", "numpy", "awkward1")]

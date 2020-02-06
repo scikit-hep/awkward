@@ -71,7 +71,7 @@ namespace awkward {
     }
     util::Parameters parameters;
     if (nameptr_ != nullptr) {
-      parameters["__class__"] = util::quote(name_, true);
+      parameters["__record__"] = util::quote(name_, true);
     }
     std::vector<std::shared_ptr<Content>> contents;
     std::shared_ptr<util::RecordLookup> recordlookup = std::make_shared<util::RecordLookup>();

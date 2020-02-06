@@ -6,8 +6,7 @@ import numpy
 if distutils.version.LooseVersion(numpy.__version__) < distutils.version.LooseVersion("1.13.1"):
     raise ImportError("Numpy 1.13.1 or later required")
 
-classes = {}
-functions = {}
+behavior = {}
 
 import awkward1.layout
 from awkward1.layout import Type
@@ -31,6 +30,6 @@ from awkward1.operations.convert import *
 from awkward1.operations.describe import *
 from awkward1.operations.structure import *
 
-from awkward1.behavior.string import *
+from awkward1.behaviors.string import *
 
 __version__ = awkward1.layout.__version__

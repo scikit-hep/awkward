@@ -17,7 +17,7 @@ import awkward1.operations.convert
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin, Sequence):
-    def __init__(self, data, type=None, classes=None, functions=None):
+    def __init__(self, data, behavior=None):
         if isinstance(data, awkward1.layout.Content):
             layout = data
         elif isinstance(data, Array):
@@ -31,24 +31,11 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
 
-        self._classes = classes
-        self._functions = functions
-
-        if type is not None:
-            if not isinstance(type, awkward1.layout.ArrayType):
-                raise TypeError("type must be an awkward1.layout.ArrayType")
-            if type.length > len(layout):
-                raise TypeError("ArrayType length ({0}) is greater than layout length {1}".format(type.length, len(layout)))
-            if type.length < len(layout):
-                layout = layout[:type.length]
-            cls = awkward1._util.regular_classes(self._classes).get(type.parameters.get("__class__"))
-            if cls is not None:
-                if not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Array):
-                    raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Array".format(repr(type.parameters["__class__"])))
-                self.__class__ = cls
-            layout = layout.astype(type.type)
+        if self.__class__ is Array:
+            self.__class__ = awkward1._util.arrayclass(layout, behavior)
 
         self.layout = layout
+        self._behavior = behavior
 
     @property
     def layout(self):
@@ -69,10 +56,15 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
 
     def __iter__(self):
         for x in self._layout:
-            yield awkward1._util.wrap(x, self._classes, self._functions)
+            yield awkward1._util.wrap(x, self._behavior)
 
     def __getitem__(self, where):
-        return awkward1._util.wrap(self._layout[where], self._classes, self._functions)
+        return awkward1._util.wrap(self._layout[where], self._behavior)
+
+    def __setitem__(self, where, what):
+        if not isinstance(where, str):
+            raise ValueError("only fields may be assigned in-place (by field name)")
+        self._layout = awkward1.operations.structure.withfield(self._layout, what, where).layout
 
     def __getattr__(self, where):
         if where in dir(super(Array, self)):
@@ -85,11 +77,6 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
                     raise AttributeError("while trying to get field {0}, an exception occurred:\n{1}: {2}".format(repr(where), type(err), str(err)))
             else:
                 raise AttributeError("no field named {0}".format(repr(where)))
-
-    def __setitem__(self, where, what):
-        if not isinstance(where, str):
-            raise ValueError("only fields may be assigned in-place (by field name)")
-        self._layout = awkward1.operations.structure.withfield(self._layout, what, where).layout
 
     def __dir__(self):
         return sorted(set(dir(super(Array, self)) + [x for x in self._layout.keys() if _dir_pattern.match(x) and not keyword.iskeyword(x)]))
@@ -126,10 +113,10 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
         return self["9"]
 
     def __str__(self, limit_value=85):
-        return awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
+        return awkward1._util.minimally_touching_string(limit_value, self._layout, self._behavior)
 
     def __repr__(self, limit_value=40, limit_total=85):
-        value = awkward1._util.minimally_touching_string(limit_value, self._layout, self._classes, self._functions)
+        value = awkward1._util.minimally_touching_string(limit_value, self._layout, self._behavior)
 
         limit_type = limit_total - len(value) - len("<Array  type=>")
         type = repr(str(self.type))
@@ -145,7 +132,7 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
             except:
                 out = numpy.empty(len(self._layout), dtype="O")
                 for i, x in enumerate(self._layout):
-                    out[i] = awkward1._util.wrap(x, self._classes, self._functions)
+                    out[i] = awkward1._util.wrap(x, self._behavior)
                 return out
         else:
             return awkward1._numpy.convert_to_array(self._layout, args, kwargs)
@@ -154,29 +141,20 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
         return awkward1._numpy.array_function(func, types, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
 
 class Record(awkward1._numpy.NDArrayOperatorsMixin):
-    def __init__(self, data, type=None, classes=None, functions=None):
+    def __init__(self, data, behavior=None):
         # FIXME: more checks here
         layout = data
         if not isinstance(layout, awkward1.layout.Record):
             raise TypeError("could not convert data into an awkward1.Record")
 
-        self._classes = classes
-        self._functions = functions
-
-        if type is not None:
-            if not isinstance(type, awkward1.layout.RecordType):
-                raise TypeError("type must be an awkward1.layout.RecordType")
-            cls = awkward1._util.regular_classes(self._classes).get(type.parameters.get("__class__"))
-            if cls is not None:
-                if not isinstance(cls, __builtins__["type"]) or not issubclass(cls, Record):
-                    raise TypeError("type.parameters['__class__'] = {0} must be a subclass of awkward1.Record".format(repr(type.parameters["__class__"])))
-                self.__class__ = cls
-            layout = layout.astype(type)
+        if self.__class__ is Record:
+            self.__class__ = awkward1._util.recordclass(layout, behavior)
 
         self.layout = layout
+        self._behavior = behavior
 
     @property
     def layout(self):
@@ -193,18 +171,64 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
         return self._layout.type
 
     def __getitem__(self, where):
-        return awkward1._util.wrap(self._layout[where], self._classes, self._functions)
+        return awkward1._util.wrap(self._layout[where], self._behavior)
 
     def __setitem__(self, where, what):
         if not isinstance(where, str):
             raise ValueError("only fields may be assigned in-place (by field name)")
         self._layout = awkward1.operations.structure.withfield(self._layout, what, where).layout
 
+    def __getattr__(self, where):
+        if where in dir(super(Record, self)):
+            return super(Record, self).__getattribute__(where)
+        else:
+            if where in self._layout.keys():
+                try:
+                    return self[where]
+                except Exception as err:
+                    raise AttributeError("while trying to get field {0}, an exception occurred:\n{1}: {2}".format(repr(where), type(err), str(err)))
+            else:
+                raise AttributeError("no field named {0}".format(repr(where)))
+
+    def __dir__(self):
+        return sorted(set(dir(super(Array, self)) + [x for x in self._layout.keys() if _dir_pattern.match(x) and not keyword.iskeyword(x)]))
+
+    @property
+    def i0(self):
+        return self["0"]
+    @property
+    def i1(self):
+        return self["1"]
+    @property
+    def i2(self):
+        return self["2"]
+    @property
+    def i3(self):
+        return self["3"]
+    @property
+    def i4(self):
+        return self["4"]
+    @property
+    def i5(self):
+        return self["5"]
+    @property
+    def i6(self):
+        return self["6"]
+    @property
+    def i7(self):
+        return self["7"]
+    @property
+    def i8(self):
+        return self["8"]
+    @property
+    def i9(self):
+        return self["9"]
+
     def __str__(self, limit_value=85):
-        return awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._classes, self._functions)[1:-1]
+        return awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._behavior)[1:-1]
 
     def __repr__(self, limit_value=40, limit_total=85):
-        value = awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._classes, self._functions)[1:-1]
+        value = awkward1._util.minimally_touching_string(limit_value + 2, self._layout, self._behavior)[1:-1]
 
         limit_type = limit_total - len(value) - len("<Record  type=>")
         type = repr(str(self._layout.type))
@@ -214,13 +238,12 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
         return "<Record {0} type={1}>".format(value, type)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
 
 class FillableArray(Sequence):
-    def __init__(self, classes=None, functions=None):
+    def __init__(self, behavior=None):
         self._fillablearray = awkward1.layout.FillableArray()
-        self._classes = classes
-        self._functions = functions
+        self._behavior = behavior
 
     @property
     def type(self):
@@ -231,11 +254,11 @@ class FillableArray(Sequence):
         return len(self._fillablearray)
 
     def __getitem__(self, where):
-        return awkward1._util.wrap(self._fillablearray[where], self._classes, self._functions)
+        return awkward1._util.wrap(self._fillablearray[where], self._behavior)
 
     def __iter__(self):
         for x in self._fillablearray.snapshot():
-            yield awkward1._util.wrap(x, self._classes, self._functions)
+            yield awkward1._util.wrap(x, self._behavior)
 
     def __str__(self, limit_value=85, snapshot=None):
         if snapshot is None:
@@ -260,10 +283,10 @@ class FillableArray(Sequence):
         return awkward1._numpy.array_function(func, types, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._classes, self._functions)
+        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
 
     def snapshot(self):
-        return awkward1._util.wrap(self._fillablearray.snapshot(), self._classes, self._functions)
+        return awkward1._util.wrap(self._fillablearray.snapshot(), self._behavior)
 
     def null(self):
         self._fillablearray.null()

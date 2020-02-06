@@ -3,6 +3,7 @@
   <compounddef id="NumpyArray_8cpp" kind="file" language="C++">
     <compoundname>NumpyArray.cpp</compoundname>
     <includes local="no">iomanip</includes>
+    <includes local="no">numeric</includes>
     <includes local="no">sstream</includes>
     <includes local="no">stdexcept</includes>
     <includes local="yes">awkward/cpu-kernels/identities.h</includes>
@@ -18,7 +19,7 @@
     <includes local="yes">awkward/util.h</includes>
     <includes local="yes">awkward/array/NumpyArray.h</includes>
     <incdepgraph>
-      <node id="7">
+      <node id="8">
         <label>awkward/cpu-kernels/operations.h</label>
       </node>
       <node id="2">
@@ -57,44 +58,49 @@
         </childnode>
         <childnode refid="16" relation="include">
         </childnode>
-      </node>
-      <node id="10">
-        <label>awkward/type/ArrayType.h</label>
-      </node>
-      <node id="15">
-        <label>awkward/util.h</label>
-      </node>
-      <node id="4">
-        <label>stdexcept</label>
-      </node>
-      <node id="6">
-        <label>awkward/cpu-kernels/getitem.h</label>
-      </node>
-      <node id="5">
-        <label>awkward/cpu-kernels/identities.h</label>
+        <childnode refid="17" relation="include">
+        </childnode>
       </node>
       <node id="11">
-        <label>awkward/array/RegularArray.h</label>
+        <label>awkward/type/ArrayType.h</label>
       </node>
       <node id="16">
-        <label>awkward/array/NumpyArray.h</label>
+        <label>awkward/util.h</label>
       </node>
-      <node id="9">
-        <label>awkward/type/RegularType.h</label>
-      </node>
-      <node id="14">
-        <label>awkward/array/UnionArray.h</label>
-      </node>
-      <node id="8">
-        <label>awkward/type/PrimitiveType.h</label>
+      <node id="5">
+        <label>stdexcept</label>
       </node>
       <node id="3">
-        <label>sstream</label>
+        <label>numeric</label>
       </node>
-      <node id="13">
-        <label>awkward/array/IndexedArray.h</label>
+      <node id="7">
+        <label>awkward/cpu-kernels/getitem.h</label>
+      </node>
+      <node id="6">
+        <label>awkward/cpu-kernels/identities.h</label>
       </node>
       <node id="12">
+        <label>awkward/array/RegularArray.h</label>
+      </node>
+      <node id="17">
+        <label>awkward/array/NumpyArray.h</label>
+      </node>
+      <node id="10">
+        <label>awkward/type/RegularType.h</label>
+      </node>
+      <node id="15">
+        <label>awkward/array/UnionArray.h</label>
+      </node>
+      <node id="9">
+        <label>awkward/type/PrimitiveType.h</label>
+      </node>
+      <node id="4">
+        <label>sstream</label>
+      </node>
+      <node id="14">
+        <label>awkward/array/IndexedArray.h</label>
+      </node>
+      <node id="13">
         <label>awkward/array/EmptyArray.h</label>
       </node>
     </incdepgraph>
@@ -128,7 +134,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="162" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="162" bodyend="201"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="237" column="8" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="237" bodyend="276"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1adf8a5960d7cc8e8447e7357e7416a1dd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>const std::vector&lt; ssize_t &gt;</type>
@@ -145,7 +151,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="671" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="671" bodyend="680"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="787" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="787" bodyend="796"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1aadc1072e0733b797c5e796c493958e92" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>const std::vector&lt; ssize_t &gt;</type>
@@ -162,7 +168,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="682" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="682" bodyend="689"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="798" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="798" bodyend="805"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1a4d963c2e411466bfb13f20952ef20ead" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>const std::vector&lt; ssize_t &gt;</type>
@@ -183,7 +189,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="691" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="691" bodyend="706"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="807" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="807" bodyend="822"/>
       </memberdef>
       <memberdef kind="function" id="namespaceawkward_1a10de17b76758789899b5d3294568be00" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>const std::vector&lt; ssize_t &gt;</type>
@@ -204,7 +210,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/NumpyArray.cpp" line="708" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="708" bodyend="722"/>
+        <location file="src/libawkward/array/NumpyArray.cpp" line="824" column="21" bodyfile="src/libawkward/array/NumpyArray.cpp" bodystart="824" bodyend="838"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

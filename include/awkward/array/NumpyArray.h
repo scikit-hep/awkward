@@ -21,11 +21,16 @@ namespace awkward {
     static const std::unordered_map<std::type_index, std::string> format_map;
 
     NumpyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format);
-    NumpyArray(const Index8 count);
-    NumpyArray(const IndexU8 count);
-    NumpyArray(const Index32 count);
-    NumpyArray(const IndexU32 count);
-    NumpyArray(const Index64 count);
+    NumpyArray(const Index8 index);
+    NumpyArray(const IndexU8 index);
+    NumpyArray(const Index32 index);
+    NumpyArray(const IndexU32 index);
+    NumpyArray(const Index64 index);
+    NumpyArray(const Index8 index, const std::string& format);
+    NumpyArray(const IndexU8 index, const std::string& format);
+    NumpyArray(const Index32 index, const std::string& format);
+    NumpyArray(const IndexU32 index, const std::string& format);
+    NumpyArray(const Index64 index, const std::string& format);
 
     const std::shared_ptr<void> ptr() const;
     const std::vector<ssize_t> shape() const;
@@ -40,6 +45,16 @@ namespace awkward {
     void* byteptr(ssize_t at) const;
     ssize_t bytelength() const;
     uint8_t getbyte(ssize_t at) const;
+    int8_t getint8(ssize_t at) const;
+    uint8_t getuint8(ssize_t at) const;
+    int16_t getint16(ssize_t at) const;
+    uint16_t getuint16(ssize_t at) const;
+    int32_t getint32(ssize_t at) const;
+    uint32_t getuint32(ssize_t at) const;
+    int64_t getint64(ssize_t at) const;
+    uint64_t getuint64(ssize_t at) const;
+    float_t getfloat(ssize_t at) const;
+    double_t getdouble(ssize_t at) const;
     const std::shared_ptr<Content> toRegularArray() const;
 
     bool isscalar() const override;
@@ -65,6 +80,7 @@ namespace awkward {
     const std::shared_ptr<Content> getitem(const Slice& where) const override;
     const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> carry(const Index64& carry) const override;
+    const std::string purelist_parameter(const std::string& key) const override;
     bool purelist_isregular() const override;
     int64_t purelist_depth() const override;
     const std::pair<int64_t, int64_t> minmax_depth() const override;

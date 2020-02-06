@@ -65,25 +65,35 @@ namespace awkward {
     }
   }
 
-  NumpyArray::NumpyArray(const Index8 count)
-    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }), 0, sizeof(int8_t), format_map.at(std::type_index(typeid(int8_t)))) {
-  }
+  NumpyArray::NumpyArray(const Index8 index)
+    : NumpyArray(index, format_map.at(std::type_index(typeid(int8_t)))) { }
 
-  NumpyArray::NumpyArray(const IndexU8 count)
-    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }), 0, sizeof(uint8_t), format_map.at(std::type_index(typeid(uint8_t)))) {
-  }
+  NumpyArray::NumpyArray(const IndexU8 index)
+    : NumpyArray(index, format_map.at(std::type_index(typeid(uint8_t)))) { }
 
-  NumpyArray::NumpyArray(const Index32 count)
-    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }), 0, sizeof(int32_t), format_map.at(std::type_index(typeid(int32_t)))) {
-  }
+  NumpyArray::NumpyArray(const Index32 index)
+    : NumpyArray(index, format_map.at(std::type_index(typeid(int32_t)))) { }
 
-  NumpyArray::NumpyArray(const IndexU32 count)
-    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }), 0, sizeof(uint32_t), format_map.at(std::type_index(typeid(uint32_t)))) {
-  }
+  NumpyArray::NumpyArray(const IndexU32 index)
+    : NumpyArray(index, format_map.at(std::type_index(typeid(uint32_t)))) { }
 
-  NumpyArray::NumpyArray(const Index64 count)
-    : NumpyArray(Identities::none(), util::Parameters(), count.ptr(), std::vector<ssize_t>({ (ssize_t)count.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }), 0, sizeof(int64_t), format_map.at(std::type_index(typeid(int64_t)))) {
-  }
+  NumpyArray::NumpyArray(const Index64 index)
+    : NumpyArray(index, format_map.at(std::type_index(typeid(int64_t)))) { }
+
+  NumpyArray::NumpyArray(const Index8 index, const std::string& format)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int8_t) }), 0, sizeof(int8_t), format) { }
+
+  NumpyArray::NumpyArray(const IndexU8 index, const std::string& format)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint8_t) }), 0, sizeof(uint8_t), format) { }
+
+  NumpyArray::NumpyArray(const Index32 index, const std::string& format)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int32_t) }), 0, sizeof(int32_t), format) { }
+
+  NumpyArray::NumpyArray(const IndexU32 index, const std::string& format)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(uint32_t) }), 0, sizeof(uint32_t), format) { }
+
+  NumpyArray::NumpyArray(const Index64 index, const std::string& format)
+    : NumpyArray(Identities::none(), util::Parameters(), index.ptr(), std::vector<ssize_t>({ (ssize_t)index.length() }), std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }), 0, sizeof(int64_t), format) { }
 
   const std::shared_ptr<void> NumpyArray::ptr() const {
     return ptr_;
@@ -140,7 +150,47 @@ namespace awkward {
   }
 
   uint8_t NumpyArray::getbyte(ssize_t at) const {
-    return *reinterpret_cast<uint8_t*>(reinterpret_cast<ssize_t>(ptr_.get()) + byteoffset_ + at);
+    return *reinterpret_cast<uint8_t*>(byteptr(at));
+  }
+
+  int8_t NumpyArray::getint8(ssize_t at) const  {
+    return *reinterpret_cast<int8_t*>(byteptr(at));
+  }
+
+  uint8_t NumpyArray::getuint8(ssize_t at) const {
+    return *reinterpret_cast<uint8_t*>(byteptr(at));
+  }
+
+  int16_t NumpyArray::getint16(ssize_t at) const {
+    return *reinterpret_cast<int16_t*>(byteptr(at));
+  }
+
+  uint16_t NumpyArray::getuint16(ssize_t at) const {
+    return *reinterpret_cast<uint16_t*>(byteptr(at));
+  }
+
+  int32_t NumpyArray::getint32(ssize_t at) const {
+    return *reinterpret_cast<int32_t*>(byteptr(at));
+  }
+
+  uint32_t NumpyArray::getuint32(ssize_t at) const {
+    return *reinterpret_cast<uint32_t*>(byteptr(at));
+  }
+
+  int64_t NumpyArray::getint64(ssize_t at) const {
+    return *reinterpret_cast<int64_t*>(byteptr(at));
+  }
+
+  uint64_t NumpyArray::getuint64(ssize_t at) const {
+    return *reinterpret_cast<uint64_t*>(byteptr(at));
+  }
+
+  float_t NumpyArray::getfloat(ssize_t at) const {
+    return *reinterpret_cast<float*>(byteptr(at));
+  }
+
+  double_t NumpyArray::getdouble(ssize_t at) const {
+    return *reinterpret_cast<double*>(byteptr(at));
   }
 
   const std::shared_ptr<Content> NumpyArray::toRegularArray() const {
@@ -306,7 +356,7 @@ namespace awkward {
     assert(!isscalar());
     std::stringstream out;
     out << indent << pre << "<" << classname() << " format=" << util::quote(format_, true) << " shape=\"";
-    for (std::size_t i = 0;  i < ndim();  i++) {
+    for (std::size_t i = 0;  i < shape_.size();  i++) {
       if (i != 0) {
         out << " ";
       }
@@ -315,7 +365,7 @@ namespace awkward {
     out << "\" ";
     if (!iscontiguous()) {
       out << "strides=\"";
-      for (std::size_t i = 0;  i < ndim();  i++) {
+      for (std::size_t i = 0;  i < shape_.size();  i++) {
         if (i != 0) {
           out << ", ";
         }
@@ -394,7 +444,7 @@ namespace awkward {
 
   void NumpyArray::tojson_part(ToJson& builder) const {
     check_for_iteration();
-    if (parameter_equals("__class__", "\"char\"")) {
+    if (parameter_equals("__array__", "\"char\"")) {
       tojson_string(builder);
     }
     else if (format_.compare("d") == 0) {
@@ -643,6 +693,10 @@ namespace awkward {
     return std::make_shared<NumpyArray>(identities, parameters_, ptr, shape, strides_, 0, itemsize_, format_);
   }
 
+  const std::string NumpyArray::purelist_parameter(const std::string& key) const {
+    return parameter(key);
+  }
+
   bool NumpyArray::purelist_isregular() const {
     return true;
   }
@@ -802,7 +856,7 @@ namespace awkward {
     if (shape_.size() <= 1) {
       throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
-    if (toaxis >= shape_.size() - 1) {
+    if (toaxis >= (int64_t)shape_.size() - 1) {
       throw std::invalid_argument(std::string("NumpyArray cannot be flattened because axis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
     if (iscontiguous()) {

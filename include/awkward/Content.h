@@ -43,6 +43,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem(const Slice& where) const;
     virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const = 0;
+    virtual const std::string purelist_parameter(const std::string& key) const = 0;
     virtual bool purelist_isregular() const = 0;
     virtual int64_t purelist_depth() const = 0;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const = 0;

@@ -381,6 +381,10 @@ namespace awkward {
       return std::make_shared<RawArrayOf<T>>(identities, parameters_, ptr, 0, carry.length(), itemsize_);
     }
 
+    const std::string purelist_parameter(const std::string& key) const override {
+      return parameter(key);
+    }
+
     bool purelist_isregular() const override {
       return true;
     }
