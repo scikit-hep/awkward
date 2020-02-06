@@ -506,10 +506,6 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RegularArray::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: RegularArray::equal_part");
-  }
-
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     assert(advanced.length() == 0);
 

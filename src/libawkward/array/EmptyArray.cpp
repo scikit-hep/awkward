@@ -175,10 +175,6 @@ namespace awkward {
     return other;
   }
 
-  const std::shared_ptr<Content> EmptyArray::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: EmptyArray::equal_part");
-  }
-
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy

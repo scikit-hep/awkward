@@ -630,10 +630,6 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: RecordArray::equal_part");
-  }
-
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
     if (fieldindex >= numfields()) {
       throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields()) + std::string(" fields")));

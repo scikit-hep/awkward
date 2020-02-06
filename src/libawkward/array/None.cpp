@@ -153,10 +153,6 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::merge");
   }
 
-  const std::shared_ptr<Content> None::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("undefined operation: None::equal_part");
-  }
-
   const std::shared_ptr<Content> None::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: None::getitem_next(SliceAt)");
   }

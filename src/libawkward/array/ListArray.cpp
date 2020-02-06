@@ -812,11 +812,6 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: ListArray::equal_part");
-  }
-
-  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {

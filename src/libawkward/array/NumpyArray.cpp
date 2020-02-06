@@ -356,7 +356,7 @@ namespace awkward {
     assert(!isscalar());
     std::stringstream out;
     out << indent << pre << "<" << classname() << " format=" << util::quote(format_, true) << " shape=\"";
-    for (std::size_t i = 0;  i < ndim();  i++) {
+    for (std::size_t i = 0;  i < shape_.size();  i++) {
       if (i != 0) {
         out << " ";
       }
@@ -365,7 +365,7 @@ namespace awkward {
     out << "\" ";
     if (!iscontiguous()) {
       out << "strides=\"";
-      for (std::size_t i = 0;  i < ndim();  i++) {
+      for (std::size_t i = 0;  i < shape_.size();  i++) {
         if (i != 0) {
           out << ", ";
         }
@@ -856,7 +856,7 @@ namespace awkward {
     if (shape_.size() <= 1) {
       throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
-    if (toaxis >= shape_.size() - 1) {
+    if (toaxis >= (int64_t)shape_.size() - 1) {
       throw std::invalid_argument(std::string("NumpyArray cannot be flattened because axis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
     if (iscontiguous()) {
@@ -1258,33 +1258,6 @@ namespace awkward {
     else {
       throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
     }
-  }
-
-  const std::shared_ptr<Content> NumpyArray::equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
-    // if (length() != other.get()->length()) {
-    //   throw std::invalid_argument("cannot compare equality for arrays of different lengths");
-    // }
-    //
-    // if (shape_.size() == 0) {
-    //   // probably won't ever need this...
-    //   throw std::invalid_argument("undefined operation: 'equal' on NumpyArray scalar");
-    // }
-    // else if (shape_.size() == 1) {
-    //   std::shared_ptr<NumpyArray> othernumpy;
-    //   if (std::shared_ptr<NumpyArray> specific = std::dynamic_pointer_cast<NumpyArray>(other)) {
-    //     othernumpy = specific;
-    //   }
-    //   else if (std::shared_ptr<IndexedArray32> specific = std::dynamic_pointer_cast<Index)
-    //
-    //
-    //
-    //
-    // }
-    // else {
-    //   std::shared_ptr<Content> next = toRegularArray();
-    //   return next.get()->equal_part(other, axis, depth);
-    // }
-    throw std::runtime_error("FIXME: NumpyArray::equal_part");
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

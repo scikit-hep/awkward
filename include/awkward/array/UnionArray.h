@@ -66,7 +66,6 @@ namespace awkward {
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
     const std::shared_ptr<Content> reverse_merge(const std::shared_ptr<Content>& other) const;
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
-    const std::shared_ptr<Content> equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const override;
 
   protected:
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;

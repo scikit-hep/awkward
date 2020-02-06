@@ -381,7 +381,7 @@ namespace awkward {
       return std::make_shared<RawArrayOf<T>>(identities, parameters_, ptr, 0, carry.length(), itemsize_);
     }
 
-    const std::string purelist_parameter(const std::string& key) const {
+    const std::string purelist_parameter(const std::string& key) const override {
       return parameter(key);
     }
 
@@ -488,11 +488,6 @@ namespace awkward {
       else {
         throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
       }
-    }
-
-
-    const std::shared_ptr<Content> equal_part(const std::shared_ptr<Content>& other, int64_t axis, int64_t depth) const {
-      throw std::runtime_error("FIXME: RawArray::equal_part");
     }
 
   protected:
