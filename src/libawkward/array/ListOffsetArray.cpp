@@ -756,6 +756,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<SliceItem> ListOffsetArrayOf<T>::asslice() const {
+    throw std::runtime_error("FIXME: ListOffsetArray::asslice");
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     assert(advanced.length() == 0);
     int64_t lenstarts = offsets_.length() - 1;

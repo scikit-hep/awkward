@@ -630,6 +630,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<SliceItem> RecordArray::asslice() const {
+    throw std::invalid_argument("cannot use records as a slice");
+  }
+
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
     if (fieldindex >= numfields()) {
       throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields()) + std::string(" fields")));

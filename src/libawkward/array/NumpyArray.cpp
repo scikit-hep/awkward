@@ -1259,6 +1259,10 @@ namespace awkward {
       throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
     }
   }
+  
+  const std::shared_ptr<SliceItem> NumpyArray::asslice() const {
+    throw std::runtime_error("FIXME: NumpyArray::asslice");
+  }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("NumpyArray has its own getitem_next system");

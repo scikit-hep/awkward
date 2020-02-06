@@ -953,6 +953,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<SliceItem> IndexedArrayOf<T, ISOPTION>::asslice() const {
+    throw std::runtime_error("FIXME: IndexedArray::asslice");
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: IndexedArray::getitem_next(SliceAt)");
   }

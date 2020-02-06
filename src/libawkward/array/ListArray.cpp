@@ -812,6 +812,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<SliceItem> ListArrayOf<T>::asslice() const {
+    throw std::runtime_error("FIXME: ListArray::asslice");
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {

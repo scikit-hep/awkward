@@ -506,6 +506,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<SliceItem> RegularArray::asslice() const {
+    throw std::runtime_error("FIXME: RegularArray::asslice");
+  }
+
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     assert(advanced.length() == 0);
 

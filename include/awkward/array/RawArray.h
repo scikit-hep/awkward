@@ -490,6 +490,10 @@ namespace awkward {
       }
     }
 
+    const std::shared_ptr<SliceItem> asslice() const override {
+      throw std::runtime_error("FIXME: RawArray::asslice");
+    }
+
   protected:
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
       return getitem_at(at.at());
