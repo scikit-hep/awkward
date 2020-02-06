@@ -77,8 +77,8 @@ namespace awkward {
     int64_t ndim() const;
     const std::shared_ptr<SliceItem> shallow_copy() const override;
     const std::string tostring() const override;
-    bool preserves_type(const Index64& advanced) const override;
     const std::string tostring_part() const;
+    bool preserves_type(const Index64& advanced) const override;
     const IndexOf<T> ravel() const;
   private:
     const IndexOf<T> index_;
@@ -118,8 +118,8 @@ namespace awkward {
     const std::shared_ptr<SliceItem> content() const;
     const std::shared_ptr<SliceItem> shallow_copy() const override;
     const std::string tostring() const override;
-    bool preserves_type(const Index64& advanced) const override;
     const std::string tostring_part() const;
+    bool preserves_type(const Index64& advanced) const override;
   private:
     const IndexOf<T> missing_;
     const std::shared_ptr<SliceItem> content_;
@@ -135,8 +135,8 @@ namespace awkward {
     const std::shared_ptr<SliceItem> content() const;
     const std::shared_ptr<SliceItem> shallow_copy() const override;
     const std::string tostring() const override;
-    bool preserves_type(const Index64& advanced) const override;
     const std::string tostring_part() const;
+    bool preserves_type(const Index64& advanced) const override;
   private:
     const IndexOf<T> offsets_;
     const std::shared_ptr<SliceItem> content_;

@@ -370,6 +370,11 @@ namespace awkward {
     return out.str();
   }
 
+  template <typename T>
+  bool SliceMissingOf<T>::preserves_type(const Index64& advanced) const {
+    return true;
+  }
+
   template class SliceMissingOf<int64_t>;
 
   /////////////////////////////////////////////////////// SliceJaggedOf<T>
@@ -428,6 +433,11 @@ namespace awkward {
     }
     out << "]";
     return out.str();
+  }
+
+  template <typename T>
+  bool SliceJaggedOf<T>::preserves_type(const Index64& advanced) const {
+    return true;
   }
 
   template class SliceJaggedOf<int64_t>;
