@@ -955,7 +955,28 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const std::shared_ptr<SliceItem> IndexedArrayOf<T, ISOPTION>::asslice() const {
     if (ISOPTION) {
-      throw std::runtime_error("FIXME: IndexedOptionArray::asslice");
+      int64_t numnull;
+      struct Error err1 = util::awkward_indexedarray_numnull<T>(
+        &numnull,
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length());
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 nextcarry(length() - numnull);
+      Index64 outindex(length());
+      struct Error err2 = util::awkward_indexedarray_getitem_nextcarry_outindex64_64<T>(
+        nextcarry.ptr().get(),
+        outindex.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length(),
+        content_.get()->length());
+      util::handle_error(err2, classname(), identities_.get());
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+
+      return std::make_shared<SliceMissing64>(outindex, next.get()->asslice());
     }
     else {
       return project().get()->asslice();

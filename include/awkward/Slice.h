@@ -113,15 +113,15 @@ namespace awkward {
   template <typename T>
   class SliceMissingOf: public SliceItem {
   public:
-    SliceMissingOf(const IndexOf<T>& missing, const std::shared_ptr<SliceItem>& content);
-    const IndexOf<T> missing() const;
+    SliceMissingOf(const IndexOf<T>& index, const std::shared_ptr<SliceItem>& content);
+    const IndexOf<T> index() const;
     const std::shared_ptr<SliceItem> content() const;
     const std::shared_ptr<SliceItem> shallow_copy() const override;
     const std::string tostring() const override;
     const std::string tostring_part() const;
     bool preserves_type(const Index64& advanced) const override;
   private:
-    const IndexOf<T> missing_;
+    const IndexOf<T> index_;
     const std::shared_ptr<SliceItem> content_;
   };
 

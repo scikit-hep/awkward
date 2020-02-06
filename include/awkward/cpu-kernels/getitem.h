@@ -94,6 +94,9 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_indexedarray32_getitem_nextcarry_outindex_64(int64_t* tocarry, int32_t* toindex, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
   EXPORT_SYMBOL struct Error awkward_indexedarrayU32_getitem_nextcarry_outindex_64(int64_t* tocarry, uint32_t* toindex, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
   EXPORT_SYMBOL struct Error awkward_indexedarray64_getitem_nextcarry_outindex_64(int64_t* tocarry, int64_t* toindex, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
+  EXPORT_SYMBOL struct Error awkward_indexedarray32_getitem_nextcarry_outindex64_64(int64_t* tocarry, int64_t* toindex, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
+  EXPORT_SYMBOL struct Error awkward_indexedarrayU32_getitem_nextcarry_outindex64_64(int64_t* tocarry, int64_t* toindex, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
+  EXPORT_SYMBOL struct Error awkward_indexedarray64_getitem_nextcarry_outindex64_64(int64_t* tocarry, int64_t* toindex, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
 
   EXPORT_SYMBOL struct Error awkward_indexedarray32_getitem_nextcarry_64(int64_t* tocarry, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
   EXPORT_SYMBOL struct Error awkward_indexedarrayU32_getitem_nextcarry_64(int64_t* tocarry, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);

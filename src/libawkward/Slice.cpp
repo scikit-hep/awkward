@@ -315,13 +315,13 @@ namespace awkward {
   /////////////////////////////////////////////////////// SliceMissingOf<T>
 
   template <typename T>
-  SliceMissingOf<T>::SliceMissingOf(const IndexOf<T>& missing, const std::shared_ptr<SliceItem>& content)
-      : missing_(missing)
+  SliceMissingOf<T>::SliceMissingOf(const IndexOf<T>& index, const std::shared_ptr<SliceItem>& content)
+      : index_(index)
       , content_(content) { }
 
   template <typename T>
-  const IndexOf<T> SliceMissingOf<T>::missing() const {
-    return missing_;
+  const IndexOf<T> SliceMissingOf<T>::index() const {
+    return index_;
   }
 
   template <typename T>
@@ -331,7 +331,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<SliceItem> SliceMissingOf<T>::shallow_copy() const {
-    return std::make_shared<SliceMissingOf<T>>(missing_, content_);
+    return std::make_shared<SliceMissingOf<T>>(index_, content_);
   }
 
   template <typename T>
@@ -343,12 +343,12 @@ namespace awkward {
   const std::string SliceMissingOf<T>::tostring_part() const {
     std::stringstream out;
     out << "[";
-    if (missing_.length() < 6) {
-      for (int64_t i = 0;  i < missing_.length();  i++) {
+    if (index_.length() < 6) {
+      for (int64_t i = 0;  i < index_.length();  i++) {
         if (i != 0) {
           out << ", ";
         }
-        out << (T)missing_.getitem_at_nowrap(i);
+        out << (T)index_.getitem_at_nowrap(i);
       }
     }
     else {
@@ -356,14 +356,14 @@ namespace awkward {
         if (i != 0) {
           out << ", ";
         }
-        out << (T)missing_.getitem_at_nowrap(i);
+        out << (T)index_.getitem_at_nowrap(i);
       }
       out << ", ..., ";
-      for (int64_t i = missing_.length() - 3;  i < missing_.length();  i++) {
-        if (i != missing_.length() - 3) {
+      for (int64_t i = index_.length() - 3;  i < index_.length();  i++) {
+        if (i != index_.length() - 3) {
           out << ", ";
         }
-        out << (T)missing_.getitem_at_nowrap(i);
+        out << (T)index_.getitem_at_nowrap(i);
       }
     }
     out << "]";
