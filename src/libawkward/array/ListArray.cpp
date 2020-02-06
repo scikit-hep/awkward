@@ -813,7 +813,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<SliceItem> ListArrayOf<T>::asslice() const {
-    throw std::runtime_error("FIXME: ListArray::asslice");
+    return toListOffsetArray64().get()->asslice();
   }
 
   template <typename T>

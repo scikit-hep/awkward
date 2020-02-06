@@ -755,9 +755,26 @@ namespace awkward {
     return std::make_shared<ListArray64>(Identities::none(), util::Parameters(), starts, stops, content);
   }
 
+  template <>
+  const std::shared_ptr<SliceItem> ListOffsetArrayOf<int64_t>::asslice() const {
+    if (offsets_.getitem_at_nowrap(0) == 0) {
+      return std::make_shared<SliceJagged64>(offsets_, content_.get()->asslice());
+    }
+    else {
+      Index64 offsets(offsets_.length());
+      struct Error err = awkward_listoffsetarray64_compact_offsets64(
+        offsets.ptr().get(),
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length());
+      util::handle_error(err, classname(), identities_.get());
+      return std::make_shared<SliceJagged64>(offsets, content_.get()->asslice());
+    }
+  }
+
   template <typename T>
   const std::shared_ptr<SliceItem> ListOffsetArrayOf<T>::asslice() const {
-    throw std::runtime_error("FIXME: ListOffsetArray::asslice");
+    return toListOffsetArray64().get()->asslice();
   }
 
   template <typename T>
