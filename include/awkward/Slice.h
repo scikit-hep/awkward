@@ -110,6 +110,23 @@ namespace awkward {
     const std::vector<std::string> keys_;
   };
 
+  template <typename T>
+  class SliceMissingOf: public SliceItem {
+  public:
+    SliceMissingOf(const IndexOf<T>& missing, const std::shared_ptr<SliceItem>& content);
+    const IndexOf<T> missing() const;
+    const std::shared_ptr<SliceItem> content() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
+    const std::string tostring() const override;
+    bool preserves_type(const Index64& advanced) const override;
+    const std::string tostring_part() const;
+  private:
+    const IndexOf<T> missing_;
+    const std::shared_ptr<SliceItem> content_;
+  };
+
+  typedef SliceMissingOf<int64_t> SliceMissing64;
+
   class Slice {
   public:
     static int64_t none();
