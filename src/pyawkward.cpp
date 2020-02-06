@@ -529,6 +529,10 @@ void toslice_part(ak::Slice& slice, py::object obj) {
   }
 
   else if (py::isinstance<py::iterable>(obj)) {
+    if (py::isinstance<ak::Content>(obj)) {
+      obj = py::module::import("awkward1").attr("tonumpy")(obj);
+    }
+
     std::vector<std::string> strings;
     bool all_strings = true;
     for (auto x : obj) {
@@ -612,7 +616,10 @@ void toslice_part(ak::Slice& slice, py::object obj) {
 }
 
 bool handle_as_numpy(const std::shared_ptr<ak::Content>& content) {
-  if (ak::NumpyArray* raw = dynamic_cast<ak::NumpyArray*>(content.get())) {
+  if (content.get()->parameter_equals("__array__", "\"string\"")) {
+    return true;
+  }
+  else if (ak::NumpyArray* raw = dynamic_cast<ak::NumpyArray*>(content.get())) {
     return true;
   }
   else if (ak::EmptyArray* raw = dynamic_cast<ak::EmptyArray*>(content.get())) {
