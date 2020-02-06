@@ -611,6 +611,57 @@ void toslice_part(ak::Slice& slice, py::object obj) {
   }
 }
 
+bool handle_as_numpy(const std::shared_ptr<ak::Content>& content) {
+  if (ak::NumpyArray* raw = dynamic_cast<ak::NumpyArray*>(content.get())) {
+    return true;
+  }
+  else if (ak::EmptyArray* raw = dynamic_cast<ak::EmptyArray*>(content.get())) {
+    return true;
+  }
+  else if (ak::RegularArray* raw = dynamic_cast<ak::RegularArray*>(content.get())) {
+    return handle_as_numpy(raw->content());
+  }
+  else if (ak::IndexedArray32* raw = dynamic_cast<ak::IndexedArray32*>(content.get())) {
+    return handle_as_numpy(raw->content());
+  }
+  else if (ak::IndexedArrayU32* raw = dynamic_cast<ak::IndexedArrayU32*>(content.get())) {
+    return handle_as_numpy(raw->content());
+  }
+  else if (ak::IndexedArray64* raw = dynamic_cast<ak::IndexedArray64*>(content.get())) {
+    return handle_as_numpy(raw->content());
+  }
+  else if (ak::UnionArray8_32* raw = dynamic_cast<ak::UnionArray8_32*>(content.get())) {
+    std::shared_ptr<ak::Content> first = raw->content(0);
+    for (int64_t i = 1;  i < raw->numcontents();  i++) {
+      if (!first.get()->mergeable(raw->content(i), false)) {
+        return false;
+      }
+    }
+    return handle_as_numpy(first);
+  }
+  else if (ak::UnionArray8_U32* raw = dynamic_cast<ak::UnionArray8_U32*>(content.get())) {
+    std::shared_ptr<ak::Content> first = raw->content(0);
+    for (int64_t i = 1;  i < raw->numcontents();  i++) {
+      if (!first.get()->mergeable(raw->content(i), false)) {
+        return false;
+      }
+    }
+    return handle_as_numpy(first);
+  }
+  else if (ak::UnionArray8_64* raw = dynamic_cast<ak::UnionArray8_64*>(content.get())) {
+    std::shared_ptr<ak::Content> first = raw->content(0);
+    for (int64_t i = 1;  i < raw->numcontents();  i++) {
+      if (!first.get()->mergeable(raw->content(i), false)) {
+        return false;
+      }
+    }
+    return handle_as_numpy(first);
+  }
+  else {
+    return false;
+  }
+}
+
 ak::Slice toslice(py::object obj) {
   ak::Slice out;
   if (py::isinstance<py::tuple>(obj)) {
@@ -619,12 +670,22 @@ ak::Slice toslice(py::object obj) {
     }
   }
   else if (py::isinstance<ak::Content>(obj)) {
-    std::shared_ptr<ak::Content> array = unbox_content(obj);
-    out.append(array.get()->asslice());
+    std::shared_ptr<ak::Content> content = unbox_content(obj);
+    if (handle_as_numpy(content)) {
+      toslice_part(out, obj);
+    }
+    else {
+      out.append(content.get()->asslice());
+    }
   }
   else if (py::isinstance(obj, py::module::import("awkward1").attr("Array"))) {
-    std::shared_ptr<ak::Content> array = unbox_content(obj.attr("layout"));
-    out.append(array.get()->asslice());
+    std::shared_ptr<ak::Content> content = unbox_content(obj.attr("layout"));
+    if (handle_as_numpy(content)) {
+      toslice_part(out, obj);
+    }
+    else {
+      out.append(content.get()->asslice());
+    }
   }
   else {
     toslice_part(out, obj);

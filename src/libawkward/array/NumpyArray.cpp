@@ -1262,7 +1262,7 @@ namespace awkward {
 
   const std::shared_ptr<SliceItem> NumpyArray::asslice() const {
     if (ndim() != 1) {
-      throw std::invalid_argument("regular dimensions cannot be mixed with var dimensions in slice (try ak.tonumpy or ak.tojagged)");
+      throw std::invalid_argument("regular dimensions cannot be mixed with var dimensions or 'None' in slice (try ak.tonumpy or ak.tojagged)");
     }
 #ifdef _MSC_VER
     if (format_.compare("q") == 0) {

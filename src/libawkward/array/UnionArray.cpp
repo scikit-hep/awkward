@@ -36,7 +36,11 @@ namespace awkward {
       : Content(identities, parameters)
       , tags_(tags)
       , index_(index)
-      , contents_(contents) { }
+      , contents_(contents) {
+    if (contents_.empty()) {
+      throw std::invalid_argument("UnionArray must have at least one content");
+    }
+  }
 
   template <typename T, typename I>
   const IndexOf<T> UnionArrayOf<T, I>::tags() const {
