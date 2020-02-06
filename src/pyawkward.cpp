@@ -532,6 +532,9 @@ void toslice_part(ak::Slice& slice, py::object obj) {
     if (py::isinstance<ak::Content>(obj)) {
       obj = py::module::import("awkward1").attr("tonumpy")(obj);
     }
+    else if (py::isinstance(obj, py::module::import("awkward1").attr("Array"))) {
+      obj = py::module::import("awkward1").attr("tonumpy")(obj);
+    }
 
     std::vector<std::string> strings;
     bool all_strings = true;
@@ -577,6 +580,10 @@ void toslice_part(ak::Slice& slice, py::object obj) {
       }
 
       else {
+        ssize_t flatlen = 1;
+        for (auto x : info.shape) {
+          flatlen *= x;
+        }
         std::string format(info.format);
         format.erase(0, format.find_first_not_of("@=<>!"));
         if (py::isinstance<py::array>(obj) &&
@@ -590,7 +597,8 @@ void toslice_part(ak::Slice& slice, py::object obj) {
             format.compare("l") != 0       &&
             format.compare("L") != 0       &&
             format.compare("q") != 0       &&
-            format.compare("Q") != 0) {
+            format.compare("Q") != 0       &&
+            flatlen != 0) {
           throw std::invalid_argument("arrays used as an index must be integer or boolean");
         }
 

@@ -23,6 +23,16 @@ def test_array_slice():
     assert awkward1.tolist(array[indexedarray]) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
     assert awkward1.tolist(array[awkward1.Array(indexedarray)]) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
 
+    assert awkward1.tolist(array[awkward1.layout.EmptyArray()]) == []
+
+    content0 = awkward1.layout.NumpyArray(numpy.array([5, 2, 2]))
+    content1 = awkward1.layout.NumpyArray(numpy.array([3, 9, 0, 1]))
+    tags = awkward1.layout.Index8(numpy.array([0, 0, 0, 1, 1, 1, 1], dtype=numpy.int8))
+    index2 = awkward1.layout.Index64(numpy.array([0, 1, 2, 0, 1, 2, 3], dtype=numpy.int64))
+    unionarray = awkward1.layout.UnionArray8_64(tags, index2, [content0, content1])
+    assert awkward1.tolist(array[unionarray]) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
+    assert awkward1.tolist(array[awkward1.Array(unionarray)]) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
+
     array = awkward1.Array(numpy.array([[0.0, 1.1, 2.2, 3.3, 4.4], [5.5, 6.6, 7.7, 8.8, 9.9]]))
     assert awkward1.tolist(array[awkward1.layout.NumpyArray(numpy.array([[0, 1], [1, 0]])), awkward1.layout.NumpyArray(numpy.array([[2, 4], [3, 3]]))]) == [[2.2, 9.9], [8.8, 3.3]]
     assert awkward1.tolist(array[awkward1.layout.NumpyArray(numpy.array([[0, 1], [1, 0]]))]) == [[[0.0, 1.1, 2.2, 3.3, 4.4], [5.5, 6.6, 7.7, 8.8, 9.9]], [[5.5, 6.6, 7.7, 8.8, 9.9], [0.0, 1.1, 2.2, 3.3, 4.4]]]

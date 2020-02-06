@@ -1036,7 +1036,34 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<SliceItem> UnionArrayOf<T, I>::asslice() const {
-    throw std::runtime_error("FIXME: UnionArray::asslice");
+    std::shared_ptr<Content> simplified = simplify(false);
+    if (UnionArray8_32* raw = dynamic_cast<UnionArray8_32*>(simplified.get())) {
+      if (raw->numcontents() == 1) {
+        return raw->content(0).get()->asslice();
+      }
+      else {
+        throw std::invalid_argument("cannot use a union of different types as a slice");
+      }
+    }
+    else if (UnionArray8_U32* raw = dynamic_cast<UnionArray8_U32*>(simplified.get())) {
+      if (raw->numcontents() == 1) {
+        return raw->content(0).get()->asslice();
+      }
+      else {
+        throw std::invalid_argument("cannot use a union of different types as a slice");
+      }
+    }
+    else if (UnionArray8_64* raw = dynamic_cast<UnionArray8_64*>(simplified.get())) {
+      if (raw->numcontents() == 1) {
+        return raw->content(0).get()->asslice();
+      }
+      else {
+        throw std::invalid_argument("cannot use a union of different types as a slice");
+      }
+    }
+    else {
+      return simplified.get()->asslice();
+    }
   }
 
   template <typename T, typename I>

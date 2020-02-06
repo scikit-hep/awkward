@@ -491,7 +491,7 @@ namespace awkward {
     }
 
     const std::shared_ptr<SliceItem> asslice() const override {
-      throw std::runtime_error("FIXME: RawArray::asslice");
+      throw std::invalid_argument("cannot use RawArray as a slice");
     }
 
   protected:

@@ -507,7 +507,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> RegularArray::asslice() const {
-    throw std::runtime_error("FIXME: RegularArray::asslice");
+    throw std::invalid_argument("regular dimensions cannot be mixed with var dimensions or 'None' in slice (try ak.tonumpy or ak.tojagged)");
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

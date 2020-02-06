@@ -176,7 +176,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> EmptyArray::asslice() const {
-    throw std::runtime_error("FIXME: EmptyArray::asslice");
+    Index64 index(0);
+    std::vector<int64_t> shape({ 0 });
+    std::vector<int64_t> strides({ 1 });
+    return std::make_shared<SliceArray64>(index, shape, strides);
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
