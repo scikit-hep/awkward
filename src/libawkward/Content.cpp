@@ -174,6 +174,12 @@ namespace awkward {
     else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
       return getitem_next(*fields, tail, advanced);
     }
+    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      return getitem_next(*missing, tail, advanced);
+    }
+    else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
+      return getitem_next(*jagged, tail, advanced);
+    }
     else {
       throw std::runtime_error("unrecognized slice type");
     }
@@ -218,6 +224,14 @@ namespace awkward {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
+  }
+
+  const std::shared_ptr<Content> Content::getitem_next(const SliceMissing64& fields, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("FIXME: getitem_next(SliceMissing64)");
+  }
+
+  const std::shared_ptr<Content> Content::getitem_next(const SliceJagged64& fields, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("FIXME: getitem_next(SliceJagged64)");
   }
 
   const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const {

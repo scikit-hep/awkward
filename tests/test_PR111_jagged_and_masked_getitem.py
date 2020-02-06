@@ -66,3 +66,9 @@ def test_new_slices():
     assert awkward1.tolist(listarray) == [[0, 9, 3], [], [2, 5]]
 
     repr(awkward1.layout.Slice(listoffsetarray)) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 5]))]"
+
+def test_missing():
+    array = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+
+    print(array[awkward1.Array([3, 6, None, None, 8, 6])])
+    raise Exception

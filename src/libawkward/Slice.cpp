@@ -623,6 +623,12 @@ namespace awkward {
         else if (dynamic_cast<SliceFields*>(items_[i].get()) != nullptr) {
           types.push_back('[');
         }
+        else if (dynamic_cast<SliceMissing64*>(items_[i].get()) != nullptr) {
+          types.push_back('?');
+        }
+        else if (dynamic_cast<SliceJagged64*>(items_[i].get()) != nullptr) {
+          types.push_back('J');
+        }
       }
 
       if (std::count(types.begin(), types.end(), '.') > 1) {

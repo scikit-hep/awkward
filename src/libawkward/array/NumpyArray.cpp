@@ -621,10 +621,27 @@ namespace awkward {
     throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
   }
 
+  bool can_use_strides(const std::shared_ptr<SliceItem>& head, const Slice& tail) {
+    std::shared_ptr<SliceItem> nexthead = tail.head();
+    Slice nexttail = tail.tail();
+    if (head.get() == nullptr) {
+      return true;
+    }
+    else if (dynamic_cast<SliceAt*>(head.get())  ||
+             dynamic_cast<SliceRange*>(head.get())  ||
+             dynamic_cast<SliceEllipsis*>(head.get())  ||
+             dynamic_cast<SliceNewAxis*>(head.get())) {
+      return can_use_strides(nexthead, nexttail);
+    }
+    else {
+      return false;
+    }
+  }
+
   const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
     assert(!isscalar());
 
-    if (!where.isadvanced()  &&  identities_.get() == nullptr) {
+    if (can_use_strides(where.head(), where.tail())  &&  !where.isadvanced()  &&  identities_.get() == nullptr) {
       std::vector<ssize_t> nextshape = { 1 };
       nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
       std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };
@@ -1465,14 +1482,8 @@ namespace awkward {
     else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
       return getitem_bystrides(*newaxis, tail, length);
     }
-    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
-      throw std::invalid_argument(field->tostring() + std::string(" is not a valid slice type for ") + classname());
-    }
-    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
-      throw std::invalid_argument(fields->tostring() + std::string(" is not a valid slice type for ") + classname());
-    }
     else {
-      throw std::runtime_error("unrecognized slice item type");
+      throw std::runtime_error("unrecognized slice item type for NumpyArray::getitem_bystrides");
     }
   }
 
@@ -1609,6 +1620,12 @@ namespace awkward {
     }
     else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
       throw std::invalid_argument(fields->tostring() + std::string(" is not a valid slice type for ") + classname());
+    }
+    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      throw std::invalid_argument(missing->tostring() + std::string(" is not a valid slice type for ") + classname());
+    }
+    else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
+      throw std::invalid_argument(jagged->tostring() + std::string(" is not a valid slice type for ") + classname());
     }
     else {
       throw std::runtime_error("unrecognized slice item type");

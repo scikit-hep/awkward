@@ -620,6 +620,12 @@ namespace awkward {
     else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
       return Content::getitem_next(*fields, tail, advanced);
     }
+    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      return Content::getitem_next(*missing, tail, advanced);
+    }
+    else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
+      return Content::getitem_next(*jagged, tail, advanced);
+    }
     else {
       throw std::runtime_error("unrecognized slice type");
     }
