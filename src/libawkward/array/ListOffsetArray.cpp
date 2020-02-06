@@ -757,8 +757,12 @@ namespace awkward {
 
   template <>
   const std::shared_ptr<SliceItem> ListOffsetArrayOf<int64_t>::asslice() const {
-    if (offsets_.getitem_at_nowrap(0) == 0) {
-      return std::make_shared<SliceJagged64>(offsets_, content_.get()->asslice());
+    int64_t start = offsets_.getitem_at_nowrap(0);
+    int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
+    std::shared_ptr<Content> next = content_.get()->getitem_range_nowrap(start, stop);
+
+    if (start == 0) {
+      return std::make_shared<SliceJagged64>(offsets_, next.get()->asslice());
     }
     else {
       Index64 offsets(offsets_.length());
@@ -768,7 +772,7 @@ namespace awkward {
         offsets_.offset(),
         offsets_.length());
       util::handle_error(err, classname(), identities_.get());
-      return std::make_shared<SliceJagged64>(offsets, content_.get()->asslice());
+      return std::make_shared<SliceJagged64>(offsets, next.get()->asslice());
     }
   }
 
