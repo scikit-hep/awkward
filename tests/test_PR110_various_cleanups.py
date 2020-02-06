@@ -75,14 +75,41 @@ def test_count():
 def test_flatten():
     assert awkward1.tolist(awkward1.flatten(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]), axis=0)) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-# def test_string_equal():
-#     trials = [
-#         (["one", "two", "", "three", "four", "", "five", "six", ""],
-#          ["one", "two", "", "three", "four", "", "five", "six", ""]),
-#         ]
+def test_string_equal():
+    trials = [
+        (["one", "two", "", "three", "four", "", "five", "six", ""],
+         ["one", "two", "", "three", "four", "", "five", "six", ""]),
 
-#     one = awkward1.Array(["one", "two", "", "three", "four", "", "five", "six", ""])
-#     two = awkward1.Array(["one", "TWO", "", "three", "foUr", "", "five", "six", ""])
-#     print(one == two)
+        (["one", "two", "", "three", "four", "", "five", "six"],
+         ["one", "two", "", "three", "four", "", "five", "six"]),
 
-#     raise Exception
+        (["one", "two", "", "three", "four", "", "five", "six", ""],
+         ["one", "Two", "", "threE", "four", "", "five", "siX", ""]),
+
+        (["one", "two", "", "three", "four", "", "five", "six"],
+         ["one", "Two", "", "threE", "four", "", "five", "siX"]),
+
+        (["one", "two", "", "thre", "four", "", "five", "six", ""],
+         ["one", "two", "", "three", "four", "", "five", "six", ""]),
+
+        (["one", "two", "", "thre", "four", "", "five", "six"],
+         ["one", "two", "", "three", "four", "", "five", "six"]),
+
+        (["one", "two", "", "three", "four", "", "five", "six", ""],
+         ["one", "two", ":)", "three", "four", "", "five", "six", ""]),
+
+        (["one", "two", "", "three", "four", "", "five", "six"],
+         ["one", "two", ":)", "three", "four", "", "five", "six"]),
+
+        (["one", "two", "", "three", "four", "", "five", "six", ""],
+         ["", "two", "", "three", "four", "", "five", "six", ""]),
+
+        (["one", "two", "", "three", "four", "", "five", "six"],
+         ["", "two", "", "three", "four", "", "five", "six"]),
+        ]
+
+    for left, right in trials:
+        assert awkward1.tolist(awkward1.Array(left) == awkward1.Array(right)) == [x == y for x, y in zip(left, right)]
+
+def test_string_equal2():
+    assert awkward1.tolist(awkward1.Array(["one", "two", "three", "two", "two", "one"]) == "two") == [False, True, False, True, True, False]

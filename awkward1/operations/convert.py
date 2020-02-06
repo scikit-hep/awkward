@@ -270,8 +270,11 @@ def tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,
             out = awkward1.layout.RegularArray(out, size)
         return out
 
+    elif isinstance(array, str) or (awkward1._util.py27 and isinstance(array, unicode)):
+        return fromiter([array], highlevel=False)
+
     elif isinstance(array, Iterable):
-        return awkward1.highlevel.Array(array).layout
+        return fromiter(array, highlevel=False)
 
     elif not allowother:
         raise TypeError("{0} cannot be converted into an Awkward Array".format(array))

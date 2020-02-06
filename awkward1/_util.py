@@ -4,12 +4,14 @@ import inspect
 import numbers
 import re
 import sys
+import os
 
 import numpy
 
 import awkward1.layout
 
 py27 = (sys.version_info[0] < 3)
+win  = (os.name == "nt")
 
 unknowntypes = (awkward1.layout.EmptyArray,)
 

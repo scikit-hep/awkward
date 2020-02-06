@@ -63,8 +63,11 @@ def string_equal(one, two):
 
     # ufunc.reduceat requires a weird "offsets" that
     #    (a) lacks a final value (end of array is taken as boundary)
-    #    (b) starts with a zero, which cumsum does not provide
-    offsets = numpy.empty(len(possible_counts), dtype=numpy.int64)
+    #    (b) fails on Windows if it's not 32-bit
+    #    (c) starts with a zero, which cumsum does not provide
+    #    (d) doesn't handle offset[i] == offset[i + 1] with an identity
+    dtype = numpy.int32 if awkward1._util.win else numpy.int64
+    offsets = numpy.empty(len(possible_counts), dtype=dtype)
     offsets[0] = 0
     numpy.cumsum(possible_counts[:-1], out=offsets[1:])
 
