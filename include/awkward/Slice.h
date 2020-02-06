@@ -127,6 +127,23 @@ namespace awkward {
 
   typedef SliceMissingOf<int64_t> SliceMissing64;
 
+  template <typename T>
+  class SliceJaggedOf: public SliceItem {
+  public:
+    SliceJaggedOf(const IndexOf<T>& offsets, const std::shared_ptr<SliceItem>& content);
+    const IndexOf<T> offsets() const;
+    const std::shared_ptr<SliceItem> content() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
+    const std::string tostring() const override;
+    bool preserves_type(const Index64& advanced) const override;
+    const std::string tostring_part() const;
+  private:
+    const IndexOf<T> offsets_;
+    const std::shared_ptr<SliceItem> content_;
+  };
+
+  typedef SliceJaggedOf<int64_t> SliceJagged64;
+
   class Slice {
   public:
     static int64_t none();

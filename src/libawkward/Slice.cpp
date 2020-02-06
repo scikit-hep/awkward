@@ -372,6 +372,66 @@ namespace awkward {
 
   template class SliceMissingOf<int64_t>;
 
+  /////////////////////////////////////////////////////// SliceJaggedOf<T>
+
+  template <typename T>
+  SliceJaggedOf<T>::SliceJaggedOf(const IndexOf<T>& offsets, const std::shared_ptr<SliceItem>& content)
+      : offsets_(offsets)
+      , content_(content) { }
+
+  template <typename T>
+  const IndexOf<T> SliceJaggedOf<T>::offsets() const {
+    return offsets_;
+  }
+
+  template <typename T>
+  const std::shared_ptr<SliceItem> SliceJaggedOf<T>::content() const {
+    return content_;
+  }
+
+  template <typename T>
+  const std::shared_ptr<SliceItem> SliceJaggedOf<T>::shallow_copy() const {
+    return std::make_shared<SliceJaggedOf<T>>(offsets_, content_);
+  }
+
+  template <typename T>
+  const std::string SliceJaggedOf<T>::tostring() const {
+    return std::string("jagged(") + tostring_part() + std::string(", ") + content_.get()->tostring() + std::string(")");
+  }
+
+  template <typename T>
+  const std::string SliceJaggedOf<T>::tostring_part() const {
+    std::stringstream out;
+    out << "[";
+    if (offsets_.length() < 6) {
+      for (int64_t i = 0;  i < offsets_.length();  i++) {
+        if (i != 0) {
+          out << ", ";
+        }
+        out << (T)offsets_.getitem_at_nowrap(i);
+      }
+    }
+    else {
+      for (int64_t i = 0;  i < 3;  i++) {
+        if (i != 0) {
+          out << ", ";
+        }
+        out << (T)offsets_.getitem_at_nowrap(i);
+      }
+      out << ", ..., ";
+      for (int64_t i = offsets_.length() - 3;  i < offsets_.length();  i++) {
+        if (i != offsets_.length() - 3) {
+          out << ", ";
+        }
+        out << (T)offsets_.getitem_at_nowrap(i);
+      }
+    }
+    out << "]";
+    return out.str();
+  }
+
+  template class SliceJaggedOf<int64_t>;
+
   /////////////////////////////////////////////////////// Slice
 
   int64_t Slice::none() {
