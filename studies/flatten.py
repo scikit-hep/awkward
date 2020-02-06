@@ -812,13 +812,6 @@ def compact_array(array, depth=-1):
 
     return data_items
 
-def compact_data(array, len, toptr, depth):
-    if isinstance(array, Content):
-        toptr.append(array)
-        return compact_data(array, array.__len__(), toptr, depth - 1)
-    else:
-        return toptr.append(array)
-
 # NumpyArray
 def NumpyArray_flatten(self, axis=0):
     if axis < 0:
