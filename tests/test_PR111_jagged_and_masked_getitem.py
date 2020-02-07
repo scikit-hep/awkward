@@ -47,8 +47,8 @@ def test_new_slices():
     assert awkward1.tolist(indexedarray) == [5, 2, None, 3, 9, None, 1]
 
     # assert repr(awkward1.layout.Slice(indexedarray)) == "[missing([0, 1, -1, ..., 3, -1, 4], array([5, 2, 3, 9, 1]))]"
-     awkward1.layout.Slice(indexedarray)
- 
+    awkward1.layout.Slice(indexedarray)
+
     offsets = awkward1.layout.Index64(numpy.array([0, 4, 4, 7], dtype=numpy.int64))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
     assert awkward1.tolist(listoffsetarray) == [[1, 0, 9, 3], [], [2, 2, 5]]
