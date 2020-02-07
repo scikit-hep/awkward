@@ -778,3 +778,17 @@ ERROR awkward_unionarray8_U32_project_64(int64_t* lenout, int64_t* tocarry, cons
 ERROR awkward_unionarray8_64_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length, int64_t which) {
   return awkward_unionarray_project<int64_t, int8_t, int64_t>(lenout, tocarry, fromtags, tagsoffset, fromindex, indexoffset, length, which);
 }
+
+template <typename T>
+ERROR awkward_missing_repeat(T* outindex, const T* index, int64_t indexoffset, int64_t indexlength, int64_t repetitions, int64_t regularsize) {
+  for (int64_t i = 0;  i < repetitions;  i++) {
+    for (int64_t j = 0;  j < indexlength;  j++) {
+      T base = index[indexoffset + j];
+      outindex[i*indexlength + j] = base + (base >= 0 ? i*regularsize : 0);
+    }
+  }
+  return success();
+}
+ERROR awkward_missing_repeat_64(int64_t* outindex, const int64_t* index, int64_t indexoffset, int64_t indexlength, int64_t repetitions, int64_t regularsize) {
+  return awkward_missing_repeat<int64_t>(outindex, index, indexoffset, indexlength, repetitions, regularsize);
+}

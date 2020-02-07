@@ -69,4 +69,11 @@ def test_new_slices():
 
 def test_missing():
     array = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
-    assert awkward1.tolist(array[awkward1.Array([3, 6, None, None, 8, 6])]) == [3.3, 6.6, None, None, 8.8, 6.6]
+    assert awkward1.tolist(array[awkward1.Array([3, 6, None, None, -2, 6])]) == [3.3, 6.6, None, None, 8.8, 6.6]
+
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999]))
+    regulararray = awkward1.layout.RegularArray(content, 4)
+    assert awkward1.tolist(regulararray) == [[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7], [8.8, 9.9, 10.0, 11.1]]
+    assert awkward1.tolist(regulararray[awkward1.Array([2, 1, 1, None, -1])]) == [[8.8, 9.9, 10.0, 11.1], [4.4, 5.5, 6.6, 7.7], [4.4, 5.5, 6.6, 7.7], None, [8.8, 9.9, 10.0, 11.1]]
+    assert awkward1.tolist(regulararray[:, awkward1.Array([2, 1, 1, None, -1])]) == [[2.2, 1.1, 1.1, None, 3.3], [6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    assert awkward1.tolist(regulararray[1:, awkward1.Array([2, 1, 1, None, -1])]) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]

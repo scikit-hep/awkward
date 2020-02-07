@@ -238,12 +238,25 @@ namespace awkward {
     std::cout << next.get()->tostring() << std::endl;
 
     if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
-      std::shared_ptr<Content> out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), missing.index(), raw->content());
+      Index64 index(missing.index());
+      Index64 outindex(index.length()*raw->length());
+      struct Error err = awkward_missing_repeat_64(
+        outindex.ptr().get(),
+        index.ptr().get(),
+        index.offset(),
+        index.length(),
+        raw->length(),
+        raw->size());
+      util::handle_error(err, classname(), nullptr);
+
+      std::cout << "outindex " << outindex.tostring() << std::endl;
+
+      std::shared_ptr<Content> out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, raw->content());
 
       std::cout << "out" << std::endl;
       std::cout << out.get()->tostring() << std::endl;
 
-      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, missing.length());
+      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, index.length());
     }
     else {
       throw std::runtime_error("SliceMissing did not terminate on a SliceArray?");

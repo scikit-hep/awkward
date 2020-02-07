@@ -511,6 +511,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+    std::cout << "RegularArray size " << size_ << " getitem_next(SliceAt) " << at.tostring() << " tail " << tail.tostring() << std::endl;
+
     assert(advanced.length() == 0);
 
     int64_t len = length();
@@ -530,6 +532,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+    std::cout << "RegularArray size " << size_ << " getitem_next(SliceRanage) " << range.tostring() << " tail " << tail.tostring() << std::endl;
+
     int64_t len = length();
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -586,6 +590,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+    std::cout << "RegularArray size " << size_ << " getitem_next(SliceArray) " << array.tostring() << " tail " << tail.tostring() << std::endl;
+
     int64_t len = length();
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
