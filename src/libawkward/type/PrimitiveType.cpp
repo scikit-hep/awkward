@@ -93,7 +93,7 @@ namespace awkward {
       case uint8:   itemsize = 1; format = "B"; break;
       case int16:   itemsize = 2; format = "h"; break;
       case uint16:  itemsize = 2; format = "H"; break;
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
       case int32:   itemsize = 4; format = "l"; break;
       case uint32:  itemsize = 4; format = "L"; break;
       case int64:   itemsize = 8; format = "q"; break;

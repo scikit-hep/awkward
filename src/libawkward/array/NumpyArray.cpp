@@ -41,15 +41,15 @@ namespace awkward {
   const std::unordered_map<std::type_index, std::string> NumpyArray::format_map = {
     { typeid(int8_t), "b"},
     { typeid(uint8_t), "B"},
- #ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     { typeid(int32_t), "l"},
     { typeid(uint32_t), "L"},
     { typeid(int64_t), "q"}
- #else
+#else
     { typeid(int32_t), "i"},
     { typeid(uint32_t), "I"},
     { typeid(int64_t), "l"}
- #endif
+#endif
  };
 
   NumpyArray::NumpyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
@@ -293,28 +293,28 @@ namespace awkward {
     else if (format_.compare("f") == 0) {
       out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float32);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("q") == 0) {
 #else
     else if (format_.compare("l") == 0) {
 #endif
       out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int64);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("Q") == 0) {
 #else
     else if (format_.compare("L") == 0) {
 #endif
       out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint64);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("l") == 0) {
 #else
     else if (format_.compare("i") == 0) {
 #endif
       out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int32);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("L") == 0) {
 #else
     else if (format_.compare("I") == 0) {
@@ -374,14 +374,14 @@ namespace awkward {
       out << "\" ";
     }
     out << "data=\"";
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     if (ndim() == 1  &&  format_.compare("l") == 0) {
 #else
     if (ndim() == 1  &&  format_.compare("i") == 0) {
 #endif
       tostring_as<int32_t>(out, reinterpret_cast<int32_t*>(byteptr()), length());
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (ndim() == 1  &&  format_.compare("q") == 0) {
 #else
     else if (ndim() == 1  &&  format_.compare("l") == 0) {
@@ -453,28 +453,28 @@ namespace awkward {
     else if (format_.compare("f") == 0) {
       tojson_real<float>(builder);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("q") == 0) {
 #else
     else if (format_.compare("l") == 0) {
 #endif
       tojson_integer<int64_t>(builder);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("Q") == 0) {
 #else
     else if (format_.compare("L") == 0) {
 #endif
       tojson_integer<uint64_t>(builder);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
       else if (format_.compare("l") == 0) {
 #else
       else if (format_.compare("i") == 0) {
 #endif
       tojson_integer<int32_t>(builder);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("L") == 0) {
 #else
     else if (format_.compare("I") == 0) {
@@ -770,7 +770,7 @@ namespace awkward {
       throw std::invalid_argument(std::string("NumpyArray cannot be counted in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
 
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     std::string format = "q";
 #else
     std::string format = "l";
@@ -996,7 +996,7 @@ namespace awkward {
         itemsize = 8;
         format = "d";
       }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
       else if (format_.compare("Q") == 0  &&  other_format.compare("Q") == 0) {
         itemsize = 8;
         format = "Q";
@@ -1008,7 +1008,7 @@ namespace awkward {
       }
       else if (format_.compare("q") == 0  ||  format_.compare("Q") == 0  ||  format_.compare("l") == 0  ||  format_.compare("L") == 0  ||  format_.compare("i") == 0  ||  format_.compare("I") == 0  ||  format_.compare("h") == 0  ||  format_.compare("H") == 0  ||  format_.compare("b") == 0  ||  format_.compare("B") == 0  ||  format_.compare("c") == 0  ||  other_format.compare("q") == 0  ||  other_format.compare("Q") == 0  ||  other_format.compare("l") == 0  ||  other_format.compare("L") == 0  ||  other_format.compare("i") == 0  ||  other_format.compare("I") == 0  ||  other_format.compare("h") == 0  ||  other_format.compare("H") == 0  ||  other_format.compare("b") == 0  ||  other_format.compare("B") == 0  ||  other_format.compare("c") == 0) {
         itemsize = 8;
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
         format = "q";
 #else
         format = "l";
@@ -1054,28 +1054,28 @@ namespace awkward {
         else if (format_.compare("f") == 0) {
           err = awkward_numpyarray_fill_todouble_fromfloat(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<float*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
         else if (format_.compare("q") == 0) {
 #else
         else if (format_.compare("l") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_from64(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<int64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("Q") == 0) {
 #else
           else if (format_.compare("L") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_fromU64(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("l") == 0) {
 #else
           else if (format_.compare("i") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_from32(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<int32_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("L") == 0) {
 #else
           else if (format_.compare("I") == 0) {
@@ -1108,28 +1108,28 @@ namespace awkward {
         else if (other_format.compare("f") == 0) {
           err = awkward_numpyarray_fill_todouble_fromfloat(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<float*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
         else if (other_format.compare("q") == 0) {
 #else
         else if (other_format.compare("l") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_from64(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<int64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("Q") == 0) {
 #else
           else if (other_format.compare("L") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_fromU64(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("l") == 0) {
 #else
           else if (other_format.compare("i") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_from32(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<int32_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("L") == 0) {
 #else
           else if (other_format.compare("I") == 0) {
@@ -1165,28 +1165,28 @@ namespace awkward {
       }
 
       else if (itemsize == 8) {
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
         if (format_.compare("q") == 0) {
 #else
         if (format_.compare("l") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_from64(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<int64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("Q") == 0) {
 #else
           else if (format_.compare("L") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_fromU64(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("l") == 0) {
 #else
           else if (format_.compare("i") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_from32(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<int32_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("L") == 0) {
 #else
           else if (format_.compare("I") == 0) {
@@ -1213,28 +1213,28 @@ namespace awkward {
         }
         util::handle_error(err, classname(), nullptr);
 
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
         if (other_format.compare("q") == 0) {
 #else
         if (other_format.compare("l") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_from64(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<int64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("Q") == 0) {
 #else
           else if (other_format.compare("L") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_fromU64(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("l") == 0) {
 #else
           else if (other_format.compare("i") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_from32(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<int32_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("L") == 0) {
 #else
           else if (other_format.compare("I") == 0) {
@@ -1281,7 +1281,7 @@ namespace awkward {
     if (ndim() != 1) {
       throw std::invalid_argument("regular dimensions cannot be mixed with var dimensions or 'None' in slice (try ak.tonumpy or ak.tojagged)");
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     if (format_.compare("q") == 0) {
 #else
     if (format_.compare("l") == 0) {
@@ -1297,21 +1297,21 @@ namespace awkward {
       int64_t offset = (int64_t)contiguous_self.byteoffset() / (int64_t)itemsize_;
       Index64 index(length());
       struct Error err;
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
       if (format_.compare("Q") == 0) {
 #else
       if (format_.compare("L") == 0) {
 #endif
         err = awkward_numpyarray_fill_to64_fromU64(index.ptr().get(), 0, reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()), offset, length());
       }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
       else if (format_.compare("l") == 0) {
 #else
       else if (format_.compare("i") == 0) {
 #endif
         err = awkward_numpyarray_fill_to64_from32(index.ptr().get(), 0, reinterpret_cast<int32_t*>(contiguous_self.ptr().get()), offset, length());
       }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
       else if (format_.compare("L") == 0) {
 #else
       else if (format_.compare("I") == 0) {

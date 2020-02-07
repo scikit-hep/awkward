@@ -349,7 +349,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::count(int64_t axis) const {
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     std::string format = "q";
 #else
     std::string format = "l";
