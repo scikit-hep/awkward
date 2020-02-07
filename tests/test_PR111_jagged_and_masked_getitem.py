@@ -54,7 +54,8 @@ def test_new_slices():
     assert awkward1.tolist(listoffsetarray) == [[1, 0, 9, 3], [], [2, 2, 5]]
 
     # assert repr(awkward1.layout.Slice(listoffsetarray)) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 2]))]"
-    awkward1.layout.Slice(listoffsetarray)
+    for i in range(1000):
+        awkward1.layout.Slice(listoffsetarray)
 
     # offsets = awkward1.layout.Index64(numpy.array([1, 4, 4, 6], dtype=numpy.int64))
     # listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
