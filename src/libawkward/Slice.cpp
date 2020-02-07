@@ -123,10 +123,11 @@ namespace awkward {
   /////////////////////////////////////////////////////// SliceArrayOf<T>
 
   template <typename T>
-  SliceArrayOf<T>::SliceArrayOf(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides)
+  SliceArrayOf<T>::SliceArrayOf(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides, bool frombool)
       : index_(index)
       , shape_(shape)
-      , strides_(strides) {
+      , strides_(strides)
+      , frombool_(frombool) {
     if (shape_.empty()) {
       throw std::runtime_error("shape must not be zero-dimensional");
     }
@@ -156,13 +157,18 @@ namespace awkward {
   }
 
   template <typename T>
+  bool SliceArrayOf<T>::frombool() const {
+    return frombool_;
+  }
+
+  template <typename T>
   int64_t SliceArrayOf<T>::ndim() const {
     return (int64_t)shape_.size();
   }
 
   template <typename T>
   const std::shared_ptr<SliceItem> SliceArrayOf<T>::shallow_copy() const {
-    return std::make_shared<SliceArrayOf<T>>(index_, shape_, strides_);
+    return std::make_shared<SliceArrayOf<T>>(index_, shape_, strides_, frombool_);
   }
 
   template <typename T>
@@ -208,7 +214,7 @@ namespace awkward {
             out << ", ";
           }
           IndexOf<T> index(index_.ptr(), index_.offset() + i*strides_[0], shape_[1]);
-          SliceArrayOf<T> subarray(index, shape, strides);
+          SliceArrayOf<T> subarray(index, shape, strides, frombool_);
           out << subarray.tostring_part();
         }
       }
@@ -218,7 +224,7 @@ namespace awkward {
             out << ", ";
           }
           IndexOf<T> index(index_.ptr(), index_.offset() + i*strides_[0], shape_[1]);
-          SliceArrayOf<T> subarray(index, shape, strides);
+          SliceArrayOf<T> subarray(index, shape, strides, frombool_);
           out << subarray.tostring_part();
         }
         out << ", ..., ";
@@ -227,7 +233,7 @@ namespace awkward {
             out << ", ";
           }
           IndexOf<T> index(index_.ptr(), index_.offset() + i*strides_[0], shape_[1]);
-          SliceArrayOf<T> subarray(index, shape, strides);
+          SliceArrayOf<T> subarray(index, shape, strides, frombool_);
           out << subarray.tostring_part();
         }
       }
@@ -589,7 +595,7 @@ namespace awkward {
           for (size_t j = 0;  j < shape.size();  j++) {
             strides.push_back(0);
           }
-          items_[i] = std::make_shared<SliceArray64>(index, shape, strides);
+          items_[i] = std::make_shared<SliceArray64>(index, shape, strides, false);
         }
         else if (SliceArray64* array = dynamic_cast<SliceArray64*>(items_[i].get())) {
           std::vector<int64_t> arrayshape = array->shape();
@@ -606,7 +612,7 @@ namespace awkward {
               throw std::invalid_argument("cannot broadcast arrays in slice");
             }
           }
-          items_[i] = std::make_shared<SliceArray64>(array->index(), shape, strides);
+          items_[i] = std::make_shared<SliceArray64>(array->index(), shape, strides, array->frombool());
         }
       }
 

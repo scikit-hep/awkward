@@ -982,7 +982,24 @@ namespace awkward {
 
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
 
-      return std::make_shared<SliceMissing64>(outindex, next.get()->asslice());
+      std::shared_ptr<SliceItem> slicecontent = next.get()->asslice();
+      if (SliceArray64* raw = dynamic_cast<SliceArray64*>(slicecontent.get())) {
+        Index64 nonzero(raw->index());
+        Index64 adjustedindex(nonzero.length() + numnull);
+        struct Error err3 = awkward_indexedarray_getitem_adjust_outindex_64(
+          adjustedindex.ptr().get(),
+          outindex.ptr().get(),
+          outindex.offset(),
+          outindex.length(),
+          nonzero.ptr().get(),
+          nonzero.offset(),
+          nonzero.length());
+        util::handle_error(err3, classname(), nullptr);
+        return std::make_shared<SliceMissing64>(adjustedindex, slicecontent);
+      }
+      else {
+        return std::make_shared<SliceMissing64>(outindex, slicecontent);
+      }
     }
     else {
       return project().get()->asslice();

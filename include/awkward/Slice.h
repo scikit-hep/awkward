@@ -69,11 +69,12 @@ namespace awkward {
   template <typename T>
   class SliceArrayOf: public SliceItem {
   public:
-    SliceArrayOf<T>(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides);
+    SliceArrayOf<T>(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides, bool frombool);
     const IndexOf<T> index() const;
     const int64_t length() const;
     const std::vector<int64_t> shape() const;
     const std::vector<int64_t> strides() const;
+    bool frombool() const;
     int64_t ndim() const;
     const std::shared_ptr<SliceItem> shallow_copy() const override;
     const std::string tostring() const override;
@@ -84,6 +85,7 @@ namespace awkward {
     const IndexOf<T> index_;
     const std::vector<int64_t> shape_;
     const std::vector<int64_t> strides_;
+    bool frombool_;
   };
 
   typedef SliceArrayOf<int64_t> SliceArray64;

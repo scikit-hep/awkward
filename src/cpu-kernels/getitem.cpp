@@ -690,6 +690,25 @@ ERROR awkward_indexedarray64_getitem_nextcarry_outindex64_64(int64_t* tocarry, i
   return awkward_indexedarray_getitem_nextcarry_outindex<int64_t, int64_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
 }
 
+template <typename T>
+ERROR awkward_indexedarray_getitem_adjust_outindex(T* toindex, const T* fromindex, int64_t fromindexoffset, int64_t fromindexlength, const T* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
+  int64_t j = 0;
+  int64_t k = 0;
+  for (int64_t i = 0;  i < fromindexlength;  i++) {
+    if (nonzero[nonzerooffset + j] == i) {
+      // HERE
+      j++;
+    }
+    // HERE
+
+
+  }
+  return success();
+}
+ERROR awkward_indexedarray_getitem_adjust_outindex_64(int64_t* toindex, const T* fromindex, int64_t fromindexoffset, int64_t fromindexlength, const int64_t* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
+  return awkward_indexedarray_getitem_adjust_outindex<int64_t>(toindex, fromindex, fromindexoffset, fromindexlength, nonzero, nonzerooffset, nonzerolength);
+}
+
 template <typename C, typename T>
 ERROR awkward_indexedarray_getitem_nextcarry(T* tocarry, const C* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
   int64_t k = 0;

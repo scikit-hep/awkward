@@ -91,3 +91,11 @@ def test_missing():
 
     assert awkward1.tolist(listoffsetarray[:, numpy.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False])]) == [[2.2, 1.1, 1.1, None, 3.3], [6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
     assert awkward1.tolist(listoffsetarray[1:, numpy.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False])]) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+
+# def test_bool_missing():
+#     array = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+
+#     print(awkward1.layout.slice_tostring(awkward1.Array([True, False, None, True, False])))
+
+#     # print(awkward1.tolist(array))
+#     raise Exception

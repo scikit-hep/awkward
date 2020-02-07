@@ -1296,7 +1296,7 @@ namespace awkward {
       std::shared_ptr<int64_t> ptr(ptr_, raw);
       std::vector<int64_t> shape({ (int64_t)shape_[0] });
       std::vector<int64_t> strides({ (int64_t)strides_[0] / (int64_t)itemsize_ });
-      return std::make_shared<SliceArray64>(Index64(ptr, (int64_t)byteoffset_ / (int64_t)itemsize_, length()), shape, strides);
+      return std::make_shared<SliceArray64>(Index64(ptr, (int64_t)byteoffset_ / (int64_t)itemsize_, length()), shape, strides, false);
     }
     else if (format_.compare("q") == 0  ||  format_.compare("Q") == 0  ||  format_.compare("l") == 0  ||  format_.compare("L") == 0  ||  format_.compare("i") == 0  ||  format_.compare("I") == 0  ||  format_.compare("h") == 0  ||  format_.compare("H") == 0  ||  format_.compare("b") == 0  ||  format_.compare("B") == 0  ||  format_.compare("c") == 0) {
       NumpyArray contiguous_self = contiguous();
@@ -1343,7 +1343,7 @@ namespace awkward {
 
       std::vector<int64_t> shape({ (int64_t)shape_[0] });
       std::vector<int64_t> strides({ 1 });
-      return std::make_shared<SliceArray64>(index, shape, strides);
+      return std::make_shared<SliceArray64>(index, shape, strides, false);
     }
     else if (format_.compare("?") == 0) {
       int64_t numtrue;
@@ -1366,7 +1366,7 @@ namespace awkward {
 
       std::vector<int64_t> shape({ numtrue });
       std::vector<int64_t> strides({ 1 });
-      return std::make_shared<SliceArray64>(index, shape, strides);
+      return std::make_shared<SliceArray64>(index, shape, strides, true);
     }
     else {
       throw std::invalid_argument("only arrays of integers or booleans may be used as a slice");

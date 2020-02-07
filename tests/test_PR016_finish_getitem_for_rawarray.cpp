@@ -114,7 +114,7 @@ int main(int, char**) {
   array1.ptr().get()[1] = 0;
   array1.ptr().get()[2] = 0;
   array1.ptr().get()[3] = -1;
-  if (tostring(content.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1}))))) != "[2.2, 0, 0, 9.9]") {
+  if (tostring(content.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1}), false)))) != "[2.2, 0, 0, 9.9]") {
     return -1;
   }
 
@@ -143,7 +143,7 @@ int main(int, char**) {
   array2.ptr().get()[1] = -1;
   array2.ptr().get()[2] = 2;
   array2.ptr().get()[3] = 0;
-  if (tostring(listA.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1})), new SliceArray64(array2, std::vector<int64_t>({4}), std::vector<int64_t>({1}))))) != "[4.4, 2.2, 2.2, 6.6]") {
+  if (tostring(listA.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1}), false), new SliceArray64(array2, std::vector<int64_t>({4}), std::vector<int64_t>({1}), false)))) != "[4.4, 2.2, 2.2, 6.6]") {
     return -1;
   }
 

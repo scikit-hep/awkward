@@ -645,7 +645,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
               strides.push_back((int64_t)intinfo.strides[i] / sizeof(int64_t));
             }
             ak::Index64 index(std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(intinfo.ptr), pyobject_deleter<int64_t>(intarray.ptr())), 0, shape[0]);
-            slice.append(std::make_shared<ak::SliceArray64>(index, shape, strides));
+            slice.append(std::make_shared<ak::SliceArray64>(index, shape, strides, true));
           }
         }
 
@@ -682,7 +682,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
             strides.push_back((int64_t)intinfo.strides[i] / (int64_t)sizeof(int64_t));
           }
           ak::Index64 index(std::shared_ptr<int64_t>(reinterpret_cast<int64_t*>(intinfo.ptr), pyobject_deleter<int64_t>(intarray.ptr())), 0, shape[0]);
-          slice.append(std::make_shared<ak::SliceArray64>(index, shape, strides));
+          slice.append(std::make_shared<ak::SliceArray64>(index, shape, strides, false));
         }
       }
     }
