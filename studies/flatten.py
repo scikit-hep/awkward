@@ -907,20 +907,20 @@ def RegularArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
-        if len(self.content) % self.size != 0:
-            return self.getitem[0, len(self.content)*self.size]
+        if self.content.__len__() % self.size != 0:
+            return self.__getitem__(slice(0, self.content.__len__()*self.size)) #FIXME
         else:
             return self.content
     else:
         count = [self.size]*len(self.content)
         ## FIXME ccount = content_.get()->count64();
-        ccount = [self.content.size]*len(self.content)
-        offsets = [0]*(len(self.content) + 1)
-        for i in range(len(self.content)):
+        ccount = [self.size]*self.content.__len__()
+        offsets = [0]*(self.content.__len__() + 1)
+        for i in range(self.content.__len__()):
             l = 0
             for j in range(count[i]):
                 l += ccount[j + i*self.size]
-                offsets[i + 1] = l + self.offsets[i]
+                offsets[i + 1] = l #FIXME + self.offsets[i]
 
         return ListOffsetArray(offsets, self.content.flatten(axis - 1))
 
@@ -949,11 +949,11 @@ def ListArray_flatten(self, axis=0):
             stop = self.stops[i]
             if start < 0  or  stop < 0:
                 raise IndexError("all start and stop values must be non-negative")
-                length = stop - start
-                if length > 0:
-                    for l in range(length):
-                        indxarray[at] = start + l
-                        at += 1
+            length = stop - start
+            if length > 0:
+                for l in range(length):
+                    indxarray[at] = start + l
+                    at += 1
 
         return IndexedArray(indxarray, self.content)
     else:
@@ -966,10 +966,18 @@ def ListOffsetArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
+        #int64_t start = offsets_.getitem_at_nowrap(0);
+        #int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
         start = self.offsets[0]
         stop = self.offsets[len(self.offsets) - 1]
 
-        return self.getitem[start:stop]
+        # FIXME:
+        #return content_.get()->getitem_range_nowrap(start, stop);
+        offsets = self.offsets[start : stop + 1]
+        if len(offsets) == 0:
+            offsets = [0]
+
+        return ListOffsetArray(offsets, self.content)
     else:
       return self.content.flatten(axis - 1)
 
@@ -986,7 +994,7 @@ def IndexedArray_flatten(self, axis=0):
         for i in range(len(self.index)):
             j = self.index[i] #FIXME self.indexoffset
             if j < 0  or  j >= len(self.index):
-                raise IndexValue("index out of range")
+                raise IndexError("index out of range")
             else:
                 nextcarry[k] = j
                 k += 1
@@ -1006,14 +1014,14 @@ def IndexedOptionArray_flatten(self, axis=0):
     if axis == 0:
         numnull = 0
         for i in range(len(self.index)):
-            if self.index[self.indexoffset + i] < 0:
+            if self.index[i] < 0: # FIXME self.indexoffset
                 numnull = numnull
 
         nextcarry = [0]*(len(self.index) - numnull)
         k = 0
         for i in range(len(self.index)):
-            j = self.index[self.indexoffset + i]
-            if j >= lencontent:
+            j = self.index[i] #FIXME self.indexoffset
+            if j >= len(self.content):
                 raise IndexError("index out of range")
             elif j >= 0:
                 nextcarry[k] = j
@@ -1022,7 +1030,7 @@ def IndexedOptionArray_flatten(self, axis=0):
     # FIXME:
     # std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
     # return next.get()->flatten(toaxis);
-        return IndexedOptionArray(index, self.content)
+        return IndexedOptionArray(nextcarry, self.content)
     else:
         return self.content.flatten(axis)
 
@@ -1052,10 +1060,21 @@ def UnionArray_flatten(self, axis=0):
 
 UnionArray.flatten = UnionArray_flatten
 
-for i in range(10):
+for i in range(100):
     print("flatten i =", i)
-    array = Content.random()
-    #array = NumpyArray.random()
+    #array = Content.random()
+    #array = NumpyArray.random() # ok
+    #array = EmptyArray.random() # ok
+    #array = RawArray.random() # ok
+    #array = RecordArray.random() # ok
+
+    array = ListArray.random() # not ok
+    #array = IndexedArray.random() # not ok
+    #array = UnionArray.random() # not ok
+    #array = IndexedOptionArray.random() # not ok
+    #array = ListOffsetArray.random() # not ok
+    #array = RegularArray.random() # not ok
+    #array = UnionArray.random() # not ok
     for axis in range(5):
         print("axis =", axis)
         try:
