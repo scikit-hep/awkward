@@ -709,18 +709,6 @@ ak::Slice toslice(py::object obj) {
   return out;
 }
 
-py::class_<ak::Slice> make_Slice(py::handle m, std::string name) {
-  return (py::class_<ak::Slice>(m, name.c_str())
-      .def(py::init([](py::object obj) {
-        return toslice(obj);
-      }))
-
-      .def("__repr__", [](ak::Slice& self) -> const std::string {
-        return self.tostring();
-      })
-  );
-}
-
 /////////////////////////////////////////////////////////////// Iterator
 
 py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(py::handle m, std::string name) {
@@ -1696,8 +1684,6 @@ PYBIND11_MODULE(layout, m) {
   make_IdentitiesOf<int32_t>(m, "Identities32");
   make_IdentitiesOf<int64_t>(m, "Identities64");
 
-  make_Slice(m, "Slice");
-
   make_Iterator(m, "Iterator");
 
   make_FillableArray(m, "FillableArray");
@@ -1740,6 +1726,10 @@ PYBIND11_MODULE(layout, m) {
   make_UnionArrayOf<int8_t, int32_t>(m,  "UnionArray8_32");
   make_UnionArrayOf<int8_t, uint32_t>(m, "UnionArray8_U32");
   make_UnionArrayOf<int8_t, int64_t>(m,  "UnionArray8_64");
+
+  m.def("slice_tostring", [](py::object obj) -> std::string {
+    return toslice(obj).tostring();
+  });
 
   m.def("fromjson", [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;

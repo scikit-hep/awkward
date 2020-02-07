@@ -46,41 +46,42 @@ def test_new_slices():
     # indexedarray = awkward1.layout.IndexedOptionArray64(index, content)
     # assert awkward1.tolist(indexedarray) == [5, 2, None, 3, 9, None, 1]
 
-    # # assert repr(awkward1.layout.Slice(indexedarray)) == "[missing([0, 1, -1, ..., 3, -1, 4], array([5, 2, 3, 9, 1]))]"
-    # awkward1.layout.Slice(indexedarray)
+    # # assert awkward1.layout.slice_tostring(indexedarray) == "[missing([0, 1, -1, ..., 3, -1, 4], array([5, 2, 3, 9, 1]))]"
+    # awkward1.layout.slice_tostring(indexedarray)
 
     # offsets = awkward1.layout.Index64(numpy.array([0, 4, 4, 7], dtype=numpy.int64))
     # listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
     # assert awkward1.tolist(listoffsetarray) == [[1, 0, 9, 3], [], [2, 2, 5]]
 
-    # # assert repr(awkward1.layout.Slice(listoffsetarray)) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 2]))]"
-    # awkward1.layout.Slice(listoffsetarray)
+    # # assert awkward1.layout.slice_tostring(listoffsetarray) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 2]))]"
+    # awkward1.layout.slice_tostring(listoffsetarray)
 
     import gc
 
-    offsets = awkward1.layout.Index64(numpy.array([1, 4, 4, 6], dtype=numpy.int64))
-    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
-    assert awkward1.tolist(listoffsetarray) == [[0, 9, 3], [], [2, 2]]
+    for i in range(100):
+        offsets = awkward1.layout.Index64(numpy.array([1, 4, 4, 6], dtype=numpy.int64))
+        listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+        assert awkward1.tolist(listoffsetarray) == [[0, 9, 3], [], [2, 2]]
 
-    # assert repr(awkward1.layout.Slice(listoffsetarray)) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 2]))]"
-    tmp = awkward1.layout.Slice(listoffsetarray)
+        # assert awkward1.layout.slice_tostring(listoffsetarray) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 2]))]"
+        tmp = awkward1.layout.slice_tostring(listoffsetarray)
 
-    del tmp
-    gc.collect()
+        del tmp
+        gc.collect()
 
-    del listoffsetarray
-    gc.collect()
+        del listoffsetarray
+        gc.collect()
 
-    del offsets
-    gc.collect()
+        del offsets
+        gc.collect()
 
     # starts = awkward1.layout.Index64(numpy.array([1, 99, 5], dtype=numpy.int64))
     # stops = awkward1.layout.Index64(numpy.array([4, 99, 7], dtype=numpy.int64))
     # listarray = awkward1.layout.ListArray64(starts, stops, content)
     # assert awkward1.tolist(listarray) == [[0, 9, 3], [], [2, 5]]
 
-    # # assert repr(awkward1.layout.Slice(listarray)) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 5]))]"
-    # awkward1.layout.Slice(listarray)
+    # # assert awkward1.layout.slice_tostring(listarray) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 5]))]"
+    # awkward1.layout.slice_tostring(listarray)
 
 def test_missing():
     array = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
