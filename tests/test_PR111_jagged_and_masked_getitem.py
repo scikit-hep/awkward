@@ -49,19 +49,20 @@ def test_new_slices():
     # # assert repr(awkward1.layout.Slice(indexedarray)) == "[missing([0, 1, -1, ..., 3, -1, 4], array([5, 2, 3, 9, 1]))]"
     # awkward1.layout.Slice(indexedarray)
 
-    offsets = awkward1.layout.Index64(numpy.array([0, 4, 4, 7], dtype=numpy.int64))
-    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
-    assert awkward1.tolist(listoffsetarray) == [[1, 0, 9, 3], [], [2, 2, 5]]
+    for i in range(1000):
+        offsets = awkward1.layout.Index64(numpy.array([0, 4, 4, 7], dtype=numpy.int64))
+        listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+        assert awkward1.tolist(listoffsetarray) == [[1, 0, 9, 3], [], [2, 2, 5]]
 
-    # assert repr(awkward1.layout.Slice(listoffsetarray)) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 2]))]"
-    awkward1.layout.Slice(listoffsetarray)
+        # assert repr(awkward1.layout.Slice(listoffsetarray)) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 2]))]"
+        awkward1.layout.Slice(listoffsetarray)
 
-    offsets = awkward1.layout.Index64(numpy.array([1, 4, 4, 6], dtype=numpy.int64))
-    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
-    assert awkward1.tolist(listoffsetarray) == [[0, 9, 3], [], [2, 2]]
+        offsets = awkward1.layout.Index64(numpy.array([1, 4, 4, 6], dtype=numpy.int64))
+        listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+        assert awkward1.tolist(listoffsetarray) == [[0, 9, 3], [], [2, 2]]
 
-    # assert repr(awkward1.layout.Slice(listoffsetarray)) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 2]))]"
-    awkward1.layout.Slice(listoffsetarray)
+        # assert repr(awkward1.layout.Slice(listoffsetarray)) == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 2]))]"
+        awkward1.layout.Slice(listoffsetarray)
 
     # starts = awkward1.layout.Index64(numpy.array([1, 99, 5], dtype=numpy.int64))
     # stops = awkward1.layout.Index64(numpy.array([4, 99, 7], dtype=numpy.int64))
