@@ -14,14 +14,32 @@ import awkward1._util
 import awkward1.layout
 
 def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
-    def recurse(array):
+    def recurse(array, index):
+        if regulararray and len(array.shape) > 1:
+            return awkward1.layout.RegularArray(recurse(array.reshape((-1,) + array.shape[2:]), index), array.shape[1])
+
         if len(array.shape) == 0:
-            return awkward1.layout.NumpyArray(array.reshape(1))
-        elif regulararray and len(array.shape) > 1:
-            return awkward1.layout.RegularArray(recurse(array.reshape((-1,) + array.shape[2:])), array.shape[1])
+            data = awkward1.layout.NumpyArray(array.reshape(1))
         else:
-            return awkward1.layout.NumpyArray(array)
-    layout = recurse(array)
+            data = awkward1.layout.NumpyArray(array)
+
+        if index is not None:
+            return awkward1.layout.IndexedOptionArray64(index, data)
+        else:
+            return data
+
+    if isinstance(array, numpy.ma.MaskedArray):
+        mask = numpy.ma.getmaskarray(array)
+        array = numpy.ma.getdata(array)
+        index = numpy.arange(array.size, dtype=numpy.int64)
+        index[mask.reshape(-1)] = -1
+        index = awkward1.layout.Index64(index)
+        if len(mask.shape) > 1:
+            regulararray = True
+    else:
+        index = None
+
+    layout = recurse(array, index)
     if highlevel:
         return awkward1._util.wrap(layout, behavior)
     else:
