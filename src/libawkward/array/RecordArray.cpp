@@ -691,12 +691,12 @@ namespace awkward {
       RecordArray out(Identities::none(), parameters_, length(), istuple());
       return out.getitem_next(nexthead, nexttail, advanced);
     }
-    // else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
-    //   return getitem_next(*missing, tail, advanced);
-    // }
-    // else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
-    //   return getitem_next(*jagged, tail, advanced);
-    // }
+    else if (const SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      return Content::getitem_next(*missing, tail, advanced);
+    }
+    else if (const SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
+      return Content::getitem_next(*jagged, tail, advanced);
+    }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {

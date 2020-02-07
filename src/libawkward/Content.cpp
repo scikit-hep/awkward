@@ -226,11 +226,11 @@ namespace awkward {
     return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceMissing64& fields, const Slice& tail, const Index64& advanced) const {
+  const std::shared_ptr<Content> Content::getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("FIXME: getitem_next(SliceMissing64)");
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceJagged64& fields, const Slice& tail, const Index64& advanced) const {
+  const std::shared_ptr<Content> Content::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("FIXME: getitem_next(SliceJagged64)");
   }
 
