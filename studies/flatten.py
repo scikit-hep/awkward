@@ -907,9 +907,22 @@ def RegularArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
-        return NumpyArray.onedim([self.size] * len(self))
+        if len(self.content) % self.size != 0:
+            return self.getitem[0, len(self.content)*self.size]
+        else:
+            return self.content
     else:
-        return RegularArray(self.content.flatten(axis - 1), self.size)
+        count = [self.size]*len(self.content)
+        ## FIXME ccount = content_.get()->count64();
+        ccount = [self.content.size]*len(self.content)
+        offsets = [0]*(len(self.content) + 1)
+        for i in range(len(self.content)):
+            l = 0
+            for j in range(count[i]):
+                l += ccount[j + i*self.size]
+                offsets[i + 1] = l + self.offsets[i]
+
+        return ListOffsetArray(offsets, self.content.flatten(axis - 1))
 
 RegularArray.flatten = RegularArray_flatten
 
@@ -918,8 +931,31 @@ def ListArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
-        out = [self.stops[i] - self.starts[i] for i in range(len(self.starts))]
-        return NumpyArray.onedim(out)
+        lenstarts = len(self.starts)
+        lenarray = 0
+        for i in range(lenstarts):
+            start = self.starts[i] # self.startsoffset?
+            stop = self.stops[i] # self.stopsoffset?
+            if start < 0  or  stop < 0:
+                raise IndexError("all start and stop values must be non-negative")
+
+            length = stop - start
+            lenarray += length
+
+        indxarray = [0]*lenarray
+        at = 0
+        for i in range(lenstarts):
+            start = self.starts[i]
+            stop = self.stops[i]
+            if start < 0  or  stop < 0:
+                raise IndexError("all start and stop values must be non-negative")
+                length = stop - start
+                if length > 0:
+                    for l in range(length):
+                        indxarray[at] = start + l
+                        at += 1
+
+        return IndexedArray(indxarray, self.content)
     else:
         return ListArray(self.starts, self.stops, self.content.flatten(axis - 1))
 
@@ -930,10 +966,12 @@ def ListOffsetArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
-        out = [self.offsets[i + 1] - self.offsets[i] for i in range(len(self.offsets) - 1)]
-        return NumpyArray.onedim(out)
+        start = self.offsets[0]
+        stop = self.offsets[len(self.offsets) - 1]
+
+        return self.getitem[start:stop]
     else:
-        return ListOffsetArray(self.offsets, self.content.flatten(axis - 1))
+      return self.content.flatten(axis - 1)
 
 ListOffsetArray.flatten = ListOffsetArray_flatten
 
@@ -941,8 +979,23 @@ ListOffsetArray.flatten = ListOffsetArray_flatten
 def IndexedArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
+    if axis == 0:
+
+        nextcarry = [0]*len(self.index)
+        k = 0
+        for i in range(len(self.index)):
+            j = self.index[i] #FIXME self.indexoffset
+            if j < 0  or  j >= len(self.index):
+                raise IndexValue("index out of range")
+            else:
+                nextcarry[k] = j
+                k += 1
+
+#std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+#return next.get()->flatten(toaxis);
+        return IndexedArray(nextcarry, self.content)
     else:
-        return IndexedArray(self.index, self.content.flatten(axis))
+        return self.content.flatten(axis)
 
 IndexedArray.flatten = IndexedArray_flatten
 
@@ -950,8 +1003,28 @@ IndexedArray.flatten = IndexedArray_flatten
 def IndexedOptionArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
+    if axis == 0:
+        numnull = 0
+        for i in range(len(self.index)):
+            if self.index[self.indexoffset + i] < 0:
+                numnull = numnull
+
+        nextcarry = [0]*(len(self.index) - numnull)
+        k = 0
+        for i in range(len(self.index)):
+            j = self.index[self.indexoffset + i]
+            if j >= lencontent:
+                raise IndexError("index out of range")
+            elif j >= 0:
+                nextcarry[k] = j
+                k += 1
+
+    # FIXME:
+    # std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+    # return next.get()->flatten(toaxis);
+        return IndexedOptionArray(index, self.content)
     else:
-        return IndexedOptionArray(self.index, self.content.flatten(axis))
+        return self.content.flatten(axis)
 
 IndexedOptionArray.flatten = IndexedOptionArray_flatten
 
@@ -981,14 +1054,14 @@ UnionArray.flatten = UnionArray_flatten
 
 for i in range(10):
     print("flatten i =", i)
-    #array = Content.random()
-    array = NumpyArray.random()
+    array = Content.random()
+    #array = NumpyArray.random()
     for axis in range(5):
         print("axis =", axis)
         try:
             rowwise = flatten(array, axis)
             columnar = array.flatten(axis)
-            indexed = array.argsort(axis)
+            #indexed = array.argsort(axis)
         except IndexError:
             break
         columnar = list(columnar)
