@@ -621,27 +621,33 @@ namespace awkward {
     throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
   }
 
-  bool can_use_strides(const std::shared_ptr<SliceItem>& head, const Slice& tail) {
-    std::shared_ptr<SliceItem> nexthead = tail.head();
-    Slice nexttail = tail.tail();
+  bool getitem_too_general(const std::shared_ptr<SliceItem>& head, const Slice& tail) {
     if (head.get() == nullptr) {
+      return false;
+    }
+    else if (dynamic_cast<SliceMissing64*>(head.get())  ||  dynamic_cast<SliceJagged64*>(head.get())) {
       return true;
     }
-    else if (dynamic_cast<SliceAt*>(head.get())  ||
-             dynamic_cast<SliceRange*>(head.get())  ||
-             dynamic_cast<SliceEllipsis*>(head.get())  ||
-             dynamic_cast<SliceNewAxis*>(head.get())) {
-      return can_use_strides(nexthead, nexttail);
-    }
     else {
-      return false;
+      return getitem_too_general(tail.head(), tail.tail());
     }
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
-    assert(!isscalar());
+    if (isscalar()) {
+      throw std::runtime_error("cannot get-item on a scalar");
+    }
 
-    if (can_use_strides(where.head(), where.tail())  &&  !where.isadvanced()  &&  identities_.get() == nullptr) {
+    if (getitem_too_general(where.head(), where.tail())) {
+      if (ndim() == 1) {
+        return Content::getitem(where);
+      }
+      else {
+        return toRegularArray().get()->getitem(where);
+      }
+    }
+
+    else if (!where.isadvanced()  &&  identities_.get() == nullptr) {
       std::vector<ssize_t> nextshape = { 1 };
       nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
       std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };

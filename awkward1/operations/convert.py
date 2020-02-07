@@ -13,14 +13,14 @@ import numpy
 import awkward1._util
 import awkward1.layout
 
-def fromnumpy(array, highlevel=True, behavior=None):
+def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
     def recurse(array):
         if len(array.shape) == 0:
             return awkward1.layout.NumpyArray(array.reshape(1))
-        elif len(array.shape) == 1:
-            return awkward1.layout.NumpyArray(array)
-        else:
+        elif regulararray and len(array.shape) > 1:
             return awkward1.layout.RegularArray(recurse(array.reshape((-1,) + array.shape[2:])), array.shape[1])
+        else:
+            return awkward1.layout.NumpyArray(array)
     layout = recurse(array)
     if highlevel:
         return awkward1._util.wrap(layout, behavior)
