@@ -800,17 +800,77 @@ def count_strides(array):
 def compact_array(array, depth=-1):
     data_items = []
 
+    def recurse(array, depth):
+        if isinstance(array, Content) and array.__len__() > 0:
+            if depth != 0:
+                for it in range(array.__len__()):
+                    recurse(array.__getitem__(it), depth - 1)
+        else:
+            data_items.append(array)
+
+    recurse(array, depth)
+
+    return data_items
+
+def index_array(array, depth=-1):
+    indices = []
+    offset = array.offset
+
     def recurse(array, index, depth):
         if isinstance(array, Content) and array.__len__() > 0:
             if depth != 0:
                 for it in range(array.__len__()):
-                    recurse(array.__getitem__(it), it, depth - 1)
+                    index = array.offset + it
+                    recurse(array.__getitem__(it), index, depth - 1)
         else:
-            data_items.append(array)
+            indices.append(index)
 
-    recurse(array, 0, depth)
+    recurse(array, offset, depth)
 
-    return data_items
+    return indices
+
+def partition(tuple, begin, end):
+    pivot_idx = begin
+    for i in range(begin + 1, end + 1):
+        if tuple[i][0] <= tuple[begin][0]:
+            pivot_idx += 1
+            tuple[i], tuple[pivot_idx] = tuple[pivot_idx], tuple[i]
+    tuple[pivot_idx], tuple[begin] = tuple[begin], tuple[pivot_idx]
+    return pivot_idx
+
+def quick_sort_recursion(tuple, begin, end):
+    if begin >= end:
+        return
+    pivot_idx = partition(tuple, begin, end)
+    quick_sort_recursion(tuple, begin, pivot_idx - 1)
+    quick_sort_recursion(tuple, pivot_idx + 1, end)
+
+def quick_sort(tuple, begin = 0, end = None):
+    if end is None:
+        end = len(tuple) - 1
+
+    return quick_sort_recursion(tuple, begin, end)
+
+# Returns sorted indices
+def NumpyArray_argsort(self, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    else:
+        tuple = []
+        indices = index_array(self, len(self.shape))
+
+        for i in range(len(indices)): {
+            tuple.append((self.ptr[indices[i]], indices[i]))
+        }
+
+        sorted_tuple = quick_sort(tuple)
+        sorted_indices = []
+        for it in range(len(tuple)):
+            sorted_indices.append(tuple[it][1])
+
+        return NumpyArray.onedim(sorted_indices)
+
+NumpyArray.argsort = NumpyArray_argsort
 
 # NumpyArray
 def NumpyArray_flatten(self, axis=0):
@@ -824,6 +884,10 @@ def NumpyArray_flatten(self, axis=0):
 
         shape = self.shape[:axis] + [int(self.shape[axis])*int(self.shape[axis + 1])] + self.shape[axis + 2:]
         strides = self.strides[:axis] + self.strides[axis + 1:]
+
+        if len(shape) > 1:
+            # compact strides for a compact array
+            strides[0] = shape[-1]
 
         return NumpyArray(compact_ptr, shape, strides, 0)
 
@@ -924,9 +988,8 @@ for i in range(10):
         try:
             rowwise = flatten(array, axis)
             columnar = array.flatten(axis)
-            columnar.tostring_part("", "", "")
+            indexed = array.argsort(axis)
         except IndexError:
-            print("IndexError")
             break
         columnar = list(columnar)
         assert rowwise == columnar
