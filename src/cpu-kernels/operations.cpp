@@ -322,7 +322,7 @@ ERROR awkward_listarray64_compact_offsets64(int64_t* tooffsets, const int64_t* f
 
 template <typename C, typename T>
 ERROR awkward_listoffsetarray_compact_offsets(T* tooffsets, const C* fromoffsets, int64_t offsetsoffset, int64_t length) {
-  int64_t diff = (int64_t)fromoffsets[0];
+  int64_t diff = (int64_t)fromoffsets[offsetsoffset + 0];
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < length;  i++) {
     tooffsets[i + 1] = fromoffsets[offsetsoffset + i + 1] - diff;

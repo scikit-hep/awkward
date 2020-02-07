@@ -761,19 +761,19 @@ namespace awkward {
     int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
     std::shared_ptr<Content> next = content_.get()->getitem_range_nowrap(start, stop);
 
-    // if (start == 0) {
+    if (start == 0) {
       return std::make_shared<SliceJagged64>(offsets_, next.get()->asslice());
-    // }
-    // else {
-    //   Index64 offsets(offsets_.length());
-    //   struct Error err = awkward_listoffsetarray64_compact_offsets64(
-    //     offsets.ptr().get(),
-    //     offsets_.ptr().get(),
-    //     offsets_.offset(),
-    //     offsets_.length());
-    //   util::handle_error(err, classname(), identities_.get());
-    //   return std::make_shared<SliceJagged64>(offsets, next.get()->asslice());
-    // }
+    }
+    else {
+      Index64 offsets(offsets_.length());
+      struct Error err = awkward_listoffsetarray64_compact_offsets64(
+        offsets.ptr().get(),
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length());
+      util::handle_error(err, classname(), identities_.get());
+      return std::make_shared<SliceJagged64>(offsets, next.get()->asslice());
+    }
   }
 
   template <typename T>
