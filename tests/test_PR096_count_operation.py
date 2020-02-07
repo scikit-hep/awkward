@@ -149,8 +149,6 @@ def test_count_union_array():
     tags = awkward1.layout.Index8(numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
     index = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
     array = awkward1.layout.UnionArray8_32(tags, index, [content0, content1])
-    # print(awkward1.tolist(array))
-    # ['one', 'two', [1.1, 2.2, 3.3], [], 'three', [4.4, 5.5], 'five', 'four']
     assert awkward1.tolist(array.count(0)) == [3, 3, 3, 0, 5, 2, 4, 4]
     assert awkward1.tolist(array.count(-1)) == [3, 3, 3, 0, 5, 2, 4, 4]
 
@@ -204,7 +202,6 @@ def test_count_union_array():
     content03 = awkward1.layout.ListOffsetArray64(roffsets3, rcontent3)
     content3 = awkward1.layout.UnionArray8_32(tags3, index3, [content03])
     array3 = awkward1.layout.ListOffsetArray64(offsets3, content3)
-    print(awkward1.tolist(array3))
     assert awkward1.tolist(array3.count(0)) == [4, 28, 12, 19, 2, 8, 1, 16, 26, 32, 5, 60, 10, 2]
     assert awkward1.tolist(array3.count(1)) == [[2, 2, 22, 8],
     [8, 8, 15, 4, 15, 26, 2, 15, 4, 17, 15, 32, 26, 8, 1, 3, 22, 1, 2, 15, 3, 18, 14, 6, 14, 4, 1, 4],
