@@ -709,8 +709,8 @@ ak::Slice toslice(py::object obj) {
   return out;
 }
 
-py::class_<ak::Slice, std::shared_ptr<ak::Slice>> make_Slice(py::handle m, std::string name) {
-  return (py::class_<ak::Slice, std::shared_ptr<ak::Slice>>(m, name.c_str())
+py::class_<ak::Slice> make_Slice(py::handle m, std::string name) {
+  return (py::class_<ak::Slice>(m, name.c_str())
       .def(py::init([](py::object obj) {
         return toslice(obj);
       }))
