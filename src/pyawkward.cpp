@@ -584,7 +584,11 @@ void toslice_part(ak::Slice& slice, py::object obj) {
 
   else if (py::isinstance<py::iterable>(obj)) {
     std::shared_ptr<ak::Content> content(nullptr);
-    if (py::isinstance<ak::Content>(obj)) {
+
+    if (py::isinstance(obj, py::module::import("numpy").attr("ma").attr("MaskedArray"))) {
+      content = unbox_content(py::module::import("awkward1").attr("fromnumpy")(obj).attr("layout"));
+    }
+    else if (py::isinstance<ak::Content>(obj)) {
       content = unbox_content(obj);
     }
     else if (py::isinstance(obj, py::module::import("awkward1").attr("Array"))) {
