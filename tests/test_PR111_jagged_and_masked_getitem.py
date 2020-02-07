@@ -77,3 +77,10 @@ def test_missing():
     assert awkward1.tolist(regulararray[awkward1.Array([2, 1, 1, None, -1])]) == [[8.8, 9.9, 10.0, 11.1], [4.4, 5.5, 6.6, 7.7], [4.4, 5.5, 6.6, 7.7], None, [8.8, 9.9, 10.0, 11.1]]
     assert awkward1.tolist(regulararray[:, awkward1.Array([2, 1, 1, None, -1])]) == [[2.2, 1.1, 1.1, None, 3.3], [6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
     assert awkward1.tolist(regulararray[1:, awkward1.Array([2, 1, 1, None, -1])]) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999]))
+    offsets = awkward1.layout.Index64(numpy.array([0, 4, 8, 12], dtype=numpy.int64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+    assert awkward1.tolist(listoffsetarray) == [[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7], [8.8, 9.9, 10.0, 11.1]]
+    assert awkward1.tolist(listoffsetarray[:, awkward1.Array([2, 1, 1, None, -1])]) == [[2.2, 1.1, 1.1, None, 3.3], [6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    assert awkward1.tolist(listoffsetarray[1:, awkward1.Array([2, 1, 1, None, -1])]) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
