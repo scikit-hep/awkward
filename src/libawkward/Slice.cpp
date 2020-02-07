@@ -320,6 +320,11 @@ namespace awkward {
       , content_(content) { }
 
   template <typename T>
+  int64_t SliceMissingOf<T>::length() const {
+    return index_.length();
+  }
+
+  template <typename T>
   const IndexOf<T> SliceMissingOf<T>::index() const {
     return index_;
   }
@@ -383,6 +388,11 @@ namespace awkward {
   SliceJaggedOf<T>::SliceJaggedOf(const IndexOf<T>& offsets, const std::shared_ptr<SliceItem>& content)
       : offsets_(offsets)
       , content_(content) { }
+
+  template <typename T>
+  int64_t SliceJaggedOf<T>::length() const {
+    return offsets_.length() - 1;
+  }
 
   template <typename T>
   const IndexOf<T> SliceJaggedOf<T>::offsets() const {

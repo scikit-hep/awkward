@@ -114,6 +114,7 @@ namespace awkward {
   class SliceMissingOf: public SliceItem {
   public:
     SliceMissingOf(const IndexOf<T>& index, const std::shared_ptr<SliceItem>& content);
+    int64_t length() const;
     const IndexOf<T> index() const;
     const std::shared_ptr<SliceItem> content() const;
     const std::shared_ptr<SliceItem> shallow_copy() const override;
@@ -131,6 +132,7 @@ namespace awkward {
   class SliceJaggedOf: public SliceItem {
   public:
     SliceJaggedOf(const IndexOf<T>& offsets, const std::shared_ptr<SliceItem>& content);
+    int64_t length() const;
     const IndexOf<T> offsets() const;
     const std::shared_ptr<SliceItem> content() const;
     const std::shared_ptr<SliceItem> shallow_copy() const override;

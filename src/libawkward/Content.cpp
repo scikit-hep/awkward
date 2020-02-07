@@ -7,6 +7,7 @@
 #include "awkward/array/ListArray.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/UnionArray.h"
+#include "awkward/array/IndexedArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -227,7 +228,26 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: getitem_next(SliceMissing64)");
+    std::cout << "HERE" << std::endl;
+    std::cout << tostring() << std::endl;
+    std::cout << "slice missing " << missing.index().tostring() << std::endl;
+    std::cout << "slice content " << missing.content()->tostring() << std::endl;
+
+    std::shared_ptr<Content> next = getitem_next(missing.content(), tail, advanced);
+    std::cout << "next" << std::endl;
+    std::cout << next.get()->tostring() << std::endl;
+
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
+      std::shared_ptr<Content> out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), missing.index(), raw->content());
+
+      std::cout << "out" << std::endl;
+      std::cout << out.get()->tostring() << std::endl;
+
+      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, missing.length());
+    }
+    else {
+      throw std::runtime_error("SliceMissing did not terminate on a SliceArray?");
+    }
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
@@ -235,10 +255,21 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const {
+    // std::cout << "getitem_next_array_wrap shape";
+    // for (auto x : shape) {
+    //   std::cout << " " << x;
+    // }
+    // std::cout << std::endl;
+    // std::cout << outcontent.get()->tostring() << std::endl;
+
     std::shared_ptr<Content> out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), outcontent, (int64_t)shape[shape.size() - 1]);
     for (int64_t i = (int64_t)shape.size() - 2;  i >= 0;  i--) {
       out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, (int64_t)shape[(size_t)i]);
     }
+
+    // std::cout << "    ... out" << std::endl;
+    // std::cout << out.get()->tostring() << std::endl;
+
     return out;
   }
 
