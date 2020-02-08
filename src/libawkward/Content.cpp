@@ -232,13 +232,14 @@ namespace awkward {
 
     if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
       Index64 index(missing.index());
-      Index64 outindex(index.length()*raw->length());
+      Index64 outindex(index.length()*length());
+
       struct Error err = awkward_missing_repeat_64(
         outindex.ptr().get(),
         index.ptr().get(),
         index.offset(),
         index.length(),
-        raw->length(),
+        length(),
         raw->size());
       util::handle_error(err, classname(), nullptr);
 

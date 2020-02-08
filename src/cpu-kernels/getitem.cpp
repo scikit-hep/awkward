@@ -810,6 +810,7 @@ ERROR awkward_missing_repeat(T* outindex, const T* index, int64_t indexoffset, i
       outindex[i*indexlength + j] = base + (base >= 0 ? i*regularsize : 0);
     }
   }
+
   return success();
 }
 ERROR awkward_missing_repeat_64(int64_t* outindex, const int64_t* index, int64_t indexoffset, int64_t indexlength, int64_t repetitions, int64_t regularsize) {
