@@ -973,11 +973,6 @@ namespace awkward {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
     }
 
-    std::cout << "slicestarts  " << slicestarts.tostring() << std::endl;
-    std::cout << "slicestops   " << slicestops.tostring() << std::endl;
-    std::cout << "slicecontent " << slicecontent.tostring() << std::endl;
-    std::cout << tostring() << std::endl;
-
     int64_t carrylen;
     struct Error err1 = awkward_listarray_getitem_jagged_carrylen_64(
       &carrylen,
@@ -987,9 +982,6 @@ namespace awkward {
     util::handle_error(err1, classname(), identities_.get());
 
     Index64 sliceindex = slicecontent.index();
-
-    std::cout << "    -> " << sliceindex.tostring() << std::endl;
-
     Index64 outoffsets(slicestarts.length() + 1);
     Index64 nextcarry(carrylen);
     struct Error err2 = util::awkward_listarray_getitem_jagged_apply_64(
@@ -1008,10 +1000,8 @@ namespace awkward {
       content_.get()->length());
     util::handle_error(err2, classname(), nullptr);
 
-    std::cout << "outoffsets " << outoffsets.tostring() << std::endl;
-    std::cout << "nextcarry  " << nextcarry.tostring() << std::endl;
-
-    throw std::runtime_error("undefined operation: ListArray::getitem_next_jagged(array)");
+    std::shared_ptr<Content> outcontent = content_.get()->carry(nextcarry);
+    return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), outoffsets, outcontent);
   }
 
   template <typename T>
