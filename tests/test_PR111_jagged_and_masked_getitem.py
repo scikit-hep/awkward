@@ -161,3 +161,11 @@ def test_double_jagged():
 
     assert awkward1.tolist(regulararray[:, awkward1.Array([[2, 1, 0], [-1]])]) == [[[2, 1, 0], [5]], [[8, 7, 6], [13]]]
     assert awkward1.tolist(regulararray[1:, awkward1.Array([[2, 1, 0], [-1]])]) == [[[8, 7, 6], [13]]]
+
+def test_masked_jagged():
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]])
+    assert awkward1.tolist(array[awkward1.Array([[-1, -2], None, [], None, [-2, 0], [], [1]])]) == [[3.3, 2.2], None, [], None, [4.4, 4.4], [], [8.8]]
+
+def test_jagged_masked():
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]])
+    assert awkward1.tolist(array[awkward1.Array([[-1, None], [], [None, 0], [None], [1]])]) == [[3.3, None], [], [None, 4.4], [None], [8.8]]

@@ -1011,7 +1011,36 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
-    throw std::runtime_error("undefined operation: ListArray::getitem_next_jagged(missing)");
+    if (starts_.length() < slicestarts.length()) {
+      util::handle_error(failure("jagged slice length differs from array length", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+
+    Index64 missing = slicecontent.index();
+    Index64 smalloffsets(slicestarts.length() + 1);
+    Index64 largeoffsets(slicestarts.length() + 1);
+    struct Error err = awkward_listarray_getitem_jagged_shrink_64(
+      smalloffsets.ptr().get(),
+      largeoffsets.ptr().get(),
+      slicestarts.ptr().get(),
+      slicestarts.offset(),
+      slicestops.ptr().get(),
+      slicestops.offset(),
+      slicestarts.length(),
+      missing.ptr().get(),
+      missing.offset(),
+      missing.length());
+    util::handle_error(err, classname(), nullptr);
+
+    std::shared_ptr<Content> out = Content::getitem_next_jagged(util::make_starts(smalloffsets), util::make_stops(smalloffsets), slicecontent.content());
+
+    if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get())) {
+      std::shared_ptr<Content> content = raw->content();
+      std::shared_ptr<Content> indexedoptionarray = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), missing, content);
+      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), largeoffsets, indexedoptionarray);
+    }
+    else {
+      throw std::runtime_error(std::string("expected ListOffsetArray64 from ListArray::getitem_next_jagged, got ") + out.get()->classname());
+    }
   }
 
   template <typename T>

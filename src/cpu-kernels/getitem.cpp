@@ -851,6 +851,9 @@ ERROR awkward_listarray_getitem_jagged_apply(T* tooffsets, T* tocarry, const T* 
     T slicestop = slicestops[slicestopsoffset + i];
     tooffsets[i] = (T)k;
     if (slicestart != slicestop) {
+      if (slicestop < slicestart) {
+        return failure("jagged slice's stops[i] < starts[i]", i, kSliceNone);
+      }
       if (slicestop > sliceinnerlen) {
         return failure("jagged slice's offsets extend beyond its content", i, slicestop);
       }
@@ -887,6 +890,43 @@ ERROR awkward_listarrayU32_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* 
 }
 ERROR awkward_listarray64_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset, int64_t contentlen) {
   return awkward_listarray_getitem_jagged_apply<int64_t, int64_t>(tooffsets, tocarry, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, sliceindex, sliceindexoffset, sliceinnerlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, contentlen);
+}
+
+template <typename T>
+ERROR awkward_listarray_getitem_jagged_shrink(T* tosmalloffsets, T* tolargeoffsets, const T* slicestarts, int64_t slicestartsoffset, const T* slicestops, int64_t slicestopsoffset, int64_t length, const T* missing, int64_t missingoffset, int64_t missinglength) {
+  if (length == 0) {
+    tosmalloffsets[0] = 0;
+    tolargeoffsets[0] = 0;
+  }
+  else {
+    tosmalloffsets[0] = slicestarts[slicestartsoffset + 0];
+    tolargeoffsets[0] = slicestarts[slicestartsoffset + 0];
+  }
+  for (int64_t i = 0;  i < length;  i++) {
+    T slicestart = slicestarts[slicestartsoffset + i];
+    T slicestop = slicestops[slicestopsoffset + i];
+    if (slicestart != slicestop) {
+      if (slicestop < slicestart) {
+        return failure("jagged slice's stops[i] < starts[i]", i, kSliceNone);
+      }
+      if (slicestop > missinglength) {
+        return failure("jagged slice's offsets extend beyond its content", i, slicestop);
+      }
+      T smallcount = 0;
+      for (int64_t j = slicestart;  j < slicestop;  j++) {
+        smallcount += (missing[missingoffset + j] >= 0 ? 1 : 0);
+      }
+      tosmalloffsets[i + 1] = tosmalloffsets[i] + smallcount;
+    }
+    else {
+      tosmalloffsets[i + 1] = tosmalloffsets[i];
+    }
+    tolargeoffsets[i + 1] = tolargeoffsets[i] + (slicestop - slicestart);
+  }
+  return success();
+}
+ERROR awkward_listarray_getitem_jagged_shrink_64(int64_t* tosmalloffsets, int64_t* tolargeoffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t length, const int64_t* missing, int64_t missingoffset, int64_t missinglength) {
+  return awkward_listarray_getitem_jagged_shrink<int64_t>(tosmalloffsets, tolargeoffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, length, missing, missingoffset, missinglength);
 }
 
 template <typename C, typename T>
