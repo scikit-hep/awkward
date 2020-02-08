@@ -135,21 +135,6 @@ namespace awkward {
     return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
   }
 
-  const std::shared_ptr<Content> Content::getitem_next_jagged(const Index64& starts, const Index64& stops, const std::shared_ptr<SliceItem>& slicecontent) const {
-    if (SliceArray64* array = dynamic_cast<SliceArray64*>(slicecontent.get())) {
-      return getitem_next_jagged(starts, stops, *array);
-    }
-    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(slicecontent.get())) {
-      return getitem_next_jagged(starts, stops, *missing);
-    }
-    else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(slicecontent.get())) {
-      return getitem_next_jagged(starts, stops, *jagged);
-    }
-    else {
-      throw std::runtime_error("unexpected slice type for getitem_next_jagged");
-    }
-  }
-
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
     std::shared_ptr<Content> next = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), shallow_copy(), length());
 
@@ -199,6 +184,21 @@ namespace awkward {
     }
     else {
       throw std::runtime_error("unrecognized slice type");
+    }
+  }
+
+  const std::shared_ptr<Content> Content::getitem_next_jagged(const Index64& starts, const Index64& stops, const std::shared_ptr<SliceItem>& slicecontent) const {
+    if (SliceArray64* array = dynamic_cast<SliceArray64*>(slicecontent.get())) {
+      return getitem_next_jagged(starts, stops, *array);
+    }
+    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(slicecontent.get())) {
+      return getitem_next_jagged(starts, stops, *missing);
+    }
+    else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(slicecontent.get())) {
+      return getitem_next_jagged(starts, stops, *jagged);
+    }
+    else {
+      throw std::runtime_error("unexpected slice type for getitem_next_jagged");
     }
   }
 

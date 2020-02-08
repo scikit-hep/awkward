@@ -816,3 +816,17 @@ ERROR awkward_missing_repeat(T* outindex, const T* index, int64_t indexoffset, i
 ERROR awkward_missing_repeat_64(int64_t* outindex, const int64_t* index, int64_t indexoffset, int64_t indexlength, int64_t repetitions, int64_t regularsize) {
   return awkward_missing_repeat<int64_t>(outindex, index, indexoffset, indexlength, repetitions, regularsize);
 }
+
+template <typename T>
+ERROR awkward_regulararray_getitem_jagged_expand(T* multistarts, T* multistops, const T* singleoffsets, int64_t regularsize, int64_t regularlength) {
+  for (int64_t i = 0;  i < regularlength;  i++) {
+    for (int64_t j = 0;  j < regularsize;  j++) {
+      multistarts[i*regularsize + j] = singleoffsets[j];
+      multistops[i*regularsize + j] = singleoffsets[j + 1];
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_getitem_jagged_expand_64(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t regularsize, int64_t regularlength) {
+  return awkward_regulararray_getitem_jagged_expand<int64_t>(multistarts, multistops, singleoffsets, regularsize, regularlength);
+}

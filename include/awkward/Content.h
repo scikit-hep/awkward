@@ -42,6 +42,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const = 0;
     virtual const std::shared_ptr<Content> getitem(const Slice& where) const;
     virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const;
+    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& starts, const Index64& stops, const std::shared_ptr<SliceItem>& slicecontent) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const = 0;
     virtual const std::string purelist_parameter(const std::string& key) const = 0;
     virtual bool purelist_isregular() const = 0;
@@ -73,7 +74,6 @@ namespace awkward {
     bool parameter_equals(const std::string& key, const std::string& value) const;
     bool parameters_equal(const util::Parameters& other) const;
     const std::shared_ptr<Content> merge_as_union(const std::shared_ptr<Content>& other) const;
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& starts, const Index64& stops, const std::shared_ptr<SliceItem>& slicecontent) const;
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const = 0;

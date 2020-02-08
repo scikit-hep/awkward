@@ -148,9 +148,9 @@ def test_records_missing():
     assert awkward1.tolist(array[:, awkward1.Array([1, None, 2, -1])]) == [{"x": [1, None, 2, 3], "y": [1.1, None, 2.2, 3.3]}, {"x": [5, None, 6, 7], "y": [5.5, None, 6.6, 7.7]}, {"x": [9, None, 10, 11], "y": [9.9, None, 10.0, 11.1]}]
     assert awkward1.tolist(array[1:, awkward1.Array([1, None, 2, -1])]) == [{"x": [5, None, 6, 7], "y": [5.5, None, 6.6, 7.7]}, {"x": [9, None, 10, 11], "y": [9.9, None, 10.0, 11.1]}]
 
-# def test_jagged():
-#     array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]])
+def test_jagged():
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]])
 
-#     print(awkward1.tolist(array[awkward1.Array([[0, -1], [], [-1, 0], [-1], [1, 1, -2]])]))
+    print(awkward1.tolist(array[awkward1.Array([[0, -1], [], [-1, 0], [-1], [1, 1, -2, 0]])]))
 
-#     raise Exception
+    raise Exception

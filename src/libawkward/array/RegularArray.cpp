@@ -640,10 +640,26 @@ namespace awkward {
       throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
     }
 
-    std::cout << tostring() << std::endl;
-    std::cout << jagged.tostring() << std::endl;
+    if (jagged.length() != size_) {
+      throw std::invalid_argument(std::string("cannot fit jagged slice with length ") + std::to_string(jagged.length()) + std::string(" into ") + classname() + std::string(" of size ") + std::to_string(size_));
+    }
 
-    throw std::runtime_error("FIXME: RegularArray::getitem_next(jagged)");
+    int64_t regularlength = length();
+    Index64 singleoffsets = jagged.offsets();
+    Index64 multistarts(size_*regularlength);
+    Index64 multistops(size_*regularlength);
+    struct Error err = awkward_regulararray_getitem_jagged_expand_64(
+      multistarts.ptr().get(),
+      multistops.ptr().get(),
+      singleoffsets.ptr().get(),
+      size_,
+      regularlength);
+    util::handle_error(err, classname(), identities_.get());
+
+    std::shared_ptr<Content> down = content_.get()->getitem_next_jagged(multistarts, multistops, jagged.content());
+    std::shared_ptr<Content> next = down.get()->getitem_next(tail.head(), tail.tail(), advanced);
+
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), next, size_);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceArray64& slicecontent) const {

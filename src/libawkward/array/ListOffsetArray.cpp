@@ -364,6 +364,12 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& starts, const Index64& stops, const std::shared_ptr<SliceItem>& slicecontent) const {
+    std::shared_ptr<Content> listarray = std::make_shared<ListArrayOf<T>>(identities_, parameters_, make_starts(offsets_), make_stops(offsets_), content_);
+    return listarray.get()->getitem_next_jagged(starts, stops, slicecontent);
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::carry(const Index64& carry) const {
     IndexOf<T> starts = make_starts(offsets_);
     IndexOf<T> stops = make_stops(offsets_);

@@ -43,6 +43,7 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const override;
     const std::shared_ptr<Content> getitem_field(const std::string& key) const override;
     const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const override;
+    const std::shared_ptr<Content> getitem_next_jagged(const Index64& starts, const Index64& stops, const std::shared_ptr<SliceItem>& slicecontent) const override;
     const std::shared_ptr<Content> carry(const Index64& carry) const override;
     const std::string purelist_parameter(const std::string& key) const override;
     bool purelist_isregular() const override;
