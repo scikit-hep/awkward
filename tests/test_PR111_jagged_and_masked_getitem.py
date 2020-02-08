@@ -174,3 +174,14 @@ def test_masked_jagged():
 def test_jagged_masked():
     array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]])
     assert awkward1.tolist(array[awkward1.Array([[-1, None], [], [None, 0], [None], [1]])]) == [[3.3, None], [], [None, 4.4], [None], [8.8]]
+
+def test_regular_regular():
+    content = awkward1.layout.NumpyArray(numpy.arange(2*3*5))
+    regulararray1 = awkward1.layout.RegularArray(content, 5)
+    regulararray2 = awkward1.layout.RegularArray(regulararray1, 3)
+
+    assert awkward1.tolist(regulararray2[awkward1.Array([[[2], [1, -2], [-1, 2, 0]], [[-3], [-4, 3], [-5, -3, 4]]])]) == [[[2], [6, 8], [14, 12, 10]], [[17], [21, 23], [25, 27, 29]]]
+
+    assert awkward1.tolist(regulararray2[awkward1.Array([[[2], [1, -2], [-1, None, 0]], [[-3], [-4, 3], [-5, None, 4]]])]) == [[[2], [6, 8], [14, None, 10]], [[17], [21, 23], [25, None, 29]]]
+
+    # assert awkward1.tolist(regulararray2[awkward1.Array([[[2], None, [-1, None, 0]], [[-3], None, [-5, None, 4]]])]) == [[[2], None, [14, None, 10]], [[17], None, [25, None, 29]]]

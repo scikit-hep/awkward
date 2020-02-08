@@ -663,15 +663,18 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
-    throw std::runtime_error("undefined operation: RegularArray::getitem_next_jagged(array)");
+    std::shared_ptr<Content> self = toListOffsetArray64();
+    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
-    throw std::runtime_error("undefined operation: RegularArray::getitem_next_jagged(missing)");
+    std::shared_ptr<Content> self = toListOffsetArray64();
+    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
-    throw std::runtime_error("undefined operation: RegularArray::getitem_next_jagged(jagged)");
+    std::shared_ptr<Content> self = toListOffsetArray64();
+    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
   }
 
 }

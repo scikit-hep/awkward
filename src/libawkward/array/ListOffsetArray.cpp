@@ -918,17 +918,20 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
-    throw std::runtime_error("undefined operation: ListOffsetArray::getitem_next_jagged(array)");
+    ListArrayOf<T> listarray(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), content_);
+    return listarray.getitem_next_jagged(slicestarts, slicestops, slicecontent);
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
-    throw std::runtime_error("undefined operation: ListOffsetArray::getitem_next_jagged(missing)");
+    ListArrayOf<T> listarray(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), content_);
+    return listarray.getitem_next_jagged(slicestarts, slicestops, slicecontent);
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
-    throw std::runtime_error("undefined operation: ListOffsetArray::getitem_next_jagged(jagged)");
+    ListArrayOf<T> listarray(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), content_);
+    return listarray.getitem_next_jagged(slicestarts, slicestops, slicecontent);
   }
 
   template class ListOffsetArrayOf<int32_t>;
