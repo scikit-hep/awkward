@@ -692,7 +692,6 @@ namespace awkward {
       return out.getitem_next(nexthead, nexttail, advanced);
     }
     else if (const SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
-      // FIXME: need to test this case!
       return Content::getitem_next(*missing, tail, advanced);
     }
     else {

@@ -82,6 +82,15 @@ def test_missing():
     assert awkward1.tolist(regulararray[:, numpy.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False])]) == [[2.2, 1.1, 1.1, None, 3.3], [6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
     assert awkward1.tolist(regulararray[1:, numpy.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False])]) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
 
+    content = awkward1.layout.NumpyArray(numpy.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7], [8.8, 9.9, 10.0, 11.1]]))
+    assert awkward1.tolist(content[awkward1.Array([2, 1, 1, None, -1])]) == [[8.8, 9.9, 10.0, 11.1], [4.4, 5.5, 6.6, 7.7], [4.4, 5.5, 6.6, 7.7], None, [8.8, 9.9, 10.0, 11.1]]
+    assert awkward1.tolist(content[:, awkward1.Array([2, 1, 1, None, -1])]) == [[2.2, 1.1, 1.1, None, 3.3], [6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    assert awkward1.tolist(content[1:, awkward1.Array([2, 1, 1, None, -1])]) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+
+    assert awkward1.tolist(content[numpy.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False])]) == [[8.8, 9.9, 10.0, 11.1], [4.4, 5.5, 6.6, 7.7], [4.4, 5.5, 6.6, 7.7], None, [8.8, 9.9, 10.0, 11.1]]
+    assert awkward1.tolist(content[:, numpy.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False])]) == [[2.2, 1.1, 1.1, None, 3.3], [6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    assert awkward1.tolist(content[1:, numpy.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False])]) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999]))
     offsets = awkward1.layout.Index64(numpy.array([0, 4, 8, 12], dtype=numpy.int64))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
@@ -107,3 +116,34 @@ def test_bool_missing():
                         mask = [x1, x2, x3, x4, x5]
                         expected = [m if m is None else x for x, m in zip(data, mask) if m is not False]
                         assert awkward1.tolist(array[awkward1.Array(mask)]) == expected
+
+def test_bool_missing2():
+    array = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    assert awkward1.tolist(array[awkward1.Array([3, 6, None, None, -2, 6])]) == [3.3, 6.6, None, None, 8.8, 6.6]
+
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999]))
+    regulararray = awkward1.layout.RegularArray(content, 4)
+    assert awkward1.tolist(regulararray) == [[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7], [8.8, 9.9, 10.0, 11.1]]
+    assert awkward1.tolist(regulararray[:, awkward1.Array([True, None, False, True])]) == [[0.0, None, 3.3], [4.4, None, 7.7], [8.8, None, 11.1]]
+    assert awkward1.tolist(regulararray[1:, awkward1.Array([True, None, False, True])]) == [[4.4, None, 7.7], [8.8, None, 11.1]]
+
+    content = awkward1.layout.NumpyArray(numpy.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7], [8.8, 9.9, 10.0, 11.1]]))
+    assert awkward1.tolist(content[:, awkward1.Array([True, None, False, True])]) == [[0.0, None, 3.3], [4.4, None, 7.7], [8.8, None, 11.1]]
+    assert awkward1.tolist(content[1:, awkward1.Array([True, None, False, True])]) == [[4.4, None, 7.7], [8.8, None, 11.1]]
+
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999]))
+    offsets = awkward1.layout.Index64(numpy.array([0, 4, 8, 12], dtype=numpy.int64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+    assert awkward1.tolist(listoffsetarray[:, awkward1.Array([True, None, False, True])]) == [[0.0, None, 3.3], [4.4, None, 7.7], [8.8, None, 11.1]]
+    assert awkward1.tolist(listoffsetarray[1:, awkward1.Array([True, None, False, True])]) == [[4.4, None, 7.7], [8.8, None, 11.1]]
+
+def test_records_missing():
+    array = awkward1.Array([{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}, {"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}, {"x": 6, "y": 6.6}, {"x": 7, "y": 7.7}, {"x": 8, "y": 8.8}, {"x": 9, "y": 9.9}])
+    assert awkward1.tolist(array[awkward1.Array([3, 1, None, 1, 7])]) == [{"x": 3, "y": 3.3}, {"x": 1, "y": 1.1}, None, {"x": 1, "y": 1.1}, {"x": 7, "y": 7.7}]
+
+    array = awkward1.Array([[{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}, {"x": 6, "y": 6.6}, {"x": 7, "y": 7.7}, {"x": 8, "y": 8.8}, {"x": 9, "y": 9.9}]])
+    assert awkward1.tolist(array[:, awkward1.Array([1, None, 2, -1])]) == [[{"x": 1, "y": 1.1}, None, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [{"x": 5, "y": 5.5}, None, {"x": 6, "y": 6.6}, {"x": 9, "y": 9.9}]]
+
+    array = awkward1.Array([{"x": [0, 1, 2, 3], "y": [0.0, 1.1, 2.2, 3.3]}, {"x": [4, 5, 6, 7], "y": [4.4, 5.5, 6.6, 7.7]}, {"x": [8, 9, 10, 11], "y": [8.8, 9.9, 10.0, 11.1]}])
+    assert awkward1.tolist(array[:, awkward1.Array([1, None, 2, -1])]) == [{"x": [1, None, 2, 3], "y": [1.1, None, 2.2, 3.3]}, {"x": [5, None, 6, 7], "y": [5.5, None, 6.6, 7.7]}, {"x": [9, None, 10, 11], "y": [9.9, None, 10.0, 11.1]}]
+    assert awkward1.tolist(array[1:, awkward1.Array([1, None, 2, -1])]) == [{"x": [5, None, 6, 7], "y": [5.5, None, 6.6, 7.7]}, {"x": [9, None, 10, 11], "y": [9.9, None, 10.0, 11.1]}]

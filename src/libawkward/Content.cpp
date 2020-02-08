@@ -8,6 +8,7 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/IndexedArray.h"
+#include "awkward/array/RecordArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -227,28 +228,52 @@ namespace awkward {
     return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
   }
 
+  const std::shared_ptr<Content> getitem_next_regular_missing(const SliceMissing64& missing, const Slice& tail, const Index64& advanced, const RegularArray* raw, int64_t length, const std::string& classname) {
+    Index64 index(missing.index());
+    Index64 outindex(index.length()*length);
+
+    struct Error err = awkward_missing_repeat_64(
+      outindex.ptr().get(),
+      index.ptr().get(),
+      index.offset(),
+      index.length(),
+      length,
+      raw->size());
+    util::handle_error(err, classname, nullptr);
+
+    std::shared_ptr<Content> out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, raw->content());
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, index.length());
+  }
+
   const std::shared_ptr<Content> Content::getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const {
+    if (advanced.length() != 0) {
+      throw std::invalid_argument("cannot mix missing values in slice with NumPy-style advanced indexing");
+    }
+
     std::shared_ptr<Content> next = getitem_next(missing.content(), tail, advanced);
 
     if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
-      Index64 index(missing.index());
-      Index64 outindex(index.length()*length());
+      return getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname());
+    }
 
-      struct Error err = awkward_missing_repeat_64(
-        outindex.ptr().get(),
-        index.ptr().get(),
-        index.offset(),
-        index.length(),
-        length(),
-        raw->size());
-      util::handle_error(err, classname(), nullptr);
-
-      std::shared_ptr<Content> out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, raw->content());
-      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, index.length());
+    else if (RecordArray* rec = dynamic_cast<RecordArray*>(next.get())) {
+      if (rec->numfields() == 0) {
+        return next;
+      }
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : rec->contents()) {
+        if (RegularArray* raw = dynamic_cast<RegularArray*>(content.get())) {
+          contents.push_back(getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname()));
+        }
+        else {
+          throw std::runtime_error(std::string("FIXME: unhandled case of SliceMissing with RecordArray containing\n") + content.get()->tostring());
+        }
+      }
+      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, rec->recordlookup());
     }
 
     else {
-      throw std::runtime_error("SliceMissing did not terminate on a SliceArray?");
+      throw std::runtime_error(std::string("FIXME: unhandled case of SliceMissing with\n") + next.get()->tostring());
     }
   }
 

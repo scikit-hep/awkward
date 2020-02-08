@@ -1632,7 +1632,7 @@ namespace awkward {
       throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field names because it has no fields"));
     }
     else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
-      throw std::runtime_error("FIXME: NumpyArray::getitem_next(missing)");
+      throw std::runtime_error("undefined operation: NumpyArray::getitem_next(missing) (defer to Content::getitem_next(missing))");
     }
     else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
       throw std::runtime_error("FIXME: NumpyArray::getitem_next(jagged)");
