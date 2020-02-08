@@ -692,10 +692,8 @@ namespace awkward {
       return out.getitem_next(nexthead, nexttail, advanced);
     }
     else if (const SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      // FIXME: need to test this case!
       return Content::getitem_next(*missing, tail, advanced);
-    }
-    else if (const SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
-      return Content::getitem_next(*jagged, tail, advanced);
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
@@ -733,6 +731,10 @@ namespace awkward {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
+  }
+
+  const std::shared_ptr<Content> RecordArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::invalid_argument(std::string("undefined operation: RecordArray::getitem_next(jagged)"));
   }
 
 }

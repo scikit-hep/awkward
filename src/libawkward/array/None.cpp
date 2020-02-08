@@ -158,23 +158,27 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> None::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: None::getitem_next(SliceAt)");
+    throw std::runtime_error("undefined operation: None::getitem_next(at)");
   }
 
   const std::shared_ptr<Content> None::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: None::getitem_next(SliceRange)");
+    throw std::runtime_error("undefined operation: None::getitem_next(range)");
   }
 
   const std::shared_ptr<Content> None::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: None::getitem_next(SliceArray64)");
+    throw std::runtime_error("undefined operation: None::getitem_next(array)");
   }
 
   const std::shared_ptr<Content> None::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: None::getitem_next(SliceField)");
+    throw std::runtime_error("undefined operation: None::getitem_next(field)");
   }
 
   const std::shared_ptr<Content> None::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: None::getitem_next(SliceFields)");
+    throw std::runtime_error("undefined operation: None::getitem_next(fields)");
+  }
+
+  const std::shared_ptr<Content> None::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("undefined operation: None::getitem_next(jagged)");
   }
 
   const std::shared_ptr<Content> none = std::make_shared<None>();

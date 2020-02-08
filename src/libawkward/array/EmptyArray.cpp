@@ -198,11 +198,15 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
-    throw std::invalid_argument(field.tostring() + std::string(" is not a valid slice type for ") + classname());
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a field name because it has no fields"));
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
-    throw std::invalid_argument(fields.tostring() + std::string(" is not a valid slice type for ") + classname());
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field names because it has no fields"));
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a jagged array because it is one-dimensional"));
   }
 
 }

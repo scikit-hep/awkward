@@ -955,6 +955,11 @@ namespace awkward {
     }
   }
 
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("FIXME: ListArray::getitem_next(jagged)");
+  }
+
   template class ListArrayOf<int32_t>;
   template class ListArrayOf<uint32_t>;
   template class ListArrayOf<int64_t>;

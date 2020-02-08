@@ -635,4 +635,8 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> RegularArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("FIXME: RegularArray::getitem_next(jagged)");
+  }
+
 }

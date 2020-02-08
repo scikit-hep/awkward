@@ -599,7 +599,7 @@ namespace awkward {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
-    else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())) {
+    else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())  ||  dynamic_cast<SliceJagged64*>(head.get())) {
       std::vector<std::shared_ptr<Content>> outcontents;
       for (int64_t i = 0;  i < numcontents();  i++) {
         std::shared_ptr<Content> projection = project(i);
@@ -622,9 +622,6 @@ namespace awkward {
     }
     else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
       return Content::getitem_next(*missing, tail, advanced);
-    }
-    else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
-      return Content::getitem_next(*jagged, tail, advanced);
     }
     else {
       throw std::runtime_error("unrecognized slice type");
@@ -1074,17 +1071,22 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: UnionArray::getitem_next(SliceAt)");
+    throw std::runtime_error("undefined operation: UnionArray::getitem_next(at)");
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: UnionArray::getitem_next(SliceRange)");
+    throw std::runtime_error("undefined operation: UnionArray::getitem_next(range)");
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: UnionArray::getitem_next(SliceArray64)");
+    throw std::runtime_error("undefined operation: UnionArray::getitem_next(array)");
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("undefined operation: UnionArray::getitem_next(jagged)");
   }
 
   template class UnionArrayOf<int8_t, int32_t>;

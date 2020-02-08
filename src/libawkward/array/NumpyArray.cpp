@@ -1374,23 +1374,27 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("NumpyArray has its own getitem_next system");
+    throw std::runtime_error("undefined operation: NumpyArray::getitem_next(at) (without 'length', 'stride', and 'first')");
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("NumpyArray has its own getitem_next system");
+    throw std::runtime_error("undefined operation: NumpyArray::getitem_next(range) (without 'length', 'stride', and 'first')");
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("NumpyArray has its own getitem_next system");
+    throw std::runtime_error("undefined operation: NumpyArray::getitem_next(array) (without 'length', 'stride', and 'first')");
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("NumpyArray has its own getitem_next system");
+    throw std::runtime_error("undefined operation: NumpyArray::getitem_next(field) (without 'length', 'stride', and 'first')");
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("NumpyArray has its own getitem_next system");
+    throw std::runtime_error("undefined operation: NumpyArray::getitem_next(fields) (without 'length', 'stride', and 'first')");
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a jagged array because it is one-dimensional"));
   }
 
   bool NumpyArray::iscontiguous() const {
@@ -1622,16 +1626,16 @@ namespace awkward {
       return getitem_next(*array, tail, carry, advanced, length, stride, first);
     }
     else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
-      throw std::invalid_argument(field->tostring() + std::string(" is not a valid slice type for ") + classname());
+      throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a field name because it has no fields"));
     }
     else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
-      throw std::invalid_argument(fields->tostring() + std::string(" is not a valid slice type for ") + classname());
+      throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field names because it has no fields"));
     }
     else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
-      throw std::invalid_argument(missing->tostring() + std::string(" is not a valid slice type for ") + classname());
+      throw std::runtime_error("FIXME: NumpyArray::getitem_next(missing)");
     }
     else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
-      throw std::invalid_argument(jagged->tostring() + std::string(" is not a valid slice type for ") + classname());
+      throw std::runtime_error("FIXME: NumpyArray::getitem_next(jagged)");
     }
     else {
       throw std::runtime_error("unrecognized slice item type");

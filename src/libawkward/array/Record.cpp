@@ -286,4 +286,8 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::getitem_next(fields)");
   }
 
+  const std::shared_ptr<Content> Record::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("undefined operation: Record::getitem_next(jagged)");
+  }
+
 }
