@@ -92,10 +92,28 @@ def test_missing():
     assert awkward1.tolist(listoffsetarray[:, numpy.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False])]) == [[2.2, 1.1, 1.1, None, 3.3], [6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
     assert awkward1.tolist(listoffsetarray[1:, numpy.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False])]) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
 
-# def test_bool_missing():
-#     array = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+def test_bool_missing():
+    data = [1.1, 2.2, 3.3, 4.4, 5.5]
+    array = awkward1.layout.NumpyArray(numpy.array(data))
 
-#     print(awkward1.layout.slice_tostring(awkward1.Array([True, False, None, True, False])))
+    assert awkward1.layout.slice_tostring(awkward1.Array([True, False, None, True, False])) == "[missing([0, -1, 1], array([0, 3]))]"
 
-#     # print(awkward1.tolist(array))
-#     raise Exception
+    print(awkward1.layout.slice_tostring(awkward1.Array([None, None, None])))
+
+    # for x1 in [True, False, None]:
+    #     for x2 in [True, False, None]:
+    #         for x3 in [True, False, None]:
+    #             for x4 in [True, False, None]:
+    #                 for x5 in [True, False, None]:
+    #                     mask = [x1, x2, x3, x4, x5]
+    #                     expected = [m if m is None else x for x, m in zip(data, mask) if m is not False]
+    #                     actual = awkward1.tolist(array[awkward1.Array(mask)])
+    #                     print(mask)
+    #                     print(expected)
+    #                     print(actual)
+    #                     print()
+    #                     if expected != actual:
+    #                         raise Exception
+
+    # assert awkward1.tolist(array[awkward1.Array([True, False, False, True, True])]) == [1.1, 4.4, 5.5]
+    raise Exception

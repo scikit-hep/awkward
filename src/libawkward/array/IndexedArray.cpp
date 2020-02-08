@@ -984,22 +984,26 @@ namespace awkward {
 
       std::shared_ptr<SliceItem> slicecontent = next.get()->asslice();
       if (SliceArray64* raw = dynamic_cast<SliceArray64*>(slicecontent.get())) {
-        Index64 nonzero(raw->index());
-        Index64 adjustedindex(nonzero.length() + numnull);
-        struct Error err3 = awkward_indexedarray_getitem_adjust_outindex_64(
-          adjustedindex.ptr().get(),
-          outindex.ptr().get(),
-          outindex.offset(),
-          outindex.length(),
-          nonzero.ptr().get(),
-          nonzero.offset(),
-          nonzero.length());
-        util::handle_error(err3, classname(), nullptr);
-        return std::make_shared<SliceMissing64>(adjustedindex, slicecontent);
+        if (raw->frombool()) {
+          Index64 nonzero(raw->index());
+          Index64 adjustedindex(nonzero.length() + numnull);
+          Index64 adjustednonzero(nonzero.length());
+          struct Error err3 = awkward_indexedarray_getitem_adjust_outindex_64(
+            adjustedindex.ptr().get(),
+            adjustednonzero.ptr().get(),
+            outindex.ptr().get(),
+            outindex.offset(),
+            outindex.length(),
+            nonzero.ptr().get(),
+            nonzero.offset(),
+            nonzero.length());
+          util::handle_error(err3, classname(), nullptr);
+
+          std::shared_ptr<SliceItem> outcontent = std::make_shared<SliceArray64>(adjustednonzero, raw->shape(), raw->strides(), true);
+          return std::make_shared<SliceMissing64>(adjustedindex, outcontent);
+        }
       }
-      else {
-        return std::make_shared<SliceMissing64>(outindex, slicecontent);
-      }
+      return std::make_shared<SliceMissing64>(outindex, slicecontent);
     }
     else {
       return project().get()->asslice();
