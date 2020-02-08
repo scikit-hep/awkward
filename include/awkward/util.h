@@ -12,8 +12,15 @@
 
 namespace awkward {
   class Identities;
+  template <typename T>
+  class IndexOf;
 
   namespace util {
+    template <typename T>
+    IndexOf<T> make_starts(const IndexOf<T>& offsets);
+    template <typename T>
+    IndexOf<T> make_stops(const IndexOf<T>& offsets);
+
     typedef std::vector<std::string> RecordLookup;
     std::shared_ptr<RecordLookup> init_recordlookup(int64_t numfields);
     int64_t fieldindex(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);
@@ -129,19 +136,21 @@ namespace awkward {
     template <typename T>
     ERROR awkward_listarray_broadcast_tooffsets64(int64_t* tocarry, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t offsetslength, const T* fromstarts, int64_t startsoffset, const T* fromstops, int64_t stopsoffset, int64_t lencontent);
     template <typename T>
-    Error awkward_listoffsetarray_toRegularArray(int64_t* size, const T* fromoffsets, int64_t offsetsoffset, int64_t offsetslength);
+    ERROR awkward_listoffsetarray_toRegularArray(int64_t* size, const T* fromoffsets, int64_t offsetsoffset, int64_t offsetslength);
     template <typename T, typename I>
-    Error awkward_unionarray_simplify8_32_to8_64(int8_t* totags, int64_t* toindex, const T* outertags, int64_t outertagsoffset, const I* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base);
+    ERROR awkward_unionarray_simplify8_32_to8_64(int8_t* totags, int64_t* toindex, const T* outertags, int64_t outertagsoffset, const I* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base);
     template <typename T, typename I>
-    Error awkward_unionarray_simplify8_U32_to8_64(int8_t* totags, int64_t* toindex, const T* outertags, int64_t outertagsoffset, const I* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const uint32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base);
+    ERROR awkward_unionarray_simplify8_U32_to8_64(int8_t* totags, int64_t* toindex, const T* outertags, int64_t outertagsoffset, const I* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const uint32_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base);
     template <typename T, typename I>
-    Error awkward_unionarray_simplify8_64_to8_64(int8_t* totags, int64_t* toindex, const T* outertags, int64_t outertagsoffset, const I* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int64_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base);
+    ERROR awkward_unionarray_simplify8_64_to8_64(int8_t* totags, int64_t* toindex, const T* outertags, int64_t outertagsoffset, const I* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int64_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base);
     template <typename T, typename I>
-    Error awkward_unionarray_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const T* fromtags, int64_t fromtagsoffset, const I* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
+    ERROR awkward_unionarray_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const T* fromtags, int64_t fromtagsoffset, const I* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
 
     template <typename T>
-    Error awkward_listarray_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, const int64_t* slicestops, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset, int64_t contentlen);
+    ERROR awkward_listarray_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset, int64_t contentlen);
 
+    template <typename T>
+    ERROR awkward_listarray_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset);
   }
 }
 

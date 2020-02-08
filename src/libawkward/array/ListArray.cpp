@@ -967,7 +967,7 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
     if (starts_.length() < slicestarts.length()) {
-      throw std::runtime_error("ListArray::getitem_next_jagged slicestarts does not fit ListArray");
+      util::handle_error(failure("jagged slice length differs from array length", kSliceNone, kSliceNone), classname(), identities_.get());
     }
     if (stops_.length() < starts_.length()) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
@@ -977,18 +977,22 @@ namespace awkward {
     struct Error err1 = awkward_listarray_getitem_jagged_carrylen_64(
       &carrylen,
       slicestarts.ptr().get(),
+      slicestarts.offset(),
       slicestops.ptr().get(),
+      slicestops.offset(),
       slicestarts.length());
     util::handle_error(err1, classname(), identities_.get());
 
     Index64 sliceindex = slicecontent.index();
     Index64 outoffsets(slicestarts.length() + 1);
     Index64 nextcarry(carrylen);
-    struct Error err2 = util::awkward_listarray_getitem_jagged_apply_64(
+    struct Error err2 = util::awkward_listarray_getitem_jagged_apply_64<T>(
       outoffsets.ptr().get(),
       nextcarry.ptr().get(),
       slicestarts.ptr().get(),
+      slicestarts.offset(),
       slicestops.ptr().get(),
+      slicestops.offset(),
       slicestarts.length(),
       sliceindex.ptr().get(),
       sliceindex.offset(),
@@ -1001,6 +1005,7 @@ namespace awkward {
     util::handle_error(err2, classname(), nullptr);
 
     std::shared_ptr<Content> outcontent = content_.get()->carry(nextcarry);
+
     return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), outoffsets, outcontent);
   }
 
@@ -1011,7 +1016,28 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
-    throw std::runtime_error("undefined operation: ListArray::getitem_next_jagged(jagged)");
+    if (starts_.length() < slicestarts.length()) {
+      util::handle_error(failure("jagged slice length differs from array length", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+
+    Index64 outoffsets(slicestarts.length() + 1);
+    struct Error err = util::awkward_listarray_getitem_jagged_descend_64<T>(
+      outoffsets.ptr().get(),
+      slicestarts.ptr().get(),
+      slicestarts.offset(),
+      slicestops.ptr().get(),
+      slicestops.offset(),
+      slicestarts.length(),
+      starts_.ptr().get(),
+      starts_.offset(),
+      stops_.ptr().get(),
+      stops_.offset());
+    util::handle_error(err, classname(), identities_.get());
+
+    Index64 sliceoffsets = slicecontent.offsets();
+    std::shared_ptr<Content> outcontent = content_.get()->getitem_next_jagged(util::make_starts(sliceoffsets), util::make_stops(sliceoffsets), slicecontent.content());
+
+    return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), outoffsets, outcontent);
   }
 
   template class ListArrayOf<int32_t>;

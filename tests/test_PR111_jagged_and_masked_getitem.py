@@ -151,3 +151,7 @@ def test_records_missing():
 def test_jagged():
     array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]])
     assert awkward1.tolist(array[awkward1.Array([[0, -1], [], [-1, 0], [-1], [1, 1, -2, 0]])]) == [[1.1, 3.3], [], [5.5, 4.4], [6.6], [8.8, 8.8, 8.8, 7.7]]
+
+def test_double_jagged():
+    array = awkward1.Array([[[0, 1, 2, 3], [4, 5]], [[6, 7, 8], [9, 10, 11, 12, 13]]])
+    assert awkward1.tolist(array[awkward1.Array([[[2, 1, 0], [-1]], [[-1, -2, -3], [2, 1, 1, 3]]])]) == [[[2, 1, 0], [5]], [[8, 7, 6], [11, 10, 10, 12]]]

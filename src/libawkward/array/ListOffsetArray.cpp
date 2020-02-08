@@ -21,16 +21,6 @@
 
 namespace awkward {
   template <typename T>
-  IndexOf<T> make_starts(const IndexOf<T>& offsets) {
-    return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
-  }
-
-  template <typename T>
-  IndexOf<T> make_stops(const IndexOf<T>& offsets) {
-    return IndexOf<T>(offsets.ptr(), offsets.offset() + 1, offsets.length() - 1);
-  }
-
-  template <typename T>
   ListOffsetArrayOf<T>::ListOffsetArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content)
       : Content(identities, parameters)
       , offsets_(offsets)
@@ -38,12 +28,12 @@ namespace awkward {
 
   template <typename T>
   const IndexOf<T> ListOffsetArrayOf<T>::starts() const {
-    return make_starts(offsets_);
+    return util::make_starts(offsets_);
   }
 
   template <typename T>
   const IndexOf<T> ListOffsetArrayOf<T>::stops() const {
-    return make_stops(offsets_);
+    return util::make_stops(offsets_);
   }
 
   template <typename T>
@@ -79,8 +69,8 @@ namespace awkward {
       throw std::invalid_argument(std::string("cannot broadcast ListOffsetArray of length ") + std::to_string(offsets_.length() - 1) + (" to length ") + std::to_string(offsets.length() - 1));
     }
 
-    IndexOf<T> starts = make_starts(offsets_);
-    IndexOf<T> stops = make_stops(offsets_);
+    IndexOf<T> starts = util::make_starts(offsets_);
+    IndexOf<T> stops = util::make_stops(offsets_);
 
     int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
     Index64 nextcarry(carrylen);
@@ -365,14 +355,14 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent) const {
-    std::shared_ptr<Content> listarray = std::make_shared<ListArrayOf<T>>(identities_, parameters_, make_starts(offsets_), make_stops(offsets_), content_);
+    std::shared_ptr<Content> listarray = std::make_shared<ListArrayOf<T>>(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), content_);
     return listarray.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::carry(const Index64& carry) const {
-    IndexOf<T> starts = make_starts(offsets_);
-    IndexOf<T> stops = make_stops(offsets_);
+    IndexOf<T> starts = util::make_starts(offsets_);
+    IndexOf<T> stops = util::make_stops(offsets_);
     IndexOf<T> nextstarts(carry.length());
     IndexOf<T> nextstops(carry.length());
     struct Error err = util::awkward_listarray_getitem_carry_64<T>(
@@ -582,8 +572,8 @@ namespace awkward {
     Index64 starts(mylength + theirlength);
     Index64 stops(mylength + theirlength);
 
-    IndexOf<T> self_starts = make_starts(offsets_);
-    IndexOf<T> self_stops = make_stops(offsets_);
+    IndexOf<T> self_starts = util::make_starts(offsets_);
+    IndexOf<T> self_stops = util::make_stops(offsets_);
 
     if (std::is_same<T, int32_t>::value) {
       struct Error err = awkward_listarray_fill_to64_from32(
@@ -791,8 +781,8 @@ namespace awkward {
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     assert(advanced.length() == 0);
     int64_t lenstarts = offsets_.length() - 1;
-    IndexOf<T> starts = make_starts(offsets_);
-    IndexOf<T> stops = make_stops(offsets_);
+    IndexOf<T> starts = util::make_starts(offsets_);
+    IndexOf<T> stops = util::make_stops(offsets_);
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     Index64 nextcarry(lenstarts);
@@ -812,8 +802,8 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = offsets_.length() - 1;
-    IndexOf<T> starts = make_starts(offsets_);
-    IndexOf<T> stops = make_stops(offsets_);
+    IndexOf<T> starts = util::make_starts(offsets_);
+    IndexOf<T> stops = util::make_stops(offsets_);
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     int64_t start = range.start();
@@ -876,8 +866,8 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = offsets_.length() - 1;
-    IndexOf<T> starts = make_starts(offsets_);
-    IndexOf<T> stops = make_stops(offsets_);
+    IndexOf<T> starts = util::make_starts(offsets_);
+    IndexOf<T> stops = util::make_stops(offsets_);
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     Index64 flathead = array.ravel();
