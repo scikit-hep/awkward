@@ -206,7 +206,22 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
-    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a jagged array because it is one-dimensional"));
+    if (advanced.length() != 0) {
+      throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
+    }
+    throw std::runtime_error("FIXME: EmptyArray::getitem_next(jagged)");
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceArray64& slicecontent) const {
+    throw std::runtime_error("undefined operation: EmptyArray::getitem_next_jagged(array)");
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceMissing64& slicecontent) const {
+    throw std::runtime_error("undefined operation: EmptyArray::getitem_next_jagged(missing)");
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceJagged64& slicecontent) const {
+    throw std::runtime_error("undefined operation: EmptyArray::getitem_next_jagged(jagged)");
   }
 
 }

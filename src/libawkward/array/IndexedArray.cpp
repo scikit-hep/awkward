@@ -1027,6 +1027,21 @@ namespace awkward {
     throw std::runtime_error("undefined operation: IndexedArray::getitem_next(jagged)");
   }
 
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceArray64& slicecontent) const {
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next_jagged(array)");
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceMissing64& slicecontent) const {
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next_jagged(missing)");
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceJagged64& slicecontent) const {
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next_jagged(jagged)");
+  }
+
   template class IndexedArrayOf<int32_t, false>;
   template class IndexedArrayOf<uint32_t, false>;
   template class IndexedArrayOf<int64_t, false>;

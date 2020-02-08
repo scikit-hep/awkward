@@ -73,6 +73,7 @@ namespace awkward {
     bool parameter_equals(const std::string& key, const std::string& value) const;
     bool parameters_equal(const util::Parameters& other) const;
     const std::shared_ptr<Content> merge_as_union(const std::shared_ptr<Content>& other) const;
+    const std::shared_ptr<Content> getitem_next_jagged(const Index64& starts, const Index64& stops, const std::shared_ptr<SliceItem>& slicecontent) const;
 
   protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const = 0;
@@ -84,6 +85,9 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const = 0;
+    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceArray64& slicecontent) const = 0;
+    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceMissing64& slicecontent) const = 0;
+    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceJagged64& slicecontent) const = 0;
 
     const std::shared_ptr<Content> getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const;
     const std::string parameters_tostring(const std::string& indent, const std::string& pre, const std::string& post) const;

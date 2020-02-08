@@ -957,7 +957,26 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    if (advanced.length() != 0) {
+      throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
+    }
+
     throw std::runtime_error("FIXME: ListArray::getitem_next(jagged)");
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceArray64& slicecontent) const {
+    throw std::runtime_error("undefined operation: ListArray::getitem_next_jagged(array)");
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceMissing64& slicecontent) const {
+    throw std::runtime_error("undefined operation: ListArray::getitem_next_jagged(missing)");
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceJagged64& slicecontent) const {
+    throw std::runtime_error("undefined operation: ListArray::getitem_next_jagged(jagged)");
   }
 
   template class ListArrayOf<int32_t>;

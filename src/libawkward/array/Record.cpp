@@ -290,4 +290,16 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::getitem_next(jagged)");
   }
 
+  const std::shared_ptr<Content> Record::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceArray64& slicecontent) const {
+    throw std::runtime_error("undefined operation: Record::getitem_next_jagged(array)");
+  }
+
+  const std::shared_ptr<Content> Record::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceMissing64& slicecontent) const {
+    throw std::runtime_error("undefined operation: Record::getitem_next_jagged(missing)");
+  }
+
+  const std::shared_ptr<Content> Record::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceJagged64& slicecontent) const {
+    throw std::runtime_error("undefined operation: Record::getitem_next_jagged(jagged)");
+  }
+
 }
