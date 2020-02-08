@@ -155,3 +155,9 @@ def test_jagged():
 def test_double_jagged():
     array = awkward1.Array([[[0, 1, 2, 3], [4, 5]], [[6, 7, 8], [9, 10, 11, 12, 13]]])
     assert awkward1.tolist(array[awkward1.Array([[[2, 1, 0], [-1]], [[-1, -2, -3], [2, 1, 1, 3]]])]) == [[[2, 1, 0], [5]], [[8, 7, 6], [11, 10, 10, 12]]]
+
+    content = awkward1.Array([[0, 1, 2, 3], [4, 5], [6, 7, 8], [9, 10, 11, 12, 13]]).layout
+    regulararray = awkward1.layout.RegularArray(content, 2)
+
+    assert awkward1.tolist(regulararray[:, awkward1.Array([[2, 1, 0], [-1]])]) == [[[2, 1, 0], [5]], [[8, 7, 6], [13]]]
+    assert awkward1.tolist(regulararray[1:, awkward1.Array([[2, 1, 0], [-1]])]) == [[[8, 7, 6], [13]]]
