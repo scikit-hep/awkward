@@ -1405,15 +1405,15 @@ namespace awkward {
     throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a jagged array because it is one-dimensional"));
   }
 
-  const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceArray64& slicecontent) const {
+  const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
     throw std::runtime_error("undefined operation: NumpyArray::getitem_next_jagged(array)");
   }
 
-  const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceMissing64& slicecontent) const {
+  const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
     throw std::runtime_error("undefined operation: NumpyArray::getitem_next_jagged(missing)");
   }
 
-  const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceJagged64& slicecontent) const {
+  const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
     throw std::runtime_error("undefined operation: NumpyArray::getitem_next_jagged(jagged)");
   }
 

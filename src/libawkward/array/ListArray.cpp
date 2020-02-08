@@ -965,17 +965,22 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceArray64& slicecontent) const {
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
+    std::cout << "slicestarts  " << slicestarts.tostring() << std::endl;
+    std::cout << "slicestops   " << slicestops.tostring() << std::endl;
+    std::cout << "slicecontent " << slicecontent.tostring() << std::endl;
+    std::cout << tostring() << std::endl;
+
     throw std::runtime_error("undefined operation: ListArray::getitem_next_jagged(array)");
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceMissing64& slicecontent) const {
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
     throw std::runtime_error("undefined operation: ListArray::getitem_next_jagged(missing)");
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceJagged64& slicecontent) const {
+  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
     throw std::runtime_error("undefined operation: ListArray::getitem_next_jagged(jagged)");
   }
 

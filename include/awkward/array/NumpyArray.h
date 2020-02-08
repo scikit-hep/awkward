@@ -122,9 +122,9 @@ namespace awkward {
     const NumpyArray getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
     const NumpyArray getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
     const NumpyArray getitem_next(const SliceArray64& array, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const;
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceArray64& slicecontent) const override;
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceMissing64& slicecontent) const override;
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceJagged64& slicecontent) const override;
+    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const override;
+    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const override;
+    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const override;
 
   void tojson_boolean(ToJson& builder) const;
   template <typename T>

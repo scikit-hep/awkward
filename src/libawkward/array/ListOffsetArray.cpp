@@ -364,9 +364,9 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& starts, const Index64& stops, const std::shared_ptr<SliceItem>& slicecontent) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent) const {
     std::shared_ptr<Content> listarray = std::make_shared<ListArrayOf<T>>(identities_, parameters_, make_starts(offsets_), make_stops(offsets_), content_);
-    return listarray.get()->getitem_next_jagged(starts, stops, slicecontent);
+    return listarray.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
   }
 
   template <typename T>
@@ -930,17 +930,17 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceArray64& slicecontent) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
     throw std::runtime_error("undefined operation: ListOffsetArray::getitem_next_jagged(array)");
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceMissing64& slicecontent) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
     throw std::runtime_error("undefined operation: ListOffsetArray::getitem_next_jagged(missing)");
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& starts, const Index64& stops, const SliceJagged64& slicecontent) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
     throw std::runtime_error("undefined operation: ListOffsetArray::getitem_next_jagged(jagged)");
   }
 
