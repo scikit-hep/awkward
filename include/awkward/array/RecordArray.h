@@ -71,7 +71,6 @@ namespace awkward {
     const std::vector<std::pair<std::string, std::shared_ptr<Content>>> fielditems() const;
     const std::shared_ptr<RecordArray> astuple() const;
 
-  protected:
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;

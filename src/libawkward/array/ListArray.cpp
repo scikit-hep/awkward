@@ -960,8 +960,33 @@ namespace awkward {
     if (advanced.length() != 0) {
       throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
     }
+    if (stops_.length() < starts_.length()) {
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
 
-    throw std::runtime_error("FIXME: ListArray::getitem_next(jagged)");
+    int64_t len = length();
+    Index64 singleoffsets = jagged.offsets();
+    Index64 multistarts(jagged.length()*len);
+    Index64 multistops(jagged.length()*len);
+    Index64 nextcarry(jagged.length()*len);
+    struct Error err = util::awkward_listarray_getitem_jagged_expand_64(
+      multistarts.ptr().get(),
+      multistops.ptr().get(),
+      singleoffsets.ptr().get(),
+      nextcarry.ptr().get(),
+      starts_.ptr().get(),
+      starts_.offset(),
+      stops_.ptr().get(),
+      stops_.offset(),
+      jagged.length(),
+      len);
+    util::handle_error(err, classname(), identities_.get());
+
+    std::shared_ptr<Content> carried = content_.get()->carry(nextcarry);
+    std::shared_ptr<Content> down = carried.get()->getitem_next_jagged(multistarts, multistops, jagged.content());
+    std::shared_ptr<Content> next = down.get()->getitem_next(tail.head(), tail.tail(), advanced);
+
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), next, jagged.length());
   }
 
   template <typename T>

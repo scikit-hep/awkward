@@ -75,7 +75,6 @@ namespace awkward {
     bool parameters_equal(const util::Parameters& other) const;
     const std::shared_ptr<Content> merge_as_union(const std::shared_ptr<Content>& other) const;
 
-  protected:
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const = 0;
     virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const = 0;
     virtual const std::shared_ptr<Content> getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& advanced) const;
@@ -89,6 +88,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const = 0;
     virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const = 0;
 
+  protected:
     const std::shared_ptr<Content> getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const;
     const std::string parameters_tostring(const std::string& indent, const std::string& pre, const std::string& post) const;
 

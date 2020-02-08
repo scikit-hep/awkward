@@ -147,6 +147,9 @@ namespace awkward {
     ERROR awkward_unionarray_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const T* fromtags, int64_t fromtagsoffset, const I* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
 
     template <typename T>
+    Error awkward_listarray_getitem_jagged_expand_64(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t* tocarry, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset, int64_t jaggedsize, int64_t length);
+
+    template <typename T>
     ERROR awkward_listarray_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset, int64_t contentlen);
 
     template <typename T>

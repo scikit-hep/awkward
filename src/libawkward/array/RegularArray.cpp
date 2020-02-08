@@ -646,20 +646,20 @@ namespace awkward {
 
     int64_t regularlength = length();
     Index64 singleoffsets = jagged.offsets();
-    Index64 multistarts(size_*regularlength);
-    Index64 multistops(size_*regularlength);
+    Index64 multistarts(jagged.length()*regularlength);
+    Index64 multistops(jagged.length()*regularlength);
     struct Error err = awkward_regulararray_getitem_jagged_expand_64(
       multistarts.ptr().get(),
       multistops.ptr().get(),
       singleoffsets.ptr().get(),
-      size_,
+      jagged.length(),
       regularlength);
     util::handle_error(err, classname(), identities_.get());
 
     std::shared_ptr<Content> down = content_.get()->getitem_next_jagged(multistarts, multistops, jagged.content());
     std::shared_ptr<Content> next = down.get()->getitem_next(tail.head(), tail.tail(), advanced);
 
-    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), next, size_);
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), next, jagged.length());
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {

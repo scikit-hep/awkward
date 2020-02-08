@@ -912,11 +912,8 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
-    if (advanced.length() != 0) {
-      throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
-    }
-
-    throw std::runtime_error("FIXME: ListOffsetArray::getitem_next(jagged)");
+    ListArrayOf<T> listarray(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), content_);
+    return listarray.getitem_next(jagged, tail, advanced);
   }
 
   template <typename T>

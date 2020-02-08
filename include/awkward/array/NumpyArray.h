@@ -102,7 +102,6 @@ namespace awkward {
     void become_contiguous();
     const NumpyArray contiguous() const;
 
-  protected:
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;
@@ -110,6 +109,7 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const override;
 
+  protected:
     const NumpyArray contiguous_next(const Index64& bytepos) const;
     const NumpyArray getitem_bystrides(const std::shared_ptr<SliceItem>& head, const Slice& tail, int64_t length) const;
     const NumpyArray getitem_bystrides(const SliceAt& at, const Slice& tail, int64_t length) const;
