@@ -966,10 +966,50 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
+    if (starts_.length() < slicestarts.length()) {
+      throw std::runtime_error("ListArray::getitem_next_jagged slicestarts does not fit ListArray");
+    }
+    if (stops_.length() < starts_.length()) {
+      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+    }
+
     std::cout << "slicestarts  " << slicestarts.tostring() << std::endl;
     std::cout << "slicestops   " << slicestops.tostring() << std::endl;
     std::cout << "slicecontent " << slicecontent.tostring() << std::endl;
     std::cout << tostring() << std::endl;
+
+    int64_t carrylen;
+    struct Error err1 = awkward_listarray_getitem_jagged_carrylen_64(
+      &carrylen,
+      slicestarts.ptr().get(),
+      slicestops.ptr().get(),
+      slicestarts.length());
+    util::handle_error(err1, classname(), identities_.get());
+
+    Index64 sliceindex = slicecontent.index();
+
+    std::cout << "    -> " << sliceindex.tostring() << std::endl;
+
+    Index64 outoffsets(slicestarts.length() + 1);
+    Index64 nextcarry(carrylen);
+    struct Error err2 = util::awkward_listarray_getitem_jagged_apply_64(
+      outoffsets.ptr().get(),
+      nextcarry.ptr().get(),
+      slicestarts.ptr().get(),
+      slicestops.ptr().get(),
+      slicestarts.length(),
+      sliceindex.ptr().get(),
+      sliceindex.offset(),
+      sliceindex.length(),
+      starts_.ptr().get(),
+      starts_.offset(),
+      stops_.ptr().get(),
+      stops_.offset(),
+      content_.get()->length());
+    util::handle_error(err2, classname(), nullptr);
+
+    std::cout << "outoffsets " << outoffsets.tostring() << std::endl;
+    std::cout << "nextcarry  " << nextcarry.tostring() << std::endl;
 
     throw std::runtime_error("undefined operation: ListArray::getitem_next_jagged(array)");
   }

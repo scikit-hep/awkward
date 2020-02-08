@@ -830,3 +830,61 @@ ERROR awkward_regulararray_getitem_jagged_expand(T* multistarts, T* multistops, 
 ERROR awkward_regulararray_getitem_jagged_expand_64(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t regularsize, int64_t regularlength) {
   return awkward_regulararray_getitem_jagged_expand<int64_t>(multistarts, multistops, singleoffsets, regularsize, regularlength);
 }
+
+template <typename T>
+ERROR awkward_listarray_getitem_jagged_carrylen(int64_t* carrylen, const T* slicestarts, const T* slicestops, int64_t sliceouterlen) {
+  *carrylen = 0;
+  for (int64_t i = 0;  i < sliceouterlen;  i++) {
+    *carrylen = *carrylen + (int64_t)(slicestops[i] - slicestarts[i]);
+  }
+  return success();
+}
+ERROR awkward_listarray_getitem_jagged_carrylen_64(int64_t* carrylen, const int64_t* slicestarts, const int64_t* slicestops, int64_t sliceouterlen) {
+  return awkward_listarray_getitem_jagged_carrylen<int64_t>(carrylen, slicestarts, slicestops, sliceouterlen);
+}
+
+template <typename C, typename T>
+ERROR awkward_listarray_getitem_jagged_apply(T* tooffsets, T* tocarry, const T* slicestarts, const T* slicestops, int64_t sliceouterlen, const T* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const C* fromstarts, int64_t fromstartsoffset, const C* fromstops, int64_t fromstopsoffset, int64_t contentlen) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < sliceouterlen;  i++) {
+    T slicestart = slicestarts[i];
+    T slicestop = slicestops[i];
+    tooffsets[i] = (T)k;
+    if (slicestart != slicestop) {
+      if (slicestop > sliceinnerlen) {
+        return failure("jagged slice's offsets extend beyond its content", i, slicestop);
+      }
+      int64_t start = (int64_t)fromstarts[fromstartsoffset + i];
+      int64_t stop = (int64_t)fromstops[fromstopsoffset + i];
+      if (stop < start) {
+        return failure("stops[i] < starts[i]", i, kSliceNone);
+      }
+      if (start != stop  &&  stop > contentlen) {
+        return failure("stops[i] > len(content)", i, kSliceNone);
+      }
+      int64_t count = stop - start;
+      for (int64_t j = slicestart;  j < slicestop;  j++) {
+        int64_t index = (int64_t)sliceindex[sliceindexoffset + j];
+        if (index < 0) {
+          index += count;
+        }
+        if (!(0 <= index  &&  index < count)) {
+          return failure("index out of range", i, (int64_t)sliceindex[sliceindexoffset + j]);
+        }
+        tocarry[k] = start + index;
+        k++;
+      }
+    }
+    tooffsets[i + 1] = (T)k;
+  }
+  return success();
+}
+ERROR awkward_listarray32_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, const int64_t* slicestops, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const int32_t* fromstarts, int64_t fromstartsoffset, const int32_t* fromstops, int64_t fromstopsoffset, int64_t contentlen) {
+  return awkward_listarray_getitem_jagged_apply<int32_t, int64_t>(tooffsets, tocarry, slicestarts, slicestops, sliceouterlen, sliceindex, sliceindexoffset, sliceinnerlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, contentlen);
+}
+ERROR awkward_listarrayU32_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, const int64_t* slicestops, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const uint32_t* fromstarts, int64_t fromstartsoffset, const uint32_t* fromstops, int64_t fromstopsoffset, int64_t contentlen) {
+  return awkward_listarray_getitem_jagged_apply<uint32_t, int64_t>(tooffsets, tocarry, slicestarts, slicestops, sliceouterlen, sliceindex, sliceindexoffset, sliceinnerlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, contentlen);
+}
+ERROR awkward_listarray64_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, const int64_t* slicestops, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset, int64_t contentlen) {
+  return awkward_listarray_getitem_jagged_apply<int64_t, int64_t>(tooffsets, tocarry, slicestarts, slicestops, sliceouterlen, sliceindex, sliceindexoffset, sliceinnerlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, contentlen);
+}

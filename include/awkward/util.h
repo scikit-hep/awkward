@@ -139,6 +139,9 @@ namespace awkward {
     template <typename T, typename I>
     Error awkward_unionarray_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const T* fromtags, int64_t fromtagsoffset, const I* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
 
+    template <typename T>
+    Error awkward_listarray_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, const int64_t* slicestops, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset, int64_t contentlen);
+
   }
 }
 

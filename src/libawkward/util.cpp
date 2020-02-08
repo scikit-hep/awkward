@@ -791,5 +791,18 @@ namespace awkward {
       return awkward_unionarray8_64_simplify_one_to8_64(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, towhich, fromwhich, length, base);
     }
 
+    template <>
+    Error awkward_listarray_getitem_jagged_apply_64<int32_t>(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, const int64_t* slicestops, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const int32_t* fromstarts, int64_t fromstartsoffset, const int32_t* fromstops, int64_t fromstopsoffset, int64_t contentlen) {
+      return awkward_listarray32_getitem_jagged_apply_64(tooffsets, tocarry, slicestarts, slicestops, sliceouterlen, sliceindex, sliceindexoffset, sliceinnerlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, contentlen);
+    }
+    template <>
+    Error awkward_listarray_getitem_jagged_apply_64<uint32_t>(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, const int64_t* slicestops, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const uint32_t* fromstarts, int64_t fromstartsoffset, const uint32_t* fromstops, int64_t fromstopsoffset, int64_t contentlen) {
+      return awkward_listarrayU32_getitem_jagged_apply_64(tooffsets, tocarry, slicestarts, slicestops, sliceouterlen, sliceindex, sliceindexoffset, sliceinnerlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, contentlen);
+    }
+    template <>
+    Error awkward_listarray_getitem_jagged_apply_64<int64_t>(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, const int64_t* slicestops, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset, int64_t contentlen) {
+      return awkward_listarray64_getitem_jagged_apply_64(tooffsets, tocarry, slicestarts, slicestops, sliceouterlen, sliceindex, sliceindexoffset, sliceinnerlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, contentlen);
+    }
+
   }
 }
