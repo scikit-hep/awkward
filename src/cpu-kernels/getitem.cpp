@@ -743,17 +743,23 @@ ERROR awkward_listoffsetarray_getitem_adjust_offsets_index(T* tooffsets, T* tono
       numnull += (originalmask[maskoffset + j]);
     }
 
-    std::cout << "slicestart " << slicestart << " slicestop " << slicestop << " originalcount " << (slicestop - slicestart) << std::endl;
+    std::cout << "slicestart " << slicestart << " slicestop " << slicestop << " originalcount " << (slicestop - slicestart) << " numnull " << numnull << std::endl;
 
     int64_t nullcount = 0;
     int64_t count = 0;
+
+    std::cout << "k < " << indexlength << ", index[indexoffset + k] < 0 is " << (index[indexoffset + k] < 0) << ", nullcount is " << nullcount << ", count is " << count << ", nonzero[nonzerooffset + index[indexoffset + k]] is " << nonzero[nonzerooffset + index[indexoffset + k]] << std::endl;
+
     while (k < indexlength  &&  ((index[indexoffset + k] < 0  &&  nullcount < numnull)  ||  (nonzero[nonzerooffset + index[indexoffset + k]] < slicestop))) {
-      std::cout << "k " << k << " index[k] " << index[indexoffset + k] << " count " << count << " nullcount " << nullcount << std::endl;
 
       if (index[indexoffset + k] < 0) {
+        std::cout << "another null" << std::endl;
+
         nullcount++;
       }
       else {
+        std::cout << "not a null" << std::endl;
+
         int64_t j = index[indexoffset + k];
 
         std::cout << "j " << j << " nonzero[j] " << nonzero[nonzerooffset + j] << std::endl;
@@ -764,6 +770,8 @@ ERROR awkward_listoffsetarray_getitem_adjust_offsets_index(T* tooffsets, T* tono
       }
       k++;
       count++;
+
+      std::cout << "k < " << indexlength << ", index[indexoffset + k] < 0 is " << (index[indexoffset + k] < 0) << ", nullcount is " << nullcount << ", count is " << count << ", nonzero[nonzerooffset + index[indexoffset + k]] is " << nonzero[nonzerooffset + index[indexoffset + k]] << std::endl;
     }
     std::cout << "final count " << count << std::endl;
 
