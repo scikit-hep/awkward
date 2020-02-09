@@ -69,21 +69,23 @@ namespace awkward {
   template <typename T>
   class SliceArrayOf: public SliceItem {
   public:
-    SliceArrayOf<T>(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides);
+    SliceArrayOf<T>(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides, bool frombool);
     const IndexOf<T> index() const;
     const int64_t length() const;
     const std::vector<int64_t> shape() const;
     const std::vector<int64_t> strides() const;
+    bool frombool() const;
     int64_t ndim() const;
     const std::shared_ptr<SliceItem> shallow_copy() const override;
     const std::string tostring() const override;
-    bool preserves_type(const Index64& advanced) const override;
     const std::string tostring_part() const;
+    bool preserves_type(const Index64& advanced) const override;
     const IndexOf<T> ravel() const;
   private:
     const IndexOf<T> index_;
     const std::vector<int64_t> shape_;
     const std::vector<int64_t> strides_;
+    bool frombool_;
   };
 
   typedef SliceArrayOf<int64_t> SliceArray64;
@@ -109,6 +111,44 @@ namespace awkward {
   private:
     const std::vector<std::string> keys_;
   };
+
+  template <typename T>
+  class SliceMissingOf: public SliceItem {
+  public:
+    SliceMissingOf(const IndexOf<T>& index, const Index8& originalmask, const std::shared_ptr<SliceItem>& content);
+    int64_t length() const;
+    const IndexOf<T> index() const;
+    const Index8 originalmask() const;
+    const std::shared_ptr<SliceItem> content() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
+    const std::string tostring() const override;
+    const std::string tostring_part() const;
+    bool preserves_type(const Index64& advanced) const override;
+  private:
+    const IndexOf<T> index_;
+    const Index8 originalmask_;
+    const std::shared_ptr<SliceItem> content_;
+  };
+
+  typedef SliceMissingOf<int64_t> SliceMissing64;
+
+  template <typename T>
+  class SliceJaggedOf: public SliceItem {
+  public:
+    SliceJaggedOf(const IndexOf<T>& offsets, const std::shared_ptr<SliceItem>& content);
+    int64_t length() const;
+    const IndexOf<T> offsets() const;
+    const std::shared_ptr<SliceItem> content() const;
+    const std::shared_ptr<SliceItem> shallow_copy() const override;
+    const std::string tostring() const override;
+    const std::string tostring_part() const;
+    bool preserves_type(const Index64& advanced) const override;
+  private:
+    const IndexOf<T> offsets_;
+    const std::shared_ptr<SliceItem> content_;
+  };
+
+  typedef SliceJaggedOf<int64_t> SliceJagged64;
 
   class Slice {
   public:

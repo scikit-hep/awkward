@@ -142,7 +142,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] Implement appendable records.
       * [X] Test all (tested in mock [studies/fillable.py](tree/master/studies/fillable.py)).
    * [X] JSON → Awkward via header-only [RapidJSON](https://rapidjson.org) and `awkward.fromiter`.
-   * [ ] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old; issue [#67](https://github.com/scikit-hep/awkward-1.0/issues/67)).
+   * [X] Extend `__getitem__` to take jagged arrays of integers and booleans (same behavior as old; issue [#67](https://github.com/scikit-hep/awkward-1.0/issues/67)).
    * [ ] Full suite of array types:
       * [X] `EmptyArray`: 1-dimensional array with length 0 and unknown type (result of `UnknownFillable`, compatible with all types of arrays).
       * [X] `RawArray`: flat, 1-dimensional array type for pure C++ (header-only).

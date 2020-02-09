@@ -44,6 +44,9 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_numpyarray_getitem_next_array_64(int64_t* nextcarryptr, int64_t* nextadvancedptr, const int64_t* carryptr, const int64_t* flatheadptr, int64_t lencarry, int64_t lenflathead, int64_t skip);
   EXPORT_SYMBOL struct Error awkward_numpyarray_getitem_next_array_advanced_64(int64_t* nextcarryptr, const int64_t* carryptr, const int64_t* advancedptr, const int64_t* flatheadptr, int64_t lencarry, int64_t skip);
 
+  EXPORT_SYMBOL struct Error awkward_numpyarray_getitem_boolean_numtrue(int64_t* numtrue, const int8_t* fromptr, int64_t byteoffset, int64_t length, int64_t stride);
+  EXPORT_SYMBOL struct Error awkward_numpyarray_getitem_boolean_nonzero_64(int64_t* toptr, const int8_t* fromptr, int64_t byteoffset, int64_t length, int64_t stride);
+
   EXPORT_SYMBOL struct Error awkward_listarray32_getitem_next_at_64(int64_t* tocarry, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at);
   EXPORT_SYMBOL struct Error awkward_listarrayU32_getitem_next_at_64(int64_t* tocarry, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at);
   EXPORT_SYMBOL struct Error awkward_listarray64_getitem_next_at_64(int64_t* tocarry, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset, int64_t at);
@@ -92,6 +95,16 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_indexedarrayU32_getitem_nextcarry_outindex_64(int64_t* tocarry, uint32_t* toindex, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
   EXPORT_SYMBOL struct Error awkward_indexedarray64_getitem_nextcarry_outindex_64(int64_t* tocarry, int64_t* toindex, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
 
+  EXPORT_SYMBOL struct Error awkward_indexedarray32_getitem_nextcarry_outindex_mask_64(int64_t* tocarry, int64_t* toindex, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
+  EXPORT_SYMBOL struct Error awkward_indexedarrayU32_getitem_nextcarry_outindex_mask_64(int64_t* tocarry, int64_t* toindex, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
+  EXPORT_SYMBOL struct Error awkward_indexedarray64_getitem_nextcarry_outindex_mask_64(int64_t* tocarry, int64_t* toindex, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
+
+  EXPORT_SYMBOL struct Error awkward_listoffsetarray_getitem_adjust_offsets_64(int64_t* tooffsets, int64_t* tononzero, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t length, const int64_t* nonzero, int64_t nonzerooffset, int64_t nonzerolength);
+
+  EXPORT_SYMBOL struct Error awkward_listoffsetarray_getitem_adjust_offsets_index_64(int64_t* tooffsets, int64_t* tononzero, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t length, const int64_t* index, int64_t indexoffset, int64_t indexlength, const int64_t* nonzero, int64_t nonzerooffset, int64_t nonzerolength, const int8_t* originalmask, int64_t maskoffset, int64_t masklength);
+
+  EXPORT_SYMBOL struct Error awkward_indexedarray_getitem_adjust_outindex_64(int8_t* tomask, int64_t* toindex, int64_t* tononzero, const int64_t* fromindex, int64_t fromindexoffset, int64_t fromindexlength, const int64_t* nonzero, int64_t nonzerooffset, int64_t nonzerolength);
+
   EXPORT_SYMBOL struct Error awkward_indexedarray32_getitem_nextcarry_64(int64_t* tocarry, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
   EXPORT_SYMBOL struct Error awkward_indexedarrayU32_getitem_nextcarry_64(int64_t* tocarry, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
   EXPORT_SYMBOL struct Error awkward_indexedarray64_getitem_nextcarry_64(int64_t* tocarry, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
@@ -107,6 +120,28 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_unionarray8_32_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const int32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which);
   EXPORT_SYMBOL struct Error awkward_unionarray8_U32_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const uint32_t* fromindex, int64_t indexoffset, int64_t length, int64_t which);
   EXPORT_SYMBOL struct Error awkward_unionarray8_64_project_64(int64_t* lenout, int64_t* tocarry, const int8_t* fromtags, int64_t tagsoffset, const int64_t* fromindex, int64_t indexoffset, int64_t length, int64_t which);
+
+  EXPORT_SYMBOL struct Error awkward_missing_repeat_64(int64_t* outindex, const int64_t* index, int64_t indexoffset, int64_t indexlength, int64_t repetitions, int64_t regularsize);
+
+  EXPORT_SYMBOL struct Error awkward_regulararray_getitem_jagged_expand_64(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t regularsize, int64_t regularlength);
+
+  EXPORT_SYMBOL struct Error awkward_listarray32_getitem_jagged_expand_64(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t* tocarry, const int32_t* fromstarts, int64_t fromstartsoffset, const int32_t* fromstops, int64_t fromstopsoffset, int64_t jaggedsize, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_getitem_jagged_expand_64(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t* tocarry, const uint32_t* fromstarts, int64_t fromstartsoffset, const uint32_t* fromstops, int64_t fromstopsoffset, int64_t jaggedsize, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarray64_getitem_jagged_expand_64(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t* tocarry, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset, int64_t jaggedsize, int64_t length);
+
+  EXPORT_SYMBOL struct Error awkward_listarray_getitem_jagged_carrylen_64(int64_t* carrylen, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen);
+
+  EXPORT_SYMBOL struct Error awkward_listarray32_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const int32_t* fromstarts, int64_t fromstartsoffset, const int32_t* fromstops, int64_t fromstopsoffset, int64_t contentlen);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const uint32_t* fromstarts, int64_t fromstartsoffset, const uint32_t* fromstops, int64_t fromstopsoffset, int64_t contentlen);
+  EXPORT_SYMBOL struct Error awkward_listarray64_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset, int64_t contentlen);
+
+  EXPORT_SYMBOL struct Error awkward_listarray_getitem_jagged_numvalid_64(int64_t* numvalid, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t length, const int64_t* missing, int64_t missingoffset, int64_t missinglength);
+
+  EXPORT_SYMBOL struct Error awkward_listarray_getitem_jagged_shrink_64(int64_t* tocarry, int64_t* tosmalloffsets, int64_t* tolargeoffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t length, const int64_t* missing, int64_t missingoffset);
+
+  EXPORT_SYMBOL struct Error awkward_listarray32_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int32_t* fromstarts, int64_t fromstartsoffset, const int32_t* fromstops, int64_t fromstopsoffset);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const uint32_t* fromstarts, int64_t fromstartsoffset, const uint32_t* fromstops, int64_t fromstopsoffset);
+  EXPORT_SYMBOL struct Error awkward_listarray64_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset);
 
 }
 

@@ -7,6 +7,8 @@
 #include "awkward/array/ListArray.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/UnionArray.h"
+#include "awkward/array/IndexedArray.h"
+#include "awkward/array/RecordArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -174,8 +176,29 @@ namespace awkward {
     else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
       return getitem_next(*fields, tail, advanced);
     }
+    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      return getitem_next(*missing, tail, advanced);
+    }
+    else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
+      return getitem_next(*jagged, tail, advanced);
+    }
     else {
       throw std::runtime_error("unrecognized slice type");
+    }
+  }
+
+  const std::shared_ptr<Content> Content::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent, const Slice& tail) const {
+    if (SliceArray64* array = dynamic_cast<SliceArray64*>(slicecontent.get())) {
+      return getitem_next_jagged(slicestarts, slicestops, *array, tail);
+    }
+    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(slicecontent.get())) {
+      return getitem_next_jagged(slicestarts, slicestops, *missing, tail);
+    }
+    else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(slicecontent.get())) {
+      return getitem_next_jagged(slicestarts, slicestops, *jagged, tail);
+    }
+    else {
+      throw std::runtime_error("unexpected slice type for getitem_next_jagged");
     }
   }
 
@@ -218,6 +241,55 @@ namespace awkward {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
+  }
+
+  const std::shared_ptr<Content> getitem_next_regular_missing(const SliceMissing64& missing, const Slice& tail, const Index64& advanced, const RegularArray* raw, int64_t length, const std::string& classname) {
+    Index64 index(missing.index());
+    Index64 outindex(index.length()*length);
+
+    struct Error err = awkward_missing_repeat_64(
+      outindex.ptr().get(),
+      index.ptr().get(),
+      index.offset(),
+      index.length(),
+      length,
+      raw->size());
+    util::handle_error(err, classname, nullptr);
+
+    IndexedOptionArray64 out(Identities::none(), util::Parameters(), outindex, raw->content());
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify(), index.length());
+  }
+
+  const std::shared_ptr<Content> Content::getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const {
+    if (advanced.length() != 0) {
+      throw std::invalid_argument("cannot mix missing values in slice with NumPy-style advanced indexing");
+    }
+
+    std::shared_ptr<Content> next = getitem_next(missing.content(), tail, advanced);
+
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
+      return getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname());
+    }
+
+    else if (RecordArray* rec = dynamic_cast<RecordArray*>(next.get())) {
+      if (rec->numfields() == 0) {
+        return next;
+      }
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : rec->contents()) {
+        if (RegularArray* raw = dynamic_cast<RegularArray*>(content.get())) {
+          contents.push_back(getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname()));
+        }
+        else {
+          throw std::runtime_error(std::string("FIXME: unhandled case of SliceMissing with RecordArray containing\n") + content.get()->tostring());
+        }
+      }
+      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, rec->recordlookup());
+    }
+
+    else {
+      throw std::runtime_error(std::string("FIXME: unhandled case of SliceMissing with\n") + next.get()->tostring());
+    }
   }
 
   const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const {

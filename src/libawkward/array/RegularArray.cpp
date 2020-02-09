@@ -349,7 +349,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::count(int64_t axis) const {
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     std::string format = "q";
 #else
     std::string format = "l";
@@ -506,6 +506,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<SliceItem> RegularArray::asslice() const {
+    throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
+  }
+
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     assert(advanced.length() == 0);
 
@@ -629,6 +633,47 @@ namespace awkward {
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
     }
+  }
+
+  const std::shared_ptr<Content> RegularArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    if (advanced.length() != 0) {
+      throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
+    }
+
+    if (jagged.length() != size_) {
+      throw std::invalid_argument(std::string("cannot fit jagged slice with length ") + std::to_string(jagged.length()) + std::string(" into ") + classname() + std::string(" of size ") + std::to_string(size_));
+    }
+
+    int64_t regularlength = length();
+    Index64 singleoffsets = jagged.offsets();
+    Index64 multistarts(jagged.length()*regularlength);
+    Index64 multistops(jagged.length()*regularlength);
+    struct Error err = awkward_regulararray_getitem_jagged_expand_64(
+      multistarts.ptr().get(),
+      multistops.ptr().get(),
+      singleoffsets.ptr().get(),
+      jagged.length(),
+      regularlength);
+    util::handle_error(err, classname(), identities_.get());
+
+    std::shared_ptr<Content> down = content_.get()->getitem_next_jagged(multistarts, multistops, jagged.content(), tail);
+
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), down, jagged.length());
+  }
+
+  const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+    std::shared_ptr<Content> self = toListOffsetArray64();
+    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
+  }
+
+  const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+    std::shared_ptr<Content> self = toListOffsetArray64();
+    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
+  }
+
+  const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+    std::shared_ptr<Content> self = toListOffsetArray64();
+    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
 }

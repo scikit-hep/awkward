@@ -490,7 +490,10 @@ namespace awkward {
       }
     }
 
-  protected:
+    const std::shared_ptr<SliceItem> asslice() const override {
+      throw std::invalid_argument("cannot use RawArray as a slice");
+    }
+
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
       return getitem_at(at.at());
     }
@@ -542,11 +545,27 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const override {
-      throw std::invalid_argument(field.tostring() + std::string(" is not a valid slice type for ") + classname());
+      throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a field name because it has no fields"));
     }
 
     const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override {
-      throw std::invalid_argument(fields.tostring() + std::string(" is not a valid slice type for ") + classname());
+      throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field names because it has no fields"));
+    }
+
+    const std::shared_ptr<Content> getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const override {
+      throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a jagged array because it is one-dimensional"));
+    }
+
+    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const override {
+      throw std::runtime_error("undefined operation: RawArray::getitem_next_jagged(array)");
+    }
+
+    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const override {
+      throw std::runtime_error("undefined operation: RawArray::getitem_next_jagged(missing)");
+    }
+
+    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const override {
+      throw std::runtime_error("undefined operation: RawArray::getitem_next_jagged(jagged)");
     }
 
   private:

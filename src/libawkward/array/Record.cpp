@@ -223,6 +223,10 @@ namespace awkward {
     throw std::invalid_argument("Record cannot be merged because it is not an array");
   }
 
+  const std::shared_ptr<SliceItem> Record::asslice() const {
+    throw std::invalid_argument("cannot use a record as a slice");
+  }
+
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
     return array_.get()->field(fieldindex).get()->getitem_at_nowrap(at_);
   }
@@ -280,6 +284,22 @@ namespace awkward {
 
   const std::shared_ptr<Content> Record::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(fields)");
+  }
+
+  const std::shared_ptr<Content> Record::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("undefined operation: Record::getitem_next(jagged)");
+  }
+
+  const std::shared_ptr<Content> Record::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+    throw std::runtime_error("undefined operation: Record::getitem_next_jagged(array)");
+  }
+
+  const std::shared_ptr<Content> Record::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+    throw std::runtime_error("undefined operation: Record::getitem_next_jagged(missing)");
+  }
+
+  const std::shared_ptr<Content> Record::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+    throw std::runtime_error("undefined operation: Record::getitem_next_jagged(jagged)");
   }
 
 }

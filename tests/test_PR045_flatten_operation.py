@@ -93,7 +93,6 @@ def test_flatten_numpy_array():
     # assert awkward1.tolist(array2.flatten(2)) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
 
     array3 = array[:, 1::2, :3]
-    print(awkward1.tolist(array3))
     assert awkward1.tolist(array3) == [[[5, 6, 7]], [[20, 21, 22]]]
     assert flatten(awkward1.tolist(array3)) == [[5, 6, 7], [20, 21, 22]]
     assert awkward1.tolist(array3.flatten()) == [[5, 6, 7], [20, 21, 22]]

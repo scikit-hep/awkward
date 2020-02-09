@@ -537,7 +537,7 @@ namespace awkward {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
-    else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())) {
+    else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())  ||  dynamic_cast<SliceJagged64*>(head.get())) {
       if (ISOPTION) {
         int64_t numnull;
         struct Error err1 = util::awkward_indexedarray_numnull<T>(
@@ -560,7 +560,8 @@ namespace awkward {
 
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
         std::shared_ptr<Content> out = next.get()->getitem_next(head, tail, advanced);
-        return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, outindex, out);
+        IndexedArrayOf<T, ISOPTION> out2(identities_, parameters_, outindex, out);
+        return out2.simplify();
       }
       else {
         Index64 nextcarry(length());
@@ -587,6 +588,9 @@ namespace awkward {
     }
     else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
       return Content::getitem_next(*fields, tail, advanced);
+    }
+    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      return Content::getitem_next(*missing, tail, advanced);
     }
     else {
       throw std::runtime_error("unrecognized slice type");
@@ -680,7 +684,8 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::count(int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), util::Parameters(), index_, content_.get()->count(toaxis));
+    IndexedArrayOf<T, ISOPTION> out(Identities::none(), util::Parameters(), index_, content_.get()->count(toaxis));
+    return out.simplify();
   }
 
   template <typename T, bool ISOPTION>
@@ -953,18 +958,135 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<SliceItem> IndexedArrayOf<T, ISOPTION>::asslice() const {
+    if (ISOPTION) {
+      int64_t numnull;
+      struct Error err1 = util::awkward_indexedarray_numnull<T>(
+        &numnull,
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length());
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 nextcarry(length() - numnull);
+      Index64 outindex(length());
+      struct Error err2 = util::awkward_indexedarray_getitem_nextcarry_outindex_mask_64<T>(
+        nextcarry.ptr().get(),
+        outindex.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length(),
+        content_.get()->length());
+      util::handle_error(err2, classname(), identities_.get());
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+
+      std::shared_ptr<SliceItem> slicecontent = next.get()->asslice();
+      if (SliceArray64* raw = dynamic_cast<SliceArray64*>(slicecontent.get())) {
+        if (raw->frombool()) {
+          Index64 nonzero(raw->index());
+          Index8 originalmask(length());
+          Index64 adjustedindex(nonzero.length() + numnull);
+          Index64 adjustednonzero(nonzero.length());
+          struct Error err3 = awkward_indexedarray_getitem_adjust_outindex_64(
+            originalmask.ptr().get(),
+            adjustedindex.ptr().get(),
+            adjustednonzero.ptr().get(),
+            outindex.ptr().get(),
+            outindex.offset(),
+            outindex.length(),
+            nonzero.ptr().get(),
+            nonzero.offset(),
+            nonzero.length());
+          util::handle_error(err3, classname(), nullptr);
+
+          std::shared_ptr<SliceItem> outcontent = std::make_shared<SliceArray64>(adjustednonzero, raw->shape(), raw->strides(), true);
+          return std::make_shared<SliceMissing64>(adjustedindex, originalmask, outcontent);
+        }
+      }
+      return std::make_shared<SliceMissing64>(outindex, Index8(0), slicecontent);
+    }
+    else {
+      return project().get()->asslice();
+    }
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(SliceAt)");
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(at)");
   }
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(SliceRange)");
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(range)");
   }
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(SliceArray64)");
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(array)");
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(jagged)");
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent, tail);
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent, tail);
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent, tail);
+  }
+
+  template <typename T, bool ISOPTION>
+  template <typename S>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
+    if (ISOPTION) {
+      int64_t numnull;
+      struct Error err1 = util::awkward_indexedarray_numnull<T>(
+        &numnull,
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length());
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 nextcarry(length() - numnull);
+      IndexOf<T> outindex(length());
+      struct Error err2 = util::awkward_indexedarray_getitem_nextcarry_outindex_64<T>(
+        nextcarry.ptr().get(),
+        outindex.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length(),
+        content_.get()->length());
+      util::handle_error(err2, classname(), identities_.get());
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      std::shared_ptr<Content> out = next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
+      IndexedArrayOf<T, ISOPTION> out2(identities_, parameters_, outindex, out);
+      return out2.simplify();
+    }
+    else {
+      Index64 nextcarry(length());
+      struct Error err = util::awkward_indexedarray_getitem_nextcarry_64<T>(
+        nextcarry.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length(),
+        content_.get()->length());
+      util::handle_error(err, classname(), identities_.get());
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      return next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
+    }
   }
 
   template class IndexedArrayOf<int32_t, false>;

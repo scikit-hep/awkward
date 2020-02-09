@@ -41,15 +41,15 @@ namespace awkward {
   const std::unordered_map<std::type_index, std::string> NumpyArray::format_map = {
     { typeid(int8_t), "b"},
     { typeid(uint8_t), "B"},
- #ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     { typeid(int32_t), "l"},
     { typeid(uint32_t), "L"},
     { typeid(int64_t), "q"}
- #else
+#else
     { typeid(int32_t), "i"},
     { typeid(uint32_t), "I"},
     { typeid(int64_t), "l"}
- #endif
+#endif
  };
 
   NumpyArray::NumpyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<void>& ptr, const std::vector<ssize_t>& shape, const std::vector<ssize_t>& strides, ssize_t byteoffset, ssize_t itemsize, const std::string format)
@@ -293,28 +293,28 @@ namespace awkward {
     else if (format_.compare("f") == 0) {
       out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float32);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("q") == 0) {
 #else
     else if (format_.compare("l") == 0) {
 #endif
       out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int64);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("Q") == 0) {
 #else
     else if (format_.compare("L") == 0) {
 #endif
       out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint64);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("l") == 0) {
 #else
     else if (format_.compare("i") == 0) {
 #endif
       out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int32);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("L") == 0) {
 #else
     else if (format_.compare("I") == 0) {
@@ -374,14 +374,14 @@ namespace awkward {
       out << "\" ";
     }
     out << "data=\"";
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     if (ndim() == 1  &&  format_.compare("l") == 0) {
 #else
     if (ndim() == 1  &&  format_.compare("i") == 0) {
 #endif
       tostring_as<int32_t>(out, reinterpret_cast<int32_t*>(byteptr()), length());
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (ndim() == 1  &&  format_.compare("q") == 0) {
 #else
     else if (ndim() == 1  &&  format_.compare("l") == 0) {
@@ -453,28 +453,28 @@ namespace awkward {
     else if (format_.compare("f") == 0) {
       tojson_real<float>(builder);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("q") == 0) {
 #else
     else if (format_.compare("l") == 0) {
 #endif
       tojson_integer<int64_t>(builder);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("Q") == 0) {
 #else
     else if (format_.compare("L") == 0) {
 #endif
       tojson_integer<uint64_t>(builder);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
       else if (format_.compare("l") == 0) {
 #else
       else if (format_.compare("i") == 0) {
 #endif
       tojson_integer<int32_t>(builder);
     }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     else if (format_.compare("L") == 0) {
 #else
     else if (format_.compare("I") == 0) {
@@ -621,10 +621,33 @@ namespace awkward {
     throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
   }
 
-  const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
-    assert(!isscalar());
+  bool getitem_too_general(const std::shared_ptr<SliceItem>& head, const Slice& tail) {
+    if (head.get() == nullptr) {
+      return false;
+    }
+    else if (dynamic_cast<SliceMissing64*>(head.get())  ||  dynamic_cast<SliceJagged64*>(head.get())) {
+      return true;
+    }
+    else {
+      return getitem_too_general(tail.head(), tail.tail());
+    }
+  }
 
-    if (!where.isadvanced()  &&  identities_.get() == nullptr) {
+  const std::shared_ptr<Content> NumpyArray::getitem(const Slice& where) const {
+    if (isscalar()) {
+      throw std::runtime_error("cannot get-item on a scalar");
+    }
+
+    if (getitem_too_general(where.head(), where.tail())) {
+      if (ndim() == 1) {
+        return Content::getitem(where);
+      }
+      else {
+        return toRegularArray().get()->getitem(where);
+      }
+    }
+
+    else if (!where.isadvanced()  &&  identities_.get() == nullptr) {
       std::vector<ssize_t> nextshape = { 1 };
       nextshape.insert(nextshape.end(), shape_.begin(), shape_.end());
       std::vector<ssize_t> nextstrides = { shape_[0]*strides_[0] };
@@ -753,7 +776,7 @@ namespace awkward {
       throw std::invalid_argument(std::string("NumpyArray cannot be counted in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
 
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     std::string format = "q";
 #else
     std::string format = "l";
@@ -979,7 +1002,7 @@ namespace awkward {
         itemsize = 8;
         format = "d";
       }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
       else if (format_.compare("Q") == 0  &&  other_format.compare("Q") == 0) {
         itemsize = 8;
         format = "Q";
@@ -991,7 +1014,7 @@ namespace awkward {
       }
       else if (format_.compare("q") == 0  ||  format_.compare("Q") == 0  ||  format_.compare("l") == 0  ||  format_.compare("L") == 0  ||  format_.compare("i") == 0  ||  format_.compare("I") == 0  ||  format_.compare("h") == 0  ||  format_.compare("H") == 0  ||  format_.compare("b") == 0  ||  format_.compare("B") == 0  ||  format_.compare("c") == 0  ||  other_format.compare("q") == 0  ||  other_format.compare("Q") == 0  ||  other_format.compare("l") == 0  ||  other_format.compare("L") == 0  ||  other_format.compare("i") == 0  ||  other_format.compare("I") == 0  ||  other_format.compare("h") == 0  ||  other_format.compare("H") == 0  ||  other_format.compare("b") == 0  ||  other_format.compare("B") == 0  ||  other_format.compare("c") == 0) {
         itemsize = 8;
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
         format = "q";
 #else
         format = "l";
@@ -1037,28 +1060,28 @@ namespace awkward {
         else if (format_.compare("f") == 0) {
           err = awkward_numpyarray_fill_todouble_fromfloat(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<float*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
         else if (format_.compare("q") == 0) {
 #else
         else if (format_.compare("l") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_from64(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<int64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("Q") == 0) {
 #else
           else if (format_.compare("L") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_fromU64(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("l") == 0) {
 #else
           else if (format_.compare("i") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_from32(reinterpret_cast<double*>(ptr.get()), 0, reinterpret_cast<int32_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("L") == 0) {
 #else
           else if (format_.compare("I") == 0) {
@@ -1091,28 +1114,28 @@ namespace awkward {
         else if (other_format.compare("f") == 0) {
           err = awkward_numpyarray_fill_todouble_fromfloat(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<float*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
         else if (other_format.compare("q") == 0) {
 #else
         else if (other_format.compare("l") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_from64(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<int64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("Q") == 0) {
 #else
           else if (other_format.compare("L") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_fromU64(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("l") == 0) {
 #else
           else if (other_format.compare("i") == 0) {
 #endif
           err = awkward_numpyarray_fill_todouble_from32(reinterpret_cast<double*>(ptr.get()), self_flatlength, reinterpret_cast<int32_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("L") == 0) {
 #else
           else if (other_format.compare("I") == 0) {
@@ -1148,28 +1171,28 @@ namespace awkward {
       }
 
       else if (itemsize == 8) {
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
         if (format_.compare("q") == 0) {
 #else
         if (format_.compare("l") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_from64(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<int64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("Q") == 0) {
 #else
           else if (format_.compare("L") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_fromU64(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("l") == 0) {
 #else
           else if (format_.compare("i") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_from32(reinterpret_cast<int64_t*>(ptr.get()), 0, reinterpret_cast<int32_t*>(contiguous_self.ptr().get()), self_offset, self_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (format_.compare("L") == 0) {
 #else
           else if (format_.compare("I") == 0) {
@@ -1196,28 +1219,28 @@ namespace awkward {
         }
         util::handle_error(err, classname(), nullptr);
 
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
         if (other_format.compare("q") == 0) {
 #else
         if (other_format.compare("l") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_from64(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<int64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("Q") == 0) {
 #else
           else if (other_format.compare("L") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_fromU64(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<uint64_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("l") == 0) {
 #else
           else if (other_format.compare("i") == 0) {
 #endif
           err = awkward_numpyarray_fill_to64_from32(reinterpret_cast<int64_t*>(ptr.get()), self_flatlength, reinterpret_cast<int32_t*>(contiguous_other.ptr().get()), other_offset, other_flatlength);
         }
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
           else if (other_format.compare("L") == 0) {
 #else
           else if (other_format.compare("I") == 0) {
@@ -1260,24 +1283,153 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<SliceItem> NumpyArray::asslice() const {
+    if (ndim() != 1) {
+      throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
+    }
+#if defined _MSC_VER || defined __i386__
+    if (format_.compare("q") == 0) {
+#else
+    if (format_.compare("l") == 0) {
+#endif
+      int64_t* raw = reinterpret_cast<int64_t*>(ptr_.get());
+      std::shared_ptr<int64_t> ptr(ptr_, raw);
+      std::vector<int64_t> shape({ (int64_t)shape_[0] });
+      std::vector<int64_t> strides({ (int64_t)strides_[0] / (int64_t)itemsize_ });
+      return std::make_shared<SliceArray64>(Index64(ptr, (int64_t)byteoffset_ / (int64_t)itemsize_, length()), shape, strides, false);
+    }
+    else if (format_.compare("q") == 0  ||  format_.compare("Q") == 0  ||  format_.compare("l") == 0  ||  format_.compare("L") == 0  ||  format_.compare("i") == 0  ||  format_.compare("I") == 0  ||  format_.compare("h") == 0  ||  format_.compare("H") == 0  ||  format_.compare("b") == 0  ||  format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+      NumpyArray contiguous_self = contiguous();
+      int64_t offset = (int64_t)contiguous_self.byteoffset() / (int64_t)itemsize_;
+      Index64 index(length());
+      struct Error err;
+#if defined _MSC_VER || defined __i386__
+      if (format_.compare("Q") == 0) {
+#else
+      if (format_.compare("L") == 0) {
+#endif
+        err = awkward_numpyarray_fill_to64_fromU64(index.ptr().get(), 0, reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("l") == 0) {
+#else
+      else if (format_.compare("i") == 0) {
+#endif
+        err = awkward_numpyarray_fill_to64_from32(index.ptr().get(), 0, reinterpret_cast<int32_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("L") == 0) {
+#else
+      else if (format_.compare("I") == 0) {
+#endif
+        err = awkward_numpyarray_fill_to64_fromU32(index.ptr().get(), 0, reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+      else if (format_.compare("h") == 0) {
+        err = awkward_numpyarray_fill_to64_from16(index.ptr().get(), 0, reinterpret_cast<int16_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+      else if (format_.compare("H") == 0) {
+        err = awkward_numpyarray_fill_to64_fromU16(index.ptr().get(), 0, reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+      else if (format_.compare("b") == 0) {
+        err = awkward_numpyarray_fill_to64_from8(index.ptr().get(), 0, reinterpret_cast<int8_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+        err = awkward_numpyarray_fill_to64_fromU8(index.ptr().get(), 0, reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()), offset, length());
+      }
+      else {
+        throw std::runtime_error("oops: check format_.compare cases above");
+      }
+      util::handle_error(err, classname(), identities_.get());
+
+      std::vector<int64_t> shape({ (int64_t)shape_[0] });
+      std::vector<int64_t> strides({ 1 });
+      return std::make_shared<SliceArray64>(index, shape, strides, false);
+    }
+    else if (format_.compare("?") == 0) {
+      int64_t numtrue;
+      struct Error err1 = awkward_numpyarray_getitem_boolean_numtrue(
+        &numtrue,
+        reinterpret_cast<int8_t*>(ptr_.get()),
+        (int64_t)byteoffset_,
+        (int64_t)shape_[0],
+        (int64_t)strides_[0]);
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 index(numtrue);
+      struct Error err2 = awkward_numpyarray_getitem_boolean_nonzero_64(
+        index.ptr().get(),
+        reinterpret_cast<int8_t*>(ptr_.get()),
+        (int64_t)byteoffset_,
+        (int64_t)shape_[0],
+        (int64_t)strides_[0]);
+      util::handle_error(err2, classname(), identities_.get());
+
+      std::vector<int64_t> shape({ numtrue });
+      std::vector<int64_t> strides({ 1 });
+      return std::make_shared<SliceArray64>(index, shape, strides, true);
+    }
+    else {
+      throw std::invalid_argument("only arrays of integers or booleans may be used as a slice");
+    }
+  }
+
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("NumpyArray has its own getitem_next system");
+    throw std::runtime_error("undefined operation: NumpyArray::getitem_next(at) (without 'length', 'stride', and 'first')");
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("NumpyArray has its own getitem_next system");
+    throw std::runtime_error("undefined operation: NumpyArray::getitem_next(range) (without 'length', 'stride', and 'first')");
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("NumpyArray has its own getitem_next system");
+    throw std::runtime_error("undefined operation: NumpyArray::getitem_next(array) (without 'length', 'stride', and 'first')");
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("NumpyArray has its own getitem_next system");
+    throw std::runtime_error("undefined operation: NumpyArray::getitem_next(field) (without 'length', 'stride', and 'first')");
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("NumpyArray has its own getitem_next system");
+    throw std::runtime_error("undefined operation: NumpyArray::getitem_next(fields) (without 'length', 'stride', and 'first')");
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    if (shape_.size() != 1) {
+      throw std::runtime_error("undefined operation: NumpyArray::getitem_next(jagged) with ndim != 1");
+    }
+
+    if (advanced.length() != 0) {
+      throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
+    }
+
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a jagged array because it is one-dimensional"));
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+    if (ndim() == 1) {
+      throw std::invalid_argument("too many jagged slice dimensions for array");
+    }
+    else {
+      throw std::runtime_error(std::string("undefined operation: NumpyArray::getitem_next_jagged(array) for ndim == ") + std::to_string(ndim()));
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+    if (ndim() == 1) {
+      throw std::invalid_argument("too many jagged slice dimensions for array");
+    }
+    else {
+      throw std::runtime_error(std::string("undefined operation: NumpyArray::getitem_next_jagged(missing) for ndim == ") + std::to_string(ndim()));
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+    if (ndim() == 1) {
+      throw std::invalid_argument("too many jagged slice dimensions for array");
+    }
+    else {
+      throw std::runtime_error(std::string("undefined operation: NumpyArray::getitem_next_jagged(jagged) for ndim == ") + std::to_string(ndim()));
+    }
   }
 
   bool NumpyArray::iscontiguous() const {
@@ -1375,14 +1527,8 @@ namespace awkward {
     else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
       return getitem_bystrides(*newaxis, tail, length);
     }
-    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
-      throw std::invalid_argument(field->tostring() + std::string(" is not a valid slice type for ") + classname());
-    }
-    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
-      throw std::invalid_argument(fields->tostring() + std::string(" is not a valid slice type for ") + classname());
-    }
     else {
-      throw std::runtime_error("unrecognized slice item type");
+      throw std::runtime_error("unrecognized slice item type for NumpyArray::getitem_bystrides");
     }
   }
 
@@ -1515,10 +1661,16 @@ namespace awkward {
       return getitem_next(*array, tail, carry, advanced, length, stride, first);
     }
     else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
-      throw std::invalid_argument(field->tostring() + std::string(" is not a valid slice type for ") + classname());
+      throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a field name because it has no fields"));
     }
     else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
-      throw std::invalid_argument(fields->tostring() + std::string(" is not a valid slice type for ") + classname());
+      throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field names because it has no fields"));
+    }
+    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      throw std::runtime_error("undefined operation: NumpyArray::getitem_next(missing) (defer to Content::getitem_next(missing))");
+    }
+    else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
+      throw std::runtime_error("FIXME: NumpyArray::getitem_next(jagged)");
     }
     else {
       throw std::runtime_error("unrecognized slice item type");

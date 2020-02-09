@@ -630,6 +630,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<SliceItem> RecordArray::asslice() const {
+    throw std::invalid_argument("cannot use records as a slice");
+  }
+
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
     if (fieldindex >= numfields()) {
       throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields()) + std::string(" fields")));
@@ -687,6 +691,9 @@ namespace awkward {
       RecordArray out(Identities::none(), parameters_, length(), istuple());
       return out.getitem_next(nexthead, nexttail, advanced);
     }
+    else if (const SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      return Content::getitem_next(*missing, tail, advanced);
+    }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
@@ -723,6 +730,36 @@ namespace awkward {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
+  }
+
+  const std::shared_ptr<Content> RecordArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::invalid_argument(std::string("undefined operation: RecordArray::getitem_next(jagged)"));
+  }
+
+  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent, tail);
+  }
+
+  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent, tail);
+  }
+
+  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent, tail);
+  }
+
+  template <typename S>
+  const std::shared_ptr<Content> RecordArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
+    if (contents_.empty()) {
+      return shallow_copy();
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail));
+      }
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    }
   }
 
 }

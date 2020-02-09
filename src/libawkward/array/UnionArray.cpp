@@ -36,7 +36,11 @@ namespace awkward {
       : Content(identities, parameters)
       , tags_(tags)
       , index_(index)
-      , contents_(contents) { }
+      , contents_(contents) {
+    if (contents_.empty()) {
+      throw std::invalid_argument("UnionArray must have at least one content");
+    }
+  }
 
   template <typename T, typename I>
   const IndexOf<T> UnionArrayOf<T, I>::tags() const {
@@ -301,7 +305,12 @@ namespace awkward {
       throw std::runtime_error("FIXME: handle UnionArray with more than 127 contents");
     }
 
-    return std::make_shared<UnionArray8_64>(identities_, parameters_, tags, index, contents);
+    if (contents.size() == 1) {
+      return contents[0].get()->carry(index);
+    }
+    else {
+      return std::make_shared<UnionArray8_64>(identities_, parameters_, tags, index, contents);
+    }
   }
 
   template <typename T, typename I>
@@ -595,7 +604,7 @@ namespace awkward {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
-    else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())) {
+    else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())  ||  dynamic_cast<SliceJagged64*>(head.get())) {
       std::vector<std::shared_ptr<Content>> outcontents;
       for (int64_t i = 0;  i < numcontents();  i++) {
         std::shared_ptr<Content> projection = project(i);
@@ -615,6 +624,9 @@ namespace awkward {
     }
     else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
       return Content::getitem_next(*fields, tail, advanced);
+    }
+    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      return Content::getitem_next(*missing, tail, advanced);
     }
     else {
       throw std::runtime_error("unrecognized slice type");
@@ -788,8 +800,7 @@ namespace awkward {
       contents.emplace_back(content.get()->count(toaxis));
     }
     UnionArrayOf<T, I>unionarray(Identities::none(), util::Parameters(), tags_, index_, contents);
-
-    return unionarray.simplify(true);
+    return unionarray.simplify(false);
   }
 
   template <typename T, typename I>
@@ -798,7 +809,8 @@ namespace awkward {
     for (auto content : contents_) {
       contents.emplace_back(content.get()->flatten(axis));
     }
-    return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents);
+    UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+    return out.simplify(false);
   }
 
   template <typename T, typename I>
@@ -1031,18 +1043,82 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<SliceItem> UnionArrayOf<T, I>::asslice() const {
+    std::shared_ptr<Content> simplified = simplify(false);
+    if (UnionArray8_32* raw = dynamic_cast<UnionArray8_32*>(simplified.get())) {
+      if (raw->numcontents() == 1) {
+        return raw->content(0).get()->asslice();
+      }
+      else {
+        throw std::invalid_argument("cannot use a union of different types as a slice");
+      }
+    }
+    else if (UnionArray8_U32* raw = dynamic_cast<UnionArray8_U32*>(simplified.get())) {
+      if (raw->numcontents() == 1) {
+        return raw->content(0).get()->asslice();
+      }
+      else {
+        throw std::invalid_argument("cannot use a union of different types as a slice");
+      }
+    }
+    else if (UnionArray8_64* raw = dynamic_cast<UnionArray8_64*>(simplified.get())) {
+      if (raw->numcontents() == 1) {
+        return raw->content(0).get()->asslice();
+      }
+      else {
+        throw std::invalid_argument("cannot use a union of different types as a slice");
+      }
+    }
+    else {
+      return simplified.get()->asslice();
+    }
+  }
+
+  template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: UnionArray::getitem_next(SliceAt)");
+    throw std::runtime_error("undefined operation: UnionArray::getitem_next(at)");
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: UnionArray::getitem_next(SliceRange)");
+    throw std::runtime_error("undefined operation: UnionArray::getitem_next(range)");
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: UnionArray::getitem_next(SliceArray64)");
+    throw std::runtime_error("undefined operation: UnionArray::getitem_next(array)");
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    throw std::runtime_error("undefined operation: UnionArray::getitem_next(jagged)");
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent, tail);
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent, tail);
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent, tail);
+  }
+
+  template <typename T, typename I>
+  template <typename S>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
+    std::shared_ptr<Content> simplified = simplify(false);
+    if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
+        dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
+        dynamic_cast<UnionArray8_64*>(simplified.get())) {
+      throw std::invalid_argument("cannot apply jagged slices to irreducible union arrays");
+    }
+    return simplified.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
   template class UnionArrayOf<int8_t, int32_t>;

@@ -175,6 +175,13 @@ namespace awkward {
     return other;
   }
 
+  const std::shared_ptr<SliceItem> EmptyArray::asslice() const {
+    Index64 index(0);
+    std::vector<int64_t> shape({ 0 });
+    std::vector<int64_t> strides({ 1 });
+    return std::make_shared<SliceArray64>(index, shape, strides, false);
+  }
+
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
@@ -191,11 +198,30 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
-    throw std::invalid_argument(field.tostring() + std::string(" is not a valid slice type for ") + classname());
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a field name because it has no fields"));
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
-    throw std::invalid_argument(fields.tostring() + std::string(" is not a valid slice type for ") + classname());
+    throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field names because it has no fields"));
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    if (advanced.length() != 0) {
+      throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
+    }
+    throw std::runtime_error("FIXME: EmptyArray::getitem_next(jagged)");
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+    throw std::runtime_error("undefined operation: EmptyArray::getitem_next_jagged(array)");
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+    throw std::runtime_error("undefined operation: EmptyArray::getitem_next_jagged(missing)");
+  }
+
+  const std::shared_ptr<Content> EmptyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+    throw std::runtime_error("undefined operation: EmptyArray::getitem_next_jagged(jagged)");
   }
 
 }

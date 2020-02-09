@@ -39,7 +39,7 @@ namespace awkward {
   const std::shared_ptr<Content> Int64Fillable::snapshot() const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __i386__
     return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "q");
 #else
     return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), buffer_.ptr(), shape, strides, 0, sizeof(int64_t), "l");

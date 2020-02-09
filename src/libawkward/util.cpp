@@ -17,6 +17,23 @@ namespace rj = rapidjson;
 
 namespace awkward {
   namespace util {
+    template <typename T>
+    IndexOf<T> make_starts(const IndexOf<T>& offsets) {
+      return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
+    }
+
+    template <typename T>
+    IndexOf<T> make_stops(const IndexOf<T>& offsets) {
+      return IndexOf<T>(offsets.ptr(), offsets.offset() + 1, offsets.length() - 1);
+    }
+
+    template IndexOf<int32_t> make_starts(const IndexOf<int32_t>& offsets);
+    template IndexOf<uint32_t> make_starts(const IndexOf<uint32_t>& offsets);
+    template IndexOf<int64_t> make_starts(const IndexOf<int64_t>& offsets);
+    template IndexOf<int32_t> make_stops(const IndexOf<int32_t>& offsets);
+    template IndexOf<uint32_t> make_stops(const IndexOf<uint32_t>& offsets);
+    template IndexOf<int64_t> make_stops(const IndexOf<int64_t>& offsets);
+
     std::shared_ptr<RecordLookup> init_recordlookup(int64_t numfields) {
       std::shared_ptr<RecordLookup> out = std::make_shared<RecordLookup>();
       for (int64_t i = 0;  i < numfields;  i++) {
@@ -559,6 +576,19 @@ namespace awkward {
     }
 
     template <>
+    Error awkward_indexedarray_getitem_nextcarry_outindex_mask_64<int32_t>(int64_t* tocarry, int64_t* toindex, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+      return awkward_indexedarray32_getitem_nextcarry_outindex_mask_64(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
+    }
+    template <>
+    Error awkward_indexedarray_getitem_nextcarry_outindex_mask_64<uint32_t>(int64_t* tocarry, int64_t* toindex, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+      return awkward_indexedarrayU32_getitem_nextcarry_outindex_mask_64(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
+    }
+    template <>
+    Error awkward_indexedarray_getitem_nextcarry_outindex_mask_64<int64_t>(int64_t* tocarry, int64_t* toindex, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+      return awkward_indexedarray64_getitem_nextcarry_outindex_mask_64(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
+    }
+
+    template <>
     Error awkward_indexedarray_getitem_nextcarry_64<int32_t>(int64_t* tocarry, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
       return awkward_indexedarray32_getitem_nextcarry_64(tocarry, fromindex, indexoffset, lenindex, lencontent);
     }
@@ -777,6 +807,45 @@ namespace awkward {
     template <>
     Error awkward_unionarray_simplify_one_to8_64<int8_t, int64_t>(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base) {
       return awkward_unionarray8_64_simplify_one_to8_64(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, towhich, fromwhich, length, base);
+    }
+
+    template <>
+    Error awkward_listarray_getitem_jagged_expand_64<int32_t>(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t* tocarry, const int32_t* fromstarts, int64_t fromstartsoffset, const int32_t* fromstops, int64_t fromstopsoffset, int64_t jaggedsize, int64_t length) {
+      return awkward_listarray32_getitem_jagged_expand_64(multistarts, multistops, singleoffsets, tocarry, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, jaggedsize, length);
+    }
+    template <>
+    Error awkward_listarray_getitem_jagged_expand_64(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t* tocarry, const uint32_t* fromstarts, int64_t fromstartsoffset, const uint32_t* fromstops, int64_t fromstopsoffset, int64_t jaggedsize, int64_t length) {
+      return awkward_listarrayU32_getitem_jagged_expand_64(multistarts, multistops, singleoffsets, tocarry, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, jaggedsize, length);
+    }
+    template <>
+    Error awkward_listarray_getitem_jagged_expand_64(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t* tocarry, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset, int64_t jaggedsize, int64_t length) {
+      return awkward_listarray64_getitem_jagged_expand_64(multistarts, multistops, singleoffsets, tocarry, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, jaggedsize, length);
+    }
+
+    template <>
+    Error awkward_listarray_getitem_jagged_apply_64<int32_t>(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const int32_t* fromstarts, int64_t fromstartsoffset, const int32_t* fromstops, int64_t fromstopsoffset, int64_t contentlen) {
+      return awkward_listarray32_getitem_jagged_apply_64(tooffsets, tocarry, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, sliceindex, sliceindexoffset, sliceinnerlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, contentlen);
+    }
+    template <>
+    Error awkward_listarray_getitem_jagged_apply_64<uint32_t>(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const uint32_t* fromstarts, int64_t fromstartsoffset, const uint32_t* fromstops, int64_t fromstopsoffset, int64_t contentlen) {
+      return awkward_listarrayU32_getitem_jagged_apply_64(tooffsets, tocarry, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, sliceindex, sliceindexoffset, sliceinnerlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, contentlen);
+    }
+    template <>
+    Error awkward_listarray_getitem_jagged_apply_64<int64_t>(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset, int64_t contentlen) {
+      return awkward_listarray64_getitem_jagged_apply_64(tooffsets, tocarry, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, sliceindex, sliceindexoffset, sliceinnerlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset, contentlen);
+    }
+
+    template <>
+    Error awkward_listarray_getitem_jagged_descend_64<int32_t>(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int32_t* fromstarts, int64_t fromstartsoffset, const int32_t* fromstops, int64_t fromstopsoffset) {
+      return awkward_listarray32_getitem_jagged_descend_64(tooffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset);
+    }
+    template <>
+    Error awkward_listarray_getitem_jagged_descend_64<uint32_t>(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const uint32_t* fromstarts, int64_t fromstartsoffset, const uint32_t* fromstops, int64_t fromstopsoffset) {
+      return awkward_listarrayU32_getitem_jagged_descend_64(tooffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset);
+    }
+    template <>
+    Error awkward_listarray_getitem_jagged_descend_64<int64_t>(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset) {
+      return awkward_listarray64_getitem_jagged_descend_64(tooffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset);
     }
 
   }
