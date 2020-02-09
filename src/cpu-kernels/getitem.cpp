@@ -700,8 +700,8 @@ ERROR awkward_listoffsetarray_getitem_adjust_offsets(T* tooffsets, T* tononzero,
     int64_t count = 0;
     while (j < nonzerolength  &&  nonzero[nonzerooffset + j] < slicestop) {
       tononzero[j] = nonzero[nonzerooffset + j] - slicestart;
-      count++;
       j++;
+      count++;
     }
     tooffsets[i + 1] = tooffsets[i] + count;
   }
@@ -709,6 +709,31 @@ ERROR awkward_listoffsetarray_getitem_adjust_offsets(T* tooffsets, T* tononzero,
 }
 ERROR awkward_listoffsetarray_getitem_adjust_offsets_64(int64_t* tooffsets, int64_t* tononzero, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t length, const int64_t* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
   return awkward_listoffsetarray_getitem_adjust_offsets<int64_t>(tooffsets, tononzero, fromoffsets, offsetsoffset, length, nonzero, nonzerooffset, nonzerolength);
+}
+
+template <typename T>
+ERROR awkward_listoffsetarray_getitem_adjust_offsets_index(T* tooffsets, T* tononzero, const T* fromoffsets, int64_t offsetsoffset, int64_t length, const T* index, int64_t indexoffset, int64_t indexlength, const T* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
+  int64_t k = 0;
+  tooffsets[0] = fromoffsets[offsetsoffset + 0];
+  for (int64_t i = 0;  i < length;  i++) {
+    T slicestart = fromoffsets[offsetsoffset + i];
+    T slicestop = fromoffsets[offsetsoffset + i + 1];
+
+    int64_t count = 0;
+    while (k < indexlength  &&  (index[indexoffset + k] < 0  ||  nonzero[nonzerooffset + index[indexoffset + k]] < slicestop)) {
+      if (index[indexoffset + k] >= 0) {
+        int64_t j = index[indexoffset + k];
+        tononzero[j] = nonzero[nonzerooffset + j] - slicestart;
+      }
+      k++;
+      count++;
+    }
+    tooffsets[i + 1] = tooffsets[i] + count;
+  }
+  return success();
+}
+ERROR awkward_listoffsetarray_getitem_adjust_offsets_index_64(int64_t* tooffsets, int64_t* tononzero, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t length, const int64_t* index, int64_t indexoffset, int64_t indexlength, const int64_t* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
+  return awkward_listoffsetarray_getitem_adjust_offsets_index<int64_t>(tooffsets, tononzero, fromoffsets, offsetsoffset, length, index, indexoffset, indexlength, nonzero, nonzerooffset, nonzerolength);
 }
 
 template <typename T>

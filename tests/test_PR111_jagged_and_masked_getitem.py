@@ -265,3 +265,16 @@ def test_jagged_mask():
     assert awkward1.tolist(array[[[True, False, True], [], [True, True], [True], [True, True, True]]]) == [[1.1, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert awkward1.tolist(array[[[True, True, True], [], [False, True], [True], [True, True, True]]]) == [[1.1, 2.2, 3.3], [], [5.5], [6.6], [7.7, 8.8, 9.9]]
     assert awkward1.tolist(array[[[True, True, True], [], [False, False], [True], [True, True, True]]]) == [[1.1, 2.2, 3.3], [], [], [6.6], [7.7, 8.8, 9.9]]
+
+def test_jagged_missing_mask():
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    assert awkward1.tolist(awkward1.tolist(array[[[True, True, True], [], [True, True]]])) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(awkward1.tolist(array[[[True, False, True], [], [True, True]]])) == [[1.1, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(awkward1.tolist(array[[[True, None, True], [], [True, True]]])) == [[1.1, None, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(awkward1.tolist(array[[[True, None, False], [], [True, True]]])) == [[1.1, None], [], [4.4, 5.5]]
+    assert awkward1.tolist(awkward1.tolist(array[[[False, None, True], [], [True, True]]])) == [[None, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(awkward1.tolist(array[[[False, None, False], [], [True, True]]])) == [[None], [], [4.4, 5.5]]
+    assert awkward1.tolist(awkward1.tolist(array[[[True, True, False], [], [False, True]]])) == [[1.1, 2.2], [], [5.5]]
+    assert awkward1.tolist(awkward1.tolist(array[[[True, True, None], [], [False, True]]])) == [[1.1, 2.2, None], [], [5.5]]
+    # assert awkward1.tolist(awkward1.tolist(array[[[True, True, False], [None], [False, True]]])) == [[1.1, 2.2], [None], [5.5]]
+    # assert awkward1.tolist(awkward1.tolist(array[[[True, True, False], [], [None, True]]])) == [[1.1, 2.2], [], [None, 5.5]]

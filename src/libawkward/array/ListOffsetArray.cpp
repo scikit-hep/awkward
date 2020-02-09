@@ -769,9 +769,9 @@ namespace awkward {
     }
 
     std::shared_ptr<SliceItem> slicecontent = next.get()->asslice();
-    if (SliceArray64* raw = dynamic_cast<SliceArray64*>(slicecontent.get())) {
-      if (raw->frombool()) {
-        Index64 nonzero(raw->index());
+    if (SliceArray64* array = dynamic_cast<SliceArray64*>(slicecontent.get())) {
+      if (array->frombool()) {
+        Index64 nonzero(array->index());
         Index64 adjustedoffsets(offsets.get()->length());
         Index64 adjustednonzero(nonzero.length());
 
@@ -786,8 +786,36 @@ namespace awkward {
           nonzero.length());
         util::handle_error(err, classname(), nullptr);
 
-        std::shared_ptr<SliceItem> outcontent = std::make_shared<SliceArray64>(adjustednonzero, raw->shape(), raw->strides(), true);
-        return std::make_shared<SliceJagged64>(adjustedoffsets, outcontent);
+        std::shared_ptr<SliceItem> newarray = std::make_shared<SliceArray64>(adjustednonzero, array->shape(), array->strides(), true);
+        return std::make_shared<SliceJagged64>(adjustedoffsets, newarray);
+      }
+    }
+    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(slicecontent.get())) {
+      if (SliceArray64* array = dynamic_cast<SliceArray64*>(missing->content().get())) {
+        if (array->frombool()) {
+          Index64 index(missing->index());
+          Index64 nonzero(array->index());
+          Index64 adjustedoffsets(offsets.get()->length());
+          Index64 adjustednonzero(nonzero.length());
+
+          struct Error err = awkward_listoffsetarray_getitem_adjust_offsets_index_64(
+            adjustedoffsets.ptr().get(),
+            adjustednonzero.ptr().get(),
+            offsets.get()->ptr().get(),
+            offsets.get()->offset(),
+            offsets.get()->length() - 1,
+            index.ptr().get(),
+            index.offset(),
+            index.length(),
+            nonzero.ptr().get(),
+            nonzero.offset(),
+            nonzero.length());
+          util::handle_error(err, classname(), nullptr);
+
+          std::shared_ptr<SliceItem> newarray = std::make_shared<SliceArray64>(adjustednonzero, array->shape(), array->strides(), true);
+          std::shared_ptr<SliceItem> newmissing = std::make_shared<SliceMissing64>(missing->index(), newarray);
+          return std::make_shared<SliceJagged64>(adjustedoffsets, newmissing);
+        }
       }
     }
     return std::make_shared<SliceJagged64>(Index64(offsets.get()->ptr(), offsets.get()->offset(), offsets.get()->length()), slicecontent);
