@@ -740,7 +740,7 @@ ERROR awkward_listoffsetarray_getitem_adjust_offsets_index(T* tooffsets, T* tono
     T slicestop = fromoffsets[offsetsoffset + i + 1];
     int64_t numnull = 0;
     for (int64_t j = slicestart;  j < slicestop;  j++) {
-      numnull += (originalmask[maskoffset + j]);
+      numnull += (originalmask[maskoffset + j] != 0 ? 1 : 0);
     }
     int64_t nullcount = 0;
     int64_t count = 0;
