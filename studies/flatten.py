@@ -880,14 +880,35 @@ def NumpyArray_flatten(self, axis=0):
         if self.shape[0] == 0:
             return NumpyArray.onedim([])
 
+        # compact array and strides
         compact_ptr = compact_array(array, len(self.shape))
+        compact_strides = self.strides
+        compact_strides[2] = 1
+        compact_strides[1] = compact_strides[2] * self.shape[2]
+        compact_strides[0] = compact_strides[1] * self.shape[1]
 
-        shape = self.shape[:axis] + [int(self.shape[axis])*int(self.shape[axis + 1])] + self.shape[axis + 2:]
-        strides = self.strides[:axis] + self.strides[axis + 1:]
+        # flatten shape
+        shape = []
+        if len(self.shape) == 1:
+            shape = []
+        else:
+            offset = axis
+            indx = offset
+            for i in range(axis):
+                shape.append(self.shape[i])
+            shape.append(self.shape[axis]*self.shape[axis + 1])
+            for i in range(len(self.shape) - axis - 2):
+                shape.append(self.shape[axis + 2 + i])
 
-        if len(shape) > 1:
-            # compact strides for a compact array
-            strides[0] = shape[-1]
+        # flatten strides
+        strides = []
+        if len(self.strides) == 1:
+            strides = []
+        else:
+            for i in range(axis):
+                strides.append(compact_strides[i])
+            for i in range(len(compact_strides) - axis - 1):
+                strides.append(compact_strides[axis + i + 1])
 
         return NumpyArray(compact_ptr, shape, strides, 0)
 
