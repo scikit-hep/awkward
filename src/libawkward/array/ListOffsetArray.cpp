@@ -799,11 +799,6 @@ namespace awkward {
           Index64 adjustedoffsets(offsets.get()->length());
           Index64 adjustednonzero(nonzero.length());
 
-          std::cout << "offsets         " << offsets.get()->tostring() << std::endl;
-          std::cout << "originalmask    " << originalmask.tostring() << std::endl;
-          std::cout << "index           " << index.tostring() << std::endl;
-          std::cout << "nonzero         " << nonzero.tostring() << std::endl;
-
           struct Error err = awkward_listoffsetarray_getitem_adjust_offsets_index_64(
             adjustedoffsets.ptr().get(),
             adjustednonzero.ptr().get(),
@@ -821,15 +816,9 @@ namespace awkward {
             originalmask.length());
           util::handle_error(err, classname(), nullptr);
 
-          std::cout << "adjustedoffsets " << adjustedoffsets.tostring() << std::endl;
-          std::cout << "adjustednonzero " << adjustednonzero.tostring() << std::endl;
-
           std::shared_ptr<SliceItem> newarray = std::make_shared<SliceArray64>(adjustednonzero, array->shape(), array->strides(), true);
           std::shared_ptr<SliceItem> newmissing = std::make_shared<SliceMissing64>(missing->index(), missing->originalmask(), newarray);
-          std::shared_ptr<SliceJagged64> tmp = std::make_shared<SliceJagged64>(adjustedoffsets, newmissing);
-
-          std::cout << "final output " << tmp.get()->tostring() << std::endl;
-          return tmp;
+          return std::make_shared<SliceJagged64>(adjustedoffsets, newmissing);
         }
       }
     }
