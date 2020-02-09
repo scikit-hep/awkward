@@ -1030,23 +1030,23 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
-    return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent);
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
-    return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent);
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
-    return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent);
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename T, bool ISOPTION>
   template <typename S>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent) const {
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
     if (ISOPTION) {
       int64_t numnull;
       struct Error err1 = util::awkward_indexedarray_numnull<T>(
@@ -1068,7 +1068,7 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
 
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-      std::shared_ptr<Content> out = next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
+      std::shared_ptr<Content> out = next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
       IndexedArrayOf<T, ISOPTION> out2(identities_, parameters_, outindex, out);
       return out2.simplify();
     }
@@ -1083,7 +1083,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
 
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-      return next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
+      return next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
     }
   }
 

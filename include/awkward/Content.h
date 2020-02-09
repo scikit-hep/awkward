@@ -42,7 +42,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const = 0;
     virtual const std::shared_ptr<Content> getitem(const Slice& where) const;
     virtual const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const;
-    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent) const;
+    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent, const Slice& tail) const;
     virtual const std::shared_ptr<Content> carry(const Index64& carry) const = 0;
     virtual const std::string purelist_parameter(const std::string& key) const = 0;
     virtual bool purelist_isregular() const = 0;
@@ -84,9 +84,9 @@ namespace awkward {
     virtual const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const;
     virtual const std::shared_ptr<Content> getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const = 0;
-    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const = 0;
-    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const = 0;
-    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const = 0;
+    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const = 0;
+    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const = 0;
+    virtual const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const = 0;
 
   protected:
     const std::shared_ptr<Content> getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const;

@@ -187,15 +187,15 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent) const {
+  const std::shared_ptr<Content> Content::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent, const Slice& tail) const {
     if (SliceArray64* array = dynamic_cast<SliceArray64*>(slicecontent.get())) {
-      return getitem_next_jagged(slicestarts, slicestops, *array);
+      return getitem_next_jagged(slicestarts, slicestops, *array, tail);
     }
     else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(slicecontent.get())) {
-      return getitem_next_jagged(slicestarts, slicestops, *missing);
+      return getitem_next_jagged(slicestarts, slicestops, *missing, tail);
     }
     else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(slicecontent.get())) {
-      return getitem_next_jagged(slicestarts, slicestops, *jagged);
+      return getitem_next_jagged(slicestarts, slicestops, *jagged, tail);
     }
     else {
       throw std::runtime_error("unexpected slice type for getitem_next_jagged");

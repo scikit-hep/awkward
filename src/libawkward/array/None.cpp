@@ -181,15 +181,15 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::getitem_next(jagged)");
   }
 
-  const std::shared_ptr<Content> None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
+  const std::shared_ptr<Content> None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: None::getitem_next_jagged(array)");
   }
 
-  const std::shared_ptr<Content> None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
+  const std::shared_ptr<Content> None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: None::getitem_next_jagged(missing)");
   }
 
-  const std::shared_ptr<Content> None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
+  const std::shared_ptr<Content> None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: None::getitem_next_jagged(jagged)");
   }
 

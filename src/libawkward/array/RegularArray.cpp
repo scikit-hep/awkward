@@ -636,6 +636,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+    std::cout << "RegularArray::getitem_next(jagged)" << std::endl;
+
     if (advanced.length() != 0) {
       throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
     }
@@ -656,25 +658,24 @@ namespace awkward {
       regularlength);
     util::handle_error(err, classname(), identities_.get());
 
-    std::shared_ptr<Content> down = content_.get()->getitem_next_jagged(multistarts, multistops, jagged.content());
-    std::shared_ptr<Content> next = down.get()->getitem_next(tail.head(), tail.tail(), advanced);
+    std::shared_ptr<Content> down = content_.get()->getitem_next_jagged(multistarts, multistops, jagged.content(), tail);
 
-    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), next, jagged.length());
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), down, jagged.length());
   }
 
-  const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
+  const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     std::shared_ptr<Content> self = toListOffsetArray64();
-    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
+    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
-  const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
+  const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     std::shared_ptr<Content> self = toListOffsetArray64();
-    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
+    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
-  const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
+  const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     std::shared_ptr<Content> self = toListOffsetArray64();
-    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
+    return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
 }

@@ -736,27 +736,27 @@ namespace awkward {
     throw std::invalid_argument(std::string("undefined operation: RecordArray::getitem_next(jagged)"));
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
-    return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent);
+  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent, tail);
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
-    return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent);
+  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent, tail);
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
-    return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent);
+  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename S>
-  const std::shared_ptr<Content> RecordArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent) const {
+  const std::shared_ptr<Content> RecordArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
     if (contents_.empty()) {
       return shallow_copy();
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent));
+        contents.push_back(content.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail));
       }
       return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
     }

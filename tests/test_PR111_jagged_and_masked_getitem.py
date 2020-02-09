@@ -238,3 +238,8 @@ def test_indexedarray():
     assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], [None], [1, None, 1]])]) == [[6.6, 9.9], [5.5], [None], [1.1, None, 1.1]]
     assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [], [1, 1]])]) == [[6.6, 9.9], [5.5], None, [], [1.1, 1.1]]
     assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [None], [1, None, 1]])]) == [[6.6, 9.9], [5.5], None, [None], [1.1, None, 1.1]]
+
+def test_sequential():
+    array = awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5).tolist())
+    assert awkward1.tolist(array[awkward1.Array([[2, 1, 0], [2, 1, 0]])]) == [[[10, 11, 12, 13, 14], [5, 6, 7, 8, 9], [0, 1, 2, 3, 4]], [[25, 26, 27, 28, 29], [20, 21, 22, 23, 24], [15, 16, 17, 18, 19]]]
+    assert awkward1.tolist(array[awkward1.Array([[2, 1, 0], [2, 1, 0]]), :2]) == [[[10, 11], [5, 6], [0, 1]], [[25, 26], [20, 21], [15, 16]]]

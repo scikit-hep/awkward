@@ -354,9 +354,9 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent, const Slice& tail) const {
     std::shared_ptr<Content> listarray = std::make_shared<ListArrayOf<T>>(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), content_);
-    return listarray.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
+    return listarray.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename T>
@@ -917,21 +917,21 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     ListArrayOf<T> listarray(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), content_);
-    return listarray.getitem_next_jagged(slicestarts, slicestops, slicecontent);
+    return listarray.getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     ListArrayOf<T> listarray(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), content_);
-    return listarray.getitem_next_jagged(slicestarts, slicestops, slicecontent);
+    return listarray.getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     ListArrayOf<T> listarray(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), content_);
-    return listarray.getitem_next_jagged(slicestarts, slicestops, slicecontent);
+    return listarray.getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
   template class ListOffsetArrayOf<int32_t>;
