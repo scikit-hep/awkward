@@ -207,6 +207,12 @@ def tolist(array):
     elif isinstance(array, awkward1.layout.Content):
         return [tolist(x) for x in array]
 
+    elif isinstance(array, dict):
+        return dict((n, tolist(x)) for n, x in array.items())
+
+    elif isinstance(array, Iterable):
+        return [tolist(x) for x in array]
+
     else:
         raise TypeError("unrecognized array type: {0}".format(repr(array)))
 

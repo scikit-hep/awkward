@@ -636,8 +636,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
-    std::cout << "RegularArray::getitem_next(jagged)" << std::endl;
-
     if (advanced.length() != 0) {
       throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
     }

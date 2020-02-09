@@ -691,6 +691,27 @@ ERROR awkward_indexedarray64_getitem_nextcarry_outindex64_64(int64_t* tocarry, i
 }
 
 template <typename T>
+ERROR awkward_listoffsetarray_getitem_adjust_offsets(T* tooffsets, T* tononzero, const T* fromoffsets, int64_t offsetsoffset, int64_t length, const T* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
+  int64_t j = 0;
+  tooffsets[0] = fromoffsets[offsetsoffset + 0];
+  for (int64_t i = 0;  i < length;  i++) {
+    T slicestart = fromoffsets[offsetsoffset + i];
+    T slicestop = fromoffsets[offsetsoffset + i + 1];
+    int64_t count = 0;
+    while (j < nonzerolength  &&  nonzero[nonzerooffset + j] < slicestop) {
+      tononzero[j] = nonzero[nonzerooffset + j] - slicestart;
+      count++;
+      j++;
+    }
+    tooffsets[i + 1] = tooffsets[i] + count;
+  }
+  return success();
+}
+ERROR awkward_listoffsetarray_getitem_adjust_offsets_64(int64_t* tooffsets, int64_t* tononzero, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t length, const int64_t* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
+  return awkward_listoffsetarray_getitem_adjust_offsets<int64_t>(tooffsets, tononzero, fromoffsets, offsetsoffset, length, nonzero, nonzerooffset, nonzerolength);
+}
+
+template <typename T>
 ERROR awkward_indexedarray_getitem_adjust_outindex(T* toindex, T* tononzero, const T* fromindex, int64_t fromindexoffset, int64_t fromindexlength, const T* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
   int64_t j = 0;
   int64_t k = 0;

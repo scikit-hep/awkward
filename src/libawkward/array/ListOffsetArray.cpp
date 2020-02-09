@@ -757,19 +757,40 @@ namespace awkward {
     int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
     std::shared_ptr<Content> next = content_.get()->getitem_range_nowrap(start, stop);
 
-    if (start == 0) {
-      return std::make_shared<SliceJagged64>(offsets_, next.get()->asslice());
-    }
-    else {
-      Index64 offsets(offsets_.length());
+    std::shared_ptr<Index64> offsets = std::make_shared<Index64>(offsets_.ptr(), offsets_.offset(), offsets_.length());
+    if (start != 0) {
+      offsets = std::make_shared<Index64>(offsets_.length());
       struct Error err = awkward_listoffsetarray64_compact_offsets64(
-        offsets.ptr().get(),
+        offsets.get()->ptr().get(),
         offsets_.ptr().get(),
         offsets_.offset(),
         length());
       util::handle_error(err, classname(), identities_.get());
-      return std::make_shared<SliceJagged64>(offsets, next.get()->asslice());
     }
+
+    std::shared_ptr<SliceItem> slicecontent = next.get()->asslice();
+    if (SliceArray64* raw = dynamic_cast<SliceArray64*>(slicecontent.get())) {
+      if (raw->frombool()) {
+        Index64 nonzero(raw->index());
+        Index64 adjustedoffsets(offsets.get()->length());
+        Index64 adjustednonzero(nonzero.length());
+
+        struct Error err = awkward_listoffsetarray_getitem_adjust_offsets_64(
+          adjustedoffsets.ptr().get(),
+          adjustednonzero.ptr().get(),
+          offsets.get()->ptr().get(),
+          offsets.get()->offset(),
+          offsets.get()->length() - 1,
+          nonzero.ptr().get(),
+          nonzero.offset(),
+          nonzero.length());
+        util::handle_error(err, classname(), nullptr);
+
+        std::shared_ptr<SliceItem> outcontent = std::make_shared<SliceArray64>(adjustednonzero, raw->shape(), raw->strides(), true);
+        return std::make_shared<SliceJagged64>(adjustedoffsets, outcontent);
+      }
+    }
+    return std::make_shared<SliceJagged64>(Index64(offsets.get()->ptr(), offsets.get()->offset(), offsets.get()->length()), slicecontent);
   }
 
   template <typename T>
