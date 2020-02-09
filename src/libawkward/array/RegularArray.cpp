@@ -507,7 +507,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> RegularArray::asslice() const {
-    throw std::invalid_argument("regular dimensions cannot be mixed with var dimensions or 'None' in slice (try ak.tonumpy or ak.tojagged)");
+    throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

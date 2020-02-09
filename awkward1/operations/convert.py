@@ -153,6 +153,9 @@ def tonumpy(array):
     elif isinstance(array, awkward1.layout.Content):
         raise AssertionError("unrecognized Content type: {0}".format(type(array)))
 
+    elif isinstance(array, Iterable):
+        return numpy.asarray(array)
+
     else:
         raise ValueError("cannot convert {0} into numpy.ndarray".format(array))
 

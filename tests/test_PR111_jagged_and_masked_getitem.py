@@ -253,3 +253,7 @@ def test_union():
     assert awkward1.tolist(unionarray) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8], [], [9.9, 10.0, 11.1, 12.2]]
 
     assert awkward1.tolist(unionarray[awkward1.Array([[0, -1], [], [1, 1], [], [-1], [], [1, -2, -1]])]) == [[1.1, 3.3], [], [5.5, 5.5], [], [8.8], [], [10.0, 11.1, 12.2]]
+
+def test_python_to_jaggedslice():
+    assert awkward1.layout.slice_tostring([[1, 2, 3], [], [4, 5]]) == "[jagged([0, 3, 3, 5], array([1, 2, 3, 4, 5]))]"
+    assert awkward1.layout.slice_tostring([[1, 2], [3, 4], [5, 6]]) == "[array([[1, 2], [3, 4], [5, 6]])]"

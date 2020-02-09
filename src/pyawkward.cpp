@@ -487,10 +487,10 @@ py::class_<ak::IdentitiesOf<T>> make_IdentitiesOf(py::handle m, std::string name
 /////////////////////////////////////////////////////////////// Slice
 
 bool handle_as_numpy(const std::shared_ptr<ak::Content>& content) {
-  if (content.get()->parameter_equals("__array__", "\"string\"")) {
-    return true;
-  }
-  else if (ak::NumpyArray* raw = dynamic_cast<ak::NumpyArray*>(content.get())) {
+  // if (content.get()->parameter_equals("__array__", "\"string\"")) {
+  //   return true;
+  // }
+  if (ak::NumpyArray* raw = dynamic_cast<ak::NumpyArray*>(content.get())) {
     return true;
   }
   else if (ak::EmptyArray* raw = dynamic_cast<ak::EmptyArray*>(content.get())) {
@@ -541,6 +541,8 @@ bool handle_as_numpy(const std::shared_ptr<ak::Content>& content) {
 }
 
 void toslice_part(ak::Slice& slice, py::object obj) {
+  int64_t length_before = slice.length();
+
   if (py::isinstance<py::int_>(obj)) {
     // FIXME: what happens if you give this a Numpy integer? a Numpy 0-dimensional array?
     slice.append(std::make_shared<ak::SliceAt>(obj.cast<int64_t>()));
@@ -583,50 +585,80 @@ void toslice_part(ak::Slice& slice, py::object obj) {
   }
 
   else if (py::isinstance<py::iterable>(obj)) {
-    std::shared_ptr<ak::Content> content(nullptr);
-
-    if (py::isinstance(obj, py::module::import("numpy").attr("ma").attr("MaskedArray"))) {
-      content = unbox_content(py::module::import("awkward1").attr("fromnumpy")(obj).attr("layout"));
-    }
-    else if (py::isinstance<ak::Content>(obj)) {
-      content = unbox_content(obj);
-    }
-    else if (py::isinstance(obj, py::module::import("awkward1").attr("Array"))) {
-      content = unbox_content(obj.attr("layout"));
-    }
-
-    if (content.get() != nullptr  &&  !handle_as_numpy(content)) {
-      slice.append(content.get()->asslice());
-    }
-    else {
-      if (py::isinstance<ak::Content>(obj)) {
-        obj = py::module::import("awkward1").attr("tonumpy")(obj);
-      }
-      else if (py::isinstance(obj, py::module::import("awkward1").attr("Array"))) {
-        obj = py::module::import("awkward1").attr("tonumpy")(obj);
-      }
-
-      std::vector<std::string> strings;
-      bool all_strings = true;
-      for (auto x : obj) {
-        if (py::isinstance<py::str>(x)) {
-          strings.push_back(x.cast<std::string>());
-        }
-        else {
-          all_strings = false;
-          break;
-        }
-      }
-
-      if (all_strings  &&  !strings.empty()) {
-        slice.append(std::make_shared<ak::SliceFields>(strings));
+    std::vector<std::string> strings;
+    bool all_strings = true;
+    for (auto x : obj) {
+      if (py::isinstance<py::str>(x)) {
+        strings.push_back(x.cast<std::string>());
       }
       else {
-        py::object objarray = py::module::import("numpy").attr("asarray")(obj);
-        if (!py::isinstance<py::array>(objarray)) {
-          throw std::invalid_argument("iterable cannot be cast as an array");
+        all_strings = false;
+        break;
+      }
+    }
+
+    if (all_strings  &&  !strings.empty()) {
+      slice.append(std::make_shared<ak::SliceFields>(strings));
+    }
+    else {
+      std::shared_ptr<ak::Content> content(nullptr);
+
+      if (py::isinstance(obj, py::module::import("numpy").attr("ma").attr("MaskedArray"))) {
+        content = unbox_content(py::module::import("awkward1").attr("fromnumpy")(obj, false, false));
+      }
+      else if (py::isinstance(obj, py::module::import("numpy").attr("ndarray"))) {
+        // content = nullptr!
+      }
+      else if (py::isinstance<ak::Content>(obj)) {
+        content = unbox_content(obj);
+      }
+      else if (py::isinstance<ak::FillableArray>(obj)) {
+        content = unbox_content(obj.attr("snapshot")());
+      }
+      else if (py::isinstance(obj, py::module::import("awkward1").attr("Array"))) {
+        content = unbox_content(obj.attr("layout"));
+      }
+      else if (py::isinstance(obj, py::module::import("awkward1").attr("FillableArray"))) {
+        content = unbox_content(obj.attr("snapshot")().attr("layout"));
+      }
+      else {
+        bool bad = false;
+        try {
+          obj = py::module::import("numpy").attr("asarray")(obj);
         }
-        py::array array = objarray.cast<py::array>();
+        catch (py::error_already_set& exc) {
+          exc.restore();
+          PyErr_Clear();
+          bad = true;
+        }
+        if (!bad) {
+          py::array array = obj.cast<py::array>();
+          py::buffer_info info = array.request();
+          if (info.format.compare("O") == 0) {
+            bad = true;
+          }
+        }
+        if (bad) {
+          content = unbox_content(py::module::import("awkward1").attr("fromiter")(obj, false));
+        }
+      }
+
+      if (content.get() != nullptr  &&  !handle_as_numpy(content)) {
+        if (content.get()->parameter_equals("__array__", "\"string\"")) {
+          obj = box(content);
+          obj = py::module::import("awkward1").attr("tolist")(obj);
+          std::vector<std::string> strings;
+          for (auto x : obj) {
+            strings.push_back(x.cast<std::string>());
+          }
+          slice.append(std::make_shared<ak::SliceFields>(strings));
+        }
+        else {
+          slice.append(content.get()->asslice());
+        }
+      }
+      else {
+        py::array array = obj.cast<py::array>();
         if (array.ndim() == 0) {
           throw std::invalid_argument("arrays used as an index must have at least one dimension");
         }
