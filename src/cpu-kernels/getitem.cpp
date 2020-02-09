@@ -992,9 +992,6 @@ ERROR awkward_listarray_getitem_jagged_descend(T* tooffsets, const T* slicestart
   for (int64_t i = 0;  i < sliceouterlen;  i++) {
     int64_t slicecount = (int64_t)(slicestops[slicestopsoffset + i] - slicestarts[slicestartsoffset + i]);
     int64_t count = (int64_t)(fromstops[fromstopsoffset + i] - fromstarts[fromstartsoffset + i]);
-
-    std::cout << "    i " << i << " slicecount " << slicecount << " count " << count << std::endl;
-
     if (slicecount != count) {
       return failure("jagged slice inner length differs from array inner length", i, kSliceNone);
     }
