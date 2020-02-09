@@ -184,4 +184,11 @@ def test_regular_regular():
 
     assert awkward1.tolist(regulararray2[awkward1.Array([[[2], [1, -2], [-1, None, 0]], [[-3], [-4, 3], [-5, None, 4]]])]) == [[[2], [6, 8], [14, None, 10]], [[17], [21, 23], [25, None, 29]]]
 
-    # assert awkward1.tolist(regulararray2[awkward1.Array([[[2], None, [-1, None, 0]], [[-3], None, [-5, None, 4]]])]) == [[[2], None, [14, None, 10]], [[17], None, [25, None, 29]]]
+def test_masked_of_jagged_of_whatever():
+    content = awkward1.layout.NumpyArray(numpy.arange(2*3*5))
+    regulararray1 = awkward1.layout.RegularArray(content, 5)
+    regulararray2 = awkward1.layout.RegularArray(regulararray1, 3)
+
+    assert awkward1.tolist(regulararray2[awkward1.Array([[[2], None, [-1, 2, 0]], [[-3], None, [-5, -3, 4]]])]) == [[[2], None, [14, 12, 10]], [[17], None, [25, 27, 29]]]
+
+    assert awkward1.tolist(regulararray2[awkward1.Array([[[2], None, [-1, None, 0]], [[-3], None, [-5, None, 4]]])]) == [[[2], None, [14, None, 10]], [[17], None, [25, None, 29]]]

@@ -1041,11 +1041,9 @@ namespace awkward {
     }
 
     Index64 missing = slicecontent.index();
-    Index64 smalloffsets(slicestarts.length() + 1);
-    Index64 largeoffsets(slicestarts.length() + 1);
-    struct Error err = awkward_listarray_getitem_jagged_shrink_64(
-      smalloffsets.ptr().get(),
-      largeoffsets.ptr().get(),
+    int64_t numvalid;
+    struct Error err1 = awkward_listarray_getitem_jagged_numvalid_64(
+      &numvalid,
       slicestarts.ptr().get(),
       slicestarts.offset(),
       slicestops.ptr().get(),
@@ -1054,9 +1052,54 @@ namespace awkward {
       missing.ptr().get(),
       missing.offset(),
       missing.length());
-    util::handle_error(err, classname(), nullptr);
+    util::handle_error(err1, classname(), nullptr);
 
-    std::shared_ptr<Content> out = Content::getitem_next_jagged(util::make_starts(smalloffsets), util::make_stops(smalloffsets), slicecontent.content());
+    Index64 nextcarry(numvalid);
+    Index64 smalloffsets(slicestarts.length() + 1);
+    Index64 largeoffsets(slicestarts.length() + 1);
+    struct Error err2 = awkward_listarray_getitem_jagged_shrink_64(
+      nextcarry.ptr().get(),
+      smalloffsets.ptr().get(),
+      largeoffsets.ptr().get(),
+      slicestarts.ptr().get(),
+      slicestarts.offset(),
+      slicestops.ptr().get(),
+      slicestops.offset(),
+      slicestarts.length(),
+      missing.ptr().get(),
+      missing.offset());
+    util::handle_error(err2, classname(), nullptr);
+
+    std::cout << "SliceMissing " << slicecontent.tostring() << std::endl;
+    std::cout << tostring() << std::endl;
+    std::cout << "smalloffsets " << smalloffsets.tostring() << std::endl;
+    std::cout << "largeoffsets " << largeoffsets.tostring() << std::endl;
+
+    std::cout << "content" << std::endl;
+    std::cout << content_.get()->tostring() << std::endl;
+
+    std::shared_ptr<Content> out;
+    if (dynamic_cast<SliceJagged64*>(slicecontent.content().get())) {
+      std::cout << "slicecontent.content is SliceJagged; using carry" << std::endl;
+
+      std::cout << "nextcarry " << nextcarry.tostring() << std::endl;
+
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+
+      std::shared_ptr<Content> next = std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), smalloffsets, nextcontent);
+
+      std::cout << "next" << std::endl;
+      std::cout << next.get()->tostring() << std::endl;
+
+      out = next.get()->getitem_next_jagged(util::make_starts(smalloffsets), util::make_stops(smalloffsets), slicecontent.content());
+    }
+    else {
+      std::cout << "slicecontent.content is anything else; not using it" << std::endl;
+      out = Content::getitem_next_jagged(util::make_starts(smalloffsets), util::make_stops(smalloffsets), slicecontent.content());
+    }
+
+    std::cout << "out" << std::endl;
+    std::cout << out.get()->tostring() << std::endl;
 
     if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get())) {
       std::shared_ptr<Content> content = raw->content();
@@ -1073,6 +1116,11 @@ namespace awkward {
     if (starts_.length() < slicestarts.length()) {
       util::handle_error(failure("jagged slice length differs from array length", kSliceNone, kSliceNone), classname(), identities_.get());
     }
+
+    std::cout << "SliceJagged " << slicecontent.tostring() << std::endl;
+    std::cout << tostring() << std::endl;
+    std::cout << "slicestarts " << slicestarts.tostring() << std::endl;
+    std::cout << "slicestops  " << slicestops.tostring() << std::endl;
 
     Index64 outoffsets(slicestarts.length() + 1);
     struct Error err = util::awkward_listarray_getitem_jagged_descend_64<T>(

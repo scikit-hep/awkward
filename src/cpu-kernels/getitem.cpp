@@ -922,7 +922,32 @@ ERROR awkward_listarray64_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* t
 }
 
 template <typename T>
-ERROR awkward_listarray_getitem_jagged_shrink(T* tosmalloffsets, T* tolargeoffsets, const T* slicestarts, int64_t slicestartsoffset, const T* slicestops, int64_t slicestopsoffset, int64_t length, const T* missing, int64_t missingoffset, int64_t missinglength) {
+ERROR awkward_listarray_getitem_jagged_numvalid(int64_t* numvalid, const T* slicestarts, int64_t slicestartsoffset, const T* slicestops, int64_t slicestopsoffset, int64_t length, const T* missing, int64_t missingoffset, int64_t missinglength) {
+  *numvalid = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    T slicestart = slicestarts[slicestartsoffset + i];
+    T slicestop = slicestops[slicestopsoffset + i];
+    if (slicestart != slicestop) {
+      if (slicestop < slicestart) {
+        return failure("jagged slice's stops[i] < starts[i]", i, kSliceNone);
+      }
+      if (slicestop > missinglength) {
+        return failure("jagged slice's offsets extend beyond its content", i, slicestop);
+      }
+      for (int64_t j = slicestart;  j < slicestop;  j++) {
+        *numvalid = *numvalid + (missing[missingoffset + j] >= 0 ? 1 : 0);
+      }
+    }
+  }
+  return success();
+}
+ERROR awkward_listarray_getitem_jagged_numvalid_64(int64_t* numvalid, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t length, const int64_t* missing, int64_t missingoffset, int64_t missinglength) {
+  return awkward_listarray_getitem_jagged_numvalid<int64_t>(numvalid, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, length, missing, missingoffset, missinglength);
+}
+
+template <typename T>
+ERROR awkward_listarray_getitem_jagged_shrink(T* tocarry, T* tosmalloffsets, T* tolargeoffsets, const T* slicestarts, int64_t slicestartsoffset, const T* slicestops, int64_t slicestopsoffset, int64_t length, const T* missing, int64_t missingoffset) {
+  int64_t k = 0;
   if (length == 0) {
     tosmalloffsets[0] = 0;
     tolargeoffsets[0] = 0;
@@ -935,15 +960,13 @@ ERROR awkward_listarray_getitem_jagged_shrink(T* tosmalloffsets, T* tolargeoffse
     T slicestart = slicestarts[slicestartsoffset + i];
     T slicestop = slicestops[slicestopsoffset + i];
     if (slicestart != slicestop) {
-      if (slicestop < slicestart) {
-        return failure("jagged slice's stops[i] < starts[i]", i, kSliceNone);
-      }
-      if (slicestop > missinglength) {
-        return failure("jagged slice's offsets extend beyond its content", i, slicestop);
-      }
       T smallcount = 0;
       for (int64_t j = slicestart;  j < slicestop;  j++) {
-        smallcount += (missing[missingoffset + j] >= 0 ? 1 : 0);
+        if (missing[missingoffset + j] >= 0) {
+          tocarry[k] = j;
+          k++;
+          smallcount++;
+        }
       }
       tosmalloffsets[i + 1] = tosmalloffsets[i] + smallcount;
     }
@@ -954,8 +977,8 @@ ERROR awkward_listarray_getitem_jagged_shrink(T* tosmalloffsets, T* tolargeoffse
   }
   return success();
 }
-ERROR awkward_listarray_getitem_jagged_shrink_64(int64_t* tosmalloffsets, int64_t* tolargeoffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t length, const int64_t* missing, int64_t missingoffset, int64_t missinglength) {
-  return awkward_listarray_getitem_jagged_shrink<int64_t>(tosmalloffsets, tolargeoffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, length, missing, missingoffset, missinglength);
+ERROR awkward_listarray_getitem_jagged_shrink_64(int64_t* tocarry, int64_t* tosmalloffsets, int64_t* tolargeoffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t length, const int64_t* missing, int64_t missingoffset) {
+  return awkward_listarray_getitem_jagged_shrink<int64_t>(tocarry, tosmalloffsets, tolargeoffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, length, missing, missingoffset);
 }
 
 template <typename C, typename T>
@@ -969,6 +992,9 @@ ERROR awkward_listarray_getitem_jagged_descend(T* tooffsets, const T* slicestart
   for (int64_t i = 0;  i < sliceouterlen;  i++) {
     int64_t slicecount = (int64_t)(slicestops[slicestopsoffset + i] - slicestarts[slicestartsoffset + i]);
     int64_t count = (int64_t)(fromstops[fromstopsoffset + i] - fromstarts[fromstartsoffset + i]);
+
+    std::cout << "    i " << i << " slicecount " << slicecount << " count " << count << std::endl;
+
     if (slicecount != count) {
       return failure("jagged slice inner length differs from array inner length", i, kSliceNone);
     }
