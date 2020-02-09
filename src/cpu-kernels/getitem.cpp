@@ -652,11 +652,11 @@ ERROR awkward_indexedarray64_numnull(int64_t* numnull, const int64_t* fromindex,
   return awkward_indexedarray_numnull<int64_t>(numnull, fromindex, indexoffset, lenindex);
 }
 
-template <typename CIN, typename COUT, typename T>
-ERROR awkward_indexedarray_getitem_nextcarry_outindex(T* tocarry, COUT* toindex, const CIN* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+template <typename C, typename T>
+ERROR awkward_indexedarray_getitem_nextcarry_outindex(T* tocarry, C* toindex, const C* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
   int64_t k = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
-    CIN j = fromindex[indexoffset + i];
+    C j = fromindex[indexoffset + i];
     if (j >= lencontent) {
       return failure("index out of range", i, j);
     }
@@ -665,29 +665,49 @@ ERROR awkward_indexedarray_getitem_nextcarry_outindex(T* tocarry, COUT* toindex,
     }
     else {
       tocarry[k] = j;
-      toindex[i] = (COUT)k;
+      toindex[i] = (C)k;
       k++;
     }
   }
   return success();
 }
 ERROR awkward_indexedarray32_getitem_nextcarry_outindex_64(int64_t* tocarry, int32_t* toindex, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
-  return awkward_indexedarray_getitem_nextcarry_outindex<int32_t, int32_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
+  return awkward_indexedarray_getitem_nextcarry_outindex<int32_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
 }
 ERROR awkward_indexedarrayU32_getitem_nextcarry_outindex_64(int64_t* tocarry, uint32_t* toindex, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
-  return awkward_indexedarray_getitem_nextcarry_outindex<uint32_t, uint32_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
+  return awkward_indexedarray_getitem_nextcarry_outindex<uint32_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
 }
 ERROR awkward_indexedarray64_getitem_nextcarry_outindex_64(int64_t* tocarry, int64_t* toindex, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
-  return awkward_indexedarray_getitem_nextcarry_outindex<int64_t, int64_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
+  return awkward_indexedarray_getitem_nextcarry_outindex<int64_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
 }
-ERROR awkward_indexedarray32_getitem_nextcarry_outindex64_64(int64_t* tocarry, int64_t* toindex, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
-  return awkward_indexedarray_getitem_nextcarry_outindex<int32_t, int64_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
+
+template <typename C, typename T>
+ERROR awkward_indexedarray_getitem_nextcarry_outindex_mask(T* tocarry, T* toindex, const C* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < lenindex;  i++) {
+    C j = fromindex[indexoffset + i];
+    if (j >= lencontent) {
+      return failure("index out of range", i, j);
+    }
+    else if (j < 0) {
+      toindex[i] = -1;
+    }
+    else {
+      tocarry[k] = j;
+      toindex[i] = (T)k;
+      k++;
+    }
+  }
+  return success();
 }
-ERROR awkward_indexedarrayU32_getitem_nextcarry_outindex64_64(int64_t* tocarry, int64_t* toindex, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
-  return awkward_indexedarray_getitem_nextcarry_outindex<uint32_t, int64_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
+ERROR awkward_indexedarray32_getitem_nextcarry_outindex_mask_64(int64_t* tocarry, int64_t* toindex, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  return awkward_indexedarray_getitem_nextcarry_outindex_mask<int32_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
 }
-ERROR awkward_indexedarray64_getitem_nextcarry_outindex64_64(int64_t* tocarry, int64_t* toindex, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
-  return awkward_indexedarray_getitem_nextcarry_outindex<int64_t, int64_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
+ERROR awkward_indexedarrayU32_getitem_nextcarry_outindex_mask_64(int64_t* tocarry, int64_t* toindex, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  return awkward_indexedarray_getitem_nextcarry_outindex_mask<uint32_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
+}
+ERROR awkward_indexedarray64_getitem_nextcarry_outindex_mask_64(int64_t* tocarry, int64_t* toindex, const int64_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
+  return awkward_indexedarray_getitem_nextcarry_outindex_mask<int64_t, int64_t>(tocarry, toindex, fromindex, indexoffset, lenindex, lencontent);
 }
 
 template <typename T>
@@ -712,36 +732,58 @@ ERROR awkward_listoffsetarray_getitem_adjust_offsets_64(int64_t* tooffsets, int6
 }
 
 template <typename T>
-ERROR awkward_listoffsetarray_getitem_adjust_offsets_index(T* tooffsets, T* tononzero, const T* fromoffsets, int64_t offsetsoffset, int64_t length, const T* index, int64_t indexoffset, int64_t indexlength, const T* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
+ERROR awkward_listoffsetarray_getitem_adjust_offsets_index(T* tooffsets, T* tononzero, const T* fromoffsets, int64_t offsetsoffset, int64_t length, const T* index, int64_t indexoffset, int64_t indexlength, const T* nonzero, int64_t nonzerooffset, int64_t nonzerolength, const int8_t* originalmask, int64_t maskoffset, int64_t masklength) {
   int64_t k = 0;
   tooffsets[0] = fromoffsets[offsetsoffset + 0];
   for (int64_t i = 0;  i < length;  i++) {
     T slicestart = fromoffsets[offsetsoffset + i];
     T slicestop = fromoffsets[offsetsoffset + i + 1];
+    int64_t numnull = 0;
+    for (int64_t j = slicestart;  j < slicestop;  j++) {
+      numnull += (originalmask[maskoffset + j]);
+    }
 
+    std::cout << "slicestart " << slicestart << " slicestop " << slicestop << " originalcount " << (slicestop - slicestart) << std::endl;
+
+    int64_t nullcount = 0;
     int64_t count = 0;
-    while (k < indexlength  &&  (index[indexoffset + k] < 0  ||  nonzero[nonzerooffset + index[indexoffset + k]] < slicestop)) {
-      if (index[indexoffset + k] >= 0) {
+    while (k < indexlength  &&  ((index[indexoffset + k] < 0  &&  nullcount < numnull)  ||  (nonzero[nonzerooffset + index[indexoffset + k]] < slicestop))) {
+      std::cout << "k " << k << " index[k] " << index[indexoffset + k] << " count " << count << " nullcount " << nullcount << std::endl;
+
+      if (index[indexoffset + k] < 0) {
+        nullcount++;
+      }
+      else {
         int64_t j = index[indexoffset + k];
+
+        std::cout << "j " << j << " nonzero[j] " << nonzero[nonzerooffset + j] << std::endl;
+
         tononzero[j] = nonzero[nonzerooffset + j] - slicestart;
+
+        std::cout << "tononzero[" << j << "] = " << tononzero[j] << std::endl;
       }
       k++;
       count++;
     }
+    std::cout << "final count " << count << std::endl;
+
     tooffsets[i + 1] = tooffsets[i] + count;
+
+    std::cout << "tooffsets[" << (i + 1) << "] = " << tooffsets[i] + count << std::endl;
   }
   return success();
 }
-ERROR awkward_listoffsetarray_getitem_adjust_offsets_index_64(int64_t* tooffsets, int64_t* tononzero, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t length, const int64_t* index, int64_t indexoffset, int64_t indexlength, const int64_t* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
-  return awkward_listoffsetarray_getitem_adjust_offsets_index<int64_t>(tooffsets, tononzero, fromoffsets, offsetsoffset, length, index, indexoffset, indexlength, nonzero, nonzerooffset, nonzerolength);
+ERROR awkward_listoffsetarray_getitem_adjust_offsets_index_64(int64_t* tooffsets, int64_t* tononzero, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t length, const int64_t* index, int64_t indexoffset, int64_t indexlength, const int64_t* nonzero, int64_t nonzerooffset, int64_t nonzerolength, const int8_t* originalmask, int64_t maskoffset, int64_t masklength) {
+  return awkward_listoffsetarray_getitem_adjust_offsets_index<int64_t>(tooffsets, tononzero, fromoffsets, offsetsoffset, length, index, indexoffset, indexlength, nonzero, nonzerooffset, nonzerolength, originalmask, maskoffset, masklength);
 }
 
 template <typename T>
-ERROR awkward_indexedarray_getitem_adjust_outindex(T* toindex, T* tononzero, const T* fromindex, int64_t fromindexoffset, int64_t fromindexlength, const T* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
+ERROR awkward_indexedarray_getitem_adjust_outindex(int8_t* tomask, T* toindex, T* tononzero, const T* fromindex, int64_t fromindexoffset, int64_t fromindexlength, const T* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
   int64_t j = 0;
   int64_t k = 0;
   for (int64_t i = 0;  i < fromindexlength;  i++) {
     T from = fromindex[fromindexoffset + i];
+    tomask[i] = (from < 0);
     if (from < 0) {
       toindex[k] = -1;
       k++;
@@ -755,8 +797,8 @@ ERROR awkward_indexedarray_getitem_adjust_outindex(T* toindex, T* tononzero, con
   }
   return success();
 }
-ERROR awkward_indexedarray_getitem_adjust_outindex_64(int64_t* toindex, int64_t* tononzero, const int64_t* fromindex, int64_t fromindexoffset, int64_t fromindexlength, const int64_t* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
-  return awkward_indexedarray_getitem_adjust_outindex<int64_t>(toindex, tononzero, fromindex, fromindexoffset, fromindexlength, nonzero, nonzerooffset, nonzerolength);
+ERROR awkward_indexedarray_getitem_adjust_outindex_64(int8_t* tomask, int64_t* toindex, int64_t* tononzero, const int64_t* fromindex, int64_t fromindexoffset, int64_t fromindexlength, const int64_t* nonzero, int64_t nonzerooffset, int64_t nonzerolength) {
+  return awkward_indexedarray_getitem_adjust_outindex<int64_t>(tomask, toindex, tononzero, fromindex, fromindexoffset, fromindexlength, nonzero, nonzerooffset, nonzerolength);
 }
 
 template <typename C, typename T>

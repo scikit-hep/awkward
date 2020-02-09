@@ -793,10 +793,16 @@ namespace awkward {
     else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(slicecontent.get())) {
       if (SliceArray64* array = dynamic_cast<SliceArray64*>(missing->content().get())) {
         if (array->frombool()) {
-          Index64 index(missing->index());
-          Index64 nonzero(array->index());
+          Index8 originalmask = missing->originalmask();
+          Index64 index = missing->index();
+          Index64 nonzero = array->index();
           Index64 adjustedoffsets(offsets.get()->length());
           Index64 adjustednonzero(nonzero.length());
+
+          std::cout << "offsets         " << offsets.get()->tostring() << std::endl;
+          std::cout << "originalmask    " << originalmask.tostring() << std::endl;
+          std::cout << "index           " << index.tostring() << std::endl;
+          std::cout << "nonzero         " << nonzero.tostring() << std::endl;
 
           struct Error err = awkward_listoffsetarray_getitem_adjust_offsets_index_64(
             adjustedoffsets.ptr().get(),
@@ -809,11 +815,17 @@ namespace awkward {
             index.length(),
             nonzero.ptr().get(),
             nonzero.offset(),
-            nonzero.length());
+            nonzero.length(),
+            originalmask.ptr().get(),
+            originalmask.offset(),
+            originalmask.length());
           util::handle_error(err, classname(), nullptr);
 
+          std::cout << "adjustedoffsets " << adjustedoffsets.tostring() << std::endl;
+          std::cout << "adjustednonzero " << adjustednonzero.tostring() << std::endl;
+
           std::shared_ptr<SliceItem> newarray = std::make_shared<SliceArray64>(adjustednonzero, array->shape(), array->strides(), true);
-          std::shared_ptr<SliceItem> newmissing = std::make_shared<SliceMissing64>(missing->index(), newarray);
+          std::shared_ptr<SliceItem> newmissing = std::make_shared<SliceMissing64>(missing->index(), missing->originalmask(), newarray);
           return std::make_shared<SliceJagged64>(adjustedoffsets, newmissing);
         }
       }

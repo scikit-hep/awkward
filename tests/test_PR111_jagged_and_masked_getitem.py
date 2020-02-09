@@ -276,5 +276,5 @@ def test_jagged_missing_mask():
     assert awkward1.tolist(awkward1.tolist(array[[[False, None, False], [], [True, True]]])) == [[None], [], [4.4, 5.5]]
     assert awkward1.tolist(awkward1.tolist(array[[[True, True, False], [], [False, True]]])) == [[1.1, 2.2], [], [5.5]]
     assert awkward1.tolist(awkward1.tolist(array[[[True, True, None], [], [False, True]]])) == [[1.1, 2.2, None], [], [5.5]]
-    # assert awkward1.tolist(awkward1.tolist(array[[[True, True, False], [None], [False, True]]])) == [[1.1, 2.2], [None], [5.5]]
-    # assert awkward1.tolist(awkward1.tolist(array[[[True, True, False], [], [None, True]]])) == [[1.1, 2.2], [], [None, 5.5]]
+    assert awkward1.tolist(awkward1.tolist(array[[[True, True, False], [None], [False, True]]])) == [[1.1, 2.2], [None], [5.5]]
+    assert awkward1.tolist(awkward1.tolist(array[[[True, True, False], [], [None, True]]])) == [[1.1, 2.2], [], [None, 5.5]]

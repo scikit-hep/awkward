@@ -321,8 +321,9 @@ namespace awkward {
   /////////////////////////////////////////////////////// SliceMissingOf<T>
 
   template <typename T>
-  SliceMissingOf<T>::SliceMissingOf(const IndexOf<T>& index, const std::shared_ptr<SliceItem>& content)
+  SliceMissingOf<T>::SliceMissingOf(const IndexOf<T>& index, const Index8& originalmask, const std::shared_ptr<SliceItem>& content)
       : index_(index)
+      , originalmask_(originalmask)
       , content_(content) { }
 
   template <typename T>
@@ -336,13 +337,18 @@ namespace awkward {
   }
 
   template <typename T>
+  const Index8 SliceMissingOf<T>::originalmask() const {
+    return originalmask_;
+  }
+
+  template <typename T>
   const std::shared_ptr<SliceItem> SliceMissingOf<T>::content() const {
     return content_;
   }
 
   template <typename T>
   const std::shared_ptr<SliceItem> SliceMissingOf<T>::shallow_copy() const {
-    return std::make_shared<SliceMissingOf<T>>(index_, content_);
+    return std::make_shared<SliceMissingOf<T>>(index_, originalmask_, content_);
   }
 
   template <typename T>
