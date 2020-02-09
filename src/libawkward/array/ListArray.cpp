@@ -1082,8 +1082,8 @@ namespace awkward {
 
     if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get())) {
       std::shared_ptr<Content> content = raw->content();
-      std::shared_ptr<Content> indexedoptionarray = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), missing, content);
-      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), largeoffsets, indexedoptionarray);
+      IndexedOptionArray64 indexedoptionarray(Identities::none(), util::Parameters(), missing, content);
+      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), largeoffsets, indexedoptionarray.simplify());
     }
     else {
       throw std::runtime_error(std::string("expected ListOffsetArray64 from ListArray::getitem_next_jagged, got ") + out.get()->classname());

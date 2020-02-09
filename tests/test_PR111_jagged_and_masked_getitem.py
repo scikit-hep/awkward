@@ -219,3 +219,22 @@ def test_record():
     assert awkward1.tolist(array[awkward1.Array([[-1, 1], None, [0, 0, 1], [-1, -2]])]) == [{"x": [2, 1], "y": [3.3, 1.1]}, None, {"x": [3, 3, 4], "y": [4.4, 4.4, 5.5]}, {"x": [8, 7], "y": [9.9, 8.8]}]
     assert awkward1.tolist(array[awkward1.Array([[-1, 1], None, [0, 0, None, 1], [-1, -2]])]) == [{"x": [2, 1], "y": [3.3, 1.1]}, None, {"x": [3, 3, None, 4], "y": [4.4, 4.4, None, 5.5]}, {"x": [8, 7], "y": [9.9, 8.8]}]
 
+def test_indexedarray():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
+    index = awkward1.layout.Index64(numpy.array([3, 2, 1, 0], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedArray64(index, array)
+    assert awkward1.tolist(indexedarray) == [[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], [0.0, 1.1, 2.2]]
+
+    assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], [], [1, 1]])]) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
+    assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], [None], [1, None, 1]])]) == [[6.6, 9.9], [5.5], [None], [1.1, None, 1.1]]
+    assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [], [1, 1]])]) == [[6.6, 9.9], [5.5], None, [], [1.1, 1.1]]
+    assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [None], [1, None, 1]])]) == [[6.6, 9.9], [5.5], None, [None], [1.1, None, 1.1]]
+
+    index = awkward1.layout.Index64(numpy.array([3, 2, 1, 0], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedOptionArray64(index, array)
+    assert awkward1.tolist(indexedarray) == [[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], [0.0, 1.1, 2.2]]
+
+    assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], [], [1, 1]])]) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
+    assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], [None], [1, None, 1]])]) == [[6.6, 9.9], [5.5], [None], [1.1, None, 1.1]]
+    assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [], [1, 1]])]) == [[6.6, 9.9], [5.5], None, [], [1.1, 1.1]]
+    assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [None], [1, None, 1]])]) == [[6.6, 9.9], [5.5], None, [None], [1.1, None, 1.1]]

@@ -256,8 +256,8 @@ namespace awkward {
       raw->size());
     util::handle_error(err, classname, nullptr);
 
-    std::shared_ptr<Content> out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, raw->content());
-    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, index.length());
+    IndexedOptionArray64 out(Identities::none(), util::Parameters(), outindex, raw->content());
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify(), index.length());
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const {

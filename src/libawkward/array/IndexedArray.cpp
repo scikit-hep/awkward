@@ -560,7 +560,8 @@ namespace awkward {
 
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
         std::shared_ptr<Content> out = next.get()->getitem_next(head, tail, advanced);
-        return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, outindex, out);
+        IndexedArrayOf<T, ISOPTION> out2(identities_, parameters_, outindex, out);
+        return out2.simplify();
       }
       else {
         Index64 nextcarry(length());
@@ -683,7 +684,8 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::count(int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), util::Parameters(), index_, content_.get()->count(toaxis));
+    IndexedArrayOf<T, ISOPTION> out(Identities::none(), util::Parameters(), index_, content_.get()->count(toaxis));
+    return out.simplify();
   }
 
   template <typename T, bool ISOPTION>
@@ -1029,17 +1031,60 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
-    throw std::runtime_error("undefined operation: IndexedArray::getitem_next_jagged(array)");
+    return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent);
   }
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
-    throw std::runtime_error("undefined operation: IndexedArray::getitem_next_jagged(missing)");
+    return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent);
   }
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
-    throw std::runtime_error("undefined operation: IndexedArray::getitem_next_jagged(jagged)");
+    return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent);
+  }
+
+  template <typename T, bool ISOPTION>
+  template <typename S>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent) const {
+    if (ISOPTION) {
+      int64_t numnull;
+      struct Error err1 = util::awkward_indexedarray_numnull<T>(
+        &numnull,
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length());
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 nextcarry(length() - numnull);
+      IndexOf<T> outindex(length());
+      struct Error err2 = util::awkward_indexedarray_getitem_nextcarry_outindex_64<T>(
+        nextcarry.ptr().get(),
+        outindex.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length(),
+        content_.get()->length());
+      util::handle_error(err2, classname(), identities_.get());
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      std::shared_ptr<Content> out = next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
+      IndexedArrayOf<T, ISOPTION> out2(identities_, parameters_, outindex, out);
+      return out2.simplify();
+    }
+    else {
+      Index64 nextcarry(length());
+      struct Error err = util::awkward_indexedarray_getitem_nextcarry_64<T>(
+        nextcarry.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length(),
+        content_.get()->length());
+      util::handle_error(err, classname(), identities_.get());
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      return next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent);
+    }
   }
 
   template class IndexedArrayOf<int32_t, false>;
