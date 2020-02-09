@@ -243,3 +243,13 @@ def test_sequential():
     array = awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5).tolist())
     assert awkward1.tolist(array[awkward1.Array([[2, 1, 0], [2, 1, 0]])]) == [[[10, 11, 12, 13, 14], [5, 6, 7, 8, 9], [0, 1, 2, 3, 4]], [[25, 26, 27, 28, 29], [20, 21, 22, 23, 24], [15, 16, 17, 18, 19]]]
     assert awkward1.tolist(array[awkward1.Array([[2, 1, 0], [2, 1, 0]]), :2]) == [[[10, 11], [5, 6], [0, 1]], [[25, 26], [20, 21], [15, 16]]]
+
+def test_union():
+    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    two = awkward1.Array([[6.6], [7.7, 8.8], [], [9.9, 10.0, 11.1, 12.2]]).layout
+    tags = awkward1.layout.Index8(numpy.array([0, 0, 0, 1, 1, 1, 1], dtype=numpy.int8))
+    index = awkward1.layout.Index64(numpy.array([0, 1, 2, 0, 1, 2, 3], dtype=numpy.int64))
+    unionarray = awkward1.layout.UnionArray8_64(tags, index, [one, two])
+    assert awkward1.tolist(unionarray) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8], [], [9.9, 10.0, 11.1, 12.2]]
+
+    assert awkward1.tolist(unionarray[awkward1.Array([[0, -1], [], [1, 1], [], [-1], [], [1, -2, -1]])]) == [[1.1, 3.3], [], [5.5, 5.5], [], [8.8], [], [10.0, 11.1, 12.2]]

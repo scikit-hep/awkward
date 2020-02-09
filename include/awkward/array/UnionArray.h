@@ -76,6 +76,10 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const override;
     const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const override;
 
+  protected:
+    template <typename S>
+    const std::shared_ptr<Content> getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const;
+
   private:
     const IndexOf<T> tags_;
     const IndexOf<I> index_;
