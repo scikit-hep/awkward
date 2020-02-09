@@ -1406,15 +1406,30 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
-    throw std::runtime_error("undefined operation: NumpyArray::getitem_next_jagged(array)");
+    if (ndim() == 1) {
+      throw std::invalid_argument("too many jagged slice dimensions for array");
+    }
+    else {
+      throw std::runtime_error(std::string("undefined operation: NumpyArray::getitem_next_jagged(array) for ndim == ") + std::to_string(ndim()));
+    }
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
-    throw std::runtime_error("undefined operation: NumpyArray::getitem_next_jagged(missing)");
+    if (ndim() == 1) {
+      throw std::invalid_argument("too many jagged slice dimensions for array");
+    }
+    else {
+      throw std::runtime_error(std::string("undefined operation: NumpyArray::getitem_next_jagged(missing) for ndim == ") + std::to_string(ndim()));
+    }
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
-    throw std::runtime_error("undefined operation: NumpyArray::getitem_next_jagged(jagged)");
+    if (ndim() == 1) {
+      throw std::invalid_argument("too many jagged slice dimensions for array");
+    }
+    else {
+      throw std::runtime_error(std::string("undefined operation: NumpyArray::getitem_next_jagged(jagged) for ndim == ") + std::to_string(ndim()));
+    }
   }
 
   bool NumpyArray::iscontiguous() const {

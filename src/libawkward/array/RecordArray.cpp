@@ -737,15 +737,29 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent) const {
-    throw std::runtime_error("undefined operation: RecordArray::getitem_next_jagged(array)");
+    return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent);
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent) const {
-    throw std::runtime_error("undefined operation: RecordArray::getitem_next_jagged(missing)");
+    return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent);
   }
 
   const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent) const {
-    throw std::runtime_error("undefined operation: RecordArray::getitem_next_jagged(jagged)");
+    return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent);
+  }
+
+  template <typename S>
+  const std::shared_ptr<Content> RecordArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent) const {
+    if (contents_.empty()) {
+      return shallow_copy();
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent));
+      }
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    }
   }
 
 }

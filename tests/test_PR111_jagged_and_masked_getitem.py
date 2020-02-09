@@ -192,3 +192,30 @@ def test_masked_of_jagged_of_whatever():
     assert awkward1.tolist(regulararray2[awkward1.Array([[[2], None, [-1, 2, 0]], [[-3], None, [-5, -3, 4]]])]) == [[[2], None, [14, 12, 10]], [[17], None, [25, 27, 29]]]
 
     assert awkward1.tolist(regulararray2[awkward1.Array([[[2], None, [-1, None, 0]], [[-3], None, [-5, None, 4]]])]) == [[[2], None, [14, None, 10]], [[17], None, [25, None, 29]]]
+
+def test_emptyarray():
+    content = awkward1.layout.EmptyArray()
+    offsets = awkward1.layout.Index64(numpy.array([0, 0, 0, 0, 0], dtype=numpy.int64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+    assert awkward1.tolist(listoffsetarray) == [[], [], [], []]
+
+    assert awkward1.tolist(listoffsetarray[awkward1.Array([[], [], [], []])]) == [[], [], [], []]
+    assert awkward1.tolist(listoffsetarray[awkward1.Array([[], [None], [], []])]) == [[], [None], [], []]
+    assert awkward1.tolist(listoffsetarray[awkward1.Array([[], [], None, [], []])]) == [[], [], None, [], []]
+    assert awkward1.tolist(listoffsetarray[awkward1.Array([[], [None], None, [], []])]) == [[], [None], None, [], []]
+
+    with pytest.raises(ValueError):
+        listoffsetarray[awkward1.Array([[], [0], [], []])]
+
+def test_numpyarray():
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    with pytest.raises(ValueError):
+        array[awkward1.Array([[[], [], []], [], [[], []]])]
+
+def test_record():
+    array = awkward1.Array([{"x": [0, 1, 2], "y": [0.0, 1.1, 2.2, 3.3]}, {"x": [3, 4, 5, 6], "y": [4.4, 5.5]}, {"x": [7, 8], "y": [6.6, 7.7, 8.8, 9.9]}])
+    assert awkward1.tolist(array[awkward1.Array([[-1, 1], [0, 0, 1], [-1, -2]])]) == [{"x": [2, 1], "y": [3.3, 1.1]}, {"x": [3, 3, 4], "y": [4.4, 4.4, 5.5]}, {"x": [8, 7], "y": [9.9, 8.8]}]
+    assert awkward1.tolist(array[awkward1.Array([[-1, 1], [0, 0, None, 1], [-1, -2]])]) == [{"x": [2, 1], "y": [3.3, 1.1]}, {"x": [3, 3, None, 4], "y": [4.4, 4.4, None, 5.5]}, {"x": [8, 7], "y": [9.9, 8.8]}]
+    assert awkward1.tolist(array[awkward1.Array([[-1, 1], None, [0, 0, 1], [-1, -2]])]) == [{"x": [2, 1], "y": [3.3, 1.1]}, None, {"x": [3, 3, 4], "y": [4.4, 4.4, 5.5]}, {"x": [8, 7], "y": [9.9, 8.8]}]
+    assert awkward1.tolist(array[awkward1.Array([[-1, 1], None, [0, 0, None, 1], [-1, -2]])]) == [{"x": [2, 1], "y": [3.3, 1.1]}, None, {"x": [3, 3, None, 4], "y": [4.4, 4.4, None, 5.5]}, {"x": [8, 7], "y": [9.9, 8.8]}]
+
