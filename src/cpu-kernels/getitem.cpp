@@ -733,28 +733,66 @@ ERROR awkward_listoffsetarray_getitem_adjust_offsets_64(int64_t* tooffsets, int6
 
 template <typename T>
 ERROR awkward_listoffsetarray_getitem_adjust_offsets_index(T* tooffsets, T* tononzero, const T* fromoffsets, int64_t offsetsoffset, int64_t length, const T* index, int64_t indexoffset, int64_t indexlength, const T* nonzero, int64_t nonzerooffset, int64_t nonzerolength, const int8_t* originalmask, int64_t maskoffset, int64_t masklength) {
+  std::cout << "indexlength   " << indexlength << std::endl;
+  std::cout << "nonzerolength " << nonzerolength << std::endl;
+
   int64_t k = 0;
   tooffsets[0] = fromoffsets[offsetsoffset + 0];
   for (int64_t i = 0;  i < length;  i++) {
     T slicestart = fromoffsets[offsetsoffset + i];
     T slicestop = fromoffsets[offsetsoffset + i + 1];
+
+    std::cout << "i " << i << " slicestart " << slicestart << " slicestop " << slicestop << std::endl;
+
     int64_t numnull = 0;
     for (int64_t j = slicestart;  j < slicestop;  j++) {
+      std::cout << "originalmask[" << maskoffset << " + " << j << "] = " << (int)(originalmask[maskoffset + j]) << std::endl;
       numnull += (originalmask[maskoffset + j] != 0 ? 1 : 0);
     }
+
+    std::cout << "numnull is " << numnull << std::endl;
+
     int64_t nullcount = 0;
+
+    if (k < indexlength) {
+      std::cout << "nullcount " << nullcount << ", index[" << indexoffset << " + " << k << "] = " << index[indexoffset + k] << std::endl;
+      if (index[indexoffset + k] >= 0) {
+        if (index[indexoffset + k] < nonzerolength) {
+          std::cout << "nonzero[" << nonzerooffset << " + " << index[indexoffset + k] << "] = " << nonzero[nonzerooffset + index[indexoffset + k]] << std::endl;
+        }
+      }
+    }
+
     int64_t count = 0;
-    while (k < indexlength  &&  ((index[indexoffset + k] < 0  &&  nullcount < numnull)  ||  (index[indexoffset + k] < nonzerolength  &&  nonzero[nonzerooffset + index[indexoffset + k]] < slicestop))) {
+    while (k < indexlength  &&  ((index[indexoffset + k] < 0  &&  nullcount < numnull)  ||  (index[indexoffset + k] >= 0  &&  index[indexoffset + k] < nonzerolength  &&  nonzero[nonzerooffset + index[indexoffset + k]] < slicestop))) {
+      std::cout << "entering loop, k is " << k << std::endl;
+
       if (index[indexoffset + k] < 0) {
         nullcount++;
       }
       else {
         int64_t j = index[indexoffset + k];
         tononzero[j] = nonzero[nonzerooffset + j] - slicestart;
+
+        std::cout << "tononzero[" << j << "] = " << tononzero[j] << std::endl;
       }
       k++;
       count++;
+
+      if (k < indexlength) {
+        std::cout << "nullcount " << nullcount << ", index[" << indexoffset << " + " << k << "] = " << index[indexoffset + k] << std::endl;
+        if (index[indexoffset + k] >= 0) {
+          if (index[indexoffset + k] < nonzerolength) {
+            std::cout << "nonzero[" << nonzerooffset << " + " << index[indexoffset + k] << "] = " << nonzero[nonzerooffset + index[indexoffset + k]] << std::endl;
+          }
+        }
+      }
+
     }
+
+    std::cout << "count is " << count << std::endl;
+    std::cout << std::endl;
+
     tooffsets[i + 1] = tooffsets[i] + count;
   }
   return success();
