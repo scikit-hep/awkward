@@ -744,7 +744,7 @@ ERROR awkward_listoffsetarray_getitem_adjust_offsets_index(T* tooffsets, T* tono
     }
     int64_t nullcount = 0;
     int64_t count = 0;
-    while (k < indexlength  &&  ((index[indexoffset + k] < 0  &&  nullcount < numnull)  ||  (nonzero[nonzerooffset + index[indexoffset + k]] < slicestop))) {
+    while (k < indexlength  &&  ((index[indexoffset + k] < 0  &&  nullcount < numnull)  ||  (index[indexoffset + k] < nonzerolength  &&  nonzero[nonzerooffset + index[indexoffset + k]] < slicestop))) {
       if (index[indexoffset + k] < 0) {
         nullcount++;
       }
