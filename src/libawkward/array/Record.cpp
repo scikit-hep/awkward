@@ -227,6 +227,10 @@ namespace awkward {
     throw std::invalid_argument("cannot use a record as a slice");
   }
 
+  const std::shared_ptr<Content> Record::pad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: Record pad is not implemented");
+  }
+
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
     return array_.get()->field(fieldindex).get()->getitem_at_nowrap(at_);
   }

@@ -1012,6 +1012,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::pad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION> pad is not implemented");
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: IndexedArray::getitem_next(at)");
   }

@@ -1373,6 +1373,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> NumpyArray::pad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: NumpyArray pad is not implemented");
+  }
+
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: NumpyArray::getitem_next(at) (without 'length', 'stride', and 'first')");
   }

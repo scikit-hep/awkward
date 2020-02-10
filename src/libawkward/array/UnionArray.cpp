@@ -1075,6 +1075,11 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::pad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: UnionArrayOf<T, I> pad is not implemented");
+  }
+
+  template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: UnionArray::getitem_next(at)");
   }
