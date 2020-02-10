@@ -10,8 +10,6 @@
 namespace py = pybind11;
 namespace ak = awkward;
 
-PYBIND11_EXPORT int64_t testy(int64_t x, int64_t y);
-
 ak::Slice toslice(py::object obj);
 
 void make_slice_tostring(py::module& m, const std::string& name);

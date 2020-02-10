@@ -2,5 +2,5 @@
 
 import dependent
 
-def test_add():
-    assert dependent.add(12, 34) == 46
+# def test_add():
+#     assert dependent.add(12, 34) == 46

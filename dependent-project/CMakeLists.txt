@@ -9,3 +9,4 @@ add_subdirectory(pybind11)
 
 pybind11_add_module(dependent dependent.cpp)
 set_target_properties(dependent PROPERTIES CXX_VISIBILITY_PRESET hidden)
+target_link_libraries(dependent "awkward/libawkward-static.a")
