@@ -80,6 +80,12 @@ jobs:
           python setup.py build
           ls awkward1
           python -m pytest -vv tests
+
+          cd tests/dependent-project
+          cmake .
+          make
+          python -m pytest -vv tests.py
+
         displayName: "Build and test"
 
   - job: MacOS
@@ -132,6 +138,12 @@ jobs:
           python setup.py build
           ls awkward1
           python -m pytest -vv tests
+
+          cd tests/dependent-project
+          cmake .
+          make
+          python -m pytest -vv tests.py
+
         displayName: "Build and test"
 
   - job: Linux
