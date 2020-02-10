@@ -82,133 +82,133 @@ jobs:
           python -m pytest -vv tests
 
           cd dependent-project
-          cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
+          cmake -DPYTHON_EXECUTABLE:FILEPATH=python .
           make
           python -m pytest -vv tests.py
 
         displayName: "Build and test"
 
-  - job: MacOS
+  # - job: MacOS
 
-    pool:
-      vmImage: "macOS-10.14"
+  #   pool:
+  #     vmImage: "macOS-10.14"
 
-    strategy:
-      matrix:
-        "py27":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "1.16.5"
-        "py35":
-          python.version: "3.5"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py36":
-          python.version: "3.6"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py37":
-          python.version: "3.7"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py38":
-          python.version: "3.8"
-          python.architecture: "x64"
-          numpy.version: "latest"
+  #   strategy:
+  #     matrix:
+  #       "py27":
+  #         python.version: "2.7"
+  #         python.architecture: "x64"
+  #         numpy.version: "1.16.5"
+  #       "py35":
+  #         python.version: "3.5"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
+  #       "py36":
+  #         python.version: "3.6"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
+  #       "py37":
+  #         python.version: "3.7"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
+  #       "py38":
+  #         python.version: "3.8"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
 
-    steps:
-      - checkout: self
-        submodules: recursive
+  #   steps:
+  #     - checkout: self
+  #       submodules: recursive
 
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '$(python.version)'
-          architecture: '$(python.architecture)'
-        displayName: 'Python $(python.version)'
+  #     - task: UsePythonVersion@0
+  #       inputs:
+  #         versionSpec: '$(python.version)'
+  #         architecture: '$(python.architecture)'
+  #       displayName: 'Python $(python.version)'
 
-      - script: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          python -m pip install -r requirements-test.txt
-          python -c "import numpy; print(numpy.__version__)"
-          python -c "import pytest; print(pytest.__version__)"
-        displayName: "Install"
+  #     - script: |
+  #         python -m pip install --upgrade pip
+  #         python -m pip install -r requirements.txt
+  #         python -m pip install -r requirements-test.txt
+  #         python -c "import numpy; print(numpy.__version__)"
+  #         python -c "import pytest; print(pytest.__version__)"
+  #       displayName: "Install"
 
-      - script: |
-          python setup.py build
-          ls awkward1
-          python -m pytest -vv tests
+  #     - script: |
+  #         python setup.py build
+  #         ls awkward1
+  #         python -m pytest -vv tests
 
-          cd dependent-project
-          cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
-          make
-          python -m pytest -vv tests.py
+  #         cd dependent-project
+  #         cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
+  #         make
+  #         python -m pytest -vv tests.py
 
-        displayName: "Build and test"
+  #       displayName: "Build and test"
 
-  - job: Linux
+  # - job: Linux
 
-    pool:
-      vmImage: "ubuntu-16.04"
+  #   pool:
+  #     vmImage: "ubuntu-16.04"
 
-    strategy:
-      matrix:
-        "py27-np13":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "1.13.1"
-        "py27-np16":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "1.16.5"
-        "py35-np13":
-          python.version: "3.5"
-          python.architecture: "x64"
-          numpy.version: "1.13.1"
-        "py36-np14":
-          python.version: "3.6"
-          python.architecture: "x64"
-          numpy.version: "1.14.5"
-        "py37-np14":
-          python.version: "3.7"
-          python.architecture: "x64"
-          numpy.version: "1.14.5"
-        "py38-np*":
-          python.version: "3.8"
-          python.architecture: "x64"
-          numpy.version: "latest"
+  #   strategy:
+  #     matrix:
+  #       "py27-np13":
+  #         python.version: "2.7"
+  #         python.architecture: "x64"
+  #         numpy.version: "1.13.1"
+  #       "py27-np16":
+  #         python.version: "2.7"
+  #         python.architecture: "x64"
+  #         numpy.version: "1.16.5"
+  #       "py35-np13":
+  #         python.version: "3.5"
+  #         python.architecture: "x64"
+  #         numpy.version: "1.13.1"
+  #       "py36-np14":
+  #         python.version: "3.6"
+  #         python.architecture: "x64"
+  #         numpy.version: "1.14.5"
+  #       "py37-np14":
+  #         python.version: "3.7"
+  #         python.architecture: "x64"
+  #         numpy.version: "1.14.5"
+  #       "py38-np*":
+  #         python.version: "3.8"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
 
-    steps:
-      - checkout: self
-        submodules: recursive
+  #   steps:
+  #     - checkout: self
+  #       submodules: recursive
 
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '$(python.version)'
-          architecture: '$(python.architecture)'
-        displayName: 'Python $(python.version)'
+  #     - task: UsePythonVersion@0
+  #       inputs:
+  #         versionSpec: '$(python.version)'
+  #         architecture: '$(python.architecture)'
+  #       displayName: 'Python $(python.version)'
 
-      - script: |
-          python -m pip install --upgrade pip
-          if [ $(numpy.version) = "latest" ]; then
-            python -m pip install -r requirements.txt;
-          else
-            sed 's/numpy>=1.13.1/numpy==$(numpy.version)/' requirements.txt > requirements2.txt;
-            python -m pip install -r requirements2.txt;
-          fi
-          python -m pip install -r requirements-test.txt
-          python -c "import numpy; print(numpy.__version__)"
-          python -c "import pytest; print(pytest.__version__)"
-        displayName: "Install"
+  #     - script: |
+  #         python -m pip install --upgrade pip
+  #         if [ $(numpy.version) = "latest" ]; then
+  #           python -m pip install -r requirements.txt;
+  #         else
+  #           sed 's/numpy>=1.13.1/numpy==$(numpy.version)/' requirements.txt > requirements2.txt;
+  #           python -m pip install -r requirements2.txt;
+  #         fi
+  #         python -m pip install -r requirements-test.txt
+  #         python -c "import numpy; print(numpy.__version__)"
+  #         python -c "import pytest; print(pytest.__version__)"
+  #       displayName: "Install"
 
-      - script: |
-          python setup.py build
-          ls awkward1
-          python -m pytest -vv tests
+  #     - script: |
+  #         python setup.py build
+  #         ls awkward1
+  #         python -m pytest -vv tests
 
-          cd dependent-project
-          cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
-          make
-          python -m pytest -vv tests.py
+  #         cd dependent-project
+  #         cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
+  #         make
+  #         python -m pytest -vv tests.py
 
-        displayName: "Build and test"
+  #       displayName: "Build and test"
