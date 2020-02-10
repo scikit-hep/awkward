@@ -7,7 +7,6 @@ dependent_project/CMakeFiles
 dependent_project/CMakeCache.txt
 dependent_project/Makefile
 dependent_project/cmake_install.cmake
-dependent_project/pybind11
 
 ############################################################# IDEs
 
