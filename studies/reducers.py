@@ -30,6 +30,9 @@ class Content:
         cls = random.choice(choices)
         return cls.random(minlen, choices)
 
+    def tolist(self):
+        return list(self)
+
 def random_number():
     return round(random.gauss(5, 3), 1)
 
@@ -603,10 +606,41 @@ assert numpy.prod(example, axis=2).shape == (2, 3)
 assert numpy.prod(example, axis=None) == 7581744426003940878
 # (but that should be a special case because it results in a scalar.)
 
-def NumpyArray_prod(self):
-    out = 1
-    for x in self:
-        out *= x
-    return out
+def NumpyArray_prod(self, axis):
+    assert len(self.shape) != 0
+
+    if axis < 0:
+        axis += len(self.shape)
+    assert 0 <= axis < len(self.shape)
+
+    if axis == 0:
+        length = self.shape[0]
+        stepsize = self.strides[0]
+
+        shape = self.shape[1:]
+        strides = self.strides[1:]
+
+        flatlen = 1
+        for x in shape:
+            flatlen *= x
+
+        ptr = [1] * flatlen
+        return NumpyArray(ptr, shape, strides, 0)
+
+    else:
+        raise AssertionError
 
 NumpyArray.prod = NumpyArray_prod
+
+example = NumpyArray(primes[:2*3*5], [2, 3, 5], [15, 5, 1], 0)
+
+assert (example.tolist() ==
+    [[[  2,   3,   5,   7,  11],
+      [ 13,  17,  19,  23,  29],
+      [ 31,  37,  41,  43,  47]],
+     [[ 53,  59,  61,  67,  71],
+      [ 73,  79,  83,  89,  97],
+      [101, 103, 107, 109, 113]]])
+assert example.shape == [2, 3, 5]
+
+print(example.prod(axis=0).tolist())
