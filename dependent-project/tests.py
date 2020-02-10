@@ -2,5 +2,8 @@
 
 import dependent
 
-# def test_add():
-#     assert dependent.add(12, 34) == 46
+import awkward1 as ak
+
+def test_producer():
+    assert ak.tolist(dependent.producer()) == [1.1, 2.2, 3.3]
+    assert dependent.consumer(ak.Array([1.1, 2.2, 3.3]).layout) == "[1.1,2.2,3.3]"
