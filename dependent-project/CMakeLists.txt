@@ -5,7 +5,7 @@ project (dependent-project)
 
 include_directories(include)
 
-add_subdirectory(pybind11)
+add_subdirectory(../pybind11 cmake_pybind11)
 
 find_library(CPU-KERNELS awkward-cpu-kernels-static PATHS awkward1)
 find_library(LIBAWKWARD awkward-static PATHS awkward1)
