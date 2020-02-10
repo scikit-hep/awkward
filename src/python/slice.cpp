@@ -15,6 +15,10 @@
 
 #include "awkward/python/slice.h"
 
+int64_t testy(int64_t x, int64_t y) {
+  return x + y;
+}
+
 bool handle_as_numpy(const std::shared_ptr<ak::Content>& content) {
   // if (content.get()->parameter_equals("__array__", "\"string\"")) {
   //   return true;

@@ -18,6 +18,8 @@ PYBIND11_MODULE(layout, m) {
   m.attr("__version__") = "dev";
 #endif
 
+  m.def("testy", &testy);
+
   /////////////////////////////////////////////////////////////// index.h
 
   make_IndexOf<int8_t>(m,   "Index8");

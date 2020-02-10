@@ -81,7 +81,7 @@ jobs:
           ls awkward1
           python -m pytest -vv tests
 
-          cd tests/dependent-project
+          cd dependent-project
           cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
           make
           python -m pytest -vv tests.py
@@ -139,7 +139,7 @@ jobs:
           ls awkward1
           python -m pytest -vv tests
 
-          cd tests/dependent-project
+          cd dependent-project
           cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
           make
           python -m pytest -vv tests.py
@@ -206,7 +206,7 @@ jobs:
           ls awkward1
           python -m pytest -vv tests
 
-          cd tests/dependent-project
+          cd dependent-project
           cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
           make
           python -m pytest -vv tests.py
