@@ -82,7 +82,7 @@ jobs:
           python -m pytest -vv tests
 
           cd tests/dependent-project
-          cmake .
+          cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
           make
           python -m pytest -vv tests.py
 
@@ -140,7 +140,7 @@ jobs:
           python -m pytest -vv tests
 
           cd tests/dependent-project
-          cmake .
+          cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
           make
           python -m pytest -vv tests.py
 
@@ -207,7 +207,7 @@ jobs:
           python -m pytest -vv tests
 
           cd tests/dependent-project
-          cmake .
+          cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
           make
           python -m pytest -vv tests.py
 
