@@ -18,6 +18,27 @@ std::shared_ptr<ak::Content> producer() {
   builder.real(2.2);
   builder.real(3.3);
 
+  builder.beginlist();
+  builder.integer(1);
+  builder.integer(2);
+  builder.integer(3);
+  builder.endlist();
+
+  builder.beginlist();
+  builder.endlist();
+
+  builder.beginlist();
+  builder.integer(4);
+  builder.integer(5);
+  builder.endlist();
+
+  builder.beginrecord();
+  builder.field_fast("x");
+  builder.real(12.3);
+  builder.field_fast("y");
+  builder.string("wow");
+  builder.endrecord();
+  
   return builder.snapshot();
 }
 

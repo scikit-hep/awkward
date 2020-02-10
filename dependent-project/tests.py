@@ -5,5 +5,5 @@ import dependent
 import awkward1 as ak
 
 def test_producer():
-    assert ak.tolist(dependent.producer()) == [1.1, 2.2, 3.3]
-    assert dependent.consumer(ak.Array([1.1, 2.2, 3.3]).layout) == "[1.1,2.2,3.3]"
+    assert ak.tolist(dependent.producer()) == [1.1, 2.2, 3.3, [1, 2, 3], [], [4, 5], {"x": 12.3, "y": "wow"}]
+    assert dependent.consumer(ak.Array([1.1, 2.2, 3.3, [1, 2, 3], [], [4, 5], {"x": 12.3, "y": "wow"}]).layout) == """[1.1,2.2,3.3,[1,2,3],[],[4,5],{"x":12.3,"y":"wow"}]"""
