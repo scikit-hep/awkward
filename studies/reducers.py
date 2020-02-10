@@ -563,3 +563,50 @@ class UnionArray(Content):
             out += content.toxml(indent + "    ", "<content i=\"" + str(i) + "\">", "</content>\n")
         out += indent + "</UnionArray>" + post
         return out
+
+###################################################################### use NumPy to define correct behavior
+
+import numpy
+
+# (My example reducer will be 'prod' on prime numbers; can't get the right answer accidentally.)
+primes = [x for x in range(2, 1000) if all(x % n != 0 for n in range(2, x))]
+
+example = numpy.array(primes[:2*3*5]).reshape(2, 3, 5)
+
+assert (example.tolist() ==
+    [[[  2,   3,   5,   7,  11],
+      [ 13,  17,  19,  23,  29],
+      [ 31,  37,  41,  43,  47]],
+     [[ 53,  59,  61,  67,  71],
+      [ 73,  79,  83,  89,  97],
+      [101, 103, 107, 109, 113]]])
+assert example.shape == (2, 3, 5)
+
+assert (numpy.prod(example, axis=0).tolist() ==
+    [[ 106,  177,  305,  469, 781],
+     [ 949, 1343, 1577, 2047, 2813],
+     [3131, 3811, 4387, 4687, 5311]])
+assert numpy.prod(example, axis=0).shape == (3, 5)
+
+assert (numpy.prod(example, axis=1).tolist() ==
+    [[   806,   1887,   3895,   6923, 14993],
+     [390769, 480083, 541741, 649967, 778231]])
+assert numpy.prod(example, axis=1).shape == (2, 5)
+
+assert (numpy.prod(example, axis=2).tolist() ==
+    [[     2310,    2800733,    95041567],
+     [907383479, 4132280413, 13710311357]])
+assert numpy.prod(example, axis=2).shape == (2, 3)
+
+# (axis=3 is a numpy.AxisError; axis<0 counts backward from the end.)
+
+assert numpy.prod(example, axis=None) == 7581744426003940878
+# (but that should be a special case because it results in a scalar.)
+
+def NumpyArray_prod(self):
+    out = 1
+    for x in self:
+        out *= x
+    return out
+
+NumpyArray.prod = NumpyArray_prod
