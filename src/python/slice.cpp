@@ -268,7 +268,7 @@ ak::Slice toslice(py::object obj) {
   return out;
 }
 
-void make_slice_tostring(py::module m, std::string name) {
+void make_slice_tostring(py::module& m, const std::string& name) {
   m.def(name.c_str(), [](py::object obj) -> std::string {
     return toslice(obj).tostring();
   });

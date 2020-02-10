@@ -24,19 +24,9 @@ private:
 };
 
 template <typename T>
-std::string repr(T& self) {
-  return self.tostring();
-}
+py::object getitem(const T& self, const py::object& obj);
 
-template <typename T>
-int64_t len(T& self) {
-  return self.length();
-}
-
-template <typename T>
-py::object getitem(T& self, py::object obj);
-
-ak::util::Parameters dict2parameters(py::object in);
+ak::util::Parameters dict2parameters(const py::object& in);
 py::dict parameters2dict(const ak::util::Parameters& in);
 
 #endif // AWKWARDPY_UTIL_H_

@@ -24,7 +24,7 @@
 
 #include "awkward/python/boxing.h"
 
-py::object box(std::shared_ptr<ak::Content> content) {
+py::object box(const std::shared_ptr<ak::Content>& content) {
   // scalars
   if (ak::None* raw = dynamic_cast<ak::None*>(content.get())) {
     return py::none();
@@ -105,7 +105,7 @@ py::object box(std::shared_ptr<ak::Content> content) {
   }
 }
 
-py::object box(std::shared_ptr<ak::Identities> identities) {
+py::object box(const std::shared_ptr<ak::Identities>& identities) {
   if (identities.get() == nullptr) {
     return py::none();
   }
@@ -120,7 +120,7 @@ py::object box(std::shared_ptr<ak::Identities> identities) {
   }
 }
 
-py::object box(std::shared_ptr<ak::Type> t) {
+py::object box(const std::shared_ptr<ak::Type>& t) {
   if (ak::ArrayType* raw = dynamic_cast<ak::ArrayType*>(t.get())) {
     return py::cast(*raw);
   }
@@ -150,7 +150,7 @@ py::object box(std::shared_ptr<ak::Type> t) {
   }
 }
 
-std::shared_ptr<ak::Content> unbox_content(py::handle obj) {
+std::shared_ptr<ak::Content> unbox_content(const py::handle& obj) {
   try {
     obj.cast<ak::Record*>();
     throw std::invalid_argument("content argument must be a Content subtype (excluding Record)");
@@ -231,7 +231,7 @@ std::shared_ptr<ak::Content> unbox_content(py::handle obj) {
   throw std::invalid_argument("content argument must be a Content subtype");
 }
 
-std::shared_ptr<ak::Identities> unbox_identities_none(py::handle obj) {
+std::shared_ptr<ak::Identities> unbox_identities_none(const py::handle& obj) {
   if (obj.is(py::none())) {
     return ak::Identities::none();
   }
@@ -240,7 +240,7 @@ std::shared_ptr<ak::Identities> unbox_identities_none(py::handle obj) {
   }
 }
 
-std::shared_ptr<ak::Identities> unbox_identities(py::handle obj) {
+std::shared_ptr<ak::Identities> unbox_identities(const py::handle& obj) {
   try {
     return obj.cast<ak::Identities32*>()->shallow_copy();
   }
@@ -252,7 +252,7 @@ std::shared_ptr<ak::Identities> unbox_identities(py::handle obj) {
   throw std::invalid_argument("id argument must be an Identities subtype");
 }
 
-std::shared_ptr<ak::Type> unbox_type(py::handle obj) {
+std::shared_ptr<ak::Type> unbox_type(const py::handle& obj) {
   try {
     return obj.cast<ak::ArrayType*>()->shallow_copy();
   }

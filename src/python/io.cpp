@@ -4,8 +4,8 @@
 
 #include "awkward/python/io.h"
 
-void make_fromjson(py::module m, std::string name) {
-  m.def(name.c_str(), [](std::string source, int64_t initial, double resize, int64_t buffersize) -> py::object {
+void make_fromjson(py::module& m, const std::string& name) {
+  m.def(name.c_str(), [](const std::string& source, int64_t initial, double resize, int64_t buffersize) -> py::object {
     bool isarray = false;
     for (char const &x: source) {
       if (x != 9  &&  x != 10  &&  x != 13  &&  x != 32) {  // whitespace
@@ -42,8 +42,8 @@ void make_fromjson(py::module m, std::string name) {
   }, py::arg("source"), py::arg("initial") = 1024, py::arg("resize") = 2.0, py::arg("buffersize") = 65536);
 }
 
-void make_fromroot_nestedvector(py::module m, std::string name) {
-  m.def(name.c_str(), [](ak::Index64& byteoffsets, ak::NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, int64_t initial, double resize) -> py::object {
+void make_fromroot_nestedvector(py::module& m, const std::string& name) {
+  m.def(name.c_str(), [](const ak::Index64& byteoffsets, const ak::NumpyArray& rawdata, int64_t depth, int64_t itemsize, const std::string& format, int64_t initial, double resize) -> py::object {
       return box(FromROOT_nestedvector(byteoffsets, rawdata, depth, itemsize, format, ak::FillableOptions(initial, resize)));
   }, py::arg("byteoffsets"), py::arg("rawdata"), py::arg("depth"), py::arg("itemsize"), py::arg("format"), py::arg("initial") = 1024, py::arg("resize") = 2.0);
 }

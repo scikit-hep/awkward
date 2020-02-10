@@ -13,6 +13,6 @@ template <typename T>
 py::tuple identity(const T& self);
 
 template <typename T>
-py::class_<ak::IdentitiesOf<T>> make_IdentitiesOf(py::handle m, std::string name);
+py::class_<ak::IdentitiesOf<T>> make_IdentitiesOf(const py::handle& m, const std::string& name);
 
 #endif // AWKWARDPY_IDENTITIES_H_

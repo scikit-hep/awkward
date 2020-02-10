@@ -12,7 +12,7 @@
 
 namespace py = pybind11;
 
-void make_fromjson(py::module m, std::string name);
-void make_fromroot_nestedvector(py::module m, std::string name);
+void make_fromjson(py::module& m, const std::string& name);
+void make_fromroot_nestedvector(py::module& m, const std::string& name);
 
 #endif // AWKWARDPY_IO_H_

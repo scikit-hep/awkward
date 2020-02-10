@@ -10,7 +10,7 @@
 
 /////////////////////////////////////////////////////////////// Iterator
 
-py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(py::handle m, std::string name) {
+py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(const py::handle& m, const std::string& name) {
   auto next = [](ak::Iterator& iterator) -> py::object {
     if (iterator.isdone()) {
       throw py::stop_iteration();
@@ -19,19 +19,19 @@ py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(py::handle
   };
 
   return (py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>>(m, name.c_str())
-      .def(py::init([](py::object content) -> ak::Iterator {
+      .def(py::init([](const py::object& content) -> ak::Iterator {
         return ak::Iterator(unbox_content(content));
       }))
       .def("__repr__", &ak::Iterator::tostring)
       .def("__next__", next)
       .def("next", next)
-      .def("__iter__", [](py::object self) -> py::object { return self; })
+      .def("__iter__", [](const py::object& self) -> py::object { return self; })
   );
 }
 
 /////////////////////////////////////////////////////////////// Content
 
-py::class_<ak::Content, std::shared_ptr<ak::Content>> make_Content(py::handle m, std::string name) {
+py::class_<ak::Content, std::shared_ptr<ak::Content>> make_Content(const py::handle& m, const std::string& name) {
   return py::class_<ak::Content, std::shared_ptr<ak::Content>>(m, name.c_str());
 }
 
@@ -76,41 +76,51 @@ py::tuple identity(const T& self) {
 }
 
 template <typename T>
-ak::Iterator iter(T& self) {
+std::string repr(const T& self) {
+  return self.tostring();
+}
+
+template <typename T>
+int64_t len(const T& self) {
+  return self.length();
+}
+
+template <typename T>
+ak::Iterator iter(const T& self) {
   return ak::Iterator(self.shallow_copy());
 }
 
 template <typename T>
-py::dict getparameters(T& self) {
+py::dict getparameters(const T& self) {
   return parameters2dict(self.parameters());
 }
 
 template <typename T>
-py::object parameter(T& self, std::string& key) {
+py::object parameter(const T& self, const std::string& key) {
   std::string cppvalue = self.parameter(key);
   py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(), cppvalue.length(), "surrogateescape"));
   return py::module::import("json").attr("loads")(pyvalue);
 }
 
 template <typename T>
-py::object purelist_parameter(T& self, std::string& key) {
+py::object purelist_parameter(const T& self, const std::string& key) {
   std::string cppvalue = self.purelist_parameter(key);
   py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(), cppvalue.length(), "surrogateescape"));
   return py::module::import("json").attr("loads")(pyvalue);
 }
 
 template <typename T>
-void setparameters(T& self, py::object parameters) {
+void setparameters(T& self, const py::object& parameters) {
   self.setparameters(dict2parameters(parameters));
 }
 
 template <typename T>
-void setparameter(T& self, std::string& key, py::object value) {
+void setparameter(T& self, const std::string& key, const py::object& value) {
   py::object valuestr = py::module::import("json").attr("dumps")(value);
   self.setparameter(key, valuestr.cast<std::string>());
 }
 
-int64_t check_maxdecimals(py::object maxdecimals) {
+int64_t check_maxdecimals(const py::object& maxdecimals) {
   if (maxdecimals.is(py::none())) {
     return -1;
   }
@@ -123,12 +133,12 @@ int64_t check_maxdecimals(py::object maxdecimals) {
 }
 
 template <typename T>
-std::string tojson_string(T& self, bool pretty, py::object maxdecimals) {
+std::string tojson_string(const T& self, bool pretty, const py::object& maxdecimals) {
   return self.tojson(pretty, check_maxdecimals(maxdecimals));
 }
 
 template <typename T>
-void tojson_file(T& self, std::string destination, bool pretty, py::object maxdecimals, int64_t buffersize) {
+void tojson_file(const T& self, const std::string& destination, bool pretty, py::object maxdecimals, int64_t buffersize) {
 #ifdef _MSC_VER
   FILE* file;
   if (fopen_s(&file, destination.c_str(), "wb") != 0) {
@@ -151,8 +161,8 @@ void tojson_file(T& self, std::string destination, bool pretty, py::object maxde
 template <typename T>
 py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
   return x.def("__repr__", &repr<T>)
-          .def_property("identities", [](T& self) -> py::object { return box(self.identities()); }, [](T& self, py::object identities) -> void { self.setidentities(unbox_identities_none(identities)); })
-          .def("setidentities", [](T& self, py::object identities) -> void {
+          .def_property("identities", [](const T& self) -> py::object { return box(self.identities()); }, [](T& self, const py::object& identities) -> void { self.setidentities(unbox_identities_none(identities)); })
+          .def("setidentities", [](T& self, const py::object& identities) -> void {
            self.setidentities(unbox_identities_none(identities));
           })
           .def("setidentities", [](T& self) -> void {
@@ -162,10 +172,10 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("setparameter", &setparameter<T>)
           .def("parameter", &parameter<T>)
           .def("purelist_parameter", &purelist_parameter<T>)
-          .def_property_readonly("type", [](T& self) -> py::object {
+          .def_property_readonly("type", [](const T& self) -> py::object {
             return box(self.type());
           })
-          .def("astype", [](T& self, std::shared_ptr<ak::Type>& type) -> py::object {
+          .def("astype", [](const T& self, const std::shared_ptr<ak::Type>& type) -> py::object {
             return box(self.astype(type));
           })
           .def("__len__", &len<T>)
@@ -186,19 +196,19 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("getitem_nothing", &T::getitem_nothing)
 
           // operations
-          .def("count", [](T& self, int64_t axis) -> py::object {
+          .def("count", [](const T& self, int64_t axis) -> py::object {
             return box(self.count(axis));
           }, py::arg("axis") = 0)
-          .def("flatten", [](T& self, int64_t axis) -> py::object {
+          .def("flatten", [](const T& self, int64_t axis) -> py::object {
             return box(self.flatten(axis));
           }, py::arg("axis") = 0)
-          .def("mergeable", [](T& self, py::object other, bool mergebool) -> bool {
+          .def("mergeable", [](const T& self, const py::object& other, bool mergebool) -> bool {
             return self.mergeable(unbox_content(other), mergebool);
           }, py::arg("other"), py::arg("mergebool") = false)
-          .def("merge", [](T& self, py::object other) -> py::object {
+          .def("merge", [](const T& self, const py::object& other) -> py::object {
             return box(self.merge(unbox_content(other)));
           })
-          .def("merge_as_union", [](T& self, py::object other) -> py::object {
+          .def("merge_as_union", [](const T& self, const py::object& other) -> py::object {
             return box(self.merge_as_union(unbox_content(other)));
           })
 
@@ -207,9 +217,9 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
 
 /////////////////////////////////////////////////////////////// EmptyArray
 
-py::class_<ak::EmptyArray, std::shared_ptr<ak::EmptyArray>, ak::Content> make_EmptyArray(py::handle m, std::string name) {
+py::class_<ak::EmptyArray, std::shared_ptr<ak::EmptyArray>, ak::Content> make_EmptyArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::EmptyArray, std::shared_ptr<ak::EmptyArray>, ak::Content>(m, name.c_str())
-      .def(py::init([](py::object identities, py::object parameters) -> ak::EmptyArray {
+      .def(py::init([](const py::object& identities, const py::object& parameters) -> ak::EmptyArray {
         return ak::EmptyArray(unbox_identities_none(identities), dict2parameters(parameters));
       }), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
   );
@@ -218,16 +228,16 @@ py::class_<ak::EmptyArray, std::shared_ptr<ak::EmptyArray>, ak::Content> make_Em
 /////////////////////////////////////////////////////////////// IndexedArray
 
 template <typename T, bool ISOPTION>
-py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T, ISOPTION>>, ak::Content> make_IndexedArrayOf(py::handle m, std::string name) {
+py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T, ISOPTION>>, ak::Content> make_IndexedArrayOf(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T, ISOPTION>>, ak::Content>(m, name.c_str())
-      .def(py::init([](ak::IndexOf<T>& index, py::object content, py::object identities, py::object parameters) -> ak::IndexedArrayOf<T, ISOPTION> {
+      .def(py::init([](const ak::IndexOf<T>& index, const py::object& content, const py::object& identities, const py::object& parameters) -> ak::IndexedArrayOf<T, ISOPTION> {
         return ak::IndexedArrayOf<T, ISOPTION>(unbox_identities_none(identities), dict2parameters(parameters), index, std::shared_ptr<ak::Content>(unbox_content(content)));
       }), py::arg("index"), py::arg("content"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
       .def_property_readonly("index", &ak::IndexedArrayOf<T, ISOPTION>::index)
       .def_property_readonly("content", &ak::IndexedArrayOf<T, ISOPTION>::content)
       .def_property_readonly("isoption", &ak::IndexedArrayOf<T, ISOPTION>::isoption)
-      .def("project", [](ak::IndexedArrayOf<T, ISOPTION>& self, py::object mask) {
+      .def("project", [](const ak::IndexedArrayOf<T, ISOPTION>& self, const py::object& mask) {
         if (mask.is(py::none())) {
           return box(self.project());
         }
@@ -236,24 +246,24 @@ py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T
         }
       }, py::arg("mask") = py::none())
       .def("bytemask", &ak::IndexedArrayOf<T, ISOPTION>::bytemask)
-      .def("simplify", [](ak::IndexedArrayOf<T, ISOPTION>& self) {
+      .def("simplify", [](const ak::IndexedArrayOf<T, ISOPTION>& self) {
         return box(self.simplify());
       })
   );
 }
 
-template py::class_<ak::IndexedArray32, std::shared_ptr<ak::IndexedArray32>, ak::Content> make_IndexedArrayOf(py::handle m, std::string name);
-template py::class_<ak::IndexedArrayU32, std::shared_ptr<ak::IndexedArrayU32>, ak::Content> make_IndexedArrayOf(py::handle m, std::string name);
-template py::class_<ak::IndexedArray64, std::shared_ptr<ak::IndexedArray64>, ak::Content> make_IndexedArrayOf(py::handle m, std::string name);
-template py::class_<ak::IndexedOptionArray32, std::shared_ptr<ak::IndexedOptionArray32>, ak::Content> make_IndexedArrayOf(py::handle m, std::string name);
-template py::class_<ak::IndexedOptionArray64, std::shared_ptr<ak::IndexedOptionArray64>, ak::Content> make_IndexedArrayOf(py::handle m, std::string name);
+template py::class_<ak::IndexedArray32, std::shared_ptr<ak::IndexedArray32>, ak::Content> make_IndexedArrayOf(const py::handle& m, const std::string& name);
+template py::class_<ak::IndexedArrayU32, std::shared_ptr<ak::IndexedArrayU32>, ak::Content> make_IndexedArrayOf(const py::handle& m, const std::string& name);
+template py::class_<ak::IndexedArray64, std::shared_ptr<ak::IndexedArray64>, ak::Content> make_IndexedArrayOf(const py::handle& m, const std::string& name);
+template py::class_<ak::IndexedOptionArray32, std::shared_ptr<ak::IndexedOptionArray32>, ak::Content> make_IndexedArrayOf(const py::handle& m, const std::string& name);
+template py::class_<ak::IndexedOptionArray64, std::shared_ptr<ak::IndexedOptionArray64>, ak::Content> make_IndexedArrayOf(const py::handle& m, const std::string& name);
 
 /////////////////////////////////////////////////////////////// ListArray
 
 template <typename T>
-py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content> make_ListArrayOf(py::handle m, std::string name) {
+py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content> make_ListArrayOf(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content>(m, name.c_str())
-      .def(py::init([](ak::IndexOf<T>& starts, ak::IndexOf<T>& stops, py::object content, py::object identities, py::object parameters) -> ak::ListArrayOf<T> {
+      .def(py::init([](const ak::IndexOf<T>& starts, const ak::IndexOf<T>& stops, const py::object& content, const py::object& identities, const py::object& parameters) -> ak::ListArrayOf<T> {
         return ak::ListArrayOf<T>(unbox_identities_none(identities), dict2parameters(parameters), starts, stops, unbox_content(content));
       }), py::arg("starts"), py::arg("stops"), py::arg("content"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
@@ -266,16 +276,16 @@ py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content>
   );
 }
 
-template py::class_<ak::ListArray32, std::shared_ptr<ak::ListArray32>, ak::Content> make_ListArrayOf(py::handle m, std::string name);
-template py::class_<ak::ListArrayU32, std::shared_ptr<ak::ListArrayU32>, ak::Content> make_ListArrayOf(py::handle m, std::string name);
-template py::class_<ak::ListArray64, std::shared_ptr<ak::ListArray64>, ak::Content> make_ListArrayOf(py::handle m, std::string name);
+template py::class_<ak::ListArray32, std::shared_ptr<ak::ListArray32>, ak::Content> make_ListArrayOf(const py::handle& m, const std::string& name);
+template py::class_<ak::ListArrayU32, std::shared_ptr<ak::ListArrayU32>, ak::Content> make_ListArrayOf(const py::handle& m, const std::string& name);
+template py::class_<ak::ListArray64, std::shared_ptr<ak::ListArray64>, ak::Content> make_ListArrayOf(const py::handle& m, const std::string& name);
 
 /////////////////////////////////////////////////////////////// ListOffsetArray
 
 template <typename T>
-py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, ak::Content> make_ListOffsetArrayOf(py::handle m, std::string name) {
+py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, ak::Content> make_ListOffsetArrayOf(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, ak::Content>(m, name.c_str())
-      .def(py::init([](ak::IndexOf<T>& offsets, py::object content, py::object identities, py::object parameters) -> ak::ListOffsetArrayOf<T> {
+      .def(py::init([](const ak::IndexOf<T>& offsets, const py::object& content, const py::object& identities, const py::object& parameters) -> ak::ListOffsetArrayOf<T> {
         return ak::ListOffsetArrayOf<T>(unbox_identities_none(identities), dict2parameters(parameters), offsets, std::shared_ptr<ak::Content>(unbox_content(content)));
       }), py::arg("offsets"), py::arg("content"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
@@ -289,15 +299,15 @@ py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, 
   );
 }
 
-template py::class_<ak::ListOffsetArray32, std::shared_ptr<ak::ListOffsetArray32>, ak::Content> make_ListOffsetArrayOf(py::handle m, std::string name);
-template py::class_<ak::ListOffsetArrayU32, std::shared_ptr<ak::ListOffsetArrayU32>, ak::Content> make_ListOffsetArrayOf(py::handle m, std::string name);
-template py::class_<ak::ListOffsetArray64, std::shared_ptr<ak::ListOffsetArray64>, ak::Content> make_ListOffsetArrayOf(py::handle m, std::string name);
+template py::class_<ak::ListOffsetArray32, std::shared_ptr<ak::ListOffsetArray32>, ak::Content> make_ListOffsetArrayOf(const py::handle& m, const std::string& name);
+template py::class_<ak::ListOffsetArrayU32, std::shared_ptr<ak::ListOffsetArrayU32>, ak::Content> make_ListOffsetArrayOf(const py::handle& m, const std::string& name);
+template py::class_<ak::ListOffsetArray64, std::shared_ptr<ak::ListOffsetArray64>, ak::Content> make_ListOffsetArrayOf(const py::handle& m, const std::string& name);
 
 /////////////////////////////////////////////////////////////// NumpyArray
 
-py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_NumpyArray(py::handle m, std::string name) {
+py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_NumpyArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content>(m, name.c_str(), py::buffer_protocol())
-      .def_buffer([](ak::NumpyArray& self) -> py::buffer_info {
+      .def_buffer([](const ak::NumpyArray& self) -> py::buffer_info {
         return py::buffer_info(
           self.byteptr(),
           self.itemsize(),
@@ -307,7 +317,7 @@ py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_Nu
           self.strides());
       })
 
-      .def(py::init([](py::array array, py::object identities, py::object parameters) -> ak::NumpyArray {
+      .def(py::init([](py::array& array, const py::object& identities, const py::object& parameters) -> ak::NumpyArray {
         py::buffer_info info = array.request();
         if (info.ndim == 0) {
           throw std::invalid_argument("NumpyArray must not be scalar; try array.reshape(1)");
@@ -341,31 +351,31 @@ py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_Nu
 
 /////////////////////////////////////////////////////////////// RecordArray
 
-py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, std::string name) {
+py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle& m, const std::string& name) {
   return py::class_<ak::Record, std::shared_ptr<ak::Record>>(m, name.c_str())
-      .def(py::init([](std::shared_ptr<ak::RecordArray> recordarray, int64_t at) -> ak::Record {
+      .def(py::init([](const std::shared_ptr<ak::RecordArray>& recordarray, int64_t at) -> ak::Record {
         return ak::Record(recordarray, at);
       }), py::arg("recordarray"), py::arg("at"))
       .def("__repr__", &repr<ak::Record>)
-      .def_property_readonly("identities", [](ak::Record& self) -> py::object { return box(self.identities()); })
+      .def_property_readonly("identities", [](const ak::Record& self) -> py::object { return box(self.identities()); })
       .def("__getitem__", &getitem<ak::Record>)
-      .def_property_readonly("type", [](ak::Record& self) -> py::object {
+      .def_property_readonly("type", [](const ak::Record& self) -> py::object {
         return box(self.type());
       })
       .def_property("parameters", &getparameters<ak::Record>, &setparameters<ak::Record>)
       .def("setparameter", &setparameter<ak::Record>)
       .def("parameter", &parameter<ak::Record>)
       .def("purelist_parameter", &purelist_parameter<ak::Record>)
-      .def_property_readonly("type", [](ak::Record& self) -> py::object {
+      .def_property_readonly("type", [](const ak::Record& self) -> py::object {
         return box(self.type());
       })
-      .def("astype", [](ak::Record& self, std::shared_ptr<ak::Type>& type) -> py::object {
+      .def("astype", [](const ak::Record& self, const std::shared_ptr<ak::Type>& type) -> py::object {
         return box(self.astype(type));
       })
       .def("tojson", &tojson_string<ak::Record>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
 
-      .def_property_readonly("array", [](ak::Record& self) -> py::object { return box(self.array()); })
+      .def_property_readonly("array", [](const ak::Record& self) -> py::object { return box(self.array()); })
       .def_property_readonly("at", &ak::Record::at)
       .def_property_readonly("istuple", &ak::Record::istuple)
       .def_property_readonly("numfields", &ak::Record::numfields)
@@ -373,20 +383,20 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
       .def("key", &ak::Record::key)
       .def("haskey", &ak::Record::haskey)
       .def("keys", &ak::Record::keys)
-      .def("field", [](ak::Record& self, int64_t fieldindex) -> py::object {
+      .def("field", [](const ak::Record& self, int64_t fieldindex) -> py::object {
         return box(self.field(fieldindex));
       })
-      .def("field", [](ak::Record& self, std::string key) -> py::object {
+      .def("field", [](const ak::Record& self, const std::string& key) -> py::object {
         return box(self.field(key));
       })
-      .def("fields", [](ak::Record& self) -> py::object {
+      .def("fields", [](const ak::Record& self) -> py::object {
         py::list out;
         for (auto item : self.fields()) {
           out.append(box(item));
         }
         return out;
       })
-      .def("fielditems", [](ak::Record& self) -> py::object {
+      .def("fielditems", [](const ak::Record& self) -> py::object {
         py::list out;
         for (auto item : self.fielditems()) {
           py::str key(item.first);
@@ -398,7 +408,7 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
         }
         return out;
       })
-      .def_property_readonly("astuple", [](ak::Record& self) -> py::object {
+      .def_property_readonly("astuple", [](const ak::Record& self) -> py::object {
         return box(self.astuple());
       })
      .def_property_readonly("identity", &identity<ak::Record>)
@@ -406,7 +416,7 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, st
   ;
 }
 
-ak::RecordArray iterable_to_RecordArray(py::iterable contents, py::object keys, py::object identities, py::object parameters) {
+ak::RecordArray iterable_to_RecordArray(const py::iterable& contents, const py::object& keys, const py::object& identities, const py::object& parameters) {
   std::vector<std::shared_ptr<ak::Content>> out;
   for (auto x : contents) {
     out.push_back(unbox_content(x));
@@ -429,9 +439,9 @@ ak::RecordArray iterable_to_RecordArray(py::iterable contents, py::object keys, 
   }
 }
 
-py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_RecordArray(py::handle m, std::string name) {
+py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_RecordArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content>(m, name.c_str())
-      .def(py::init([](py::dict contents, py::object identities, py::object parameters) -> ak::RecordArray {
+      .def(py::init([](const py::dict& contents, const py::object& identities, const py::object& parameters) -> ak::RecordArray {
         std::shared_ptr<ak::util::RecordLookup> recordlookup = std::make_shared<ak::util::RecordLookup>();
         std::vector<std::shared_ptr<ak::Content>> out;
         for (auto x : contents) {
@@ -445,13 +455,13 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, recordlookup);
       }), py::arg("contents"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
       .def(py::init(&iterable_to_RecordArray), py::arg("contents"), py::arg("keys") = py::none(), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
-      .def(py::init([](int64_t length, bool istuple, py::object identities, py::object parameters) -> ak::RecordArray {
+      .def(py::init([](int64_t length, bool istuple, const py::object& identities, const py::object& parameters) -> ak::RecordArray {
         return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), length, istuple);
       }), py::arg("length"), py::arg("istuple") = false, py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
       .def_property_readonly("istuple", &ak::RecordArray::istuple)
       .def_property_readonly("contents", &ak::RecordArray::contents)
-      .def("setitem_field", [](ak::RecordArray& self, py::object where, py::object what) -> py::object {
+      .def("setitem_field", [](const ak::RecordArray& self, const py::object& where, const py::object& what) -> py::object {
         std::shared_ptr<ak::Content> mywhat = unbox_content(what);
         if (where.is(py::none())) {
           return box(self.setitem_field(self.numfields(), mywhat));
@@ -473,20 +483,20 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         }
       }, py::arg("where"), py::arg("what"))
 
-      .def("field", [](ak::RecordArray& self, int64_t fieldindex) -> std::shared_ptr<ak::Content> {
+      .def("field", [](const ak::RecordArray& self, int64_t fieldindex) -> std::shared_ptr<ak::Content> {
         return self.field(fieldindex);
       })
-      .def("field", [](ak::RecordArray& self, std::string key) -> std::shared_ptr<ak::Content> {
+      .def("field", [](const ak::RecordArray& self, const std::string& key) -> std::shared_ptr<ak::Content> {
         return self.field(key);
       })
-      .def("fields", [](ak::RecordArray& self) -> py::object {
+      .def("fields", [](const ak::RecordArray& self) -> py::object {
         py::list out;
         for (auto item : self.fields()) {
           out.append(box(item));
         }
         return out;
       })
-      .def("fielditems", [](ak::RecordArray& self) -> py::object {
+      .def("fielditems", [](const ak::RecordArray& self) -> py::object {
         py::list out;
         for (auto item : self.fielditems()) {
           py::str key(item.first);
@@ -498,7 +508,7 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         }
         return out;
       })
-      .def_property_readonly("astuple", [](ak::RecordArray& self) -> py::object {
+      .def_property_readonly("astuple", [](const ak::RecordArray& self) -> py::object {
         return box(self.astuple());
       })
 
@@ -507,9 +517,9 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
 
 /////////////////////////////////////////////////////////////// RegularArray
 
-py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> make_RegularArray(py::handle m, std::string name) {
+py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> make_RegularArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content>(m, name.c_str())
-      .def(py::init([](py::object content, int64_t size, py::object identities, py::object parameters) -> ak::RegularArray {
+      .def(py::init([](const py::object& content, int64_t size, const py::object& identities, const py::object& parameters) -> ak::RegularArray {
         return ak::RegularArray(unbox_identities_none(identities), dict2parameters(parameters), std::shared_ptr<ak::Content>(unbox_content(content)), size);
       }), py::arg("content"), py::arg("size"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
@@ -523,9 +533,9 @@ py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> mak
 /////////////////////////////////////////////////////////////// UnionArray
 
 template <typename T, typename I>
-py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::Content> make_UnionArrayOf(py::handle m, std::string name) {
+py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::Content> make_UnionArrayOf(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::Content>(m, name.c_str())
-      .def(py::init([](ak::IndexOf<T>& tags, ak::IndexOf<I>& index, py::iterable contents, py::object identities, py::object parameters) -> ak::UnionArrayOf<T, I> {
+      .def(py::init([](const ak::IndexOf<T>& tags, ak::IndexOf<I>& index, const py::iterable& contents, const py::object& identities, const py::object& parameters) -> ak::UnionArrayOf<T, I> {
         std::vector<std::shared_ptr<ak::Content>> out;
         for (auto content : contents) {
           out.push_back(std::shared_ptr<ak::Content>(unbox_content(content)));
@@ -540,13 +550,13 @@ py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::
       .def_property_readonly("numcontents", &ak::UnionArrayOf<T, I>::numcontents)
       .def("content", &ak::UnionArrayOf<T, I>::content)
       .def("project", &ak::UnionArrayOf<T, I>::project)
-      .def("simplify", [](ak::UnionArrayOf<T, I>& self, bool mergebool) -> py::object {
+      .def("simplify", [](const ak::UnionArrayOf<T, I>& self, bool mergebool) -> py::object {
         return box(self.simplify(mergebool));
       }, py::arg("mergebool") = false)
 
   );
 }
 
-template py::class_<ak::UnionArray8_32, std::shared_ptr<ak::UnionArray8_32>, ak::Content> make_UnionArrayOf(py::handle m, std::string name);
-template py::class_<ak::UnionArray8_U32, std::shared_ptr<ak::UnionArray8_U32>, ak::Content> make_UnionArrayOf(py::handle m, std::string name);
-template py::class_<ak::UnionArray8_64, std::shared_ptr<ak::UnionArray8_64>, ak::Content> make_UnionArrayOf(py::handle m, std::string name);
+template py::class_<ak::UnionArray8_32, std::shared_ptr<ak::UnionArray8_32>, ak::Content> make_UnionArrayOf(const py::handle& m, const std::string& name);
+template py::class_<ak::UnionArray8_U32, std::shared_ptr<ak::UnionArray8_U32>, ak::Content> make_UnionArrayOf(const py::handle& m, const std::string& name);
+template py::class_<ak::UnionArray8_64, std::shared_ptr<ak::UnionArray8_64>, ak::Content> make_UnionArrayOf(const py::handle& m, const std::string& name);

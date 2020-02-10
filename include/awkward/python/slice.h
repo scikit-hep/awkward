@@ -12,6 +12,6 @@ namespace ak = awkward;
 
 ak::Slice toslice(py::object obj);
 
-void make_slice_tostring(py::module m, std::string name);
+void make_slice_tostring(py::module& m, const std::string& name);
 
 #endif // AWKWARDPY_SLICE_H_

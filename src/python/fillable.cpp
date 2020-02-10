@@ -8,7 +8,7 @@
 
 #include "awkward/python/fillable.h"
 
-void fillable_fill(ak::FillableArray& self, py::handle obj) {
+void fillable_fill(ak::FillableArray& self, const py::handle& obj) {
   if (obj.is(py::none())) {
     self.null();
   }
@@ -62,31 +62,31 @@ void fillable_fill(ak::FillableArray& self, py::handle obj) {
   }
 }
 
-py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name) {
+py::class_<ak::FillableArray> make_FillableArray(const py::handle& m, const std::string& name) {
   return (py::class_<ak::FillableArray>(m, name.c_str())
       .def(py::init([](int64_t initial, double resize) -> ak::FillableArray {
         return ak::FillableArray(ak::FillableOptions(initial, resize));
       }), py::arg("initial") = 1024, py::arg("resize") = 2.0)
-      .def_property_readonly("_ptr", [](ak::FillableArray* self) -> size_t { return reinterpret_cast<size_t>(self); })
+      .def_property_readonly("_ptr", [](const ak::FillableArray* self) -> size_t { return reinterpret_cast<size_t>(self); })
       .def("__repr__", &ak::FillableArray::tostring)
       .def("__len__", &ak::FillableArray::length)
       .def("clear", &ak::FillableArray::clear)
       .def_property_readonly("type", &ak::FillableArray::type)
-      .def("snapshot", [](ak::FillableArray& self) -> py::object {
+      .def("snapshot", [](const ak::FillableArray& self) -> py::object {
         return box(self.snapshot());
       })
       .def("__getitem__", &getitem<ak::FillableArray>)
-      .def("__iter__", [](ak::FillableArray& self) -> ak::Iterator {
+      .def("__iter__", [](const ak::FillableArray& self) -> ak::Iterator {
         return ak::Iterator(self.snapshot());
       })
       .def("null", &ak::FillableArray::null)
       .def("boolean", &ak::FillableArray::boolean)
       .def("integer", &ak::FillableArray::integer)
       .def("real", &ak::FillableArray::real)
-      .def("bytestring", [](ak::FillableArray& self, py::bytes x) -> void {
+      .def("bytestring", [](ak::FillableArray& self, const py::bytes& x) -> void {
         self.bytestring(x.cast<std::string>());
       })
-      .def("string", [](ak::FillableArray& self, py::str x) -> void {
+      .def("string", [](ak::FillableArray& self, const py::str& x) -> void {
         self.string(x.cast<std::string>());
       })
       .def("beginlist", &ak::FillableArray::beginlist)
@@ -94,7 +94,7 @@ py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name)
       .def("begintuple", &ak::FillableArray::begintuple)
       .def("index", &ak::FillableArray::index)
       .def("endtuple", &ak::FillableArray::endtuple)
-      .def("beginrecord", [](ak::FillableArray& self, py::object name) -> void {
+      .def("beginrecord", [](ak::FillableArray& self, const py::object& name) -> void {
         if (name.is(py::none())) {
           self.beginrecord();
         }

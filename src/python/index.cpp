@@ -7,9 +7,9 @@
 #include "awkward/python/index.h"
 
 template <typename T>
-py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
+py::class_<ak::IndexOf<T>> make_IndexOf(const py::handle& m, const std::string& name) {
   return (py::class_<ak::IndexOf<T>>(m, name.c_str(), py::buffer_protocol())
-      .def_buffer([](ak::IndexOf<T>& self) -> py::buffer_info {
+      .def_buffer([](const ak::IndexOf<T>& self) -> py::buffer_info {
         return py::buffer_info(
           reinterpret_cast<void*>(reinterpret_cast<ssize_t>(self.ptr().get()) + self.offset()*sizeof(T)),
           sizeof(T),
@@ -41,8 +41,8 @@ py::class_<ak::IndexOf<T>> make_IndexOf(py::handle m, std::string name) {
   );
 }
 
-template py::class_<ak::Index8> make_IndexOf<int8_t>(py::handle m, std::string name);
-template py::class_<ak::IndexU8> make_IndexOf<uint8_t>(py::handle m, std::string name);
-template py::class_<ak::Index32> make_IndexOf<int32_t>(py::handle m, std::string name);
-template py::class_<ak::IndexU32> make_IndexOf<uint32_t>(py::handle m, std::string name);
-template py::class_<ak::Index64> make_IndexOf<int64_t>(py::handle m, std::string name);
+template py::class_<ak::Index8> make_IndexOf<int8_t>(const py::handle& m, const std::string& name);
+template py::class_<ak::IndexU8> make_IndexOf<uint8_t>(const py::handle& m, const std::string& name);
+template py::class_<ak::Index32> make_IndexOf<int32_t>(const py::handle& m, const std::string& name);
+template py::class_<ak::IndexU32> make_IndexOf<uint32_t>(const py::handle& m, const std::string& name);
+template py::class_<ak::Index64> make_IndexOf<int64_t>(const py::handle& m, const std::string& name);

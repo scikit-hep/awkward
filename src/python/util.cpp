@@ -21,7 +21,7 @@
 #include "awkward/python/util.h"
 
 template <typename T>
-py::object getitem(T& self, py::object obj) {
+py::object getitem(const T& self, const py::object& obj) {
   if (py::isinstance<py::int_>(obj)) {
     return box(self.getitem_at(obj.cast<int64_t>()));
   }
@@ -65,7 +65,7 @@ py::object getitem(T& self, py::object obj) {
   return box(self.getitem(toslice(obj)));
 }
 
-ak::util::Parameters dict2parameters(py::object in) {
+ak::util::Parameters dict2parameters(const py::object& in) {
   ak::util::Parameters out;
   if (in.is(py::none())) {
     // None is equivalent to an empty dict
@@ -95,24 +95,24 @@ py::dict parameters2dict(const ak::util::Parameters& in) {
   return out;
 }
 
-template py::object getitem(ak::EmptyArray& self, py::object obj);
-template py::object getitem(ak::IndexedArray32& self, py::object obj);
-template py::object getitem(ak::IndexedArrayU32& self, py::object obj);
-template py::object getitem(ak::IndexedArray64& self, py::object obj);
-template py::object getitem(ak::IndexedOptionArray32& self, py::object obj);
-template py::object getitem(ak::IndexedOptionArray64& self, py::object obj);
-template py::object getitem(ak::ListArray32& self, py::object obj);
-template py::object getitem(ak::ListArrayU32& self, py::object obj);
-template py::object getitem(ak::ListArray64& self, py::object obj);
-template py::object getitem(ak::ListOffsetArray32& self, py::object obj);
-template py::object getitem(ak::ListOffsetArrayU32& self, py::object obj);
-template py::object getitem(ak::ListOffsetArray64& self, py::object obj);
-template py::object getitem(ak::NumpyArray& self, py::object obj);
-template py::object getitem(ak::Record& self, py::object obj);
-template py::object getitem(ak::RecordArray& self, py::object obj);
-template py::object getitem(ak::RegularArray& self, py::object obj);
-template py::object getitem(ak::UnionArray8_32& self, py::object obj);
-template py::object getitem(ak::UnionArray8_U32& self, py::object obj);
-template py::object getitem(ak::UnionArray8_64& self, py::object obj);
+template py::object getitem(const ak::EmptyArray& self, const py::object& obj);
+template py::object getitem(const ak::IndexedArray32& self, const py::object& obj);
+template py::object getitem(const ak::IndexedArrayU32& self, const py::object& obj);
+template py::object getitem(const ak::IndexedArray64& self, const py::object& obj);
+template py::object getitem(const ak::IndexedOptionArray32& self, const py::object& obj);
+template py::object getitem(const ak::IndexedOptionArray64& self, const py::object& obj);
+template py::object getitem(const ak::ListArray32& self, const py::object& obj);
+template py::object getitem(const ak::ListArrayU32& self, const py::object& obj);
+template py::object getitem(const ak::ListArray64& self, const py::object& obj);
+template py::object getitem(const ak::ListOffsetArray32& self, const py::object& obj);
+template py::object getitem(const ak::ListOffsetArrayU32& self, const py::object& obj);
+template py::object getitem(const ak::ListOffsetArray64& self, const py::object& obj);
+template py::object getitem(const ak::NumpyArray& self, const py::object& obj);
+template py::object getitem(const ak::Record& self, const py::object& obj);
+template py::object getitem(const ak::RecordArray& self, const py::object& obj);
+template py::object getitem(const ak::RegularArray& self, const py::object& obj);
+template py::object getitem(const ak::UnionArray8_32& self, const py::object& obj);
+template py::object getitem(const ak::UnionArray8_U32& self, const py::object& obj);
+template py::object getitem(const ak::UnionArray8_64& self, const py::object& obj);
 
-template py::object getitem(ak::FillableArray& self, py::object obj);
+template py::object getitem(const ak::FillableArray& self, const py::object& obj);

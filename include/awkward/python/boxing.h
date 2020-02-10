@@ -12,12 +12,12 @@
 namespace py = pybind11;
 namespace ak = awkward;
 
-py::object box(std::shared_ptr<ak::Content> content);
-py::object box(std::shared_ptr<ak::Identities> identities);
-py::object box(std::shared_ptr<ak::Type> t);
-std::shared_ptr<ak::Content> unbox_content(py::handle obj);
-std::shared_ptr<ak::Identities> unbox_identities_none(py::handle obj);
-std::shared_ptr<ak::Identities> unbox_identities(py::handle obj);
-std::shared_ptr<ak::Type> unbox_type(py::handle obj);
+py::object box(const std::shared_ptr<ak::Content>& content);
+py::object box(const std::shared_ptr<ak::Identities>& identities);
+py::object box(const std::shared_ptr<ak::Type>& t);
+std::shared_ptr<ak::Content> unbox_content(const py::handle& obj);
+std::shared_ptr<ak::Identities> unbox_identities_none(const py::handle& obj);
+std::shared_ptr<ak::Identities> unbox_identities(const py::handle& obj);
+std::shared_ptr<ak::Type> unbox_type(const py::handle& obj);
 
 #endif // AWKWARDPY_BOXING_H_

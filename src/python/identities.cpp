@@ -8,9 +8,9 @@
 #include "awkward/python/identities.h"
 
 template <typename T>
-py::class_<ak::IdentitiesOf<T>> make_IdentitiesOf(py::handle m, std::string name) {
+py::class_<ak::IdentitiesOf<T>> make_IdentitiesOf(const py::handle& m, const std::string& name) {
   return (py::class_<ak::IdentitiesOf<T>>(m, name.c_str(), py::buffer_protocol())
-      .def_buffer([](ak::IdentitiesOf<T>& self) -> py::buffer_info {
+      .def_buffer([](const ak::IdentitiesOf<T>& self) -> py::buffer_info {
         return py::buffer_info(
           reinterpret_cast<void*>(reinterpret_cast<ssize_t>(self.ptr().get()) + self.offset()*sizeof(T)),
           sizeof(T),
@@ -22,7 +22,7 @@ py::class_<ak::IdentitiesOf<T>> make_IdentitiesOf(py::handle m, std::string name
 
       .def_static("newref", &ak::Identities::newref)
 
-      .def(py::init([](ak::Identities::Ref ref, ak::Identities::FieldLoc fieldloc, int64_t width, int64_t length) {
+      .def(py::init([](ak::Identities::Ref ref, const ak::Identities::FieldLoc& fieldloc, int64_t width, int64_t length) {
         return ak::IdentitiesOf<T>(ref, fieldloc, width, length);
       }))
 
@@ -47,7 +47,7 @@ py::class_<ak::IdentitiesOf<T>> make_IdentitiesOf(py::handle m, std::string name
       .def_property_readonly("fieldloc", &ak::IdentitiesOf<T>::fieldloc)
       .def_property_readonly("width", &ak::IdentitiesOf<T>::width)
       .def_property_readonly("length", &ak::IdentitiesOf<T>::length)
-      .def_property_readonly("array", [](py::buffer& self) -> py::array {
+      .def_property_readonly("array", [](const py::buffer& self) -> py::array {
         return py::array(self);
       })
       .def("identity_at_str", &ak::IdentitiesOf<T>::identity_at)
@@ -71,5 +71,5 @@ py::class_<ak::IdentitiesOf<T>> make_IdentitiesOf(py::handle m, std::string name
   );
 }
 
-template py::class_<ak::Identities32> make_IdentitiesOf(py::handle m, std::string name);
-template py::class_<ak::Identities64> make_IdentitiesOf(py::handle m, std::string name);
+template py::class_<ak::Identities32> make_IdentitiesOf(const py::handle& m, const std::string& name);
+template py::class_<ak::Identities64> make_IdentitiesOf(const py::handle& m, const std::string& name);

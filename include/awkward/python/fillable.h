@@ -10,6 +10,6 @@
 namespace py = pybind11;
 namespace ak = awkward;
 
-py::class_<ak::FillableArray> make_FillableArray(py::handle m, std::string name);
+py::class_<ak::FillableArray> make_FillableArray(const py::handle& m, const std::string& name);
 
 #endif // AWKWARDPY_FILLABLE_H_
