@@ -69,7 +69,7 @@ addtest(PR019 tests/test_PR019_use_json_library.cpp)
 addtest(PR030 tests/test_PR030_recordarray_in_numba.cpp)
 
 # Third tier: Python modules.
-pybind11_add_module(layout src/python/pyawkward.cpp)
+pybind11_add_module(layout ${PYAWKWARD_SOURCES})
 set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
 target_link_libraries(layout PRIVATE awkward-static)
 

@@ -1,0 +1,50 @@
+// BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+
+#ifndef AWKWARDPY_CONTENT_H_
+#define AWKWARDPY_CONTENT_H_
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+#include "awkward/Iterator.h"
+#include "awkward/Content.h"
+#include "awkward/array/EmptyArray.h"
+#include "awkward/array/IndexedArray.h"
+#include "awkward/array/ListArray.h"
+#include "awkward/array/ListOffsetArray.h"
+#include "awkward/array/NumpyArray.h"
+#include "awkward/array/Record.h"
+#include "awkward/array/RecordArray.h"
+#include "awkward/array/RegularArray.h"
+#include "awkward/array/UnionArray.h"
+
+namespace py = pybind11;
+namespace ak = awkward;
+
+py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(py::handle m, std::string name);
+
+py::class_<ak::Content, std::shared_ptr<ak::Content>> make_Content(py::handle m, std::string name);
+
+py::class_<ak::EmptyArray, std::shared_ptr<ak::EmptyArray>, ak::Content> make_EmptyArray(py::handle m, std::string name);
+
+template <typename T, bool ISOPTION>
+py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T, ISOPTION>>, ak::Content> make_IndexedArrayOf(py::handle m, std::string name);
+
+template <typename T>
+py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content> make_ListArrayOf(py::handle m, std::string name);
+
+template <typename T>
+py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, ak::Content> make_ListOffsetArrayOf(py::handle m, std::string name);
+
+py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_NumpyArray(py::handle m, std::string name);
+
+py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(py::handle m, std::string name);
+
+py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_RecordArray(py::handle m, std::string name);
+
+py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> make_RegularArray(py::handle m, std::string name);
+
+template <typename T, typename I>
+py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::Content> make_UnionArrayOf(py::handle m, std::string name);
+
+#endif // AWKWARDPY_CONTENT_H_
