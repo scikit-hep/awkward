@@ -3,10 +3,10 @@ docs/demos/countries.geojson
 docs/demos/test-program
 docs/demos/test-program.cpp
 
-dependent_project/CMakeFiles
-dependent_project/CMakeCache.txt
-dependent_project/Makefile
-dependent_project/cmake_install.cmake
+dependent-project/CMakeFiles
+dependent-project/CMakeCache.txt
+dependent-project/Makefile
+dependent-project/cmake_install.cmake
 
 ############################################################# IDEs
 
