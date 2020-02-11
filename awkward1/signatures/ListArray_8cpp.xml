@@ -31,6 +31,18 @@
       <node id="5">
         <label>awkward/cpu-kernels/getitem.h</label>
       </node>
+      <node id="9">
+        <label>awkward/type/UnknownType.h</label>
+      </node>
+      <node id="4">
+        <label>awkward/cpu-kernels/identities.h</label>
+      </node>
+      <node id="12">
+        <label>awkward/array/RegularArray.h</label>
+      </node>
+      <node id="13">
+        <label>awkward/array/NumpyArray.h</label>
+      </node>
       <node id="1">
         <label>src/libawkward/array/ListArray.cpp</label>
         <link refid="ListArray_8cpp"/>
@@ -66,18 +78,6 @@
         </childnode>
         <childnode refid="17" relation="include">
         </childnode>
-      </node>
-      <node id="9">
-        <label>awkward/type/UnknownType.h</label>
-      </node>
-      <node id="4">
-        <label>awkward/cpu-kernels/identities.h</label>
-      </node>
-      <node id="12">
-        <label>awkward/array/RegularArray.h</label>
-      </node>
-      <node id="13">
-        <label>awkward/array/NumpyArray.h</label>
       </node>
       <node id="11">
         <label>awkward/array/ListOffsetArray.h</label>

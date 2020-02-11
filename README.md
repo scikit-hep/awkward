@@ -104,6 +104,14 @@ rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
 <p align="center">See Azure Pipelines <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary">buildtest-awkward</a> (CI) and <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary">deploy-awkward</a> (CD).</p>
 <br>
 
+## Building projects that depend on Awkward
+
+Python projects can simply use `awkward1` as a Python library.
+
+C++ projects can either link against the shared libraries `libawkward-cpu-kernels.so` and `libawkward.so` or the static libraries, whose names end in `-static`. All four libraries, as well as their C++ header files, are shipped with the Python library. Even if you installed Awkward Array with pip, you'll have everything you need to build an Awkward C++ program.
+
+If you also want to bind your C++ to Python and share Awkward Arrays between modules in Python, see the [dependent-project](https://github.com/scikit-hep/awkward-1.0/tree/master/dependent-project) example. This is a small CMake project bound to Python with pybind11 that can produce and consume Awkward Arrays in Python. Such projects depend on a specific version of Awkward Array, but we intend to stabilize the ABI for more flexibility.
+
 ## Roadmap
 
 **The six-month sprint:**

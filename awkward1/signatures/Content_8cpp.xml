@@ -8,11 +8,25 @@
     <includes local="yes">awkward/array/ListArray.h</includes>
     <includes local="yes">awkward/array/EmptyArray.h</includes>
     <includes local="yes">awkward/array/UnionArray.h</includes>
+    <includes local="yes">awkward/array/IndexedArray.h</includes>
+    <includes local="yes">awkward/array/RecordArray.h</includes>
     <includes local="yes">awkward/type/ArrayType.h</includes>
     <includes local="yes">awkward/Content.h</includes>
     <incdepgraph>
       <node id="3">
         <label>awkward/cpu-kernels/operations.h</label>
+      </node>
+      <node id="10">
+        <label>awkward/type/ArrayType.h</label>
+      </node>
+      <node id="9">
+        <label>awkward/array/RecordArray.h</label>
+      </node>
+      <node id="4">
+        <label>awkward/array/RegularArray.h</label>
+      </node>
+      <node id="11">
+        <label>awkward/Content.h</label>
       </node>
       <node id="1">
         <label>src/libawkward/Content.cpp</label>
@@ -33,15 +47,10 @@
         </childnode>
         <childnode refid="9" relation="include">
         </childnode>
-      </node>
-      <node id="8">
-        <label>awkward/type/ArrayType.h</label>
-      </node>
-      <node id="4">
-        <label>awkward/array/RegularArray.h</label>
-      </node>
-      <node id="9">
-        <label>awkward/Content.h</label>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
       </node>
       <node id="7">
         <label>awkward/array/UnionArray.h</label>
@@ -52,11 +61,53 @@
       <node id="5">
         <label>awkward/array/ListArray.h</label>
       </node>
+      <node id="8">
+        <label>awkward/array/IndexedArray.h</label>
+      </node>
       <node id="6">
         <label>awkward/array/EmptyArray.h</label>
       </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="namespaceawkward_1abce05627919deb8b9f9c5749bfde738e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>const std::shared_ptr&lt; Content &gt;</type>
+        <definition>const std::shared_ptr&lt;Content&gt; awkward::getitem_next_regular_missing</definition>
+        <argsstring>(const SliceMissing64 &amp;missing, const Slice &amp;tail, const Index64 &amp;advanced, const RegularArray *raw, int64_t length, const std::string &amp;classname)</argsstring>
+        <name>getitem_next_regular_missing</name>
+        <param>
+          <type>const SliceMissing64 &amp;</type>
+          <declname>missing</declname>
+        </param>
+        <param>
+          <type>const Slice &amp;</type>
+          <declname>tail</declname>
+        </param>
+        <param>
+          <type>const Index64 &amp;</type>
+          <declname>advanced</declname>
+        </param>
+        <param>
+          <type>const RegularArray *</type>
+          <declname>raw</declname>
+        </param>
+        <param>
+          <type>int64_t</type>
+          <declname>length</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>classname</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/libawkward/Content.cpp" line="246" column="25" bodyfile="src/libawkward/Content.cpp" bodystart="246" bodyend="261"/>
+      </memberdef>
+      </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>

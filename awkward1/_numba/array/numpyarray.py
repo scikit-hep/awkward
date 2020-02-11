@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+from __future__ import absolute_import
+
 import operator
 
 import numpy
@@ -14,7 +16,7 @@ from ..._numba import cpu, util, identities, content
 def typeof(val, c):
     import awkward1._numba.types
     type = val.type
-    while isinstance(type, (awkward1.layout.ArrayType, awkward1.layout.RegularType)):
+    while isinstance(type, (awkward1.types.ArrayType, awkward1.types.RegularType)):
         type = type.type
     return NumpyArrayType(numba.typeof(numpy.asarray(val)), numba.typeof(val.identities), util.dict2parameters(val.parameters))
 
