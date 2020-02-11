@@ -24,19 +24,19 @@ def parameters(array):
 
 def typeof(array):
     if array is None:
-        return awkward1.type.UnknownType()
+        return awkward1.types.UnknownType()
 
     elif isinstance(array, (bool, numpy.bool, numpy.bool_)):
-        return awkward1.type.PrimitiveType("bool")
+        return awkward1.types.PrimitiveType("bool")
 
     elif isinstance(array, numbers.Integral):
-        return awkward1.type.PrimitiveType("int64")
+        return awkward1.types.PrimitiveType("int64")
 
     elif isinstance(array, numbers.Real):
-        return awkward1.type.PrimitiveType("float64")
+        return awkward1.types.PrimitiveType("float64")
 
     elif isinstance(array, (numpy.int8, numpy.int16, numpy.int32, numpy.int64, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64, numpy.float32, numpy.float64)):
-        return awkward1.type.PrimitiveType(typeof.dtype2primitive[array.dtype.type])
+        return awkward1.types.PrimitiveType(typeof.dtype2primitive[array.dtype.type])
 
     elif isinstance(array, numpy.generic):
         raise ValueError("cannot describe {0} as a PrimitiveType".format(type(array)))
@@ -51,10 +51,10 @@ def typeof(array):
         if len(array.shape) == 0:
             return typeof(array.reshape((1,))[0])
         else:
-            out = awkward1.type.PrimitiveType(typeof.dtype2primitive[array.dtype.type])
+            out = awkward1.types.PrimitiveType(typeof.dtype2primitive[array.dtype.type])
             for x in array.shape[-1:0:-1]:
-                out = awkward1.type.RegularType(out, x)
-            return awkward1.type.ArrayType(out, array.shape[0])
+                out = awkward1.types.RegularType(out, x)
+            return awkward1.types.ArrayType(out, array.shape[0])
 
     elif isinstance(array, awkward1.layout.FillableArray):
         return array.type

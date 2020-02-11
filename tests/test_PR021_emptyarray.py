@@ -13,13 +13,13 @@ def test_unknown():
     a = awkward1.fromjson("[[], [], []]").layout
     assert awkward1.tolist(a) == [[], [], []]
     assert str(awkward1.typeof(a)) == "var * unknown"
-    assert awkward1.typeof(a) == awkward1.type.ListType(awkward1.type.UnknownType())
-    assert not awkward1.typeof(a) == awkward1.type.PrimitiveType("float64")
+    assert awkward1.typeof(a) == awkward1.types.ListType(awkward1.types.UnknownType())
+    assert not awkward1.typeof(a) == awkward1.types.PrimitiveType("float64")
 
     a = awkward1.fromjson("[[], [[], []], [[], [], []]]").layout
     assert awkward1.tolist(a) == [[], [[], []], [[], [], []]]
     assert str(awkward1.typeof(a)) == "var * var * unknown"
-    assert awkward1.typeof(a) == awkward1.type.ListType(awkward1.type.ListType(awkward1.type.UnknownType()))
+    assert awkward1.typeof(a) == awkward1.types.ListType(awkward1.types.ListType(awkward1.types.UnknownType()))
 
     a = awkward1.layout.FillableArray()
     a.beginlist()
@@ -30,14 +30,14 @@ def test_unknown():
     a.endlist()
     assert awkward1.tolist(a) == [[], [], []]
     assert str(awkward1.typeof(a)) == "var * unknown"
-    assert awkward1.typeof(a) == awkward1.type.ListType(awkward1.type.UnknownType())
-    assert not awkward1.typeof(a) == awkward1.type.PrimitiveType("float64")
+    assert awkward1.typeof(a) == awkward1.types.ListType(awkward1.types.UnknownType())
+    assert not awkward1.typeof(a) == awkward1.types.PrimitiveType("float64")
 
     a = a.snapshot()
     assert awkward1.tolist(a) == [[], [], []]
     assert str(awkward1.typeof(a)) == "var * unknown"
-    assert awkward1.typeof(a) == awkward1.type.ListType(awkward1.type.UnknownType())
-    assert not awkward1.typeof(a) == awkward1.type.PrimitiveType("float64")
+    assert awkward1.typeof(a) == awkward1.types.ListType(awkward1.types.UnknownType())
+    assert not awkward1.typeof(a) == awkward1.types.PrimitiveType("float64")
 
 def test_getitem():
     a = awkward1.fromjson("[[], [[], []], [[], [], []]]")

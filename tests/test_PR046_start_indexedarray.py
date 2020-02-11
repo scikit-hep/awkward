@@ -49,9 +49,9 @@ def test_type():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4]))
     index = awkward1.layout.Index32(numpy.array([2, 2, 0, 3, 4], dtype=numpy.int32))
     array = awkward1.layout.IndexedArray32(index, content)
-    assert awkward1.typeof(array) == awkward1.type.PrimitiveType("float64")
+    assert awkward1.typeof(array) == awkward1.types.PrimitiveType("float64")
     array = awkward1.layout.IndexedOptionArray32(index, content)
-    assert awkward1.typeof(array) == awkward1.type.OptionType(awkward1.type.PrimitiveType("float64"))
+    assert awkward1.typeof(array) == awkward1.types.OptionType(awkward1.types.PrimitiveType("float64"))
 
 def test_null():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4]))
@@ -156,8 +156,8 @@ def test_json():
 
 def test_emptyarray():
     array = awkward1.layout.EmptyArray()
-    assert isinstance(array.astype(awkward1.type.OptionType(awkward1.type.PrimitiveType("float32"))), awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.astype(awkward1.types.OptionType(awkward1.types.PrimitiveType("float32"))), awkward1.layout.IndexedOptionArray64)
 
     offsets = awkward1.layout.Index64(numpy.array([0], dtype=numpy.int64))
     array = awkward1.layout.ListOffsetArray64(offsets, awkward1.layout.EmptyArray())
-    assert isinstance(array.astype(awkward1.type.ListType(awkward1.type.OptionType(awkward1.type.PrimitiveType("float32")))).content, awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array.astype(awkward1.types.ListType(awkward1.types.OptionType(awkward1.types.PrimitiveType("float32")))).content, awkward1.layout.IndexedOptionArray64)

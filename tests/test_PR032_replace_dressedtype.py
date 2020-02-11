@@ -12,27 +12,27 @@ import awkward1
 py27 = (sys.version_info[0] < 3)
 
 def test_types_with_parameters():
-    t = awkward1.type.UnknownType()
+    t = awkward1.types.UnknownType()
     assert t.parameters == {}
     t.parameters = {"key": ["val", "ue"]}
     assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.type.UnknownType(parameters={"key": ["val", "ue"]})
+    t = awkward1.types.UnknownType(parameters={"key": ["val", "ue"]})
     assert t.parameters == {"key": ["val", "ue"]}
 
-    t = awkward1.type.PrimitiveType("int32", parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.type.PrimitiveType("float64", parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.type.ArrayType(awkward1.type.PrimitiveType("int32"), 100, parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.type.ListType(awkward1.type.PrimitiveType("int32"), parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.type.RegularType(awkward1.type.PrimitiveType("int32"), 5, parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.type.OptionType(awkward1.type.PrimitiveType("int32"), parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.type.UnionType((awkward1.type.PrimitiveType("int32"), awkward1.type.PrimitiveType("float64")), parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.type.RecordType({"one": awkward1.type.PrimitiveType("int32"), "two": awkward1.type.PrimitiveType("float64")}, parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
+    t = awkward1.types.PrimitiveType("int32", parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
+    t = awkward1.types.PrimitiveType("float64", parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
+    t = awkward1.types.ArrayType(awkward1.types.PrimitiveType("int32"), 100, parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
+    t = awkward1.types.ListType(awkward1.types.PrimitiveType("int32"), parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
+    t = awkward1.types.RegularType(awkward1.types.PrimitiveType("int32"), 5, parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
+    t = awkward1.types.OptionType(awkward1.types.PrimitiveType("int32"), parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
+    t = awkward1.types.UnionType((awkward1.types.PrimitiveType("int32"), awkward1.types.PrimitiveType("float64")), parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
+    t = awkward1.types.RecordType({"one": awkward1.types.PrimitiveType("int32"), "two": awkward1.types.PrimitiveType("float64")}, parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
 
-    t = awkward1.type.UnknownType(parameters={"key1": ["val", "ue"], "key2": u"one \u2192 two"})
+    t = awkward1.types.UnknownType(parameters={"key1": ["val", "ue"], "key2": u"one \u2192 two"})
     assert t.parameters == {"key2": u"one \u2192 two", "key1": ["val", "ue"]}
 
-    assert t == awkward1.type.UnknownType(parameters={"key2": u"one \u2192 two", "key1": ["val", "ue"]})
-    assert t != awkward1.type.UnknownType(parameters={"key": ["val", "ue"]})
+    assert t == awkward1.types.UnknownType(parameters={"key2": u"one \u2192 two", "key1": ["val", "ue"]})
+    assert t != awkward1.types.UnknownType(parameters={"key": ["val", "ue"]})
 
 def test_dress():
     class Dummy(awkward1.highlevel.Array):
@@ -46,7 +46,7 @@ def test_dress():
     a = awkward1.Array(x, behavior=ns)
     assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
-    x2 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5])).astype(awkward1.type.PrimitiveType("float64", {"__array__": "Dummy"})))
+    x2 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5])).astype(awkward1.types.PrimitiveType("float64", {"__array__": "Dummy"})))
     a2 = awkward1.Array(x2, behavior=ns)
     assert repr(a2) == "<Array [<Dummy [1.1, 2.2, 3.3]>, ... ] type='3 * var * float64[parameters={\"__ar...'>"
     assert repr(a2[0]) == "<Dummy [1.1, 2.2, 3.3]>"
@@ -54,8 +54,8 @@ def test_dress():
     assert repr(a2[2]) == "<Dummy [4.4, 5.5]>"
 
 def test_typestr():
-    t = awkward1.type.PrimitiveType("float64", {"__typestr__": "something"})
-    t2 = awkward1.type.ListType(t)
+    t = awkward1.types.PrimitiveType("float64", {"__typestr__": "something"})
+    t2 = awkward1.types.ListType(t)
 
     assert repr(t) == "something"
     assert repr(t2) == "var * something"
@@ -187,46 +187,46 @@ def test_boxing():
     def f2(q):
         return q
 
-    t = awkward1.type.UnknownType(parameters={"one": 1, "two": 2})
+    t = awkward1.types.UnknownType(parameters={"one": 1, "two": 2})
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.type.PrimitiveType("int32", parameters={"one": 1, "two": 2})
+    t = awkward1.types.PrimitiveType("int32", parameters={"one": 1, "two": 2})
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.type.PrimitiveType("float64", parameters={"one": 1, "two": 2})
+    t = awkward1.types.PrimitiveType("float64", parameters={"one": 1, "two": 2})
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.type.ListType(awkward1.type.ListType(awkward1.type.PrimitiveType("int32"), parameters={"one": 1, "two": 2}))
+    t = awkward1.types.ListType(awkward1.types.ListType(awkward1.types.PrimitiveType("int32"), parameters={"one": 1, "two": 2}))
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.type.ListType(awkward1.type.ListType(awkward1.type.PrimitiveType("int32")), parameters={"one": 1, "two": 2})
+    t = awkward1.types.ListType(awkward1.types.ListType(awkward1.types.PrimitiveType("int32")), parameters={"one": 1, "two": 2})
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.type.RegularType(awkward1.type.ListType(awkward1.type.PrimitiveType("int32")), 5, parameters={"one": 1, "two": 2})
+    t = awkward1.types.RegularType(awkward1.types.ListType(awkward1.types.PrimitiveType("int32")), 5, parameters={"one": 1, "two": 2})
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.type.OptionType(awkward1.type.PrimitiveType("int32"), parameters={"one": 1, "two": 2})
+    t = awkward1.types.OptionType(awkward1.types.PrimitiveType("int32"), parameters={"one": 1, "two": 2})
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.type.OptionType(awkward1.type.ListType(awkward1.type.PrimitiveType("int32")), parameters={"one": 1, "two": 2})
+    t = awkward1.types.OptionType(awkward1.types.ListType(awkward1.types.PrimitiveType("int32")), parameters={"one": 1, "two": 2})
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.type.UnionType((awkward1.type.PrimitiveType("int32"), awkward1.type.PrimitiveType("float64")), parameters={"one": 1, "two": 2})
+    t = awkward1.types.UnionType((awkward1.types.PrimitiveType("int32"), awkward1.types.PrimitiveType("float64")), parameters={"one": 1, "two": 2})
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.type.RecordType((awkward1.type.PrimitiveType("int32"), awkward1.type.PrimitiveType("float64")), parameters={"one": 1, "two": 2})
+    t = awkward1.types.RecordType((awkward1.types.PrimitiveType("int32"), awkward1.types.PrimitiveType("float64")), parameters={"one": 1, "two": 2})
     f1(t)
     assert f2(t) == t
 
-    t = awkward1.type.RecordType({"one": awkward1.type.PrimitiveType("int32"), "two": awkward1.type.PrimitiveType("float64")}, parameters={"one": 1, "two": 2})
+    t = awkward1.types.RecordType({"one": awkward1.types.PrimitiveType("int32"), "two": awkward1.types.PrimitiveType("float64")}, parameters={"one": 1, "two": 2})
     f1(t)
     assert f2(t) == t

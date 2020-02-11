@@ -14,7 +14,7 @@ from ..._numba import cpu, util, identities, content
 def typeof(val, c):
     import awkward1._numba.types
     type = val.type
-    while isinstance(type, (awkward1.type.ArrayType, awkward1.type.RegularType)):
+    while isinstance(type, (awkward1.types.ArrayType, awkward1.types.RegularType)):
         type = type.type
     return NumpyArrayType(numba.typeof(numpy.asarray(val)), numba.typeof(val.identities), util.dict2parameters(val.parameters))
 
