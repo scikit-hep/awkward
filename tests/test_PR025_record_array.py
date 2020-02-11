@@ -6,7 +6,7 @@ import itertools
 import pytest
 import numpy
 
-import awkward1
+import awkward1._internal
 
 def test_basic():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
@@ -83,33 +83,33 @@ def test_type():
     recordarray = awkward1.layout.RecordArray([content1, listoffsetarray])
     assert str(awkward1.typeof(recordarray)) == '(int64, var * float64)'
 
-    assert awkward1.typeof(recordarray) == awkward1.layout.RecordType((
-        awkward1.layout.PrimitiveType("int64"),
-        awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))))
-    assert awkward1.typeof(recordarray[2]) == awkward1.layout.RecordType(
-        (awkward1.layout.PrimitiveType("int64"),
-        awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))))
+    assert awkward1.typeof(recordarray) == awkward1.types.RecordType((
+        awkward1.types.PrimitiveType("int64"),
+        awkward1.types.ListType(awkward1.types.PrimitiveType("float64"))))
+    assert awkward1.typeof(recordarray[2]) == awkward1.types.RecordType(
+        (awkward1.types.PrimitiveType("int64"),
+        awkward1.types.ListType(awkward1.types.PrimitiveType("float64"))))
 
     recordarray = awkward1.layout.RecordArray([content1, listoffsetarray], keys=["one", "two"])
     assert str(awkward1.typeof(recordarray)) in ('{"one": int64, "two": var * float64}', '{"two": var * float64, "one": int64}')
 
-    assert str(awkward1.layout.RecordType(
-        (awkward1.layout.PrimitiveType("int32"),
-        awkward1.layout.PrimitiveType("float64")))) == '(int32, float64)'
+    assert str(awkward1.types.RecordType(
+        (awkward1.types.PrimitiveType("int32"),
+        awkward1.types.PrimitiveType("float64")))) == '(int32, float64)'
 
-    assert str(awkward1.layout.RecordType(
-        {"one": awkward1.layout.PrimitiveType("int32"),
-        "two": awkward1.layout.PrimitiveType("float64")})) in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
+    assert str(awkward1.types.RecordType(
+        {"one": awkward1.types.PrimitiveType("int32"),
+        "two": awkward1.types.PrimitiveType("float64")})) in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
 
-    assert awkward1.typeof(recordarray) == awkward1.layout.RecordType({
-        "one": awkward1.layout.PrimitiveType("int64"),
-        "two": awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))})
-    assert awkward1.typeof(recordarray[2]) == awkward1.layout.RecordType({
-        "one": awkward1.layout.PrimitiveType("int64"),
-        "two": awkward1.layout.ListType(awkward1.layout.PrimitiveType("float64"))})
+    assert awkward1.typeof(recordarray) == awkward1.types.RecordType({
+        "one": awkward1.types.PrimitiveType("int64"),
+        "two": awkward1.types.ListType(awkward1.types.PrimitiveType("float64"))})
+    assert awkward1.typeof(recordarray[2]) == awkward1.types.RecordType({
+        "one": awkward1.types.PrimitiveType("int64"),
+        "two": awkward1.types.ListType(awkward1.types.PrimitiveType("float64"))})
 
 def test_getitem():
-    assert awkward1.layout.slice_tostring((1, 2, [3], "four", ["five", "six"], slice(7, 8, 9))) == '[array([1]), array([2]), array([3]), "four", ["five", "six"], 7:8:9]'
+    assert awkward1._internal.slice_tostring((1, 2, [3], "four", ["five", "six"], slice(7, 8, 9))) == '[array([1]), array([2]), array([3]), "four", ["five", "six"], 7:8:9]'
 
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5], dtype=numpy.int64))
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=numpy.float64))

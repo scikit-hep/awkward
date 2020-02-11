@@ -4,11 +4,8 @@
 
 #include "awkward/python/index.h"
 #include "awkward/python/identities.h"
-#include "awkward/python/slice.h"
 #include "awkward/python/fillable.h"
 #include "awkward/python/content.h"
-#include "awkward/python/type.h"
-#include "awkward/python/io.h"
 
 namespace py = pybind11;
 PYBIND11_MODULE(layout, m) {
@@ -30,10 +27,6 @@ PYBIND11_MODULE(layout, m) {
 
   make_IdentitiesOf<int32_t>(m, "Identities32");
   make_IdentitiesOf<int64_t>(m, "Identities64");
-
-  /////////////////////////////////////////////////////////////// slice.h
-
-  make_slice_tostring(m, "slice_tostring");
 
   /////////////////////////////////////////////////////////////// fillable.h
 
@@ -71,20 +64,4 @@ PYBIND11_MODULE(layout, m) {
   make_UnionArrayOf<int8_t, uint32_t>(m, "UnionArray8_U32");
   make_UnionArrayOf<int8_t, int64_t>(m,  "UnionArray8_64");
 
-  /////////////////////////////////////////////////////////////// type.h
-
-  make_Type(m, "Type");
-  make_ArrayType(m, "ArrayType");
-  make_PrimitiveType(m, "PrimitiveType");
-  make_RegularType(m, "RegularType");
-  make_UnknownType(m, "UnknownType");
-  make_ListType(m, "ListType");
-  make_OptionType(m, "OptionType");
-  make_UnionType(m, "UnionType");
-  make_RecordType(m, "RecordType");
-
-  /////////////////////////////////////////////////////////////// io.h
-
-  make_fromjson(m, "fromjson");
-  make_fromroot_nestedvector(m, "fromroot_nestedvector");
 }

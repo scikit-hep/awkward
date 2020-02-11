@@ -10,8 +10,9 @@ except ImportError:
 
 import numpy
 
-import awkward1._util
 import awkward1.layout
+import awkward1._util
+import awkward1._internal
 
 def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
     def recurse(array, index):
@@ -56,7 +57,7 @@ def fromiter(iterable, highlevel=True, behavior=None, initial=1024, resize=2.0):
         return layout
 
 def fromjson(source, highlevel=True, behavior=None, initial=1024, resize=2.0, buffersize=65536):
-    layout = awkward1.layout.fromjson(source, initial=initial, resize=resize, buffersize=buffersize)
+    layout = awkward1._internal.fromjson(source, initial=initial, resize=resize, buffersize=buffersize)
     if highlevel:
         return awkward1._util.wrap(layout, behavior)
     else:
