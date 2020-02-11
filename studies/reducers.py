@@ -1103,16 +1103,20 @@ def ListOffsetArray_reduce_next(self, axis, depth):
     offsetscopy = list(self.offsets)
     print("offsetscopy", offsetscopy)
 
+    something = [None] * (self.offsets[-1] - self.offsets[0])
+
     nextcarry = [None] * (self.offsets[-1] - self.offsets[0])
     k = 0
     while k < len(nextcarry):
         for i in range(len(offsetscopy) - 1):
             if offsetscopy[i] < offsetscopy[i + 1]:
                 nextcarry[k] = offsetscopy[i]
+                something[k] = offsetscopy[i] - self.offsets[i]
                 k += 1
                 offsetscopy[i] += 1
-
+                
     print("nextcarry", nextcarry)
+    print("something", something)
 
     nextcontent = self.content.carry(nextcarry)
 
