@@ -666,14 +666,14 @@ assert (akarray.tolist() ==
       [101, 103, 107, 109, 113]]])
 assert akarray.shape == [2, 3, 5]
 
-def NumpyArray_prod(self, axis):
+def NumpyArray_prod(self, axis, semigroup):
     assert len(self.shape) != 0
 
     if axis < 0:
         axis += len(self.shape)
     assert 0 <= axis < len(self.shape)
 
-    if axis == 0:
+    if not semigroup and axis == 0:
         length = self.shape[0]
         stepsize = self.strides[0]
 
@@ -715,10 +715,13 @@ def NumpyArray_prod(self, axis):
 
         return NumpyArray(ptr, shape, strides, 0)
 
+    else:
+        raise NotImplementedError("Must be contiguous: in the real world, I'd convert to RegularArray for this case.")
+
 NumpyArray.prod = NumpyArray_prod
 
-assert (akarray.prod(axis=0).tolist() ==
+assert (akarray.prod(axis=0, semigroup=False).tolist() ==
     [[ 106,  177,  305,  469, 781],
      [ 949, 1343, 1577, 2047, 2813],
      [3131, 3811, 4387, 4687, 5311]])
-assert akarray.prod(axis=0).shape == [3, 5]
+assert akarray.prod(axis=0, semigroup=False).shape == [3, 5]
