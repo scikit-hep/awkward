@@ -412,6 +412,52 @@ class IndexedOptionArray(Content):
         out += indent + "</IndexedOptionArray>\n"
         return out
 
+class ByteMaskedArray(Content):
+    def __init__(self, mask, content, validwhen):
+        assert isinstance(mask, list)
+        assert isinstance(content, Content)
+        assert isinstance(validwhen, bool)
+        assert len(mask) <= len(content)
+        for x in mask:
+            assert isinstance(x, bool)
+        self.mask = mask
+        self.content = content
+        self.validwhen = validwhen
+
+    @staticmethod
+    def random(minlen=0, choices=None):
+        validwhen = random.choice([False, True])
+        mask = [(random.randint(0, 4) == 0) ^ validwhen for i in range(random_length(minlen))]   # 80% are valid
+        content = Content.random(len(mask), choices)
+        return ByteMaskedArray(mask, content, validwhen)
+
+    def __len__(self):
+        return len(self.mask)
+
+    def __getitem__(self, where):
+        if isinstance(where, int):
+            assert 0 <= where < len(self)
+            if self.mask[where] == self.validwhen:
+                return self.content[where]
+            else:
+                return None
+        elif isinstance(where, slice) and where.step is None:
+            return ByteMaskedArray(self.mask[where.start:where.stop], self.content[where.start:where.stop], self.validwhen)
+        elif isinstance(where, str):
+            return ByteMaskedArray(self.mask, self.content[where], self.validwhen)
+        else:
+            raise AssertionError(where)
+
+    def __repr__(self):
+        return "ByteMaskedArray(" + repr(self.mask) + ", " + repr(self.content) + ", " + repr(self.validwhen) + ")"
+
+    def toxml(self, indent="", pre="", post=""):
+        out = indent + pre + "<ByteMaskedArray validwhen=\"" + repr(self.validwhen) + "\">\n"
+        out += indent + "    <mask>" + " ".join(str(x) for x in self.mask) + "</mask>\n"
+        out += self.content.toxml(indent + "    ", "<content>", "</content>\n")
+        out += indent + "</ByteMaskedArray>\n"
+        return out
+
 class RecordArray(Content):
     def __init__(self, contents, recordlookup, length):
         assert isinstance(contents, list)
@@ -629,7 +675,9 @@ def NumpyArray_prod(self, axis):
         stepsize = self.strides[0]
 
         shape = self.shape[1:]
-        strides = self.strides[1:]
+        strides = [1]
+        for x in shape[:0:-1]:
+            strides = [strides[0] * x] + strides
 
         flatlen = 1
         for x in shape:
@@ -641,7 +689,7 @@ def NumpyArray_prod(self, axis):
         def recurse(k, n, base):
             if n < len(shape) - 1:
                 for i in range(shape[n]):
-                    k = recurse(k, n + 1, base + i*strides[n])
+                    k = recurse(k, n + 1, base + i*self.strides[n + 1])   # item-strides, not byte-strides
             elif n == len(shape) - 1:
                 for i in range(shape[n]):
                     for j in range(self.shape[0]):
@@ -650,19 +698,21 @@ def NumpyArray_prod(self, axis):
                     k += 1
             return k
 
-        recurse(0, 0, 0)
+        recurse(0, 0, self.offset)   # item-offset, not byte-offset
 
-        ptr = [None] * flatlen
+        ptr = [1] * flatlen   # identity for empty reductions
 
-        # k = 0
-        # lastparent = -1
-        # for i in range(flatlen*self.shape[0]):
-        #     if parents[i] != lastparent:
-        #         ptr[k] = 
+        lastparent = -1
+        for i in range(flatlen*self.shape[0]):
+            if parents[i] != lastparent:
+                ptr[parents[i]] = (self.ptr[index[i]],)
+            else:
+                ptr[parents[i]] = (self.ptr[index[i]],) + ptr[lastparent]
+            lastparent = parents[i]
 
+        print(ptr)
 
-        print("index  ", index)
-        print("parents", parents)
+        raise Exception
 
         return NumpyArray(ptr, shape, strides, 0)
 
@@ -671,4 +721,4 @@ def NumpyArray_prod(self, axis):
 
 NumpyArray.prod = NumpyArray_prod
 
-akarray.prod(axis=0)
+print(akarray.prod(axis=0).tolist())
