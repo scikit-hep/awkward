@@ -525,6 +525,20 @@ ERROR awkward_numpyarray_fill_tobool_frombool(bool* toptr, int64_t tooffset, con
   return awkward_numpyarray_fill_frombool<bool>(toptr, tooffset, fromptr, fromoffset, length);
 }
 
+template <typename T>
+ERROR awkward_numpyarray_pad_copy(uint8_t* toptr, const uint8_t* fromptr, int64_t tolen, int64_t fromlen, int64_t tostride, int64_t fromstride, int64_t offset, const T* pos) {
+  for (int64_t j = 0; j < tolen*tostride; j++) {
+    toptr[j] = 0;
+  }
+  for (int64_t i = 0;  i < fromlen;  i++) {
+    memcpy(&toptr[i*tostride], &fromptr[offset + (int64_t)pos[i]], (size_t)fromstride);
+  }
+  return success();
+}
+ERROR awkward_numpyarray_pad_copy_64(uint8_t* toptr, const uint8_t* fromptr, int64_t tolen, int64_t fromlen, int64_t tostride, int64_t fromstride, int64_t offset, const int64_t* pos) {
+  return awkward_numpyarray_pad_copy<int64_t>(toptr, fromptr, tolen, fromlen, tostride, fromstride, offset, pos);
+}
+
 template <typename FROM, typename TO>
 ERROR awkward_listarray_fill(TO* tostarts, int64_t tostartsoffset, TO* tostops, int64_t tostopsoffset, const FROM* fromstarts, int64_t fromstartsoffset, const FROM* fromstops, int64_t fromstopsoffset, int64_t length, int64_t base) {
   for (int64_t i = 0;  i < length;  i++) {
