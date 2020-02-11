@@ -926,7 +926,7 @@ def ListOffsetArray_reduce_next(self, regularized, axis, semigroup, index, paren
     regularized, axis = self.regularize_axis(regularized, axis)
     nextaxis = axis - 1 if regularized else axis
 
-    if regularized and self.purelist_depth() == 2:
+    if regularized and self.minmax_depth() == (2, 2):
         nextparents = [None] * (self.offsets[-1] - self.offsets[0])
         k = 0
         for i in range(len(index)):
@@ -980,3 +980,6 @@ assert list(depth2.reduce(1, False)) == [[2*3*5, 1, 7*11, 13], [], [17*19*23*29]
 assert list(depth2.reduce(-1, False)) == [[2*3*5, 1, 7*11, 13], [], [17*19*23*29]]
 
 print(list(depth2.reduce(0, False)))
+
+print(list(RawArray(primes[:10]).reduce_next(True, 0, False, [0, 3, 5, 6, 1, 4, 7, 2, 8, 9], [0, 0, 0, 0, 1, 1, 1, 2, 2, 3], 4)))
+print([2*7*13*17, 3*11*19, 5*23, 29])
