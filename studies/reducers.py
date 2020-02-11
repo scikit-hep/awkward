@@ -91,7 +91,10 @@ class NumpyArray(Content):
         assert isinstance(offset, int)
         if all(x != 0 for x in shape):
             assert 0 <= offset < len(ptr)
-            assert shape[0] * strides[0] + offset <= len(ptr)
+            last = offset
+            for sh, st in zip(shape, strides):
+                last += (sh - 1) * st
+            assert last <= len(ptr)
         self.ptr = ptr
         self.shape = shape
         self.strides = strides
@@ -700,25 +703,22 @@ def NumpyArray_prod(self, axis):
 
         recurse(0, 0, self.offset)   # item-offset, not byte-offset
 
-        ptr = [1] * flatlen   # identity for empty reductions
+        ptr = [1] * flatlen   # initialize to identity because lists can be empty
 
         lastparent = -1
         for i in range(flatlen*self.shape[0]):
             if parents[i] != lastparent:
-                ptr[parents[i]] = (self.ptr[index[i]],)
+                ptr[parents[i]] = self.ptr[index[i]]
             else:
-                ptr[parents[i]] = (self.ptr[index[i]],) + ptr[lastparent]
+                ptr[parents[i]] = self.ptr[index[i]] * ptr[lastparent]
             lastparent = parents[i]
-
-        print(ptr)
-
-        raise Exception
 
         return NumpyArray(ptr, shape, strides, 0)
 
-    else:
-        raise AssertionError
-
 NumpyArray.prod = NumpyArray_prod
 
-print(akarray.prod(axis=0).tolist())
+assert (akarray.prod(axis=0).tolist() ==
+    [[ 106,  177,  305,  469, 781],
+     [ 949, 1343, 1577, 2047, 2813],
+     [3131, 3811, 4387, 4687, 5311]])
+assert akarray.prod(axis=0).shape == [3, 5]
