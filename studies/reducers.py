@@ -878,108 +878,164 @@ assert numpy.prod(nparray, axis=None) == 7581744426003940878
 #      [3131, 3811, 4387, 4687, 5311]])
 # assert akarray.prod(axis=0, semigroup=False).shape == [3, 5]
 
-def Content_reduce(self, axis, semigroup):
+# def Content_reduce(self, axis, semigroup):
+#     index = [None] * len(self)
+#     for i in range(len(self)):
+#         index[i] = i
+#     return self.reduce_next(False, axis, semigroup, index, None, len(self))
+
+# Content.reduce = Content_reduce
+
+# def Content_regularize_axis(self, regularized, axis):
+#     regular_axis = axis
+#     if not regularized:
+#         (min, max), pure = self.minmax_depth(), self.purelist_depth()
+#         axislen = min - 1
+#         if regular_axis < 0:
+#             if min == max == pure:
+#                 regular_axis = axis + axislen
+#                 regularized = True
+#         else:
+#             regularized = True
+
+#         print("regularizing", min, max, pure, "axis", axis, "->", regular_axis)
+
+#         if not (0 <= regular_axis < axislen):
+#             raise ValueError("cannot request axis {0} for a structure of {1}-{2} lists deep".format(axis, min - 1, max - 1))
+
+#     return regularized, regular_axis
+
+# Content.regularize_axis = Content_regularize_axis
+
+# def RawArray_reduce_next(self, regularized, axis, semigroup, index, parents, length):
+#     print("RawArray_reduce_next", regularized, axis, semigroup, index, parents, length)
+
+#     regularized, axis = self.regularize_axis(regularized, axis)
+
+#     out = [1] * length
+#     lastparent = -1
+#     for i in range(len(index)):
+#         out[parents[i]] *= self.ptr[index[i]]
+#     return RawArray(out)
+
+# RawArray.reduce_next = RawArray_reduce_next
+
+# def ListOffsetArray_reduce_next(self, regularized, axis, semigroup, index, parents, length):
+#     print("ListOffsetArray_reduce_next", regularized, axis, semigroup, index, parents, length)
+
+#     regularized, axis = self.regularize_axis(regularized, axis)
+#     nextaxis = axis - 1 if regularized else axis
+
+#     if regularized and self.minmax_depth() == (2, 2):
+#         nextparents = [None] * (self.offsets[-1] - self.offsets[0])
+#         k = 0
+#         for i in range(len(index)):
+#             start = self.offsets[index[i]]
+#             stop = self.offsets[index[i] + 1]
+#             for j in range(start, stop):
+#                 nextparents[k] = i
+#                 k += 1
+#     else:
+#         nextparents = parents
+
+#     if axis <= 0:
+#         nextindex = [None] * (self.offsets[-1] - self.offsets[0])
+#         k = 0
+#         for i in range(len(index)):
+#             start = self.offsets[index[i]]
+#             stop = self.offsets[index[i] + 1]
+#             for j in range(start, stop):
+#                 nextindex[k] = j
+#                 k += 1
+#         return self.content.reduce_next(regularized, nextaxis, semigroup, nextindex, nextparents, len(self))
+
+#     else:
+#         nextindex = [None] * (self.offsets[-1] - self.offsets[0])
+#         k = 0
+#         for i in range(len(index)):
+#             start = self.offsets[index[i]]
+#             stop = self.offsets[index[i] + 1]
+#             for j in range(start, stop):
+#                 nextindex[k] = j
+#                 k += 1
+#         nextcontent = self.content.reduce_next(regularized, nextaxis, semigroup, nextindex, nextparents, len(self))
+#         nextoffsets = [None] * len(self.offsets)
+#         nextoffsets[0] = 0
+#         for i in range(len(self.offsets) - 1):
+#             nextoffsets[i + 1] = self.offsets[i + 1] - self.offsets[0]
+#         return ListOffsetArray(nextoffsets, nextcontent)
+
+# ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
+
+# depth1 = ListOffsetArray([0, 3, 3, 5], RawArray(primes[:5]))
+# assert list(depth1) == [[2, 3, 5], [], [7, 11]]
+
+# assert list(depth1.reduce(0, False)) == [30, 1, 77]
+# assert list(depth1.reduce(-1, False)) == [30, 1, 77]
+
+# depth2 = ListOffsetArray([0, 4, 4, 5], ListOffsetArray([0, 3, 3, 5, 6, 10], RawArray(primes[:10])))
+# assert list(depth2) == [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19, 23, 29]]]
+
+# assert list(depth2.reduce(1, False)) == [[2*3*5, 1, 7*11, 13], [], [17*19*23*29]]
+# assert list(depth2.reduce(-1, False)) == [[2*3*5, 1, 7*11, 13], [], [17*19*23*29]]
+
+# print(list(RawArray(primes[:10]).reduce_next(True, 0, False, [0, 3, 5, 6, 1, 4, 7, 2, 8, 9], [0, 0, 0, 0, 1, 1, 1, 2, 2, 3], 4)))
+# print([2*7*13*17, 3*11*19, 5*23, 29])
+
+def Content_reduce(self, axis):
     index = [None] * len(self)
     for i in range(len(self)):
         index[i] = i
-    return self.reduce_next(False, axis, semigroup, index, None, len(self))
+    return self.reduce_next(axis, 0, index, None)
 
 Content.reduce = Content_reduce
 
-def Content_regularize_axis(self, regularized, axis):
-    regular_axis = axis
-    if not regularized:
-        (min, max), pure = self.minmax_depth(), self.purelist_depth()
-        axislen = min - 1
-        if regular_axis < 0:
-            if min == max == pure:
-                regular_axis = axis + axislen
-                regularized = True
-        else:
-            regularized = True
-
-        print("regularizing", min, max, pure, "axis", axis, "->", regular_axis)
-
-        if not (0 <= regular_axis < axislen):
-            raise ValueError("cannot request axis {0} for a structure of {1}-{2} lists deep".format(axis, min - 1, max - 1))
-
-    return regularized, regular_axis
-
-Content.regularize_axis = Content_regularize_axis
-
-def RawArray_reduce_next(self, regularized, axis, semigroup, index, parents, length):
-    print("RawArray_reduce_next", regularized, axis, semigroup, index, parents, length)
-
-    regularized, axis = self.regularize_axis(regularized, axis)
-
-    out = [1] * length
-    lastparent = -1
-    for i in range(len(index)):
-        out[parents[i]] *= self.ptr[index[i]]
-    return RawArray(out)
-
-RawArray.reduce_next = RawArray_reduce_next
-
-def ListOffsetArray_reduce_next(self, regularized, axis, semigroup, index, parents, length):
-    print("ListOffsetArray_reduce_next", regularized, axis, semigroup, index, parents, length)
-
-    regularized, axis = self.regularize_axis(regularized, axis)
-    nextaxis = axis - 1 if regularized else axis
-
-    if regularized and self.minmax_depth() == (2, 2):
-        nextparents = [None] * (self.offsets[-1] - self.offsets[0])
-        k = 0
-        for i in range(len(index)):
-            start = self.offsets[index[i]]
-            stop = self.offsets[index[i] + 1]
-            for j in range(start, stop):
-                nextparents[k] = i
-                k += 1
+def ListOffsetArray_reduce_next(self, axis, depth, index, parents):
+    print("ListOffsetArray_reduce_next", axis, depth, index, parents)
+    if depth == 0:
+        return self.content.reduce_next(axis, depth + 1, index, parents)
     else:
-        nextparents = parents
+        sumcount = 0
+        counts = []
+        for i in range(len(self)):
+            count = self.offsets[i + 1] - self.offsets[i]
+            sumcount += count
+            while count > len(counts):
+                counts.append(0)
+            if count < len(counts):
+                counts[count - 1] += 1
+        print("sumcount", sumcount)
+        print("counts", counts)
 
-    if axis <= 0:
-        nextindex = [None] * (self.offsets[-1] - self.offsets[0])
-        k = 0
-        for i in range(len(index)):
-            start = self.offsets[index[i]]
-            stop = self.offsets[index[i] + 1]
-            for j in range(start, stop):
-                nextindex[k] = j
-                k += 1
-        return self.content.reduce_next(regularized, nextaxis, semigroup, nextindex, nextparents, len(self))
+        for i in range(len(counts) - 2, -1, -1):
+            counts[i] += counts[i + 1]
+        print("counts", counts)
 
-    else:
-        nextindex = [None] * (self.offsets[-1] - self.offsets[0])
-        k = 0
-        for i in range(len(index)):
-            start = self.offsets[index[i]]
-            stop = self.offsets[index[i] + 1]
-            for j in range(start, stop):
-                nextindex[k] = j
-                k += 1
-        nextcontent = self.content.reduce_next(regularized, nextaxis, semigroup, nextindex, nextparents, len(self))
-        nextoffsets = [None] * len(self.offsets)
-        nextoffsets[0] = 0
-        for i in range(len(self.offsets) - 1):
-            nextoffsets[i + 1] = self.offsets[i + 1] - self.offsets[0]
-        return ListOffsetArray(nextoffsets, nextcontent)
+        countoffsets = [None] * (len(counts) + 1)
+        countoffsets[0] = 0
+        for i in range(len(counts)):
+            countoffsets[i + 1] = countoffsets[i] + counts[i]
+        print("countoffsets", countoffsets)
+
+        index = [None] * sumcount
+        for i in range(len(self)):
+            start = self.offsets[i]
+            stop = self.offsets[i + 1]
+            count = stop - start
+            for j in range(count):
+                index[countoffsets[j]] = start + j
+                countoffsets[j] += 1
+        print("index", index)
+
+        parents = [None] * sumcount
+        for i in range(len(countoffsets) - 1):
+            for j in range(countoffsets[i], countoffsets[i + 1]):
+                parents[j] = i
+        print("parents", parents)
+
+        raise Exception
 
 ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
-
-depth1 = ListOffsetArray([0, 3, 3, 5], RawArray(primes[:5]))
-assert list(depth1) == [[2, 3, 5], [], [7, 11]]
-
-assert list(depth1.reduce(0, False)) == [30, 1, 77]
-assert list(depth1.reduce(-1, False)) == [30, 1, 77]
-
-depth2 = ListOffsetArray([0, 4, 4, 5], ListOffsetArray([0, 3, 3, 5, 6, 10], RawArray(primes[:10])))
-assert list(depth2) == [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19, 23, 29]]]
-
-assert list(depth2.reduce(1, False)) == [[2*3*5, 1, 7*11, 13], [], [17*19*23*29]]
-assert list(depth2.reduce(-1, False)) == [[2*3*5, 1, 7*11, 13], [], [17*19*23*29]]
-
-print(list(depth2.reduce(0, False)))
-
-print(list(RawArray(primes[:10]).reduce_next(True, 0, False, [0, 3, 5, 6, 1, 4, 7, 2, 8, 9], [0, 0, 0, 0, 1, 1, 1, 2, 2, 3], 4)))
-print([2*7*13*17, 3*11*19, 5*23, 29])
+depth2 = ListOffsetArray([0, 4, 4, 6], ListOffsetArray([0, 3, 3, 5, 6, 8, 9], RawArray(primes[:9])))
+assert list(depth2) == [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19], [23]]]
+print(list(depth2.reduce(0)))
