@@ -5,7 +5,7 @@
 #include "awkward/python/type.h"
 
 namespace py = pybind11;
-PYBIND11_MODULE(types, m) {
+PYBIND11_MODULE(type, m) {
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
 #else

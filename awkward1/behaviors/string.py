@@ -30,8 +30,8 @@ class CharBehavior(awkward1.highlevel.Array):
             yield x
 
 awkward1.behavior["char"] = CharBehavior
-byte = awkward1.types.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "byte", "encoding": None})
-utf8 = awkward1.types.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "utf8", "encoding": "utf-8"})
+byte = awkward1.type.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "byte", "encoding": None})
+utf8 = awkward1.type.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "utf8", "encoding": "utf-8"})
 
 class StringBehavior(awkward1.highlevel.Array):
     def __iter__(self):
@@ -43,8 +43,8 @@ class StringBehavior(awkward1.highlevel.Array):
                 yield x.__str__()
 
 awkward1.behavior["string"] = StringBehavior
-bytestring = awkward1.types.ListType(byte, {"__array__": "string", "__typestr__": "bytes"})
-string = awkward1.types.ListType(utf8, {"__array__": "string", "__typestr__": "string"})
+bytestring = awkward1.type.ListType(byte, {"__array__": "string", "__typestr__": "bytes"})
+string = awkward1.type.ListType(utf8, {"__array__": "string", "__typestr__": "string"})
 
 def string_equal(one, two):
     # first condition: string lengths must be the same

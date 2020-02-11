@@ -73,9 +73,9 @@ pybind11_add_module(layout src/python/modules/layout.cpp ${PYAWKWARD_SOURCES})
 set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
 target_link_libraries(layout PRIVATE awkward-static)
 
-pybind11_add_module(types src/python/modules/types.cpp ${PYAWKWARD_SOURCES})
-set_target_properties(types PROPERTIES CXX_VISIBILITY_PRESET hidden)
-target_link_libraries(types PRIVATE awkward-static)
+pybind11_add_module(type src/python/modules/type.cpp ${PYAWKWARD_SOURCES})
+set_target_properties(type PROPERTIES CXX_VISIBILITY_PRESET hidden)
+target_link_libraries(type PRIVATE awkward-static)
 
 pybind11_add_module(_internal src/python/modules/_internal.cpp ${PYAWKWARD_SOURCES})
 set_target_properties(_internal PROPERTIES CXX_VISIBILITY_PRESET hidden)

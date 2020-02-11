@@ -4,7 +4,7 @@ import json
 
 import numba
 
-import awkward1.types
+import awkward1.type
 from .._numba import util
 
 class LiteralTypeType(numba.types.Type):
@@ -30,31 +30,31 @@ def box(tpe, val, c):
 def typeof_literaltype(literal_type):
     return LiteralTypeType(literal_type)
 
-@numba.extending.typeof_impl.register(awkward1.types.UnknownType)
+@numba.extending.typeof_impl.register(awkward1.type.UnknownType)
 def typeof_UnknownType(val, c):
     return UnknownTypeType(val.parameters)
 
-@numba.extending.typeof_impl.register(awkward1.types.PrimitiveType)
+@numba.extending.typeof_impl.register(awkward1.type.PrimitiveType)
 def typeof_PrimitiveType(val, c):
     return PrimitiveTypeType(val.dtype, val.parameters)
 
-@numba.extending.typeof_impl.register(awkward1.types.RegularType)
+@numba.extending.typeof_impl.register(awkward1.type.RegularType)
 def typeof_RegularType(val, c):
     return RegularTypeType(numba.typeof(val.type), val.parameters)
 
-@numba.extending.typeof_impl.register(awkward1.types.ListType)
+@numba.extending.typeof_impl.register(awkward1.type.ListType)
 def typeof_ListType(val, c):
     return ListTypeType(numba.typeof(val.type), val.parameters)
 
-@numba.extending.typeof_impl.register(awkward1.types.OptionType)
+@numba.extending.typeof_impl.register(awkward1.type.OptionType)
 def typeof_OptionType(val, c):
     return OptionTypeType(numba.typeof(val.type), val.parameters)
 
-@numba.extending.typeof_impl.register(awkward1.types.UnionType)
+@numba.extending.typeof_impl.register(awkward1.type.UnionType)
 def typeof_UnionType(val, c):
     return UnionTypeType([numba.typeof(x) for x in val.types], val.parameters)
 
-@numba.extending.typeof_impl.register(awkward1.types.RecordType)
+@numba.extending.typeof_impl.register(awkward1.type.RecordType)
 def typeof_RecordType(val, c):
     return RecordTypeType([numba.typeof(x) for x in val.types], None if val.istuple else tuple(val.keys()), val.parameters)
 
@@ -229,11 +229,11 @@ def unbox_RecordType(tpe, obj, c):
 
 @numba.extending.box(UnknownTypeType)
 def box_UnknownType(tpe, val, c):
-    return c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.types.UnknownType(tpe.parameters)))
+    return c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.type.UnknownType(tpe.parameters)))
 
 @numba.extending.box(PrimitiveTypeType)
 def box_PrimitiveType(tpe, val, c):
-    return c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.types.PrimitiveType(tpe.dtype, tpe.parameters)))
+    return c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.type.PrimitiveType(tpe.dtype, tpe.parameters)))
 
 def box_parameters(parameters, c):
     jsonloads_obj = c.pyapi.unserialize(c.pyapi.serialize_object(json.loads))
@@ -246,7 +246,7 @@ def box_parameters(parameters, c):
 @numba.extending.box(RegularTypeType)
 def box_RegularType(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
-    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.types.RegularType))
+    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.type.RegularType))
     type_obj = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
     size_obj = c.pyapi.long_from_longlong(proxyin.size)
     parameters_obj = box_parameters(tpe.parameters, c)
@@ -260,7 +260,7 @@ def box_RegularType(tpe, val, c):
 @numba.extending.box(ListTypeType)
 def box_ListType(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
-    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.types.ListType))
+    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.type.ListType))
     type_obj = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
     parameters_obj = box_parameters(tpe.parameters, c)
     out = c.pyapi.call_function_objargs(class_obj, (type_obj, parameters_obj))
@@ -272,7 +272,7 @@ def box_ListType(tpe, val, c):
 @numba.extending.box(OptionTypeType)
 def box_OptionType(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
-    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.types.OptionType))
+    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.type.OptionType))
     type_obj = c.pyapi.from_native_value(tpe.typetpe, proxyin.type, c.env_manager)
     parameters_obj = box_parameters(tpe.parameters, c)
     out = c.pyapi.call_function_objargs(class_obj, (type_obj, parameters_obj))
@@ -284,7 +284,7 @@ def box_OptionType(tpe, val, c):
 @numba.extending.box(UnionTypeType)
 def box_UnionType(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
-    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.types.UnionType))
+    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.type.UnionType))
     types_obj = c.pyapi.tuple_new(len(tpe.typetpes))
     for i, t in enumerate(tpe.typetpes):
         x_obj = c.pyapi.from_native_value(t, getattr(proxyin, field(i)), c.env_manager)
@@ -299,7 +299,7 @@ def box_UnionType(tpe, val, c):
 @numba.extending.box(RecordTypeType)
 def box_RecordType(tpe, val, c):
     proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
-    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.types.RecordType))
+    class_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.type.RecordType))
     types_obj = c.pyapi.tuple_new(len(tpe.typetpes))
     for i, t in enumerate(tpe.typetpes):
         x_obj = c.pyapi.from_native_value(t, getattr(proxyin, field(i)), c.env_manager)
