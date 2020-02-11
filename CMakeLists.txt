@@ -74,13 +74,13 @@ pybind11_add_module(layout src/python/layout.cpp ${LAYOUT_SOURCES})
 set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
 target_link_libraries(layout PRIVATE awkward-static)
 
-pybind11_add_module(types src/python/types.cpp)
-set_target_properties(types PROPERTIES CXX_VISIBILITY_PRESET hidden)
-target_link_libraries(types PRIVATE awkward-static)
+pybind11_add_module(_types src/python/_types.cpp)
+set_target_properties(_types PROPERTIES CXX_VISIBILITY_PRESET hidden)
+target_link_libraries(_types PRIVATE awkward-static)
 
-pybind11_add_module(io src/python/io.cpp)
-set_target_properties(io PROPERTIES CXX_VISIBILITY_PRESET hidden)
-target_link_libraries(io PRIVATE awkward-static)
+pybind11_add_module(_io src/python/_io.cpp)
+set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
+target_link_libraries(_io PRIVATE awkward-static)
 
 # Everything can be built with
 #

@@ -8,6 +8,8 @@ if distutils.version.LooseVersion(numpy.__version__) < distutils.version.LooseVe
 
 behavior = {}
 
+import awkward1._types as types
+
 import awkward1._numba
 
 import awkward1.highlevel

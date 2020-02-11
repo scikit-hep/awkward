@@ -65,7 +65,7 @@ void make_fromroot_nestedvector(py::module& m, const std::string& name) {
 /////////////////////////////////////////////////////////////// module
 
 namespace py = pybind11;
-PYBIND11_MODULE(io, m) {
+PYBIND11_MODULE(_io, m) {
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
 #else

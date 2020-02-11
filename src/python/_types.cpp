@@ -456,7 +456,7 @@ py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_Unk
 /////////////////////////////////////////////////////////////// module
 
 namespace py = pybind11;
-PYBIND11_MODULE(types, m) {
+PYBIND11_MODULE(_types, m) {
 #ifdef VERSION_INFO
   m.attr("__version__") = VERSION_INFO;
 #else
