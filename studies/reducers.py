@@ -311,9 +311,25 @@ class ListOffsetArray(Content):
 
     def carry(self, index):
         assert all(0 <= i < len(self) for i in index)
-        starts = [self.offsets[i] for i in index]
-        stops = [self.offsets[i + 1] for i in index]
-        return ListArray(starts, stops, self.content)
+        # starts = [self.offsets[i] for i in index]
+        # stops = [self.offsets[i + 1] for i in index]
+        # return ListArray(starts, stops, self.content)
+
+        # ordinarily, we'd output a ListArray, but I want fewer things to worry about right now
+        nextoffsets = [None] * (len(index) + 1)
+        nextoffsets[0] = 0
+        sumcounts = 0
+        for i in range(len(index)):
+            count = self.offsets[index[i] + 1] - self.offsets[index[i]]
+            sumcounts += count
+            nextoffsets[i + 1] = nextoffsets[i] + count
+        nextindex = [None] * sumcounts
+        k = 0
+        for i in range(len(index)):
+            for j in range(self.offsets[index[i]], self.offsets[index[i] + 1]):
+                nextindex[k] = j
+                k += 1
+        return ListOffsetArray(nextoffsets, self.content.carry(nextindex))
 
     def purelist_depth(self):
         return self.content.purelist_depth() + 1
@@ -982,91 +998,149 @@ assert numpy.prod(nparray, axis=None) == 7581744426003940878
 # print(list(RawArray(primes[:10]).reduce_next(True, 0, False, [0, 3, 5, 6, 1, 4, 7, 2, 8, 9], [0, 0, 0, 0, 1, 1, 1, 2, 2, 3], 4)))
 # print([2*7*13*17, 3*11*19, 5*23, 29])
 
+########################################################################
+
+# def Content_reduce(self, axis):
+#     index = [None] * len(self)
+#     for i in range(len(self)):
+#         index[i] = i
+#     return self.reduce_next(axis, 0, index, None, len(self))
+
+# Content.reduce = Content_reduce
+
+# def ListOffsetArray_reduce_next(self, axis, depth, index, parents, length):
+#     print("ListOffsetArray_reduce_next", axis, depth, index, parents, length)
+#     if depth == 0:
+#         return self.content.reduce_next(axis, depth + 1, index, parents, len(self))
+#     else:
+#         sumcount = 0
+#         counts = []
+#         for i in range(len(self)):
+#             count = self.offsets[i + 1] - self.offsets[i]
+#             sumcount += count
+#             while count >= len(counts) - 1:
+#                 counts.append(0)
+#             counts[count - 1] += 1
+                
+#         for i in range(len(counts) - 2, -1, -1):
+#             counts[i] += counts[i + 1]
+
+#         print("counts", counts)
+
+#         countoffsets = [None] * (len(counts) + 1)
+#         countstarts = [None] * (len(counts) + 1)
+#         countoffsets[0] = 0
+#         countstarts[0] = 0
+#         for i in range(len(counts)):
+#             countoffsets[i + 1] = countoffsets[i] + counts[i]
+#             countstarts[i + 1] = countstarts[i] + counts[i]
+
+#         print("countoffsets", countoffsets)
+
+#         nextindex = [None] * sumcount
+#         for i in range(len(self)):
+#             start = self.offsets[i]
+#             stop = self.offsets[i + 1]
+#             count = stop - start
+#             for j in range(count):
+#                 nextindex[countstarts[j]] = start + j
+#                 countstarts[j] += 1
+
+#         print("nextindex", nextindex)
+
+#         nextparents = [None] * sumcount
+#         for i in range(len(countoffsets) - 1):
+#             for j in range(countoffsets[i], countoffsets[i + 1]):
+#                 nextparents[j] = i
+
+#         print("nextparents", nextparents)
+
+#         return self.content.reduce_next(axis, depth + 1, nextindex, nextparents, len(counts))
+
+# ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
+
+# def RawArray_reduce_next(self, axis, depth, index, parents, length):
+#     print("RawArray_reduce_next", axis, depth, index, parents, length)
+
+#     print([self.ptr[index[i]] for i in index])
+
+#     raise Exception
+
+#     out = [1] * length
+#     lastparent = -1
+#     for i in range(len(index)):
+#         out[parents[i]] *= self.ptr[index[i]]
+
+#     return RawArray(out)
+
+# RawArray.reduce_next = RawArray_reduce_next
+
+# # depth2 = ListOffsetArray([0, 4, 4, 6], ListOffsetArray([0, 3, 3, 5, 6, 8, 9], RawArray(primes[:9])))
+# # assert list(depth2) == [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19], [23]]]
+# # print(list(depth2.reduce(0)))
+# # print([2*7*13*17*23, 3*11*19, 5])
+
+# depth2 = ListOffsetArray([0, 3, 6], ListOffsetArray([0, 5, 10, 15, 20, 25, 30], RawArray(primes[:2*3*5])))
+# assert depth2.tolist() == nparray.tolist()
+
+# print(list(depth2.reduce(0)))
+
+########################################################################
+
 def Content_reduce(self, axis):
-    index = [None] * len(self)
-    for i in range(len(self)):
-        index[i] = i
-    return self.reduce_next(axis, 0, index, None, len(self))
+    # index = [None] * len(self)
+    # for i in range(len(self)):
+    #     index[i] = i
+    # parents = [None] * len(self)
+    # for i in range(len(self)):
+    #     index[i] = 0
+    # return self.reduce_next(axis, 0, index, parents, len(self))
+    return self.reduce_next(axis, 0)
 
 Content.reduce = Content_reduce
 
-def ListOffsetArray_reduce_next(self, axis, depth, index, parents, length):
-    print("ListOffsetArray_reduce_next", axis, depth, index, parents, length)
-    if depth == 0:
-        return self.content.reduce_next(axis, depth + 1, index, parents, len(self))
-    else:
-        sumcount = 0
-        counts = []
-        for i in range(len(self)):
-            count = self.offsets[i + 1] - self.offsets[i]
-            sumcount += count
-            while count > len(counts):
-                counts.append(0)
-            if count < len(counts):
-                counts[count - 1] += 1
-                
-        for i in range(len(counts) - 2, -1, -1):
-            counts[i] += counts[i + 1]
+def ListOffsetArray_reduce_next(self, axis, depth):
+    offsetscopy = list(self.offsets)
+    print("offsetscopy", offsetscopy)
 
-        print("counts", counts)
+    nextcarry = [None] * (self.offsets[-1] - self.offsets[0])
+    k = 0
+    while k < len(nextcarry):
+        for i in range(len(offsetscopy) - 1):
+            if offsetscopy[i] < offsetscopy[i + 1]:
+                nextcarry[k] = offsetscopy[i]
+                k += 1
+                offsetscopy[i] += 1
 
-        countoffsets = [None] * (len(counts) + 1)
-        countstarts = [None] * (len(counts) + 1)
-        countoffsets[0] = 0
-        countstarts[0] = 0
-        for i in range(len(counts)):
-            countoffsets[i + 1] = countoffsets[i] + counts[i]
-            countstarts[i + 1] = countstarts[i] + counts[i]
+    print("nextcarry", nextcarry)
 
-        print("countoffsets", countoffsets)
+    nextcontent = self.content.carry(nextcarry)
 
-        nextindex = [None] * sumcount
-        for i in range(len(self)):
-            start = self.offsets[i]
-            stop = self.offsets[i + 1]
-            count = stop - start
-            for j in range(count):
-                nextindex[countstarts[j]] = start + j
-                countstarts[j] += 1
+    print(nextcontent.toxml())
+    print([x if isinstance(x, int) else list(x) for x in nextcontent])
 
-        print("nextindex", nextindex)
-
-        nextparents = [None] * sumcount
-        for i in range(len(countoffsets) - 1):
-            for j in range(countoffsets[i], countoffsets[i + 1]):
-                nextparents[j] = i
-
-        print("nextparents", nextparents)
-
-        return self.content.reduce_next(axis, depth + 1, nextindex, nextparents, len(counts))
+    return nextcontent.reduce_next(axis, depth + 1)
 
 ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
-
-def RawArray_reduce_next(self, axis, depth, index, parents, length):
-    print("RawArray_reduce_next", axis, depth, index, parents, length)
-
-    out = [1] * length
-    lastparent = -1
-    for i in range(len(index)):
-        out[parents[i]] *= self.ptr[index[i]]
-    return RawArray(out)
-
-RawArray.reduce_next = RawArray_reduce_next
-
-# depth2 = ListOffsetArray([0, 4, 4, 6], ListOffsetArray([0, 3, 3, 5, 6, 8, 9], RawArray(primes[:9])))
-# assert list(depth2) == [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19], [23]]]
-# print(list(depth2.reduce(0)))
-# print([2*7*13*17*23, 3*11*19, 5])
 
 depth2 = ListOffsetArray([0, 3, 6], ListOffsetArray([0, 5, 10, 15, 20, 25, 30], RawArray(primes[:2*3*5])))
 assert depth2.tolist() == nparray.tolist()
 
-print(list(depth2.reduce(0)))
+depth2.reduce(0)
 
 
 
-assert (numpy.prod(nparray, axis=0).tolist() ==
-    [[ 106,  177,  305,  469, 781],
-     [ 949, 1343, 1577, 2047, 2813],
-     [3131, 3811, 4387, 4687, 5311]])
-assert numpy.prod(nparray, axis=0).shape == (3, 5)
+# assert (nparray.tolist() ==
+#     [[[  2,   3,   5,   7,  11],
+#       [ 13,  17,  19,  23,  29],
+#       [ 31,  37,  41,  43,  47]],
+#      [[ 53,  59,  61,  67,  71],
+#       [ 73,  79,  83,  89,  97],
+#       [101, 103, 107, 109, 113]]])
+# assert nparray.shape == (2, 3, 5)
+
+# assert (numpy.prod(nparray, axis=0).tolist() ==
+#     [[ 106,  177,  305,  469, 781],
+#      [ 949, 1343, 1577, 2047, 2813],
+#      [3131, 3811, 4387, 4687, 5311]])
+# assert numpy.prod(nparray, axis=0).shape == (3, 5)
