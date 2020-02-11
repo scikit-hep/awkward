@@ -574,37 +574,48 @@ import numpy
 # (My example reducer will be 'prod' on prime numbers; can't get the right answer accidentally.)
 primes = [x for x in range(2, 1000) if all(x % n != 0 for n in range(2, x))]
 
-example = numpy.array(primes[:2*3*5]).reshape(2, 3, 5)
+nparray = numpy.array(primes[:2*3*5]).reshape(2, 3, 5)
 
-assert (example.tolist() ==
+assert (nparray.tolist() ==
     [[[  2,   3,   5,   7,  11],
       [ 13,  17,  19,  23,  29],
       [ 31,  37,  41,  43,  47]],
      [[ 53,  59,  61,  67,  71],
       [ 73,  79,  83,  89,  97],
       [101, 103, 107, 109, 113]]])
-assert example.shape == (2, 3, 5)
+assert nparray.shape == (2, 3, 5)
 
-assert (numpy.prod(example, axis=0).tolist() ==
+assert (numpy.prod(nparray, axis=0).tolist() ==
     [[ 106,  177,  305,  469, 781],
      [ 949, 1343, 1577, 2047, 2813],
      [3131, 3811, 4387, 4687, 5311]])
-assert numpy.prod(example, axis=0).shape == (3, 5)
+assert numpy.prod(nparray, axis=0).shape == (3, 5)
 
-assert (numpy.prod(example, axis=1).tolist() ==
+assert (numpy.prod(nparray, axis=1).tolist() ==
     [[   806,   1887,   3895,   6923, 14993],
      [390769, 480083, 541741, 649967, 778231]])
-assert numpy.prod(example, axis=1).shape == (2, 5)
+assert numpy.prod(nparray, axis=1).shape == (2, 5)
 
-assert (numpy.prod(example, axis=2).tolist() ==
+assert (numpy.prod(nparray, axis=2).tolist() ==
     [[     2310,    2800733,    95041567],
      [907383479, 4132280413, 13710311357]])
-assert numpy.prod(example, axis=2).shape == (2, 3)
+assert numpy.prod(nparray, axis=2).shape == (2, 3)
 
 # (axis=3 is a numpy.AxisError; axis<0 counts backward from the end.)
 
-assert numpy.prod(example, axis=None) == 7581744426003940878
+assert numpy.prod(nparray, axis=None) == 7581744426003940878
 # (but that should be a special case because it results in a scalar.)
+
+akarray = NumpyArray(primes[:2*3*5], [2, 3, 5], [15, 5, 1], 0)
+
+assert (akarray.tolist() ==
+    [[[  2,   3,   5,   7,  11],
+      [ 13,  17,  19,  23,  29],
+      [ 31,  37,  41,  43,  47]],
+     [[ 53,  59,  61,  67,  71],
+      [ 73,  79,  83,  89,  97],
+      [101, 103, 107, 109, 113]]])
+assert akarray.shape == [2, 3, 5]
 
 def NumpyArray_prod(self, axis):
     assert len(self.shape) != 0
@@ -624,7 +635,35 @@ def NumpyArray_prod(self, axis):
         for x in shape:
             flatlen *= x
 
-        ptr = [1] * flatlen
+        index = [None] * (flatlen*self.shape[0])
+        parents = [None] * (flatlen*self.shape[0])
+
+        def recurse(k, n, base):
+            if n < len(shape) - 1:
+                for i in range(shape[n]):
+                    k = recurse(k, n + 1, base + i*strides[n])
+            elif n == len(shape) - 1:
+                for i in range(shape[n]):
+                    for j in range(self.shape[0]):
+                        index[k*self.shape[0] + j] = base + j*self.strides[0] + i
+                        parents[k*self.shape[0] + j] = k
+                    k += 1
+            return k
+
+        recurse(0, 0, 0)
+
+        ptr = [None] * flatlen
+
+        # k = 0
+        # lastparent = -1
+        # for i in range(flatlen*self.shape[0]):
+        #     if parents[i] != lastparent:
+        #         ptr[k] = 
+
+
+        print("index  ", index)
+        print("parents", parents)
+
         return NumpyArray(ptr, shape, strides, 0)
 
     else:
@@ -632,15 +671,4 @@ def NumpyArray_prod(self, axis):
 
 NumpyArray.prod = NumpyArray_prod
 
-example = NumpyArray(primes[:2*3*5], [2, 3, 5], [15, 5, 1], 0)
-
-assert (example.tolist() ==
-    [[[  2,   3,   5,   7,  11],
-      [ 13,  17,  19,  23,  29],
-      [ 31,  37,  41,  43,  47]],
-     [[ 53,  59,  61,  67,  71],
-      [ 73,  79,  83,  89,  97],
-      [101, 103, 107, 109, 113]]])
-assert example.shape == [2, 3, 5]
-
-print(example.prod(axis=0).tolist())
+akarray.prod(axis=0)
