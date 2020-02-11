@@ -1,4 +1,4 @@
-import math
+ import math
 import random
 
 class Content:
@@ -64,6 +64,10 @@ class RawArray(Content):
             raise ValueError("field " + repr(where) + " not found")
         else:
             raise AssertionError(where)
+
+    def carry(self, index):
+        assert all(0 <= i < len(self) for i in index)
+        return RawArray([self.ptr[i] for i in index])
 
     def __repr__(self):
         return "RawArray(" + repr(self.ptr) + ")"
@@ -133,6 +137,21 @@ class NumpyArray(Content):
         else:
             raise AssertionError(where)
 
+    def carry(self, index):
+        assert all(0 <= i < len(self) for i in index)
+        shape = [len(index)] + self.shape[1:]
+        strides = [1]
+        for x in shape[:0:-1]:
+            strides = [strides[0] * x] + strides
+        if len(self.shape) == 1:
+            ptr = [self.ptr[self.offset + self.strides[0] * i] for i in index]
+        else:
+            o = self.offset
+            sh0, sh1 = self.shape[0], self.shape[1]
+            st0, st1 = self.strides[0], self.strides[1]
+            ptr = sum([self.ptr[o + st0*i : o + st0*i + st1*sh1] for i in index], [])
+        return NumpyArray(ptr, shape, strides, 0)
+
     def __repr__(self):
         return "NumpyArray(" + repr(self.ptr) + ", " + repr(self.shape) + ", " + repr(self.strides) + ", " + repr(self.offset) + ")"
 
@@ -167,6 +186,10 @@ class EmptyArray(Content):
         else:
             raise AssertionError(where)
 
+    def carry(self, index):
+        # this will always fail
+        assert all(0 <= i < len(self) for i in index)
+        
     def __repr__(self):
         return "EmptyArray()"
 
@@ -200,6 +223,14 @@ class RegularArray(Content):
             return RegularArray(self.content[where], self.size)
         else:
             raise AssertionError(where)
+
+    def carry(self, index):
+        assert all(0 <= i < len(self) for i in index)
+        nextcarry = [None] * len(index) * self.size
+        for i in range(len(index)):
+            for j in range(self.size):
+                nextcarry[i*self.size + j] = index[i]*self.size + j
+        return RegularArray(self.content.carry(nextcarry), self.size)
 
     def __repr__(self):
         return "RegularArray(" + repr(self.content) + ", " + repr(self.size) + ")"
@@ -252,6 +283,12 @@ class ListOffsetArray(Content):
             return ListOffsetArray(self.offsets, self.content[where])
         else:
             raise AssertionError(where)
+
+    def carry(self, index):
+        assert all(0 <= i < len(self) for i in index)
+        starts = [self.offsets[i] for i in index]
+        stops = [self.offsets[i + 1] for i in index]
+        return ListArray(starts, stops, self.content)
 
     def __repr__(self):
         return "ListOffsetArray(" + repr(self.offsets) + ", " + repr(self.content) + ")"
@@ -310,6 +347,12 @@ class ListArray(Content):
         else:
             raise AssertionError(where)
 
+    def carry(self, index):
+        assert all(0 <= i < len(self) for i in index)
+        starts = [self.offsets[i] for i in index]
+        stops = [self.offsets[i + 1] for i in index]
+        return ListArray(starts, stops, self.content)
+
     def __repr__(self):
         return "ListArray(" + repr(self.starts) + ", " + repr(self.stops) + ", " + repr(self.content) + ")"
 
@@ -356,6 +399,11 @@ class IndexedArray(Content):
             return IndexedArray(self.index, self.content[where])
         else:
             raise AssertionError(where)
+
+    def carry(self, index):
+        assert all(0 <= i < len(self) for i in index)
+        index = [self.index[i] for i in index]
+        return IndexedArray(index, self.content)
 
     def __repr__(self):
         return "IndexedArray(" + repr(self.index) + ", " + repr(self.content) + ")"
@@ -405,6 +453,11 @@ class IndexedOptionArray(Content):
         else:
             raise AssertionError(where)
 
+    def carry(self, index):
+        assert all(0 <= i < len(self) for i in index)
+        index = [self.index[i] for i in index]
+        return IndexedOptionArray(index, self.content)
+
     def __repr__(self):
         return "IndexedOptionArray(" + repr(self.index) + ", " + repr(self.content) + ")"
 
@@ -450,6 +503,11 @@ class ByteMaskedArray(Content):
             return ByteMaskedArray(self.mask, self.content[where], self.validwhen)
         else:
             raise AssertionError(where)
+
+    def carry(self, index):
+        assert all(0 <= i < len(self) for i in index)
+        mask = [self.mask[i] for i in index]
+        return ByteMaskedArray(mask, self.content.carry(index), self.validwhen)
 
     def __repr__(self):
         return "ByteMaskedArray(" + repr(self.mask) + ", " + repr(self.content) + ", " + repr(self.validwhen) + ")"
@@ -537,6 +595,13 @@ class RecordArray(Content):
         else:
             raise AssertionError(where)
 
+    def carry(self, index):
+        assert all(0 <= i < len(self) for i in index)
+        if len(self.contents) == 0:
+            return RecordArray([], self.recordlookup, len(index))
+        else:
+            return RecordArray([x.carry(index) for x in self.contents], self.recordlookup, self.length)
+
     def __repr__(self):
         return "RecordArray([" + ", ".join(repr(x) for x in self.contents) + "], " + repr(self.recordlookup) + ", " + repr(self.length) + ")"
 
@@ -604,6 +669,10 @@ class UnionArray(Content):
         else:
             raise AssertionError(where)
 
+    def carry(self, index):
+        assert all(0 <= i < len(self) for i in index)
+        return UnionArray([self.tags[i] for i in index], [self.index[i] for i in index], self.contents)
+
     def __repr__(self):
         return "UnionArray(" + repr(self.tags) + ", " + repr(self.index) + ", [" + ", ".join(repr(x) for x in self.contents) + "])"
 
@@ -655,73 +724,102 @@ assert numpy.prod(nparray, axis=2).shape == (2, 3)
 assert numpy.prod(nparray, axis=None) == 7581744426003940878
 # (but that should be a special case because it results in a scalar.)
 
-akarray = NumpyArray(primes[:2*3*5], [2, 3, 5], [15, 5, 1], 0)
+# akarray = NumpyArray(primes[:2*3*5], [2, 3, 5], [15, 5, 1], 0)
 
-assert (akarray.tolist() ==
-    [[[  2,   3,   5,   7,  11],
-      [ 13,  17,  19,  23,  29],
-      [ 31,  37,  41,  43,  47]],
-     [[ 53,  59,  61,  67,  71],
-      [ 73,  79,  83,  89,  97],
-      [101, 103, 107, 109, 113]]])
-assert akarray.shape == [2, 3, 5]
+# assert (akarray.tolist() ==
+#     [[[  2,   3,   5,   7,  11],
+#       [ 13,  17,  19,  23,  29],
+#       [ 31,  37,  41,  43,  47]],
+#      [[ 53,  59,  61,  67,  71],
+#       [ 73,  79,  83,  89,  97],
+#       [101, 103, 107, 109, 113]]])
+# assert akarray.shape == [2, 3, 5]
 
-def NumpyArray_prod(self, axis, semigroup):
-    assert len(self.shape) != 0
+# def NumpyArray_prod(self, axis, semigroup):
+#     assert len(self.shape) != 0
 
-    if axis < 0:
-        axis += len(self.shape)
-    assert 0 <= axis < len(self.shape)
+#     if axis < 0:
+#         axis += len(self.shape)
+#     assert 0 <= axis < len(self.shape)
 
-    if not semigroup and axis == 0:
-        length = self.shape[0]
-        stepsize = self.strides[0]
+#     if not semigroup and axis == 0:
+#         length = self.shape[0]
+#         stepsize = self.strides[0]
 
-        shape = self.shape[1:]
-        strides = [1]
-        for x in shape[:0:-1]:
-            strides = [strides[0] * x] + strides
+#         shape = self.shape[1:]
+#         strides = [1]
+#         for x in shape[:0:-1]:
+#             strides = [strides[0] * x] + strides
 
-        flatlen = 1
-        for x in shape:
-            flatlen *= x
+#         flatlen = 1
+#         for x in shape:
+#             flatlen *= x
 
-        index = [None] * (flatlen*self.shape[0])
-        parents = [None] * (flatlen*self.shape[0])
+#         index = [None] * (flatlen*self.shape[0])
+#         parents = [None] * (flatlen*self.shape[0])
 
-        def recurse(k, n, base):
-            if n < len(shape) - 1:
-                for i in range(shape[n]):
-                    k = recurse(k, n + 1, base + i*self.strides[n + 1])   # item-strides, not byte-strides
-            elif n == len(shape) - 1:
-                for i in range(shape[n]):
-                    for j in range(self.shape[0]):
-                        index[k*self.shape[0] + j] = base + j*self.strides[0] + i
-                        parents[k*self.shape[0] + j] = k
-                    k += 1
-            return k
+#         def recurse(k, n, base):
+#             if n < len(shape) - 1:
+#                 for i in range(shape[n]):
+#                     k = recurse(k, n + 1, base + i*self.strides[n + 1])   # item-strides, not byte-strides
+#             elif n == len(shape) - 1:
+#                 for i in range(shape[n]):
+#                     for j in range(self.shape[0]):
+#                         index[k*self.shape[0] + j] = base + j*self.strides[0] + i
+#                         parents[k*self.shape[0] + j] = k
+#                     k += 1
+#             return k
 
-        recurse(0, 0, self.offset)   # item-offset, not byte-offset
+#         recurse(0, 0, self.offset)   # item-offset, not byte-offset
 
-        ptr = [1] * flatlen   # initialize to identity because lists can be empty
+#         ptr = [1] * flatlen   # initialize to identity because lists can be empty
 
-        lastparent = -1
-        for i in range(flatlen*self.shape[0]):
-            if parents[i] != lastparent:
-                ptr[parents[i]] = self.ptr[index[i]]
-            else:
-                ptr[parents[i]] = self.ptr[index[i]] * ptr[lastparent]
-            lastparent = parents[i]
+#         lastparent = -1
+#         for i in range(flatlen*self.shape[0]):
+#             if parents[i] != lastparent:
+#                 ptr[parents[i]] = self.ptr[index[i]]
+#             else:
+#                 ptr[parents[i]] = self.ptr[index[i]] * ptr[lastparent]
+#             lastparent = parents[i]
 
-        return NumpyArray(ptr, shape, strides, 0)
+#         return NumpyArray(ptr, shape, strides, 0)
 
+#     else:
+#         raise NotImplementedError("Must be contiguous: in the real world, I'd convert to RegularArray for this case.")
+
+# NumpyArray.prod = NumpyArray_prod
+
+# assert (akarray.prod(axis=0, semigroup=False).tolist() ==
+#     [[ 106,  177,  305,  469, 781],
+#      [ 949, 1343, 1577, 2047, 2813],
+#      [3131, 3811, 4387, 4687, 5311]])
+# assert akarray.prod(axis=0, semigroup=False).shape == [3, 5]
+
+def Content_reduce(self, axis, semigroup):
+    index = [None] * len(self)
+    for i in range(len(self)):
+        index[i] = i
+    if axis is None:
+        return self.reduce_next(semigroup, index)
     else:
-        raise NotImplementedError("Must be contiguous: in the real world, I'd convert to RegularArray for this case.")
+        parents = [None] * len(self)
+        for i in range(len(self)):
+            parents[i] = 0
+        return self.reduce_next_axis(axis, semigroup, index, parents, 0)
 
-NumpyArray.prod = NumpyArray_prod
+Content.reduce = Content_reduce
 
-assert (akarray.prod(axis=0, semigroup=False).tolist() ==
-    [[ 106,  177,  305,  469, 781],
-     [ 949, 1343, 1577, 2047, 2813],
-     [3131, 3811, 4387, 4687, 5311]])
-assert akarray.prod(axis=0, semigroup=False).shape == [3, 5]
+def RawArray_reduce_next(self, semigroup, index):
+    pass
+
+
+
+
+
+    
+RawArray.reduce_next = RawArray_reduce_next
+
+def RawArray_reduce_next_axis(self, axis, semigroup, index, parents, depth):
+    raise NotImplementedError
+
+RawArray.reduce_next = RawArray_reduce_next
