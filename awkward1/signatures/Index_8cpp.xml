@@ -12,18 +12,6 @@
       <node id="3">
         <label>iomanip</label>
       </node>
-      <node id="7">
-        <label>awkward/Index.h</label>
-      </node>
-      <node id="4">
-        <label>sstream</label>
-      </node>
-      <node id="6">
-        <label>awkward/Slice.h</label>
-      </node>
-      <node id="5">
-        <label>type_traits</label>
-      </node>
       <node id="1">
         <label>src/libawkward/Index.cpp</label>
         <link refid="Index_8cpp"/>
@@ -39,6 +27,18 @@
         </childnode>
         <childnode refid="7" relation="include">
         </childnode>
+      </node>
+      <node id="7">
+        <label>awkward/Index.h</label>
+      </node>
+      <node id="4">
+        <label>sstream</label>
+      </node>
+      <node id="6">
+        <label>awkward/Slice.h</label>
+      </node>
+      <node id="5">
+        <label>type_traits</label>
       </node>
       <node id="2">
         <label>cstring</label>

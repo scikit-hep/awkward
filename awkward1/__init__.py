@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+from __future__ import absolute_import
+
 import distutils.version
 
 import numpy
@@ -8,18 +10,9 @@ if distutils.version.LooseVersion(numpy.__version__) < distutils.version.LooseVe
 
 behavior = {}
 
-import awkward1.layout
-from awkward1.layout import Type
-from awkward1.layout import UnknownType
-from awkward1.layout import PrimitiveType
-from awkward1.layout import ListType
-from awkward1.layout import RegularType
-from awkward1.layout import RecordType
-from awkward1.layout import OptionType
-from awkward1.layout import UnionType
-from awkward1.layout import ArrayType
-
 import awkward1._numba
+
+import awkward1.types
 
 import awkward1.highlevel
 from awkward1.highlevel import Array

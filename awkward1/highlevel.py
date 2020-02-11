@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+from __future__ import absolute_import
+
 import re
 import keyword
 try:
@@ -49,7 +51,7 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
 
     @property
     def type(self):
-        return awkward1.layout.ArrayType(self._layout.type, len(self._layout))
+        return awkward1.types.ArrayType(self._layout.type, len(self._layout))
 
     def __len__(self):
         return len(self._layout)
@@ -248,7 +250,7 @@ class FillableArray(Sequence):
     @property
     def type(self):
         tmp = self._fillablearray.snapshot()
-        return awkward1.layout.ArrayType(tmp.type, len(tmp))
+        return awkward1.types.ArrayType(tmp.type, len(tmp))
 
     def __len__(self):
         return len(self._fillablearray)

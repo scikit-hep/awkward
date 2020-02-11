@@ -21,9 +21,6 @@
       <node id="4">
         <label>stdexcept</label>
       </node>
-      <node id="5">
-        <label>awkward/type/UnknownType.h</label>
-      </node>
       <node id="1">
         <label>src/libawkward/array/None.cpp</label>
         <link refid="None_8cpp"/>
@@ -39,6 +36,9 @@
         </childnode>
         <childnode refid="7" relation="include">
         </childnode>
+      </node>
+      <node id="5">
+        <label>awkward/type/UnknownType.h</label>
       </node>
       <node id="3">
         <label>sstream</label>
@@ -58,7 +58,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="src/libawkward/array/None.cpp" line="172" column="25" bodyfile="src/libawkward/array/None.cpp" bodystart="172" bodyend="-1"/>
+        <location file="src/libawkward/array/None.cpp" line="196" column="25" bodyfile="src/libawkward/array/None.cpp" bodystart="196" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>

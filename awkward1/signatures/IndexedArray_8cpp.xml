@@ -34,6 +34,15 @@
       <node id="9">
         <label>awkward/type/UnknownType.h</label>
       </node>
+      <node id="4">
+        <label>awkward/cpu-kernels/identities.h</label>
+      </node>
+      <node id="13">
+        <label>awkward/array/UnionArray.h</label>
+      </node>
+      <node id="2">
+        <label>sstream</label>
+      </node>
       <node id="1">
         <label>src/libawkward/array/IndexedArray.cpp</label>
         <link refid="IndexedArray_8cpp"/>
@@ -63,15 +72,6 @@
         </childnode>
         <childnode refid="14" relation="include">
         </childnode>
-      </node>
-      <node id="4">
-        <label>awkward/cpu-kernels/identities.h</label>
-      </node>
-      <node id="13">
-        <label>awkward/array/UnionArray.h</label>
-      </node>
-      <node id="2">
-        <label>sstream</label>
       </node>
       <node id="14">
         <label>awkward/array/IndexedArray.h</label>
