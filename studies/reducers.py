@@ -1119,6 +1119,14 @@ def ListOffsetArray_reduce_next(self, axis, depth):
     print(nextcontent.toxml())
     print([x if isinstance(x, int) else list(x) for x in nextcontent])
 
+    # parents = [None] * (self.offsets[-1] - self.offsets[0])
+    # k = 0
+    # for i in range(len(self.offsets) - 1):
+    #     for j in range(self.offsets[i], self.offsets[i + 1]):
+    #         parents[k] = i
+    #         k += 1
+    # print("parents", parents)
+
     return nextcontent.reduce_next(axis, depth + 1)
 
 ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
