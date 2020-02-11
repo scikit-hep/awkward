@@ -15,6 +15,27 @@
       <node id="8">
         <label>awkward/cpu-kernels/operations.h</label>
       </node>
+      <node id="9">
+        <label>awkward/util.h</label>
+      </node>
+      <node id="2">
+        <label>cassert</label>
+      </node>
+      <node id="7">
+        <label>awkward/cpu-kernels/getitem.h</label>
+      </node>
+      <node id="5">
+        <label>rapidjson/document.h</label>
+      </node>
+      <node id="6">
+        <label>awkward/cpu-kernels/identities.h</label>
+      </node>
+      <node id="3">
+        <label>sstream</label>
+      </node>
+      <node id="10">
+        <label>awkward/Identities.h</label>
+      </node>
       <node id="1">
         <label>src/libawkward/util.cpp</label>
         <link refid="libawkward_2util_8cpp"/>
@@ -36,27 +57,6 @@
         </childnode>
         <childnode refid="10" relation="include">
         </childnode>
-      </node>
-      <node id="9">
-        <label>awkward/util.h</label>
-      </node>
-      <node id="2">
-        <label>cassert</label>
-      </node>
-      <node id="7">
-        <label>awkward/cpu-kernels/getitem.h</label>
-      </node>
-      <node id="5">
-        <label>rapidjson/document.h</label>
-      </node>
-      <node id="6">
-        <label>awkward/cpu-kernels/identities.h</label>
-      </node>
-      <node id="3">
-        <label>sstream</label>
-      </node>
-      <node id="10">
-        <label>awkward/Identities.h</label>
       </node>
       <node id="4">
         <label>set</label>

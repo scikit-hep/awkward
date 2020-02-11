@@ -16,6 +16,18 @@
       <node id="3">
         <label>awkward/cpu-kernels/operations.h</label>
       </node>
+      <node id="10">
+        <label>awkward/type/ArrayType.h</label>
+      </node>
+      <node id="9">
+        <label>awkward/array/RecordArray.h</label>
+      </node>
+      <node id="4">
+        <label>awkward/array/RegularArray.h</label>
+      </node>
+      <node id="11">
+        <label>awkward/Content.h</label>
+      </node>
       <node id="1">
         <label>src/libawkward/Content.cpp</label>
         <link refid="Content_8cpp"/>
@@ -39,18 +51,6 @@
         </childnode>
         <childnode refid="11" relation="include">
         </childnode>
-      </node>
-      <node id="10">
-        <label>awkward/type/ArrayType.h</label>
-      </node>
-      <node id="9">
-        <label>awkward/array/RecordArray.h</label>
-      </node>
-      <node id="4">
-        <label>awkward/array/RegularArray.h</label>
-      </node>
-      <node id="11">
-        <label>awkward/Content.h</label>
       </node>
       <node id="7">
         <label>awkward/array/UnionArray.h</label>

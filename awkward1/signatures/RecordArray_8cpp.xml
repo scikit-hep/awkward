@@ -42,9 +42,6 @@
       <node id="2">
         <label>sstream</label>
       </node>
-      <node id="10">
-        <label>awkward/array/IndexedArray.h</label>
-      </node>
       <node id="1">
         <label>src/libawkward/array/RecordArray.cpp</label>
         <link refid="RecordArray_8cpp"/>
@@ -72,6 +69,9 @@
         </childnode>
         <childnode refid="13" relation="include">
         </childnode>
+      </node>
+      <node id="10">
+        <label>awkward/array/IndexedArray.h</label>
       </node>
       <node id="3">
         <label>algorithm</label>

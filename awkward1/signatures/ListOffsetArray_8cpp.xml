@@ -37,12 +37,6 @@
       <node id="4">
         <label>awkward/cpu-kernels/identities.h</label>
       </node>
-      <node id="12">
-        <label>awkward/array/RegularArray.h</label>
-      </node>
-      <node id="13">
-        <label>awkward/array/NumpyArray.h</label>
-      </node>
       <node id="1">
         <label>src/libawkward/array/ListOffsetArray.cpp</label>
         <link refid="ListOffsetArray_8cpp"/>
@@ -78,6 +72,12 @@
         </childnode>
         <childnode refid="17" relation="include">
         </childnode>
+      </node>
+      <node id="12">
+        <label>awkward/array/RegularArray.h</label>
+      </node>
+      <node id="13">
+        <label>awkward/array/NumpyArray.h</label>
       </node>
       <node id="17">
         <label>awkward/array/ListOffsetArray.h</label>

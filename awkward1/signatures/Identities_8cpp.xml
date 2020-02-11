@@ -19,12 +19,6 @@
       <node id="5">
         <label>iomanip</label>
       </node>
-      <node id="2">
-        <label>cassert</label>
-      </node>
-      <node id="9">
-        <label>awkward/cpu-kernels/getitem.h</label>
-      </node>
       <node id="1">
         <label>src/libawkward/Identities.cpp</label>
         <link refid="Identities_8cpp"/>
@@ -48,6 +42,12 @@
         </childnode>
         <childnode refid="11" relation="include">
         </childnode>
+      </node>
+      <node id="2">
+        <label>cassert</label>
+      </node>
+      <node id="9">
+        <label>awkward/cpu-kernels/getitem.h</label>
       </node>
       <node id="8">
         <label>awkward/cpu-kernels/identities.h</label>

@@ -4,14 +4,14 @@
     <compoundname>identities.cpp</compoundname>
     <includes local="yes">awkward/cpu-kernels/identities.h</includes>
     <incdepgraph>
+      <node id="2">
+        <label>awkward/cpu-kernels/identities.h</label>
+      </node>
       <node id="1">
         <label>src/cpu-kernels/identities.cpp</label>
         <link refid="identities_8cpp"/>
         <childnode refid="2" relation="include">
         </childnode>
-      </node>
-      <node id="2">
-        <label>awkward/cpu-kernels/identities.h</label>
       </node>
     </incdepgraph>
       <sectiondef kind="func">
