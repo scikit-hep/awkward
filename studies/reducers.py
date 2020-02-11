@@ -69,6 +69,12 @@ class RawArray(Content):
         assert all(0 <= i < len(self) for i in index)
         return RawArray([self.ptr[i] for i in index])
 
+    def purelist_depth(self):
+        return 1
+
+    def minmax_depth(self):
+        return 1, 1
+
     def __repr__(self):
         return "RawArray(" + repr(self.ptr) + ")"
 
@@ -152,6 +158,12 @@ class NumpyArray(Content):
             ptr = sum([self.ptr[o + st0*i : o + st0*i + st1*sh1] for i in index], [])
         return NumpyArray(ptr, shape, strides, 0)
 
+    def purelist_depth(self):
+        return len(self.shape)
+
+    def minmax_depth(self):
+        return len(self.shape), len(self.shape)
+
     def __repr__(self):
         return "NumpyArray(" + repr(self.ptr) + ", " + repr(self.shape) + ", " + repr(self.strides) + ", " + repr(self.offset) + ")"
 
@@ -189,6 +201,12 @@ class EmptyArray(Content):
     def carry(self, index):
         # this will always fail
         assert all(0 <= i < len(self) for i in index)
+
+    def purelist_depth(self):
+        return 1
+
+    def minmax_depth(self):
+        return 1, 1
         
     def __repr__(self):
         return "EmptyArray()"
@@ -231,6 +249,13 @@ class RegularArray(Content):
             for j in range(self.size):
                 nextcarry[i*self.size + j] = index[i]*self.size + j
         return RegularArray(self.content.carry(nextcarry), self.size)
+
+    def purelist_depth(self):
+        return self.content.purelist_depth() + 1
+
+    def minmax_depth(self):
+        min, max = self.content.minmax_depth()
+        return min + 1, max + 1
 
     def __repr__(self):
         return "RegularArray(" + repr(self.content) + ", " + repr(self.size) + ")"
@@ -289,6 +314,13 @@ class ListOffsetArray(Content):
         starts = [self.offsets[i] for i in index]
         stops = [self.offsets[i + 1] for i in index]
         return ListArray(starts, stops, self.content)
+
+    def purelist_depth(self):
+        return self.content.purelist_depth() + 1
+
+    def minmax_depth(self):
+        min, max = self.content.minmax_depth()
+        return min + 1, max + 1
 
     def __repr__(self):
         return "ListOffsetArray(" + repr(self.offsets) + ", " + repr(self.content) + ")"
@@ -353,6 +385,13 @@ class ListArray(Content):
         stops = [self.offsets[i + 1] for i in index]
         return ListArray(starts, stops, self.content)
 
+    def purelist_depth(self):
+        return self.content.purelist_depth() + 1
+
+    def minmax_depth(self):
+        min, max = self.content.minmax_depth()
+        return min + 1, max + 1
+
     def __repr__(self):
         return "ListArray(" + repr(self.starts) + ", " + repr(self.stops) + ", " + repr(self.content) + ")"
 
@@ -404,6 +443,12 @@ class IndexedArray(Content):
         assert all(0 <= i < len(self) for i in index)
         index = [self.index[i] for i in index]
         return IndexedArray(index, self.content)
+
+    def purelist_depth(self):
+        return self.content.purelist_depth()
+
+    def minmax_depth(self):
+        return self.content.minmax_depth()
 
     def __repr__(self):
         return "IndexedArray(" + repr(self.index) + ", " + repr(self.content) + ")"
@@ -458,6 +503,12 @@ class IndexedOptionArray(Content):
         index = [self.index[i] for i in index]
         return IndexedOptionArray(index, self.content)
 
+    def purelist_depth(self):
+        return self.content.purelist_depth()
+
+    def minmax_depth(self):
+        return self.content.minmax_depth()
+
     def __repr__(self):
         return "IndexedOptionArray(" + repr(self.index) + ", " + repr(self.content) + ")"
 
@@ -508,6 +559,12 @@ class ByteMaskedArray(Content):
         assert all(0 <= i < len(self) for i in index)
         mask = [self.mask[i] for i in index]
         return ByteMaskedArray(mask, self.content.carry(index), self.validwhen)
+
+    def purelist_depth(self):
+        return self.content.purelist_depth()
+
+    def minmax_depth(self):
+        return self.content.minmax_depth()
 
     def __repr__(self):
         return "ByteMaskedArray(" + repr(self.mask) + ", " + repr(self.content) + ", " + repr(self.validwhen) + ")"
@@ -602,6 +659,19 @@ class RecordArray(Content):
         else:
             return RecordArray([x.carry(index) for x in self.contents], self.recordlookup, self.length)
 
+    def purelist_depth(self):
+        return 1
+
+    def minmax_depth(self):
+        min, max = None, None
+        for content in self.contents:
+            thismin, thismax = content.minmax_depth()
+            if min is None or thismin < min:
+                min = thismin
+            if max is None or thismax > max:
+                max = thismax
+        return min, max
+
     def __repr__(self):
         return "RecordArray([" + ", ".join(repr(x) for x in self.contents) + "], " + repr(self.recordlookup) + ", " + repr(self.length) + ")"
 
@@ -672,6 +742,19 @@ class UnionArray(Content):
     def carry(self, index):
         assert all(0 <= i < len(self) for i in index)
         return UnionArray([self.tags[i] for i in index], [self.index[i] for i in index], self.contents)
+
+    def purelist_depth(self):
+        return 1
+
+    def minmax_depth(self):
+        min, max = None, None
+        for content in self.contents:
+            thismin, thismax = content.minmax_depth()
+            if min is None or thismin < min:
+                min = thismin
+            if max is None or thismax > max:
+                max = thismax
+        return min, max
 
     def __repr__(self):
         return "UnionArray(" + repr(self.tags) + ", " + repr(self.index) + ", [" + ", ".join(repr(x) for x in self.contents) + "])"
@@ -799,27 +882,101 @@ def Content_reduce(self, axis, semigroup):
     index = [None] * len(self)
     for i in range(len(self)):
         index[i] = i
-    if axis is None:
-        return self.reduce_next(semigroup, index)
-    else:
-        parents = [None] * len(self)
-        for i in range(len(self)):
-            parents[i] = 0
-        return self.reduce_next_axis(axis, semigroup, index, parents, 0)
+    return self.reduce_next(False, axis, semigroup, index, None, len(self))
 
 Content.reduce = Content_reduce
 
-def RawArray_reduce_next(self, semigroup, index):
-    pass
+def Content_regularize_axis(self, regularized, axis):
+    regular_axis = axis
+    if not regularized:
+        (min, max), pure = self.minmax_depth(), self.purelist_depth()
+        axislen = min - 1
+        if regular_axis < 0:
+            if min == max == pure:
+                regular_axis = axis + axislen
+                regularized = True
+        else:
+            regularized = True
 
+        print("regularizing", min, max, pure, "axis", axis, "->", regular_axis)
 
+        if not (0 <= regular_axis < axislen):
+            raise ValueError("cannot request axis {0} for a structure of {1}-{2} lists deep".format(axis, min - 1, max - 1))
 
+    return regularized, regular_axis
 
+Content.regularize_axis = Content_regularize_axis
 
-    
+def RawArray_reduce_next(self, regularized, axis, semigroup, index, parents, length):
+    print("RawArray_reduce_next", regularized, axis, semigroup, index, parents, length)
+
+    regularized, axis = self.regularize_axis(regularized, axis)
+
+    out = [1] * length
+    lastparent = -1
+    for i in range(len(index)):
+        out[parents[i]] *= self.ptr[index[i]]
+    return RawArray(out)
+
 RawArray.reduce_next = RawArray_reduce_next
 
-def RawArray_reduce_next_axis(self, axis, semigroup, index, parents, depth):
-    raise NotImplementedError
+def ListOffsetArray_reduce_next(self, regularized, axis, semigroup, index, parents, length):
+    print("ListOffsetArray_reduce_next", regularized, axis, semigroup, index, parents, length)
 
-RawArray.reduce_next = RawArray_reduce_next
+    regularized, axis = self.regularize_axis(regularized, axis)
+    nextaxis = axis - 1 if regularized else axis
+
+    if regularized and self.purelist_depth() == 2:
+        nextparents = [None] * (self.offsets[-1] - self.offsets[0])
+        k = 0
+        for i in range(len(index)):
+            start = self.offsets[index[i]]
+            stop = self.offsets[index[i] + 1]
+            for j in range(start, stop):
+                nextparents[k] = i
+                k += 1
+    else:
+        nextparents = parents
+
+    if axis <= 0:
+        nextindex = [None] * (self.offsets[-1] - self.offsets[0])
+        k = 0
+        for i in range(len(index)):
+            start = self.offsets[index[i]]
+            stop = self.offsets[index[i] + 1]
+            for j in range(start, stop):
+                nextindex[k] = j
+                k += 1
+        return self.content.reduce_next(regularized, nextaxis, semigroup, nextindex, nextparents, len(self))
+
+    else:
+        nextindex = [None] * (self.offsets[-1] - self.offsets[0])
+        k = 0
+        for i in range(len(index)):
+            start = self.offsets[index[i]]
+            stop = self.offsets[index[i] + 1]
+            for j in range(start, stop):
+                nextindex[k] = j
+                k += 1
+        nextcontent = self.content.reduce_next(regularized, nextaxis, semigroup, nextindex, nextparents, len(self))
+        nextoffsets = [None] * len(self.offsets)
+        nextoffsets[0] = 0
+        for i in range(len(self.offsets) - 1):
+            nextoffsets[i + 1] = self.offsets[i + 1] - self.offsets[0]
+        return ListOffsetArray(nextoffsets, nextcontent)
+
+ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
+
+depth1 = ListOffsetArray([0, 3, 3, 5], RawArray(primes[:5]))
+assert list(depth1) == [[2, 3, 5], [], [7, 11]]
+
+assert list(depth1.reduce(0, False)) == [30, 1, 77]
+assert list(depth1.reduce(-1, False)) == [30, 1, 77]
+
+depth2 = ListOffsetArray([0, 4, 4, 5], ListOffsetArray([0, 3, 3, 5, 6, 10], RawArray(primes[:10])))
+assert list(depth2) == [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19, 23, 29]]]
+
+assert list(depth2.reduce(1, False)) == [[2*3*5, 1, 7*11, 13], [], [17*19*23*29]]
+assert list(depth2.reduce(-1, False)) == [[2*3*5, 1, 7*11, 13], [], [17*19*23*29]]
+
+print(list(depth2.reduce(0, False)))
