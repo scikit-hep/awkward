@@ -4,7 +4,6 @@
 
 #include "awkward/python/index.h"
 #include "awkward/python/identities.h"
-#include "awkward/python/fillable.h"
 #include "awkward/python/content.h"
 
 namespace py = pybind11;
@@ -28,13 +27,10 @@ PYBIND11_MODULE(layout, m) {
   make_IdentitiesOf<int32_t>(m, "Identities32");
   make_IdentitiesOf<int64_t>(m, "Identities64");
 
-  /////////////////////////////////////////////////////////////// fillable.h
-
-  make_FillableArray(m, "FillableArray");
-
   /////////////////////////////////////////////////////////////// content.h
 
   make_Iterator(m, "Iterator");
+  make_FillableArray(m, "FillableArray");
   make_Content(m, "Content");
 
   make_EmptyArray(m, "EmptyArray");
@@ -64,4 +60,7 @@ PYBIND11_MODULE(layout, m) {
   make_UnionArrayOf<int8_t, uint32_t>(m, "UnionArray8_U32");
   make_UnionArrayOf<int8_t, int64_t>(m,  "UnionArray8_64");
 
+  m.def("_slice_tostring", [](py::object obj) -> std::string {
+    return toslice(obj).tostring();
+  });
 }

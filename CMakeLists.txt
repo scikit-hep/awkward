@@ -25,7 +25,6 @@ set(CMAKE_MACOSX_RPATH 1)
 # Three tiers: cpu-kernels (extern "C" interface), libawkward (C++), and Python modules.
 file(GLOB CPU_KERNEL_SOURCES "src/cpu-kernels/*.cpp")
 file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp" "src/libawkward/array/*.cpp" "src/libawkward/fillable/*.cpp" "src/libawkward/type/*.cpp" "src/libawkward/io/*.cpp")
-file(GLOB PYAWKWARD_SOURCES "src/python/*.cpp")
 include_directories(include)
 
 # C++ dependencies (header-only): RapidJSON and pybind11.
@@ -69,17 +68,19 @@ addtest(PR019 tests/test_PR019_use_json_library.cpp)
 addtest(PR030 tests/test_PR030_recordarray_in_numba.cpp)
 
 # Third tier: Python modules.
-pybind11_add_module(layout src/python/modules/layout.cpp ${PYAWKWARD_SOURCES})
+
+file(GLOB LAYOUT_SOURCES "src/python/layout/*.cpp")
+pybind11_add_module(layout src/python/layout.cpp ${LAYOUT_SOURCES})
 set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
 target_link_libraries(layout PRIVATE awkward-static)
 
-pybind11_add_module(types src/python/modules/types.cpp ${PYAWKWARD_SOURCES})
+pybind11_add_module(types src/python/types.cpp)
 set_target_properties(types PROPERTIES CXX_VISIBILITY_PRESET hidden)
 target_link_libraries(types PRIVATE awkward-static)
 
-pybind11_add_module(_internal src/python/modules/_internal.cpp ${PYAWKWARD_SOURCES})
-set_target_properties(_internal PROPERTIES CXX_VISIBILITY_PRESET hidden)
-target_link_libraries(_internal PRIVATE awkward-static)
+pybind11_add_module(io src/python/io.cpp)
+set_target_properties(io PROPERTIES CXX_VISIBILITY_PRESET hidden)
+target_link_libraries(io PRIVATE awkward-static)
 
 # Everything can be built with
 #

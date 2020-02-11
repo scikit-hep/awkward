@@ -7,61 +7,60 @@ import pytest
 import numpy
 
 import awkward1
-import awkward1._internal
 
 py27 = (sys.version_info[0] < 3)
 
 def test_slice():
-    assert awkward1._internal.slice_tostring(3) == "[3]"
-    assert awkward1._internal.slice_tostring(slice(None)) == "[:]"
-    assert awkward1._internal.slice_tostring(slice(10)) == "[:10]"
-    assert awkward1._internal.slice_tostring(slice(1, 2)) == "[1:2]"
-    assert awkward1._internal.slice_tostring(slice(1, None)) == "[1:]"
-    assert awkward1._internal.slice_tostring(slice(None, None, 2)) == "[::2]"
-    assert awkward1._internal.slice_tostring(slice(1, 2, 3)) == "[1:2:3]"
+    assert awkward1.layout._slice_tostring(3) == "[3]"
+    assert awkward1.layout._slice_tostring(slice(None)) == "[:]"
+    assert awkward1.layout._slice_tostring(slice(10)) == "[:10]"
+    assert awkward1.layout._slice_tostring(slice(1, 2)) == "[1:2]"
+    assert awkward1.layout._slice_tostring(slice(1, None)) == "[1:]"
+    assert awkward1.layout._slice_tostring(slice(None, None, 2)) == "[::2]"
+    assert awkward1.layout._slice_tostring(slice(1, 2, 3)) == "[1:2:3]"
     if not py27:
-        assert awkward1._internal.slice_tostring(Ellipsis) == "[...]"
-    assert awkward1._internal.slice_tostring(numpy.newaxis) == "[newaxis]"
-    assert awkward1._internal.slice_tostring(None) == "[newaxis]"
-    assert awkward1._internal.slice_tostring([1, 2, 3]) == "[array([1, 2, 3])]"
-    assert awkward1._internal.slice_tostring(numpy.array([[1, 2], [3, 4], [5, 6]])) == "[array([[1, 2], [3, 4], [5, 6]])]"
-    assert awkward1._internal.slice_tostring(numpy.array([1, 2, 3, 4, 5, 6])[::-2]) == "[array([6, 4, 2])]"
+        assert awkward1.layout._slice_tostring(Ellipsis) == "[...]"
+    assert awkward1.layout._slice_tostring(numpy.newaxis) == "[newaxis]"
+    assert awkward1.layout._slice_tostring(None) == "[newaxis]"
+    assert awkward1.layout._slice_tostring([1, 2, 3]) == "[array([1, 2, 3])]"
+    assert awkward1.layout._slice_tostring(numpy.array([[1, 2], [3, 4], [5, 6]])) == "[array([[1, 2], [3, 4], [5, 6]])]"
+    assert awkward1.layout._slice_tostring(numpy.array([1, 2, 3, 4, 5, 6])[::-2]) == "[array([6, 4, 2])]"
     a = numpy.arange(3*5).reshape(3, 5)[1::, ::-2]
-    assert awkward1._internal.slice_tostring(a) == "[array(" + str(a.tolist()) + ")]"
+    assert awkward1.layout._slice_tostring(a) == "[array(" + str(a.tolist()) + ")]"
     a = numpy.arange(3*5).reshape(3, 5)[::-1, ::2]
-    assert awkward1._internal.slice_tostring(a) == "[array(" + str(a.tolist()) + ")]"
-    assert awkward1._internal.slice_tostring([True, True, False, False, True]) == "[array([0, 1, 4])]"
-    assert awkward1._internal.slice_tostring([[True, True], [False, False], [True, False]]) == "[array([0, 0, 2]), array([0, 1, 0])]"
-    assert awkward1._internal.slice_tostring(()) == "[]"
-    assert awkward1._internal.slice_tostring((3,)) == "[3]"
-    assert awkward1._internal.slice_tostring((3, slice(1, 2, 3))) == "[3, 1:2:3]"
-    assert awkward1._internal.slice_tostring((slice(None), [1, 2, 3])) == "[:, array([1, 2, 3])]"
-    assert awkward1._internal.slice_tostring(([1, 2, 3], slice(None))) == "[array([1, 2, 3]), :]"
-    assert awkward1._internal.slice_tostring((slice(None), [True, True, False, False, True])) == "[:, array([0, 1, 4])]"
-    assert awkward1._internal.slice_tostring((slice(None), [[True, True], [False, False], [True, False]])) == "[:, array([0, 0, 2]), array([0, 1, 0])]"
-    assert awkward1._internal.slice_tostring(([[True, True], [False, False], [True, False]], slice(None))) == "[array([0, 0, 2]), array([0, 1, 0]), :]"
+    assert awkward1.layout._slice_tostring(a) == "[array(" + str(a.tolist()) + ")]"
+    assert awkward1.layout._slice_tostring([True, True, False, False, True]) == "[array([0, 1, 4])]"
+    assert awkward1.layout._slice_tostring([[True, True], [False, False], [True, False]]) == "[array([0, 0, 2]), array([0, 1, 0])]"
+    assert awkward1.layout._slice_tostring(()) == "[]"
+    assert awkward1.layout._slice_tostring((3,)) == "[3]"
+    assert awkward1.layout._slice_tostring((3, slice(1, 2, 3))) == "[3, 1:2:3]"
+    assert awkward1.layout._slice_tostring((slice(None), [1, 2, 3])) == "[:, array([1, 2, 3])]"
+    assert awkward1.layout._slice_tostring(([1, 2, 3], slice(None))) == "[array([1, 2, 3]), :]"
+    assert awkward1.layout._slice_tostring((slice(None), [True, True, False, False, True])) == "[:, array([0, 1, 4])]"
+    assert awkward1.layout._slice_tostring((slice(None), [[True, True], [False, False], [True, False]])) == "[:, array([0, 0, 2]), array([0, 1, 0])]"
+    assert awkward1.layout._slice_tostring(([[True, True], [False, False], [True, False]], slice(None))) == "[array([0, 0, 2]), array([0, 1, 0]), :]"
 
     with pytest.raises(ValueError):
-        awkward1._internal.slice_tostring(numpy.array([1.1, 2.2, 3.3]))
-    assert awkward1._internal.slice_tostring(numpy.array(["one", "two", "three"])) == '[["one", "two", "three"]]'
+        awkward1.layout._slice_tostring(numpy.array([1.1, 2.2, 3.3]))
+    assert awkward1.layout._slice_tostring(numpy.array(["one", "two", "three"])) == '[["one", "two", "three"]]'
     with pytest.raises(ValueError):
-        awkward1._internal.slice_tostring(numpy.array([1, 2, 3, None, 4, 5]))
+        awkward1.layout._slice_tostring(numpy.array([1, 2, 3, None, 4, 5]))
 
-    assert awkward1._internal.slice_tostring((123, [[1, 1], [2, 2], [3, 3]])) == "[array([[123, 123], [123, 123], [123, 123]]), array([[1, 1], [2, 2], [3, 3]])]"
-    assert awkward1._internal.slice_tostring(([[1, 1], [2, 2], [3, 3]], 123)) == "[array([[1, 1], [2, 2], [3, 3]]), array([[123, 123], [123, 123], [123, 123]])]"
-    assert awkward1._internal.slice_tostring(([[100, 200, 300, 400]], [[1], [2], [3]])) == "[array([[100, 200, 300, 400], [100, 200, 300, 400], [100, 200, 300, 400]]), array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]])]"
-    assert awkward1._internal.slice_tostring(([[1], [2], [3]], [[100, 200, 300, 400]])) == "[array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]), array([[100, 200, 300, 400], [100, 200, 300, 400], [100, 200, 300, 400]])]"
+    assert awkward1.layout._slice_tostring((123, [[1, 1], [2, 2], [3, 3]])) == "[array([[123, 123], [123, 123], [123, 123]]), array([[1, 1], [2, 2], [3, 3]])]"
+    assert awkward1.layout._slice_tostring(([[1, 1], [2, 2], [3, 3]], 123)) == "[array([[1, 1], [2, 2], [3, 3]]), array([[123, 123], [123, 123], [123, 123]])]"
+    assert awkward1.layout._slice_tostring(([[100, 200, 300, 400]], [[1], [2], [3]])) == "[array([[100, 200, 300, 400], [100, 200, 300, 400], [100, 200, 300, 400]]), array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]])]"
+    assert awkward1.layout._slice_tostring(([[1], [2], [3]], [[100, 200, 300, 400]])) == "[array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]), array([[100, 200, 300, 400], [100, 200, 300, 400], [100, 200, 300, 400]])]"
 
     with pytest.raises(ValueError):
-        awkward1._internal.slice_tostring((3, slice(None), [[1], [2], [3]]))
+        awkward1.layout._slice_tostring((3, slice(None), [[1], [2], [3]]))
     with pytest.raises(ValueError):
-        awkward1._internal.slice_tostring(([[1, 2, 3, 4]], slice(None), [[1], [2], [3]]))
+        awkward1.layout._slice_tostring(([[1, 2, 3, 4]], slice(None), [[1], [2], [3]]))
     with pytest.raises(ValueError):
-        awkward1._internal.slice_tostring((slice(None), 3, slice(None), [[1], [2], [3]], slice(None)))
+        awkward1.layout._slice_tostring((slice(None), 3, slice(None), [[1], [2], [3]], slice(None)))
     with pytest.raises(ValueError):
-        awkward1._internal.slice_tostring((slice(None), [[1, 2, 3, 4]], slice(None), [[1], [2], [3]], slice(None)))
-    assert awkward1._internal.slice_tostring((slice(None), 3, [[1], [2], [3]], slice(None))) == "[:, array([[3], [3], [3]]), array([[1], [2], [3]]), :]"
-    assert awkward1._internal.slice_tostring((slice(None), [[1, 2, 3, 4]], [[1], [2], [3]], slice(None))) == "[:, array([[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]), array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]), :]"
+        awkward1.layout._slice_tostring((slice(None), [[1, 2, 3, 4]], slice(None), [[1], [2], [3]], slice(None)))
+    assert awkward1.layout._slice_tostring((slice(None), 3, [[1], [2], [3]], slice(None))) == "[:, array([[3], [3], [3]]), array([[1], [2], [3]]), :]"
+    assert awkward1.layout._slice_tostring((slice(None), [[1, 2, 3, 4]], [[1], [2], [3]], slice(None))) == "[:, array([[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]), array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]), :]"
 
 def test_numpyarray_getitem_bystrides():
     a = numpy.arange(10)

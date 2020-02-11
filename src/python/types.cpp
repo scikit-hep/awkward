@@ -1,8 +1,91 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/python/boxing.h"
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
-#include "awkward/python/type.h"
+#include "awkward/type/Type.h"
+#include "awkward/type/ArrayType.h"
+#include "awkward/type/ListType.h"
+#include "awkward/type/OptionType.h"
+#include "awkward/type/PrimitiveType.h"
+#include "awkward/type/RecordType.h"
+#include "awkward/type/RegularType.h"
+#include "awkward/type/UnionType.h"
+#include "awkward/type/UnknownType.h"
+#include "awkward/python/util.h"
+
+namespace py = pybind11;
+namespace ak = awkward;
+
+/////////////////////////////////////////////////////////////// boxing
+
+py::object box(const std::shared_ptr<ak::Type>& t) {
+  if (ak::ArrayType* raw = dynamic_cast<ak::ArrayType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::ListType* raw = dynamic_cast<ak::ListType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::OptionType* raw = dynamic_cast<ak::OptionType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::PrimitiveType* raw = dynamic_cast<ak::PrimitiveType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::RecordType* raw = dynamic_cast<ak::RecordType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::RegularType* raw = dynamic_cast<ak::RegularType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::UnionType* raw = dynamic_cast<ak::UnionType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::UnknownType* raw = dynamic_cast<ak::UnknownType*>(t.get())) {
+    return py::cast(*raw);
+  }
+  else {
+    throw std::runtime_error("missing boxer for Type subtype");
+  }
+}
+
+std::shared_ptr<ak::Type> unbox_type(const py::handle& obj) {
+  try {
+    return obj.cast<ak::ArrayType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::ListType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::OptionType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::PrimitiveType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::RecordType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::RegularType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::UnionType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::UnknownType*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  throw std::invalid_argument("argument must be a Type subtype");
+}
+
+/////////////////////////////////////////////////////////////// Type
 
 py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(const py::handle& m, const std::string& name) {
   return (py::class_<ak::Type, std::shared_ptr<ak::Type>>(m, name.c_str())
@@ -13,6 +96,36 @@ py::class_<ak::Type, std::shared_ptr<ak::Type>> make_Type(const py::handle& m, c
         return !self.get()->equal(other, true);
       })
   );
+}
+
+ak::util::Parameters dict2parameters(const py::object& in) {
+  ak::util::Parameters out;
+  if (in.is(py::none())) {
+    // None is equivalent to an empty dict
+  }
+  else if (py::isinstance<py::dict>(in)) {
+    for (auto pair : in.cast<py::dict>()) {
+      std::string key = pair.first.cast<std::string>();
+      py::object value = py::module::import("json").attr("dumps")(pair.second);
+      out[key] = value.cast<std::string>();
+    }
+  }
+  else {
+    throw std::invalid_argument("type parameters must be a dict (or None)");
+  }
+  return out;
+}
+
+py::dict parameters2dict(const ak::util::Parameters& in) {
+  py::dict out;
+  for (auto pair : in) {
+    std::string cppkey = pair.first;
+    std::string cppvalue = pair.second;
+    py::str pykey(PyUnicode_DecodeUTF8(cppkey.data(), cppkey.length(), "surrogateescape"));
+    py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(), cppvalue.length(), "surrogateescape"));
+    out[pykey] = py::module::import("json").attr("loads")(pyvalue);
+  }
+  return out;
 }
 
 template <typename T>
@@ -338,4 +451,25 @@ py::class_<ak::UnknownType, std::shared_ptr<ak::UnknownType>, ak::Type> make_Unk
         return ak::UnknownType(dict2parameters(state[0]));
       }))
   );
+}
+
+/////////////////////////////////////////////////////////////// module
+
+namespace py = pybind11;
+PYBIND11_MODULE(types, m) {
+#ifdef VERSION_INFO
+  m.attr("__version__") = VERSION_INFO;
+#else
+  m.attr("__version__") = "dev";
+#endif
+
+  make_Type(m, "Type");
+  make_ArrayType(m, "ArrayType");
+  make_PrimitiveType(m, "PrimitiveType");
+  make_RegularType(m, "RegularType");
+  make_UnknownType(m, "UnknownType");
+  make_ListType(m, "ListType");
+  make_OptionType(m, "OptionType");
+  make_UnionType(m, "UnionType");
+  make_RecordType(m, "RecordType");
 }

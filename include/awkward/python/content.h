@@ -6,12 +6,14 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include "awkward/fillable/FillableArray.h"
 #include "awkward/Iterator.h"
 #include "awkward/Content.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/array/None.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/Record.h"
 #include "awkward/array/RecordArray.h"
@@ -20,6 +22,10 @@
 
 namespace py = pybind11;
 namespace ak = awkward;
+
+ak::Slice toslice(py::object obj);
+
+py::class_<ak::FillableArray> make_FillableArray(const py::handle& m, const std::string& name);
 
 py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(const py::handle& m, const std::string& name);
 

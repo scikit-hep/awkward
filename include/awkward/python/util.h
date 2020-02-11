@@ -4,6 +4,15 @@
 #define AWKWARDPY_UTIL_H_
 
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
+
+#include "awkward/Content.h"
+#include "awkward/fillable/FillableArray.h"
+#include "awkward/array/NumpyArray.h"
+#include "awkward/array/EmptyArray.h"
+#include "awkward/array/RegularArray.h"
+#include "awkward/array/IndexedArray.h"
+#include "awkward/array/UnionArray.h"
 
 #include "awkward/util.h"
 
@@ -22,11 +31,5 @@ public:
 private:
   PyObject* pyobj_;
 };
-
-template <typename T>
-py::object getitem(const T& self, const py::object& obj);
-
-ak::util::Parameters dict2parameters(const py::object& in);
-py::dict parameters2dict(const ak::util::Parameters& in);
 
 #endif // AWKWARDPY_UTIL_H_

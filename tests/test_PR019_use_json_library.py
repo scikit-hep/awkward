@@ -8,7 +8,6 @@ import pytest
 import numpy
 
 import awkward1
-import awkward1._internal
 
 def test_fromstring():
     a = awkward1.fromjson("[[1.1, 2.2, 3], [], [4, 5.5]]")
@@ -72,7 +71,7 @@ def test_root_nestedvector():
         0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 99, 0, 0, 0, 123, 0, 0, 0, 1, 0, 0, 0, 123
         ], dtype=numpy.uint8))
 
-    result = awkward1._internal.fromroot_nestedvector(byteoffsets, rawdata, 2, numpy.dtype(">i").itemsize, ">i")
+    result = awkward1.io.fromroot_nestedvector(byteoffsets, rawdata, 2, numpy.dtype(">i").itemsize, ">i")
     assert numpy.asarray(result.offsets).tolist() == [0, 3, 5]
     assert numpy.asarray(result.content.offsets).tolist() == [0, 1, 1, 3, 5, 6]
     assert numpy.asarray(result.content.content).tolist() == [123, 99, 123, 99, 123, 123]
