@@ -812,6 +812,12 @@ def compact_array(array, depth=-1):
 
     return data_items
 
+def compact_strides(array, shape):
+    strides = len(shape)*[1]
+    for i in range(len(shape), 1, -1):
+        strides[i - 1] = strides[i] * shape[i]
+    return strides
+
 def index_array(array, depth=-1):
     indices = []
     offset = array.offset
@@ -881,11 +887,8 @@ def NumpyArray_flatten(self, axis=0):
             return NumpyArray.onedim([])
 
         # compact array and strides
-        compact_ptr = compact_array(array, len(self.shape))
-        compact_strides = self.strides
-        compact_strides[2] = 1
-        compact_strides[1] = compact_strides[2] * self.shape[2]
-        compact_strides[0] = compact_strides[1] * self.shape[1]
+        comp_ptr = compact_array(array, len(self.shape))
+        comp_strides = compact_strides(array, self.shape)
 
         # flatten shape
         shape = []
@@ -906,11 +909,11 @@ def NumpyArray_flatten(self, axis=0):
             strides = []
         else:
             for i in range(axis):
-                strides.append(compact_strides[i])
-            for i in range(len(compact_strides) - axis - 1):
-                strides.append(compact_strides[axis + i + 1])
+                strides.append(comp_strides[i])
+            for i in range(len(comp_strides) - axis - 1):
+                strides.append(comp_strides[axis + i + 1])
 
-        return NumpyArray(compact_ptr, shape, strides, 0)
+        return NumpyArray(comp_ptr, shape, strides, 0)
 
 NumpyArray.flatten = NumpyArray_flatten
 
@@ -929,7 +932,8 @@ def RegularArray_flatten(self, axis=0):
         raise NotImplementedError
     elif axis == 0:
         if self.content.__len__() % self.size != 0:
-            return self.__getitem__(slice(0, self.content.__len__()*self.size)) #FIXME
+            # FIXME
+            return self.content.flatten()
         else:
             return self.content
     else:
@@ -949,6 +953,8 @@ RegularArray.flatten = RegularArray_flatten
 
 # ListArray
 def ListArray_flatten(self, axis=0):
+    if len(self.stops) > len(self.starts):
+        raise IndexError("cannot flatten starts != stops")
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
@@ -987,18 +993,15 @@ def ListOffsetArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
-        #int64_t start = offsets_.getitem_at_nowrap(0);
-        #int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
-        start = self.offsets[0]
-        stop = self.offsets[len(self.offsets) - 1]
+        starts = []
+        stops = []
+        for i in range(array.__len__()):
+            x = array.__getitem__(i)
+            if x.__len__() > 0:
+                starts.append(self.offsets[i])
+                stops.append(self.offsets[i] + x.__len__())
 
-        # FIXME:
-        #return content_.get()->getitem_range_nowrap(start, stop);
-        offsets = self.offsets[start : stop + 1]
-        if len(offsets) == 0:
-            offsets = [0]
-
-        return ListOffsetArray(offsets, self.content)
+        return ListArray(starts, stops, self.content).flatten()
     else:
       return self.content.flatten(axis - 1)
 
@@ -1020,11 +1023,9 @@ def IndexedArray_flatten(self, axis=0):
                 nextcarry[k] = j
                 k += 1
 
-#std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-#return next.get()->flatten(toaxis);
-        return IndexedArray(nextcarry, self.content)
+        return IndexedArray(nextcarry, self.content).flatten()
     else:
-        return self.content.flatten(axis)
+        return self.content.flatten(axis - 1)
 
 IndexedArray.flatten = IndexedArray_flatten
 
@@ -1048,12 +1049,9 @@ def IndexedOptionArray_flatten(self, axis=0):
                 nextcarry[k] = j
                 k += 1
 
-    # FIXME:
-    # std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-    # return next.get()->flatten(toaxis);
-        return IndexedOptionArray(nextcarry, self.content)
+        return IndexedOptionArray(nextcarry, self.content.flatten())
     else:
-        return self.content.flatten(axis)
+        return self.content.flatten(axis - 1)
 
 IndexedOptionArray.flatten = IndexedOptionArray_flatten
 
@@ -1063,8 +1061,15 @@ def RecordArray_flatten(self, axis=0):
         raise NotImplementedError
     else:
         contents = []
+        flattened_content = []
         for x in self.contents:
-            contents.append(x.flatten(axis))
+            length = len(x)
+            flattened_content = x.flatten(axis)
+            tolength = len(flattened_content)
+            if length != tolength:
+                return RecordArray(self.contents, self.recordlookup, self.length)
+            contents.append(flattened_content)
+
         return RecordArray(contents, self.recordlookup, self.length)
 
 RecordArray.flatten = RecordArray_flatten
@@ -1075,28 +1080,45 @@ def UnionArray_flatten(self, axis=0):
         raise NotImplementedError
     else:
         contents = []
+        flattened_content = []
         for x in self.contents:
-            contents.append(x.flatten(axis))
+            step = int((len(x.content)/len(x)))
+            newtags = []
+            newindex = []
+            for i in self.index:
+                for j in range(step):
+                    newindex.append(i*step+j)
+            for i in self.tags:
+                for j in range(step):
+                    newtags.append(i)
+
+            length = len(x)
+            flattened_content = x.flatten(axis)
+            tolength = len(flattened_content)
+            if length != tolength:
+                return UnionArray(newtags, newindex, flattened_content)
+            contents.append(flattened_content)
+
         return UnionArray(self.tags, self.index, contents)
 
 UnionArray.flatten = UnionArray_flatten
 
 for i in range(100):
     print("flatten i =", i)
-    #array = Content.random()
+    array = Content.random()
     #array = NumpyArray.random() # ok
     #array = EmptyArray.random() # ok
     #array = RawArray.random() # ok
     #array = RecordArray.random() # ok
 
-    array = ListArray.random() # not ok
+    #array = ListArray.random() # not ok
     #array = IndexedArray.random() # not ok
     #array = UnionArray.random() # not ok
     #array = IndexedOptionArray.random() # not ok
     #array = ListOffsetArray.random() # not ok
     #array = RegularArray.random() # not ok
     #array = UnionArray.random() # not ok
-    for axis in range(5):
+    for axis in range(1):
         print("axis =", axis)
         try:
             rowwise = flatten(array, axis)
