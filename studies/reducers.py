@@ -1,4 +1,4 @@
- import math
+import math
 import random
 
 class Content:
@@ -832,6 +832,43 @@ def Content_reduce(self, axis):
     return self.reduce_next(axis, 0, parents, 1)[0]
 
 Content.reduce = Content_reduce
+
+def RegularArray_toListOffsetArray(self):
+    nextoffsets = [None] * (len(self) + 1)
+    for i in range(len(nextoffsets)):
+        nextoffsets[i] = i * self.size
+    return ListOffsetArray(nextoffsets, self.content)
+
+RegularArray.toListOffsetArray = RegularArray_toListOffsetArray
+
+def RegularArray_reduce_next(self, axis, depth, parents, length):
+    return self.toListOffsetArray().reduce_next(axis, depth, parents, length)
+
+RegularArray.reduce_next = RegularArray_reduce_next
+
+def ListArray_toListOffsetArray(self):
+    contentlen = 0
+    for i in range(len(self.starts)):
+        contentlen += self.stops[i] - self.starts[i]
+
+    nextoffsets = [None] * (len(self.starts) + 1)
+    nextoffsets[0] = 0
+    nextcarry = [None] * contentlen
+    k = 0
+    for i in range(len(self.starts)):
+        nextoffsets[i + 1] = nextoffsets[i] + (self.stops[i] - self.starts[i])
+        for j in range(self.starts[i], self.stops[i]):
+            nextcarry[k] = j
+            k += 1
+
+    return ListOffsetArray(nextoffsets, self.content.carry(nextcarry))
+
+ListArray.toListOffsetArray = ListArray_toListOffsetArray
+
+def ListArray_reduce_next(self, axis, depth, parents, length):
+    return self.toListOffsetArray().reduce_next(axis, depth, parents, length)
+
+ListArray.reduce_next = ListArray_reduce_next
 
 def ListOffsetArray_reduce_next(self, axis, depth, parents, length):
     maxcount = 0
