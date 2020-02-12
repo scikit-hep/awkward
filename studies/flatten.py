@@ -971,7 +971,7 @@ def ListOffsetArray_flatten(self, axis=0):
     elif axis == 0:
         starts, stops = zip(*[(self.offsets[i], self.offsets[i] + array.__getitem__(i).__len__()) for i in range(array.__len__()) if array.__getitem__(i).__len__() > 0])
 
-        return ListArray(starts, stops, self.content).flatten()
+        return ListArray(list(starts), list(stops), self.content).flatten()
     else:
       return self.content.flatten(axis - 1)
 
