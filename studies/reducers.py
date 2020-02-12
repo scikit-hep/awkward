@@ -1091,32 +1091,32 @@ def Content_reduce(self, axis):
     # index = [None] * len(self)
     # for i in range(len(self)):
     #     index[i] = i
-    # parents = [None] * len(self)
-    # for i in range(len(self)):
-    #     index[i] = 0
+    parents = [None] * len(self)
+    for i in range(len(self)):
+        parents[i] = 0
     # return self.reduce_next(axis, 0, index, parents, len(self))
-    return self.reduce_next(axis, 0)
+    return self.reduce_next(axis, 0, parents)
 
 Content.reduce = Content_reduce
 
-def ListOffsetArray_reduce_next(self, axis, depth):
+def ListOffsetArray_reduce_next(self, axis, depth, parents):
     offsetscopy = list(self.offsets)
     print("offsetscopy", offsetscopy)
 
-    something = [None] * (self.offsets[-1] - self.offsets[0])
+    nextparents = [None] * (self.offsets[-1] - self.offsets[0])
 
     nextcarry = [None] * (self.offsets[-1] - self.offsets[0])
     k = 0
     while k < len(nextcarry):
         for i in range(len(offsetscopy) - 1):
-            if offsetscopy[i] < offsetscopy[i + 1]:
+            if offsetscopy[i] < self.offsets[i + 1]:
                 nextcarry[k] = offsetscopy[i]
-                something[k] = offsetscopy[i] - self.offsets[i]
+                nextparents[k] = parents[i]*(self.offsets[i + 1] - self.offsets[i]) + (offsetscopy[i] - self.offsets[i])
                 k += 1
                 offsetscopy[i] += 1
                 
     print("nextcarry", nextcarry)
-    print("something", something)
+    print("nextparents", nextparents)
 
     nextcontent = self.content.carry(nextcarry)
 
@@ -1131,7 +1131,7 @@ def ListOffsetArray_reduce_next(self, axis, depth):
     #         k += 1
     # print("parents", parents)
 
-    return nextcontent.reduce_next(axis, depth + 1)
+    return nextcontent.reduce_next(axis, depth + 1, nextparents)
 
 ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
 
