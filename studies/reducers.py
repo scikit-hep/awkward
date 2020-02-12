@@ -947,10 +947,10 @@ def ListOffsetArray_reduce_next(self, negaxis, parents, length):
         k = 0
         last = -1
         for i in range(len(parents)):
-            if parents[i] != last:
+            while last < parents[i]:
                 outoffsets[k] = i
                 k += 1
-                last = parents[i]
+                last += 1
 
         return ListOffsetArray(outoffsets, outcontent)
 
@@ -994,6 +994,21 @@ assert list(depth2.reduce(-1)) == [
       73 *  79 *  83 *  89 *  97,
      101 * 103 * 107 * 109 * 113]]
 
-# depth1 = ListOffsetArray([0, 4, 8, 12], RawArray(primes[:12]))
-# assert list(depth1) == [[2, 3, 5, 7], [11, 13, 17, 19], [23, 29, 31, 37]]
-# print(depth1.reduce(-1))
+depth2 = ListOffsetArray([0, 4, 4, 6], ListOffsetArray([0, 3, 3, 5, 6, 8, 9], RawArray(primes[:9])))
+assert list(depth2) == [
+    [[ 2,  3, 5],
+     [         ],
+     [ 7, 11   ],
+     [13       ]],
+    [],
+    [[17, 19   ],
+     [23       ]]]
+
+assert list(depth2.reduce(-1)) == [
+    [2*3*5, 1, 7*11, 13],
+    [],
+    [17*19, 23]]
+
+depth1 = ListOffsetArray([0, 4, 8, 12], RawArray(primes[:12]))
+assert list(depth1) == [[2, 3, 5, 7], [11, 13, 17, 19], [23, 29, 31, 37]]
+assert list(depth1.reduce(-1)) == [2 * 3 * 5 * 7, 11 * 13 * 17 * 19, 23 * 29 * 31 * 37]
