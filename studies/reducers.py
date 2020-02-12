@@ -1103,16 +1103,20 @@ def ListOffsetArray_reduce_next(self, axis, depth, parents, length):
     print("\nListOffsetArray_reduce_next", axis, depth, parents, length)
     print(self.toxml())
 
+    maxcount = 0
+    for i in range(len(self.offsets) - 1):
+        count = self.offsets[i + 1] - self.offsets[i]
+        if count > maxcount:
+            maxcount = count
+
     offsetscopy = list(self.offsets)
 
-    nextparents = [None] * (self.offsets[-1] - self.offsets[0])
     nextcarry = [None] * (self.offsets[-1] - self.offsets[0])
+    nextparents = [None] * (self.offsets[-1] - self.offsets[0])
+    distincts = [None] * (maxcount * length)
     k = 0
     last_nextparents = -1
     nextlength = 0
-
-    something = [-1] * 15
-
     while k < len(nextcarry):
         for i in range(len(offsetscopy) - 1):
             if offsetscopy[i] < self.offsets[i + 1]:
@@ -1122,10 +1126,9 @@ def ListOffsetArray_reduce_next(self, axis, depth, parents, length):
                 nextcarry[k] = offsetscopy[i]
                 nextparents[k] = parents[i]*count + diff
 
-                if something[nextparents[k]] == -1 or something[nextparents[k]] > i:
-                    something[nextparents[k]] = i
+                distincts[nextparents[k]] = i
 
-                print("k", "%2d" % k, "i", i, "parents[i]", parents[i], "diff", diff, "nextparents[k]", nextparents[k])
+                print("k", "%2d" % k, "i", i, "count", count, "parents[i]", parents[i], "diff", diff, "nextparents[k]", nextparents[k])
 
                 if last_nextparents != nextparents[k]:
                     nextlength += 1
@@ -1140,7 +1143,7 @@ def ListOffsetArray_reduce_next(self, axis, depth, parents, length):
 
     print("next")
     print(next.toxml())
-    print("something", something)
+    print("distincts", distincts)
 
     raise Exception
 
