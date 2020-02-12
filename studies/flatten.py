@@ -932,20 +932,18 @@ def RegularArray_flatten(self, axis=0):
         raise NotImplementedError
     elif axis == 0:
         if self.content.__len__() % self.size != 0:
-            # FIXME
-            return self.content.flatten()
+            return RegularArray(self.content, self.__len__()*self.size)
         else:
             return self.content
     else:
         count = [self.size]*len(self.content)
-        ## FIXME ccount = content_.get()->count64();
-        ccount = [self.size]*self.content.__len__()
+        ccount = self.count(0)
         offsets = [0]*(self.content.__len__() + 1)
         for i in range(self.content.__len__()):
             l = 0
             for j in range(count[i]):
                 l += ccount[j + i*self.size]
-                offsets[i + 1] = l #FIXME + self.offsets[i]
+                offsets[i + 1] = l
 
         return ListOffsetArray(offsets, self.content.flatten(axis - 1))
 
@@ -958,29 +956,9 @@ def ListArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
-        lenstarts = len(self.starts)
-        lenarray = 0
-        for i in range(lenstarts):
-            start = self.starts[i] # self.startsoffset?
-            stop = self.stops[i] # self.stopsoffset?
-            if start < 0  or  stop < 0:
-                raise IndexError("all start and stop values must be non-negative")
-
-            length = stop - start
-            lenarray += length
-
-        indxarray = [0]*lenarray
-        at = 0
-        for i in range(lenstarts):
-            start = self.starts[i]
-            stop = self.stops[i]
-            if start < 0  or  stop < 0:
-                raise IndexError("all start and stop values must be non-negative")
-            length = stop - start
-            if length > 0:
-                for l in range(length):
-                    indxarray[at] = start + l
-                    at += 1
+        ##lenarray = sum(i - j for i, j in zip(self.stops, self.starts))
+        indxarray = [ x + z for x, y in zip(self.starts, self.stops) for z in range(y - x) if x > 0 and y > 0 and y - x > 0]
+        ##assert len(indxarray) == lenarray
 
         return IndexedArray(indxarray, self.content)
     else:
@@ -993,13 +971,7 @@ def ListOffsetArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
-        starts = []
-        stops = []
-        for i in range(array.__len__()):
-            x = array.__getitem__(i)
-            if x.__len__() > 0:
-                starts.append(self.offsets[i])
-                stops.append(self.offsets[i] + x.__len__())
+        starts, stops = zip(*[(self.offsets[i], self.offsets[i] + array.__getitem__(i).__len__()) for i in range(array.__len__()) if array.__getitem__(i).__len__() > 0])
 
         return ListArray(starts, stops, self.content).flatten()
     else:
@@ -1012,18 +984,9 @@ def IndexedArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     if axis == 0:
+        nextcarry = [x for x in self.index if self.index[x] > 0 and self.index[x] < len(self.index)]
 
-        nextcarry = [0]*len(self.index)
-        k = 0
-        for i in range(len(self.index)):
-            j = self.index[i] #FIXME self.indexoffset
-            if j < 0  or  j >= len(self.index):
-                raise IndexError("index out of range")
-            else:
-                nextcarry[k] = j
-                k += 1
-
-        return IndexedArray(nextcarry, self.content).flatten()
+        return IndexedArray(self.index, self.content.flatten())
     else:
         return self.content.flatten(axis - 1)
 
@@ -1034,22 +997,9 @@ def IndexedOptionArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     if axis == 0:
-        numnull = 0
-        for i in range(len(self.index)):
-            if self.index[i] < 0: # FIXME self.indexoffset
-                numnull = numnull
+        nextcarry = [x for x in self.index if self.index[x] > 0 and self.index[x] < len(self.index)]
 
-        nextcarry = [0]*(len(self.index) - numnull)
-        k = 0
-        for i in range(len(self.index)):
-            j = self.index[i] #FIXME self.indexoffset
-            if j >= len(self.content):
-                raise IndexError("index out of range")
-            elif j >= 0:
-                nextcarry[k] = j
-                k += 1
-
-        return IndexedOptionArray(nextcarry, self.content.flatten())
+        return IndexedOptionArray(nextcarry, self.content).flatten()
     else:
         return self.content.flatten(axis - 1)
 
@@ -1061,14 +1011,11 @@ def RecordArray_flatten(self, axis=0):
         raise NotImplementedError
     else:
         contents = []
-        flattened_content = []
         for x in self.contents:
-            length = len(x)
-            flattened_content = x.flatten(axis)
-            tolength = len(flattened_content)
-            if length != tolength:
+            tocontent = x.flatten(axis)
+            if len(x) != len(tocontent):
                 return RecordArray(self.contents, self.recordlookup, self.length)
-            contents.append(flattened_content)
+            contents.append(tocontent)
 
         return RecordArray(contents, self.recordlookup, self.length)
 
@@ -1080,24 +1027,16 @@ def UnionArray_flatten(self, axis=0):
         raise NotImplementedError
     else:
         contents = []
-        flattened_content = []
         for x in self.contents:
-            step = int((len(x.content)/len(x)))
-            newtags = []
-            newindex = []
-            for i in self.index:
-                for j in range(step):
-                    newindex.append(i*step+j)
-            for i in self.tags:
-                for j in range(step):
-                    newtags.append(i)
+            if x.__len__() > 0:
+                step = int(x.content.__len__()/x.__len__())
 
-            length = len(x)
-            flattened_content = x.flatten(axis)
-            tolength = len(flattened_content)
-            if length != tolength:
-                return UnionArray(newtags, newindex, flattened_content)
-            contents.append(flattened_content)
+                tocontent = x.flatten(axis)
+                if len(x) != len(tocontent):
+                    totags = [ i for i in self.tags for j in range(step)]
+                    toindex = [ (i*step + j) for i in self.index for j in range(step)]
+                    return UnionArray(totags, toindex, tocontent)
+                contents.append(tocontent)
 
         return UnionArray(self.tags, self.index, contents)
 
@@ -1106,18 +1045,7 @@ UnionArray.flatten = UnionArray_flatten
 for i in range(100):
     print("flatten i =", i)
     array = Content.random()
-    #array = NumpyArray.random() # ok
-    #array = EmptyArray.random() # ok
-    #array = RawArray.random() # ok
-    #array = RecordArray.random() # ok
 
-    #array = ListArray.random() # not ok
-    #array = IndexedArray.random() # not ok
-    #array = UnionArray.random() # not ok
-    #array = IndexedOptionArray.random() # not ok
-    #array = ListOffsetArray.random() # not ok
-    #array = RegularArray.random() # not ok
-    #array = UnionArray.random() # not ok
     for axis in range(1):
         print("axis =", axis)
         try:
