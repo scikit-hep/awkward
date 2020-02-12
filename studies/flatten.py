@@ -956,9 +956,7 @@ def ListArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
-        ##lenarray = sum(i - j for i, j in zip(self.stops, self.starts))
         indxarray = [ x + z for x, y in zip(self.starts, self.stops) for z in range(y - x) if x > 0 and y > 0 and y - x > 0]
-        ##assert len(indxarray) == lenarray
 
         return IndexedArray(indxarray, self.content)
     else:
