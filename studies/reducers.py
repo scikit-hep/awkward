@@ -1095,45 +1095,70 @@ def Content_reduce(self, axis):
     for i in range(len(self)):
         parents[i] = 0
     # return self.reduce_next(axis, 0, index, parents, len(self))
-    return self.reduce_next(axis, 0, parents)
+    return self.reduce_next(axis, 0, parents, 1)
 
 Content.reduce = Content_reduce
 
-def ListOffsetArray_reduce_next(self, axis, depth, parents):
+def ListOffsetArray_reduce_next(self, axis, depth, parents, length):
+    print("\nListOffsetArray_reduce_next", axis, depth, parents, length)
+    print(self.toxml())
+
     offsetscopy = list(self.offsets)
-    print("offsetscopy", offsetscopy)
 
     nextparents = [None] * (self.offsets[-1] - self.offsets[0])
-
     nextcarry = [None] * (self.offsets[-1] - self.offsets[0])
     k = 0
+    last_nextparents = -1
+    nextlength = 0
+
+    something = [-1] * 15
+
     while k < len(nextcarry):
         for i in range(len(offsetscopy) - 1):
             if offsetscopy[i] < self.offsets[i + 1]:
+                count = self.offsets[i + 1] - self.offsets[i]
+                diff = offsetscopy[i] - self.offsets[i]
+
                 nextcarry[k] = offsetscopy[i]
-                nextparents[k] = parents[i]*(self.offsets[i + 1] - self.offsets[i]) + (offsetscopy[i] - self.offsets[i])
+                nextparents[k] = parents[i]*count + diff
+
+                if something[nextparents[k]] == -1 or something[nextparents[k]] > i:
+                    something[nextparents[k]] = i
+
+                print("k", "%2d" % k, "i", i, "parents[i]", parents[i], "diff", diff, "nextparents[k]", nextparents[k])
+
+                if last_nextparents != nextparents[k]:
+                    nextlength += 1
+
+                last_nextparents = nextparents[k]
                 k += 1
                 offsetscopy[i] += 1
-                
-    print("nextcarry", nextcarry)
-    print("nextparents", nextparents)
 
     nextcontent = self.content.carry(nextcarry)
 
-    print(nextcontent.toxml())
-    print([x if isinstance(x, int) else list(x) for x in nextcontent])
+    next = nextcontent.reduce_next(axis, depth + 1, nextparents, nextlength)
 
-    # parents = [None] * (self.offsets[-1] - self.offsets[0])
-    # k = 0
-    # for i in range(len(self.offsets) - 1):
-    #     for j in range(self.offsets[i], self.offsets[i + 1]):
-    #         parents[k] = i
-    #         k += 1
-    # print("parents", parents)
+    print("next")
+    print(next.toxml())
+    print("something", something)
 
-    return nextcontent.reduce_next(axis, depth + 1, nextparents)
+    raise Exception
+
+    return ListOffsetArray(self.offsets, next)
 
 ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
+
+def RawArray_reduce_next(self, axis, depth, parents, length):
+    print("\nRawArray_reduce_next", axis, depth, parents, length)
+    print(self.toxml())
+
+    ptr = [1] * length
+    for i in range(len(parents)):
+        ptr[parents[i]] *= self.ptr[i]
+
+    return RawArray(ptr)
+
+RawArray.reduce_next = RawArray_reduce_next
 
 depth2 = ListOffsetArray([0, 3, 6], ListOffsetArray([0, 5, 10, 15, 20, 25, 30], RawArray(primes[:2*3*5])))
 assert depth2.tolist() == nparray.tolist()
