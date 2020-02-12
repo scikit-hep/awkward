@@ -802,18 +802,18 @@ assert (nparray.tolist() ==
       [101, 103, 107, 109, 113]]])
 assert nparray.shape == (2, 3, 5)
 
-assert (numpy.prod(nparray, axis=0).tolist() ==
+assert (numpy.prod(nparray, axis=-3).tolist() ==
     [[ 106,  177,  305,  469, 781],
      [ 949, 1343, 1577, 2047, 2813],
      [3131, 3811, 4387, 4687, 5311]])
 assert numpy.prod(nparray, axis=0).shape == (3, 5)
 
-assert (numpy.prod(nparray, axis=1).tolist() ==
+assert (numpy.prod(nparray, axis=-2).tolist() ==
     [[   806,   1887,   3895,   6923, 14993],
      [390769, 480083, 541741, 649967, 778231]])
 assert numpy.prod(nparray, axis=1).shape == (2, 5)
 
-assert (numpy.prod(nparray, axis=2).tolist() ==
+assert (numpy.prod(nparray, axis=-1).tolist() ==
     [[     2310,    2800733,    95041567],
      [907383479, 4132280413, 13710311357]])
 assert numpy.prod(nparray, axis=2).shape == (2, 3)
@@ -917,16 +917,28 @@ def ListOffsetArray_reduce_next(self, negaxis, parents, length):
         nextcontent = self.content.carry(nextcarry)
         outcontent = nextcontent.reduce_next(negaxis - 1, nextparents, maxnextparents + 1)
 
+        gaps = [None] * length
+        k = 0
+        last = -1
+        for i in range(len(parents)):
+            if last < parents[i]:
+                gaps[k] = parents[i] - last
+                k += 1
+                last = parents[i]
+
         outstarts = [None] * length
         outstops = [None] * length
         maxdistinct = -1
+        j = 0
         k = 0
         for i in range(len(distincts)):
             if maxdistinct < distincts[i]:
                 maxdistinct = distincts[i]
-                outstarts[k] = i
-                outstops[k] = i
-                k += 1
+                for x in range(gaps[j]):
+                    outstarts[k] = i
+                    outstops[k] = i
+                    k += 1
+                j += 1
             if distincts[i] != -1:
                 outstops[k - 1] = i + 1
 
@@ -994,6 +1006,10 @@ assert list(depth2.reduce(-1)) == [
       73 *  79 *  83 *  89 *  97,
      101 * 103 * 107 * 109 * 113]]
 
+assert list(depth2.reduce(-2)) == [
+    [2*13*31, 3*17*37, 5*19*41, 7*23*43, 11*29*47],
+    [53*73*101, 59*79*103, 61*83*107, 67*89*109, 71*97*113]]
+
 depth2 = ListOffsetArray([0, 4, 4, 6], ListOffsetArray([0, 3, 3, 5, 6, 8, 9], RawArray(primes[:9])))
 assert list(depth2) == [
     [[ 2,  3, 5],
@@ -1009,6 +1025,21 @@ assert list(depth2.reduce(-1)) == [
     [],
     [17*19, 23]]
 
+assert list(depth2.reduce(-2)) == [
+    [2*7*13, 3*11, 5],
+    [],
+    [17*23, 19]]
+
 depth1 = ListOffsetArray([0, 4, 8, 12], RawArray(primes[:12]))
 assert list(depth1) == [[2, 3, 5, 7], [11, 13, 17, 19], [23, 29, 31, 37]]
-assert list(depth1.reduce(-1)) == [2 * 3 * 5 * 7, 11 * 13 * 17 * 19, 23 * 29 * 31 * 37]
+
+assert list(depth1.reduce(-1)) == [
+    2*3*5*7,
+    11*13*17*19,
+    23*29*31*37]
+
+assert list(depth1.reduce(-2)) == [
+    2*11*23,
+    3*13*29,
+    5*17*31,
+    7*19*37]
