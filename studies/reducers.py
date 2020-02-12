@@ -1095,7 +1095,7 @@ def Content_reduce(self, axis):
     for i in range(len(self)):
         parents[i] = 0
     # return self.reduce_next(axis, 0, index, parents, len(self))
-    return self.reduce_next(axis, 0, parents, 1)
+    return self.reduce_next(axis, 0, parents, 1)[0]
 
 Content.reduce = Content_reduce
 
@@ -1113,7 +1113,7 @@ def ListOffsetArray_reduce_next(self, axis, depth, parents, length):
 
     nextcarry = [None] * (self.offsets[-1] - self.offsets[0])
     nextparents = [None] * (self.offsets[-1] - self.offsets[0])
-    distincts = [None] * (maxcount * length)
+    distincts = [-1] * (maxcount * length)
     k = 0
     last_nextparents = -1
     nextlength = 0
@@ -1139,15 +1139,25 @@ def ListOffsetArray_reduce_next(self, axis, depth, parents, length):
 
     nextcontent = self.content.carry(nextcarry)
 
-    next = nextcontent.reduce_next(axis, depth + 1, nextparents, nextlength)
+    outcontent = nextcontent.reduce_next(axis, depth + 1, nextparents, nextlength)
 
-    print("next")
-    print(next.toxml())
+    print("outcontent")
+    print(outcontent.toxml())
     print("distincts", distincts)
 
-    raise Exception
+    nextoffsets = [None] * (length + 1)
+    nextoffsets[-1] = len(distincts)
+    last = -1
+    k = 0
+    count = 0
+    for i in range(len(distincts)):
+        if last != distincts[i]:
+            nextoffsets[k] = count
+            k += 1
+        last = distincts[i]
+        count += 1
 
-    return ListOffsetArray(self.offsets, next)
+    return ListOffsetArray(nextoffsets, outcontent)
 
 ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
 
@@ -1166,7 +1176,7 @@ RawArray.reduce_next = RawArray_reduce_next
 depth2 = ListOffsetArray([0, 3, 6], ListOffsetArray([0, 5, 10, 15, 20, 25, 30], RawArray(primes[:2*3*5])))
 assert depth2.tolist() == nparray.tolist()
 
-depth2.reduce(0)
+print(list(depth2.reduce(0)))
 
 
 
