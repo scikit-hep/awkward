@@ -7,7 +7,7 @@ assert depth2.tolist() == [
      [ 73,  79,  83,  89,  97],
      [101, 103, 107, 109, 113]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 106,  177,  305,  469,  781],
     [ 949, 1343, 1577, 2047, 2813],
     [3131, 3811, 4387, 4687, 5311]]
@@ -21,7 +21,7 @@ assert depth2.tolist() == [
      [ 73,  79,  83,  89,  97],
      [101, 103, 107, 109, 113]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 106,  177,  305,  469,  781],
     [ 949, 1343, 1577, 2047, 2813],
     [3131, 3811, 4387, 4687, 5311]]
@@ -35,7 +35,7 @@ assert depth2.tolist() == [
      [ 73,  79,  83,  89,  97],
      [101, 103, 107, 109     ]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 106,  177,  305,  469,  781],
     [ 949, 1343, 1577, 2047, 2813],
     [3131, 3811, 4387, 4687,   47]]
@@ -49,7 +49,7 @@ assert depth2.tolist() == [
      [ 73,  79,  83,  89,  97],
      [101, 103, 107,         ]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 106,  177,  305,  469,  781],
     [ 949, 1343, 1577, 2047, 2813],
     [3131, 3811, 4387,   43,   47]]
@@ -63,7 +63,7 @@ assert depth2.tolist() == [
      [ 73,  79,  83,  89,    ],
      [101, 103, 107, 109     ]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 106,  177,  305,  469, 781],
     [ 949, 1343, 1577, 2047,  29],
     [3131, 3811, 4387, 4687,  47]]
@@ -77,7 +77,7 @@ assert depth2.tolist() == [
      [ 73,  79,  83,  89,  97],
      [101, 103, 107, 109, 113]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 159,  295,  427,  737,   71],
     [ 949, 1343, 1577, 2047, 2813],
     [3131, 3811, 4387, 4687, 5311]]
@@ -91,7 +91,7 @@ assert depth2.tolist() == [
      [ 73,  79,  83,  89,  97],
      [101, 103, 107, 109, 113]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 265,  413,  671,   67,   71],
     [ 949, 1343, 1577, 2047, 2813],
     [3131, 3811, 4387, 4687, 5311]]
@@ -105,7 +105,7 @@ assert depth2.tolist() == [
      [ 73,  79,  83,  89,  97],
      [101, 103, 107, 109, 113]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 159,  295,  427,   67,   71],
     [ 949, 1343, 1577, 2047, 2813],
     [3131, 3811, 4387, 4687, 5311]]
@@ -119,7 +119,7 @@ assert depth2.tolist() == [
      [ 73,  79,  83,  89,  97],
      [101, 103, 107, 109, 113]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 159,  295,  427,  737,   71],
     [ 949, 1343, 1577, 2047,   97],
     [3131, 3811, 4387, 4687, 5311]]
@@ -133,7 +133,7 @@ assert depth2.tolist() == [
      [ 73,  79,  83,  89,  97],
      [101, 103, 107, 109     ]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 106,  177,  305,  469,  781],
     [ 949, 1343, 1577, 2047, 2813],
     [3131, 3811, 4387, 4687]]
@@ -147,7 +147,7 @@ assert depth2.tolist() == [
      [ 73,  79,  83,  89     ],
      [101, 103, 107, 109, 113]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 106,  177,  305,  469,  781],
     [ 949, 1343, 1577, 2047      ],
     [3131, 3811, 4387, 4687, 5311]]
@@ -161,7 +161,7 @@ assert list(depth2) == [
     [[     17        ],
      [     19,  23   ]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [2*11*17, 3*13, 5],
     [7*19   , 23     ]]
 
@@ -173,7 +173,7 @@ assert list(depth2) == [
     [[     17        ],
      [     19,  23   ]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [2*11*17, 3*13, 5],
     [7*19   , 23     ]]
 
@@ -186,7 +186,7 @@ assert list(depth2) == [
      [23       ],
      [29       ]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [ 34, 57, 5],
     [161, 11   ],
     [377       ]]
@@ -200,7 +200,7 @@ assert list(depth2) == [
     [[17, 19   ],
      [23       ]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [34, 57, 5],
     [23       ],
     [ 7, 11   ],
@@ -216,7 +216,7 @@ assert list(depth2) == [
     [[17, 19   ],
      [23       ]]]
 
-assert list(depth2.reduce(0)) == [
+assert list(depth2.reduce(-3)) == [
     [34, 57, 5],
     [23       ],
     [ 7, 11   ],

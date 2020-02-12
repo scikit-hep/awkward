@@ -826,10 +826,17 @@ assert numpy.prod(nparray, axis=None) == 7581744426003940878
 ########################################################################
 
 def Content_reduce(self, axis):
+    mindepth, maxdepth = self.minmax_depth()
+    if mindepth != maxdepth:
+        raise NotImplementedError("mindepth != maxdepth")
+    if axis >= 0:
+        raise NotImplementedError("axis >= 0")
+    negaxis = -axis
+
     parents = [None] * len(self)
     for i in range(len(self)):
         parents[i] = 0
-    return self.reduce_next(axis, 0, parents, 1)[0]
+    return self.reduce_next(negaxis, parents, 1)[0]
 
 Content.reduce = Content_reduce
 
@@ -841,8 +848,8 @@ def RegularArray_toListOffsetArray(self):
 
 RegularArray.toListOffsetArray = RegularArray_toListOffsetArray
 
-def RegularArray_reduce_next(self, axis, depth, parents, length):
-    return self.toListOffsetArray().reduce_next(axis, depth, parents, length)
+def RegularArray_reduce_next(self, negaxis, parents, length):
+    return self.toListOffsetArray().reduce_next(negaxis, parents, length)
 
 RegularArray.reduce_next = RegularArray_reduce_next
 
@@ -865,74 +872,128 @@ def ListArray_toListOffsetArray(self):
 
 ListArray.toListOffsetArray = ListArray_toListOffsetArray
 
-def ListArray_reduce_next(self, axis, depth, parents, length):
-    return self.toListOffsetArray().reduce_next(axis, depth, parents, length)
+def ListArray_reduce_next(self, negaxis, parents, length):
+    return self.toListOffsetArray().reduce_next(negaxis, parents, length)
 
 ListArray.reduce_next = ListArray_reduce_next
 
-def ListOffsetArray_reduce_next(self, axis, depth, parents, length):
-    maxcount = 0
-    for i in range(len(self.offsets) - 1):
-        count = self.offsets[i + 1] - self.offsets[i]
-        if count > maxcount:
-            maxcount = count
+def ListOffsetArray_reduce_next(self, negaxis, parents, length):
+    depth = self.minmax_depth()[0]
+    # print("ListOffsetArray negaxis", negaxis, "depth", depth)
 
-    offsetscopy = list(self.offsets)
+    if negaxis == depth:
+        maxcount = 0
+        for i in range(len(self.offsets) - 1):
+            count = self.offsets[i + 1] - self.offsets[i]
+            if count > maxcount:
+                maxcount = count
 
-    nextcarry = [None] * (self.offsets[-1] - self.offsets[0])
-    nextparents = [None] * (self.offsets[-1] - self.offsets[0])
-    maxnextparents = 0
-    distincts = [-1] * (maxcount * length)
-    k = 0
-    last_nextparents = -1
-    while k < len(nextcarry):
-        j = 0
-        for i in range(len(offsetscopy) - 1):
-            if offsetscopy[i] < self.offsets[i + 1]:
-                count = self.offsets[i + 1] - self.offsets[i]
-                diff = offsetscopy[i] - self.offsets[i]
+        offsetscopy = list(self.offsets)
 
-                nextcarry[k] = offsetscopy[i]
-                nextparents[k] = parents[i]*maxcount + diff
-                if maxnextparents < nextparents[k]:
-                    maxnextparents = nextparents[k]
+        nextcarry = [None] * (self.offsets[-1] - self.offsets[0])
+        nextparents = [None] * (self.offsets[-1] - self.offsets[0])
+        maxnextparents = 0
+        distincts = [-1] * (maxcount * length)
+        k = 0
+        while k < len(nextcarry):
+            j = 0
+            for i in range(len(offsetscopy) - 1):
+                if offsetscopy[i] < self.offsets[i + 1]:
+                    count = self.offsets[i + 1] - self.offsets[i]
+                    diff = offsetscopy[i] - self.offsets[i]
 
-                if distincts[nextparents[k]] == -1:
-                    distincts[nextparents[k]] = j
-                    j += 1
+                    nextcarry[k] = offsetscopy[i]
+                    nextparents[k] = parents[i]*maxcount + diff
+                    if maxnextparents < nextparents[k]:
+                        maxnextparents = nextparents[k]
 
-                last_nextparents = nextparents[k]
+                    if distincts[nextparents[k]] == -1:
+                        distincts[nextparents[k]] = j
+                        j += 1
+
+                    k += 1
+                    offsetscopy[i] += 1
+
+        nextcontent = self.content.carry(nextcarry)
+        outcontent = nextcontent.reduce_next(negaxis - 1, nextparents, maxnextparents + 1)
+
+        outstarts = [None] * length
+        outstops = [None] * length
+        maxdistinct = -1
+        k = 0
+        for i in range(len(distincts)):
+            if maxdistinct < distincts[i]:
+                maxdistinct = distincts[i]
+                outstarts[k] = i
+                outstops[k] = i
                 k += 1
-                offsetscopy[i] += 1
+            if distincts[i] != -1:
+                outstops[k - 1] = i + 1
 
-    nextcontent = self.content.carry(nextcarry)
-    outcontent = nextcontent.reduce_next(axis, depth + 1, nextparents, maxnextparents + 1)
+        return ListArray(outstarts, outstops, outcontent)
 
-    nextstarts = [None] * length
-    nextstops = [None] * length
-    maxdistinct = -1
-    k = 0
-    count = 0
-    for i in range(len(distincts)):
-        if maxdistinct < distincts[i]:
-            maxdistinct = distincts[i]
-            nextstarts[k] = i
-            nextstops[k] = i
-            k += 1
-        if distincts[i] != -1:
-            nextstops[k - 1] = i + 1
+    elif negaxis < depth:
+        nextparents = [None] * (self.offsets[-1] - self.offsets[0])
+        k = 0
+        for i in range(len(self.offsets) - 1):
+            for j in range(self.offsets[i], self.offsets[i + 1]):
+                nextparents[j] = i
 
-    return ListArray(nextstarts, nextstops, outcontent)
+        trimmed = self.content[self.offsets[0]:self.offsets[-1]]
+        outcontent = trimmed.reduce_next(negaxis, nextparents, len(self.offsets) - 1)
+
+        outoffsets = [None] * (length + 1)
+        outoffsets[-1] = len(parents)
+        k = 0
+        last = -1
+        for i in range(len(parents)):
+            if parents[i] != last:
+                outoffsets[k] = i
+                k += 1
+                last = parents[i]
+
+        return ListOffsetArray(outoffsets, outcontent)
+
+    else:
+        raise NotImplementedError((negaxis, depth))
 
 ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
 
-def RawArray_reduce_next(self, axis, depth, parents, length):
-    ptr = [1] * length
-    for i in range(len(parents)):
-        ptr[parents[i]] *= self.ptr[i]
+def RawArray_reduce_next(self, negaxis, parents, length):
+    depth = self.minmax_depth()[0]
+    # print("RawArray negaxis", negaxis, "depth", depth)
 
-    return RawArray(ptr)
+    if negaxis == depth:
+        ptr = [1] * length
+        for i in range(len(parents)):
+            ptr[parents[i]] *= self.ptr[i]
+
+        return RawArray(ptr)
+
+    else:
+        raise NotImplementedError((negaxis, depth))
 
 RawArray.reduce_next = RawArray_reduce_next
 
 exec(open("reducer_tests.py").read())
+
+depth2 = ListOffsetArray([0, 3, 6], ListOffsetArray([0, 5, 10, 15, 20, 25, 30], RawArray(primes[:2*3*5])))
+assert depth2.tolist() == [
+    [[  2,   3,   5,   7,  11],
+     [ 13,  17,  19,  23,  29],
+     [ 31,  37,  41,  43,  47]],
+    [[ 53,  59,  61,  67,  71],
+     [ 73,  79,  83,  89,  97],
+     [101, 103, 107, 109, 113]]]
+
+assert list(depth2.reduce(-1)) == [
+    [  2 *   3 *   5 *   7 *  11,
+      13 *  17 *  19 *  23 *  29,
+      31 *  37 *  41 *  43 *  47],
+    [ 53 *  59 *  61 *  67 *  71,
+      73 *  79 *  83 *  89 *  97,
+     101 * 103 * 107 * 109 * 113]]
+
+# depth1 = ListOffsetArray([0, 4, 8, 12], RawArray(primes[:12]))
+# assert list(depth1) == [[2, 3, 5, 7], [11, 13, 17, 19], [23, 29, 31, 37]]
+# print(depth1.reduce(-1))
