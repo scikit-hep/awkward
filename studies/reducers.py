@@ -1112,10 +1112,10 @@ def ListOffsetArray_reduce_next(self, axis, depth, parents, length):
 
     nextcarry = [None] * (self.offsets[-1] - self.offsets[0])
     nextparents = [None] * (self.offsets[-1] - self.offsets[0])
+    maxnextparents = 0
     distincts = [-1] * (maxcount * length)
     k = 0
     last_nextparents = -1
-    nextlength = 0
     while k < len(nextcarry):
         j = 0
         for i in range(len(offsetscopy) - 1):
@@ -1125,6 +1125,8 @@ def ListOffsetArray_reduce_next(self, axis, depth, parents, length):
 
                 nextcarry[k] = offsetscopy[i]
                 nextparents[k] = parents[i]*maxcount + diff
+                if maxnextparents < nextparents[k]:
+                    maxnextparents = nextparents[k]
 
                 print("k", "%2d" % k, "i", i, "count", count, "parents[i]", parents[i], "diff", diff, "nextparents[k]", nextparents[k])
 
@@ -1132,43 +1134,51 @@ def ListOffsetArray_reduce_next(self, axis, depth, parents, length):
                     distincts[nextparents[k]] = j
                     j += 1
 
-                if last_nextparents != nextparents[k]:
-                    nextlength += 1
-
                 last_nextparents = nextparents[k]
                 k += 1
                 offsetscopy[i] += 1
 
     nextcontent = self.content.carry(nextcarry)
-    outcontent = nextcontent.reduce_next(axis, depth + 1, nextparents, nextlength)
+    outcontent = nextcontent.reduce_next(axis, depth + 1, nextparents, maxnextparents + 1)
 
     print("outcontent")
     print(outcontent.toxml())
     print("distincts", distincts)
-
-    # numdistincts = 0
-    # last = -1
+    
+    # nextoffsets = [None] * (length + 1)
+    # nextoffsets[-1] = len(distincts)
+    # maxdistinct = -1
+    # k = 0
+    # count = 0
     # for i in range(len(distincts)):
-    #     if last != distincts[i]:
-    #         numdistincts += 1
-    #     last = distincts[i]
-    # print("length", length, "numdistincts", numdistincts)
+    #     if maxdistinct < distincts[i]:
+    #         maxdistinct = distincts[i]
+    #         nextoffsets[k] = count
+    #         k += 1
+    #     count += 1
 
-    nextoffsets = [None] * (length + 1)
-    nextoffsets[-1] = len(distincts)
-    last = -1
+    # print("nextoffsets", nextoffsets)
+
+    # return ListOffsetArray(nextoffsets, outcontent)
+
+    nextstarts = [None] * length
+    nextstops = [None] * length
+    maxdistinct = -1
     k = 0
     count = 0
     for i in range(len(distincts)):
-        if last != distincts[i]:
-            nextoffsets[k] = count
+        if maxdistinct < distincts[i]:
+            maxdistinct = distincts[i]
+            nextstarts[k] = i
+            nextstops[k] = i
             k += 1
-        last = distincts[i]
-        count += 1
+        if distincts[i] != -1:
+            nextstops[k - 1] = i + 1
 
-    print("nextoffsets", nextoffsets)
+    print("nextstarts", nextstarts)
+    print("nextstops", nextstops)
 
-    return ListOffsetArray(nextoffsets, outcontent)
+    return ListArray(nextstarts, nextstops, outcontent)
 
 ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
 
@@ -1296,6 +1306,102 @@ assert list(depth2.reduce(0)) == [
     [ 949, 1343, 1577, 2047,   97],
     [3131, 3811, 4387, 4687, 5311]]
 
+depth2 = ListOffsetArray([0, 3, 6], ListOffsetArray([0, 5, 10, 14, 19, 24, 28], RawArray([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109])))
+assert depth2.tolist() == [
+    [[  2,   3,   5,   7,  11],
+     [ 13,  17,  19,  23,  29],
+     [ 31,  37,  41,  43     ]],
+    [[ 53,  59,  61,  67,  71],
+     [ 73,  79,  83,  89,  97],
+     [101, 103, 107, 109     ]]]
+
+assert list(depth2.reduce(0)) == [
+    [ 106,  177,  305,  469,  781],
+    [ 949, 1343, 1577, 2047, 2813],
+    [3131, 3811, 4387, 4687]]
+
+depth2 = ListOffsetArray([0, 3, 6], ListOffsetArray([0, 5, 9, 14, 19, 23, 28], RawArray([2, 3, 5, 7, 11, 13, 17, 19, 23, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 101, 103, 107, 109, 113])))
+assert depth2.tolist() == [
+    [[  2,   3,   5,   7,  11],
+     [ 13,  17,  19,  23     ],
+     [ 31,  37,  41,  43,  47]],
+    [[ 53,  59,  61,  67,  71],
+     [ 73,  79,  83,  89     ],
+     [101, 103, 107, 109, 113]]]
+
+assert list(depth2.reduce(0)) == [
+    [ 106,  177,  305,  469,  781],
+    [ 949, 1343, 1577, 2047      ],
+    [3131, 3811, 4387, 4687, 5311]]
+
+####################################
+
+depth2 = ListOffsetArray([0, 2, 4, 6], ListOffsetArray([0, 3, 4, 6, 6, 7, 9], RawArray(primes[:9])))
+assert list(depth2) == [
+    [[      2,   3, 5],
+     [      7        ]],
+    [[     11,  13   ],
+     [               ]],
+    [[     17        ],
+     [     19,  23   ]]]
+
+assert list(depth2.reduce(0)) == [
+    [2*11*17, 3*13, 5],
+    [7*19   , 23     ]]
+
+depth2 = ListOffsetArray([0, 2, 3, 5], ListOffsetArray([0, 3, 4, 6, 7, 9], RawArray(primes[:9])))
+assert list(depth2) == [
+    [[      2,   3, 5],
+     [      7        ]],
+    [[     11,  13   ]],
+    [[     17        ],
+     [     19,  23   ]]]
+
+assert list(depth2.reduce(0)) == [
+    [2*11*17, 3*13, 5],
+    [7*19   , 23     ]]
+
+depth2 = ListOffsetArray([0, 3, 6], ListOffsetArray([0, 3, 5, 6, 8, 9, 10], RawArray(primes[:10])))
+assert list(depth2) == [
+    [[ 2,  3, 5],
+     [ 7, 11   ],
+     [13       ]],
+    [[17, 19   ],
+     [23       ],
+     [29       ]]]
+
+assert list(depth2.reduce(0)) == [
+    [ 34, 57, 5],
+    [161, 11   ],
+    [377       ]]
+
+depth2 = ListOffsetArray([0, 4, 6], ListOffsetArray([0, 3, 3, 5, 6, 8, 9], RawArray(primes[:9])))
+assert list(depth2) == [
+    [[ 2,  3, 5],
+     [         ],
+     [ 7, 11   ],
+     [13       ]],
+    [[17, 19   ],
+     [23       ]]]
+
+assert list(depth2.reduce(0)) == [
+    [34, 57, 5],
+    [23       ],
+    [ 7, 11   ],
+    [13       ]]
+
 depth2 = ListOffsetArray([0, 4, 4, 6], ListOffsetArray([0, 3, 3, 5, 6, 8, 9], RawArray(primes[:9])))
-assert list(depth2) == [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19], [23]]]
-print(list(depth2.reduce(0)))
+assert list(depth2) == [
+    [[ 2,  3, 5],
+     [         ],
+     [ 7, 11   ],
+     [13       ]],
+    [],
+    [[17, 19   ],
+     [23       ]]]
+
+assert list(depth2.reduce(0)) == [
+    [34, 57, 5],
+    [23       ],
+    [ 7, 11   ],
+    [13       ]]
