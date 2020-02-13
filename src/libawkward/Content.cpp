@@ -72,6 +72,10 @@ namespace awkward {
     return out;
   }
 
+  const std::shared_ptr<Content> Content::reduce(util::Reducer reducer, int64_t axis) const {
+    throw std::runtime_error("FIXME: Content::reduce");
+  }
+
   const util::Parameters Content::parameters() const {
     return parameters_;
   }

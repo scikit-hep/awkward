@@ -67,6 +67,7 @@ namespace awkward {
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
     void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
     int64_t nbytes() const;
+    const std::shared_ptr<Content> reduce(util::Reducer reducer, int64_t axis) const;
 
     const util::Parameters parameters() const;
     void setparameters(const util::Parameters& parameters);
