@@ -846,13 +846,15 @@ namespace awkward {
         throw std::runtime_error("offsets_.length() - 1 != parents.length()");
       }
 
+      int64_t nextlen;
+      
+      awkward_listoffsetarray_reduce_nextlen_64(int64_t* nextlen, const int64_t* offsets, int64_t offsetsoffset, int64_t length)
+
       int64_t maxcount;
       Index64 offsetscopy(offsets_.length());
-      int64_t nextlen;
       struct Error err1 = awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
         &maxcount,
         offsetscopy.ptr().get(),
-        &nextlen,
         offsets_.ptr().get(),
         offsets_.offset(),
         offsets_.length() - 1);

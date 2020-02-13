@@ -12,7 +12,12 @@ ERROR awkward_content_reduce_zeroparents_64(int64_t* toparents, int64_t length) 
   return success();
 }
 
-ERROR awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(int64_t* maxcount, int64_t* offsetscopy, int64_t* nextlen, const int64_t* offsets, int64_t offsetsoffset, int64_t length) {
+ERROR awkward_listoffsetarray_reduce_nextlen_64(int64_t* nextlen, const int64_t* offsets, int64_t offsetsoffset, int64_t length) {
+  *nextlen = offsets[offsetsoffset + i + 1] - offsets[offsetsoffset + i];
+  return success();
+}
+
+ERROR awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(int64_t* maxcount, int64_t* offsetscopy, const int64_t* offsets, int64_t offsetsoffset, int64_t length) {
   *maxcount = 0;
   offsetscopy[0] = offsets[offsetsoffset + 0];
   for (int64_t i = 0;  i < length;  i++) {
@@ -22,7 +27,6 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(int64_t* m
     }
     offsetscopy[i + 1] = offsets[offsetsoffset + i + 1];
   }
-  *nextlen = offsetscopy[length] - offsetscopy[0];
   return success();
 }
 
