@@ -847,24 +847,28 @@ namespace awkward {
       }
 
       int64_t nextlen;
-      
-      awkward_listoffsetarray_reduce_nextlen_64(int64_t* nextlen, const int64_t* offsets, int64_t offsetsoffset, int64_t length)
-
-      int64_t maxcount;
-      Index64 offsetscopy(offsets_.length());
-      struct Error err1 = awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
-        &maxcount,
-        offsetscopy.ptr().get(),
+      struct Error err1 = awkward_listoffsetarray_reduce_nextlen_64(
+        &nextlen,
         offsets_.ptr().get(),
         offsets_.offset(),
         offsets_.length() - 1);
       util::handle_error(err1, classname(), identities_.get());
 
+      int64_t maxcount;
+      Index64 offsetscopy(offsets_.length());
+      struct Error err2 = awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
+        &maxcount,
+        offsetscopy.ptr().get(),
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length() - 1);
+      util::handle_error(err2, classname(), identities_.get());
+
       Index64 nextcarry(nextlen);
       Index64 nextparents(nextlen);
       int64_t maxnextparents = 0;
       Index64 distincts(maxcount * outlength);
-      struct Error err2 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
+      struct Error err3 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
         nextcarry.ptr().get(),
         nextparents.ptr().get(),
         nextlen,
@@ -878,28 +882,28 @@ namespace awkward {
         parents.ptr().get(),
         parents.offset(),
         maxcount);
-      util::handle_error(err2, classname(), identities_.get());
+      util::handle_error(err3, classname(), identities_.get());
 
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, nextparents, maxnextparents + 1);
 
       Index64 gaps(outlength);
-      struct Error err3 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
+      struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
         gaps.ptr().get(),
         parents.ptr().get(),
         parents.offset(),
         parents.length());
-      util::handle_error(err3, classname(), identities_.get());
+      util::handle_error(err4, classname(), identities_.get());
 
       Index64 outstarts(outlength);
       Index64 outstops(outlength);
-      struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
+      struct Error err5 = awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
         outstarts.ptr().get(),
         outstops.ptr().get(),
         distincts.ptr().get(),
         maxcount * outlength,
         gaps.ptr().get());
-      util::handle_error(err4, classname(), identities_.get());
+      util::handle_error(err5, classname(), identities_.get());
 
       return std::make_shared<ListArray64>(Identities::none(), util::Parameters(), outstarts, outstops, outcontent);
     }
