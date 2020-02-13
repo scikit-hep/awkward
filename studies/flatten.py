@@ -1027,18 +1027,7 @@ def UnionArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     else:
-        contents = []
-        tocontent = []
-        for x in self.contents:
-            if x.__len__() > 0:
-                tocontent = x.flatten(axis)
-                if tocontent.__len__() > 0 and x.__len__() != tocontent.__len__():
-                    #step = int(x.content.__len__()/x.__len__())
-                    #totags = [ i for i in self.tags for j in range(step)]
-                    #toindex = [ (i*step + j) for i in self.index for j in range(step)]
-                    #return UnionArray(totags, toindex, list(tocontent))
-                    return UnionArray(self.tags, self.index, self.contents)
-                contents.append(tocontent)
+        contents = [content.flatten(axis) for sublist in contents for content in sublist if len(content.flatten(axis)) > 0]
 
         return UnionArray(self.tags, self.index, contents)
 
