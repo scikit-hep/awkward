@@ -956,7 +956,7 @@ def ListArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
-        indxarray = [ x + z for x, y in zip(self.starts, self.stops) for z in range(y - x) if x > 0 and y > 0 and y - x > 0]
+        indxarray = [ x + z for x, y in zip(self.starts, self.stops) for z in range(y - x) if x >= 0 and y >= 0 and y - x > 0]
 
         return IndexedArray(indxarray, self.content)
     else:
@@ -969,9 +969,12 @@ def ListOffsetArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     elif axis == 0:
-        starts, stops = zip(*[(self.offsets[i], self.offsets[i] + array.__getitem__(i).__len__()) for i in range(array.__len__()) if array.__getitem__(i).__len__() > 0])
+        if self.__len__() > 0:
+            starts, stops = zip(*[(self.offsets[i], self.offsets[i] + array.__getitem__(i).__len__()) for i in range(array.__len__()) if array.__getitem__(i).__len__() > 0])
 
-        return ListArray(list(starts), list(stops), self.content).flatten()
+            return ListArray(list(starts), list(stops), self.content).flatten()
+        else:
+            return self
     else:
       return self.content.flatten(axis - 1)
 
@@ -982,9 +985,9 @@ def IndexedArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     if axis == 0:
-        nextcarry = [x for x in self.index if self.index[x] > 0 and self.index[x] < len(self.index)]
+        nextcarry = [x for x in self.index if self.index[x] >= 0 and self.index[x] < len(self.index)]
 
-        return IndexedArray(self.index, self.content.flatten())
+        return IndexedArray(nextcarry, self.content)
     else:
         return self.content.flatten(axis - 1)
 
@@ -997,7 +1000,7 @@ def IndexedOptionArray_flatten(self, axis=0):
     if axis == 0:
         nextcarry = [x for x in self.index if self.index[x] > 0 and self.index[x] < len(self.index)]
 
-        return IndexedOptionArray(nextcarry, self.content).flatten()
+        return IndexedOptionArray(nextcarry, self.content)
     else:
         return self.content.flatten(axis - 1)
 
@@ -1025,6 +1028,7 @@ def UnionArray_flatten(self, axis=0):
         raise NotImplementedError
     else:
         contents = []
+        tocontent = []
         for x in self.contents:
             if x.__len__() > 0:
                 step = int(x.content.__len__()/x.__len__())
@@ -1033,7 +1037,7 @@ def UnionArray_flatten(self, axis=0):
                 if len(x) != len(tocontent):
                     totags = [ i for i in self.tags for j in range(step)]
                     toindex = [ (i*step + j) for i in self.index for j in range(step)]
-                    return UnionArray(totags, toindex, tocontent)
+                    return UnionArray(totags, toindex, list(tocontent))
                 contents.append(tocontent)
 
         return UnionArray(self.tags, self.index, contents)
