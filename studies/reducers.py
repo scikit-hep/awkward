@@ -75,6 +75,9 @@ class RawArray(Content):
     def minmax_depth(self):
         return 1, 1
 
+    def branch_depth(self):
+        return False, 1
+
     def __repr__(self):
         return "RawArray(" + repr(self.ptr) + ")"
 
@@ -164,6 +167,9 @@ class NumpyArray(Content):
     def minmax_depth(self):
         return len(self.shape), len(self.shape)
 
+    def branch_depth(self):
+        return False, len(self.shape)
+
     def __repr__(self):
         return "NumpyArray(" + repr(self.ptr) + ", " + repr(self.shape) + ", " + repr(self.strides) + ", " + repr(self.offset) + ")"
 
@@ -207,7 +213,10 @@ class EmptyArray(Content):
 
     def minmax_depth(self):
         return 1, 1
-        
+
+    def branch_depth(self):
+        return False, 1
+
     def __repr__(self):
         return "EmptyArray()"
 
@@ -256,6 +265,13 @@ class RegularArray(Content):
     def minmax_depth(self):
         min, max = self.content.minmax_depth()
         return min + 1, max + 1
+
+    def branch_depth(self):
+        branch, depth = self.content.branch_depth()
+        if branch:
+            return branch, depth
+        else:
+            return False, depth + 1
 
     def __repr__(self):
         return "RegularArray(" + repr(self.content) + ", " + repr(self.size) + ")"
@@ -338,6 +354,13 @@ class ListOffsetArray(Content):
         min, max = self.content.minmax_depth()
         return min + 1, max + 1
 
+    def branch_depth(self):
+        branch, depth = self.content.branch_depth()
+        if branch:
+            return branch, depth
+        else:
+            return False, depth + 1
+
     def __repr__(self):
         return "ListOffsetArray(" + repr(self.offsets) + ", " + repr(self.content) + ")"
 
@@ -408,6 +431,13 @@ class ListArray(Content):
         min, max = self.content.minmax_depth()
         return min + 1, max + 1
 
+    def branch_depth(self):
+        branch, depth = self.content.branch_depth()
+        if branch:
+            return branch, depth
+        else:
+            return False, depth + 1
+
     def __repr__(self):
         return "ListArray(" + repr(self.starts) + ", " + repr(self.stops) + ", " + repr(self.content) + ")"
 
@@ -465,6 +495,9 @@ class IndexedArray(Content):
 
     def minmax_depth(self):
         return self.content.minmax_depth()
+
+    def branch_depth(self):
+        return self.content.branch_depth()
 
     def __repr__(self):
         return "IndexedArray(" + repr(self.index) + ", " + repr(self.content) + ")"
@@ -525,6 +558,9 @@ class IndexedOptionArray(Content):
     def minmax_depth(self):
         return self.content.minmax_depth()
 
+    def branch_depth(self):
+        return self.content.branch_depth()
+
     def __repr__(self):
         return "IndexedOptionArray(" + repr(self.index) + ", " + repr(self.content) + ")"
 
@@ -581,6 +617,9 @@ class ByteMaskedArray(Content):
 
     def minmax_depth(self):
         return self.content.minmax_depth()
+
+    def branch_depth(self):
+        return self.content.branch_depth()
 
     def __repr__(self):
         return "ByteMaskedArray(" + repr(self.mask) + ", " + repr(self.content) + ", " + repr(self.validwhen) + ")"
@@ -688,6 +727,22 @@ class RecordArray(Content):
                 max = thismax
         return min, max
 
+    def branch_depth(self):
+        if len(self.contents) == 0:
+            return False, 1
+        else:
+            anybranch = False
+            mindepth = -1
+            for content in self.contents:
+                branch, depth = content.branch_depth()
+                if mindepth == -1:
+                    mindepth = depth
+                if branch or mindepth != depth:
+                    anybranch = True
+                if mindepth > depth:
+                    mindepth = depth
+            return anybranch, mindepth
+
     def __repr__(self):
         return "RecordArray([" + ", ".join(repr(x) for x in self.contents) + "], " + repr(self.recordlookup) + ", " + repr(self.length) + ")"
 
@@ -772,6 +827,19 @@ class UnionArray(Content):
                 max = thismax
         return min, max
 
+    def branch_depth(self):
+        anybranch = False
+        mindepth = -1
+        for content in self.contents:
+            branch, depth = content.branch_depth()
+            if mindepth == -1:
+                mindepth = depth
+            if branch or mindepth != depth:
+                anybranch = True
+            if mindepth > depth:
+                mindepth = depth
+        return anybranch, mindepth
+
     def __repr__(self):
         return "UnionArray(" + repr(self.tags) + ", " + repr(self.index) + ", [" + ", ".join(repr(x) for x in self.contents) + "])"
 
@@ -825,26 +893,40 @@ assert numpy.prod(nparray, axis=None) == 7581744426003940878
 
 ########################################################################
 
-# def Content_regularize_negaxis(self, regularized, negaxis):
-#     if not regularized:
-#         mindepth, maxdepth = self.minmax_depth()
+def Content_regularize_negaxis(self, regularized, negaxis):
+    regular_negaxis = negaxis
 
-#         if negaxis > 0:
-#             regularized = True
-#         else:
-#             if mindepth == maxdepth:
-#                 negaxis += mindepth
-#                 regularized = True
+    if not regularized:
+        mindepth, maxdepth = self.minmax_depth()
 
-#         if regularized and 
+        if negaxis > 0:
+            regularized = True
+        else:
+            if mindepth == maxdepth:
+                regular_negaxis += mindepth
+                regularized = True
+
+        if regularized and not (0 < regular_negaxis <= mindepth):
+            raise ValueError("cannot reduce axis {0} on a structure with minimum depth {1}".format(-negaxis, mindepth))
+
+    return regularized, regular_negaxis
+
+Content.regularize_negaxis = Content_regularize_negaxis
 
 def Content_reduce(self, axis):
-    mindepth, maxdepth = self.minmax_depth()
-    if mindepth != maxdepth:
-        raise NotImplementedError("mindepth != maxdepth")
-    if axis >= 0:
-        raise NotImplementedError("axis >= 0")
-    negaxis = -axis
+    negaxis = -axis   # easier to think about it this way because negaxis aligns with depth
+    branch, depth = self.branch_depth()
+
+    if branch:
+        if negaxis <= 0:
+            raise ValueError("cannot use non-negative axis on a nested list structure of variable depth (negative axis counts from the leaves of the tree)")
+        if negaxis > depth:
+            raise ValueError("cannot use axis={0} on a nested list structure that splits into different depths, the minimum of which is {1} from the leaves".format(axis, depth))
+    else:
+        if negaxis <= 0:
+            negaxis += depth
+        if not (0 < negaxis <= depth):
+            raise ValueError("axis={0} exceeds the depth of the nested list structure ({1})".format(axis, depth))
 
     parents = [None] * len(self)
     for i in range(len(self)):
@@ -852,6 +934,15 @@ def Content_reduce(self, axis):
     return self.reduce_next(negaxis, parents, 1)[0]
 
 Content.reduce = Content_reduce
+
+def RawArray_reduce_next(self, negaxis, parents, length):
+    assert negaxis == 1
+    ptr = [1] * length
+    for i in range(len(parents)):
+        ptr[parents[i]] *= self.ptr[i]
+    return RawArray(ptr)
+
+RawArray.reduce_next = RawArray_reduce_next
 
 def RegularArray_toListOffsetArray(self):
     nextoffsets = [None] * (len(self) + 1)
@@ -891,10 +982,9 @@ def ListArray_reduce_next(self, negaxis, parents, length):
 ListArray.reduce_next = ListArray_reduce_next
 
 def ListOffsetArray_reduce_next(self, negaxis, parents, length):
-    depth = self.minmax_depth()[0]
-    # print("ListOffsetArray negaxis", negaxis, "depth", depth)
+    branch, depth = self.branch_depth()
 
-    if negaxis == depth:
+    if not branch and negaxis == depth:
         maxcount = 0
         for i in range(len(self.offsets) - 1):
             count = self.offsets[i + 1] - self.offsets[i]
@@ -957,7 +1047,7 @@ def ListOffsetArray_reduce_next(self, negaxis, parents, length):
 
         return ListArray(outstarts, outstops, outcontent)
 
-    elif negaxis < depth:
+    else:
         nextparents = [None] * (self.offsets[-1] - self.offsets[0])
         k = 0
         for i in range(len(self.offsets) - 1):
@@ -979,80 +1069,47 @@ def ListOffsetArray_reduce_next(self, negaxis, parents, length):
 
         return ListOffsetArray(outoffsets, outcontent)
 
-    else:
-        raise NotImplementedError((negaxis, depth))
-
 ListOffsetArray.reduce_next = ListOffsetArray_reduce_next
 
-def RawArray_reduce_next(self, negaxis, parents, length):
-    depth = self.minmax_depth()[0]
-    # print("RawArray negaxis", negaxis, "depth", depth)
-
-    if negaxis == depth:
-        ptr = [1] * length
-        for i in range(len(parents)):
-            ptr[parents[i]] *= self.ptr[i]
-
-        return RawArray(ptr)
-
+def RecordArray_reduce_next(self, negaxis, parents, length):
+    if len(self.contents) == 0:
+        return RecordArray(self.contents, self.recordlookup, length)
     else:
-        raise NotImplementedError((negaxis, depth))
+        contents = []
+        for content in self.contents:
+            trimmed = content[0:len(self)]
+            contents.append(trimmed.reduce_next(negaxis, parents, length))
+        return RecordArray(contents, self.recordlookup, self.length)
 
-RawArray.reduce_next = RawArray_reduce_next
+RecordArray.reduce_next = RecordArray_reduce_next
 
 exec(open("reducer_tests.py").read())
 
-depth2 = ListOffsetArray([0, 3, 6], ListOffsetArray([0, 5, 10, 15, 20, 25, 30], RawArray(primes[:2*3*5])))
-assert depth2.tolist() == [
-    [[  2,   3,   5,   7,  11],
-     [ 13,  17,  19,  23,  29],
-     [ 31,  37,  41,  43,  47]],
-    [[ 53,  59,  61,  67,  71],
-     [ 73,  79,  83,  89,  97],
-     [101, 103, 107, 109, 113]]]
+complicated = ListOffsetArray([0, 1, 1, 3], RecordArray([ListOffsetArray([0, 3, 3, 5], RawArray(primes[:5])), ListOffsetArray([0, 4, 4, 6], ListOffsetArray([0, 3, 3, 5, 6, 8, 9], RawArray(primes[:9])))], ["x", "y"], None))
+assert complicated.tolist() == [[{"x": [2, 3, 5], "y": [[2, 3, 5], [], [7, 11], [13]]}], [], [{"x": [], "y": []}, {"x": [7, 11], "y": [[17, 19], [23]]}]]
+assert complicated.minmax_depth() == (3, 4)
+assert complicated.branch_depth() == (True, 2)
 
-assert list(depth2.reduce(-1)) == [
-    [  2 *   3 *   5 *   7 *  11,
-      13 *  17 *  19 *  23 *  29,
-      31 *  37 *  41 *  43 *  47],
-    [ 53 *  59 *  61 *  67 *  71,
-      73 *  79 *  83 *  89 *  97,
-     101 * 103 * 107 * 109 * 113]]
-
-assert list(depth2.reduce(-2)) == [
-    [2*13*31, 3*17*37, 5*19*41, 7*23*43, 11*29*47],
-    [53*73*101, 59*79*103, 61*83*107, 67*89*109, 71*97*113]]
-
-depth2 = ListOffsetArray([0, 4, 4, 6], ListOffsetArray([0, 3, 3, 5, 6, 8, 9], RawArray(primes[:9])))
-assert list(depth2) == [
-    [[ 2,  3, 5],
-     [         ],
-     [ 7, 11   ],
-     [13       ]],
+assert list(complicated["x"]) == [
+    [[2, 3, 5]],
     [],
-    [[17, 19   ],
-     [23       ]]]
+    [[],
+     [7, 11]]]
+assert list(complicated["y"]) == [
+    [[[ 2,  3, 5],
+      [         ],
+      [ 7, 11   ],
+      [13       ]]],
+    [             ],
+    [[          ],
+     [[17, 19   ],
+      [23       ]]]]
 
-assert list(depth2.reduce(-1)) == [
-    [2*3*5, 1, 7*11, 13],
-    [],
-    [17*19, 23]]
+assert list(complicated["x"].reduce(-1)) == [[30], [], [1, 77]]
+assert list(complicated["y"].reduce(-1)) == [[[30, 1, 77, 13]], [], [[], [323, 23]]]
+assert list(complicated.reduce(-1)) == [{"x": [30], "y": [[30, 1, 77, 13]]}, {"x": [], "y": []}, {"x": [1, 77], "y": [[], [323, 23]]}]
 
-assert list(depth2.reduce(-2)) == [
-    [2*7*13, 3*11, 5],
-    [],
-    [17*23, 19]]
+assert list(complicated["x"].reduce(-2)) == [[2, 3, 5], [], [7, 11]]
+assert list(complicated["y"].reduce(-2)) == [[[182, 33, 5]], [], [[], [391, 19]]]
 
-depth1 = ListOffsetArray([0, 4, 8, 12], RawArray(primes[:12]))
-assert list(depth1) == [[2, 3, 5, 7], [11, 13, 17, 19], [23, 29, 31, 37]]
-
-assert list(depth1.reduce(-1)) == [
-    2*3*5*7,
-    11*13*17*19,
-    23*29*31*37]
-
-assert list(depth1.reduce(-2)) == [
-    2*11*23,
-    3*13*29,
-    5*17*31,
-    7*19*37]
+assert list(complicated.reduce(-2)) == [{"x": [2, 3, 5], "y": [[182, 33, 5]]}, {"x": [], "y": []}, {"x": [7, 11], "y": [[], [391, 19]]}]
