@@ -1031,13 +1031,13 @@ def UnionArray_flatten(self, axis=0):
         tocontent = []
         for x in self.contents:
             if x.__len__() > 0:
-                step = int(x.content.__len__()/x.__len__())
-
                 tocontent = x.flatten(axis)
-                if len(x) != len(tocontent):
-                    totags = [ i for i in self.tags for j in range(step)]
-                    toindex = [ (i*step + j) for i in self.index for j in range(step)]
-                    return UnionArray(totags, toindex, list(tocontent))
+                if tocontent.__len__() > 0 and x.__len__() != tocontent.__len__():
+                    #step = int(x.content.__len__()/x.__len__())
+                    #totags = [ i for i in self.tags for j in range(step)]
+                    #toindex = [ (i*step + j) for i in self.index for j in range(step)]
+                    #return UnionArray(totags, toindex, list(tocontent))
+                    return UnionArray(self.tags, self.index, self.contents)
                 contents.append(tocontent)
 
         return UnionArray(self.tags, self.index, contents)
