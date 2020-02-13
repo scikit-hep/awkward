@@ -6,6 +6,7 @@
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
+#include "awkward/cpu-kernels/reducers.h"
 #include "awkward/type/ListType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -834,6 +835,31 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<SliceItem> ListOffsetArrayOf<T>::asslice() const {
     return toListOffsetArray64().get()->asslice();
+  }
+
+  template <>
+  const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+
+    if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      int64_t maxcount;
+      // struct Error err1 = awkward_listoffsetarray_reduce_nonlocal_maxcount
+
+
+
+      throw std::runtime_error("FIXME: ListOffsetArray:reduce_next 1");
+    }
+
+    else {
+
+
+      throw std::runtime_error("FIXME: ListOffsetArray:reduce_next 2");
+    }
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+    return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, length);
   }
 
   template <typename T>

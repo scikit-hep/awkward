@@ -1377,6 +1377,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> NumpyArray::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+    throw std::runtime_error("FIXME: NumpyArray:reduce_next");
+  }
+
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: NumpyArray::getitem_next(at) (without 'length', 'stride', and 'first')");
   }

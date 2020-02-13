@@ -823,6 +823,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+    throw std::runtime_error("FIXME: ListArray:reduce_next");
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {

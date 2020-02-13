@@ -498,6 +498,10 @@ namespace awkward {
       throw std::invalid_argument("cannot use RawArray as a slice");
     }
 
+    const std::shared_ptr<Content> reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+      throw std::runtime_error("FIXME: Raw:reduce_next");
+    }
+
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
       return getitem_at(at.at());
     }

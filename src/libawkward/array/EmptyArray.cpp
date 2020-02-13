@@ -186,6 +186,10 @@ namespace awkward {
     return std::make_shared<SliceArray64>(index, shape, strides, false);
   }
 
+  const std::shared_ptr<Content> EmptyArray::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+    throw std::runtime_error("FIXME: EmptyArray:reduce_next");
+  }
+
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy

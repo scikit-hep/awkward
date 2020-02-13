@@ -1094,6 +1094,11 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+    throw std::runtime_error("FIXME: UnionArray:reduce_next");
+  }
+
+  template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: UnionArray::getitem_next(at)");
   }

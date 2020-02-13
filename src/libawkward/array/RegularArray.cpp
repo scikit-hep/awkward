@@ -515,6 +515,10 @@ namespace awkward {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
+  const std::shared_ptr<Content> RegularArray::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+    throw std::runtime_error("FIXME: RegularArray:reduce_next");
+  }
+
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     assert(advanced.length() == 0);
 

@@ -62,6 +62,7 @@ namespace awkward {
     virtual bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const = 0;
     virtual const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const = 0;
     virtual const std::shared_ptr<SliceItem> asslice() const = 0;
+    virtual const std::shared_ptr<Content> reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const = 0;
 
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
