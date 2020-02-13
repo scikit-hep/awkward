@@ -932,7 +932,7 @@ def RegularArray_flatten(self, axis=0):
         raise NotImplementedError
     elif axis == 0:
         if self.content.__len__() % self.size != 0:
-            return RegularArray(self.content, self.__len__()*self.size)
+            return RegularArray(self.content[0:self.__len__()*self.size], self.__len__()*self.size)
         else:
             return self.content
     else:
@@ -1027,9 +1027,14 @@ def UnionArray_flatten(self, axis=0):
     if axis < 0:
         raise NotImplementedError
     else:
-        contents = [content.flatten(axis) for sublist in contents for content in sublist if len(content.flatten(axis)) > 0]
+        contents = []
+        for x in self.contents:
+            tocontent = x.flatten(axis)
+            if len(x) != len(tocontent):
+                return UnionArray(self.tags, self.index, self.contents)
+            contents.append(tocontent)
 
-        return UnionArray(self.tags, self.index, contents)
+        return UnionArray(self.tags, self.index, tocontents)
 
 UnionArray.flatten = UnionArray_flatten
 
