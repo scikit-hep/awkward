@@ -842,9 +842,41 @@ namespace awkward {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
-      int64_t maxcount;
-      // struct Error err1 = awkward_listoffsetarray_reduce_nonlocal_maxcount
+      if (offsets_.length() - 1 != parents.length()) {
+        throw std::runtime_error("offsets_.length() - 1 != parents.length()");
+      }
 
+      int64_t maxcount;
+      Index64 offsetscopy(offsets_.length());
+      int64_t nextlen;
+      struct Error err1 = awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
+        &maxcount,
+        offsetscopy.ptr().get(),
+        &nextlen,
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length() - 1);
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 nextcarry(nextlen);
+      Index64 nextparents(nextlen);
+      int64_t maxnextparents = 0;
+      Index64 distincts(maxcount * length);
+      struct Error err2 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
+        nextcarry.ptr().get(),
+        nextparents.ptr().get(),
+        nextlen,
+        &maxnextparents,
+        distincts.ptr().get(),
+        maxcount * length,
+        offsetscopy.ptr().get(),
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length() - 1,
+        parents.ptr().get(),
+        parents.offset(),
+        maxcount);
+      util::handle_error(err2, classname(), identities_.get());
 
 
       throw std::runtime_error("FIXME: ListOffsetArray:reduce_next 1");

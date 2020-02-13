@@ -8,6 +8,9 @@
 extern "C" {
   EXPORT_SYMBOL struct Error awkward_content_reduce_zeroparents_64(int64_t* toparents, int64_t length);
 
+  EXPORT_SYMBOL struct Error awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(int64_t* maxcount, int64_t* offsetscopy, int64_t* nextlen, const int64_t* offsets, int64_t offsetsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listoffsetarray_reduce_nonlocal_preparenext_64(int64_t* nextcarry, int64_t* nextparents, int64_t nextlen, int64_t* maxnextparents, int64_t* distincts, int64_t distinctslen, int64_t* offsetscopy, const int64_t* offsets, int64_t offsetsoffset, int64_t length, const int64_t* parents, int64_t parentsoffset, int64_t maxcount);
+
 }
 
 #endif // AWKWARDCPU_REDUCERS_H_
