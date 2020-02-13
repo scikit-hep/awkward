@@ -276,3 +276,32 @@ assert list(depth1.reduce(-2)) == [
     3*13*29,
     5*17*31,
     7*19*37]
+
+complicated = ListOffsetArray([0, 1, 1, 3], RecordArray([ListOffsetArray([0, 3, 3, 5], RawArray(primes[:5])), ListOffsetArray([0, 4, 4, 6], ListOffsetArray([0, 3, 3, 5, 6, 8, 9], RawArray(primes[:9])))], ["x", "y"], None))
+assert complicated.tolist() == [[{"x": [2, 3, 5], "y": [[2, 3, 5], [], [7, 11], [13]]}], [], [{"x": [], "y": []}, {"x": [7, 11], "y": [[17, 19], [23]]}]]
+assert complicated.minmax_depth() == (3, 4)
+assert complicated.branch_depth() == (True, 2)
+
+assert list(complicated["x"]) == [
+    [[2, 3, 5]],
+    [],
+    [[],
+     [7, 11]]]
+assert list(complicated["y"]) == [
+    [[[ 2,  3, 5],
+      [         ],
+      [ 7, 11   ],
+      [13       ]]],
+    [             ],
+    [[          ],
+     [[17, 19   ],
+      [23       ]]]]
+
+assert list(complicated["x"].reduce(-1)) == [[30], [], [1, 77]]
+assert list(complicated["y"].reduce(-1)) == [[[30, 1, 77, 13]], [], [[], [323, 23]]]
+assert list(complicated.reduce(-1)) == [{"x": [30], "y": [[30, 1, 77, 13]]}, {"x": [], "y": []}, {"x": [1, 77], "y": [[], [323, 23]]}]
+
+assert list(complicated["x"].reduce(-2)) == [[2, 3, 5], [], [7, 11]]
+assert list(complicated["y"].reduce(-2)) == [[[182, 33, 5]], [], [[], [391, 19]]]
+
+assert list(complicated.reduce(-2)) == [{"x": [2, 3, 5], "y": [[182, 33, 5]]}, {"x": [], "y": []}, {"x": [7, 11], "y": [[], [391, 19]]}]

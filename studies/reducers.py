@@ -1083,33 +1083,140 @@ def RecordArray_reduce_next(self, negaxis, parents, length):
 
 RecordArray.reduce_next = RecordArray_reduce_next
 
+def IndexedOptionArray_reduce_next(self, negaxis, parents, length):
+    numnull = 0
+    for i in range(len(self.index)):
+        if self.index[i] < 0:
+            numnull += 1
+
+    nextparents = [None] * (len(self.index) - numnull)
+    nextcarry = [None] * (len(self.index) - numnull)
+    k = 0
+    for i in range(len(self.index)):
+        if self.index[i] >= 0:
+            nextcarry[k] = self.index[i]
+            nextparents[k] = parents[i]
+            k += 1
+
+    next = self.content.carry(nextcarry)
+    return next.reduce_next(negaxis, nextparents, length)
+
+    # if True:  # isinstance(next, (RawArray, NumpyArray, EmptyArray)):
+    #     print("index", self.index)
+    #     print("parents", parents)
+    #     print("length", length)
+    #     print("next", list(next))
+    #     print(next.toxml())
+    #     print("reduced", list(reduced))
+    #     print(reduced.toxml())
+
+    #     raise Exception
+
+    # else:
+    #     return reduced
+
+IndexedOptionArray.reduce_next = IndexedOptionArray_reduce_next
+
 exec(open("reducer_tests.py").read())
 
-complicated = ListOffsetArray([0, 1, 1, 3], RecordArray([ListOffsetArray([0, 3, 3, 5], RawArray(primes[:5])), ListOffsetArray([0, 4, 4, 6], ListOffsetArray([0, 3, 3, 5, 6, 8, 9], RawArray(primes[:9])))], ["x", "y"], None))
-assert complicated.tolist() == [[{"x": [2, 3, 5], "y": [[2, 3, 5], [], [7, 11], [13]]}], [], [{"x": [], "y": []}, {"x": [7, 11], "y": [[17, 19], [23]]}]]
-assert complicated.minmax_depth() == (3, 4)
-assert complicated.branch_depth() == (True, 2)
+depth2 = ListOffsetArray([0, 3, 6], IndexedOptionArray([5, 4, 3, 2, 1, 0], ListOffsetArray([0, 5, 10, 15, 20, 25, 30], RawArray(primes[:2*3*5]))))
+assert depth2.tolist() == [
+    [[101, 103, 107, 109, 113],
+     [ 73,  79,  83,  89,  97],
+     [ 53,  59,  61,  67,  71]],
+    [[ 31,  37,  41,  43,  47],
+     [ 13,  17,  19,  23,  29],
+     [  2,   3,   5,   7,  11]]]
 
-assert list(complicated["x"]) == [
-    [[2, 3, 5]],
+assert list(depth2.reduce(-1)) == [
+    [101 * 103 * 107 * 109 * 113,
+      73 *  79 *  83 *  89 *  97,
+      53 *  59 *  61 *  67 *  71],
+    [ 31 *  37 *  41 *  43 *  47,
+      13 *  17 *  19 *  23 *  29,
+       2 *   3 *   5 *   7 *  11]]
+
+assert list(depth2.reduce(-2)) == [
+    [101*73*53, 103*79*59, 107*83*61, 109*89*67, 113*97*71],
+    [  31*13*2,   37*17*3,   41*19*5,   43*23*7,  47*29*11]]
+
+assert list(depth2.reduce(-3)) == [
+    [101*31, 103*37, 107*41, 109*43, 113*47],
+    [ 73*13,  79*17,  83*19,  89*23,  97*29],
+    [  53*2,   59*3,   61*5,   67*7,  71*11]]
+
+depth2 = ListOffsetArray([0, 3, 6], IndexedOptionArray([3, -1, 2, 1, -1, 0], ListOffsetArray([0, 5, 10, 15, 20], RawArray([2, 3, 5, 7, 11, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 101, 103, 107, 109, 113]))))
+assert depth2.tolist() == [
+    [[101, 103, 107, 109, 113],
+     None,
+     [ 53,  59,  61,  67,  71]],
+    [[ 31,  37,  41,  43,  47],
+     None,
+     [  2,   3,   5,   7,  11]]]
+
+assert list(depth2.reduce(-1)) == [
+    [101 * 103 * 107 * 109 * 113,
+      53 *  59 *  61 *  67 *  71],
+    [ 31 *  37 *  41 *  43 *  47,
+       2 *   3 *   5 *   7 *  11]]
+
+assert list(depth2.reduce(-2)) == [
+    [101*53, 103*59, 107*61, 109*67, 113*71],
+    [  31*2,   37*3,   41*5,   43*7,  47*11]]
+
+assert list(depth2.reduce(-3)) == [
+    [101*31, 103*37, 107*41, 109*43, 113*47],
     [],
-    [[],
-     [7, 11]]]
-assert list(complicated["y"]) == [
-    [[[ 2,  3, 5],
-      [         ],
-      [ 7, 11   ],
-      [13       ]]],
-    [             ],
-    [[          ],
-     [[17, 19   ],
-      [23       ]]]]
+    [  53*2,   59*3,   61*5,   67*7,  71*11]]
 
-assert list(complicated["x"].reduce(-1)) == [[30], [], [1, 77]]
-assert list(complicated["y"].reduce(-1)) == [[[30, 1, 77, 13]], [], [[], [323, 23]]]
-assert list(complicated.reduce(-1)) == [{"x": [30], "y": [[30, 1, 77, 13]]}, {"x": [], "y": []}, {"x": [1, 77], "y": [[], [323, 23]]}]
+depth2 = ListOffsetArray([0, 3, 6], ListOffsetArray([0, 5, 10, 15, 20, 25, 30], IndexedOptionArray([15, 16, 17, 18, 19, -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 5, 6, 7, 8, 9, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4], RawArray([2, 3, 5, 7, 11, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 101, 103, 107, 109, 113]))))
+assert depth2.tolist() == [
+    [[ 101,  103,  107,  109,  113],
+     [None, None, None, None, None],
+     [  53,   59,   61,   67,   71]],
+    [[  31,   37,   41,   43,   47],
+     [None, None, None, None, None],
+     [   2,    3,    5,    7,   11]]]
 
-assert list(complicated["x"].reduce(-2)) == [[2, 3, 5], [], [7, 11]]
-assert list(complicated["y"].reduce(-2)) == [[[182, 33, 5]], [], [[], [391, 19]]]
+assert list(depth2.reduce(-1)) == [
+    [101 * 103 * 107 * 109 * 113,
+       1 *   1 *   1 *   1 *   1,
+      53 *  59 *  61 *  67 *  71],
+    [ 31 *  37 *  41 *  43 *  47,
+       1 *   1 *   1 *   1 *   1,
+       2 *   3 *   5 *   7 *  11]]
 
-assert list(complicated.reduce(-2)) == [{"x": [2, 3, 5], "y": [[182, 33, 5]]}, {"x": [], "y": []}, {"x": [7, 11], "y": [[], [391, 19]]}]
+assert list(depth2.reduce(-2)) == [
+    [101*53, 103*59, 107*61, 109*67, 113*71],
+    [  31*2,   37*3,   41*5,   43*7,  47*11]]
+
+assert list(depth2.reduce(-3)) == [
+    [101*31, 103*37, 107*41, 109*43, 113*47],
+    [     1,      1,      1,      1,      1],
+    [  53*2,   59*3,   61*5,   67*7,  71*11]]
+
+depth2 = ListOffsetArray([0, 3, 6], ListOffsetArray([0, 5, 6, 11, 16, 17, 22], IndexedOptionArray([15, 16, 17, 18, 19, -1, 10, 11, 12, 13, 14, 5, 6, 7, 8, 9, -1, 0, 1, 2, 3, 4], RawArray([2, 3, 5, 7, 11, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 101, 103, 107, 109, 113]))))
+assert depth2.tolist() == [
+    [[ 101,  103,  107,  109,  113],
+     [None],
+     [  53,   59,   61,   67,   71]],
+    [[  31,   37,   41,   43,   47],
+     [None],
+     [   2,    3,    5,    7,   11]]]
+
+assert list(depth2.reduce(-1)) == [
+    [101 * 103 * 107 * 109 * 113,
+       1,
+      53 *  59 *  61 *  67 *  71],
+    [ 31 *  37 *  41 *  43 *  47,
+       1,
+       2 *   3 *   5 *   7 *  11]]
+
+assert list(depth2.reduce(-2)) == [
+    [101*53, 103*59, 107*61, 109*67, 113*71],
+    [  31*2,   37*3,   41*5,   43*7,  47*11]]
+
+assert list(depth2.reduce(-3)) == [
+    [101*31, 103*37, 107*41, 109*43, 113*47],
+    [     1],
+    [  53*2,   59*3,   61*5,   67*7,  71*11]]
