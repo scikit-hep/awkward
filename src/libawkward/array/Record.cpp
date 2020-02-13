@@ -232,7 +232,7 @@ namespace awkward {
     throw std::invalid_argument("cannot use a record as a slice");
   }
 
-  const std::shared_ptr<Content> Record::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+  const std::shared_ptr<Content> Record::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
     throw std::runtime_error("FIXME: Record:reduce_next");
   }
 

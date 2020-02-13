@@ -1377,7 +1377,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+  const std::shared_ptr<Content> NumpyArray::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
     throw std::runtime_error("FIXME: NumpyArray:reduce_next");
   }
 

@@ -58,3 +58,38 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_preparenext_64(int64_t* nextcarry,
   }
   return success();
 }
+
+ERROR awkward_listoffsetarray_reduce_nonlocal_findgaps_64(int64_t* gaps, const int64_t* parents, int64_t parentsoffset, int64_t lenparents) {
+  int64_t k = 0;
+  int64_t last = -1;
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    int64_t parent = parents[parentsoffset + i];
+    if (last < parent) {
+      gaps[k] = parent - last;
+      k++;
+      last = parent;
+    }
+  }
+  return success();
+}
+
+ERROR awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(int64_t* outstarts, int64_t* outstops, const int64_t* distincts, int64_t lendistincts, const int64_t* gaps) {
+  int64_t j = 0;
+  int64_t k = 0;
+  int64_t maxdistinct = -1;
+  for (int64_t i = 0;  i < lendistincts;  i++) {
+    if (maxdistinct < distincts[i]) {
+      maxdistinct = distincts[i];
+      for (int64_t gappy = 0;  gappy < gaps[j];  gappy++) {
+        outstarts[k] = i;
+        outstops[k] = i;
+        k++;
+      }
+      j++;
+    }
+    if (distincts[i] != -1) {
+      outstops[k - 1] = i + 1;
+    }
+  }
+  return success();
+}

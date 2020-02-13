@@ -1017,7 +1017,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
     throw std::runtime_error("FIXME: IndexedArray:reduce_next");
   }
 

@@ -838,7 +838,7 @@ namespace awkward {
   }
 
   template <>
-  const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t length) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -861,14 +861,14 @@ namespace awkward {
       Index64 nextcarry(nextlen);
       Index64 nextparents(nextlen);
       int64_t maxnextparents = 0;
-      Index64 distincts(maxcount * length);
+      Index64 distincts(maxcount * outlength);
       struct Error err2 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
         nextcarry.ptr().get(),
         nextparents.ptr().get(),
         nextlen,
         &maxnextparents,
         distincts.ptr().get(),
-        maxcount * length,
+        maxcount * outlength,
         offsetscopy.ptr().get(),
         offsets_.ptr().get(),
         offsets_.offset(),
@@ -878,8 +878,28 @@ namespace awkward {
         maxcount);
       util::handle_error(err2, classname(), identities_.get());
 
+      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+      std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, nextparents, maxnextparents + 1);
 
-      throw std::runtime_error("FIXME: ListOffsetArray:reduce_next 1");
+      Index64 gaps(outlength);
+      struct Error err3 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
+        gaps.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
+        parents.length());
+      util::handle_error(err3, classname(), identities_.get());
+
+      Index64 outstarts(outlength);
+      Index64 outstops(outlength);
+      struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
+        outstarts.ptr().get(),
+        outstops.ptr().get(),
+        distincts.ptr().get(),
+        maxcount * outlength,
+        gaps.ptr().get());
+      util::handle_error(err4, classname(), identities_.get());
+
+      return std::make_shared<ListArray64>(Identities::none(), util::Parameters(), outstarts, outstops, outcontent);
     }
 
     else {
