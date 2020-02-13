@@ -113,6 +113,10 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::minmax_depth");
   }
 
+  const std::pair<bool, int64_t> None::branch_depth() const {
+    throw std::runtime_error("undefined operation: None::branch_depth");
+  }
+
   int64_t None::numfields() const {
     throw std::runtime_error("undefined operation: None::numfields");
   }

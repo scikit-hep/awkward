@@ -48,6 +48,7 @@ namespace awkward {
     virtual bool purelist_isregular() const = 0;
     virtual int64_t purelist_depth() const = 0;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const = 0;
+    virtual const std::pair<bool, int64_t> branch_depth() const = 0;
     virtual int64_t numfields() const = 0;
     virtual int64_t fieldindex(const std::string& key) const = 0;
     virtual const std::string key(int64_t fieldindex) const = 0;

@@ -135,6 +135,10 @@ namespace awkward {
     return std::pair<int64_t, int64_t>(1, 1);
   }
 
+  const std::pair<bool, int64_t> EmptyArray::branch_depth() const {
+    return std::pair<bool, int64_t>(false, 1);
+  }
+
   int64_t EmptyArray::numfields() const { return -1; }
 
   int64_t EmptyArray::fieldindex(const std::string& key) const {

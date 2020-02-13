@@ -439,6 +439,29 @@ namespace awkward {
     return std::pair<int64_t, int64_t>(min, max);
   }
 
+  const std::pair<bool, int64_t> RecordArray::branch_depth() const {
+    if (contents_.empty()) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
+    else {
+      bool anybranch = false;
+      int64_t mindepth = -1;
+      for (auto content : contents_) {
+        std::pair<bool, int64_t> content_depth = content.get()->branch_depth();
+        if (mindepth == -1) {
+          mindepth = content_depth.second;
+        }
+        if (content_depth.first  ||  mindepth != content_depth.second) {
+          anybranch = true;
+        }
+        if (mindepth > content_depth.second) {
+          mindepth = content_depth.second;
+        }
+      }
+      return std::pair<bool, int64_t>(anybranch, mindepth);
+    }
+  }
+
   int64_t RecordArray::numfields() const {
     return (int64_t)contents_.size();
   }

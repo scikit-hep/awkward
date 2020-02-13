@@ -317,6 +317,11 @@ namespace awkward {
     return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);
   }
 
+  const std::pair<bool, int64_t> RegularArray::branch_depth() const {
+    std::pair<bool, int64_t> content_depth = content_.get()->minmax_depth();
+    return std::pair<bool, int64_t>(content_depth.first, content_depth.second + 1);
+  }
+
   int64_t RegularArray::numfields() const {
     return content_.get()->numfields();
   }

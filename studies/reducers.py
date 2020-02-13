@@ -893,26 +893,6 @@ assert numpy.prod(nparray, axis=None) == 7581744426003940878
 
 ########################################################################
 
-def Content_regularize_negaxis(self, regularized, negaxis):
-    regular_negaxis = negaxis
-
-    if not regularized:
-        mindepth, maxdepth = self.minmax_depth()
-
-        if negaxis > 0:
-            regularized = True
-        else:
-            if mindepth == maxdepth:
-                regular_negaxis += mindepth
-                regularized = True
-
-        if regularized and not (0 < regular_negaxis <= mindepth):
-            raise ValueError("cannot reduce axis {0} on a structure with minimum depth {1}".format(-negaxis, mindepth))
-
-    return regularized, regular_negaxis
-
-Content.regularize_negaxis = Content_regularize_negaxis
-
 def Content_reduce(self, axis):
     negaxis = -axis   # easier to think about it this way because negaxis aligns with depth
     branch, depth = self.branch_depth()

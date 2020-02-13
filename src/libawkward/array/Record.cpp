@@ -183,6 +183,11 @@ namespace awkward {
     return std::pair<int64_t, int64_t>(out.first - 1, out.second - 1);
   }
 
+  const std::pair<bool, int64_t> Record::branch_depth() const {
+    std::pair<bool, int64_t> out = array_.get()->branch_depth();
+    return std::pair<bool, int64_t>(out.first, out.second - 1);
+  }
+
   int64_t Record::numfields() const {
     return array_.get()->numfields();
   }

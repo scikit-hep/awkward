@@ -642,6 +642,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::pair<bool, int64_t> IndexedArrayOf<T, ISOPTION>::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  template <typename T, bool ISOPTION>
   int64_t IndexedArrayOf<T, ISOPTION>::numfields() const {
     return content_.get()->numfields();
   }

@@ -730,6 +730,25 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::pair<bool, int64_t> UnionArrayOf<T, I>::branch_depth() const {
+    bool anybranch = false;
+    int64_t mindepth = -1;
+    for (auto content : contents_) {
+      std::pair<bool, int64_t> content_depth = content.get()->branch_depth();
+      if (mindepth == -1) {
+        mindepth = content_depth.second;
+      }
+      if (content_depth.first  ||  mindepth != content_depth.second) {
+        anybranch = true;
+      }
+      if (mindepth > content_depth.second) {
+        mindepth = content_depth.second;
+      }
+    }
+    return std::pair<bool, int64_t>(anybranch, mindepth);
+  }
+
+  template <typename T, typename I>
   int64_t UnionArrayOf<T, I>::numfields() const {
     return (int64_t)keys().size();
   }

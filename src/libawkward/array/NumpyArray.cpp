@@ -732,6 +732,10 @@ namespace awkward {
     return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
   }
 
+  const std::pair<bool, int64_t> NumpyArray::branch_depth() const {
+    return std::pair<bool, int64_t>(false, (int64_t)shape_.size());
+  }
+
   int64_t NumpyArray::numfields() const { return -1; }
 
   int64_t NumpyArray::fieldindex(const std::string& key) const {
