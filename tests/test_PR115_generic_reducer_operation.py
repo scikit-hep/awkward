@@ -24,13 +24,17 @@ def test():
          [ 73,  79,  83,  89,  97],
          [101, 103, 107, 109, 113]]]
 
-    assert awkward1.tolist(depth2.prod(axis=-1)) == [
-    [  2 *   3 *   5 *   7 *  11,
-      13 *  17 *  19 *  23 *  29,
-      31 *  37 *  41 *  43 *  47],
-    [ 53 *  59 *  61 *  67 *  71,
-      73 *  79 *  83 *  89 *  97,
-     101 * 103 * 107 * 109 * 113]]
+    # assert awkward1.tolist(depth2.prod(axis=-1)) == [
+    #      [  2 *   3 *   5 *   7 *  11,
+    #        13 *  17 *  19 *  23 *  29,
+    #        31 *  37 *  41 *  43 *  47],
+    #      [ 53 *  59 *  61 *  67 *  71,
+    #        73 *  79 *  83 *  89 *  97,
+    #       101 * 103 * 107 * 109 * 113]]
+
+    assert awkward1.tolist(depth2.prod(axis=-2)) == [
+        [2*13*31, 3*17*37, 5*19*41, 7*23*43, 11*29*47],
+        [53*73*101, 59*79*103, 61*83*107, 67*89*109, 71*97*113]]
 
     # content2 = awkward1.layout.NumpyArray(numpy.array(primes[:12], dtype=numpy.int64))
     # offsets3 = awkward1.layout.Index64(numpy.array([0, 4, 8, 12], dtype=numpy.int64))

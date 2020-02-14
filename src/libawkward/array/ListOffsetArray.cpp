@@ -413,7 +413,7 @@ namespace awkward {
 
   template <typename T>
   const std::pair<bool, int64_t> ListOffsetArrayOf<T>::branch_depth() const {
-    std::pair<bool, int64_t> content_depth = content_.get()->minmax_depth();
+    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first, content_depth.second + 1);
   }
 
@@ -844,6 +844,7 @@ namespace awkward {
     std::cout << "ListOffsetArray::reduce_next " << negaxis << " " << parents.tostring() << " " << outlength << std::endl;
     std::cout << tostring() << std::endl;
 
+    std::cout << "branch " << branchdepth.first << " depth " << branchdepth.second << " so " << (!branchdepth.first) << " and " << (negaxis == branchdepth.second) << " makes " << (!branchdepth.first  &&  negaxis == branchdepth.second) << std::endl;
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       std::cout << "nonlocal" << std::endl;
 

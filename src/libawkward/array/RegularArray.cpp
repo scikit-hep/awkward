@@ -318,7 +318,7 @@ namespace awkward {
   }
 
   const std::pair<bool, int64_t> RegularArray::branch_depth() const {
-    std::pair<bool, int64_t> content_depth = content_.get()->minmax_depth();
+    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first, content_depth.second + 1);
   }
 
