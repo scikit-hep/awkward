@@ -233,7 +233,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
-    throw std::runtime_error("FIXME: Record:reduce_next");
+    std::shared_ptr<Content> trimmed = array_.get()->getitem_range_nowrap(at_, at_ + 1);
+    return trimmed.get()->reduce_next(reducer, negaxis, parents, outlength);
   }
 
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
