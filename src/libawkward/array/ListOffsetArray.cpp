@@ -841,13 +841,7 @@ namespace awkward {
   const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
-    std::cout << "ListOffsetArray::reduce_next " << negaxis << " " << parents.tostring() << " " << outlength << std::endl;
-    std::cout << tostring() << std::endl;
-
-    std::cout << "branch " << branchdepth.first << " depth " << branchdepth.second << " so " << (!branchdepth.first) << " and " << (negaxis == branchdepth.second) << " makes " << (!branchdepth.first  &&  negaxis == branchdepth.second) << std::endl;
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
-      std::cout << "nonlocal" << std::endl;
-
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error("offsets_.length() - 1 != parents.length()");
       }
@@ -863,8 +857,6 @@ namespace awkward {
       util::handle_error(err1, classname(), identities_.get());
       int64_t nextlen = globalstop - globalstart;
 
-      std::cout << "nextlen " << nextlen << std::endl;
-
       int64_t maxcount;
       Index64 offsetscopy(offsets_.length());
       struct Error err2 = awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(
@@ -874,9 +866,6 @@ namespace awkward {
         offsets_.offset(),
         offsets_.length() - 1);
       util::handle_error(err2, classname(), identities_.get());
-
-      std::cout << "maxcount " << maxcount << std::endl;
-      std::cout << "offsetscopy " << offsetscopy.tostring() << std::endl;
 
       Index64 nextcarry(nextlen);
       Index64 nextparents(nextlen);
@@ -898,11 +887,6 @@ namespace awkward {
         maxcount);
       util::handle_error(err3, classname(), identities_.get());
 
-      std::cout << "nextcarry " << nextcarry.tostring() << std::endl;
-      std::cout << "nextparents " << nextparents.tostring() << std::endl;
-      std::cout << "maxnextparents " << maxnextparents << std::endl;
-      std::cout << "distincts " << distincts.tostring() << std::endl;
-
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, nextparents, maxnextparents + 1);
 
@@ -914,8 +898,6 @@ namespace awkward {
         parents.length());
       util::handle_error(err4, classname(), identities_.get());
 
-      std::cout << "gaps " << gaps.tostring() << std::endl;
-
       Index64 outstarts(outlength);
       Index64 outstops(outlength);
       struct Error err5 = awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
@@ -926,15 +908,10 @@ namespace awkward {
         gaps.ptr().get());
       util::handle_error(err5, classname(), identities_.get());
 
-      std::cout << "outstarts " << outstarts.tostring() << std::endl;
-      std::cout << "outstops " << outstops.tostring() << std::endl;
-
       return std::make_shared<ListArray64>(Identities::none(), util::Parameters(), outstarts, outstops, outcontent);
     }
 
     else {
-      std::cout << "local" << std::endl;
-
       int64_t globalstart;
       int64_t globalstop;
       struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
@@ -945,8 +922,6 @@ namespace awkward {
         offsets_.length() - 1);
       util::handle_error(err1, classname(), identities_.get());
 
-      std::cout << "globalstart " << globalstart << " globalstop " << globalstop << std::endl;
-
       Index64 nextparents(globalstop - globalstart);
       struct Error err2 = awkward_listoffsetarray_reduce_local_nextparents_64(
         nextparents.ptr().get(),
@@ -954,8 +929,6 @@ namespace awkward {
         offsets_.offset(),
         offsets_.length() - 1);
       util::handle_error(err2, classname(), identities_.get());
-
-      std::cout << "nextparents " << nextparents.tostring() << std::endl;
 
       std::shared_ptr<Content> trimmed = content_.get()->getitem_range_nowrap(globalstart, globalstop);
       std::shared_ptr<Content> outcontent = trimmed.get()->reduce_next(reducer, negaxis, nextparents, offsets_.length() - 1);
@@ -968,8 +941,6 @@ namespace awkward {
         parents.length(),
         outlength);
       util::handle_error(err3, classname(), identities_.get());
-
-      std::cout << "outoffsets " << outoffsets.tostring() << std::endl;
 
       return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), outoffsets, outcontent);
     }
