@@ -490,7 +490,7 @@ namespace awkward {
     else if (format_.compare("b") == 0) {
       tojson_integer<int8_t>(builder);
     }
-    else if (format_.compare("B") == 0) {
+    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
       tojson_integer<uint8_t>(builder);
     }
     else if (format_.compare("?") == 0) {
@@ -1378,7 +1378,70 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
-    throw std::runtime_error("FIXME: NumpyArray:reduce_next");
+    if (shape_.empty()) {
+      throw std::runtime_error("attempting to reduce a scalar");
+    }
+    else if (shape_.size() != 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->reduce_next(reducer, negaxis, parents, outlength);
+    }
+    else {
+      std::shared_ptr<void> ptr;
+      if (format_.compare("?") == 0) {
+        ptr = reducer.apply_bool(reinterpret_cast<bool*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("b") == 0) {
+        ptr = reducer.apply_int8(reinterpret_cast<int8_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+        ptr = reducer.apply_uint8(reinterpret_cast<uint8_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("h") == 0) {
+        ptr = reducer.apply_int16(reinterpret_cast<int16_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("H") == 0) {
+        ptr = reducer.apply_uint16(reinterpret_cast<uint16_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("l") == 0) {
+#else
+      else if (format_.compare("i") == 0) {
+#endif
+        ptr = reducer.apply_int32(reinterpret_cast<int32_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("L") == 0) {
+#else
+      else if (format_.compare("I") == 0) {
+#endif
+ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("q") == 0) {
+#else
+      else if (format_.compare("l") == 0) {
+#endif
+        ptr = reducer.apply_int64(reinterpret_cast<int64_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("Q") == 0) {
+#else
+      else if (format_.compare("L") == 0) {
+#endif
+        ptr = reducer.apply_uint64(reinterpret_cast<uint64_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("f") == 0) {
+        ptr = reducer.apply_float32(reinterpret_cast<float*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("d") == 0) {
+        ptr = reducer.apply_float64(reinterpret_cast<double*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else {
+        throw std::invalid_argument(std::string("cannot apply reducers to NumpyArray with format \"") + format_ + std::string("\""));
+      }
+      std::vector<ssize_t> shape({ outlength });
+      std::vector<ssize_t> strides({ itemsize_ });
+      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize_, format_);
+    }
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
