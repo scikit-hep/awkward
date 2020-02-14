@@ -658,7 +658,18 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
-    throw std::runtime_error("FIXME: RecordArray:reduce_next");
+    if (contents_.empty()) {
+      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), outlength, istuple());
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        std::shared_ptr<Content> trimmed = content.get()->getitem_range_nowrap(0, length());
+        std::shared_ptr<Content> next = trimmed.get()->reduce_next(reducer, negaxis, parents, outlength);
+        contents.push_back(next);
+      }
+      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_);
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {

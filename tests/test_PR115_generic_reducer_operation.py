@@ -381,3 +381,37 @@ def test_gaps():
         [2*7*13, 3*11, 5],
         [],
         [17*23, 19]]
+
+def test_complicated():
+    offsets1 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64))
+    content1 = awkward1.layout.ListOffsetArray64(offsets1, awkward1.layout.NumpyArray(numpy.array(primes[:5], dtype=numpy.int64)))
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 8, 9], dtype=numpy.int64))
+    offsets3 = awkward1.layout.Index64(numpy.array([0, 4, 4, 6], dtype=numpy.int64))
+    content2 = awkward1.layout.ListOffsetArray64(offsets3, awkward1.layout.ListOffsetArray64(offsets2, awkward1.layout.NumpyArray(numpy.array(primes[:9], dtype=numpy.int64))))
+    offsets4 = awkward1.layout.Index64(numpy.array([0, 1, 1, 3], dtype=numpy.int64))
+    complicated = awkward1.layout.ListOffsetArray64(offsets4, awkward1.layout.RecordArray([content1, content2], ["x", "y"]))
+
+    assert awkward1.tolist(complicated) == [[{"x": [2, 3, 5], "y": [[2, 3, 5], [], [7, 11], [13]]}], [], [{"x": [], "y": []}, {"x": [7, 11], "y": [[17, 19], [23]]}]]
+
+    assert awkward1.tolist(complicated["x"]) == [
+        [[2, 3, 5]],
+        [],
+        [[],
+         [7, 11]]]
+    assert awkward1.tolist(complicated["y"]) == [
+        [[[ 2,  3, 5],
+          [         ],
+          [ 7, 11   ],
+          [13       ]]],
+        [             ],
+        [[          ],
+         [[17, 19   ],
+          [23       ]]]]
+
+    assert awkward1.tolist(complicated.prod(-1)) == [{"x": [30], "y": [[30, 1, 77, 13]]}, {"x": [], "y": []}, {"x": [1, 77], "y": [[], [323, 23]]}]
+    assert awkward1.tolist(complicated["x"].prod(-1)) == [[30], [], [1, 77]]
+    assert awkward1.tolist(complicated["y"].prod(-1)) == [[[30, 1, 77, 13]], [], [[], [323, 23]]]
+
+    assert awkward1.tolist(complicated.prod(-2)) == [{"x": [2, 3, 5], "y": [[182, 33, 5]]}, {"x": [], "y": []}, {"x": [7, 11], "y": [[], [391, 19]]}]
+    assert awkward1.tolist(complicated["x"].prod(-2)) == [[2, 3, 5], [], [7, 11]]
+    assert awkward1.tolist(complicated["y"].prod(-2)) == [[[182, 33, 5]], [], [[], [391, 19]]]
