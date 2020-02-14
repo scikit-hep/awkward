@@ -516,7 +516,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
-    throw std::runtime_error("FIXME: RegularArray:reduce_next");
+    return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
