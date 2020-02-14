@@ -19,7 +19,7 @@ class Content:
     @staticmethod
     def random(minlen=0, choices=None):
         "Generate a random array from a set of possible classes."
-        
+
         if choices is None:
             choices = [x for x in globals().values() if isinstance(x, type) and issubclass(x, Content)]
         else:
@@ -307,7 +307,7 @@ class ListOffsetArray(Content):
         for x in counts:
             offsets.append(offsets[-1] + x)
         return ListOffsetArray(offsets, Content.random(offsets[-1], choices))
-        
+
     def __len__(self):
         return len(self.offsets) - 1
 
@@ -401,7 +401,7 @@ class ListArray(Content):
             starts = [random.randint(0, len(content) - 1) for i in range(length)]
             stops = [x + min(random_length(), len(content) - x) for x in starts]
         return ListArray(starts, stops, content)
-        
+
     def __len__(self):
         return len(self.starts)
 
@@ -1029,7 +1029,7 @@ def ListOffsetArray_reduce_next(self, negaxis, parents, length):
 
     else:
         nextparents = [None] * (self.offsets[-1] - self.offsets[0])
-        k = 0
+        # k = 0
         for i in range(len(self.offsets) - 1):
             for j in range(self.offsets[i], self.offsets[i + 1]):
                 nextparents[j] = i

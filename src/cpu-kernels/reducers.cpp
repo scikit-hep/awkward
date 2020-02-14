@@ -12,8 +12,9 @@ ERROR awkward_content_reduce_zeroparents_64(int64_t* toparents, int64_t length) 
   return success();
 }
 
-ERROR awkward_listoffsetarray_reduce_nextlen_64(int64_t* nextlen, const int64_t* offsets, int64_t offsetsoffset, int64_t length) {
-  *nextlen = offsets[offsetsoffset + length] - offsets[offsetsoffset + 0];
+ERROR awkward_listoffsetarray_reduce_global_startstop_64(int64_t* globalstart, int64_t* globalstop, const int64_t* offsets, int64_t offsetsoffset, int64_t length) {
+  *globalstart = offsets[offsetsoffset + 0];
+  *globalstop = offsets[offsetsoffset + length];
   return success();
 }
 
@@ -93,6 +94,29 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(int64_t* outstar
     }
     if (distincts[i] != -1) {
       outstops[k - 1] = i + 1;
+    }
+  }
+  return success();
+}
+
+ERROR awkward_listoffsetarray_reduce_local_nextparents_64(int64_t* nextparents, const int64_t* offsets, int64_t offsetsoffset, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    for (int64_t j = offsets[offsetsoffset + i];  j < offsets[offsetsoffset + i + 1];  j++) {
+      nextparents[j] = i;
+    }
+  }
+  return success();
+}
+
+ERROR awkward_listoffsetarray_reduce_local_outoffsets_64(int64_t* outoffsets, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  outoffsets[outlength] = lenparents;
+  int64_t k = 0;
+  int64_t last = -1;
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    while (last < parents[parentsoffset + i]) {
+      outoffsets[k] = i;
+      k++;
+      last++;
     }
   }
   return success();

@@ -846,13 +846,16 @@ namespace awkward {
         throw std::runtime_error("offsets_.length() - 1 != parents.length()");
       }
 
-      int64_t nextlen;
-      struct Error err1 = awkward_listoffsetarray_reduce_nextlen_64(
-        &nextlen,
+      int64_t globalstart;
+      int64_t globalstop;
+      struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
+        &globalstart,
+        &globalstop,
         offsets_.ptr().get(),
         offsets_.offset(),
         offsets_.length() - 1);
       util::handle_error(err1, classname(), identities_.get());
+      int64_t nextlen = globalstop - globalstart;
 
       int64_t maxcount;
       Index64 offsetscopy(offsets_.length());
@@ -909,9 +912,37 @@ namespace awkward {
     }
 
     else {
+      int64_t globalstart;
+      int64_t globalstop;
+      struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
+        &globalstart,
+        &globalstop,
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length() - 1);
+      util::handle_error(err1, classname(), identities_.get());
 
+      Index64 nextparents(globalstop - globalstart);
+      struct Error err2 = awkward_listoffsetarray_reduce_local_nextparents_64(
+        nextparents.ptr().get(),
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        offsets_.length() - 1);
+      util::handle_error(err2, classname(), identities_.get());
 
-      throw std::runtime_error("FIXME: ListOffsetArray:reduce_next 2");
+      std::shared_ptr<Content> trimmed = content_.get()->getitem_range_nowrap(globalstart, globalstop);
+      std::shared_ptr<Content> outcontent = trimmed.get()->reduce_next(reducer, negaxis, nextparents, offsets_.length() - 1);
+
+      Index64 outoffsets(outlength + 1);
+      struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(
+        outoffsets.ptr().get(),
+        parents.ptr().get(),
+        parents.offset(),
+        parents.length(),
+        outlength);
+      util::handle_error(err3, classname(), identities_.get());
+
+      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), outoffsets, outcontent);
     }
   }
 
