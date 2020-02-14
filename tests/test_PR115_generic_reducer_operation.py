@@ -24,6 +24,8 @@ def test():
          [ 73,  79,  83,  89,  97],
          [101, 103, 107, 109, 113]]]
 
+    print(depth2.prod(axis=-1))
+
     # content2 = awkward1.layout.NumpyArray(numpy.array(primes[:12], dtype=numpy.int64))
     # offsets3 = awkward1.layout.Index64(numpy.array([0, 4, 8, 12], dtype=numpy.int64))
     # depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
