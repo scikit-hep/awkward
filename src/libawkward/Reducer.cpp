@@ -13,6 +13,7 @@ namespace awkward {
       offset,
       parents.ptr().get(),
       parents.offset(),
+      parents.length(),
       outlength);
     util::handle_error(err, "'prod'", nullptr);
     return ptr;
@@ -26,6 +27,7 @@ namespace awkward {
       offset,
       parents.ptr().get(),
       parents.offset(),
+      parents.length(),
       outlength);
     util::handle_error(err, "'prod'", nullptr);
     return ptr;
@@ -39,6 +41,7 @@ namespace awkward {
       offset,
       parents.ptr().get(),
       parents.offset(),
+      parents.length(),
       outlength);
     util::handle_error(err, "'prod'", nullptr);
     return ptr;
@@ -52,6 +55,7 @@ namespace awkward {
       offset,
       parents.ptr().get(),
       parents.offset(),
+      parents.length(),
       outlength);
     util::handle_error(err, "'prod'", nullptr);
     return ptr;
@@ -65,6 +69,7 @@ namespace awkward {
       offset,
       parents.ptr().get(),
       parents.offset(),
+      parents.length(),
       outlength);
     util::handle_error(err, "'prod'", nullptr);
     return ptr;
@@ -78,6 +83,7 @@ namespace awkward {
       offset,
       parents.ptr().get(),
       parents.offset(),
+      parents.length(),
       outlength);
     util::handle_error(err, "'prod'", nullptr);
     return ptr;
@@ -91,6 +97,7 @@ namespace awkward {
       offset,
       parents.ptr().get(),
       parents.offset(),
+      parents.length(),
       outlength);
     util::handle_error(err, "'prod'", nullptr);
     return ptr;
@@ -104,6 +111,7 @@ namespace awkward {
       offset,
       parents.ptr().get(),
       parents.offset(),
+      parents.length(),
       outlength);
     util::handle_error(err, "'prod'", nullptr);
     return ptr;
@@ -117,6 +125,7 @@ namespace awkward {
       offset,
       parents.ptr().get(),
       parents.offset(),
+      parents.length(),
       outlength);
     util::handle_error(err, "'prod'", nullptr);
     return ptr;
@@ -130,6 +139,7 @@ namespace awkward {
       offset,
       parents.ptr().get(),
       parents.offset(),
+      parents.length(),
       outlength);
     util::handle_error(err, "'prod'", nullptr);
     return ptr;
@@ -143,6 +153,7 @@ namespace awkward {
       offset,
       parents.ptr().get(),
       parents.offset(),
+      parents.length(),
       outlength);
     util::handle_error(err, "'prod'", nullptr);
     return ptr;

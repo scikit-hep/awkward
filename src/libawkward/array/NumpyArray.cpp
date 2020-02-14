@@ -1378,10 +1378,14 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
+    std::cout << "NumpyArray::reduce_next " << negaxis << " " << parents.tostring() << " " << outlength << std::endl;
+
     if (shape_.empty()) {
       throw std::runtime_error("attempting to reduce a scalar");
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
+      std::cout << "toRegularArray" << std::endl;
+
       return toRegularArray().get()->reduce_next(reducer, negaxis, parents, outlength);
     }
     else {
@@ -1440,7 +1444,12 @@ ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ 
       }
       std::vector<ssize_t> shape({ (ssize_t)outlength });
       std::vector<ssize_t> strides({ (ssize_t)itemsize_ });
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize_, format_);
+
+      std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize_, format_);
+
+      std::cout << "ptr " << out.get()->tostring() << std::endl;
+
+      return out;
     }
   }
 
