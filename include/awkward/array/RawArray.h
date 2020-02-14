@@ -25,7 +25,8 @@
 #include "awkward/array/IndexedArray.h"
 
 namespace awkward {
-  void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
+  // function included in multiple source files must be inline
+  inline void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
     for (int i = 0;  i < length;  i++) {
       builder.boolean((bool)array[i]);
     }

@@ -108,6 +108,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_numpyarray_fill_to64_frombool(int64_t* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length);
   EXPORT_SYMBOL struct Error awkward_numpyarray_fill_tobool_frombool(bool* toptr, int64_t tooffset, const bool* fromptr, int64_t fromoffset, int64_t length);
 
+  EXPORT_SYMBOL struct Error awkward_zero_index_64(int64_t* toindex, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_zero_raw_ptr(uint8_t* toptr, int64_t length);
   EXPORT_SYMBOL struct Error awkward_numpyarray_pad_copy_64(uint8_t* toptr, const uint8_t* fromptr, int64_t tolen, int64_t fromlen, int64_t tostride, int64_t fromstride, int64_t offset, const int64_t* pos);
 
   EXPORT_SYMBOL struct Error awkward_listarray_fill_to64_from32(int64_t* tostarts, int64_t tostartsoffset, int64_t* tostops, int64_t tostopsoffset, const int32_t* fromstarts, int64_t fromstartsoffset, const int32_t* fromstops, int64_t fromstopsoffset, int64_t length, int64_t base);

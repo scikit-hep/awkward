@@ -526,6 +526,24 @@ ERROR awkward_numpyarray_fill_tobool_frombool(bool* toptr, int64_t tooffset, con
 }
 
 template <typename T>
+ERROR awkward_zero_index(T* toindex, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toindex[i] = 0;
+  }
+  return success();
+}
+ERROR awkward_zero_index_64(int64_t* toindex, int64_t length) {
+  return awkward_zero_index<int64_t>(toindex, length);
+}
+
+ERROR awkward_zero_raw_ptr(uint8_t* toptr, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toptr[i] = 0;
+  }
+  return success();
+}
+
+template <typename T>
 ERROR awkward_numpyarray_pad_copy(uint8_t* toptr, const uint8_t* fromptr, int64_t tolen, int64_t fromlen, int64_t tostride, int64_t fromstride, int64_t offset, const T* pos) {
   for (int64_t j = 0; j < tolen*tostride; j++) {
     toptr[j] = 0;

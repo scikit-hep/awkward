@@ -9,10 +9,12 @@
 #include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
+#include "awkward/type/OptionType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/array/RawArray.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
@@ -510,8 +512,51 @@ namespace awkward {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
-  const std::shared_ptr<Content> RegularArray::pad(int64_t length, int64_t axis) const {
-    throw std::runtime_error("FIXME: RegularArray pad is not implemented");
+  const std::shared_ptr<Content> RegularArray::pad(int64_t pad_width, int64_t axis) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (OptionType* raw = dynamic_cast<OptionType*>(type().get())) {
+      std::cout << "RegularArray is OptionType\n";
+    }
+    if (toaxis == 0) {
+      Index64 result(pad_width);
+      struct Error err1 = awkward_zero_index_64(
+        result.ptr().get(),
+        pad_width);
+      util::handle_error(err1, classname(), identities_.get());
+      std::cout << result.length() << "\n";
+
+      std::shared_ptr<void> ptr(new uint8_t[(size_t)pad_width], util::array_deleter<uint8_t>());
+      struct Error err2 = awkward_zero_raw_ptr(
+        reinterpret_cast<uint8_t*>(ptr.get()),
+        pad_width);
+      util::handle_error(err2, classname(), identities_.get());
+
+      /*std::shared_ptr<Content> empty = OptionType(util::Parameters(), type()).empty();
+      std::shared_ptr<Content> next = empty.get()->carry(result);
+      return next;
+*/
+      std::vector<std::shared_ptr<Content>> contents;
+      contents.emplace_back(content_);
+      for (int64_t i = 0; i < pad_width; i++) {
+        std::cout << i << ":" << contents.back().get()->length() << "\n";
+        //contents.emplace_back(OptionType(util::Parameters(), type()).empty());
+      }
+      std::cout << contents.size() << "\n";
+      Index8 tags(contents.size());
+      Index64 index(contents.size());
+      /*RawArrayOf<double> rawarray(Identities::none(), util::Parameters(), pad_width + 1);
+      for (int i = 0;  i < pad_width + 1;  i++) {
+        *rawarray.borrow(i) = 0.0;
+      }*/
+
+      //RawArrayOf<uint8_t> rawarray(Identities::none(), util::Parameters(), pad_width);
+      return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
+      //return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), result, rawarray.shallow_copy());
+      //return rawarray.shallow_copy();
+    }
+    else {
+      return content_.get()->pad(pad_width, toaxis - 1);
+    }
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
