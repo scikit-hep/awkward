@@ -1438,8 +1438,8 @@ ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ 
       else {
         throw std::invalid_argument(std::string("cannot apply reducers to NumpyArray with format \"") + format_ + std::string("\""));
       }
-      std::vector<ssize_t> shape({ outlength });
-      std::vector<ssize_t> strides({ itemsize_ });
+      std::vector<ssize_t> shape({ (ssize_t)outlength });
+      std::vector<ssize_t> strides({ (ssize_t)itemsize_ });
       return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize_, format_);
     }
   }
