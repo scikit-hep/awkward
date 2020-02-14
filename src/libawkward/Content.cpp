@@ -73,7 +73,7 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Content> Content::reduce(util::Reducer reducer, int64_t axis) const {
+  const std::shared_ptr<Content> Content::reduce(const Reducer& reducer, int64_t axis) const {
     int64_t negaxis = -axis;
     std::pair<bool, int64_t> branchdepth = branch_depth();
     bool branch = branchdepth.first;

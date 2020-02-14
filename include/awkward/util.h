@@ -34,19 +34,6 @@ namespace awkward {
 
     void handle_error(const struct Error& err, const std::string& classname, const Identities* id);
 
-    enum class Reducer {
-      count,
-      count_nonzero,
-      any,
-      all,
-      sum,
-      prod,
-      min,
-      max,
-
-      numreducers
-    };
-
     template <typename T>
     IndexOf<T> make_starts(const IndexOf<T>& offsets);
     template <typename T>

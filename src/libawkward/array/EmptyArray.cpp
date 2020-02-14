@@ -186,7 +186,7 @@ namespace awkward {
     return std::make_shared<SliceArray64>(index, shape, strides, false);
   }
 
-  const std::shared_ptr<Content> EmptyArray::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
+  const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
     throw std::runtime_error("FIXME: EmptyArray:reduce_next");
   }
 

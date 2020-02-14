@@ -657,7 +657,7 @@ namespace awkward {
     throw std::invalid_argument("cannot use records as a slice");
   }
 
-  const std::shared_ptr<Content> RecordArray::reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
+  const std::shared_ptr<Content> RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
     throw std::runtime_error("FIXME: RecordArray:reduce_next");
   }
 

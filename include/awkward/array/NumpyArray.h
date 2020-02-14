@@ -98,7 +98,7 @@ namespace awkward {
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
     const std::shared_ptr<SliceItem> asslice() const override;
-    const std::shared_ptr<Content> reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const override;
+    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const override;
 
     bool iscontiguous() const;
     void become_contiguous();

@@ -12,6 +12,7 @@
 #include "awkward/io/json.h"
 #include "awkward/type/Type.h"
 #include "awkward/Index.h"
+#include "awkward/Reducer.h"
 
 namespace awkward {
   class Content {
@@ -62,13 +63,13 @@ namespace awkward {
     virtual bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const = 0;
     virtual const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const = 0;
     virtual const std::shared_ptr<SliceItem> asslice() const = 0;
-    virtual const std::shared_ptr<Content> reduce_next(util::Reducer reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const = 0;
+    virtual const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const = 0;
 
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
     void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
     int64_t nbytes() const;
-    const std::shared_ptr<Content> reduce(util::Reducer reducer, int64_t axis) const;
+    const std::shared_ptr<Content> reduce(const Reducer& reducer, int64_t axis) const;
 
     const util::Parameters parameters() const;
     void setparameters(const util::Parameters& parameters);
