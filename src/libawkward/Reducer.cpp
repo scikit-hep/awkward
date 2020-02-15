@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#include <limits>
+
 #include "awkward/cpu-kernels/reducers.h"
 
 #include "awkward/Reducer.h"
@@ -1011,6 +1013,184 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  /////////////////////////////////////////////////////////////// min (minimum, in which infinity is the identity)
+
+  const std::string ReducerMin::name() const {
+    return "min";
+  }
+
+  const std::string ReducerMin::preferred_type() const {
+    return "d";
+  }
+
+  ssize_t ReducerMin::preferred_typesize() const {
+    return 8;
+  }
+
+  const std::shared_ptr<void> ReducerMin::apply_bool(const bool* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_bool_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerMin::apply_int8(const int8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<int8_t> ptr(new int8_t[(size_t)outlength], util::array_deleter<int8_t>());
+    struct Error err = awkward_reduce_min_int8_int8_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength,
+      std::numeric_limits<int8_t>::max());
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerMin::apply_uint8(const uint8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<uint8_t> ptr(new uint8_t[(size_t)outlength], util::array_deleter<uint8_t>());
+    struct Error err = awkward_reduce_min_uint8_uint8_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength,
+      std::numeric_limits<uint8_t>::max());
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerMin::apply_int16(const int16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<int16_t> ptr(new int16_t[(size_t)outlength], util::array_deleter<int16_t>());
+    struct Error err = awkward_reduce_min_int16_int16_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength,
+      std::numeric_limits<int16_t>::max());
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerMin::apply_uint16(const uint16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<uint16_t> ptr(new uint16_t[(size_t)outlength], util::array_deleter<uint16_t>());
+    struct Error err = awkward_reduce_min_uint16_uint16_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength,
+      std::numeric_limits<uint16_t>::max());
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerMin::apply_int32(const int32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength], util::array_deleter<int32_t>());
+    struct Error err = awkward_reduce_min_int32_int32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength,
+      std::numeric_limits<int32_t>::max());
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerMin::apply_uint32(const uint32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength], util::array_deleter<uint32_t>());
+    struct Error err = awkward_reduce_min_uint32_uint32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength,
+      std::numeric_limits<uint32_t>::max());
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerMin::apply_int64(const int64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength], util::array_deleter<int64_t>());
+    struct Error err = awkward_reduce_min_int64_int64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength,
+      std::numeric_limits<int64_t>::max());
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerMin::apply_uint64(const uint64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength], util::array_deleter<uint64_t>());
+    struct Error err = awkward_reduce_min_uint64_uint64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength,
+      std::numeric_limits<uint64_t>::max());
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerMin::apply_float32(const float* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<float> ptr(new float[(size_t)outlength], util::array_deleter<float>());
+    struct Error err = awkward_reduce_min_float32_float32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength,
+      std::numeric_limits<float>::infinity());
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerMin::apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<double> ptr(new double[(size_t)outlength], util::array_deleter<double>());
+    struct Error err = awkward_reduce_min_float64_float64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength,
+      std::numeric_limits<double>::infinity());
     util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }

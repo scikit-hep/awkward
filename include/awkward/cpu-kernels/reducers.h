@@ -66,6 +66,17 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_reduce_prod_bool_float32_64(bool* toptr, const float* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
   EXPORT_SYMBOL struct Error awkward_reduce_prod_bool_float64_64(bool* toptr, const double* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
 
+  EXPORT_SYMBOL struct Error awkward_reduce_min_int8_int8_64(int8_t* toptr, const int8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength, int8_t identity);
+  EXPORT_SYMBOL struct Error awkward_reduce_min_uint8_uint8_64(uint8_t* toptr, const uint8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength, uint8_t identity);
+  EXPORT_SYMBOL struct Error awkward_reduce_min_int16_int16_64(int16_t* toptr, const int16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength, int16_t identity);
+  EXPORT_SYMBOL struct Error awkward_reduce_min_uint16_uint16_64(uint16_t* toptr, const uint16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength, uint16_t identity);
+  EXPORT_SYMBOL struct Error awkward_reduce_min_int32_int32_64(int32_t* toptr, const int32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength, int32_t identity);
+  EXPORT_SYMBOL struct Error awkward_reduce_min_uint32_uint32_64(uint32_t* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength, uint32_t identity);
+  EXPORT_SYMBOL struct Error awkward_reduce_min_int64_int64_64(int64_t* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength, int64_t identity);
+  EXPORT_SYMBOL struct Error awkward_reduce_min_uint64_uint64_64(uint64_t* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength, uint64_t identity);
+  EXPORT_SYMBOL struct Error awkward_reduce_min_float32_float32_64(float* toptr, const float* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength, float identity);
+  EXPORT_SYMBOL struct Error awkward_reduce_min_float64_float64_64(double* toptr, const double* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength, double identity);
+
   EXPORT_SYMBOL struct Error awkward_content_reduce_zeroparents_64(int64_t* toparents, int64_t length);
   EXPORT_SYMBOL struct Error awkward_listoffsetarray_reduce_global_startstop_64(int64_t* globalstart, int64_t* globalstop, const int64_t* offsets, int64_t offsetsoffset, int64_t length);
 

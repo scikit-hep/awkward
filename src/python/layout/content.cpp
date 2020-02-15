@@ -869,6 +869,10 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
             ak::ReducerAll reducer;
             return box(self.reduce(reducer, axis));
           }, py::arg("axis"))
+          .def("min", [](const T& self, int64_t axis) -> py::object {
+            ak::ReducerMin reducer;
+            return box(self.reduce(reducer, axis));
+          }, py::arg("axis"))
 
   ;
 }
