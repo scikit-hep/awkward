@@ -73,6 +73,8 @@ namespace awkward {
     const std::string name() const override;
     const std::string preferred_type() const override;
     ssize_t preferred_typesize() const override;
+    const std::string return_type(const std::string& given_type) const override;
+    ssize_t return_typesize(const std::string& given_type) const override;
     const std::shared_ptr<void> apply_bool(const bool* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
     const std::shared_ptr<void> apply_int8(const int8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
     const std::shared_ptr<void> apply_uint8(const uint8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
@@ -91,6 +93,8 @@ namespace awkward {
     const std::string name() const override;
     const std::string preferred_type() const override;
     ssize_t preferred_typesize() const override;
+    const std::string return_type(const std::string& given_type) const override;
+    ssize_t return_typesize(const std::string& given_type) const override;
     const std::shared_ptr<void> apply_bool(const bool* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
     const std::shared_ptr<void> apply_int8(const int8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
     const std::shared_ptr<void> apply_uint8(const uint8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
