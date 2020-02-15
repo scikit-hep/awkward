@@ -16,7 +16,7 @@ namespace awkward {
     else if (given_type.compare("b") == 0) {
       return 1;
     }
-    else if (given_type.compare("B") == 0  ||  format_.compare("c") == 0) {
+    else if (given_type.compare("B") == 0  ||  given_type.compare("c") == 0) {
       return 1;
     }
     else if (given_type.compare("h") == 0) {
@@ -33,30 +33,30 @@ namespace awkward {
       return 4;
     }
 #if defined _MSC_VER || defined __i386__
-      else if (format_.compare("L") == 0) {
+      else if (given_type.compare("L") == 0) {
 #else
-    else if (format_.compare("I") == 0) {
+    else if (given_type.compare("I") == 0) {
 #endif
       return 4;
     }
 #if defined _MSC_VER || defined __i386__
-    else if (format_.compare("q") == 0) {
+    else if (given_type.compare("q") == 0) {
 #else
-    else if (format_.compare("l") == 0) {
+    else if (given_type.compare("l") == 0) {
 #endif
       return 8;
     }
 #if defined _MSC_VER || defined __i386__
-    else if (format_.compare("Q") == 0) {
+    else if (given_type.compare("Q") == 0) {
 #else
-    else if (format_.compare("L") == 0) {
+    else if (given_type.compare("L") == 0) {
 #endif
       return 8;
     }
-    else if (format_.compare("f") == 0) {
+    else if (given_type.compare("f") == 0) {
       return 4;
     }
-    else if (format_.compare("d") == 0) {
+    else if (given_type.compare("d") == 0) {
       return 8;
     }
     else {
