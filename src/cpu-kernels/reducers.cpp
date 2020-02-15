@@ -5,54 +5,174 @@
 
 #include "awkward/cpu-kernels/reducers.h"
 
-template <typename T>
-ERROR awkward_reduce_prod(T* toptr, const T* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+template <typename OUT, typename IN>
+ERROR awkward_reduce_sum(OUT* toptr, const IN* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
   for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = (T)1;
+    toptr[i] = (OUT)0;
+  }
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    toptr[parents[parentsoffset + i]] += fromptr[fromptroffset + i];
+  }
+  return success();
+}
+ERROR awkward_reduce_sum_int8_int8_64(int8_t* toptr, const int8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum<int8_t, int8_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_uint8_uint8_64(uint8_t* toptr, const uint8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum<uint8_t, uint8_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_int16_int16_64(int16_t* toptr, const int16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum<int16_t, int16_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_uint16_uint16_64(uint16_t* toptr, const uint16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum<uint16_t, uint16_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_int32_int32_64(int32_t* toptr, const int32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum<int32_t, int32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_uint32_uint32_64(uint32_t* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum<uint32_t, uint32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_int64_int64_64(int64_t* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum<int64_t, int64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_uint64_uint64_64(uint64_t* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum<uint64_t, uint64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_float32_float32_64(float* toptr, const float* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum<float, float>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_float64_float64_64(double* toptr, const double* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum<double, double>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+
+template <typename IN>
+ERROR awkward_reduce_sum_bool(bool* toptr, const IN* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  for (int64_t i = 0;  i < outlength;  i++) {
+    toptr[i] = (bool)0;
+  }
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    toptr[parents[parentsoffset + i]] |= (fromptr[fromptroffset + i] != 0);
+  }
+  return success();
+}
+ERROR awkward_reduce_sum_bool_bool_64(bool* toptr, const bool* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum_bool<bool>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_bool_int8_64(bool* toptr, const int8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum_bool<int8_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_bool_uint8_64(bool* toptr, const uint8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum_bool<uint8_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_bool_int16_64(bool* toptr, const int16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum_bool<int16_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_bool_uint16_64(bool* toptr, const uint16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum_bool<uint16_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_bool_int32_64(bool* toptr, const int32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum_bool<int32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_bool_uint32_64(bool* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum_bool<uint32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_bool_int64_64(bool* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum_bool<int64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_bool_uint64_64(bool* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum_bool<uint64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_bool_float32_64(bool* toptr, const float* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum_bool<float>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_sum_bool_float64_64(bool* toptr, const double* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_sum_bool<double>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+
+template <typename OUT, typename IN>
+ERROR awkward_reduce_prod(OUT* toptr, const IN* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  for (int64_t i = 0;  i < outlength;  i++) {
+    toptr[i] = (OUT)1;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     toptr[parents[parentsoffset + i]] *= fromptr[fromptroffset + i];
   }
   return success();
 }
-ERROR awkward_reduce_prod_bool_64(bool* toptr, const bool* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+ERROR awkward_reduce_prod_int8_int8_64(int8_t* toptr, const int8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod<int8_t, int8_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_prod_uint8_uint8_64(uint8_t* toptr, const uint8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod<uint8_t, uint8_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_prod_int16_int16_64(int16_t* toptr, const int16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod<int16_t, int16_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_prod_uint16_uint16_64(uint16_t* toptr, const uint16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod<uint16_t, uint16_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_prod_int32_int32_64(int32_t* toptr, const int32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod<int32_t, int32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_prod_uint32_uint32_64(uint32_t* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod<uint32_t, uint32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_prod_int64_int64_64(int64_t* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod<int64_t, int64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_prod_uint64_uint64_64(uint64_t* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod<uint64_t, uint64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_prod_float32_float32_64(float* toptr, const float* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod<float, float>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_prod_float64_float64_64(double* toptr, const double* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod<double, double>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+
+template <typename IN>
+ERROR awkward_reduce_prod_bool(bool* toptr, const IN* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
   for (int64_t i = 0;  i < outlength;  i++) {
     toptr[i] = (bool)1;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[parentsoffset + i]] *= (fromptr[fromptroffset + i] != 0);
+    toptr[parents[parentsoffset + i]] &= (fromptr[fromptroffset + i] != 0);
   }
   return success();
 }
-ERROR awkward_reduce_prod_int8_64(int8_t* toptr, const int8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<int8_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+ERROR awkward_reduce_prod_bool_bool_64(bool* toptr, const bool* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod_bool<bool>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
-ERROR awkward_reduce_prod_uint8_64(uint8_t* toptr, const uint8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<uint8_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+ERROR awkward_reduce_prod_bool_int8_64(bool* toptr, const int8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod_bool<int8_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
-ERROR awkward_reduce_prod_int16_64(int16_t* toptr, const int16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<int16_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+ERROR awkward_reduce_prod_bool_uint8_64(bool* toptr, const uint8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod_bool<uint8_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
-ERROR awkward_reduce_prod_uint16_64(uint16_t* toptr, const uint16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<uint16_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+ERROR awkward_reduce_prod_bool_int16_64(bool* toptr, const int16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod_bool<int16_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
-ERROR awkward_reduce_prod_int32_64(int32_t* toptr, const int32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<int32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+ERROR awkward_reduce_prod_bool_uint16_64(bool* toptr, const uint16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod_bool<uint16_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
-ERROR awkward_reduce_prod_uint32_64(uint32_t* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<uint32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+ERROR awkward_reduce_prod_bool_int32_64(bool* toptr, const int32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod_bool<int32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
-ERROR awkward_reduce_prod_int64_64(int64_t* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<int64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+ERROR awkward_reduce_prod_bool_uint32_64(bool* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod_bool<uint32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
-ERROR awkward_reduce_prod_uint64_64(uint64_t* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<uint64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+ERROR awkward_reduce_prod_bool_int64_64(bool* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod_bool<int64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
-ERROR awkward_reduce_prod_float32_64(float* toptr, const float* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<float>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+ERROR awkward_reduce_prod_bool_uint64_64(bool* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod_bool<uint64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
-ERROR awkward_reduce_prod_float64_64(double* toptr, const double* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<double>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+ERROR awkward_reduce_prod_bool_float32_64(bool* toptr, const float* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod_bool<float>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_prod_bool_float64_64(bool* toptr, const double* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_prod_bool<double>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
 
 ERROR awkward_content_reduce_zeroparents_64(int64_t* toparents, int64_t length) {

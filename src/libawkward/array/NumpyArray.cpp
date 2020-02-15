@@ -1438,10 +1438,10 @@ namespace awkward {
       else {
         throw std::invalid_argument(std::string("cannot apply reducers to NumpyArray with format \"") + format_ + std::string("\""));
       }
-      std::vector<ssize_t> shape({ (ssize_t)outlength });
-      std::vector<ssize_t> strides({ (ssize_t)itemsize_ });
       std::string format = reducer.return_type(format_);
       ssize_t itemsize = reducer.return_typesize(format_);
+      std::vector<ssize_t> shape({ (ssize_t)outlength });
+      std::vector<ssize_t> strides({ itemsize });
       return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
     }
   }

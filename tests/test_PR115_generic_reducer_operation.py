@@ -657,3 +657,86 @@ def test_UnionArray():
         [2*53, 3*59, 5*61, 7*67, 11*71],
         [13*73, 17*79, 19*83, 23*89, 29*97],
         [31*101, 37*103, 41*107, 43*109, 47*113]]
+
+def test_sum():
+    content2 = awkward1.layout.NumpyArray(numpy.array([1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048], dtype=numpy.int64))
+    offsets3 = awkward1.layout.Index64(numpy.array([0, 4, 8, 12], dtype=numpy.int64))
+    depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
+
+    assert awkward1.tolist(depth1.sum(-1)) == [
+        1 + 2 + 4 + 8,
+        16 + 32 + 64 + 128,
+        256 + 512 + 1024 + 2048]
+    assert awkward1.tolist(depth1.sum(1)) == [
+        1 + 2 + 4 + 8,
+        16 + 32 + 64 + 128,
+        256 + 512 + 1024 + 2048]
+
+    assert awkward1.tolist(depth1.sum(-2)) == [
+        1 + 16 + 256,
+        2 + 32 + 512,
+        4 + 64 + 1024,
+        8 + 128 + 2048]
+    assert awkward1.tolist(depth1.sum(0)) == [
+        1 + 16 + 256,
+        2 + 32 + 512,
+        4 + 64 + 1024,
+        8 + 128 + 2048]
+
+def test_any():
+    content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 0.0, 0.0, 0.0]))
+    offsets3 = awkward1.layout.Index64(numpy.array([0, 3, 6, 10], dtype=numpy.int64))
+    depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
+    assert awkward1.tolist(depth1) == [
+        [1.1, 2.2, 3.3],
+        [0.0, 2.2, 0.0],
+        [0.0, 0.0, 0.0, 0.0]]
+
+    assert awkward1.tolist(depth1.any(-1)) == [
+        True,
+        True,
+        False]
+    assert awkward1.tolist(depth1.any(1)) == [
+        True,
+        True,
+        False]
+
+    assert awkward1.tolist(depth1.any(-2)) == [
+        True,
+        True,
+        True,
+        False]
+    assert awkward1.tolist(depth1.any(0)) == [
+        True,
+        True,
+        True,
+        False]
+
+def test_all():
+    content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4]))
+    offsets3 = awkward1.layout.Index64(numpy.array([0, 3, 6, 10], dtype=numpy.int64))
+    depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
+    assert awkward1.tolist(depth1) == [
+        [1.1, 2.2, 3.3],
+        [0.0, 2.2, 0.0],
+        [0.0, 2.2, 0.0, 4.4]]
+
+    assert awkward1.tolist(depth1.all(-1)) == [
+        True,
+        False,
+        False]
+    assert awkward1.tolist(depth1.all(1)) == [
+        True,
+        False,
+        False]
+
+    assert awkward1.tolist(depth1.all(-2)) == [
+        False,
+        True,
+        False,
+        True]
+    assert awkward1.tolist(depth1.all(0)) == [
+        False,
+        True,
+        False,
+        True]

@@ -64,6 +64,174 @@ namespace awkward {
     }
   }
 
+  /////////////////////////////////////////////////////////////// sum (addition)
+
+  const std::string ReducerSum::name() const {
+    return "sum";
+  }
+
+  const std::string ReducerSum::preferred_type() const {
+    return "d";
+  }
+
+  ssize_t ReducerSum::preferred_typesize() const {
+    return 8;
+  }
+
+  const std::shared_ptr<void> ReducerSum::apply_bool(const bool* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_bool_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerSum::apply_int8(const int8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<int8_t> ptr(new int8_t[(size_t)outlength], util::array_deleter<int8_t>());
+    struct Error err = awkward_reduce_sum_int8_int8_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerSum::apply_uint8(const uint8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<uint8_t> ptr(new uint8_t[(size_t)outlength], util::array_deleter<uint8_t>());
+    struct Error err = awkward_reduce_sum_uint8_uint8_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerSum::apply_int16(const int16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<int16_t> ptr(new int16_t[(size_t)outlength], util::array_deleter<int16_t>());
+    struct Error err = awkward_reduce_sum_int16_int16_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerSum::apply_uint16(const uint16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<uint16_t> ptr(new uint16_t[(size_t)outlength], util::array_deleter<uint16_t>());
+    struct Error err = awkward_reduce_sum_uint16_uint16_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerSum::apply_int32(const int32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength], util::array_deleter<int32_t>());
+    struct Error err = awkward_reduce_sum_int32_int32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerSum::apply_uint32(const uint32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength], util::array_deleter<uint32_t>());
+    struct Error err = awkward_reduce_sum_uint32_uint32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerSum::apply_int64(const int64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength], util::array_deleter<int64_t>());
+    struct Error err = awkward_reduce_sum_int64_int64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerSum::apply_uint64(const uint64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength], util::array_deleter<uint64_t>());
+    struct Error err = awkward_reduce_sum_uint64_uint64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerSum::apply_float32(const float* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<float> ptr(new float[(size_t)outlength], util::array_deleter<float>());
+    struct Error err = awkward_reduce_sum_float32_float32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerSum::apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<double> ptr(new double[(size_t)outlength], util::array_deleter<double>());
+    struct Error err = awkward_reduce_sum_float64_float64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
   /////////////////////////////////////////////////////////////// prod (multiplication)
 
   const std::string ReducerProd::name() const {
@@ -84,7 +252,7 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_bool(const bool* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
-    struct Error err = awkward_reduce_prod_bool_64(
+    struct Error err = awkward_reduce_prod_bool_bool_64(
       ptr.get(),
       data,
       offset,
@@ -98,7 +266,7 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_int8(const int8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<int8_t> ptr(new int8_t[(size_t)outlength], util::array_deleter<int8_t>());
-    struct Error err = awkward_reduce_prod_int8_64(
+    struct Error err = awkward_reduce_prod_int8_int8_64(
       ptr.get(),
       data,
       offset,
@@ -112,7 +280,7 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_uint8(const uint8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<uint8_t> ptr(new uint8_t[(size_t)outlength], util::array_deleter<uint8_t>());
-    struct Error err = awkward_reduce_prod_uint8_64(
+    struct Error err = awkward_reduce_prod_uint8_uint8_64(
       ptr.get(),
       data,
       offset,
@@ -126,7 +294,7 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_int16(const int16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<int16_t> ptr(new int16_t[(size_t)outlength], util::array_deleter<int16_t>());
-    struct Error err = awkward_reduce_prod_int16_64(
+    struct Error err = awkward_reduce_prod_int16_int16_64(
       ptr.get(),
       data,
       offset,
@@ -140,7 +308,7 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_uint16(const uint16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<uint16_t> ptr(new uint16_t[(size_t)outlength], util::array_deleter<uint16_t>());
-    struct Error err = awkward_reduce_prod_uint16_64(
+    struct Error err = awkward_reduce_prod_uint16_uint16_64(
       ptr.get(),
       data,
       offset,
@@ -154,7 +322,7 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_int32(const int32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength], util::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_prod_int32_64(
+    struct Error err = awkward_reduce_prod_int32_int32_64(
       ptr.get(),
       data,
       offset,
@@ -168,7 +336,7 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_uint32(const uint32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength], util::array_deleter<uint32_t>());
-    struct Error err = awkward_reduce_prod_uint32_64(
+    struct Error err = awkward_reduce_prod_uint32_uint32_64(
       ptr.get(),
       data,
       offset,
@@ -182,7 +350,7 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_int64(const int64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength], util::array_deleter<int64_t>());
-    struct Error err = awkward_reduce_prod_int64_64(
+    struct Error err = awkward_reduce_prod_int64_int64_64(
       ptr.get(),
       data,
       offset,
@@ -196,7 +364,7 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_uint64(const uint64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength], util::array_deleter<uint64_t>());
-    struct Error err = awkward_reduce_prod_uint64_64(
+    struct Error err = awkward_reduce_prod_uint64_uint64_64(
       ptr.get(),
       data,
       offset,
@@ -210,7 +378,7 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_float32(const float* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<float> ptr(new float[(size_t)outlength], util::array_deleter<float>());
-    struct Error err = awkward_reduce_prod_float32_64(
+    struct Error err = awkward_reduce_prod_float32_float32_64(
       ptr.get(),
       data,
       offset,
@@ -224,7 +392,359 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<double> ptr(new double[(size_t)outlength], util::array_deleter<double>());
-    struct Error err = awkward_reduce_prod_float64_64(
+    struct Error err = awkward_reduce_prod_float64_float64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  /////////////////////////////////////////////////////////////// any (logical or)
+
+  const std::string ReducerAny::name() const {
+    return "any";
+  }
+
+  const std::string ReducerAny::preferred_type() const {
+    return "?";
+  }
+
+  ssize_t ReducerAny::preferred_typesize() const {
+    return 1;
+  }
+
+  const std::string ReducerAny::return_type(const std::string& given_type) const {
+    return "?";
+  }
+
+  ssize_t ReducerAny::return_typesize(const std::string& given_type) const {
+    return 1;
+  }
+
+  const std::shared_ptr<void> ReducerAny::apply_bool(const bool* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_bool_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAny::apply_int8(const int8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_int8_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAny::apply_uint8(const uint8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_uint8_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAny::apply_int16(const int16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_int16_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAny::apply_uint16(const uint16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_uint16_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAny::apply_int32(const int32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_int32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAny::apply_uint32(const uint32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_uint32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAny::apply_int64(const int64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_int64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAny::apply_uint64(const uint64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_uint64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAny::apply_float32(const float* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_float32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAny::apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_sum_bool_float64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  /////////////////////////////////////////////////////////////// all (logical and)
+
+  const std::string ReducerAll::name() const {
+    return "all";
+  }
+
+  const std::string ReducerAll::preferred_type() const {
+    return "?";
+  }
+
+  ssize_t ReducerAll::preferred_typesize() const {
+    return 1;
+  }
+
+  const std::string ReducerAll::return_type(const std::string& given_type) const {
+    return "?";
+  }
+
+  ssize_t ReducerAll::return_typesize(const std::string& given_type) const {
+    return 1;
+  }
+
+  const std::shared_ptr<void> ReducerAll::apply_bool(const bool* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_bool_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAll::apply_int8(const int8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_int8_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAll::apply_uint8(const uint8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_uint8_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAll::apply_int16(const int16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_int16_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAll::apply_uint16(const uint16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_uint16_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAll::apply_int32(const int32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_int32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAll::apply_uint32(const uint32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_uint32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAll::apply_int64(const int64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_int64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAll::apply_uint64(const uint64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_uint64_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAll::apply_float32(const float* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_float32_64(
+      ptr.get(),
+      data,
+      offset,
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerAll::apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
+    struct Error err = awkward_reduce_prod_bool_float64_64(
       ptr.get(),
       data,
       offset,

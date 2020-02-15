@@ -845,9 +845,21 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("merge_as_union", [](const T& self, const py::object& other) -> py::object {
             return box(self.merge_as_union(unbox_content(other)));
           })
+          .def("sum", [](const T& self, int64_t axis) -> py::object {
+            ak::ReducerSum reducer;
+            return box(self.reduce(reducer, axis));
+          }, py::arg("axis"))
           .def("prod", [](const T& self, int64_t axis) -> py::object {
-            ak::ReducerProd prod;
-            return box(self.reduce(prod, axis));
+            ak::ReducerProd reducer;
+            return box(self.reduce(reducer, axis));
+          }, py::arg("axis"))
+          .def("any", [](const T& self, int64_t axis) -> py::object {
+            ak::ReducerAny reducer;
+            return box(self.reduce(reducer, axis));
+          }, py::arg("axis"))
+          .def("all", [](const T& self, int64_t axis) -> py::object {
+            ak::ReducerAll reducer;
+            return box(self.reduce(reducer, axis));
           }, py::arg("axis"))
 
   ;
