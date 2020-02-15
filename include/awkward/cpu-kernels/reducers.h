@@ -6,6 +6,8 @@
 #include "awkward/cpu-kernels/util.h"
 
 extern "C" {
+  EXPORT_SYMBOL struct Error awkward_reduce_count_64(int64_t* toptr, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
+
   EXPORT_SYMBOL struct Error awkward_reduce_sum_int8_int8_64(int8_t* toptr, const int8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
   EXPORT_SYMBOL struct Error awkward_reduce_sum_uint8_uint8_64(uint8_t* toptr, const uint8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
   EXPORT_SYMBOL struct Error awkward_reduce_sum_int16_int16_64(int16_t* toptr, const int16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);

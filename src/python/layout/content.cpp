@@ -830,9 +830,6 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("getitem_nothing", &T::getitem_nothing)
 
           // operations
-          .def("count", [](const T& self, int64_t axis) -> py::object {
-            return box(self.count(axis));
-          }, py::arg("axis") = 0)
           .def("flatten", [](const T& self, int64_t axis) -> py::object {
             return box(self.flatten(axis));
           }, py::arg("axis") = 0)
@@ -845,6 +842,10 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("merge_as_union", [](const T& self, const py::object& other) -> py::object {
             return box(self.merge_as_union(unbox_content(other)));
           })
+          .def("count", [](const T& self, int64_t axis) -> py::object {
+            ak::ReducerCount reducer;
+            return box(self.reduce(reducer, axis));
+          }, py::arg("axis"))
           .def("sum", [](const T& self, int64_t axis) -> py::object {
             ak::ReducerSum reducer;
             return box(self.reduce(reducer, axis));

@@ -64,6 +64,85 @@ namespace awkward {
     }
   }
 
+  /////////////////////////////////////////////////////////////// count
+
+  const std::string ReducerCount::name() const {
+    return "count";
+  }
+
+  const std::string ReducerCount::preferred_type() const {
+    return "d";
+  }
+
+  ssize_t ReducerCount::preferred_typesize() const {
+    return 8;
+  }
+
+  const std::string ReducerCount::return_type(const std::string& given_type) const {
+#if defined _MSC_VER || defined __i386__
+    return "q";
+#else
+    return "l";
+#endif
+  }
+
+  ssize_t ReducerCount::return_typesize(const std::string& given_type) const {
+    return 8;
+  }
+
+  const std::shared_ptr<void> ReducerCount::apply_bool(const bool* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    // This is the only reducer that completely ignores the data.
+    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength], util::array_deleter<int64_t>());
+    struct Error err = awkward_reduce_count_64(
+      ptr.get(),
+      parents.ptr().get(),
+      parents.offset(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name(), true), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void> ReducerCount::apply_int8(const int8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data), offset, parents, outlength);
+  }
+
+  const std::shared_ptr<void> ReducerCount::apply_uint8(const uint8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data), offset, parents, outlength);
+  }
+
+  const std::shared_ptr<void> ReducerCount::apply_int16(const int16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data), offset, parents, outlength);
+  }
+
+  const std::shared_ptr<void> ReducerCount::apply_uint16(const uint16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data), offset, parents, outlength);
+  }
+
+  const std::shared_ptr<void> ReducerCount::apply_int32(const int32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data), offset, parents, outlength);
+  }
+
+  const std::shared_ptr<void> ReducerCount::apply_uint32(const uint32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data), offset, parents, outlength);
+  }
+
+  const std::shared_ptr<void> ReducerCount::apply_int64(const int64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data), offset, parents, outlength);
+  }
+
+  const std::shared_ptr<void> ReducerCount::apply_uint64(const uint64_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data), offset, parents, outlength);
+  }
+
+  const std::shared_ptr<void> ReducerCount::apply_float32(const float* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data), offset, parents, outlength);
+  }
+
+  const std::shared_ptr<void> ReducerCount::apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data), offset, parents, outlength);
+  }
+
   /////////////////////////////////////////////////////////////// sum (addition)
 
   const std::string ReducerSum::name() const {

@@ -64,15 +64,15 @@ def test_behaviors():
     assert type(array3["outer"]) is DeepDummyArray
     assert repr(array3["outer"]) == "<DeepDummyArray <DummyArray <1.1> <2.2> <3.3>> <DummyArray > <DummyArray <4.4> <5.5>>>"
 
-def test_count():
-    # FIXME: this should return a scalar 6, not NumpyArray([6])
-    # print(awkward1.count(awkward1.Array(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])), axis=0))
-    assert awkward1.tolist(awkward1.count(awkward1.Array(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]])), axis=0)) == [3, 3]
-    assert awkward1.tolist(awkward1.count(awkward1.Array(numpy.array([[[1.1, 2.2], [3.3, 4.4]], [[5.5, 6.6], [7.7, 8.8]]])), axis=0)) == [2, 2]
-    assert awkward1.tolist(awkward1.count(awkward1.Array(numpy.array([[[1.1, 2.2], [3.3, 4.4]], [[5.5, 6.6], [7.7, 8.8]]])), axis=1)) == [[2, 2], [2, 2]]
-    # FIXME: this should not be possible, as opposed to returning NumpyArray([])
-    # print(awkward1.count(awkward1.Array(numpy.array([[[1.1, 2.2], [3.3, 4.4]], [[5.5, 6.6], [7.7, 8.8]]])), axis=2))
-    assert awkward1.tolist(awkward1.count(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]), axis=0)) == [3, 0, 2]
+# def test_sizes():
+#     # FIXME: this should return a scalar 6, not NumpyArray([6])
+#     # print(awkward1.sizes(awkward1.Array(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])), axis=0))
+#     assert awkward1.tolist(awkward1.sizes(awkward1.Array(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]])), axis=0)) == [3, 3]
+#     assert awkward1.tolist(awkward1.sizes(awkward1.Array(numpy.array([[[1.1, 2.2], [3.3, 4.4]], [[5.5, 6.6], [7.7, 8.8]]])), axis=0)) == [2, 2]
+#     assert awkward1.tolist(awkward1.sizes(awkward1.Array(numpy.array([[[1.1, 2.2], [3.3, 4.4]], [[5.5, 6.6], [7.7, 8.8]]])), axis=1)) == [[2, 2], [2, 2]]
+#     # FIXME: this should not be possible, as opposed to returning NumpyArray([])
+#     # print(awkward1.sizes(awkward1.Array(numpy.array([[[1.1, 2.2], [3.3, 4.4]], [[5.5, 6.6], [7.7, 8.8]]])), axis=2))
+#     assert awkward1.tolist(awkward1.sizes(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]), axis=0)) == [3, 0, 2]
 
 def test_flatten():
     assert awkward1.tolist(awkward1.flatten(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]), axis=0)) == [1.1, 2.2, 3.3, 4.4, 5.5]
