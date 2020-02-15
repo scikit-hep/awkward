@@ -163,7 +163,7 @@ ERROR awkward_reduce_prod(OUT* toptr, const IN* fromptr, int64_t fromptroffset, 
   }
   return success();
 }
-ERROR awkward_reduce_prod_int64_bool(int64_t* toptr, const bool* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+ERROR awkward_reduce_prod_int64_bool_64(int64_t* toptr, const bool* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
   for (int64_t i = 0;  i < outlength;  i++) {
     toptr[i] = 1;
   }
