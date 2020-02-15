@@ -1413,7 +1413,7 @@ namespace awkward {
 #else
       else if (format_.compare("I") == 0) {
 #endif
-ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("q") == 0) {
@@ -1440,8 +1440,9 @@ ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ 
       }
       std::vector<ssize_t> shape({ (ssize_t)outlength });
       std::vector<ssize_t> strides({ (ssize_t)itemsize_ });
-
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize_, format_);
+      std::string format = reducer.return_type(format_);
+      ssize_t itemsize = reducer.return_typesize(format_);
+      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
     }
   }
 
