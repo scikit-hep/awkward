@@ -558,3 +558,102 @@ def test_IndexedOptionArray():
         [101*31, 103*37, 107*41, 109*43, 113*47],
         [     1],
         [  53*2,   59*3,   61*5,   67*7,  71*11]]
+
+def test_UnionArray():
+    content1 = awkward1.Array([
+        [[  2,   3,   5,   7,  11],
+         [ 13,  17,  19,  23,  29],
+         [ 31,  37,  41,  43,  47]]]).layout
+    content2 = awkward1.Array([
+        [[ 53,  59,  61,  67,  71],
+         [ 73,  79,  83,  89,  97],
+         [101, 103, 107, 109, 113]]]).layout
+
+    tags = awkward1.layout.Index8(numpy.array([0, 1], dtype=numpy.int8))
+    index = awkward1.layout.Index64(numpy.array([0, 0], dtype=numpy.int64))
+    depth2 = awkward1.layout.UnionArray8_64(tags, index, [content1, content2])
+    assert awkward1.tolist(depth2) == [
+        [[  2,   3,   5,   7,  11],
+         [ 13,  17,  19,  23,  29],
+         [ 31,  37,  41,  43,  47]],
+        [[ 53,  59,  61,  67,  71],
+         [ 73,  79,  83,  89,  97],
+         [101, 103, 107, 109, 113]]]
+
+    assert awkward1.tolist(depth2.prod(axis=-1)) == [
+         [  2 *   3 *   5 *   7 *  11,
+           13 *  17 *  19 *  23 *  29,
+           31 *  37 *  41 *  43 *  47],
+         [ 53 *  59 *  61 *  67 *  71,
+           73 *  79 *  83 *  89 *  97,
+          101 * 103 * 107 * 109 * 113]]
+    assert awkward1.tolist(depth2.prod(axis=2)) == [
+         [  2 *   3 *   5 *   7 *  11,
+           13 *  17 *  19 *  23 *  29,
+           31 *  37 *  41 *  43 *  47],
+         [ 53 *  59 *  61 *  67 *  71,
+           73 *  79 *  83 *  89 *  97,
+          101 * 103 * 107 * 109 * 113]]
+
+    assert awkward1.tolist(depth2.prod(axis=-2)) == [
+        [2*13*31, 3*17*37, 5*19*41, 7*23*43, 11*29*47],
+        [53*73*101, 59*79*103, 61*83*107, 67*89*109, 71*97*113]]
+    assert awkward1.tolist(depth2.prod(axis=1)) == [
+        [2*13*31, 3*17*37, 5*19*41, 7*23*43, 11*29*47],
+        [53*73*101, 59*79*103, 61*83*107, 67*89*109, 71*97*113]]
+
+    assert awkward1.tolist(depth2.prod(axis=-3)) == [
+        [2*53, 3*59, 5*61, 7*67, 11*71],
+        [13*73, 17*79, 19*83, 23*89, 29*97],
+        [31*101, 37*103, 41*107, 43*109, 47*113]]
+    assert awkward1.tolist(depth2.prod(axis=0)) == [
+        [2*53, 3*59, 5*61, 7*67, 11*71],
+        [13*73, 17*79, 19*83, 23*89, 29*97],
+        [31*101, 37*103, 41*107, 43*109, 47*113]]
+
+    content1 = awkward1.layout.NumpyArray(numpy.array(primes[:2*3*5], dtype=numpy.int64))
+    offsets1a = awkward1.layout.Index64(numpy.array([0, 5, 10, 15], dtype=numpy.int64))
+    offsets1b = awkward1.layout.Index64(numpy.array([15, 20, 25, 30], dtype=numpy.int64))
+    tags = awkward1.layout.Index8(numpy.array([0, 0, 0, 1, 1, 1], dtype=numpy.int8))
+    index = awkward1.layout.Index64(numpy.array([0, 1, 2, 0, 1, 2], dtype=numpy.int64))
+    unionarray = awkward1.layout.UnionArray8_64(tags, index, [awkward1.layout.ListOffsetArray64(offsets1a, content1), awkward1.layout.ListOffsetArray64(offsets1b, content1)])
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 6], dtype=numpy.int64))
+    depth2 = awkward1.layout.ListOffsetArray64(offsets2, unionarray)
+    assert awkward1.tolist(depth2) == [
+        [[  2,   3,   5,   7,  11],
+         [ 13,  17,  19,  23,  29],
+         [ 31,  37,  41,  43,  47]],
+        [[ 53,  59,  61,  67,  71],
+         [ 73,  79,  83,  89,  97],
+         [101, 103, 107, 109, 113]]]
+
+    assert awkward1.tolist(depth2.prod(axis=-1)) == [
+         [  2 *   3 *   5 *   7 *  11,
+           13 *  17 *  19 *  23 *  29,
+           31 *  37 *  41 *  43 *  47],
+         [ 53 *  59 *  61 *  67 *  71,
+           73 *  79 *  83 *  89 *  97,
+          101 * 103 * 107 * 109 * 113]]
+    assert awkward1.tolist(depth2.prod(axis=2)) == [
+         [  2 *   3 *   5 *   7 *  11,
+           13 *  17 *  19 *  23 *  29,
+           31 *  37 *  41 *  43 *  47],
+         [ 53 *  59 *  61 *  67 *  71,
+           73 *  79 *  83 *  89 *  97,
+          101 * 103 * 107 * 109 * 113]]
+
+    assert awkward1.tolist(depth2.prod(axis=-2)) == [
+        [2*13*31, 3*17*37, 5*19*41, 7*23*43, 11*29*47],
+        [53*73*101, 59*79*103, 61*83*107, 67*89*109, 71*97*113]]
+    assert awkward1.tolist(depth2.prod(axis=1)) == [
+        [2*13*31, 3*17*37, 5*19*41, 7*23*43, 11*29*47],
+        [53*73*101, 59*79*103, 61*83*107, 67*89*109, 71*97*113]]
+
+    assert awkward1.tolist(depth2.prod(axis=-3)) == [
+        [2*53, 3*59, 5*61, 7*67, 11*71],
+        [13*73, 17*79, 19*83, 23*89, 29*97],
+        [31*101, 37*103, 41*107, 43*109, 47*113]]
+    assert awkward1.tolist(depth2.prod(axis=0)) == [
+        [2*53, 3*59, 5*61, 7*67, 11*71],
+        [13*73, 17*79, 19*83, 23*89, 29*97],
+        [31*101, 37*103, 41*107, 43*109, 47*113]]

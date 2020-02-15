@@ -5,6 +5,10 @@
 #include "awkward/Reducer.h"
 
 namespace awkward {
+  const std::string ReducerProd::name() const {
+    return "prod";
+  }
+
   const std::string ReducerProd::preferred_type() const {
 #if defined _MSC_VER || defined __i386__
     return "q";
@@ -27,7 +31,7 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, "'prod'", nullptr);
+    util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }
 
@@ -41,7 +45,7 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, "'prod'", nullptr);
+    util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }
 
@@ -55,7 +59,7 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, "'prod'", nullptr);
+    util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }
 
@@ -69,7 +73,7 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, "'prod'", nullptr);
+    util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }
 
@@ -83,7 +87,7 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, "'prod'", nullptr);
+    util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }
 
@@ -97,7 +101,7 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, "'prod'", nullptr);
+    util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }
 
@@ -111,7 +115,7 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, "'prod'", nullptr);
+    util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }
 
@@ -125,7 +129,7 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, "'prod'", nullptr);
+    util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }
 
@@ -139,7 +143,7 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, "'prod'", nullptr);
+    util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }
 
@@ -153,7 +157,7 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, "'prod'", nullptr);
+    util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }
 
@@ -167,7 +171,7 @@ namespace awkward {
       parents.offset(),
       parents.length(),
       outlength);
-    util::handle_error(err, "'prod'", nullptr);
+    util::handle_error(err, util::quote(name(), true), nullptr);
     return ptr;
   }
 }
