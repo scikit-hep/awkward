@@ -10,6 +10,9 @@
 namespace awkward {
   class Reducer {
   public:
+    virtual const std::string preferred_type() const = 0;
+    virtual ssize_t preferred_typesize() const = 0;
+
     virtual const std::shared_ptr<bool> apply_bool(const bool* data, int64_t offset, const Index64& parents, int64_t outlength) const = 0;
     virtual const std::shared_ptr<int8_t> apply_int8(const int8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const = 0;
     virtual const std::shared_ptr<uint8_t> apply_uint8(const uint8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const = 0;
@@ -25,6 +28,9 @@ namespace awkward {
 
   class ReducerProd: public Reducer {
   public:
+    const std::string preferred_type() const override;
+    ssize_t preferred_typesize() const override;
+
     const std::shared_ptr<bool> apply_bool(const bool* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
     const std::shared_ptr<int8_t> apply_int8(const int8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
     const std::shared_ptr<uint8_t> apply_uint8(const uint8_t* data, int64_t offset, const Index64& parents, int64_t outlength) const override;

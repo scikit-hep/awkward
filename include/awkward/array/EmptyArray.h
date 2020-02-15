@@ -16,6 +16,7 @@ namespace awkward {
   class EmptyArray: public Content {
   public:
     EmptyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters);
+    const std::shared_ptr<Content> toNumpyArray(const std::string& format, ssize_t itemsize) const;
 
     const std::string classname() const override;
     void setidentities() override;

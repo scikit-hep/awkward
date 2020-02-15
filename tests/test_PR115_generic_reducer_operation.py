@@ -418,3 +418,16 @@ def test_complicated():
 
     assert awkward1.tolist(complicated[0]) == [{"x": [2, 3, 5], "y": [[2, 3, 5], [], [7, 11], [13]]}]
     assert awkward1.tolist(complicated[0].prod(-1)) == {"x": [30], "y": [[30, 1, 77, 13]]}
+
+def test_EmptyArray():
+    offsets = awkward1.layout.Index64(numpy.array([0, 0, 0, 0], dtype=numpy.int64))
+    array = awkward1.layout.ListOffsetArray64(offsets, awkward1.layout.EmptyArray())
+    assert awkward1.tolist(array) == [[], [], []]
+
+    assert awkward1.tolist(array.prod(-1)) == [1, 1, 1]
+
+    offsets = awkward1.layout.Index64(numpy.array([0, 0, 0, 0], dtype=numpy.int64))
+    array = awkward1.layout.ListOffsetArray64(offsets, awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)))
+    assert awkward1.tolist(array) == [[], [], []]
+
+    assert awkward1.tolist(array.prod(-1)) == [1, 1, 1]

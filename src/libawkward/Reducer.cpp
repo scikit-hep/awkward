@@ -5,6 +5,18 @@
 #include "awkward/Reducer.h"
 
 namespace awkward {
+  const std::string ReducerProd::preferred_type() const {
+#if defined _MSC_VER || defined __i386__
+    return "q";
+#else
+    return "l";
+#endif
+  }
+
+  ssize_t ReducerProd::preferred_typesize() const {
+    return 8;
+  }
+
   const std::shared_ptr<bool> ReducerProd::apply_bool(const bool* data, int64_t offset, const Index64& parents, int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength], util::array_deleter<bool>());
     struct Error err = awkward_reduce_prod_bool_64(
