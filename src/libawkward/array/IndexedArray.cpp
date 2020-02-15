@@ -1018,7 +1018,28 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
-    throw std::runtime_error("FIXME: IndexedArray:reduce_next");
+    int64_t numnull;
+    struct Error err1 = util::awkward_indexedarray_numnull<T>(
+      &numnull,
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length());
+    util::handle_error(err1, classname(), identities_.get());
+
+    Index64 nextparents(index_.length() - numnull);
+    Index64 nextcarry(index_.length() - numnull);
+    struct Error err2 = util::awkward_indexedarray_reduce_next_64<T>(
+      nextcarry.ptr().get(),
+      nextparents.ptr().get(),
+      index_.ptr().get(),
+      index_.offset(),
+      parents.ptr().get(),
+      parents.offset(),
+      index_.length());
+    util::handle_error(err2, classname(), identities_.get());
+
+    std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+    return next.get()->reduce_next(reducer, negaxis, nextparents, outlength);
   }
 
   template <typename T, bool ISOPTION>

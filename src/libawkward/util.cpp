@@ -9,6 +9,7 @@
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
+#include "awkward/cpu-kernels/reducers.h"
 
 #include "awkward/util.h"
 #include "awkward/Identities.h"
@@ -828,6 +829,22 @@ namespace awkward {
     Error awkward_listarray_getitem_jagged_descend_64<int64_t>(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset) {
       return awkward_listarray64_getitem_jagged_descend_64(tooffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset);
     }
+
+    template <>
+    Error awkward_indexedarray_reduce_next_64<int32_t>(int64_t* nextcarry, int64_t* nextparents, const int32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+      return awkward_indexedarray_reduce_next_64(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+    }
+
+    template <>
+    Error awkward_indexedarray_reduce_next_64<uint32_t>(int64_t* nextcarry, int64_t* nextparents, const uint32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+      return awkward_indexedarrayU32_reduce_next_64(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+    }
+
+    template <>
+    Error awkward_indexedarray_reduce_next_64<int64_t>(int64_t* nextcarry, int64_t* nextparents, const int64_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+      return awkward_indexedarray64_reduce_next_64(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+    }
+
 
   }
 }

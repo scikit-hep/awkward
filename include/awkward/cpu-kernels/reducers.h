@@ -29,6 +29,10 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_listoffsetarray_reduce_local_nextparents_64(int64_t* nextparents, const int64_t* offsets, int64_t offsetsoffset, int64_t length);
   EXPORT_SYMBOL struct Error awkward_listoffsetarray_reduce_local_outoffsets_64(int64_t* outoffsets, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
 
+  EXPORT_SYMBOL struct Error awkward_indexedarray32_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const int32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_indexedarrayU32_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const uint32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_indexedarray64_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const int64_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length);
+
 }
 
 #endif // AWKWARDCPU_REDUCERS_H_

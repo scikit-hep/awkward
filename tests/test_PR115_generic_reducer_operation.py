@@ -431,3 +431,130 @@ def test_EmptyArray():
     assert awkward1.tolist(array) == [[], [], []]
 
     assert awkward1.tolist(array.prod(-1)) == [1, 1, 1]
+
+def test_IndexedOptionArray():
+    content = awkward1.layout.NumpyArray(numpy.array(primes[:2*3*5], dtype=numpy.int64))
+    offsets1 = awkward1.layout.Index64(numpy.array([0, 5, 10, 15, 20, 25, 30], dtype=numpy.int64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets1, content)
+    index = awkward1.layout.Index64(numpy.array([5, 4, 3, 2, 1, 0], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedArray64(index, listoffsetarray)
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 6], dtype=numpy.int64))
+    depth2 = awkward1.layout.ListOffsetArray64(offsets2, indexedarray)
+    assert awkward1.tolist(depth2) == [
+        [[101, 103, 107, 109, 113],
+         [ 73,  79,  83,  89,  97],
+         [ 53,  59,  61,  67,  71]],
+        [[ 31,  37,  41,  43,  47],
+         [ 13,  17,  19,  23,  29],
+         [  2,   3,   5,   7,  11]]]
+
+    assert awkward1.tolist(depth2.prod(-1)) == [
+        [101 * 103 * 107 * 109 * 113,
+          73 *  79 *  83 *  89 *  97,
+          53 *  59 *  61 *  67 *  71],
+        [ 31 *  37 *  41 *  43 *  47,
+          13 *  17 *  19 *  23 *  29,
+           2 *   3 *   5 *   7 *  11]]
+
+    assert awkward1.tolist(depth2.prod(-2)) == [
+        [101*73*53, 103*79*59, 107*83*61, 109*89*67, 113*97*71],
+        [  31*13*2,   37*17*3,   41*19*5,   43*23*7,  47*29*11]]
+
+    assert awkward1.tolist(depth2.prod(-3)) == [
+        [101*31, 103*37, 107*41, 109*43, 113*47],
+        [ 73*13,  79*17,  83*19,  89*23,  97*29],
+        [  53*2,   59*3,   61*5,   67*7,  71*11]]
+
+    content = awkward1.layout.NumpyArray(numpy.array([2, 3, 5, 7, 11, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 101, 103, 107, 109, 113], dtype=numpy.int64))
+    offsets1 = awkward1.layout.Index64(numpy.array([0, 5, 10, 15, 20], dtype=numpy.int64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets1, content)
+    index = awkward1.layout.Index64(numpy.array([3, -1, 2, 1, -1, 0], dtype=numpy.int64))
+    indexedoptionarray = awkward1.layout.IndexedOptionArray64(index, listoffsetarray)
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 6], dtype=numpy.int64))
+    depth2 = awkward1.layout.ListOffsetArray64(offsets2, indexedoptionarray)
+    assert awkward1.tolist(depth2) == [
+        [[101, 103, 107, 109, 113],
+         None,
+         [ 53,  59,  61,  67,  71]],
+        [[ 31,  37,  41,  43,  47],
+         None,
+         [  2,   3,   5,   7,  11]]]
+
+    assert awkward1.tolist(depth2.prod(-1)) == [
+        [101 * 103 * 107 * 109 * 113,
+          53 *  59 *  61 *  67 *  71],
+        [ 31 *  37 *  41 *  43 *  47,
+           2 *   3 *   5 *   7 *  11]]
+
+    assert awkward1.tolist(depth2.prod(-2)) == [
+        [101*53, 103*59, 107*61, 109*67, 113*71],
+        [  31*2,   37*3,   41*5,   43*7,  47*11]]
+
+    assert awkward1.tolist(depth2.prod(-3)) == [
+        [101*31, 103*37, 107*41, 109*43, 113*47],
+        [],
+        [  53*2,   59*3,   61*5,   67*7,  71*11]]
+
+    content = awkward1.layout.NumpyArray(numpy.array([2, 3, 5, 7, 11, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 101, 103, 107, 109, 113], dtype=numpy.int64))
+    index = awkward1.layout.Index64(numpy.array([15, 16, 17, 18, 19, -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 5, 6, 7, 8, 9, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4], dtype=numpy.int64))
+    indexedoptionarray = awkward1.layout.IndexedOptionArray64(index, content)
+    offsets1 = awkward1.layout.Index64(numpy.array([0, 5, 10, 15, 20, 25, 30], dtype=numpy.int64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets1, indexedoptionarray)
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 6], dtype=numpy.int64))
+    depth2 = awkward1.layout.ListOffsetArray64(offsets2, listoffsetarray)
+    assert awkward1.tolist(depth2) == [
+        [[ 101,  103,  107,  109,  113],
+         [None, None, None, None, None],
+         [  53,   59,   61,   67,   71]],
+        [[  31,   37,   41,   43,   47],
+         [None, None, None, None, None],
+         [   2,    3,    5,    7,   11]]]
+
+    assert awkward1.tolist(depth2.prod(-1)) == [
+        [101 * 103 * 107 * 109 * 113,
+           1 *   1 *   1 *   1 *   1,
+          53 *  59 *  61 *  67 *  71],
+        [ 31 *  37 *  41 *  43 *  47,
+           1 *   1 *   1 *   1 *   1,
+           2 *   3 *   5 *   7 *  11]]
+
+    assert awkward1.tolist(depth2.prod(-2)) == [
+        [101*53, 103*59, 107*61, 109*67, 113*71],
+        [  31*2,   37*3,   41*5,   43*7,  47*11]]
+
+    assert awkward1.tolist(depth2.prod(-3)) == [
+        [101*31, 103*37, 107*41, 109*43, 113*47],
+        [     1,      1,      1,      1,      1],
+        [  53*2,   59*3,   61*5,   67*7,  71*11]]
+
+    content = awkward1.layout.NumpyArray(numpy.array([2, 3, 5, 7, 11, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 101, 103, 107, 109, 113], dtype=numpy.int64))
+    index = awkward1.layout.Index64(numpy.array([15, 16, 17, 18, 19, -1, 10, 11, 12, 13, 14, 5, 6, 7, 8, 9, -1, 0, 1, 2, 3, 4], dtype=numpy.int64))
+    indexedoptionarray = awkward1.layout.IndexedOptionArray64(index, content)
+    offsets1 = awkward1.layout.Index64(numpy.array([0, 5, 6, 11, 16, 17, 22], dtype=numpy.int64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets1, indexedoptionarray)
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 6], dtype=numpy.int64))
+    depth2 = awkward1.layout.ListOffsetArray64(offsets2, listoffsetarray)
+    assert awkward1.tolist(depth2) == [
+        [[ 101,  103,  107,  109,  113],
+         [None],
+         [  53,   59,   61,   67,   71]],
+        [[  31,   37,   41,   43,   47],
+         [None],
+         [   2,    3,    5,    7,   11]]]
+
+    assert awkward1.tolist(depth2.prod(-1)) == [
+        [101 * 103 * 107 * 109 * 113,
+           1,
+          53 *  59 *  61 *  67 *  71],
+        [ 31 *  37 *  41 *  43 *  47,
+           1,
+           2 *   3 *   5 *   7 *  11]]
+
+    assert awkward1.tolist(depth2.prod(-2)) == [
+        [101*53, 103*59, 107*61, 109*67, 113*71],
+        [  31*2,   37*3,   41*5,   43*7,  47*11]]
+
+    assert awkward1.tolist(depth2.prod(-3)) == [
+        [101*31, 103*37, 107*41, 109*43, 113*47],
+        [     1],
+        [  53*2,   59*3,   61*5,   67*7,  71*11]]

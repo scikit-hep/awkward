@@ -171,3 +171,25 @@ ERROR awkward_listoffsetarray_reduce_local_outoffsets_64(int64_t* outoffsets, co
   }
   return success();
 }
+
+template <typename T>
+ERROR awkward_indexedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const T* index, int64_t indexoffset, const int64_t* parents, int64_t parentsoffset, int64_t length) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    if (index[indexoffset + i] >= 0) {
+      nextcarry[k] = index[indexoffset + i];
+      nextparents[k] = parents[parentsoffset + i];
+      k++;
+    }
+  }
+  return success();
+}
+ERROR awkward_indexedarray32_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const int32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+  return awkward_indexedarray_reduce_next_64<int32_t>(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+}
+ERROR awkward_indexedarrayU32_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const uint32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+  return awkward_indexedarray_reduce_next_64<uint32_t>(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+}
+ERROR awkward_indexedarray64_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const int64_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+  return awkward_indexedarray_reduce_next_64<int64_t>(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+}
