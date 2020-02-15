@@ -415,3 +415,6 @@ def test_complicated():
     assert awkward1.tolist(complicated.prod(-2)) == [{"x": [2, 3, 5], "y": [[182, 33, 5]]}, {"x": [], "y": []}, {"x": [7, 11], "y": [[], [391, 19]]}]
     assert awkward1.tolist(complicated["x"].prod(-2)) == [[2, 3, 5], [], [7, 11]]
     assert awkward1.tolist(complicated["y"].prod(-2)) == [[[182, 33, 5]], [], [[], [391, 19]]]
+
+    assert awkward1.tolist(complicated[0]) == [{"x": [2, 3, 5], "y": [[2, 3, 5], [], [7, 11], [13]]}]
+    assert awkward1.tolist(complicated[0].prod(-1)) == {"x": [30], "y": [[30, 1, 77, 13]]}
