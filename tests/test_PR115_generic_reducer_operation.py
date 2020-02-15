@@ -769,3 +769,32 @@ def test_count():
         3,
         3,
         1]
+
+def test_count_nonzero():
+    content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4]))
+    offsets3 = awkward1.layout.Index64(numpy.array([0, 3, 6, 10], dtype=numpy.int64))
+    depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
+    assert awkward1.tolist(depth1) == [
+        [1.1, 2.2, 3.3],
+        [0.0, 2.2, 0.0],
+        [0.0, 2.2, 0.0, 4.4]]
+
+    assert awkward1.tolist(depth1.count_nonzero(-1)) == [
+        3,
+        1,
+        2]
+    assert awkward1.tolist(depth1.count_nonzero(1)) == [
+        3,
+        1,
+        2]
+
+    assert awkward1.tolist(depth1.count_nonzero(-2)) == [
+        1,
+        3,
+        1,
+        1]
+    assert awkward1.tolist(depth1.count_nonzero(0)) == [
+        1,
+        3,
+        1,
+        1]
