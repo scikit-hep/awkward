@@ -873,6 +873,10 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
             ak::ReducerMin reducer;
             return box(self.reduce(reducer, axis));
           }, py::arg("axis"))
+          .def("max", [](const T& self, int64_t axis) -> py::object {
+            ak::ReducerMax reducer;
+            return box(self.reduce(reducer, axis));
+          }, py::arg("axis"))
 
   ;
 }

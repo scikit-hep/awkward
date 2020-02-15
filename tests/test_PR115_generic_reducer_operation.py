@@ -827,3 +827,88 @@ def test_count_min():
         2.2,
         0.0,
         4.4]
+
+    content2 = awkward1.layout.NumpyArray(numpy.array([True, True, True, False, True, False, False, True, False, True]))
+    offsets3 = awkward1.layout.Index64(numpy.array([0, 3, 6, 10], dtype=numpy.int64))
+    depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
+    assert awkward1.tolist(depth1) == [
+        [ True,  True,  True],
+        [False,  True, False],
+        [False,  True, False, True]]
+
+    assert awkward1.tolist(depth1.min(-1)) == [
+        True,
+        False,
+        False]
+    assert awkward1.tolist(depth1.min(1)) == [
+        True,
+        False,
+        False]
+
+    assert awkward1.tolist(depth1.min(-2)) == [
+        False,
+        True,
+        False,
+        True]
+    assert awkward1.tolist(depth1.min(0)) == [
+        False,
+        True,
+        False,
+        True]
+
+def test_count_max():
+    content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4]))
+    offsets3 = awkward1.layout.Index64(numpy.array([0, 3, 6, 10], dtype=numpy.int64))
+    depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
+    assert awkward1.tolist(depth1) == [
+        [1.1, 2.2, 3.3],
+        [0.0, 2.2, 0.0],
+        [0.0, 2.2, 0.0, 4.4]]
+
+    assert awkward1.tolist(depth1.max(-1)) == [
+        3.3,
+        2.2,
+        4.4]
+    assert awkward1.tolist(depth1.max(1)) == [
+        3.3,
+        2.2,
+        4.4]
+
+    assert awkward1.tolist(depth1.max(-2)) == [
+        1.1,
+        2.2,
+        3.3,
+        4.4]
+    assert awkward1.tolist(depth1.max(0)) == [
+        1.1,
+        2.2,
+        3.3,
+        4.4]
+
+    content2 = awkward1.layout.NumpyArray(numpy.array([False, True, True, False, True, False, False, False, False, False]))
+    offsets3 = awkward1.layout.Index64(numpy.array([0, 3, 6, 10], dtype=numpy.int64))
+    depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
+    assert awkward1.tolist(depth1) == [
+        [False,  True,  True],
+        [False,  True, False],
+        [False, False, False, False]]
+
+    assert awkward1.tolist(depth1.max(-1)) == [
+        True,
+        True,
+        False]
+    assert awkward1.tolist(depth1.max(1)) == [
+        True,
+        True,
+        False]
+
+    assert awkward1.tolist(depth1.max(-2)) == [
+        False,
+        True,
+        True,
+        False]
+    assert awkward1.tolist(depth1.max(0)) == [
+        False,
+        True,
+        True,
+        False]
