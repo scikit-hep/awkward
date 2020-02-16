@@ -295,7 +295,7 @@ def min(array, axis=None, keepdims=False):
         return reduce([numpy.min(x) for x in awkward1._util.completely_flatten(layout)])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.min(axis=axis, mask=False, keepdims=keepdims), behavior)
+        return awkward1._util.wrap(layout.min(axis=axis, mask=True, keepdims=keepdims), behavior)
 
 def max(array, axis=None, keepdims=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
@@ -309,6 +309,6 @@ def max(array, axis=None, keepdims=False):
         return reduce([numpy.max(x) for x in awkward1._util.completely_flatten(layout)])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.max(axis=axis, mask=False, keepdims=keepdims), behavior)
+        return awkward1._util.wrap(layout.max(axis=axis, mask=True, keepdims=keepdims), behavior)
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "Iterable", "numpy", "awkward1")]

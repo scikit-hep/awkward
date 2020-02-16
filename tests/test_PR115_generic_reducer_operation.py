@@ -1080,3 +1080,52 @@ def test_highlevel():
         [2*7*13, 3*11, 5],
         [],
         [17*23, 19]]
+
+    assert awkward1.min(array) == 2
+    assert awkward1.tolist(awkward1.min(array, axis=-1)) == [
+        [2, None, 7, 13],
+        [],
+        [17, 23]]
+    assert awkward1.tolist(awkward1.min(array, axis=-2)) == [
+        [2, 3, 5],
+        [],
+        [17, 19]]
+
+    assert awkward1.max(array) == 23
+    assert awkward1.tolist(awkward1.max(array, axis=-1)) == [
+        [5, None, 11, 13],
+        [],
+        [19, 23]]
+    assert awkward1.tolist(awkward1.max(array, axis=-2)) == [
+        [13, 11, 5],
+        [],
+        [23, 19]]
+
+    array = awkward1.Array([
+        [[ True, False, True],
+         [                  ],
+         [False, False      ],
+         [ True             ]],
+        [],
+        [[False,  True      ],
+         [ True             ]]])
+
+    assert awkward1.any(array) == True
+    assert awkward1.tolist(awkward1.any(array, axis=-1)) == [
+        [True, False, False, True],
+        [],
+        [True, True]]
+    assert awkward1.tolist(awkward1.any(array, axis=-2)) == [
+        [True, False, True],
+        [],
+        [True, True]]
+
+    assert awkward1.all(array) == False
+    assert awkward1.tolist(awkward1.all(array, axis=-1)) == [
+        [False, True, False, True],
+        [],
+        [False, True]]
+    assert awkward1.tolist(awkward1.all(array, axis=-2)) == [
+        [False, False, True],
+        [],
+        [False, True]]

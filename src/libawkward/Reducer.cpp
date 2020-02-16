@@ -340,6 +340,15 @@ namespace awkward {
   }
 
   const std::string ReducerSum::return_type(const std::string& given_type) const {
+#if defined _MSC_VER || defined __i386__
+    // if the NumPy array is 64-bit, even Windows and 32-bit platforms return 64-bit
+    if (given_type.compare("q") == 0) {
+      return "q";
+    }
+    if (given_type.compare("Q") == 0) {
+      return "Q";
+    }
+#endif
     if (given_type.compare("?") == 0  ||
         given_type.compare("b") == 0  ||
         given_type.compare("h") == 0  ||
@@ -366,6 +375,12 @@ namespace awkward {
   }
 
   ssize_t ReducerSum::return_typesize(const std::string& given_type) const {
+#if defined _MSC_VER || defined __i386__
+    if (given_type.compare("q") == 0  ||
+        given_type.compare("Q") == 0) {
+      return 8;
+    }
+#endif
     if (given_type.compare("?") == 0  ||
         given_type.compare("b") == 0  ||
         given_type.compare("h") == 0  ||
@@ -651,6 +666,15 @@ namespace awkward {
   }
 
   const std::string ReducerProd::return_type(const std::string& given_type) const {
+#if defined _MSC_VER || defined __i386__
+    // if the NumPy array is 64-bit, even Windows and 32-bit platforms return 64-bit
+    if (given_type.compare("q") == 0) {
+      return "q";
+    }
+    if (given_type.compare("Q") == 0) {
+      return "Q";
+    }
+#endif
     if (given_type.compare("?") == 0  ||
         given_type.compare("b") == 0  ||
         given_type.compare("h") == 0  ||
@@ -677,6 +701,12 @@ namespace awkward {
   }
 
   ssize_t ReducerProd::return_typesize(const std::string& given_type) const {
+#if defined _MSC_VER || defined __i386__
+    if (given_type.compare("q") == 0  ||
+        given_type.compare("Q") == 0) {
+      return 8;
+    }
+#endif
     if (given_type.compare("?") == 0  ||
         given_type.compare("b") == 0  ||
         given_type.compare("h") == 0  ||
