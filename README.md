@@ -185,8 +185,8 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `awkward.tonumpy` (issue [#65](https://github.com/scikit-hep/awkward-1.0/issues/65)): to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
       * [ ] `awkward.flatpandas` (issue [#80](https://github.com/scikit-hep/awkward-1.0/issues/80)): flattening jaggedness into `MultiIndex` rows and nested records into `MultiIndex` columns. This is distinct from the arrays' inheritance from Pandas, distinct from the natural ability to use any one of them as DataFrame columns.
       * [ ] `awkward.flatten`: same as old with an `axis` parameter (issue [#51](https://github.com/scikit-hep/awkward-1.0/issues/51)).
-      * [ ] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporting an `axis` method (issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
-      * [ ] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std` (addendum to issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
+      * [X] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporting an `axis` method (issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
+      * [X] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std` (addendum to issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
       * [ ] `awkward.argmin`, `awkward.argmax` (issue [#70](https://github.com/scikit-hep/awkward-1.0/issues/70)): return values and `None` instead of singleton and empty lists.
       * [ ] `awkward.argsort`, and `awkward.sort` (issue [#74](https://github.com/scikit-hep/awkward-1.0/issues/74)): same as old.
       * [X] `awkward.where` (issue [#75](https://github.com/scikit-hep/awkward-1.0/issues/75)): like `numpy.where`; old doesn't have this yet, but we'll need it.
