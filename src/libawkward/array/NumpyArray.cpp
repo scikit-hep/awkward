@@ -8,6 +8,7 @@
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
+#include "awkward/cpu-kernels/reducers.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
@@ -1377,12 +1378,12 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
+  const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask) const {
     if (shape_.empty()) {
       throw std::runtime_error("attempting to reduce a scalar");
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->reduce_next(reducer, negaxis, parents, outlength);
+      return toRegularArray().get()->reduce_next(reducer, negaxis, parents, outlength, mask);
     }
     else {
       std::shared_ptr<void> ptr;
@@ -1438,11 +1439,27 @@ namespace awkward {
       else {
         throw std::invalid_argument(std::string("cannot apply reducers to NumpyArray with format \"") + format_ + std::string("\""));
       }
+
       std::string format = reducer.return_type(format_);
       ssize_t itemsize = reducer.return_typesize(format_);
       std::vector<ssize_t> shape({ (ssize_t)outlength });
       std::vector<ssize_t> strides({ itemsize });
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
+      std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
+
+      if (mask) {
+        Index64 index(outlength);
+        struct Error err = awkward_numpyarray_reduce_mask_indexedoptionarray64(
+          index.ptr().get(),
+          parents.ptr().get(),
+          parents.offset(),
+          parents.length(),
+          outlength);
+        util::handle_error(err, classname(), nullptr);
+        return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, out);
+      }
+      else {
+        return out;
+      }
     }
   }
 

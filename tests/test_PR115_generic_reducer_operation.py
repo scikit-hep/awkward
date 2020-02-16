@@ -976,3 +976,11 @@ def test_count_max():
         True,
         True,
         False]
+
+def test_mask():
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 6, 6, 9], dtype=numpy.int64))
+    array = awkward1.layout.ListOffsetArray64(offsets, content)
+
+    assert awkward1.tolist(array.min(axis=-1, mask=False)) == [1.1, numpy.inf, 4.4, 6.6, numpy.inf, numpy.inf, 7.7]
+    assert awkward1.tolist(array.min(axis=-1, mask=True)) == [1.1, None, 4.4, 6.6, None, None, 7.7]

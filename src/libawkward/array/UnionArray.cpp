@@ -1094,14 +1094,14 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask) const {
     std::shared_ptr<Content> simplified = simplify(true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
       throw std::invalid_argument(std::string("cannot reduce (call '") + reducer.name() + std::string("' on) an irreducible ") + classname());
     }
-    return simplified.get()->reduce_next(reducer, negaxis, parents, outlength);
+    return simplified.get()->reduce_next(reducer, negaxis, parents, outlength, mask);
   }
 
   template <typename T, typename I>

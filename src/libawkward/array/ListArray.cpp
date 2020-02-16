@@ -823,8 +823,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const {
-    return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength);
+  const std::shared_ptr<Content> ListArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask) const {
+    return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength, mask);
   }
 
   template <typename T>

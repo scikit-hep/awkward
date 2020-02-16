@@ -498,7 +498,7 @@ namespace awkward {
       throw std::invalid_argument("cannot use RawArray as a slice");
     }
 
-    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength) const override {
+    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask) const override {
       throw std::runtime_error("FIXME: Raw:reduce_next");
     }
 

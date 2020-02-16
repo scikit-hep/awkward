@@ -845,38 +845,38 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("merge_as_union", [](const T& self, const py::object& other) -> py::object {
             return box(self.merge_as_union(unbox_content(other)));
           })
-          .def("count", [](const T& self, int64_t axis) -> py::object {
+          .def("count", [](const T& self, int64_t axis, bool mask) -> py::object {
             ak::ReducerCount reducer;
-            return box(self.reduce(reducer, axis));
-          }, py::arg("axis"))
-          .def("count_nonzero", [](const T& self, int64_t axis) -> py::object {
+            return box(self.reduce(reducer, axis, mask));
+          }, py::arg("axis") = -1, py::arg("mask") = false)
+          .def("count_nonzero", [](const T& self, int64_t axis, bool mask) -> py::object {
             ak::ReducerCountNonzero reducer;
-            return box(self.reduce(reducer, axis));
-          }, py::arg("axis"))
-          .def("sum", [](const T& self, int64_t axis) -> py::object {
+            return box(self.reduce(reducer, axis, mask));
+          }, py::arg("axis") = -1, py::arg("mask") = false)
+          .def("sum", [](const T& self, int64_t axis, bool mask) -> py::object {
             ak::ReducerSum reducer;
-            return box(self.reduce(reducer, axis));
-          }, py::arg("axis"))
-          .def("prod", [](const T& self, int64_t axis) -> py::object {
+            return box(self.reduce(reducer, axis, mask));
+          }, py::arg("axis") = -1, py::arg("mask") = false)
+          .def("prod", [](const T& self, int64_t axis, bool mask) -> py::object {
             ak::ReducerProd reducer;
-            return box(self.reduce(reducer, axis));
-          }, py::arg("axis"))
-          .def("any", [](const T& self, int64_t axis) -> py::object {
+            return box(self.reduce(reducer, axis, mask));
+          }, py::arg("axis") = -1, py::arg("mask") = false)
+          .def("any", [](const T& self, int64_t axis, bool mask) -> py::object {
             ak::ReducerAny reducer;
-            return box(self.reduce(reducer, axis));
-          }, py::arg("axis"))
-          .def("all", [](const T& self, int64_t axis) -> py::object {
+            return box(self.reduce(reducer, axis, mask));
+          }, py::arg("axis") = -1, py::arg("mask") = false)
+          .def("all", [](const T& self, int64_t axis, bool mask) -> py::object {
             ak::ReducerAll reducer;
-            return box(self.reduce(reducer, axis));
-          }, py::arg("axis"))
-          .def("min", [](const T& self, int64_t axis) -> py::object {
+            return box(self.reduce(reducer, axis, mask));
+          }, py::arg("axis") = -1, py::arg("mask") = false)
+          .def("min", [](const T& self, int64_t axis, bool mask) -> py::object {
             ak::ReducerMin reducer;
-            return box(self.reduce(reducer, axis));
-          }, py::arg("axis"))
-          .def("max", [](const T& self, int64_t axis) -> py::object {
+            return box(self.reduce(reducer, axis, mask));
+          }, py::arg("axis") = -1, py::arg("mask") = true)
+          .def("max", [](const T& self, int64_t axis, bool mask) -> py::object {
             ak::ReducerMax reducer;
-            return box(self.reduce(reducer, axis));
-          }, py::arg("axis"))
+            return box(self.reduce(reducer, axis, mask));
+          }, py::arg("axis") = -1, py::arg("mask") = true)
 
   ;
 }
