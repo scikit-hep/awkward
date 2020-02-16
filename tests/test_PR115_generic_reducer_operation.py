@@ -1155,3 +1155,28 @@ def test_nonreducers():
     assert awkward1.var(y, ddof=1) == numpy.var(awkward1.tonumpy(y), ddof=1)
     assert awkward1.std(y) == numpy.std(awkward1.tonumpy(y))
     assert awkward1.std(y, ddof=1) == numpy.std(awkward1.tonumpy(y), ddof=1)
+
+    assert awkward1.moment(y, 1) == numpy.mean(awkward1.tonumpy(y))
+    assert awkward1.moment(y - awkward1.mean(y), 2) == numpy.var(awkward1.tonumpy(y))
+    assert awkward1.covar(y, y) == numpy.var(awkward1.tonumpy(y))
+    assert awkward1.corr(y, y) == 1.0
+
+    assert awkward1.corr(x, y) == pytest.approx(0.9968772535047296)
+    fit = awkward1.linearfit(x, y)
+    assert awkward1.tolist(fit) == pytest.approx({"intercept": 0.07999999999999773, "slope": 0.99, "intercept_error": 0.7416198487095663, "slope_error": 0.22360679774997896})
+
+    assert awkward1.tolist(awkward1.mean(y, axis=-1)) == awkward1.tolist(numpy.mean(awkward1.tonumpy(y), axis=-1))
+    assert awkward1.tolist(awkward1.var(y, axis=-1)) == awkward1.tolist(numpy.var(awkward1.tonumpy(y), axis=-1))
+    assert awkward1.tolist(awkward1.var(y, axis=-1, ddof=1)) == awkward1.tolist(numpy.var(awkward1.tonumpy(y), axis=-1, ddof=1))
+    assert awkward1.tolist(awkward1.std(y, axis=-1)) == awkward1.tolist(numpy.std(awkward1.tonumpy(y), axis=-1))
+    assert awkward1.tolist(awkward1.std(y, axis=-1, ddof=1)) == awkward1.tolist(numpy.std(awkward1.tonumpy(y), axis=-1, ddof=1))
+
+    assert awkward1.tolist(awkward1.moment(y, 1, axis=-1)) == awkward1.tolist(numpy.mean(awkward1.tonumpy(y), axis=-1))
+    assert awkward1.tolist(awkward1.moment(y - awkward1.mean(y, axis=-1), 2, axis=-1)) == awkward1.tolist(numpy.var(awkward1.tonumpy(y), axis=-1))
+    assert awkward1.tolist(awkward1.covar(y, y, axis=-1)) == awkward1.tolist(numpy.var(awkward1.tonumpy(y), axis=-1))
+    assert awkward1.tolist(awkward1.corr(y, y, axis=-1)) == [1.0, 1.0]
+
+    assert awkward1.tolist(awkward1.corr(x, y, axis=-1)) == pytest.approx([0.9975103695813371, 0.9964193240901015])
+    fit = awkward1.linearfit(x, y, axis=-1)
+    assert awkward1.tolist(fit[0]) == pytest.approx({"intercept": 0.11999999999999772, "slope": 0.9800000000000005, "intercept_error": 1.0488088481701516, "slope_error": 0.31622776601683794})
+    assert awkward1.tolist(fit[1]) == pytest.approx({"intercept": 0.04000000000000228, "slope": 0.9999999999999994, "intercept_error": 1.0488088481701516, "slope_error": 0.31622776601683794})

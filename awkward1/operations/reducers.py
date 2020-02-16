@@ -2,11 +2,11 @@
 
 from __future__ import absolute_import
 
-import collections
-
 import numpy
 
+import awkward1._util
 import awkward1._numpy
+import awkward1.layout
 import awkward1.operations.convert
 
 def count(array, axis=None, keepdims=False):
@@ -134,13 +134,11 @@ def moment(x, n, weight=None, axis=None, keepdims=False):
     with numpy.errstate(invalid="ignore"):
         if weight is None:
             sumw   = count(x, axis=axis, keepdims=keepdims)
-            sumwx  = sum(x, axis=axis, keepdims=keepdims)
             sumwxn = sum(x**n, axis=axis, keepdims=keepdims)
         else:
             sumw   = sum(x*0 + weight, axis=axis, keepdims=keepdims)
-            sumwx  = sum(x*weight, axis=axis, keepdims=keepdims)
             sumwxn = sum((x*weight)**n, axis=axis, keepdims=keepdims)
-        return numpy.true_divide(sumwxn, sumw) - numpy.true_divide(sumwx**2, sumw)
+        return numpy.true_divide(sumwxn, sumw)
 
 @awkward1._numpy.implements(numpy.mean)
 def mean(x, weight=None, axis=None, keepdims=False):
@@ -156,27 +154,17 @@ def mean(x, weight=None, axis=None, keepdims=False):
 @awkward1._numpy.implements(numpy.var)
 def var(x, weight=None, ddof=0, axis=None, keepdims=False):
     with numpy.errstate(invalid="ignore"):
+        xmean = mean(x, weight=weight, axis=axis, keepdims=keepdims)
         if weight is None:
-            sumw = count(x, axis=axis, keepdims=keepdims)
-            sumwx  = sum(x, axis=axis, keepdims=keepdims)
-            sumwx2 = sum(x**2, axis=axis, keepdims=keepdims)
+            sumw   = count(x, axis=axis, keepdims=keepdims)
+            sumwxx = sum((x - xmean)**2, axis=axis, keepdims=keepdims)
         else:
-            sumw = sum(x*0 + weight, axis=axis, keepdims=keepdims)
-            sumwx  = sum(x*weight, axis=axis, keepdims=keepdims)
-            sumwx2 = sum((x**2)*weight, axis=axis, keepdims=keepdims)
-
-        print("sumw", sumw)
-        print("sumwx", sumwx)
-        print("sumwx2", sumwx2)
-
-        diff = numpy.true_divide(sumwx2, sumw) - numpy.true_divide(sumwx**2, sumw)
-
-        print("diff", diff)
-
+            sumw   = sum(x*0 + weight, axis=axis, keepdims=keepdims)
+            sumwxx = sum((x - xmean)**2 * weight, axis=axis, keepdims=keepdims)
         if ddof != 0:
-            return diff * numpy.true_divide(sumw, sumw - ddof)
+            return numpy.true_divide(sumwxx, sumw) * numpy.true_divide(sumw, sumw - ddof)
         else:
-            return diff
+            return numpy.true_divide(sumwxx, sumw)
 
 @awkward1._numpy.implements(numpy.std)
 def std(x, weight=None, ddof=0, axis=None, keepdims=False):
@@ -209,7 +197,7 @@ def corr(x, y, weight=None, axis=None, keepdims=False):
             sumwxx = sum((xdiff**2)*weight, axis=axis, keepdims=keepdims)
             sumwyy = sum((ydiff**2)*weight, axis=axis, keepdims=keepdims)
             sumwxy = sum((xdiff*ydiff)*weight, axis=axis, keepdims=keepdims)
-        return numpy.true_divide(sumwxy, numpy.sqrt(sumwxx + sumwyy))
+        return numpy.true_divide(sumwxy, numpy.sqrt(sumwxx * sumwyy))
 
 def linearfit(x, y, weight=None, axis=None, keepdims=False):
     with numpy.errstate(invalid="ignore"):
@@ -230,6 +218,28 @@ def linearfit(x, y, weight=None, axis=None, keepdims=False):
         slope           = numpy.true_divide(((sumw*sumwxy) - (sumwx*sumwy)), delta)
         intercept_error = numpy.sqrt(numpy.true_divide(sumwxx, delta))
         slope_error     = numpy.sqrt(numpy.true_divide(sumw, delta))
-        return collections.namedtuple("LinearFit", ["intercept", "slope", "intercept_error", "slope_error"])(intercept, slope, intercept_error, slope_error)
+
+        intercept       = awkward1.operations.convert.tolayout(intercept, allowrecord=True, allowother=True)
+        slope           = awkward1.operations.convert.tolayout(slope, allowrecord=True, allowother=True)
+        intercept_error = awkward1.operations.convert.tolayout(intercept_error, allowrecord=True, allowother=True)
+        slope_error     = awkward1.operations.convert.tolayout(slope_error, allowrecord=True, allowother=True)
+
+        scalar = not isinstance(intercept, awkward1.layout.Content) and not isinstance(slope, awkward1.layout.Content) and not isinstance(intercept_error, awkward1.layout.Content) and not isinstance(slope_error, awkward1.layout.Content)
+
+        if not isinstance(intercept, (awkward1.layout.Content, awkward1.layout.Record)):
+            intercept = awkward1.layout.NumpyArray(numpy.array([intercept]))
+        if not isinstance(slope, (awkward1.layout.Content, awkward1.layout.Record)):
+            slope = awkward1.layout.NumpyArray(numpy.array([slope]))
+        if not isinstance(intercept_error, (awkward1.layout.Content, awkward1.layout.Record)):
+            intercept_error = awkward1.layout.NumpyArray(numpy.array([intercept_error]))
+        if not isinstance(slope_error, (awkward1.layout.Content, awkward1.layout.Record)):
+            slope_error = awkward1.layout.NumpyArray(numpy.array([slope_error]))
+
+        out = awkward1.layout.RecordArray([intercept, slope, intercept_error, slope_error], ["intercept", "slope", "intercept_error", "slope_error"])
+        out.setparameter("__record__", "LinearFit")
+        if scalar:
+            out = out[0]
+
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(x, y))
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("collections", "numpy", "awkward1")]
