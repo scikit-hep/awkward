@@ -526,7 +526,7 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerSum::apply_int32(const int32_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength], util::array_deleter<int32e_t>());
+    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength], util::array_deleter<int32_t>());
     struct Error err = awkward_reduce_sum_int32_int32_64(
       ptr.get(),
       data,
@@ -810,7 +810,7 @@ namespace awkward {
   const std::shared_ptr<void> ReducerProd::apply_int16(const int16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength], util::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_prod_int64_int16_64(
+    struct Error err = awkward_reduce_prod_int32_int16_64(
       ptr.get(),
       data,
       offset,

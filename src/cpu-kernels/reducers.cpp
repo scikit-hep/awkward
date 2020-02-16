@@ -65,7 +65,7 @@ ERROR awkward_reduce_sum(OUT* toptr, const IN* fromptr, int64_t fromptroffset, c
     toptr[i] = (OUT)0;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[parentsoffset + i]] += fromptr[fromptroffset + i];
+    toptr[parents[parentsoffset + i]] += (OUT)fromptr[fromptroffset + i];
   }
   return success();
 }
@@ -192,7 +192,7 @@ ERROR awkward_reduce_prod(OUT* toptr, const IN* fromptr, int64_t fromptroffset, 
     toptr[i] = (OUT)1;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[parentsoffset + i]] *= fromptr[fromptroffset + i];
+    toptr[parents[parentsoffset + i]] *= (OUT)fromptr[fromptroffset + i];
   }
   return success();
 }
