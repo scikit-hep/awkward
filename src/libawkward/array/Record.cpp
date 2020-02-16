@@ -232,9 +232,9 @@ namespace awkward {
     throw std::invalid_argument("cannot use a record as a slice");
   }
 
-  const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask) const {
+  const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> trimmed = array_.get()->getitem_range_nowrap(at_, at_ + 1);
-    return trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask);
+    return trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {

@@ -193,9 +193,9 @@ namespace awkward {
     return std::make_shared<SliceArray64>(index, shape, strides, false);
   }
 
-  const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask) const {
+  const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> asnumpy = toNumpyArray(reducer.preferred_type(), reducer.preferred_typesize());
-    return asnumpy.get()->reduce_next(reducer, negaxis, parents, outlength, mask);
+    return asnumpy.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

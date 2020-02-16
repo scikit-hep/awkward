@@ -984,3 +984,25 @@ def test_mask():
 
     assert awkward1.tolist(array.min(axis=-1, mask=False)) == [1.1, numpy.inf, 4.4, 6.6, numpy.inf, numpy.inf, 7.7]
     assert awkward1.tolist(array.min(axis=-1, mask=True)) == [1.1, None, 4.4, 6.6, None, None, 7.7]
+
+def test_keepdims():
+    nparray = numpy.array(primes[:2*3*5], dtype=numpy.int64).reshape(2, 3, 5)
+    content1 = awkward1.layout.NumpyArray(numpy.array(primes[:2*3*5], dtype=numpy.int64))
+    offsets1 = awkward1.layout.Index64(numpy.array([0, 5, 10, 15, 20, 25, 30], dtype=numpy.int64))
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 6], dtype=numpy.int64))
+    depth2 = awkward1.layout.ListOffsetArray64(offsets2, awkward1.layout.ListOffsetArray64(offsets1, content1))
+    assert awkward1.tolist(depth2) == [
+        [[  2,   3,   5,   7,  11],
+         [ 13,  17,  19,  23,  29],
+         [ 31,  37,  41,  43,  47]],
+        [[ 53,  59,  61,  67,  71],
+         [ 73,  79,  83,  89,  97],
+         [101, 103, 107, 109, 113]]]
+
+    assert awkward1.tolist(depth2.prod(axis=-1, keepdims=False)) == awkward1.tolist(nparray.prod(axis=-1, keepdims=False))
+    assert awkward1.tolist(depth2.prod(axis=-2, keepdims=False)) == awkward1.tolist(nparray.prod(axis=-2, keepdims=False))
+    assert awkward1.tolist(depth2.prod(axis=-3, keepdims=False)) == awkward1.tolist(nparray.prod(axis=-3, keepdims=False))
+
+    assert awkward1.tolist(depth2.prod(axis=-1, keepdims=True)) == awkward1.tolist(nparray.prod(axis=-1, keepdims=True))
+    assert awkward1.tolist(depth2.prod(axis=-2, keepdims=True)) == awkward1.tolist(nparray.prod(axis=-2, keepdims=True))
+    assert awkward1.tolist(depth2.prod(axis=-3, keepdims=True)) == awkward1.tolist(nparray.prod(axis=-3, keepdims=True))

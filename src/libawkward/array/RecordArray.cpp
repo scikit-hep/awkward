@@ -657,7 +657,7 @@ namespace awkward {
     throw std::invalid_argument("cannot use records as a slice");
   }
 
-  const std::shared_ptr<Content> RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask) const {
+  const std::shared_ptr<Content> RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     if (contents_.empty()) {
       return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), outlength, istuple());
     }
@@ -665,7 +665,7 @@ namespace awkward {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         std::shared_ptr<Content> trimmed = content.get()->getitem_range_nowrap(0, length());
-        std::shared_ptr<Content> next = trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask);
+        std::shared_ptr<Content> next = trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
         contents.push_back(next);
       }
       return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_);

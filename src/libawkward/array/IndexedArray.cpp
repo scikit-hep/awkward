@@ -1017,7 +1017,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask) const {
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     int64_t numnull;
     struct Error err1 = util::awkward_indexedarray_numnull<T>(
       &numnull,
@@ -1039,7 +1039,7 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-    return next.get()->reduce_next(reducer, negaxis, nextparents, outlength, mask);
+    return next.get()->reduce_next(reducer, negaxis, nextparents, outlength, mask, keepdims);
   }
 
   template <typename T, bool ISOPTION>

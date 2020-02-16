@@ -377,7 +377,11 @@ namespace awkward {
         given_type.compare("I") == 0  ||
         given_type.compare("L") == 0  ||
         given_type.compare("Q") == 0) {
+#if defined _MSC_VER || defined __i386__
+      return 4;
+#else
       return 8;
+#endif
     }
     else if (given_type.compare("f") == 0) {
       return 4;

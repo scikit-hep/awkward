@@ -161,7 +161,7 @@ namespace awkward {
     throw std::runtime_error("undefined opteration: None::asslice");
   }
 
-  const std::shared_ptr<Content> None::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask) const {
+  const std::shared_ptr<Content> None::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     throw std::runtime_error("undefined opteration: None::reduce_next");
   }
 
