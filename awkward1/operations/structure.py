@@ -208,7 +208,7 @@ def flatten(array, axis=0):
 def count(array, axis=None, keepdims=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
-        raise NotImplementedError
+        return sum(numpy.size(x) for x in awkward1._util.completely_flatten(array))
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.count(axis=axis, mask=False, keepdims=keepdims), behavior)
@@ -216,7 +216,7 @@ def count(array, axis=None, keepdims=False):
 def count_nonzero(array, axis=None, keepdims=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
-        raise NotImplementedError
+        return sum(numpy.count_nonzero(x) for x in awkward1._util.completely_flatten(array))
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.count_nonzero(axis=axis, mask=False, keepdims=keepdims), behavior)
@@ -224,7 +224,7 @@ def count_nonzero(array, axis=None, keepdims=False):
 def sum(array, axis=None, keepdims=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
-        raise NotImplementedError
+        return sum(numpy.sum(x) for x in awkward1._util.completely_flatten(array))
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.sum(axis=axis, mask=False, keepdims=keepdims), behavior)
@@ -232,7 +232,12 @@ def sum(array, axis=None, keepdims=False):
 def prod(array, axis=None, keepdims=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
-        raise NotImplementedError
+        def reduce(xs):
+            if len(xs) == 1:
+                return xs
+            else:
+                return xs[0] * reduce(xs[1:])
+        return reduce(numpy.prod(x) for x in awkward1._util.completely_flatten(array))
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.prod(axis=axis, mask=False, keepdims=keepdims), behavior)
@@ -240,7 +245,12 @@ def prod(array, axis=None, keepdims=False):
 def any(array, axis=None, keepdims=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
-        raise NotImplementedError
+        def reduce(xs):
+            if len(xs) == 1:
+                return xs
+            else:
+                return xs[0] or reduce(xs[1:])
+        return reduce(numpy.any(x) for x in awkward1._util.completely_flatten(array))
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.any(axis=axis, mask=False, keepdims=keepdims), behavior)
@@ -248,7 +258,12 @@ def any(array, axis=None, keepdims=False):
 def all(array, axis=None, keepdims=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
-        raise NotImplementedError
+        def reduce(xs):
+            if len(xs) == 1:
+                return xs
+            else:
+                return xs[0] and reduce(xs[1:])
+        return reduce(numpy.all(x) for x in awkward1._util.completely_flatten(array))
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.all(axis=axis, mask=False, keepdims=keepdims), behavior)
@@ -256,7 +271,13 @@ def all(array, axis=None, keepdims=False):
 def min(array, axis=None, keepdims=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
-        raise NotImplementedError
+        def reduce(xs):
+            if len(xs) == 1:
+                return xs
+            else:
+                x, y = xs[0], reduce(xs[1:])
+                return x if x < y else y
+        return reduce(numpy.min(x) for x in awkward1._util.completely_flatten(array))
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.min(axis=axis, mask=False, keepdims=keepdims), behavior)
@@ -264,7 +285,13 @@ def min(array, axis=None, keepdims=False):
 def max(array, axis=None, keepdims=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
-        raise NotImplementedError
+        def reduce(xs):
+            if len(xs) == 1:
+                return xs
+            else:
+                x, y = xs[0], reduce(xs[1:])
+                return x if x > y else y
+        return reduce(numpy.max(x) for x in awkward1._util.completely_flatten(array))
     else:
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.max(axis=axis, mask=False, keepdims=keepdims), behavior)

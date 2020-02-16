@@ -835,8 +835,8 @@ namespace awkward {
 
   const std::shared_ptr<void> ReducerProd::apply_uint16(const uint16_t* data, int64_t offset, const Index64& parents, int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength], util::array_deleter<int32_t>());
-    struct Error err = awkward_reduce_prod_int32_int16_64(
+    std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength], util::array_deleter<uint32_t>());
+    struct Error err = awkward_reduce_prod_uint32_uint16_64(
       ptr.get(),
       data,
       offset,
