@@ -22,6 +22,7 @@ from awkward1.highlevel import FillableArray
 from awkward1.operations.convert import *
 from awkward1.operations.describe import *
 from awkward1.operations.structure import *
+from awkward1.operations.reducers import *
 
 from awkward1.behaviors.string import *
 

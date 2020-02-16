@@ -642,6 +642,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::pair<bool, int64_t> IndexedArrayOf<T, ISOPTION>::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  template <typename T, bool ISOPTION>
   int64_t IndexedArrayOf<T, ISOPTION>::numfields() const {
     return content_.get()->numfields();
   }
@@ -1009,6 +1014,32 @@ namespace awkward {
     else {
       return project().get()->asslice();
     }
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+    int64_t numnull;
+    struct Error err1 = util::awkward_indexedarray_numnull<T>(
+      &numnull,
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length());
+    util::handle_error(err1, classname(), identities_.get());
+
+    Index64 nextparents(index_.length() - numnull);
+    Index64 nextcarry(index_.length() - numnull);
+    struct Error err2 = util::awkward_indexedarray_reduce_next_64<T>(
+      nextcarry.ptr().get(),
+      nextparents.ptr().get(),
+      index_.ptr().get(),
+      index_.offset(),
+      parents.ptr().get(),
+      parents.offset(),
+      index_.length());
+    util::handle_error(err2, classname(), identities_.get());
+
+    std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+    return next.get()->reduce_next(reducer, negaxis, nextparents, outlength, mask, keepdims);
   }
 
   template <typename T, bool ISOPTION>

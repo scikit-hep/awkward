@@ -50,8 +50,8 @@ string = awkward1.types.ListType(utf8, {"__array__": "string", "__typestr__": "s
 
 def string_equal(one, two):
     # first condition: string lengths must be the same
-    counts1 = numpy.asarray(one.count())
-    counts2 = numpy.asarray(two.count())
+    counts1 = numpy.asarray(one.count(axis=-1))
+    counts2 = numpy.asarray(two.count(axis=-1))
 
     out = (counts1 == counts2)
 

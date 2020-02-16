@@ -12,6 +12,7 @@
 #include "awkward/io/json.h"
 #include "awkward/type/Type.h"
 #include "awkward/Index.h"
+#include "awkward/Reducer.h"
 
 namespace awkward {
   class Content {
@@ -48,6 +49,7 @@ namespace awkward {
     virtual bool purelist_isregular() const = 0;
     virtual int64_t purelist_depth() const = 0;
     virtual const std::pair<int64_t, int64_t> minmax_depth() const = 0;
+    virtual const std::pair<bool, int64_t> branch_depth() const = 0;
     virtual int64_t numfields() const = 0;
     virtual int64_t fieldindex(const std::string& key) const = 0;
     virtual const std::string key(int64_t fieldindex) const = 0;
@@ -61,11 +63,13 @@ namespace awkward {
     virtual bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const = 0;
     virtual const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const = 0;
     virtual const std::shared_ptr<SliceItem> asslice() const = 0;
+    virtual const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const = 0;
 
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
     void tojson(FILE* destination, bool pretty, int64_t maxdecimals, int64_t buffersize) const;
     int64_t nbytes() const;
+    const std::shared_ptr<Content> reduce(const Reducer& reducer, int64_t axis, bool mask, bool keepdims) const;
 
     const util::Parameters parameters() const;
     void setparameters(const util::Parameters& parameters);

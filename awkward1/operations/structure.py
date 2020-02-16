@@ -2,13 +2,6 @@
 
 from __future__ import absolute_import
 
-import sys
-import numbers
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
-
 import numpy
 
 import awkward1._util
@@ -195,14 +188,14 @@ def where(condition, *args, **kwargs):
     else:
         raise TypeError("where() takes from 1 to 3 positional arguments but {0} were given".format(len(args) + 1))
 
-def count(array, axis=0):
+def sizes(array, axis=0):
     behavior = awkward1._util.behaviorof(array)
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-    return awkward1._util.wrap(layout.count(axis), behavior)
+    return awkward1._util.wrap(layout.sizes(axis), behavior)
 
 def flatten(array, axis=0):
     behavior = awkward1._util.behaviorof(array)
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     return awkward1._util.wrap(layout.flatten(axis), behavior)
 
-__all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "Iterable", "numpy", "awkward1")]
+__all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numpy", "awkward1")]

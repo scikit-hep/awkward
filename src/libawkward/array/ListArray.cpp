@@ -417,6 +417,12 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::pair<bool, int64_t> ListArrayOf<T>::branch_depth() const {
+    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
+    return std::pair<bool, int64_t>(content_depth.first, content_depth.second + 1);
+  }
+
+  template <typename T>
   int64_t ListArrayOf<T>::numfields() const {
     return content_.get()->numfields();
   }
@@ -814,6 +820,11 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<SliceItem> ListArrayOf<T>::asslice() const {
     return toListOffsetArray64().get()->asslice();
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+    return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
   template <typename T>

@@ -8,6 +8,7 @@
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
+#include "awkward/cpu-kernels/reducers.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
@@ -490,7 +491,7 @@ namespace awkward {
     else if (format_.compare("b") == 0) {
       tojson_integer<int8_t>(builder);
     }
-    else if (format_.compare("B") == 0) {
+    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
       tojson_integer<uint8_t>(builder);
     }
     else if (format_.compare("?") == 0) {
@@ -730,6 +731,10 @@ namespace awkward {
 
   const std::pair<int64_t, int64_t> NumpyArray::minmax_depth() const {
     return std::pair<int64_t, int64_t>((int64_t)shape_.size(), (int64_t)shape_.size());
+  }
+
+  const std::pair<bool, int64_t> NumpyArray::branch_depth() const {
+    return std::pair<bool, int64_t>(false, (int64_t)shape_.size());
   }
 
   int64_t NumpyArray::numfields() const { return -1; }
@@ -1370,6 +1375,94 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument("only arrays of integers or booleans may be used as a slice");
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+    if (shape_.empty()) {
+      throw std::runtime_error("attempting to reduce a scalar");
+    }
+    else if (shape_.size() != 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+    }
+    else {
+      std::shared_ptr<void> ptr;
+      if (format_.compare("?") == 0) {
+        ptr = reducer.apply_bool(reinterpret_cast<bool*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("b") == 0) {
+        ptr = reducer.apply_int8(reinterpret_cast<int8_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+        ptr = reducer.apply_uint8(reinterpret_cast<uint8_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("h") == 0) {
+        ptr = reducer.apply_int16(reinterpret_cast<int16_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("H") == 0) {
+        ptr = reducer.apply_uint16(reinterpret_cast<uint16_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("l") == 0) {
+#else
+      else if (format_.compare("i") == 0) {
+#endif
+        ptr = reducer.apply_int32(reinterpret_cast<int32_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("L") == 0) {
+#else
+      else if (format_.compare("I") == 0) {
+#endif
+        ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("q") == 0) {
+#else
+      else if (format_.compare("l") == 0) {
+#endif
+        ptr = reducer.apply_int64(reinterpret_cast<int64_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+#if defined _MSC_VER || defined __i386__
+      else if (format_.compare("Q") == 0) {
+#else
+      else if (format_.compare("L") == 0) {
+#endif
+        ptr = reducer.apply_uint64(reinterpret_cast<uint64_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("f") == 0) {
+        ptr = reducer.apply_float32(reinterpret_cast<float*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else if (format_.compare("d") == 0) {
+        ptr = reducer.apply_float64(reinterpret_cast<double*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+      }
+      else {
+        throw std::invalid_argument(std::string("cannot apply reducers to NumpyArray with format \"") + format_ + std::string("\""));
+      }
+
+      std::string format = reducer.return_type(format_);
+      ssize_t itemsize = reducer.return_typesize(format_);
+      std::vector<ssize_t> shape({ (ssize_t)outlength });
+      std::vector<ssize_t> strides({ itemsize });
+      std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
+
+      if (mask) {
+        Index64 index(outlength);
+        struct Error err = awkward_numpyarray_reduce_mask_indexedoptionarray64(
+          index.ptr().get(),
+          parents.ptr().get(),
+          parents.offset(),
+          parents.length(),
+          outlength);
+        util::handle_error(err, classname(), nullptr);
+        out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, out);
+      }
+
+      if (keepdims) {
+        out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, 1);
+      }
+
+      return out;
     }
   }
 

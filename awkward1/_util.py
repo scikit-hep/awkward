@@ -129,6 +129,37 @@ def key2index(keys, key):
 
 key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
+def completely_flatten(array):
+    if isinstance(array, unknowntypes):
+        return (numpy.array([], dtype=numpy.bool_),)
+
+    elif isinstance(array, indexedtypes):
+        return completely_flatten(array.project())
+
+    elif isinstance(array, uniontypes):
+        out = ()
+        for i in range(array.numcontents):
+            out = out + completely_flatten(array.project(i))
+        return out
+
+    elif isinstance(array, optiontypes):
+        return completely_flatten(array.project())
+
+    elif isinstance(array, listtypes):
+        return completely_flatten(array.flatten())
+
+    elif isinstance(array, recordtypes):
+        out = ()
+        for i in range(array.numfields):
+            out = out + completely_flatten(array.field(i))
+        return out
+
+    elif isinstance(array, awkward1.layout.NumpyArray):
+        return (numpy.asarray(array),)
+
+    else:
+        raise RuntimeError("cannot completely flatten: {0}".format(type(array)))
+
 def broadcast_and_apply(inputs, getfunction):
     def checklength(inputs):
         length = len(inputs[0])
@@ -160,7 +191,7 @@ def broadcast_and_apply(inputs, getfunction):
             return function(depth)
 
         elif any(isinstance(x, unknowntypes) for x in inputs):
-            return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs], depth)
+            return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.bool_)) for x in inputs], depth)
 
         elif any(isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1 for x in inputs):
             return apply([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.toRegularArray() for x in inputs], depth)

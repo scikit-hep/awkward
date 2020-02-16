@@ -183,6 +183,11 @@ namespace awkward {
     return std::pair<int64_t, int64_t>(out.first - 1, out.second - 1);
   }
 
+  const std::pair<bool, int64_t> Record::branch_depth() const {
+    std::pair<bool, int64_t> out = array_.get()->branch_depth();
+    return std::pair<bool, int64_t>(out.first, out.second - 1);
+  }
+
   int64_t Record::numfields() const {
     return array_.get()->numfields();
   }
@@ -225,6 +230,11 @@ namespace awkward {
 
   const std::shared_ptr<SliceItem> Record::asslice() const {
     throw std::invalid_argument("cannot use a record as a slice");
+  }
+
+  const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+    std::shared_ptr<Content> trimmed = array_.get()->getitem_range_nowrap(at_, at_ + 1);
+    return trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {

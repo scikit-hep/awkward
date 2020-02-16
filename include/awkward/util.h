@@ -16,24 +16,6 @@ namespace awkward {
   class IndexOf;
 
   namespace util {
-    template <typename T>
-    IndexOf<T> make_starts(const IndexOf<T>& offsets);
-    template <typename T>
-    IndexOf<T> make_stops(const IndexOf<T>& offsets);
-
-    typedef std::vector<std::string> RecordLookup;
-    std::shared_ptr<RecordLookup> init_recordlookup(int64_t numfields);
-    int64_t fieldindex(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);
-    const std::string key(const std::shared_ptr<RecordLookup>& recordlookup, int64_t fieldindex, int64_t numfields);
-    bool haskey(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);
-    const std::vector<std::string> keys(const std::shared_ptr<RecordLookup>& recordlookup, int64_t numfields);
-
-    typedef std::map<std::string, std::string> Parameters;
-    bool parameter_equals(const Parameters& parameters, const std::string& key, const std::string& value);
-    bool parameters_equal(const Parameters& self, const Parameters& other);
-
-    void handle_error(const struct Error& err, const std::string& classname, const Identities* id);
-
     template<typename T>
     class array_deleter {
     public:
@@ -49,7 +31,24 @@ namespace awkward {
     };
 
     std::string quote(const std::string& x, bool doublequote);
-    bool subset(const std::vector<std::string>& super, const std::vector<std::string>& sub);
+
+    void handle_error(const struct Error& err, const std::string& classname, const Identities* id);
+
+    template <typename T>
+    IndexOf<T> make_starts(const IndexOf<T>& offsets);
+    template <typename T>
+    IndexOf<T> make_stops(const IndexOf<T>& offsets);
+
+    typedef std::vector<std::string> RecordLookup;
+    std::shared_ptr<RecordLookup> init_recordlookup(int64_t numfields);
+    int64_t fieldindex(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);
+    const std::string key(const std::shared_ptr<RecordLookup>& recordlookup, int64_t fieldindex, int64_t numfields);
+    bool haskey(const std::shared_ptr<RecordLookup>& recordlookup, const std::string& key, int64_t numfields);
+    const std::vector<std::string> keys(const std::shared_ptr<RecordLookup>& recordlookup, int64_t numfields);
+
+    typedef std::map<std::string, std::string> Parameters;
+    bool parameter_equals(const Parameters& parameters, const std::string& key, const std::string& value);
+    bool parameters_equal(const Parameters& self, const Parameters& other);
 
     template <typename T>
     ERROR awkward_identities32_from_listoffsetarray(int32_t* toptr, const int32_t* fromptr, const T* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
@@ -154,6 +153,10 @@ namespace awkward {
 
     template <typename T>
     ERROR awkward_listarray_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset);
+
+    template <typename T>
+    ERROR awkward_indexedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const T* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length);
+
   }
 }
 
