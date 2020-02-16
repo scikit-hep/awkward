@@ -205,68 +205,68 @@ def flatten(array, axis=0):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     return awkward1._util.wrap(layout.flatten(axis), behavior)
 
-def count(array, axis=None):
+def count(array, axis=None, keepdims=False):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         raise NotImplementedError
     else:
         behavior = awkward1._util.behaviorof(array)
-        layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-        return awkward1._util.wrap(layout.count(axis), behavior)
+        return awkward1._util.wrap(layout.count(axis=axis, mask=False, keepdims=keepdims), behavior)
 
-def count_nonzero(array, axis=None):
+def count_nonzero(array, axis=None, keepdims=False):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         raise NotImplementedError
     else:
         behavior = awkward1._util.behaviorof(array)
-        layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-        return awkward1._util.wrap(layout.count_nonzero(axis), behavior)
+        return awkward1._util.wrap(layout.count_nonzero(axis=axis, mask=False, keepdims=keepdims), behavior)
 
-def sum(array, axis=None):
+def sum(array, axis=None, keepdims=False):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         raise NotImplementedError
     else:
         behavior = awkward1._util.behaviorof(array)
-        layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-        return awkward1._util.wrap(layout.sum(axis), behavior)
+        return awkward1._util.wrap(layout.sum(axis=axis, mask=False, keepdims=keepdims), behavior)
 
-def prod(array, axis=None):
+def prod(array, axis=None, keepdims=False):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         raise NotImplementedError
     else:
         behavior = awkward1._util.behaviorof(array)
-        layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-        return awkward1._util.wrap(layout.prod(axis), behavior)
+        return awkward1._util.wrap(layout.prod(axis=axis, mask=False, keepdims=keepdims), behavior)
 
-def any(array, axis=None):
+def any(array, axis=None, keepdims=False):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         raise NotImplementedError
     else:
         behavior = awkward1._util.behaviorof(array)
-        layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-        return awkward1._util.wrap(layout.any(axis), behavior)
+        return awkward1._util.wrap(layout.any(axis=axis, mask=False, keepdims=keepdims), behavior)
 
-def all(array, axis=None):
+def all(array, axis=None, keepdims=False):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         raise NotImplementedError
     else:
         behavior = awkward1._util.behaviorof(array)
-        layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-        return awkward1._util.wrap(layout.all(axis), behavior)
+        return awkward1._util.wrap(layout.all(axis=axis, mask=False, keepdims=keepdims), behavior)
 
-def min(array, axis=None):
+def min(array, axis=None, keepdims=False):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         raise NotImplementedError
     else:
         behavior = awkward1._util.behaviorof(array)
-        layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-        return awkward1._util.wrap(layout.min(axis), behavior)
+        return awkward1._util.wrap(layout.min(axis=axis, mask=False, keepdims=keepdims), behavior)
 
-def max(array, axis=None):
+def max(array, axis=None, keepdims=False):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         raise NotImplementedError
     else:
         behavior = awkward1._util.behaviorof(array)
-        layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-        return awkward1._util.wrap(layout.max(axis), behavior)
+        return awkward1._util.wrap(layout.max(axis=axis, mask=False, keepdims=keepdims), behavior)
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "Iterable", "numpy", "awkward1")]

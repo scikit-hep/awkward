@@ -684,12 +684,20 @@ def test_sum():
         8 + 128 + 2048]
 
 def test_sumprod_types():
+    def prod(xs):
+        out = 1
+        for x in xs:
+            out *= x
+        return out
+
     array = numpy.array([[True, False, False], [True, False, False]])
     content2 = awkward1.layout.NumpyArray(array.reshape(-1))
     offsets3 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6], dtype=numpy.int64))
     depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
     assert numpy.sum(array, axis=-1).dtype == numpy.asarray(depth1.sum(axis=-1)).dtype
     assert numpy.prod(array, axis=-1).dtype == numpy.asarray(depth1.prod(axis=-1)).dtype
+    assert sum(awkward1.tolist(numpy.sum(array, axis=-1))) == sum(awkward1.tolist(depth1.sum(axis=-1)))
+    assert prod(awkward1.tolist(numpy.prod(array, axis=-1))) == prod(awkward1.tolist(depth1.prod(axis=-1)))
 
     array = numpy.array([[0, 1, 2], [3, 4, 5]], dtype=numpy.int8)
     content2 = awkward1.layout.NumpyArray(array.reshape(-1))
@@ -697,6 +705,8 @@ def test_sumprod_types():
     depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
     assert numpy.sum(array, axis=-1).dtype == numpy.asarray(depth1.sum(axis=-1)).dtype
     assert numpy.prod(array, axis=-1).dtype == numpy.asarray(depth1.prod(axis=-1)).dtype
+    assert sum(awkward1.tolist(numpy.sum(array, axis=-1))) == sum(awkward1.tolist(depth1.sum(axis=-1)))
+    assert prod(awkward1.tolist(numpy.prod(array, axis=-1))) == prod(awkward1.tolist(depth1.prod(axis=-1)))
 
     array = numpy.array([[0, 1, 2], [3, 4, 5]], dtype=numpy.uint8)
     content2 = awkward1.layout.NumpyArray(array.reshape(-1))
@@ -704,6 +714,8 @@ def test_sumprod_types():
     depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
     assert numpy.sum(array, axis=-1).dtype == numpy.asarray(depth1.sum(axis=-1)).dtype
     assert numpy.prod(array, axis=-1).dtype == numpy.asarray(depth1.prod(axis=-1)).dtype
+    assert sum(awkward1.tolist(numpy.sum(array, axis=-1))) == sum(awkward1.tolist(depth1.sum(axis=-1)))
+    assert prod(awkward1.tolist(numpy.prod(array, axis=-1))) == prod(awkward1.tolist(depth1.prod(axis=-1)))
 
     array = numpy.array([[0, 1, 2], [3, 4, 5]], dtype=numpy.int16)
     content2 = awkward1.layout.NumpyArray(array.reshape(-1))
@@ -711,6 +723,8 @@ def test_sumprod_types():
     depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
     assert numpy.sum(array, axis=-1).dtype == numpy.asarray(depth1.sum(axis=-1)).dtype
     assert numpy.prod(array, axis=-1).dtype == numpy.asarray(depth1.prod(axis=-1)).dtype
+    assert sum(awkward1.tolist(numpy.sum(array, axis=-1))) == sum(awkward1.tolist(depth1.sum(axis=-1)))
+    assert prod(awkward1.tolist(numpy.prod(array, axis=-1))) == prod(awkward1.tolist(depth1.prod(axis=-1)))
 
     array = numpy.array([[0, 1, 2], [3, 4, 5]], dtype=numpy.uint16)
     content2 = awkward1.layout.NumpyArray(array.reshape(-1))
@@ -718,6 +732,8 @@ def test_sumprod_types():
     depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
     assert numpy.sum(array, axis=-1).dtype == numpy.asarray(depth1.sum(axis=-1)).dtype
     assert numpy.prod(array, axis=-1).dtype == numpy.asarray(depth1.prod(axis=-1)).dtype
+    assert sum(awkward1.tolist(numpy.sum(array, axis=-1))) == sum(awkward1.tolist(depth1.sum(axis=-1)))
+    assert prod(awkward1.tolist(numpy.prod(array, axis=-1))) == prod(awkward1.tolist(depth1.prod(axis=-1)))
 
     array = numpy.array([[0, 1, 2], [3, 4, 5]], dtype=numpy.int32)
     content2 = awkward1.layout.NumpyArray(array.reshape(-1))
@@ -725,6 +741,8 @@ def test_sumprod_types():
     depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
     assert numpy.sum(array, axis=-1).dtype == numpy.asarray(depth1.sum(axis=-1)).dtype
     assert numpy.prod(array, axis=-1).dtype == numpy.asarray(depth1.prod(axis=-1)).dtype
+    assert sum(awkward1.tolist(numpy.sum(array, axis=-1))) == sum(awkward1.tolist(depth1.sum(axis=-1)))
+    assert prod(awkward1.tolist(numpy.prod(array, axis=-1))) == prod(awkward1.tolist(depth1.prod(axis=-1)))
 
     array = numpy.array([[0, 1, 2], [3, 4, 5]], dtype=numpy.uint32)
     content2 = awkward1.layout.NumpyArray(array.reshape(-1))
@@ -732,6 +750,8 @@ def test_sumprod_types():
     depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
     assert numpy.sum(array, axis=-1).dtype == numpy.asarray(depth1.sum(axis=-1)).dtype
     assert numpy.prod(array, axis=-1).dtype == numpy.asarray(depth1.prod(axis=-1)).dtype
+    assert sum(awkward1.tolist(numpy.sum(array, axis=-1))) == sum(awkward1.tolist(depth1.sum(axis=-1)))
+    assert prod(awkward1.tolist(numpy.prod(array, axis=-1))) == prod(awkward1.tolist(depth1.prod(axis=-1)))
 
     array = numpy.array([[0, 1, 2], [3, 4, 5]], dtype=numpy.int64)
     content2 = awkward1.layout.NumpyArray(array.reshape(-1))
@@ -739,6 +759,8 @@ def test_sumprod_types():
     depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
     assert numpy.sum(array, axis=-1).dtype == numpy.asarray(depth1.sum(axis=-1)).dtype
     assert numpy.prod(array, axis=-1).dtype == numpy.asarray(depth1.prod(axis=-1)).dtype
+    assert sum(awkward1.tolist(numpy.sum(array, axis=-1))) == sum(awkward1.tolist(depth1.sum(axis=-1)))
+    assert prod(awkward1.tolist(numpy.prod(array, axis=-1))) == prod(awkward1.tolist(depth1.prod(axis=-1)))
 
     array = numpy.array([[0, 1, 2], [3, 4, 5]], dtype=numpy.uint64)
     content2 = awkward1.layout.NumpyArray(array.reshape(-1))
@@ -746,6 +768,8 @@ def test_sumprod_types():
     depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
     assert numpy.sum(array, axis=-1).dtype == numpy.asarray(depth1.sum(axis=-1)).dtype
     assert numpy.prod(array, axis=-1).dtype == numpy.asarray(depth1.prod(axis=-1)).dtype
+    assert sum(awkward1.tolist(numpy.sum(array, axis=-1))) == sum(awkward1.tolist(depth1.sum(axis=-1)))
+    assert prod(awkward1.tolist(numpy.prod(array, axis=-1))) == prod(awkward1.tolist(depth1.prod(axis=-1)))
 
 def test_any():
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 0.0, 0.0, 0.0]))

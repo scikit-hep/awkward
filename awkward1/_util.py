@@ -129,6 +129,11 @@ def key2index(keys, key):
 
 key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
+def completely_flatten(array):
+    pass
+
+
+
 def broadcast_and_apply(inputs, getfunction):
     def checklength(inputs):
         length = len(inputs[0])
