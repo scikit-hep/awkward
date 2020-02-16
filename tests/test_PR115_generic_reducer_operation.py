@@ -1046,10 +1046,26 @@ def test_highlevel():
         [3, 0, 2, 1],
         [],
         [2, 1]]
+    assert awkward1.tolist(awkward1.count(array, axis=2)) == [
+        [3, 0, 2, 1],
+        [],
+        [2, 1]]
+    assert awkward1.tolist(awkward1.count(array, axis=-1, keepdims=True)) == [
+        [[3], [0], [2], [1]],
+        [],
+        [[2], [1]]]
     assert awkward1.tolist(awkward1.count(array, axis=-2)) == [
         [3, 2, 1],
         [],
         [2, 1]]
+    assert awkward1.tolist(awkward1.count(array, axis=1)) == [
+        [3, 2, 1],
+        [],
+        [2, 1]]
+    assert awkward1.tolist(awkward1.count(array, axis=-2, keepdims=True)) == [
+        [[3, 2, 1]],
+        [[]],
+        [[2, 1]]]
 
     assert awkward1.count_nonzero(array) == 9
     assert awkward1.tolist(awkward1.count_nonzero(array, axis=-1)) == [
@@ -1129,3 +1145,13 @@ def test_highlevel():
         [False, False, True],
         [],
         [False, True]]
+
+def test_nonreducers():
+    x = awkward1.Array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]])
+    y = awkward1.Array([[1.1, 2.2, 2.9, 4.0, 5.1], [0.9, 2.1, 3.2, 4.1, 4.9]])
+
+    assert awkward1.mean(y) == numpy.mean(awkward1.tonumpy(y))
+    assert awkward1.var(y) == numpy.var(awkward1.tonumpy(y))
+    assert awkward1.var(y, ddof=1) == numpy.var(awkward1.tonumpy(y), ddof=1)
+    assert awkward1.std(y) == numpy.std(awkward1.tonumpy(y))
+    assert awkward1.std(y, ddof=1) == numpy.std(awkward1.tonumpy(y), ddof=1)
