@@ -38,8 +38,6 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_reduce_sum_uint32_uint16_64(uint32_t* toptr, const uint16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
   EXPORT_SYMBOL struct Error awkward_reduce_sum_int32_int32_64(int32_t* toptr, const int32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
   EXPORT_SYMBOL struct Error awkward_reduce_sum_uint32_uint32_64(uint32_t* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_reduce_sum_int32_int64_64(int32_t* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_reduce_sum_uint32_uint64_64(uint32_t* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
 
   EXPORT_SYMBOL struct Error awkward_reduce_sum_bool_bool_64(bool* toptr, const bool* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
   EXPORT_SYMBOL struct Error awkward_reduce_sum_bool_int8_64(bool* toptr, const int8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
@@ -71,8 +69,6 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_reduce_prod_uint32_uint16_64(uint32_t* toptr, const uint16_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
   EXPORT_SYMBOL struct Error awkward_reduce_prod_int32_int32_64(int32_t* toptr, const int32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
   EXPORT_SYMBOL struct Error awkward_reduce_prod_uint32_uint32_64(uint32_t* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_reduce_prod_int32_int64_64(int32_t* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_reduce_prod_uint32_uint64_64(uint32_t* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
 
   EXPORT_SYMBOL struct Error awkward_reduce_prod_bool_bool_64(bool* toptr, const bool* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
   EXPORT_SYMBOL struct Error awkward_reduce_prod_bool_int8_64(bool* toptr, const int8_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);

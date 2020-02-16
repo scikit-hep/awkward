@@ -1030,3 +1030,53 @@ def test_keepdims():
     assert awkward1.tolist(depth2.prod(axis=-1, keepdims=True)) == awkward1.tolist(nparray.prod(axis=-1, keepdims=True))
     assert awkward1.tolist(depth2.prod(axis=-2, keepdims=True)) == awkward1.tolist(nparray.prod(axis=-2, keepdims=True))
     assert awkward1.tolist(depth2.prod(axis=-3, keepdims=True)) == awkward1.tolist(nparray.prod(axis=-3, keepdims=True))
+
+def test_highlevel():
+    array = awkward1.Array([
+        [[ 2,  3, 5],
+         [         ],
+         [ 7, 11   ],
+         [13       ]],
+        [],
+        [[17, 19   ],
+         [23       ]]])
+
+    assert awkward1.count(array) == 9
+    assert awkward1.tolist(awkward1.count(array, axis=-1)) == [
+        [3, 0, 2, 1],
+        [],
+        [2, 1]]
+    assert awkward1.tolist(awkward1.count(array, axis=-2)) == [
+        [3, 2, 1],
+        [],
+        [2, 1]]
+
+    assert awkward1.count_nonzero(array) == 9
+    assert awkward1.tolist(awkward1.count_nonzero(array, axis=-1)) == [
+        [3, 0, 2, 1],
+        [],
+        [2, 1]]
+    assert awkward1.tolist(awkward1.count_nonzero(array, axis=-2)) == [
+        [3, 2, 1],
+        [],
+        [2, 1]]
+
+    assert awkward1.sum(array) == 2 + 3 + 5 + 7 + 11 + 13 + 17 + 19 + 23
+    assert awkward1.tolist(awkward1.sum(array, axis=-1)) == [
+        [2 + 3 + 5, 0, 7 + 11, 13],
+        [],
+        [17 + 19, 23]]
+    assert awkward1.tolist(awkward1.sum(array, axis=-2)) == [
+        [2 + 7 + 13, 3 + 11, 5],
+        [],
+        [17 + 23, 19]]
+
+    assert awkward1.prod(array) == 2*3*5*7*11*13*17*19*23
+    assert awkward1.tolist(awkward1.prod(array, axis=-1)) == [
+        [2*3*5, 1, 7*11, 13],
+        [],
+        [17*19, 23]]
+    assert awkward1.tolist(awkward1.prod(array, axis=-2)) == [
+        [2*7*13, 3*11, 5],
+        [],
+        [17*23, 19]]

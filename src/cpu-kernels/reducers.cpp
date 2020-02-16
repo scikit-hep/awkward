@@ -135,12 +135,6 @@ ERROR awkward_reduce_sum_int32_int32_64(int32_t* toptr, const int32_t* fromptr, 
 ERROR awkward_reduce_sum_uint32_uint32_64(uint32_t* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
   return awkward_reduce_sum<uint32_t, uint32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
-ERROR awkward_reduce_sum_int32_int64_64(int32_t* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_sum<int32_t, int64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
-}
-ERROR awkward_reduce_sum_uint32_uint64_64(uint32_t* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_sum<uint32_t, uint64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
-}
 
 template <typename IN>
 ERROR awkward_reduce_sum_bool(bool* toptr, const IN* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
@@ -261,12 +255,6 @@ ERROR awkward_reduce_prod_int32_int32_64(int32_t* toptr, const int32_t* fromptr,
 }
 ERROR awkward_reduce_prod_uint32_uint32_64(uint32_t* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
   return awkward_reduce_prod<uint32_t, uint32_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
-}
-ERROR awkward_reduce_prod_int32_int64_64(int32_t* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<int32_t, int64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
-}
-ERROR awkward_reduce_prod_uint32_uint64_64(uint32_t* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
-  return awkward_reduce_prod<uint32_t, uint64_t>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength);
 }
 
 template <typename IN>
