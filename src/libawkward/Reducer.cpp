@@ -346,11 +346,9 @@ namespace awkward {
         given_type.compare("i") == 0  ||
         given_type.compare("l") == 0  ||
         given_type.compare("q") == 0) {
-#if defined _MSC_VER || defined __i386__
-      return "q";
-#else
+      // for _MSC_VER or __i386__, "l" means 32-bit, and that's what the default dtype should be
+      // for MacOS/Linux 64-bit,   "l" means 64-bit, and that's what the default dtype should be
       return "l";
-#endif
     }
     else if (
         given_type.compare("B") == 0  ||
@@ -358,11 +356,9 @@ namespace awkward {
         given_type.compare("I") == 0  ||
         given_type.compare("L") == 0  ||
         given_type.compare("Q") == 0) {
-#if defined _MSC_VER || defined __i386__
-      return "Q";
-#else
+      // for _MSC_VER or __i386__, "L" means unsigned 32-bit, and that's what the default dtype should be
+      // for MacOS/Linux 64-bit,   "L" means unsigned 64-bit, and that's what the default dtype should be
       return "L";
-#endif
     }
     else {
       return given_type;
