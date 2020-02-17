@@ -595,6 +595,20 @@ def pad(data, length, axis=0):
     if axis < 0:
         raise NotImplementedError("axis < 0 is much harder for untyped data...")
     else:
+        if isinstance(data, (list, Content)):
+            if axis == 0:
+                result = [x for x in data]
+                return result + [None] * length
+            else:
+                return [pad(x, length, axis - 1) for x in data]
+        elif isinstance(data, tuple):
+            return tuple(pad(x, length, axis) for x in data)
+
+        elif isinstance(data, dict):
+            return {n: pad(x, length, axis) for n, x in data.items()}
+        elif isinstance(data, (bool, int, float)):
+            raise IndexError
+
         raise NotImplementedError(repr(data))
 
 # RawArray
@@ -606,22 +620,140 @@ def RawArray_pad(self, length, axis=0):
 
 RawArray.pad = RawArray_pad
 
+def numpy_array_index(array):
+    bytepos = []
+    for i in range(array.shape[0]) :
+        bytepos.append(i*array.strides[0])
+
+    index = []
+    for x in range(len(bytepos)):
+        for y in range(array.strides[0]):
+            index.append(x*array.strides[0] + array.offset + y)
+
+    return index
+
+def wrap_array(array, stride):
+    offsets = []
+    for x in range(int(array.__len__()/stride)):
+        offsets.append(x*stride)
+    offsets.append(array.__len__())
+
+    return ListOffsetArray(offsets, array)
+
+def compact_array(array, depth=-1):
+    data_items = []
+
+    def recurse(array, depth):
+        if isinstance(array, Content) and array.__len__() > 0:
+            if depth != 0:
+                for it in range(array.__len__()):
+                    recurse(array.__getitem__(it), depth - 1)
+        else:
+            data_items.append(array)
+
+    recurse(array, depth)
+
+    return data_items
+
 # NumpyArray
 def NumpyArray_pad(self, length, axis=0):
+    # use shapeless padding
+    return self.pad_no_shape(length, axis)
+
+    # this is for padding with a NumpyArray shape
     if axis < 0:
         raise NotImplementedError
+    elif axis > len(self.shape) - 1:
+        raise IndexError
     else:
-        regarray = RegularArray(RegularArray(RawArray(self.ptr),self.shape[2]),self.shape[1])
-        indxarray = []
-        for i in range(regarray.__len__()):
-            indxarray.append(i)
-        for i in range(length):
-            # FIXME: make shape
-            indxarray.append(-1)
+        # compact array
+        comp_ptr = compact_array(self, len(self.shape))
+        out = RawArray(comp_ptr)
+        comp_index = [x for x in range(out.__len__())]
 
-        return IndexedOptionArray(indxarray, regarray)
+        # calculate extra padding
+        extra_padding = 1
+        for x in self.shape[axis+1:]:
+            extra_padding = extra_padding * x
+
+        # and how many padding chunks
+        chunks = 1
+        for x in self.shape[:axis]:
+            chunks = chunks * x
+
+        # insert the None's
+        insert_index = self.offset
+        for x in range(chunks):
+            insert_index = insert_index + self.shape[axis] * self.strides[axis]
+            for y in range(length):
+                for z in range(extra_padding):
+                    comp_index.insert(insert_index, -1)
+                    insert_index = insert_index + 1
+
+        indexedArray = IndexedOptionArray(comp_index, out)
+
+        # if the array is one-dimentional we are done
+        if len(self.shape) == 1:
+            return indexedArray
+
+        # else wrap it in a new shape
+        else:
+            out = indexedArray
+
+            shape = [x for x in self.shape]
+            shape[axis] = self.shape[axis] + length
+
+            for x in shape[-1:0:-1]:
+                out = wrap_array(out, x)
+
+            return wrap_array(out, shape[0]).content
 
 NumpyArray.pad = NumpyArray_pad
+
+def NumpyArray_pad_no_shape(self, length, axis=0):
+    if axis < 0:
+        raise NotImplementedError
+    elif axis > len(self.shape) - 1:
+        raise IndexError
+    else:
+        # compact array
+        comp_ptr = compact_array(self, len(self.shape))
+        out = RawArray(comp_ptr)
+
+        # shape it in a RegularArray
+        for i in range(len(self.shape) - 1):
+            out = RegularArray(out, self.shape[len(self.shape) - 1 - i])
+
+        # index it with shapeless padding
+        indxarray = []
+        for i in range(out.__len__()):
+            indxarray.append(i)
+
+    if axis == 0:
+
+        for i in range(length):
+            indxarray.append(-1)
+
+        return IndexedOptionArray(indxarray, out)
+    else:
+        comp_index = [x for x in range(RawArray(comp_ptr).__len__())]
+
+        # how many padding chunks
+        chunks = 1
+        for x in self.shape[:axis]:
+            chunks = chunks * x
+
+        # insert the None's
+        insert_index = self.offset
+        for x in range(chunks):
+            insert_index = insert_index + self.shape[axis] * self.strides[axis]
+            for y in range(length):
+                comp_index.insert(insert_index, -1)
+                insert_index = insert_index + 1
+
+        return IndexedOptionArray(comp_index, RawArray(comp_ptr))
+
+NumpyArray.pad_no_shape = NumpyArray_pad_no_shape
 
 # EmptyArray
 def EmptyArray_pad(self, length, axis=0):
@@ -642,7 +774,7 @@ def RegularArray_pad(self, length, axis=0):
         raise NotImplementedError
     elif axis == 0:
         indxarray = []
-        for x in range(self.size):
+        for x in range(self.__len__()):
             indxarray.append(x)
         for y in range(length):
             indxarray.append(-1)
@@ -650,7 +782,11 @@ def RegularArray_pad(self, length, axis=0):
         return IndexedOptionArray(indxarray, self)
 
     else:
-        raise NotImplementedError
+        indxarray = []
+        for x in range(self.__len__()):
+            indxarray.append(x)
+
+        return IndexedOptionArray(indxarray, self.content.pad(length, axis))
 
 RegularArray.pad = RegularArray_pad
 
@@ -663,14 +799,17 @@ def ListArray_pad(self, length, axis=0):
     elif axis == 0:
         indxarray = []
         for x in range(self.starts.__len__()):
-            indxarray.append(self.starts[x])
-            for y in range(self.stops[x] - self.starts[x]):
-                indxarray.append(self.starts[x]+y)
+            indxarray.append(x)
 
         for i in range(length):
             indxarray.append(-1)
 
         return IndexedOptionArray(indxarray, self)
+    else:
+        out = self.content.pad(length, axis-1)
+        padded_starts.append(out.__len__())
+        padded_stops.append(out.__len__() + length)
+        return ListArray(padded_starts, padded_stops, out)
 
 ListArray.pad = ListArray_pad
 
@@ -687,6 +826,15 @@ def ListOffsetArray_pad(self, length, axis=0):
             indxarray.append(-1)
 
         return IndexedOptionArray(indxarray, self)
+    else:
+        #FIXME: check if self.__len__() > 1:
+        starts, stops = zip(*[(self.offsets[i], self.offsets[i] + self.__getitem__(i).__len__()) for i in range(self.__len__())])
+        padded_starts = list(starts)
+        padded_starts.append(self.content.__len__())
+        padded_stops = list(stops)
+        padded_stops.append(self.content.__len__() + length)
+
+        return ListArray(padded_starts, padded_stops, self.content.pad(length, axis-1))
 
 ListOffsetArray.pad = ListOffsetArray_pad
 
@@ -695,7 +843,6 @@ def IndexedArray_pad(self, length, axis=0):
     if axis < 0:
         raise NotImplementedError
     if axis == 0:
-        # FIXME: check it
         indxarray = []
         for x in self.index:
             indxarray.append(x)
@@ -704,6 +851,10 @@ def IndexedArray_pad(self, length, axis=0):
             indxarray.append(-1)
 
         return IndexedOptionArray(indxarray, self.content)
+    else:
+        out = self.content.pad(length, axis)
+
+        return IndexedArray(self.index, out)
 
 IndexedArray.pad = IndexedArray_pad
 
@@ -720,6 +871,8 @@ def IndexedOptionArray_pad(self, length, axis=0):
             indxarray.append(-1)
 
         return IndexedOptionArray(indxarray, self.content)
+    else:
+        return self.content.pad(length, axis-1)
 
 IndexedOptionArray.pad = IndexedOptionArray_pad
 
@@ -727,6 +880,16 @@ IndexedOptionArray.pad = IndexedOptionArray_pad
 def RecordArray_pad(self, length, axis=0):
     if axis < 0:
         raise NotImplementedError
+    elif axis == 0:
+
+        indxarray = []
+        for x in range(self.__len__()):
+            indxarray.append(x)
+
+        for i in range(length):
+            indxarray.append(-1)
+
+        return IndexedOptionArray(indxarray, self)
     else:
         raise NotImplementedError
 
@@ -736,6 +899,16 @@ RecordArray.pad = RecordArray_pad
 def UnionArray_pad(self, length, axis=0):
     if axis < 0:
         raise NotImplementedError
+    elif axis == 0:
+
+        indxarray = []
+        for x in range(self.__len__()):
+            indxarray.append(x)
+
+        for i in range(length):
+            indxarray.append(-1)
+
+        return IndexedOptionArray(indxarray, self)
     else:
         raise NotImplementedError
 
@@ -743,38 +916,17 @@ UnionArray.pad = UnionArray_pad
 
 for i in range(100):
     print("pad i =", i)
-    #array = Content.random()
-
-    array = ListArray([10, 4, 5, 10, 0, 4, 9, 9, 10, 6, 5, 10, 5, 10, 2, 5, 0, 6, 9, 5, 10, 7, 1, 4, 6, 7], [10, 4, 5, 10, 0, 4, 9, 9, 10, 6, 5, 10, 5, 10, 2, 5, 0, 6, 9, 5, 10, 7, 1, 4, 6, 7], EmptyArray())
-    assert list(array) == [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
-    assert list(array.pad(3,0)) == [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], None, None, None]
-
-    array = RegularArray(IndexedOptionArray([13, 9, 13, 4, 8, 3, 15, -1, 16, 2, 8], NumpyArray([2.1, 8.4, 7.4, 1.6, 2.2, 3.4, 6.2, 5.4, 1.5, 3.9, 3.8, 3.0, 8.5, 6.9, 4.3, 3.6, 6.7, 1.8, 3.2], [18], [1], 1)), 3)
-    assert list(array) == [[4.3, 3.8, 4.3], [3.4, 3.9, 2.2], [6.7, None, 1.8]]
-    assert list(array.pad(3,0)) == [[4.3, 3.8, 4.3], [3.4, 3.9, 2.2], [6.7, None, 1.8], None, None, None]
-
-    array = ListOffsetArray([4, 4, 15, 24, 28, 28, 56, 57, 78], RecordArray([], None, 106))
-    assert list(array) == [[], [(), (), (), (), (), (), (), (), (), (), ()], [(), (), (), (), (), (), (), (), ()], [(), (), (), ()], [], [(), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), ()], [()], [(), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), ()]]
-    assert list(array.pad(3,0)) == [[], [(), (), (), (), (), (), (), (), (), (), ()], [(), (), (), (), (), (), (), (), ()], [(), (), (), ()], [], [(), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), ()], [()], [(), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), (), ()], None, None, None]
-
-    array = NumpyArray([ 0,  1,  2,  3,  4, 5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],[2, 3, 5], [15, 5, 1], 0)
-    assert list(array) == [[[ 0,  1,  2,  3,  4], [ 5,  6,  7,  8,  9], [10, 11, 12, 13, 14]],
-                            [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]
-    assert list(array.pad(3,0)) == [[[ 0,  1,  2,  3,  4], [ 5,  6,  7,  8,  9], [10, 11, 12, 13, 14]],
-                            [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
-                            [[ None,  None,  None,  None,  None], [ None,  None,  None,  None,  None], [None, None, None, None, None]],
-                            [[ None,  None,  None,  None,  None], [ None,  None,  None,  None,  None], [None, None, None, None, None]],
-                            [[ None,  None,  None,  None,  None], [ None,  None,  None,  None,  None], [None, None, None, None, None]]]
-
+    array = Content.random()
     for axis in range(5):
+        axis = 0
         print("axis =", axis)
         try:
-            #FIXME: rowwise = pad(array, axis)
+            rowwise = pad(array, 3, axis)
             columnar = array.pad(3, axis)
         except IndexError:
             break
         columnar = list(columnar)
-        #FIXME: assert rowwise == columnar
+        assert rowwise == columnar
 
 # ### Don't worry about the not-implemented-yet ones
 # # SlicedArray
