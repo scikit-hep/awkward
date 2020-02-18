@@ -262,8 +262,10 @@ def broadcast_and_apply(inputs, getfunction):
             for x in inputs:
                 if isinstance(x, optiontypes):
                     nextinputs.append(x.project(nextmask))
-                else:
+                elif isinstance(x, awkward1.layout.Content):
                     nextinputs.append(awkward1.layout.IndexedOptionArray64(nextindex, x).project(nextmask))
+                else:
+                    nextinputs.append(x)
 
             outcontent = apply(nextinputs, depth)
             assert isinstance(outcontent, tuple)

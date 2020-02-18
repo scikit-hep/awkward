@@ -21,6 +21,8 @@ from awkward1.highlevel import FillableArray
 
 from awkward1._numexpr import evaluate as numexpr
 
+from awkward1._autograd import elementwise_grad as autograd
+
 from awkward1.operations.convert import *
 from awkward1.operations.describe import *
 from awkward1.operations.structure import *
