@@ -43,7 +43,6 @@ def getArguments(names, local_dict=None, global_dict=None):
 
 def evaluate(expression, local_dict=None, global_dict=None, order="K", casting="safe", **kwargs):
     import numexpr
-    import awkward1.highlevel
 
     context = numexpr.necompiler.getContext(kwargs, frame_depth=1)
     expr_key = (expression, tuple(sorted(context.items())))
@@ -56,10 +55,9 @@ def evaluate(expression, local_dict=None, global_dict=None, order="K", casting="
 
     def getfunction(inputs):
         if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-
             return lambda depth: awkward1.layout.NumpyArray(numexpr.evaluate(expression, dict(zip(names, inputs)), {}, order=order, casting=casting, **kwargs))
-
-        return None
+        else:
+            return None
 
     return awkward1._util.wrap(awkward1._util.broadcast_and_apply(arrays, getfunction), awkward1._util.behaviorof(arrays))
 
@@ -67,7 +65,6 @@ evaluate.evaluate = evaluate
 
 def re_evaluate(local_dict=None):
     import numexpr
-    import awkward1.highlevel
 
     try:
         compiled_ex = numexpr.necompiler._numexpr_last["ex"]
