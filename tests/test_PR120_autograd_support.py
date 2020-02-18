@@ -12,7 +12,7 @@ import awkward1
 autograd = pytest.importorskip("autograd")
 
 def tanh(x):
-    y = autograd.numpy.exp(-2.0 * x)
+    y = numpy.exp(-2.0 * x)
     return (1.0 - y) / (1.0 + y)
 
 def test():

@@ -9,8 +9,35 @@ import awkward1.operations.convert
 import awkward1._numpy
 import awkward1._util
 
+NEP13Box = None
+
+def register():
+    import autograd
+    global NEP13Box
+
+    if NEP13Box is None:
+        class NEP13Box(autograd.extend.Box, awkward1._numpy.NDArrayOperatorsMixin):
+            def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+                import autograd
+
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, NEP13Box):
+                        nextinputs.append(autograd.numpy.numpy_boxes.ArrayBox(numpy.asarray(x._value), x._trace, x._node))
+                    else:
+                        nextinputs.append(x)
+
+                out = getattr(getattr(autograd.numpy, ufunc.__name__), method)(*nextinputs, **kwargs)
+                return NEP13Box(awkward1.layout.NumpyArray(out._value), out._trace, out._node)
+
+        NEP13Box.register(awkward1.layout.NumpyArray)
+
+        autograd.extend.VSpace.register(awkward1.layout.NumpyArray, lambda x: autograd.numpy.numpy_vspaces.ArrayVSpace(numpy.asarray(x)))
+
 def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
     import autograd
+    register()
+
     gradfun = autograd.elementwise_grad(fun, argnum, *nary_op_args, **nary_op_kwargs)
 
     def broadcast(*args, **kwargs):
@@ -18,9 +45,7 @@ def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
 
         def getfunction(inputs):
             if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-                arrays = [numpy.asarray(x) if isinstance(x, awkward1.layout.NumpyArray) else x for x in inputs]
-                return lambda depth: (awkward1.layout.NumpyArray(gradfun(*arrays)),)
-
+                return lambda depth: (awkward1.layout.NumpyArray(gradfun(*inputs)),)
             else:
                 return None
 
