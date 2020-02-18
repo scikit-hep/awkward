@@ -20,6 +20,9 @@ def register():
             def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
                 import autograd
 
+                if method != "__call__" or len(inputs) == 0 or "out" in kwargs or ufunc.__class__.__module__ != "numpy":
+                    return NotImplemented
+
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, NEP13Box):
@@ -27,7 +30,7 @@ def register():
                     else:
                         nextinputs.append(x)
 
-                out = getattr(getattr(autograd.numpy, ufunc.__name__), method)(*nextinputs, **kwargs)
+                out = getattr(autograd.numpy, ufunc.__name__)(*nextinputs, **kwargs)
                 return NEP13Box(awkward1.layout.NumpyArray(out._value), out._trace, out._node)
 
         NEP13Box.register(awkward1.layout.NumpyArray)
