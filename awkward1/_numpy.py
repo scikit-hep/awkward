@@ -44,23 +44,32 @@ def array_ufunc(ufunc, method, inputs, kwargs, behavior):
 
     inputs = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=True) for x in inputs]
 
+    def adjust(custom, inputs, kwargs):
+        tmp = custom(*inputs, **kwargs)
+        if not isinstance(tmp, tuple):
+            return (tmp,)
+        else:
+            return tmp
+
     def getfunction(inputs):
         signature = (ufunc,) + tuple(x.parameters.get("__record__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
         custom = awkward1._util.overload(behavior, signature)
         if custom is not None:
-            return lambda depth: custom(*inputs, **kwargs)
+            return lambda depth: adjust(custom, inputs, kwargs)
 
         signature = (ufunc,) + tuple(x.parameters.get("__array__") if isinstance(x, awkward1.layout.Content) else type(x) for x in inputs)
         custom = awkward1._util.overload(behavior, signature)
         if custom is not None:
-            return lambda depth: custom(*inputs, **kwargs)
+            return lambda depth: adjust(custom, inputs, kwargs)
 
         if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-            return lambda depth: awkward1.layout.NumpyArray(getattr(ufunc, method)(*inputs, **kwargs))
+            return lambda depth: (awkward1.layout.NumpyArray(getattr(ufunc, method)(*inputs, **kwargs)),)
 
         return None
 
-    return awkward1._util.wrap(awkward1._util.broadcast_and_apply(inputs, getfunction), behavior)
+    out = awkward1._util.broadcast_and_apply(inputs, getfunction)
+    assert isinstance(out, tuple) and len(out) == 1
+    return awkward1._util.wrap(out[0], behavior)
 
 try:
     NDArrayOperatorsMixin = numpy.lib.mixins.NDArrayOperatorsMixin
