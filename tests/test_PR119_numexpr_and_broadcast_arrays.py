@@ -20,5 +20,6 @@ def test_broadcast_arrays():
     a = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     b = awkward1.Array([100, 200, 300])
 
-    print(awkward1.broadcast_arrays(a, b))
-    raise Exception
+    out = awkward1.broadcast_arrays(a, b)
+    assert awkward1.tolist(out[0]) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(out[1]) == [[100, 100, 100], [], [300, 300]]

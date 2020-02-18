@@ -18,12 +18,13 @@ def withfield(base, what, where=None):
         if isinstance(base, awkward1.layout.RecordArray):
             if not isinstance(what, awkward1.layout.Content):
                 what = awkward1.layout.NumpyArray(numpy.lib.stride_tricks.as_strided([what], shape=(len(base),), strides=(0,)))
-            return lambda depth: base.setitem_field(where, what)
+            return lambda depth: (base.setitem_field(where, what),)
         else:
             return None
 
     out = awkward1._util.broadcast_and_apply([base, what], getfunction)
-    return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(base, what))
+    assert isinstance(out, tuple) and len(out) == 1
+    return awkward1._util.wrap(out[0], behavior=awkward1._util.behaviorof(base, what))
 
 def isna(array):
     import awkward1.highlevel

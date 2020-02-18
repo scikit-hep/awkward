@@ -335,7 +335,7 @@ def broadcast_and_apply(inputs, getfunction):
                 numoutputs = None
                 for key in keys:
                     outcontents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs], depth))
-                    assert isinstance(outcontents, tuple)
+                    assert isinstance(outcontents[-1], tuple)
                     if numoutputs is not None:
                         assert numoutputs == len(outcontents[-1])
                     numoutputs = len(outcontents[-1])

@@ -55,11 +55,13 @@ def evaluate(expression, local_dict=None, global_dict=None, order="K", casting="
 
     def getfunction(inputs):
         if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-            return lambda depth: awkward1.layout.NumpyArray(numexpr.evaluate(expression, dict(zip(names, inputs)), {}, order=order, casting=casting, **kwargs))
+            return lambda depth: (awkward1.layout.NumpyArray(numexpr.evaluate(expression, dict(zip(names, inputs)), {}, order=order, casting=casting, **kwargs)),)
         else:
             return None
 
-    return awkward1._util.wrap(awkward1._util.broadcast_and_apply(arrays, getfunction), awkward1._util.behaviorof(arrays))
+    out = awkward1._util.broadcast_and_apply(arrays, getfunction)
+    assert isinstance(out, tuple) and len(out) == 1
+    return awkward1._util.wrap(out[0], awkward1._util.behaviorof(arrays))
 
 evaluate.evaluate = evaluate
 
@@ -78,10 +80,12 @@ def re_evaluate(local_dict=None):
     def getfunction(inputs):
         if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
 
-            return lambda depth: awkward1.layout.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs))))
+            return lambda depth: (awkward1.layout.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),)
 
         return None
 
-    return awkward1._util.wrap(awkward1._util.broadcast_and_apply(arrays, getfunction), awkward1._util.behaviorof(arrays))
+    out = awkward1._util.broadcast_and_apply(arrays, getfunction)
+    assert isinstance(out, tuple) and len(out) == 1
+    return awkward1._util.wrap(out[0], awkward1._util.behaviorof(arrays))
 
 evaluate.re_evaluate = re_evaluate
