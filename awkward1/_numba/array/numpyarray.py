@@ -32,12 +32,15 @@ class NumpyArrayType(awkward1._numba.content.ContentType):
     def lower_getitem_at_nowrap(context, builder, sig, args):
         rettpe, (tpe, wheretpe) = sig.return_type, sig.args
         val, whereval = args
-        proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+        # proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+        proxyin = context.make_helper(builder, tpe, val)
 
         if isinstance(rettpe, NumpyArrayType):
             proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
             proxyout.array = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, rettpe.arraytpe(tpe.arraytpe, wheretpe), (proxyin.array, whereval))
             proxyout.length = numba.targets.arrayobj.array_len(context, builder, numba.intp(rettpe.arraytpe), (proxyout.array,))
+            if tpe.identitiestpe != numba.none:
+                raise NotImplementedError
             return proxyout._getvalue()
 
         else:
@@ -45,7 +48,8 @@ class NumpyArrayType(awkward1._numba.content.ContentType):
 
     @staticmethod
     def lower_getitem_range_nowrap(context, builder, tpe, val, whereval, length):
-        proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+        # proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+        proxyin = context.make_helper(builder, tpe, val)
         proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
         proxyout.array = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.arraytpe(tpe.arraytpe, numba.types.slice2_type), (proxyin.array, whereval))
         proxyout.length = length
@@ -79,7 +83,8 @@ def unbox(tpe, obj, c):
 @numba.extending.box(NumpyArrayType)
 def box(tpe, val, c):
     NumpyArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.NumpyArray))
-    proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
+    # proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
+    proxyin = c.context.make_helper(c.builder, tpe, val)
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
     args = [array_obj]
     if tpe.identitiestpe != numba.none:
