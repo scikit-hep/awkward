@@ -2,9 +2,4 @@
 
 from __future__ import absolute_import
 
-try:
-    import numba
-except ImportError:
-    installed = False
-else:
-    installed = True
+import numba

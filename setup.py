@@ -106,6 +106,9 @@ setup(name = "awkward1",
       url = "https://github.com/jpivarski/awkward1",
       download_url = "https://github.com/jpivarski/awkward1/releases",
       license = "BSD 3-clause",
+      entry_points = {
+        "numba_extensions": ["init = awkward1:loadnumba"]
+      },
       ext_modules = [CMakeExtension("awkward")],
       cmdclass = {"build_ext": CMakeBuild},
       test_suite = "tests",

@@ -29,9 +29,12 @@ from awkward1.operations.reducers import *
 from awkward1.behaviors.string import *
 
 # third-party connectors
-import awkward1._numba
 from awkward1._numexpr import evaluate as numexpr
 from awkward1._autograd import elementwise_grad as autograd
+def loadnumba():
+    print("wowie")
+    # called by an entrypoint in setup.py
+    import awkward1._numba
 
 # version
 __version__ = awkward1.layout.__version__
