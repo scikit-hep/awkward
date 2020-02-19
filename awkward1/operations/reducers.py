@@ -242,4 +242,10 @@ def linearfit(x, y, weight=None, axis=None, keepdims=False):
 
         return awkward1._util.wrap(out, awkward1._util.behaviorof(x, y))
 
+def softmax(x, axis=None, keepdims=False):
+    with numpy.errstate(invalid="ignore"):
+        expx = numpy.exp(x)
+        denom = sum(expx, axis=axis, keepdims=keepdims)
+        return numpy.true_divide(expx, denom)
+
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("collections", "numpy", "awkward1")]
