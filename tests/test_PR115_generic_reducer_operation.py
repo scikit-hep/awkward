@@ -1180,3 +1180,7 @@ def test_nonreducers():
     fit = awkward1.linearfit(x, y, axis=-1)
     assert awkward1.tolist(fit[0]) == pytest.approx({"intercept": 0.11999999999999772, "slope": 0.9800000000000005, "intercept_error": 1.0488088481701516, "slope_error": 0.31622776601683794})
     assert awkward1.tolist(fit[1]) == pytest.approx({"intercept": 0.04000000000000228, "slope": 0.9999999999999994, "intercept_error": 1.0488088481701516, "slope_error": 0.31622776601683794})
+
+def test_softmax():
+    array = awkward1.Array([[numpy.log(2), numpy.log(2), numpy.log(4)], [], [numpy.log(5), numpy.log(5)]])
+    assert awkward1.tolist(awkward1.softmax(array, axis=-1)) == [pytest.approx([0.25, 0.25, 0.5]), [], pytest.approx([0.5, 0.5])]
