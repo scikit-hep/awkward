@@ -2,4 +2,5 @@
 
 from __future__ import absolute_import
 
-import numba
+def register():
+    print("zoinks!")

@@ -31,10 +31,8 @@ from awkward1.behaviors.string import *
 # third-party connectors
 from awkward1._numexpr import evaluate as numexpr
 from awkward1._autograd import elementwise_grad as autograd
-def loadnumba():
-    print("wowie")
-    # called by an entrypoint in setup.py
-    import awkward1._numba
+#    awkward1._pandas is imported by highlevel (without importing pandas before it's necessary)
+#    awkward1._numba is imported by an entry_point the first time Numba compiles a function
 
 # version
 __version__ = awkward1.layout.__version__
