@@ -39,7 +39,16 @@ def test_NumpyArray():
 
     @numba.njit
     def f4(x):
-        return numba_unsafe_refcount.get_refcount(x.array), x[2]
+        return numba_unsafe_refcount.get_refcount(x.array), x[1]
 
-    assert f4(array) == (1, 3.3)
+    assert f4(array) == (1, 2.2)
     assert sys.getrefcount(array) == 2
+
+    @numba.njit
+    def f5(x):
+        return x[1:4]
+
+    assert awkward1.tolist(f5(array)) == [2.2, 3.3, 4.4]
+
+    array2 = awkward1.layout.NumpyArray(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+    assert awkward1.tolist(f4(array2)[1]) == [4.4, 5.5, 6.6]

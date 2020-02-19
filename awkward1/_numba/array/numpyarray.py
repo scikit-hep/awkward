@@ -19,38 +19,43 @@ class NumpyArrayType(awkward1._numba.content.ContentType):
         self.identitiestpe = identitiestpe
         self.parameters = parameters
 
-    def getitem_at(self):
+    def typeof_getitem_at(self):
         if self.arraytpe.ndim == 1:
             return self.arraytpe.dtype
         else:
-            return numba.types.Array(self.arraytpe.dtype, self.arraytpe.ndim - 1, self.arraytpe.layout)
+            return NumpyArrayType(numba.types.Array(self.arraytpe.dtype, self.arraytpe.ndim - 1, self.arraytpe.layout), self.identitiestpe, self.parameters)
 
-    def getitem_range(self):
-        return self
-
-    def getitem_field(self):
+    def typeof_getitem_field(self):
         raise TypeError("array has no fields")
 
-    @property
-    def lower_len(self):
-        return lower_len
+    @staticmethod
+    def lower_getitem_at_nowrap(context, builder, sig, args):
+        rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+        val, whereval = args
+        proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
 
-    @property
-    def lower_getitem_at(self):
-        return lower_getitem
+        if isinstance(rettpe, NumpyArrayType):
+            proxyout = numba.cgutils.create_struct_proxy(rettpe)(context, builder)
+            proxyout.array = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, rettpe.arraytpe(tpe.arraytpe, wheretpe), (proxyin.array, whereval))
+            proxyout.length = numba.targets.arrayobj.array_len(context, builder, numba.intp(rettpe.arraytpe), (proxyout.array,))
+            return proxyout._getvalue()
 
-    @property
-    def lower_getitem_range(self):
-        return lower_getitem
+        else:
+            return numba.targets.arrayobj.getitem_arraynd_intp(context, builder, rettpe(tpe.arraytpe, wheretpe), (proxyin.array, whereval))
 
-    @property
-    def lower_getitem_field(self):
-        raise AssertionError
+    @staticmethod
+    def lower_getitem_range_nowrap(context, builder, tpe, val, whereval, length):
+        proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+        proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
+        proxyout.array = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.arraytpe(tpe.arraytpe, numba.types.slice2_type), (proxyin.array, whereval))
+        proxyout.length = length
+        return proxyout._getvalue()
 
 @numba.extending.register_model(NumpyArrayType)
 class NumpyArrayModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("array", fe_type.arraytpe)]
+        members = [("array", fe_type.arraytpe),
+                   ("length", numba.intp)]
         if fe_type.identitiestpe != numba.none:
             raise NotImplementedError
         super(NumpyArrayModel, self).__init__(dmm, fe_type, members)
@@ -63,6 +68,7 @@ def unbox(tpe, obj, c):
     array_obj = c.pyapi.call_function_objargs(asarray_obj, (obj,))
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
     proxyout.array = c.pyapi.to_native_value(tpe.arraytpe, array_obj).value
+    proxyout.length = numba.targets.arrayobj.array_len(c.context, c.builder, numba.intp(tpe.arraytpe), (proxyout.array,))
     c.pyapi.decref(asarray_obj)
     c.pyapi.decref(array_obj)
     if tpe.identitiestpe != numba.none:
@@ -85,26 +91,4 @@ def box(tpe, val, c):
     for x in args:
         c.pyapi.decref(x)
     c.pyapi.decref(NumpyArray_obj)
-    return out
-
-@numba.extending.lower_builtin(len, NumpyArrayType)
-def lower_len(context, builder, sig, args):
-    tpe, = sig.args
-    val, = args
-    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-    return numba.targets.arrayobj.array_len(context, builder, numba.intp(tpe.arraytpe), (proxyin.array,))
-
-@numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.Integer)
-@numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.SliceType)
-def lower_getitem(context, builder, sig, args):
-    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
-    val, whereval = args
-    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
-
-    if isinstance(rettpe, NumpyArrayType):
-        signature = rettpe.arraytpe(tpe.arraytpe, wheretpe)
-    else:
-        signature = rettpe(tpe.arraytpe, wheretpe)
-
-    out = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, signature, (proxyin.array, whereval))
     return out

@@ -6,6 +6,7 @@ import sys
 
 import numpy
 import numba
+import llvmlite.ir.types
 
 py27 = (sys.version_info[0] < 3)
 
