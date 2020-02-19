@@ -68,11 +68,11 @@ def overload(behavior, signature):
 def behaviorof(*arrays):
     behavior = None
     for x in arrays[::-1]:
-        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x._behavior is not None:
+        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x.behavior is not None:
             if behavior is None:
-                behavrio = dict(x._behavior)
+                behavior = dict(x.behavior)
             else:
-                behavior.update(x._behavior)
+                behavior.update(x.behavior)
     return behavior
 
 def wrap(content, behavior):

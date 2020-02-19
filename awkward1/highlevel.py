@@ -37,7 +37,7 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
 
         self.layout = layout
-        self._behavior = behavior
+        self.behavior = behavior
 
     @property
     def layout(self):
@@ -45,9 +45,21 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
 
     @layout.setter
     def layout(self, layout):
-        if not isinstance(layout, awkward1.layout.Content):
+        if isinstance(layout, awkward1.layout.Content):
+            self._layout = layout
+        else:
             raise TypeError("layout must be a subclass of awkward1.layout.Content")
-        self._layout = layout
+
+    @property
+    def behavior(self):
+        return self._behavior
+
+    @behavior.setter
+    def behavior(self, behavior):
+        if behavior is None or isinstance(behavior, dict):
+            self._behavior = behavior
+        else:
+            raise TypeError("behavior must be None or a dict")
 
     @property
     def type(self):
@@ -156,7 +168,7 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
             self.__class__ = awkward1._util.recordclass(layout, behavior)
 
         self.layout = layout
-        self._behavior = behavior
+        self.behavior = behavior
 
     @property
     def layout(self):
@@ -167,6 +179,17 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
         if not isinstance(layout, awkward1.layout.Record):
             raise TypeError("layout must be a subclass of awkward1.layout.Record")
         self._layout = layout
+
+    @property
+    def behavior(self):
+        return self._behavior
+
+    @behavior.setter
+    def behavior(self, behavior):
+        if behavior is None or isinstance(behavior, dict):
+            self._behavior = behavior
+        else:
+            raise TypeError("behavior must be None or a dict")
 
     @property
     def type(self):
@@ -245,7 +268,18 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
 class FillableArray(Sequence):
     def __init__(self, behavior=None):
         self._fillablearray = awkward1.layout.FillableArray()
-        self._behavior = behavior
+        self.behavior = behavior
+
+    @property
+    def behavior(self):
+        return self._behavior
+
+    @behavior.setter
+    def behavior(self, behavior):
+        if behavior is None or isinstance(behavior, dict):
+            self._behavior = behavior
+        else:
+            raise TypeError("behavior must be None or a dict")
 
     @property
     def type(self):
