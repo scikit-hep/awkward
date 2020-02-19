@@ -11,6 +11,8 @@ import numpy
 
 import awkward1
 
+pytest.skip("Disabling Numba until the rewrite is done.", allow_module_level=True)
+
 numba = pytest.importorskip("numba")
 
 def test_boxing():
