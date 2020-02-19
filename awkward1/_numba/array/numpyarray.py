@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import operator
+
 import numpy
 import numba
 
@@ -35,11 +37,11 @@ class NumpyArrayType(awkward1._numba.content.ContentType):
 
     @property
     def lower_getitem_at(self):
-        return lower_getitem_at
+        return lower_getitem
 
     @property
     def lower_getitem_range(self):
-        return lower_getitem_range
+        return lower_getitem
 
     @property
     def lower_getitem_field(self):
@@ -79,6 +81,7 @@ def box(tpe, val, c):
     else:
         args.append(c.pyapi.make_none())
     args.append(awkward1._numba.util.items2dict_impl(c, tpe.parameters))
+    out = c.pyapi.call_function_objargs(NumpyArray_obj, args)
     for x in args:
         c.pyapi.decref(x)
     c.pyapi.decref(NumpyArray_obj)
@@ -90,3 +93,18 @@ def lower_len(context, builder, sig, args):
     val, = args
     proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     return numba.targets.arrayobj.array_len(context, builder, numba.intp(tpe.arraytpe), (proxyin.array,))
+
+@numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.Integer)
+@numba.extending.lower_builtin(operator.getitem, NumpyArrayType, numba.types.SliceType)
+def lower_getitem(context, builder, sig, args):
+    rettpe, (tpe, wheretpe) = sig.return_type, sig.args
+    val, whereval = args
+    proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
+
+    if isinstance(rettpe, NumpyArrayType):
+        signature = rettpe.arraytpe(tpe.arraytpe, wheretpe)
+    else:
+        signature = rettpe(tpe.arraytpe, wheretpe)
+
+    out = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, signature, (proxyin.array, whereval))
+    return out
