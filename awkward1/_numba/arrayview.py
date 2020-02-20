@@ -203,3 +203,14 @@ def box_ArrayView(viewtype, viewval, c):
     c.pyapi.decref(arrayview_obj)
 
     return out
+
+@numba.typing.templates.infer_global(len)
+class type_len(numba.typing.templates.AbstractTemplate):
+    def generic(self, args, kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
+            return numba.intp(args[0])
+
+@numba.extending.lower_builtin(len, ArrayViewType)
+def lower_len(context, builder, sig, args):
+    proxyin = context.make_helper(builder, sig.args[0], args[0])
+    return builder.sub(proxyin.stop, proxyin.start)

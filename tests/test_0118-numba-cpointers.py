@@ -172,3 +172,12 @@ def test_refcount():
         for j in range(10):
             y = f3(array)
             assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.postable, array._numbaview.lookup.arrayptrs, array._numbaview.lookup.arraylens, array._numbaview.lookup.identityptrs, array._numbaview.lookup.identitylens)]
+
+def test_len():
+    array = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+
+    @numba.njit
+    def f1(x):
+        return len(x)
+
+    assert f1(array) == 5
