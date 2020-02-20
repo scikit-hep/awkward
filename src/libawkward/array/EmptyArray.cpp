@@ -6,6 +6,7 @@
 
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ArrayType.h"
+#include "awkward/array/IndexedArray.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/RegularArray.h"
 
@@ -183,7 +184,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::pad(int64_t length, int64_t axis) const {
-    throw std::runtime_error("FIXME: EmptyArray pad is not implemented");
+    Index64 index(length);
+    for(int64_t i = 0; i < length; i++) {
+      index.ptr().get()[i] = -1;
+    }
+    return std::make_shared<IndexedOptionArray64>(identities_, parameters_, index, std::make_shared<EmptyArray>(identities_, parameters_));
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

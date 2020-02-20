@@ -512,50 +512,96 @@ namespace awkward {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
-  const std::shared_ptr<Content> RegularArray::pad(int64_t pad_width, int64_t axis) const {
+  const std::shared_ptr<Content> RegularArray::pad(int64_t length, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (OptionType* raw = dynamic_cast<OptionType*>(type().get())) {
-      std::cout << "RegularArray is OptionType\n";
-    }
+    if(toaxis == 0) {
+      if(length > size_) {
+        auto const& out = content();
+        int64_t n = std::floor(out.get()->length()/size_);
+        Index64 outindex(n*size_);
+
+        if(out.get()->type() == IndexedOptionArray) || (out.get()->type() == IndexedArray) {
+          //If the content is not an integer multiple of size,
+          //then the length of the RegularArray is truncated
+          //to the largest integer multiple
+          for(int64_t i = 0; i < n*size_; i++) {
+            outindex.append(out.index[i]);
+          for(int64_t i = 0; i < (lenght - size_)*size_) {
+            outindex.append(-1);
+          out = IndexedOptionArray(outindex, out.content);
+
+          return RegularArray(out, self.size);
+        }
+        else {
+          for( int64_t x = 0; x < (n*size_); x++) {
+            outindex.append(x);
+          for( int64_t y = 0; y < (lenght - self.length())*size_) {
+            outindex.append(-1);
+          }
+          out = IndexedOptionArray(outindex, out);
+
+          return RegularArray(out, size_);
+        }
+      }
+      else {
+        Index64 outindex(length*size_);
+        auto out = content();
+        if( out.type() == IndexedOptionArray || out.type() == IndexedArray) {
+          outindex = out.index[:length*self.size];
+          out = IndexedOptionArray(outindex, out.content);
+        }
+        else {
+          // truncate the content
+          out = out.pad(std::floor(self.size*(out.__len__() / self.size)));
+          // pad truncated content
+          out = out.pad(size_*length, axis);
+        }
+        return RegularArray(out, size_);
+      }
+      else {
+        Index64 outindex();
+        out = content();
+        if( out.type() == IndexedOptionArray  ||  out.type() == IndexedArray) {
+          int64_t n = std::floor(out.__len__() / size_);
+          int64_t i = 0;
+          for(int64_t x = 0; x < n; x++) {
+            for(int64_t y = 0; y < size_; y++) {
+              if(y < length) {
+                outindex.append(out.index[i]);
+                i = i + 1;
+            for(int64_t z = 0; z < length - self.size; z++) {
+              outindex.append(-1);
+            }
+            out = IndexedOptionArray(outindex, out.content);
+          }
+          else {
+            out = out.pad(length, axis);
+          }
+          return RegularArray(out, length);
+
     if (toaxis == 0) {
-      Index64 result(pad_width);
+      Index64 result(length);
       struct Error err1 = awkward_zero_index_64(
         result.ptr().get(),
-        pad_width);
+        length);
       util::handle_error(err1, classname(), identities_.get());
-      std::cout << result.length() << "\n";
 
-      std::shared_ptr<void> ptr(new uint8_t[(size_t)pad_width], util::array_deleter<uint8_t>());
+      std::shared_ptr<void> ptr(new uint8_t[(size_t)length], util::array_deleter<uint8_t>());
       struct Error err2 = awkward_zero_raw_ptr(
         reinterpret_cast<uint8_t*>(ptr.get()),
-        pad_width);
+        length);
       util::handle_error(err2, classname(), identities_.get());
 
-      /*std::shared_ptr<Content> empty = OptionType(util::Parameters(), type()).empty();
-      std::shared_ptr<Content> next = empty.get()->carry(result);
-      return next;
-*/
       std::vector<std::shared_ptr<Content>> contents;
       contents.emplace_back(content_);
-      for (int64_t i = 0; i < pad_width; i++) {
-        std::cout << i << ":" << contents.back().get()->length() << "\n";
-        //contents.emplace_back(OptionType(util::Parameters(), type()).empty());
+      for (int64_t i = 0; i < length; i++) {
       }
-      std::cout << contents.size() << "\n";
       Index8 tags(contents.size());
       Index64 index(contents.size());
-      /*RawArrayOf<double> rawarray(Identities::none(), util::Parameters(), pad_width + 1);
-      for (int i = 0;  i < pad_width + 1;  i++) {
-        *rawarray.borrow(i) = 0.0;
-      }*/
-
-      //RawArrayOf<uint8_t> rawarray(Identities::none(), util::Parameters(), pad_width);
       return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
-      //return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), result, rawarray.shallow_copy());
-      //return rawarray.shallow_copy();
     }
     else {
-      return content_.get()->pad(pad_width, toaxis - 1);
+      return content_.get()->pad(length, toaxis - 1);
     }
   }
 

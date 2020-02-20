@@ -1380,40 +1380,29 @@ namespace awkward {
     if (offset > ndim()) {
       throw std::invalid_argument(std::string("NumpyArray cannot be padded in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
-    std::vector<ssize_t> nextshape = shape_;
-    nextshape[offset] += (ssize_t)pad_width;
-
-    std::vector<ssize_t> nextstrides;
-    nextstrides.emplace_back(itemsize_);
-    std::vector<ssize_t>::reverse_iterator rit = nextshape.rbegin();
-    for (ssize_t i = 0; i < nextshape.size() - 1; i++ ) {
-      nextstrides.emplace_back(nextstrides.back()*(*rit));
-      rit++;
+    if (shape_.empty()) {
+       throw std::runtime_error("attempting to reduce a scalar");
     }
-    std::reverse(std::begin(nextstrides), std::end(nextstrides));
+    std::shared_ptr<Content> out = toRegularArray();
 
-    Index64 nextbytepos(nextshape[0]);
-    struct Error err1 = awkward_numpyarray_contiguous_init_64(nextbytepos.ptr().get(), nextshape[0], nextstrides[0]);
-    util::handle_error(err1, classname(), identities_.get());
+    int64_t len = out.get()->length();
+    int64_t outlength = pad_width;
+    if(pad_width < len) {
+      outlength = len;
+    }
+    Index64 index(outlength);
+    for(int64_t i = 0; i < outlength; i++) {
+      if( i < len ) {
+        index.ptr().get()[i] = i;
+      }
+      else {
+        index.ptr().get()[i] = -1;
+      }
+    }
 
-    std::shared_ptr<void> ptr(new uint8_t[(size_t)(nextbytepos.length()*nextstrides[0])], util::array_deleter<uint8_t>());
+    out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, out);
 
-    Index64 bytepos(shape_[0]);
-    struct Error err3 = awkward_numpyarray_contiguous_init_64(bytepos.ptr().get(), shape_[0], strides_[0]);
-    util::handle_error(err3, classname(), identities_.get());
-
-    struct Error err4 = awkward_numpyarray_pad_copy_64(
-      reinterpret_cast<uint8_t*>(ptr.get()),
-      reinterpret_cast<uint8_t*>(ptr_.get()),
-      nextbytepos.length(),
-      bytepos.length(),
-      nextstrides[0],
-      strides_[0],
-      byteoffset_,
-      bytepos.ptr().get());
-    util::handle_error(err4, classname(), identities_.get());
-
-    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, nextshape, nextstrides, byteoffset_, itemsize_, format_);
+    return out;
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
