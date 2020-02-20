@@ -8,7 +8,7 @@ import pytest
 import numpy
 
 import awkward1
-import awkward1._numba.lookup
+import awkward1._numba.lookupview
 
 numba = pytest.importorskip("numba")
 
@@ -109,16 +109,16 @@ numba = pytest.importorskip("numba")
 #     assert f1(awkwardlookup) == 999
 
 def test_views():
-    assert awkward1.tolist(awkward1._numba.lookup.View.fromarray(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])).toarray()) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(awkward1._numba.lookupview.View.fromarray(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])).toarray()) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert awkward1.tolist(awkward1._numba.lookup.View.fromarray(awkward1.Array(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))).toarray()) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
+    assert awkward1.tolist(awkward1._numba.lookupview.View.fromarray(awkward1.Array(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))).toarray()) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
 
-    assert awkward1.tolist(awkward1._numba.lookup.View.fromarray(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])).toarray()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(awkward1._numba.lookupview.View.fromarray(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])).toarray()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
-    assert awkward1.tolist(awkward1._numba.lookup.View.fromarray(awkward1.Array([1.1, 2.2, None, 3.3, None, 4.4, 5.5])).toarray()) == [1.1, 2.2, None, 3.3, None, 4.4, 5.5]
+    assert awkward1.tolist(awkward1._numba.lookupview.View.fromarray(awkward1.Array([1.1, 2.2, None, 3.3, None, 4.4, 5.5])).toarray()) == [1.1, 2.2, None, 3.3, None, 4.4, 5.5]
 
-    assert awkward1.tolist(awkward1._numba.lookup.View.fromarray(awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1, 1]}, {"x": 2.2, "y": [2, 2, 2]}])).toarray()) == [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1, 1]}, {"x": 2.2, "y": [2, 2, 2]}]
+    assert awkward1.tolist(awkward1._numba.lookupview.View.fromarray(awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1, 1]}, {"x": 2.2, "y": [2, 2, 2]}])).toarray()) == [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1, 1]}, {"x": 2.2, "y": [2, 2, 2]}]
 
-    assert awkward1.tolist(awkward1._numba.lookup.View.fromarray(awkward1.Array([(0.0, []), (1.1, [1, 1]), (2.2, [2, 2, 2])])).toarray()) == [(0.0, []), (1.1, [1, 1]), (2.2, [2, 2, 2])]
+    assert awkward1.tolist(awkward1._numba.lookupview.View.fromarray(awkward1.Array([(0.0, []), (1.1, [1, 1]), (2.2, [2, 2, 2])])).toarray()) == [(0.0, []), (1.1, [1, 1]), (2.2, [2, 2, 2])]
 
-    assert awkward1.tolist(awkward1._numba.lookup.View.fromarray(awkward1.Array([1.1, 2.2, 3.3, [], [1], [2, 2]])).toarray()) == [1.1, 2.2, 3.3, [], [1], [2, 2]]
+    assert awkward1.tolist(awkward1._numba.lookupview.View.fromarray(awkward1.Array([1.1, 2.2, 3.3, [], [1], [2, 2]])).toarray()) == [1.1, 2.2, 3.3, [], [1], [2, 2]]
