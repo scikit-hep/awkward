@@ -53,7 +53,9 @@ def tolookup(layout, postable, arrays, identities):
         raise AssertionError("unrecognized layout type: {0}".format(type(layout)))
 
 @numba.extending.typeof_impl.register(Lookup)
-def typeof(obj, c):
+def typeof_Lookup(obj, c):
+    print("typeof_Lookup")
+
     return LookupType()
 
 class LookupType(numba.types.Type):
@@ -70,10 +72,12 @@ class LookupModel(numba.datamodel.models.StructModel):
                    ("arraylens",    fe_type.arraytype),
                    ("identityptrs", fe_type.arraytype),
                    ("identitylens", fe_type.arraytype)]
-        super(LookupModel).__init__(dmm, fe_type, members)
+        super(LookupModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(LookupType)
 def unbox_Lookup(lookuptype, lookupobj, c):
+    print("6 unbox_Lookup")
+
     postable_obj     = c.pyapi.object_getattr_string(lookupobj, "postable")
     arrayptrs_obj    = c.pyapi.object_getattr_string(lookupobj, "arrayptrs")
     arraylens_obj    = c.pyapi.object_getattr_string(lookupobj, "arraylens")
@@ -118,12 +122,25 @@ class ArrayView(object):
         return awkward1._util.wrap(layout[self.start:self.stop], self.behavior)
 
 @numba.extending.typeof_impl.register(ArrayView)
-def typeof(obj, c):
+def typeof_ArrayView(obj, c):
+    print("3 typeof")
+
     return ArrayViewType(obj.type, obj.behavior, obj.fields)
 
 class ArrayViewType(numba.types.Type):
     def __init__(self, type, behavior, fields):
+        print("4 ArrayViewType")
+
         super(ArrayViewType, self).__init__(name="awkward1.ArrayView({0}, <Behavior {1}>, {2})".format(type.name, hash(behavior), repr(fields)))
+
+        self.type = type
+        self.behavior = behavior
+        self.fields = fields
+
+        print("4.1", self.name)
+        print("type", type)
+        print("behavior", behavior)
+        print("fields", fields)
 
 @numba.extending.register_model(ArrayViewType)
 class ArrayViewModel(numba.datamodel.models.StructModel):
@@ -141,6 +158,8 @@ class ArrayViewModel(numba.datamodel.models.StructModel):
 
 @numba.extending.unbox(ArrayViewType)
 def unbox_ArrayView(viewtype, arrayobj, c):
+    print("5 unbox_ArrayView")
+
     view_obj   = c.pyapi.object_getattr_string(arrayobj, "_numbaview")
     lookup_obj = c.pyapi.object_getattr_string(view_obj, "lookup")
     pos_obj    = c.pyapi.object_getattr_string(view_obj, "pos")

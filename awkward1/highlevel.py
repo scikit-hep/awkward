@@ -161,11 +161,22 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
 
     @property
     def numbatype(self):
+        print("1 numbatype")
+
         import numba
         import awkward1._numba
         awkward1._numba.register()
         self._numbaview = awkward1._numba.arrayview.ArrayView.fromarray(self)
-        return numba.typeof(self._numbaview)
+
+        print("2 numbaview", self._numbaview)
+
+        out = numba.typeof(self._numbaview)
+
+        print("4.2", out)
+        print(type(out))
+        print(out._code)
+
+        return out
 
 class Record(awkward1._numpy.NDArrayOperatorsMixin):
     def __init__(self, data, behavior=None):

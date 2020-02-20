@@ -17,4 +17,4 @@ except ImportError:
 else:
     @numba.extending.typeof_impl.register(awkward1.highlevel.Array)
     def typeof_Array(obj, c):
-        return obj.numbatype()
+        return obj.numbatype
