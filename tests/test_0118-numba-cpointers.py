@@ -46,7 +46,7 @@ def unbox_AwkwardLookupType(altype, alobj, c):
     c.pyapi.decref(lookup_obj)
 
     for i, arraytype in enumerate(altype.arraytypes):
-        i_obj = c.pyapi.long_from_long(c.context.get_constant(numba.int64, i))
+        i_obj = c.pyapi.long_from_long(c.context.get_constant(numba.intp, i))
         array_obj = c.pyapi.call_method(alobj, "array", (i_obj,))
         array_val = c.pyapi.to_native_value(arraytype, array_obj).value
         setattr(proxyout, "array" + str(i), array_val)
@@ -95,15 +95,14 @@ class AwkwardViewType_methods(numba.typing.templates.AttributeTemplate):
 @numba.extending.lower_getattr(AwkwardViewType, "getval")
 def AwkwardViewType_getval(context, builder, avtype, avval):
     avproxy = context.make_helper(builder, avtype, avval)
-
+    return builder.load(avproxy.ptr)
 
 def test_tests():
-    awkwardlookup = AwkwardLookup([numpy.array([1, 2, 3, 4, 5]), numpy.array([1.1, 2.2, 3.3])])
+    awkwardlookup = AwkwardLookup([numpy.array([999, 2, 3, 4, 5]), numpy.array([1.1, 2.2, 3.3])])
 
     @numba.njit
     def f1(x):
         y = x.getview
+        return y.getval
 
-        return 3.14
-
-    f1(awkwardlookup)
+    assert f1(awkwardlookup) == 999
