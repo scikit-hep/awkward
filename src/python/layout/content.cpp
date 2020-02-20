@@ -1019,9 +1019,9 @@ py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_Nu
 
 py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle& m, const std::string& name) {
   return py::class_<ak::Record, std::shared_ptr<ak::Record>>(m, name.c_str())
-      .def(py::init([](const std::shared_ptr<ak::RecordArray>& recordarray, int64_t at) -> ak::Record {
-        return ak::Record(recordarray, at);
-      }), py::arg("recordarray"), py::arg("at"))
+      .def(py::init([](const std::shared_ptr<ak::RecordArray>& array, int64_t at) -> ak::Record {
+        return ak::Record(array, at);
+      }), py::arg("array"), py::arg("at"))
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("identities", [](const ak::Record& self) -> py::object { return box(self.identities()); })
       .def("__getitem__", &getitem<ak::Record>)
@@ -1122,6 +1122,20 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), length, istuple);
       }), py::arg("length"), py::arg("istuple") = false, py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
+      .def_property_readonly("recordlookup", [](const ak::RecordArray& self) -> py::object {
+        std::shared_ptr<ak::util::RecordLookup> recordlookup = self.recordlookup();
+        if (recordlookup.get() == nullptr) {
+          return py::none();
+        }
+        else {
+          py::list out;
+          for (auto x : *recordlookup.get()) {
+            py::str pyvalue(PyUnicode_DecodeUTF8(x.data(), x.length(), "surrogateescape"));
+            out.append(pyvalue);
+          }
+          return out;
+        }
+      })
       .def_property_readonly("istuple", &ak::RecordArray::istuple)
       .def_property_readonly("contents", &ak::RecordArray::contents)
       .def("setitem_field", [](const ak::RecordArray& self, const py::object& where, const py::object& what) -> py::object {

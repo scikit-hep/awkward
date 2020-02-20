@@ -312,4 +312,18 @@ def tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,
     else:
         return array
 
+def regularize_numpyarray(array, allowempty=True, highlevel=True):
+    def getfunction(layout):
+        if isinstance(layout, awkward1.layout.NumpyArray) and layout.ndim != 1:
+            return lambda: layout.toRegularArray()
+        elif isinstance(layout, awkward1.layout.EmptyArray) and not allowempty:
+            return lambda: layout.toNumpyArray()
+        else:
+            return None
+    out = awkward1._util.recursively_apply(tolayout(array), getfunction)
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "json", "Iterable", "numpy", "awkward1")]

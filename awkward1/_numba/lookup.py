@@ -17,7 +17,8 @@ class View(object):
     def fromarray(self, array):
         behavior = awkward1._util.behaviorof(array)
         layout = awkward1.operations.convert.tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,))
-        return View(behavior, Lookup(layout), 0, 0, len(array), (), numba.typeof(layout))
+        layout = awkward1.operations.convert.regularize_numpyarray(layout, allowempty=False, highlevel=False)
+        return View(behavior, Lookup(layout), 0, 0, len(layout), (), numba.typeof(layout))
 
     def __init__(self, behavior, lookup, pos, start, stop, fields, type):
         self.behavior = behavior
@@ -29,8 +30,8 @@ class View(object):
         self.type = type
 
     def toarray(self):
-        layout = self.type.tolayout(self.lookup, self.pos, (self.start, self.stop), self.fields)
-        return awkward1._util.wrap(layout, self.behavior)
+        layout = self.type.tolayout(self.lookup, self.pos, self.fields)
+        return awkward1._util.wrap(layout[self.start:self.stop], self.behavior)
 
 class Lookup(object):
     def __init__(self, layout):
@@ -65,7 +66,7 @@ def tolookup(layout, postable, arrays, identities):
         return RecordType.tolookup(layout, postable, arrays, identities)
 
     elif isinstance(layout, (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)):
-        return UnionType.tolookup(layout, postable, arrays, identities)
+        return UnionArrayType.tolookup(layout, postable, arrays, identities)
 
     else:
         raise AssertionError("unrecognized layout type: {0}".format(type(layout)))
@@ -100,7 +101,7 @@ def typeof(obj, c):
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(obj, c):
-    return RecordArrayType(tuple(numba.typeof(x) for x in obj.contents), numba.typeof(obj.identities), json.dumps(obj.parameters))
+    return RecordArrayType(tuple(numba.typeof(x) for x in obj.contents), obj.recordlookup, numba.typeof(obj.identities), json.dumps(obj.parameters))
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
 def typeof(obj, c):
@@ -140,19 +141,18 @@ class ContentType(numba.types.Type):
             raise AssertionError("no Index* type for array: {0}".format(arraytype))
 
 class NumpyArrayType(ContentType):
-    # 0: identities
-    # 1: array
+    IDENTITIES = 0
+    ARRAY = 1
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        if len(numpy.asarray(layout).shape) > 1:
-            return tolookup(layout.toRegularArray(), postable, arrays, identities)
-        else:
-            pos = len(postable)
-            cls.tolookup_identities(layout, postable, identities)
-            postable.append(len(arrays))
-            arrays.append(numpy.asarray(layout))
-            return pos
+        array = numpy.asarray(layout)
+        assert len(array.shape) == 1
+        pos = len(postable)
+        cls.tolookup_identities(layout, postable, identities)
+        postable.append(len(arrays))
+        arrays.append(array)
+        return pos
 
     def __init__(self, arraytype, identitiestype, parameters):
         super(NumpyArrayType, self).__init__(name="awkward1.NumpyArrayType({0}, {1}, {2})".format(arraytype.name, identitiestype.name, repr(parameters)))
@@ -160,25 +160,20 @@ class NumpyArrayType(ContentType):
         self.identitiestype = identitiestype
         self.parameters = parameters
 
-    def tolayout(self, lookup, pos, startstop, fields):
+    def tolayout(self, lookup, pos, fields):
         assert fields == ()
-        out = awkward1.layout.NumpyArray(lookup.arrays[lookup.postable[pos + 1]])
-        if startstop is None:
-            return out
-        else:
-            start, stop = startstop
-            return out[start:stop]
+        return awkward1.layout.NumpyArray(lookup.arrays[lookup.postable[pos + self.ARRAY]])
 
 class RegularArrayType(ContentType):
-    # 0: identities
-    # 1: content pos
+    IDENTITIES = 0
+    CONTENT = 1
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
         postable.append(None)
-        postable[pos + 1] = tolookup(layout.content, postable, arrays, identities)
+        postable[pos + cls.CONTENT] = tolookup(layout.content, postable, arrays, identities)
         return pos
 
     def __init__(self, contenttype, size, identitiestype, parameters):
@@ -188,20 +183,15 @@ class RegularArrayType(ContentType):
         self.identitiestype = identitiestype
         self.parameters = parameters
 
-    def tolayout(self, lookup, pos, startstop, fields):
-        content = self.contenttype.tolayout(lookup, lookup.postable[pos + 1], None, fields)
-        out = awkward1.layout.RegularArray(content, size)
-        if startstop is None:
-            return out
-        else:
-            start, stop = startstop
-            return out[start:stop]
+    def tolayout(self, lookup, pos, fields):
+        content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
+        return awkward1.layout.RegularArray(content, self.size)
 
 class ListArrayType(ContentType):
-    # 0: identities
-    # 1: starts array
-    # 2: stops array
-    # 3: content pos
+    IDENTITIES = 0
+    STARTS = 1
+    STOPS = 2
+    CONTENT = 3
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
@@ -220,7 +210,7 @@ class ListArrayType(ContentType):
         postable.append(len(arrays))
         arrays.append(stops)
         postable.append(None)
-        postable[pos + 3] = tolookup(layout.content, postable, arrays, identities)
+        postable[pos + cls.CONTENT] = tolookup(layout.content, postable, arrays, identities)
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
@@ -230,31 +220,26 @@ class ListArrayType(ContentType):
         self.identitiestype = identitiestype
         self.parameters = parameters
 
-    def ListArrayOf(self, arraytype):
-        if arraytype.dtype.bitwidth == 32 and arraytype.dtype.signed:
+    def ListArrayOf(self):
+        if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
             return awkward1.layout.ListArray32
-        elif arraytype.dtype.bitwidth == 32:
+        elif self.indextype.dtype.bitwidth == 32:
             return awkward1.layout.ListArrayU32
-        elif arraytype.dtype.bitwidth == 64 and arraytype.dtype.signed:
+        elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
             return awkward1.layout.ListArray64
         else:
-            raise AssertionError("no ListArray* type for array: {0}".format(arraytype))
+            raise AssertionError("no ListArray* type for array: {0}".format(indextype))
 
-    def tolayout(self, lookup, pos, startstop, fields):
-        starts = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + 1]])
-        stops = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + 2]])
-        content = self.contenttype.tolayout(lookup, lookup.postable[pos + 3], None, fields)
-        out = self.ListArrayOf(self.indextype)(starts, stops, content)
-        if startstop is None:
-            return out
-        else:
-            start, stop = startstop
-            return out[start:stop]
+    def tolayout(self, lookup, pos, fields):
+        starts = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + self.STARTS]])
+        stops = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + self.STOPS]])
+        content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
+        return self.ListArrayOf()(starts, stops, content)
 
 class IndexedArrayType(ContentType):
-    # 0: identities
-    # 1: index array
-    # 2: content pos
+    IDENTITIES = 0
+    INDEX = 1
+    CONTENT = 2
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
@@ -263,7 +248,7 @@ class IndexedArrayType(ContentType):
         postable.append(len(arrays))
         arrays.append(numpy.asarray(layout.index))
         postable.append(None)
-        postable[pos + 2] = tolookup(layout.content, postable, arrays, identities)
+        postable[pos + cls.CONTENT] = tolookup(layout.content, postable, arrays, identities)
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
@@ -273,10 +258,25 @@ class IndexedArrayType(ContentType):
         self.identitiestype = identitiestype
         self.parameters = parameters
 
+    def IndexedArrayOf(self):
+        if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
+            return awkward1.layout.IndexedArray32
+        elif self.indextype.dtype.bitwidth == 32:
+            return awkward1.layout.IndexedArrayU32
+        elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
+            return awkward1.layout.IndexedArray64
+        else:
+            raise AssertionError("no IndexedArray* type for array: {0}".format(self.indextype))
+
+    def tolayout(self, lookup, pos, fields):
+        index = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + self.INDEX]])
+        content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
+        return self.IndexedArrayOf()(index, content)
+
 class IndexedOptionArrayType(ContentType):
-    # 0: identities
-    # 1: index array
-    # 2: content pos
+    IDENTITIES = 0
+    INDEX = 1
+    CONTENT = 2
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
@@ -285,7 +285,7 @@ class IndexedOptionArrayType(ContentType):
         postable.append(len(arrays))
         arrays.append(numpy.asarray(layout.index))
         postable.append(None)
-        postable[pos + 2] = tolookup(layout.content, postable, arrays, identities)
+        postable[pos + cls.CONTENT] = tolookup(layout.content, postable, arrays, identities)
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
@@ -295,46 +295,74 @@ class IndexedOptionArrayType(ContentType):
         self.identitiestype = identitiestype
         self.parameters = parameters
 
+    def IndexedOptionArrayOf(self):
+        if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
+            return awkward1.layout.IndexedOptionArray32
+        elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
+            return awkward1.layout.IndexedOptionArray64
+        else:
+            raise AssertionError("no IndexedOptionArray* type for array: {0}".format(self.indextype))
+
+    def tolayout(self, lookup, pos, fields):
+        index = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + self.INDEX]])
+        content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
+        return self.IndexedOptionArrayOf()(index, content)
+
 class RecordArrayType(ContentType):
-    # 0: identities
-    # i + 1: contents pos
+    IDENTITIES = 0
+    CONTENTS = 1
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
         postable.extend([None] * layout.numfields)
-        for i, content in layout.contents:
-            postable[pos + i + 1] = tolookup(content, postable, arrays, identities)
+        for i, content in enumerate(layout.contents):
+            postable[pos + cls.CONTENTS + i] = tolookup(content, postable, arrays, identities)
         return pos
 
-    def __init__(self, contenttypes, identitiestype, parameters):
-        super(RecordArrayType, self).__init__(name="awkward1.RecordArrayType(({0}{1}), {2}, {3})".format(", ".join(x.name for x in contenttypes), "," if len(contenttypes) == 1 else "", identitiestype.name, repr(parameters)))
+    def __init__(self, contenttypes, recordlookup, identitiestype, parameters):
+        super(RecordArrayType, self).__init__(name="awkward1.RecordArrayType(({0}{1}), ({2}), {3}, {4})".format(", ".join(x.name for x in contenttypes), "," if len(contenttypes) == 1 else "", "None" if recordlookup is None else repr(tuple(recordlookup)), identitiestype.name, repr(parameters)))
         self.contenttypes = contenttypes
+        self.recordlookup = recordlookup
         self.identitiestype = identitiestype
         self.parameters = parameters
 
-class RecordType(ContentType):
-    # 0: at
-    # 1: record pos
+    def fieldindex(self, key):
+        out = -1
+        if self.recordlookup is not None:
+            for x in recordlookup:
+                if x == key:
+                    break
+        if out == -1:
+            try:
+                out = int(key)
+            except ValueError:
+                return None
+            if not 0 <= out < len(self.contenttypes):
+                return None
+        return out
 
-    @classmethod
-    def tolookup(cls, layout, postable, arrays, identities):
-        pos = len(postable)
-        postable.append(layout.at)
-        postable.append(None)
-        postable[pos + 1] = tolookup(layout.array, postable, arrays, identities)
-        return pos
-
-    def __init__(self, arraytype):
-        super(RecordType, self).__init__(name="awkward1.RecordType({0})".format(arraytype.name))
-        self.arraytype = arraytype
+    def tolayout(self, lookup, pos, fields):
+        if len(fields) > 0:
+            index = self.fieldindex(fields[0])
+            assert index is not None
+            return self.contenttypes[index].tolayout(lookup, lookup.postable[pos + self.CONTENTS + index], fields[1:])
+        else:
+            contents = []
+            for i, contenttype in enumerate(self.contenttypes):
+                layout = contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENTS + i], fields)
+                contents.append(layout)
+            if len(contents) == 0:
+                return awkward1.layout.RecordArray(numpy.iinfo(numpy.int64).max, self.recordlookup is None)
+            else:
+                return awkward1.layout.RecordArray(contents, self.recordlookup)
 
 class UnionArrayType(ContentType):
-    # 0: identities
-    # 1: tags array
-    # 2: index array
-    # i + 3: contents pos
+    IDENTITIES = 0
+    TAGS = 1
+    INDEX = 2
+    CONTENTS = 3
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
@@ -345,8 +373,8 @@ class UnionArrayType(ContentType):
         postable.append(len(arrays))
         arrays.append(numpy.asarray(layout.index))
         postable.extend([None] * layout.numcontents)
-        for i, content in layout.contents:
-            postable[pos + i + 3] = tolookup(content, postable, arrays, identities)
+        for i, content in enumerate(layout.contents):
+            postable[pos + cls.CONTENTS + i] = tolookup(content, postable, arrays, identities)
         return pos
 
     def __init__(self, tagstype, indextype, contenttypes, identitiestype, parameters):
@@ -356,3 +384,25 @@ class UnionArrayType(ContentType):
         self.contenttypes = contenttypes
         self.identitiestype = identitiestype
         self.parameters = parameters
+
+    def UnionArrayOf(self):
+        if self.tagstype.dtype.bitwidth == 8 and self.tagstype.dtype.signed:
+            if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
+                return awkward1.layout.UnionArray8_32
+            elif self.indextype.dtype.bitwidth == 32:
+                return awkward1.layout.UnionArray8_U32
+            elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
+                return awkward1.layout.UnionArray8_64
+            else:
+                raise AssertionError("no UnionArray* type for index array: {0}".format(self.indextype))
+        else:
+            raise AssertionError("no UnionArray* type for tags array: {0}".format(self.tagstype))
+
+    def tolayout(self, lookup, pos, fields):
+        tags = self.IndexOf(self.tagstype)(lookup.arrays[lookup.postable[pos + self.TAGS]])
+        index = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + self.INDEX]])
+        contents = []
+        for i, contenttype in enumerate(self.contenttypes):
+            layout = contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENTS + i], fields)
+            contents.append(layout)
+        return self.UnionArrayOf()(tags, index, contents)
