@@ -140,3 +140,35 @@ def test_box():
         return x
 
     assert awkward1.tolist(f1(array)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+def test_refcount():
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    array.numbatype
+    assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.postable, array._numbaview.lookup.arrayptrs, array._numbaview.lookup.arraylens, array._numbaview.lookup.identityptrs, array._numbaview.lookup.identitylens)]
+
+    for i in range(3):
+        @numba.njit
+        def f1(x):
+            return 3.14
+        
+        for j in range(10):
+            f1(array)
+            assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.postable, array._numbaview.lookup.arrayptrs, array._numbaview.lookup.arraylens, array._numbaview.lookup.identityptrs, array._numbaview.lookup.identitylens)]
+
+    for i in range(3):
+        @numba.njit
+        def f2(x):
+            return x
+        
+        for j in range(10):
+            y = f2(array)
+            assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.postable, array._numbaview.lookup.arrayptrs, array._numbaview.lookup.arraylens, array._numbaview.lookup.identityptrs, array._numbaview.lookup.identitylens)]
+
+    for i in range(3):
+        @numba.njit
+        def f3(x):
+            return x, x
+
+        for j in range(10):
+            y = f3(array)
+            assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.postable, array._numbaview.lookup.arrayptrs, array._numbaview.lookup.arraylens, array._numbaview.lookup.identityptrs, array._numbaview.lookup.identitylens)]

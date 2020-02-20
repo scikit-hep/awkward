@@ -87,11 +87,11 @@ def unbox_Lookup(lookuptype, lookupobj, c):
     proxyout.identityptrs = c.pyapi.to_native_value(lookuptype.arraytype, identityptrs_obj).value
     proxyout.identitylens = c.pyapi.to_native_value(lookuptype.arraytype, identitylens_obj).value
 
-    # c.pyapi.decref(postable_obj)
-    # c.pyapi.decref(arrayptrs_obj)
-    # c.pyapi.decref(arraylens_obj)
-    # c.pyapi.decref(identityptrs_obj)
-    # c.pyapi.decref(identitylens_obj)
+    c.pyapi.decref(postable_obj)
+    c.pyapi.decref(arrayptrs_obj)
+    c.pyapi.decref(arraylens_obj)
+    c.pyapi.decref(identityptrs_obj)
+    c.pyapi.decref(identitylens_obj)
 
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -164,11 +164,14 @@ def unbox_ArrayView(viewtype, arrayobj, c):
     proxyout.identitylens = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.identitylens).data
     proxyout.pylookup     = lookup_obj
 
-    # c.pyapi.decref(view_obj)
-    # # c.pyapi.decref(lookup_obj)
-    # c.pyapi.decref(pos_obj)
-    # c.pyapi.decref(start_obj)
-    # c.pyapi.decref(stop_obj)
+    c.pyapi.decref(view_obj)
+    c.pyapi.decref(lookup_obj)
+    c.pyapi.decref(pos_obj)
+    c.pyapi.decref(start_obj)
+    c.pyapi.decref(stop_obj)
+
+    if c.context.enable_nrt:
+        c.context.nrt.decref(c.builder, LookupType(), lookup_val)
 
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -190,13 +193,13 @@ def box_ArrayView(viewtype, viewval, c):
 
     out = c.pyapi.call_method(arrayview_obj, "toarray", ())
 
-    # c.pyapi.decref(ArrayView_obj)
-    # c.pyapi.decref(type_obj)
-    # c.pyapi.decref(behavior_obj)
-    # c.pyapi.decref(fields_obj)
-    # c.pyapi.decref(pos_obj)
-    # c.pyapi.decref(start_obj)
-    # c.pyapi.decref(stop_obj)
-    # # c.pyapi.decref(lookup_obj)
+    c.pyapi.decref(ArrayView_obj)
+    c.pyapi.decref(type_obj)
+    c.pyapi.decref(behavior_obj)
+    c.pyapi.decref(fields_obj)
+    c.pyapi.decref(pos_obj)
+    c.pyapi.decref(start_obj)
+    c.pyapi.decref(stop_obj)
+    c.pyapi.decref(arrayview_obj)
 
     return out
