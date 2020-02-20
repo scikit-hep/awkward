@@ -47,6 +47,7 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
     def layout(self, layout):
         if isinstance(layout, awkward1.layout.Content):
             self._layout = layout
+            self._numbaview = None
         else:
             raise TypeError("layout must be a subclass of awkward1.layout.Content")
 
@@ -79,6 +80,7 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
         if not isinstance(where, str):
             raise ValueError("only fields may be assigned in-place (by field name)")
         self._layout = awkward1.operations.structure.withfield(self._layout, what, where).layout
+        self._numbaview = None
 
     def __getattr__(self, where):
         if where in dir(super(Array, self)):
@@ -157,6 +159,14 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
 
+    @property
+    def numbatype(self):
+        import numba
+        import awkward1._numba
+        awkward1._numba.register()
+        self._numbaview = awkward1._numba.arrayview.ArrayView.fromarray(self)
+        return numba.typeof(self._numbaview)
+
 class Record(awkward1._numpy.NDArrayOperatorsMixin):
     def __init__(self, data, behavior=None):
         # FIXME: more checks here
@@ -176,9 +186,11 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
 
     @layout.setter
     def layout(self, layout):
-        if not isinstance(layout, awkward1.layout.Record):
+        if isinstance(layout, awkward1.layout.Record):
+            self._layout = layout
+            self._numbaview = None
+        else:
             raise TypeError("layout must be a subclass of awkward1.layout.Record")
-        self._layout = layout
 
     @property
     def behavior(self):
@@ -202,6 +214,7 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
         if not isinstance(where, str):
             raise ValueError("only fields may be assigned in-place (by field name)")
         self._layout = awkward1.operations.structure.withfield(self._layout, what, where).layout
+        self._numbaview = None
 
     def __getattr__(self, where):
         if where in dir(super(Record, self)):
@@ -264,6 +277,14 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
+
+    @property
+    def numbatype(self):
+        import numba
+        import awkward1._numba
+        awkward1._numba.register()
+        self._numbaview = awkward1._numba.arrayview.RecordView.fromrecord(self)
+        return numba.typeof(self._numbaview)
 
 class FillableArray(Sequence):
     def __init__(self, behavior=None):

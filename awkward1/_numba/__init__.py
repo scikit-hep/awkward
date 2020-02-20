@@ -8,11 +8,13 @@ import numpy
 
 def register():
     import awkward1._numba.layout
-    import awkward1._numba.lookupview
+    import awkward1._numba.arrayview
 
 try:
     import numba
 except ImportError:
     pass
 else:
-    pass
+    @numba.extending.typeof_impl.register(awkward1.highlevel.Array)
+    def typeof_Array(obj, c):
+        return obj.numbatype()

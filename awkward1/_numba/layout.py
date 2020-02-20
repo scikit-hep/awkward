@@ -105,12 +105,12 @@ class RegularArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.lookupview
+        import awkward1._numba.arrayview
 
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
         postable.append(None)
-        postable[pos + cls.CONTENT] = awkward1._numba.lookupview.tolookup(layout.content, postable, arrays, identities)
+        postable[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, postable, arrays, identities)
         return pos
 
     def __init__(self, contenttype, size, identitiestype, parameters):
@@ -132,7 +132,7 @@ class ListArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.lookupview
+        import awkward1._numba.arrayview
 
         if isinstance(layout, (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64)):
             starts = numpy.asarray(layout.starts)
@@ -149,7 +149,7 @@ class ListArrayType(ContentType):
         postable.append(len(arrays))
         arrays.append(stops)
         postable.append(None)
-        postable[pos + cls.CONTENT] = awkward1._numba.lookupview.tolookup(layout.content, postable, arrays, identities)
+        postable[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, postable, arrays, identities)
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
@@ -182,14 +182,14 @@ class IndexedArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.lookupview
+        import awkward1._numba.arrayview
 
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
         postable.append(len(arrays))
         arrays.append(numpy.asarray(layout.index))
         postable.append(None)
-        postable[pos + cls.CONTENT] = awkward1._numba.lookupview.tolookup(layout.content, postable, arrays, identities)
+        postable[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, postable, arrays, identities)
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
@@ -221,14 +221,14 @@ class IndexedOptionArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.lookupview
+        import awkward1._numba.arrayview
 
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
         postable.append(len(arrays))
         arrays.append(numpy.asarray(layout.index))
         postable.append(None)
-        postable[pos + cls.CONTENT] = awkward1._numba.lookupview.tolookup(layout.content, postable, arrays, identities)
+        postable[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, postable, arrays, identities)
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
@@ -257,13 +257,13 @@ class RecordArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.lookupview
+        import awkward1._numba.arrayview
 
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
         postable.extend([None] * layout.numfields)
         for i, content in enumerate(layout.contents):
-            postable[pos + cls.CONTENTS + i] = awkward1._numba.lookupview.tolookup(content, postable, arrays, identities)
+            postable[pos + cls.CONTENTS + i] = awkward1._numba.arrayview.tolookup(content, postable, arrays, identities)
         return pos
 
     def __init__(self, contenttypes, recordlookup, identitiestype, parameters):
@@ -311,7 +311,7 @@ class UnionArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.lookupview
+        import awkward1._numba.arrayview
 
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
@@ -321,7 +321,7 @@ class UnionArrayType(ContentType):
         arrays.append(numpy.asarray(layout.index))
         postable.extend([None] * layout.numcontents)
         for i, content in enumerate(layout.contents):
-            postable[pos + cls.CONTENTS + i] = awkward1._numba.lookupview.tolookup(content, postable, arrays, identities)
+            postable[pos + cls.CONTENTS + i] = awkward1._numba.arrayview.tolookup(content, postable, arrays, identities)
         return pos
 
     def __init__(self, tagstype, indextype, contenttypes, identitiestype, parameters):
