@@ -123,11 +123,20 @@ def test_views():
 
     assert awkward1.tolist(awkward1._numba.arrayview.ArrayView.fromarray(awkward1.Array([1.1, 2.2, 3.3, [], [1], [2, 2]])).toarray()) == [1.1, 2.2, 3.3, [], [1], [2, 2]]
 
-# def test_unbox():
-#     array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+def test_unbox():
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 
-#     @numba.njit
-#     def f1(x):
-#         return 3.14
+    @numba.njit
+    def f1(x):
+        return 3.14
 
-#     f1(array)
+    assert f1(array) == 3.14
+
+def test_box():
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+
+    @numba.njit
+    def f1(x):
+        return x
+
+    assert awkward1.tolist(f1(array)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]

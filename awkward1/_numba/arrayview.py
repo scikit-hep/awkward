@@ -54,8 +54,6 @@ def tolookup(layout, postable, arrays, identities):
 
 @numba.extending.typeof_impl.register(Lookup)
 def typeof_Lookup(obj, c):
-    print("typeof_Lookup")
-
     return LookupType()
 
 class LookupType(numba.types.Type):
@@ -76,8 +74,6 @@ class LookupModel(numba.datamodel.models.StructModel):
 
 @numba.extending.unbox(LookupType)
 def unbox_Lookup(lookuptype, lookupobj, c):
-    print("6 unbox_Lookup")
-
     postable_obj     = c.pyapi.object_getattr_string(lookupobj, "postable")
     arrayptrs_obj    = c.pyapi.object_getattr_string(lookupobj, "arrayptrs")
     arraylens_obj    = c.pyapi.object_getattr_string(lookupobj, "arraylens")
@@ -85,11 +81,11 @@ def unbox_Lookup(lookuptype, lookupobj, c):
     identitylens_obj = c.pyapi.object_getattr_string(lookupobj, "identitylens")
 
     proxyout = c.context.make_helper(c.builder, lookuptype)
-    proxyout.postable     = c.pyapi.to_native_value(lookuptype.arraytype, postable_obj)
-    proxyout.arrayptrs    = c.pyapi.to_native_value(lookuptype.arraytype, arrayptrs_obj)
-    proxyout.arraylens    = c.pyapi.to_native_value(lookuptype.arraytype, arraylens_obj)
-    proxyout.identityptrs = c.pyapi.to_native_value(lookuptype.arraytype, identityptrs_obj)
-    proxyout.identitylens = c.pyapi.to_native_value(lookuptype.arraytype, identitylens_obj)
+    proxyout.postable     = c.pyapi.to_native_value(lookuptype.arraytype, postable_obj).value
+    proxyout.arrayptrs    = c.pyapi.to_native_value(lookuptype.arraytype, arrayptrs_obj).value
+    proxyout.arraylens    = c.pyapi.to_native_value(lookuptype.arraytype, arraylens_obj).value
+    proxyout.identityptrs = c.pyapi.to_native_value(lookuptype.arraytype, identityptrs_obj).value
+    proxyout.identitylens = c.pyapi.to_native_value(lookuptype.arraytype, identitylens_obj).value
 
     # c.pyapi.decref(postable_obj)
     # c.pyapi.decref(arrayptrs_obj)
@@ -123,24 +119,14 @@ class ArrayView(object):
 
 @numba.extending.typeof_impl.register(ArrayView)
 def typeof_ArrayView(obj, c):
-    print("3 typeof")
-
     return ArrayViewType(obj.type, obj.behavior, obj.fields)
 
 class ArrayViewType(numba.types.Type):
     def __init__(self, type, behavior, fields):
-        print("4 ArrayViewType")
-
         super(ArrayViewType, self).__init__(name="awkward1.ArrayView({0}, <Behavior {1}>, {2})".format(type.name, hash(behavior), repr(fields)))
-
         self.type = type
         self.behavior = behavior
         self.fields = fields
-
-        print("4.1", self.name)
-        print("type", type)
-        print("behavior", behavior)
-        print("fields", fields)
 
 @numba.extending.register_model(ArrayViewType)
 class ArrayViewModel(numba.datamodel.models.StructModel):
@@ -158,8 +144,6 @@ class ArrayViewModel(numba.datamodel.models.StructModel):
 
 @numba.extending.unbox(ArrayViewType)
 def unbox_ArrayView(viewtype, arrayobj, c):
-    print("5 unbox_ArrayView")
-
     view_obj   = c.pyapi.object_getattr_string(arrayobj, "_numbaview")
     lookup_obj = c.pyapi.object_getattr_string(view_obj, "lookup")
     pos_obj    = c.pyapi.object_getattr_string(view_obj, "pos")
@@ -178,12 +162,41 @@ def unbox_ArrayView(viewtype, arrayobj, c):
     proxyout.arraylens    = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.arraylens).data
     proxyout.identityptrs = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.identityptrs).data
     proxyout.identitylens = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.identitylens).data
+    proxyout.pylookup     = lookup_obj
 
     # c.pyapi.decref(view_obj)
-    # c.pyapi.decref(lookup_obj)
+    # # c.pyapi.decref(lookup_obj)
     # c.pyapi.decref(pos_obj)
     # c.pyapi.decref(start_obj)
     # c.pyapi.decref(stop_obj)
 
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
+
+@numba.extending.box(ArrayViewType)
+def box_ArrayView(viewtype, viewval, c):
+    ArrayView_obj = c.pyapi.unserialize(c.pyapi.serialize_object(ArrayView))
+    type_obj      = c.pyapi.unserialize(c.pyapi.serialize_object(viewtype.type))
+    behavior_obj  = c.pyapi.unserialize(c.pyapi.serialize_object(viewtype.behavior))
+    fields_obj    = c.pyapi.unserialize(c.pyapi.serialize_object(viewtype.fields))
+
+    proxyin = c.context.make_helper(c.builder, viewtype, viewval)
+    pos_obj    = c.pyapi.long_from_ssize_t(proxyin.pos)
+    start_obj  = c.pyapi.long_from_ssize_t(proxyin.start)
+    stop_obj   = c.pyapi.long_from_ssize_t(proxyin.stop)
+    lookup_obj = proxyin.pylookup
+
+    arrayview_obj = c.pyapi.call_function_objargs(ArrayView_obj, (type_obj, behavior_obj, lookup_obj, pos_obj, start_obj, stop_obj, fields_obj))
+
+    out = c.pyapi.call_method(arrayview_obj, "toarray", ())
+
+    # c.pyapi.decref(ArrayView_obj)
+    # c.pyapi.decref(type_obj)
+    # c.pyapi.decref(behavior_obj)
+    # c.pyapi.decref(fields_obj)
+    # c.pyapi.decref(pos_obj)
+    # c.pyapi.decref(start_obj)
+    # c.pyapi.decref(stop_obj)
+    # # c.pyapi.decref(lookup_obj)
+
+    return out
