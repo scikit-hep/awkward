@@ -10,48 +10,57 @@ import numpy
 import awkward1
 
 numba = pytest.importorskip("numba")
-numba_unsafe_refcount = pytest.importorskip("numba.unsafe.refcount")
 
-def test_NumpyArray():
-    array = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    # assert sys.getrefcount(array) == 2
+class AwkwardLookup:
+    def __init__(self, arrays):
+        self.lookup = numpy.arange(len(arrays), dtype=numpy.intp)
+        self.arrays = arrays
 
-    # @numba.njit
-    # def f1(x):
-    #     return numba_unsafe_refcount.get_refcount(x.array)
+    def array(self, i):
+        return self.arrays[i]
 
-    # assert f1(array) == 1
-    # assert sys.getrefcount(array) == 2
+@numba.extending.typeof_impl.register(AwkwardLookup)
+def typeof(obj, c):
+    return AwkwardLookupType(numba.typeof(obj.lookup), tuple(numba.typeof(x) for x in obj.arrays))
 
-    # @numba.njit
-    # def f2(x):
-    #     return numba_unsafe_refcount.get_refcount(x.array), x
+class AwkwardLookupType(numba.types.Type):
+    def __init__(self, lookuptype, arraytypes):
+        super(AwkwardLookupType, self).__init__(name="AwkwardLookupType({0}, ({1}{2}))".format(lookuptype.name, ", ".join(x.name for x in arraytypes), "," if len(arraytypes) == 1 else ""))
+        self.lookuptype = lookuptype
+        self.arraytypes = arraytypes
 
-    # assert f2(array)[0] == 1
-    # assert sys.getrefcount(array) == 2
+@numba.extending.register_model(AwkwardLookupType)
+class AwkwardLookupModel(numba.datamodel.models.StructModel):
+    def __init__(self, dmm, fe_type):
+        members = [("lookup", fe_type.lookuptype)]
+        for i, x in enumerate(fe_type.arraytypes):
+            members.append(("array" + str(i), x))
+        super(AwkwardLookupModel, self).__init__(dmm, fe_type, members)
 
-    # @numba.njit
-    # def f3(x):
-    #     return numba_unsafe_refcount.get_refcount(x.array), len(x)
+@numba.extending.unbox(AwkwardLookupType)
+def unbox_AwkwardLookupType(altype, alobj, c):
+    proxyout = numba.cgutils.create_struct_proxy(altype)(c.context, c.builder)
 
-    # assert f3(array) == (1, 5)
-    # assert sys.getrefcount(array) == 2
+    lookup_obj = c.pyapi.object_getattr_string(alobj, "lookup")
+    proxyout.lookup = c.pyapi.to_native_value(altype.lookuptype, lookup_obj).value
+    c.pyapi.decref(lookup_obj)
 
-    # @numba.njit
-    # def f4(x):
-    #     return numba_unsafe_refcount.get_refcount(x.array), x[1]
+    for i, arraytype in enumerate(altype.arraytypes):
+        i_obj = c.pyapi.long_from_long(c.context.get_constant(numba.int64, i))
+        array_obj = c.pyapi.call_method(alobj, "array", (i_obj,))
+        array_val = c.pyapi.to_native_value(arraytype, array_obj).value
+        setattr(proxyout, "array" + str(i), array_val)
+        c.pyapi.decref(i_obj)
+        c.pyapi.decref(array_obj)
 
-    # assert f4(array) == (1, 2.2)
-    # assert sys.getrefcount(array) == 2
+    is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    return numba.extending.NativeValue(proxyout._getvalue(), is_error)
+    
+def test_tests():
+    awkwardlookup = AwkwardLookup([numpy.array([1, 2, 3, 4, 5]), numpy.array([1.1, 2.2, 3.3])])
 
     @numba.njit
-    def f5(x):
-        return x[1:4]
+    def f1(x):
+        return 3.14
 
-    # assert awkward1.tolist(f5(array)) == [2.2, 3.3, 4.4]
-    print(f5(array))
-
-    raise Exception
-
-    # array2 = awkward1.layout.NumpyArray(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
-    # assert awkward1.tolist(f4(array2)[1]) == [4.4, 5.5, 6.6]
+    f1(awkwardlookup)
