@@ -30,6 +30,8 @@ class NumpyArrayType(awkward1._numba.content.ContentType):
 
     @staticmethod
     def lower_getitem_at_nowrap(context, builder, sig, args):
+        print("NumpyArray lower_getitem_at_nowrap")
+
         rettpe, (tpe, wheretpe) = sig.return_type, sig.args
         val, whereval = args
         # proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
@@ -47,9 +49,15 @@ class NumpyArrayType(awkward1._numba.content.ContentType):
             return numba.targets.arrayobj.getitem_arraynd_intp(context, builder, rettpe(tpe.arraytpe, wheretpe), (proxyin.array, whereval))
 
     @staticmethod
-    def lower_getitem_range_nowrap(context, builder, tpe, val, whereval, length):
+    def lower_getitem_range_nowrap(context, builder, pyapi, tpe, val, whereval, length):
+        print("NumpyArray lower_getitem_range_nowrap 4")
+        
         # proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
         proxyin = context.make_helper(builder, tpe, val)
+
+        pyapi.call_function_objargs(pyapi.unserialize(pyapi.serialize_object(print)), (pyapi.long_from_ulong(context.get_constant(numba.uint64, 4)),))
+        pyapi.call_function_objargs(pyapi.unserialize(pyapi.serialize_object(print)), (pyapi.long_from_ulong(builder.ptrtoint(proxyin._getpointer(), context.get_value_type(numba.uint64))),))
+
         proxyout = numba.cgutils.create_struct_proxy(tpe)(context, builder)
         proxyout.array = numba.targets.arrayobj.getitem_arraynd_intp(context, builder, tpe.arraytpe(tpe.arraytpe, numba.types.slice2_type), (proxyin.array, whereval))
         proxyout.length = length
@@ -68,6 +76,8 @@ numba.extending.make_attribute_wrapper(NumpyArrayType, "array", "array")
 
 @numba.extending.unbox(NumpyArrayType)
 def unbox(tpe, obj, c):
+    print("NumpyArray unbox 1")
+
     asarray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(numpy.asarray))
     array_obj = c.pyapi.call_function_objargs(asarray_obj, (obj,))
     proxyout = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder)
@@ -78,13 +88,26 @@ def unbox(tpe, obj, c):
     if tpe.identitiestpe != numba.none:
         raise NotImplementedError
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
-    return numba.extending.NativeValue(proxyout._getvalue(), is_error)
+
+    c.pyapi.call_function_objargs(c.pyapi.unserialize(c.pyapi.serialize_object(print)), (c.pyapi.long_from_ulong(c.context.get_constant(numba.uint64, 1)),))
+    c.pyapi.call_function_objargs(c.pyapi.unserialize(c.pyapi.serialize_object(print)), (c.pyapi.long_from_ulong(c.builder.ptrtoint(proxyout._getpointer(), c.context.get_value_type(numba.uint64))),))
+
+    out = proxyout._getvalue()
+    print("1", out)
+
+    return numba.extending.NativeValue(out, is_error)
 
 @numba.extending.box(NumpyArrayType)
 def box(tpe, val, c):
+    print("NumpyArray box 5")
+
     NumpyArray_obj = c.pyapi.unserialize(c.pyapi.serialize_object(awkward1.layout.NumpyArray))
     # proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     proxyin = c.context.make_helper(c.builder, tpe, val)
+
+    c.pyapi.call_function_objargs(c.pyapi.unserialize(c.pyapi.serialize_object(print)), (c.pyapi.long_from_ulong(c.context.get_constant(numba.uint64, 5)),))
+    c.pyapi.call_function_objargs(c.pyapi.unserialize(c.pyapi.serialize_object(print)), (c.pyapi.long_from_ulong(c.builder.ptrtoint(proxyin._getpointer(), c.context.get_value_type(numba.uint64))),))
+
     array_obj = c.pyapi.from_native_value(tpe.arraytpe, proxyin.array, c.env_manager)
     args = [array_obj]
     if tpe.identitiestpe != numba.none:

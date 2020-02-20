@@ -24,6 +24,8 @@ class type_len(numba.typing.templates.AbstractTemplate):
 
 @numba.extending.lower_builtin(len, ContentType)
 def lower_len(context, builder, sig, args):
+    print("ContentType lower_len")
+
     tpe, = sig.args
     val, = args
     # proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
@@ -47,15 +49,25 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
 
 @numba.extending.lower_builtin(operator.getitem, ContentType, numba.types.Integer)
 def lower_getitem_at(context, builder, sig, args):
+    print("ContentType lower_getitem_at")
+
     return sig.args[0].lower_getitem_at_nowrap(context, builder, sig, args)
 
 @numba.extending.lower_builtin(operator.getitem, ContentType, numba.types.SliceType)
 def lower_getitem_range(context, builder, sig, args):
+    print("ContentType lower_getitem_range 2")
+
     rettpe, (tpe, wheretpe) = sig.return_type, sig.args
     val, whereval = args
 
-    # proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, ref=val)
+    # proxyin = numba.cgutils.create_struct_proxy(tpe)(context, builder, value=val)
     proxyin = context.make_helper(builder, tpe, val)
+
+    print("2", val)
+    import awkward1._numba.util
+    awkward1._numba.util.debug(context, builder, numba.uint64, context.get_constant(numba.uint64, 2))
+    awkward1._numba.util.debug(context, builder, numba.uint64, builder.ptrtoint(proxyin._getpointer(), context.get_value_type(numba.uint64)))
+
     if context.enable_nrt:
         context.nrt.incref(builder, tpe, val)
 
@@ -92,8 +104,13 @@ class ContentRangeModel(numba.datamodel.models.StructModel):
 
 @numba.extending.box(ContentRangeType)
 def box_contentrange(tpe, val, c):
+    print("box_contentrange 3")
+
     # proxyin = numba.cgutils.create_struct_proxy(tpe)(c.context, c.builder, value=val)
     proxyin = c.context.make_helper(c.builder, tpe, val)
+
+    c.pyapi.call_function_objargs(c.pyapi.unserialize(c.pyapi.serialize_object(print)), (c.pyapi.long_from_ulong(c.context.get_constant(numba.uint64, 3)),))
+    c.pyapi.call_function_objargs(c.pyapi.unserialize(c.pyapi.serialize_object(print)), (c.pyapi.long_from_ulong(c.builder.ptrtoint(proxyin._getpointer(), c.context.get_value_type(numba.uint64))),))
 
     proxyslice = numba.cgutils.create_struct_proxy(numba.types.slice2_type)(c.context, c.builder)
     proxyslice.start = proxyin.start
@@ -101,6 +118,6 @@ def box_contentrange(tpe, val, c):
     proxyslice.step = c.context.get_constant(numba.intp, 1)
     length = c.builder.sub(proxyin.stop, proxyin.start)
 
-    trimmed = tpe.basetpe.lower_getitem_range_nowrap(c.context, c.builder, tpe.basetpe, proxyin.base, proxyslice._getvalue(), length)   # c.builder.load(proxyin.base)
+    trimmed = tpe.basetpe.lower_getitem_range_nowrap(c.context, c.builder, c.pyapi, tpe.basetpe, proxyin.base, proxyslice._getvalue(), length)   # c.builder.load(proxyin.base)
 
     return c.pyapi.from_native_value(tpe.basetpe, trimmed, c.env_manager)
