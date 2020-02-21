@@ -23,6 +23,11 @@ class Lookup(object):
         self.arrayptrs = numpy.array([x.ctypes.data for x in arrays], dtype=numpy.intp)
         self.identityptrs = numpy.array([x.ctypes.data for x in identities], dtype=numpy.intp)
 
+        print("postable ", self.postable)
+        print("arrayptrs", self.arrayptrs)
+        for i, x in enumerate(arrays):
+            print("array[{0}] ".format(i), x)
+
 def tolookup(layout, postable, arrays, identities):
     import awkward1.layout
 

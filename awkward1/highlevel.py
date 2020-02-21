@@ -164,7 +164,8 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
         import numba
         import awkward1._numba
         awkward1._numba.register()
-        self._numbaview = awkward1._numba.arrayview.ArrayView.fromarray(self)
+        if self._numbaview is None:
+            self._numbaview = awkward1._numba.arrayview.ArrayView.fromarray(self)
         return numba.typeof(self._numbaview)
 
 class Record(awkward1._numpy.NDArrayOperatorsMixin):
@@ -283,7 +284,8 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
         import numba
         import awkward1._numba
         awkward1._numba.register()
-        self._numbaview = awkward1._numba.arrayview.RecordView.fromrecord(self)
+        if self._numbaview is None:
+            self._numbaview = awkward1._numba.arrayview.RecordView.fromrecord(self)
         return numba.typeof(self._numbaview)
 
 class FillableArray(Sequence):

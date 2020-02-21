@@ -183,12 +183,27 @@ def test_len():
     assert f1(array) == 5
 
 def test_NumpyArray_getitem():
-    array = awkward1.Array([1, 2, 3, 4, 5])
+    array = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])
 
     @numba.njit
-    def f1(x):
-        return x[2]
+    def f1(x, i):
+        return x[i]
 
-    print(f1(array))
+    assert f1(array, 0) == 1.1
+    assert f1(array, 1) == 2.2
+    assert f1(array, 2) == 3.3
+    assert f1(array, 3) == 4.4
+    assert f1(array, 4) == 5.5
+    assert f1(array, -1) == 5.5
+    assert f1(array, -2) == 4.4
+    assert f1(array, -3) == 3.3
+    assert f1(array, -4) == 2.2
+    assert f1(array, -5) == 1.1
 
-    raise Exception
+    with pytest.raises(ValueError) as err:
+        assert f1(array, 5)
+    assert str(err.value) == "slice index out of bounds"
+
+    with pytest.raises(ValueError) as err:
+        assert f1(array, -6)
+    assert str(err.value) == "slice index out of bounds"

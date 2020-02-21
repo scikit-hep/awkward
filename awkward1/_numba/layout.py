@@ -77,6 +77,49 @@ class ContentType(numba.types.Type):
         else:
             raise AssertionError("no Index* type for array: {0}".format(arraytype))
 
+def castint(context, builder, fromtype, totype, val):
+    if fromtype.bitwidth < totype.bitwidth:
+        if fromtype.signed:
+            return builder.sext(val, context.get_value_type(totype))
+        else:
+            return builder.zext(val, context.get_value_type(totype))
+    elif fromtype.bitwidth > totype.bitwidth:
+        return builder.trunc(val, context.get_value_type(totype))
+    else:
+        return val
+
+def posat(context, builder, pos, offset):
+    return builder.add(pos, context.get_constant(numba.intp, offset))
+
+def getat(context, builder, baseptr, offset, rettype=None):
+    ptrtype = None
+    if rettype is not None:
+        ptrtype = context.get_value_type(numba.types.CPointer(rettype))
+    byteoffset = builder.mul(offset, context.get_constant(numba.intp, numba.intp.bitwidth // 8))
+    return builder.load(numba.cgutils.pointer_add(builder, baseptr, byteoffset, ptrtype))
+
+def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
+    atval = castint(context, builder, attype, numba.intp, atval)
+
+    if not attype.signed:
+        wrapneg = False
+
+    if wrapneg or checkbounds:
+        length = builder.sub(viewproxy.stop, viewproxy.start)
+
+        if wrapneg:
+            regular_atval = numba.cgutils.alloca_once_value(builder, atval)
+            with builder.if_then(builder.icmp_signed("<", atval, context.get_constant(numba.intp, 0))):
+                builder.store(builder.add(atval, length), regular_atval)
+            atval = builder.load(regular_atval)
+
+        if checkbounds:
+            with builder.if_then(builder.or_(builder.icmp_signed("<", atval, context.get_constant(numba.intp, 0)),
+                                             builder.icmp_signed(">=", atval, length))):
+                context.call_conv.return_user_exc(builder, ValueError, ("slice index out of bounds",))
+
+    return atval
+
 class NumpyArrayType(ContentType):
     IDENTITIES = 0
     ARRAY = 1
@@ -114,21 +157,16 @@ class NumpyArrayType(ContentType):
         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
         whicharray = getat(context, builder, viewproxy.postable, whichpos)
         arrayptr = getat(context, builder, viewproxy.arrayptrs, whicharray)
-        arraypos = builder.add(viewproxy.start, numba.cgutils.intp_t(atval))
-        return getat(context, builder, arrayptr, arraypos)
+        atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
+        arraypos = builder.add(viewproxy.start, atval)
+        return getat(context, builder, arrayptr, arraypos, rettype)
 
     def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
         raise NotImplementedError
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
         raise AssertionError
-
-def posat(context, builder, pos, offset):
-    return builder.add(pos, context.get_constant(numba.intp, offset))
-
-def getat(context, builder, baseptr, offset):
-    return builder.load(numba.cgutils.pointer_add(builder, ptr, offset))
-
+        
 class RegularArrayType(ContentType):
     IDENTITIES = 0
     CONTENT = 1
