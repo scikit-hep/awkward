@@ -207,3 +207,40 @@ def test_NumpyArray_getitem():
     with pytest.raises(ValueError) as err:
         assert f1(array, -6)
     assert str(err.value) == "slice index out of bounds"
+
+    @numba.njit
+    def f2(x, i1, i2):
+        return x[i1:i2]
+
+    assert awkward1.tolist(f2(array,  0, 5)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(f2(array,  1, 5)) == [     2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(f2(array,  2, 5)) == [          3.3, 4.4, 5.5]
+    assert awkward1.tolist(f2(array,  3, 5)) == [               4.4, 5.5]
+    assert awkward1.tolist(f2(array,  4, 5)) == [                    5.5]
+    assert awkward1.tolist(f2(array,  5, 5)) == [                       ]
+    assert awkward1.tolist(f2(array,  6, 5)) == [                       ]
+    assert awkward1.tolist(f2(array, -1, 5)) == [                    5.5]
+    assert awkward1.tolist(f2(array, -2, 5)) == [               4.4, 5.5]
+    assert awkward1.tolist(f2(array, -3, 5)) == [          3.3, 4.4, 5.5]
+    assert awkward1.tolist(f2(array, -4, 5)) == [     2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(f2(array, -5, 5)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(f2(array, -6, 5)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+    assert awkward1.tolist(f2(array, 0, -6)) == [                       ]
+    assert awkward1.tolist(f2(array, 0, -5)) == [                       ]
+    assert awkward1.tolist(f2(array, 0, -4)) == [1.1                    ]
+    assert awkward1.tolist(f2(array, 0, -3)) == [1.1, 2.2               ]
+    assert awkward1.tolist(f2(array, 0, -2)) == [1.1, 2.2, 3.3          ]
+    assert awkward1.tolist(f2(array, 0, -1)) == [1.1, 2.2, 3.3, 4.4     ]
+    assert awkward1.tolist(f2(array, 0,  6)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(f2(array, 0,  5)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(f2(array, 0,  4)) == [1.1, 2.2, 3.3, 4.4     ]
+    assert awkward1.tolist(f2(array, 0,  3)) == [1.1, 2.2, 3.3          ]
+    assert awkward1.tolist(f2(array, 0,  2)) == [1.1, 2.2               ]
+    assert awkward1.tolist(f2(array, 0,  1)) == [1.1                    ]
+    assert awkward1.tolist(f2(array, 0,  0)) == [                       ]
+
+    aslist = [1.1, 2.2, 3.3, 4.4, 5.5]
+    for i1 in range(-6, 7):
+        for i2 in range(-6, 7):
+            assert awkward1.tolist(f2(array, i1, i2)) == aslist[i1:i2]

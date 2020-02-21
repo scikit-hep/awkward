@@ -216,7 +216,7 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
             viewtype, wheretype = args
             if isinstance(wheretype, numba.types.Integer):
                 return viewtype.type.getitem_at(viewtype)(viewtype, wheretype)
-            elif isinstance(wheretype, numba.types.SliceType) and wheretype.has_step:
+            elif isinstance(wheretype, numba.types.SliceType) and not wheretype.has_step:
                 return viewtype.type.getitem_range(viewtype)(viewtype, wheretype)
             elif isinstance(wheretype, numba.types.StringLiteral):
                 return viewtype.type.getitem_field(viewtype, wheretype.literal_value)(viewtype, wheretype)
