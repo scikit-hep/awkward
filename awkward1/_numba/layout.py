@@ -108,16 +108,26 @@ class NumpyArrayType(ContentType):
         raise NotImplementedError
 
     def getitem_field(self, viewtype, key):
-        raise NotImplementedError
+        raise TypeError("array has no fields; cannot extract {0}".format(repr(key)))
 
-    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
-        return builder.load(numba.cgutils.pointer_add(builder, viewproxy.postable, context.get_constant(numba.intp, 0)))
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+        whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
+        whicharray = getat(context, builder, viewproxy.postable, whichpos)
+        arrayptr = getat(context, builder, viewproxy.arrayptrs, whicharray)
+        arraypos = builder.add(viewproxy.start, numba.cgutils.intp_t(atval))
+        return getat(context, builder, arrayptr, arraypos)
 
-    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
         raise NotImplementedError
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
-        raise NotImplementedError
+        raise AssertionError
+
+def posat(context, builder, pos, offset):
+    return builder.add(pos, context.get_constant(numba.intp, offset))
+
+def getat(context, builder, baseptr, offset):
+    return builder.load(numba.cgutils.pointer_add(builder, ptr, offset))
 
 class RegularArrayType(ContentType):
     IDENTITIES = 0
@@ -151,10 +161,10 @@ class RegularArrayType(ContentType):
     def getitem_field(self, viewtype, key):
         raise NotImplementedError
 
-    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         raise NotImplementedError
 
-    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
         raise NotImplementedError
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
@@ -255,10 +265,10 @@ class IndexedArrayType(ContentType):
     def getitem_field(self, viewtype, key):
         raise NotImplementedError
 
-    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         raise NotImplementedError
 
-    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
         raise NotImplementedError
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
@@ -308,10 +318,10 @@ class IndexedOptionArrayType(ContentType):
     def getitem_field(self, viewtype, key):
         raise NotImplementedError
 
-    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         raise NotImplementedError
 
-    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
         raise NotImplementedError
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
@@ -376,10 +386,10 @@ class RecordArrayType(ContentType):
     def getitem_field(self, viewtype, key):
         raise NotImplementedError
 
-    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         raise NotImplementedError
 
-    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
         raise NotImplementedError
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
@@ -443,10 +453,10 @@ class UnionArrayType(ContentType):
     def getitem_field(self, viewtype, key):
         raise NotImplementedError
 
-    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         raise NotImplementedError
 
-    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
         raise NotImplementedError
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):

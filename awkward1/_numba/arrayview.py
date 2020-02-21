@@ -223,7 +223,7 @@ def lower_getitem_at(context, builder, sig, args):
     rettype, (viewtype, wheretype) = sig.return_type, sig.args
     viewval, whereval = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
-    return viewtype.type.lower_getitem_at(context, builder, rettype, viewtype, viewval, viewproxy, wheretype, whereval)
+    return viewtype.type.lower_getitem_at(context, builder, rettype, viewtype, viewval, viewproxy, wheretype, whereval, True, True)
 
 @numba.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.slice2_type)
 def lower_getitem_range(context, builder, sig, args):
@@ -231,7 +231,7 @@ def lower_getitem_range(context, builder, sig, args):
     viewval, whereval = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
     whereproxy = context.make_helper(builder, wheretype, whereval)
-    return viewtype.type.lower_getitem_range(context, builder, rettype, viewtype, viewval, viewproxy, whereproxy.start, whereproxy.stop)
+    return viewtype.type.lower_getitem_range(context, builder, rettype, viewtype, viewval, viewproxy, whereproxy.start, whereproxy.stop, True)
 
 @numba.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.StringLiteral)
 def lower_getitem_field(context, builder, sig, args):
