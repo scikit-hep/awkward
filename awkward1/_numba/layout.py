@@ -133,7 +133,10 @@ def getat(context, builder, baseptr, offset, rettype=None):
     ptrtype = None
     if rettype is not None:
         ptrtype = context.get_value_type(numba.types.CPointer(rettype))
-    byteoffset = builder.mul(offset, context.get_constant(numba.intp, numba.intp.bitwidth // 8))
+        bitwidth = rettype.bitwidth
+    else:
+        bitwidth = numba.intp.bitwidth
+    byteoffset = builder.mul(offset, context.get_constant(numba.intp, bitwidth // 8))
     return builder.load(numba.cgutils.pointer_add(builder, baseptr, byteoffset, ptrtype))
 
 def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
@@ -200,7 +203,7 @@ class NumpyArrayType(ContentType):
         return getat(context, builder, arrayptr, arraypos, rettype)
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
-        raise AssertionError
+        raise AssertionError("shouldn't get here because type-check should fail")
         
 class RegularArrayType(ContentType):
     IDENTITIES = 0

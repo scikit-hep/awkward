@@ -244,3 +244,31 @@ def test_NumpyArray_getitem():
     for i1 in range(-6, 7):
         for i2 in range(-6, 7):
             assert awkward1.tolist(f2(array, i1, i2)) == aslist[i1:i2]
+
+def test_RegularArray_getitem():
+    array = awkward1.Array(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+
+def test_ListArray_getitem():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+
+def test_IndexedArray_getitem():
+    content = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]).layout
+    index = awkward1.layout.Index64(numpy.array([3, 2, 2, 5, 0, 7], dtype=numpy.int64))
+    array = awkward1.Array(awkward1.layout.IndexedArray64(index, content))
+
+def test_IndexedOptionArray_getitem():
+    array = awkward1.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+
+def test_RecordArray_getitem():
+    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}])
+
+    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}])
+    
+def test_UnionArray_getitem():
+    array = awkward1.Array([1, 2, 3, [], [1], [2, 2]])
+
+    content1 = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]).layout
+    content2 = awkward1.Array([{"y": [], "z": 0}, {"y": [1], "z": 1}, {"y": [2, 2], "z": 2}, {"y": [3, 3, 3], "z": 3}, {"y": [4, 4, 4, 4], "z": 4}]).layout
+    tags  = awkward1.layout.Index8( numpy.array([1, 0, 1, 0, 1, 0, 1, 0, 1], dtype=numpy.int8))
+    index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2, 3, 3, 4], dtype=numpy.int64))
+    array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content1, content2]))
