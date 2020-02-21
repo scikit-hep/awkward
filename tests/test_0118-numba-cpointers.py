@@ -198,6 +198,28 @@ def test_RegularArray_getitem():
     assert f2(array, 1, -2) == 5.5
     assert f2(array, 1, -1) == 6.6
 
+    array = awkward1.Array(numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+
+    @numba.njit
+    def f3(x, i1, i2):
+        return x[i1:i2]
+
+    assert awkward1.tolist(f3(array, -1, 3)) == [                        [5.5, 6.6]]
+    assert awkward1.tolist(f3(array, -2, 3)) == [            [3.3, 4.4], [5.5, 6.6]]
+    assert awkward1.tolist(f3(array, -3, 3)) == [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]
+    assert awkward1.tolist(f3(array,  0, 3)) == [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]
+    assert awkward1.tolist(f3(array,  1, 3)) == [            [3.3, 4.4], [5.5, 6.6]]
+    assert awkward1.tolist(f3(array,  2, 3)) == [                        [5.5, 6.6]]
+    assert awkward1.tolist(f3(array,  3, 3)) == [                                  ]
+
+    assert awkward1.tolist(f3(array, 0,  0)) == [                                  ]
+    assert awkward1.tolist(f3(array, 0,  1)) == [[1.1, 2.2]                        ]
+    assert awkward1.tolist(f3(array, 0,  2)) == [[1.1, 2.2], [3.3, 4.4]            ]
+    assert awkward1.tolist(f3(array, 0,  3)) == [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]
+    assert awkward1.tolist(f3(array, 0, -1)) == [[1.1, 2.2], [3.3, 4.4]            ]
+    assert awkward1.tolist(f3(array, 0, -2)) == [[1.1, 2.2]                        ]
+    assert awkward1.tolist(f3(array, 0, -3)) == [                                  ]
+
 def test_ListArray_getitem():
     array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
 

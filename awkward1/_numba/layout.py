@@ -246,9 +246,6 @@ class RegularArrayType(ContentType):
         proxyout.pylookup     = viewproxy.pylookup
         return proxyout._getvalue()
 
-    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_range not implemented")
-
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
         raise NotImplementedError(type(self).__name__ + ".lower_getitem_field not implemented")
 
