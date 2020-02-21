@@ -9,6 +9,8 @@ import numba
 
 import awkward1.layout
 
+import awkward1._numba.arrayview
+
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof(obj, c):
     return NumpyArrayType(numba.typeof(numpy.asarray(obj)), numba.typeof(obj.identities), json.dumps(obj.parameters))
@@ -99,14 +101,30 @@ class NumpyArrayType(ContentType):
         assert fields == ()
         return awkward1.layout.NumpyArray(lookup.arrays[lookup.postable[pos + self.ARRAY]])
 
+    def getitem_at(self, viewtype):
+        return self.arraytype.dtype
+
+    def getitem_range(self, viewtype):
+        raise NotImplementedError
+
+    def getitem_field(self, viewtype, key):
+        raise NotImplementedError
+
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+        return builder.load(numba.cgutils.pointer_add(builder, viewproxy.postable, context.get_constant(numba.intp, 0)))
+
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+        raise NotImplementedError
+
+    def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
+        raise NotImplementedError
+
 class RegularArrayType(ContentType):
     IDENTITIES = 0
     CONTENT = 1
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.arrayview
-
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
         postable.append(None)
@@ -124,6 +142,24 @@ class RegularArrayType(ContentType):
         content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
         return awkward1.layout.RegularArray(content, self.size)
 
+    def getitem_at(self, viewtype):
+        return self.arraytype.dtype
+
+    def getitem_range(self, viewtype):
+        raise NotImplementedError
+
+    def getitem_field(self, viewtype, key):
+        raise NotImplementedError
+
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+        raise NotImplementedError
+
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+        raise NotImplementedError
+
+    def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
+        raise NotImplementedError
+
 class ListArrayType(ContentType):
     IDENTITIES = 0
     STARTS = 1
@@ -132,8 +168,6 @@ class ListArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.arrayview
-
         if isinstance(layout, (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64)):
             starts = numpy.asarray(layout.starts)
             stops = numpy.asarray(layout.stops)
@@ -182,8 +216,6 @@ class IndexedArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.arrayview
-
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
         postable.append(len(arrays))
@@ -214,6 +246,24 @@ class IndexedArrayType(ContentType):
         content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
         return self.IndexedArrayOf()(index, content)
 
+    def getitem_at(self, viewtype):
+        return self.arraytype.dtype
+
+    def getitem_range(self, viewtype):
+        raise NotImplementedError
+
+    def getitem_field(self, viewtype, key):
+        raise NotImplementedError
+
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+        raise NotImplementedError
+
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+        raise NotImplementedError
+
+    def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
+        raise NotImplementedError
+
 class IndexedOptionArrayType(ContentType):
     IDENTITIES = 0
     INDEX = 1
@@ -221,8 +271,6 @@ class IndexedOptionArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.arrayview
-
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
         postable.append(len(arrays))
@@ -251,14 +299,30 @@ class IndexedOptionArrayType(ContentType):
         content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
         return self.IndexedOptionArrayOf()(index, content)
 
+    def getitem_at(self, viewtype):
+        return self.arraytype.dtype
+
+    def getitem_range(self, viewtype):
+        raise NotImplementedError
+
+    def getitem_field(self, viewtype, key):
+        raise NotImplementedError
+
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+        raise NotImplementedError
+
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+        raise NotImplementedError
+
+    def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
+        raise NotImplementedError
+
 class RecordArrayType(ContentType):
     IDENTITIES = 0
     CONTENTS = 1
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.arrayview
-
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
         postable.extend([None] * layout.numfields)
@@ -303,6 +367,24 @@ class RecordArrayType(ContentType):
             else:
                 return awkward1.layout.RecordArray(contents, self.recordlookup)
 
+    def getitem_at(self, viewtype):
+        return self.arraytype.dtype
+
+    def getitem_range(self, viewtype):
+        raise NotImplementedError
+
+    def getitem_field(self, viewtype, key):
+        raise NotImplementedError
+
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+        raise NotImplementedError
+
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+        raise NotImplementedError
+
+    def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
+        raise NotImplementedError
+
 class UnionArrayType(ContentType):
     IDENTITIES = 0
     TAGS = 1
@@ -311,8 +393,6 @@ class UnionArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, postable, arrays, identities):
-        import awkward1._numba.arrayview
-
         pos = len(postable)
         cls.tolookup_identities(layout, postable, identities)
         postable.append(len(arrays))
@@ -353,3 +433,21 @@ class UnionArrayType(ContentType):
             layout = contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENTS + i], fields)
             contents.append(layout)
         return self.UnionArrayOf()(tags, index, contents)
+
+    def getitem_at(self, viewtype):
+        return self.arraytype.dtype
+
+    def getitem_range(self, viewtype):
+        raise NotImplementedError
+
+    def getitem_field(self, viewtype, key):
+        raise NotImplementedError
+
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
+        raise NotImplementedError
+
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop):
+        raise NotImplementedError
+
+    def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
+        raise NotImplementedError

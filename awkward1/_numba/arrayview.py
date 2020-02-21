@@ -2,10 +2,11 @@
 
 from __future__ import absolute_import
 
+import operator
+
 import numpy
 import numba
 
-import awkward1.layout
 import awkward1.operations.convert
 import awkward1._util
 import awkward1._numba.layout
@@ -20,11 +21,11 @@ class Lookup(object):
         self.arrays = tuple(arrays)
         self.identities = tuple(identities)
         self.arrayptrs = numpy.array([x.ctypes.data for x in arrays], dtype=numpy.intp)
-        self.arraylens = numpy.array([len(x) for x in arrays], dtype=numpy.intp)
         self.identityptrs = numpy.array([x.ctypes.data for x in identities], dtype=numpy.intp)
-        self.identitylens = numpy.array([len(x) for x in identities], dtype=numpy.intp)
 
 def tolookup(layout, postable, arrays, identities):
+    import awkward1.layout
+
     if isinstance(layout, awkward1.layout.NumpyArray):
         return awkward1._numba.layout.NumpyArrayType.tolookup(layout, postable, arrays, identities)
 
@@ -67,31 +68,23 @@ class LookupModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("postable",     fe_type.arraytype),
                    ("arrayptrs",    fe_type.arraytype),
-                   ("arraylens",    fe_type.arraytype),
-                   ("identityptrs", fe_type.arraytype),
-                   ("identitylens", fe_type.arraytype)]
+                   ("identityptrs", fe_type.arraytype)]
         super(LookupModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(LookupType)
 def unbox_Lookup(lookuptype, lookupobj, c):
     postable_obj     = c.pyapi.object_getattr_string(lookupobj, "postable")
     arrayptrs_obj    = c.pyapi.object_getattr_string(lookupobj, "arrayptrs")
-    arraylens_obj    = c.pyapi.object_getattr_string(lookupobj, "arraylens")
     identityptrs_obj = c.pyapi.object_getattr_string(lookupobj, "identityptrs")
-    identitylens_obj = c.pyapi.object_getattr_string(lookupobj, "identitylens")
 
     proxyout = c.context.make_helper(c.builder, lookuptype)
     proxyout.postable     = c.pyapi.to_native_value(lookuptype.arraytype, postable_obj).value
     proxyout.arrayptrs    = c.pyapi.to_native_value(lookuptype.arraytype, arrayptrs_obj).value
-    proxyout.arraylens    = c.pyapi.to_native_value(lookuptype.arraytype, arraylens_obj).value
     proxyout.identityptrs = c.pyapi.to_native_value(lookuptype.arraytype, identityptrs_obj).value
-    proxyout.identitylens = c.pyapi.to_native_value(lookuptype.arraytype, identitylens_obj).value
 
     c.pyapi.decref(postable_obj)
     c.pyapi.decref(arrayptrs_obj)
-    c.pyapi.decref(arraylens_obj)
     c.pyapi.decref(identityptrs_obj)
-    c.pyapi.decref(identitylens_obj)
 
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -123,7 +116,7 @@ def typeof_ArrayView(obj, c):
 
 class ArrayViewType(numba.types.Type):
     def __init__(self, type, behavior, fields):
-        super(ArrayViewType, self).__init__(name="awkward1.ArrayView({0}, <Behavior {1}>, {2})".format(type.name, hash(behavior), repr(fields)))
+        super(ArrayViewType, self).__init__(name="awkward1.ArrayView({0}, {1}, {2})".format(type.name, "None" if behavior is None else "<Behavior {0}>".format(hash(behavior)), repr(fields)))
         self.type = type
         self.behavior = behavior
         self.fields = fields
@@ -136,9 +129,7 @@ class ArrayViewModel(numba.datamodel.models.StructModel):
                    ("stop",         numba.intp),
                    ("postable",     numba.types.CPointer(numba.intp)),
                    ("arrayptrs",    numba.types.CPointer(numba.intp)),
-                   ("arraylens",    numba.types.CPointer(numba.intp)),
                    ("identityptrs", numba.types.CPointer(numba.intp)),
-                   ("identitylens", numba.types.CPointer(numba.intp)),
                    ("pylookup",     numba.types.pyobject)]
         super(ArrayViewModel, self).__init__(dmm, fe_type, members)
 
@@ -159,9 +150,7 @@ def unbox_ArrayView(viewtype, arrayobj, c):
     proxyout.stop         = c.pyapi.number_as_ssize_t(stop_obj)
     proxyout.postable     = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.postable).data
     proxyout.arrayptrs    = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.arrayptrs).data
-    proxyout.arraylens    = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.arraylens).data
     proxyout.identityptrs = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.identityptrs).data
-    proxyout.identitylens = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.identitylens).data
     proxyout.pylookup     = lookup_obj
 
     c.pyapi.decref(view_obj)
@@ -214,3 +203,53 @@ class type_len(numba.typing.templates.AbstractTemplate):
 def lower_len(context, builder, sig, args):
     proxyin = context.make_helper(builder, sig.args[0], args[0])
     return builder.sub(proxyin.stop, proxyin.start)
+
+@numba.typing.templates.infer_global(operator.getitem)
+class type_getitem(numba.typing.templates.AbstractTemplate):
+    def generic(self, args, kwargs):
+        if len(args) == 2 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
+            viewtype, wheretype = args
+            if isinstance(wheretype, numba.types.Integer):
+                return viewtype.type.getitem_at(viewtype)(viewtype, wheretype)
+            elif isinstance(wheretype, numba.types.SliceType) and wheretype.has_step:
+                return viewtype.type.getitem_range(viewtype)(viewtype, wheretype)
+            elif isinstance(wheretype, numba.types.StringLiteral):
+                return viewtype.type.getitem_field(viewtype, wheretype.literal_value)(viewtype, wheretype)
+            else:
+                raise TypeError("only an integer, start:stop range, or a field name string may be used as Awkward Array slices in compiled code")
+
+@numba.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.Integer)
+def lower_getitem_at(context, builder, sig, args):
+    rettype, (viewtype, wheretype) = sig.return_type, sig.args
+    viewval, whereval = args
+    viewproxy = context.make_helper(builder, viewtype, viewval)
+    return viewtype.type.lower_getitem_at(context, builder, rettype, viewtype, viewval, viewproxy, wheretype, whereval)
+
+@numba.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.slice2_type)
+def lower_getitem_range(context, builder, sig, args):
+    rettype, (viewtype, wheretype) = sig.return_type, sig.args
+    viewval, whereval = args
+    viewproxy = context.make_helper(builder, viewtype, viewval)
+    whereproxy = context.make_helper(builder, wheretype, whereval)
+    return viewtype.type.lower_getitem_range(context, builder, rettype, viewtype, viewval, viewproxy, whereproxy.start, whereproxy.stop)
+
+@numba.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.StringLiteral)
+def lower_getitem_field(context, builder, sig, args):
+    rettype, (viewtype, wheretype) = sig.return_type, sig.args
+    viewval, whereval = args
+    viewproxy = context.make_helper(builder, viewtype, viewval)
+    return viewtype.type.lower_getitem_field(context, builder, rettype, viewtype, viewval, viewproxy, wheretype.literal_value)
+
+@numba.typing.templates.infer_getattr
+class type_methods(numba.typing.templates.AttributeTemplate):
+    key = ArrayViewType
+
+    def generic_resolve(self, viewtype, attr):
+        # if attr == "???":
+        #     do_something_specific
+        return viewtype.getitem_field(attr)
+
+@numba.extending.lower_getattr_generic(ArrayViewType)
+def lower_getattr_generic(context, builder, viewtype, viewval, attr):
+    viewproxy = context.make_helper(builder, viewtype, viewval)
+    return viewtype.lower_getitem_field(context, builder, viewtype, viewval, viewproxy, attr)

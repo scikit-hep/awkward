@@ -7,8 +7,8 @@ import awkward1.layout
 import numpy
 
 def register():
-    import awkward1._numba.layout
     import awkward1._numba.arrayview
+    import awkward1._numba.layout
 
 try:
     import numba
