@@ -187,9 +187,6 @@ class NumpyArrayType(ContentType):
     def getitem_at(self, viewtype):
         return self.arraytype.dtype
 
-    def getitem_range(self, viewtype):
-        return awkward1._numba.arrayview.ArrayViewType(self, viewtype.behavior, viewtype.fields)
-
     def getitem_field(self, viewtype, key):
         raise TypeError("array has no fields; cannot extract {0}".format(repr(key)))
 
@@ -228,16 +225,26 @@ class RegularArrayType(ContentType):
         return awkward1.layout.RegularArray(content, self.size)
 
     def getitem_at(self, viewtype):
-        raise NotImplementedError(type(self).__name__ + ".getitem_at not implemented")
-
-    def getitem_range(self, viewtype):
-        raise NotImplementedError(type(self).__name__ + ".getitem_range not implemented")
-
-    def getitem_field(self, viewtype, key):
-        raise NotImplementedError(type(self).__name__ + ".getitem_field not implemented")
+        return awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_at not implemented")
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.postable, whichpos)
+
+        atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
+
+        size = context.get_constant(numba.intp, self.size)
+        start = builder.mul(builder.add(viewproxy.start, atval), size)
+        stop  = builder.add(start, size)
+
+        proxyout = context.make_helper(builder, rettype)
+        proxyout.pos = nextpos
+        proxyout.start = start
+        proxyout.stop = stop
+        proxyout.postable     = viewproxy.postable
+        proxyout.arrayptrs    = viewproxy.arrayptrs
+        proxyout.pylookup     = viewproxy.pylookup
+        return proxyout._getvalue()
 
     def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
         raise NotImplementedError(type(self).__name__ + ".lower_getitem_range not implemented")

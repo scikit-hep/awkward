@@ -149,8 +149,54 @@ def test_NumpyArray_getitem():
         for i2 in range(-6, 7):
             assert awkward1.tolist(f2(array, i1, i2)) == aslist[i1:i2]
 
+    @numba.njit
+    def f3(x, i1, i2):
+        return x[1:4][i1:i2]
+
+    assert awkward1.tolist(f3(array, -1, 3)) == [          4.4]
+    assert awkward1.tolist(f3(array, -2, 3)) == [     3.3, 4.4]
+    assert awkward1.tolist(f3(array, -3, 3)) == [2.2, 3.3, 4.4]
+    assert awkward1.tolist(f3(array,  0, 3)) == [2.2, 3.3, 4.4]
+    assert awkward1.tolist(f3(array,  1, 3)) == [     3.3, 4.4]
+    assert awkward1.tolist(f3(array,  2, 3)) == [          4.4]
+    assert awkward1.tolist(f3(array,  3, 3)) == [             ]
+
+    assert awkward1.tolist(f3(array, 0, -4)) == [             ]
+    assert awkward1.tolist(f3(array, 0, -3)) == [             ]
+    assert awkward1.tolist(f3(array, 0, -2)) == [2.2          ]
+    assert awkward1.tolist(f3(array, 0, -1)) == [2.2, 3.3     ]
+    assert awkward1.tolist(f3(array, 0,  3)) == [2.2, 3.3, 4.4]
+    assert awkward1.tolist(f3(array, 0,  2)) == [2.2, 3.3     ]
+    assert awkward1.tolist(f3(array, 0,  1)) == [2.2          ]
+    assert awkward1.tolist(f3(array, 0,  0)) == [             ]
+
 def test_RegularArray_getitem():
     array = awkward1.Array(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+
+    @numba.njit
+    def f1(x, i):
+        return x[i]
+
+    assert f1(array, -2) == [1.1, 2.2, 3.3]
+    assert f1(array,  0) == [1.1, 2.2, 3.3]
+    assert f1(array,  1) == [4.4, 5.5, 6.6]
+    assert f1(array, -1) == [4.4, 5.5, 6.6]
+
+    @numba.njit
+    def f2(x, i, j):
+        return x[i][j]
+
+    assert f2(array, 1, 0) == 4.4
+    assert f2(array, 1, 1) == 5.5
+    assert f2(array, 1, 2) == 6.6
+
+    assert f2(array, -1, 0) == 4.4
+    assert f2(array, -1, 1) == 5.5
+    assert f2(array, -1, 2) == 6.6
+
+    assert f2(array, 1, -3) == 4.4
+    assert f2(array, 1, -2) == 5.5
+    assert f2(array, 1, -1) == 6.6
 
 def test_ListArray_getitem():
     array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
