@@ -223,6 +223,16 @@ def test_RegularArray_getitem():
 def test_ListArray_getitem():
     array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
 
+    @numba.njit
+    def f1(x, i):
+        return x[i]
+
+    assert awkward1.tolist(f1(array, 0)) == [0.0, 1.1, 2.2]
+    assert awkward1.tolist(f1(array, 1)) == []
+    assert awkward1.tolist(f1(array, 2)) == [3.3, 4.4]
+    assert awkward1.tolist(f1(array, 3)) == [5.5]
+    assert awkward1.tolist(f1(array, 4)) == [6.6, 7.7, 8.8, 9.9]
+
 def test_IndexedArray_getitem():
     content = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]).layout
     index = awkward1.layout.Index64(numpy.array([3, 2, 2, 5, 0, 7], dtype=numpy.int64))

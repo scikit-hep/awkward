@@ -298,6 +298,48 @@ class ListArrayType(ContentType):
         content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
         return self.ListArrayOf()(starts, stops, content)
 
+    def getitem_at(self, viewtype):
+        return awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
+
+    def getitem_range(self, viewtype):
+        raise NotImplementedError(type(self).__name__ + ".getitem_range not implemented")
+
+    def getitem_field(self, viewtype, key):
+        raise NotImplementedError(type(self).__name__ + ".getitem_field not implemented")
+
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.postable, whichpos)
+
+        atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
+
+        startspos = posat(context, builder, viewproxy.pos, self.STARTS)
+        whichstarts = getat(context, builder, viewproxy.postable, startspos)
+        startsptr = getat(context, builder, viewproxy.arrayptrs, whichstarts)
+        startsarraypos = builder.add(viewproxy.start, atval)
+        start = getat(context, builder, startsptr, startsarraypos, self.indextype.dtype)
+
+        stopspos = posat(context, builder, viewproxy.pos, self.STOPS)
+        whichstops = getat(context, builder, viewproxy.postable, stopspos)
+        stopsptr = getat(context, builder, viewproxy.arrayptrs, whichstops)
+        stopsarraypos = builder.add(viewproxy.start, atval)
+        stop = getat(context, builder, stopsptr, stopsarraypos, self.indextype.dtype)
+
+        proxyout = context.make_helper(builder, rettype)
+        proxyout.pos = nextpos
+        proxyout.start = start
+        proxyout.stop = stop
+        proxyout.postable     = viewproxy.postable
+        proxyout.arrayptrs    = viewproxy.arrayptrs
+        proxyout.pylookup     = viewproxy.pylookup
+        return proxyout._getvalue()
+
+    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
+        raise NotImplementedError(type(self).__name__ + ".lower_getitem_range not implemented")
+
+    def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
+        raise NotImplementedError(type(self).__name__ + ".lower_getitem_field not implemented")
+
 class IndexedArrayType(ContentType):
     IDENTITIES = 0
     INDEX = 1
