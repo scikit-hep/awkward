@@ -530,19 +530,17 @@ class RecordArrayType(ContentType):
                 return awkward1.layout.RecordArray(contents, self.recordlookup)
 
     def getitem_at(self, viewtype):
-        raise NotImplementedError(type(self).__name__ + ".getitem_at not implemented")
-
-    def getitem_range(self, viewtype):
-        raise NotImplementedError(type(self).__name__ + ".getitem_range not implemented")
+        return awkward1._numba.arrayview.RecordViewType(viewtype)
 
     def getitem_field(self, viewtype, key):
         raise NotImplementedError(type(self).__name__ + ".getitem_field not implemented")
 
-    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_at not implemented")
-
-    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_range not implemented")
+    def lower_getitem_at(self, context, builder, rettype, arrayviewtype, arrayviewval, arrayviewproxy, attype, atval, wrapneg, checkbounds):
+        atval = regularize_atval(context, builder, arrayviewproxy, attype, atval, wrapneg, checkbounds)
+        proxyout = context.make_helper(builder, awkward1._numba.arrayview.RecordViewType(arrayviewtype))
+        proxyout.arrayview = arrayviewval
+        proxyout.at        = atval
+        return proxyout._getvalue()
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
         raise NotImplementedError(type(self).__name__ + ".lower_getitem_field not implemented")
