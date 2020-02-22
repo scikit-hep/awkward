@@ -297,12 +297,6 @@ class ListArrayType(ContentType):
     def getitem_at(self, viewtype):
         return awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
 
-    def getitem_range(self, viewtype):
-        raise NotImplementedError(type(self).__name__ + ".getitem_range not implemented")
-
-    def getitem_field(self, viewtype, key):
-        raise NotImplementedError(type(self).__name__ + ".getitem_field not implemented")
-
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
@@ -326,9 +320,6 @@ class ListArrayType(ContentType):
         proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()
-
-    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_range not implemented")
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
         raise NotImplementedError(type(self).__name__ + ".lower_getitem_field not implemented")
