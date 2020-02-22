@@ -113,6 +113,9 @@ class ContentType(numba.types.Type):
         proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()
 
+    def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
+        return viewval
+
 def castint(context, builder, fromtype, totype, val):
     if isinstance(fromtype, llvmlite.ir.types.IntType):
         if fromtype.width == 8:
@@ -198,7 +201,7 @@ class NumpyArrayType(ContentType):
         return self.arraytype.dtype
 
     def getitem_field(self, viewtype, key):
-        raise TypeError("array has no fields; cannot extract {0}".format(repr(key)))
+        raise TypeError("array does not contain tuples or records; cannot get field {0}".format(repr(key)))
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
@@ -253,9 +256,6 @@ class RegularArrayType(ContentType):
         proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()
-
-    def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_field not implemented")
 
 class ListArrayType(ContentType):
     IDENTITIES = 0
@@ -333,9 +333,6 @@ class ListArrayType(ContentType):
         proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()
 
-    def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_field not implemented")
-
 class IndexedArrayType(ContentType):
     IDENTITIES = 0
     INDEX = 1
@@ -376,9 +373,6 @@ class IndexedArrayType(ContentType):
     def getitem_at(self, viewtype):
         return self.contenttype.getitem_at(viewtype)
 
-    def getitem_field(self, viewtype, key):
-        raise NotImplementedError(type(self).__name__ + ".getitem_field not implemented")
-
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
@@ -400,9 +394,6 @@ class IndexedArrayType(ContentType):
         nextviewtype = awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
 
         return self.contenttype.lower_getitem_at(context, builder, rettype, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, nextat, False, False)
-
-    def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_field not implemented")
 
 class IndexedOptionArrayType(ContentType):
     IDENTITIES = 0
@@ -442,9 +433,6 @@ class IndexedOptionArrayType(ContentType):
     def getitem_at(self, viewtype):
         return numba.types.optional(self.contenttype.getitem_at(viewtype))
 
-    def getitem_field(self, viewtype, key):
-        raise NotImplementedError(type(self).__name__ + ".getitem_field not implemented")
-
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
@@ -479,9 +467,6 @@ class IndexedOptionArrayType(ContentType):
                 output.data = outdata
 
         return output._getvalue()
-
-    def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_field not implemented")
 
 class RecordArrayType(ContentType):
     IDENTITIES = 0
@@ -562,7 +547,9 @@ class RecordArrayType(ContentType):
         proxyout.at        = atval
         return proxyout._getvalue()
 
-    def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
+    def lower_getitem_field(self, context, builder, viewtype, viewval, key):
+        viewproxy = context.make_helper(builder, viewtype, viewval)
+
         index = self.fieldindex(key)
         contenttype = self.contenttypes[index]
 
@@ -578,8 +565,9 @@ class RecordArrayType(ContentType):
 
         return proxynext._getvalue()
 
-    def lower_getitem_field_record(self, context, builder, recordviewtype, recordviewval, recordviewproxy, key):
+    def lower_getitem_field_record(self, context, builder, recordviewtype, recordviewval, key):
         arrayviewtype = recordviewtype.arrayviewtype
+        recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
         arrayviewval = recordviewproxy.arrayview
         arrayviewproxy = context.make_helper(builder, arrayviewtype, arrayviewval)
 

@@ -117,9 +117,12 @@ class ArrayView(object):
 def typeof_ArrayView(obj, c):
     return ArrayViewType(obj.type, obj.behavior, obj.fields)
 
+def repr_behavior(behavior):
+    return repr(behavior)
+
 class ArrayViewType(numba.types.Type):
     def __init__(self, type, behavior, fields):
-        super(ArrayViewType, self).__init__(name="awkward1.ArrayView({0}, {1}, {2})".format(type.name, "None" if behavior is None else "<Behavior {0}>".format(hash(behavior)), repr(fields)))
+        super(ArrayViewType, self).__init__(name="awkward1.ArrayView({0}, {1}, {2})".format(type.name, repr_behavior(behavior), repr(fields)))
         self.type = type
         self.behavior = behavior
         self.fields = fields
@@ -243,8 +246,7 @@ def lower_getitem_range(context, builder, sig, args):
 def lower_getitem_field(context, builder, sig, args):
     rettype, (viewtype, wheretype) = sig.return_type, sig.args
     viewval, whereval = args
-    viewproxy = context.make_helper(builder, viewtype, viewval)
-    return viewtype.type.lower_getitem_field(context, builder, viewtype, viewval, viewproxy, wheretype.literal_value)
+    return viewtype.type.lower_getitem_field(context, builder, viewtype, viewval, wheretype.literal_value)
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):
@@ -257,8 +259,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
 
 @numba.extending.lower_getattr_generic(ArrayViewType)
 def lower_getattr_generic(context, builder, viewtype, viewval, attr):
-    viewproxy = context.make_helper(builder, viewtype, viewval)
-    return viewtype.type.lower_getitem_field(context, builder, viewtype, viewval, viewproxy, attr)
+    return viewtype.type.lower_getitem_field(context, builder, viewtype, viewval, attr)
 
 class RecordView(object):
     @classmethod
@@ -347,8 +348,7 @@ class type_getitem_record(numba.typing.templates.AbstractTemplate):
 def lower_getitem_field_record(context, builder, sig, args):
     rettype, (recordviewtype, wheretype) = sig.return_type, sig.args
     recordviewval, whereval = args
-    recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
-    return recordviewtype.arrayviewtype.type.lower_getitem_field_record(context, builder, recordviewtype, recordviewval, recordviewproxy, wheretype.literal_value)
+    return recordviewtype.arrayviewtype.type.lower_getitem_field_record(context, builder, recordviewtype, recordviewval, wheretype.literal_value)
 
 @numba.typing.templates.infer_getattr
 class type_methods_record(numba.typing.templates.AttributeTemplate):
@@ -361,5 +361,4 @@ class type_methods_record(numba.typing.templates.AttributeTemplate):
 
 @numba.extending.lower_getattr_generic(RecordViewType)
 def lower_getattr_generic_record(context, builder, recordviewtype, recordviewval, attr):
-    recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
-    return recordviewtype.arrayviewtype.type.lower_getitem_field_record(context, builder, recordviewtype, recordviewval, recordviewproxy, attr)
+    return recordviewtype.arrayviewtype.type.lower_getitem_field_record(context, builder, recordviewtype, recordviewval, attr)

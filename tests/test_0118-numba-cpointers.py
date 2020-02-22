@@ -398,6 +398,18 @@ def test_RecordArray_getitem_field():
 
     assert awkward1.tolist(f4(array)) == [[1], [2, 2], [3, 3, 3]]
 
+# def test_ListArray_getitem_field():
+#     array = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]])
+
+#     @numba.njit
+#     def f1(x):
+#         return x["x"]
+
+#     print(f1(array))
+
+
+#     raise Exception
+
 def test_UnionArray_getitem():
     array = awkward1.Array([1, 2, 3, [], [1], [2, 2]])
 
