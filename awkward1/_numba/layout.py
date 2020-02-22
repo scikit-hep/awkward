@@ -426,19 +426,43 @@ class IndexedOptionArrayType(ContentType):
         return self.IndexedOptionArrayOf()(index, content)
 
     def getitem_at(self, viewtype):
-        raise NotImplementedError(type(self).__name__ + ".getitem_at not implemented")
-
-    def getitem_range(self, viewtype):
-        raise NotImplementedError(type(self).__name__ + ".getitem_range not implemented")
+        return numba.types.optional(self.contenttype.getitem_at(viewtype))
 
     def getitem_field(self, viewtype, key):
         raise NotImplementedError(type(self).__name__ + ".getitem_field not implemented")
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_at not implemented")
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-    def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_range not implemented")
+        atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
+
+        indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
+        indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
+        indexarraypos = builder.add(viewproxy.start, atval)
+        nextat = getat(context, builder, indexptr, indexarraypos, self.indextype.dtype)
+
+        output = context.make_helper(builder, rettype)
+
+        with builder.if_else(builder.icmp_signed("<", nextat, context.get_constant(self.indextype.dtype, 0))) as (isnone, isvalid):
+            with isnone:
+                output.valid = numba.cgutils.false_bit
+                output.data = numba.cgutils.get_null_value(output.data.type)
+
+            with isvalid:
+                proxynext = context.make_helper(builder, self.contenttype.getitem_range(viewtype))
+                proxynext.pos       = nextpos
+                proxynext.start     = context.get_constant(numba.intp, 0)
+                proxynext.stop      = builder.add(nextat, context.get_constant(numba.intp, 1))
+                proxynext.arrayptrs = viewproxy.arrayptrs
+                proxynext.pylookup  = viewproxy.pylookup
+
+                outdata = self.contenttype.lower_getitem_at(context, builder, rettype.type, viewtype, proxynext._getvalue(), proxynext, numba.intp, nextat, False, False)
+
+                output.valid = numba.cgutils.true_bit
+                output.data = outdata
+
+        return output._getvalue()
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
         raise NotImplementedError(type(self).__name__ + ".lower_getitem_field not implemented")

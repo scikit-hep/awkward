@@ -259,6 +259,18 @@ def test_IndexedArray_getitem():
 def test_IndexedOptionArray_getitem():
     array = awkward1.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
 
+    @numba.njit
+    def f1(x, i):
+        return x[i]
+
+    assert [f1(array, 0), f1(array, 1), f1(array, 2), f1(array, 3)] == [1.1, 2.2, None, 3.3]
+
+    @numba.njit
+    def f2(x, i1, i2):
+        return x[i1:i2]
+
+    assert awkward1.tolist(f2(array, 1, 5)) == [2.2, None, 3.3, None]
+
 def test_RecordArray_getitem():
     array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}])
 
