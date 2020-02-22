@@ -113,41 +113,6 @@ class ArrayView(object):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
         return awkward1._util.wrap(layout[self.start:self.stop], self.behavior)
 
-class RecordView(object):
-    @classmethod
-    def fromrecord(self, record):
-        behavior = awkward1._util.behaviorof(record)
-        layout = awkward1.operations.convert.tolayout(record, allowrecord=True, allowother=False, numpytype=(numpy.number,))
-        assert isinstance(layout, awkward1.layout.Record)
-        arraylayout = layout.array
-        return RecordView(ArrayView(numba.typeof(arraylayout), behavior, Lookup(arraylayout), 0, 0, len(arraylayout), ()), layout.at)
-
-    def __init__(self, arrayview, at):
-        self.arrayview = arrayview
-        self.at = at
-
-    def torecord(self):
-        arraylayout = self.arrayview.toarray()
-        return awkward1._util.wrap(awkward1.layout.Record(arraylayout, self.at), self.arrayview.behavior)
-
-        # import awkward1.highlevel
-        # behavior = awkward1._util.behaviorof(record)
-
-        # layout = None
-        # if isinstance(record, awkward1.highlevel.Record):
-        #     layout = record.layout
-        # elif isinstance(record, awkward1.highlevel.FillableArray):
-        #     layout = record.snapshot().layout
-        # elif isinstance(record, awkward1.layout.FillableArray):
-        #     layout = record.snapshot()
-        # elif isinstance(record, awkward1.layout.Record):
-        #     layout = record
-
-        # if not isinstance(layout, awkward1.layout.Record):
-        #     raise TypeError("RecordView can only be constructed from a Record, not {0}".format(type(record)))
-
-        # return RecordView(ArrayView.fromarray(layout.array), layout.at)
-
 @numba.extending.typeof_impl.register(ArrayView)
 def typeof_ArrayView(obj, c):
     return ArrayViewType(obj.type, obj.behavior, obj.fields)
@@ -170,8 +135,13 @@ class ArrayViewModel(numba.datamodel.models.StructModel):
         super(ArrayViewModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(ArrayViewType)
-def unbox_ArrayView(viewtype, arrayobj, c):
+def unbox_Array(viewtype, arrayobj, c):
     view_obj   = c.pyapi.object_getattr_string(arrayobj, "_numbaview")
+    out = unbox_ArrayView(viewtype, view_obj, c)
+    c.pyapi.decref(view_obj)
+    return out
+
+def unbox_ArrayView(viewtype, view_obj, c):
     lookup_obj = c.pyapi.object_getattr_string(view_obj, "lookup")
     pos_obj    = c.pyapi.object_getattr_string(view_obj, "pos")
     start_obj  = c.pyapi.object_getattr_string(view_obj, "start")
@@ -187,7 +157,6 @@ def unbox_ArrayView(viewtype, arrayobj, c):
     proxyout.arrayptrs = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.arrayptrs).data
     proxyout.pylookup  = lookup_obj
 
-    c.pyapi.decref(view_obj)
     c.pyapi.decref(lookup_obj)
     c.pyapi.decref(pos_obj)
     c.pyapi.decref(start_obj)
@@ -200,6 +169,12 @@ def unbox_ArrayView(viewtype, arrayobj, c):
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
 
 @numba.extending.box(ArrayViewType)
+def box_Array(viewtype, viewval, c):
+    arrayview_obj = box_ArrayView(viewtype, viewval, c)
+    out = c.pyapi.call_method(arrayview_obj, "toarray", ())
+    c.pyapi.decref(arrayview_obj)
+    return out
+
 def box_ArrayView(viewtype, viewval, c):
     ArrayView_obj = c.pyapi.unserialize(c.pyapi.serialize_object(ArrayView))
     type_obj      = c.pyapi.unserialize(c.pyapi.serialize_object(viewtype.type))
@@ -212,9 +187,7 @@ def box_ArrayView(viewtype, viewval, c):
     stop_obj   = c.pyapi.long_from_ssize_t(proxyin.stop)
     lookup_obj = proxyin.pylookup
 
-    arrayview_obj = c.pyapi.call_function_objargs(ArrayView_obj, (type_obj, behavior_obj, lookup_obj, pos_obj, start_obj, stop_obj, fields_obj))
-
-    out = c.pyapi.call_method(arrayview_obj, "toarray", ())
+    out = c.pyapi.call_function_objargs(ArrayView_obj, (type_obj, behavior_obj, lookup_obj, pos_obj, start_obj, stop_obj, fields_obj))
 
     c.pyapi.decref(ArrayView_obj)
     c.pyapi.decref(type_obj)
@@ -223,7 +196,6 @@ def box_ArrayView(viewtype, viewval, c):
     c.pyapi.decref(pos_obj)
     c.pyapi.decref(start_obj)
     c.pyapi.decref(stop_obj)
-    c.pyapi.decref(arrayview_obj)
 
     return out
 
@@ -287,3 +259,76 @@ class type_methods(numba.typing.templates.AttributeTemplate):
 def lower_getattr_generic(context, builder, viewtype, viewval, attr):
     viewproxy = context.make_helper(builder, viewtype, viewval)
     return viewtype.lower_getitem_field(context, builder, viewtype, viewval, viewproxy, attr)
+
+class RecordView(object):
+    @classmethod
+    def fromrecord(self, record):
+        behavior = awkward1._util.behaviorof(record)
+        layout = awkward1.operations.convert.tolayout(record, allowrecord=True, allowother=False, numpytype=(numpy.number,))
+        assert isinstance(layout, awkward1.layout.Record)
+        arraylayout = layout.array
+        return RecordView(ArrayView(numba.typeof(arraylayout), behavior, Lookup(arraylayout), 0, 0, len(arraylayout), ()), layout.at)
+
+    def __init__(self, arrayview, at):
+        self.arrayview = arrayview
+        self.at = at
+
+    def torecord(self):
+        arraylayout = self.arrayview.toarray().layout
+        return awkward1._util.wrap(awkward1.layout.Record(arraylayout, self.at), self.arrayview.behavior)
+
+@numba.extending.typeof_impl.register(RecordView)
+def typeof_RecordView(obj, c):
+    return RecordViewType(numba.typeof(obj.arrayview))
+
+class RecordViewType(numba.types.Type):
+    def __init__(self, arrayviewtype):
+        super(RecordViewType, self).__init__(name="RecordViewType({0})".format(arrayviewtype.name))
+        self.arrayviewtype = arrayviewtype
+
+@numba.extending.register_model(RecordViewType)
+class RecordViewModel(numba.datamodel.models.StructModel):
+    def __init__(self, dmm, fe_type):
+        members = [("arrayview", fe_type.arrayviewtype),
+                   ("at",        numba.intp)]
+        super(RecordViewModel, self).__init__(dmm, fe_type, members)
+
+@numba.extending.unbox(RecordViewType)
+def unbox_RecordView(recordviewtype, recordobj, c):
+    recordview_obj = c.pyapi.object_getattr_string(recordobj, "_numbaview")
+    arrayview_obj  = c.pyapi.object_getattr_string(recordview_obj, "arrayview")
+    at_obj         = c.pyapi.object_getattr_string(recordview_obj, "at")
+
+    arrayview_val = unbox_ArrayView(recordviewtype.arrayviewtype, arrayview_obj, c).value
+
+    proxyout = c.context.make_helper(c.builder, recordviewtype)
+    proxyout.arrayview = arrayview_val
+    proxyout.at        = c.pyapi.number_as_ssize_t(at_obj)
+
+    c.pyapi.decref(recordview_obj)
+    c.pyapi.decref(at_obj)
+
+    if c.context.enable_nrt:
+        c.context.nrt.decref(c.builder, recordviewtype.arrayviewtype, arrayview_val)
+
+    is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
+    return numba.extending.NativeValue(proxyout._getvalue(), is_error)
+
+@numba.extending.box(RecordViewType)
+def box_RecordView(recordviewtype, viewval, c):
+    RecordView_obj = c.pyapi.unserialize(c.pyapi.serialize_object(RecordView))
+    
+    proxyin = c.context.make_helper(c.builder, recordviewtype, viewval)
+    arrayview_obj = box_ArrayView(recordviewtype.arrayviewtype, proxyin.arrayview, c)
+    at_obj        = c.pyapi.long_from_ssize_t(proxyin.at)
+
+    recordview_obj = c.pyapi.call_function_objargs(RecordView_obj, (arrayview_obj, at_obj))
+
+    out = c.pyapi.call_method(recordview_obj, "torecord", ())
+
+    c.pyapi.decref(RecordView_obj)
+    c.pyapi.decref(arrayview_obj)
+    c.pyapi.decref(at_obj)
+    c.pyapi.decref(recordview_obj)
+
+    return out
