@@ -244,6 +244,18 @@ def test_IndexedArray_getitem():
     index = awkward1.layout.Index64(numpy.array([3, 2, 2, 5, 0, 7], dtype=numpy.int64))
     array = awkward1.Array(awkward1.layout.IndexedArray64(index, content))
 
+    @numba.njit
+    def f1(x, i):
+        return x[i]
+
+    assert [f1(array, 0), f1(array, 1), f1(array, 2), f1(array, 3)] == [3.3, 2.2, 2.2, 5.5]
+
+    @numba.njit
+    def f2(x, i1, i2):
+        return x[i1:i2]
+
+    assert awkward1.tolist(f2(array, 1, 5)) == [2.2, 2.2, 5.5, 0]
+
 def test_IndexedOptionArray_getitem():
     array = awkward1.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
 
