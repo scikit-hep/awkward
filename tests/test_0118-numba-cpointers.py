@@ -322,8 +322,6 @@ def test_RecordView_refcount():
 
 def test_Record_getitem():
     record = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}])[3]
-    print(record)
-
     @numba.njit
     def f1(x):
         return x["x"]
@@ -335,6 +333,18 @@ def test_Record_getitem():
         return x["y"]
 
     assert awkward1.tolist(f2(record)) == [3, 3, 3]
+
+    @numba.njit
+    def f3(x):
+        return x.x
+
+    assert f3(record) == 3.3
+
+    @numba.njit
+    def f4(x):
+        return x.y
+
+    assert awkward1.tolist(f4(record)) == [3, 3, 3]
 
 def test_RecordArray_getitem():
     array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}])
@@ -360,6 +370,33 @@ def test_RecordArray_getitem():
         return x[i][j]
 
     assert awkward1.tolist(f3(array, 2, -2)) == {"x": 3.3, "y": [3, 3, 3]}
+
+def test_RecordArray_getitem_field():
+    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}])
+
+    @numba.njit
+    def f1(x):
+        return x[1:4]["x"]
+
+    assert awkward1.tolist(f1(array)) == [1.1, 2.2, 3.3]
+
+    @numba.njit
+    def f2(x):
+        return x[1:4]["y"]
+
+    assert awkward1.tolist(f2(array)) == [[1], [2, 2], [3, 3, 3]]
+
+    @numba.njit
+    def f3(x):
+        return x[1:4].x
+
+    assert awkward1.tolist(f3(array)) == [1.1, 2.2, 3.3]
+
+    @numba.njit
+    def f4(x):
+        return x[1:4].y
+
+    assert awkward1.tolist(f4(array)) == [[1], [2, 2], [3, 3, 3]]
 
 def test_UnionArray_getitem():
     array = awkward1.Array([1, 2, 3, [], [1], [2, 2]])

@@ -538,7 +538,13 @@ class RecordArrayType(ContentType):
         return awkward1._numba.arrayview.RecordViewType(viewtype)
 
     def getitem_field(self, viewtype, key):
-        raise NotImplementedError(type(self).__name__ + ".getitem_field not implemented")
+        index = self.fieldindex(key)
+        if index is None:
+            if self.recordlookup is None:
+                raise ValueError("no field {0} in tuples with {1} fields".format(repr(key), len(self.contenttypes)))
+            else:
+                raise ValueError("no field {0} in records with fields: [{1}]".format(repr(key), ", ".join(repr(x) for x in self.recordlookup)))
+        return self.contenttypes[index].getitem_range(viewtype)
 
     def getitem_field_record(self, recordviewtype, key):
         index = self.fieldindex(key)
@@ -557,7 +563,20 @@ class RecordArrayType(ContentType):
         return proxyout._getvalue()
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
-        raise NotImplementedError(type(self).__name__ + ".lower_getitem_field not implemented")
+        index = self.fieldindex(key)
+        contenttype = self.contenttypes[index]
+
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+
+        proxynext = context.make_helper(builder, contenttype.getitem_range(viewtype))
+        proxynext.pos       = nextpos
+        proxynext.start     = viewproxy.start
+        proxynext.stop      = viewproxy.stop
+        proxynext.arrayptrs = viewproxy.arrayptrs
+        proxynext.pylookup  = viewproxy.pylookup
+
+        return proxynext._getvalue()
 
     def lower_getitem_field_record(self, context, builder, recordviewtype, recordviewval, recordviewproxy, key):
         arrayviewtype = recordviewtype.arrayviewtype
