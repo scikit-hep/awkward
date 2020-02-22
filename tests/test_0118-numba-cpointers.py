@@ -48,7 +48,7 @@ def test_box():
 def test_refcount():
     array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     array.numbatype
-    assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.postable, array._numbaview.lookup.arrayptrs)]
+    assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.positions, array._numbaview.lookup.arrayptrs)]
 
     for i in range(3):
         @numba.njit
@@ -57,7 +57,7 @@ def test_refcount():
         
         for j in range(10):
             f1(array)
-            assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.postable, array._numbaview.lookup.arrayptrs)]
+            assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.positions, array._numbaview.lookup.arrayptrs)]
 
     for i in range(3):
         @numba.njit
@@ -66,7 +66,7 @@ def test_refcount():
         
         for j in range(10):
             y = f2(array)
-            assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.postable, array._numbaview.lookup.arrayptrs)]
+            assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.positions, array._numbaview.lookup.arrayptrs)]
 
     for i in range(3):
         @numba.njit
@@ -75,7 +75,7 @@ def test_refcount():
 
         for j in range(10):
             y = f3(array)
-            assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.postable, array._numbaview.lookup.arrayptrs)]
+            assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.positions, array._numbaview.lookup.arrayptrs)]
 
 def test_len():
     array = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])

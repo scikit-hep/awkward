@@ -13,44 +13,44 @@ import awkward1._numba.layout
 
 class Lookup(object):
     def __init__(self, layout):
-        postable = []
+        positions = []
         arrays = []
-        tolookup(layout, postable, arrays)
-        self.postable = numpy.array(postable, dtype=numpy.intp)
+        tolookup(layout, positions, arrays)
+        self.positions = numpy.array(positions, dtype=numpy.intp)
         self.arrays = tuple(arrays)
         self.arrayptrs = numpy.array([x.ctypes.data for x in arrays], dtype=numpy.intp)
 
-        print("postable ", self.postable)
+        print("positions ", self.positions)
         print("arrayptrs", self.arrayptrs)
         for i, x in enumerate(arrays):
             print("array[{0}] ".format(i), x)
 
-def tolookup(layout, postable, arrays):
+def tolookup(layout, positions, arrays):
     import awkward1.layout
 
     if isinstance(layout, awkward1.layout.NumpyArray):
-        return awkward1._numba.layout.NumpyArrayType.tolookup(layout, postable, arrays)
+        return awkward1._numba.layout.NumpyArrayType.tolookup(layout, positions, arrays)
 
     elif isinstance(layout, awkward1.layout.RegularArray):
-        return awkward1._numba.layout.RegularArrayType.tolookup(layout, postable, arrays)
+        return awkward1._numba.layout.RegularArrayType.tolookup(layout, positions, arrays)
 
     elif isinstance(layout, (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)):
-        return awkward1._numba.layout.ListArrayType.tolookup(layout, postable, arrays)
+        return awkward1._numba.layout.ListArrayType.tolookup(layout, positions, arrays)
 
     elif isinstance(layout, (awkward1.layout.IndexedArray32, awkward1.layout.IndexedArrayU32, awkward1.layout.IndexedArray64)):
-        return awkward1._numba.layout.IndexedArrayType.tolookup(layout, postable, arrays)
+        return awkward1._numba.layout.IndexedArrayType.tolookup(layout, positions, arrays)
 
     elif isinstance(layout, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)):
-        return awkward1._numba.layout.IndexedOptionArrayType.tolookup(layout, postable, arrays)
+        return awkward1._numba.layout.IndexedOptionArrayType.tolookup(layout, positions, arrays)
 
     elif isinstance(layout, awkward1.layout.RecordArray):
-        return awkward1._numba.layout.RecordArrayType.tolookup(layout, postable, arrays)
+        return awkward1._numba.layout.RecordArrayType.tolookup(layout, positions, arrays)
 
     elif isinstance(layout, awkward1.layout.Record):
-        return awkward1._numba.layout.RecordType.tolookup(layout, postable, arrays)
+        return awkward1._numba.layout.RecordType.tolookup(layout, positions, arrays)
 
     elif isinstance(layout, (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)):
-        return awkward1._numba.layout.UnionArrayType.tolookup(layout, postable, arrays)
+        return awkward1._numba.layout.UnionArrayType.tolookup(layout, positions, arrays)
 
     else:
         raise AssertionError("unrecognized layout type: {0}".format(type(layout)))
@@ -68,20 +68,20 @@ class LookupType(numba.types.Type):
 @numba.extending.register_model(LookupType)
 class LookupModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("postable",     fe_type.arraytype),
-                   ("arrayptrs",    fe_type.arraytype)]
+        members = [("positions", fe_type.arraytype),
+                   ("arrayptrs", fe_type.arraytype)]
         super(LookupModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(LookupType)
 def unbox_Lookup(lookuptype, lookupobj, c):
-    postable_obj     = c.pyapi.object_getattr_string(lookupobj, "postable")
-    arrayptrs_obj    = c.pyapi.object_getattr_string(lookupobj, "arrayptrs")
+    positions_obj = c.pyapi.object_getattr_string(lookupobj, "positions")
+    arrayptrs_obj = c.pyapi.object_getattr_string(lookupobj, "arrayptrs")
 
     proxyout = c.context.make_helper(c.builder, lookuptype)
-    proxyout.postable     = c.pyapi.to_native_value(lookuptype.arraytype, postable_obj).value
-    proxyout.arrayptrs    = c.pyapi.to_native_value(lookuptype.arraytype, arrayptrs_obj).value
+    proxyout.positions = c.pyapi.to_native_value(lookuptype.arraytype, positions_obj).value
+    proxyout.arrayptrs = c.pyapi.to_native_value(lookuptype.arraytype, arrayptrs_obj).value
 
-    c.pyapi.decref(postable_obj)
+    c.pyapi.decref(positions_obj)
     c.pyapi.decref(arrayptrs_obj)
 
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
@@ -122,12 +122,12 @@ class ArrayViewType(numba.types.Type):
 @numba.extending.register_model(ArrayViewType)
 class ArrayViewModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("pos",          numba.intp),
-                   ("start",        numba.intp),
-                   ("stop",         numba.intp),
-                   ("postable",     numba.types.CPointer(numba.intp)),
-                   ("arrayptrs",    numba.types.CPointer(numba.intp)),
-                   ("pylookup",     numba.types.pyobject)]
+        members = [("pos",       numba.intp),
+                   ("start",     numba.intp),
+                   ("stop",      numba.intp),
+                   ("positions", numba.types.CPointer(numba.intp)),
+                   ("arrayptrs", numba.types.CPointer(numba.intp)),
+                   ("pylookup",  numba.types.pyobject)]
         super(ArrayViewModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(ArrayViewType)
@@ -142,12 +142,12 @@ def unbox_ArrayView(viewtype, arrayobj, c):
     lookup_proxy = c.context.make_helper(c.builder, LookupType(), lookup_val)
 
     proxyout = c.context.make_helper(c.builder, viewtype)
-    proxyout.pos          = c.pyapi.number_as_ssize_t(pos_obj)
-    proxyout.start        = c.pyapi.number_as_ssize_t(start_obj)
-    proxyout.stop         = c.pyapi.number_as_ssize_t(stop_obj)
-    proxyout.postable     = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.postable).data
-    proxyout.arrayptrs    = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.arrayptrs).data
-    proxyout.pylookup     = lookup_obj
+    proxyout.pos       = c.pyapi.number_as_ssize_t(pos_obj)
+    proxyout.start     = c.pyapi.number_as_ssize_t(start_obj)
+    proxyout.stop      = c.pyapi.number_as_ssize_t(stop_obj)
+    proxyout.positions = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.positions).data
+    proxyout.arrayptrs = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.arrayptrs).data
+    proxyout.pylookup  = lookup_obj
 
     c.pyapi.decref(view_obj)
     c.pyapi.decref(lookup_obj)

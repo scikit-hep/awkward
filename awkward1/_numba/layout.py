@@ -55,12 +55,12 @@ def typeof(obj, c):
 
 class ContentType(numba.types.Type):
     @classmethod
-    def tolookup_identities(cls, layout, postable, arrays):
-        postable.append(None)
+    def tolookup_identities(cls, layout, positions, arrays):
+        positions.append(None)
         if layout.identities is None:
-            postable[-1] = -1
+            positions[-1] = -1
         else:
-            postable[-1] = len(arrays)
+            positions[-1] = len(arrays)
             arrays.append(numpy.asarray(layout.identities))
 
     def IndexOf(self, arraytype):
@@ -106,12 +106,12 @@ class ContentType(numba.types.Type):
             builder.store(length, regular_stop)
 
         proxyout = context.make_helper(builder, rettype)
-        proxyout.pos          = viewproxy.pos
-        proxyout.start        = builder.add(viewproxy.start, builder.load(regular_start))
-        proxyout.stop         = builder.add(viewproxy.start, builder.load(regular_stop))
-        proxyout.postable     = viewproxy.postable
-        proxyout.arrayptrs    = viewproxy.arrayptrs
-        proxyout.pylookup     = viewproxy.pylookup
+        proxyout.pos       = viewproxy.pos
+        proxyout.start     = builder.add(viewproxy.start, builder.load(regular_start))
+        proxyout.stop      = builder.add(viewproxy.start, builder.load(regular_stop))
+        proxyout.positions = viewproxy.positions
+        proxyout.arrayptrs = viewproxy.arrayptrs
+        proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()
 
 def castint(context, builder, fromtype, totype, val):
@@ -165,12 +165,12 @@ class NumpyArrayType(ContentType):
     ARRAY = 1
 
     @classmethod
-    def tolookup(cls, layout, postable, arrays):
+    def tolookup(cls, layout, positions, arrays):
         array = numpy.asarray(layout)
         assert len(array.shape) == 1
-        pos = len(postable)
-        cls.tolookup_identities(layout, postable, arrays)
-        postable.append(len(arrays))
+        pos = len(positions)
+        cls.tolookup_identities(layout, positions, arrays)
+        positions.append(len(arrays))
         arrays.append(array)
         return pos
 
@@ -182,7 +182,7 @@ class NumpyArrayType(ContentType):
 
     def tolayout(self, lookup, pos, fields):
         assert fields == ()
-        return awkward1.layout.NumpyArray(lookup.arrays[lookup.postable[pos + self.ARRAY]])
+        return awkward1.layout.NumpyArray(lookup.arrays[lookup.positions[pos + self.ARRAY]])
 
     def getitem_at(self, viewtype):
         return self.arraytype.dtype
@@ -192,7 +192,7 @@ class NumpyArrayType(ContentType):
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
-        whicharray = getat(context, builder, viewproxy.postable, whichpos)
+        whicharray = getat(context, builder, viewproxy.positions, whichpos)
         arrayptr = getat(context, builder, viewproxy.arrayptrs, whicharray)
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
         arraypos = builder.add(viewproxy.start, atval)
@@ -206,11 +206,11 @@ class RegularArrayType(ContentType):
     CONTENT = 1
 
     @classmethod
-    def tolookup(cls, layout, postable, arrays):
-        pos = len(postable)
-        cls.tolookup_identities(layout, postable, arrays)
-        postable.append(None)
-        postable[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, postable, arrays)
+    def tolookup(cls, layout, positions, arrays):
+        pos = len(positions)
+        cls.tolookup_identities(layout, positions, arrays)
+        positions.append(None)
+        positions[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, positions, arrays)
         return pos
 
     def __init__(self, contenttype, size, identitiestype, parameters):
@@ -221,7 +221,7 @@ class RegularArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
+        content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
         return awkward1.layout.RegularArray(content, self.size)
 
     def getitem_at(self, viewtype):
@@ -229,7 +229,7 @@ class RegularArrayType(ContentType):
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
-        nextpos = getat(context, builder, viewproxy.postable, whichpos)
+        nextpos = getat(context, builder, viewproxy.positions, whichpos)
 
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
 
@@ -238,12 +238,12 @@ class RegularArrayType(ContentType):
         stop  = builder.add(start, size)
 
         proxyout = context.make_helper(builder, rettype)
-        proxyout.pos = nextpos
-        proxyout.start = start
-        proxyout.stop = stop
-        proxyout.postable     = viewproxy.postable
-        proxyout.arrayptrs    = viewproxy.arrayptrs
-        proxyout.pylookup     = viewproxy.pylookup
+        proxyout.pos       = nextpos
+        proxyout.start     = start
+        proxyout.stop      = stop
+        proxyout.positions = viewproxy.positions
+        proxyout.arrayptrs = viewproxy.arrayptrs
+        proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()
 
     def lower_getitem_field(self, context, builder, rettype, viewtype, viewval, viewproxy, key):
@@ -256,7 +256,7 @@ class ListArrayType(ContentType):
     CONTENT = 3
 
     @classmethod
-    def tolookup(cls, layout, postable, arrays):
+    def tolookup(cls, layout, positions, arrays):
         if isinstance(layout, (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64)):
             starts = numpy.asarray(layout.starts)
             stops = numpy.asarray(layout.stops)
@@ -265,14 +265,14 @@ class ListArrayType(ContentType):
             starts = offsets[:-1]
             stops = offsets[1:]
 
-        pos = len(postable)
-        cls.tolookup_identities(layout, postable, arrays)
-        postable.append(len(arrays))
+        pos = len(positions)
+        cls.tolookup_identities(layout, positions, arrays)
+        positions.append(len(arrays))
         arrays.append(starts)
-        postable.append(len(arrays))
+        positions.append(len(arrays))
         arrays.append(stops)
-        postable.append(None)
-        postable[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, postable, arrays)
+        positions.append(None)
+        positions[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, positions, arrays)
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
@@ -293,9 +293,9 @@ class ListArrayType(ContentType):
             raise AssertionError("no ListArray* type for array: {0}".format(indextype))
 
     def tolayout(self, lookup, pos, fields):
-        starts = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + self.STARTS]])
-        stops = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + self.STOPS]])
-        content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
+        starts = self.IndexOf(self.indextype)(lookup.arrays[lookup.positions[pos + self.STARTS]])
+        stops = self.IndexOf(self.indextype)(lookup.arrays[lookup.positions[pos + self.STOPS]])
+        content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
         return self.ListArrayOf()(starts, stops, content)
 
     def getitem_at(self, viewtype):
@@ -309,29 +309,29 @@ class ListArrayType(ContentType):
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
-        nextpos = getat(context, builder, viewproxy.postable, whichpos)
+        nextpos = getat(context, builder, viewproxy.positions, whichpos)
 
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
 
         startspos = posat(context, builder, viewproxy.pos, self.STARTS)
-        whichstarts = getat(context, builder, viewproxy.postable, startspos)
+        whichstarts = getat(context, builder, viewproxy.positions, startspos)
         startsptr = getat(context, builder, viewproxy.arrayptrs, whichstarts)
         startsarraypos = builder.add(viewproxy.start, atval)
         start = getat(context, builder, startsptr, startsarraypos, self.indextype.dtype)
 
         stopspos = posat(context, builder, viewproxy.pos, self.STOPS)
-        whichstops = getat(context, builder, viewproxy.postable, stopspos)
+        whichstops = getat(context, builder, viewproxy.positions, stopspos)
         stopsptr = getat(context, builder, viewproxy.arrayptrs, whichstops)
         stopsarraypos = builder.add(viewproxy.start, atval)
         stop = getat(context, builder, stopsptr, stopsarraypos, self.indextype.dtype)
 
         proxyout = context.make_helper(builder, rettype)
-        proxyout.pos = nextpos
-        proxyout.start = start
-        proxyout.stop = stop
-        proxyout.postable     = viewproxy.postable
-        proxyout.arrayptrs    = viewproxy.arrayptrs
-        proxyout.pylookup     = viewproxy.pylookup
+        proxyout.pos       = nextpos
+        proxyout.start     = castint(context, builder, self.indextype.dtype, numba.intp, start)
+        proxyout.stop      = castint(context, builder, self.indextype.dtype, numba.intp, stop)
+        proxyout.positions = viewproxy.positions
+        proxyout.arrayptrs = viewproxy.arrayptrs
+        proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()
 
     def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
@@ -346,13 +346,13 @@ class IndexedArrayType(ContentType):
     CONTENT = 2
 
     @classmethod
-    def tolookup(cls, layout, postable, arrays):
-        pos = len(postable)
-        cls.tolookup_identities(layout, postable, arrays)
-        postable.append(len(arrays))
+    def tolookup(cls, layout, positions, arrays):
+        pos = len(positions)
+        cls.tolookup_identities(layout, positions, arrays)
+        positions.append(len(arrays))
         arrays.append(numpy.asarray(layout.index))
-        postable.append(None)
-        postable[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, postable, arrays)
+        positions.append(None)
+        positions[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, positions, arrays)
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
@@ -373,8 +373,8 @@ class IndexedArrayType(ContentType):
             raise AssertionError("no IndexedArray* type for array: {0}".format(self.indextype))
 
     def tolayout(self, lookup, pos, fields):
-        index = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + self.INDEX]])
-        content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
+        index = self.IndexOf(self.indextype)(lookup.arrays[lookup.positions[pos + self.INDEX]])
+        content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
         return self.IndexedArrayOf()(index, content)
 
     def getitem_at(self, viewtype):
@@ -401,13 +401,13 @@ class IndexedOptionArrayType(ContentType):
     CONTENT = 2
 
     @classmethod
-    def tolookup(cls, layout, postable, arrays):
-        pos = len(postable)
-        cls.tolookup_identities(layout, postable, arrays)
-        postable.append(len(arrays))
+    def tolookup(cls, layout, positions, arrays):
+        pos = len(positions)
+        cls.tolookup_identities(layout, positions, arrays)
+        positions.append(len(arrays))
         arrays.append(numpy.asarray(layout.index))
-        postable.append(None)
-        postable[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, postable, arrays)
+        positions.append(None)
+        positions[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, positions, arrays)
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
@@ -426,8 +426,8 @@ class IndexedOptionArrayType(ContentType):
             raise AssertionError("no IndexedOptionArray* type for array: {0}".format(self.indextype))
 
     def tolayout(self, lookup, pos, fields):
-        index = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + self.INDEX]])
-        content = self.contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENT], fields)
+        index = self.IndexOf(self.indextype)(lookup.arrays[lookup.positions[pos + self.INDEX]])
+        content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
         return self.IndexedOptionArrayOf()(index, content)
 
     def getitem_at(self, viewtype):
@@ -453,12 +453,12 @@ class RecordArrayType(ContentType):
     CONTENTS = 1
 
     @classmethod
-    def tolookup(cls, layout, postable, arrays):
-        pos = len(postable)
-        cls.tolookup_identities(layout, postable, arrays)
-        postable.extend([None] * layout.numfields)
+    def tolookup(cls, layout, positions, arrays):
+        pos = len(positions)
+        cls.tolookup_identities(layout, positions, arrays)
+        positions.extend([None] * layout.numfields)
         for i, content in enumerate(layout.contents):
-            postable[pos + cls.CONTENTS + i] = awkward1._numba.arrayview.tolookup(content, postable, arrays)
+            positions[pos + cls.CONTENTS + i] = awkward1._numba.arrayview.tolookup(content, positions, arrays)
         return pos
 
     def __init__(self, contenttypes, recordlookup, identitiestype, parameters):
@@ -487,11 +487,11 @@ class RecordArrayType(ContentType):
         if len(fields) > 0:
             index = self.fieldindex(fields[0])
             assert index is not None
-            return self.contenttypes[index].tolayout(lookup, lookup.postable[pos + self.CONTENTS + index], fields[1:])
+            return self.contenttypes[index].tolayout(lookup, lookup.positions[pos + self.CONTENTS + index], fields[1:])
         else:
             contents = []
             for i, contenttype in enumerate(self.contenttypes):
-                layout = contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENTS + i], fields)
+                layout = contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENTS + i], fields)
                 contents.append(layout)
             if len(contents) == 0:
                 return awkward1.layout.RecordArray(numpy.iinfo(numpy.int64).max, self.recordlookup is None)
@@ -523,16 +523,16 @@ class UnionArrayType(ContentType):
     CONTENTS = 3
 
     @classmethod
-    def tolookup(cls, layout, postable, arrays):
-        pos = len(postable)
-        cls.tolookup_identities(layout, postable, arrays)
-        postable.append(len(arrays))
+    def tolookup(cls, layout, positions, arrays):
+        pos = len(positions)
+        cls.tolookup_identities(layout, positions, arrays)
+        positions.append(len(arrays))
         arrays.append(numpy.asarray(layout.tags))
-        postable.append(len(arrays))
+        positions.append(len(arrays))
         arrays.append(numpy.asarray(layout.index))
-        postable.extend([None] * layout.numcontents)
+        positions.extend([None] * layout.numcontents)
         for i, content in enumerate(layout.contents):
-            postable[pos + cls.CONTENTS + i] = awkward1._numba.arrayview.tolookup(content, postable, arrays)
+            positions[pos + cls.CONTENTS + i] = awkward1._numba.arrayview.tolookup(content, positions, arrays)
         return pos
 
     def __init__(self, tagstype, indextype, contenttypes, identitiestype, parameters):
@@ -557,11 +557,11 @@ class UnionArrayType(ContentType):
             raise AssertionError("no UnionArray* type for tags array: {0}".format(self.tagstype))
 
     def tolayout(self, lookup, pos, fields):
-        tags = self.IndexOf(self.tagstype)(lookup.arrays[lookup.postable[pos + self.TAGS]])
-        index = self.IndexOf(self.indextype)(lookup.arrays[lookup.postable[pos + self.INDEX]])
+        tags = self.IndexOf(self.tagstype)(lookup.arrays[lookup.positions[pos + self.TAGS]])
+        index = self.IndexOf(self.indextype)(lookup.arrays[lookup.positions[pos + self.INDEX]])
         contents = []
         for i, contenttype in enumerate(self.contenttypes):
-            layout = contenttype.tolayout(lookup, lookup.postable[pos + self.CONTENTS + i], fields)
+            layout = contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENTS + i], fields)
             contents.append(layout)
         return self.UnionArrayOf()(tags, index, contents)
 
