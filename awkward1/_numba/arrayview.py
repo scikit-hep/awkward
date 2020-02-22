@@ -16,11 +16,20 @@ class Lookup(object):
         positions = []
         arrays = []
         tolookup(layout, positions, arrays)
-        self.positions = numpy.array(positions, dtype=numpy.intp)
+
+        def find(x):
+            for i, array in enumerate(arrays):
+                if x is array:
+                    return i
+            else:
+                assert isinstance(x, int)
+                return x
+
+        self.positions = numpy.array([find(x) for x in positions], dtype=numpy.intp)
         self.arrays = tuple(arrays)
         self.arrayptrs = numpy.array([x.ctypes.data for x in arrays], dtype=numpy.intp)
 
-        print("positions ", self.positions)
+        print("positions", self.positions)
         print("arrayptrs", self.arrayptrs)
         for i, x in enumerate(arrays):
             print("array[{0}] ".format(i), x)

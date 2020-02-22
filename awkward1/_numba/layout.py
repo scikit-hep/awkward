@@ -56,12 +56,11 @@ def typeof(obj, c):
 class ContentType(numba.types.Type):
     @classmethod
     def tolookup_identities(cls, layout, positions, arrays):
-        positions.append(None)
         if layout.identities is None:
-            positions[-1] = -1
+            positions.append(-1)
         else:
-            positions[-1] = len(arrays)
             arrays.append(numpy.asarray(layout.identities))
+            positions.append(arrays[-1])
 
     def IndexOf(self, arraytype):
         if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
@@ -170,7 +169,7 @@ class NumpyArrayType(ContentType):
         assert len(array.shape) == 1
         pos = len(positions)
         cls.tolookup_identities(layout, positions, arrays)
-        positions.append(len(arrays))
+        positions.append(array)
         arrays.append(array)
         return pos
 
@@ -267,9 +266,9 @@ class ListArrayType(ContentType):
 
         pos = len(positions)
         cls.tolookup_identities(layout, positions, arrays)
-        positions.append(len(arrays))
+        positions.append(starts)
         arrays.append(starts)
-        positions.append(len(arrays))
+        positions.append(stops)
         arrays.append(stops)
         positions.append(None)
         positions[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, positions, arrays)
@@ -326,7 +325,7 @@ class ListArrayType(ContentType):
         stop = getat(context, builder, stopsptr, stopsarraypos, self.indextype.dtype)
 
         proxyout = context.make_helper(builder, rettype)
-        proxyout.pos       = nextpos
+        proxyout.pos = nextpos
         proxyout.start     = castint(context, builder, self.indextype.dtype, numba.intp, start)
         proxyout.stop      = castint(context, builder, self.indextype.dtype, numba.intp, stop)
         proxyout.positions = viewproxy.positions
@@ -349,8 +348,8 @@ class IndexedArrayType(ContentType):
     def tolookup(cls, layout, positions, arrays):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, arrays)
-        positions.append(len(arrays))
         arrays.append(numpy.asarray(layout.index))
+        positions.append(arrays[-1])
         positions.append(None)
         positions[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, positions, arrays)
         return pos
@@ -404,8 +403,8 @@ class IndexedOptionArrayType(ContentType):
     def tolookup(cls, layout, positions, arrays):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, arrays)
-        positions.append(len(arrays))
         arrays.append(numpy.asarray(layout.index))
+        positions.append(arrays[-1])
         positions.append(None)
         positions[pos + cls.CONTENT] = awkward1._numba.arrayview.tolookup(layout.content, positions, arrays)
         return pos
@@ -526,10 +525,10 @@ class UnionArrayType(ContentType):
     def tolookup(cls, layout, positions, arrays):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, arrays)
-        positions.append(len(arrays))
         arrays.append(numpy.asarray(layout.tags))
-        positions.append(len(arrays))
+        positions.append(arrays[-1])
         arrays.append(numpy.asarray(layout.index))
+        positions.append(arrays[-1])
         positions.extend([None] * layout.numcontents)
         for i, content in enumerate(layout.contents):
             positions[pos + cls.CONTENTS + i] = awkward1._numba.arrayview.tolookup(content, positions, arrays)
