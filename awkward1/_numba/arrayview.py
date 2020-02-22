@@ -29,10 +29,10 @@ class Lookup(object):
         self.arrays = tuple(arrays)
         self.arrayptrs = numpy.array([x if isinstance(x, int) else x.ctypes.data for x in positions], dtype=numpy.intp)
 
-        print("positions", self.positions)
-        print("arrayptrs", self.arrayptrs)
-        for i, x in enumerate(arrays):
-            print("array[{0}] ".format(i), x)
+        # print("positions", self.positions)
+        # print("arrayptrs", self.arrayptrs)
+        # for i, x in enumerate(arrays):
+        #     print("array[{0}] ".format(i), x)
 
 def tolookup(layout, positions, arrays):
     import awkward1.layout
@@ -222,7 +222,7 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
             elif isinstance(wheretype, numba.types.StringLiteral):
                 return viewtype.type.getitem_field(viewtype, wheretype.literal_value)(viewtype, wheretype)
             else:
-                raise TypeError("only an integer, start:stop range, or a field name string may be used as Awkward Array slices in compiled code")
+                raise TypeError("only an integer, start:stop range, or a *constant* field name string may be used as awkward1.Array slices in compiled code")
 
 @numba.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.Integer)
 def lower_getitem_at(context, builder, sig, args):
@@ -244,7 +244,7 @@ def lower_getitem_field(context, builder, sig, args):
     rettype, (viewtype, wheretype) = sig.return_type, sig.args
     viewval, whereval = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
-    return viewtype.type.lower_getitem_field(context, builder, rettype, viewtype, viewval, viewproxy, wheretype.literal_value)
+    return viewtype.type.lower_getitem_field(context, builder, viewtype, viewval, viewproxy, wheretype.literal_value)
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):
@@ -253,12 +253,12 @@ class type_methods(numba.typing.templates.AttributeTemplate):
     def generic_resolve(self, viewtype, attr):
         # if attr == "???":
         #     do_something_specific
-        return viewtype.getitem_field(attr)
+        return viewtype.type.getitem_field(viewtype, attr)
 
 @numba.extending.lower_getattr_generic(ArrayViewType)
 def lower_getattr_generic(context, builder, viewtype, viewval, attr):
     viewproxy = context.make_helper(builder, viewtype, viewval)
-    return viewtype.lower_getitem_field(context, builder, viewtype, viewval, viewproxy, attr)
+    return viewtype.type.lower_getitem_field(context, builder, viewtype, viewval, viewproxy, attr)
 
 class RecordView(object):
     @classmethod
@@ -332,3 +332,34 @@ def box_RecordView(recordviewtype, viewval, c):
     c.pyapi.decref(recordview_obj)
 
     return out
+
+@numba.typing.templates.infer_global(operator.getitem)
+class type_getitem_record(numba.typing.templates.AbstractTemplate):
+    def generic(self, args, kwargs):
+        if len(args) == 2 and len(kwargs) == 0 and isinstance(args[0], RecordViewType):
+            recordviewtype, wheretype = args
+            if isinstance(wheretype, numba.types.StringLiteral):
+                return recordviewtype.arrayviewtype.type.getitem_field_record(recordviewtype, wheretype.literal_value)(recordviewtype, wheretype)
+            else:
+                raise TypeError("only a *constant* field name string may be used as awkward1.Record slices in compiled code")
+
+@numba.extending.lower_builtin(operator.getitem, RecordViewType, numba.types.StringLiteral)
+def lower_getitem_field_record(context, builder, sig, args):
+    rettype, (recordviewtype, wheretype) = sig.return_type, sig.args
+    recordviewval, whereval = args
+    recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
+    return recordviewtype.arrayviewtype.type.lower_getitem_field_record(context, builder, recordviewtype, recordviewval, recordviewproxy, wheretype.literal_value)
+
+@numba.typing.templates.infer_getattr
+class type_methods_record(numba.typing.templates.AttributeTemplate):
+    key = RecordViewType
+
+    def generic_resolve(self, recordviewtype, attr):
+        # if attr == "???":
+        #     do_something_specific
+        return recordviewtype.arrayviewtype.type.getitem_field_record(recordviewtype, attr)
+
+@numba.extending.lower_getattr_generic(RecordViewType)
+def lower_getattr_generic_record(context, builder, recordviewtype, recordviewval, attr):
+    recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
+    return recordviewtype.arrayviewtype.type.lower_getitem_field_record(context, builder, recordviewtype, recordviewval, recordviewproxy, attr)

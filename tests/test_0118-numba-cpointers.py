@@ -320,6 +320,22 @@ def test_RecordView_refcount():
             y = f3(record)
             assert [sys.getrefcount(x) == 2 for x in (record._numbaview, record._numbaview.arrayview, record._numbaview.arrayview.lookup, record._numbaview.arrayview.lookup.positions, record._numbaview.arrayview.lookup.arrayptrs)]
 
+def test_Record_getitem():
+    record = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}])[3]
+    print(record)
+
+    @numba.njit
+    def f1(x):
+        return x["x"]
+
+    assert f1(record) == 3.3
+
+    @numba.njit
+    def f2(x):
+        return x["y"]
+
+    assert awkward1.tolist(f2(record)) == [3, 3, 3]
+
 def test_RecordArray_getitem():
     array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}])
 
