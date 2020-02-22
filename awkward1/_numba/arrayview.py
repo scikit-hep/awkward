@@ -96,7 +96,7 @@ class ArrayView(object):
     @classmethod
     def fromarray(self, array):
         behavior = awkward1._util.behaviorof(array)
-        layout = awkward1.operations.convert.tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,))
+        layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False, numpytype=(numpy.number,))
         layout = awkward1.operations.convert.regularize_numpyarray(layout, allowempty=False, highlevel=False)
         return ArrayView(numba.typeof(layout), behavior, Lookup(layout), 0, 0, len(layout), ())
 
@@ -112,6 +112,41 @@ class ArrayView(object):
     def toarray(self):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
         return awkward1._util.wrap(layout[self.start:self.stop], self.behavior)
+
+class RecordView(object):
+    @classmethod
+    def fromrecord(self, record):
+        behavior = awkward1._util.behaviorof(record)
+        layout = awkward1.operations.convert.tolayout(record, allowrecord=True, allowother=False, numpytype=(numpy.number,))
+        assert isinstance(layout, awkward1.layout.Record)
+        arraylayout = layout.array
+        return RecordView(ArrayView(numba.typeof(arraylayout), behavior, Lookup(arraylayout), 0, 0, len(arraylayout), ()), layout.at)
+
+    def __init__(self, arrayview, at):
+        self.arrayview = arrayview
+        self.at = at
+
+    def torecord(self):
+        arraylayout = self.arrayview.toarray()
+        return awkward1._util.wrap(awkward1.layout.Record(arraylayout, self.at), self.arrayview.behavior)
+
+        # import awkward1.highlevel
+        # behavior = awkward1._util.behaviorof(record)
+
+        # layout = None
+        # if isinstance(record, awkward1.highlevel.Record):
+        #     layout = record.layout
+        # elif isinstance(record, awkward1.highlevel.FillableArray):
+        #     layout = record.snapshot().layout
+        # elif isinstance(record, awkward1.layout.FillableArray):
+        #     layout = record.snapshot()
+        # elif isinstance(record, awkward1.layout.Record):
+        #     layout = record
+
+        # if not isinstance(layout, awkward1.layout.Record):
+        #     raise TypeError("RecordView can only be constructed from a Record, not {0}".format(type(record)))
+
+        # return RecordView(ArrayView.fromarray(layout.array), layout.at)
 
 @numba.extending.typeof_impl.register(ArrayView)
 def typeof_ArrayView(obj, c):

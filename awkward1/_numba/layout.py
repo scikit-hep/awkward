@@ -6,6 +6,7 @@ import json
 
 import numpy
 import numba
+import llvmlite.ir.types
 
 import awkward1.layout
 
@@ -113,6 +114,17 @@ class ContentType(numba.types.Type):
         return proxyout._getvalue()
 
 def castint(context, builder, fromtype, totype, val):
+    if isinstance(fromtype, llvmlite.ir.types.IntType):
+        if fromtype.width == 8:
+            fromtype = numba.int8
+        elif fromtype.width == 16:
+            fromtype = numba.int16
+        elif fromtype.width == 32:
+            fromtype = numba.int32
+        elif fromtype.width == 64:
+            fromtype = numba.int64
+    if not isinstance(fromtype, numba.types.Integer):
+        raise AssertionError("unrecognized integer type: {0}".format(repr(fromtype)))
     if fromtype.bitwidth < totype.bitwidth:
         if fromtype.signed:
             return builder.sext(val, context.get_value_type(totype))
@@ -156,7 +168,7 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
                                              builder.icmp_signed(">=", atval, length))):
                 context.call_conv.return_user_exc(builder, ValueError, ("slice index out of bounds",))
 
-    return atval
+    return castint(context, builder, atval.type, numba.intp, atval)
 
 class NumpyArrayType(ContentType):
     IDENTITIES = 0
