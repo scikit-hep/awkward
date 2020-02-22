@@ -381,7 +381,7 @@ class IndexedArrayType(ContentType):
         proxynext = context.make_helper(builder, self.contenttype.getitem_range(viewtype))
         proxynext.pos       = nextpos
         proxynext.start     = context.get_constant(numba.intp, 0)
-        proxynext.stop      = builder.add(nextat, context.get_constant(numba.intp, 1))
+        proxynext.stop      = builder.add(castint(context, builder, self.indextype.dtype, numba.intp, nextat), context.get_constant(numba.intp, 1))
         proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.pylookup  = viewproxy.pylookup
 
@@ -453,7 +453,7 @@ class IndexedOptionArrayType(ContentType):
                 proxynext = context.make_helper(builder, self.contenttype.getitem_range(viewtype))
                 proxynext.pos       = nextpos
                 proxynext.start     = context.get_constant(numba.intp, 0)
-                proxynext.stop      = builder.add(nextat, context.get_constant(numba.intp, 1))
+                proxynext.stop      = builder.add(castint(context, builder, self.indextype.dtype, numba.intp, nextat), context.get_constant(numba.intp, 1))
                 proxynext.arrayptrs = viewproxy.arrayptrs
                 proxynext.pylookup  = viewproxy.pylookup
 

@@ -1,5 +1,6 @@
 pytest>=3.9
 numba>=0.46.0
+enum34;python_version<"3.4"
 pandas>=0.24.0
 numexpr
 autograd
