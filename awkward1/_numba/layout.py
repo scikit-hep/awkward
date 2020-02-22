@@ -108,7 +108,6 @@ class ContentType(numba.types.Type):
         proxyout.pos       = viewproxy.pos
         proxyout.start     = builder.add(viewproxy.start, builder.load(regular_start))
         proxyout.stop      = builder.add(viewproxy.start, builder.load(regular_stop))
-        proxyout.positions = viewproxy.positions
         proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()
@@ -191,8 +190,7 @@ class NumpyArrayType(ContentType):
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
-        whicharray = getat(context, builder, viewproxy.positions, whichpos)
-        arrayptr = getat(context, builder, viewproxy.arrayptrs, whicharray)
+        arrayptr = getat(context, builder, viewproxy.arrayptrs, whichpos)
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
         arraypos = builder.add(viewproxy.start, atval)
         return getat(context, builder, arrayptr, arraypos, rettype)
@@ -228,7 +226,7 @@ class RegularArrayType(ContentType):
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
-        nextpos = getat(context, builder, viewproxy.positions, whichpos)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
 
@@ -240,7 +238,6 @@ class RegularArrayType(ContentType):
         proxyout.pos       = nextpos
         proxyout.start     = start
         proxyout.stop      = stop
-        proxyout.positions = viewproxy.positions
         proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()
@@ -308,19 +305,17 @@ class ListArrayType(ContentType):
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
-        nextpos = getat(context, builder, viewproxy.positions, whichpos)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
 
         startspos = posat(context, builder, viewproxy.pos, self.STARTS)
-        whichstarts = getat(context, builder, viewproxy.positions, startspos)
-        startsptr = getat(context, builder, viewproxy.arrayptrs, whichstarts)
+        startsptr = getat(context, builder, viewproxy.arrayptrs, startspos)
         startsarraypos = builder.add(viewproxy.start, atval)
         start = getat(context, builder, startsptr, startsarraypos, self.indextype.dtype)
 
         stopspos = posat(context, builder, viewproxy.pos, self.STOPS)
-        whichstops = getat(context, builder, viewproxy.positions, stopspos)
-        stopsptr = getat(context, builder, viewproxy.arrayptrs, whichstops)
+        stopsptr = getat(context, builder, viewproxy.arrayptrs, stopspos)
         stopsarraypos = builder.add(viewproxy.start, atval)
         stop = getat(context, builder, stopsptr, stopsarraypos, self.indextype.dtype)
 
@@ -328,7 +323,6 @@ class ListArrayType(ContentType):
         proxyout.pos = nextpos
         proxyout.start     = castint(context, builder, self.indextype.dtype, numba.intp, start)
         proxyout.stop      = castint(context, builder, self.indextype.dtype, numba.intp, stop)
-        proxyout.positions = viewproxy.positions
         proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()

@@ -25,9 +25,9 @@ class Lookup(object):
                 assert isinstance(x, int)
                 return x
 
-        self.positions = numpy.array([find(x) for x in positions], dtype=numpy.intp)
+        self.positions = [find(x) for x in positions]
         self.arrays = tuple(arrays)
-        self.arrayptrs = numpy.array([x.ctypes.data for x in arrays], dtype=numpy.intp)
+        self.arrayptrs = numpy.array([x if isinstance(x, int) else x.ctypes.data for x in positions], dtype=numpy.intp)
 
         print("positions", self.positions)
         print("arrayptrs", self.arrayptrs)
@@ -77,20 +77,16 @@ class LookupType(numba.types.Type):
 @numba.extending.register_model(LookupType)
 class LookupModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("positions", fe_type.arraytype),
-                   ("arrayptrs", fe_type.arraytype)]
+        members = [("arrayptrs", fe_type.arraytype)]
         super(LookupModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(LookupType)
 def unbox_Lookup(lookuptype, lookupobj, c):
-    positions_obj = c.pyapi.object_getattr_string(lookupobj, "positions")
     arrayptrs_obj = c.pyapi.object_getattr_string(lookupobj, "arrayptrs")
 
     proxyout = c.context.make_helper(c.builder, lookuptype)
-    proxyout.positions = c.pyapi.to_native_value(lookuptype.arraytype, positions_obj).value
     proxyout.arrayptrs = c.pyapi.to_native_value(lookuptype.arraytype, arrayptrs_obj).value
 
-    c.pyapi.decref(positions_obj)
     c.pyapi.decref(arrayptrs_obj)
 
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
@@ -134,7 +130,6 @@ class ArrayViewModel(numba.datamodel.models.StructModel):
         members = [("pos",       numba.intp),
                    ("start",     numba.intp),
                    ("stop",      numba.intp),
-                   ("positions", numba.types.CPointer(numba.intp)),
                    ("arrayptrs", numba.types.CPointer(numba.intp)),
                    ("pylookup",  numba.types.pyobject)]
         super(ArrayViewModel, self).__init__(dmm, fe_type, members)
@@ -154,7 +149,6 @@ def unbox_ArrayView(viewtype, arrayobj, c):
     proxyout.pos       = c.pyapi.number_as_ssize_t(pos_obj)
     proxyout.start     = c.pyapi.number_as_ssize_t(start_obj)
     proxyout.stop      = c.pyapi.number_as_ssize_t(stop_obj)
-    proxyout.positions = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.positions).data
     proxyout.arrayptrs = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.arrayptrs).data
     proxyout.pylookup  = lookup_obj
 
