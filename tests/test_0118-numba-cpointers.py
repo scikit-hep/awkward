@@ -398,17 +398,104 @@ def test_RecordArray_getitem_field():
 
     assert awkward1.tolist(f4(array)) == [[1], [2, 2], [3, 3, 3]]
 
-# def test_ListArray_getitem_field():
-#     array = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]])
+def test_ListArray_getitem_field():
+    array = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}], [{"x": 5.5, "y": [5, 5, 5, 5, 5]}], [{"x": 6.6, "y": [6, 6, 6, 6, 6, 6]}, {"x": 7.7, "y": [7, 7, 7, 7, 7, 7, 7]}, {"x": 8.8, "y": [8, 8, 8, 8, 8, 8, 8, 8]}, {"x": 9.9, "y": [9, 9, 9, 9, 9, 9, 9, 9, 9]}]])
 
-#     @numba.njit
-#     def f1(x):
-#         return x["x"]
+    @numba.njit
+    def f1(x):
+        return x["x"]
 
-#     print(f1(array))
+    assert awkward1.tolist(f1(array)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
 
+    @numba.njit
+    def f2(x):
+        return x.y
 
-#     raise Exception
+    assert awkward1.tolist(f2(array)) == [[[], [1], [2, 2]], [], [[3, 3, 3], [4, 4, 4, 4]], [[5, 5, 5, 5, 5]], [[6, 6, 6, 6, 6, 6], [7, 7, 7, 7, 7, 7, 7], [8, 8, 8, 8, 8, 8, 8, 8], [9, 9, 9, 9, 9, 9, 9, 9, 9]]]
+
+    @numba.njit
+    def f3(x):
+        return x[1:4].x
+
+    assert awkward1.tolist(f3(array)) == [[], [3.3, 4.4], [5.5]]
+
+    @numba.njit
+    def f4(x):
+        return x[1:4]["y"]
+
+    assert awkward1.tolist(f4(array)) == [[], [[3, 3, 3], [4, 4, 4, 4]], [[5, 5, 5, 5, 5]]]
+
+    @numba.njit
+    def f5(x):
+        return x["x"][1:4]
+
+    assert awkward1.tolist(f5(array)) == [[], [3.3, 4.4], [5.5]]
+
+    @numba.njit
+    def f6(x):
+        return x.y[1:4]
+
+    assert awkward1.tolist(f6(array)) == [[], [[3, 3, 3], [4, 4, 4, 4]], [[5, 5, 5, 5, 5]]]
+
+    @numba.njit
+    def f7(x):
+        return x[4]["x"]
+
+    assert awkward1.tolist(awkward1.tolist(f7(array))) == [6.6, 7.7, 8.8, 9.9]
+
+    @numba.njit
+    def f8(x):
+        return x[4].y
+
+    assert awkward1.tolist(awkward1.tolist(f8(array))) == [[6, 6, 6, 6, 6, 6], [7, 7, 7, 7, 7, 7, 7], [8, 8, 8, 8, 8, 8, 8, 8], [9, 9, 9, 9, 9, 9, 9, 9, 9]]
+
+    @numba.njit
+    def f9(x):
+        return x.x[4]
+
+    assert awkward1.tolist(awkward1.tolist(f9(array))) == [6.6, 7.7, 8.8, 9.9]
+
+    @numba.njit
+    def f10(x):
+        return x["y"][4]
+
+    assert awkward1.tolist(awkward1.tolist(f10(array))) == [[6, 6, 6, 6, 6, 6], [7, 7, 7, 7, 7, 7, 7], [8, 8, 8, 8, 8, 8, 8, 8], [9, 9, 9, 9, 9, 9, 9, 9, 9]]
+
+    @numba.njit
+    def f11(x):
+        return x[4]["x"][1]
+
+    assert f11(array) == 7.7
+
+    @numba.njit
+    def f12(x):
+        return x[4].y[1]
+
+    assert awkward1.tolist(awkward1.tolist(f12(array))) == [7, 7, 7, 7, 7, 7, 7]
+
+    @numba.njit
+    def f12b(x):
+        return x[4].y[1][6]
+
+    assert awkward1.tolist(awkward1.tolist(f12b(array))) == 7
+
+    @numba.njit
+    def f13(x):
+        return x.x[4][1]
+
+    assert f13(array) == 7.7
+
+    @numba.njit
+    def f14(x):
+        return x["y"][4][1]
+
+    assert awkward1.tolist(awkward1.tolist(f14(array))) == [7, 7, 7, 7, 7, 7, 7]
+
+    @numba.njit
+    def f14b(x):
+        return x["y"][4][1][6]
+
+    assert awkward1.tolist(f14b(array)) == 7
 
 def test_UnionArray_getitem():
     array = awkward1.Array([1, 2, 3, [], [1], [2, 2]])

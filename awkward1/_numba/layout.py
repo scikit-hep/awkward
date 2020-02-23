@@ -84,6 +84,8 @@ class ContentType(numba.types.Type):
         return awkward1._numba.arrayview.ArrayViewType(self, viewtype.behavior, viewtype.fields + (key,))
 
     def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
+        print(type(self).__name__, "lower range", viewtype)
+
         length = builder.sub(viewproxy.stop, viewproxy.start)
 
         regular_start = numba.cgutils.alloca_once_value(builder, start)
@@ -113,7 +115,9 @@ class ContentType(numba.types.Type):
         proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()
 
-    def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
+    def lower_getitem_field(self, context, builder, viewtype, viewval, key):
+        print(type(self).__name__, "lower field", viewtype)
+
         return viewval
 
 def castint(context, builder, fromtype, totype, val):
@@ -204,6 +208,8 @@ class NumpyArrayType(ContentType):
         raise TypeError("array does not contain tuples or records; cannot get field {0}".format(repr(key)))
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+        print(type(self).__name__, "lower at", viewtype)
+
         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
         arrayptr = getat(context, builder, viewproxy.arrayptrs, whichpos)
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
@@ -310,6 +316,8 @@ class ListArrayType(ContentType):
         return awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+        print(type(self).__name__, "lower at", viewtype)
+
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
@@ -384,14 +392,13 @@ class IndexedArrayType(ContentType):
         indexarraypos = builder.add(viewproxy.start, atval)
         nextat = getat(context, builder, indexptr, indexarraypos, self.indextype.dtype)
 
-        proxynext = context.make_helper(builder, self.contenttype.getitem_range(viewtype))
+        nextviewtype = awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
+        proxynext = context.make_helper(builder, nextviewtype)
         proxynext.pos       = nextpos
-        proxynext.start     = context.get_constant(numba.intp, 0)
-        proxynext.stop      = builder.add(castint(context, builder, self.indextype.dtype, numba.intp, nextat), context.get_constant(numba.intp, 1))
+        proxynext.start     = viewproxy.start
+        proxynext.stop      = builder.add(castint(context, builder, self.indextype.dtype, numba.intp, nextat), builder.add(viewproxy.start, context.get_constant(numba.intp, 1)))
         proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.pylookup  = viewproxy.pylookup
-
-        nextviewtype = awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
 
         return self.contenttype.lower_getitem_at(context, builder, rettype, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, nextat, False, False)
 
@@ -452,14 +459,13 @@ class IndexedOptionArrayType(ContentType):
                 output.data = numba.cgutils.get_null_value(output.data.type)
 
             with isvalid:
-                proxynext = context.make_helper(builder, self.contenttype.getitem_range(viewtype))
+                nextviewtype = awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
+                proxynext = context.make_helper(builder, nextviewtype)
                 proxynext.pos       = nextpos
-                proxynext.start     = context.get_constant(numba.intp, 0)
-                proxynext.stop      = builder.add(castint(context, builder, self.indextype.dtype, numba.intp, nextat), context.get_constant(numba.intp, 1))
+                proxynext.start     = viewproxy.start
+                proxynext.stop      = builder.add(castint(context, builder, self.indextype.dtype, numba.intp, nextat), builder.add(viewproxy.start, context.get_constant(numba.intp, 1)))
                 proxynext.arrayptrs = viewproxy.arrayptrs
                 proxynext.pylookup  = viewproxy.pylookup
-
-                nextviewtype = awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
 
                 outdata = self.contenttype.lower_getitem_at(context, builder, rettype.type, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, nextat, False, False)
 
@@ -520,7 +526,19 @@ class RecordArrayType(ContentType):
                 return awkward1.layout.RecordArray(contents, self.recordlookup)
 
     def getitem_at(self, viewtype):
-        return awkward1._numba.arrayview.RecordViewType(viewtype)
+        if len(viewtype.fields) == 0:
+            return awkward1._numba.arrayview.RecordViewType(viewtype)
+        else:
+            key = viewtype.fields[0]
+            index = self.fieldindex(key)
+            if index is None:
+                if self.recordlookup is None:
+                    raise ValueError("no field {0} in tuples with {1} fields".format(repr(key), len(self.contenttypes)))
+                else:
+                    raise ValueError("no field {0} in records with fields: [{1}]".format(repr(key), ", ".join(repr(x) for x in self.recordlookup)))
+            contenttype = self.contenttypes[index]
+            subviewtype = awkward1._numba.arrayview.ArrayViewType(contenttype, viewtype.behavior, viewtype.fields[1:])
+            return contenttype.getitem_at(subviewtype)
 
     def getitem_field(self, viewtype, key):
         index = self.fieldindex(key)
@@ -540,14 +558,37 @@ class RecordArrayType(ContentType):
                 raise ValueError("no field {0} in record with fields: [{1}]".format(repr(key), ", ".join(repr(x) for x in self.recordlookup)))
         return self.contenttypes[index].getitem_at(recordviewtype.arrayviewtype)
 
-    def lower_getitem_at(self, context, builder, rettype, arrayviewtype, arrayviewval, arrayviewproxy, attype, atval, wrapneg, checkbounds):
-        atval = regularize_atval(context, builder, arrayviewproxy, attype, atval, wrapneg, checkbounds)
-        proxyout = context.make_helper(builder, awkward1._numba.arrayview.RecordViewType(arrayviewtype))
-        proxyout.arrayview = arrayviewval
-        proxyout.at        = atval
-        return proxyout._getvalue()
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+        print(type(self).__name__, "lower at", viewtype)
+
+        atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
+
+        if len(viewtype.fields) == 0:
+            proxyout = context.make_helper(builder, awkward1._numba.arrayview.RecordViewType(viewtype))
+            proxyout.arrayview = viewval
+            proxyout.at        = atval
+            return proxyout._getvalue()
+
+        else:
+            index = self.fieldindex(viewtype.fields[0])
+            contenttype = self.contenttypes[index]
+
+            whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
+            nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+
+            nextviewtype = awkward1._numba.arrayview.ArrayViewType(contenttype, viewtype.behavior, viewtype.fields[1:])
+            proxynext = context.make_helper(builder, nextviewtype)
+            proxynext.pos       = nextpos
+            proxynext.start     = viewproxy.start
+            proxynext.stop      = builder.add(atval, builder.add(viewproxy.start, context.get_constant(numba.intp, 1)))
+            proxynext.arrayptrs = viewproxy.arrayptrs
+            proxynext.pylookup  = viewproxy.pylookup
+
+            return contenttype.lower_getitem_at(context, builder, rettype, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, atval, False, False)
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, key):
+        print(type(self).__name__, "lower field", viewtype, key)
+
         viewproxy = context.make_helper(builder, viewtype, viewval)
 
         index = self.fieldindex(key)
@@ -566,6 +607,8 @@ class RecordArrayType(ContentType):
         return proxynext._getvalue()
 
     def lower_getitem_field_record(self, context, builder, recordviewtype, recordviewval, key):
+        print(type(self).__name__, "lower field record", recordviewtype, key)
+
         arrayviewtype = recordviewtype.arrayviewtype
         recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
         arrayviewval = recordviewproxy.arrayview
