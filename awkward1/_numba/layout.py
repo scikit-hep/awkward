@@ -622,8 +622,8 @@ class RecordArrayType(ContentType):
 
         proxynext = context.make_helper(builder, contenttype.getitem_range(arrayviewtype))
         proxynext.pos       = nextpos
-        proxynext.start     = context.get_constant(numba.intp, 0)
-        proxynext.stop      = builder.add(recordviewproxy.at, context.get_constant(numba.intp, 1))
+        proxynext.start     = arrayviewproxy.start
+        proxynext.stop      = builder.add(recordviewproxy.at, builder.add(arrayviewproxy.start, context.get_constant(numba.intp, 1)))
         proxynext.arrayptrs = arrayviewproxy.arrayptrs
         proxynext.pylookup  = arrayviewproxy.pylookup
 
