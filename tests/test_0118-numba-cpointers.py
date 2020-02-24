@@ -598,17 +598,17 @@ def test_IndexedArray_deep_at():
 
     assert f1(array) == 5.5
 
-def test_UnionArray_getitem():
-    array = awkward1.Array([1, 2, 3, [], [1], [2, 2], {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}])
+# def test_UnionArray_getitem():
+#     array = awkward1.Array([1, 2, 3, [], [1], [2, 2], {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}])
 
-    @numba.njit
-    def f1(x, i):
-        return x[i]
+#     @numba.njit
+#     def f1(x, i):
+#         return x[i]
 
-    print(f1(array, 1))
+#     print(f1(array, 1))
 
 
-    raise Exception
+#     raise Exception
 
 # def test_UnionArray_getitem_samefield():
 #     content1 = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]).layout

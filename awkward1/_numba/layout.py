@@ -714,26 +714,22 @@ class UnionArrayType(ContentType):
         raise NotImplementedError(type(self).__name__ + ".getitem_field not implemented")
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
-        atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
+        # atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
 
-        tagspos = posat(context, builder, viewproxy.pos, self.TAGS)
-        tagsptr = getat(context, builder, viewproxy.arrayptrs, tagspos)
-        tagsarraypos = builder.add(viewproxy.start, atval)
-        tag = getat(context, builder, tagsptr, tagsarraypos, self.tagstype.dtype)
+        # tagspos = posat(context, builder, viewproxy.pos, self.TAGS)
+        # tagsptr = getat(context, builder, viewproxy.arrayptrs, tagspos)
+        # tagsarraypos = builder.add(viewproxy.start, atval)
+        # tag = getat(context, builder, tagsptr, tagsarraypos, self.tagstype.dtype)
 
-        indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
-        indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
-        indexarraypos = builder.add(viewproxy.start, atval)
-        nextat = getat(context, builder, indexptr, indexarraypos, self.indextype.dtype)
+        # indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
+        # indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
+        # indexarraypos = builder.add(viewproxy.start, atval)
+        # nextat = getat(context, builder, indexptr, indexarraypos, self.indextype.dtype)
 
-        nextviewtype = awkward1._numba.arrayview.MultiViewType(self.tagstype, [awkward1._numba.arrayview.wrap(x, viewtype, None) for x in self.contenttypes])
-        proxynext = 
-        for index, contenttype in enumerate(self.contenttypes):
-            
+        # nextviewtype = awkward1._numba.arrayview.MultiViewType(self.tagstype, [awkward1._numba.arrayview.wrap(x, viewtype, None) for x in self.contenttypes])
+        # proxynext = 
+        # for index, contenttype in enumerate(self.contenttypes):
 
-
-
-            
         raise NotImplementedError(type(self).__name__ + ".lower_getitem_at not implemented")
 
     def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
