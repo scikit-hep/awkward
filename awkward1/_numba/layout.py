@@ -78,11 +78,11 @@ class ContentType(numba.types.Type):
             raise AssertionError("no Index* type for array: {0}".format(arraytype))
 
     def getitem_range(self, viewtype):
-        return awkward1._numba.arrayview.ArrayViewType(self, viewtype.behavior, viewtype.fields)
+        return awkward1._numba.arrayview.wrap(self, viewtype, None)
 
     def getitem_field(self, viewtype, key):
         if self.hasfield(key):
-            return awkward1._numba.arrayview.ArrayViewType(self, viewtype.behavior, viewtype.fields + (key,))
+            return awkward1._numba.arrayview.wrap(self, viewtype, viewtype.fields + (key,))
         else:
             raise TypeError("array does not have a field with key {0}".format(repr(key)))
 
@@ -246,7 +246,7 @@ class RegularArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        return awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
+        return awkward1._numba.arrayview.wrap(self.contenttype, viewtype, None)
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
@@ -319,7 +319,7 @@ class ListArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        return awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
+        return awkward1._numba.arrayview.wrap(self.contenttype, viewtype, None)
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         print(type(self).__name__, "lower at", viewtype)
@@ -401,7 +401,7 @@ class IndexedArrayType(ContentType):
         indexarraypos = builder.add(viewproxy.start, atval)
         nextat = getat(context, builder, indexptr, indexarraypos, self.indextype.dtype)
 
-        nextviewtype = awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
+        nextviewtype = awkward1._numba.arrayview.wrap(self.contenttype, viewtype, None)
         proxynext = context.make_helper(builder, nextviewtype)
         proxynext.pos       = nextpos
         proxynext.start     = viewproxy.start
@@ -471,7 +471,7 @@ class IndexedOptionArrayType(ContentType):
                 output.data = numba.cgutils.get_null_value(output.data.type)
 
             with isvalid:
-                nextviewtype = awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
+                nextviewtype = awkward1._numba.arrayview.wrap(self.contenttype, viewtype, None)
                 proxynext = context.make_helper(builder, nextviewtype)
                 proxynext.pos       = nextpos
                 proxynext.start     = viewproxy.start
@@ -552,7 +552,7 @@ class RecordArrayType(ContentType):
                 else:
                     raise ValueError("no field {0} in records with fields: [{1}]".format(repr(key), ", ".join(repr(x) for x in self.recordlookup)))
             contenttype = self.contenttypes[index]
-            subviewtype = awkward1._numba.arrayview.ArrayViewType(contenttype, viewtype.behavior, viewtype.fields[1:])
+            subviewtype = awkward1._numba.arrayview.wrap(contenttype, viewtype, viewtype.fields[1:])
             return contenttype.getitem_at(subviewtype)
 
     def getitem_field(self, viewtype, key):
@@ -563,7 +563,7 @@ class RecordArrayType(ContentType):
             else:
                 raise ValueError("no field {0} in records with fields: [{1}]".format(repr(key), ", ".join(repr(x) for x in self.recordlookup)))
         contenttype = self.contenttypes[index]
-        subviewtype = awkward1._numba.arrayview.ArrayViewType(contenttype, viewtype.behavior, viewtype.fields)
+        subviewtype = awkward1._numba.arrayview.wrap(contenttype, viewtype, None)
         return contenttype.getitem_range(subviewtype)
 
     def getitem_field_record(self, recordviewtype, key):
@@ -574,7 +574,7 @@ class RecordArrayType(ContentType):
             else:
                 raise ValueError("no field {0} in record with fields: [{1}]".format(repr(key), ", ".join(repr(x) for x in self.recordlookup)))
         contenttype = self.contenttypes[index]
-        subviewtype = awkward1._numba.arrayview.ArrayViewType(contenttype, recordviewtype.arrayviewtype.behavior, recordviewtype.arrayviewtype.fields)
+        subviewtype = awkward1._numba.arrayview.wrap(contenttype, recordviewtype, None)
         return contenttype.getitem_at(subviewtype)
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
@@ -595,7 +595,7 @@ class RecordArrayType(ContentType):
             whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
             nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-            nextviewtype = awkward1._numba.arrayview.ArrayViewType(contenttype, viewtype.behavior, viewtype.fields[1:])
+            nextviewtype = awkward1._numba.arrayview.wrap(contenttype, viewtype, viewtype.fields[1:])
             proxynext = context.make_helper(builder, nextviewtype)
             proxynext.pos       = nextpos
             proxynext.start     = viewproxy.start
@@ -646,7 +646,7 @@ class RecordArrayType(ContentType):
         proxynext.arrayptrs = arrayviewproxy.arrayptrs
         proxynext.pylookup  = arrayviewproxy.pylookup
 
-        nextviewtype = awkward1._numba.arrayview.ArrayViewType(contenttype, arrayviewtype.behavior, arrayviewtype.fields)
+        nextviewtype = awkward1._numba.arrayview.wrap(contenttype, arrayviewtype, None)
 
         rettype = self.getitem_field_record(recordviewtype, key)
 
@@ -705,7 +705,7 @@ class UnionArrayType(ContentType):
         return any(x.hasfield(key) for x in self.contenttypes)
 
     def getitem_at(self, viewtype):
-        raise NotImplementedError(type(self).__name__ + ".getitem_at not implemented")
+        return awkward1._numba.arrayview.MultiViewType(self.tagstype, [x.getitem_at(viewtype) for x in self.contenttypes])
 
     def getitem_range(self, viewtype):
         raise NotImplementedError(type(self).__name__ + ".getitem_range not implemented")
@@ -714,6 +714,26 @@ class UnionArrayType(ContentType):
         raise NotImplementedError(type(self).__name__ + ".getitem_field not implemented")
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+        atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
+
+        tagspos = posat(context, builder, viewproxy.pos, self.TAGS)
+        tagsptr = getat(context, builder, viewproxy.arrayptrs, tagspos)
+        tagsarraypos = builder.add(viewproxy.start, atval)
+        tag = getat(context, builder, tagsptr, tagsarraypos, self.tagstype.dtype)
+
+        indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
+        indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
+        indexarraypos = builder.add(viewproxy.start, atval)
+        nextat = getat(context, builder, indexptr, indexarraypos, self.indextype.dtype)
+
+        nextviewtype = awkward1._numba.arrayview.MultiViewType(self.tagstype, [awkward1._numba.arrayview.wrap(x, viewtype, None) for x in self.contenttypes])
+        proxynext = 
+        for index, contenttype in enumerate(self.contenttypes):
+            
+
+
+
+            
         raise NotImplementedError(type(self).__name__ + ".lower_getitem_at not implemented")
 
     def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):

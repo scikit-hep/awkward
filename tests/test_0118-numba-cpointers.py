@@ -601,8 +601,18 @@ def test_IndexedArray_deep_at():
 def test_UnionArray_getitem():
     array = awkward1.Array([1, 2, 3, [], [1], [2, 2], {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}])
 
-    content1 = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]).layout
-    content2 = awkward1.Array([{"y": [], "z": 0}, {"y": [1], "z": 1}, {"y": [2, 2], "z": 2}, {"y": [3, 3, 3], "z": 3}, {"y": [4, 4, 4, 4], "z": 4}]).layout
-    tags  = awkward1.layout.Index8( numpy.array([1, 0, 1, 0, 1, 0, 1, 0, 1], dtype=numpy.int8))
-    index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2, 3, 3, 4], dtype=numpy.int64))
-    array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content1, content2]))
+    @numba.njit
+    def f1(x, i):
+        return x[i]
+
+    print(f1(array, 1))
+
+
+    raise Exception
+
+# def test_UnionArray_getitem_samefield():
+#     content1 = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]).layout
+#     content2 = awkward1.Array([{"y": [], "z": 0}, {"y": [1], "z": 1}, {"y": [2, 2], "z": 2}, {"y": [3, 3, 3], "z": 3}, {"y": [4, 4, 4, 4], "z": 4}]).layout
+#     tags  = awkward1.layout.Index8( numpy.array([1, 0, 1, 0, 1, 0, 1, 0, 1], dtype=numpy.int8))
+#     index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2, 3, 3, 4], dtype=numpy.int64))
+#     array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content1, content2]))
