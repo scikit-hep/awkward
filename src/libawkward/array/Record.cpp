@@ -228,7 +228,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::pad(int64_t length, int64_t axis) const {
-    throw std::runtime_error("FIXME: Record pad is not implemented");
+    throw std::invalid_argument("Record cannot be padded because it is not an array");
   }
 
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {

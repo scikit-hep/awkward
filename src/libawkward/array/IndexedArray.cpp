@@ -39,6 +39,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  bool IndexedArrayOf<T, ISOPTION>::isindexed() const {
+    return true;
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::project() const {
     if (ISOPTION) {
       int64_t numnull;
@@ -1013,7 +1018,15 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::pad(int64_t length, int64_t axis) const {
-    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION> pad is not implemented");
+    Index64 toindex(index().length() + length);
+    struct Error err = util::awkward_indexedarray_pad_64<T>(
+      toindex.ptr().get(),
+      index().ptr().get(),
+      index().length() + length,
+      index().length());
+    util::handle_error(err, classname(), identities_.get());
+
+    return std::make_shared<IndexedOptionArray64>(identities_, parameters_, toindex, content());
   }
 
   template <typename T, bool ISOPTION>

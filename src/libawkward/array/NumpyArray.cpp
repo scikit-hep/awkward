@@ -1374,35 +1374,68 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::pad(int64_t pad_width, int64_t axis) const {
+  const std::shared_ptr<Content> NumpyArray::pad(int64_t length, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     ssize_t offset = (ssize_t)toaxis;
     if (offset > ndim()) {
       throw std::invalid_argument(std::string("NumpyArray cannot be padded in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
     if (shape_.empty()) {
-       throw std::runtime_error("attempting to reduce a scalar");
+       throw std::runtime_error("attempting to pad a scalar");
     }
-    std::shared_ptr<Content> out = toRegularArray();
+    if (toaxis == 0) {
+      std::shared_ptr<Content> out = toRegularArray();
 
-    int64_t len = out.get()->length();
-    int64_t outlength = pad_width;
-    if(pad_width < len) {
-      outlength = len;
+      Index64 index(length);
+      struct Error err1 = awkward_index_pad(
+        index.ptr().get(),
+        out.get()->length(),
+        length);
+      util::handle_error(err1, classname(), identities_.get());
+
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, out);
     }
-    Index64 index(outlength);
-    for(int64_t i = 0; i < outlength; i++) {
-      if( i < len ) {
-        index.ptr().get()[i] = i;
+    else {
+      NumpyArray contiguous_self = contiguous();
+      std::vector<ssize_t> flatshape({ 1 });
+      for (auto x : shape_) {
+        flatshape[0] = flatshape[0] * x;
       }
-      else {
-        index.ptr().get()[i] = -1;
+      std::vector<ssize_t> flatstrides({ itemsize_ });
+      std::shared_ptr<Content> out = std::make_shared<NumpyArray>(identities_, parameters_, contiguous_self.ptr(), flatshape, flatstrides, contiguous_self.byteoffset(), contiguous_self.itemsize(), contiguous_self.format());
+
+      Index64 index(length);
+      struct Error err2 = awkward_index_pad(
+        index.ptr().get(),
+        shape_[toaxis],
+        length);
+      util::handle_error(err2, classname(), identities_.get());
+
+      // how many padding chunks
+      int64_t chunks = 1;
+      for (int64_t x = 0; x < toaxis; x++) {
+        chunks = chunks * shape_[x];
       }
+
+      Index64 outindex(length*chunks);
+      struct Error err3 = awkward_index_inject_pad(
+        outindex.ptr().get(),
+        index.ptr().get(),
+        shape_[toaxis],
+        chunks,
+        length);
+      util::handle_error(err3, classname(), identities_.get());
+
+      for (int64_t i = (int64_t)shape_.size() - 1;  i > toaxis;  i--) {
+        out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, shape_[(size_t)i]);
+      }
+      out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, out);
+      out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, length);
+      for (int64_t i = toaxis - 1;  i > 0;  i--) {
+        out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, shape_[(size_t)i]);
+      }
+      return out;
     }
-
-    out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, out);
-
-    return out;
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

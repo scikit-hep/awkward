@@ -20,6 +20,7 @@ namespace awkward {
     virtual ~Content();
 
     virtual bool isscalar() const;
+    virtual bool isindexed() const;
     virtual const std::string classname() const = 0;
     virtual const std::shared_ptr<Identities> identities() const;
     virtual void setidentities() = 0;

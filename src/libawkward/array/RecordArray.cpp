@@ -634,8 +634,17 @@ namespace awkward {
     throw std::invalid_argument("cannot use records as a slice");
   }
 
-  const std::shared_ptr<Content> RecordArray::pad(int64_t length, int64_t axis) const {
-    throw std::runtime_error("FIXME: RecordArray pad is not implemented");
+  const std::shared_ptr<Content> RecordArray::pad(int64_t pad_width, int64_t axis) const {
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->pad(pad_width, axis));
+    }
+    if (contents.empty()) {
+      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+    }
+    else {
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {

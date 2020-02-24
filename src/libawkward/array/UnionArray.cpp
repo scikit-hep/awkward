@@ -1075,8 +1075,13 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::pad(int64_t length, int64_t axis) const {
-    throw std::runtime_error("FIXME: UnionArrayOf<T, I> pad is not implemented");
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::pad(int64_t pad_width, int64_t axis) const {
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.emplace_back(content.get()->pad(pad_width, axis));
+    }
+    UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+    return out.simplify(false);
   }
 
   template <typename T, typename I>

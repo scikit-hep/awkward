@@ -543,6 +543,110 @@ ERROR awkward_zero_raw_ptr(uint8_t* toptr, int64_t length) {
   return success();
 }
 
+ERROR awkward_index_pad(int64_t* toindex, const int64_t fromlength, int64_t tolength) {
+  for (int64_t i = 0; i < tolength; i++) {
+    if (i < fromlength) {
+      toindex[i] = i;
+    }
+    else {
+      toindex[i] = -1;
+    }
+  }
+  return success();
+}
+
+ERROR awkward_index_inject_pad(int64_t* toindex, const int64_t* fromindex, int64_t shape, int64_t chunks, int64_t length) {
+  int64_t k = 0;
+  for (int64_t i = 0; i < chunks; i++) {
+    for (int64_t j = 0; j < length; j++) {
+      if (fromindex[j] != -1) {
+        toindex[k++] = fromindex[j] + shape*i;
+      }
+      else {
+        toindex[k++] = fromindex[j];
+      }
+    }
+  }
+  return success();
+}
+
+ERROR awkward_index_clip(int64_t* toindex, const int64_t* fromindex, int64_t tolength) {
+  for (int64_t i = 0; i < tolength; i++) {
+    toindex[i] = fromindex[i];
+  }
+  return success();
+}
+
+template <typename FROM, typename TO>
+ERROR awkward_indexedarray_pad(TO* toindex, const FROM* fromindex, int64_t tolength, int64_t fromlength) {
+  for (int64_t i = 0; i < fromlength; i++) {
+    toindex[i] = (TO)fromindex[i];
+  }
+  for (int64_t i = fromlength; i < tolength; i++) {
+    toindex[i] = -1;
+  }
+  return success();
+}
+ERROR awkward_indexedarray_pad_to64_from32(int64_t* toindex, const int32_t* fromindex, int64_t tolength, int64_t fromlength) {
+  return awkward_indexedarray_pad<int32_t, int64_t>(toindex, fromindex, tolength, fromlength);
+}
+ERROR awkward_indexedarray_pad_to64_fromU32(int64_t* toindex, const uint32_t* fromindex, int64_t tolength, int64_t fromlength) {
+  return awkward_indexedarray_pad<uint32_t, int64_t>(toindex, fromindex, tolength, fromlength);
+}
+ERROR awkward_indexedarray_pad_to64_from64(int64_t* toindex, const int64_t* fromindex, int64_t tolength, int64_t fromlength) {
+  return awkward_indexedarray_pad<int64_t, int64_t>(toindex, fromindex, tolength, fromlength);
+}
+
+template <typename FROM>
+ERROR awkward_indexedarray_inject_pad(int64_t* toindex, const FROM* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
+  int64_t i = 0;
+  int64_t j = 0;
+  for(int64_t x = 0; x < tolength; x++) {
+    for(int64_t y = 0; y < fromsize; y++) {
+      if(y < fromlength) {
+        toindex[j] = fromindex[i];
+        i = i + 1;
+        j = j + 1;
+      }
+      else {
+        i = i + 1;
+      }
+    }
+    for(int64_t z = 0; z < fromlength - fromsize; z++) {
+      toindex[j] = -1;
+      j = j + 1;
+    }
+  }
+  return success();
+}
+ERROR awkward_indexedarray_inject_pad_from32(int64_t* toindex, const int32_t* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
+  return awkward_indexedarray_inject_pad<int32_t>(toindex, fromindex, tolength, fromlength, fromsize);
+}
+ERROR awkward_indexedarray_inject_pad_fromU32(int64_t* toindex, const uint32_t* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
+  return awkward_indexedarray_inject_pad<uint32_t>(toindex, fromindex, tolength, fromlength, fromsize);
+}
+ERROR awkward_indexedarray_inject_pad_from64(int64_t* toindex, const int64_t* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
+  return awkward_indexedarray_inject_pad<int64_t>(toindex, fromindex, tolength, fromlength, fromsize);
+}
+
+
+ERROR awkward_indexedarray_clip(int64_t* toindex, int64_t* fromindex, int64_t tolength) {
+  for (int64_t i = 0; i < tolength; i++) {
+    toindex[i] = fromindex[i];
+  }
+  return success();
+}
+
+ERROR awkward_regulararray_pad(int64_t* toindex, int64_t tolength, int64_t fromlength) {
+  for (int64_t i = 0; i < fromlength; i++) {
+    toindex[i] = i;
+  }
+  for (int64_t i = fromlength; i < tolength; i++) {
+    toindex[i] = -1;
+  }
+  return success();
+}
+
 template <typename T>
 ERROR awkward_numpyarray_pad_copy(uint8_t* toptr, const uint8_t* fromptr, int64_t tolen, int64_t fromlen, int64_t tostride, int64_t fromstride, int64_t offset, const T* pos) {
   for (int64_t j = 0; j < tolen*tostride; j++) {

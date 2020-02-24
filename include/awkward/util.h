@@ -98,6 +98,8 @@ namespace awkward {
     template <typename T>
     ERROR awkward_indexedarray_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const T* fromindex, int64_t lenindex, int64_t indexoffset);
     template <typename T>
+    ERROR awkward_indexedarray_pad_64(int64_t* toindex, const T* fromindex, int64_t tolength, int64_t fromlength);
+    template <typename T>
     ERROR awkward_listarray_flatten_length(int64_t* tolen, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>
     ERROR awkward_listarray_flatten_64(int64_t* tocarry, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
