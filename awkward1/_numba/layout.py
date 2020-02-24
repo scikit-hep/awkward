@@ -87,8 +87,6 @@ class ContentType(numba.types.Type):
             raise TypeError("array does not have a field with key {0}".format(repr(key)))
 
     def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
-        print(type(self).__name__, "lower range", viewtype)
-
         length = builder.sub(viewproxy.stop, viewproxy.start)
 
         regular_start = numba.cgutils.alloca_once_value(builder, start)
@@ -119,8 +117,6 @@ class ContentType(numba.types.Type):
         return proxyout._getvalue()
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, key):
-        print(type(self).__name__, "lower field", viewtype)
-
         return viewval
 
 def castint(context, builder, fromtype, totype, val):
@@ -211,8 +207,6 @@ class NumpyArrayType(ContentType):
         return self.arraytype.dtype
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
-        print(type(self).__name__, "lower at", viewtype)
-
         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
         arrayptr = getat(context, builder, viewproxy.arrayptrs, whichpos)
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
@@ -322,8 +316,6 @@ class ListArrayType(ContentType):
         return awkward1._numba.arrayview.wrap(self.contenttype, viewtype, None)
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
-        print(type(self).__name__, "lower at", viewtype)
-
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
@@ -578,8 +570,6 @@ class RecordArrayType(ContentType):
         return contenttype.getitem_at(subviewtype)
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
-        print(type(self).__name__, "lower at", viewtype)
-
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
 
         if len(viewtype.fields) == 0:
@@ -606,8 +596,6 @@ class RecordArrayType(ContentType):
             return contenttype.lower_getitem_at(context, builder, rettype, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, atval, False, False)
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, key):
-        print(type(self).__name__, "lower field", viewtype, key)
-
         viewproxy = context.make_helper(builder, viewtype, viewval)
 
         index = self.fieldindex(key)
@@ -626,8 +614,6 @@ class RecordArrayType(ContentType):
         return proxynext._getvalue()
 
     def lower_getitem_field_record(self, context, builder, recordviewtype, recordviewval, key):
-        print(type(self).__name__, "lower field record", recordviewtype, key)
-
         arrayviewtype = recordviewtype.arrayviewtype
         recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
         arrayviewval = recordviewproxy.arrayview
@@ -705,31 +691,18 @@ class UnionArrayType(ContentType):
         return any(x.hasfield(key) for x in self.contenttypes)
 
     def getitem_at(self, viewtype):
-        return awkward1._numba.arrayview.MultiViewType(self.tagstype, [x.getitem_at(viewtype) for x in self.contenttypes])
+        if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
+            raise TypeError("union types cannot be accessed in Numba")
 
     def getitem_range(self, viewtype):
-        raise NotImplementedError(type(self).__name__ + ".getitem_range not implemented")
+        if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
+            raise TypeError("union types cannot be accessed in Numba")
 
     def getitem_field(self, viewtype, key):
-        raise NotImplementedError(type(self).__name__ + ".getitem_field not implemented")
+        if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
+            raise TypeError("union types cannot be accessed in Numba")
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
-        # atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
-
-        # tagspos = posat(context, builder, viewproxy.pos, self.TAGS)
-        # tagsptr = getat(context, builder, viewproxy.arrayptrs, tagspos)
-        # tagsarraypos = builder.add(viewproxy.start, atval)
-        # tag = getat(context, builder, tagsptr, tagsarraypos, self.tagstype.dtype)
-
-        # indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
-        # indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
-        # indexarraypos = builder.add(viewproxy.start, atval)
-        # nextat = getat(context, builder, indexptr, indexarraypos, self.indextype.dtype)
-
-        # nextviewtype = awkward1._numba.arrayview.MultiViewType(self.tagstype, [awkward1._numba.arrayview.wrap(x, viewtype, None) for x in self.contenttypes])
-        # proxynext = 
-        # for index, contenttype in enumerate(self.contenttypes):
-
         raise NotImplementedError(type(self).__name__ + ".lower_getitem_at not implemented")
 
     def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):

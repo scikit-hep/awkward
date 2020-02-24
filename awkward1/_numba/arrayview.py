@@ -29,11 +29,6 @@ class Lookup(object):
         self.arrays = tuple(arrays)
         self.arrayptrs = numpy.array([x if isinstance(x, int) else x.ctypes.data for x in positions], dtype=numpy.intp)
 
-        # print("positions", self.positions)
-        # print("arrayptrs", self.arrayptrs)
-        # for i, x in enumerate(arrays):
-        #     print("array[{0}] ".format(i), x)
-
 def tolookup(layout, positions, arrays):
     import awkward1.layout
 
@@ -116,7 +111,13 @@ class ArrayView(object):
 @numba.extending.typeof_impl.register(ArrayView)
 def typeof_ArrayView(obj, c):
     return ArrayViewType(obj.type, obj.behavior, obj.fields)
-        
+
+def wrap(type, viewtype, fields):
+    if fields is None:
+        return ArrayViewType(type, viewtype.behavior, viewtype.fields)
+    else:
+        return ArrayViewType(type, viewtype.behavior, fields)
+
 def repr_behavior(behavior):
     return repr(behavior)
 
@@ -370,34 +371,3 @@ class type_methods_record(numba.typing.templates.AttributeTemplate):
 @numba.extending.lower_getattr_generic(RecordViewType)
 def lower_getattr_generic_record(context, builder, recordviewtype, recordviewval, attr):
     return recordviewtype.arrayviewtype.type.lower_getitem_field_record(context, builder, recordviewtype, recordviewval, attr)
-
-def wrap(type, viewtype, fields):
-    # if isinstance(viewtype, MultiViewType):
-    #     return MultiViewType(viewtype.tagstype, [wrap(type, x, fields) for x in viewtype.viewtypes])
-    # else:
-    if fields is None:
-        return ArrayViewType(type, viewtype.behavior, viewtype.fields)
-    else:
-        return ArrayViewType(type, viewtype.behavior, fields)
-
-# class MultiViewType(numba.types.Type):
-#     def __init__(self, tagstype, viewtypes):
-#         super(MultiViewType, self).__init__(name="awkward1.MultiView({0}, ({1}{2}))".format(tagstype.name, ", ".join(x.name for x in viewtypes), "," if len(viewtypes) == 1 else ""))
-#         self.tagstype = tagstype
-#         self.viewtypes = viewtypes
-
-#     @property
-#     def behavior(self):
-#         return self.viewtypes[0].behavior
-
-#     @property
-#     def fields(self):
-#         return self.viewtypes[0].fields
-
-# @numba.extending.register_model(MultiViewType)
-# class MultiViewModel(numba.datamodel.models.StructModel):
-#     def __init__(self, dmm, fe_type):
-#         members = [("tag", fe_type.tagstype.dtype)]
-#         for i, x in enumerate(fe_type.viewtypes):
-#             members.append(("view" + str(i), x))
-#         super(MultiViewModel, self).__init__(dmm, fe_type, members)
