@@ -6,7 +6,6 @@ import json
 
 import numpy
 import numba
-import llvmlite.ir.types
 
 import awkward1.layout
 
@@ -119,28 +118,6 @@ class ContentType(numba.types.Type):
     def lower_getitem_field(self, context, builder, viewtype, viewval, key):
         return viewval
 
-def castint(context, builder, fromtype, totype, val):
-    if isinstance(fromtype, llvmlite.ir.types.IntType):
-        if fromtype.width == 8:
-            fromtype = numba.int8
-        elif fromtype.width == 16:
-            fromtype = numba.int16
-        elif fromtype.width == 32:
-            fromtype = numba.int32
-        elif fromtype.width == 64:
-            fromtype = numba.int64
-    if not isinstance(fromtype, numba.types.Integer):
-        raise AssertionError("unrecognized integer type: {0}".format(repr(fromtype)))
-    if fromtype.bitwidth < totype.bitwidth:
-        if fromtype.signed:
-            return builder.sext(val, context.get_value_type(totype))
-        else:
-            return builder.zext(val, context.get_value_type(totype))
-    elif fromtype.bitwidth > totype.bitwidth:
-        return builder.trunc(val, context.get_value_type(totype))
-    else:
-        return val
-
 def posat(context, builder, pos, offset):
     return builder.add(pos, context.get_constant(numba.intp, offset))
 
@@ -155,7 +132,7 @@ def getat(context, builder, baseptr, offset, rettype=None):
     return builder.load(numba.cgutils.pointer_add(builder, baseptr, byteoffset, ptrtype))
 
 def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
-    atval = castint(context, builder, attype, numba.intp, atval)
+    atval = awkward1._numba.castint(context, builder, attype, numba.intp, atval)
 
     if not attype.signed:
         wrapneg = False
@@ -174,7 +151,7 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
                                              builder.icmp_signed(">=", atval, length))):
                 context.call_conv.return_user_exc(builder, ValueError, ("slice index out of bounds",))
 
-    return castint(context, builder, atval.type, numba.intp, atval)
+    return awkward1._numba.castint(context, builder, atval.type, numba.intp, atval)
 
 class NumpyArrayType(ContentType):
     IDENTITIES = 0
@@ -333,8 +310,8 @@ class ListArrayType(ContentType):
 
         proxyout = context.make_helper(builder, rettype)
         proxyout.pos       = nextpos
-        proxyout.start     = castint(context, builder, self.indextype.dtype, numba.intp, start)
-        proxyout.stop      = castint(context, builder, self.indextype.dtype, numba.intp, stop)
+        proxyout.start     = awkward1._numba.castint(context, builder, self.indextype.dtype, numba.intp, start)
+        proxyout.stop      = awkward1._numba.castint(context, builder, self.indextype.dtype, numba.intp, stop)
         proxyout.arrayptrs = viewproxy.arrayptrs
         proxyout.pylookup  = viewproxy.pylookup
         return proxyout._getvalue()
@@ -397,7 +374,7 @@ class IndexedArrayType(ContentType):
         proxynext = context.make_helper(builder, nextviewtype)
         proxynext.pos       = nextpos
         proxynext.start     = viewproxy.start
-        proxynext.stop      = builder.add(castint(context, builder, self.indextype.dtype, numba.intp, nextat), builder.add(viewproxy.start, context.get_constant(numba.intp, 1)))
+        proxynext.stop      = builder.add(awkward1._numba.castint(context, builder, self.indextype.dtype, numba.intp, nextat), builder.add(viewproxy.start, context.get_constant(numba.intp, 1)))
         proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.pylookup  = viewproxy.pylookup
 
@@ -467,7 +444,7 @@ class IndexedOptionArrayType(ContentType):
                 proxynext = context.make_helper(builder, nextviewtype)
                 proxynext.pos       = nextpos
                 proxynext.start     = viewproxy.start
-                proxynext.stop      = builder.add(castint(context, builder, self.indextype.dtype, numba.intp, nextat), builder.add(viewproxy.start, context.get_constant(numba.intp, 1)))
+                proxynext.stop      = builder.add(awkward1._numba.castint(context, builder, self.indextype.dtype, numba.intp, nextat), builder.add(viewproxy.start, context.get_constant(numba.intp, 1)))
                 proxynext.arrayptrs = viewproxy.arrayptrs
                 proxynext.pylookup  = viewproxy.pylookup
 

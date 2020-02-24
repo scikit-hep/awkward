@@ -639,3 +639,17 @@ def test_fillable_refcount():
     assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 4)
     del y
     assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 2)
+
+def test_fillable_len():
+    builder = awkward1.FillableArray()
+    builder.real(1.1)
+    builder.real(2.2)
+    builder.real(3.3)
+    builder.real(4.4)
+    builder.real(5.5)
+
+    @numba.njit
+    def f1(x):
+        return len(x)
+
+    assert f1(builder) == 5

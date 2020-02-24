@@ -288,7 +288,7 @@ def lower_getiter(context, builder, sig, args):
     proxyout = context.make_helper(builder, rettype)
     proxyout.view = viewval
     proxyout.length = builder.sub(viewproxy.stop, viewproxy.start)
-    proxyout.at = numba.cgutils.alloca_once_value(builder, context.get_constant(numba.int64, 0))
+    proxyout.at = numba.cgutils.alloca_once_value(builder, context.get_constant(numba.intp, 0))
     if context.enable_nrt:
         context.nrt.incref(builder, viewtype, viewval)
     return numba.targets.imputils.impl_ret_new_ref(context, builder, rettype, proxyout._getvalue())
