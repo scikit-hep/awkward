@@ -81,3 +81,13 @@ def string_equal(one, two):
     return awkward1.layout.NumpyArray(out)
 
 awkward1.behavior[numpy.equal, "string", "string"] = string_equal
+
+def string_numba_typer(viewtype):
+    import numba
+    return numba.types.string
+
+def string_numba_lower(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+    raise Exception("FIXME: what goes here?")
+
+awkward1.behavior["__numba_typer__", "string"] = string_numba_typer
+awkward1.behavior["__numba_lower__", "string"] = string_numba_lower

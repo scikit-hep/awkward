@@ -48,6 +48,48 @@ def arrayclass(layout, behavior):
             return cls
     return awkward1.highlevel.Array
 
+def numba_array_typer(layouttype, behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    arr = layouttype.parameters.get("__array__")
+    if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
+        typer = behavior.get(("__numba_typer__", arr))
+        if callable(typer):
+            return typer
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        typer = behavior.get(("__numba_typer__", ".", rec))
+        if callable(typer):
+            return typer
+    deeprec = layouttype.parameters.get("__record__")
+    if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
+        typer = behavior.get(("__numba_typer__", "*", deeprec))
+        if callable(typer):
+            return typer
+    return None
+
+def numba_array_lower(layouttype, behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    arr = layouttype.parameters.get("__array__")
+    if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
+        lower = behavior.get(("__numba_lower__", arr))
+        if callable(lower):
+            return lower
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        lower = behavior.get(("__numba_lower__", ".", rec))
+        if callable(lower):
+            return lower
+    deeprec = layouttype.parameters.get("__record__")
+    if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
+        lower = behavior.get(("__numba_lower__", "*", deeprec))
+        if callable(lower):
+            return lower
+    return None
+
 def recordclass(layout, behavior):
     import awkward1
     if behavior is None:
@@ -58,6 +100,28 @@ def recordclass(layout, behavior):
         if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Record):
             return cls
     return awkward1.highlevel.Record
+
+def numba_record_typer(layouttype, behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        typer = behavior.get(("__numba_typer__", rec))
+        if callable(typer):
+            return typer
+    return None
+
+def numba_record_lower(layouttype, behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        lower = behavior.get(("__numba_lower__", rec))
+        if callable(lower):
+            return lower
+    return None
 
 def overload(behavior, signature):
     import awkward1

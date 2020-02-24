@@ -217,7 +217,7 @@ class type_getitem(numba.typing.templates.AbstractTemplate):
         if len(args) == 2 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
             viewtype, wheretype = args
             if isinstance(wheretype, numba.types.Integer):
-                return viewtype.type.getitem_at(viewtype)(viewtype, wheretype)
+                return viewtype.type.getitem_at_check(viewtype)(viewtype, wheretype)
             elif isinstance(wheretype, numba.types.SliceType) and not wheretype.has_step:
                 return viewtype.type.getitem_range(viewtype)(viewtype, wheretype)
             elif isinstance(wheretype, numba.types.StringLiteral):
@@ -230,7 +230,7 @@ def lower_getitem_at(context, builder, sig, args):
     rettype, (viewtype, wheretype) = sig.return_type, sig.args
     viewval, whereval = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
-    return viewtype.type.lower_getitem_at(context, builder, rettype, viewtype, viewval, viewproxy, wheretype, whereval, True, True)
+    return viewtype.type.lower_getitem_at_check(context, builder, rettype, viewtype, viewval, viewproxy, wheretype, whereval, True, True)
 
 @numba.extending.lower_builtin(operator.getitem, ArrayViewType, numba.types.slice2_type)
 def lower_getitem_range(context, builder, sig, args):
@@ -261,7 +261,7 @@ def lower_getattr_generic(context, builder, viewtype, viewval, attr):
 
 class IteratorType(numba.types.common.SimpleIteratorType):
     def __init__(self, viewtype):
-        super(IteratorType, self).__init__("awkward1.Iterator({0})".format(viewtype.name), viewtype.type.getitem_at(viewtype))
+        super(IteratorType, self).__init__("awkward1.Iterator({0})".format(viewtype.name), viewtype.type.getitem_at_check(viewtype))
         self.viewtype = viewtype
 
 @numba.typing.templates.infer

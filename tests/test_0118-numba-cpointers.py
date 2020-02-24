@@ -656,8 +656,8 @@ def test_FillableArray_len():
 
 def test_FillableArray_simple():
     @numba.njit
-    def f1(q):
-        q.clear()
+    def f1(x):
+        x.clear()
         return 3.14
 
     a = awkward1.FillableArray()
@@ -665,11 +665,11 @@ def test_FillableArray_simple():
 
 def test_FillableArray_boolean():
     @numba.njit
-    def f1(q):
-        q.boolean(True)
-        q.boolean(False)
-        q.boolean(False)
-        return q
+    def f1(x):
+        x.boolean(True)
+        x.boolean(False)
+        x.boolean(False)
+        return x
 
     a = awkward1.FillableArray()
     b = f1(a)
@@ -678,11 +678,11 @@ def test_FillableArray_boolean():
 
 def test_FillableArray_integer():
     @numba.njit
-    def f1(q):
-        q.integer(1)
-        q.integer(2)
-        q.integer(3)
-        return q
+    def f1(x):
+        x.integer(1)
+        x.integer(2)
+        x.integer(3)
+        return x
 
     a = awkward1.FillableArray()
     b = f1(a)
@@ -691,11 +691,11 @@ def test_FillableArray_integer():
 
 def test_FillableArray_real():
     @numba.njit
-    def f1(q, z):
-        q.real(1)
-        q.real(2.2)
-        q.real(z)
-        return q
+    def f1(x, z):
+        x.real(1)
+        x.real(2.2)
+        x.real(z)
+        return x
 
     a = awkward1.FillableArray()
     b = f1(a, numpy.array([3.5], dtype=numpy.float32)[0])
@@ -704,19 +704,19 @@ def test_FillableArray_real():
 
 def test_FillableArray_list():
     @numba.njit
-    def f1(q):
-        q.beginlist()
-        q.real(1.1)
-        q.real(2.2)
-        q.real(3.3)
-        q.endlist()
-        q.beginlist()
-        q.endlist()
-        q.beginlist()
-        q.real(4.4)
-        q.real(5.5)
-        q.endlist()
-        return q
+    def f1(x):
+        x.beginlist()
+        x.real(1.1)
+        x.real(2.2)
+        x.real(3.3)
+        x.endlist()
+        x.beginlist()
+        x.endlist()
+        x.beginlist()
+        x.real(4.4)
+        x.real(5.5)
+        x.endlist()
+        return x
 
     a = awkward1.FillableArray()
     b = f1(a)
@@ -724,18 +724,36 @@ def test_FillableArray_list():
     assert awkward1.tolist(b.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
     @numba.njit
-    def f2(q):
-        return len(q)
+    def f2(x):
+        return len(x)
 
     assert f2(a) == 3
     assert f2(b) == 3
 
     @numba.njit
-    def f3(q):
-        q.clear()
-        return q
+    def f3(x):
+        x.clear()
+        return x
 
     c = f3(b)
     assert awkward1.tolist(a.snapshot()) == []
     assert awkward1.tolist(b.snapshot()) == []
     assert awkward1.tolist(c.snapshot()) == []
+
+# def test_string():
+#     array = awkward1.Array(["one", "two", "three", "four", "five"])
+
+#     @numba.njit
+#     def f1(x, i):
+#         return x[i]
+
+#     assert f1(array, 0) == "one"
+#     assert f1(array, 1) == "two"
+#     assert f1(array, 2) == "three"
+
+#     @numba.njit
+#     def f2(x, i, j):
+#         return x[i] + x[j]
+
+#     print(f2(array, 1, 3))
+#     raise Exception

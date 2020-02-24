@@ -8,16 +8,16 @@ import numpy
 import numba
 
 import awkward1.layout
-
+import awkward1._util
 import awkward1._numba.arrayview
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof(obj, c):
-    return NumpyArrayType(numba.typeof(numpy.asarray(obj)), numba.typeof(obj.identities), json.dumps(obj.parameters))
+    return NumpyArrayType(numba.typeof(numpy.asarray(obj)), numba.typeof(obj.identities), obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.RegularArray)
 def typeof(obj, c):
-    return RegularArrayType(numba.typeof(obj.content), obj.size, numba.typeof(obj.identities), json.dumps(obj.parameters))
+    return RegularArrayType(numba.typeof(obj.content), obj.size, numba.typeof(obj.identities), obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.ListArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListArrayU32)
@@ -26,22 +26,22 @@ def typeof(obj, c):
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray64)
 def typeof(obj, c):
-    return ListArrayType(numba.typeof(numpy.asarray(obj.starts)), numba.typeof(obj.content), numba.typeof(obj.identities), json.dumps(obj.parameters))
+    return ListArrayType(numba.typeof(numpy.asarray(obj.starts)), numba.typeof(obj.content), numba.typeof(obj.identities), obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArray64)
 def typeof(obj, c):
-    return IndexedArrayType(numba.typeof(numpy.asarray(obj.index)), numba.typeof(obj.content), numba.typeof(obj.identities), json.dumps(obj.parameters))
+    return IndexedArrayType(numba.typeof(numpy.asarray(obj.index)), numba.typeof(obj.content), numba.typeof(obj.identities), obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedOptionArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedOptionArray64)
 def typeof(obj, c):
-    return IndexedOptionArrayType(numba.typeof(numpy.asarray(obj.index)), numba.typeof(obj.content), numba.typeof(obj.identities), json.dumps(obj.parameters))
+    return IndexedOptionArrayType(numba.typeof(numpy.asarray(obj.index)), numba.typeof(obj.content), numba.typeof(obj.identities), obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(obj, c):
-    return RecordArrayType(tuple(numba.typeof(x) for x in obj.contents), obj.recordlookup, numba.typeof(obj.identities), json.dumps(obj.parameters))
+    return RecordArrayType(tuple(numba.typeof(x) for x in obj.contents), obj.recordlookup, numba.typeof(obj.identities), obj.parameters)
 
 @numba.extending.typeof_impl.register(awkward1.layout.Record)
 def typeof(obj, c):
@@ -51,7 +51,7 @@ def typeof(obj, c):
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_U32)
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_64)
 def typeof(obj, c):
-    return UnionArrayType(numba.typeof(numpy.asarray(obj.tags)), numba.typeof(numpy.asarray(obj.index)), tuple(numba.typeof(x) for x in obj.contents), numba.typeof(obj.identities), json.dumps(obj.parameters))
+    return UnionArrayType(numba.typeof(numpy.asarray(obj.tags)), numba.typeof(numpy.asarray(obj.index)), tuple(numba.typeof(x) for x in obj.contents), numba.typeof(obj.identities), obj.parameters)
 
 class ContentType(numba.types.Type):
     @classmethod
@@ -76,6 +76,13 @@ class ContentType(numba.types.Type):
         else:
             raise AssertionError("no Index* type for array: {0}".format(arraytype))
 
+    def getitem_at_check(self, viewtype):
+        typer = awkward1._util.numba_array_typer(viewtype.type, viewtype.behavior)
+        if typer is None:
+            return self.getitem_at(viewtype)
+        else:
+            return typer(viewtype)
+
     def getitem_range(self, viewtype):
         return awkward1._numba.arrayview.wrap(self, viewtype, None)
 
@@ -84,6 +91,13 @@ class ContentType(numba.types.Type):
             return awkward1._numba.arrayview.wrap(self, viewtype, viewtype.fields + (key,))
         else:
             raise TypeError("array does not have a field with key {0}".format(repr(key)))
+
+    def lower_getitem_at_check(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+        lower = awkward1._util.numba_array_lower(viewtype.type, viewtype.behavior)
+        if lower is None:
+            return self.lower_getitem_at(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds)
+        else:
+            return lower(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds)
 
     def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
         length = builder.sub(viewproxy.stop, viewproxy.start)
@@ -168,14 +182,14 @@ class NumpyArrayType(ContentType):
         return pos
 
     def __init__(self, arraytype, identitiestype, parameters):
-        super(NumpyArrayType, self).__init__(name="awkward1.NumpyArrayType({0}, {1}, {2})".format(arraytype.name, identitiestype.name, repr(parameters)))
+        super(NumpyArrayType, self).__init__(name="awkward1.NumpyArrayType({0}, {1}, {2})".format(arraytype.name, identitiestype.name, json.dumps(parameters)))
         self.arraytype = arraytype
         self.identitiestype = identitiestype
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
         assert fields == ()
-        return awkward1.layout.NumpyArray(lookup.arrays[lookup.positions[pos + self.ARRAY]])
+        return awkward1.layout.NumpyArray(lookup.arrays[lookup.positions[pos + self.ARRAY]], parameters=self.parameters)
 
     def hasfield(self, key):
         return False
@@ -203,7 +217,7 @@ class RegularArrayType(ContentType):
         return pos
 
     def __init__(self, contenttype, size, identitiestype, parameters):
-        super(RegularArrayType, self).__init__(name="awkward1.RegularArrayType({0}, {1}, {2}, {3})".format(contenttype.name, size, identitiestype.name, repr(parameters)))
+        super(RegularArrayType, self).__init__(name="awkward1.RegularArrayType({0}, {1}, {2}, {3})".format(contenttype.name, size, identitiestype.name, json.dumps(parameters)))
         self.contenttype = contenttype
         self.size = size
         self.identitiestype = identitiestype
@@ -211,7 +225,7 @@ class RegularArrayType(ContentType):
 
     def tolayout(self, lookup, pos, fields):
         content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
-        return awkward1.layout.RegularArray(content, self.size)
+        return awkward1.layout.RegularArray(content, self.size, parameters=self.parameters)
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
@@ -264,7 +278,7 @@ class ListArrayType(ContentType):
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
-        super(ListArrayType, self).__init__(name="awkward1.ListArrayType({0}, {1}, {2}, {3})".format(indextype.name, contenttype.name, identitiestype.name, repr(parameters)))
+        super(ListArrayType, self).__init__(name="awkward1.ListArrayType({0}, {1}, {2}, {3})".format(indextype.name, contenttype.name, identitiestype.name, json.dumps(parameters)))
         self.indextype = indextype
         self.contenttype = contenttype
         self.identitiestype = identitiestype
@@ -284,7 +298,7 @@ class ListArrayType(ContentType):
         starts = self.IndexOf(self.indextype)(lookup.arrays[lookup.positions[pos + self.STARTS]])
         stops = self.IndexOf(self.indextype)(lookup.arrays[lookup.positions[pos + self.STOPS]])
         content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
-        return self.ListArrayOf()(starts, stops, content)
+        return self.ListArrayOf()(starts, stops, content, parameters=self.parameters)
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
@@ -332,7 +346,7 @@ class IndexedArrayType(ContentType):
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
-        super(IndexedArrayType, self).__init__(name="awkward1.IndexedArrayType({0}, {1}, {2}, {3})".format(indextype.name, contenttype.name, identitiestype.name, repr(parameters)))
+        super(IndexedArrayType, self).__init__(name="awkward1.IndexedArrayType({0}, {1}, {2}, {3})".format(indextype.name, contenttype.name, identitiestype.name, json.dumps(parameters)))
         self.indextype = indextype
         self.contenttype = contenttype
         self.identitiestype = identitiestype
@@ -351,13 +365,13 @@ class IndexedArrayType(ContentType):
     def tolayout(self, lookup, pos, fields):
         index = self.IndexOf(self.indextype)(lookup.arrays[lookup.positions[pos + self.INDEX]])
         content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
-        return self.IndexedArrayOf()(index, content)
+        return self.IndexedArrayOf()(index, content, parameters=self.parameters)
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        return self.contenttype.getitem_at(viewtype)
+        return self.contenttype.getitem_at_check(viewtype)
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
@@ -378,7 +392,7 @@ class IndexedArrayType(ContentType):
         proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.pylookup  = viewproxy.pylookup
 
-        return self.contenttype.lower_getitem_at(context, builder, rettype, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, nextat, False, False)
+        return self.contenttype.lower_getitem_at_check(context, builder, rettype, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, nextat, False, False)
 
 class IndexedOptionArrayType(ContentType):
     IDENTITIES = 0
@@ -396,7 +410,7 @@ class IndexedOptionArrayType(ContentType):
         return pos
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
-        super(IndexedOptionArrayType, self).__init__(name="awkward1.IndexedOptionArrayType({0}, {1}, {2}, {3})".format(indextype.name, contenttype.name, identitiestype.name, repr(parameters)))
+        super(IndexedOptionArrayType, self).__init__(name="awkward1.IndexedOptionArrayType({0}, {1}, {2}, {3})".format(indextype.name, contenttype.name, identitiestype.name, json.dumps(parameters)))
         self.indextype = indextype
         self.contenttype = contenttype
         self.identitiestype = identitiestype
@@ -413,13 +427,13 @@ class IndexedOptionArrayType(ContentType):
     def tolayout(self, lookup, pos, fields):
         index = self.IndexOf(self.indextype)(lookup.arrays[lookup.positions[pos + self.INDEX]])
         content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
-        return self.IndexedOptionArrayOf()(index, content)
+        return self.IndexedOptionArrayOf()(index, content, parameters=self.parameters)
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        return numba.types.optional(self.contenttype.getitem_at(viewtype))
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
@@ -448,7 +462,7 @@ class IndexedOptionArrayType(ContentType):
                 proxynext.arrayptrs = viewproxy.arrayptrs
                 proxynext.pylookup  = viewproxy.pylookup
 
-                outdata = self.contenttype.lower_getitem_at(context, builder, rettype.type, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, nextat, False, False)
+                outdata = self.contenttype.lower_getitem_at_check(context, builder, rettype.type, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, nextat, False, False)
 
                 output.valid = numba.cgutils.true_bit
                 output.data = outdata
@@ -469,7 +483,7 @@ class RecordArrayType(ContentType):
         return pos
 
     def __init__(self, contenttypes, recordlookup, identitiestype, parameters):
-        super(RecordArrayType, self).__init__(name="awkward1.RecordArrayType(({0}{1}), ({2}), {3}, {4})".format(", ".join(x.name for x in contenttypes), "," if len(contenttypes) == 1 else "", "None" if recordlookup is None else repr(tuple(recordlookup)), identitiestype.name, repr(parameters)))
+        super(RecordArrayType, self).__init__(name="awkward1.RecordArrayType(({0}{1}), ({2}), {3}, {4})".format(", ".join(x.name for x in contenttypes), "," if len(contenttypes) == 1 else "", "None" if recordlookup is None else repr(tuple(recordlookup)), identitiestype.name, json.dumps(parameters)))
         self.contenttypes = contenttypes
         self.recordlookup = recordlookup
         self.identitiestype = identitiestype
@@ -502,9 +516,9 @@ class RecordArrayType(ContentType):
                 layout = contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENTS + i], fields)
                 contents.append(layout)
             if len(contents) == 0:
-                return awkward1.layout.RecordArray(numpy.iinfo(numpy.int64).max, self.recordlookup is None)
+                return awkward1.layout.RecordArray(numpy.iinfo(numpy.int64).max, self.recordlookup is None, parameters=self.parameters)
             else:
-                return awkward1.layout.RecordArray(contents, self.recordlookup)
+                return awkward1.layout.RecordArray(contents, self.recordlookup, parameters=self.parameters)
 
     def hasfield(self, key):
         return self.fieldindex(key) is not None
@@ -522,7 +536,7 @@ class RecordArrayType(ContentType):
                     raise ValueError("no field {0} in records with fields: [{1}]".format(repr(key), ", ".join(repr(x) for x in self.recordlookup)))
             contenttype = self.contenttypes[index]
             subviewtype = awkward1._numba.arrayview.wrap(contenttype, viewtype, viewtype.fields[1:])
-            return contenttype.getitem_at(subviewtype)
+            return contenttype.getitem_at_check(subviewtype)
 
     def getitem_field(self, viewtype, key):
         index = self.fieldindex(key)
@@ -544,7 +558,7 @@ class RecordArrayType(ContentType):
                 raise ValueError("no field {0} in record with fields: [{1}]".format(repr(key), ", ".join(repr(x) for x in self.recordlookup)))
         contenttype = self.contenttypes[index]
         subviewtype = awkward1._numba.arrayview.wrap(contenttype, recordviewtype, None)
-        return contenttype.getitem_at(subviewtype)
+        return contenttype.getitem_at_check(subviewtype)
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
@@ -570,7 +584,7 @@ class RecordArrayType(ContentType):
             proxynext.arrayptrs = viewproxy.arrayptrs
             proxynext.pylookup  = viewproxy.pylookup
 
-            return contenttype.lower_getitem_at(context, builder, rettype, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, atval, False, False)
+            return contenttype.lower_getitem_at_check(context, builder, rettype, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, atval, False, False)
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, key):
         viewproxy = context.make_helper(builder, viewtype, viewval)
@@ -613,7 +627,7 @@ class RecordArrayType(ContentType):
 
         rettype = self.getitem_field_record(recordviewtype, key)
 
-        return contenttype.lower_getitem_at(context, builder, rettype, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, recordviewproxy.at, False, False)
+        return contenttype.lower_getitem_at_check(context, builder, rettype, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, recordviewproxy.at, False, False)
 
 class UnionArrayType(ContentType):
     IDENTITIES = 0
@@ -635,7 +649,7 @@ class UnionArrayType(ContentType):
         return pos
 
     def __init__(self, tagstype, indextype, contenttypes, identitiestype, parameters):
-        super(UnionArrayType, self).__init__(name="awkward1.UnionArrayType({0}, {1}, ({2}{3}), {4}, {5})".format(tagstype.name, indextype.name, ", ".join(x.name for x in contenttypes), "," if len(contenttypes) == 1 else "", identitiestype.name, repr(parameters)))
+        super(UnionArrayType, self).__init__(name="awkward1.UnionArrayType({0}, {1}, ({2}{3}), {4}, {5})".format(tagstype.name, indextype.name, ", ".join(x.name for x in contenttypes), "," if len(contenttypes) == 1 else "", identitiestype.name, json.dumps(parameters)))
         self.tagstype = tagstype
         self.indextype = indextype
         self.contenttypes = contenttypes
@@ -662,7 +676,7 @@ class UnionArrayType(ContentType):
         for i, contenttype in enumerate(self.contenttypes):
             layout = contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENTS + i], fields)
             contents.append(layout)
-        return self.UnionArrayOf()(tags, index, contents)
+        return self.UnionArrayOf()(tags, index, contents, parameters=self.parameters)
 
     def hasfield(self, key):
         return any(x.hasfield(key) for x in self.contenttypes)
