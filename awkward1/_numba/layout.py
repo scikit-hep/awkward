@@ -547,7 +547,9 @@ class RecordArrayType(ContentType):
                 raise ValueError("no field {0} in tuples with {1} fields".format(repr(key), len(self.contenttypes)))
             else:
                 raise ValueError("no field {0} in records with fields: [{1}]".format(repr(key), ", ".join(repr(x) for x in self.recordlookup)))
-        return self.contenttypes[index].getitem_range(viewtype)
+        contenttype = self.contenttypes[index]
+        subviewtype = awkward1._numba.arrayview.ArrayViewType(contenttype, viewtype.behavior, viewtype.fields)
+        return contenttype.getitem_range(subviewtype)
 
     def getitem_field_record(self, recordviewtype, key):
         index = self.fieldindex(key)
@@ -556,7 +558,9 @@ class RecordArrayType(ContentType):
                 raise ValueError("no field {0} in tuple with {1} fields".format(repr(key), len(self.contenttypes)))
             else:
                 raise ValueError("no field {0} in record with fields: [{1}]".format(repr(key), ", ".join(repr(x) for x in self.recordlookup)))
-        return self.contenttypes[index].getitem_at(recordviewtype.arrayviewtype)
+        contenttype = self.contenttypes[index]
+        subviewtype = awkward1._numba.arrayview.ArrayViewType(contenttype, recordviewtype.arrayviewtype.behavior, recordviewtype.arrayviewtype.fields)
+        return contenttype.getitem_at(subviewtype)
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         print(type(self).__name__, "lower at", viewtype)
