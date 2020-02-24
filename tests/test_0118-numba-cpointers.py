@@ -548,6 +548,56 @@ def test_RecordArray_deep_field():
 
     assert awkward1.tolist(f8(array)) == [{"y": {"z": 1.1}}, {"y": {"z": 2.2}}, {"y": {"z": 3.3}}]
 
+def test_ListArray_deep_at():
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 12.2, 13.3, 14.4, 15.5, 16.6]))
+    offsets1 = awkward1.layout.Index32(numpy.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18], dtype=numpy.int32))
+    listarray1 = awkward1.layout.ListOffsetArray32(offsets1, content)
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 2, 4, 6, 8], dtype=numpy.int64))
+    listarray2 = awkward1.layout.ListOffsetArray64(offsets2, listarray1)
+    offsets3 = awkward1.layout.Index32(numpy.array([0, 2, 4], dtype=numpy.int32))
+    listarray3 = awkward1.layout.ListOffsetArray32(offsets3, listarray2)
+    array = awkward1.Array(listarray3)
+
+    @numba.njit
+    def f1(x):
+        return x[1][1][1][1]
+
+    assert f1(array) == 16.6
+
+    @numba.njit
+    def f2(x):
+        return x[1][1][1]
+
+    assert awkward1.tolist(f2(array)) == [15.5, 16.6]
+
+    @numba.njit
+    def f3(x):
+        return x[1][1]
+
+    assert awkward1.tolist(f3(array)) == [[13.3, 14.4], [15.5, 16.6]]
+
+    @numba.njit
+    def f4(x):
+        return x[1]
+
+    assert awkward1.tolist(f4(array)) == [[[9.9, 10.0], [11.1, 12.2]], [[13.3, 14.4], [15.5, 16.6]]]
+
+def test_IndexedArray_deep_at():
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    index1 = awkward1.layout.Index32(numpy.array([1, 2, 3, 4], dtype=numpy.int32))
+    indexedarray1 = awkward1.layout.IndexedArray32(index1, content)
+    index2 = awkward1.layout.Index64(numpy.array([1, 2, 3], dtype=numpy.int64))
+    indexedarray2 = awkward1.layout.IndexedArray64(index2, indexedarray1)
+    index3 = awkward1.layout.Index32(numpy.array([1, 2], dtype=numpy.int32))
+    indexedarray3 = awkward1.layout.IndexedArray32(index3, indexedarray2)
+    array = awkward1.Array(indexedarray3)
+
+    @numba.njit
+    def f1(x):
+        return x[1]
+
+    assert f1(array) == 5.5
+
 def test_UnionArray_getitem():
     array = awkward1.Array([1, 2, 3, [], [1], [2, 2], {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}])
 

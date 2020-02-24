@@ -81,7 +81,10 @@ class ContentType(numba.types.Type):
         return awkward1._numba.arrayview.ArrayViewType(self, viewtype.behavior, viewtype.fields)
 
     def getitem_field(self, viewtype, key):
-        return awkward1._numba.arrayview.ArrayViewType(self, viewtype.behavior, viewtype.fields + (key,))
+        if self.hasfield(key):
+            return awkward1._numba.arrayview.ArrayViewType(self, viewtype.behavior, viewtype.fields + (key,))
+        else:
+            raise TypeError("array does not have a field with key {0}".format(repr(key)))
 
     def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
         print(type(self).__name__, "lower range", viewtype)
@@ -201,11 +204,11 @@ class NumpyArrayType(ContentType):
         assert fields == ()
         return awkward1.layout.NumpyArray(lookup.arrays[lookup.positions[pos + self.ARRAY]])
 
+    def hasfield(self, key):
+        return False
+
     def getitem_at(self, viewtype):
         return self.arraytype.dtype
-
-    def getitem_field(self, viewtype, key):
-        raise TypeError("array does not contain tuples or records; cannot get field {0}".format(repr(key)))
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         print(type(self).__name__, "lower at", viewtype)
@@ -215,9 +218,6 @@ class NumpyArrayType(ContentType):
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
         arraypos = builder.add(viewproxy.start, atval)
         return getat(context, builder, arrayptr, arraypos, rettype)
-
-    def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
-        raise AssertionError("shouldn't get here because type-check should fail")
         
 class RegularArrayType(ContentType):
     IDENTITIES = 0
@@ -241,6 +241,9 @@ class RegularArrayType(ContentType):
     def tolayout(self, lookup, pos, fields):
         content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
         return awkward1.layout.RegularArray(content, self.size)
+
+    def hasfield(self, key):
+        return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
         return awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
@@ -312,6 +315,9 @@ class ListArrayType(ContentType):
         content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
         return self.ListArrayOf()(starts, stops, content)
 
+    def hasfield(self, key):
+        return self.contenttype.hasfield(key)
+
     def getitem_at(self, viewtype):
         return awkward1._numba.arrayview.ArrayViewType(self.contenttype, viewtype.behavior, viewtype.fields)
 
@@ -378,6 +384,9 @@ class IndexedArrayType(ContentType):
         content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
         return self.IndexedArrayOf()(index, content)
 
+    def hasfield(self, key):
+        return self.contenttype.hasfield(key)
+
     def getitem_at(self, viewtype):
         return self.contenttype.getitem_at(viewtype)
 
@@ -436,6 +445,9 @@ class IndexedOptionArrayType(ContentType):
         index = self.IndexOf(self.indextype)(lookup.arrays[lookup.positions[pos + self.INDEX]])
         content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
         return self.IndexedOptionArrayOf()(index, content)
+
+    def hasfield(self, key):
+        return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
         return numba.types.optional(self.contenttype.getitem_at(viewtype))
@@ -524,6 +536,9 @@ class RecordArrayType(ContentType):
                 return awkward1.layout.RecordArray(numpy.iinfo(numpy.int64).max, self.recordlookup is None)
             else:
                 return awkward1.layout.RecordArray(contents, self.recordlookup)
+
+    def hasfield(self, key):
+        return self.fieldindex(key) is not None
 
     def getitem_at(self, viewtype):
         if len(viewtype.fields) == 0:
@@ -685,6 +700,9 @@ class UnionArrayType(ContentType):
             layout = contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENTS + i], fields)
             contents.append(layout)
         return self.UnionArrayOf()(tags, index, contents)
+
+    def hasfield(self, key):
+        return any(x.hasfield(key) for x in self.contenttypes)
 
     def getitem_at(self, viewtype):
         raise NotImplementedError(type(self).__name__ + ".getitem_at not implemented")
