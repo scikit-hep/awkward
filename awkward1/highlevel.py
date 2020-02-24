@@ -289,6 +289,14 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
 class FillableArray(Sequence):
+    @classmethod
+    def _wrap(cls, fillablearray, behavior=None):
+        assert isinstance(fillablearray, awkward1.layout.FillableArray)
+        out = cls.__new__(cls)
+        out._fillablearray = fillablearray
+        out.behavior = behavior
+        return out
+
     def __init__(self, behavior=None):
         self._fillablearray = awkward1.layout.FillableArray()
         self.behavior = behavior
@@ -343,6 +351,13 @@ class FillableArray(Sequence):
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
+
+    @property
+    def numbatype(self):
+        import numba
+        import awkward1._numba.fillable
+        awkward1._numba.register()
+        return awkward1._numba.fillable.FillableArrayType(self._behavior)
 
     def snapshot(self):
         return awkward1._util.wrap(self._fillablearray.snapshot(), self._behavior)

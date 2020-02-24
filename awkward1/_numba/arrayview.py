@@ -118,12 +118,9 @@ def wrap(type, viewtype, fields):
     else:
         return ArrayViewType(type, viewtype.behavior, fields)
 
-def repr_behavior(behavior):
-    return repr(behavior)
-
 class ArrayViewType(numba.types.Type):
     def __init__(self, type, behavior, fields):
-        super(ArrayViewType, self).__init__(name="awkward1.ArrayView({0}, {1}, {2})".format(type.name, repr_behavior(behavior), repr(fields)))
+        super(ArrayViewType, self).__init__(name="awkward1.ArrayView({0}, {1}, {2})".format(type.name, awkward1._numba.repr_behavior(behavior), repr(fields)))
         self.type = type
         self.behavior = behavior
         self.fields = fields

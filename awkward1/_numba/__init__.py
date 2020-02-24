@@ -10,6 +10,9 @@ def register():
     import awkward1._numba.arrayview
     import awkward1._numba.layout
 
+def repr_behavior(behavior):
+    return repr(behavior)
+
 try:
     import numba
 except ImportError:
@@ -21,4 +24,8 @@ else:
 
     @numba.extending.typeof_impl.register(awkward1.highlevel.Record)
     def typeof_Record(obj, c):
+        return obj.numbatype
+
+    @numba.extending.typeof_impl.register(awkward1.highlevel.FillableArray)
+    def typeof_FillableArray(obj, c):
         return obj.numbatype

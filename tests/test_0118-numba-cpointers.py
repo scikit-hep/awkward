@@ -610,3 +610,32 @@ def test_iterator():
         return out
     
     assert f1(array) == 49.5
+
+def test_fillable_refcount():
+    builder = awkward1.FillableArray()
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 2)
+
+    @numba.njit
+    def f1(x):
+        return 3.14
+
+    y = f1(builder)
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 2)
+
+    @numba.njit
+    def f2(x):
+        return x
+
+    y = f2(builder)
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 3)
+    del y
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 2)
+
+    @numba.njit
+    def f3(x):
+        return x, x
+
+    y = f3(builder)
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 4)
+    del y
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 2)
