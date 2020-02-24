@@ -262,6 +262,56 @@ class type_methods(numba.typing.templates.AttributeTemplate):
 def lower_getattr_generic(context, builder, viewtype, viewval, attr):
     return viewtype.type.lower_getitem_field(context, builder, viewtype, viewval, attr)
 
+class IteratorType(numba.types.common.SimpleIteratorType):
+    def __init__(self, viewtype):
+        super(IteratorType, self).__init__("awkward1.Iterator({0})".format(viewtype.name), viewtype.type.getitem_at(viewtype))
+        self.viewtype = viewtype
+
+@numba.typing.templates.infer
+class type_getiter(numba.typing.templates.AbstractTemplate):
+    key = "getiter"
+
+    def generic(self, args, kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
+            return IteratorType(args[0])(args[0])
+
+@numba.datamodel.registry.register_default(IteratorType)
+class IteratorModel(numba.datamodel.models.StructModel):
+    def __init__(self, dmm, fe_type):
+        members = [("view", fe_type.viewtype),
+                   ("length", numba.intp),
+                   ("at", numba.types.EphemeralPointer(numba.intp))]
+        super(IteratorModel, self).__init__(dmm, fe_type, members)
+
+@numba.extending.lower_builtin("getiter", ArrayViewType)
+def lower_getiter(context, builder, sig, args):
+    rettype, (viewtype,) = sig.return_type, sig.args
+    viewval, = args
+    viewproxy = context.make_helper(builder, viewtype, viewval)
+    proxyout = context.make_helper(builder, rettype)
+    proxyout.view = viewval
+    proxyout.length = builder.sub(viewproxy.stop, viewproxy.start)
+    proxyout.at = numba.cgutils.alloca_once_value(builder, context.get_constant(numba.int64, 0))
+    if context.enable_nrt:
+        context.nrt.incref(builder, viewtype, viewval)
+    return numba.targets.imputils.impl_ret_new_ref(context, builder, rettype, proxyout._getvalue())
+
+@numba.extending.lower_builtin("iternext", IteratorType)
+@numba.targets.imputils.iternext_impl(numba.targets.imputils.RefType.BORROWED)
+def lower_iternext(context, builder, sig, args, result):
+    itertype, = sig.args
+    iterval, = args
+    proxyin = context.make_helper(builder, itertype, iterval)
+    at = builder.load(proxyin.at)
+
+    is_valid = builder.icmp_signed("<", at, proxyin.length)
+    result.set_valid(is_valid)
+
+    with builder.if_then(is_valid, likely=True):
+        result.yield_(lower_getitem_at(context, builder, itertype.yield_type(itertype.viewtype, numba.intp), (proxyin.view, at)))
+        nextat = numba.cgutils.increment_index(builder, at)
+        builder.store(nextat, proxyin.at)
+
 class RecordView(object):
     @classmethod
     def fromrecord(self, record):

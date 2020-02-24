@@ -597,3 +597,16 @@ def test_IndexedArray_deep_at():
         return x[1]
 
     assert f1(array) == 5.5
+
+def test_iterator():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+
+    @numba.njit
+    def f1(a):
+        out = 0.0
+        for b in a:
+            for c in b:
+                out += c
+        return out
+    
+    assert f1(array) == 49.5
