@@ -611,7 +611,7 @@ def test_iterator():
     
     assert f1(array) == 49.5
 
-def test_fillable_refcount():
+def test_FillableArray_refcount():
     builder = awkward1.FillableArray()
     assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 2)
 
@@ -640,7 +640,7 @@ def test_fillable_refcount():
     del y
     assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 2)
 
-def test_fillable_len():
+def test_FillableArray_len():
     builder = awkward1.FillableArray()
     builder.real(1.1)
     builder.real(2.2)
@@ -653,3 +653,89 @@ def test_fillable_len():
         return len(x)
 
     assert f1(builder) == 5
+
+def test_FillableArray_simple():
+    @numba.njit
+    def f1(q):
+        q.clear()
+        return 3.14
+
+    a = awkward1.FillableArray()
+    f1(a)
+
+def test_FillableArray_boolean():
+    @numba.njit
+    def f1(q):
+        q.boolean(True)
+        q.boolean(False)
+        q.boolean(False)
+        return q
+
+    a = awkward1.FillableArray()
+    b = f1(a)
+    assert awkward1.tolist(a.snapshot()) == [True, False, False]
+    assert awkward1.tolist(b.snapshot()) == [True, False, False]
+
+def test_FillableArray_integer():
+    @numba.njit
+    def f1(q):
+        q.integer(1)
+        q.integer(2)
+        q.integer(3)
+        return q
+
+    a = awkward1.FillableArray()
+    b = f1(a)
+    assert awkward1.tolist(a.snapshot()) == [1, 2, 3]
+    assert awkward1.tolist(b.snapshot()) == [1, 2, 3]
+
+def test_FillableArray_real():
+    @numba.njit
+    def f1(q, z):
+        q.real(1)
+        q.real(2.2)
+        q.real(z)
+        return q
+
+    a = awkward1.FillableArray()
+    b = f1(a, numpy.array([3.5], dtype=numpy.float32)[0])
+    assert awkward1.tolist(a.snapshot()) == [1, 2.2, 3.5]
+    assert awkward1.tolist(b.snapshot()) == [1, 2.2, 3.5]
+
+def test_FillableArray_list():
+    @numba.njit
+    def f1(q):
+        q.beginlist()
+        q.real(1.1)
+        q.real(2.2)
+        q.real(3.3)
+        q.endlist()
+        q.beginlist()
+        q.endlist()
+        q.beginlist()
+        q.real(4.4)
+        q.real(5.5)
+        q.endlist()
+        return q
+
+    a = awkward1.FillableArray()
+    b = f1(a)
+    assert awkward1.tolist(a.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(b.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+    @numba.njit
+    def f2(q):
+        return len(q)
+
+    assert f2(a) == 3
+    assert f2(b) == 3
+
+    @numba.njit
+    def f3(q):
+        q.clear()
+        return q
+
+    c = f3(b)
+    assert awkward1.tolist(a.snapshot()) == []
+    assert awkward1.tolist(b.snapshot()) == []
+    assert awkward1.tolist(c.snapshot()) == []
