@@ -1022,9 +1022,9 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::pad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::rpad(int64_t length, int64_t axis) const {
     Index64 toindex(index().length() + length);
-    struct Error err = util::awkward_indexedarray_pad_64<T>(
+    struct Error err = util::awkward_indexedarray_rpad_64<T>(
       toindex.ptr().get(),
       index().ptr().get(),
       index().length() + length,
