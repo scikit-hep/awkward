@@ -201,6 +201,10 @@ namespace awkward {
     return that_;
   }
 
+  const std::shared_ptr<Fillable> OptionFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    throw std::runtime_error("FIXME: OptionFillable::append");
+  }
+
   void OptionFillable::maybeupdate(const std::shared_ptr<Fillable>& tmp) {
     if (tmp.get() != content_.get()) {
       content_ = tmp;

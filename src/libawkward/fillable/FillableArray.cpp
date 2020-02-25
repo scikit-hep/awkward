@@ -146,6 +146,10 @@ namespace awkward {
     maybeupdate(fillable_.get()->endrecord());
   }
 
+  void FillableArray::append(const std::shared_ptr<Content>& array, int64_t at) {
+    maybeupdate(fillable_.get()->append(array, at));
+  }
+
   void FillableArray::maybeupdate(const std::shared_ptr<Fillable>& tmp) {
     if (tmp.get() != fillable_.get()) {
       fillable_ = tmp;
@@ -380,6 +384,18 @@ uint8_t awkward_FillableArray_endrecord(void* fillablearray) {
   awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
   try {
     obj->endrecord();
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_FillableArray_append(void* fillablearray, const void* shared_ptr_ptr, int64_t at) {
+  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
+  const std::shared_ptr<awkward::Content>* array = reinterpret_cast<const std::shared_ptr<awkward::Content>*>(shared_ptr_ptr);
+  try {
+    obj->append(*array, at);
   }
   catch (...) {
     return 1;

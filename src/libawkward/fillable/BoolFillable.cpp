@@ -107,4 +107,9 @@ namespace awkward {
   const std::shared_ptr<Fillable> BoolFillable::endrecord() {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
+
+  const std::shared_ptr<Fillable> BoolFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    throw std::runtime_error("FIXME: BoolFillable::append");
+  }
+
 }

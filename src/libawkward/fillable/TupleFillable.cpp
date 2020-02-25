@@ -297,6 +297,10 @@ namespace awkward {
     return that_;
   }
 
+  const std::shared_ptr<Fillable> TupleFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    throw std::runtime_error("FIXME: TupleFillable::append");
+  }
+
   void TupleFillable::maybeupdate(int64_t i, const std::shared_ptr<Fillable>& tmp) {
     if (tmp.get() != contents_[(size_t)i].get()) {
       contents_[(size_t)i] = tmp;

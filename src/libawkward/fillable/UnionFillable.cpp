@@ -339,4 +339,8 @@ namespace awkward {
     }
     return that_;
   }
+
+  const std::shared_ptr<Fillable> UnionFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    throw std::runtime_error("FIXME: UnionFillable::append");
+  }
 }
