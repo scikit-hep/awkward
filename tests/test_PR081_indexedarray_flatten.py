@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+from __future__ import absolute_import
+
 import sys
 
 import pytest
@@ -13,25 +15,25 @@ def test_count():
     stops = awkward1.layout.Index64(numpy.array([7, 999, 1, 4, 5, 10], dtype=numpy.int64))
     array1 = awkward1.layout.ListArray64(starts, stops, content)
     assert awkward1.tolist(array1) == [[4, 5, 6], [], [0], [0, 1, 2, 3], [1, 2, 3, 4], [7, 8, 9]]
-    assert awkward1.tolist(array1.count()) == [3, 0, 1, 4, 4, 3]
+    assert awkward1.tolist(array1.sizes()) == [3, 0, 1, 4, 4, 3]
 
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10], dtype=numpy.int64))
     array2 = awkward1.layout.ListOffsetArray64(offsets, content)
     assert awkward1.tolist(array2) == [[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]]
-    assert awkward1.tolist(array2.count()) == [3, 0, 2, 1, 4]
+    assert awkward1.tolist(array2.sizes()) == [3, 0, 2, 1, 4]
 
     array3 = awkward1.layout.RegularArray(content, 5)
     assert awkward1.tolist(array3) == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
-    assert awkward1.tolist(array3.count()) == [5, 5]
+    assert awkward1.tolist(array3.sizes()) == [5, 5]
 
     content2 = awkward1.layout.NumpyArray(numpy.array([[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]], dtype=numpy.int64))
     assert awkward1.tolist(content2) == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
-    assert awkward1.tolist(content2.count()) == [5, 5]
+    assert awkward1.tolist(content2.sizes()) == [5, 5]
 
     index1 = awkward1.layout.Index64(numpy.array([2, 4, 0, 0, 1, 3], dtype=numpy.int64))
     array4 = awkward1.layout.IndexedArray64(index1, array2)
     assert awkward1.tolist(array4) == [[3, 4], [6, 7, 8, 9], [0, 1, 2], [0, 1, 2], [], [5]]
-    assert awkward1.tolist(array4.count()) == [2, 4, 3, 3, 0, 1]
+    assert awkward1.tolist(array4.sizes()) == [2, 4, 3, 3, 0, 1]
 
 def test_indexedarray():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))

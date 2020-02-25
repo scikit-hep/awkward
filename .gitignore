@@ -3,6 +3,12 @@ docs/demos/countries.geojson
 docs/demos/test-program
 docs/demos/test-program.cpp
 
+dependent-project/CMakeFiles
+dependent-project/CMakeCache.txt
+dependent-project/Makefile
+dependent-project/cmake_install.cmake
+dependent-project/cmake_pybind11
+
 ############################################################# IDEs
 
 # ...

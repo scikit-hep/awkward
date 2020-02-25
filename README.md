@@ -104,6 +104,14 @@ rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
 <p align="center">See Azure Pipelines <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary">buildtest-awkward</a> (CI) and <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary">deploy-awkward</a> (CD).</p>
 <br>
 
+## Building projects that depend on Awkward
+
+Python projects can simply use `awkward1` as a Python library.
+
+C++ projects can either link against the shared libraries `libawkward-cpu-kernels.so` and `libawkward.so` or the static libraries, whose names end in `-static`. All four libraries, as well as their C++ header files, are shipped with the Python library. Even if you installed Awkward Array with pip, you'll have everything you need to build an Awkward C++ program.
+
+If you also want to bind your C++ to Python and share Awkward Arrays between modules in Python, see the [dependent-project](https://github.com/scikit-hep/awkward-1.0/tree/master/dependent-project) example. This is a small CMake project bound to Python with pybind11 that can produce and consume Awkward Arrays in Python. Such projects depend on a specific version of Awkward Array, but we intend to stabilize the ABI for more flexibility.
+
 ## Roadmap
 
 **The six-month sprint:**
@@ -177,8 +185,8 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `awkward.tonumpy` (issue [#65](https://github.com/scikit-hep/awkward-1.0/issues/65)): to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
       * [ ] `awkward.flatpandas` (issue [#80](https://github.com/scikit-hep/awkward-1.0/issues/80)): flattening jaggedness into `MultiIndex` rows and nested records into `MultiIndex` columns. This is distinct from the arrays' inheritance from Pandas, distinct from the natural ability to use any one of them as DataFrame columns.
       * [ ] `awkward.flatten`: same as old with an `axis` parameter (issue [#51](https://github.com/scikit-hep/awkward-1.0/issues/51)).
-      * [ ] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporting an `axis` method (issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
-      * [ ] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std` (addendum to issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
+      * [X] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporting an `axis` method (issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
+      * [X] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std` (addendum to issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
       * [ ] `awkward.argmin`, `awkward.argmax` (issue [#70](https://github.com/scikit-hep/awkward-1.0/issues/70)): return values and `None` instead of singleton and empty lists.
       * [ ] `awkward.argsort`, and `awkward.sort` (issue [#74](https://github.com/scikit-hep/awkward-1.0/issues/74)): same as old.
       * [X] `awkward.where` (issue [#75](https://github.com/scikit-hep/awkward-1.0/issues/75)): like `numpy.where`; old doesn't have this yet, but we'll need it.

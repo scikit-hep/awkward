@@ -113,6 +113,10 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::minmax_depth");
   }
 
+  const std::pair<bool, int64_t> None::branch_depth() const {
+    throw std::runtime_error("undefined operation: None::branch_depth");
+  }
+
   int64_t None::numfields() const {
     throw std::runtime_error("undefined operation: None::numfields");
   }
@@ -159,6 +163,10 @@ namespace awkward {
 
   const std::shared_ptr<Content> None::pad(int64_t length, int64_t axis) const {
     throw std::runtime_error("undefined opteration: None::pad");
+  }
+
+  const std::shared_ptr<Content> None::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+    throw std::runtime_error("undefined opteration: None::reduce_next");
   }
 
   const std::shared_ptr<Content> None::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

@@ -84,6 +84,7 @@ namespace awkward {
     bool purelist_isregular() const override;
     int64_t purelist_depth() const override;
     const std::pair<int64_t, int64_t> minmax_depth() const override;
+    const std::pair<bool, int64_t> branch_depth() const override;
     int64_t numfields() const override;
     int64_t fieldindex(const std::string& key) const override;
     const std::string key(int64_t fieldindex) const override;
@@ -98,6 +99,7 @@ namespace awkward {
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
     const std::shared_ptr<SliceItem> asslice() const override;
     const std::shared_ptr<Content> pad(int64_t length, int64_t axis) const override;
+    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override;
 
     bool iscontiguous() const;
     void become_contiguous();

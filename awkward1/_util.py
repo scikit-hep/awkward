@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+from __future__ import absolute_import
+
 import inspect
 import numbers
 import re
@@ -127,6 +129,37 @@ def key2index(keys, key):
 
 key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
+def completely_flatten(array):
+    if isinstance(array, unknowntypes):
+        return (numpy.array([], dtype=numpy.bool_),)
+
+    elif isinstance(array, indexedtypes):
+        return completely_flatten(array.project())
+
+    elif isinstance(array, uniontypes):
+        out = ()
+        for i in range(array.numcontents):
+            out = out + completely_flatten(array.project(i))
+        return out
+
+    elif isinstance(array, optiontypes):
+        return completely_flatten(array.project())
+
+    elif isinstance(array, listtypes):
+        return completely_flatten(array.flatten())
+
+    elif isinstance(array, recordtypes):
+        out = ()
+        for i in range(array.numfields):
+            out = out + completely_flatten(array.field(i))
+        return out
+
+    elif isinstance(array, awkward1.layout.NumpyArray):
+        return (numpy.asarray(array),)
+
+    else:
+        raise RuntimeError("cannot completely flatten: {0}".format(type(array)))
+
 def broadcast_and_apply(inputs, getfunction):
     def checklength(inputs):
         length = len(inputs[0])
@@ -158,7 +191,7 @@ def broadcast_and_apply(inputs, getfunction):
             return function(depth)
 
         elif any(isinstance(x, unknowntypes) for x in inputs):
-            return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.int64)) for x in inputs], depth)
+            return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.bool_)) for x in inputs], depth)
 
         elif any(isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1 for x in inputs):
             return apply([x if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1) else x.toRegularArray() for x in inputs], depth)
@@ -182,12 +215,13 @@ def broadcast_and_apply(inputs, getfunction):
 
             tags = numpy.empty(length, dtype=numpy.int8)
             index = numpy.empty(length, dtype=numpy.int64)
-            contents = []
+            outcontents = []
             for tag, combo in enumerate(numpy.unique(combos)):
                 mask = (combos == combo)
                 tags[mask] = tag
                 index[mask] = numpy.arange(numpy.count_nonzero(mask))
                 nextinputs = []
+                numoutputs = None
                 for i, x in enumerate(inputs):
                     if isinstance(x, uniontypes):
                         nextinputs.append(x[mask].project(combo[str(i)]))
@@ -195,11 +229,15 @@ def broadcast_and_apply(inputs, getfunction):
                         nextinputs.append(x[mask])
                     else:
                         nextinputs.append(x)
-                contents.append(apply(nextinputs, depth))
+                outcontents.append(apply(nextinputs, depth))
+                assert isinstance(outcontents[-1], tuple)
+                if numoutputs is not None:
+                    assert numoutputs == len(outcontents[-1])
+                numoutputs = len(outcontents[-1])
 
             tags = awkward1.layout.Index8(tags)
             index = awkward1.layout.Index64(index)
-            return awkward1.layout.UnionArray8_64(tags, index, contents).simplify()
+            return tuple(awkward1.layout.UnionArray8_64(tags, index, [x[i] for x in outcontents]).simplify() for i in range(numoutputs))
 
         elif any(isinstance(x, optiontypes) for x in inputs):
             mask = None
@@ -224,10 +262,14 @@ def broadcast_and_apply(inputs, getfunction):
             for x in inputs:
                 if isinstance(x, optiontypes):
                     nextinputs.append(x.project(nextmask))
-                else:
+                elif isinstance(x, awkward1.layout.Content):
                     nextinputs.append(awkward1.layout.IndexedOptionArray64(nextindex, x).project(nextmask))
+                else:
+                    nextinputs.append(x)
 
-            return awkward1.layout.IndexedOptionArray64(index, apply(nextinputs, depth)).simplify()
+            outcontent = apply(nextinputs, depth)
+            assert isinstance(outcontent, tuple)
+            return tuple(awkward1.layout.IndexedOptionArray64(index, x).simplify() for x in outcontent)
 
         elif any(isinstance(x, listtypes) for x in inputs):
             if all(isinstance(x, awkward1.layout.RegularArray) or not isinstance(x, listtypes) for x in inputs):
@@ -247,7 +289,9 @@ def broadcast_and_apply(inputs, getfunction):
                             raise ValueError("cannot broadcast RegularArray of size {0} with RegularArray of size {1}".format(x.size, maxsize))
                     else:
                         nextinputs.append(x)
-                return awkward1.layout.RegularArray(apply(nextinputs, depth + 1), maxsize)
+                outcontent = apply(nextinputs, depth + 1)
+                assert isinstance(outcontent, tuple)
+                return tuple(awkward1.layout.RegularArray(x, maxsize) for x in outcontent)
 
             else:
                 for x in inputs:
@@ -264,7 +308,10 @@ def broadcast_and_apply(inputs, getfunction):
                         nextinputs.append(awkward1.layout.RegularArray(x, 1).broadcast_tooffsets64(offsets).content)
                     else:
                         nextinputs.append(x)
-                return awkward1.layout.ListOffsetArray64(offsets, apply(nextinputs, depth + 1))
+                    
+                outcontent = apply(nextinputs, depth + 1)
+                assert isinstance(outcontent, tuple)
+                return tuple(awkward1.layout.ListOffsetArray64(offsets, x) for x in outcontent)
 
         elif any(isinstance(x, recordtypes) for x in inputs):
             keys = None
@@ -286,16 +333,23 @@ def broadcast_and_apply(inputs, getfunction):
             if len(keys) == 0:
                 return awkward1.layout.RecordArray(length, istuple)
             else:
-                contents = []
+                outcontents = []
+                numoutputs = None
                 for key in keys:
-                    contents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs], depth))
-                return awkward1.layout.RecordArray(contents, keys)
+                    outcontents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs], depth))
+                    assert isinstance(outcontents[-1], tuple)
+                    if numoutputs is not None:
+                        assert numoutputs == len(outcontents[-1])
+                    numoutputs = len(outcontents[-1])
+                return tuple(awkward1.layout.RecordArray([x[i] for x in outcontents], keys) for i in range(numoutputs))
 
         else:
-            raise ValueError("cannot broadcast: {0}".format(", ".join(type(x) for x in inputs)))
+            raise ValueError("cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs)))
 
     isscalar = []
-    return broadcast_unpack(apply(broadcast_pack(inputs, isscalar), 0), isscalar)
+    out = apply(broadcast_pack(inputs, isscalar), 0)
+    assert isinstance(out, tuple)
+    return tuple(broadcast_unpack(x, isscalar) for x in out)
 
 def broadcast_pack(inputs, isscalar):
     maxlen = -1

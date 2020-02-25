@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+from __future__ import absolute_import
+
 import sys
 import os
 import json
@@ -71,7 +73,7 @@ def test_root_nestedvector():
         0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 99, 0, 0, 0, 123, 0, 0, 0, 1, 0, 0, 0, 123
         ], dtype=numpy.uint8))
 
-    result = awkward1.layout.fromroot_nestedvector(byteoffsets, rawdata, 2, numpy.dtype(">i").itemsize, ">i")
+    result = awkward1._io.fromroot_nestedvector(byteoffsets, rawdata, 2, numpy.dtype(">i").itemsize, ">i")
     assert numpy.asarray(result.offsets).tolist() == [0, 3, 5]
     assert numpy.asarray(result.content.offsets).tolist() == [0, 1, 1, 3, 5, 6]
     assert numpy.asarray(result.content.content).tolist() == [123, 99, 123, 99, 123, 123]

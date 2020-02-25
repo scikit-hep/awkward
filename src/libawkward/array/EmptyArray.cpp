@@ -16,6 +16,13 @@ namespace awkward {
   EmptyArray::EmptyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters)
       : Content(identities, parameters) { }
 
+  const std::shared_ptr<Content> EmptyArray::toNumpyArray(const std::string& format, ssize_t itemsize) const {
+    std::shared_ptr<void> ptr(new uint8_t[0], util::array_deleter<uint8_t>());
+    std::vector<ssize_t> shape({ 0 });
+    std::vector<ssize_t> strides({ itemsize });
+    return std::make_shared<NumpyArray>(identities_, parameters_, ptr, shape, strides, 0, itemsize, format);
+  }
+
   const std::string EmptyArray::classname() const {
     return "EmptyArray";
   }
@@ -136,6 +143,10 @@ namespace awkward {
     return std::pair<int64_t, int64_t>(1, 1);
   }
 
+  const std::pair<bool, int64_t> EmptyArray::branch_depth() const {
+    return std::pair<bool, int64_t>(false, 1);
+  }
+
   int64_t EmptyArray::numfields() const { return -1; }
 
   int64_t EmptyArray::fieldindex(const std::string& key) const {
@@ -189,6 +200,11 @@ namespace awkward {
       index.ptr().get()[i] = -1;
     }
     return std::make_shared<IndexedOptionArray64>(identities_, parameters_, index, std::make_shared<EmptyArray>(identities_, parameters_));
+  }
+
+  const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+    std::shared_ptr<Content> asnumpy = toNumpyArray(reducer.preferred_type(), reducer.preferred_typesize());
+    return asnumpy.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

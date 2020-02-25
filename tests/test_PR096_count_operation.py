@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+from __future__ import absolute_import
+
 import sys
 
 import pytest
@@ -25,7 +27,7 @@ def test_count_empty_array():
     empty = awkward1.layout.EmptyArray()
 
     assert awkward1.tolist(empty) == []
-    assert awkward1.tolist(empty.count(0)) == []
+    assert awkward1.tolist(empty.sizes(0)) == []
 
 def test_count_indexed_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -35,8 +37,8 @@ def test_count_indexed_array():
     indexedarray = awkward1.layout.IndexedArray64(index, listoffsetarray)
     assert awkward1.tolist(indexedarray) == [[3.3, 4.4], [0.0, 1.1, 2.2], [], [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]
     assert count(awkward1.tolist(indexedarray), 0) == [2, 3, 0, 1, 1, 4]
-    assert awkward1.tolist(indexedarray.count(0)) == [2, 3, 0, 1, 1, 4]
-    assert awkward1.tolist(indexedarray.count(-1)) == [2, 3, 0, 1, 1, 4]
+    assert awkward1.tolist(indexedarray.sizes(0)) == [2, 3, 0, 1, 1, 4]
+    assert awkward1.tolist(indexedarray.sizes(-1)) == [2, 3, 0, 1, 1, 4]
 
 def test_count_list_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -46,8 +48,8 @@ def test_count_list_array():
 
     assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
     assert count(awkward1.tolist(array), 0) == [3, 0, 2, 3, 1]
-    assert awkward1.tolist(array.count(0)) == [3, 0, 2, 3, 1]
-    assert awkward1.tolist(array.count(-1)) == [3, 0, 2, 3, 1]
+    assert awkward1.tolist(array.sizes(0)) == [3, 0, 2, 3, 1]
+    assert awkward1.tolist(array.sizes(-1)) == [3, 0, 2, 3, 1]
 
     with pytest.raises(ValueError) as err:
         count(awkward1.tolist(array), 1)
@@ -60,26 +62,26 @@ def test_count_list_offset_array():
 
     assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
     assert count(awkward1.tolist(array), 0) == [3, 0, 2, 1, 4]
-    assert awkward1.tolist(array.count(0)) == [3, 0, 2, 1, 4]
-    assert awkward1.tolist(array.count(-1)) == [3, 0, 2, 1, 4]
+    assert awkward1.tolist(array.sizes(0)) == [3, 0, 2, 1, 4]
+    assert awkward1.tolist(array.sizes(-1)) == [3, 0, 2, 1, 4]
 
     with pytest.raises(ValueError) as err:
         count(awkward1.tolist(array), 1) == [3, 0, 2, 1, 4]
     assert str(err.value) == "cannot count the lengths of non-lists"
 
-    # FIXME: assert awkward1.tolist(array.count(1)) == []
+    # FIXME: assert awkward1.tolist(array.sizes(1)) == []
 
 def test_count_numpy_array():
     array = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
     assert awkward1.tolist(array) == [[[ 0,  1,  2,  3,  4], [ 5,  6,  7,  8,  9], [10, 11, 12, 13, 14]],
                                       [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]
     assert count(awkward1.tolist(array), 0) == [3, 3]
-    assert awkward1.tolist(array.count(0)) == [3, 3]
+    assert awkward1.tolist(array.sizes(0)) == [3, 3]
     assert count(awkward1.tolist(array), 1) == [[5, 5, 5], [5, 5, 5]]
-    assert awkward1.tolist(array.count(1)) == [[5, 5, 5], [5, 5, 5]]
-    assert awkward1.tolist(array.count(2)) == [30]
-    assert awkward1.tolist(array.count(-1)) == [[5, 5, 5], [5, 5, 5]]
-    assert awkward1.tolist(array.count(-2)) == [3, 3]
+    assert awkward1.tolist(array.sizes(1)) == [[5, 5, 5], [5, 5, 5]]
+    assert awkward1.tolist(array.sizes(2)) == [30]
+    assert awkward1.tolist(array.sizes(-1)) == [[5, 5, 5], [5, 5, 5]]
+    assert awkward1.tolist(array.sizes(-2)) == [3, 3]
 
     array2 = awkward1.layout.NumpyArray(numpy.arange(2*3*5*3, dtype=numpy.int64).reshape(2, 3, 5, 3))
     assert awkward1.tolist(array2) == [[[[0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11], [12, 13, 14]],
@@ -89,18 +91,18 @@ def test_count_numpy_array():
                                         [[60, 61, 62], [63, 64, 65], [66, 67, 68], [69, 70, 71], [72, 73, 74]],
                                         [[75, 76, 77], [78, 79, 80], [81, 82, 83], [84, 85, 86], [87, 88, 89]]]]
     assert count(awkward1.tolist(array2), 0) == [3, 3]
-    assert awkward1.tolist(array2.count(0)) == [3, 3]
+    assert awkward1.tolist(array2.sizes(0)) == [3, 3]
     assert count(awkward1.tolist(array2), 1) == [[5, 5, 5], [5, 5, 5]]
-    assert awkward1.tolist(array2.count(1)) == [[5, 5, 5], [5, 5, 5]]
+    assert awkward1.tolist(array2.sizes(1)) == [[5, 5, 5], [5, 5, 5]]
     assert count(awkward1.tolist(array2), 2) == [[[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]],
                                                  [[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]]]
-    assert awkward1.tolist(array2.count(2)) == [[[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]],
+    assert awkward1.tolist(array2.sizes(2)) == [[[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]],
                                                 [[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]]]
-    assert awkward1.tolist(array2.count(3)) == [90]
-    assert awkward1.tolist(array2.count(-1)) == [[[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]],
+    assert awkward1.tolist(array2.sizes(3)) == [90]
+    assert awkward1.tolist(array2.sizes(-1)) == [[[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]],
                                                 [[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]]]
-    assert awkward1.tolist(array2.count(-2)) == [[5, 5, 5], [5, 5, 5]]
-    assert awkward1.tolist(array2.count(-3)) == [3, 3]
+    assert awkward1.tolist(array2.sizes(-2)) == [[5, 5, 5], [5, 5, 5]]
+    assert awkward1.tolist(array2.sizes(-3)) == [3, 3]
 
 ## def test_count_raw_array():
     ## RawArrayOf<T> is usable only in C++
@@ -123,10 +125,10 @@ def test_count_record_array():
         count(awkward1.tolist(recordarray), 0)
     assert str(err.value) == "cannot count the lengths of non-lists"
 
-    assert(awkward1.tolist(recordarray.count(0))) == [{'one': 5, 'two': 3}]
+    assert(awkward1.tolist(recordarray.sizes(0))) == [{'one': 5, 'two': 3}]
 
     with pytest.raises(ValueError) as err:
-        awkward1.tolist(recordarray.count(1))
+        awkward1.tolist(recordarray.sizes(1))
     assert str(err.value) == "NumpyArray cannot be counted because it has 0 dimensions"
 
 def test_count_regular_array():
@@ -137,11 +139,11 @@ def test_count_regular_array():
 
     assert awkward1.tolist(regulararray) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
     assert count(awkward1.tolist(regulararray), 0) == [2, 2, 2]
-    assert awkward1.tolist(regulararray.count(0)) == [2, 2, 2]
+    assert awkward1.tolist(regulararray.sizes(0)) == [2, 2, 2]
     assert count(awkward1.tolist(regulararray), 1) == [[3, 0], [2, 1], [4, 0]]
-    assert awkward1.tolist(regulararray.count(1)) == [[3, 0], [2, 1], [4, 0]]
-    assert awkward1.tolist(regulararray.count(-1)) == [[3, 0], [2, 1], [4, 0]]
-    assert awkward1.tolist(regulararray.count(-2)) == [2, 2, 2]
+    assert awkward1.tolist(regulararray.sizes(1)) == [[3, 0], [2, 1], [4, 0]]
+    assert awkward1.tolist(regulararray.sizes(-1)) == [[3, 0], [2, 1], [4, 0]]
+    assert awkward1.tolist(regulararray.sizes(-2)) == [2, 2, 2]
 
 def test_count_union_array():
     content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
@@ -149,8 +151,8 @@ def test_count_union_array():
     tags = awkward1.layout.Index8(numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
     index = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
     array = awkward1.layout.UnionArray8_32(tags, index, [content0, content1])
-    assert awkward1.tolist(array.count(0)) == [3, 3, 3, 0, 5, 2, 4, 4]
-    assert awkward1.tolist(array.count(-1)) == [3, 3, 3, 0, 5, 2, 4, 4]
+    assert awkward1.tolist(array.sizes(0)) == [3, 3, 3, 0, 5, 2, 4, 4]
+    assert awkward1.tolist(array.sizes(-1)) == [3, 3, 3, 0, 5, 2, 4, 4]
 
     with pytest.raises(ValueError) as err:
         count(awkward1.tolist(array), 0)
@@ -202,8 +204,8 @@ def test_count_union_array():
     content03 = awkward1.layout.ListOffsetArray64(roffsets3, rcontent3)
     content3 = awkward1.layout.UnionArray8_32(tags3, index3, [content03])
     array3 = awkward1.layout.ListOffsetArray64(offsets3, content3)
-    assert awkward1.tolist(array3.count(0)) == [4, 28, 12, 19, 2, 8, 1, 16, 26, 32, 5, 60, 10, 2]
-    assert awkward1.tolist(array3.count(1)) == [[2, 2, 22, 8],
+    assert awkward1.tolist(array3.sizes(0)) == [4, 28, 12, 19, 2, 8, 1, 16, 26, 32, 5, 60, 10, 2]
+    assert awkward1.tolist(array3.sizes(1)) == [[2, 2, 22, 8],
     [8, 8, 15, 4, 15, 26, 2, 15, 4, 17, 15, 32, 26, 8, 1, 3, 22, 1, 2, 15, 3, 18, 14, 6, 14, 4, 1, 4],
     [4, 6, 2, 2, 26, 2, 11, 2, 13, 32, 17, 0],
     [6, 2, 15, 15, 15, 2, 3, 11, 5, 1, 15, 6, 11, 4, 26, 11, 15, 13, 1],

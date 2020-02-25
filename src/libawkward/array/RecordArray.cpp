@@ -439,6 +439,29 @@ namespace awkward {
     return std::pair<int64_t, int64_t>(min, max);
   }
 
+  const std::pair<bool, int64_t> RecordArray::branch_depth() const {
+    if (contents_.empty()) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
+    else {
+      bool anybranch = false;
+      int64_t mindepth = -1;
+      for (auto content : contents_) {
+        std::pair<bool, int64_t> content_depth = content.get()->branch_depth();
+        if (mindepth == -1) {
+          mindepth = content_depth.second;
+        }
+        if (content_depth.first  ||  mindepth != content_depth.second) {
+          anybranch = true;
+        }
+        if (mindepth > content_depth.second) {
+          mindepth = content_depth.second;
+        }
+      }
+      return std::pair<bool, int64_t>(anybranch, mindepth);
+    }
+  }
+
   int64_t RecordArray::numfields() const {
     return (int64_t)contents_.size();
   }
@@ -644,6 +667,21 @@ namespace awkward {
     }
     else {
       return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    }
+  }
+
+  const std::shared_ptr<Content> RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+    if (contents_.empty()) {
+      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), outlength, istuple());
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        std::shared_ptr<Content> trimmed = content.get()->getitem_range_nowrap(0, length());
+        std::shared_ptr<Content> next = trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+        contents.push_back(next);
+      }
+      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_);
     }
   }
 

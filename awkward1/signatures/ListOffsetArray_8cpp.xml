@@ -37,12 +37,6 @@
       <node id="4">
         <label>awkward/cpu-kernels/identities.h</label>
       </node>
-      <node id="12">
-        <label>awkward/array/RegularArray.h</label>
-      </node>
-      <node id="13">
-        <label>awkward/array/NumpyArray.h</label>
-      </node>
       <node id="1">
         <label>src/libawkward/array/ListOffsetArray.cpp</label>
         <link refid="ListOffsetArray_8cpp"/>
@@ -79,6 +73,12 @@
         <childnode refid="17" relation="include">
         </childnode>
       </node>
+      <node id="12">
+        <label>awkward/array/RegularArray.h</label>
+      </node>
+      <node id="13">
+        <label>awkward/array/NumpyArray.h</label>
+      </node>
       <node id="17">
         <label>awkward/array/ListOffsetArray.h</label>
       </node>
@@ -105,52 +105,6 @@
       </node>
     </incdepgraph>
     <innernamespace refid="namespaceawkward">awkward</innernamespace>
-      <sectiondef kind="func">
-      <memberdef kind="function" id="namespaceawkward_1abc7dccb4d2b3ebf70c1f9028d74ad447" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <templateparamlist>
-          <param>
-            <type>typename T</type>
-          </param>
-        </templateparamlist>
-        <type>IndexOf&lt; T &gt;</type>
-        <definition>IndexOf&lt;T&gt; awkward::make_starts</definition>
-        <argsstring>(const IndexOf&lt; T &gt; &amp;offsets)</argsstring>
-        <name>make_starts</name>
-        <param>
-          <type>const IndexOf&lt; T &gt; &amp;</type>
-          <declname>offsets</declname>
-        </param>
-        <briefdescription>
-        </briefdescription>
-        <detaileddescription>
-        </detaileddescription>
-        <inbodydescription>
-        </inbodydescription>
-        <location file="src/libawkward/array/ListOffsetArray.cpp" line="24" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="24" bodyend="26"/>
-      </memberdef>
-      <memberdef kind="function" id="namespaceawkward_1aa3d73a21953e0578aa577329c38dc0ed" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <templateparamlist>
-          <param>
-            <type>typename T</type>
-          </param>
-        </templateparamlist>
-        <type>IndexOf&lt; T &gt;</type>
-        <definition>IndexOf&lt;T&gt; awkward::make_stops</definition>
-        <argsstring>(const IndexOf&lt; T &gt; &amp;offsets)</argsstring>
-        <name>make_stops</name>
-        <param>
-          <type>const IndexOf&lt; T &gt; &amp;</type>
-          <declname>offsets</declname>
-        </param>
-        <briefdescription>
-        </briefdescription>
-        <detaileddescription>
-        </detaileddescription>
-        <inbodydescription>
-        </inbodydescription>
-        <location file="src/libawkward/array/ListOffsetArray.cpp" line="29" column="11" bodyfile="src/libawkward/array/ListOffsetArray.cpp" bodystart="29" bodyend="31"/>
-      </memberdef>
-      </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>

@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+from __future__ import absolute_import
+
 import sys
 import itertools
 
@@ -9,14 +11,14 @@ import numpy
 import awkward1
 
 def test_types():
-    t0 = awkward1.layout.UnknownType()
-    t1 = awkward1.layout.PrimitiveType("int32")
-    t2 = awkward1.layout.OptionType(t1)
-    t3 = awkward1.layout.UnionType((t1, awkward1.layout.PrimitiveType("float64")))
-    t4 = awkward1.layout.ListType(t1)
-    t4b = awkward1.layout.ListType(awkward1.layout.PrimitiveType("int32"))
-    t5 = awkward1.layout.ListType(t4)
-    t6 = awkward1.layout.OptionType(t4)
+    t0 = awkward1.types.UnknownType()
+    t1 = awkward1.types.PrimitiveType("int32")
+    t2 = awkward1.types.OptionType(t1)
+    t3 = awkward1.types.UnionType((t1, awkward1.types.PrimitiveType("float64")))
+    t4 = awkward1.types.ListType(t1)
+    t4b = awkward1.types.ListType(awkward1.types.PrimitiveType("int32"))
+    t5 = awkward1.types.ListType(t4)
+    t6 = awkward1.types.OptionType(t4)
     assert repr(t0) == "unknown"
     assert repr(t1) == "int32"
     assert repr(t2) == "?int32"

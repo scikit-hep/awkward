@@ -17,6 +17,12 @@
       <node id="6">
         <label>awkward/type/ArrayType.h</label>
       </node>
+      <node id="4">
+        <label>stdexcept</label>
+      </node>
+      <node id="5">
+        <label>awkward/type/UnknownType.h</label>
+      </node>
       <node id="1">
         <label>src/libawkward/array/EmptyArray.cpp</label>
         <link refid="EmptyArray_8cpp"/>
@@ -36,12 +42,6 @@
         </childnode>
         <childnode refid="9" relation="include">
         </childnode>
-      </node>
-      <node id="4">
-        <label>stdexcept</label>
-      </node>
-      <node id="5">
-        <label>awkward/type/UnknownType.h</label>
       </node>
       <node id="8">
         <label>awkward/array/RegularArray.h</label>

@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "awkward/cpu-kernels/operations.h"
+#include "awkward/cpu-kernels/reducers.h"
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/EmptyArray.h"
@@ -74,6 +75,39 @@ namespace awkward {
       out += pair.second;
     }
     return out;
+  }
+
+  const std::shared_ptr<Content> Content::reduce(const Reducer& reducer, int64_t axis, bool mask, bool keepdims) const {
+    int64_t negaxis = -axis;
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    bool branch = branchdepth.first;
+    int64_t depth = branchdepth.second;
+
+    if (branch) {
+      if (negaxis <= 0) {
+        throw std::invalid_argument("cannot use non-negative axis on a nested list structure of variable depth (negative axis counts from the leaves of the tree; non-negative from the root)");
+      }
+      if (negaxis > depth) {
+        throw std::invalid_argument(std::string("cannot use axis=") + std::to_string(axis) + std::string(" on a nested list structure that splits into different depths, the minimum of which is depth=") + std::to_string(depth) + std::string(" from the leaves"));
+      }
+    }
+    else {
+      if (negaxis <= 0) {
+        negaxis += depth;
+      }
+      if (!(0 < negaxis  &&  negaxis <= depth)) {
+        throw std::invalid_argument(std::string("axis=") + std::to_string(axis) + std::string(" exceeds the depth of the nested list structure (which is ") + std::to_string(depth) + std::string(")"));
+      }
+    }
+
+    Index64 parents(length());
+    struct Error err = awkward_content_reduce_zeroparents_64(
+      parents.ptr().get(),
+      length());
+    util::handle_error(err, classname(), identities_.get());
+
+    std::shared_ptr<Content> next = reduce_next(reducer, negaxis, parents, 1, mask, keepdims);
+    return next.get()->getitem_at_nowrap(0);
   }
 
   const util::Parameters Content::parameters() const {

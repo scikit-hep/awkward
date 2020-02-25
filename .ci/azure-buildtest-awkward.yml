@@ -80,6 +80,7 @@ jobs:
           python setup.py build
           ls awkward1
           python -m pytest -vv tests
+
         displayName: "Build and test"
 
   - job: MacOS
@@ -132,6 +133,12 @@ jobs:
           python setup.py build
           ls awkward1
           python -m pytest -vv tests
+
+          cd dependent-project
+          cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
+          make
+          python -m pytest -vv tests.py
+
         displayName: "Build and test"
 
   - job: Linux
@@ -193,4 +200,10 @@ jobs:
           python setup.py build
           ls awkward1
           python -m pytest -vv tests
+
+          cd dependent-project
+          cmake -DPYBIND11_PYTHON_VERSION=$(python.version) .
+          make
+          python -m pytest -vv tests.py
+
         displayName: "Build and test"

@@ -320,6 +320,11 @@ namespace awkward {
     return std::pair<int64_t, int64_t>(content_depth.first + 1, content_depth.second + 1);
   }
 
+  const std::pair<bool, int64_t> RegularArray::branch_depth() const {
+    std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
+    return std::pair<bool, int64_t>(content_depth.first, content_depth.second + 1);
+  }
+
   int64_t RegularArray::numfields() const {
     return content_.get()->numfields();
   }
@@ -612,6 +617,10 @@ namespace awkward {
       }
       return std::make_shared<RegularArray>(identities_, parameters_, out, pad_width);
     }
+  }
+
+  const std::shared_ptr<Content> RegularArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+    return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

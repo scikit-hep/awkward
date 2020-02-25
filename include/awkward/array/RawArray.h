@@ -398,6 +398,10 @@ namespace awkward {
       return std::pair<int64_t, int64_t>(1, 1);
     }
 
+    const std::pair<bool, int64_t> branch_depth() const {
+      return std::pair<bool, int64_t>(false, 1);
+    }
+
     int64_t numfields() const override {
       return -1;
     }
@@ -497,6 +501,10 @@ namespace awkward {
 
     const std::shared_ptr<Content> pad(int64_t length, int64_t axis) const override {
       throw std::runtime_error("FIXME: RawArray is not implemented");
+    }
+
+    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {
+      throw std::runtime_error("FIXME: Raw:reduce_next");
     }
 
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {

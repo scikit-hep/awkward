@@ -1,11 +1,6 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-import sys
-import numbers
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from __future__ import absolute_import
 
 import numpy
 
@@ -23,12 +18,13 @@ def withfield(base, what, where=None):
         if isinstance(base, awkward1.layout.RecordArray):
             if not isinstance(what, awkward1.layout.Content):
                 what = awkward1.layout.NumpyArray(numpy.lib.stride_tricks.as_strided([what], shape=(len(base),), strides=(0,)))
-            return lambda depth: base.setitem_field(where, what)
+            return lambda depth: (base.setitem_field(where, what),)
         else:
             return None
 
     out = awkward1._util.broadcast_and_apply([base, what], getfunction)
-    return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(base, what))
+    assert isinstance(out, tuple) and len(out) == 1
+    return awkward1._util.wrap(out[0], behavior=awkward1._util.behaviorof(base, what))
 
 def isna(array):
     import awkward1.highlevel
@@ -156,6 +152,20 @@ def concatenate(arrays, axis=0, mergebool=True):
 
     return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*arrays))
 
+@awkward1._numpy.implements(numpy.broadcast_arrays)
+def broadcast_arrays(*arrays):
+    inputs = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=False) for x in arrays]
+
+    def getfunction(inputs):
+        if all(isinstance(x, awkward1.layout.NumpyArray) for x in inputs):
+            return lambda depth: tuple(inputs)
+        else:
+            return None
+
+    out = awkward1._util.broadcast_and_apply(inputs, getfunction)
+    assert isinstance(out, tuple)
+    return [awkward1._util.wrap(x, awkward1._util.behaviorof(arrays)) for x in out]
+
 @awkward1._numpy.implements(numpy.where)
 def where(condition, *args, **kwargs):
     import awkward1.highlevel
@@ -193,14 +203,14 @@ def where(condition, *args, **kwargs):
     else:
         raise TypeError("where() takes from 1 to 3 positional arguments but {0} were given".format(len(args) + 1))
 
-def count(array, axis=0):
+def sizes(array, axis=0):
     behavior = awkward1._util.behaviorof(array)
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-    return awkward1._util.wrap(layout.count(axis), behavior)
+    return awkward1._util.wrap(layout.sizes(axis), behavior)
 
 def flatten(array, axis=0):
     behavior = awkward1._util.behaviorof(array)
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     return awkward1._util.wrap(layout.flatten(axis), behavior)
 
-__all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "Iterable", "numpy", "awkward1")]
+__all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numpy", "awkward1")]

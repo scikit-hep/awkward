@@ -9,6 +9,7 @@
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
+#include "awkward/cpu-kernels/reducers.h"
 
 #include "awkward/util.h"
 #include "awkward/Identities.h"
@@ -17,6 +18,27 @@ namespace rj = rapidjson;
 
 namespace awkward {
   namespace util {
+    void handle_error(const struct Error& err, const std::string& classname, const Identities* identities) {
+      if (err.str != nullptr) {
+        std::stringstream out;
+        out << "in " << classname;
+        if (err.identity != kSliceNone  &&  identities != nullptr) {
+          assert(err.identity > 0);
+          if (0 <= err.identity  &&  err.identity < identities->length()) {
+            out << " with identity [" << identities->identity_at(err.identity) << "]";
+          }
+          else {
+            out << " with invalid identity";
+          }
+        }
+        if (err.attempt != kSliceNone) {
+          out << " attempting to get " << err.attempt;
+        }
+        out << ", " << err.str;
+        throw std::invalid_argument(out.str());
+      }
+    }
+
     template <typename T>
     IndexOf<T> make_starts(const IndexOf<T>& offsets) {
       return IndexOf<T>(offsets.ptr(), offsets.offset(), offsets.length() - 1);
@@ -33,6 +55,16 @@ namespace awkward {
     template IndexOf<int32_t> make_stops(const IndexOf<int32_t>& offsets);
     template IndexOf<uint32_t> make_stops(const IndexOf<uint32_t>& offsets);
     template IndexOf<int64_t> make_stops(const IndexOf<int64_t>& offsets);
+
+    std::string quote(const std::string& x, bool doublequote) {
+      // TODO: escape characters, possibly using RapidJSON.
+      if (doublequote) {
+        return std::string("\"") + x + std::string("\"");
+      }
+      else {
+        return std::string("'") + x + std::string("'");
+      }
+    }
 
     std::shared_ptr<RecordLookup> init_recordlookup(int64_t numfields) {
       std::shared_ptr<RecordLookup> out = std::make_shared<RecordLookup>();
@@ -131,56 +163,6 @@ namespace awkward {
           if (!parameter_equals(self, pair.first, pair.second)) {
             return false;
           }
-        }
-      }
-      return true;
-    }
-
-    void handle_error(const struct Error& err, const std::string& classname, const Identities* identities) {
-      if (err.str != nullptr) {
-        std::stringstream out;
-        out << "in " << classname;
-        if (err.identity != kSliceNone  &&  identities != nullptr) {
-          assert(err.identity > 0);
-          if (0 <= err.identity  &&  err.identity < identities->length()) {
-            out << " with identity [" << identities->identity_at(err.identity) << "]";
-          }
-          else {
-            out << " with invalid identity";
-          }
-        }
-        if (err.attempt != kSliceNone) {
-          out << " attempting to get " << err.attempt;
-        }
-        out << ", " << err.str;
-        throw std::invalid_argument(out.str());
-      }
-    }
-
-    std::string quote(const std::string& x, bool doublequote) {
-      // TODO: escape characters, possibly using RapidJSON.
-      if (doublequote) {
-        return std::string("\"") + x + std::string("\"");
-      }
-      else {
-        return std::string("'") + x + std::string("'");
-      }
-    }
-
-    bool subset(const std::vector<std::string>& super, const std::vector<std::string>& sub) {
-      if (super.size() < sub.size()) {
-        return false;
-      }
-      for (auto x : sub) {
-        bool found = false;
-        for (auto y : super) {
-          if (x == y) {
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          return false;
         }
       }
       return true;
@@ -860,6 +842,22 @@ namespace awkward {
     Error awkward_listarray_getitem_jagged_descend_64<int64_t>(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset) {
       return awkward_listarray64_getitem_jagged_descend_64(tooffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset);
     }
+
+    template <>
+    Error awkward_indexedarray_reduce_next_64<int32_t>(int64_t* nextcarry, int64_t* nextparents, const int32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+      return awkward_indexedarray32_reduce_next_64(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+    }
+
+    template <>
+    Error awkward_indexedarray_reduce_next_64<uint32_t>(int64_t* nextcarry, int64_t* nextparents, const uint32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+      return awkward_indexedarrayU32_reduce_next_64(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+    }
+
+    template <>
+    Error awkward_indexedarray_reduce_next_64<int64_t>(int64_t* nextcarry, int64_t* nextparents, const int64_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+      return awkward_indexedarray64_reduce_next_64(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+    }
+
 
   }
 }

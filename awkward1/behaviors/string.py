@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+from __future__ import absolute_import
+
 import codecs
 
 import numpy
@@ -30,8 +32,8 @@ class CharBehavior(awkward1.highlevel.Array):
             yield x
 
 awkward1.behavior["char"] = CharBehavior
-byte = awkward1.layout.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "byte", "encoding": None})
-utf8 = awkward1.layout.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "utf8", "encoding": "utf-8"})
+byte = awkward1.types.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "byte", "encoding": None})
+utf8 = awkward1.types.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "utf8", "encoding": "utf-8"})
 
 class StringBehavior(awkward1.highlevel.Array):
     def __iter__(self):
@@ -43,13 +45,13 @@ class StringBehavior(awkward1.highlevel.Array):
                 yield x.__str__()
 
 awkward1.behavior["string"] = StringBehavior
-bytestring = awkward1.layout.ListType(byte, {"__array__": "string", "__typestr__": "bytes"})
-string = awkward1.layout.ListType(utf8, {"__array__": "string", "__typestr__": "string"})
+bytestring = awkward1.types.ListType(byte, {"__array__": "string", "__typestr__": "bytes"})
+string = awkward1.types.ListType(utf8, {"__array__": "string", "__typestr__": "string"})
 
 def string_equal(one, two):
     # first condition: string lengths must be the same
-    counts1 = numpy.asarray(one.count())
-    counts2 = numpy.asarray(two.count())
+    counts1 = numpy.asarray(one.count(axis=-1))
+    counts2 = numpy.asarray(two.count(axis=-1))
 
     out = (counts1 == counts2)
 
