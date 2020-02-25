@@ -806,7 +806,7 @@ def test_custom_record2():
     assert f1(array, 2) == 303.3
 
 def dummy_typer3(viewtype, args):
-    return numba.float64(numba.int64)
+    return numba.float64(*args)
 
 def dummy_lower3(context, builder, sig, args):
     def compute(rec, j):
