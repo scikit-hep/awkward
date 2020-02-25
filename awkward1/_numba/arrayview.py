@@ -433,7 +433,7 @@ class type_getattr_record(numba.typing.templates.AttributeTemplate):
     key = RecordViewType
 
     def generic_resolve(self, recordviewtype, attr):
-        for recname, methodname, typer, lower in awkward1._util.numba_methods(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
+        for methodname, typer, lower in awkward1._util.numba_methods(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
             if attr == methodname:
                 class type_method(numba.typing.templates.AbstractTemplate):
                     key = methodname
@@ -445,7 +445,7 @@ class type_getattr_record(numba.typing.templates.AttributeTemplate):
                             return sig
                 return numba.types.BoundFunction(type_method, recordviewtype)
 
-        for recname, attrname, typer, lower in awkward1._util.numba_attrs(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
+        for attrname, typer, lower in awkward1._util.numba_attrs(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
             if attr == attrname:
                 return typer(recordviewtype)
 
@@ -454,8 +454,49 @@ class type_getattr_record(numba.typing.templates.AttributeTemplate):
 
 @numba.extending.lower_getattr_generic(RecordViewType)
 def lower_getattr_generic_record(context, builder, recordviewtype, recordviewval, attr):
-    for recname, attrname, typer, lower in awkward1._util.numba_attrs(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
+    for attrname, typer, lower in awkward1._util.numba_attrs(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
         if attr == attrname:
             return lower(context, builder, typer(recordviewtype)(recordviewtype), (recordviewval,))
     else:
         return recordviewtype.lower_field(context, builder, recordviewval, attr)
+
+def register_unary_operator(unaryop):
+    @numba.typing.templates.infer_global(unaryop)
+    class type_binary_operator(numba.typing.templates.AbstractTemplate):
+        def generic(self, args, kwargs):
+            if len(args) == 1 and len(kwargs) == 0:
+                behavior = None
+
+                if isinstance(args[0], RecordViewType):
+                    left = args[0].arrayviewtype.type
+                    behavior = args[0].arrayviewtype.behavior
+
+                for typer, lower in awkward1._util.numba_unaryops(unaryop, left, behavior):
+                    numba.extending.lower_builtin(unaryop, *args)(lower)
+                    return typer(unaryop, args[0])
+
+for unaryop in (abs, operator.inv, operator.invert, operator.neg, operator.not_, operator.pos, operator.truth):
+    register_unary_operator(unaryop)
+
+def register_binary_operator(binop):
+    @numba.typing.templates.infer_global(binop)
+    class type_binary_operator(numba.typing.templates.AbstractTemplate):
+        def generic(self, args, kwargs):
+            if len(args) == 2 and len(kwargs) == 0:
+                behavior = None
+
+                if isinstance(args[0], RecordViewType):
+                    left = args[0].arrayviewtype.type
+                    behavior = args[0].arrayviewtype.behavior
+
+                if isinstance(args[1], RecordViewType):
+                    right = args[1].arrayviewtype.type
+                    if behavior is None:
+                        behavior = args[1].arrayviewtype.behavior
+
+                for typer, lower in awkward1._util.numba_binops(binop, left, right, behavior):
+                    numba.extending.lower_builtin(binop, *args)(lower)
+                    return typer(binop, args[0], args[1])
+
+for binop in (operator.add, operator.and_, operator.contains, operator.eq, operator.floordiv, operator.ge, operator.gt, operator.le, operator.lshift, operator.lt, operator.mod, operator.mul, operator.ne, operator.or_, operator.pow, operator.rshift, operator.sub, operator.truediv, operator.xor) + (() if not hasattr(operator, "matmul") else (operator.matmul,)):
+    register_binary_operator(binop)

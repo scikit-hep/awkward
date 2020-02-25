@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import sys
+import operator
 
 import pytest
 import numpy
@@ -826,3 +827,65 @@ def test_custom_record3():
 
     assert f1(array, 1, 1000) == 1202.2
     assert f1(array, 2, 1000) == 1303.3
+
+def dummy_typer4(binop, left, right):
+    return numba.float64(left, right)
+
+def dummy_lower4(context, builder, sig, args):
+    def compute(left, right):
+        return left.x + right.x
+    return context.compile_internal(builder, compute, sig, args)
+
+def test_custom_record4():
+    behavior = {}
+    behavior["__numba_typer__", "Dummy", operator.add, "Dummy"] = dummy_typer4
+    behavior["__numba_lower__", "Dummy", operator.add, "Dummy"] = dummy_lower4
+    behavior["__numba_typer__", "Dummy", operator.eq, "Dummy"] = dummy_typer4
+    behavior["__numba_lower__", "Dummy", operator.eq, "Dummy"] = dummy_lower4
+
+    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior)
+    array.layout.setparameter("__record__", "Dummy")
+
+    @numba.njit
+    def f1(x, i, j):
+        return x[i] + x[j]
+
+    assert f1(array, 1, 2) == 5.5
+
+    @numba.njit
+    def f2(x, i, j):
+        return x[i] == x[j]
+
+    assert f2(array, 1, 2) == 5.5
+
+def dummy_typer5(unaryop, left):
+    return numba.float64(left)
+
+def dummy_lower5(context, builder, sig, args):
+    def compute(left):
+        return abs(left.x)
+    return context.compile_internal(builder, compute, sig, args)
+
+def test_custom_record5():
+    behavior = {}
+    behavior["__numba_typer__", abs, "Dummy"] = dummy_typer5
+    behavior["__numba_lower__", abs, "Dummy"] = dummy_lower5
+    behavior["__numba_typer__", operator.neg, "Dummy"] = dummy_typer5
+    behavior["__numba_lower__", operator.neg, "Dummy"] = dummy_lower5
+
+    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": -2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior)
+    array.layout.setparameter("__record__", "Dummy")
+
+    @numba.njit
+    def f1(x, i):
+        return abs(x[i])
+
+    assert f1(array, 1) == 2.2
+    assert f1(array, 2) == 3.3
+
+    @numba.njit
+    def f2(x, i):
+        return -x[i]
+
+    assert f2(array, 1) == 2.2
+    assert f2(array, 2) == 3.3

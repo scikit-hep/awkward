@@ -138,7 +138,7 @@ def numba_attrs(layouttype, behavior):
         for key, typer in behavior.items():
             if isinstance(key, tuple) and len(key) == 3 and key[0] == "__numba_typer__" and key[1] == rec:
                 lower = behavior.get(("__numba_lower__", key[1], key[2]))
-                yield rec, key[2], typer, lower
+                yield key[2], typer, lower
 
 def numba_methods(layouttype, behavior):
     import awkward1
@@ -149,7 +149,44 @@ def numba_methods(layouttype, behavior):
         for key, typer in behavior.items():
             if isinstance(key, tuple) and len(key) == 4 and key[0] == "__numba_typer__" and key[1] == rec and key[3] == ():
                 lower = behavior.get(("__numba_lower__", key[1], key[2], ()))
-                yield rec, key[2], typer, lower
+                yield key[2], typer, lower
+
+def numba_unaryops(unaryop, left, behavior):
+    import awkward1
+    import awkward1._numba.layout
+    if behavior is None:
+        behavior = awkward1.behavior
+
+    if isinstance(left, awkward1._numba.layout.ContentType):
+        left = left.parameters.get("__record__")
+        if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
+            return None
+
+    for key, typer in behavior.items():
+        if isinstance(key, tuple) and len(key) == 3 and key[0] == "__numba_typer__" and key[1] == unaryop and key[2] == left:
+            lower = behavior.get(("__numba_lower__", key[1], key[2]))
+            yield typer, lower
+
+def numba_binops(binop, left, right, behavior):
+    import awkward1
+    import awkward1._numba.layout
+    if behavior is None:
+        behavior = awkward1.behavior
+
+    if isinstance(left, awkward1._numba.layout.ContentType):
+        left = left.parameters.get("__record__")
+        if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
+            return None
+
+    if isinstance(right, awkward1._numba.layout.ContentType):
+        right = right.parameters.get("__record__")
+        if not (isinstance(right, str) or (py27 and isinstance(right, unicode))):
+            return None
+
+    for key, typer in behavior.items():
+        if isinstance(key, tuple) and len(key) == 4 and key[0] == "__numba_typer__" and key[1] == left and key[2] == binop and key[3] == right:
+            lower = behavior.get(("__numba_lower__", key[1], key[2], key[3]))
+            yield typer, lower
 
 def behaviorof(*arrays):
     behavior = None
