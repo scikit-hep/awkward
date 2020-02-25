@@ -328,9 +328,10 @@ def lower_append(context, builder, sig, args):
 
     viewproxy = context.make_helper(builder, viewtype, viewval)
     atval = awkward1._numba.layout.regularize_atval(context, builder, viewproxy, attype, atval, True, True)
+    atval = awkward1._numba.castint(context, builder, numba.intp, numba.int64, atval)
 
     sharedptr = awkward1._numba.layout.getat(context, builder, viewproxy.sharedptrs, viewproxy.pos)
 
     proxyin = context.make_helper(builder, fillabletype, fillableval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_append, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
+    call(context, builder, awkward1._numba.libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
     return context.get_dummy_value()

@@ -6,20 +6,19 @@
 #include <vector>
 
 #include "awkward/cpu-kernels/util.h"
+#include "awkward/array/IndexedArray.h"
 #include "awkward/fillable/FillableOptions.h"
 #include "awkward/fillable/GrowableBuffer.h"
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
+  template <typename T>
   class IndexedFillable: public Fillable {
   public:
-    static const std::shared_ptr<Fillable> fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Content>& array);
-
-    IndexedFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<Content>& array, bool hasnull);
+    IndexedFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<T>& array, bool hasnull);
 
     const Content* arrayptr() const;
 
-    const std::string classname() const override;
     int64_t length() const override;
     void clear() override;
     const std::shared_ptr<Content> snapshot() const override;
@@ -38,15 +37,24 @@ namespace awkward {
     const std::shared_ptr<Fillable> beginrecord(const char* name, bool check) override;
     const std::shared_ptr<Fillable> field(const char* key, bool check) override;
     const std::shared_ptr<Fillable> endrecord() override;
-    const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
 
-  private:
+  protected:
     const FillableOptions options_;
     GrowableBuffer<int64_t> index_;
-    const std::shared_ptr<Content> array_;
-    const int64_t arraylength_;
+    const std::shared_ptr<T> array_;
     bool hasnull_;
   };
+
+  class IndexedGenericFillable: public IndexedFillable<Content> {
+  public:
+    static const std::shared_ptr<Fillable> fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Content>& array);
+
+    IndexedGenericFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<Content>& array, bool hasnull);
+
+    const std::string classname() const override;
+    const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
+  };
+
 }
 
 #endif // AWKWARD_INDEXEDFILLABLE_H_

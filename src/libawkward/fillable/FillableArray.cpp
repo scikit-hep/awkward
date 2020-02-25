@@ -147,13 +147,27 @@ namespace awkward {
   }
 
   void FillableArray::append(const std::shared_ptr<Content>& array, int64_t at) {
+    int64_t length = array.get()->length();
+    int64_t regular_at = at;
+    if (regular_at < 0) {
+      regular_at += length;
+    }
+    if (!(0 <= regular_at  &&  regular_at < length)) {
+      throw std::invalid_argument(std::string("'append' index (") + std::to_string(at) + std::string(") out of bounds (") + std::to_string(length) + std::string(")"));
+    }
+    return append_nowrap(array, regular_at);
+  }
+
+  void FillableArray::append_nowrap(const std::shared_ptr<Content>& array, int64_t at) {
     maybeupdate(fillable_.get()->append(array, at));
   }
 
   void FillableArray::extend(const std::shared_ptr<Content>& array) {
+    std::shared_ptr<Fillable> tmp = fillable_;
     for (int64_t i = 0;  i < array.get()->length();  i++) {
-      maybeupdate(fillable_.get()->append(array, i));
+      tmp = fillable_.get()->append(array, i);
     }
+    maybeupdate(tmp);
   }
 
   void FillableArray::maybeupdate(const std::shared_ptr<Fillable>& tmp) {
@@ -397,23 +411,11 @@ uint8_t awkward_FillableArray_endrecord(void* fillablearray) {
   return 0;
 }
 
-uint8_t awkward_FillableArray_append(void* fillablearray, const void* shared_ptr_ptr, int64_t at) {
+uint8_t awkward_FillableArray_append_nowrap(void* fillablearray, const void* shared_ptr_ptr, int64_t at) {
   awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
   const std::shared_ptr<awkward::Content>* array = reinterpret_cast<const std::shared_ptr<awkward::Content>*>(shared_ptr_ptr);
   try {
-    obj->append(*array, at);
-  }
-  catch (...) {
-    return 1;
-  }
-  return 0;
-}
-
-uint8_t awkward_FillableArray_extend(void* fillablearray, const void* shared_ptr_ptr) {
-  awkward::FillableArray* obj = reinterpret_cast<awkward::FillableArray*>(fillablearray);
-  const std::shared_ptr<awkward::Content>* array = reinterpret_cast<const std::shared_ptr<awkward::Content>*>(shared_ptr_ptr);
-  try {
-    obj->extend(*array);
+    obj->append_nowrap(*array, at);
   }
   catch (...) {
     return 1;

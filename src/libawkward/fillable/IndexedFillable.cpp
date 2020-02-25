@@ -11,37 +11,30 @@
 #include "awkward/fillable/IndexedFillable.h"
 
 namespace awkward {
-  const std::shared_ptr<Fillable> IndexedFillable::fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Content>& array) {
-    GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::full(options, -1, nullcount);
-    std::shared_ptr<Fillable> out = std::make_shared<IndexedFillable>(options, index, array, nullcount != 0);
-    out.get()->setthat(out);
-    return out;
-  }
-
-  IndexedFillable::IndexedFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<Content>& array, bool hasnull)
+  template <typename T>
+  IndexedFillable<T>::IndexedFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<T>& array, bool hasnull)
       : options_(options)
       , index_(index)
       , array_(array)
-      , arraylength_(array.get()->length())
       , hasnull_(hasnull) { }
 
-  const Content* IndexedFillable::arrayptr() const {
+  template <typename T>
+  const Content* IndexedFillable<T>::arrayptr() const {
     return array_.get();
   }
 
-  const std::string IndexedFillable::classname() const {
-    return "IndexedFillable";
-  };
-
-  int64_t IndexedFillable::length() const {
+  template <typename T>
+  int64_t IndexedFillable<T>::length() const {
     return index_.length();
   }
 
-  void IndexedFillable::clear() {
+  template <typename T>
+  void IndexedFillable<T>::clear() {
     index_.clear();
   }
 
-  const std::shared_ptr<Content> IndexedFillable::snapshot() const {
+  template <typename T>
+  const std::shared_ptr<Content> IndexedFillable<T>::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     if (hasnull_) {
       return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_);
@@ -51,88 +44,111 @@ namespace awkward {
     }
   }
 
-  bool IndexedFillable::active() const {
+  template <typename T>
+  bool IndexedFillable<T>::active() const {
     return false;
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::null() {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::null() {
     index_.append(-1);
     hasnull_ = true;
     return that_;
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::boolean(bool x) {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::boolean(bool x) {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
     out.get()->boolean(x);
     return out;
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::integer(int64_t x) {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::integer(int64_t x) {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
     out.get()->integer(x);
     return out;
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::real(double x) {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::real(double x) {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
     out.get()->real(x);
     return out;
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::string(const char* x, int64_t length, const char* encoding) {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::string(const char* x, int64_t length, const char* encoding) {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
     out.get()->string(x, length, encoding);
     return out;
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::beginlist() {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::beginlist() {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
     out.get()->beginlist();
     return out;
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::endlist() {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::endlist() {
     throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::begintuple(int64_t numfields) {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::begintuple(int64_t numfields) {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
     out.get()->begintuple(numfields);
     return out;
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::index(int64_t index) {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::index(int64_t index) {
     throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::endtuple() {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::endtuple() {
     throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::beginrecord(const char* name, bool check) {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::beginrecord(const char* name, bool check) {
     std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
     out.get()->beginrecord(name, check);
     return out;
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::field(const char* key, bool check) {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::field(const char* key, bool check) {
     throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::endrecord() {
+  template <typename T>
+  const std::shared_ptr<Fillable> IndexedFillable<T>::endrecord() {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
-  const std::shared_ptr<Fillable> IndexedFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+  template class IndexedFillable<Content>;
+
+  const std::shared_ptr<Fillable> IndexedGenericFillable::fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Content>& array) {
+    GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::full(options, -1, nullcount);
+    std::shared_ptr<Fillable> out = std::shared_ptr<Fillable>(new IndexedGenericFillable(options, index, array, nullcount != 0));
+    out.get()->setthat(out);
+    return out;
+  }
+
+  IndexedGenericFillable::IndexedGenericFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<Content>& array, bool hasnull)
+      : IndexedFillable<Content>(options, index, array, hasnull) { }
+
+  const std::string IndexedGenericFillable::classname() const {
+    return "IndexedGenericFillable";
+  };
+
+  const std::shared_ptr<Fillable> IndexedGenericFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
     if (array.get() == array_.get()) {
-      int64_t regular_at = at;
-      if (regular_at < 0) {
-        regular_at += arraylength_;
-      }
-      if (!(0 <= regular_at  &&  regular_at < arraylength_)) {
-        throw std::invalid_argument(std::string("'append' index (") + std::to_string(at) + std::string(") out of bounds (") + std::to_string(arraylength_) + std::string(")"));
-      }
-      index_.append(regular_at);
+      index_.append(at);
     }
     else {
       std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);

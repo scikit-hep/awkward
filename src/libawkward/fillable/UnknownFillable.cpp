@@ -150,7 +150,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Fillable> UnknownFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
-    std::shared_ptr<Fillable> out = IndexedFillable::fromnulls(options_, nullcount_, array);
+    std::shared_ptr<Fillable> out = IndexedGenericFillable::fromnulls(options_, nullcount_, array);
     out.get()->append(array, at);
     return out;
   }

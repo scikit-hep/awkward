@@ -346,7 +346,7 @@ namespace awkward {
       std::shared_ptr<Fillable> tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
-        if (IndexedFillable* raw = dynamic_cast<IndexedFillable*>(content.get())) {
+        if (IndexedGenericFillable* raw = dynamic_cast<IndexedGenericFillable*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;
@@ -355,7 +355,7 @@ namespace awkward {
         i++;
       }
       if (tofill.get() == nullptr) {
-        tofill = IndexedFillable::fromnulls(options_, 0, array);
+        tofill = IndexedGenericFillable::fromnulls(options_, 0, array);
         contents_.push_back(tofill);
       }
       int64_t length = tofill.get()->length();
