@@ -202,7 +202,15 @@ namespace awkward {
   }
 
   const std::shared_ptr<Fillable> OptionFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
-    throw std::runtime_error("FIXME: OptionFillable::append");
+    if (!content_.get()->active()) {
+      int64_t length = content_.get()->length();
+      maybeupdate(content_.get()->append(array, at));
+      offsets_.append(length);
+    }
+    else {
+      content_.get()->append(array, at);
+    }
+    return that_;
   }
 
   void OptionFillable::maybeupdate(const std::shared_ptr<Fillable>& tmp) {

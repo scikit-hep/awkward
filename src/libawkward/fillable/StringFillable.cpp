@@ -160,6 +160,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Fillable> StringFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
-    throw std::runtime_error("FIXME: StringFillable::append");
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->append(array, at);
+    return out;
   }
 }

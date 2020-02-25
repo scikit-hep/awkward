@@ -198,7 +198,15 @@ namespace awkward {
   }
 
   const std::shared_ptr<Fillable> ListFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
-    throw std::runtime_error("FIXME: ListFillable::append");
+    if (!begun_) {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->append(array, at);
+      return out;
+    }
+    else {
+      maybeupdate(content_.get()->append(array, at));
+      return that_;
+    }
   }
 
   void ListFillable::maybeupdate(const std::shared_ptr<Fillable>& tmp) {

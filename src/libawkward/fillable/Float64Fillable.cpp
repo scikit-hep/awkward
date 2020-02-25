@@ -121,6 +121,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Fillable> Float64Fillable::append(const std::shared_ptr<Content>& array, int64_t at) {
-    throw std::runtime_error("FIXME: Float64Fillable::append");
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->append(array, at);
+    return out;
   }
 }

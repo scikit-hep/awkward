@@ -298,7 +298,21 @@ namespace awkward {
   }
 
   const std::shared_ptr<Fillable> TupleFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
-    throw std::runtime_error("FIXME: TupleFillable::append");
+    if (!begun_) {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->append(array, at);
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'append' immediately after 'begintuple'; needs 'index' or 'endtuple'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->append(array, at));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->append(array, at);
+    }
+    return that_;
   }
 
   void TupleFillable::maybeupdate(int64_t i, const std::shared_ptr<Fillable>& tmp) {

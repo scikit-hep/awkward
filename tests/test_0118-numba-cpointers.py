@@ -52,6 +52,65 @@ def test_FillableArray_append():
 
     assert awkward1.tolist(builder.snapshot()) == [[3.3, 4.4], [5.5, 4.4], [0.0, 1.1, 2.2], [6.6], [6.6, 7.7, 8.8, 9.9]]
 
+    builder = awkward1.FillableArray()
+    builder.null()
+    builder.append(one, 2)
+    builder.null()
+    builder.append(two, 1)
+    builder.null()
+    assert awkward1.tolist(builder.snapshot()) == [None, [3.3, 4.4], None, [5.5, 4.4], None]
+
+    builder = awkward1.FillableArray()
+    builder.string("hello")
+    builder.append(one, 2)
+    builder.string("there")
+    builder.append(one, 0)
+    assert awkward1.tolist(builder.snapshot()) == ["hello", [3.3, 4.4], "there", [0.0, 1.1, 2.2]]
+
+    builder = awkward1.FillableArray()
+    builder.null()
+    builder.string("hello")
+    builder.null()
+    builder.append(one, 2)
+    builder.null()
+    builder.string("there")
+    builder.append(one, 0)
+    assert awkward1.tolist(builder.snapshot()) == [None, "hello", None, [3.3, 4.4], None, "there", [0.0, 1.1, 2.2]]
+
+    builder = awkward1.FillableArray()
+    builder.append(one, 2)
+    builder.string("there")
+    builder.append(one, 0)
+    assert awkward1.tolist(builder.snapshot()) == [[3.3, 4.4], "there", [0.0, 1.1, 2.2]]
+
+    builder = awkward1.FillableArray()
+    builder.null()
+    builder.append(one, 2)
+    builder.null()
+    builder.string("there")
+    builder.null()
+    builder.append(one, 0)
+    assert awkward1.tolist(builder.snapshot()) == [None, [3.3, 4.4], None, "there", None, [0.0, 1.1, 2.2]]
+
+    array = awkward1.Array(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"])
+    builder = awkward1.FillableArray()
+    builder.beginlist()
+    builder.append(array, 1)
+    builder.append(array, 2)
+    builder.append(array, 3)
+    builder.endlist()
+    builder.beginlist()
+    builder.endlist()
+    builder.beginlist()
+    builder.append(array, 4)
+    builder.append(array, 5)
+    builder.endlist()
+
+    assert awkward1.tolist(builder.snapshot()) == [["one", "two", "three"], [], ["four", "five"]]
+
+    builder.append(array, -1)
+    assert awkward1.tolist(builder.snapshot()) == [["one", "two", "three"], [], ["four", "five"], "nine"]
+
 numba = pytest.importorskip("numba")
 
 def test_views():
