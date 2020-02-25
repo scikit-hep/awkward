@@ -129,7 +129,7 @@ def overload(behavior, signature):
         behavior = awkward1.behavior
     return behavior.get(signature)
 
-def numba_methods(layouttype, behavior):
+def numba_attrs(layouttype, behavior):
     import awkward1
     if behavior is None:
         behavior = awkward1.behavior
@@ -138,6 +138,17 @@ def numba_methods(layouttype, behavior):
         for key, typer in behavior.items():
             if isinstance(key, tuple) and len(key) == 3 and key[0] == "__numba_typer__" and key[1] == rec:
                 lower = behavior.get(("__numba_lower__", key[1], key[2]))
+                yield rec, key[2], typer, lower
+
+def numba_methods(layouttype, behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        for key, typer in behavior.items():
+            if isinstance(key, tuple) and len(key) == 4 and key[0] == "__numba_typer__" and key[1] == rec and key[3] == ():
+                lower = behavior.get(("__numba_lower__", key[1], key[2], ()))
                 yield rec, key[2], typer, lower
 
 def behaviorof(*arrays):

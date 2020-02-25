@@ -263,7 +263,7 @@ def lower_getitem_field(context, builder, sig, args):
     return viewtype.type.lower_getitem_field(context, builder, viewtype, viewval, wheretype.literal_value)
 
 @numba.typing.templates.infer_getattr
-class type_methods(numba.typing.templates.AttributeTemplate):
+class type_getattr(numba.typing.templates.AttributeTemplate):
     key = ArrayViewType
 
     def generic_resolve(self, viewtype, attr):
@@ -429,19 +429,34 @@ def lower_getitem_field_record(context, builder, sig, args):
     return recordviewtype.arrayviewtype.type.lower_getitem_field_record(context, builder, recordviewtype, recordviewval, wheretype.literal_value)
 
 @numba.typing.templates.infer_getattr
-class type_methods_record(numba.typing.templates.AttributeTemplate):
+class type_getattr_record(numba.typing.templates.AttributeTemplate):
     key = RecordViewType
 
     def generic_resolve(self, recordviewtype, attr):
-        for recname, attrname, typer, lower in awkward1._util.numba_methods(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
+        for recname, methodname, typer, lower in awkward1._util.numba_methods(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
+            class type_method(numba.typing.templates.AbstractTemplate):
+                key = methodname
+                def generic(_, args, kwargs):
+                    sig = typer(recordviewtype, args, kwargs)
+                    sig.recvr = recordviewtype
+                    return sig
+
+            @numba.extending.lower_builtin("stuff", recordviewtype, numba.int64)
+            def lower_whatever(context, builder, sig, args):
+                return context.get_constant(numba.float64, 1.23)
+
+            return numba.types.BoundFunction(type_method, recordviewtype)
+
+        for recname, attrname, typer, lower in awkward1._util.numba_attrs(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
             if attr == attrname:
                 return typer(recordviewtype)
+
         else:
             return recordviewtype.typer_field(attr)
 
 @numba.extending.lower_getattr_generic(RecordViewType)
 def lower_getattr_generic_record(context, builder, recordviewtype, recordviewval, attr):
-    for recname, attrname, typer, lower in awkward1._util.numba_methods(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
+    for recname, attrname, typer, lower in awkward1._util.numba_attrs(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
         if attr == attrname:
             return lower(context, builder, typer(recordviewtype)(recordviewtype), (recordviewval,))
     else:
