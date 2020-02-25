@@ -499,8 +499,19 @@ namespace awkward {
       throw std::invalid_argument("cannot use RawArray as a slice");
     }
 
-    const std::shared_ptr<Content> rpad(int64_t length, int64_t axis) const override {
-      throw std::runtime_error("FIXME: RawArray rpad is not implemented");
+    const std::shared_ptr<Content> rpad(int64_t rpad_width, int64_t axis) const override {
+      int64_t fromlength = length_;
+      int64_t diff = rpad_width - fromlength;
+      int64_t tolength = fromlength + diff;
+      Index64 outindex(tolength);
+      struct Error err = awkward_index_rpad(
+        outindex.ptr().get(),
+        fromlength,
+        tolength);
+      util::handle_error(err, classname(), identities_.get());
+
+      std::shared_ptr<Content> out = getitem_range_nowrap(0, tolength);
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, out);
     }
 
     const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {
