@@ -500,7 +500,7 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> rpad(int64_t length, int64_t axis) const override {
-      throw std::runtime_error("FIXME: RawArray is not implemented");
+      throw std::runtime_error("FIXME: RawArray rpad is not implemented");
     }
 
     const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {

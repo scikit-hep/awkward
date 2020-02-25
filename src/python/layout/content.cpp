@@ -846,7 +846,7 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
             return box(self.merge_as_union(unbox_content(other)));
           })
           .def("rpad", [](T& self, int64_t length, int64_t axis) -> py::object {
-            return box(self.pad(length, axis));
+            return box(self.rpad(length, axis));
           }, py::arg("length"), py::arg("axis") = 0)
           .def("count", [](const T& self, int64_t axis, bool mask, bool keepdims) -> py::object {
             ak::ReducerCount reducer;
