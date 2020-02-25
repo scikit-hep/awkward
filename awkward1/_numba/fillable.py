@@ -187,9 +187,15 @@ class type_methods(numba.typing.templates.AttributeTemplate):
     def resolve_append(self, fillabletype, args, kwargs):
         if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], (awkward1._numba.arrayview.ArrayViewType, awkward1._numba.arrayview.RecordViewType, numba.types.Boolean, numba.types.Integer, numba.types.Float)):
             return numba.types.none(args[0])
+        elif len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.Optional) and isinstance(args[0].type, (numba.types.Boolean, numba.types.Integer, numba.types.Float)):
+            return numba.types.none(args[0])
+        elif len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.NoneType):
+            return numba.types.none(args[0])
         elif len(args) == 2 and len(kwargs) == 0 and isinstance(args[0], awkward1._numba.arrayview.ArrayViewType) and isinstance(args[1], numba.types.Integer):
             return numba.types.none(args[0], args[1])
         else:
+            print("HERE", args)
+
             raise TypeError("wrong number or types of arguments for FillableArray.append")
 
     @numba.typing.templates.bound_function("extend")
@@ -216,7 +222,7 @@ def lower_null(context, builder, sig, args):
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("boolean", FillableArrayType, numba.types.Boolean)
-def lower_integer(context, builder, sig, args):
+def lower_boolean(context, builder, sig, args):
     fillabletype, xtype = sig.args
     fillableval, xval = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
@@ -343,6 +349,20 @@ def lower_append_array_at(context, builder, sig, args):
     call(context, builder, awkward1._numba.libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
     return context.get_dummy_value()
 
+@numba.extending.lower_builtin("append", FillableArrayType, awkward1._numba.arrayview.ArrayViewType)
+def lower_append_array(context, builder, sig, args):
+    fillabletype, viewtype = sig.args
+    fillableval, viewval = args
+
+    proxyin = context.make_helper(builder, fillabletype, fillableval)
+    call(context, builder, awkward1._numba.libawkward.FillableArray_beginlist, (proxyin.rawptr,))
+
+    lower_extend_array(context, builder, sig, args)
+
+    call(context, builder, awkward1._numba.libawkward.FillableArray_endlist, (proxyin.rawptr,))
+
+    return context.get_dummy_value()
+
 @numba.extending.lower_builtin("append", FillableArrayType, awkward1._numba.arrayview.RecordViewType)
 def lower_append_record(context, builder, sig, args):
     fillabletype, recordviewtype = sig.args
@@ -358,6 +378,46 @@ def lower_append_record(context, builder, sig, args):
     proxyin = context.make_helper(builder, fillabletype, fillableval)
     call(context, builder, awkward1._numba.libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
     return context.get_dummy_value()
+
+@numba.extending.lower_builtin("append", FillableArrayType, numba.types.Boolean)
+def lower_append_bool(context, builder, sig, args):
+    return lower_boolean(context, builder, sig, args)
+
+@numba.extending.lower_builtin("append", FillableArrayType, numba.types.Integer)
+def lower_append_int(context, builder, sig, args):
+    return lower_integer(context, builder, sig, args)
+
+@numba.extending.lower_builtin("append", FillableArrayType, numba.types.Float)
+def lower_append_float(context, builder, sig, args):
+    return lower_real(context, builder, sig, args)
+
+@numba.extending.lower_builtin("append", FillableArrayType, numba.types.Optional)
+def lower_append_optional(context, builder, sig, args):
+    fillabletype, opttype = sig.args
+    fillableval, optval = args
+
+    optproxy = context.make_helper(builder, opttype, optval)
+    validbit = numba.cgutils.as_bool_bit(builder, optproxy.valid)
+
+    with builder.if_else(validbit) as (is_valid, is_not_valid):
+        with is_valid:
+            if isinstance(opttype.type, numba.types.Boolean):
+                lower_boolean(context, builder, numba.types.none(fillabletype, opttype.type), (fillableval, optproxy.data))
+            elif isinstance(opttype.type, numba.types.Integer):
+                lower_integer(context, builder, numba.types.none(fillabletype, opttype.type), (fillableval, optproxy.data))
+            elif isinstance(opttype.type, numba.types.Float):
+                lower_real(context, builder, numba.types.none(fillabletype, opttype.type), (fillableval, optproxy.data))
+            else:
+                raise AssertionError(opttype.type)
+
+        with is_not_valid:
+            lower_null(context, builder, numba.types.none(fillabletype,), (fillableval,))
+
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("append", FillableArrayType, numba.types.NoneType)
+def lower_append_none(context, builder, sig, args):
+    return lower_null(context, builder, sig.return_type(sig.args[0]), (args[0],))
 
 @numba.extending.lower_builtin("extend", FillableArrayType, awkward1._numba.arrayview.ArrayViewType)
 def lower_extend_array(context, builder, sig, args):
