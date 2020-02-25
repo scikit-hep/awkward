@@ -510,7 +510,7 @@ namespace awkward {
         tolength);
       util::handle_error(err, classname(), identities_.get());
 
-      std::shared_ptr<Content> out = getitem_range_nowrap(0, tolength);
+      std::shared_ptr<Content> out = getitem_range_nowrap(0, fromlength);
       return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, out);
     }
 
