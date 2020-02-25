@@ -50,20 +50,6 @@ namespace awkward {
     void field_check(const std::string& key);
     void endrecord();
 
-    template <typename T>
-    void fill(const std::vector<T>& vector) {
-      beginlist();
-      for (auto x : vector) {
-        fill(x);
-      }
-      endlist();
-    }
-
-    void fill(int64_t x);
-    void fill(double x);
-    void fill(const char* x);
-    void fill(const std::string& x);
-
   private:
     void maybeupdate(const std::shared_ptr<Fillable>& tmp);
 

@@ -146,22 +146,6 @@ namespace awkward {
     maybeupdate(fillable_.get()->endrecord());
   }
 
-  void FillableArray::fill(int64_t x) {
-    integer(x);
-  }
-
-  void FillableArray::fill(double x) {
-    real(x);
-  }
-
-  void FillableArray::fill(const char* x) {
-    bytestring(x);
-  }
-
-  void FillableArray::fill(const std::string& x) {
-    bytestring(x.c_str());
-  }
-
   void FillableArray::maybeupdate(const std::shared_ptr<Fillable>& tmp) {
     if (tmp.get() != fillable_.get()) {
       fillable_ = tmp;
