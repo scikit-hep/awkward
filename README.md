@@ -205,7 +205,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
 
    * [ ] GPU implementations of the cpu-kernels in Layer 4, with the Layer 3 C++ passing a "device" variable at every level of the layout to indicate whether the data pointers refer to main memory or a particular GPU.
    * [ ] CPU-acceleration of the cpu-kernels using vectorization and other tricks.
-   * [ ] Explicit interface with [NumExpr](https://numexpr.readthedocs.io/en/latest/index.html).
+   * [X] Explicit interface with [NumExpr](https://numexpr.readthedocs.io/en/latest/index.html).
    * [ ] Explicit interface with [Dask](https://dask.org).
    * [ ] Demonstrate Awkward 1.0 as a C++ wrapping library with [FastJet](http://fastjet.fr/).
    * [ ] Deferred array types:
@@ -216,6 +216,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [ ] `RegularChunkedArray`: like a `ChunkedArray`, but all chunks are known to have the same size.
       * [ ] `AmorphousChunkedArray`: a `ChunkedArray` without known chunk lengths (maybe not ever).
       * [ ] `UnionArray` in Numba. Have to [somehow deal with heterogeneity](https://github.com/scikit-hep/awkward-1.0/pull/118#issuecomment-590542012).
+      * [ ] Strings in Numba (issue [#124](https://github.com/scikit-hep/awkward-1.0/issues/124)).
    * [ ] Deferred operations:
       * [ ] `awkward.join`: performs an inner join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event intersection, zipping all fields.
       * [ ] `awkward.union`: performs an outer join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event union, zipping fields where possible.
