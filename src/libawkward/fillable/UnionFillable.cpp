@@ -358,6 +358,30 @@ namespace awkward {
             break;
           }
         }
+        else if (IndexedIU32Fillable* raw = dynamic_cast<IndexedIU32Fillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
+        else if (IndexedI64Fillable* raw = dynamic_cast<IndexedI64Fillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
+        else if (IndexedIO32Fillable* raw = dynamic_cast<IndexedIO32Fillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
+        else if (IndexedIO64Fillable* raw = dynamic_cast<IndexedIO64Fillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
         i++;
       }
       if (tofill.get() == nullptr) {
