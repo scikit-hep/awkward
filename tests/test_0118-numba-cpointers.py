@@ -11,6 +11,35 @@ import numpy
 import awkward1
 import awkward1._numba.arrayview
 
+def test_FillableArray_append():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+
+    builder = awkward1.FillableArray()
+    builder.append(array, 3)
+    builder.append(array, 2)
+    builder.append(array, 2)
+    builder.append(array, 0)
+    builder.append(array, 1)
+    builder.append(array, -1)
+    assert awkward1.tolist(builder.snapshot()) == [[5.5], [3.3, 4.4], [3.3, 4.4], [0.0, 1.1, 2.2], [], [6.6, 7.7, 8.8, 9.9]]
+
+    builder.extend(array)
+    assert awkward1.tolist(builder.snapshot()) == [[5.5], [3.3, 4.4], [3.3, 4.4], [0.0, 1.1, 2.2], [], [6.6, 7.7, 8.8, 9.9], [0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
+
+    builder = awkward1.FillableArray()
+    builder.null()
+    builder.null()
+    builder.null()
+    builder.append(array, 3)
+    builder.append(array, 2)
+    builder.append(array, 2)
+    builder.append(array, -1)
+
+    assert awkward1.tolist(builder.snapshot()) == [None, None, None, [5.5], [3.3, 4.4], [3.3, 4.4], [6.6, 7.7, 8.8, 9.9]]
+
+    builder.null()
+    assert awkward1.tolist(builder.snapshot()) == [None, None, None, [5.5], [3.3, 4.4], [3.3, 4.4], [6.6, 7.7, 8.8, 9.9], None]
+
 numba = pytest.importorskip("numba")
 
 def test_views():
@@ -55,7 +84,7 @@ def test_refcount():
         @numba.njit
         def f1(x):
             return 3.14
-        
+
         for j in range(10):
             f1(array)
             assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.positions, array._numbaview.lookup.arrayptrs)]
@@ -64,7 +93,7 @@ def test_refcount():
         @numba.njit
         def f2(x):
             return x
-        
+
         for j in range(10):
             y = f2(array)
             assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.positions, array._numbaview.lookup.arrayptrs)]
@@ -298,7 +327,7 @@ def test_RecordView_refcount():
         @numba.njit
         def f1(x):
             return 3.14
-        
+
         for j in range(10):
             f1(record)
             assert [sys.getrefcount(x) == 2 for x in (record._numbaview, record._numbaview.arrayview, record._numbaview.arrayview.lookup, record._numbaview.arrayview.lookup.positions, record._numbaview.arrayview.lookup.arrayptrs)]
@@ -307,7 +336,7 @@ def test_RecordView_refcount():
         @numba.njit
         def f2(x):
             return x
-        
+
         for j in range(10):
             y = f2(record)
             assert [sys.getrefcount(x) == 2 for x in (record._numbaview, record._numbaview.arrayview, record._numbaview.arrayview.lookup, record._numbaview.arrayview.lookup.positions, record._numbaview.arrayview.lookup.arrayptrs)]
@@ -609,7 +638,7 @@ def test_iterator():
             for c in b:
                 out += c
         return out
-    
+
     assert f1(array) == 49.5
 
 def test_FillableArray_refcount():

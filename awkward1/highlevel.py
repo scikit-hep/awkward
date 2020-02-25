@@ -403,3 +403,9 @@ class FillableArray(Sequence):
 
     def endrecord(self):
         self._fillablearray.endrecord()
+
+    def append(self, array, at):
+        self._fillablearray.append(array.layout, at)
+
+    def extend(self, array):
+        self._fillablearray.extend(array.layout)

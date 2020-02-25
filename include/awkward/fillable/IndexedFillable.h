@@ -15,7 +15,7 @@ namespace awkward {
   public:
     static const std::shared_ptr<Fillable> fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Content>& array);
 
-    IndexedFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<Fillable>& content, bool hasnull);
+    IndexedFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<Content>& array, bool hasnull);
 
     const std::string classname() const override;
     int64_t length() const override;
@@ -41,7 +41,8 @@ namespace awkward {
   private:
     const FillableOptions options_;
     GrowableBuffer<int64_t> index_;
-    std::shared_ptr<Fillable> content_;
+    const std::shared_ptr<Content> array_;
+    const int64_t arraylength_;
     bool hasnull_;
   };
 }
