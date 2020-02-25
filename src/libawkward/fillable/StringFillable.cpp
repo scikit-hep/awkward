@@ -20,7 +20,7 @@ namespace awkward {
     return out;
   }
 
-  StringFillable::StringFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, GrowableBuffer<uint8_t>& content, const char* encoding)
+  StringFillable::StringFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, const GrowableBuffer<uint8_t>& content, const char* encoding)
       : options_(options)
       , offsets_(offsets)
       , content_(content)

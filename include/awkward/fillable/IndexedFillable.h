@@ -1,7 +1,9 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_STRINGFILLABLE_H_
-#define AWKWARD_STRINGFILLABLE_H_
+#ifndef AWKWARD_INDEXEDFILLABLE_H_
+#define AWKWARD_INDEXEDFILLABLE_H_
+
+#include <vector>
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/fillable/FillableOptions.h"
@@ -9,12 +11,11 @@
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
-  class StringFillable: public Fillable {
+  class IndexedFillable: public Fillable {
   public:
-    static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options, const char* encoding);
+    static const std::shared_ptr<Fillable> fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Content>& array);
 
-    StringFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, const GrowableBuffer<uint8_t>& content, const char* encoding);
-    const char* encoding() const;
+    IndexedFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<Fillable>& content, bool hasnull);
 
     const std::string classname() const override;
     int64_t length() const override;
@@ -39,10 +40,10 @@ namespace awkward {
 
   private:
     const FillableOptions options_;
-    GrowableBuffer<int64_t> offsets_;
-    GrowableBuffer<uint8_t> content_;
-    const char* encoding_;
+    GrowableBuffer<int64_t> index_;
+    std::shared_ptr<Fillable> content_;
+    bool hasnull_;
   };
 }
 
-#endif // AWKWARD_STRINGFILLABLE_H_
+#endif // AWKWARD_INDEXEDFILLABLE_H_

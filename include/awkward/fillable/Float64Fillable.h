@@ -12,7 +12,7 @@ namespace awkward {
   class Float64Fillable: public Fillable {
   public:
     static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options);
-    static const std::shared_ptr<Fillable> fromint64(const FillableOptions& options, GrowableBuffer<int64_t> old);
+    static const std::shared_ptr<Fillable> fromint64(const FillableOptions& options, const GrowableBuffer<int64_t>& old);
 
     Float64Fillable(const FillableOptions& options, const GrowableBuffer<double>& buffer);
 

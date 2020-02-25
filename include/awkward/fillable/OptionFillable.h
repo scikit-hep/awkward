@@ -13,10 +13,10 @@
 namespace awkward {
   class OptionFillable: public Fillable {
   public:
-    static const std::shared_ptr<Fillable> fromnulls(const FillableOptions& options, int64_t nullcount, std::shared_ptr<Fillable> content);
-    static const std::shared_ptr<Fillable> fromvalids(const FillableOptions& options, std::shared_ptr<Fillable> content);
+    static const std::shared_ptr<Fillable> fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Fillable>& content);
+    static const std::shared_ptr<Fillable> fromvalids(const FillableOptions& options, const std::shared_ptr<Fillable>& content);
 
-    OptionFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, std::shared_ptr<Fillable> content);
+    OptionFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, const std::shared_ptr<Fillable>& content);
 
     const std::string classname() const override;
     int64_t length() const override;
