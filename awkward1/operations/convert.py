@@ -51,7 +51,7 @@ def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
 def fromiter(iterable, highlevel=True, behavior=None, initial=1024, resize=2.0):
     out = awkward1.layout.FillableArray(initial=initial, resize=resize)
     for x in iterable:
-        out.fill(x)
+        out.fromiter(x)
     layout = out.snapshot()
     if highlevel:
         return awkward1._util.wrap(layout, behavior)

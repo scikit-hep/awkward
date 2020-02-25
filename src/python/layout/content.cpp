@@ -509,7 +509,7 @@ py::object getitem(const T& self, const py::object& obj) {
 
 /////////////////////////////////////////////////////////////// FillableArray
 
-void fillable_fill(ak::FillableArray& self, const py::handle& obj) {
+void fillable_fromiter(ak::FillableArray& self, const py::handle& obj) {
   if (obj.is(py::none())) {
     self.null();
   }
@@ -533,7 +533,7 @@ void fillable_fill(ak::FillableArray& self, const py::handle& obj) {
     self.begintuple(tup.size());
     for (size_t i = 0;  i < tup.size();  i++) {
       self.index((int64_t)i);
-      fillable_fill(self, tup[i]);
+      fillable_fromiter(self, tup[i]);
     }
     self.endtuple();
   }
@@ -546,7 +546,7 @@ void fillable_fill(ak::FillableArray& self, const py::handle& obj) {
       }
       std::string key = pair.first.cast<std::string>();
       self.field_check(key.c_str());
-      fillable_fill(self, pair.second);
+      fillable_fromiter(self, pair.second);
     }
     self.endrecord();
   }
@@ -554,7 +554,7 @@ void fillable_fill(ak::FillableArray& self, const py::handle& obj) {
     py::iterable seq = obj.cast<py::iterable>();
     self.beginlist();
     for (auto x : seq) {
-      fillable_fill(self, x);
+      fillable_fromiter(self, x);
     }
     self.endlist();
   }
@@ -608,7 +608,13 @@ py::class_<ak::FillableArray> make_FillableArray(const py::handle& m, const std:
         self.field_check(x);
       })
       .def("endrecord", &ak::FillableArray::endrecord)
-      .def("fill", &fillable_fill)
+      .def("append", [](ak::FillableArray& self, const std::shared_ptr<ak::Content>& array, int64_t at) {
+        self.append(array, at);
+      })
+      .def("extend", [](ak::FillableArray& self, const std::shared_ptr<ak::Content>& array) {
+        self.extend(array);
+      })
+      .def("fromiter", &fillable_fromiter)
   );
 }
 

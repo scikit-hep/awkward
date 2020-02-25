@@ -138,3 +138,17 @@ FillableArray_endrecord.name = "FillableArray.endrecord"
 FillableArray_endrecord.argtypes  = [ctypes.c_voidp]
 FillableArray_endrecord.restype   = ctypes.c_uint8
 FillableArray_endrecord.numbatype = numba.typing.ctypes_utils.make_function_type(FillableArray_endrecord)
+
+# uint8_t awkward_FillableArray_append(void* fillablearray, const void* shared_ptr_ptr, int64_t at);
+FillableArray_append = lib.awkward_FillableArray_append
+FillableArray_append.name = "FillableArray.append"
+FillableArray_append.argtypes  = [ctypes.c_voidp, ctypes.c_voidp, ctypes.c_int64]
+FillableArray_append.restype   = ctypes.c_uint8
+FillableArray_append.numbatype = numba.typing.ctypes_utils.make_function_type(FillableArray_append)
+
+# uint8_t awkward_FillableArray_extend(void* fillablearray, const void* shared_ptr_ptr);
+FillableArray_extend = lib.awkward_FillableArray_extend
+FillableArray_extend.name = "FillableArray.extend"
+FillableArray_extend.argtypes  = [ctypes.c_voidp, ctypes.c_voidp]
+FillableArray_extend.restype   = ctypes.c_uint8
+FillableArray_extend.numbatype = numba.typing.ctypes_utils.make_function_type(FillableArray_extend)

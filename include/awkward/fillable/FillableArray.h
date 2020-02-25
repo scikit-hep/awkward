@@ -50,6 +50,7 @@ namespace awkward {
     void field_check(const std::string& key);
     void endrecord();
     void append(const std::shared_ptr<Content>& array, int64_t at);
+    void extend(const std::shared_ptr<Content>& array);
 
   private:
     void maybeupdate(const std::shared_ptr<Fillable>& tmp);
@@ -85,6 +86,7 @@ extern "C" {
   EXPORT_SYMBOL uint8_t awkward_FillableArray_field_check(void* fillablearray, const char* key);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_endrecord(void* fillablearray);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_append(void* fillablearray, const void* shared_ptr_ptr, int64_t at);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_extend(void* fillablearray, const void* shared_ptr_ptr);
 }
 
 #endif // AWKWARD_FILLABLE_H_
