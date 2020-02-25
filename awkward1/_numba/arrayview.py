@@ -176,12 +176,26 @@ def box_Array(viewtype, viewval, c):
     c.pyapi.decref(arrayview_obj)
     return out
 
+def dict2serializable(obj):
+    if obj is None:
+        return None
+    else:
+        return tuple(obj.items())
+
+def serializable2dict(obj):
+    if obj is None:
+        return None
+    else:
+        return dict(obj)
+
 def box_ArrayView(viewtype, viewval, c):
+    serializable2dict_obj = c.pyapi.unserialize(c.pyapi.serialize_object(serializable2dict))
+    behavior2_obj = c.pyapi.unserialize(c.pyapi.serialize_object(dict2serializable(viewtype.behavior)))
+    behavior_obj  = c.pyapi.call_function_objargs(serializable2dict_obj, (behavior2_obj,))
     ArrayView_obj = c.pyapi.unserialize(c.pyapi.serialize_object(ArrayView))
     type_obj      = c.pyapi.unserialize(c.pyapi.serialize_object(viewtype.type))
-    behavior_obj  = c.pyapi.unserialize(c.pyapi.serialize_object(viewtype.behavior))
     fields_obj    = c.pyapi.unserialize(c.pyapi.serialize_object(viewtype.fields))
-
+    
     proxyin = c.context.make_helper(c.builder, viewtype, viewval)
     pos_obj    = c.pyapi.long_from_ssize_t(proxyin.pos)
     start_obj  = c.pyapi.long_from_ssize_t(proxyin.start)
@@ -190,9 +204,11 @@ def box_ArrayView(viewtype, viewval, c):
 
     out = c.pyapi.call_function_objargs(ArrayView_obj, (type_obj, behavior_obj, lookup_obj, pos_obj, start_obj, stop_obj, fields_obj))
 
+    c.pyapi.decref(serializable2dict_obj)
+    c.pyapi.decref(behavior2_obj)
+    c.pyapi.decref(behavior_obj)
     c.pyapi.decref(ArrayView_obj)
     c.pyapi.decref(type_obj)
-    c.pyapi.decref(behavior_obj)
     c.pyapi.decref(fields_obj)
     c.pyapi.decref(pos_obj)
     c.pyapi.decref(start_obj)
@@ -343,6 +359,12 @@ class RecordViewType(numba.types.Type):
     def fields(self):
         return self.arrayviewtype.fields
 
+    def typer_field(self, key):
+        return self.arrayviewtype.type.getitem_field_record(self, key)
+
+    def lower_field(self, context, builder, val, key):
+        return self.arrayviewtype.type.lower_getitem_field_record(context, builder, self, val, key)
+
 @numba.extending.register_model(RecordViewType)
 class RecordViewModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
@@ -411,10 +433,16 @@ class type_methods_record(numba.typing.templates.AttributeTemplate):
     key = RecordViewType
 
     def generic_resolve(self, recordviewtype, attr):
-        # if attr == "???":
-        #     do_something_specific
-        return recordviewtype.arrayviewtype.type.getitem_field_record(recordviewtype, attr)
+        for recname, attrname, typer, lower in awkward1._util.numba_methods(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
+            if attr == attrname:
+                return typer(recordviewtype)
+        else:
+            return recordviewtype.typer_field(attr)
 
 @numba.extending.lower_getattr_generic(RecordViewType)
 def lower_getattr_generic_record(context, builder, recordviewtype, recordviewval, attr):
-    return recordviewtype.arrayviewtype.type.lower_getitem_field_record(context, builder, recordviewtype, recordviewval, attr)
+    for recname, attrname, typer, lower in awkward1._util.numba_methods(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
+        if attr == attrname:
+            return lower(context, builder, typer(recordviewtype)(recordviewtype), (recordviewval,))
+    else:
+        return recordviewtype.lower_field(context, builder, recordviewval, attr)

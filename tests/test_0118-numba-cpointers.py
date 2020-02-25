@@ -780,3 +780,26 @@ def test_custom_record():
 
     assert f1(array, 1) == 202.2
     assert f1(array, 2) == 303.3
+
+def dummy_typer2(viewtype):
+    return numba.float64
+
+def dummy_lower2(context, builder, sig, args):
+    def compute(rec):
+        return rec.x + rec.y
+    return context.compile_internal(builder, compute, sig, args)
+
+def test_custom_record2():
+    behavior = {}
+    behavior["__numba_typer__", "Dummy", "stuff"] = dummy_typer2
+    behavior["__numba_lower__", "Dummy", "stuff"] = dummy_lower2
+
+    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior)
+    array.layout.setparameter("__record__", "Dummy")
+
+    @numba.njit
+    def f1(x, i):
+        return x[i].stuff
+
+    assert f1(array, 1) == 202.2
+    assert f1(array, 2) == 303.3
