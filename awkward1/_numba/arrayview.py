@@ -434,18 +434,16 @@ class type_getattr_record(numba.typing.templates.AttributeTemplate):
 
     def generic_resolve(self, recordviewtype, attr):
         for recname, methodname, typer, lower in awkward1._util.numba_methods(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
-            class type_method(numba.typing.templates.AbstractTemplate):
-                key = methodname
-                def generic(_, args, kwargs):
-                    sig = typer(recordviewtype, args, kwargs)
-                    sig.recvr = recordviewtype
-                    return sig
-
-            @numba.extending.lower_builtin("stuff", recordviewtype, numba.int64)
-            def lower_whatever(context, builder, sig, args):
-                return context.get_constant(numba.float64, 1.23)
-
-            return numba.types.BoundFunction(type_method, recordviewtype)
+            if attr == methodname:
+                class type_method(numba.typing.templates.AbstractTemplate):
+                    key = methodname
+                    def generic(_, args, kwargs):
+                        if len(kwargs) == 0:
+                            sig = typer(recordviewtype, args)
+                            sig.recvr = recordviewtype
+                            numba.extending.lower_builtin(methodname, recordviewtype, *[x.literal_type if isinstance(x, numba.types.Literal) else x for x in args])(lower)
+                            return sig
+                return numba.types.BoundFunction(type_method, recordviewtype)
 
         for recname, attrname, typer, lower in awkward1._util.numba_attrs(recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior):
             if attr == attrname:

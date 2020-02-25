@@ -804,11 +804,13 @@ def test_custom_record2():
     assert f1(array, 1) == 202.2
     assert f1(array, 2) == 303.3
 
-def dummy_typer3(viewtype, args, kwargs):
+def dummy_typer3(viewtype, args):
     return numba.float64(numba.int64)
 
 def dummy_lower3(context, builder, sig, args):
-    return context.get_constant(numba.float64, 3.14)
+    def compute(rec, j):
+        return rec.x + rec.y + j
+    return context.compile_internal(builder, compute, sig, args)
 
 def test_custom_record3():
     behavior = {}
@@ -819,9 +821,8 @@ def test_custom_record3():
     array.layout.setparameter("__record__", "Dummy")
 
     @numba.njit
-    def f1(x, i):
-        return x[i].stuff(999)
+    def f1(x, i, j):
+        return x[i].stuff(j)
 
-    print(f1(array, 1))
-
-    raise Exception
+    assert f1(array, 1, 1000) == 1202.2
+    assert f1(array, 2, 1000) == 1303.3
