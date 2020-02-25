@@ -192,6 +192,13 @@ class type_methods(numba.typing.templates.AttributeTemplate):
         else:
             raise TypeError("wrong number or types of arguments for FillableArray.append")
 
+    @numba.typing.templates.bound_function("extend")
+    def resolve_extend(self, fillabletype, args, kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], awkward1._numba.arrayview.ArrayViewType):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError("wrong number or types of arguments for FillableArray.extend")
+
 @numba.extending.lower_builtin("clear", FillableArrayType)
 def lower_clear(context, builder, sig, args):
     fillabletype, = sig.args
@@ -322,7 +329,7 @@ def lower_endrecord(context, builder, sig, args):
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("append", FillableArrayType, awkward1._numba.arrayview.ArrayViewType, numba.types.Integer)
-def lower_append(context, builder, sig, args):
+def lower_append_array_at(context, builder, sig, args):
     fillabletype, viewtype, attype = sig.args
     fillableval, viewval, atval = args
 
@@ -334,4 +341,36 @@ def lower_append(context, builder, sig, args):
 
     proxyin = context.make_helper(builder, fillabletype, fillableval)
     call(context, builder, awkward1._numba.libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("append", FillableArrayType, awkward1._numba.arrayview.RecordViewType)
+def lower_append_record(context, builder, sig, args):
+    fillabletype, recordviewtype = sig.args
+    fillableval, recordviewval = args
+
+    recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
+
+    arrayviewproxy = context.make_helper(builder, recordviewtype.arrayviewtype, recordviewproxy.arrayview)
+    atval = awkward1._numba.castint(context, builder, numba.intp, numba.int64, recordviewproxy.at)
+
+    sharedptr = awkward1._numba.layout.getat(context, builder, arrayviewproxy.sharedptrs, arrayviewproxy.pos)
+
+    proxyin = context.make_helper(builder, fillabletype, fillableval)
+    call(context, builder, awkward1._numba.libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
+    return context.get_dummy_value()
+
+@numba.extending.lower_builtin("extend", FillableArrayType, awkward1._numba.arrayview.ArrayViewType)
+def lower_extend_array(context, builder, sig, args):
+    fillabletype, viewtype = sig.args
+    fillableval, viewval = args
+
+    viewproxy = context.make_helper(builder, viewtype, viewval)
+
+    sharedptr = awkward1._numba.layout.getat(context, builder, viewproxy.sharedptrs, viewproxy.pos)
+
+    proxyin = context.make_helper(builder, fillabletype, fillableval)
+    with numba.cgutils.for_range(builder, viewproxy.stop, viewproxy.start) as loop:
+        atval = awkward1._numba.castint(context, builder, numba.intp, numba.int64, loop.index)
+        call(context, builder, awkward1._numba.libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
+
     return context.get_dummy_value()

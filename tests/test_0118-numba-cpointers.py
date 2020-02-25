@@ -1056,3 +1056,37 @@ def test_FillableArray_append_numba():
     f1(array, builder)
 
     assert awkward1.tolist(builder.snapshot()) == [[5.5], [3.3, 4.4], [3.3, 4.4], [0.0, 1.1, 2.2], [], [6.6, 7.7, 8.8, 9.9]]
+
+def test_FillableArray_append_numba2():
+    @numba.njit
+    def f1(array, builder):
+        builder.append(array[3])
+        builder.append(array[2])
+        builder.append(array[2])
+        builder.append(array[0])
+        builder.append(array[1])
+        builder.append(array[-1])
+
+    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}])
+    builder = awkward1.FillableArray()
+
+    f1(array, builder)
+
+    assert awkward1.tolist(builder.snapshot()) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}]
+
+def test_FillableArray_append_numba3():
+    @numba.njit
+    def f1(array, builder):
+        builder.extend(array[3])
+        builder.extend(array[2])
+        builder.extend(array[2])
+        builder.extend(array[0])
+        builder.extend(array[1])
+        builder.extend(array[-1])
+
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+    builder = awkward1.FillableArray()
+
+    f1(array, builder)
+
+    assert awkward1.tolist(builder.snapshot()) == [5.5, 3.3, 4.4, 3.3, 4.4, 0.0, 1.1, 2.2, 6.6, 7.7, 8.8, 9.9]
