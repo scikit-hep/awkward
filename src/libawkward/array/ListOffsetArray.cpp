@@ -961,25 +961,45 @@ namespace awkward {
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad(int64_t rpad_width, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     std::shared_ptr<Content> out = content();
-    int64_t startslen = length();
-    IndexOf<T> starts = util::make_starts(offsets_);
-    IndexOf<T> stops = util::make_stops(offsets_);
-    out = std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts, stops, out);
-
     if (toaxis == 0) {
       if (out.get()->isindexed()) {
-        // FIXME:
+        out = content()->getitem_range_nowrap(0, out.get()->length());
+        out = out.get()->rpad(rpad_width, toaxis);
+
+        IndexOf<T> starts = util::make_starts(offsets_);
+        IndexOf<T> stops = util::make_stops(offsets_);
+
+        Index64 padded_starts(rpad_width);
+        Index64 padded_stops(rpad_width);
+        struct Error err1 = util::awkward_listarray_rpad_64<T>(
+          padded_starts.ptr().get(),
+          padded_stops.ptr().get(),
+          starts.ptr().get(),
+          stops.ptr().get(),
+          rpad_width,
+          starts.length(),
+          starts.offset(),
+          stops.offset()
+        );
+        util::handle_error(err1, classname(), identities_.get());
+
+        return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts, stops, out);
       }
       else {
+        IndexOf<T> starts = util::make_starts(offsets_);
+        IndexOf<T> stops = util::make_stops(offsets_);
+
         int64_t fromlength = length();
         int64_t tolength = rpad_width;
         Index64 outindex(tolength);
-        struct Error err = awkward_index_rpad(
+        struct Error err2 = awkward_index_rpad(
           outindex.ptr().get(),
           fromlength,
-          tolength);
-        util::handle_error(err, classname(), identities_.get());
+          tolength
+        );
+        util::handle_error(err2, classname(), identities_.get());
 
+        out = std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts, stops, out);
         return std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
       }
     }
@@ -1002,10 +1022,11 @@ namespace awkward {
             outindex.ptr().get()[count++] = -1;
           }
         }
-        out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, content());
+        out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
         return std::make_shared<RegularArray>(identities_, parameters_, out, rpad_width);
       }
     }
+
     return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets_, out);
   }
 

@@ -111,8 +111,20 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_zero_index_64(int64_t* toindex, int64_t length);
   EXPORT_SYMBOL struct Error awkward_zero_raw_ptr(uint8_t* toptr, int64_t length);
   EXPORT_SYMBOL struct Error awkward_index_rpad(int64_t* toindex, const int64_t fromlength, int64_t tolength);
+  EXPORT_SYMBOL struct Error awkward_index_append(const int64_t* fromindex, int64_t* toindex, const int64_t fromlength, int64_t length);
   EXPORT_SYMBOL struct Error awkward_index_inject_rpad(int64_t* toindex, const int64_t* fromindex, int64_t shape, int64_t chunks, int64_t length);
   EXPORT_SYMBOL struct Error awkward_index_clip(int64_t* toindex, const int64_t* fromindex, int64_t tolength);
+
+  EXPORT_SYMBOL struct Error awkward_listarray32_broadcast_toindex_64(int64_t* toindex, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_broadcast_toindex_64(int64_t* toindex, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_listarray64_broadcast_toindex_64(int64_t* toindex, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_listarray32_broadcast_toindex_rpad_64(int64_t* toindex, const int64_t* fromindex, const int32_t* fromstarts, const int32_t* fromstops, int64_t tolength, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_broadcast_toindex_rpad_64(int64_t* toindex, const int64_t* fromindex, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t tolength, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_listarray64_broadcast_toindex_rpad_64(int64_t* toindex, const int64_t* fromindex, const int64_t* fromstarts, const int64_t* fromstops, int64_t tolength, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_listarray32_rpad_64(int64_t* tostarts, int64_t* tostops, const int32_t* fromstarts, const int32_t* fromstops, int64_t tolength, int64_t fromlength, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_rpad_64(int64_t* tostarts, int64_t* tostops, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t tolength, int64_t fromlength, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_listarray64_rpad_64(int64_t* tostarts, int64_t* tostops, const int64_t* fromstarts, const int64_t* fromstops, int64_t tolength, int64_t fromlength, int64_t startsoffset, int64_t stopsoffset);
+
   EXPORT_SYMBOL struct Error awkward_indexedarray_rpad_to64_from32(int64_t* toindex, const int32_t* fromindex, int64_t tolength, int64_t fromlength);
   EXPORT_SYMBOL struct Error awkward_indexedarray_rpad_to64_fromU32(int64_t* toindex, const uint32_t* fromindex, int64_t tolength, int64_t fromlength);
   EXPORT_SYMBOL struct Error awkward_indexedarray_rpad_to64_from64(int64_t* toindex, const int64_t* fromindex, int64_t tolength, int64_t fromlength);

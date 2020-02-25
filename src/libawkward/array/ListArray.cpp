@@ -823,8 +823,89 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::rpad(int64_t length, int64_t axis) const {
-    throw std::runtime_error("FIXME: ListArrayOf<T> rpad is not implemented");
+  const std::shared_ptr<Content> ListArrayOf<T>::rpad(int64_t rpad_width, int64_t axis) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    std::shared_ptr<Content> out = content();
+    int64_t tolength = 0;
+    for (int64_t i = 0; i < starts_.length(); i++) {
+      tolength += stops_.ptr().get()[i] - starts_.ptr().get()[i];
+    }
+    Index64 self_index(tolength);
+    struct Error err1 = util::awkward_listarray_broadcast_toindex_64<T>(
+      self_index.ptr().get(),
+      starts_.ptr().get(),
+      stops_.ptr().get(),
+      starts_.length(),
+      starts_.offset(),
+      stops_.offset());
+    util::handle_error(err1, classname(), identities_.get());
+
+    if (toaxis == 0) {
+      if (rpad_width > length()) {
+        Index64 outindex(tolength + length() - rpad_width);
+        struct Error err2 = awkward_index_append(
+          self_index.ptr().get(),
+          outindex.ptr().get(),
+          tolength,
+          length() - rpad_width);
+        util::handle_error(err2, classname(), identities_.get());
+
+        out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
+
+        Index64 starts(starts_.length() + length() - rpad_width);
+        Index64 stops(starts_.length() + length() - rpad_width);
+        struct Error err3 = util::awkward_listarray_rpad_64<T>(
+          starts.ptr().get(),
+          stops.ptr().get(),
+          starts_.ptr().get(),
+          stops_.ptr().get(),
+          tolength,
+          starts_.length(),
+          starts_.offset(),
+          stops_.offset()
+        );
+        util::handle_error(err3, classname(), identities_.get());
+
+        return std::make_shared<ListArray64>(identities_, parameters_, starts, stops, out);
+      }
+      else {
+        Index64 starts(rpad_width);
+        Index64 stops(rpad_width);
+        struct Error err4 = util::awkward_listarray_rpad_64<T>(
+          starts.ptr().get(),
+          stops.ptr().get(),
+          starts_.ptr().get(),
+          stops_.ptr().get(),
+          rpad_width,
+          starts_.length(),
+          starts_.offset(),
+          stops_.offset()
+        );
+        util::handle_error(err4, classname(), identities_.get());
+
+        return std::make_shared<ListArray64>(identities_, parameters_, starts, stops, out);
+      }
+    }
+    else if (toaxis == 1) {
+
+      Index64 outindex(rpad_width*starts_.length());
+      struct Error err5 = util::awkward_listarray_broadcast_toindex_rpad_64<T>(
+        outindex.ptr().get(),
+        self_index.ptr().get(),
+        starts_.ptr().get(),
+        stops_.ptr().get(),
+        rpad_width,
+        starts_.length(),
+        starts_.offset(),
+        stops_.offset());
+      util::handle_error(err5, classname(), identities_.get());
+
+      out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
+      return std::make_shared<RegularArray>(identities_, parameters_, out, rpad_width);
+  }
+  else {
+      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, out.get()->rpad(rpad_width, axis - 1));
+    }
   }
 
   template <typename T>

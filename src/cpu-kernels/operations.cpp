@@ -555,6 +555,16 @@ ERROR awkward_index_rpad(int64_t* toindex, const int64_t fromlength, int64_t tol
   return success();
 }
 
+ERROR awkward_index_append(const int64_t* fromindex, int64_t* toindex, const int64_t fromlength, int64_t length) {
+  for (int64_t i = 0; i < fromlength; i++) {
+    toindex[i] = fromindex[i];
+  }
+  for (int64_t i = fromlength; i < fromlength + length; i++) {
+    toindex[i] = -1;
+  }
+  return success();
+}
+
 ERROR awkward_index_inject_rpad(int64_t* toindex, const int64_t* fromindex, int64_t shape, int64_t chunks, int64_t length) {
   int64_t k = 0;
   for (int64_t i = 0; i < chunks; i++) {
@@ -575,6 +585,104 @@ ERROR awkward_index_clip(int64_t* toindex, const int64_t* fromindex, int64_t tol
     toindex[i] = fromindex[i];
   }
   return success();
+}
+
+template <typename T, typename C>
+ERROR awkward_listarray_broadcast_toindex(T* toindex, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+// FIXME: add offsets
+  int64_t k = 0;
+  for (int64_t x = 0;  x < lenstarts;  x++) {
+    if (fromstops[x] - fromstarts[x] > 0) {
+      for (int64_t y = 0; y < (fromstops[x] - fromstarts[x]); y++) {
+        toindex[k] = fromstarts[x] + y;
+        ++k;
+      }
+    }
+    else {
+      toindex[k] = fromstarts[x];
+      ++k;
+    }
+  }
+  return success();
+}
+ERROR awkward_listarray32_broadcast_toindex_64(int64_t* toindex, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_listarray_broadcast_toindex<int64_t, int32_t>(toindex, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+}
+ERROR awkward_listarrayU32_broadcast_toindex_64(int64_t* toindex, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_listarray_broadcast_toindex<int64_t, uint32_t>(toindex, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+}
+ERROR awkward_listarray64_broadcast_toindex_64(int64_t* toindex, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_listarray_broadcast_toindex<int64_t, int64_t>(toindex, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+}
+
+template <typename T, typename C>
+ERROR awkward_listarray_rpad(T* tostarts, T* tostops, const C* fromstarts, const C* fromstops, int64_t tolength, int64_t fromlength, int64_t startsoffset, int64_t stopsoffset) {
+  if (tolength > fromlength) {
+    for (int64_t i = 0; i < fromlength; i++) {
+      tostarts[i] = (T)fromstarts[i];
+      tostops[i] = (T)fromstops[i];
+    }
+    for (int64_t i = fromlength; i < tolength - fromlength; i++) {
+      tostarts[i] = (T)(fromlength + i);
+      tostops[i] = (T)(fromlength + i + 1);
+    }
+  }
+  else {
+    for (int64_t i = 0; i < tolength; i++) {
+      tostarts[i] = (T)fromstarts[i];
+      tostops[i] = (T)fromstops[i];
+    }
+  }
+  return success();
+}
+ERROR awkward_listarray32_rpad_64(int64_t* tostarts, int64_t* tostops, const int32_t* fromstarts, const int32_t* fromstops, int64_t tolength, int64_t fromlength, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_listarray_rpad<int64_t, int32_t>(tostarts, tostops, fromstarts, fromstops, tolength, fromlength, startsoffset, stopsoffset);
+}
+ERROR awkward_listarrayU32_rpad_64(int64_t* tostarts, int64_t* tostops, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t tolength, int64_t fromlength, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_listarray_rpad<int64_t, uint32_t>(tostarts, tostops, fromstarts, fromstops, tolength, fromlength, startsoffset, stopsoffset);
+}
+ERROR awkward_listarray64_rpad_64(int64_t* tostarts, int64_t* tostops, const int64_t* fromstarts, const int64_t* fromstops, int64_t tolength, int64_t fromlength, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_listarray_rpad<int64_t, int64_t>(tostarts, tostops, fromstarts, fromstops, tolength, fromlength, startsoffset, stopsoffset);
+}
+
+template <typename T, typename C>
+ERROR awkward_listarray_broadcast_toindex_rpad(T* toindex, const T* fromindex, const C* fromstarts, const C* fromstops, int64_t tolength, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  int64_t shift = 0;
+  int64_t l = 0;
+  for (int64_t i = 0; i < lenstarts; i++) {
+    int64_t step = fromstops[i] - fromstarts[i];
+    if (step <= tolength) {
+      int64_t k = 0;
+      for (int64_t j = 0; j < step; j++) {
+        toindex[l] = fromindex[shift];
+        ++shift;
+        ++k;
+        ++l;
+      }
+      while (k < tolength) {
+        toindex[l] = -1;
+        ++k;
+        ++l;
+      }
+    }
+    else {
+      for (int64_t j = 0; j < tolength; j++) {
+        toindex[l] = fromindex[shift];
+        ++shift;
+        ++l;
+      }
+    }
+  }
+  return success();
+}
+ERROR awkward_listarray32_broadcast_toindex_rpad_64(int64_t* toindex, const int64_t* fromindex, const int32_t* fromstarts, const int32_t* fromstops, int64_t tolength, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_listarray_broadcast_toindex_rpad<int64_t, int32_t>(toindex, fromindex, fromstarts, fromstops, tolength, lenstarts, startsoffset, stopsoffset);
+}
+ERROR awkward_listarrayU32_broadcast_toindex_rpad_64(int64_t* toindex, const int64_t* fromindex, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t tolength, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_listarray_broadcast_toindex_rpad<int64_t, uint32_t>(toindex, fromindex, fromstarts, fromstops, tolength, lenstarts, startsoffset, stopsoffset);
+}
+ERROR awkward_listarray64_broadcast_toindex_rpad_64(int64_t* toindex, const int64_t* fromindex, const int64_t* fromstarts, const int64_t* fromstops, int64_t tolength, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_listarray_broadcast_toindex_rpad<int64_t, int64_t>(toindex, fromindex, fromstarts, fromstops, tolength, lenstarts, startsoffset, stopsoffset);
 }
 
 template <typename FROM, typename TO>
