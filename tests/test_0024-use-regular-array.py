@@ -71,17 +71,3 @@ def test_newaxis():
     assert awkward1.tolist(array[:, numpy.newaxis]) == [[[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]]], [[[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]]
 
     assert awkward1.tolist(listoffsetarray[:, numpy.newaxis]) == [[[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]]], [[[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]]
-
-numba = pytest.importorskip("numba")
-
-def test_empty_array_slice_numba():
-    # inspired by PR015::test_deep_numpy
-    content = awkward1.layout.NumpyArray(numpy.array([[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]]))
-    listarray = awkward1.layout.ListArray64(awkward1.layout.Index64(numpy.array([0, 3, 3])), awkward1.layout.Index64(numpy.array([3, 3, 5])), content)
-
-    @numba.njit
-    def f1(q, i, j):
-        return q[2, i, j]
-
-    assert awkward1.tolist(f1(listarray, numpy.array([1], dtype=int), numpy.array([], dtype=int))) == []
-    assert awkward1.tolist(f1(listarray, numpy.array([], dtype=int), numpy.array([], dtype=int))) == []

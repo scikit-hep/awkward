@@ -10,21 +10,21 @@
 #include "awkward/fillable/OptionFillable.h"
 
 namespace awkward {
-  const std::shared_ptr<Fillable> OptionFillable::fromnulls(const FillableOptions& options, int64_t nullcount, std::shared_ptr<Fillable> content) {
+  const std::shared_ptr<Fillable> OptionFillable::fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Fillable>& content) {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::full(options, -1, nullcount);
     std::shared_ptr<Fillable> out = std::make_shared<OptionFillable>(options, offsets, content);
     out.get()->setthat(out);
     return out;
   }
 
-  const std::shared_ptr<Fillable> OptionFillable::fromvalids(const FillableOptions& options, std::shared_ptr<Fillable> content) {
+  const std::shared_ptr<Fillable> OptionFillable::fromvalids(const FillableOptions& options, const std::shared_ptr<Fillable>& content) {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::arange(options, content->length());
     std::shared_ptr<Fillable> out = std::make_shared<OptionFillable>(options, offsets, content);
     out.get()->setthat(out);
     return out;
   }
 
-  OptionFillable::OptionFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, std::shared_ptr<Fillable> content)
+  OptionFillable::OptionFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, const std::shared_ptr<Fillable>& content)
       : options_(options)
       , offsets_(offsets)
       , content_(content) { }
@@ -197,6 +197,18 @@ namespace awkward {
       if (length != content_.get()->length()) {
         offsets_.append(length);
       }
+    }
+    return that_;
+  }
+
+  const std::shared_ptr<Fillable> OptionFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    if (!content_.get()->active()) {
+      int64_t length = content_.get()->length();
+      maybeupdate(content_.get()->append(array, at));
+      offsets_.append(length);
+    }
+    else {
+      content_.get()->append(array, at);
     }
     return that_;
   }

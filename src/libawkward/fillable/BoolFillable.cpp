@@ -107,4 +107,11 @@ namespace awkward {
   const std::shared_ptr<Fillable> BoolFillable::endrecord() {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
+
+  const std::shared_ptr<Fillable> BoolFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->append(array, at);
+    return out;
+  }
+
 }

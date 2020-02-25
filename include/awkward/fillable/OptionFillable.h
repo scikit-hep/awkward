@@ -13,10 +13,10 @@
 namespace awkward {
   class OptionFillable: public Fillable {
   public:
-    static const std::shared_ptr<Fillable> fromnulls(const FillableOptions& options, int64_t nullcount, std::shared_ptr<Fillable> content);
-    static const std::shared_ptr<Fillable> fromvalids(const FillableOptions& options, std::shared_ptr<Fillable> content);
+    static const std::shared_ptr<Fillable> fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Fillable>& content);
+    static const std::shared_ptr<Fillable> fromvalids(const FillableOptions& options, const std::shared_ptr<Fillable>& content);
 
-    OptionFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, std::shared_ptr<Fillable> content);
+    OptionFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, const std::shared_ptr<Fillable>& content);
 
     const std::string classname() const override;
     int64_t length() const override;
@@ -37,6 +37,7 @@ namespace awkward {
     const std::shared_ptr<Fillable> beginrecord(const char* name, bool check) override;
     const std::shared_ptr<Fillable> field(const char* key, bool check) override;
     const std::shared_ptr<Fillable> endrecord() override;
+    const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
 
   private:
     const FillableOptions options_;

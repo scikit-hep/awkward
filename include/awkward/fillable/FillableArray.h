@@ -49,20 +49,9 @@ namespace awkward {
     void field_check(const char* key);
     void field_check(const std::string& key);
     void endrecord();
-
-    template <typename T>
-    void fill(const std::vector<T>& vector) {
-      beginlist();
-      for (auto x : vector) {
-        fill(x);
-      }
-      endlist();
-    }
-
-    void fill(int64_t x);
-    void fill(double x);
-    void fill(const char* x);
-    void fill(const std::string& x);
+    void append(const std::shared_ptr<Content>& array, int64_t at);
+    void append_nowrap(const std::shared_ptr<Content>& array, int64_t at);
+    void extend(const std::shared_ptr<Content>& array);
 
   private:
     void maybeupdate(const std::shared_ptr<Fillable>& tmp);
@@ -97,6 +86,7 @@ extern "C" {
   EXPORT_SYMBOL uint8_t awkward_FillableArray_field_fast(void* fillablearray, const char* key);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_field_check(void* fillablearray, const char* key);
   EXPORT_SYMBOL uint8_t awkward_FillableArray_endrecord(void* fillablearray);
+  EXPORT_SYMBOL uint8_t awkward_FillableArray_append_nowrap(void* fillablearray, const void* shared_ptr_ptr, int64_t at);
 }
 
 #endif // AWKWARD_FILLABLE_H_

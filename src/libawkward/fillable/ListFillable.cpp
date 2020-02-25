@@ -20,7 +20,7 @@ namespace awkward {
     return out;
   }
 
-  ListFillable::ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, std::shared_ptr<Fillable> content, bool begun)
+  ListFillable::ListFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, const std::shared_ptr<Fillable>& content, bool begun)
       : options_(options)
       , offsets_(offsets)
       , content_(content)
@@ -193,6 +193,18 @@ namespace awkward {
     }
     else {
       content_.get()->endrecord();
+      return that_;
+    }
+  }
+
+  const std::shared_ptr<Fillable> ListFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    if (!begun_) {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->append(array, at);
+      return out;
+    }
+    else {
+      maybeupdate(content_.get()->append(array, at));
       return that_;
     }
   }

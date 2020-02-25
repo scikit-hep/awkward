@@ -20,7 +20,7 @@ namespace awkward {
     return out;
   }
 
-  StringFillable::StringFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, GrowableBuffer<uint8_t>& content, const char* encoding)
+  StringFillable::StringFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& offsets, const GrowableBuffer<uint8_t>& content, const char* encoding)
       : options_(options)
       , offsets_(offsets)
       , content_(content)
@@ -157,5 +157,11 @@ namespace awkward {
 
   const std::shared_ptr<Fillable> StringFillable::endrecord() {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
+  }
+
+  const std::shared_ptr<Fillable> StringFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->append(array, at);
+    return out;
   }
 }

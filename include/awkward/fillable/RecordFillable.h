@@ -40,6 +40,7 @@ namespace awkward {
     const std::shared_ptr<Fillable> beginrecord(const char* name, bool check) override;
     const std::shared_ptr<Fillable> field(const char* key, bool check) override;
     const std::shared_ptr<Fillable> endrecord() override;
+    const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
 
   private:
     const std::shared_ptr<Fillable> field_fast(const char* key);

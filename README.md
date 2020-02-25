@@ -161,12 +161,10 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
       * [X] `IndexedArray` and `IndexedOptionArray`: the old `IndexedArray` and `IndexedMaskedArray`; the latter has option type.
       * [X] `UnionArray` (issue [#54](https://github.com/scikit-hep/awkward-1.0/issues/54)): same as the old version.
-         * [ ] Implement it in Numba as well.
       * [ ] `BitMaskedArray` (issue [#58](https://github.com/scikit-hep/awkward-1.0/issues/58)): for nullable data with a bit mask (for Arrow).
       * [ ] `UnmaskedArray` (issue [#59](https://github.com/scikit-hep/awkward-1.0/issues/59)): for optional type without actually having a mask.
-      * [ ] `SlicedArray` (issue [#55](https://github.com/scikit-hep/awkward-1.0/issues/55)): lazy-slicing (from old `Table`) that can be applied to any type.
-      * [ ] `ChunkedArray` (issue [#56](https://github.com/scikit-hep/awkward-1.0/issues/56)): same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required.
-      * [ ] `PyVirtualArray` (issue [#57](https://github.com/scikit-hep/awkward-1.0/issues/57)): same as old `VirtualArray`, but it only works in Python (passes _through_ C++).
+      * [ ] `ChunkedArray` (issue [#56](https://github.com/scikit-hep/awkward-1.0/issues/56)): same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required. Also, this will only be available on the top of a hierarchy (without nesting).
+      * [ ] `VirtualArray` (issue [#57](https://github.com/scikit-hep/awkward-1.0/issues/57)): same as old `VirtualArray`.
    * [X] Describe high-level types using [datashape](https://datashape.readthedocs.io/en/latest/) and possibly also an in-house schema. (Emit datashape _strings_ from C++.)
    * [ ] Translation to and from Apache Arrow and Parquet in C++ (issue [#68](https://github.com/scikit-hep/awkward-1.0/issues/68)).
    * [X] Layer 1 interface `Array`:
@@ -217,6 +215,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [ ] `SparseArray`: same as the old version, but now we need a good lookup mechanism.
       * [ ] `RegularChunkedArray`: like a `ChunkedArray`, but all chunks are known to have the same size.
       * [ ] `AmorphousChunkedArray`: a `ChunkedArray` without known chunk lengths (maybe not ever).
+      * [ ] `UnionArray` in Numba. Have to [somehow deal with heterogeneity](https://github.com/scikit-hep/awkward-1.0/pull/118#issuecomment-590542012).
    * [ ] Deferred operations:
       * [ ] `awkward.join`: performs an inner join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event intersection, zipping all fields.
       * [ ] `awkward.union`: performs an outer join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event union, zipping fields where possible.

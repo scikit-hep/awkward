@@ -25,6 +25,7 @@ namespace awkward {
     const std::shared_ptr<Content> project(const Index8& mask) const;
     const Index8 bytemask() const;
     const std::shared_ptr<Content> simplify() const;
+    T index_at_nowrap(int64_t at) const;
 
     const std::string classname() const override;
     void setidentities() override;

@@ -10,12 +10,12 @@
 #include "awkward/array/Record.h"
 
 namespace awkward {
-  Record::Record(const std::shared_ptr<RecordArray>& array, int64_t at)
+  Record::Record(const std::shared_ptr<const RecordArray> array, int64_t at)
       : Content(Identities::none(), array.get()->parameters())
       , array_(array)
       , at_(at) { }
 
-  const std::shared_ptr<RecordArray> Record::array() const {
+  const std::shared_ptr<const RecordArray> Record::array() const {
     return array_;
   }
 

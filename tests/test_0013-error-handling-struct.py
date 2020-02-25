@@ -6,10 +6,8 @@ import sys
 
 import pytest
 import numpy
-numba = pytest.importorskip("numba")
 
 import awkward1
-awkward1_numba_util = pytest.importorskip("awkward1._numba.util")
 
 py27 = (sys.version_info[0] < 3)
 
@@ -253,19 +251,3 @@ def test_listarray_listarray_numpyarray():
     with pytest.raises(ValueError) as excinfo:
         array2[:, 1:][3, 0, 20]
     assert str(excinfo.value) == "in ListArray64 with identity [3, 1] attempting to get 20, index out of range"
-
-def test_array():
-    starts  = numpy.array([0, 3, 3, 5, 6])
-    stops   = numpy.array([3, 3, 5, 6, 10])
-    content = numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
-    array   = awkward1.layout.ListArray64(awkward1.layout.Index64(starts),
-                                          awkward1.layout.Index64(stops),
-                                          awkward1.layout.NumpyArray(content))
-
-    @numba.njit
-    def f1(q):
-        return q[[2, 0, 20, 1],]
-
-    with pytest.raises(ValueError) as excinfo:
-        f1(array)
-    assert str(excinfo.value) == "in ak::RegularArray, indexing error"

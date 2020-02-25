@@ -29,6 +29,18 @@ py::class_<ak::FillableArray> make_FillableArray(const py::handle& m, const std:
 
 py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(const py::handle& m, const std::string& name);
 
+class PersistentSharedPtr {
+public:
+  PersistentSharedPtr(const std::shared_ptr<ak::Content>& ptr);
+  py::object layout() const;
+  size_t ptr() const;
+
+private:
+  const std::shared_ptr<ak::Content> ptr_;
+};
+
+py::class_<PersistentSharedPtr> make_PersistentSharedPtr(const py::handle& m, const std::string& name);
+
 py::class_<ak::Content, std::shared_ptr<ak::Content>> make_Content(const py::handle& m, const std::string& name);
 
 py::class_<ak::EmptyArray, std::shared_ptr<ak::EmptyArray>, ak::Content> make_EmptyArray(const py::handle& m, const std::string& name);

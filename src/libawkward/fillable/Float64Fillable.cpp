@@ -15,7 +15,7 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Fillable> Float64Fillable::fromint64(const FillableOptions& options, GrowableBuffer<int64_t> old) {
+  const std::shared_ptr<Fillable> Float64Fillable::fromint64(const FillableOptions& options, const GrowableBuffer<int64_t>& old) {
     GrowableBuffer<double> buffer = GrowableBuffer<double>::empty(options, old.reserved());
     int64_t* oldraw = old.ptr().get();
     double* newraw = buffer.ptr().get();
@@ -118,5 +118,11 @@ namespace awkward {
 
   const std::shared_ptr<Fillable> Float64Fillable::endrecord() {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
+  }
+
+  const std::shared_ptr<Fillable> Float64Fillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->append(array, at);
+    return out;
   }
 }

@@ -31,6 +31,7 @@ PYBIND11_MODULE(layout, m) {
 
   make_Iterator(m, "Iterator");
   make_FillableArray(m, "FillableArray");
+  make_PersistentSharedPtr(m, "_PersistentSharedPtr");
   make_Content(m, "Content");
 
   make_EmptyArray(m, "EmptyArray");

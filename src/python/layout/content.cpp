@@ -509,7 +509,7 @@ py::object getitem(const T& self, const py::object& obj) {
 
 /////////////////////////////////////////////////////////////// FillableArray
 
-void fillable_fill(ak::FillableArray& self, const py::handle& obj) {
+void fillable_fromiter(ak::FillableArray& self, const py::handle& obj) {
   if (obj.is(py::none())) {
     self.null();
   }
@@ -533,7 +533,7 @@ void fillable_fill(ak::FillableArray& self, const py::handle& obj) {
     self.begintuple(tup.size());
     for (size_t i = 0;  i < tup.size();  i++) {
       self.index((int64_t)i);
-      fillable_fill(self, tup[i]);
+      fillable_fromiter(self, tup[i]);
     }
     self.endtuple();
   }
@@ -546,7 +546,7 @@ void fillable_fill(ak::FillableArray& self, const py::handle& obj) {
       }
       std::string key = pair.first.cast<std::string>();
       self.field_check(key.c_str());
-      fillable_fill(self, pair.second);
+      fillable_fromiter(self, pair.second);
     }
     self.endrecord();
   }
@@ -554,7 +554,7 @@ void fillable_fill(ak::FillableArray& self, const py::handle& obj) {
     py::iterable seq = obj.cast<py::iterable>();
     self.beginlist();
     for (auto x : seq) {
-      fillable_fill(self, x);
+      fillable_fromiter(self, x);
     }
     self.endlist();
   }
@@ -608,7 +608,13 @@ py::class_<ak::FillableArray> make_FillableArray(const py::handle& m, const std:
         self.field_check(x);
       })
       .def("endrecord", &ak::FillableArray::endrecord)
-      .def("fill", &fillable_fill)
+      .def("append", [](ak::FillableArray& self, const std::shared_ptr<ak::Content>& array, int64_t at) {
+        self.append(array, at);
+      })
+      .def("extend", [](ak::FillableArray& self, const std::shared_ptr<ak::Content>& array) {
+        self.extend(array);
+      })
+      .def("fromiter", &fillable_fromiter)
   );
 }
 
@@ -634,6 +640,23 @@ py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(const py::
 }
 
 /////////////////////////////////////////////////////////////// Content
+
+PersistentSharedPtr::PersistentSharedPtr(const std::shared_ptr<ak::Content>& ptr)
+    : ptr_(ptr) { }
+
+py::object PersistentSharedPtr::layout() const {
+  return box(ptr_);
+}
+
+size_t PersistentSharedPtr::ptr() const {
+  return reinterpret_cast<size_t>(&ptr_);
+}
+
+py::class_<PersistentSharedPtr> make_PersistentSharedPtr(const py::handle& m, const std::string& name) {
+  return py::class_<PersistentSharedPtr>(m, name.c_str())
+             .def("layout", &PersistentSharedPtr::layout)
+             .def("ptr", &PersistentSharedPtr::ptr);
+}
 
 py::class_<ak::Content, std::shared_ptr<ak::Content>> make_Content(const py::handle& m, const std::string& name) {
   return py::class_<ak::Content, std::shared_ptr<ak::Content>>(m, name.c_str());
@@ -828,6 +851,9 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def_property_readonly("purelist_isregular", &T::purelist_isregular)
           .def_property_readonly("purelist_depth", &T::purelist_depth)
           .def("getitem_nothing", &T::getitem_nothing)
+          .def_property_readonly("_persistent_shared_ptr", [](std::shared_ptr<ak::Content>& self) -> PersistentSharedPtr {
+            return PersistentSharedPtr(self);
+          })
 
           // operations
           .def("sizes", [](const T& self, int64_t axis) -> py::object {
@@ -1019,9 +1045,9 @@ py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_Nu
 
 py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle& m, const std::string& name) {
   return py::class_<ak::Record, std::shared_ptr<ak::Record>>(m, name.c_str())
-      .def(py::init([](const std::shared_ptr<ak::RecordArray>& recordarray, int64_t at) -> ak::Record {
-        return ak::Record(recordarray, at);
-      }), py::arg("recordarray"), py::arg("at"))
+      .def(py::init([](const std::shared_ptr<ak::RecordArray>& array, int64_t at) -> ak::Record {
+        return ak::Record(array, at);
+      }), py::arg("array"), py::arg("at"))
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("identities", [](const ak::Record& self) -> py::object { return box(self.identities()); })
       .def("__getitem__", &getitem<ak::Record>)
@@ -1038,7 +1064,7 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle
       .def("tojson", &tojson_string<ak::Record>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
 
-      .def_property_readonly("array", [](const ak::Record& self) -> py::object { return box(self.array()); })
+      .def_property_readonly("array", [](const ak::Record& self) -> std::shared_ptr<const ak::RecordArray> { return self.array(); })
       .def_property_readonly("at", &ak::Record::at)
       .def_property_readonly("istuple", &ak::Record::istuple)
       .def_property_readonly("numfields", &ak::Record::numfields)
@@ -1122,6 +1148,20 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
         return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), length, istuple);
       }), py::arg("length"), py::arg("istuple") = false, py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
+      .def_property_readonly("recordlookup", [](const ak::RecordArray& self) -> py::object {
+        std::shared_ptr<ak::util::RecordLookup> recordlookup = self.recordlookup();
+        if (recordlookup.get() == nullptr) {
+          return py::none();
+        }
+        else {
+          py::list out;
+          for (auto x : *recordlookup.get()) {
+            py::str pyvalue(PyUnicode_DecodeUTF8(x.data(), x.length(), "surrogateescape"));
+            out.append(pyvalue);
+          }
+          return out;
+        }
+      })
       .def_property_readonly("istuple", &ak::RecordArray::istuple)
       .def_property_readonly("contents", &ak::RecordArray::contents)
       .def("setitem_field", [](const ak::RecordArray& self, const py::object& where, const py::object& what) -> py::object {

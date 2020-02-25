@@ -48,6 +48,48 @@ def arrayclass(layout, behavior):
             return cls
     return awkward1.highlevel.Array
 
+def numba_array_typer(layouttype, behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    arr = layouttype.parameters.get("__array__")
+    if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
+        typer = behavior.get(("__numba_typer__", arr))
+        if callable(typer):
+            return typer
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        typer = behavior.get(("__numba_typer__", ".", rec))
+        if callable(typer):
+            return typer
+    deeprec = layouttype.parameters.get("__record__")
+    if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
+        typer = behavior.get(("__numba_typer__", "*", deeprec))
+        if callable(typer):
+            return typer
+    return None
+
+def numba_array_lower(layouttype, behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    arr = layouttype.parameters.get("__array__")
+    if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
+        lower = behavior.get(("__numba_lower__", arr))
+        if callable(lower):
+            return lower
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        lower = behavior.get(("__numba_lower__", ".", rec))
+        if callable(lower):
+            return lower
+    deeprec = layouttype.parameters.get("__record__")
+    if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
+        lower = behavior.get(("__numba_lower__", "*", deeprec))
+        if callable(lower):
+            return lower
+    return None
+
 def recordclass(layout, behavior):
     import awkward1
     if behavior is None:
@@ -59,20 +101,105 @@ def recordclass(layout, behavior):
             return cls
     return awkward1.highlevel.Record
 
+def numba_record_typer(layouttype, behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        typer = behavior.get(("__numba_typer__", rec))
+        if callable(typer):
+            return typer
+    return None
+
+def numba_record_lower(layouttype, behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        lower = behavior.get(("__numba_lower__", rec))
+        if callable(lower):
+            return lower
+    return None
+
 def overload(behavior, signature):
     import awkward1
     if behavior is None:
         behavior = awkward1.behavior
     return behavior.get(signature)
 
+def numba_attrs(layouttype, behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        for key, typer in behavior.items():
+            if isinstance(key, tuple) and len(key) == 3 and key[0] == "__numba_typer__" and key[1] == rec:
+                lower = behavior.get(("__numba_lower__", key[1], key[2]))
+                yield key[2], typer, lower
+
+def numba_methods(layouttype, behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    rec = layouttype.parameters.get("__record__")
+    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+        for key, typer in behavior.items():
+            if isinstance(key, tuple) and len(key) == 4 and key[0] == "__numba_typer__" and key[1] == rec and key[3] == ():
+                lower = behavior.get(("__numba_lower__", key[1], key[2], ()))
+                yield key[2], typer, lower
+
+def numba_unaryops(unaryop, left, behavior):
+    import awkward1
+    import awkward1._numba.layout
+    if behavior is None:
+        behavior = awkward1.behavior
+    done = False
+
+    if isinstance(left, awkward1._numba.layout.ContentType):
+        left = left.parameters.get("__record__")
+        if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
+            done = True
+
+    if not done:
+        for key, typer in behavior.items():
+            if isinstance(key, tuple) and len(key) == 3 and key[0] == "__numba_typer__" and key[1] == unaryop and key[2] == left:
+                lower = behavior.get(("__numba_lower__", key[1], key[2]))
+                yield typer, lower
+
+def numba_binops(binop, left, right, behavior):
+    import awkward1
+    import awkward1._numba.layout
+    if behavior is None:
+        behavior = awkward1.behavior
+    done = False
+
+    if isinstance(left, awkward1._numba.layout.ContentType):
+        left = left.parameters.get("__record__")
+        if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
+            done = True
+
+    if isinstance(right, awkward1._numba.layout.ContentType):
+        right = right.parameters.get("__record__")
+        if not (isinstance(right, str) or (py27 and isinstance(right, unicode))):
+            done = True
+
+    if not done:
+        for key, typer in behavior.items():
+            if isinstance(key, tuple) and len(key) == 4 and key[0] == "__numba_typer__" and key[1] == left and key[2] == binop and key[3] == right:
+                lower = behavior.get(("__numba_lower__", key[1], key[2], key[3]))
+                yield typer, lower
+
 def behaviorof(*arrays):
     behavior = None
     for x in arrays[::-1]:
-        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x._behavior is not None:
+        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x.behavior is not None:
             if behavior is None:
-                behavrio = dict(x._behavior)
+                behavior = dict(x.behavior)
             else:
-                behavior.update(x._behavior)
+                behavior.update(x.behavior)
     return behavior
 
 def wrap(content, behavior):
@@ -383,6 +510,74 @@ def broadcast_unpack(x, isscalar):
             return x.getitem_nothing()
         else:
             return x[0]
+
+def recursively_apply(layout, getfunction):
+    custom = getfunction(layout)
+    if custom is not None:
+        return custom()
+
+    elif isinstance(layout, awkward1.layout.NumpyArray):
+        return layout
+
+    elif isinstance(layout, awkward1.layout.EmptyArray):
+        return layout
+
+    elif isinstance(layout, awkward1.layout.RegularArray):
+        return awkward1.layout.RegularArray(recursively_apply(layout.content, getfunction), layout.size, layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.ListArray32):
+        return awkward1.layout.ListArray32(layout.starts, layout.stops, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.ListArrayU32):
+        return awkward1.layout.ListArrayU32(layout.starts, layout.stops, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.ListArray64):
+        return awkward1.layout.ListArray64(layout.starts, layout.stops, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.ListOffsetArray32):
+        return awkward1.layout.ListOffsetArray32(layout.offsets, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.ListOffsetArrayU32):
+        return awkward1.layout.ListOffsetArrayU32(layout.offsets, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.ListOffsetArray64):
+        return awkward1.layout.ListOffsetArray64(layout.offsets, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.IndexedArray32):
+        return awkward1.layout.IndexedArray32(layout.index, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.IndexedArrayU32):
+        return awkward1.layout.IndexedArrayU32(layout.index, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.IndexedArray64):
+        return awkward1.layout.IndexedArray64(layout.index, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.IndexedOptionArray32):
+        return awkward1.layout.IndexedOptionArray32(layout.index, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.IndexedOptionArray64):
+        return awkward1.layout.IndexedOptionArray64(layout.index, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.RecordArray):
+        if len(layout.contents) == 0:
+            return awkward1.layout.RecordArray(len(layout), layout.recordlookup is None, layout.identities, layout.parameters)
+        else:
+            return awkward1.layout.RecordArray([recursively_apply(x, getfunction) for x in layout.contents], layout.recordlookup, layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.Record):
+        return awkward1.layout.Record(recursively_apply(layout.array, getfunction), layout.at)
+
+    elif isinstance(layout, awkward1.layout.UnionArray8_32):
+        return awkward1.layout.UnionArray8_32(layout.tags, layout.index, [recursively_apply(x, getfunction) for x in layout.contents], layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.UnionArray8_U32):
+        return awkward1.layout.UnionArray8_U32(layout.tags, layout.index, [recursively_apply(x, getfunction) for x in layout.contents], layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.UnionArray8_64):
+        return awkward1.layout.UnionArray8_64(layout.tags, layout.index, [recursively_apply(x, getfunction) for x in layout.contents], layout.identities, layout.parameters)
+
+    else:
+        raise AssertionError("unrecognized Content type: {0}".format(type(layout)))
 
 def minimally_touching_string(limit_length, layout, behavior):
     import awkward1.layout

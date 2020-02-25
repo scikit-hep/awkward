@@ -8,8 +8,8 @@
 namespace awkward {
   class Record: public Content {
   public:
-    Record(const std::shared_ptr<RecordArray>& array, int64_t at);
-    const std::shared_ptr<RecordArray> array() const;
+    Record(const std::shared_ptr<const RecordArray> array, int64_t at);
+    const std::shared_ptr<const RecordArray> array() const;
     int64_t at() const;
     const std::vector<std::shared_ptr<Content>> contents() const;
     const std::shared_ptr<util::RecordLookup> recordlookup() const;
@@ -74,7 +74,7 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const override;
 
   private:
-    std::shared_ptr<RecordArray> array_;
+    const std::shared_ptr<const RecordArray> array_;
     int64_t at_;
   };
 }

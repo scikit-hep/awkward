@@ -37,7 +37,7 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
 
         self.layout = layout
-        self._behavior = behavior
+        self.behavior = behavior
 
     @property
     def layout(self):
@@ -45,9 +45,22 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
 
     @layout.setter
     def layout(self, layout):
-        if not isinstance(layout, awkward1.layout.Content):
+        if isinstance(layout, awkward1.layout.Content):
+            self._layout = layout
+            self._numbaview = None
+        else:
             raise TypeError("layout must be a subclass of awkward1.layout.Content")
-        self._layout = layout
+
+    @property
+    def behavior(self):
+        return self._behavior
+
+    @behavior.setter
+    def behavior(self, behavior):
+        if behavior is None or isinstance(behavior, dict):
+            self._behavior = behavior
+        else:
+            raise TypeError("behavior must be None or a dict")
 
     @property
     def type(self):
@@ -67,6 +80,7 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
         if not isinstance(where, str):
             raise ValueError("only fields may be assigned in-place (by field name)")
         self._layout = awkward1.operations.structure.withfield(self._layout, what, where).layout
+        self._numbaview = None
 
     def __getattr__(self, where):
         if where in dir(super(Array, self)):
@@ -145,6 +159,15 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
 
+    @property
+    def numbatype(self):
+        import numba
+        import awkward1._numba
+        awkward1._numba.register()
+        if self._numbaview is None:
+            self._numbaview = awkward1._numba.arrayview.ArrayView.fromarray(self)
+        return numba.typeof(self._numbaview)
+
 class Record(awkward1._numpy.NDArrayOperatorsMixin):
     def __init__(self, data, behavior=None):
         # FIXME: more checks here
@@ -156,7 +179,7 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
             self.__class__ = awkward1._util.recordclass(layout, behavior)
 
         self.layout = layout
-        self._behavior = behavior
+        self.behavior = behavior
 
     @property
     def layout(self):
@@ -164,9 +187,22 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
 
     @layout.setter
     def layout(self, layout):
-        if not isinstance(layout, awkward1.layout.Record):
+        if isinstance(layout, awkward1.layout.Record):
+            self._layout = layout
+            self._numbaview = None
+        else:
             raise TypeError("layout must be a subclass of awkward1.layout.Record")
-        self._layout = layout
+
+    @property
+    def behavior(self):
+        return self._behavior
+
+    @behavior.setter
+    def behavior(self, behavior):
+        if behavior is None or isinstance(behavior, dict):
+            self._behavior = behavior
+        else:
+            raise TypeError("behavior must be None or a dict")
 
     @property
     def type(self):
@@ -179,6 +215,7 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
         if not isinstance(where, str):
             raise ValueError("only fields may be assigned in-place (by field name)")
         self._layout = awkward1.operations.structure.withfield(self._layout, what, where).layout
+        self._numbaview = None
 
     def __getattr__(self, where):
         if where in dir(super(Record, self)):
@@ -242,10 +279,38 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
 
+    @property
+    def numbatype(self):
+        import numba
+        import awkward1._numba
+        awkward1._numba.register()
+        if self._numbaview is None:
+            self._numbaview = awkward1._numba.arrayview.RecordView.fromrecord(self)
+        return numba.typeof(self._numbaview)
+
 class FillableArray(Sequence):
+    @classmethod
+    def _wrap(cls, fillablearray, behavior=None):
+        assert isinstance(fillablearray, awkward1.layout.FillableArray)
+        out = cls.__new__(cls)
+        out._fillablearray = fillablearray
+        out.behavior = behavior
+        return out
+
     def __init__(self, behavior=None):
         self._fillablearray = awkward1.layout.FillableArray()
-        self._behavior = behavior
+        self.behavior = behavior
+
+    @property
+    def behavior(self):
+        return self._behavior
+
+    @behavior.setter
+    def behavior(self, behavior):
+        if behavior is None or isinstance(behavior, dict):
+            self._behavior = behavior
+        else:
+            raise TypeError("behavior must be None or a dict")
 
     @property
     def type(self):
@@ -286,6 +351,13 @@ class FillableArray(Sequence):
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
+
+    @property
+    def numbatype(self):
+        import numba
+        import awkward1._numba.fillable
+        awkward1._numba.register()
+        return awkward1._numba.fillable.FillableArrayType(self._behavior)
 
     def snapshot(self):
         return awkward1._util.wrap(self._fillablearray.snapshot(), self._behavior)
@@ -331,3 +403,24 @@ class FillableArray(Sequence):
 
     def endrecord(self):
         self._fillablearray.endrecord()
+
+    def append(self, obj, at=None):
+        if at is None:
+            if isinstance(obj, Record):
+                self._fillablearray.append(obj.layout.array, obj.layout.at)
+            elif isinstance(obj, Array):
+                self._fillablearray.extend(obj.layout)
+            else:
+                self._fillablearray.fromiter(obj)
+
+        else:
+            if isinstance(obj, Array):
+                self._fillablearray.append(obj.layout, at)
+            else:
+                raise TypeError("'append' method can only be used with 'at' when 'obj' is an ak.Array")
+
+    def extend(self, obj):
+        if isinstance(obj, Array):
+            self._fillablearray.extend(obj.layout)
+        else:
+            raise TypeError("'extend' method requires an ak.Array")

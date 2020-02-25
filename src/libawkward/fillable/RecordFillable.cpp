@@ -399,6 +399,24 @@ namespace awkward {
     return that_;
   }
 
+  const std::shared_ptr<Fillable> RecordFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    if (!begun_) {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->append(array, at);
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument("called 'append' immediately after 'beginrecord'; needs 'index' or 'endrecord'");
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->append(array, at));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->append(array, at);
+    }
+    return that_;
+  }
+
   void RecordFillable::maybeupdate(int64_t i, const std::shared_ptr<Fillable>& tmp) {
     if (tmp.get() != contents_[(size_t)i].get()) {
       contents_[(size_t)i] = tmp;

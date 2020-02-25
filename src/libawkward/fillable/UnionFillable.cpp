@@ -13,6 +13,7 @@
 #include "awkward/fillable/ListFillable.h"
 #include "awkward/fillable/TupleFillable.h"
 #include "awkward/fillable/RecordFillable.h"
+#include "awkward/fillable/IndexedFillable.h"
 #include "awkward/array/UnionArray.h"
 
 #include "awkward/fillable/UnionFillable.h"
@@ -336,6 +337,64 @@ namespace awkward {
         offsets_.append(length);
         current_ = -1;
       }
+    }
+    return that_;
+  }
+
+  const std::shared_ptr<Fillable> UnionFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    if (current_ == -1) {
+      std::shared_ptr<Fillable> tofill(nullptr);
+      int8_t i = 0;
+      for (auto content : contents_) {
+        if (IndexedGenericFillable* raw = dynamic_cast<IndexedGenericFillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
+        else if (IndexedI32Fillable* raw = dynamic_cast<IndexedI32Fillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
+        else if (IndexedIU32Fillable* raw = dynamic_cast<IndexedIU32Fillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
+        else if (IndexedI64Fillable* raw = dynamic_cast<IndexedI64Fillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
+        else if (IndexedIO32Fillable* raw = dynamic_cast<IndexedIO32Fillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
+        else if (IndexedIO64Fillable* raw = dynamic_cast<IndexedIO64Fillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
+        i++;
+      }
+      if (tofill.get() == nullptr) {
+        tofill = IndexedGenericFillable::fromnulls(options_, 0, array);
+        contents_.push_back(tofill);
+      }
+      int64_t length = tofill.get()->length();
+      tofill.get()->append(array, at);
+      types_.append(i);
+      offsets_.append(length);
+    }
+    else {
+      contents_[(size_t)current_].get()->append(array, at);
     }
     return that_;
   }

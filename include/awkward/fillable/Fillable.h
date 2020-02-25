@@ -34,6 +34,7 @@ namespace awkward {
     virtual const std::shared_ptr<Fillable> beginrecord(const char* name, bool check) = 0;
     virtual const std::shared_ptr<Fillable> field(const char* key, bool check) = 0;
     virtual const std::shared_ptr<Fillable> endrecord() = 0;
+    virtual const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) = 0;
 
     void setthat(const std::shared_ptr<Fillable>& that);
 

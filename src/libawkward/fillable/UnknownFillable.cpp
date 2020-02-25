@@ -15,6 +15,7 @@
 #include "awkward/fillable/ListFillable.h"
 #include "awkward/fillable/TupleFillable.h"
 #include "awkward/fillable/RecordFillable.h"
+#include "awkward/fillable/IndexedFillable.h"
 
 #include "awkward/fillable/UnknownFillable.h"
 
@@ -146,5 +147,11 @@ namespace awkward {
 
   const std::shared_ptr<Fillable> UnknownFillable::endrecord() {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
+  }
+
+  const std::shared_ptr<Fillable> UnknownFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    std::shared_ptr<Fillable> out = IndexedGenericFillable::fromnulls(options_, nullcount_, array);
+    out.get()->append(array, at);
+    return out;
   }
 }

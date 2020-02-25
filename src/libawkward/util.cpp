@@ -91,7 +91,7 @@ namespace awkward {
         catch (std::invalid_argument err) {
           throw std::invalid_argument(std::string("key ") + quote(key, true) + std::string(" does not exist (not in record)"));
         }
-        if (out >= numfields) {
+        if (!(0 <= out  &&  out < numfields)) {
           throw std::invalid_argument(std::string("key interpreted as fieldindex ") + key + std::string(" for records with only " + std::to_string(numfields) + std::string(" fields")));
         }
       }

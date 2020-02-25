@@ -63,9 +63,9 @@ set_target_properties(awkward-static PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 # Tests for second tier (these do not depend on Python).
-addtest(PR016 tests/test_PR016_finish_getitem_for_rawarray.cpp)
-addtest(PR019 tests/test_PR019_use_json_library.cpp)
-addtest(PR030 tests/test_PR030_recordarray_in_numba.cpp)
+addtest(test0016 tests/test_0016-finish-getitem-for-rawarray.cpp)
+addtest(test0019 tests/test_0019-use-json-library.cpp)
+addtest(test0030 tests/test_0030-recordarray-in-numba.cpp)
 
 # Third tier: Python modules.
 
