@@ -827,6 +827,7 @@ namespace awkward {
     throw std::runtime_error("FIXME: ListArrayOf<T> pad is not implemented");
   }
 
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
