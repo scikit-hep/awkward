@@ -543,7 +543,7 @@ ERROR awkward_zero_raw_ptr(uint8_t* toptr, int64_t length) {
   return success();
 }
 
-ERROR awkward_index_pad(int64_t* toindex, const int64_t fromlength, int64_t tolength) {
+ERROR awkward_index_rpad(int64_t* toindex, const int64_t fromlength, int64_t tolength) {
   for (int64_t i = 0; i < tolength; i++) {
     if (i < fromlength) {
       toindex[i] = i;
@@ -555,7 +555,7 @@ ERROR awkward_index_pad(int64_t* toindex, const int64_t fromlength, int64_t tole
   return success();
 }
 
-ERROR awkward_index_inject_pad(int64_t* toindex, const int64_t* fromindex, int64_t shape, int64_t chunks, int64_t length) {
+ERROR awkward_index_inject_rpad(int64_t* toindex, const int64_t* fromindex, int64_t shape, int64_t chunks, int64_t length) {
   int64_t k = 0;
   for (int64_t i = 0; i < chunks; i++) {
     for (int64_t j = 0; j < length; j++) {
@@ -578,7 +578,7 @@ ERROR awkward_index_clip(int64_t* toindex, const int64_t* fromindex, int64_t tol
 }
 
 template <typename FROM, typename TO>
-ERROR awkward_indexedarray_pad(TO* toindex, const FROM* fromindex, int64_t tolength, int64_t fromlength) {
+ERROR awkward_indexedarray_rpad(TO* toindex, const FROM* fromindex, int64_t tolength, int64_t fromlength) {
   for (int64_t i = 0; i < fromlength; i++) {
     toindex[i] = (TO)fromindex[i];
   }
@@ -587,18 +587,18 @@ ERROR awkward_indexedarray_pad(TO* toindex, const FROM* fromindex, int64_t tolen
   }
   return success();
 }
-ERROR awkward_indexedarray_pad_to64_from32(int64_t* toindex, const int32_t* fromindex, int64_t tolength, int64_t fromlength) {
-  return awkward_indexedarray_pad<int32_t, int64_t>(toindex, fromindex, tolength, fromlength);
+ERROR awkward_indexedarray_rpad_to64_from32(int64_t* toindex, const int32_t* fromindex, int64_t tolength, int64_t fromlength) {
+  return awkward_indexedarray_rpad<int32_t, int64_t>(toindex, fromindex, tolength, fromlength);
 }
-ERROR awkward_indexedarray_pad_to64_fromU32(int64_t* toindex, const uint32_t* fromindex, int64_t tolength, int64_t fromlength) {
-  return awkward_indexedarray_pad<uint32_t, int64_t>(toindex, fromindex, tolength, fromlength);
+ERROR awkward_indexedarray_rpad_to64_fromU32(int64_t* toindex, const uint32_t* fromindex, int64_t tolength, int64_t fromlength) {
+  return awkward_indexedarray_rpad<uint32_t, int64_t>(toindex, fromindex, tolength, fromlength);
 }
-ERROR awkward_indexedarray_pad_to64_from64(int64_t* toindex, const int64_t* fromindex, int64_t tolength, int64_t fromlength) {
-  return awkward_indexedarray_pad<int64_t, int64_t>(toindex, fromindex, tolength, fromlength);
+ERROR awkward_indexedarray_rpad_to64_from64(int64_t* toindex, const int64_t* fromindex, int64_t tolength, int64_t fromlength) {
+  return awkward_indexedarray_rpad<int64_t, int64_t>(toindex, fromindex, tolength, fromlength);
 }
 
 template <typename FROM>
-ERROR awkward_indexedarray_inject_pad(int64_t* toindex, const FROM* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
+ERROR awkward_indexedarray_inject_rpad(int64_t* toindex, const FROM* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
   int64_t i = 0;
   int64_t j = 0;
   for(int64_t x = 0; x < tolength; x++) {
@@ -619,14 +619,14 @@ ERROR awkward_indexedarray_inject_pad(int64_t* toindex, const FROM* fromindex, i
   }
   return success();
 }
-ERROR awkward_indexedarray_inject_pad_from32(int64_t* toindex, const int32_t* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
-  return awkward_indexedarray_inject_pad<int32_t>(toindex, fromindex, tolength, fromlength, fromsize);
+ERROR awkward_indexedarray_inject_rpad_from32(int64_t* toindex, const int32_t* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
+  return awkward_indexedarray_inject_rpad<int32_t>(toindex, fromindex, tolength, fromlength, fromsize);
 }
-ERROR awkward_indexedarray_inject_pad_fromU32(int64_t* toindex, const uint32_t* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
-  return awkward_indexedarray_inject_pad<uint32_t>(toindex, fromindex, tolength, fromlength, fromsize);
+ERROR awkward_indexedarray_inject_rpad_fromU32(int64_t* toindex, const uint32_t* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
+  return awkward_indexedarray_inject_rpad<uint32_t>(toindex, fromindex, tolength, fromlength, fromsize);
 }
-ERROR awkward_indexedarray_inject_pad_from64(int64_t* toindex, const int64_t* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
-  return awkward_indexedarray_inject_pad<int64_t>(toindex, fromindex, tolength, fromlength, fromsize);
+ERROR awkward_indexedarray_inject_rpad_from64(int64_t* toindex, const int64_t* fromindex, int64_t tolength, int64_t fromlength, int64_t fromsize) {
+  return awkward_indexedarray_inject_rpad<int64_t>(toindex, fromindex, tolength, fromlength, fromsize);
 }
 
 
@@ -637,7 +637,7 @@ ERROR awkward_indexedarray_clip(int64_t* toindex, int64_t* fromindex, int64_t to
   return success();
 }
 
-ERROR awkward_regulararray_pad(int64_t* toindex, int64_t tolength, int64_t fromlength) {
+ERROR awkward_regulararray_rpad(int64_t* toindex, int64_t tolength, int64_t fromlength) {
   for (int64_t i = 0; i < fromlength; i++) {
     toindex[i] = i;
   }
@@ -648,7 +648,7 @@ ERROR awkward_regulararray_pad(int64_t* toindex, int64_t tolength, int64_t froml
 }
 
 template <typename T>
-ERROR awkward_numpyarray_pad_copy(uint8_t* toptr, const uint8_t* fromptr, int64_t tolen, int64_t fromlen, int64_t tostride, int64_t fromstride, int64_t offset, const T* pos) {
+ERROR awkward_numpyarray_rpad_copy(uint8_t* toptr, const uint8_t* fromptr, int64_t tolen, int64_t fromlen, int64_t tostride, int64_t fromstride, int64_t offset, const T* pos) {
   for (int64_t j = 0; j < tolen*tostride; j++) {
     toptr[j] = 0;
   }
@@ -657,8 +657,8 @@ ERROR awkward_numpyarray_pad_copy(uint8_t* toptr, const uint8_t* fromptr, int64_
   }
   return success();
 }
-ERROR awkward_numpyarray_pad_copy_64(uint8_t* toptr, const uint8_t* fromptr, int64_t tolen, int64_t fromlen, int64_t tostride, int64_t fromstride, int64_t offset, const int64_t* pos) {
-  return awkward_numpyarray_pad_copy<int64_t>(toptr, fromptr, tolen, fromlen, tostride, fromstride, offset, pos);
+ERROR awkward_numpyarray_rpad_copy_64(uint8_t* toptr, const uint8_t* fromptr, int64_t tolen, int64_t fromlen, int64_t tostride, int64_t fromstride, int64_t offset, const int64_t* pos) {
+  return awkward_numpyarray_rpad_copy<int64_t>(toptr, fromptr, tolen, fromlen, tostride, fromstride, offset, pos);
 }
 
 template <typename FROM, typename TO>
