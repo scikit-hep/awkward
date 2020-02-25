@@ -40,6 +40,18 @@ def test_FillableArray_append():
     builder.null()
     assert awkward1.tolist(builder.snapshot()) == [None, None, None, [5.5], [3.3, 4.4], [3.3, 4.4], [6.6, 7.7, 8.8, 9.9], None]
 
+    one = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+    two = awkward1.Array([[3.3, 2.2, 1.1, 0.0], [5.5, 4.4], [], [6.6]])
+
+    builder = awkward1.FillableArray()
+    builder.append(one, 2)
+    builder.append(two, 1)
+    builder.append(one, 0)
+    builder.append(two, -1)
+    builder.append(one, -1)
+
+    assert awkward1.tolist(builder.snapshot()) == [[3.3, 4.4], [5.5, 4.4], [0.0, 1.1, 2.2], [6.6], [6.6, 7.7, 8.8, 9.9]]
+
 numba = pytest.importorskip("numba")
 
 def test_views():

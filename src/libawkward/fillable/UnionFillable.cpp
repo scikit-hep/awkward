@@ -13,6 +13,7 @@
 #include "awkward/fillable/ListFillable.h"
 #include "awkward/fillable/TupleFillable.h"
 #include "awkward/fillable/RecordFillable.h"
+#include "awkward/fillable/IndexedFillable.h"
 #include "awkward/array/UnionArray.h"
 
 #include "awkward/fillable/UnionFillable.h"
@@ -341,6 +342,30 @@ namespace awkward {
   }
 
   const std::shared_ptr<Fillable> UnionFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
-    throw std::runtime_error("FIXME: UnionFillable::append");
+    if (current_ == -1) {
+      std::shared_ptr<Fillable> tofill(nullptr);
+      int8_t i = 0;
+      for (auto content : contents_) {
+        if (IndexedFillable* raw = dynamic_cast<IndexedFillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
+        i++;
+      }
+      if (tofill.get() == nullptr) {
+        tofill = IndexedFillable::fromnulls(options_, 0, array);
+        contents_.push_back(tofill);
+      }
+      int64_t length = tofill.get()->length();
+      tofill.get()->append(array, at);
+      types_.append(i);
+      offsets_.append(length);
+    }
+    else {
+      contents_[(size_t)current_].get()->append(array, at);
+    }
+    return that_;
   }
 }

@@ -17,6 +17,8 @@ namespace awkward {
 
     IndexedFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<Content>& array, bool hasnull);
 
+    const Content* arrayptr() const;
+
     const std::string classname() const override;
     int64_t length() const override;
     void clear() override;

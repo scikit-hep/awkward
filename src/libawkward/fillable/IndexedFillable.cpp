@@ -6,6 +6,7 @@
 #include "awkward/Index.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/type/OptionType.h"
+#include "awkward/fillable/UnionFillable.h"
 
 #include "awkward/fillable/IndexedFillable.h"
 
@@ -23,6 +24,10 @@ namespace awkward {
       , array_(array)
       , arraylength_(array.get()->length())
       , hasnull_(hasnull) { }
+
+  const Content* IndexedFillable::arrayptr() const {
+    return array_.get();
+  }
 
   const std::string IndexedFillable::classname() const {
     return "IndexedFillable";
@@ -47,7 +52,7 @@ namespace awkward {
   }
 
   bool IndexedFillable::active() const {
-    throw std::runtime_error("FIXME: IndexedFillable::active");
+    return false;
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::null() {
@@ -57,51 +62,65 @@ namespace awkward {
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::boolean(bool x) {
-    throw std::runtime_error("FIXME: IndexedFillable::boolean");
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->boolean(x);
+    return out;
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::integer(int64_t x) {
-    throw std::runtime_error("FIXME: IndexedFillable::integer");
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->integer(x);
+    return out;
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::real(double x) {
-    throw std::runtime_error("FIXME: IndexedFillable::real");
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->real(x);
+    return out;
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::string(const char* x, int64_t length, const char* encoding) {
-    throw std::runtime_error("FIXME: IndexedFillable::string");
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->string(x, length, encoding);
+    return out;
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::beginlist() {
-    throw std::runtime_error("FIXME: IndexedFillable::beginlist");
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->beginlist();
+    return out;
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::endlist() {
-    throw std::runtime_error("FIXME: IndexedFillable::endlist");
+    throw std::invalid_argument("called 'endlist' without 'beginlist' at the same level before it");
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::begintuple(int64_t numfields) {
-    throw std::runtime_error("FIXME: IndexedFillable::begintuple");
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->begintuple(numfields);
+    return out;
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::index(int64_t index) {
-    throw std::runtime_error("FIXME: IndexedFillable::index");
+    throw std::invalid_argument("called 'index' without 'begintuple' at the same level before it");
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::endtuple() {
-    throw std::runtime_error("FIXME: IndexedFillable::endtuple");
+    throw std::invalid_argument("called 'endtuple' without 'begintuple' at the same level before it");
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::beginrecord(const char* name, bool check) {
-    throw std::runtime_error("FIXME: IndexedFillable::beginrecord");
+    std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+    out.get()->beginrecord(name, check);
+    return out;
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::field(const char* key, bool check) {
-    throw std::runtime_error("FIXME: IndexedFillable::field");
+    throw std::invalid_argument("called 'field' without 'beginrecord' at the same level before it");
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::endrecord() {
-    throw std::runtime_error("FIXME: IndexedFillable::endrecord");
+    throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
   const std::shared_ptr<Fillable> IndexedFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
@@ -116,7 +135,9 @@ namespace awkward {
       index_.append(regular_at);
     }
     else {
-      throw std::runtime_error("FIXME: IndexedFillable::append(array != array_)");
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->append(array, at);
+      return out;
     }
     return that_;
   }
