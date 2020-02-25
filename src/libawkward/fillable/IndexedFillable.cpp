@@ -34,17 +34,6 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> IndexedFillable<T>::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length());
-    if (hasnull_) {
-      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_);
-    }
-    else {
-      return std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), index, array_);
-    }
-  }
-
-  template <typename T>
   bool IndexedFillable<T>::active() const {
     return false;
   }
@@ -130,6 +119,7 @@ namespace awkward {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
+  /////////////////////////////////////////////////////////////////////////////////////////////
   template class IndexedFillable<Content>;
 
   const std::shared_ptr<Fillable> IndexedGenericFillable::fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Content>& array) {
@@ -146,9 +136,174 @@ namespace awkward {
     return "IndexedGenericFillable";
   };
 
+  const std::shared_ptr<Content> IndexedGenericFillable::snapshot() const {
+    std::cout << "HERE " << index_.length();
+
+    Index64 index(index_.ptr(), 0, index_.length());
+
+    std::cout << "index " << index.tostring() << std::endl;
+
+    if (hasnull_) {
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_);
+    }
+    else {
+      return std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), index, array_);
+    }
+  }
+
   const std::shared_ptr<Fillable> IndexedGenericFillable::append(const std::shared_ptr<Content>& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append(at);
+    }
+    else {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->append(array, at);
+      return out;
+    }
+    return that_;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  template class IndexedFillable<IndexedArray32>;
+
+  IndexedI32Fillable::IndexedI32Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArray32>& array, bool hasnull)
+      : IndexedFillable<IndexedArray32>(options, index, array, hasnull) { }
+
+  const std::string IndexedI32Fillable::classname() const {
+    return "IndexedI32Fillable";
+  };
+
+  const std::shared_ptr<Content> IndexedI32Fillable::snapshot() const {
+    Index64 index(index_.ptr(), 0, index_.length());
+    if (hasnull_) {
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+    }
+    else {
+      return std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+    }
+  }
+
+  const std::shared_ptr<Fillable> IndexedI32Fillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    if (array.get() == array_.get()) {
+      index_.append((int64_t)array_.get()->index_at_nowrap(at));
+    }
+    else {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->append(array, at);
+      return out;
+    }
+    return that_;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  template class IndexedFillable<IndexedArrayU32>;
+
+  IndexedIU32Fillable::IndexedIU32Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArrayU32>& array, bool hasnull)
+      : IndexedFillable<IndexedArrayU32>(options, index, array, hasnull) { }
+
+  const std::string IndexedIU32Fillable::classname() const {
+    return "IndexedIU32Fillable";
+  };
+
+  const std::shared_ptr<Content> IndexedIU32Fillable::snapshot() const {
+    Index64 index(index_.ptr(), 0, index_.length());
+    if (hasnull_) {
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+    }
+    else {
+      return std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+    }
+  }
+
+  const std::shared_ptr<Fillable> IndexedIU32Fillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    if (array.get() == array_.get()) {
+      index_.append((int64_t)array_.get()->index_at_nowrap(at));
+    }
+    else {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->append(array, at);
+      return out;
+    }
+    return that_;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  template class IndexedFillable<IndexedArray64>;
+
+  IndexedI64Fillable::IndexedI64Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArray64>& array, bool hasnull)
+      : IndexedFillable<IndexedArray64>(options, index, array, hasnull) { }
+
+  const std::string IndexedI64Fillable::classname() const {
+    return "IndexedI64Fillable";
+  };
+
+  const std::shared_ptr<Content> IndexedI64Fillable::snapshot() const {
+    Index64 index(index_.ptr(), 0, index_.length());
+    if (hasnull_) {
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+    }
+    else {
+      return std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+    }
+  }
+
+  const std::shared_ptr<Fillable> IndexedI64Fillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    if (array.get() == array_.get()) {
+      index_.append(array_.get()->index_at_nowrap(at));
+    }
+    else {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->append(array, at);
+      return out;
+    }
+    return that_;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  template class IndexedFillable<IndexedOptionArray32>;
+
+  IndexedIO32Fillable::IndexedIO32Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedOptionArray32>& array, bool hasnull)
+      : IndexedFillable<IndexedOptionArray32>(options, index, array, hasnull) { }
+
+  const std::string IndexedIO32Fillable::classname() const {
+    return "IndexedIO32Fillable";
+  };
+
+  const std::shared_ptr<Content> IndexedIO32Fillable::snapshot() const {
+    Index64 index(index_.ptr(), 0, index_.length());
+    return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+  }
+
+  const std::shared_ptr<Fillable> IndexedIO32Fillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    if (array.get() == array_.get()) {
+      index_.append((int64_t)array_.get()->index_at_nowrap(at));
+    }
+    else {
+      std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);
+      out.get()->append(array, at);
+      return out;
+    }
+    return that_;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  template class IndexedFillable<IndexedOptionArray64>;
+
+  IndexedIO64Fillable::IndexedIO64Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedOptionArray64>& array, bool hasnull)
+      : IndexedFillable<IndexedOptionArray64>(options, index, array, hasnull) { }
+
+  const std::string IndexedIO64Fillable::classname() const {
+    return "IndexedIO64Fillable";
+  };
+
+  const std::shared_ptr<Content> IndexedIO64Fillable::snapshot() const {
+    Index64 index(index_.ptr(), 0, index_.length());
+    return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+  }
+
+  const std::shared_ptr<Fillable> IndexedIO64Fillable::append(const std::shared_ptr<Content>& array, int64_t at) {
+    if (array.get() == array_.get()) {
+      index_.append(array_.get()->index_at_nowrap(at));
     }
     else {
       std::shared_ptr<Fillable> out = UnionFillable::fromsingle(options_, that_);

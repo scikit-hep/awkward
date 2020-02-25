@@ -352,6 +352,12 @@ namespace awkward {
             break;
           }
         }
+        else if (IndexedI32Fillable* raw = dynamic_cast<IndexedI32Fillable*>(content.get())) {
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
+        }
         i++;
       }
       if (tofill.get() == nullptr) {

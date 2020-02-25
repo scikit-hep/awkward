@@ -1064,7 +1064,7 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle
       .def("tojson", &tojson_string<ak::Record>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
 
-      .def_property_readonly("array", [](const ak::Record& self) -> py::object { return box(self.array()); })
+      .def_property_readonly("array", [](const ak::Record& self) -> std::shared_ptr<const ak::RecordArray> { return self.array(); })
       .def_property_readonly("at", &ak::Record::at)
       .def_property_readonly("istuple", &ak::Record::istuple)
       .def_property_readonly("numfields", &ak::Record::numfields)

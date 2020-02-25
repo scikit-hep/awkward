@@ -21,7 +21,6 @@ namespace awkward {
 
     int64_t length() const override;
     void clear() override;
-    const std::shared_ptr<Content> snapshot() const override;
 
     bool active() const override;
     const std::shared_ptr<Fillable> null() override;
@@ -52,6 +51,52 @@ namespace awkward {
     IndexedGenericFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<Content>& array, bool hasnull);
 
     const std::string classname() const override;
+    const std::shared_ptr<Content> snapshot() const override;
+    const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
+  };
+
+  class IndexedI32Fillable: public IndexedFillable<IndexedArray32> {
+  public:
+    IndexedI32Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArray32>& array, bool hasnull);
+
+    const std::string classname() const override;
+    const std::shared_ptr<Content> snapshot() const override;
+    const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
+  };
+
+  class IndexedIU32Fillable: public IndexedFillable<IndexedArrayU32> {
+  public:
+    IndexedIU32Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArrayU32>& array, bool hasnull);
+
+    const std::string classname() const override;
+    const std::shared_ptr<Content> snapshot() const override;
+    const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
+  };
+
+  class IndexedI64Fillable: public IndexedFillable<IndexedArray64> {
+  public:
+    IndexedI64Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArray64>& array, bool hasnull);
+
+    const std::string classname() const override;
+    const std::shared_ptr<Content> snapshot() const override;
+    const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
+  };
+
+  class IndexedIO32Fillable: public IndexedFillable<IndexedOptionArray32> {
+  public:
+    IndexedIO32Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedOptionArray32>& array, bool hasnull);
+
+    const std::string classname() const override;
+    const std::shared_ptr<Content> snapshot() const override;
+    const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
+  };
+
+  class IndexedIO64Fillable: public IndexedFillable<IndexedOptionArray64> {
+  public:
+    IndexedIO64Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedOptionArray64>& array, bool hasnull);
+
+    const std::string classname() const override;
+    const std::shared_ptr<Content> snapshot() const override;
     const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
   };
 
