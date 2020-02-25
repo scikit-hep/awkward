@@ -15,7 +15,6 @@
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
-#include "awkward/array/None.h"
 #include "awkward/array/UnionArray.h"
 #include "awkward/util.h"
 
@@ -1439,7 +1438,7 @@ namespace awkward {
       for (int64_t i = toaxis - 1;  i > 0;  i--) {
         out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, shape_[(size_t)i]);
       }
-      
+
       return out;
     }
   }
