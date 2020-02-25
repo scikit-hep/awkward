@@ -499,7 +499,7 @@ namespace awkward {
       throw std::invalid_argument("cannot use RawArray as a slice");
     }
 
-    const std::shared_ptr<Content> pad(int64_t length, int64_t axis) const override {
+    const std::shared_ptr<Content> rpad(int64_t length, int64_t axis) const override {
       throw std::runtime_error("FIXME: RawArray is not implemented");
     }
 

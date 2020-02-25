@@ -823,8 +823,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::pad(int64_t length, int64_t axis) const {
-    throw std::runtime_error("FIXME: ListArrayOf<T> pad is not implemented");
+  const std::shared_ptr<Content> ListArrayOf<T>::rpad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: ListArrayOf<T> rpad is not implemented");
   }
 
   template <typename T>

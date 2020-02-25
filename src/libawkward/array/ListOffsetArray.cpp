@@ -958,7 +958,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::pad(int64_t pad_width, int64_t axis) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad(int64_t rpad_width, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     std::shared_ptr<Content> out = content();
     int64_t startslen = length();
@@ -972,9 +972,9 @@ namespace awkward {
       }
       else {
         int64_t fromlength = length();
-        int64_t tolength = pad_width;
+        int64_t tolength = rpad_width;
         Index64 outindex(tolength);
-        struct Error err = awkward_index_pad(
+        struct Error err = awkward_index_rpad(
           outindex.ptr().get(),
           fromlength,
           tolength);
@@ -988,22 +988,22 @@ namespace awkward {
         // FIXME:
       }
       else {
-        // FIXME: if pad_width < an offset
-        Index64 outindex(pad_width*(offsets_.length() - 1));
+        // FIXME: if rpad_width < an offset
+        Index64 outindex(rpad_width*(offsets_.length() - 1));
         int64_t count = 0;
         for (int64_t i = 0; i < offsets_.length() - 1; i++) {
           int64_t diff = offsets_.ptr().get()[i + 1] - offsets_.ptr().get()[i];
           for (int64_t x = 0; x < diff; x++) {
-            if (x < pad_width) {
+            if (x < rpad_width) {
               outindex.ptr().get()[count++] = offsets_.ptr().get()[i] + x;
             }
           }
-          for (int64_t y = diff; y < pad_width; y++) {
+          for (int64_t y = diff; y < rpad_width; y++) {
             outindex.ptr().get()[count++] = -1;
           }
         }
         out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, content());
-        return std::make_shared<RegularArray>(identities_, parameters_, out, pad_width);
+        return std::make_shared<RegularArray>(identities_, parameters_, out, rpad_width);
       }
     }
     return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets_, out);

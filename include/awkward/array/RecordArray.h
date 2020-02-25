@@ -72,7 +72,7 @@ namespace awkward {
     const std::vector<std::shared_ptr<Content>> fields() const;
     const std::vector<std::pair<std::string, std::shared_ptr<Content>>> fielditems() const;
     const std::shared_ptr<RecordArray> astuple() const;
-    const std::shared_ptr<Content> pad(int64_t length, int64_t axis) const override;
+    const std::shared_ptr<Content> rpad(int64_t length, int64_t axis) const override;
 
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;

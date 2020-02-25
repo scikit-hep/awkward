@@ -194,7 +194,7 @@ namespace awkward {
     return std::make_shared<SliceArray64>(index, shape, strides, false);
   }
 
-  const std::shared_ptr<Content> EmptyArray::pad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> EmptyArray::rpad(int64_t length, int64_t axis) const {
     Index64 index(length);
     for(int64_t i = 0; i < length; i++) {
       index.ptr().get()[i] = -1;

@@ -1378,20 +1378,20 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::pad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> NumpyArray::rpad(int64_t length, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     ssize_t offset = (ssize_t)toaxis;
     if (offset > ndim()) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be padded in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+      throw std::invalid_argument(std::string("NumpyArray cannot be rpadded in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
     if (shape_.empty()) {
-       throw std::runtime_error("attempting to pad a scalar");
+       throw std::runtime_error("attempting to rpad a scalar");
     }
     if (toaxis == 0) {
       std::shared_ptr<Content> out = toRegularArray();
 
       Index64 index(length);
-      struct Error err1 = awkward_index_pad(
+      struct Error err1 = awkward_index_rpad(
         index.ptr().get(),
         out.get()->length(),
         length);
@@ -1409,20 +1409,20 @@ namespace awkward {
       std::shared_ptr<Content> out = std::make_shared<NumpyArray>(identities_, parameters_, contiguous_self.ptr(), flatshape, flatstrides, contiguous_self.byteoffset(), contiguous_self.itemsize(), contiguous_self.format());
 
       Index64 index(length);
-      struct Error err2 = awkward_index_pad(
+      struct Error err2 = awkward_index_rpad(
         index.ptr().get(),
         shape_[toaxis],
         length);
       util::handle_error(err2, classname(), identities_.get());
 
-      // how many padding chunks
+      // how many rpadding chunks
       int64_t chunks = 1;
       for (int64_t x = 0; x < toaxis; x++) {
         chunks = chunks * shape_[x];
       }
 
       Index64 outindex(length*chunks);
-      struct Error err3 = awkward_index_inject_pad(
+      struct Error err3 = awkward_index_inject_rpad(
         outindex.ptr().get(),
         index.ptr().get(),
         shape_[toaxis],

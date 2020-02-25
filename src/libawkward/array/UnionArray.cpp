@@ -1094,10 +1094,10 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::pad(int64_t pad_width, int64_t axis) const {
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad(int64_t rpad_width, int64_t axis) const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {
-      contents.emplace_back(content.get()->pad(pad_width, axis));
+      contents.emplace_back(content.get()->rpad(rpad_width, axis));
     }
     UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
     return out.simplify(false);
