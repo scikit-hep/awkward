@@ -56,11 +56,8 @@ namespace awkward {
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
     const std::shared_ptr<SliceItem> asslice() const override;
-<<<<<<< HEAD
     const std::shared_ptr<Content> pad(int64_t length, int64_t axis) const override;
-=======
     const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override;
->>>>>>> b25d31bc4b51bc95acfa12413a4729b17162343e
 
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;

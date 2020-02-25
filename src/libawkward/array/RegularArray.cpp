@@ -9,12 +9,10 @@
 #include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
-#include "awkward/type/OptionType.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
-#include "awkward/array/RawArray.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
@@ -22,7 +20,6 @@
 #include "awkward/array/RegularArray.h"
 
 namespace awkward {
-
   RegularArray::RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<Content>& content, int64_t size)
       : Content(identities, parameters)
       , content_(content)
