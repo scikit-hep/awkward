@@ -117,42 +117,49 @@ def test_FillableArray_append():
     builder.append(array[2])
     builder.append(array[1])
     builder.append(array[-1])
-    assert awkward1.tolist(builder.snapshot()) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}]
+    tmp = builder.snapshot()
+    assert awkward1.tolist(tmp) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}]
+    assert isinstance(tmp.layout, awkward1.layout.IndexedArray64)
+    assert isinstance(tmp.layout.content, awkward1.layout.RecordArray)
 
     builder.append(array)
-    assert awkward1.tolist(builder.snapshot()) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]
+    tmp = builder.snapshot()
+    assert awkward1.tolist(tmp) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]
+    assert isinstance(tmp.layout, awkward1.layout.IndexedArray64)
+    assert isinstance(tmp.layout.content, awkward1.layout.RecordArray)
 
     builder.append(999)
-    assert awkward1.tolist(builder.snapshot()) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, 999]
+    tmp = builder.snapshot()
+    assert awkward1.tolist(tmp) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, 999]
+    assert isinstance(tmp.layout, awkward1.layout.UnionArray8_64)
 
     builder.append([1, 2, 3, 4, 5])
-    assert awkward1.tolist(builder.snapshot()) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, 999, [1, 2, 3, 4, 5]]
+    tmp = builder.snapshot()
+    assert awkward1.tolist(tmp) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, 999, [1, 2, 3, 4, 5]]
+    assert isinstance(tmp.layout, awkward1.layout.UnionArray8_64)
 
-    # array1 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-    #
-    # builder = awkward1.FillableArray()
-    # builder.append(array1[2])
-    # builder.append(array1[1])
-    # builder.append(array1[0])
-    # array2 = builder.snapshot()
-    # print(array2.layout)
-    #
-    # builder = awkward1.FillableArray()
-    # builder.append(array2[2])
-    # builder.append(array2[1])
-    # builder.append(array2[0])
-    # array3 = builder.snapshot()
-    # print(array3.layout)
-    #
-    # builder = awkward1.FillableArray()
-    # builder.append(array3[2])
-    # builder.append(array3[1])
-    # builder.append(array3[0])
-    # array4 = builder.snapshot()
-    # print(array4.layout)
-    #
-    # raise Exception
+    array1 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 
+    builder = awkward1.FillableArray()
+    builder.append(array1, 2)
+    builder.append(array1, 1)
+    builder.append(array1, 0)
+    array2 = builder.snapshot()
+    assert isinstance(array2.layout.content, awkward1.layout.ListOffsetArray64)
+
+    builder = awkward1.FillableArray()
+    builder.append(array2, 2)
+    builder.append(array2, 1)
+    builder.append(array2, 0)
+    array3 = builder.snapshot()
+    assert isinstance(array3.layout.content, awkward1.layout.ListOffsetArray64)
+
+    builder = awkward1.FillableArray()
+    builder.append(array3, 2)
+    builder.append(array3, 1)
+    builder.append(array3, 0)
+    array4 = builder.snapshot()
+    assert isinstance(array4.layout.content, awkward1.layout.ListOffsetArray64)
 
 numba = pytest.importorskip("numba")
 

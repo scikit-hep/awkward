@@ -124,7 +124,25 @@ namespace awkward {
 
   const std::shared_ptr<Fillable> IndexedGenericFillable::fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Content>& array) {
     GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::full(options, -1, nullcount);
-    std::shared_ptr<Fillable> out = std::shared_ptr<Fillable>(new IndexedGenericFillable(options, index, array, nullcount != 0));
+    std::shared_ptr<Fillable> out;
+    if (std::shared_ptr<IndexedArray32> ptr = std::dynamic_pointer_cast<IndexedArray32>(array)) {
+      out = std::make_shared<IndexedI32Fillable>(options, index, ptr, nullcount != 0);
+    }
+    else if (std::shared_ptr<IndexedArrayU32> ptr = std::dynamic_pointer_cast<IndexedArrayU32>(array)) {
+      out = std::make_shared<IndexedIU32Fillable>(options, index, ptr, nullcount != 0);
+    }
+    else if (std::shared_ptr<IndexedArray64> ptr = std::dynamic_pointer_cast<IndexedArray64>(array)) {
+      out = std::make_shared<IndexedI64Fillable>(options, index, ptr, nullcount != 0);
+    }
+    else if (std::shared_ptr<IndexedOptionArray32> ptr = std::dynamic_pointer_cast<IndexedOptionArray32>(array)) {
+      out = std::make_shared<IndexedIO32Fillable>(options, index, ptr, nullcount != 0);
+    }
+    else if (std::shared_ptr<IndexedOptionArray64> ptr = std::dynamic_pointer_cast<IndexedOptionArray64>(array)) {
+      out = std::make_shared<IndexedIO64Fillable>(options, index, ptr, nullcount != 0);
+    }
+    else {
+      out = std::make_shared<IndexedGenericFillable>(options, index, array, nullcount != 0);
+    }
     out.get()->setthat(out);
     return out;
   }
@@ -137,12 +155,7 @@ namespace awkward {
   };
 
   const std::shared_ptr<Content> IndexedGenericFillable::snapshot() const {
-    std::cout << "HERE " << index_.length();
-
     Index64 index(index_.ptr(), 0, index_.length());
-
-    std::cout << "index " << index.tostring() << std::endl;
-
     if (hasnull_) {
       return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_);
     }
