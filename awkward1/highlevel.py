@@ -404,8 +404,23 @@ class FillableArray(Sequence):
     def endrecord(self):
         self._fillablearray.endrecord()
 
-    def append(self, array, at):
-        self._fillablearray.append(array.layout, at)
+    def append(self, obj, at=None):
+        if at is None:
+            if isinstance(obj, Record):
+                self._fillablearray.append(obj.layout.array, obj.layout.at)
+            elif isinstance(obj, Array):
+                self._fillablearray.extend(obj.layout)
+            else:
+                self._fillablearray.fromiter(obj)
 
-    def extend(self, array):
-        self._fillablearray.extend(array.layout)
+        else:
+            if isinstance(obj, Array):
+                self._fillablearray.append(obj.layout, at)
+            else:
+                raise TypeError("'append' method can only be used with 'at' when 'obj' is an ak.Array")
+
+    def extend(self, obj):
+        if isinstance(obj, Array):
+            self._fillablearray.extend(obj.layout)
+        else:
+            raise TypeError("'extend' method requires an ak.Array")

@@ -111,6 +111,23 @@ def test_FillableArray_append():
     builder.append(array, -1)
     assert awkward1.tolist(builder.snapshot()) == [["one", "two", "three"], [], ["four", "five"], "nine"]
 
+    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}])
+    builder = awkward1.FillableArray()
+    builder.append(array[2])
+    builder.append(array[2])
+    builder.append(array[1])
+    builder.append(array[-1])
+    assert awkward1.tolist(builder.snapshot()) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}]
+
+    builder.append(array)
+    assert awkward1.tolist(builder.snapshot()) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]
+
+    builder.append(999)
+    assert awkward1.tolist(builder.snapshot()) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, 999]
+
+    builder.append([1, 2, 3, 4, 5])
+    assert awkward1.tolist(builder.snapshot()) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, 999, [1, 2, 3, 4, 5]]
+
 numba = pytest.importorskip("numba")
 
 def test_views():
@@ -989,3 +1006,20 @@ def test_custom_record5():
 
     assert f2(array, 1) == 2.2
     assert f2(array, 2) == 3.3
+
+def test_FillableArray_append_numba():
+    @numba.njit
+    def f1(array, builder):
+        builder.append(array, 3)
+        builder.append(array, 2)
+        builder.append(array, 2)
+        builder.append(array, 0)
+        builder.append(array, 1)
+        builder.append(array, -1)
+
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+    builder = awkward1.FillableArray()
+
+    f1(array, builder)
+
+    assert awkward1.tolist(builder.snapshot()) == [[5.5], [3.3, 4.4], [3.3, 4.4], [0.0, 1.1, 2.2], [], [6.6, 7.7, 8.8, 9.9]]
