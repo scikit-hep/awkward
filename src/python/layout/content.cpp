@@ -880,7 +880,7 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
             ak::ReducerMax reducer;
             return box(self.reduce(reducer, axis, mask, keepdims));
           }, py::arg("axis") = -1, py::arg("mask") = true, py::arg("keepdims") = false)
-          
+
   ;
 }
 

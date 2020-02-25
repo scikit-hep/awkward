@@ -1034,6 +1034,7 @@ namespace awkward {
     return std::make_shared<IndexedOptionArray64>(identities_, parameters_, toindex, content());
   }
 
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     int64_t numnull;
     struct Error err1 = util::awkward_indexedarray_numnull<T>(
