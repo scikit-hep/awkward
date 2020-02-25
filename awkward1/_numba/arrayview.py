@@ -14,8 +14,10 @@ import awkward1._numba.layout
 class Lookup(object):
     def __init__(self, layout):
         positions = []
+        sharedptrs = []
         arrays = []
-        tolookup(layout, positions, arrays)
+        tolookup(layout, positions, sharedptrs, arrays)
+        assert len(positions) == len(sharedptrs)
 
         def find(x):
             for i, array in enumerate(arrays):
@@ -26,35 +28,37 @@ class Lookup(object):
                 return x
 
         self.positions = [find(x) for x in positions]
+        self.sharedptrs_hold = sharedptrs
         self.arrays = tuple(arrays)
         self.arrayptrs = numpy.array([x if isinstance(x, int) else x.ctypes.data for x in positions], dtype=numpy.intp)
+        self.sharedptrs = numpy.array([0 if x is None else x.ptr() for x in sharedptrs], dtype=numpy.intp)
 
-def tolookup(layout, positions, arrays):
+def tolookup(layout, positions, sharedptrs, arrays):
     import awkward1.layout
 
     if isinstance(layout, awkward1.layout.NumpyArray):
-        return awkward1._numba.layout.NumpyArrayType.tolookup(layout, positions, arrays)
+        return awkward1._numba.layout.NumpyArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, awkward1.layout.RegularArray):
-        return awkward1._numba.layout.RegularArrayType.tolookup(layout, positions, arrays)
+        return awkward1._numba.layout.RegularArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)):
-        return awkward1._numba.layout.ListArrayType.tolookup(layout, positions, arrays)
+        return awkward1._numba.layout.ListArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, (awkward1.layout.IndexedArray32, awkward1.layout.IndexedArrayU32, awkward1.layout.IndexedArray64)):
-        return awkward1._numba.layout.IndexedArrayType.tolookup(layout, positions, arrays)
+        return awkward1._numba.layout.IndexedArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)):
-        return awkward1._numba.layout.IndexedOptionArrayType.tolookup(layout, positions, arrays)
+        return awkward1._numba.layout.IndexedOptionArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, awkward1.layout.RecordArray):
-        return awkward1._numba.layout.RecordArrayType.tolookup(layout, positions, arrays)
+        return awkward1._numba.layout.RecordArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, awkward1.layout.Record):
-        return awkward1._numba.layout.RecordType.tolookup(layout, positions, arrays)
+        return awkward1._numba.layout.RecordType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)):
-        return awkward1._numba.layout.UnionArrayType.tolookup(layout, positions, arrays)
+        return awkward1._numba.layout.UnionArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     else:
         raise AssertionError("unrecognized layout type: {0}".format(type(layout)))
@@ -72,17 +76,21 @@ class LookupType(numba.types.Type):
 @numba.extending.register_model(LookupType)
 class LookupModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("arrayptrs", fe_type.arraytype)]
+        members = [("arrayptrs", fe_type.arraytype),
+                   ("sharedptrs", fe_type.arraytype)]
         super(LookupModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(LookupType)
 def unbox_Lookup(lookuptype, lookupobj, c):
     arrayptrs_obj = c.pyapi.object_getattr_string(lookupobj, "arrayptrs")
+    sharedptrs_obj = c.pyapi.object_getattr_string(lookupobj, "sharedptrs")
 
     proxyout = c.context.make_helper(c.builder, lookuptype)
     proxyout.arrayptrs = c.pyapi.to_native_value(lookuptype.arraytype, arrayptrs_obj).value
+    proxyout.sharedptrs = c.pyapi.to_native_value(lookuptype.arraytype, sharedptrs_obj).value
 
     c.pyapi.decref(arrayptrs_obj)
+    c.pyapi.decref(sharedptrs_obj)
 
     is_error = numba.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -128,11 +136,12 @@ class ArrayViewType(numba.types.Type):
 @numba.extending.register_model(ArrayViewType)
 class ArrayViewModel(numba.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("pos",       numba.intp),
-                   ("start",     numba.intp),
-                   ("stop",      numba.intp),
-                   ("arrayptrs", numba.types.CPointer(numba.intp)),
-                   ("pylookup",  numba.types.pyobject)]
+        members = [("pos",        numba.intp),
+                   ("start",      numba.intp),
+                   ("stop",       numba.intp),
+                   ("arrayptrs",  numba.types.CPointer(numba.intp)),
+                   ("sharedptrs", numba.types.CPointer(numba.intp)),
+                   ("pylookup",   numba.types.pyobject)]
         super(ArrayViewModel, self).__init__(dmm, fe_type, members)
 
 @numba.extending.unbox(ArrayViewType)
@@ -152,11 +161,12 @@ def unbox_ArrayView(viewtype, view_obj, c):
     lookup_proxy = c.context.make_helper(c.builder, LookupType(), lookup_val)
 
     proxyout = c.context.make_helper(c.builder, viewtype)
-    proxyout.pos       = c.pyapi.number_as_ssize_t(pos_obj)
-    proxyout.start     = c.pyapi.number_as_ssize_t(start_obj)
-    proxyout.stop      = c.pyapi.number_as_ssize_t(stop_obj)
-    proxyout.arrayptrs = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.arrayptrs).data
-    proxyout.pylookup  = lookup_obj
+    proxyout.pos        = c.pyapi.number_as_ssize_t(pos_obj)
+    proxyout.start      = c.pyapi.number_as_ssize_t(start_obj)
+    proxyout.stop       = c.pyapi.number_as_ssize_t(stop_obj)
+    proxyout.arrayptrs  = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.arrayptrs).data
+    proxyout.sharedptrs = c.context.make_helper(c.builder, LookupType.arraytype, lookup_proxy.sharedptrs).data
+    proxyout.pylookup   = lookup_obj
 
     c.pyapi.decref(lookup_obj)
     c.pyapi.decref(pos_obj)
@@ -195,7 +205,7 @@ def box_ArrayView(viewtype, viewval, c):
     ArrayView_obj = c.pyapi.unserialize(c.pyapi.serialize_object(ArrayView))
     type_obj      = c.pyapi.unserialize(c.pyapi.serialize_object(viewtype.type))
     fields_obj    = c.pyapi.unserialize(c.pyapi.serialize_object(viewtype.fields))
-    
+
     proxyin = c.context.make_helper(c.builder, viewtype, viewval)
     pos_obj    = c.pyapi.long_from_ssize_t(proxyin.pos)
     start_obj  = c.pyapi.long_from_ssize_t(proxyin.start)
@@ -396,7 +406,7 @@ def unbox_RecordView(recordviewtype, recordobj, c):
 @numba.extending.box(RecordViewType)
 def box_RecordView(recordviewtype, viewval, c):
     RecordView_obj = c.pyapi.unserialize(c.pyapi.serialize_object(RecordView))
-    
+
     proxyin = c.context.make_helper(c.builder, recordviewtype, viewval)
     arrayview_obj = box_ArrayView(recordviewtype.arrayviewtype, proxyin.arrayview, c)
     at_obj        = c.pyapi.long_from_ssize_t(proxyin.at)

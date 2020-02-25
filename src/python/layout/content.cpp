@@ -641,6 +641,23 @@ py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(const py::
 
 /////////////////////////////////////////////////////////////// Content
 
+PersistentSharedPtr::PersistentSharedPtr(const std::shared_ptr<ak::Content>& ptr)
+    : ptr_(ptr) { }
+
+py::object PersistentSharedPtr::layout() const {
+  return box(ptr_);
+}
+
+size_t PersistentSharedPtr::ptr() const {
+  return reinterpret_cast<size_t>(&ptr_);
+}
+
+py::class_<PersistentSharedPtr> make_PersistentSharedPtr(const py::handle& m, const std::string& name) {
+  return py::class_<PersistentSharedPtr>(m, name.c_str())
+             .def("layout", &PersistentSharedPtr::layout)
+             .def("ptr", &PersistentSharedPtr::ptr);
+}
+
 py::class_<ak::Content, std::shared_ptr<ak::Content>> make_Content(const py::handle& m, const std::string& name) {
   return py::class_<ak::Content, std::shared_ptr<ak::Content>>(m, name.c_str());
 }
@@ -834,6 +851,9 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def_property_readonly("purelist_isregular", &T::purelist_isregular)
           .def_property_readonly("purelist_depth", &T::purelist_depth)
           .def("getitem_nothing", &T::getitem_nothing)
+          .def_property_readonly("_persistent_shared_ptr", [](std::shared_ptr<ak::Content>& self) -> PersistentSharedPtr {
+            return PersistentSharedPtr(self);
+          })
 
           // operations
           .def("sizes", [](const T& self, int64_t axis) -> py::object {
