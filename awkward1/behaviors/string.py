@@ -86,7 +86,7 @@ def string_numba_typer(viewtype):
     import numba
     return numba.types.string
 
-def string_numba_lower(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+def string_numba_lower(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
     raise Exception("FIXME: what goes here?")
 
 awkward1.behavior["__numba_typer__", "string"] = string_numba_typer

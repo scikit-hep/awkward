@@ -94,10 +94,11 @@ class ContentType(numba.types.Type):
 
     def lower_getitem_at_check(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         lower = awkward1._util.numba_array_lower(viewtype.type, viewtype.behavior)
-        if lower is None:
-            return self.lower_getitem_at(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds)
+        if lower is not None:
+            atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
+            return lower(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval)
         else:
-            return lower(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds)
+            return self.lower_getitem_at(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds)
 
     def lower_getitem_range(self, context, builder, rettype, viewtype, viewval, viewproxy, start, stop, wrapneg):
         length = builder.sub(viewproxy.stop, viewproxy.start)
@@ -523,6 +524,14 @@ class RecordArrayType(ContentType):
     def hasfield(self, key):
         return self.fieldindex(key) is not None
 
+    def getitem_at_check(self, viewtype):
+        out = self.getitem_at(viewtype)
+        if isinstance(out, awkward1._numba.arrayview.RecordViewType):
+            typer = awkward1._util.numba_record_typer(out.arrayviewtype.type, out.arrayviewtype.behavior)
+            if typer is not None:
+                return typer(out)
+        return out
+
     def getitem_at(self, viewtype):
         if len(viewtype.fields) == 0:
             return awkward1._numba.arrayview.RecordViewType(viewtype)
@@ -559,6 +568,15 @@ class RecordArrayType(ContentType):
         contenttype = self.contenttypes[index]
         subviewtype = awkward1._numba.arrayview.wrap(contenttype, recordviewtype, None)
         return contenttype.getitem_at_check(subviewtype)
+
+    def lower_getitem_at_check(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+        out = self.lower_getitem_at(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds)
+        baretype = self.getitem_at(viewtype)
+        if isinstance(baretype, awkward1._numba.arrayview.RecordViewType):
+            lower = awkward1._util.numba_record_lower(baretype.arrayviewtype.type, baretype.arrayviewtype.behavior)
+            if lower is not None:
+                return lower(context, builder, rettype(baretype), (out,))
+        return out
 
     def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
         atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)

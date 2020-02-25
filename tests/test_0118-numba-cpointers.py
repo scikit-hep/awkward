@@ -757,3 +757,26 @@ def test_FillableArray_list():
 
 #     print(f2(array, 1, 3))
 #     raise Exception
+
+def dummy_typer(viewtype):
+    return numba.float64
+
+def dummy_lower(context, builder, sig, args):
+    def convert(rec):
+        return rec.x + rec.y
+    return context.compile_internal(builder, convert, sig, args)
+
+def test_custom_record():
+    behavior = {}
+    behavior["__numba_typer__", "Dummy"] = dummy_typer
+    behavior["__numba_lower__", "Dummy"] = dummy_lower
+
+    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior)
+    array.layout.setparameter("__record__", "Dummy")
+
+    @numba.njit
+    def f1(x, i):
+        return x[i]
+
+    assert f1(array, 1) == 202.2
+    assert f1(array, 2) == 303.3
