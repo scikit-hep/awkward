@@ -515,7 +515,7 @@ namespace awkward {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
-  const std::shared_ptr<Content> RegularArray::rpad(int64_t rpad_width, int64_t axis) const {
+  const std::shared_ptr<Content> RegularArray::rpad(int64_t length, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     std::shared_ptr<Content> out = content();
     // If the content is not an integer multiple of size,
@@ -525,15 +525,15 @@ namespace awkward {
     int64_t fromlength = n*size();
 
     if (toaxis == 0) {
-      if (rpad_width > size()) {
-        int64_t tolength = (rpad_width - size())*size();
+      if (length > size()) {
+        int64_t tolength = (length - size())*size();
 
         if (out.get()->isindexed()) {
           out = out.get()->getitem_range_nowrap(0, fromlength);
           out = out.get()->rpad(tolength, toaxis);
         }
         else {
-          (rpad_width >= out.get()->length()/size()) ? tolength = rpad_width*size() : tolength = out.get()->length() - rpad_width*size();
+          (length >= out.get()->length()/size()) ? tolength = length*size() : tolength = out.get()->length() - length*size();
           Index64 outindex(tolength);
           struct Error err = awkward_index_rpad(
             outindex.ptr().get(),
@@ -545,7 +545,7 @@ namespace awkward {
         }
       }
       else {  // clip it
-        int64_t tolength = rpad_width*size();
+        int64_t tolength = length*size();
         out = out.get()->getitem_range_nowrap(0, tolength);
       }
 
@@ -555,13 +555,13 @@ namespace awkward {
       if(out.get()->isindexed()) {
         out = out.get()->getitem_range_nowrap(0, fromlength);
 
-        Index64 outindex(n*rpad_width);
+        Index64 outindex(n*length);
         if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(out.get())) {
           struct Error err = awkward_indexedarray_inject_rpad_from32(
             outindex.ptr().get(),
             rawother->index().ptr().get(),
             n,
-            rpad_width,
+            length,
             size());
           util::handle_error(err, classname(), identities_.get());
           out = rawother->content();
@@ -571,7 +571,7 @@ namespace awkward {
             outindex.ptr().get(),
             rawother->index().ptr().get(),
             n,
-            rpad_width,
+            length,
             size());
           util::handle_error(err, classname(), identities_.get());
           out = rawother->content();
@@ -581,7 +581,7 @@ namespace awkward {
             outindex.ptr().get(),
             rawother->index().ptr().get(),
             n,
-            rpad_width,
+            length,
             size());
           util::handle_error(err, classname(), identities_.get());
           out = rawother->content();
@@ -591,7 +591,7 @@ namespace awkward {
             outindex.ptr().get(),
             rawother->index().ptr().get(),
             n,
-            rpad_width,
+            length,
             size());
           util::handle_error(err, classname(), identities_.get());
           out = rawother->content();
@@ -601,21 +601,21 @@ namespace awkward {
             outindex.ptr().get(),
             rawother->index().ptr().get(),
             n,
-            rpad_width,
+            length,
             size());
           util::handle_error(err, classname(), identities_.get());
           out = rawother->content();
         }
 
         out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
-        return std::make_shared<RegularArray>(identities_, parameters_, out, rpad_width);
+        return std::make_shared<RegularArray>(identities_, parameters_, out, length);
       }
       else {
-        return toListOffsetArray64().get()->rpad(rpad_width, axis);
+        return toListOffsetArray64().get()->rpad(length, axis);
       }
     }
     else {
-      out = out.get()->rpad(rpad_width, axis - 1);
+      out = out.get()->rpad(length, axis - 1);
       return std::make_shared<RegularArray>(identities_, parameters_, out, size_);
     }
   }

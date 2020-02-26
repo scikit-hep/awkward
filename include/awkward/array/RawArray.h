@@ -499,9 +499,9 @@ namespace awkward {
       throw std::invalid_argument("cannot use RawArray as a slice");
     }
 
-    const std::shared_ptr<Content> rpad(int64_t rpad_width, int64_t axis) const override {
+    const std::shared_ptr<Content> rpad(int64_t length, int64_t axis) const override {
       int64_t fromlength = length_;
-      int64_t diff = rpad_width - fromlength;
+      int64_t diff = length - fromlength;
       int64_t tolength = fromlength + diff;
       Index64 outindex(tolength);
       struct Error err = awkward_index_rpad(

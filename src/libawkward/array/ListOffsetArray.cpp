@@ -958,25 +958,25 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad(int64_t rpad_width, int64_t axis) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad(int64_t length, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     std::shared_ptr<Content> out = content();
     if (toaxis == 0) {
       if (out.get()->isindexed()) {
         out = content()->getitem_range_nowrap(0, out.get()->length());
-        out = out.get()->rpad(rpad_width, toaxis);
+        out = out.get()->rpad(length, toaxis);
 
         IndexOf<T> starts = util::make_starts(offsets_);
         IndexOf<T> stops = util::make_stops(offsets_);
 
-        Index64 padded_starts(rpad_width);
-        Index64 padded_stops(rpad_width);
+        Index64 padded_starts(length);
+        Index64 padded_stops(length);
         struct Error err1 = util::awkward_listarray_rpad_64<T>(
           padded_starts.ptr().get(),
           padded_stops.ptr().get(),
           starts.ptr().get(),
           stops.ptr().get(),
-          rpad_width,
+          length,
           starts.length(),
           starts.offset(),
           stops.offset()
@@ -989,8 +989,8 @@ namespace awkward {
         IndexOf<T> starts = util::make_starts(offsets_);
         IndexOf<T> stops = util::make_stops(offsets_);
 
-        int64_t fromlength = length();
-        int64_t tolength = rpad_width;
+        int64_t fromlength = offsets_.length() - 1;
+        int64_t tolength = length;
         Index64 outindex(tolength);
         struct Error err2 = awkward_index_rpad(
           outindex.ptr().get(),
@@ -1008,22 +1008,22 @@ namespace awkward {
         // FIXME:
       }
       else {
-        // FIXME: if rpad_width < an offset
-        Index64 outindex(rpad_width*(offsets_.length() - 1));
+        // FIXME: if length < an offset
+        Index64 outindex(length*(offsets_.length() - 1));
         int64_t count = 0;
         for (int64_t i = 0; i < offsets_.length() - 1; i++) {
           int64_t diff = offsets_.ptr().get()[i + 1] - offsets_.ptr().get()[i];
           for (int64_t x = 0; x < diff; x++) {
-            if (x < rpad_width) {
+            if (x < length) {
               outindex.ptr().get()[count++] = offsets_.ptr().get()[i] + x;
             }
           }
-          for (int64_t y = diff; y < rpad_width; y++) {
+          for (int64_t y = diff; y < length; y++) {
             outindex.ptr().get()[count++] = -1;
           }
         }
         out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
-        return std::make_shared<RegularArray>(identities_, parameters_, out, rpad_width);
+        return std::make_shared<RegularArray>(identities_, parameters_, out, length);
       }
     }
 
