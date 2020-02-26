@@ -186,6 +186,8 @@ class type_methods(numba.typing.templates.AttributeTemplate):
 
     @numba.typing.templates.bound_function("append")
     def resolve_append(self, fillabletype, args, kwargs):
+        import awkward1.highlevel
+
         if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], (awkward1._numba.arrayview.ArrayViewType, awkward1._numba.arrayview.RecordViewType, numba.types.Boolean, numba.types.Integer, numba.types.Float)):
             return numba.types.none(args[0])
         elif len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.Optional) and isinstance(args[0].type, (numba.types.Boolean, numba.types.Integer, numba.types.Float)):
@@ -195,7 +197,11 @@ class type_methods(numba.typing.templates.AttributeTemplate):
         elif len(args) == 2 and len(kwargs) == 0 and isinstance(args[0], awkward1._numba.arrayview.ArrayViewType) and isinstance(args[1], numba.types.Integer):
             return numba.types.none(args[0], args[1])
         else:
-            print("HERE", args)
+            if len(args) == 1 and fillabletype.behavior is not None:
+                for key, lower in fillabletype.behavior.items():
+                    if isinstance(key, tuple) and len(key) == 3 and key[0] == "__numba_lower__" and key[1] == awkward1.highlevel.FillableArray.append and (args[0] == key[2] or (isinstance(key[2], type) and isinstance(args[0], key[2]))):
+                        numba.extending.lower_builtin("append", FillableArrayType, args[0])(lower)
+                        return numba.types.none(args[0])
 
             raise TypeError("wrong number or types of arguments for FillableArray.append")
 
