@@ -13,6 +13,7 @@ import awkward1._numba.libawkward
 
 dynamic_addrs = {}
 def globalstring(context, builder, pyvalue):
+    import llvmlite.ir.types
     if pyvalue not in dynamic_addrs:
         buf = dynamic_addrs[pyvalue] = numpy.array(pyvalue.encode("utf-8") + b"\x00")
         context.add_dynamic_addr(builder, buf.ctypes.data, info="str({0})".format(repr(pyvalue)))
