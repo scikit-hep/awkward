@@ -525,32 +525,13 @@ ERROR awkward_numpyarray_fill_tobool_frombool(bool* toptr, int64_t tooffset, con
   return awkward_numpyarray_fill_frombool<bool>(toptr, tooffset, fromptr, fromoffset, length);
 }
 
-template <typename T>
-ERROR awkward_zero_index(T* toindex, int64_t length) {
-  for (int64_t i = 0;  i < length;  i++) {
-    toindex[i] = 0;
-  }
-  return success();
-}
-ERROR awkward_zero_index_64(int64_t* toindex, int64_t length) {
-  return awkward_zero_index<int64_t>(toindex, length);
-}
-
-ERROR awkward_zero_raw_ptr(uint8_t* toptr, int64_t length) {
-  for (int64_t i = 0;  i < length;  i++) {
-    toptr[i] = 0;
-  }
-  return success();
-}
-
 ERROR awkward_index_rpad(int64_t* toindex, const int64_t fromlength, int64_t tolength) {
-  for (int64_t i = 0; i < tolength; i++) {
-    if (i < fromlength) {
-      toindex[i] = i;
-    }
-    else {
-      toindex[i] = -1;
-    }
+  int64_t length = (tolength < fromlength) ? tolength : fromlength;
+  for (int64_t i = 0; i < length; i++) {
+    toindex[i] = i;
+  }
+  for (int64_t i = length; i < tolength; i++) {
+    toindex[i] = -1;
   }
   return success();
 }
@@ -580,27 +561,14 @@ ERROR awkward_index_inject_rpad(int64_t* toindex, const int64_t* fromindex, int6
   return success();
 }
 
-ERROR awkward_index_clip(int64_t* toindex, const int64_t* fromindex, int64_t tolength) {
-  for (int64_t i = 0; i < tolength; i++) {
-    toindex[i] = fromindex[i];
-  }
-  return success();
-}
-
 template <typename T, typename C>
 ERROR awkward_listarray_broadcast_toindex(T* toindex, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
 // FIXME: add offsets
   int64_t k = 0;
   for (int64_t x = 0;  x < lenstarts;  x++) {
-    if (fromstops[x] - fromstarts[x] > 0) {
-      for (int64_t y = 0; y < (fromstops[x] - fromstarts[x]); y++) {
-        toindex[k] = fromstarts[x] + y;
-        ++k;
-      }
-    }
-    else {
-      toindex[k] = fromstarts[x];
-      ++k;
+    toindex[k++] = fromstarts[x];
+    for (int64_t y = 1; y < fromstops[x] - fromstarts[x]; y++) {
+      toindex[k++] = fromstarts[x] + y;
     }
   }
   return success();
@@ -617,21 +585,14 @@ ERROR awkward_listarray64_broadcast_toindex_64(int64_t* toindex, const int64_t* 
 
 template <typename T, typename C>
 ERROR awkward_listarray_rpad(T* tostarts, T* tostops, const C* fromstarts, const C* fromstops, int64_t tolength, int64_t fromlength, int64_t startsoffset, int64_t stopsoffset) {
-  if (tolength > fromlength) {
-    for (int64_t i = 0; i < fromlength; i++) {
-      tostarts[i] = (T)fromstarts[i];
-      tostops[i] = (T)fromstops[i];
-    }
-    for (int64_t i = fromlength; i < tolength - fromlength; i++) {
-      tostarts[i] = (T)(fromlength + i);
-      tostops[i] = (T)(fromlength + i + 1);
-    }
+  int64_t length = (tolength < fromlength) ? tolength : fromlength;
+  for (int64_t i = 0; i < length; i++) {
+    tostarts[i] = (T)fromstarts[i];
+    tostops[i] = (T)fromstops[i];
   }
-  else {
-    for (int64_t i = 0; i < tolength; i++) {
-      tostarts[i] = (T)fromstarts[i];
-      tostops[i] = (T)fromstops[i];
-    }
+  for (int64_t i = length; i < tolength - fromlength; i++) {
+    tostarts[i] = (T)(fromlength + i);
+    tostops[i] = (T)(fromlength + i + 1);
   }
   return success();
 }
@@ -647,30 +608,15 @@ ERROR awkward_listarray64_rpad_64(int64_t* tostarts, int64_t* tostops, const int
 
 template <typename T, typename C>
 ERROR awkward_listarray_broadcast_toindex_rpad(T* toindex, const T* fromindex, const C* fromstarts, const C* fromstops, int64_t tolength, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  int64_t shift = 0;
-  int64_t l = 0;
   for (int64_t i = 0; i < lenstarts; i++) {
-    int64_t step = fromstops[i] - fromstarts[i];
-    if (step <= tolength) {
-      int64_t k = 0;
-      for (int64_t j = 0; j < step; j++) {
-        toindex[l] = fromindex[shift];
-        ++shift;
-        ++k;
-        ++l;
-      }
-      while (k < tolength) {
-        toindex[l] = -1;
-        ++k;
-        ++l;
-      }
+    int64_t range = fromstops[i] - fromstarts[i];
+    int64_t length = (range > tolength) ? tolength : range;
+    int64_t k = i*lenstarts;
+    for (int64_t j = 0; j < length; j++) {
+      toindex[k + j] = fromindex[k + j];
     }
-    else {
-      for (int64_t j = 0; j < tolength; j++) {
-        toindex[l] = fromindex[shift];
-        ++shift;
-        ++l;
-      }
+    for (int64_t j = length; j < tolength; j++) {
+      toindex[k + j] = -1;
     }
   }
   return success();
@@ -743,30 +689,6 @@ ERROR awkward_indexedarray_clip(int64_t* toindex, int64_t* fromindex, int64_t to
     toindex[i] = fromindex[i];
   }
   return success();
-}
-
-ERROR awkward_regulararray_rpad(int64_t* toindex, int64_t tolength, int64_t fromlength) {
-  for (int64_t i = 0; i < fromlength; i++) {
-    toindex[i] = i;
-  }
-  for (int64_t i = fromlength; i < tolength; i++) {
-    toindex[i] = -1;
-  }
-  return success();
-}
-
-template <typename T>
-ERROR awkward_numpyarray_rpad_copy(uint8_t* toptr, const uint8_t* fromptr, int64_t tolen, int64_t fromlen, int64_t tostride, int64_t fromstride, int64_t offset, const T* pos) {
-  for (int64_t j = 0; j < tolen*tostride; j++) {
-    toptr[j] = 0;
-  }
-  for (int64_t i = 0;  i < fromlen;  i++) {
-    memcpy(&toptr[i*tostride], &fromptr[offset + (int64_t)pos[i]], (size_t)fromstride);
-  }
-  return success();
-}
-ERROR awkward_numpyarray_rpad_copy_64(uint8_t* toptr, const uint8_t* fromptr, int64_t tolen, int64_t fromlen, int64_t tostride, int64_t fromstride, int64_t offset, const int64_t* pos) {
-  return awkward_numpyarray_rpad_copy<int64_t>(toptr, fromptr, tolen, fromlen, tostride, fromstride, offset, pos);
 }
 
 template <typename FROM, typename TO>

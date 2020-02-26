@@ -535,10 +535,10 @@ namespace awkward {
         else {
           (rpad_width >= out.get()->length()/size()) ? tolength = rpad_width*size() : tolength = out.get()->length() - rpad_width*size();
           Index64 outindex(tolength);
-          struct Error err = awkward_regulararray_rpad(
+          struct Error err = awkward_index_rpad(
             outindex.ptr().get(),
-            tolength,
-            fromlength);
+            fromlength,
+            tolength);
           util::handle_error(err, classname(), identities_.get());
 
           out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
