@@ -966,40 +966,17 @@ namespace awkward {
         out = content()->getitem_range_nowrap(0, out.get()->length());
         out = out.get()->rpad(length, toaxis);
 
-        IndexOf<T> starts = util::make_starts(offsets_);
-        IndexOf<T> stops = util::make_stops(offsets_);
-
-        Index64 padded_starts(length);
-        Index64 padded_stops(length);
-        struct Error err1 = util::awkward_listarray_rpad_64<T>(
-          padded_starts.ptr().get(),
-          padded_stops.ptr().get(),
-          starts.ptr().get(),
-          stops.ptr().get(),
-          length,
-          starts.length(),
-          starts.offset(),
-          stops.offset()
-        );
-        util::handle_error(err1, classname(), identities_.get());
-
-        return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts, stops, out);
+        return std::make_shared<ListArrayOf<T>>(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), out);
       }
       else {
-        IndexOf<T> starts = util::make_starts(offsets_);
-        IndexOf<T> stops = util::make_stops(offsets_);
-
-        int64_t fromlength = offsets_.length() - 1;
-        int64_t tolength = length;
-        Index64 outindex(tolength);
-        struct Error err2 = awkward_index_rpad(
+        Index64 outindex(length);
+        struct Error err1 = awkward_index_rpad(
           outindex.ptr().get(),
-          fromlength,
-          tolength
-        );
-        util::handle_error(err2, classname(), identities_.get());
+          offsets_.length() - 1,
+          length);
+        util::handle_error(err1, classname(), identities_.get());
 
-        out = std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts, stops, out);
+        out = std::make_shared<ListArrayOf<T>>(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), out);
         return std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
       }
     }
@@ -1008,20 +985,15 @@ namespace awkward {
         // FIXME:
       }
       else {
-        // FIXME: if length < an offset
         Index64 outindex(length*(offsets_.length() - 1));
-        int64_t count = 0;
-        for (int64_t i = 0; i < offsets_.length() - 1; i++) {
-          int64_t diff = offsets_.ptr().get()[i + 1] - offsets_.ptr().get()[i];
-          for (int64_t x = 0; x < diff; x++) {
-            if (x < length) {
-              outindex.ptr().get()[count++] = offsets_.ptr().get()[i] + x;
-            }
-          }
-          for (int64_t y = diff; y < length; y++) {
-            outindex.ptr().get()[count++] = -1;
-          }
-        }
+        struct Error err2 = util::awkward_listoffsetarray_rpad_64<T>(
+          outindex.ptr().get(),
+          offsets_.ptr().get(),
+          offsets_.length(),
+          length
+        );
+        util::handle_error(err2, classname(), identities_.get());
+
         out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
         return std::make_shared<RegularArray>(identities_, parameters_, out, length);
       }

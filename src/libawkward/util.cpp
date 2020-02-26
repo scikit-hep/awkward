@@ -531,6 +531,19 @@ namespace awkward {
     }
 
     template <>
+    ERROR awkward_listoffsetarray_rpad_64<int32_t>(int64_t* toindex, const int32_t* fromoffsets, int64_t fromlength, int64_t length) {
+      return awkward_listoffsetarray32_rpad_64(toindex, fromoffsets, fromlength, length);
+    }
+    template <>
+    ERROR awkward_listoffsetarray_rpad_64<uint32_t>(int64_t* toindex, const uint32_t* fromoffsets, int64_t fromlength, int64_t length) {
+      return awkward_listoffsetarrayU32_rpad_64(toindex, fromoffsets, fromlength, length);
+    }
+    template <>
+    ERROR awkward_listoffsetarray_rpad_64<int64_t>(int64_t* toindex, const int64_t* fromoffsets, int64_t fromlength, int64_t length) {
+      return awkward_listoffsetarray64_rpad_64(toindex, fromoffsets, fromlength, length);
+    }
+
+    template <>
     Error awkward_listarray_flatten_length<int32_t>(int64_t* tolen, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
       return awkward_listarray32_flatten_length(tolen, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
     }

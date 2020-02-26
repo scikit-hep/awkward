@@ -862,8 +862,7 @@ namespace awkward {
           tolength,
           starts_.length(),
           starts_.offset(),
-          stops_.offset()
-        );
+          stops_.offset());
         util::handle_error(err3, classname(), identities_.get());
 
         return std::make_shared<ListArray64>(identities_, parameters_, starts, stops, out);
@@ -879,8 +878,7 @@ namespace awkward {
           length,
           starts_.length(),
           starts_.offset(),
-          stops_.offset()
-        );
+          stops_.offset());
         util::handle_error(err4, classname(), identities_.get());
 
         return std::make_shared<ListArray64>(identities_, parameters_, starts, stops, out);
