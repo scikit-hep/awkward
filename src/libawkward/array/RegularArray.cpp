@@ -544,14 +544,14 @@ namespace awkward {
           out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
         }
       }
-      else {  // clip it if length < size()
+      else {  // clip it
         int64_t tolength = rpad_width*size();
         out = out.get()->getitem_range_nowrap(0, tolength);
       }
 
       return std::make_shared<RegularArray>(identities_, parameters_, out, size());
     }
-    else {
+    else if (toaxis == 1) {
       if(out.get()->isindexed()) {
         out = out.get()->getitem_range_nowrap(0, fromlength);
 
@@ -608,11 +608,15 @@ namespace awkward {
         }
 
         out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
+        return std::make_shared<RegularArray>(identities_, parameters_, out, rpad_width);
       }
       else {
-        out = out.get()->rpad(rpad_width, axis);
+        return toListOffsetArray64().get()->rpad(rpad_width, axis);
       }
-      return std::make_shared<RegularArray>(identities_, parameters_, out, rpad_width);
+    }
+    else {
+      out = out.get()->rpad(rpad_width, axis - 1);
+      return std::make_shared<RegularArray>(identities_, parameters_, out, size_);
     }
   }
 

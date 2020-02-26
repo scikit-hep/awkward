@@ -501,7 +501,7 @@ namespace awkward {
       contents.push_back(content.get()->count(toaxis));
     }
     if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+      return std::make_shared<RecordArray>(identities_, parameters_, length_, istuple());
     }
     else {
       return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
@@ -514,7 +514,7 @@ namespace awkward {
       contents.push_back(content.get()->flatten(axis));
     }
     if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+      return std::make_shared<RecordArray>(identities_, parameters_, length_, istuple());
     }
     else {
       return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
@@ -663,7 +663,7 @@ namespace awkward {
       contents.push_back(content.get()->rpad(rpad_width, axis));
     }
     if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+      return std::make_shared<RecordArray>(identities_, parameters_, length_, istuple());
     }
     else {
       return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);

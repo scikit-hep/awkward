@@ -52,12 +52,6 @@ def test_rpad_regular_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
-    assert awkward1.tolist(listoffsetarray) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], []]
-    assert awkward1.tolist(listoffsetarray.rpad(3,0)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4]]
-    assert awkward1.tolist(listoffsetarray.rpad(7,0)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], [], None]
-    assert awkward1.tolist(listoffsetarray.rpad(5,1)) == [[0.0, 1.1, 2.2, None, None], [None, None, None, None, None], [3.3, 4.4, None, None, None], [5.5, None, None, None, None], [6.6, 7.7, 8.8, 9.9, None], [None, None, None, None, None]]
-    assert awkward1.tolist(listoffsetarray.rpad(1,1)) == [[0.0], [None], [3.3], [5.5], [6.6], [None]]
-
     regulararray = awkward1.layout.RegularArray(listoffsetarray, 2)
 
     assert awkward1.tolist(regulararray.rpad(1, 0)) == [[[0.0, 1.1, 2.2], []]]
@@ -68,26 +62,26 @@ def test_rpad_regular_array():
     assert awkward1.tolist(regulararray.rpad(6, 0)) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []], [None, None], [None, None], [None, None]]
     assert awkward1.tolist(regulararray.rpad(7, 0)) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []], [None, None], [None, None], [None, None], [None, None]]
 
-    print("Before rpadding: ", awkward1.tolist(regulararray))
-    #[[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
-    print("rpad 5 in 1: ", awkward1.tolist(regulararray.rpad(5, 1)))
-    #assert awkward1.tolist(regulararray.rpad(5, 1)) == [[[0.0, 1.1, 2.2], [], None, None, None], [[3.3, 4.4], [5.5], None, None, None], [[6.6, 7.7, 8.8, 9.9], [], None, None, None]]
-    print("rpad 5 in 2: ", awkward1.tolist(regulararray.rpad(5, 2)))
-    #assert awkward1.tolist(regulararray.rpad(5, 2)) == [[[0.0, 1.1, 2.2, None, None], [None, None, None, None, None]], [[3.3, 4.4, None, None, None], [5.5, None, None, None, None]], [[6.6, 7.7, 8.8, 9.9, None], [None, None, None, None, None]]]
+    assert awkward1.tolist(regulararray.rpad(1, 1)) == [[[0.0, 1.1, 2.2]], [[3.3, 4.4]], [[6.6, 7.7, 8.8, 9.9]]]
+    assert awkward1.tolist(regulararray.rpad(2, 1)) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
+    assert awkward1.tolist(regulararray.rpad(3, 1)) == [[[0.0, 1.1, 2.2], [], None], [[3.3, 4.4], [5.5], None], [[6.6, 7.7, 8.8, 9.9], [], None]]
+    assert awkward1.tolist(regulararray.rpad(4, 1)) == [[[0.0, 1.1, 2.2], [], None, None], [[3.3, 4.4], [5.5], None, None], [[6.6, 7.7, 8.8, 9.9], [], None, None]]
+    assert awkward1.tolist(regulararray.rpad(5, 1)) == [[[0.0, 1.1, 2.2], [], None, None, None], [[3.3, 4.4], [5.5], None, None, None], [[6.6, 7.7, 8.8, 9.9], [], None, None, None]]
+    assert awkward1.tolist(regulararray.rpad(6, 1)) == [[[0.0, 1.1, 2.2], [], None, None, None, None], [[3.3, 4.4], [5.5], None, None, None, None], [[6.6, 7.7, 8.8, 9.9], [], None, None, None, None]]
+    assert awkward1.tolist(regulararray.rpad(7, 1)) == [[[0.0, 1.1, 2.2], [], None, None, None, None, None], [[3.3, 4.4], [5.5], None, None, None, None, None], [[6.6, 7.7, 8.8, 9.9], [], None, None, None, None, None]]
 
-    print("rpad 1 in 1: ", awkward1.tolist(regulararray.rpad(1, 1)))
-    print("rpad 2 in 1: ", awkward1.tolist(regulararray.rpad(2, 1)))
-    print("rpad 3 in 1: ", awkward1.tolist(regulararray.rpad(3, 1)))
-    print("rpad 4 in 1: ", awkward1.tolist(regulararray.rpad(4, 1)))
-    print("rpad 6 in 1: ", awkward1.tolist(regulararray.rpad(6, 1)))
-    print("rpad 7 in 1: ", awkward1.tolist(regulararray.rpad(7, 1)))
-    print("rpad 8 in 1: ", awkward1.tolist(regulararray.rpad(8, 1)))
-    print("rpad 9 in 1: ", awkward1.tolist(regulararray.rpad(9, 1)))
+    assert awkward1.tolist(regulararray.rpad(1, 2)) == [[[0.0], [None]], [[3.3], [5.5]], [[6.6], [None]]]
+    assert awkward1.tolist(regulararray.rpad(2, 2)) == [[[0.0, 1.1], [None, None]], [[3.3, 4.4], [5.5, None]], [[6.6, 7.7], [None, None]]]
+    assert awkward1.tolist(regulararray.rpad(3, 2)) == [[[0.0, 1.1, 2.2], [None, None, None]], [[3.3, 4.4, None], [5.5, None, None]], [[6.6, 7.7, 8.8], [None, None, None]]]
+    assert awkward1.tolist(regulararray.rpad(4, 2)) == [[[0.0, 1.1, 2.2, None], [None, None, None, None]], [[3.3, 4.4, None, None], [5.5, None, None, None]], [[6.6, 7.7, 8.8, 9.9], [None, None, None, None]]]
+    assert awkward1.tolist(regulararray.rpad(5, 2)) == [[[0.0, 1.1, 2.2, None, None], [None, None, None, None, None]], [[3.3, 4.4, None, None, None], [5.5, None, None, None, None]], [[6.6, 7.7, 8.8, 9.9, None], [None, None, None, None, None]]]
 
-    assert awkward1.tolist(regulararray.rpad(1, 1)) == [[[0.0]], [[None]], [[3.3]], [[5.5]], [[6.6]], [[None]]]
-    assert awkward1.tolist(regulararray.rpad(2, 1)) == [[[0.0, 1.1], [None, None]], [[3.3, 4.4], [5.5, None]], [[6.6, 7.7], [None, None]]]
-    assert awkward1.tolist(regulararray.rpad(3, 1)) == [[[0.0, 1.1, 2.2], [None, None, None], [3.3, 4.4, None]], [[5.5, None, None], [6.6, 7.7, 8.8], [None, None, None]]]
-    assert awkward1.tolist(regulararray.rpad(4, 1)) == [[[0.0, 1.1, 2.2, None],  [None, None, None, None],  [3.3, 4.4, None, None],  [5.5, None, None, None]]]
-    assert awkward1.tolist(regulararray.rpad(5, 1)) == [[[0.0, 1.1, 2.2, None, None], [None, None, None, None, None], [3.3, 4.4, None, None, None], [5.5, None, None, None, None], [6.6, 7.7, 8.8, 9.9, None]]]
-    assert awkward1.tolist(regulararray.rpad(6, 1)) == [[[0.0, 1.1, 2.2, None, None, None], [None, None, None, None, None, None], [3.3, 4.4, None, None, None, None], [5.5, None, None, None, None, None], [6.6, 7.7, 8.8, 9.9, None, None], [None, None, None, None, None, None]]]
-    # FIXME: assert awkward1.tolist(regulararray.rpad(7, 1)) == [[[0.0, 1.1, 2.2, None, None, None, None], [None, None, None, None, None, None, None]], [[3.3, 4.4, None, None, None, None, None], [5.5, None, None, None, None, None, None]], [[6.6, 7.7, 8.8, 9.9, None, None, None], [None, None, None, None, None, None, None]]]
+def test_rpad_listoffset_array():
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+    assert awkward1.tolist(listoffsetarray) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], []]
+    assert awkward1.tolist(listoffsetarray.rpad(3,0)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4]]
+    assert awkward1.tolist(listoffsetarray.rpad(7,0)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], [], None]
+    assert awkward1.tolist(listoffsetarray.rpad(5,1)) == [[0.0, 1.1, 2.2, None, None], [None, None, None, None, None], [3.3, 4.4, None, None, None], [5.5, None, None, None, None], [6.6, 7.7, 8.8, 9.9, None], [None, None, None, None, None]]
+    assert awkward1.tolist(listoffsetarray.rpad(1,1)) == [[0.0], [None], [3.3], [5.5], [6.6], [None]]
