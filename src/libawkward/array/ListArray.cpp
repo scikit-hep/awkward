@@ -827,34 +827,38 @@ namespace awkward {
     int64_t toaxis = axis_wrap_if_negative(axis);
     std::shared_ptr<Content> out = content();
     int64_t tolength = 0;
-    for (int64_t i = 0; i < starts_.length(); i++) {
-      tolength += stops_.ptr().get()[i] - starts_.ptr().get()[i];
-    }
+    struct Error err1 = util::awkward_listarray_index_length_count_64<T>(
+      tolength,
+      starts_.ptr().get(),
+      stops_.ptr().get(),
+      starts_.length());
+    util::handle_error(err1, classname(), identities_.get());
+
     Index64 self_index(tolength);
-    struct Error err1 = util::awkward_listarray_broadcast_toindex_64<T>(
+    struct Error err2 = util::awkward_listarray_broadcast_toindex_64<T>(
       self_index.ptr().get(),
       starts_.ptr().get(),
       stops_.ptr().get(),
       starts_.length(),
       starts_.offset(),
       stops_.offset());
-    util::handle_error(err1, classname(), identities_.get());
+    util::handle_error(err2, classname(), identities_.get());
 
     if (toaxis == 0) {
       if (length > starts_.length()) {
         Index64 outindex(tolength + starts_.length() - length);
-        struct Error err2 = awkward_index_append(
+        struct Error err3 = awkward_index_append(
           self_index.ptr().get(),
           outindex.ptr().get(),
           tolength,
           starts_.length() - length);
-        util::handle_error(err2, classname(), identities_.get());
+        util::handle_error(err3, classname(), identities_.get());
 
         out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
 
         Index64 starts(starts_.length() + starts_.length() - length);
         Index64 stops(starts_.length() + starts_.length() - length);
-        struct Error err3 = util::awkward_listarray_rpad_64<T>(
+        struct Error err4 = util::awkward_listarray_rpad_64<T>(
           starts.ptr().get(),
           stops.ptr().get(),
           starts_.ptr().get(),
@@ -863,14 +867,14 @@ namespace awkward {
           starts_.length(),
           starts_.offset(),
           stops_.offset());
-        util::handle_error(err3, classname(), identities_.get());
+        util::handle_error(err4, classname(), identities_.get());
 
         return std::make_shared<ListArray64>(identities_, parameters_, starts, stops, out);
       }
       else {
         Index64 starts(length);
         Index64 stops(length);
-        struct Error err4 = util::awkward_listarray_rpad_64<T>(
+        struct Error err5 = util::awkward_listarray_rpad_64<T>(
           starts.ptr().get(),
           stops.ptr().get(),
           starts_.ptr().get(),
@@ -879,7 +883,7 @@ namespace awkward {
           starts_.length(),
           starts_.offset(),
           stops_.offset());
-        util::handle_error(err4, classname(), identities_.get());
+        util::handle_error(err5, classname(), identities_.get());
 
         return std::make_shared<ListArray64>(identities_, parameters_, starts, stops, out);
       }
@@ -887,7 +891,7 @@ namespace awkward {
     else if (toaxis == 1) {
 
       Index64 outindex(length*starts_.length());
-      struct Error err5 = util::awkward_listarray_broadcast_toindex_rpad_64<T>(
+      struct Error err6 = util::awkward_listarray_broadcast_toindex_rpad_64<T>(
         outindex.ptr().get(),
         self_index.ptr().get(),
         starts_.ptr().get(),
@@ -896,7 +900,7 @@ namespace awkward {
         starts_.length(),
         starts_.offset(),
         stops_.offset());
-      util::handle_error(err5, classname(), identities_.get());
+      util::handle_error(err6, classname(), identities_.get());
 
       out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
       return std::make_shared<RegularArray>(identities_, parameters_, out, length);

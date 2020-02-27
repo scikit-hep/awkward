@@ -568,6 +568,26 @@ ERROR awkward_index_inject_rpad(int64_t* toindex, const int64_t* fromindex, int6
   return success();
 }
 
+template <typename C>
+ERROR awkward_listarray_index_length_count_64(int64_t tolength, const C* fromstarts, const C* fromstops, int64_t lenstarts) {
+  int64_t length = 0;
+  for (int64_t i = 0; i < lenstarts; i++) {
+    length += fromstops[i] - fromstarts[i];
+  }
+  tolength = length;
+
+  return success();
+}
+ERROR awkward_listarray32_index_length_count_64(int64_t tolength, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts) {
+  return awkward_listarray_index_length_count_64<int32_t>(tolength, fromstarts, fromstops, lenstarts);
+}
+ERROR awkward_listarrayU32_index_length_count_64(int64_t tolength, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts) {
+  return awkward_listarray_index_length_count_64<uint32_t>(tolength, fromstarts, fromstops, lenstarts);
+}
+ERROR awkward_listarray64_index_length_count_64(int64_t tolength, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts) {
+  return awkward_listarray_index_length_count_64<int64_t>(tolength, fromstarts, fromstops, lenstarts);
+}
+
 template <typename T, typename C>
 ERROR awkward_listarray_broadcast_toindex(T* toindex, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
 // FIXME: add offsets

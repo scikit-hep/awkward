@@ -85,3 +85,13 @@ def test_rpad_and_clip_listoffset_array():
     assert awkward1.tolist(listoffsetarray.rpad_and_clip(7,0)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], [], None]
     assert awkward1.tolist(listoffsetarray.rpad_and_clip(5,1)) == [[0.0, 1.1, 2.2, None, None], [None, None, None, None, None], [3.3, 4.4, None, None, None], [5.5, None, None, None, None], [6.6, 7.7, 8.8, 9.9, None], [None, None, None, None, None]]
     assert awkward1.tolist(listoffsetarray.rpad_and_clip(1,1)) == [[0.0], [None], [3.3], [5.5], [6.6], [None]]
+
+    content = awkward1.layout.NumpyArray(numpy.array([1.5, 3.3]))
+    index = awkward1.layout.Index64(numpy.array([0, -3, 1, -2, 1, 0, 0, -3, -13, 0, 1, 1, 0, 1, 1, 1, 1, -10, 0, -1, 0, 0, 0, 1, -1, 1, 1]))
+    indexedarray = awkward1.layout.IndexedOptionArray64(index, content)
+    offsets = awkward1.layout.Index64(numpy.array([14, 15, 15, 15, 26, 26, 26]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, indexedarray)
+
+    assert awkward1.tolist(listoffsetarray) == [[3.3], [], [], [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3], [], []]
+    assert awkward1.tolist(listoffsetarray.rpad_and_clip(1,0)) == [[3.3]]
+    assert awkward1.tolist(listoffsetarray.rpad_and_clip(1,1)) == [[3.3], [None], [None], [3.3], [None], [None]]

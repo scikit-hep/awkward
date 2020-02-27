@@ -1382,10 +1382,10 @@ namespace awkward {
     int64_t toaxis = axis_wrap_if_negative(axis);
     ssize_t offset = (ssize_t)toaxis;
     if (offset > ndim()) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be rpadded in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+      throw std::invalid_argument(std::string("NumpyArray cannot be padded in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
     }
     if (shape_.empty()) {
-       throw std::runtime_error("attempting to rpad a scalar");
+       throw std::runtime_error("attempting to pad a scalar");
     }
     if (toaxis == 0) {
       std::shared_ptr<Content> out = toRegularArray();
@@ -1415,7 +1415,7 @@ namespace awkward {
         length);
       util::handle_error(err2, classname(), identities_.get());
 
-      // how many rpadding chunks
+      // how many padding chunks
       int64_t chunks = 1;
       for (int64_t x = 0; x < toaxis; x++) {
         chunks = chunks * shape_[x];
