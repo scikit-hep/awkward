@@ -4,6 +4,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/IndexedArray.h"
@@ -196,9 +197,10 @@ namespace awkward {
 
   const std::shared_ptr<Content> EmptyArray::rpad(int64_t length, int64_t axis) const {
     Index64 index(length);
-    for(int64_t i = 0; i < length; i++) {
-      index.ptr().get()[i] = -1;
-    }
+    struct Error err = awkward_emptyarray_index_rpad(
+      index.ptr().get(),
+      length);
+    util::handle_error(err, classname(), identities_.get());
     return std::make_shared<IndexedOptionArray64>(identities_, parameters_, index, std::make_shared<EmptyArray>(identities_, parameters_));
   }
 

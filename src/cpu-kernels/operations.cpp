@@ -525,6 +525,13 @@ ERROR awkward_numpyarray_fill_tobool_frombool(bool* toptr, int64_t tooffset, con
   return awkward_numpyarray_fill_frombool<bool>(toptr, tooffset, fromptr, fromoffset, length);
 }
 
+ERROR awkward_emptyarray_index_rpad(int64_t* toindex, int64_t tolength) {
+  for(int64_t i = 0; i < tolength; i++) {
+    toindex[i] = -1;
+  }
+  return success();
+}
+
 ERROR awkward_index_rpad(int64_t* toindex, const int64_t fromlength, int64_t tolength) {
   int64_t length = (tolength < fromlength) ? tolength : fromlength;
   for (int64_t i = 0; i < length; i++) {
