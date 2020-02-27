@@ -958,13 +958,13 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad_and_clip(int64_t length, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     std::shared_ptr<Content> out = content();
     if (toaxis == 0) {
       if (out.get()->isindexed()) {
         out = content()->getitem_range_nowrap(0, out.get()->length());
-        out = out.get()->rpad(length, toaxis);
+        out = out.get()->rpad_and_clip(length, toaxis);
 
         return std::make_shared<ListArrayOf<T>>(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), out);
       }

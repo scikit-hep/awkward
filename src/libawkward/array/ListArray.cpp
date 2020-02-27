@@ -823,7 +823,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::rpad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> ListArrayOf<T>::rpad_and_clip(int64_t length, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     std::shared_ptr<Content> out = content();
     int64_t tolength = 0;
@@ -902,7 +902,7 @@ namespace awkward {
       return std::make_shared<RegularArray>(identities_, parameters_, out, length);
   }
   else {
-      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, out.get()->rpad(length, axis - 1));
+      return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, out.get()->rpad_and_clip(length, axis - 1));
     }
   }
 

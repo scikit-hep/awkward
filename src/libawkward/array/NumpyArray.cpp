@@ -1378,7 +1378,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::rpad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> NumpyArray::rpad_and_clip(int64_t length, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     ssize_t offset = (ssize_t)toaxis;
     if (offset > ndim()) {

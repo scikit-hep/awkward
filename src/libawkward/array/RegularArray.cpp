@@ -515,7 +515,7 @@ namespace awkward {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
-  const std::shared_ptr<Content> RegularArray::rpad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> RegularArray::rpad_and_clip(int64_t length, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     std::shared_ptr<Content> out = content();
     // If the content is not an integer multiple of size,
@@ -530,7 +530,7 @@ namespace awkward {
 
         if (out.get()->isindexed()) {
           out = out.get()->getitem_range_nowrap(0, fromlength);
-          out = out.get()->rpad(tolength, toaxis);
+          out = out.get()->rpad_and_clip(tolength, toaxis);
         }
         else {
           (length >= out.get()->length()/size()) ? tolength = length*size() : tolength = out.get()->length() - length*size();
@@ -611,11 +611,11 @@ namespace awkward {
         return std::make_shared<RegularArray>(identities_, parameters_, out, length);
       }
       else {
-        return toListOffsetArray64().get()->rpad(length, axis);
+        return toListOffsetArray64().get()->rpad_and_clip(length, axis);
       }
     }
     else {
-      out = out.get()->rpad(length, axis - 1);
+      out = out.get()->rpad_and_clip(length, axis - 1);
       return std::make_shared<RegularArray>(identities_, parameters_, out, size_);
     }
   }

@@ -657,10 +657,10 @@ namespace awkward {
     throw std::invalid_argument("cannot use records as a slice");
   }
 
-  const std::shared_ptr<Content> RecordArray::rpad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> RecordArray::rpad_and_clip(int64_t length, int64_t axis) const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {
-      contents.push_back(content.get()->rpad(length, axis));
+      contents.push_back(content.get()->rpad_and_clip(length, axis));
     }
     if (contents.empty()) {
       return std::make_shared<RecordArray>(identities_, parameters_, length_, istuple());
