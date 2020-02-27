@@ -663,7 +663,7 @@ namespace awkward {
       contents.push_back(content.get()->rpad_and_clip(length, axis));
     }
     if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, length_, istuple());
+      return std::make_shared<RecordArray>(identities_, parameters_, this->length(), istuple());
     }
     else {
       return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
