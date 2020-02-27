@@ -958,12 +958,43 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad(int64_t length, int64_t axis) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    std::shared_ptr<Content> out = content();
+    if (toaxis == 0) {
+      //FIXME: do not clip
+      Index64 outindex(length);
+      struct Error err1 = awkward_index_rpad(
+        outindex.ptr().get(),
+        offsets_.length() - 1,
+        length);
+      util::handle_error(err1, classname(), identities_.get());
+
+      out = std::make_shared<ListArrayOf<T>>(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), out);
+      return std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
+    }
+    else {
+      // FIXME: do not clip
+      Index64 outindex(length*(offsets_.length() - 1));
+      struct Error err2 = util::awkward_listoffsetarray_rpad_64<T>(
+        outindex.ptr().get(),
+        offsets_.ptr().get(),
+        offsets_.length(),
+        length);
+      util::handle_error(err2, classname(), identities_.get());
+
+      out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
+      return std::make_shared<RegularArray>(identities_, parameters_, out, length);
+    }
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad_and_clip(int64_t length, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     std::shared_ptr<Content> out = content();
     if (toaxis == 0) {
       Index64 outindex(length);
-      struct Error err1 = awkward_index_rpad(
+      struct Error err1 = awkward_index_rpad_and_clip(
         outindex.ptr().get(),
         offsets_.length() - 1,
         length);
@@ -978,8 +1009,7 @@ namespace awkward {
         outindex.ptr().get(),
         offsets_.ptr().get(),
         offsets_.length(),
-        length
-      );
+        length);
       util::handle_error(err2, classname(), identities_.get());
 
       out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);

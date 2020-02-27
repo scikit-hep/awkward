@@ -845,6 +845,9 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("merge_as_union", [](const T& self, const py::object& other) -> py::object {
             return box(self.merge_as_union(unbox_content(other)));
           })
+          .def("rpad", [](T& self, int64_t length, int64_t axis) -> py::object {
+            return box(self.rpad(length, axis));
+          }, py::arg("length"), py::arg("axis") = 0)
           .def("rpad_and_clip", [](T& self, int64_t length, int64_t axis) -> py::object {
             return box(self.rpad_and_clip(length, axis));
           }, py::arg("length"), py::arg("axis") = 0)

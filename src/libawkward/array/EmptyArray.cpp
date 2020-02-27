@@ -195,6 +195,10 @@ namespace awkward {
     return std::make_shared<SliceArray64>(index, shape, strides, false);
   }
 
+  const std::shared_ptr<Content> EmptyArray::rpad(int64_t length, int64_t axis) const {
+    return rpad_and_clip(length, axis);
+  }
+
   const std::shared_ptr<Content> EmptyArray::rpad_and_clip(int64_t length, int64_t axis) const {
     Index64 index(length);
     struct Error err = awkward_emptyarray_index_rpad(

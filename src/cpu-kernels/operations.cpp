@@ -543,6 +543,17 @@ ERROR awkward_index_rpad(int64_t* toindex, const int64_t fromlength, int64_t tol
   return success();
 }
 
+ERROR awkward_index_rpad_and_clip(int64_t* toindex, const int64_t fromlength, int64_t tolength) {
+  int64_t length = (tolength < fromlength) ? tolength : fromlength;
+  for (int64_t i = 0; i < length; i++) {
+    toindex[i] = i;
+  }
+  for (int64_t i = length; i < tolength; i++) {
+    toindex[i] = -1;
+  }
+  return success();
+}
+
 ERROR awkward_index_append(const int64_t* fromindex, int64_t* toindex, const int64_t fromlength, int64_t length) {
   for (int64_t i = 0; i < fromlength; i++) {
     toindex[i] = fromindex[i];

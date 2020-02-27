@@ -1378,6 +1378,23 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> NumpyArray::rpad(int64_t length, int64_t axis) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    ssize_t offset = (ssize_t)toaxis;
+    if (offset > ndim()) {
+      throw std::invalid_argument(std::string("NumpyArray cannot be padded in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    }
+    if (shape_.empty()) {
+       throw std::runtime_error("attempting to pad a scalar");
+    }
+    if (length < shape_[toaxis]) {
+      return shallow_copy();
+    }
+    else {
+      return rpad_and_clip(length, toaxis);
+    }
+  }
+
   const std::shared_ptr<Content> NumpyArray::rpad_and_clip(int64_t length, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     ssize_t offset = (ssize_t)toaxis;
@@ -1391,7 +1408,7 @@ namespace awkward {
       std::shared_ptr<Content> out = toRegularArray();
 
       Index64 index(length);
-      struct Error err1 = awkward_index_rpad(
+      struct Error err1 = awkward_index_rpad_and_clip(
         index.ptr().get(),
         out.get()->length(),
         length);
@@ -1409,7 +1426,7 @@ namespace awkward {
       std::shared_ptr<Content> out = std::make_shared<NumpyArray>(identities_, parameters_, contiguous_self.ptr(), flatshape, flatstrides, contiguous_self.byteoffset(), contiguous_self.itemsize(), contiguous_self.format());
 
       Index64 index(length);
-      struct Error err2 = awkward_index_rpad(
+      struct Error err2 = awkward_index_rpad_and_clip(
         index.ptr().get(),
         shape_[toaxis],
         length);

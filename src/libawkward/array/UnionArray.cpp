@@ -1094,6 +1094,16 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad(int64_t length, int64_t axis) const {
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.emplace_back(content.get()->rpad(length, axis));
+    }
+    UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+    return out.simplify(false);
+  }
+
+  template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad_and_clip(int64_t length, int64_t axis) const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {

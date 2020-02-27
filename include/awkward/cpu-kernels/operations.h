@@ -110,6 +110,7 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_emptyarray_index_rpad(int64_t* toindex, int64_t tolength);
   EXPORT_SYMBOL struct Error awkward_index_rpad(int64_t* toindex, const int64_t fromlength, int64_t tolength);
+  EXPORT_SYMBOL struct Error awkward_index_rpad_and_clip(int64_t* toindex, const int64_t fromlength, int64_t tolength);
   EXPORT_SYMBOL struct Error awkward_index_append(const int64_t* fromindex, int64_t* toindex, const int64_t fromlength, int64_t length);
   EXPORT_SYMBOL struct Error awkward_index_inject_rpad(int64_t* toindex, const int64_t* fromindex, int64_t shape, int64_t chunks, int64_t length);
   EXPORT_SYMBOL struct Error awkward_listarray32_index_length_count_64(int64_t tolength, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts);

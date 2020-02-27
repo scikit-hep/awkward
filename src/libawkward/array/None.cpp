@@ -161,6 +161,10 @@ namespace awkward {
     throw std::runtime_error("undefined opteration: None::asslice");
   }
 
+  const std::shared_ptr<Content> None::rpad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("undefined opteration: None::rpad");
+  }
+
   const std::shared_ptr<Content> None::rpad_and_clip(int64_t length, int64_t axis) const {
     throw std::runtime_error("undefined opteration: None::rpad_and_clip");
   }
