@@ -157,10 +157,10 @@ namespace awkward {
   const std::shared_ptr<Content> IndexedGenericFillable::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     if (hasnull_) {
-      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_);
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->parameters(), index, array_);
     }
     else {
-      return std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), index, array_);
+      return std::make_shared<IndexedArray64>(Identities::none(), array_.get()->parameters(), index, array_);
     }
   }
 
@@ -189,10 +189,10 @@ namespace awkward {
   const std::shared_ptr<Content> IndexedI32Fillable::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     if (hasnull_) {
-      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
     }
     else {
-      return std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+      return std::make_shared<IndexedArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
     }
   }
 
@@ -221,10 +221,10 @@ namespace awkward {
   const std::shared_ptr<Content> IndexedIU32Fillable::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     if (hasnull_) {
-      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
     }
     else {
-      return std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+      return std::make_shared<IndexedArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
     }
   }
 
@@ -253,10 +253,10 @@ namespace awkward {
   const std::shared_ptr<Content> IndexedI64Fillable::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     if (hasnull_) {
-      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
     }
     else {
-      return std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+      return std::make_shared<IndexedArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
     }
   }
 
@@ -284,7 +284,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> IndexedIO32Fillable::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
-    return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+    return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
   }
 
   const std::shared_ptr<Fillable> IndexedIO32Fillable::append(const std::shared_ptr<Content>& array, int64_t at) {
@@ -311,7 +311,7 @@ namespace awkward {
 
   const std::shared_ptr<Content> IndexedIO64Fillable::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
-    return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_.get()->content());
+    return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
   }
 
   const std::shared_ptr<Fillable> IndexedIO64Fillable::append(const std::shared_ptr<Content>& array, int64_t at) {
