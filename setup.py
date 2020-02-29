@@ -8,79 +8,104 @@ import sys
 import shutil
 import glob
 
-import distutils.version
 import setuptools
-import setuptools.command.build_ext
-from setuptools import setup
+from setuptools.command.build_ext import build_ext, get_config_var, libtype
+from setuptools import setup, Extension
+from setuptools.extension import Library
 
-class CMakeExtension(setuptools.Extension):
-    def __init__(self, name, sourcedir=""):
-        setuptools.Extension.__init__(self, name, sources=[])
-        self.sourcedir = os.path.abspath(sourcedir)
 
-class CMakeBuild(setuptools.command.build_ext.build_ext):
-    def run(self):
+cpu_kernel_sources = glob.glob("src/cpu-kernels/*.cpp")
+libawkward_sources = glob.glob("src/libawkward/**/*.cpp", recursive=True)
+layout_sources = glob.glob("src/python/layout/*.cpp")
+include_dirs = ['rapidjson/include', 'pybind11/include', 'include']
+
+ext_modules = [
+    Library(
+        "awkward1.awkward-cpu-kernels", cpu_kernel_sources, include_dirs=include_dirs, language="c++",
+    ),
+    Library(
+        "awkward1.awkward", libawkward_sources, include_dirs=include_dirs, language="c++",
+        extra_link_arks=["-lawkward-cpu-kernels"]
+    ),
+    Extension(
+        "awkward1.layout", layout_sources + ['src/python/layout.cpp'],
+        include_dirs=include_dirs, language="c++", extra_link_args=['-lawkward']
+    ),
+    Extension(
+        "awkward1.types", ['src/python/types.cpp'], include_dirs=include_dirs, language="c++", extra_link_args=['-lawkward']
+    ),
+    Extension(
+        "awkward1._io", ['src/python/_io.cpp'], include_dirs=include_dirs, language="c++", extra_link_args=['-lawkward']
+    ),
+]
+
+
+# As of Python 3.6, CCompiler has a `has_flag` method.
+# cf http://bugs.python.org/issue26689
+def has_flag(compiler, flagname):
+    """Return a boolean indicating whether a flag name is supported on
+    the specified compiler.
+    """
+    import tempfile
+
+    with tempfile.NamedTemporaryFile("w", suffix=".cpp") as f:
+        f.write("int main (int argc, char **argv) { return 0; }")
         try:
-            out = subprocess.check_output(["cmake", "--version"])
-        except OSError:
-            raise RuntimeError("CMake must be installed to build the following extensions: " + ", ".join(x.name for x in self.extensions))
+            compiler.compile([f.name], extra_postargs=[flagname])
+        except setuptools.distutils.errors.CompileError:
+            return False
+    return True
 
-        if platform.system() == "Windows":
-            cmake_version = distutils.version.LooseVersion(re.search(r"version\s*([\d.]+)", out.decode()).group(1))
-            if cmake_version < "3.4":
-                raise RuntimeError("CMake >= 3.4 is required on Windows")
 
-        for x in self.extensions:
-            self.build_extension(x)
+def cpp_flag(compiler):
+    """Return the -std=c++[11/14/17] compiler flag.
+    The newer version is prefered over c++11 (when it is available).
+    """
+    # flags = ['-std=c++14', '-std=c++11']
+    flags = ['-std=c++11']
 
-    def build_extension(self, ext):
-        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-        cmake_args = ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir, "-DPYTHON_EXECUTABLE=" + sys.executable]
+    for flag in flags:
+        if has_flag(compiler, flag): return flag
 
-        cfg = "Debug" if self.debug else "Release"
-        build_args = ["--config", cfg]
+    raise RuntimeError('Unsupported compiler -- at least C++11 support '
+                       'is needed!')
 
-        if platform.system() == "Windows":
-            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir), "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE"]
-            if sys.maxsize > 2**32:
-                cmake_args += ["-A", "x64"]
-            build_args += ["--", "/m"]
 
-        else:
-            cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
+class BuildExt(build_ext):
+    """A custom build extension for adding compiler-specific options."""
 
-        if not os.path.exists(self.build_temp):
-            os.makedirs(self.build_temp)
+    c_opts = {"msvc": ["/EHsc", "/bigobj"], "unix": [""]}
 
-        subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
-        subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
-        subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
+    if sys.platform == "darwin":
+        c_opts["unix"] += ["-stdlib=libc++", "-mmacosx-version-min=10.9"]
 
-        for lib in (glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "libawkward-cpu-kernels-static.*")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "libawkward-static.*")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.so")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.dylib")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.dll")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.exp")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.pyd"))):
-          if os.path.exists(lib):
-              os.remove(lib)
+    def build_extensions(self):
+        ct = self.compiler.compiler_type
+        opts = self.c_opts.get(ct, [])
+        if ct == "unix":
+            opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
+            opts.append(cpp_flag(self.compiler))
+            if has_flag(self.compiler, "-fvisibility=hidden"):
+                opts.append("-fvisibility=hidden")
+        elif ct == "msvc":
+            opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
+        for ext in self.extensions:
+            ext.extra_compile_args = opts
+        build_ext.build_extensions(self)
 
-        for lib in os.listdir(self.build_temp):
-            if lib.startswith("libawkward-cpu-kernels-static.") or lib.startswith("libawkward-static."):
-                shutil.copy(os.path.join(self.build_temp, lib), "awkward1")
-                shutil.move(os.path.join(self.build_temp, lib), os.path.join(extdir, "awkward1"))
 
-        for lib in os.listdir(extdir):
-            if lib.endswith(".so") or lib.endswith(".dylib") or lib.endswith(".dll") or lib.endswith(".pyd"):
-                shutil.copy(os.path.join(extdir, lib), "awkward1")
-                shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
+    def get_ext_filename(self, fullname):
+        filename = super(build_ext, self).get_ext_filename(fullname)
+        if fullname in self.ext_map:
+            ext = self.ext_map[fullname]
+            if isinstance(ext, Library):
+                so_ext = get_config_var('EXT_SUFFIX')
+                filename = filename[:-len(so_ext)]
+                fn, ext = os.path.splitext(filename)
+                return self.shlib_compiler.library_filename(fn, libtype) 
+            else:
+                return super(BuildExt, self).get_ext_filename(fullname)
 
-        if platform.system() == "Windows":
-            for lib in os.listdir(os.path.join(self.build_temp, cfg)):
-                if lib.startswith("awkward-cpu-kernels-static.") or lib.startswith("awkward-static.") or lib.endswith(".dll") or lib.endswith(".exp") or lib.endswith(".pyd"):
-                    shutil.copy(os.path.join(os.path.join(self.build_temp, cfg), lib), "awkward1")
-                    shutil.move(os.path.join(os.path.join(self.build_temp, cfg), lib), os.path.join(extdir, "awkward1"))
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(exclude=["tests"]),
@@ -93,8 +118,7 @@ setup(name = "awkward1",
                      (os.path.join("awkward1", "include", "awkward", "array"),       glob.glob("include/awkward/array/*.h")),
                      (os.path.join("awkward1", "include", "awkward", "fillable"),    glob.glob("include/awkward/fillable/*.h")),
                      (os.path.join("awkward1", "include", "awkward", "io"),          glob.glob("include/awkward/io/*.h")),
-                     (os.path.join("awkward1", "include", "awkward", "type"),        glob.glob("include/awkward/type/*.h"))] +
-                    [(os.path.join("awkward1", "signatures"), [x for x in glob.glob("awkward1/signatures/*.xml") if x != "index.xml" and not x.startswith("dir_") and not x.startswith("namespace")])]),
+                     (os.path.join("awkward1", "include", "awkward", "type"),        glob.glob("include/awkward/type/*.h"))]),
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
@@ -109,8 +133,8 @@ setup(name = "awkward1",
       entry_points = {
         "numba_extensions": ["init = awkward1._numba:register"]
       },
-      ext_modules = [CMakeExtension("awkward")],
-      cmdclass = {"build_ext": CMakeBuild},
+      ext_modules = ext_modules,
+      cmdclass = {"build_ext": BuildExt},
       test_suite = "tests",
       python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
       install_requires = open("requirements.txt").read().strip().split(),

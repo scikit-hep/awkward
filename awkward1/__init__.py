@@ -4,12 +4,24 @@ from __future__ import absolute_import
 
 import distutils.version
 
+import platform
+import os 
+import ctypes
+
 # NumPy 1.13.1 introduced NEP13, without which Awkward ufuncs won't work,
 # which would be worse than lacking a feature: it would cause unexpected output.
 # NumPy 1.17.0 introduced NEP18, which is optional (use ak.* instead of np.*).
 import numpy
 if distutils.version.LooseVersion(numpy.__version__) < distutils.version.LooseVersion("1.13.1"):
     raise ImportError("Numpy 1.13.1 or later required")
+
+# libname = "libawkward-cpu-kernels.cpython-37m-darwin.so"
+# libpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), libname)
+# lib2 = ctypes.CDLL(libpath, mode=1)
+
+# libname = "libawkward.cpython-37m-darwin.so"
+# libpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), libname)
+# lib1 = ctypes.CDLL(libpath, mode=1)
 
 # C++ modules
 import awkward1.layout
@@ -32,7 +44,7 @@ from awkward1.behaviors.string import *
 from awkward1._numexpr import evaluate as numexpr
 from awkward1._autograd import elementwise_grad as autograd
 #    awkward1._pandas is imported by highlevel (without importing pandas before it's necessary)
-import awkward1.numba
+# import awkward1.numba
 #    awkward1.numba.register is called by an entry_point the first time Numba compiles a function
 
 # version
