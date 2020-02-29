@@ -19,8 +19,6 @@ file(READ "VERSION_INFO" VERSION_INFO)
 string(STRIP ${VERSION_INFO} VERSION_INFO)
 add_definitions(-DVERSION_INFO="${VERSION_INFO}")
 
-set(CMAKE_MACOSX_RPATH 1)
-
 # Three tiers: cpu-kernels (extern "C" interface), libawkward (C++), and Python modules.
 file(GLOB CPU_KERNEL_SOURCES "src/cpu-kernels/*.cpp")
 file(GLOB_RECURSE LIBAWKWARD_SOURCES "src/libawkward/*.cpp")
@@ -80,6 +78,10 @@ target_link_libraries(types PRIVATE awkward-static)
 pybind11_add_module(_io src/python/_io.cpp)
 set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
 target_link_libraries(_io PRIVATE awkward-static)
+
+install(TARGETS layout types _io awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static LIBRARY DESTINATION awkward1)
+
+
 
 # Everything can be built with
 #
