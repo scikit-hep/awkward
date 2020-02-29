@@ -24,7 +24,7 @@ set(CMAKE_MACOSX_RPATH 1)
 
 # Three tiers: cpu-kernels (extern "C" interface), libawkward (C++), and Python modules.
 file(GLOB CPU_KERNEL_SOURCES "src/cpu-kernels/*.cpp")
-file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp" "src/libawkward/array/*.cpp" "src/libawkward/fillable/*.cpp" "src/libawkward/type/*.cpp" "src/libawkward/io/*.cpp")
+file(GLOB LIBAWKWARD_SOURCES "src/libawkward/*.cpp" "src/libawkward/array/*.cpp" "src/libawkward/builder/*.cpp" "src/libawkward/type/*.cpp" "src/libawkward/io/*.cpp")
 include_directories(include)
 
 # C++ dependencies (header-only): RapidJSON and pybind11.

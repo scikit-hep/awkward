@@ -35,7 +35,7 @@ def test_types():
     assert repr(t5.type) == "var * int32"
 
 def test_boolean():
-    a = awkward1.layout.FillableArray()
+    a = awkward1.layout.ArrayBuilder()
     a.boolean(True)
     a.boolean(True)
     a.boolean(False)
@@ -45,7 +45,7 @@ def test_boolean():
     assert awkward1.tolist(a[1:-1]) == [True, False]
 
 def test_big():
-    a = awkward1.layout.FillableArray(initial=90)
+    a = awkward1.layout.ArrayBuilder(initial=90)
     for i in range(2000):
         if i == 200:
             tmp = a.snapshot()
@@ -54,7 +54,7 @@ def test_big():
     assert awkward1.tolist(tmp) == [True, False] * 100
 
 def test_integer():
-    a = awkward1.layout.FillableArray()
+    a = awkward1.layout.ArrayBuilder()
     a.integer(10)
     a.integer(9)
     a.integer(8)
@@ -65,7 +65,7 @@ def test_integer():
     assert awkward1.tolist(a[1:-1]) == [9, 8, 7]
 
 def test_real():
-    a = awkward1.layout.FillableArray()
+    a = awkward1.layout.ArrayBuilder()
     a.real(1.1)
     a.real(2.2)
     a.real(3.3)
@@ -76,7 +76,7 @@ def test_real():
     assert awkward1.tolist(a[1:-1]) == [2.2, 3.3, 4.4]
 
 def test_integer_real():
-    a = awkward1.layout.FillableArray()
+    a = awkward1.layout.ArrayBuilder()
     a.integer(1)
     a.integer(2)
     a.real(3.3)
@@ -87,7 +87,7 @@ def test_integer_real():
     assert awkward1.tolist(a[1:-1]) == [2.0, 3.3, 4.0]
 
 def test_real_integer():
-    a = awkward1.layout.FillableArray()
+    a = awkward1.layout.ArrayBuilder()
     a.real(1.1)
     a.real(2.2)
     a.integer(3)
@@ -98,7 +98,7 @@ def test_real_integer():
     assert awkward1.tolist(a[1:-1]) == [2.2, 3.0, 4.4]
 
 def test_list_real():
-    a = awkward1.layout.FillableArray()
+    a = awkward1.layout.ArrayBuilder()
     a.beginlist()
     a.real(1.1)
     a.real(2.2)
@@ -116,7 +116,7 @@ def test_list_real():
     assert awkward1.tolist(a[1:]) == [[], [4.4, 5.5]]
 
 def test_list_list_real():
-    a = awkward1.layout.FillableArray()
+    a = awkward1.layout.ArrayBuilder()
     a.beginlist()
     a.beginlist()
     a.real(1.1)
@@ -148,23 +148,23 @@ def test_list_list_real():
 
 def test_list_errors():
     with pytest.raises(ValueError):
-        a = awkward1.layout.FillableArray()
+        a = awkward1.layout.ArrayBuilder()
         a.endlist()
 
     with pytest.raises(ValueError):
-        a = awkward1.layout.FillableArray()
+        a = awkward1.layout.ArrayBuilder()
         a.real(3.14)
         a.endlist()
 
     with pytest.raises(ValueError):
-        a = awkward1.layout.FillableArray()
+        a = awkward1.layout.ArrayBuilder()
         a.beginlist()
         a.real(3.14)
         a.endlist()
         a.endlist()
 
     with pytest.raises(ValueError):
-        a = awkward1.layout.FillableArray()
+        a = awkward1.layout.ArrayBuilder()
         a.beginlist()
         a.beginlist()
         a.real(3.14)
@@ -172,7 +172,7 @@ def test_list_errors():
         a.endlist()
         a.endlist()
 
-    a = awkward1.layout.FillableArray()
+    a = awkward1.layout.ArrayBuilder()
     a.beginlist()
     a.real(1.1)
     a.real(2.2)

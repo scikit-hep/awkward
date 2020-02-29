@@ -23,7 +23,7 @@ def test_unknown():
     assert str(awkward1.typeof(a)) == "var * var * unknown"
     assert awkward1.typeof(a) == awkward1.types.ListType(awkward1.types.ListType(awkward1.types.UnknownType()))
 
-    a = awkward1.layout.FillableArray()
+    a = awkward1.layout.ArrayBuilder()
     a.beginlist()
     a.endlist()
     a.beginlist()

@@ -335,13 +335,13 @@ void toslice_part(ak::Slice& slice, py::object obj) {
       else if (py::isinstance<ak::Content>(obj)) {
         content = unbox_content(obj);
       }
-      else if (py::isinstance<ak::FillableArray>(obj)) {
+      else if (py::isinstance<ak::ArrayBuilder>(obj)) {
         content = unbox_content(obj.attr("snapshot")());
       }
       else if (py::isinstance(obj, py::module::import("awkward1").attr("Array"))) {
         content = unbox_content(obj.attr("layout"));
       }
-      else if (py::isinstance(obj, py::module::import("awkward1").attr("FillableArray"))) {
+      else if (py::isinstance(obj, py::module::import("awkward1").attr("ArrayBuilder"))) {
         content = unbox_content(obj.attr("snapshot")().attr("layout"));
       }
       else {
@@ -507,9 +507,9 @@ py::object getitem(const T& self, const py::object& obj) {
   return box(self.getitem(toslice(obj)));
 }
 
-/////////////////////////////////////////////////////////////// FillableArray
+/////////////////////////////////////////////////////////////// ArrayBuilder
 
-void fillable_fromiter(ak::FillableArray& self, const py::handle& obj) {
+void builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   if (obj.is(py::none())) {
     self.null();
   }
@@ -533,7 +533,7 @@ void fillable_fromiter(ak::FillableArray& self, const py::handle& obj) {
     self.begintuple(tup.size());
     for (size_t i = 0;  i < tup.size();  i++) {
       self.index((int64_t)i);
-      fillable_fromiter(self, tup[i]);
+      builder_fromiter(self, tup[i]);
     }
     self.endtuple();
   }
@@ -546,7 +546,7 @@ void fillable_fromiter(ak::FillableArray& self, const py::handle& obj) {
       }
       std::string key = pair.first.cast<std::string>();
       self.field_check(key.c_str());
-      fillable_fromiter(self, pair.second);
+      builder_fromiter(self, pair.second);
     }
     self.endrecord();
   }
@@ -554,7 +554,7 @@ void fillable_fromiter(ak::FillableArray& self, const py::handle& obj) {
     py::iterable seq = obj.cast<py::iterable>();
     self.beginlist();
     for (auto x : seq) {
-      fillable_fromiter(self, x);
+      builder_fromiter(self, x);
     }
     self.endlist();
   }
@@ -563,39 +563,39 @@ void fillable_fromiter(ak::FillableArray& self, const py::handle& obj) {
   }
 }
 
-py::class_<ak::FillableArray> make_FillableArray(const py::handle& m, const std::string& name) {
-  return (py::class_<ak::FillableArray>(m, name.c_str())
-      .def(py::init([](int64_t initial, double resize) -> ak::FillableArray {
-        return ak::FillableArray(ak::FillableOptions(initial, resize));
+py::class_<ak::ArrayBuilder> make_ArrayBuilder(const py::handle& m, const std::string& name) {
+  return (py::class_<ak::ArrayBuilder>(m, name.c_str())
+      .def(py::init([](int64_t initial, double resize) -> ak::ArrayBuilder {
+        return ak::ArrayBuilder(ak::ArrayBuilderOptions(initial, resize));
       }), py::arg("initial") = 1024, py::arg("resize") = 2.0)
-      .def_property_readonly("_ptr", [](const ak::FillableArray* self) -> size_t { return reinterpret_cast<size_t>(self); })
-      .def("__repr__", &ak::FillableArray::tostring)
-      .def("__len__", &ak::FillableArray::length)
-      .def("clear", &ak::FillableArray::clear)
-      .def_property_readonly("type", &ak::FillableArray::type)
-      .def("snapshot", [](const ak::FillableArray& self) -> py::object {
+      .def_property_readonly("_ptr", [](const ak::ArrayBuilder* self) -> size_t { return reinterpret_cast<size_t>(self); })
+      .def("__repr__", &ak::ArrayBuilder::tostring)
+      .def("__len__", &ak::ArrayBuilder::length)
+      .def("clear", &ak::ArrayBuilder::clear)
+      .def_property_readonly("type", &ak::ArrayBuilder::type)
+      .def("snapshot", [](const ak::ArrayBuilder& self) -> py::object {
         return box(self.snapshot());
       })
-      .def("__getitem__", &getitem<ak::FillableArray>)
-      .def("__iter__", [](const ak::FillableArray& self) -> ak::Iterator {
+      .def("__getitem__", &getitem<ak::ArrayBuilder>)
+      .def("__iter__", [](const ak::ArrayBuilder& self) -> ak::Iterator {
         return ak::Iterator(self.snapshot());
       })
-      .def("null", &ak::FillableArray::null)
-      .def("boolean", &ak::FillableArray::boolean)
-      .def("integer", &ak::FillableArray::integer)
-      .def("real", &ak::FillableArray::real)
-      .def("bytestring", [](ak::FillableArray& self, const py::bytes& x) -> void {
+      .def("null", &ak::ArrayBuilder::null)
+      .def("boolean", &ak::ArrayBuilder::boolean)
+      .def("integer", &ak::ArrayBuilder::integer)
+      .def("real", &ak::ArrayBuilder::real)
+      .def("bytestring", [](ak::ArrayBuilder& self, const py::bytes& x) -> void {
         self.bytestring(x.cast<std::string>());
       })
-      .def("string", [](ak::FillableArray& self, const py::str& x) -> void {
+      .def("string", [](ak::ArrayBuilder& self, const py::str& x) -> void {
         self.string(x.cast<std::string>());
       })
-      .def("beginlist", &ak::FillableArray::beginlist)
-      .def("endlist", &ak::FillableArray::endlist)
-      .def("begintuple", &ak::FillableArray::begintuple)
-      .def("index", &ak::FillableArray::index)
-      .def("endtuple", &ak::FillableArray::endtuple)
-      .def("beginrecord", [](ak::FillableArray& self, const py::object& name) -> void {
+      .def("beginlist", &ak::ArrayBuilder::beginlist)
+      .def("endlist", &ak::ArrayBuilder::endlist)
+      .def("begintuple", &ak::ArrayBuilder::begintuple)
+      .def("index", &ak::ArrayBuilder::index)
+      .def("endtuple", &ak::ArrayBuilder::endtuple)
+      .def("beginrecord", [](ak::ArrayBuilder& self, const py::object& name) -> void {
         if (name.is(py::none())) {
           self.beginrecord();
         }
@@ -604,17 +604,17 @@ py::class_<ak::FillableArray> make_FillableArray(const py::handle& m, const std:
           self.beginrecord_check(cppname.c_str());
         }
       }, py::arg("name") = py::none())
-      .def("field", [](ak::FillableArray& self, const std::string& x) -> void {
+      .def("field", [](ak::ArrayBuilder& self, const std::string& x) -> void {
         self.field_check(x);
       })
-      .def("endrecord", &ak::FillableArray::endrecord)
-      .def("append", [](ak::FillableArray& self, const std::shared_ptr<ak::Content>& array, int64_t at) {
+      .def("endrecord", &ak::ArrayBuilder::endrecord)
+      .def("append", [](ak::ArrayBuilder& self, const std::shared_ptr<ak::Content>& array, int64_t at) {
         self.append(array, at);
       })
-      .def("extend", [](ak::FillableArray& self, const std::shared_ptr<ak::Content>& array) {
+      .def("extend", [](ak::ArrayBuilder& self, const std::shared_ptr<ak::Content>& array) {
         self.extend(array);
       })
-      .def("fromiter", &fillable_fromiter)
+      .def("fromiter", &builder_fromiter)
   );
 }
 

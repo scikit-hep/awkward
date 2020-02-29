@@ -88,7 +88,7 @@ def test_identities():
     assert numpy.asarray(array.content(1).identities).tolist() == [[0], [1], [4], [7], [6]]
 
 def test_fromiter():
-    builder = awkward1.layout.FillableArray()
+    builder = awkward1.layout.ArrayBuilder()
 
     builder.integer(0)
     builder.integer(1)

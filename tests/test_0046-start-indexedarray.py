@@ -112,7 +112,7 @@ def test_highlevel():
     assert str(array) == "[2.2, 2.2, 0, None, 4.4]"
     assert repr(array) == "<Array [2.2, 2.2, 0, None, 4.4] type='5 * ?float64'>"
 
-def test_fillable():
+def test_builder():
     assert awkward1.tolist(awkward1.Array([1.1, 2.2, 3.3, None, 4.4])) == [1.1, 2.2, 3.3, None, 4.4]
     assert awkward1.tolist(awkward1.Array([None, 2.2, 3.3, None, 4.4])) == [None, 2.2, 3.3, None, 4.4]
 

@@ -19,7 +19,7 @@ import awkward1.types
 behavior = {}
 from awkward1.highlevel import Array
 from awkward1.highlevel import Record
-from awkward1.highlevel import FillableArray
+from awkward1.highlevel import ArrayBuilder
 
 # operations and behaviors
 from awkward1.operations.convert import *

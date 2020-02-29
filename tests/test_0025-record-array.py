@@ -256,106 +256,106 @@ def test_setidentities():
     assert recordarray2[2, "outer", 0].identity == (2, "outer", 0)
     assert recordarray2[2, "outer", 0, "two"].identity == (2, "outer", 0, "two")
 
-def test_fillable_tuple():
-    fillable = awkward1.layout.FillableArray()
-    assert str(fillable.type) == 'unknown'
-    assert awkward1.tolist(fillable.snapshot()) == []
+def test_builder_tuple():
+    builder = awkward1.layout.ArrayBuilder()
+    assert str(builder.type) == 'unknown'
+    assert awkward1.tolist(builder.snapshot()) == []
 
-    fillable.begintuple(0)
-    fillable.endtuple()
+    builder.begintuple(0)
+    builder.endtuple()
 
-    fillable.begintuple(0)
-    fillable.endtuple()
+    builder.begintuple(0)
+    builder.endtuple()
 
-    fillable.begintuple(0)
-    fillable.endtuple()
+    builder.begintuple(0)
+    builder.endtuple()
 
-    assert str(fillable.type) == '()'
-    assert awkward1.tolist(fillable.snapshot()) == [(), (), ()]
+    assert str(builder.type) == '()'
+    assert awkward1.tolist(builder.snapshot()) == [(), (), ()]
 
-    fillable = awkward1.layout.FillableArray()
+    builder = awkward1.layout.ArrayBuilder()
 
-    fillable.begintuple(3)
-    fillable.index(0)
-    fillable.boolean(True)
-    fillable.index(1)
-    fillable.beginlist()
-    fillable.integer(1)
-    fillable.endlist()
-    fillable.index(2)
-    fillable.real(1.1)
-    fillable.endtuple()
+    builder.begintuple(3)
+    builder.index(0)
+    builder.boolean(True)
+    builder.index(1)
+    builder.beginlist()
+    builder.integer(1)
+    builder.endlist()
+    builder.index(2)
+    builder.real(1.1)
+    builder.endtuple()
 
-    fillable.begintuple(3)
-    fillable.index(1)
-    fillable.beginlist()
-    fillable.integer(2)
-    fillable.integer(2)
-    fillable.endlist()
-    fillable.index(2)
-    fillable.real(2.2)
-    fillable.index(0)
-    fillable.boolean(False)
-    fillable.endtuple()
+    builder.begintuple(3)
+    builder.index(1)
+    builder.beginlist()
+    builder.integer(2)
+    builder.integer(2)
+    builder.endlist()
+    builder.index(2)
+    builder.real(2.2)
+    builder.index(0)
+    builder.boolean(False)
+    builder.endtuple()
 
-    fillable.begintuple(3)
-    fillable.index(2)
-    fillable.real(3.3)
-    fillable.index(1)
-    fillable.beginlist()
-    fillable.integer(3)
-    fillable.integer(3)
-    fillable.integer(3)
-    fillable.endlist()
-    fillable.index(0)
-    fillable.boolean(True)
-    fillable.endtuple()
+    builder.begintuple(3)
+    builder.index(2)
+    builder.real(3.3)
+    builder.index(1)
+    builder.beginlist()
+    builder.integer(3)
+    builder.integer(3)
+    builder.integer(3)
+    builder.endlist()
+    builder.index(0)
+    builder.boolean(True)
+    builder.endtuple()
 
-    assert str(fillable.type) == '(bool, var * int64, float64)'
-    assert awkward1.tolist(fillable.snapshot()) == [(True, [1], 1.1), (False, [2, 2], 2.2), (True, [3, 3, 3], 3.3)]
+    assert str(builder.type) == '(bool, var * int64, float64)'
+    assert awkward1.tolist(builder.snapshot()) == [(True, [1], 1.1), (False, [2, 2], 2.2), (True, [3, 3, 3], 3.3)]
 
-def test_fillable_record():
-    fillable = awkward1.layout.FillableArray()
-    assert str(fillable.type) == 'unknown'
-    assert awkward1.tolist(fillable.snapshot()) == []
+def test_builder_record():
+    builder = awkward1.layout.ArrayBuilder()
+    assert str(builder.type) == 'unknown'
+    assert awkward1.tolist(builder.snapshot()) == []
 
-    fillable.beginrecord()
-    fillable.endrecord()
+    builder.beginrecord()
+    builder.endrecord()
 
-    fillable.beginrecord()
-    fillable.endrecord()
+    builder.beginrecord()
+    builder.endrecord()
 
-    fillable.beginrecord()
-    fillable.endrecord()
+    builder.beginrecord()
+    builder.endrecord()
 
-    assert str(fillable.type) == '{}'
-    assert awkward1.tolist(fillable.snapshot()) == [{}, {}, {}]
+    assert str(builder.type) == '{}'
+    assert awkward1.tolist(builder.snapshot()) == [{}, {}, {}]
 
-    fillable = awkward1.layout.FillableArray()
+    builder = awkward1.layout.ArrayBuilder()
 
-    fillable.beginrecord()
-    fillable.field("one")
-    fillable.integer(1)
-    fillable.field("two")
-    fillable.real(1.1)
-    fillable.endrecord()
+    builder.beginrecord()
+    builder.field("one")
+    builder.integer(1)
+    builder.field("two")
+    builder.real(1.1)
+    builder.endrecord()
 
-    fillable.beginrecord()
-    fillable.field("two")
-    fillable.real(2.2)
-    fillable.field("one")
-    fillable.integer(2)
-    fillable.endrecord()
+    builder.beginrecord()
+    builder.field("two")
+    builder.real(2.2)
+    builder.field("one")
+    builder.integer(2)
+    builder.endrecord()
 
-    fillable.beginrecord()
-    fillable.field("one")
-    fillable.integer(3)
-    fillable.field("two")
-    fillable.real(3.3)
-    fillable.endrecord()
+    builder.beginrecord()
+    builder.field("one")
+    builder.integer(3)
+    builder.field("two")
+    builder.real(3.3)
+    builder.endrecord()
 
-    assert str(fillable.type) == '{"one": int64, "two": float64}'
-    assert awkward1.tolist(fillable.snapshot()) == [{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}]
+    assert str(builder.type) == '{"one": int64, "two": float64}'
+    assert awkward1.tolist(builder.snapshot()) == [{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}]
 
 def test_fromiter():
     dataset = [

@@ -195,7 +195,7 @@ def numba_binops(binop, left, right, behavior):
 def behaviorof(*arrays):
     behavior = None
     for x in arrays[::-1]:
-        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)) and x.behavior is not None:
+        if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.ArrayBuilder)) and x.behavior is not None:
             if behavior is None:
                 behavior = dict(x.behavior)
             else:
