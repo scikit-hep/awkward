@@ -77,7 +77,7 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python setup.py build
+          python -m pip install -v .
           ls awkward1
           python -m pytest -vv tests
 
@@ -130,7 +130,7 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python setup.py build
+          python -m pip install -v .
           ls awkward1
           python -m pytest -vv tests
 
