@@ -4,12 +4,13 @@ from __future__ import absolute_import
 
 import numpy
 import numba
+import numba.typing.ctypes_utils
 
 import awkward1.operations.convert
 import awkward1._util
+import awkward1._libawkward
 import awkward1._numba.layout
 import awkward1._numba.arrayview
-import awkward1._numba.libawkward
 
 dynamic_addrs = {}
 def globalstring(context, builder, pyvalue):
@@ -65,8 +66,9 @@ def box_FillableArray(fillabletype, fillableval, c):
     return out
 
 def call(context, builder, fcn, args):
-    fcntype = context.get_function_pointer_type(fcn.numbatype)
-    fcnval = context.add_dynamic_addr(builder, fcn.numbatype.get_pointer(fcn), info=fcn.name)
+    numbatype = numba.typing.ctypes_utils.make_function_type(fcn)
+    fcntype = context.get_function_pointer_type(numbatype)
+    fcnval = context.add_dynamic_addr(builder, numbatype.get_pointer(fcn), info=fcn.name)
     fcnptr = builder.bitcast(fcnval, fcntype)
     err = context.call_function_pointer(builder, fcnptr, args)
     with builder.if_then(builder.icmp_unsigned("!=", err, context.get_constant(numba.uint8, 0)), likely=False):
@@ -84,7 +86,7 @@ def lower_len(context, builder, sig, args):
     fillableval, = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
     result = numba.cgutils.alloca_once(builder, context.get_value_type(numba.int64))
-    call(context, builder, awkward1._numba.libawkward.FillableArray_length, (proxyin.rawptr, result))
+    call(context, builder, awkward1._libawkward.FillableArray_length, (proxyin.rawptr, result))
     return awkward1._numba.castint(context, builder, numba.int64, numba.intp, builder.load(result))
 
 @numba.typing.templates.infer_getattr
@@ -217,7 +219,7 @@ def lower_clear(context, builder, sig, args):
     fillabletype, = sig.args
     fillableval, = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_clear, (proxyin.rawptr,))
+    call(context, builder, awkward1._libawkward.FillableArray_clear, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("null", FillableArrayType)
@@ -225,7 +227,7 @@ def lower_null(context, builder, sig, args):
     fillabletype, = sig.args
     fillableval, = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_null, (proxyin.rawptr,))
+    call(context, builder, awkward1._libawkward.FillableArray_null, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("boolean", FillableArrayType, numba.types.Boolean)
@@ -234,7 +236,7 @@ def lower_boolean(context, builder, sig, args):
     fillableval, xval = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
     x = builder.zext(xval, context.get_value_type(numba.uint8))
-    call(context, builder, awkward1._numba.libawkward.FillableArray_boolean, (proxyin.rawptr, x))
+    call(context, builder, awkward1._libawkward.FillableArray_boolean, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("integer", FillableArrayType, numba.types.Integer)
@@ -243,7 +245,7 @@ def lower_integer(context, builder, sig, args):
     fillableval, xval = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
     x = awkward1._numba.castint(context, builder, xtype, numba.int64, xval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_integer, (proxyin.rawptr, x))
+    call(context, builder, awkward1._libawkward.FillableArray_integer, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("real", FillableArrayType, numba.types.Integer)
@@ -262,7 +264,7 @@ def lower_real(context, builder, sig, args):
         x = builder.fptrunc(xval, context.get_value_type(numba.types.float64))
     else:
         x = xval
-    call(context, builder, awkward1._numba.libawkward.FillableArray_real, (proxyin.rawptr, x))
+    call(context, builder, awkward1._libawkward.FillableArray_real, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("beginlist", FillableArrayType)
@@ -270,7 +272,7 @@ def lower_beginlist(context, builder, sig, args):
     fillabletype, = sig.args
     fillableval, = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_beginlist, (proxyin.rawptr,))
+    call(context, builder, awkward1._libawkward.FillableArray_beginlist, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("endlist", FillableArrayType)
@@ -278,7 +280,7 @@ def lower_endlist(context, builder, sig, args):
     fillabletype, = sig.args
     fillableval, = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_endlist, (proxyin.rawptr,))
+    call(context, builder, awkward1._libawkward.FillableArray_endlist, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("begintuple", FillableArrayType, numba.types.Integer)
@@ -287,7 +289,7 @@ def lower_begintuple(context, builder, sig, args):
     fillableval, numfieldsval = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
     numfields = awkward1._numba.castint(context, builder, numfieldstype, numba.int64, numfieldsval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_begintuple, (proxyin.rawptr, numfields))
+    call(context, builder, awkward1._libawkward.FillableArray_begintuple, (proxyin.rawptr, numfields))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("index", FillableArrayType, numba.types.Integer)
@@ -296,7 +298,7 @@ def lower_index(context, builder, sig, args):
     fillableval, indexval = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
     index = awkward1._numba.castint(context, builder, indextype, numba.int64, indexval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_index, (proxyin.rawptr, index))
+    call(context, builder, awkward1._libawkward.FillableArray_index, (proxyin.rawptr, index))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("endtuple", FillableArrayType)
@@ -304,7 +306,7 @@ def lower_endtuple(context, builder, sig, args):
     fillabletype, = sig.args
     fillableval, = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_endtuple, (proxyin.rawptr,))
+    call(context, builder, awkward1._libawkward.FillableArray_endtuple, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("beginrecord", FillableArrayType)
@@ -312,7 +314,7 @@ def lower_beginrecord(context, builder, sig, args):
     fillabletype, = sig.args
     fillableval, = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_beginrecord, (proxyin.rawptr,))
+    call(context, builder, awkward1._libawkward.FillableArray_beginrecord, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("beginrecord", FillableArrayType, numba.types.StringLiteral)
@@ -321,7 +323,7 @@ def lower_beginrecord(context, builder, sig, args):
     fillableval, nameval = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
     name = globalstring(context, builder, nametype.literal_value)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_beginrecord_fast, (proxyin.rawptr, name))
+    call(context, builder, awkward1._libawkward.FillableArray_beginrecord_fast, (proxyin.rawptr, name))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("field", FillableArrayType, numba.types.StringLiteral)
@@ -330,7 +332,7 @@ def lower_field(context, builder, sig, args):
     fillableval, keyval = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
     key = globalstring(context, builder, keytype.literal_value)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_field_fast, (proxyin.rawptr, key))
+    call(context, builder, awkward1._libawkward.FillableArray_field_fast, (proxyin.rawptr, key))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("endrecord", FillableArrayType)
@@ -338,7 +340,7 @@ def lower_endrecord(context, builder, sig, args):
     fillabletype, = sig.args
     fillableval, = args
     proxyin = context.make_helper(builder, fillabletype, fillableval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_endrecord, (proxyin.rawptr,))
+    call(context, builder, awkward1._libawkward.FillableArray_endrecord, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("append", FillableArrayType, awkward1._numba.arrayview.ArrayViewType, numba.types.Integer)
@@ -353,7 +355,7 @@ def lower_append_array_at(context, builder, sig, args):
     sharedptr = awkward1._numba.layout.getat(context, builder, viewproxy.sharedptrs, viewproxy.pos)
 
     proxyin = context.make_helper(builder, fillabletype, fillableval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
+    call(context, builder, awkward1._libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("append", FillableArrayType, awkward1._numba.arrayview.ArrayViewType)
@@ -362,11 +364,11 @@ def lower_append_array(context, builder, sig, args):
     fillableval, viewval = args
 
     proxyin = context.make_helper(builder, fillabletype, fillableval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_beginlist, (proxyin.rawptr,))
+    call(context, builder, awkward1._libawkward.FillableArray_beginlist, (proxyin.rawptr,))
 
     lower_extend_array(context, builder, sig, args)
 
-    call(context, builder, awkward1._numba.libawkward.FillableArray_endlist, (proxyin.rawptr,))
+    call(context, builder, awkward1._libawkward.FillableArray_endlist, (proxyin.rawptr,))
 
     return context.get_dummy_value()
 
@@ -383,7 +385,7 @@ def lower_append_record(context, builder, sig, args):
     sharedptr = awkward1._numba.layout.getat(context, builder, arrayviewproxy.sharedptrs, arrayviewproxy.pos)
 
     proxyin = context.make_helper(builder, fillabletype, fillableval)
-    call(context, builder, awkward1._numba.libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
+    call(context, builder, awkward1._libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
     return context.get_dummy_value()
 
 @numba.extending.lower_builtin("append", FillableArrayType, numba.types.Boolean)
@@ -438,6 +440,6 @@ def lower_extend_array(context, builder, sig, args):
     proxyin = context.make_helper(builder, fillabletype, fillableval)
     with numba.cgutils.for_range(builder, viewproxy.stop, viewproxy.start) as loop:
         atval = awkward1._numba.castint(context, builder, numba.intp, numba.int64, loop.index)
-        call(context, builder, awkward1._numba.libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
+        call(context, builder, awkward1._libawkward.FillableArray_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
 
     return context.get_dummy_value()
