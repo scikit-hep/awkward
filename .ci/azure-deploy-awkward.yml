@@ -132,7 +132,7 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python setup.py bdist_wheel
+          python -m pip wheel .
         displayName: "Build"
 
       - script: |
