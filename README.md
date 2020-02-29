@@ -60,12 +60,14 @@ The original Awkward 0.x will be available in perpetuity as **awkward0**, but on
 
 Awkward 1.0 is available to early adopters as [awkward1 in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python), but developers will need to compile from source. For that, you will need
 
-   * [CMake/CTest](https://cmake.org/),
+   * [CMake/CTest](https://cmake.org/)
    * a C++11-compliant compiler,
 
 and optionally
 
    * Python 2.7, 3.5, 3.6, 3.7, or 3.8 (CPython, not an alternative like PyPy),
+   * Pip 10 (will add `cmake`, `setuptools`, and `scikit-build` during the build process only)
+       * Older pip users may need to manually install or update the above Python packages
    * NumPy 1.13.1 or later,
    * pytest 3.9 or later (to run tests),
    * Numba 0.46 or later (to run all the tests).
@@ -90,8 +92,8 @@ cd ..
 To compile _with Python_ (the usual case):
 
 ```bash
-python setup.py build
-pytest -vv tests                       # optional: run Python tests
+pip install .         # optionally add -e before the dot for an editable build; python files can be edited inplace
+pytest -vv tests      # optional: run Python tests
 ```
 
 In lieu of "make clean" for Python builds, I use the following to remove compiled code from the source tree:

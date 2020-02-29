@@ -8,10 +8,8 @@ project (awkward LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-if (MSVC)
-  set(PYBIND11_CPP_STANDARD /std:c++14)
-else()
-  set(PYBIND11_CPP_STANDARD -std=c++11)
+if(MSVC)
+  set(CMAKE_CXX_STANDARD 14)
 endif()
 
 # VERSION_INFO is the version stamp for everything (all C++, all Python).
@@ -20,21 +18,23 @@ string(STRIP ${VERSION_INFO} VERSION_INFO)
 add_definitions(-DVERSION_INFO="${VERSION_INFO}")
 
 # Three tiers: cpu-kernels (extern "C" interface), libawkward (C++), and Python modules.
-file(GLOB CPU_KERNEL_SOURCES "src/cpu-kernels/*.cpp")
-file(GLOB_RECURSE LIBAWKWARD_SOURCES "src/libawkward/*.cpp")
+file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp")
+file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 include_directories(include)
 
 # C++ dependencies (header-only): RapidJSON and pybind11.
 include_directories(rapidjson/include)
-add_subdirectory(pybind11)
 
 # Macro to add C++ tests (part of CMake build, distinct from pytests in Python).
-enable_testing()
+include(CTest)
+
 macro(addtest name filename)
-  add_executable(${name} ${filename})
-  target_link_libraries(${name} PRIVATE awkward-static awkward-cpu-kernels-static)
-  set_target_properties(${name} PROPERTIES CXX_VISIBILITY_PRESET hidden)
-  add_test(${name} ${name})
+  if(BUILD_TESTING)
+    add_executable(${name} ${filename})
+    target_link_libraries(${name} PRIVATE awkward-static awkward-cpu-kernels-static)
+    set_target_properties(${name} PROPERTIES CXX_VISIBILITY_PRESET hidden)
+    add_test(${name} ${name})
+  endif()
 endmacro(addtest)
 
 # First tier: cpu-kernels (object files, static library, and dynamic library).
@@ -64,22 +64,28 @@ addtest(test0016 tests/test_0016-finish-getitem-for-rawarray.cpp)
 addtest(test0019 tests/test_0019-use-json-library.cpp)
 addtest(test0030 tests/test_0030-recordarray-in-numba.cpp)
 
+install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static LIBRARY DESTINATION awkward1)
+
+
 # Third tier: Python modules.
 
-file(GLOB LAYOUT_SOURCES "src/python/layout/*.cpp")
-pybind11_add_module(layout src/python/layout.cpp ${LAYOUT_SOURCES})
-set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
-target_link_libraries(layout PRIVATE awkward-static)
+if(SKBUILD)
+  add_subdirectory(pybind11)
+  file(GLOB LAYOUT_SOURCES "src/python/layout/*.cpp")
+  pybind11_add_module(layout src/python/layout.cpp ${LAYOUT_SOURCES})
+  set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
+  target_link_libraries(layout PRIVATE awkward-static)
 
-pybind11_add_module(types src/python/types.cpp)
-set_target_properties(types PROPERTIES CXX_VISIBILITY_PRESET hidden)
-target_link_libraries(types PRIVATE awkward-static)
+  pybind11_add_module(types src/python/types.cpp)
+  set_target_properties(types PROPERTIES CXX_VISIBILITY_PRESET hidden)
+  target_link_libraries(types PRIVATE awkward-static)
 
-pybind11_add_module(_io src/python/_io.cpp)
-set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
-target_link_libraries(_io PRIVATE awkward-static)
+  pybind11_add_module(_io src/python/_io.cpp)
+  set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
+  target_link_libraries(_io PRIVATE awkward-static)
 
-install(TARGETS layout types _io awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static LIBRARY DESTINATION awkward1)
+  install(TARGETS layout types _io LIBRARY DESTINATION awkward1)
+endif()
 
 
 
