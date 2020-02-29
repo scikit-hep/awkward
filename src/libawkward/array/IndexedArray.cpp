@@ -39,11 +39,6 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  bool IndexedArrayOf<T, ISOPTION>::isindexed() const {
-    return true;
-  }
-
-  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::project() const {
     if (ISOPTION) {
       int64_t numnull;

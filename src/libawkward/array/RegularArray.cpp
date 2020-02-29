@@ -527,90 +527,24 @@ namespace awkward {
     if (toaxis == 0) {
       if (length > size()) {
         int64_t tolength = (length - size())*size();
+        (length >= out.get()->length()/size()) ? tolength = length*size() : tolength = out.get()->length() - length*size();
+        Index64 outindex(tolength);
+        struct Error err = awkward_index_rpad(
+          outindex.ptr().get(),
+          fromlength,
+          tolength);
+        util::handle_error(err, classname(), identities_.get());
 
-        if (out.get()->isindexed()) {
-          out = out.get()->getitem_range_nowrap(0, fromlength);
-          out = out.get()->rpad(tolength, toaxis);
-        }
-        else {
-          (length >= out.get()->length()/size()) ? tolength = length*size() : tolength = out.get()->length() - length*size();
-          Index64 outindex(tolength);
-          struct Error err = awkward_index_rpad(
-            outindex.ptr().get(),
-            fromlength,
-            tolength);
-          util::handle_error(err, classname(), identities_.get());
-
-          out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
-        }
+        out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out).get()->simplify();
       }
       return std::make_shared<RegularArray>(identities_, parameters_, out, size());
     }
     else if (toaxis == 1) {
-      if (out.get()->isindexed()) {
-        if (length < n) {
-          return shallow_copy();
-        }
-        out = out.get()->getitem_range_nowrap(0, fromlength);
-
-        Index64 outindex(n*length);
-        if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(out.get())) {
-          struct Error err = awkward_indexedarray_inject_rpad_from32(
-            outindex.ptr().get(),
-            rawother->index().ptr().get(),
-            n,
-            length,
-            size());
-          util::handle_error(err, classname(), identities_.get());
-          out = rawother->content();
-        }
-        else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(out.get())) {
-          struct Error err = awkward_indexedarray_inject_rpad_fromU32(
-            outindex.ptr().get(),
-            rawother->index().ptr().get(),
-            n,
-            length,
-            size());
-          util::handle_error(err, classname(), identities_.get());
-          out = rawother->content();
-        }
-        else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(out.get())) {
-          struct Error err = awkward_indexedarray_inject_rpad_from64(
-            outindex.ptr().get(),
-            rawother->index().ptr().get(),
-            n,
-            length,
-            size());
-          util::handle_error(err, classname(), identities_.get());
-          out = rawother->content();
-        }
-        else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(out.get())) {
-          struct Error err = awkward_indexedarray_inject_rpad_from32(
-            outindex.ptr().get(),
-            rawother->index().ptr().get(),
-            n,
-            length,
-            size());
-          util::handle_error(err, classname(), identities_.get());
-          out = rawother->content();
-        }
-        else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(out.get())) {
-          struct Error err = awkward_indexedarray_inject_rpad_from64(
-            outindex.ptr().get(),
-            rawother->index().ptr().get(),
-            n,
-            length,
-            size());
-          util::handle_error(err, classname(), identities_.get());
-          out = rawother->content();
-        }
-
-        out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
-        return std::make_shared<RegularArray>(identities_, parameters_, out, length);
+      if (length < n) {
+        return shallow_copy();
       }
-      else {
-        return toListOffsetArray64().get()->rpad(length, axis);
-      }
+
+      return toListOffsetArray64().get()->rpad(length, axis);
     }
     else {
       out = out.get()->rpad(length, axis - 1);
@@ -630,22 +564,15 @@ namespace awkward {
     if (toaxis == 0) {
       if (length > size()) {
         int64_t tolength = (length - size())*size();
+        (length >= out.get()->length()/size()) ? tolength = length*size() : tolength = out.get()->length() - length*size();
+        Index64 outindex(tolength);
+        struct Error err = awkward_index_rpad_and_clip(
+          outindex.ptr().get(),
+          fromlength,
+          tolength);
+        util::handle_error(err, classname(), identities_.get());
 
-        if (out.get()->isindexed()) {
-          out = out.get()->getitem_range_nowrap(0, fromlength);
-          out = out.get()->rpad_and_clip(tolength, toaxis);
-        }
-        else {
-          (length >= out.get()->length()/size()) ? tolength = length*size() : tolength = out.get()->length() - length*size();
-          Index64 outindex(tolength);
-          struct Error err = awkward_index_rpad_and_clip(
-            outindex.ptr().get(),
-            fromlength,
-            tolength);
-          util::handle_error(err, classname(), identities_.get());
-
-          out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
-        }
+        out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out).get()->simplify();
       }
       else {  // clip it
         int64_t tolength = length*size();
@@ -655,67 +582,7 @@ namespace awkward {
       return std::make_shared<RegularArray>(identities_, parameters_, out, size());
     }
     else if (toaxis == 1) {
-      if(out.get()->isindexed()) {
-        out = out.get()->getitem_range_nowrap(0, fromlength);
-
-        Index64 outindex(n*length);
-        if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(out.get())) {
-          struct Error err = awkward_indexedarray_inject_rpad_from32(
-            outindex.ptr().get(),
-            rawother->index().ptr().get(),
-            n,
-            length,
-            size());
-          util::handle_error(err, classname(), identities_.get());
-          out = rawother->content();
-        }
-        else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(out.get())) {
-          struct Error err = awkward_indexedarray_inject_rpad_fromU32(
-            outindex.ptr().get(),
-            rawother->index().ptr().get(),
-            n,
-            length,
-            size());
-          util::handle_error(err, classname(), identities_.get());
-          out = rawother->content();
-        }
-        else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(out.get())) {
-          struct Error err = awkward_indexedarray_inject_rpad_from64(
-            outindex.ptr().get(),
-            rawother->index().ptr().get(),
-            n,
-            length,
-            size());
-          util::handle_error(err, classname(), identities_.get());
-          out = rawother->content();
-        }
-        else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(out.get())) {
-          struct Error err = awkward_indexedarray_inject_rpad_from32(
-            outindex.ptr().get(),
-            rawother->index().ptr().get(),
-            n,
-            length,
-            size());
-          util::handle_error(err, classname(), identities_.get());
-          out = rawother->content();
-        }
-        else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(out.get())) {
-          struct Error err = awkward_indexedarray_inject_rpad_from64(
-            outindex.ptr().get(),
-            rawother->index().ptr().get(),
-            n,
-            length,
-            size());
-          util::handle_error(err, classname(), identities_.get());
-          out = rawother->content();
-        }
-
-        out = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, out);
-        return std::make_shared<RegularArray>(identities_, parameters_, out, length);
-      }
-      else {
-        return toListOffsetArray64().get()->rpad_and_clip(length, axis);
-      }
+      return toListOffsetArray64().get()->rpad_and_clip(length, axis);
     }
     else {
       out = out.get()->rpad_and_clip(length, axis - 1);

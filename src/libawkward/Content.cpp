@@ -25,10 +25,6 @@ namespace awkward {
     return false;
   }
 
-  bool Content::isindexed() const {
-    return false;
-  }
-
   const std::shared_ptr<Identities> Content::identities() const {
     return identities_;
   }

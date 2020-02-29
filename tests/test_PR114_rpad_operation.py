@@ -142,7 +142,7 @@ def test_rpad_regular_array():
     assert awkward1.tolist(regulararray.rpad(6, 0)) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []], [None, None], [None, None], [None, None]]
     assert awkward1.tolist(regulararray.rpad(7, 0)) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []], [None, None], [None, None], [None, None], [None, None]]
 
-    assert awkward1.tolist(regulararray.rpad(1, 1)) == [[[0.0, 1.1, 2.2]], [[3.3, 4.4]], [[6.6, 7.7, 8.8, 9.9]]]
+    assert awkward1.tolist(regulararray.rpad(1, 1)) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
     assert awkward1.tolist(regulararray.rpad(2, 1)) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
     assert awkward1.tolist(regulararray.rpad(3, 1)) == [[[0.0, 1.1, 2.2], [], None], [[3.3, 4.4], [5.5], None], [[6.6, 7.7, 8.8, 9.9], [], None]]
     assert awkward1.tolist(regulararray.rpad(4, 1)) == [[[0.0, 1.1, 2.2], [], None, None], [[3.3, 4.4], [5.5], None, None], [[6.6, 7.7, 8.8, 9.9], [], None, None]]
