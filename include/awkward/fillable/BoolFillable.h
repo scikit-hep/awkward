@@ -9,7 +9,7 @@
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
-  class BoolFillable: public Fillable {
+  class EXPORT_SYMBOL BoolFillable: public Fillable {
   public:
     static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options);
 

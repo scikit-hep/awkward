@@ -8,7 +8,7 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
-  class RegularType: public Type {
+  class EXPORT_SYMBOL RegularType: public Type {
   public:
     RegularType(const util::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t size);
 

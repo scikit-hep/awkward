@@ -13,7 +13,7 @@
 
 namespace awkward {
   template <typename T>
-  class IndexedFillable: public Fillable {
+  class EXPORT_SYMBOL IndexedFillable: public Fillable {
   public:
     IndexedFillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<T>& array, bool hasnull);
 
@@ -44,7 +44,7 @@ namespace awkward {
     bool hasnull_;
   };
 
-  class IndexedGenericFillable: public IndexedFillable<Content> {
+  class EXPORT_SYMBOL IndexedGenericFillable: public IndexedFillable<Content> {
   public:
     static const std::shared_ptr<Fillable> fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Content>& array);
 
@@ -55,7 +55,7 @@ namespace awkward {
     const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
   };
 
-  class IndexedI32Fillable: public IndexedFillable<IndexedArray32> {
+  class EXPORT_SYMBOL IndexedI32Fillable: public IndexedFillable<IndexedArray32> {
   public:
     IndexedI32Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArray32>& array, bool hasnull);
 
@@ -64,7 +64,7 @@ namespace awkward {
     const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
   };
 
-  class IndexedIU32Fillable: public IndexedFillable<IndexedArrayU32> {
+  class EXPORT_SYMBOL IndexedIU32Fillable: public IndexedFillable<IndexedArrayU32> {
   public:
     IndexedIU32Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArrayU32>& array, bool hasnull);
 
@@ -73,7 +73,7 @@ namespace awkward {
     const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
   };
 
-  class IndexedI64Fillable: public IndexedFillable<IndexedArray64> {
+  class EXPORT_SYMBOL IndexedI64Fillable: public IndexedFillable<IndexedArray64> {
   public:
     IndexedI64Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArray64>& array, bool hasnull);
 
@@ -82,7 +82,7 @@ namespace awkward {
     const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
   };
 
-  class IndexedIO32Fillable: public IndexedFillable<IndexedOptionArray32> {
+  class EXPORT_SYMBOL IndexedIO32Fillable: public IndexedFillable<IndexedOptionArray32> {
   public:
     IndexedIO32Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedOptionArray32>& array, bool hasnull);
 
@@ -91,7 +91,7 @@ namespace awkward {
     const std::shared_ptr<Fillable> append(const std::shared_ptr<Content>& array, int64_t at) override;
   };
 
-  class IndexedIO64Fillable: public IndexedFillable<IndexedOptionArray64> {
+  class EXPORT_SYMBOL IndexedIO64Fillable: public IndexedFillable<IndexedOptionArray64> {
   public:
     IndexedIO64Fillable(const FillableOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedOptionArray64>& array, bool hasnull);
 

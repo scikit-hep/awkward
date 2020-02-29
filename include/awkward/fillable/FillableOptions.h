@@ -9,7 +9,7 @@
 #include "awkward/cpu-kernels/util.h"
 
 namespace awkward {
-  class FillableOptions {
+  class EXPORT_SYMBOL FillableOptions {
   public:
     FillableOptions(int64_t initial, double resize);
     int64_t initial() const;

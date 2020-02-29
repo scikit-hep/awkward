@@ -14,7 +14,7 @@
 #include "awkward/array/NumpyArray.h"
 
 namespace awkward {
-  const std::shared_ptr<Content> FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const FillableOptions& options);
+  EXPORT_SYMBOL const std::shared_ptr<Content> FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const FillableOptions& options);
 }
 
 #endif // AWKWARD_IO_ROOT_H_

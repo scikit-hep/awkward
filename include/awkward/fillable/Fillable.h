@@ -11,7 +11,7 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
-  class Fillable {
+  class EXPORT_SYMBOL Fillable {
   public:
     virtual ~Fillable();
 

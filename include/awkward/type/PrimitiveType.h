@@ -6,7 +6,7 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
-  class PrimitiveType: public Type {
+  class EXPORT_SYMBOL PrimitiveType: public Type {
   public:
     enum DType {
       boolean,

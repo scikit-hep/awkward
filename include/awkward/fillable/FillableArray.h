@@ -11,7 +11,7 @@
 #include "awkward/fillable/UnknownFillable.h"
 
 namespace awkward {
-  class FillableArray {
+  class EXPORT_SYMBOL FillableArray {
   public:
     FillableArray(const FillableOptions& options);
 

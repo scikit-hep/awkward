@@ -12,7 +12,7 @@
 #include "awkward/fillable/UnknownFillable.h"
 
 namespace awkward {
-  class TupleFillable: public Fillable {
+  class EXPORT_SYMBOL TupleFillable: public Fillable {
   public:
     static const std::shared_ptr<Fillable> fromempty(const FillableOptions& options);
 

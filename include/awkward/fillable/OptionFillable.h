@@ -11,7 +11,7 @@
 #include "awkward/fillable/Fillable.h"
 
 namespace awkward {
-  class OptionFillable: public Fillable {
+  class EXPORT_SYMBOL OptionFillable: public Fillable {
   public:
     static const std::shared_ptr<Fillable> fromnulls(const FillableOptions& options, int64_t nullcount, const std::shared_ptr<Fillable>& content);
     static const std::shared_ptr<Fillable> fromvalids(const FillableOptions& options, const std::shared_ptr<Fillable>& content);

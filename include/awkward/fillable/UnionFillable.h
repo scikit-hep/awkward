@@ -14,7 +14,7 @@ namespace awkward {
   class TupleFillable;
   class RecordFillable;
 
-  class UnionFillable: public Fillable {
+  class EXPORT_SYMBOL UnionFillable: public Fillable {
   public:
     static const std::shared_ptr<Fillable> fromsingle(const FillableOptions& options, const std::shared_ptr<Fillable>& firstcontent);
 
