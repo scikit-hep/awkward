@@ -7,7 +7,8 @@ from skbuild import setup
 import setuptools
 
 setup(name = "awkward1",
-      packages = setuptools.find_packages(exclude=["tests"]),
+      packages = setuptools.find_packages("src"),
+      package_dir = {"": "src"},
       data_files = ([#("", glob.glob("rapidjson/include/rapidjson/*.h")),
                      #("", glob.glob("rapidjson/include/rapidjson/*/*.h")),
                      (os.path.join("awkward1", "include", "awkward"),                glob.glob("include/awkward/*.h")),
