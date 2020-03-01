@@ -87,18 +87,3 @@ if(SKBUILD)
 
   install(TARGETS layout types _io LIBRARY DESTINATION "${PYTHON_RELATIVE_SITE_PACKAGES_DIR}/awkward1")
 endif()
-
-# Everything can be built with
-#
-#     mkdir build
-#     cd build
-#     cmake ..
-#     make all
-#     make CTEST_OUTPUT_ON_FAILURE=1 test    # optional: run C++ tests
-#     cd ..
-#
-# or with
-#
-#     python setup.py build
-#
-# which additionally moves compiled libraries into the awkward1/ Python source tree.

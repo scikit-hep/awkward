@@ -58,52 +58,50 @@ The original Awkward 0.x will be available in perpetuity as **awkward0**, but on
 
 ## Compiling from source
 
-Awkward 1.0 is available to early adopters as [awkward1 in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python), but developers will need to compile from source. For that, you will need
+Awkward 1.0 is available to early adopters as [awkward1 in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python), but developers will need to compile from source.
 
-   * [CMake/CTest](https://cmake.org/)
-   * a C++11-compliant compiler,
-
-and optionally
-
-   * Python 2.7, 3.5, 3.6, 3.7, or 3.8 (CPython, not an alternative like PyPy),
-   * Pip 10 (will add `cmake`, `setuptools`, and `scikit-build` during the build process only)
-       * Older pip users may need to manually install or update the above Python packages
-   * NumPy 1.13.1 or later,
-   * pytest 3.9 or later (to run tests),
-   * Numba 0.46 or later (to run all the tests).
-
-To get the code from GitHub, be sure to use `--recursive` to get Awkward's git-module dependencies (pybind11 and RapidJSON):
+To get this repository, be sure to clone it recursively because C++ dependencies (pybind11 and RapidJSON) are included and versioned as git submodules.
 
 ```bash
 git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
 ```
 
-To compile _without Python_ (unusual case):
+From the `awkward-1.0` base directory, the easy way **to compile everything** is
 
 ```bash
-mkdir build
-cd build
-cmake ..
-make all
-make CTEST_OUTPUT_ON_FAILURE=1 test    # optional: run C++ tests
-cd ..
+# Optional but recommended: set up an isolated environment (once).
+python -m venv .env --system-site-packages
+source .env/bin/activate
+
+# Get dependencies, compile everything, and install (in environment).
+# This is the command to repeatedly call when recompiling.
+pip install -v .
+
+# Optional: run the Python tests.
+pytest -vv tests
+
+# Optional: exit the isolated environment.
+deactivate
 ```
 
-To compile _with Python_ (the usual case):
+(The above won't automatically download dependencies if your `pip` version is older than 10; check `pip --version`. With an old `pip`, you can manually install the dependencies listed in [pyproject.toml](pyproject.toml). Also, the isolated environment won't work in Python 2. Use Python 3.)
+
+If you only need the C++ libraries (`libawkward-cpu-kernels.so` and `libawkward.so`) and do not need Python for testing, you can **compile a pure C++ project** with
 
 ```bash
-pip install .         # optionally add -e before the dot for an editable build; python files can be edited inplace
-pytest -vv tests      # optional: run Python tests
+cmake -S . -B build
+cmake --build build
+
+# optional: run C++ tests
+cmake --build build --target test
 ```
 
-In lieu of "make clean" for Python builds, I use the following to remove compiled code from the source tree:
+assuming that you have CMake 3.13 or later, a compiler capable of C++11, and a make system (Make or Ninja).
 
-```bash
-rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
-```
+The continuous integration (CI) and deployment (CD) are hosted by Azure Pipelines:
 
 <br>
-<p align="center">See Azure Pipelines <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary">buildtest-awkward</a> (CI) and <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary">deploy-awkward</a> (CD).</p>
+<p align="center"><a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary">buildtest-awkward</a> (CI) and <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary">deploy-awkward</a> (CD)</p>
 <br>
 
 ## Building projects that depend on Awkward
@@ -116,7 +114,7 @@ If you also want to bind your C++ to Python and share Awkward Arrays between mod
 
 ## Roadmap
 
-**The six-month sprint:**
+**The six-month ~~sprint~~ marathon:**
 
    * [X] **September 2019:** Set up CI/CD; define jagged array types in C++; pervasive infrastructure like database-style indexing.
    * [X] **October 2019:** NumPy-compliant slicing; the Numba implementation. Feature parity will be maintained in Numba continuously.
