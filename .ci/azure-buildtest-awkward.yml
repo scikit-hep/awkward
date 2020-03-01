@@ -134,7 +134,7 @@ jobs:
         displayName: "Test"
 
       - script: |
-          cmake -DCMAKE_PREFIX_PATH=../.env .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
+          cmake .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
         workingDirectory: dependent-project
         displayName: "Test dependent project"
 
@@ -184,7 +184,11 @@ jobs:
           python -m pip install --upgrade pip
         displayName: "Install Pip"
       - script: |
-          python -m pip install numpy==$(numpy.version)
+          if [ $(numpy.version) = "latest" ]; then
+            python -m pip install numpy;
+          else
+            python -m pip install numpy==$(numpy.version);
+          fi
         displayName: "Install NumPy"
       - script: |
           python -m pip list
@@ -197,6 +201,6 @@ jobs:
           python -m pytest -vv -rs tests
         displayName: "Test"
       - script: |
-          cmake -DCMAKE_PREFIX_PATH=../.env .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
+          cmake .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
         workingDirectory: dependent-project
         displayName: "Test dependent project"
