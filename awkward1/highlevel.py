@@ -288,17 +288,17 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
             self._numbaview = awkward1._numba.arrayview.RecordView.fromrecord(self)
         return numba.typeof(self._numbaview)
 
-class FillableArray(Sequence):
+class ArrayBuilder(Sequence):
     @classmethod
-    def _wrap(cls, fillablearray, behavior=None):
-        assert isinstance(fillablearray, awkward1.layout.FillableArray)
+    def _wrap(cls, layout, behavior=None):
+        assert isinstance(layout, awkward1.layout.ArrayBuilder)
         out = cls.__new__(cls)
-        out._fillablearray = fillablearray
+        out._layout = layout
         out.behavior = behavior
         return out
 
     def __init__(self, behavior=None):
-        self._fillablearray = awkward1.layout.FillableArray()
+        self._layout = awkward1.layout.ArrayBuilder()
         self.behavior = behavior
 
     @property
@@ -314,17 +314,17 @@ class FillableArray(Sequence):
 
     @property
     def type(self):
-        tmp = self._fillablearray.snapshot()
+        tmp = self._layout.snapshot()
         return awkward1.types.ArrayType(tmp.type, len(tmp))
 
     def __len__(self):
-        return len(self._fillablearray)
+        return len(self._layout)
 
     def __getitem__(self, where):
-        return awkward1._util.wrap(self._fillablearray[where], self._behavior)
+        return awkward1._util.wrap(self._layout[where], self._behavior)
 
     def __iter__(self):
-        for x in self._fillablearray.snapshot():
+        for x in self._layout.snapshot():
             yield awkward1._util.wrap(x, self._behavior)
 
     def __str__(self, limit_value=85, snapshot=None):
@@ -336,15 +336,15 @@ class FillableArray(Sequence):
         snapshot = self.snapshot()
         value = self.__str__(limit_value=limit_value, snapshot=snapshot)
 
-        limit_type = limit_total - len(value) - len("<FillableArray  type=>")
+        limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
         type = repr(str(snapshot.type))
         if len(type) > limit_type:
             type = type[:(limit_type - 4)] + "..." + type[-1]
 
-        return "<FillableArray {0} type={1}>".format(value, type)
+        return "<ArrayBuilder {0} type={1}>".format(value, type)
 
     def __array__(self, *args, **kwargs):
-        return awkward1._numpy.convert_to_array(self._fillablearray.snapshot(), args, kwargs)
+        return awkward1._numpy.convert_to_array(self._layout.snapshot(), args, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         return awkward1._numpy.array_function(func, types, args, kwargs)
@@ -355,72 +355,72 @@ class FillableArray(Sequence):
     @property
     def numbatype(self):
         import numba
-        import awkward1._numba.fillable
+        import awkward1._numba.builder
         awkward1._numba.register()
-        return awkward1._numba.fillable.FillableArrayType(self._behavior)
+        return awkward1._numba.builder.ArrayBuilderType(self._behavior)
 
     def snapshot(self):
-        return awkward1._util.wrap(self._fillablearray.snapshot(), self._behavior)
+        return awkward1._util.wrap(self._layout.snapshot(), self._behavior)
 
     def null(self):
-        self._fillablearray.null()
+        self._layout.null()
 
     def boolean(self, x):
-        self._fillablearray.boolean(x)
+        self._layout.boolean(x)
 
     def integer(self, x):
-        self._fillablearray.integer(x)
+        self._layout.integer(x)
 
     def real(self, x):
-        self._fillablearray.real(x)
+        self._layout.real(x)
 
     def bytestring(self, x):
-        self._fillablearray.bytestring(x)
+        self._layout.bytestring(x)
 
     def string(self, x):
-        self._fillablearray.string(x)
+        self._layout.string(x)
 
     def beginlist(self):
-        self._fillablearray.beginlist()
+        self._layout.beginlist()
 
     def endlist(self):
-        self._fillablearray.endlist()
+        self._layout.endlist()
 
     def begintuple(self):
-        self._fillablearray.begintuple()
+        self._layout.begintuple()
 
     def index(self, i):
-        self._fillablearray.index(i)
+        self._layout.index(i)
 
     def endtuple(self):
-        self._fillablearray.endtuple()
+        self._layout.endtuple()
 
     def beginrecord(self, name=None):
-        self._fillablearray.beginrecord(name)
+        self._layout.beginrecord(name)
 
     def field(self, key):
-        self._fillablearray.field(key)
+        self._layout.field(key)
 
     def endrecord(self):
-        self._fillablearray.endrecord()
+        self._layout.endrecord()
 
     def append(self, obj, at=None):
         if at is None:
             if isinstance(obj, Record):
-                self._fillablearray.append(obj.layout.array, obj.layout.at)
+                self._layout.append(obj.layout.array, obj.layout.at)
             elif isinstance(obj, Array):
-                self._fillablearray.extend(obj.layout)
+                self._layout.extend(obj.layout)
             else:
-                self._fillablearray.fromiter(obj)
+                self._layout.fromiter(obj)
 
         else:
             if isinstance(obj, Array):
-                self._fillablearray.append(obj.layout, at)
+                self._layout.append(obj.layout, at)
             else:
                 raise TypeError("'append' method can only be used with 'at' when 'obj' is an ak.Array")
 
     def extend(self, obj):
         if isinstance(obj, Array):
-            self._fillablearray.extend(obj.layout)
+            self._layout.extend(obj.layout)
         else:
             raise TypeError("'extend' method requires an ak.Array")

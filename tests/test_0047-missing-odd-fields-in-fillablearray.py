@@ -10,7 +10,7 @@ import numpy
 import awkward1
 
 def test():
-    out = awkward1.FillableArray()
+    out = awkward1.ArrayBuilder()
     
     out.beginrecord()
     if True:

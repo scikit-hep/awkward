@@ -49,7 +49,7 @@ def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
         return layout
 
 def fromiter(iterable, highlevel=True, behavior=None, initial=1024, resize=2.0):
-    out = awkward1.layout.FillableArray(initial=initial, resize=resize)
+    out = awkward1.layout.ArrayBuilder(initial=initial, resize=resize)
     for x in iterable:
         out.fromiter(x)
     layout = out.snapshot()
@@ -84,10 +84,10 @@ def tonumpy(array):
         out = array.layout
         return tonumpy(out.array[out.at : out.at + 1])[0]
 
-    elif isinstance(array, awkward1.highlevel.FillableArray):
+    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
         return tonumpy(array.snapshot().layout)
 
-    elif isinstance(array, awkward1.layout.FillableArray):
+    elif isinstance(array, awkward1.layout.ArrayBuilder):
         return tonumpy(array.snapshot())
 
     elif awkward1.operations.describe.parameters(array).get("__array__") == "char":
@@ -192,7 +192,7 @@ def tolist(array):
     elif isinstance(array, awkward1.highlevel.Record):
         return tolist(array.layout)
 
-    elif isinstance(array, awkward1.highlevel.FillableArray):
+    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
         return tolist(array.snapshot())
 
     elif isinstance(array, awkward1.layout.Record) and array.istuple:
@@ -201,7 +201,7 @@ def tolist(array):
     elif isinstance(array, awkward1.layout.Record):
         return {n: tolist(x) for n, x in array.fielditems()}
 
-    elif isinstance(array, awkward1.layout.FillableArray):
+    elif isinstance(array, awkward1.layout.ArrayBuilder):
         return [tolist(x) for x in array.snapshot()]
 
     elif isinstance(array, awkward1.layout.NumpyArray):
@@ -240,13 +240,13 @@ def tojson(array, destination=None, pretty=False, maxdecimals=None, buffersize=6
     elif isinstance(array, awkward1.highlevel.Record):
         out = array.layout
 
-    elif isinstance(array, awkward1.highlevel.FillableArray):
+    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
         out = array.snapshot().layout
 
     elif isinstance(array, awkward1.layout.Record):
         out = array
 
-    elif isinstance(array, awkward1.layout.FillableArray):
+    elif isinstance(array, awkward1.layout.ArrayBuilder):
         out = array.snapshot()
 
     elif isinstance(array, awkward1.layout.Content):
@@ -269,10 +269,10 @@ def tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,
     elif allowrecord and isinstance(array, awkward1.highlevel.Record):
         return array.layout
 
-    elif isinstance(array, awkward1.highlevel.FillableArray):
+    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
         return array.snapshot().layout
 
-    elif isinstance(array, awkward1.layout.FillableArray):
+    elif isinstance(array, awkward1.layout.ArrayBuilder):
         return array.snapshot()
 
     elif isinstance(array, awkward1.layout.Content):

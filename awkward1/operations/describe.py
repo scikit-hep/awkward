@@ -15,10 +15,10 @@ def parameters(array):
     elif isinstance(array, (awkward1.layout.Content, awkward1.layout.Record)):
         return array.parameters
 
-    elif isinstance(array, awkward1.highlevel.FillableArray):
+    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
         return array.snapshot().layout.parameters
 
-    elif isinstance(array, awkward1.layout.FillableArray):
+    elif isinstance(array, awkward1.layout.ArrayBuilder):
         return array.snapshot().parameters
 
     else:
@@ -43,7 +43,7 @@ def typeof(array):
     elif isinstance(array, numpy.generic):
         raise ValueError("cannot describe {0} as a PrimitiveType".format(type(array)))
 
-    elif isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.FillableArray)):
+    elif isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.ArrayBuilder)):
         return array.type
 
     elif isinstance(array, awkward1.layout.Record):
@@ -58,7 +58,7 @@ def typeof(array):
                 out = awkward1.types.RegularType(out, x)
             return awkward1.types.ArrayType(out, array.shape[0])
 
-    elif isinstance(array, awkward1.layout.FillableArray):
+    elif isinstance(array, awkward1.layout.ArrayBuilder):
         return array.type
 
     elif isinstance(array, awkward1.layout.Content):

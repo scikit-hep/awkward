@@ -9,7 +9,7 @@ import numpy
 def register():
     import awkward1._numba.arrayview
     import awkward1._numba.layout
-    import awkward1._numba.fillable
+    import awkward1._numba.builder
 
     awkward1.numba.ArrayViewType = awkward1._numba.arrayview.ArrayViewType
     awkward1.numba.ArrayViewModel = awkward1._numba.arrayview.ArrayViewModel
@@ -23,8 +23,8 @@ def register():
     awkward1.numba.IndexedOptionArrayType = awkward1._numba.layout.IndexedOptionArrayType
     awkward1.numba.RecordArrayType = awkward1._numba.layout.RecordArrayType
     awkward1.numba.UnionArrayType = awkward1._numba.layout.UnionArrayType
-    awkward1.numba.FillableArrayType = awkward1._numba.fillable.FillableArrayType
-    awkward1.numba.FillableArrayModel = awkward1._numba.fillable.FillableArrayModel
+    awkward1.numba.ArrayBuilderType = awkward1._numba.builder.ArrayBuilderType
+    awkward1.numba.ArrayBuilderModel = awkward1._numba.builder.ArrayBuilderModel
 
 try:
     import numba
@@ -39,8 +39,8 @@ else:
     def typeof_Record(obj, c):
         return obj.numbatype
 
-    @numba.extending.typeof_impl.register(awkward1.highlevel.FillableArray)
-    def typeof_FillableArray(obj, c):
+    @numba.extending.typeof_impl.register(awkward1.highlevel.ArrayBuilder)
+    def typeof_ArrayBuilder(obj, c):
         return obj.numbatype
 
 def repr_behavior(behavior):
