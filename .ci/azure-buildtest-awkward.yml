@@ -72,13 +72,10 @@ jobs:
           python -m pip install --upgrade pip
         displayName: "Install Pip"
       - script: |
-          python -m pip install -r requirements.txt -r requirements-test.txt
-        displayName: "Install requirements"
-      - script: |
           python -m pip list
         displayName: "Show versions"
       - script: |
-          python -m pip install -v .
+          python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
           python -m pytest -vv tests
@@ -126,14 +123,11 @@ jobs:
           python -m pip install --upgrade pip
         displayName: "Install Pip"
       - script: |
-          python -m pip install -r requirements.txt -r requirements-test.txt
-        displayName: "Install requirements"
-      - script: |
           python -m pip list
         displayName: "Print versions"
 
       - script: |
-          python -m pip install -v .
+          python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
           python -m pytest -vv tests
@@ -193,19 +187,14 @@ jobs:
           python -m pip install --upgrade pip
         displayName: "Install Pip"
       - script: |
-          if [ $(numpy.version) = "latest" ]; then
-            python -m pip install -r requirements.txt -r requirements-test.txt;
-          else
-            sed 's/numpy>=1.13.1/numpy==$(numpy.version)/' requirements.txt > requirements2.txt;
-            python -m pip install -r requirements2.txt -r requirements-test.txt;
-          fi
-        displayName: "Install requirements"
+          python -m pip install numpy==$(numpy.version)
+        displayName: "Install NumPy"
       - script: |
           python -m pip list
         displayName: "Print versions"
 
       - script: |
-          python -m pip install -v .
+          python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
           python -m pytest -vv tests

@@ -75,10 +75,10 @@ source .env/bin/activate
 
 # Get dependencies, compile everything, and install (in environment).
 # This is the command to repeatedly call when recompiling.
-pip install -v .
+pip install -v .[test,dev]
 
 # Optional: run the Python tests.
-pytest -vv tests
+python -m pytest -vv tests
 
 # Optional: exit the isolated environment.
 deactivate

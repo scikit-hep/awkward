@@ -6,6 +6,15 @@ import glob
 from skbuild import setup
 import setuptools
 
+extras = {
+    "test": ["pytest>=3.9"],
+    "docs": [],
+    "dev": ["numba>=0.46.0", 'enum34;python_version<"3.4"', "pandas>=0.24.0", "numexpr", "autograd"]}
+extras["all"] = sum(extras.values(), [])
+
+install_requires = ["numpy>=1.13.1"]
+tests_require = extras["test"]
+
 setup(name = "awkward1",
       packages = setuptools.find_packages(where="src"),
       package_dir = {"": "src"},
@@ -32,8 +41,9 @@ setup(name = "awkward1",
       },
       test_suite = "tests",
       python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
-      install_requires = open("requirements.txt").read().strip().split(),
-      tests_require = open("requirements-test.txt").read().strip().split(),
+      install_requires = install_requires,
+      tests_require = extras["test"],
+      extras_require = extras,
       cmake_args=['-DBUILD_TESTING=OFF'],
       classifiers = [
 #         "Development Status :: 1 - Planning",
