@@ -3,8 +3,70 @@
 import os
 import glob
 
-from skbuild import setup
+# Future change if skbuild supported:
+# from skbuild import setup
 import setuptools
+# else:
+import setuptools.command.build_ext as build_ext
+from setuptools import setup
+import glob
+import subprocess
+import platform
+import sys
+
+class CMakeExtension(setuptools.Extension):
+    def __init__(self, name, sourcedir=""):
+        setuptools.Extension.__init__(self, name, sources=[])
+        self.sourcedir = os.path.abspath(sourcedir)
+
+class CMakeBuild(setuptools.command.build_ext.build_ext):
+    def run(self):
+        try:
+            out = subprocess.check_output(["cmake", "--version"])
+        except OSError:
+            raise RuntimeError("CMake must be installed to build the following extensions: " + ", ".join(x.name for x in self.extensions))
+
+        for x in self.extensions:
+            self.build_extension(x)
+
+    def build_extension(self, ext):
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+
+        print("--- HENRYIII ---")
+        print(extdir)
+        print(dir(self))
+        print(dir(ext))
+
+
+        cmake_args = ["-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
+                      "-DPYTHON_EXECUTABLE=" + sys.executable,
+                      "-DPYBUILD=ON",
+                      "-DBUILD_TESTING=OFF",
+                      "-GNinja"
+                      ]
+
+        cfg = "Debug" if self.debug else "Release"
+        build_args = ["--config", cfg]
+
+        if platform.system() == "Windows":
+            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir),
+                           "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE"]
+            if sys.maxsize > 2**32:
+                cmake_args += ["-A", "x64"]
+            build_args += ["--", "/m"]
+
+        else:
+            cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
+
+        if not os.path.exists(self.build_temp):
+            os.makedirs(self.build_temp)
+
+        subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
+        subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
+        subprocess.check_call(["cmake", "--build", ".", "--target", "install"], cwd=self.build_temp)
+
+
+
 
 install_requires = open("requirements.txt").read().strip().split()
 
@@ -19,13 +81,13 @@ tests_require = extras["test"]
 setup(name = "awkward1",
       packages = setuptools.find_packages(where="src"),
       package_dir = {"": "src"},
-      data_files = ([("awkward1/include/awkward",             glob.glob("include/awkward/*.h")),
-                     ("awkward1/include/awkward/cpu-kernels", glob.glob("include/awkward/cpu-kernels/*.h")),
-                     ("awkward1/include/awkward/python",      glob.glob("include/awkward/python/*.h")),
-                     ("awkward1/include/awkward/array",       glob.glob("include/awkward/array/*.h")),
-                     ("awkward1/include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
-                     ("awkward1/include/awkward/io",          glob.glob("include/awkward/io/*.h")),
-                     ("awkward1/include/awkward/type",        glob.glob("include/awkward/type/*.h"))]),
+      data_files = ([("include/awkward",             glob.glob("include/awkward/*.h")),
+                     ("include/awkward/cpu-kernels", glob.glob("include/awkward/cpu-kernels/*.h")),
+                     ("include/awkward/python",      glob.glob("include/awkward/python/*.h")),
+                     ("include/awkward/array",       glob.glob("include/awkward/array/*.h")),
+                     ("include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
+                     ("include/awkward/io",          glob.glob("include/awkward/io/*.h")),
+                     ("include/awkward/type",        glob.glob("include/awkward/type/*.h"))]),
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
@@ -45,7 +107,9 @@ setup(name = "awkward1",
       install_requires = install_requires,
       tests_require = extras["test"],
       extras_require = extras,
-      cmake_args=['-DBUILD_TESTING=OFF'],
+      # cmake_args=['-DBUILD_TESTING=OFF'],      # SkBuild
+      ext_modules = [CMakeExtension("awkward")], # Not SkBuild
+      cmdclass = {"build_ext": CMakeBuild},      # Not SkBuild
       classifiers = [
 #         "Development Status :: 1 - Planning",
 #         "Development Status :: 2 - Pre-Alpha",

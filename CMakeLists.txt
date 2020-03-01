@@ -68,10 +68,9 @@ install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-s
 
 # Third tier: Python modules.
 
-if(SKBUILD)
+if(SKBUILD OR PYBUILD)
   add_subdirectory(pybind11)
-  find_package(PythonExtensions REQUIRED)
-
+  
   file(GLOB LAYOUT_SOURCES "src/python/layout/*.cpp")
   pybind11_add_module(layout src/python/layout.cpp ${LAYOUT_SOURCES})
   set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
@@ -85,5 +84,10 @@ if(SKBUILD)
   set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
   target_link_libraries(_io PRIVATE awkward-static)
 
-  install(TARGETS layout types _io LIBRARY DESTINATION "${PYTHON_RELATIVE_SITE_PACKAGES_DIR}/awkward1")
+  if(SKBUILD)
+    find_package(PythonExtensions REQUIRED)
+    install(TARGETS layout types _io LIBRARY DESTINATION "${PYTHON_RELATIVE_SITE_PACKAGES_DIR}/awkward1")
+  else()
+    install(TARGETS layout types _io LIBRARY DESTINATION "awkward1")
+  endif()
 endif()

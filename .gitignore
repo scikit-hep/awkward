@@ -113,3 +113,7 @@ Testing/
 
 # Python environments
 /.env/*
+
+# Pip stuff
+/pip-wheel-metadata/*
+/_skbuild/*
