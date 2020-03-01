@@ -8,7 +8,7 @@
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/error/en.h"
 
-#include "awkward/fillable/FillableArray.h"
+#include "awkward/builder/ArrayBuilder.h"
 #include "awkward/Content.h"
 
 #include "awkward/io/json.h"
@@ -324,28 +324,28 @@ namespace awkward {
 
   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
   public:
-    Handler(const FillableOptions& options): array_(options), depth_(0) { }
+    Handler(const ArrayBuilderOptions& options): builder_(options), depth_(0) { }
 
     const std::shared_ptr<Content> snapshot() const {
-      return array_.snapshot();
+      return builder_.snapshot();
     }
 
-    bool Null()               { array_.null();              return true; }
-    bool Bool(bool x)         { array_.boolean(x);          return true; }
-    bool Int(int x)           { array_.integer((int64_t)x); return true; }
-    bool Uint(unsigned int x) { array_.integer((int64_t)x); return true; }
-    bool Int64(int64_t x)     { array_.integer(x);          return true; }
-    bool Uint64(uint64_t x)   { array_.integer((int64_t)x); return true; }
-    bool Double(double x)     { array_.real(x);             return true; }
+    bool Null()               { builder_.null();              return true; }
+    bool Bool(bool x)         { builder_.boolean(x);          return true; }
+    bool Int(int x)           { builder_.integer((int64_t)x); return true; }
+    bool Uint(unsigned int x) { builder_.integer((int64_t)x); return true; }
+    bool Int64(int64_t x)     { builder_.integer(x);          return true; }
+    bool Uint64(uint64_t x)   { builder_.integer((int64_t)x); return true; }
+    bool Double(double x)     { builder_.real(x);             return true; }
 
     bool String(const char* str, rj::SizeType length, bool copy) {
-      array_.string(str, (int64_t)length);
+      builder_.string(str, (int64_t)length);
       return true;
     }
 
     bool StartArray() {
       if (depth_ != 0) {
-        array_.beginlist();
+        builder_.beginlist();
       }
       depth_++;
       return true;
@@ -353,38 +353,38 @@ namespace awkward {
     bool EndArray(rj::SizeType numfields) {
       depth_--;
       if (depth_ != 0) {
-        array_.endlist();
+        builder_.endlist();
       }
       return true;
     }
 
     bool StartObject() {
       if (depth_ == 0) {
-        array_.beginlist();
+        builder_.beginlist();
       }
       depth_++;
-      array_.beginrecord();
+      builder_.beginrecord();
       return true;
     }
     bool EndObject(rj::SizeType numfields) {
       depth_--;
-      array_.endrecord();
+      builder_.endrecord();
       if (depth_ == 0) {
-        array_.endlist();
+        builder_.endlist();
       }
       return true;
     }
     bool Key(const char* str, rj::SizeType length, bool copy) {
-      array_.field_check(str);
+      builder_.field_check(str);
       return true;
     }
 
   private:
-    FillableArray array_;
+    ArrayBuilder builder_;
     int64_t depth_;
   };
 
-  const std::shared_ptr<Content> FromJsonString(const char* source, const FillableOptions& options) {
+  const std::shared_ptr<Content> FromJsonString(const char* source, const ArrayBuilderOptions& options) {
     Handler handler(options);
     rj::Reader reader;
     rj::StringStream stream(source);
@@ -396,7 +396,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> FromJsonFile(FILE* source, const FillableOptions& options, int64_t buffersize) {
+  const std::shared_ptr<Content> FromJsonFile(FILE* source, const ArrayBuilderOptions& options, int64_t buffersize) {
     Handler handler(options);
     rj::Reader reader;
     std::shared_ptr<char> buffer(new char[(size_t)buffersize], util::array_deleter<char>());

@@ -5,7 +5,7 @@
 #include "awkward/Content.h"
 #include "awkward/Identities.h"
 #include "awkward/array/ListOffsetArray.h"
-#include "awkward/fillable/GrowableBuffer.h"
+#include "awkward/builder/GrowableBuffer.h"
 
 #include "awkward/io/root.h"
 
@@ -34,7 +34,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const FillableOptions& options) {
+  const std::shared_ptr<Content> FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const ArrayBuilderOptions& options) {
     assert(depth > 0);
     assert(rawdata.ndim() == 1);
 

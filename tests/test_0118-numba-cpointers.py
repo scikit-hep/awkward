@@ -11,10 +11,10 @@ import numpy
 import awkward1
 import awkward1._numba.arrayview
 
-def test_FillableArray_append():
+def test_ArrayBuilder_append():
     array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.append(array, 3)
     builder.append(array, 2)
     builder.append(array, 2)
@@ -26,7 +26,7 @@ def test_FillableArray_append():
     builder.extend(array)
     assert awkward1.tolist(builder.snapshot()) == [[5.5], [3.3, 4.4], [3.3, 4.4], [0.0, 1.1, 2.2], [], [6.6, 7.7, 8.8, 9.9], [0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.null()
     builder.null()
     builder.null()
@@ -43,7 +43,7 @@ def test_FillableArray_append():
     one = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
     two = awkward1.Array([[3.3, 2.2, 1.1, 0.0], [5.5, 4.4], [], [6.6]])
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.append(one, 2)
     builder.append(two, 1)
     builder.append(one, 0)
@@ -52,7 +52,7 @@ def test_FillableArray_append():
 
     assert awkward1.tolist(builder.snapshot()) == [[3.3, 4.4], [5.5, 4.4], [0.0, 1.1, 2.2], [6.6], [6.6, 7.7, 8.8, 9.9]]
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.null()
     builder.append(one, 2)
     builder.null()
@@ -60,14 +60,14 @@ def test_FillableArray_append():
     builder.null()
     assert awkward1.tolist(builder.snapshot()) == [None, [3.3, 4.4], None, [5.5, 4.4], None]
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.string("hello")
     builder.append(one, 2)
     builder.string("there")
     builder.append(one, 0)
     assert awkward1.tolist(builder.snapshot()) == ["hello", [3.3, 4.4], "there", [0.0, 1.1, 2.2]]
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.null()
     builder.string("hello")
     builder.null()
@@ -77,13 +77,13 @@ def test_FillableArray_append():
     builder.append(one, 0)
     assert awkward1.tolist(builder.snapshot()) == [None, "hello", None, [3.3, 4.4], None, "there", [0.0, 1.1, 2.2]]
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.append(one, 2)
     builder.string("there")
     builder.append(one, 0)
     assert awkward1.tolist(builder.snapshot()) == [[3.3, 4.4], "there", [0.0, 1.1, 2.2]]
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.null()
     builder.append(one, 2)
     builder.null()
@@ -93,7 +93,7 @@ def test_FillableArray_append():
     assert awkward1.tolist(builder.snapshot()) == [None, [3.3, 4.4], None, "there", None, [0.0, 1.1, 2.2]]
 
     array = awkward1.Array(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"])
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.beginlist()
     builder.append(array, 1)
     builder.append(array, 2)
@@ -112,7 +112,7 @@ def test_FillableArray_append():
     assert awkward1.tolist(builder.snapshot()) == [["one", "two", "three"], [], ["four", "five"], "nine"]
 
     array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}])
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.append(array[2])
     builder.append(array[2])
     builder.append(array[1])
@@ -140,21 +140,21 @@ def test_FillableArray_append():
 
     array1 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.append(array1, 2)
     builder.append(array1, 1)
     builder.append(array1, 0)
     array2 = builder.snapshot()
     assert isinstance(array2.layout.content, awkward1.layout.ListOffsetArray64)
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.append(array2, 2)
     builder.append(array2, 1)
     builder.append(array2, 0)
     array3 = builder.snapshot()
     assert isinstance(array3.layout.content, awkward1.layout.ListOffsetArray64)
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
     builder.append(array3, 2)
     builder.append(array3, 1)
     builder.append(array3, 0)
@@ -762,37 +762,37 @@ def test_iterator():
 
     assert f1(array) == 49.5
 
-def test_FillableArray_refcount():
-    builder = awkward1.FillableArray()
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 2)
+def test_ArrayBuilder_refcount():
+    builder = awkward1.ArrayBuilder()
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
 
     @numba.njit
     def f1(x):
         return 3.14
 
     y = f1(builder)
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 2)
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
 
     @numba.njit
     def f2(x):
         return x
 
     y = f2(builder)
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 3)
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 3)
     del y
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 2)
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
 
     @numba.njit
     def f3(x):
         return x, x
 
     y = f3(builder)
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 4)
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 4)
     del y
-    assert (sys.getrefcount(builder), sys.getrefcount(builder._fillablearray)) == (2, 2)
+    assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
 
-def test_FillableArray_len():
-    builder = awkward1.FillableArray()
+def test_ArrayBuilder_len():
+    builder = awkward1.ArrayBuilder()
     builder.real(1.1)
     builder.real(2.2)
     builder.real(3.3)
@@ -805,16 +805,16 @@ def test_FillableArray_len():
 
     assert f1(builder) == 5
 
-def test_FillableArray_simple():
+def test_ArrayBuilder_simple():
     @numba.njit
     def f1(x):
         x.clear()
         return 3.14
 
-    a = awkward1.FillableArray()
+    a = awkward1.ArrayBuilder()
     f1(a)
 
-def test_FillableArray_boolean():
+def test_ArrayBuilder_boolean():
     @numba.njit
     def f1(x):
         x.boolean(True)
@@ -822,12 +822,12 @@ def test_FillableArray_boolean():
         x.boolean(False)
         return x
 
-    a = awkward1.FillableArray()
+    a = awkward1.ArrayBuilder()
     b = f1(a)
     assert awkward1.tolist(a.snapshot()) == [True, False, False]
     assert awkward1.tolist(b.snapshot()) == [True, False, False]
 
-def test_FillableArray_integer():
+def test_ArrayBuilder_integer():
     @numba.njit
     def f1(x):
         x.integer(1)
@@ -835,12 +835,12 @@ def test_FillableArray_integer():
         x.integer(3)
         return x
 
-    a = awkward1.FillableArray()
+    a = awkward1.ArrayBuilder()
     b = f1(a)
     assert awkward1.tolist(a.snapshot()) == [1, 2, 3]
     assert awkward1.tolist(b.snapshot()) == [1, 2, 3]
 
-def test_FillableArray_real():
+def test_ArrayBuilder_real():
     @numba.njit
     def f1(x, z):
         x.real(1)
@@ -848,12 +848,12 @@ def test_FillableArray_real():
         x.real(z)
         return x
 
-    a = awkward1.FillableArray()
+    a = awkward1.ArrayBuilder()
     b = f1(a, numpy.array([3.5], dtype=numpy.float32)[0])
     assert awkward1.tolist(a.snapshot()) == [1, 2.2, 3.5]
     assert awkward1.tolist(b.snapshot()) == [1, 2.2, 3.5]
 
-def test_FillableArray_list():
+def test_ArrayBuilder_list():
     @numba.njit
     def f1(x):
         x.beginlist()
@@ -869,7 +869,7 @@ def test_FillableArray_list():
         x.endlist()
         return x
 
-    a = awkward1.FillableArray()
+    a = awkward1.ArrayBuilder()
     b = f1(a)
     assert awkward1.tolist(a.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert awkward1.tolist(b.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
@@ -1040,7 +1040,7 @@ def test_custom_record5():
     assert f2(array, 1) == 2.2
     assert f2(array, 2) == 3.3
 
-def test_FillableArray_append_numba():
+def test_ArrayBuilder_append_numba():
     @numba.njit
     def f1(array, builder):
         builder.append(array, 3)
@@ -1051,13 +1051,13 @@ def test_FillableArray_append_numba():
         builder.append(array, -1)
 
     array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
 
     f1(array, builder)
 
     assert awkward1.tolist(builder.snapshot()) == [[5.5], [3.3, 4.4], [3.3, 4.4], [0.0, 1.1, 2.2], [], [6.6, 7.7, 8.8, 9.9]]
 
-def test_FillableArray_append_numba2():
+def test_ArrayBuilder_append_numba2():
     @numba.njit
     def f1(array, builder):
         builder.append(array[3])
@@ -1068,13 +1068,13 @@ def test_FillableArray_append_numba2():
         builder.append(array[-1])
 
     array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}])
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
 
     f1(array, builder)
 
     assert awkward1.tolist(builder.snapshot()) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}]
 
-def test_FillableArray_append_numba3():
+def test_ArrayBuilder_append_numba3():
     @numba.njit
     def f1(array, builder):
         builder.extend(array[3])
@@ -1085,13 +1085,13 @@ def test_FillableArray_append_numba3():
         builder.extend(array[-1])
 
     array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
 
     f1(array, builder)
 
     assert awkward1.tolist(builder.snapshot()) == [5.5, 3.3, 4.4, 3.3, 4.4, 0.0, 1.1, 2.2, 6.6, 7.7, 8.8, 9.9]
 
-def test_FillableArray_append_numba4():
+def test_ArrayBuilder_append_numba4():
     @numba.njit
     def f1(array, builder):
         builder.append(array[3])
@@ -1102,13 +1102,13 @@ def test_FillableArray_append_numba4():
         builder.append(array[-1])
 
     array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
 
     f1(array, builder)
 
     assert awkward1.tolist(builder.snapshot()) == [[5.5], [3.3, 4.4], [3.3, 4.4], [0.0, 1.1, 2.2], [], [6.6, 7.7, 8.8, 9.9]]
 
-def test_FillableArray_append_numba5():
+def test_ArrayBuilder_append_numba5():
     @numba.njit
     def f1(builder, x):
         builder.append(x)
@@ -1124,7 +1124,7 @@ def test_FillableArray_append_numba5():
     def f3(builder, i):
         builder.append(f2(builder, i))
 
-    builder = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
 
     f1(builder, True)
     f1(builder, 1)

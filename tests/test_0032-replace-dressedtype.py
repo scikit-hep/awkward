@@ -63,34 +63,34 @@ def test_typestr():
     assert repr(t2) == "var * something"
 
 def test_record_name():
-    fillable = awkward1.layout.FillableArray()
+    builder = awkward1.layout.ArrayBuilder()
 
-    fillable.beginrecord("Dummy")
-    fillable.field("one")
-    fillable.integer(1)
-    fillable.field("two")
-    fillable.real(1.1)
-    fillable.endrecord()
+    builder.beginrecord("Dummy")
+    builder.field("one")
+    builder.integer(1)
+    builder.field("two")
+    builder.real(1.1)
+    builder.endrecord()
 
-    fillable.beginrecord("Dummy")
-    fillable.field("two")
-    fillable.real(2.2)
-    fillable.field("one")
-    fillable.integer(2)
-    fillable.endrecord()
+    builder.beginrecord("Dummy")
+    builder.field("two")
+    builder.real(2.2)
+    builder.field("one")
+    builder.integer(2)
+    builder.endrecord()
 
-    a = fillable.snapshot()
+    a = builder.snapshot()
     assert repr(a.type) == 'struct[["one", "two"], [int64, float64], parameters={"__record__": "Dummy"}]'
     assert a.type.parameters == {"__record__": "Dummy"}
 
-def test_fillable_string():
-    fillable = awkward1.FillableArray()
+def test_builder_string():
+    builder = awkward1.ArrayBuilder()
 
-    fillable.bytestring(b"one")
-    fillable.bytestring(b"two")
-    fillable.bytestring(b"three")
+    builder.bytestring(b"one")
+    builder.bytestring(b"two")
+    builder.bytestring(b"three")
 
-    a = fillable.snapshot()
+    a = builder.snapshot()
     if py27:
         assert str(a) == "['one', 'two', 'three']"
     else:
@@ -103,13 +103,13 @@ def test_fillable_string():
         assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
     assert repr(a.type) == "3 * bytes"
 
-    fillable = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
 
-    fillable.string("one")
-    fillable.string("two")
-    fillable.string("three")
+    builder.string("one")
+    builder.string("two")
+    builder.string("three")
 
-    a = fillable.snapshot()
+    a = builder.snapshot()
     if py27:
         assert str(a) == "[u'one', u'two', u'three']"
     else:
@@ -122,23 +122,23 @@ def test_fillable_string():
         assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
     assert repr(a.type) == "3 * string"
 
-    fillable = awkward1.FillableArray()
+    builder = awkward1.ArrayBuilder()
 
-    fillable.beginlist()
-    fillable.string("one")
-    fillable.string("two")
-    fillable.string("three")
-    fillable.endlist()
+    builder.beginlist()
+    builder.string("one")
+    builder.string("two")
+    builder.string("three")
+    builder.endlist()
 
-    fillable.beginlist()
-    fillable.endlist()
+    builder.beginlist()
+    builder.endlist()
 
-    fillable.beginlist()
-    fillable.string("four")
-    fillable.string("five")
-    fillable.endlist()
+    builder.beginlist()
+    builder.string("four")
+    builder.string("five")
+    builder.endlist()
 
-    a = fillable.snapshot()
+    a = builder.snapshot()
     if py27:
         assert str(a) == "[[u'one', u'two', u'three'], [], [u'four', u'five']]"
     else:

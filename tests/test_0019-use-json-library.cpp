@@ -3,30 +3,30 @@
 #include <memory>
 
 #include "awkward/Slice.h"
-#include "awkward/fillable/FillableArray.h"
-#include "awkward/fillable/FillableOptions.h"
+#include "awkward/builder/ArrayBuilder.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/array/NumpyArray.h"
 
 namespace ak = awkward;
 
-void fill(ak::FillableArray& builder, int64_t x) {
+void fill(ak::ArrayBuilder& builder, int64_t x) {
   builder.integer(x);
 }
 
-void fill(ak::FillableArray& builder, double x) {
+void fill(ak::ArrayBuilder& builder, double x) {
   builder.real(x);
 }
 
-void fill(ak::FillableArray& builder, const char* x) {
+void fill(ak::ArrayBuilder& builder, const char* x) {
   builder.bytestring(x);
 }
 
-void fill(ak::FillableArray& builder, const std::string& x) {
+void fill(ak::ArrayBuilder& builder, const std::string& x) {
   builder.bytestring(x.c_str());
 }
 
 template <typename T>
-void fill(ak::FillableArray& builder, const std::vector<T>& vector) {
+void fill(ak::ArrayBuilder& builder, const std::vector<T>& vector) {
   builder.beginlist();
   for (auto x : vector) {
     fill(builder, x);
@@ -38,7 +38,7 @@ int main(int, char**) {
   std::vector<std::vector<std::vector<double>>> vector =
     {{{0.0, 1.1, 2.2}, {}, {3.3, 4.4}}, {{5.5}}, {}, {{6.6, 7.7, 8.8, 9.9}}};
 
-  ak::FillableArray builder(ak::FillableOptions(1024, 2.0));
+  ak::ArrayBuilder builder(ak::ArrayBuilderOptions(1024, 2.0));
   for (auto x : vector) fill(builder, x);
   std::shared_ptr<ak::Content> array = builder.snapshot();
 

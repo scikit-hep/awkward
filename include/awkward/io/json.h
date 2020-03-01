@@ -6,15 +6,15 @@
 #include <cstdio>
 #include <string>
 
-#include "awkward/fillable/FillableOptions.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/util.h"
 
 namespace awkward {
   class Content;
 
-  const std::shared_ptr<Content> FromJsonString(const char* source, const FillableOptions& options);
-  const std::shared_ptr<Content> FromJsonFile(FILE* source, const FillableOptions& options, int64_t buffersize);
+  const std::shared_ptr<Content> FromJsonString(const char* source, const ArrayBuilderOptions& options);
+  const std::shared_ptr<Content> FromJsonFile(FILE* source, const ArrayBuilderOptions& options, int64_t buffersize);
 
   class EXPORT_SYMBOL ToJson {
   public:

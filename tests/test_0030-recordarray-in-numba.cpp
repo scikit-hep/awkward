@@ -4,18 +4,18 @@
 #include <vector>
 
 #include "awkward/Slice.h"
-#include "awkward/fillable/FillableArray.h"
-#include "awkward/fillable/FillableOptions.h"
+#include "awkward/builder/ArrayBuilder.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 
 namespace ak = awkward;
 
 int main(int, char**) 
 {
 
-  // create fillable array
-  ak::FillableArray myarray(ak::FillableOptions(1024, 2.0));
+  // create builder
+  ak::ArrayBuilder myarray(ak::ArrayBuilderOptions(1024, 2.0));
 
-  // populate fillable array with lists
+  // populate builder with lists
   myarray.beginrecord();
   myarray.field_check("one");
   myarray.boolean(true);
@@ -51,5 +51,3 @@ int main(int, char**)
     {return -1;}
   return 0;
 }
-
-
