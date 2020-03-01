@@ -4,17 +4,9 @@ from __future__ import absolute_import
 
 import os
 import ctypes
-import platform
+import ctypes.util
 
-if platform.system() == "Windows":
-    libname = "awkward.dll"
-elif platform.system() == "Darwin":
-    libname = "libawkward.dylib"
-else:
-    libname = "libawkward.so"
-
-libpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), libname)
-
+libpath = ctypes.util.find_library("awkward")
 lib = ctypes.cdll.LoadLibrary(libpath)
 
 # bool awkward_ArrayBuilder_length(void* fillablearray, int64_t* result);

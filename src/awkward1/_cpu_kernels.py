@@ -4,15 +4,7 @@ from __future__ import absolute_import
 
 import os
 import ctypes
-import platform
+import ctypes.util
 
-if platform.system() == "Windows":
-    libname = "awkward-cpu-kernels.dll"
-elif platform.system() == "Darwin":
-    libname = "libawkward-cpu-kernels.dylib"
-else:
-    libname = "libawkward-cpu-kernels.so"
-
-libpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), libname)
-
+libpath = ctypes.util.find_library("awkward-cpu-kernels")
 lib = ctypes.cdll.LoadLibrary(libpath)
