@@ -38,7 +38,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
                       "-DPYTHON_EXECUTABLE=" + sys.executable,
                       "-DPYBUILD=ON",
                       "-DBUILD_TESTING=OFF",
-                      "-GNinja"
                       ]
 
         cfg = "Debug" if self.debug else "Release"
