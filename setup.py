@@ -9,7 +9,8 @@ import setuptools
 extras = {
     "test": ["pytest>=3.9"],
     "docs": [],
-    "dev": ["numba>=0.46.0", 'enum34;python_version<"3.4"', "pandas>=0.24.0", "numexpr", "autograd"]}
+    "dev":  ["numba>=0.46.0", 'enum34;python_version<"3.4"', "pandas>=0.24.0", "numexpr", "autograd"]}
+
 extras["all"] = sum(extras.values(), [])
 
 install_requires = ["numpy>=1.13.1"]

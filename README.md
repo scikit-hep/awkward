@@ -66,11 +66,11 @@ To get this repository, be sure to clone it recursively because C++ dependencies
 git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
 ```
 
-From the `awkward-1.0` base directory, the easy way **to compile everything** is
+From the `awkward-1.0` base directory, the easy way **to compile everything** (assuming that you have Python and pip) is
 
 ```bash
 # Optional but recommended: set up an isolated environment (once).
-python -m venv .env --system-site-packages
+python -m venv .env
 source .env/bin/activate
 
 # Get dependencies, compile everything, and install (in environment).
@@ -78,7 +78,7 @@ source .env/bin/activate
 pip install -v .[test,dev]
 
 # Optional: run the Python tests.
-python -m pytest -vv tests
+python -m pytest
 
 # Optional: exit the isolated environment.
 deactivate
