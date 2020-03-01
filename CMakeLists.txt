@@ -66,7 +66,6 @@ addtest(test0030 tests/test_0030-recordarray-in-numba.cpp)
 
 install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static LIBRARY DESTINATION awkward1)
 
-
 # Third tier: Python modules.
 
 if(SKBUILD)
@@ -86,8 +85,6 @@ if(SKBUILD)
 
   install(TARGETS layout types _io LIBRARY DESTINATION awkward1)
 endif()
-
-
 
 # Everything can be built with
 #
