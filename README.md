@@ -66,25 +66,25 @@ To get this repository, be sure to clone it recursively because C++ dependencies
 git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
 ```
 
-From the `awkward-1.0` base directory, the easy way **to compile everything** (assuming that you have Python and pip) is
+From the `awkward-1.0` base directory, the easy way **to compile everything** (assuming that you have Python 3 and pip) is
 
 ```bash
-# Optional but recommended: set up an isolated environment (once).
+# Set up an isolated environment and download all development dependencies.
 python -m venv .env
 source .env/bin/activate
+pip install -r requirements.txt -r requirements-test.txt -r requirements-docs.txt -r requirements-dev.txt
 
-# Get dependencies, compile everything, and install (in environment).
-# This is the command to repeatedly call when recompiling.
-pip install -v .[test,dev]
+# Compile or recompile into the isolated environment.
+python setup.py install
 
-# Optional: run the Python tests.
+# Run the Python tests.
 python -m pytest
 
-# Optional: exit the isolated environment.
+# Exit the isolated environment.
 deactivate
 ```
 
-(The above won't automatically download dependencies if your `pip` version is older than 10; check `pip --version`. With an old `pip`, you can manually install the dependencies listed in [pyproject.toml](pyproject.toml). Also, the isolated environment won't work in Python 2. Use Python 3.)
+(The above won't automatically download dependencies if your `pip` version is older than 10; check `pip --version`. With an old `pip`, you can manually install the dependencies listed in [pyproject.toml](pyproject.toml).)
 
 If you only need the C++ libraries (`libawkward-cpu-kernels.so` and `libawkward.so`) and do not need Python for testing, you can **compile a pure C++ project** with
 

@@ -6,14 +6,14 @@ import glob
 from skbuild import setup
 import setuptools
 
-extras = {
-    "test": ["pytest>=3.9"],
-    "docs": [],
-    "dev":  ["numba>=0.46.0", 'enum34;python_version<"3.4"', "pandas>=0.24.0", "numexpr", "autograd"]}
+install_requires = open("requirements.txt").read().strip().split()
 
+extras = {
+    "test": open("requirements-test.txt").read().strip().split(),
+    "docs": open("requirements-docs.txt").read().strip().split(),
+    "dev":  open("requirements-dev.txt").read().strip().split()}
 extras["all"] = sum(extras.values(), [])
 
-install_requires = ["numpy>=1.13.1"]
 tests_require = extras["test"]
 
 setup(name = "awkward1",
