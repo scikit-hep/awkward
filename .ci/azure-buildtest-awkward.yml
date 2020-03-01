@@ -130,11 +130,14 @@ jobs:
           python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
+          ls /Users/runner/hostedtoolcache/Python/*/*/lib
+          python -c 'import ctypes.util; print(ctypes.util.find_library("awkward"))'
+          python -c 'import ctypes.util; print(ctypes.util.find_library("awkward-cpu-kernels"))'
           python -m pytest -vv -rs tests
         displayName: "Test"
 
       - script: |
-          cmake .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
+          cmake -DCMAKE_PREFIX_PATH=/Users/runner/hostedtoolcache/Python/*/* .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
         workingDirectory: dependent-project
         displayName: "Test dependent project"
 
@@ -198,9 +201,12 @@ jobs:
           python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
+          ls /opt/hostedtoolcache/Python/*/*/lib
+          python -c 'import ctypes.util; print(ctypes.util.find_library("awkward"))'
+          python -c 'import ctypes.util; print(ctypes.util.find_library("awkward-cpu-kernels"))'
           python -m pytest -vv -rs tests
         displayName: "Test"
       - script: |
-          cmake .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
+          cmake -DCMAKE_PREFIX_PATH=/opt/hostedtoolcache/Python/*/* .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
         workingDirectory: dependent-project
         displayName: "Test dependent project"

@@ -77,11 +77,9 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 libdir = os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1]), "lib")
 if platform.system() == "Windows":
     libraries = [os.path.join(libdir, "awkward-cpu-kernels-static.lib"),
-                 os.path.join(libdir, "awkward-cpu-kernels.dll"),
-                 os.path.join(libdir, "awkward-cpu-kernels.exp"),
+                 os.path.join(libdir, "awkward-cpu-kernels.lib"),
                  os.path.join(libdir, "awkward-static.lib"),
-                 os.path.join(libdir, "awkward.dll"),
-                 os.path.join(libdir, "awkward.exp")]
+                 os.path.join(libdir, "awkward.lib")]
 elif platform.system() == "Darwin":
     libraries = [os.path.join(libdir, "libawkward-cpu-kernels-static.a"),
                  os.path.join(libdir, "libawkward-cpu-kernels.dylib"),
@@ -94,18 +92,18 @@ else:
                  os.path.join(libdir, "libawkward-static.a")]
 
 ### Rejected alternative: explicit post-install copy results in files that aren't cleaned by pip uninstall.
-
-class Install(setuptools.command.install.install):
-    def run(self):
-        super(Install, self).run()
-        # for x in os.listdir(os.path.join(self.build_lib, "lib")):
-        #     shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "lib", x))
-        print("========================================================")
-        print("os.listdir(self.build_lib)", os.listdir(self.build_lib))
-        print("os.listdir(os.path.join(self.build_lib, 'lib'))", os.listdir(os.path.join(self.build_lib, 'lib')))
-        print("os.path.join(self.prefix, 'lib')", os.path.join(self.prefix, 'lib'))
-        print("========================================================")
-
+# 
+# class Install(setuptools.command.install.install):
+#     def run(self):
+#         super(Install, self).run()
+#         # for x in os.listdir(os.path.join(self.build_lib, "lib")):
+#         #     shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "lib", x))
+#         print("========================================================")
+#         print("os.listdir(self.build_lib)", os.listdir(self.build_lib))
+#         print("os.listdir(os.path.join(self.build_lib, 'lib'))", os.listdir(os.path.join(self.build_lib, 'lib')))
+#         print("os.path.join(self.prefix, 'lib')", os.path.join(self.prefix, 'lib'))
+#         print("========================================================")
+# 
 # cmdclass["install"] = Install
 
 setup(name = "awkward1",
@@ -118,8 +116,7 @@ setup(name = "awkward1",
                     ("include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
                     ("include/awkward/io",          glob.glob("include/awkward/io/*.h")),
                     ("include/awkward/type",        glob.glob("include/awkward/type/*.h")),
-#                    ("lib",                         libraries)
-],
+                    ("lib",                         libraries)],
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
@@ -142,7 +139,7 @@ setup(name = "awkward1",
 
       # cmake_args=['-DBUILD_TESTING=OFF'],      # for scikit-build
       ext_modules = [CMakeExtension("awkward")], # NOT scikit-build
-      cmdclass = {"build_ext": CMakeBuild, "install": Install},      # NOT scikit-build
+      cmdclass = {"build_ext": CMakeBuild},      # NOT scikit-build
 
       classifiers = [
 #         "Development Status :: 1 - Planning",
