@@ -1,26 +1,35 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+import glob
 import os
-import glob
-
-# Future change if skbuild supported:
-# from skbuild import setup
-import setuptools
-# else:
-import setuptools.command.build_ext as build_ext
-from setuptools import setup
-import glob
-import subprocess
 import platform
+import subprocess
 import sys
+import distutils.util
 
-DIR = os.path.dirname(os.path.realpath(__file__))
+import setuptools
+import setuptools.command.build_ext
+import setuptools.command.install
 
-class CMakeExtension(setuptools.Extension):
+from setuptools import setup, Extension
+
+install_requires = open("requirements.txt").read().strip().split()
+
+extras = {"test": open("requirements-test.txt").read().strip().split(),
+          "docs": open("requirements-docs.txt").read().strip().split(),
+          "dev":  open("requirements-dev.txt").read().strip().split()}
+extras["all"] = sum(extras.values(), [])
+
+tests_require = extras["test"]
+
+### for scikit-build:
+# DIR = os.path.dirname(os.path.realpath(__file__))
+
+class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
-        setuptools.Extension.__init__(self, name, sources=[])
+        Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
-
+    
 class CMakeBuild(setuptools.command.build_ext.build_ext):
     def run(self):
         try:
@@ -57,34 +66,54 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
              os.makedirs(self.build_temp)
         build_dir = self.build_temp
 
+        # for scikit-build:
         # build_dir = os.path.join(DIR, "_pybuild")
+
         subprocess.check_call(["cmake", "-S", ext.sourcedir, "-B", build_dir] + cmake_args)
         subprocess.check_call(["cmake", "--build", build_dir] + build_args)
         subprocess.check_call(["cmake", "--build", build_dir, "--target", "install"])
 
+### Libraries do not exist yet, so they cannot be determined with a glob pattern.
+libdir = os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), *sys.version_info[:2]), "lib")
+if platform.system() == "Windows":
+    libraries = [os.path.join(libdir, "awkward-cpu-kernels-static.lib"),
+                 os.path.join(libdir, "awkward-cpu-kernels.dll"),
+                 os.path.join(libdir, "awkward-cpu-kernels.exp"),
+                 os.path.join(libdir, "awkward-static.lib"),
+                 os.path.join(libdir, "awkward.dll"),
+                 os.path.join(libdir, "awkward.exp")]
+elif platform.system() == "Darwin":
+    libraries = [os.path.join(libdir, "libawkward-cpu-kernels-static.a"),
+                 os.path.join(libdir, "libawkward-cpu-kernels.dylib"),
+                 os.path.join(libdir, "libawkward-static.a"),
+                 os.path.join(libdir, "libawkward.dylib")]
+else:
+    libraries = [os.path.join(libdir, "libawkward-cpu-kernels.so"),
+                 os.path.join(libdir, "libawkward-cpu-kernels-static.a"),
+                 os.path.join(libdir, "libawkward.so"),
+                 os.path.join(libdir, "libawkward-static.a")]
 
-
-
-install_requires = open("requirements.txt").read().strip().split()
-
-extras = {
-    "test": open("requirements-test.txt").read().strip().split(),
-    "docs": open("requirements-docs.txt").read().strip().split(),
-    "dev":  open("requirements-dev.txt").read().strip().split()}
-extras["all"] = sum(extras.values(), [])
-
-tests_require = extras["test"]
+### Rejected alternative: explicit post-install copy results in files that aren't cleaned by pip uninstall.
+# 
+# class Install(setuptools.command.install.install):
+#     def run(self):
+#         super(Install, self).run()
+#         for x in os.listdir(os.path.join(self.build_lib, "lib")):
+#             shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "lib", x))
+# 
+# cmdclass["install"] = Install
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(where="src"),
       package_dir = {"": "src"},
-      data_files = ([("include/awkward",             glob.glob("include/awkward/*.h")),
-                     ("include/awkward/cpu-kernels", glob.glob("include/awkward/cpu-kernels/*.h")),
-                     ("include/awkward/python",      glob.glob("include/awkward/python/*.h")),
-                     ("include/awkward/array",       glob.glob("include/awkward/array/*.h")),
-                     ("include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
-                     ("include/awkward/io",          glob.glob("include/awkward/io/*.h")),
-                     ("include/awkward/type",        glob.glob("include/awkward/type/*.h"))]),
+      data_files = [("include/awkward",             glob.glob("include/awkward/*.h")),
+                    ("include/awkward/cpu-kernels", glob.glob("include/awkward/cpu-kernels/*.h")),
+                    ("include/awkward/python",      glob.glob("include/awkward/python/*.h")),
+                    ("include/awkward/array",       glob.glob("include/awkward/array/*.h")),
+                    ("include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
+                    ("include/awkward/io",          glob.glob("include/awkward/io/*.h")),
+                    ("include/awkward/type",        glob.glob("include/awkward/type/*.h")),
+                    ("lib",                         libraries)],
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
@@ -104,9 +133,11 @@ setup(name = "awkward1",
       install_requires = install_requires,
       tests_require = extras["test"],
       extras_require = extras,
-      # cmake_args=['-DBUILD_TESTING=OFF'],      # SkBuild
-      ext_modules = [CMakeExtension("awkward")], # Not SkBuild
-      cmdclass = {"build_ext": CMakeBuild},      # Not SkBuild
+
+      # cmake_args=['-DBUILD_TESTING=OFF'],      # for scikit-build
+      ext_modules = [CMakeExtension("awkward")], # NOT scikit-build
+      cmdclass = {"build_ext": CMakeBuild},      # NOT scikit-build
+
       classifiers = [
 #         "Development Status :: 1 - Planning",
 #         "Development Status :: 2 - Pre-Alpha",
@@ -134,5 +165,4 @@ setup(name = "awkward1",
           "Topic :: Scientific/Engineering :: Physics",
           "Topic :: Software Development",
           "Topic :: Utilities",
-          ],
-      )
+          ])

@@ -78,7 +78,7 @@ jobs:
           python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
-          python -m pytest -vv tests
+          python -m pytest -vv -rs tests
         displayName: "Test"
 
   - job: MacOS
@@ -130,13 +130,11 @@ jobs:
           python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
-          python -m pytest -vv tests
+          python -m pytest -vv -rs tests
         displayName: "Test"
 
       - script: |
-          cmake -DPYBIND11_PYTHON_VERSION=$(python.version) . && \
-          cmake --build . && \
-          python -m pytest -vv tests.py
+          cmake -DCMAKE_PREFIX_PATH=../.env .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
         workingDirectory: dependent-project
         displayName: "Test dependent project"
 
@@ -182,7 +180,6 @@ jobs:
           architecture: '$(python.architecture)'
         displayName: 'Python $(python.version)'
 
-
       - script: |
           python -m pip install --upgrade pip
         displayName: "Install Pip"
@@ -197,12 +194,9 @@ jobs:
           python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
-          python -m pytest -vv tests
+          python -m pytest -vv -rs tests
         displayName: "Test"
       - script: |
-          cmake -DPYBIND11_PYTHON_VERSION=$(python.version) . && \
-          cmake --build . && \
-          python -m pytest -vv tests.py
+          cmake -DCMAKE_PREFIX_PATH=../.env .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
         workingDirectory: dependent-project
         displayName: "Test dependent project"
-

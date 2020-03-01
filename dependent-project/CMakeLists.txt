@@ -3,12 +3,12 @@
 cmake_minimum_required(VERSION 2.8.12.2)
 project (dependent-project)
 
-include_directories(include)
+include_directories(${CMAKE_PREFIX_PATH}/include)
 
 add_subdirectory(../pybind11 cmake_pybind11)
 
-find_library(CPU-KERNELS awkward-cpu-kernels-static PATHS awkward1)
-find_library(LIBAWKWARD awkward-static PATHS awkward1)
+find_library(CPU-KERNELS awkward-cpu-kernels-static)
+find_library(LIBAWKWARD awkward-static)
 message(${LIBAWKWARD})
 
 pybind11_add_module(dependent dependent.cpp)

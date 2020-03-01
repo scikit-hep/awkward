@@ -8,7 +8,7 @@ project (awkward LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-if(MSVC)
+if (MSVC)
   set(CMAKE_CXX_STANDARD 14)
 endif()
 
@@ -29,7 +29,7 @@ include_directories(rapidjson/include)
 include(CTest)
 
 macro(addtest name filename)
-  if(BUILD_TESTING)
+  if (BUILD_TESTING)
     add_executable(${name} ${filename})
     target_link_libraries(${name} PRIVATE awkward-static awkward-cpu-kernels-static)
     set_target_properties(${name} PROPERTIES CXX_VISIBILITY_PRESET hidden)
@@ -68,7 +68,7 @@ install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-s
 
 # Third tier: Python modules.
 
-if(SKBUILD OR PYBUILD)
+if (PYBUILD)
   add_subdirectory(pybind11)
   
   file(GLOB LAYOUT_SOURCES "src/python/layout/*.cpp")
@@ -84,10 +84,6 @@ if(SKBUILD OR PYBUILD)
   set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
   target_link_libraries(_io PRIVATE awkward-static)
 
-  if(SKBUILD)
-    find_package(PythonExtensions REQUIRED)
-    install(TARGETS layout types _io LIBRARY DESTINATION "${PYTHON_RELATIVE_SITE_PACKAGES_DIR}/awkward1")
-  else()
-    install(TARGETS layout types _io LIBRARY DESTINATION "awkward1")
-  endif()
+  install(TARGETS awkward-cpu-kernels awkward-cpu-kernels-static awkward awkward-static layout types _io LIBRARY DESTINATION "awkward1")
+
 endif()
