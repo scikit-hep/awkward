@@ -14,6 +14,8 @@ import subprocess
 import platform
 import sys
 
+DIR = os.path.dirname(os.path.realpath(__file__))
+
 class CMakeExtension(setuptools.Extension):
     def __init__(self, name, sourcedir=""):
         setuptools.Extension.__init__(self, name, sources=[])
@@ -31,12 +33,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-
-        print("--- HENRYIII ---")
-        print(extdir)
-        print(dir(self))
-        print(dir(ext))
-
 
         cmake_args = ["-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
                       "-DPYTHON_EXECUTABLE=" + sys.executable,
@@ -59,11 +55,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
 
         if not os.path.exists(self.build_temp):
-            os.makedirs(self.build_temp)
+             os.makedirs(self.build_temp)
+        build_dir = self.build_temp
 
-        subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
-        subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
-        subprocess.check_call(["cmake", "--build", ".", "--target", "install"], cwd=self.build_temp)
+        # build_dir = os.path.join(DIR, "_pybuild")
+        subprocess.check_call(["cmake", "-S", ext.sourcedir, "-B", build_dir] + cmake_args)
+        subprocess.check_call(["cmake", "--build", build_dir] + build_args)
+        subprocess.check_call(["cmake", "--build", build_dir, "--target", "install"])
 
 
 
