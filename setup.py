@@ -105,6 +105,8 @@ if platform.system() == "Windows":
             print("\n".join(os.listdir(os.path.join(self.build_lib, "lib"))))
             for x in os.listdir(os.path.join(self.build_lib, "lib")):
                 shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "awkward1", x))
+            if not os.path.exists(os.path.join(self.prefix, "awkward1")):
+                os.mkdir(os.path.join(self.prefix, "awkward1"))
             print("To", os.path.join(self.prefix, "awkward1") + ":")
             print("\n".join(os.path.join(self.prefix, "awkward1")))
             print("==========================================================")
