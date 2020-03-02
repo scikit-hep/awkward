@@ -1,6 +1,5 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include <cassert>
 #include <sstream>
 
 #include "awkward/array/NumpyArray.h"
@@ -34,7 +33,7 @@ namespace awkward {
       case uint64:  s = "uint64"; break;
       case float32: s = "float32"; break;
       case float64: s = "float64"; break;
-      default:      assert(dtype_ < numtypes);
+      default:      s = "unknown"; break;
     }
     if (parameters_.empty()) {
       out << indent << pre << s << post;

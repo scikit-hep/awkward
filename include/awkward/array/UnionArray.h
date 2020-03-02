@@ -3,7 +3,6 @@
 #ifndef AWKWARD_UNIONARRAY_H_
 #define AWKWARD_UNIONARRAY_H_
 
-#include <cassert>
 #include <string>
 #include <memory>
 #include <vector>

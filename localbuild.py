@@ -14,13 +14,12 @@ import multiprocessing
 arguments = argparse.ArgumentParser()
 arguments.add_argument("--clean", default=False, action="store_true")
 arguments.add_argument("--release", action="store_true")
-arguments.add_argument("--no-ctest", action="store_true")
+arguments.add_argument("--ctest", action="store_true")
 arguments.add_argument("--no-buildpython", action="store_true")
 arguments.add_argument("-j", default=str(multiprocessing.cpu_count()))
 arguments.add_argument("--pytest", default=None)
 args = arguments.parse_args()
 
-args.ctest = not args.no_ctest
 args.buildpython = not args.no_buildpython
 
 try:
@@ -37,6 +36,7 @@ if args.clean:
             shutil.rmtree(x)
     sys.exit()
 
+# Changes that would trigger a recompilation.
 thisstate = {"release": args.release,
              "ctest": args.ctest,
              "buildpython": args.buildpython,
@@ -125,4 +125,6 @@ if args.buildpython:
         print("Remember to")
         print("")
         print("    export LD_LIBRARY_PATH=awkward1:$LD_LIBRARY_PATH")
+        print("")
+        print("if you plan to use awkward1 outside of this tool.")
         print("")

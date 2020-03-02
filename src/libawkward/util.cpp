@@ -1,6 +1,5 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include <cassert>
 #include <sstream>
 #include <set>
 
@@ -23,7 +22,6 @@ namespace awkward {
         std::stringstream out;
         out << "in " << classname;
         if (err.identity != kSliceNone  &&  identities != nullptr) {
-          assert(err.identity > 0);
           if (0 <= err.identity  &&  err.identity < identities->length()) {
             out << " with identity [" << identities->identity_at(err.identity) << "]";
           }

@@ -227,7 +227,6 @@ namespace awkward {
   }
 
   void NumpyArray::setidentities() {
-    assert(!isscalar());
     if (length() <= kMaxInt32) {
       std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
@@ -354,7 +353,6 @@ namespace awkward {
   }
 
   const std::string NumpyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
-    assert(!isscalar());
     std::stringstream out;
     out << indent << pre << "<" << classname() << " format=" << util::quote(format_, true) << " shape=\"";
     for (std::size_t i = 0;  i < shape_.size();  i++) {
@@ -566,7 +564,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_at(int64_t at) const {
-    assert(!isscalar());
     int64_t regular_at = at;
     if (regular_at < 0) {
       regular_at += shape_[0];
@@ -592,7 +589,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_range(int64_t start, int64_t stop) const {
-    assert(!isscalar());
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), shape_[0]);
@@ -687,7 +683,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
-    assert(!isscalar());
     Index64 carry(shape_[0]);
     struct Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
     util::handle_error(err, classname(), identities_.get());
@@ -695,8 +690,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::carry(const Index64& carry) const {
-    assert(!isscalar());
-
     std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*strides_[0])], util::array_deleter<uint8_t>());
     struct Error err = awkward_numpyarray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
@@ -1683,7 +1676,6 @@ namespace awkward {
 
   const NumpyArray NumpyArray::getitem_bystrides(const SliceEllipsis& ellipsis, const Slice& tail, int64_t length) const {
     std::pair<int64_t, int64_t> minmax = minmax_depth();
-    assert(minmax.first == minmax.second);
     int64_t mindepth = minmax.first;
 
     if (tail.length() == 0  ||  mindepth - 1 == tail.dimlength()) {
@@ -1779,9 +1771,6 @@ namespace awkward {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
-    // if we had any array slices, this int would become an array
-    assert(advanced.length() == 0);
-
     int64_t regular_at = at.at();
     if (regular_at < 0) {
       regular_at += shape_[1];
@@ -1875,7 +1864,6 @@ namespace awkward {
 
   const NumpyArray NumpyArray::getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
     std::pair<int64_t, int64_t> minmax = minmax_depth();
-    assert(minmax.first == minmax.second);
     int64_t mindepth = minmax.first;
 
     if (tail.length() == 0  ||  mindepth - 1 == tail.dimlength()) {

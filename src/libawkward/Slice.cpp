@@ -541,7 +541,9 @@ namespace awkward {
   }
 
   void Slice::append(const std::shared_ptr<SliceItem>& item) {
-    assert(!sealed_);
+    if (sealed_) {
+      throw std::runtime_error("Slice::append when sealed_ == true");
+    }
     items_.push_back(item);
   }
 
@@ -567,7 +569,9 @@ namespace awkward {
   }
 
   void Slice::become_sealed() {
-    assert(!sealed_);
+    if (sealed_) {
+      throw std::runtime_error("Slice::become_sealed when sealed_ == true");
+    }
 
     std::vector<int64_t> shape;
     for (size_t i = 0;  i < items_.size();  i++) {
@@ -670,7 +674,9 @@ namespace awkward {
   }
 
   bool Slice::isadvanced() const {
-    assert(sealed_);
+    if (!sealed_) {
+      throw std::runtime_error("Slice::isadvanced when sealed_ == false");
+    }
     for (size_t i = 0;  i < items_.size();  i++) {
       if (dynamic_cast<SliceArray64*>(items_[i].get()) != nullptr) {
         return true;

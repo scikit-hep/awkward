@@ -520,8 +520,9 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    assert(advanced.length() == 0);
-
+    if (advanced.length() != 0) {
+      throw std::runtime_error("RegularArray::getitem_next(SliceAt): advanced.length() != 0");
+    }
     int64_t len = length();
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -543,7 +544,9 @@ namespace awkward {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
-    assert(range.step() != 0);
+    if (range.step() == 0) {
+      throw std::runtime_error("RegularArray::getitem_next(SliceRange): range.step() == 0");
+    }
     int64_t regular_start = range.start();
     int64_t regular_stop = range.stop();
     int64_t regular_step = std::abs(range.step());

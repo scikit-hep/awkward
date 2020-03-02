@@ -3,7 +3,6 @@
 #ifndef AWKWARD_EMPTYARRAY_H_
 #define AWKWARD_EMPTYARRAY_H_
 
-#include <cassert>
 #include <string>
 #include <memory>
 #include <vector>
