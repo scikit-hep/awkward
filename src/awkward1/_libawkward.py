@@ -5,6 +5,8 @@ from __future__ import absolute_import
 import os
 import ctypes
 import ctypes.util
+import platform
+import pkg_resources
 
 libpath = ctypes.util.find_library("awkward")
 if libpath is None:
@@ -14,8 +16,8 @@ if libpath is None:
         name = "libawkward.dylib"
     else:
         name = "libawkward.so"
-    import pkg_resources
     libpath = pkg_resources.resource_filename("awkward1", "libawkward.so")
+
 lib = ctypes.cdll.LoadLibrary(libpath)
 
 # bool awkward_ArrayBuilder_length(void* fillablearray, int64_t* result);

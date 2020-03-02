@@ -64,53 +64,59 @@ Normally, you would install Awkward [from PyPI](https://pypi.org/project/awkward
 
 ```
 
-Python wheels are available for most operating systems, 
+Python wheels are available [on PyPI](https://pypi.org/project/awkward1/) for most operating systems and versions of Python, so most users can do
 
-## Installing from source
+```bash
+pip install awkward1
+```
 
+to get the latest release of Awkward 1.0. If a wheel does not exist for you, the above command should attempt to compile from source, downloading any dependencies it needs to do that.
 
+## Manually installing from source
 
-
-## Development workflow
-
-Awkward 1.0 is available to early adopters as [awkward1 in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python), but developers will need to compile from source.
-
-To get this repository, be sure to clone it recursively because C++ dependencies (pybind11 and RapidJSON) are included and versioned as git submodules.
+If you need to force an installation from source, get it from GitHub via
 
 ```bash
 git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
 ```
 
-From the `awkward-1.0` base directory, 
+(note the recursive git-clone; it is required to get C++ dependencies) and compile+install with dependencies via
 
 ```bash
-pip install -r requirements.txt -r requirements-test.txt -r requirements-docs.txt -r requirements-dev.txt
-
-cmake -S . -B build -DBUILD_TESTING=ON -DPYTHON_EXECUTABLE=`which python` -DPYBUILD=ON
-
-cmake --build build
-
-cmake --build build --target test
-
-python -m pytest
-
+pip install .
 ```
 
-(The above won't automatically download dependencies if your `pip` version is older than 10; check `pip --version`. With an old `pip`, you can manually install the dependencies listed in [pyproject.toml](pyproject.toml).)
-
-If you only need the C++ libraries (`libawkward-cpu-kernels.so` and `libawkward.so`) and do not need Python for testing, you can **compile a pure C++ project** with
+or
 
 ```bash
-cmake -S . -B build
-cmake --build build
-
-# optional: run C++ tests
-cmake --build build --target test
+pip install .[test,dev]
 ```
 
-assuming that you have CMake 3.13 or later, a compiler capable of C++11, and a make system (Make or Ninja).
+to perform tests (`[test]`) on all optional dependencies (`[dev]`).
 
-The continuous integration (CI) and deployment (CD) are hosted by Azure Pipelines:
+## Development workflow
+
+If you are developing Awkward Array, manually installing from source will work, but it doesn't cache previously compiled code for rapid recompilation. Instead, get it from GitHub via
+
+```bash
+git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
+```
+
+(note the recursive git-clone; it is required to get C++ dependencies) and compile+install with dependencies via
+
+```bash
+python localbuild.py --pytest tests
+```
+
+The `--pytest tests` optionally runs selected tests. See 
+
+```bash
+python localbuild.py --help
+```
+
+for more information. The build is based on CMake; see [localbuild.py](./localbuild.py) if you need to run CMake directly.
+
+Continuous integration (CI) and continuous deployment (CD) are hosted by Azure Pipelines:
 
 <br>
 <p align="center"><a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary">buildtest-awkward</a> (CI) and <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary">deploy-awkward</a> (CD)</p>

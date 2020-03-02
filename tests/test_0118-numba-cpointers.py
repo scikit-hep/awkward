@@ -9,6 +9,9 @@ import pytest
 import numpy
 
 import awkward1
+
+pytest.skip("Disabling for now.", allow_module_level=True)
+
 awkward1_numba_arrayview = pytest.importorskip("awkward1._numba.arrayview")
 
 def test_ArrayBuilder_append():
