@@ -11,7 +11,7 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class OptionBuilder: public Builder {
+  class EXPORT_SYMBOL OptionBuilder: public Builder {
   public:
     static const std::shared_ptr<Builder> fromnulls(const ArrayBuilderOptions& options, int64_t nullcount, const std::shared_ptr<Builder>& content);
     static const std::shared_ptr<Builder> fromvalids(const ArrayBuilderOptions& options, const std::shared_ptr<Builder>& content);

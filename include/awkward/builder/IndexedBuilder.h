@@ -13,7 +13,7 @@
 
 namespace awkward {
   template <typename T>
-  class IndexedBuilder: public Builder {
+  class EXPORT_SYMBOL IndexedBuilder: public Builder {
   public:
     IndexedBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<T>& array, bool hasnull);
 

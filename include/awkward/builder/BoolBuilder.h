@@ -9,7 +9,7 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class BoolBuilder: public Builder {
+  class EXPORT_SYMBOL BoolBuilder: public Builder {
   public:
     static const std::shared_ptr<Builder> fromempty(const ArrayBuilderOptions& options);
 

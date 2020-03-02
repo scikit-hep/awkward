@@ -3,6 +3,7 @@ recursive-include include *.h
 recursive-include src *.cpp
 recursive-include src/awkward1 *.py
 recursive-include tests *.cpp *.py
+include *.dll
 
 recursive-include pybind11/include/pybind11 *
 recursive-include pybind11/tools *

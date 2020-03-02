@@ -134,7 +134,7 @@ jobs:
         displayName: "Test"
 
       # - script: |
-      #     cmake -DCMAKE_PREFIX_PATH=/Users/runner/hostedtoolcache/Python/*/* .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
+      #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
       #   workingDirectory: dependent-project
       #   displayName: "Test dependent project"
 
@@ -200,7 +200,8 @@ jobs:
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
+
       # - script: |
-      #     cmake -DCMAKE_PREFIX_PATH=/opt/hostedtoolcache/Python/*/* .  &&  cmake --build .  &&  python -m pytest -vv -rs tests.py
+      #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
       #   workingDirectory: dependent-project
       #   displayName: "Test dependent project"

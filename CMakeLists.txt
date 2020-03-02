@@ -2,6 +2,13 @@
 
 cmake_minimum_required(VERSION 3.10...3.16)
 message(STATUS "CMake version ${CMAKE_VERSION}")
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+  message("-- Debug")
+elseif (CMAKE_BUILD_TYPE MATCHES Release)
+  message("-- Release")
+else()
+  message("-- CMAKE_BUILD_TYPE = " ${CMAKE_BUILD_TYPE})
+endif()
 project(awkward LANGUAGES CXX)
 
 # This is a C++11 project, but Windows starts at C++14.
@@ -64,13 +71,13 @@ addtest(test0016 tests/test_0016-finish-getitem-for-rawarray.cpp)
 addtest(test0019 tests/test_0019-use-json-library.cpp)
 addtest(test0030 tests/test_0030-recordarray-in-numba.cpp)
 
-install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static LIBRARY DESTINATION lib)
+install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static LIBRARY DESTINATION "lib")
 
 # Third tier: Python modules.
 
 if (PYBUILD)
   add_subdirectory(pybind11)
-  
+
   file(GLOB LAYOUT_SOURCES "src/python/layout/*.cpp")
   pybind11_add_module(layout src/python/layout.cpp ${LAYOUT_SOURCES})
   set_target_properties(layout PROPERTIES CXX_VISIBILITY_PRESET hidden)
@@ -84,6 +91,6 @@ if (PYBUILD)
   set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
   target_link_libraries(_io PRIVATE awkward-static)
 
-  install(TARGETS awkward-cpu-kernels awkward-cpu-kernels-static awkward awkward-static layout types _io LIBRARY DESTINATION "awkward1")
+  install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static layout types _io LIBRARY DESTINATION "awkward1")
 
 endif()

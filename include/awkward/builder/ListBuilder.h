@@ -12,7 +12,7 @@
 #include "awkward/builder/UnknownBuilder.h"
 
 namespace awkward {
-  class ListBuilder: public Builder {
+  class EXPORT_SYMBOL ListBuilder: public Builder {
   public:
     static const std::shared_ptr<Builder> fromempty(const ArrayBuilderOptions& options);
 

@@ -14,7 +14,7 @@ namespace awkward {
   class TupleBuilder;
   class RecordBuilder;
 
-  class UnionBuilder: public Builder {
+  class EXPORT_SYMBOL UnionBuilder: public Builder {
   public:
     static const std::shared_ptr<Builder> fromsingle(const ArrayBuilderOptions& options, const std::shared_ptr<Builder>& firstcontent);
 

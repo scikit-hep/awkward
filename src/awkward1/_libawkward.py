@@ -8,15 +8,15 @@ import ctypes.util
 import platform
 import pkg_resources
 
-libpath = ctypes.util.find_library("awkward")
-if libpath is None:
-    if platform.system() == "Windows":
-        name = "awkward.lib"
-    elif platform.system() == "Darwin":
-        name = "libawkward.dylib"
-    else:
-        name = "libawkward.so"
-    libpath = pkg_resources.resource_filename("awkward1", "libawkward.so")
+# libpath = ctypes.util.find_library("awkward")
+# if libpath is None:
+if platform.system() == "Windows":
+    name = "awkward.dll"
+elif platform.system() == "Darwin":
+    name = "libawkward.dylib"
+else:
+    name = "libawkward.so"
+libpath = pkg_resources.resource_filename("awkward1", name)
 
 lib = ctypes.cdll.LoadLibrary(libpath)
 
