@@ -9,12 +9,14 @@ import os
 import sys
 import json
 import glob
+import multiprocessing
 
 arguments = argparse.ArgumentParser()
 arguments.add_argument("--clean", default=False, action="store_true")
 arguments.add_argument("--release", action="store_true")
 arguments.add_argument("--no-ctest", action="store_true")
 arguments.add_argument("--no-buildpython", action="store_true")
+arguments.add_argument("-j", default=str(multiprocessing.cpu_count()))
 arguments.add_argument("--pytest", default=None)
 args = arguments.parse_args()
 
@@ -26,7 +28,7 @@ try:
 except:
     git_config = ""
 
-if "url = https://github.com/scikit-hep/awkward-1.0.git" not in git_config:
+if "github.com/scikit-hep/awkward-1.0" not in git_config:
     arguments.error("localbuild must be executed in the head of the awkward-1.0 tree")
 
 if args.clean:
@@ -49,17 +51,17 @@ try:
 except:
     laststate = None
 
+def check_call(args, env=None):
+    print(" ".join(args))
+    return subprocess.check_call(args, env=env)
+
 # Refresh the directory if any configuration has changed.
-if (# os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
-    # os.stat("localbuild.py").st_mtime >= localbuild_time or
-    # os.stat("setup.py").st_mtime >= localbuild_time or
+if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
+    os.stat("localbuild.py").st_mtime >= localbuild_time or
+    os.stat("setup.py").st_mtime >= localbuild_time or
     thisstate != laststate):
 
-    subprocess.check_call(["pip", "install",
-                           "-r", "requirements.txt",
-                           "-r", "requirements-test.txt",
-                           "-r", "requirements-docs.txt",
-                           "-r", "requirements-dev.txt"])
+    check_call(["pip", "install", "-r", "requirements.txt", "-r", "requirements-test.txt", "-r", "requirements-docs.txt", "-r", "requirements-dev.txt"])
 
     if os.path.exists("localbuild"):
         shutil.rmtree("localbuild")
@@ -77,14 +79,14 @@ if (# os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
     if args.buildpython:
         newdir_args.extend(["-DPYTHON_EXECUTABLE=" + thisstate["python_executable"], "-DPYBUILD=ON"])
 
-    subprocess.check_call(newdir_args)
+    check_call(newdir_args)
     json.dump(thisstate, open("localbuild/lastargs.json", "w"))
 
 # Build C++ normally; this might be a no-op if make/ninja determines that the build is up-to-date.
-subprocess.check_call(["cmake", "--build", "localbuild"])
+check_call(["cmake", "--build", "localbuild", "-j", args.j])
 
 if args.ctest:
-    subprocess.check_call(["cmake", "--build", "localbuild", "--target", "test", "--", "CTEST_OUTPUT_ON_FAILURE=1"])
+    check_call(["cmake", "--build", "localbuild", "--target", "test", "--", "CTEST_OUTPUT_ON_FAILURE=1"])
 
 # Build Python (copy sources to executable tree).
 if args.buildpython:
@@ -114,8 +116,8 @@ if args.buildpython:
         reminder = True
 
     # Run pytest on all or a subset of tests.
-    if args.pytest is not None:
-        subprocess.check_call(["python", "-m", "pytest", "-vv", "-rs", args.pytest], env=env)
+    if args.pytest is not None and not (os.path.exists(args.pytest) and not os.path.isdir(args.pytest) and not args.pytest.endswith(".py")):
+        check_call(["python", "-m", "pytest", "-vv", "-rs", args.pytest], env=env)
 
     # If you'll be using it interactively, you'll need awkward1 in the library path (for some operations).
     if reminder:

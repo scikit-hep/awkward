@@ -2,6 +2,13 @@
 
 cmake_minimum_required(VERSION 3.10...3.16)
 message(STATUS "CMake version ${CMAKE_VERSION}")
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+  message("-- Debug")
+elseif (CMAKE_BUILD_TYPE MATCHES Release)
+  message("-- Release")
+else()
+  message("-- CMAKE_BUILD_TYPE = ???")
+endif()
 project(awkward LANGUAGES CXX)
 
 # This is a C++11 project, but Windows starts at C++14.
