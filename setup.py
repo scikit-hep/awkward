@@ -75,31 +75,12 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["cmake", "--build", build_dir] + build_args)
         subprocess.check_call(["cmake", "--build", build_dir, "--target", "install"])
 
-        print("==========================================================")
-        print("Contents of " + extdir)
-        print("")
-        contents = os.listdir(extdir)
-        print("\n".join(contents))
-        print("")
-        if "lib" in contents:
-            print("Contents of " + os.path.join(extdir, "lib"))
-            print("")
-            print("\n".join(os.listdir(os.path.join(extdir, "lib"))))
-            print("")
-        if "awkward1" in contents:
-            print("Contents of " + os.path.join(extdir, "awkward1"))
-            print("")
-            print("\n".join(os.listdir(os.path.join(extdir, "awkward1"))))
-            print("")
-        print("==========================================================")
-
 if platform.system() == "Windows":
     # Libraries are not installed system-wide on Windows, but they do have to be in the awkward1 directory.
     libraries = []
 
     class Install(setuptools.command.install.install):
         def run(self):
-            super(Install, self).run()
             print("==========================================================")
             print("From", os.path.join(self.build_lib, "bin") + ":")
             print("\n".join(os.listdir(os.path.join(self.build_lib, "bin"))))
@@ -108,6 +89,8 @@ if platform.system() == "Windows":
             print("To", os.path.join(self.build_lib, "awkward1") + ":")
             print("\n".join(os.listdir(os.path.join(self.build_lib, "awkward1"))))
             print("==========================================================")
+
+            super(Install, self).run()
 
 else:
     # Libraries do not exist yet, so they cannot be determined with a glob pattern.
@@ -123,11 +106,21 @@ else:
                           os.path.join(libdir, prefix + "awkward-static" + static),
                           os.path.join(libdir, prefix + "awkward" + shared)])]
 
+    # class Install(setuptools.command.install.install):
+    #     def run(self):
+    #         print("==========================================================")
+    #         open(os.path.join(self.build_lib, "awkward1/silly.dll"), "w").write("whatever\n")
+    #         print(open(os.path.join(self.build_lib, "awkward1/silly.dll")).read())
+    #         os.system("tree {0}".format(self.build_lib))
+    #         print("==========================================================")
+    #         super(Install, self).run()
+
     Install = setuptools.command.install.install
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(where="src"),
       package_dir = {"": "src"},
+      include_package_data = True,
       package_data = {"": ["*.dll"]},
       data_files = libraries + [
           ("include/awkward",             glob.glob("include/awkward/*.h")),

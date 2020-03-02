@@ -7,7 +7,7 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
 elseif (CMAKE_BUILD_TYPE MATCHES Release)
   message("-- Release")
 else()
-  message("-- CMAKE_BUILD_TYPE = ???")
+  message("-- CMAKE_BUILD_TYPE = " ${CMAKE_BUILD_TYPE})
 endif()
 project(awkward LANGUAGES CXX)
 
