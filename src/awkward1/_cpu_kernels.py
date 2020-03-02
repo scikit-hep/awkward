@@ -11,7 +11,7 @@ import pkg_resources
 # libpath = ctypes.util.find_library("awkward")
 # if libpath is None:
 if platform.system() == "Windows":
-    name = "awkward-cpu-kernels.lib"
+    name = "awkward-cpu-kernels.dll"
 elif platform.system() == "Darwin":
     name = "libawkward-cpu-kernels.dylib"
 else:

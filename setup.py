@@ -101,15 +101,12 @@ if platform.system() == "Windows":
         def run(self):
             super(Install, self).run()
             print("==========================================================")
-            print("From", os.path.join(self.build_lib, "lib") + ":")
-            print("\n".join(os.listdir(os.path.join(self.build_lib, "lib"))))
-            # if not os.path.exists(os.path.join(self.prefix, "awkward1")):
-            #     os.mkdir(os.path.join(self.prefix, "awkward1"))
-            # for x in os.listdir(os.path.join(self.build_lib, "lib")):
-            #     shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "awkward1", x))
-            # print("To", os.path.join(self.prefix, "awkward1") + ":")
-            # print("\n".join(os.listdir(os.path.join(self.prefix, "awkward1"))))
-            subprocess.check_call(["ls", "-R", self.build_lib])
+            print("From", os.path.join(self.build_lib, "bin") + ":")
+            print("\n".join(os.listdir(os.path.join(self.build_lib, "bin"))))
+            for x in os.listdir(os.path.join(self.build_lib, "bin")):
+                shutil.copyfile(os.path.join(self.build_lib, "bin", x), os.path.join(self.build_lib, "awkward1", x))
+            print("To", os.path.join(self.build_lib, "awkward1") + ":")
+            print("\n".join(os.listdir(os.path.join(self.build_lib, "awkward1"))))
             print("==========================================================")
 
 else:
