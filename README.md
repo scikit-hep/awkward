@@ -139,7 +139,7 @@ If you also want to bind your C++ to Python and share Awkward Arrays between mod
    * [X] **November 2019:** Fillable arrays to create columnar data; high-level type objects; all list and record types.
    * [X] **December 2019:** The `awkward.Array` user interface; behavioral mix-ins, including the string type.
    * [X] **January 2020:** [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) and [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html); the rest of the array nodes: option and union types, indirection.
-   * [ ] **February 2020:** The array operations: flattening, padding, concatenating, combinatorics, etc. and array types needed for [Uproot](https://github.com/scikit-hep/awkward-1.0/milestone/1) and [Arrow/Parquet](https://github.com/scikit-hep/awkward-1.0/milestone/3) (chunked, virtual, masked, etc.).
+   * [X] **February 2020:** The array operations: flattening, padding, concatenating, combinatorics, etc. and array types needed for [Uproot](https://github.com/scikit-hep/awkward-1.0/milestone/1) and [Arrow/Parquet](https://github.com/scikit-hep/awkward-1.0/milestone/3) (chunked, virtual, masked, etc.).
 
 **Updating dependent libraries:**
 
@@ -149,7 +149,7 @@ If you also want to bind your C++ to Python and share Awkward Arrays between mod
 Most users will see Awkward 1.0 for the first time when uproot 4.0 is released.
 
 <br>
-<p align="center"><b>Progress is currently on track.</b></p>
+<p align="center"><b>Progress is a little behind: operations and Arrow conversions are not done.</b></p>
 <br>
 
 ### Checklist of features for the six-month sprint
