@@ -9,12 +9,12 @@
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/util.h"
 #include "awkward/Index.h"
-#include "awkward/fillable/FillableOptions.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/Content.h"
 #include "awkward/array/NumpyArray.h"
 
 namespace awkward {
-  const std::shared_ptr<Content> FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const FillableOptions& options);
+  EXPORT_SYMBOL const std::shared_ptr<Content> FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const ArrayBuilderOptions& options);
 }
 
 #endif // AWKWARD_IO_ROOT_H_

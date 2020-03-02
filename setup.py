@@ -1,23 +1,32 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+import glob
 import os
 import platform
-import re
 import subprocess
 import sys
-import shutil
-import glob
+import distutils.util
 
-import distutils.version
 import setuptools
 import setuptools.command.build_ext
-from setuptools import setup
+import setuptools.command.install
 
-class CMakeExtension(setuptools.Extension):
+from setuptools import setup, Extension
+
+install_requires = open("requirements.txt").read().strip().split()
+
+extras = {"test": open("requirements-test.txt").read().strip().split(),
+          "docs": open("requirements-docs.txt").read().strip().split(),
+          "dev":  open("requirements-dev.txt").read().strip().split()}
+extras["all"] = sum(extras.values(), [])
+
+tests_require = extras["test"]
+
+class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
-        setuptools.Extension.__init__(self, name, sources=[])
+        Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
-
+    
 class CMakeBuild(setuptools.command.build_ext.build_ext):
     def run(self):
         try:
@@ -25,23 +34,24 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         except OSError:
             raise RuntimeError("CMake must be installed to build the following extensions: " + ", ".join(x.name for x in self.extensions))
 
-        if platform.system() == "Windows":
-            cmake_version = distutils.version.LooseVersion(re.search(r"version\s*([\d.]+)", out.decode()).group(1))
-            if cmake_version < "3.4":
-                raise RuntimeError("CMake >= 3.4 is required on Windows")
-
         for x in self.extensions:
             self.build_extension(x)
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-        cmake_args = ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir, "-DPYTHON_EXECUTABLE=" + sys.executable]
+
+        cmake_args = ["-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
+                      "-DPYTHON_EXECUTABLE=" + sys.executable,
+                      "-DPYBUILD=ON",
+                      "-DBUILD_TESTING=OFF",
+                      ]
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
 
         if platform.system() == "Windows":
-            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir), "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE"]
+            cmake_args += ["-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir),
+                           "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE"]
             if sys.maxsize > 2**32:
                 cmake_args += ["-A", "x64"]
             build_args += ["--", "/m"]
@@ -50,51 +60,62 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
 
         if not os.path.exists(self.build_temp):
-            os.makedirs(self.build_temp)
+             os.makedirs(self.build_temp)
+        build_dir = self.build_temp
 
-        subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
-        subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
-        subprocess.check_call(["ctest", "--output-on-failure"], cwd=self.build_temp)
+        # for scikit-build:
+        # build_dir = os.path.join(DIR, "_pybuild")
 
-        for lib in (glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "libawkward-cpu-kernels-static.*")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "libawkward-static.*")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.so")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.dylib")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.dll")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.exp")) +
-                    glob.glob(os.path.join(os.path.join(extdir, "awkward1"), "*.pyd"))):
-          if os.path.exists(lib):
-              os.remove(lib)
+        subprocess.check_call(["cmake", "-S", ext.sourcedir, "-B", build_dir] + cmake_args)
+        subprocess.check_call(["cmake", "--build", build_dir] + build_args)
+        subprocess.check_call(["cmake", "--build", build_dir, "--target", "install"])
 
-        for lib in os.listdir(self.build_temp):
-            if lib.startswith("libawkward-cpu-kernels-static.") or lib.startswith("libawkward-static."):
-                shutil.copy(os.path.join(self.build_temp, lib), "awkward1")
-                shutil.move(os.path.join(self.build_temp, lib), os.path.join(extdir, "awkward1"))
+### Libraries do not exist yet, so they cannot be determined with a glob pattern.
+libdir = os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1]), "lib")
 
-        for lib in os.listdir(extdir):
-            if lib.endswith(".so") or lib.endswith(".dylib") or lib.endswith(".dll") or lib.endswith(".pyd"):
-                shutil.copy(os.path.join(extdir, lib), "awkward1")
-                shutil.move(os.path.join(extdir, lib), os.path.join(extdir, "awkward1"))
+lib = "lib"
+static = ".a"
 
-        if platform.system() == "Windows":
-            for lib in os.listdir(os.path.join(self.build_temp, cfg)):
-                if lib.startswith("awkward-cpu-kernels-static.") or lib.startswith("awkward-static.") or lib.endswith(".dll") or lib.endswith(".exp") or lib.endswith(".pyd"):
-                    shutil.copy(os.path.join(os.path.join(self.build_temp, cfg), lib), "awkward1")
-                    shutil.move(os.path.join(os.path.join(self.build_temp, cfg), lib), os.path.join(extdir, "awkward1"))
+if platform.system() == "Windows":
+    static = ".lib"
+    shared = ".lib"
+    lib = ""
+elif platform.system() == "Darwin":
+    shared = ".dylib"
+else:
+    shared = ".so"
+
+libraries = [os.path.join(libdir, lib + "awkward-cpu-kernels-static" + static),
+             os.path.join(libdir, lib + "awkward-cpu-kernels" + shared),
+             os.path.join(libdir, lib + "awkward-static" + static),
+             os.path.join(libdir, lib + "awkward" + shared)]
+
+### Rejected alternative: explicit post-install copy results in files that aren't cleaned by pip uninstall.
+# 
+# class Install(setuptools.command.install.install):
+#     def run(self):
+#         super(Install, self).run()
+#         # for x in os.listdir(os.path.join(self.build_lib, "lib")):
+#         #     shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "lib", x))
+#         print("========================================================")
+#         print("os.listdir(self.build_lib)", os.listdir(self.build_lib))
+#         print("os.listdir(os.path.join(self.build_lib, 'lib'))", os.listdir(os.path.join(self.build_lib, 'lib')))
+#         print("os.path.join(self.prefix, 'lib')", os.path.join(self.prefix, 'lib'))
+#         print("========================================================")
+# 
+# cmdclass["install"] = Install
 
 setup(name = "awkward1",
-      packages = setuptools.find_packages(exclude=["tests"]),
-      scripts = [],
-      data_files = ([("", glob.glob("rapidjson/include/rapidjson/*.h")),
-                     ("", glob.glob("rapidjson/include/rapidjson/*/*.h")),
-                     (os.path.join("awkward1", "include", "awkward"),                glob.glob("include/awkward/*.h")),
-                     (os.path.join("awkward1", "include", "awkward", "cpu-kernels"), glob.glob("include/awkward/cpu-kernels/*.h")),
-                     (os.path.join("awkward1", "include", "awkward", "python"),      glob.glob("include/awkward/python/*.h")),
-                     (os.path.join("awkward1", "include", "awkward", "array"),       glob.glob("include/awkward/array/*.h")),
-                     (os.path.join("awkward1", "include", "awkward", "fillable"),    glob.glob("include/awkward/fillable/*.h")),
-                     (os.path.join("awkward1", "include", "awkward", "io"),          glob.glob("include/awkward/io/*.h")),
-                     (os.path.join("awkward1", "include", "awkward", "type"),        glob.glob("include/awkward/type/*.h"))] +
-                    [(os.path.join("awkward1", "signatures"), [x for x in glob.glob("awkward1/signatures/*.xml") if x != "index.xml" and not x.startswith("dir_") and not x.startswith("namespace")])]),
+      packages = setuptools.find_packages(where="src"),
+      package_dir = {"": "src"},
+      data_files = [("include/awkward",             glob.glob("include/awkward/*.h")),
+                    ("include/awkward/cpu-kernels", glob.glob("include/awkward/cpu-kernels/*.h")),
+                    ("include/awkward/python",      glob.glob("include/awkward/python/*.h")),
+                    ("include/awkward/array",       glob.glob("include/awkward/array/*.h")),
+                    ("include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
+                    ("include/awkward/io",          glob.glob("include/awkward/io/*.h")),
+                    ("include/awkward/type",        glob.glob("include/awkward/type/*.h")),
+                    ("lib",                         libraries)],
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
@@ -106,13 +127,19 @@ setup(name = "awkward1",
       url = "https://github.com/jpivarski/awkward1",
       download_url = "https://github.com/jpivarski/awkward1/releases",
       license = "BSD 3-clause",
-      ext_modules = [CMakeExtension("awkward")],
-      cmdclass = {"build_ext": CMakeBuild},
+      entry_points = {
+        "numba_extensions": ["init = awkward1._numba:register"]
+      },
       test_suite = "tests",
       python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
-      install_requires = open("requirements.txt").read().strip().split(),
-      tests_require = open("requirements-test.txt").read().strip().split(),
-      zip_safe = False,
+      install_requires = install_requires,
+      tests_require = extras["test"],
+      extras_require = extras,
+
+      # cmake_args=['-DBUILD_TESTING=OFF'],      # for scikit-build
+      ext_modules = [CMakeExtension("awkward")], # NOT scikit-build
+      cmdclass = {"build_ext": CMakeBuild},      # NOT scikit-build
+
       classifiers = [
 #         "Development Status :: 1 - Planning",
 #         "Development Status :: 2 - Pre-Alpha",
@@ -140,5 +167,4 @@ setup(name = "awkward1",
           "Topic :: Scientific/Engineering :: Physics",
           "Topic :: Software Development",
           "Topic :: Utilities",
-          ],
-      )
+          ])

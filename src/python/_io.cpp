@@ -7,7 +7,7 @@
 #include "awkward/Content.h"
 #include "awkward/Index.h"
 #include "awkward/array/NumpyArray.h"
-#include "awkward/fillable/FillableOptions.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/io/json.h"
 #include "awkward/io/root.h"
 
@@ -28,7 +28,7 @@ void make_fromjson(py::module& m, const std::string& name) {
       }
     }
     if (isarray) {
-      return ak::FromJsonString(source.c_str(), ak::FillableOptions(initial, resize));
+      return ak::FromJsonString(source.c_str(), ak::ArrayBuilderOptions(initial, resize));
     }
     else {
 #ifdef _MSC_VER
@@ -42,7 +42,7 @@ void make_fromjson(py::module& m, const std::string& name) {
       }
       std::shared_ptr<ak::Content> out(nullptr);
       try {
-        out = FromJsonFile(file, ak::FillableOptions(initial, resize), buffersize);
+        out = FromJsonFile(file, ak::ArrayBuilderOptions(initial, resize), buffersize);
       }
       catch (...) {
         fclose(file);
@@ -58,7 +58,7 @@ void make_fromjson(py::module& m, const std::string& name) {
 
 void make_fromroot_nestedvector(py::module& m, const std::string& name) {
   m.def(name.c_str(), [](const ak::Index64& byteoffsets, const ak::NumpyArray& rawdata, int64_t depth, int64_t itemsize, const std::string& format, int64_t initial, double resize) -> std::shared_ptr<ak::Content> {
-      return FromROOT_nestedvector(byteoffsets, rawdata, depth, itemsize, format, ak::FillableOptions(initial, resize));
+      return FromROOT_nestedvector(byteoffsets, rawdata, depth, itemsize, format, ak::ArrayBuilderOptions(initial, resize));
   }, py::arg("byteoffsets"), py::arg("rawdata"), py::arg("depth"), py::arg("itemsize"), py::arg("format"), py::arg("initial") = 1024, py::arg("resize") = 2.0);
 }
 

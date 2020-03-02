@@ -17,7 +17,7 @@ namespace awkward {
 
   namespace util {
     template<typename T>
-    class array_deleter {
+    class EXPORT_SYMBOL array_deleter {
     public:
       void operator()(T const *p) {
         delete[] p;
@@ -25,7 +25,7 @@ namespace awkward {
     };
 
     template<typename T>
-    class no_deleter {
+    class EXPORT_SYMBOL no_deleter {
     public:
       void operator()(T const *p) { }
     };

@@ -15,7 +15,7 @@
 
 namespace awkward {
   template <typename T, bool ISOPTION>
-  class IndexedArrayOf: public Content {
+  class EXPORT_SYMBOL IndexedArrayOf: public Content {
   public:
     IndexedArrayOf<T, ISOPTION>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& index, const std::shared_ptr<Content>& content);
     const IndexOf<T> index() const;
@@ -25,6 +25,7 @@ namespace awkward {
     const std::shared_ptr<Content> project(const Index8& mask) const;
     const Index8 bytemask() const;
     const std::shared_ptr<Content> simplify() const;
+    T index_at_nowrap(int64_t at) const;
 
     const std::string classname() const override;
     void setidentities() override;

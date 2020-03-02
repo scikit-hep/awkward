@@ -271,6 +271,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  T IndexedArrayOf<T, ISOPTION>::index_at_nowrap(int64_t at) const {
+    return index_.getitem_at_nowrap(at);
+  }
+
+  template <typename T, bool ISOPTION>
   const std::string IndexedArrayOf<T, ISOPTION>::classname() const {
     if (ISOPTION) {
       if (std::is_same<T, int32_t>::value) {

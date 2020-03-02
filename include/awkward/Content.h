@@ -15,7 +15,7 @@
 #include "awkward/Reducer.h"
 
 namespace awkward {
-  class Content {
+  class EXPORT_SYMBOL Content {
   public:
     Content(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters);
     virtual ~Content();

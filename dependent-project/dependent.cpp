@@ -4,15 +4,15 @@
 
 #include <pybind11/pybind11.h>
 
-#include "awkward/fillable/FillableArray.h"
-#include "awkward/fillable/FillableOptions.h"
+#include "awkward/builder/ArrayBuilder.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/cpu-kernels/getitem.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
 
 std::shared_ptr<ak::Content> producer() {
-  ak::FillableArray builder(ak::FillableOptions(1024, 2.0));
+  ak::ArrayBuilder builder(ak::ArrayBuilderOptions(1024, 2.0));
 
   builder.real(1.1);
   builder.real(2.2);

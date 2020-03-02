@@ -8,7 +8,7 @@
 #include "awkward/Index.h"
 
 namespace awkward {
-  class Reducer {
+  class EXPORT_SYMBOL Reducer {
   public:
     virtual const std::string name() const = 0;
     virtual const std::string preferred_type() const = 0;
@@ -28,7 +28,7 @@ namespace awkward {
     virtual const std::shared_ptr<void> apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const = 0;
   };
 
-  class ReducerCount: public Reducer {
+  class EXPORT_SYMBOL ReducerCount: public Reducer {
   public:
     const std::string name() const override;
     const std::string preferred_type() const override;
@@ -48,7 +48,7 @@ namespace awkward {
     const std::shared_ptr<void> apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
   };
 
-  class ReducerCountNonzero: public Reducer {
+  class EXPORT_SYMBOL ReducerCountNonzero: public Reducer {
   public:
     const std::string name() const override;
     const std::string preferred_type() const override;
@@ -68,7 +68,7 @@ namespace awkward {
     const std::shared_ptr<void> apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
   };
 
-  class ReducerSum: public Reducer {
+  class EXPORT_SYMBOL ReducerSum: public Reducer {
   public:
     const std::string name() const override;
     const std::string preferred_type() const override;
@@ -88,7 +88,7 @@ namespace awkward {
     const std::shared_ptr<void> apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
   };
 
-  class ReducerProd: public Reducer {
+  class EXPORT_SYMBOL ReducerProd: public Reducer {
   public:
     const std::string name() const override;
     const std::string preferred_type() const override;
@@ -108,7 +108,7 @@ namespace awkward {
     const std::shared_ptr<void> apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
   };
 
-  class ReducerAny: public Reducer {
+  class EXPORT_SYMBOL ReducerAny: public Reducer {
   public:
     const std::string name() const override;
     const std::string preferred_type() const override;
@@ -128,7 +128,7 @@ namespace awkward {
     const std::shared_ptr<void> apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
   };
 
-  class ReducerAll: public Reducer {
+  class EXPORT_SYMBOL ReducerAll: public Reducer {
   public:
     const std::string name() const override;
     const std::string preferred_type() const override;
@@ -148,7 +148,7 @@ namespace awkward {
     const std::shared_ptr<void> apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
   };
 
-  class ReducerMin: public Reducer {
+  class EXPORT_SYMBOL ReducerMin: public Reducer {
   public:
     const std::string name() const override;
     const std::string preferred_type() const override;
@@ -166,7 +166,7 @@ namespace awkward {
     const std::shared_ptr<void> apply_float64(const double* data, int64_t offset, const Index64& parents, int64_t outlength) const override;
   };
 
-  class ReducerMax: public Reducer {
+  class EXPORT_SYMBOL ReducerMax: public Reducer {
   public:
     const std::string name() const override;
     const std::string preferred_type() const override;

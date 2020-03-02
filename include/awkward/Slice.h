@@ -13,7 +13,7 @@
 #include "awkward/Index.h"
 
 namespace awkward {
-  class SliceItem {
+  class EXPORT_SYMBOL SliceItem {
   public:
     static int64_t none();
     virtual ~SliceItem();
@@ -22,7 +22,7 @@ namespace awkward {
     virtual bool preserves_type(const Index64& advanced) const = 0;
   };
 
-  class SliceAt: public SliceItem {
+  class EXPORT_SYMBOL SliceAt: public SliceItem {
   public:
     SliceAt(int64_t at);
     int64_t at() const;
@@ -33,7 +33,7 @@ namespace awkward {
     const int64_t at_;
   };
 
-  class SliceRange: public SliceItem {
+  class EXPORT_SYMBOL SliceRange: public SliceItem {
   public:
     SliceRange(int64_t start, int64_t stop, int64_t step);
     int64_t start() const;
@@ -50,7 +50,7 @@ namespace awkward {
     const int64_t step_;
   };
 
-  class SliceEllipsis: public SliceItem {
+  class EXPORT_SYMBOL SliceEllipsis: public SliceItem {
   public:
     SliceEllipsis();
     const std::shared_ptr<SliceItem> shallow_copy() const override;
@@ -58,7 +58,7 @@ namespace awkward {
     bool preserves_type(const Index64& advanced) const override;
   };
 
-  class SliceNewAxis: public SliceItem {
+  class EXPORT_SYMBOL SliceNewAxis: public SliceItem {
   public:
     SliceNewAxis();
     const std::shared_ptr<SliceItem> shallow_copy() const override;
@@ -67,7 +67,7 @@ namespace awkward {
   };
 
   template <typename T>
-  class SliceArrayOf: public SliceItem {
+  class EXPORT_SYMBOL SliceArrayOf: public SliceItem {
   public:
     SliceArrayOf<T>(const IndexOf<T>& index, const std::vector<int64_t>& shape, const std::vector<int64_t>& strides, bool frombool);
     const IndexOf<T> index() const;
@@ -90,7 +90,7 @@ namespace awkward {
 
   typedef SliceArrayOf<int64_t> SliceArray64;
 
-  class SliceField: public SliceItem {
+  class EXPORT_SYMBOL SliceField: public SliceItem {
   public:
     SliceField(const std::string& key);
     const std::string key() const;
@@ -101,7 +101,7 @@ namespace awkward {
     const std::string key_;
   };
 
-  class SliceFields: public SliceItem {
+  class EXPORT_SYMBOL SliceFields: public SliceItem {
   public:
     SliceFields(const std::vector<std::string>& keys);
     const std::vector<std::string> keys() const;
@@ -113,7 +113,7 @@ namespace awkward {
   };
 
   template <typename T>
-  class SliceMissingOf: public SliceItem {
+  class EXPORT_SYMBOL SliceMissingOf: public SliceItem {
   public:
     SliceMissingOf(const IndexOf<T>& index, const Index8& originalmask, const std::shared_ptr<SliceItem>& content);
     int64_t length() const;
@@ -133,7 +133,7 @@ namespace awkward {
   typedef SliceMissingOf<int64_t> SliceMissing64;
 
   template <typename T>
-  class SliceJaggedOf: public SliceItem {
+  class EXPORT_SYMBOL SliceJaggedOf: public SliceItem {
   public:
     SliceJaggedOf(const IndexOf<T>& offsets, const std::shared_ptr<SliceItem>& content);
     int64_t length() const;
@@ -150,7 +150,7 @@ namespace awkward {
 
   typedef SliceJaggedOf<int64_t> SliceJagged64;
 
-  class Slice {
+  class EXPORT_SYMBOL Slice {
   public:
     static int64_t none();
 

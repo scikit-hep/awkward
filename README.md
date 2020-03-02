@@ -56,53 +56,63 @@ Since Awkward 1.0 is not backward-compatible, existing users of Awkward 0.x will
 
 The original Awkward 0.x will be available in perpetuity as **awkward0**, but only minor bugs will be fixed, and that only for the duration of 2020. This repository will replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array#readme) on GitHub.
 
-## Compiling from source
+## Normal installation
 
-Awkward 1.0 is available to early adopters as [awkward1 in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python), but developers will need to compile from source. For that, you will need
+Normally, you would install Awkward [from PyPI](https://pypi.org/project/awkward1/) using pip
 
-   * [CMake/CTest](https://cmake.org/),
-   * a C++11-compliant compiler,
+```bash
+pip install awkward1
+```
 
-and optionally
+to get the latest release of Awkward 1.0 as a precompiled wheel. If a wheel does not exist for your combination of operating system and Python version, the above command attempts to compile from source, downloading any dependencies it needs to do that.
 
-   * Python 2.7, 3.5, 3.6, 3.7, or 3.8 (CPython, not an alternative like PyPy),
-   * NumPy 1.13.1 or later,
-   * pytest 3.9 or later (to run tests),
-   * Numba 0.46 or later (to run all the tests).
+## Manually installing from source
 
-To get the code from GitHub, be sure to use `--recursive` to get Awkward's git-module dependencies (pybind11 and RapidJSON):
+If you need to force an installation from source, get it from GitHub via
 
 ```bash
 git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
 ```
 
-To compile _without Python_ (unusual case):
+(note the recursive git-clone; it is required to get C++ dependencies) and compile+install with dependencies via
 
 ```bash
-mkdir build
-cd build
-cmake ..
-make all
-make CTEST_OUTPUT_ON_FAILURE=1 test    # optional: run C++ tests
-cd ..
+pip install .
 ```
 
-To compile _with Python_ (the usual case):
+or
 
 ```bash
-python setup.py build
-pytest -vv tests                       # optional: run Python tests
+pip install .[test,dev]
 ```
 
-In lieu of "make clean" for Python builds, I use the following to remove compiled code from the source tree:
+to perform tests (`[test]`) on all optional dependencies (`[dev]`).
+
+## Development workflow
+
+If you are developing Awkward Array, manually installing from source will work, but it doesn't cache previously compiled code for rapid recompilation. Instead, get it from GitHub via
 
 ```bash
-rm -rf **/*~ **/__pycache__ build dist *.egg-info awkward1/*.so **/*.pyc
+git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
 ```
 
-<br>
-<p align="center">See Azure Pipelines <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary">buildtest-awkward</a> (CI) and <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary">deploy-awkward</a> (CD).</p>
-<br>
+(note the recursive git-clone; it is required to get C++ dependencies) and compile+install with dependencies via
+
+```bash
+python localbuild.py --pytest tests
+```
+
+The `--pytest tests` optionally runs selected tests. See 
+
+```bash
+python localbuild.py --help
+```
+
+for more information. The build is based on CMake; see [localbuild.py](./localbuild.py) if you need to run CMake directly.
+
+Continuous integration (CI) and continuous deployment (CD) are hosted by Azure Pipelines:
+
+<p align="center"><b><a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary">buildtest-awkward</a></b> (CI) and <b><a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary">deploy-awkward</a></b> (CD)</p>
 
 ## Building projects that depend on Awkward
 
@@ -114,14 +124,14 @@ If you also want to bind your C++ to Python and share Awkward Arrays between mod
 
 ## Roadmap
 
-**The six-month sprint:**
+**The six-month ~~sprint~~ marathon:**
 
    * [X] **September 2019:** Set up CI/CD; define jagged array types in C++; pervasive infrastructure like database-style indexing.
    * [X] **October 2019:** NumPy-compliant slicing; the Numba implementation. Feature parity will be maintained in Numba continuously.
    * [X] **November 2019:** Fillable arrays to create columnar data; high-level type objects; all list and record types.
    * [X] **December 2019:** The `awkward.Array` user interface; behavioral mix-ins, including the string type.
    * [X] **January 2020:** [NEP 13](https://www.numpy.org/neps/nep-0013-ufunc-overrides.html) and [NEP 18](https://www.numpy.org/neps/nep-0018-array-function-protocol.html); the rest of the array nodes: option and union types, indirection.
-   * [ ] **February 2020:** The array operations: flattening, padding, concatenating, combinatorics, etc. and array types needed for [Uproot](https://github.com/scikit-hep/awkward-1.0/milestone/1) and [Arrow/Parquet](https://github.com/scikit-hep/awkward-1.0/milestone/3) (chunked, virtual, masked, etc.).
+   * [X] **February 2020:** The array operations: flattening, padding, concatenating, combinatorics, etc. and array types needed for [Uproot](https://github.com/scikit-hep/awkward-1.0/milestone/1) and [Arrow/Parquet](https://github.com/scikit-hep/awkward-1.0/milestone/3) (chunked, virtual, masked, etc.).
 
 **Updating dependent libraries:**
 
@@ -131,7 +141,7 @@ If you also want to bind your C++ to Python and share Awkward Arrays between mod
 Most users will see Awkward 1.0 for the first time when uproot 4.0 is released.
 
 <br>
-<p align="center"><b>Progress is currently on track.</b></p>
+<p align="center"><b>Progress is a little behind: operations and Arrow conversions are not done.</b></p>
 <br>
 
 ### Checklist of features for the six-month sprint
@@ -161,12 +171,10 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `RecordArray`: the new `Table` _without_ lazy-slicing.
       * [X] `IndexedArray` and `IndexedOptionArray`: the old `IndexedArray` and `IndexedMaskedArray`; the latter has option type.
       * [X] `UnionArray` (issue [#54](https://github.com/scikit-hep/awkward-1.0/issues/54)): same as the old version.
-         * [ ] Implement it in Numba as well.
       * [ ] `BitMaskedArray` (issue [#58](https://github.com/scikit-hep/awkward-1.0/issues/58)): for nullable data with a bit mask (for Arrow).
       * [ ] `UnmaskedArray` (issue [#59](https://github.com/scikit-hep/awkward-1.0/issues/59)): for optional type without actually having a mask.
-      * [ ] `SlicedArray` (issue [#55](https://github.com/scikit-hep/awkward-1.0/issues/55)): lazy-slicing (from old `Table`) that can be applied to any type.
-      * [ ] `ChunkedArray` (issue [#56](https://github.com/scikit-hep/awkward-1.0/issues/56)): same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required.
-      * [ ] `PyVirtualArray` (issue [#57](https://github.com/scikit-hep/awkward-1.0/issues/57)): same as old `VirtualArray`, but it only works in Python (passes _through_ C++).
+      * [ ] `ChunkedArray` (issue [#56](https://github.com/scikit-hep/awkward-1.0/issues/56)): same as the old version, except that the type is a union if chunks conflict, not an error, and knowledge of all chunk sizes is always required. Also, this will only be available on the top of a hierarchy (without nesting).
+      * [ ] `VirtualArray` (issue [#57](https://github.com/scikit-hep/awkward-1.0/issues/57)): same as old `VirtualArray`.
    * [X] Describe high-level types using [datashape](https://datashape.readthedocs.io/en/latest/) and possibly also an in-house schema. (Emit datashape _strings_ from C++.)
    * [ ] Translation to and from Apache Arrow and Parquet in C++ (issue [#68](https://github.com/scikit-hep/awkward-1.0/issues/68)).
    * [X] Layer 1 interface `Array`:
@@ -207,7 +215,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
 
    * [ ] GPU implementations of the cpu-kernels in Layer 4, with the Layer 3 C++ passing a "device" variable at every level of the layout to indicate whether the data pointers refer to main memory or a particular GPU.
    * [ ] CPU-acceleration of the cpu-kernels using vectorization and other tricks.
-   * [ ] Explicit interface with [NumExpr](https://numexpr.readthedocs.io/en/latest/index.html).
+   * [X] Explicit interface with [NumExpr](https://numexpr.readthedocs.io/en/latest/index.html).
    * [ ] Explicit interface with [Dask](https://dask.org).
    * [ ] Demonstrate Awkward 1.0 as a C++ wrapping library with [FastJet](http://fastjet.fr/).
    * [ ] Deferred array types:
@@ -217,6 +225,8 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [ ] `SparseArray`: same as the old version, but now we need a good lookup mechanism.
       * [ ] `RegularChunkedArray`: like a `ChunkedArray`, but all chunks are known to have the same size.
       * [ ] `AmorphousChunkedArray`: a `ChunkedArray` without known chunk lengths (maybe not ever).
+      * [ ] `UnionArray` in Numba. Have to [somehow deal with heterogeneity](https://github.com/scikit-hep/awkward-1.0/pull/118#issuecomment-590542012).
+      * [ ] Strings in Numba (issue [#124](https://github.com/scikit-hep/awkward-1.0/issues/124)).
    * [ ] Deferred operations:
       * [ ] `awkward.join`: performs an inner join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event intersection, zipping all fields.
       * [ ] `awkward.union`: performs an outer join of multiple arrays; requires `Identity`. Because the `Identity` is a surrogate index, this is effectively a per-event union, zipping fields where possible.

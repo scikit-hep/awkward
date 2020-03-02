@@ -7,7 +7,7 @@
 #include <pybind11/numpy.h>
 
 #include "awkward/Content.h"
-#include "awkward/fillable/FillableArray.h"
+#include "awkward/builder/ArrayBuilder.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/RegularArray.h"

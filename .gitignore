@@ -19,15 +19,11 @@ dependent-project/cmake_pybind11
 *.log
 _minted-*
 
-############################################################# Doxygen
-
-awkward1/signatures/*.xsd
-awkward1/signatures/*.xslt
-awkward1/signatures/index.xml
-awkward1/signatures/dir_*.xml
-awkward1/signatures/namespace*.xml
-
 ############################################################# Python
+
+# Awkward directory at top-level is temporary
+/awkward1/
+/localbuild/
 
 # Byte-compiled / optimized / DLL files
 __pycache__
@@ -35,6 +31,7 @@ __pycache__
 *$py.class
 
 # Distribution / packaging
+_skbuild/
 .Python
 env/
 build/
@@ -117,3 +114,10 @@ Testing/
 *.exe
 *.out
 *.app
+
+# Python environments
+/.env/*
+
+# Pip stuff
+/pip-wheel-metadata/*
+/_skbuild/*

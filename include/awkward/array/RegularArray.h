@@ -13,7 +13,7 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  class RegularArray: public Content {
+  class EXPORT_SYMBOL RegularArray: public Content {
   public:
     RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<Content>& content, int64_t size);
     const std::shared_ptr<Content> content() const;

@@ -6,7 +6,7 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
-  class ListType: public Type {
+  class EXPORT_SYMBOL ListType: public Type {
   public:
     ListType(const util::Parameters& parameters, const std::shared_ptr<Type>& type);
 

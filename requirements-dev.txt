@@ -1,0 +1,4 @@
+numba>=0.46.0;python_version>="3"
+pandas>=0.24.0;python_version>="3"
+numexpr;python_version>="3"
+autograd;python_version>="3"

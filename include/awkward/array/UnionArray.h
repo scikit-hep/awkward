@@ -15,7 +15,7 @@
 
 namespace awkward {
   template <typename T, typename I>
-  class UnionArrayOf: public Content {
+  class EXPORT_SYMBOL UnionArrayOf: public Content {
   public:
     static const IndexOf<I> regular_index(const IndexOf<T>& tags);
 

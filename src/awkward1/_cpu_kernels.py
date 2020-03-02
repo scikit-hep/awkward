@@ -1,0 +1,21 @@
+# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+
+from __future__ import absolute_import
+
+import os
+import ctypes
+import ctypes.util
+import platform
+import pkg_resources
+
+libpath = ctypes.util.find_library("awkward")
+if libpath is None:
+    if platform.system() == "Windows":
+        name = "awkward-cpu-kernels.lib"
+    elif platform.system() == "Darwin":
+        name = "libawkward-cpu-kernels.dylib"
+    else:
+        name = "libawkward-cpu-kernels.so"
+    libpath = pkg_resources.resource_filename("awkward1", "libawkward-cpu-kernels.so")
+
+lib = ctypes.cdll.LoadLibrary(libpath)

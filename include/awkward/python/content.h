@@ -6,7 +6,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "awkward/fillable/FillableArray.h"
+#include "awkward/builder/ArrayBuilder.h"
 #include "awkward/Iterator.h"
 #include "awkward/Content.h"
 #include "awkward/array/EmptyArray.h"
@@ -25,9 +25,21 @@ namespace ak = awkward;
 
 ak::Slice toslice(py::object obj);
 
-py::class_<ak::FillableArray> make_FillableArray(const py::handle& m, const std::string& name);
+py::class_<ak::ArrayBuilder> make_ArrayBuilder(const py::handle& m, const std::string& name);
 
 py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>> make_Iterator(const py::handle& m, const std::string& name);
+
+class PersistentSharedPtr {
+public:
+  PersistentSharedPtr(const std::shared_ptr<ak::Content>& ptr);
+  py::object layout() const;
+  size_t ptr() const;
+
+private:
+  const std::shared_ptr<ak::Content> ptr_;
+};
+
+py::class_<PersistentSharedPtr> make_PersistentSharedPtr(const py::handle& m, const std::string& name);
 
 py::class_<ak::Content, std::shared_ptr<ak::Content>> make_Content(const py::handle& m, const std::string& name);
 

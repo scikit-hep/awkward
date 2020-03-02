@@ -15,7 +15,7 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  class NumpyArray: public Content {
+  class EXPORT_SYMBOL NumpyArray: public Content {
   public:
     static const std::shared_ptr<Type> unwrap_regulartype(const std::shared_ptr<Type>& type, const std::vector<ssize_t>& shape);
     static const std::unordered_map<std::type_index, std::string> format_map;

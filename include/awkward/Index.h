@@ -14,13 +14,13 @@ namespace awkward {
   template <typename T>
   class IndexOf;
 
-  class Index {
+  class EXPORT_SYMBOL Index {
     virtual const std::shared_ptr<Index> shallow_copy() const = 0;
     virtual IndexOf<int64_t> to64() const = 0;
   };
 
   template <typename T>
-  class IndexOf: public Index {
+  class EXPORT_SYMBOL IndexOf: public Index {
   public:
     IndexOf<T>(int64_t length);
     IndexOf<T>(const std::shared_ptr<T>& ptr, int64_t offset, int64_t length);
