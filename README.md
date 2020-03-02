@@ -58,19 +58,13 @@ The original Awkward 0.x will be available in perpetuity as **awkward0**, but on
 
 ## Normal installation
 
-Normally, you would install Awkward [from PyPI](https://pypi.org/project/awkward1/) using pip:
-
-```bash
-
-```
-
-Python wheels are available [on PyPI](https://pypi.org/project/awkward1/) for most operating systems and versions of Python, so most users can do
+Normally, you would install Awkward [from PyPI](https://pypi.org/project/awkward1/) using pip
 
 ```bash
 pip install awkward1
 ```
 
-to get the latest release of Awkward 1.0. If a wheel does not exist for you, the above command should attempt to compile from source, downloading any dependencies it needs to do that.
+to get the latest release of Awkward 1.0 as a precompiled wheel. If a wheel does not exist for you, the above command would attempt to compile from source, downloading any dependencies it needs to do that.
 
 ## Manually installing from source
 
