@@ -6,6 +6,7 @@ import platform
 import subprocess
 import sys
 import distutils.util
+import multiprocessing
 
 import setuptools
 import setuptools.command.build_ext
@@ -26,7 +27,7 @@ class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
-    
+
 class CMakeBuild(setuptools.command.build_ext.build_ext):
     def run(self):
         try:
@@ -54,9 +55,10 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             if sys.maxsize > 2**32:
                 cmake_args += ["-A", "x64"]
             build_args += ["--", "/m"]
-
         else:
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
+
+        build_args += ["-j", str(multiprocessing.cpu_count())]
 
         if not os.path.exists(self.build_temp):
              os.makedirs(self.build_temp)
@@ -87,13 +89,25 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             print("")
         print("==========================================================")
 
-# Libraries do not exist yet, so they cannot be determined with a glob pattern.
 if platform.system() == "Windows":
+    # Libraries are not installed system-wide on Windows, but they do have to be in the awkward1 directory.
     libraries = []
+
+    class Install(setuptools.command.install.install):
+        def run(self):
+            super(Install, self).run()
+            for x in os.listdir(os.path.join(self.build_lib, "lib")):
+                shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "awkward1", x))
+        print("==========================================================")
+        print("From", os.path.join(self.build_lib, "lib") + ":")
+        print("\n".join(os.listdir(os.path.join(self.build_lib, "lib"))))
+        print("To", os.path.join(self.prefix, "awkward1") + ":")
+        print("\n".join(os.path.join(self.prefix, "awkward1")))
+        print("==========================================================")
+
 else:
-    libdir_base = os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1]))
-    libdir1 = os.path.join(libdir_base, "lib")
-    libdir2 = os.path.join(libdir_base, "awkward1")
+    # Libraries do not exist yet, so they cannot be determined with a glob pattern.
+    libdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "lib")
     prefix = "lib"
     static = ".a"
     if platform.system() == "Windows":
@@ -104,10 +118,12 @@ else:
         shared = ".dylib"
     else:
         shared = ".so"
-    libraries = [("lib", [os.path.join(libdir1, prefix + "awkward-cpu-kernels-static" + static),
-                          os.path.join(libdir2, prefix + "awkward-cpu-kernels" + shared),
-                          os.path.join(libdir1, prefix + "awkward-static" + static),
-                          os.path.join(libdir2, prefix + "awkward" + shared)])]
+    libraries = [("lib", [os.path.join(libdir, prefix + "awkward-cpu-kernels-static" + static),
+                          os.path.join(libdir, prefix + "awkward-cpu-kernels" + shared),
+                          os.path.join(libdir, prefix + "awkward-static" + static),
+                          os.path.join(libdir, prefix + "awkward" + shared)])]
+
+    Install = setuptools.command.install.install
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(where="src"),
@@ -141,7 +157,8 @@ setup(name = "awkward1",
 
       # cmake_args=['-DBUILD_TESTING=OFF'],      # for scikit-build
       ext_modules = [CMakeExtension("awkward")], # NOT scikit-build
-      cmdclass = {"build_ext": CMakeBuild},      # NOT scikit-build
+      cmdclass = {"build_ext": CMakeBuild,       # NOT scikit-build
+                  "install": Install},
 
       classifiers = [
 #         "Development Status :: 1 - Planning",
