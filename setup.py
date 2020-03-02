@@ -7,6 +7,7 @@ import subprocess
 import sys
 import distutils.util
 import multiprocessing
+import shutil
 
 import setuptools
 import setuptools.command.build_ext
@@ -99,11 +100,11 @@ if platform.system() == "Windows":
     class Install(setuptools.command.install.install):
         def run(self):
             super(Install, self).run()
-            for x in os.listdir(os.path.join(self.build_lib, "lib")):
-                shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "awkward1", x))
             print("==========================================================")
             print("From", os.path.join(self.build_lib, "lib") + ":")
             print("\n".join(os.listdir(os.path.join(self.build_lib, "lib"))))
+            for x in os.listdir(os.path.join(self.build_lib, "lib")):
+                shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "awkward1", x))
             print("To", os.path.join(self.prefix, "awkward1") + ":")
             print("\n".join(os.path.join(self.prefix, "awkward1")))
             print("==========================================================")
