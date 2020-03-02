@@ -11,6 +11,7 @@ import json
 import glob
 
 arguments = argparse.ArgumentParser()
+arguments.add_argument("--clean", default=False, action="store_true")
 arguments.add_argument("--ctest", default=True, action="store_true")
 arguments.add_argument("--no-ctest", action="store_true")
 arguments.add_argument("--buildpython", default=True, action="store_true")
@@ -26,6 +27,20 @@ if args.buildpython == args.no_buildpython:
 
 args.ctest = not args.no_ctest
 args.buildpython = not args.no_buildpython
+
+try:
+    git_config = open(".git/config").read()
+except:
+    git_config = ""
+
+if "url = https://github.com/scikit-hep/awkward-1.0.git" not in git_config:
+    arguments.error("localbuild must be executed in the head of the awkward-1.0 tree")
+
+if args.clean:
+    for x in ("localbuild", "awkward1", ".pytest_cache", "tests/__pycache__"):
+        if os.path.exists(x):
+            shutil.rmtree(x)
+    sys.exit()
 
 thisstate = {"ctest": args.ctest, "buildpython": args.buildpython, "python_executable": sys.executable}
 
