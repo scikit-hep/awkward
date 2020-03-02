@@ -112,9 +112,7 @@ for more information. The build is based on CMake; see [localbuild.py](./localbu
 
 Continuous integration (CI) and continuous deployment (CD) are hosted by Azure Pipelines:
 
-<br>
-<p align="center"><a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary">buildtest-awkward</a> (CI) and <a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary">deploy-awkward</a> (CD)</p>
-<br>
+<p align="center"><b><a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary">buildtest-awkward</a></b> (CI) and <b><a href="https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary">deploy-awkward</a></b> (CD)</p>
 
 ## Building projects that depend on Awkward
 
