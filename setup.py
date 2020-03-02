@@ -114,11 +114,7 @@ else:
     libdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "lib")
     prefix = "lib"
     static = ".a"
-    if platform.system() == "Windows":
-        static = ".lib"
-        shared = ".lib"   # not .dll?
-        prefix = ""
-    elif platform.system() == "Darwin":
+    if platform.system() == "Darwin":
         shared = ".dylib"
     else:
         shared = ".so"
@@ -133,13 +129,14 @@ setup(name = "awkward1",
       packages = setuptools.find_packages(where="src"),
       package_dir = {"": "src"},
       package_data = {"": ["*.dll"]},
-      data_files = libraries + [("include/awkward",             glob.glob("include/awkward/*.h")),
-                                ("include/awkward/cpu-kernels", glob.glob("include/awkward/cpu-kernels/*.h")),
-                                ("include/awkward/python",      glob.glob("include/awkward/python/*.h")),
-                                ("include/awkward/array",       glob.glob("include/awkward/array/*.h")),
-                                ("include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
-                                ("include/awkward/io",          glob.glob("include/awkward/io/*.h")),
-                                ("include/awkward/type",        glob.glob("include/awkward/type/*.h"))],
+      data_files = libraries + [
+          ("include/awkward",             glob.glob("include/awkward/*.h")),
+          ("include/awkward/cpu-kernels", glob.glob("include/awkward/cpu-kernels/*.h")),
+          ("include/awkward/python",      glob.glob("include/awkward/python/*.h")),
+          ("include/awkward/array",       glob.glob("include/awkward/array/*.h")),
+          ("include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
+          ("include/awkward/io",          glob.glob("include/awkward/io/*.h")),
+          ("include/awkward/type",        glob.glob("include/awkward/type/*.h"))],
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
