@@ -16,7 +16,7 @@ elif platform.system() == "Darwin":
     name = "libawkward.dylib"
 else:
     name = "libawkward.so"
-libpath = pkg_resources.resource_filename("awkward1", "libawkward.so")
+libpath = pkg_resources.resource_filename("awkward1", name)
 
 lib = ctypes.cdll.LoadLibrary(libpath)
 

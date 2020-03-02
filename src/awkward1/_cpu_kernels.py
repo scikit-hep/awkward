@@ -16,6 +16,6 @@ elif platform.system() == "Darwin":
     name = "libawkward-cpu-kernels.dylib"
 else:
     name = "libawkward-cpu-kernels.so"
-libpath = pkg_resources.resource_filename("awkward1", "libawkward-cpu-kernels.so")
+libpath = pkg_resources.resource_filename("awkward1", name)
 
 lib = ctypes.cdll.LoadLibrary(libpath)

@@ -77,8 +77,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         print("Contents of " + os.path.join(extdir, "lib"))
         print("")
         print("\n".join(os.listdir(os.path.join(extdir, "lib"))))
+        print("")
+        print("Contents of " + os.path.join(extdir, "awkward1"))
+        print("")
+        print("\n".join(os.listdir(os.path.join(extdir, "awkward1"))))
+        print("")
         print("==========================================================")
-        
+
 # Libraries do not exist yet, so they cannot be determined with a glob pattern.
 if platform.system() == "Windows":
     libraries = []
