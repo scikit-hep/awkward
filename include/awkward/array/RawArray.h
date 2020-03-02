@@ -46,7 +46,7 @@ namespace awkward {
   }
 
   template <typename T>
-  class RawArrayOf: public Content {
+  class EXPORT_SYMBOL RawArrayOf: public Content {
   public:
     RawArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<T>& ptr, const int64_t offset, const int64_t length, const int64_t itemsize)
         : Content(identities, parameters)

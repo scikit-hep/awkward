@@ -9,7 +9,7 @@
 #include "awkward/cpu-kernels/util.h"
 
 namespace awkward {
-  class ArrayBuilderOptions {
+  class EXPORT_SYMBOL ArrayBuilderOptions {
   public:
     ArrayBuilderOptions(int64_t initial, double resize);
     int64_t initial() const;

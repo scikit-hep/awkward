@@ -47,7 +47,7 @@ jobs:
 
       - script: |
           python -m pip install --upgrade pip
-          python -m pip install twine
+          python -m pip install twine scikit-build cmake
           docker pull $(DOCKER_IMAGE)
         displayName: "Install"
 
@@ -132,7 +132,7 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python setup.py bdist_wheel
+          python -m pip wheel .
         displayName: "Build"
 
       - script: |
@@ -212,7 +212,7 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python setup.py bdist_wheel
+          python -m pip wheel .
         displayName: "Build"
 
       - script: |

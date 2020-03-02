@@ -13,7 +13,7 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  class None: public Content {
+  class EXPORT_SYMBOL None: public Content {
   public:
     None();
 

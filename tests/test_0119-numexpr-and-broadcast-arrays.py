@@ -9,6 +9,8 @@ import numpy
 
 import awkward1
 
+numexpr = pytest.importorskip("numexpr")
+
 def test_numexpr():
     a = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     b = awkward1.Array([100, 200, 300])

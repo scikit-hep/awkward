@@ -12,7 +12,7 @@
 #include "awkward/Index.h"
 
 namespace awkward {
-  class Identities {
+  class EXPORT_SYMBOL Identities {
   public:
     typedef int64_t Ref;
     typedef std::vector<std::pair<int64_t, std::string>> FieldLoc;
@@ -50,7 +50,7 @@ namespace awkward {
   };
 
   template <typename T>
-  class IdentitiesOf: public Identities {
+  class EXPORT_SYMBOL IdentitiesOf: public Identities {
   public:
     IdentitiesOf<T>(const Ref ref, const FieldLoc& fieldloc, int64_t width, int64_t length);
     IdentitiesOf<T>(const Ref ref, const FieldLoc& fieldloc, int64_t offset, int64_t width, int64_t length, const std::shared_ptr<T> ptr);

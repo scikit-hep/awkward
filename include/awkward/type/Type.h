@@ -12,7 +12,7 @@
 namespace awkward {
   class Content;
 
-  class Type {
+  class EXPORT_SYMBOL Type {
   public:
     static std::shared_ptr<Type> none();
 

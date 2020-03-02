@@ -13,7 +13,7 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  class EmptyArray: public Content {
+  class EXPORT_SYMBOL EmptyArray: public Content {
   public:
     EmptyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters);
     const std::shared_ptr<Content> toNumpyArray(const std::string& format, ssize_t itemsize) const;

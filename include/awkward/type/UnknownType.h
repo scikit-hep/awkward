@@ -6,7 +6,7 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
-  class UnknownType: public Type {
+  class EXPORT_SYMBOL UnknownType: public Type {
   public:
     UnknownType(const util::Parameters& parameters);
 

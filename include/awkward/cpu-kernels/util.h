@@ -31,14 +31,14 @@
 #include <iostream>
 
 extern "C" {
-  struct Error {
+  struct EXPORT_SYMBOL Error {
     const char* str;
     int64_t identity;
     int64_t attempt;
     int64_t extra;
   };
-  struct Error success();
-  struct Error failure(const char* str, int64_t identity, int64_t attempt);
+  EXPORT_SYMBOL struct Error success();
+  EXPORT_SYMBOL struct Error failure(const char* str, int64_t identity, int64_t attempt);
 
   const int8_t   kMaxInt8   =                 127;   // 2**7  - 1
   const uint8_t  kMaxUInt8  =                 255;   // 2**8  - 1

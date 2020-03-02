@@ -6,7 +6,7 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
-  class ArrayType: public Type {
+  class EXPORT_SYMBOL ArrayType: public Type {
   public:
     ArrayType(const util::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t length);
 

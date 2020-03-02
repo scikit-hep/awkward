@@ -12,7 +12,7 @@
 
 namespace awkward {
   template <typename T>
-  class ListOffsetArrayOf: public Content {
+  class EXPORT_SYMBOL ListOffsetArrayOf: public Content {
   public:
     ListOffsetArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& offsets, const std::shared_ptr<Content>& content);
     const IndexOf<T> starts() const;
