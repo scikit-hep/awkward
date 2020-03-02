@@ -533,11 +533,10 @@ ERROR awkward_emptyarray_index_rpad(int64_t* toindex, int64_t tolength) {
 }
 
 ERROR awkward_index_rpad(int64_t* toindex, const int64_t fromlength, int64_t tolength) {
-  int64_t length = (tolength < fromlength) ? tolength : fromlength;
-  for (int64_t i = 0; i < length; i++) {
+  for (int64_t i = 0; i < fromlength; i++) {
     toindex[i] = i;
   }
-  for (int64_t i = length; i < tolength; i++) {
+  for (int64_t i = fromlength; i < tolength; i++) {
     toindex[i] = -1;
   }
   return success();
@@ -580,22 +579,21 @@ ERROR awkward_index_inject_rpad(int64_t* toindex, const int64_t* fromindex, int6
 }
 
 template <typename C>
-ERROR awkward_listarray_index_length_count_64(int64_t tolength, const C* fromstarts, const C* fromstops, int64_t lenstarts) {
-  int64_t length = 0;
+ERROR awkward_listarray_index_length_count_64(int64_t* tolength, const C* fromstarts, const C* fromstops, int64_t lenstarts) {
+  *tolength = 0;
   for (int64_t i = 0; i < lenstarts; i++) {
-    length += fromstops[i] - fromstarts[i];
+    *tolength += fromstops[i] - fromstarts[i];
   }
-  tolength = length;
 
   return success();
 }
-ERROR awkward_listarray32_index_length_count_64(int64_t tolength, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts) {
+ERROR awkward_listarray32_index_length_count_64(int64_t* tolength, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts) {
   return awkward_listarray_index_length_count_64<int32_t>(tolength, fromstarts, fromstops, lenstarts);
 }
-ERROR awkward_listarrayU32_index_length_count_64(int64_t tolength, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts) {
+ERROR awkward_listarrayU32_index_length_count_64(int64_t* tolength, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts) {
   return awkward_listarray_index_length_count_64<uint32_t>(tolength, fromstarts, fromstops, lenstarts);
 }
-ERROR awkward_listarray64_index_length_count_64(int64_t tolength, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts) {
+ERROR awkward_listarray64_index_length_count_64(int64_t* tolength, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts) {
   return awkward_listarray_index_length_count_64<int64_t>(tolength, fromstarts, fromstops, lenstarts);
 }
 
@@ -669,6 +667,51 @@ ERROR awkward_listarray64_broadcast_toindex_rpad_64(int64_t* toindex, const int6
   return awkward_listarray_broadcast_toindex_rpad<int64_t, int64_t>(toindex, fromindex, fromstarts, fromstops, tolength, lenstarts, startsoffset, stopsoffset);
 }
 
+template <typename C>
+ERROR awkward_listoffsetarray_count_toindex_rpad(int64_t* tolength, const C* fromoffsets, int64_t lenoffsets, int64_t offset) {
+  int64_t count = 0;
+  for (int64_t i = 0;  i < lenoffsets - 1;  i++) {
+    int64_t stride = (int64_t)(fromoffsets[offset + i + 1] - fromoffsets[offset + i]);
+    for (int64_t j = 0; j < stride; j++) {
+      count = count + 1;
+    }
+  }
+  *tolength = count;
+
+  return success();
+}
+ERROR awkward_listoffsetarray32_count_toindex_rpad(int64_t* tolength, const int32_t* fromoffsets, int64_t lenoffsets, int64_t offset) {
+  return awkward_listoffsetarray_count_toindex_rpad<int32_t>(tolength, fromoffsets, lenoffsets, offset);
+}
+ERROR awkward_listoffsetarrayU32_count_toindex_rpad(int64_t* tolength, const uint32_t* fromoffsets, int64_t lenoffsets, int64_t offset) {
+  return awkward_listoffsetarray_count_toindex_rpad<uint32_t>(tolength, fromoffsets, lenoffsets, offset);
+}
+ERROR awkward_listoffsetarray64_count_toindex_rpad(int64_t* tolength, const int64_t* fromoffsets, int64_t lenoffsets, int64_t offset) {
+  return awkward_listoffsetarray_count_toindex_rpad<int64_t>(tolength, fromoffsets, lenoffsets, offset);
+}
+
+template <typename T, typename C>
+ERROR awkward_listoffsetarray_broadcast_toindex_rpad(T* toindex, const C* fromoffsets, int64_t tolength, int64_t lenoffsets, int64_t offset) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < lenoffsets - 1;  i++) {
+    int64_t stride = (int64_t)(fromoffsets[offset + i + 1] - fromoffsets[offset + i]);
+    for (int64_t j = 0; j < stride; j++) {
+      toindex[k++] = fromoffsets[offset + i] + j;
+    }
+  }
+
+  return success();
+}
+ERROR awkward_listoffsetarray32_broadcast_toindex_rpad_64(int64_t* toindex, const int32_t* fromoffsets, int64_t tolength, int64_t lenoffsets, int64_t offset) {
+  return awkward_listoffsetarray_broadcast_toindex_rpad<int64_t, int32_t>(toindex, fromoffsets, tolength, lenoffsets, offset);
+}
+ERROR awkward_listoffsetarrayU32_broadcast_toindex_rpad_64(int64_t* toindex, const uint32_t* fromoffsets, int64_t tolength, int64_t lenoffsets, int64_t offset) {
+  return awkward_listoffsetarray_broadcast_toindex_rpad<int64_t, uint32_t>(toindex, fromoffsets, tolength, lenoffsets, offset);
+}
+ERROR awkward_listoffsetarray64_broadcast_toindex_rpad_64(int64_t* toindex, const int64_t* fromoffsets, int64_t tolength, int64_t lenoffsets, int64_t offset) {
+  return awkward_listoffsetarray_broadcast_toindex_rpad<int64_t, int64_t>(toindex, fromoffsets, tolength, lenoffsets, offset);
+}
+
 template <typename T, typename C>
 ERROR awkward_listoffsetarray_rpad(T* toindex, const C* fromoffsets, int64_t fromlength, int64_t length) {
   // FIXME: if length < an offset
@@ -676,9 +719,7 @@ ERROR awkward_listoffsetarray_rpad(T* toindex, const C* fromoffsets, int64_t fro
   for (int64_t i = 0; i < fromlength - 1; i++) {
     int64_t diff = (T)(fromoffsets[i + 1] - fromoffsets[i]);
     for (int64_t x = 0; x < diff; x++) {
-      if (x < length) {
-        toindex[count++] = (T)fromoffsets[i] + x;
-      }
+      toindex[count++] = (T)fromoffsets[i] + x;
     }
     for (int64_t y = diff; y < length; y++) {
       toindex[count++] = -1;
@@ -694,6 +735,33 @@ ERROR awkward_listoffsetarrayU32_rpad_64(int64_t* toindex, const uint32_t* fromo
 }
 ERROR awkward_listoffsetarray64_rpad_64(int64_t* toindex, const int64_t* fromoffsets, int64_t fromlength, int64_t length) {
   return awkward_listoffsetarray_rpad<int64_t, int64_t>(toindex, fromoffsets, fromlength, length);
+}
+
+template <typename T, typename C>
+ERROR awkward_listoffsetarray_rpad_and_clip(T* toindex, const C* fromoffsets, int64_t fromlength, int64_t length) {
+  // FIXME: if length < an offset
+  int64_t count = 0;
+  for (int64_t i = 0; i < fromlength - 1; i++) {
+    int64_t diff = (T)(fromoffsets[i + 1] - fromoffsets[i]);
+    for (int64_t x = 0; x < diff; x++) {
+      if (x < length) {
+        toindex[count++] = (T)fromoffsets[i] + x;
+      }
+    }
+    for (int64_t y = diff; y < length; y++) {
+      toindex[count++] = -1;
+    }
+  }
+  return success();
+}
+ERROR awkward_listoffsetarray32_rpad_and_clip_64(int64_t* toindex, const int32_t* fromoffsets, int64_t fromlength, int64_t length) {
+  return awkward_listoffsetarray_rpad_and_clip<int64_t, int32_t>(toindex, fromoffsets, fromlength, length);
+}
+ERROR awkward_listoffsetarrayU32_rpad_and_clip_64(int64_t* toindex, const uint32_t* fromoffsets, int64_t fromlength, int64_t length) {
+  return awkward_listoffsetarray_rpad_and_clip<int64_t, uint32_t>(toindex, fromoffsets, fromlength, length);
+}
+ERROR awkward_listoffsetarray64_rpad_and_clip_64(int64_t* toindex, const int64_t* fromoffsets, int64_t fromlength, int64_t length) {
+  return awkward_listoffsetarray_rpad_and_clip<int64_t, int64_t>(toindex, fromoffsets, fromlength, length);
 }
 
 template <typename FROM, typename TO>

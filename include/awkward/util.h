@@ -99,7 +99,7 @@ namespace awkward {
     template <typename T>
     ERROR awkward_indexedarray_rpad_64(int64_t* toindex, const T* fromindex, int64_t tolength, int64_t fromlength);
     template <typename T>
-    ERROR awkward_listarray_index_length_count_64(int64_t tolength, const T* fromstarts, const T* fromstops, int64_t lenstarts);
+    ERROR awkward_listarray_index_length_count_64(int64_t* tolength, const T* fromstarts, const T* fromstops, int64_t lenstarts);
     template <typename T>
     ERROR awkward_listarray_broadcast_toindex_64(int64_t* toindex, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>
@@ -107,7 +107,13 @@ namespace awkward {
     template <typename T>
     ERROR awkward_listarray_rpad_64(int64_t* tostarts, int64_t* tostops, const T* fromstarts, const T* fromstops, int64_t tolength, int64_t fromlength, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>
+    ERROR awkward_listoffsetarray_count_toindex_rpad(int64_t* tolength, const T* fromoffsets, int64_t lenoffsets, int64_t offset);
+    template <typename T>
+    ERROR awkward_listoffsetarray_broadcast_toindex_rpad_64(int64_t* toindex, const T* fromoffsets, int64_t tolength, int64_t lenoffsets, int64_t offset);
+    template <typename T>
     ERROR awkward_listoffsetarray_rpad_64(int64_t* toindex, const T* fromoffsets, int64_t fromlength, int64_t length);
+    template <typename T>
+    ERROR awkward_listoffsetarray_rpad_and_clip_64(int64_t* toindex, const T* fromoffsets, int64_t fromlength, int64_t length);
     template <typename T>
     ERROR awkward_listarray_flatten_length(int64_t* tolen, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>

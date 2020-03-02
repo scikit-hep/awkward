@@ -544,10 +544,10 @@ namespace awkward {
         return shallow_copy();
       }
 
-      return toListOffsetArray64().get()->rpad(length, axis);
+      return toListOffsetArray64().get()->rpad(length, toaxis);
     }
     else {
-      out = out.get()->rpad(length, axis - 1);
+      return toListOffsetArray64().get()->rpad(length, toaxis);
       return std::make_shared<RegularArray>(identities_, parameters_, out, size_);
     }
   }

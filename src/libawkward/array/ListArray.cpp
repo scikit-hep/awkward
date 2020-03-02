@@ -828,7 +828,7 @@ namespace awkward {
     std::shared_ptr<Content> out = content();
     int64_t tolength = 0;
     struct Error err1 = util::awkward_listarray_index_length_count_64<T>(
-      tolength,
+      &tolength,
       starts_.ptr().get(),
       stops_.ptr().get(),
       starts_.length());
@@ -903,7 +903,7 @@ namespace awkward {
     std::shared_ptr<Content> out = content();
     int64_t tolength = 0;
     struct Error err1 = util::awkward_listarray_index_length_count_64<T>(
-      tolength,
+      &tolength,
       starts_.ptr().get(),
       stops_.ptr().get(),
       starts_.length());
