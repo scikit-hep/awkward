@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import os
 import ctypes
 import ctypes.util
+import platform
 
 libpath = ctypes.util.find_library("awkward")
 if libpath is None:
