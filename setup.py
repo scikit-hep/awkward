@@ -58,7 +58,10 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         else:
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
 
-        build_args += ["-j", str(multiprocessing.cpu_count())]
+        if platform.system() == "Windows":
+            build_args += ["/m"]
+        else:
+            build_args += ["-j", str(multiprocessing.cpu_count())]
 
         if not os.path.exists(self.build_temp):
              os.makedirs(self.build_temp)
