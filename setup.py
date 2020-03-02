@@ -43,8 +43,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         cmake_args = ["-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
                       "-DPYTHON_EXECUTABLE=" + sys.executable,
                       "-DPYBUILD=ON",
-                      "-DBUILD_TESTING=OFF",
-                      ]
+                      "-DBUILD_TESTING=OFF"]
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
@@ -70,52 +69,46 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         subprocess.check_call(["cmake", "--build", build_dir] + build_args)
         subprocess.check_call(["cmake", "--build", build_dir, "--target", "install"])
 
-### Libraries do not exist yet, so they cannot be determined with a glob pattern.
-libdir = os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1]), "lib")
-
-lib = "lib"
-static = ".a"
-
+        print("==========================================================")
+        print("Contents of " + extdir)
+        print("")
+        print("\n".join(os.listdir(extdir)))
+        print("")
+        print("Contents of " + os.path.join(extdir, "lib"))
+        print("")
+        print("\n".join(os.listdir(os.path.join(extdir, "lib"))))
+        print("==========================================================")
+        
+# Libraries do not exist yet, so they cannot be determined with a glob pattern.
 if platform.system() == "Windows":
-    static = ".lib"
-    shared = ".lib"
-    lib = ""
-elif platform.system() == "Darwin":
-    shared = ".dylib"
+    libraries = []
 else:
-    shared = ".so"
-
-libraries = [os.path.join(libdir, lib + "awkward-cpu-kernels-static" + static),
-             os.path.join(libdir, lib + "awkward-cpu-kernels" + shared),
-             os.path.join(libdir, lib + "awkward-static" + static),
-             os.path.join(libdir, lib + "awkward" + shared)]
-
-### Rejected alternative: explicit post-install copy results in files that aren't cleaned by pip uninstall.
-# 
-# class Install(setuptools.command.install.install):
-#     def run(self):
-#         super(Install, self).run()
-#         # for x in os.listdir(os.path.join(self.build_lib, "lib")):
-#         #     shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "lib", x))
-#         print("========================================================")
-#         print("os.listdir(self.build_lib)", os.listdir(self.build_lib))
-#         print("os.listdir(os.path.join(self.build_lib, 'lib'))", os.listdir(os.path.join(self.build_lib, 'lib')))
-#         print("os.path.join(self.prefix, 'lib')", os.path.join(self.prefix, 'lib'))
-#         print("========================================================")
-# 
-# cmdclass["install"] = Install
+    libdir = os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1]), "lib")
+    prefix = "lib"
+    static = ".a"
+    if platform.system() == "Windows":
+        static = ".lib"
+        shared = ".lib"   # not .dll?
+        prefix = ""
+    elif platform.system() == "Darwin":
+        shared = ".dylib"
+    else:
+        shared = ".so"
+    libraries = [("lib", [os.path.join(libdir, prefix + "awkward-cpu-kernels-static" + static),
+                          os.path.join(libdir, prefix + "awkward-cpu-kernels" + shared),
+                          os.path.join(libdir, prefix + "awkward-static" + static),
+                          os.path.join(libdir, prefix + "awkward" + shared)])]
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(where="src"),
       package_dir = {"": "src"},
-      data_files = [("include/awkward",             glob.glob("include/awkward/*.h")),
-                    ("include/awkward/cpu-kernels", glob.glob("include/awkward/cpu-kernels/*.h")),
-                    ("include/awkward/python",      glob.glob("include/awkward/python/*.h")),
-                    ("include/awkward/array",       glob.glob("include/awkward/array/*.h")),
-                    ("include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
-                    ("include/awkward/io",          glob.glob("include/awkward/io/*.h")),
-                    ("include/awkward/type",        glob.glob("include/awkward/type/*.h")),
-                    ("lib",                         libraries)],
+      data_files = libraries + [("include/awkward",             glob.glob("include/awkward/*.h")),
+                                ("include/awkward/cpu-kernels", glob.glob("include/awkward/cpu-kernels/*.h")),
+                                ("include/awkward/python",      glob.glob("include/awkward/python/*.h")),
+                                ("include/awkward/array",       glob.glob("include/awkward/array/*.h")),
+                                ("include/awkward/builder",     glob.glob("include/awkward/builder/*.h")),
+                                ("include/awkward/io",          glob.glob("include/awkward/io/*.h")),
+                                ("include/awkward/type",        glob.glob("include/awkward/type/*.h"))],
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
