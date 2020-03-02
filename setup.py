@@ -132,7 +132,7 @@ else:
 setup(name = "awkward1",
       packages = setuptools.find_packages(where="src"),
       package_dir = {"": "src"},
-      package_data = {"": "*.dll"},
+      package_data = {"": ["*.dll"]},
       data_files = libraries + [("include/awkward",             glob.glob("include/awkward/*.h")),
                                 ("include/awkward/cpu-kernels", glob.glob("include/awkward/cpu-kernels/*.h")),
                                 ("include/awkward/python",      glob.glob("include/awkward/python/*.h")),
