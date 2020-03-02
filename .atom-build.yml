@@ -1,2 +1,2 @@
-cmd: 'python setup.py build'
+cmd: 'pip install -v .'
 errorMatch: '(?<file>[/0-9a-zA-Z\._-]+):(?<line>\d+):(?<col>\d+):\s+error:\s+(?<message>.+)'

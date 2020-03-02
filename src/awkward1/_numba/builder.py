@@ -8,6 +8,7 @@ import numba.typing.ctypes_utils
 
 import awkward1.operations.convert
 import awkward1._util
+import awkward1._libawkward
 import awkward1._numba.layout
 import awkward1._numba.arrayview
 import awkward1._libawkward

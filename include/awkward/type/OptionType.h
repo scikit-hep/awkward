@@ -6,7 +6,7 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
-  class OptionType: public Type {
+  class EXPORT_SYMBOL OptionType: public Type {
   public:
     OptionType(const util::Parameters& parameters, const std::shared_ptr<Type>& type);
 

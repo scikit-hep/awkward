@@ -16,7 +16,7 @@ namespace awkward {
   const std::shared_ptr<Content> FromJsonString(const char* source, const ArrayBuilderOptions& options);
   const std::shared_ptr<Content> FromJsonFile(FILE* source, const ArrayBuilderOptions& options, int64_t buffersize);
 
-  class ToJson {
+  class EXPORT_SYMBOL ToJson {
   public:
     virtual void null() = 0;
     virtual void boolean(bool x) = 0;
@@ -30,7 +30,7 @@ namespace awkward {
     virtual void endrecord() = 0;
   };
 
-  class ToJsonString: public ToJson {
+  class EXPORT_SYMBOL ToJsonString: public ToJson {
   public:
     ToJsonString(int64_t maxdecimals);
     ~ToJsonString();
@@ -50,7 +50,7 @@ namespace awkward {
     Impl* impl_;
   };
 
-  class ToJsonPrettyString: public ToJson {
+  class EXPORT_SYMBOL ToJsonPrettyString: public ToJson {
   public:
     ToJsonPrettyString(int64_t maxdecimals);
     ~ToJsonPrettyString();
@@ -70,7 +70,7 @@ namespace awkward {
     Impl* impl_;
   };
 
-  class ToJsonFile: public ToJson {
+  class EXPORT_SYMBOL ToJsonFile: public ToJson {
   public:
     ToJsonFile(FILE* destination, int64_t maxdecimals, int64_t buffersize);
     ~ToJsonFile();
@@ -89,7 +89,7 @@ namespace awkward {
     Impl* impl_;
   };
 
-  class ToJsonPrettyFile: public ToJson {
+  class EXPORT_SYMBOL ToJsonPrettyFile: public ToJson {
   public:
     ToJsonPrettyFile(FILE* destination, int64_t maxdecimals, int64_t buffersize);
     ~ToJsonPrettyFile();

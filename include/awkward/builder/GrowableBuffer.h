@@ -13,7 +13,7 @@
 
 namespace awkward {
   template <typename T>
-  class GrowableBuffer {
+  class EXPORT_SYMBOL GrowableBuffer {
   public:
     static GrowableBuffer<T> empty(const ArrayBuilderOptions& options);
     static GrowableBuffer<T> empty(const ArrayBuilderOptions& options, int64_t minreserve);

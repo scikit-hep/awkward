@@ -12,7 +12,7 @@
 #include "awkward/Content.h"
 
 namespace awkward {
-  class RecordArray: public Content, public std::enable_shared_from_this<RecordArray> {
+  class EXPORT_SYMBOL RecordArray: public Content, public std::enable_shared_from_this<RecordArray> {
   public:
     RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
     RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents);

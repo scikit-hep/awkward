@@ -12,7 +12,7 @@
 
 namespace awkward {
   template <typename T>
-  class ListArrayOf: public Content {
+  class EXPORT_SYMBOL ListArrayOf: public Content {
   public:
     ListArrayOf<T>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& starts, const IndexOf<T>& stops, const std::shared_ptr<Content>& content);
     const IndexOf<T> starts() const;

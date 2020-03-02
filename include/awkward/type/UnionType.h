@@ -8,7 +8,7 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
-  class UnionType: public Type {
+  class EXPORT_SYMBOL UnionType: public Type {
   public:
     UnionType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types);
 

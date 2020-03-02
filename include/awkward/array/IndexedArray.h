@@ -15,7 +15,7 @@
 
 namespace awkward {
   template <typename T, bool ISOPTION>
-  class IndexedArrayOf: public Content {
+  class EXPORT_SYMBOL IndexedArrayOf: public Content {
   public:
     IndexedArrayOf<T, ISOPTION>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& index, const std::shared_ptr<Content>& content);
     const IndexOf<T> index() const;

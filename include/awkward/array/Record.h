@@ -6,7 +6,7 @@
 #include "awkward/array/RecordArray.h"
 
 namespace awkward {
-  class Record: public Content {
+  class EXPORT_SYMBOL Record: public Content {
   public:
     Record(const std::shared_ptr<const RecordArray> array, int64_t at);
     const std::shared_ptr<const RecordArray> array() const;
