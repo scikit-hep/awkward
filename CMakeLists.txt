@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-cmake_minimum_required(VERSION 3.13...3.16)
+cmake_minimum_required(VERSION 3.10...3.16)
 message("-- CMake version " ${CMAKE_VERSION})
 project (awkward LANGUAGES CXX)
 

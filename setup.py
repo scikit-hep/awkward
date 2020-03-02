@@ -22,9 +22,6 @@ extras["all"] = sum(extras.values(), [])
 
 tests_require = extras["test"]
 
-### for scikit-build:
-# DIR = os.path.dirname(os.path.realpath(__file__))
-
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
         Extension.__init__(self, name, sources=[])
@@ -75,21 +72,23 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
 ### Libraries do not exist yet, so they cannot be determined with a glob pattern.
 libdir = os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1]), "lib")
+
+lib = "lib"
+static = ".a"
+
 if platform.system() == "Windows":
-    libraries = [os.path.join(libdir, "awkward-cpu-kernels-static.lib"),
-                 os.path.join(libdir, "awkward-cpu-kernels.lib"),
-                 os.path.join(libdir, "awkward-static.lib"),
-                 os.path.join(libdir, "awkward.lib")]
+    static = ".lib"
+    shared = ".lib"
+    lib = ""
 elif platform.system() == "Darwin":
-    libraries = [os.path.join(libdir, "libawkward-cpu-kernels-static.a"),
-                 os.path.join(libdir, "libawkward-cpu-kernels.dylib"),
-                 os.path.join(libdir, "libawkward-static.a"),
-                 os.path.join(libdir, "libawkward.dylib")]
+    shared = ".dylib"
 else:
-    libraries = [os.path.join(libdir, "libawkward-cpu-kernels.so"),
-                 os.path.join(libdir, "libawkward-cpu-kernels-static.a"),
-                 os.path.join(libdir, "libawkward.so"),
-                 os.path.join(libdir, "libawkward-static.a")]
+    shared = ".so"
+
+libraries = [os.path.join(libdir, lib + "awkward-cpu-kernels-static" + static),
+             os.path.join(libdir, lib + "awkward-cpu-kernels" + shared),
+             os.path.join(libdir, lib + "awkward-static" + static),
+             os.path.join(libdir, lib + "awkward" + shared)]
 
 ### Rejected alternative: explicit post-install copy results in files that aren't cleaned by pip uninstall.
 # 
