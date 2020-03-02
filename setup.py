@@ -72,23 +72,26 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         print("==========================================================")
         print("Contents of " + extdir)
         print("")
-        print("\n".join(os.listdir(extdir)))
+        contents = os.listdir(extdir)
+        print("\n".join(contents))
         print("")
-        print("Contents of " + os.path.join(extdir, "lib"))
-        print("")
-        print("\n".join(os.listdir(os.path.join(extdir, "lib"))))
-        print("")
-        print("Contents of " + os.path.join(extdir, "awkward1"))
-        print("")
-        print("\n".join(os.listdir(os.path.join(extdir, "awkward1"))))
-        print("")
+        if "lib" in contents:
+            print("Contents of " + os.path.join(extdir, "lib"))
+            print("")
+            print("\n".join(os.listdir(os.path.join(extdir, "lib"))))
+            print("")
+        if "awkward1" in contents:
+            print("Contents of " + os.path.join(extdir, "awkward1"))
+            print("")
+            print("\n".join(os.listdir(os.path.join(extdir, "awkward1"))))
+            print("")
         print("==========================================================")
 
 # Libraries do not exist yet, so they cannot be determined with a glob pattern.
 if platform.system() == "Windows":
     libraries = []
 else:
-    libdir = os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1]), "lib")
+    libdir = os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1]), "awkward1")
     prefix = "lib"
     static = ".a"
     if platform.system() == "Windows":
