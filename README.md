@@ -56,7 +56,22 @@ Since Awkward 1.0 is not backward-compatible, existing users of Awkward 0.x will
 
 The original Awkward 0.x will be available in perpetuity as **awkward0**, but only minor bugs will be fixed, and that only for the duration of 2020. This repository will replace [scikit-hep/awkward-array](https://github.com/scikit-hep/awkward-array#readme) on GitHub.
 
-## Compiling from source
+## Normal installation
+
+Normally, you would install Awkward [from PyPI](https://pypi.org/project/awkward1/) using pip:
+
+```bash
+
+```
+
+Python wheels are available for most operating systems, 
+
+## Installing from source
+
+
+
+
+## Development workflow
 
 Awkward 1.0 is available to early adopters as [awkward1 in pip](https://pypi.org/project/awkward1/) (`pip install awkward1` and `import awkward1` in Python), but developers will need to compile from source.
 
@@ -66,22 +81,19 @@ To get this repository, be sure to clone it recursively because C++ dependencies
 git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
 ```
 
-From the `awkward-1.0` base directory, the easy way **to compile everything** (assuming that you have Python 3 and pip) is
+From the `awkward-1.0` base directory, 
 
 ```bash
-# Set up an isolated environment and download all development dependencies.
-python -m venv .env
-source .env/bin/activate
 pip install -r requirements.txt -r requirements-test.txt -r requirements-docs.txt -r requirements-dev.txt
 
-# Compile or recompile into the isolated environment.
-python setup.py install
+cmake -S . -B build -DBUILD_TESTING=ON -DPYTHON_EXECUTABLE=`which python` -DPYBUILD=ON
 
-# Run the Python tests.
+cmake --build build
+
+cmake --build build --target test
+
 python -m pytest
 
-# Exit the isolated environment.
-deactivate
 ```
 
 (The above won't automatically download dependencies if your `pip` version is older than 10; check `pip --version`. With an old `pip`, you can manually install the dependencies listed in [pyproject.toml](pyproject.toml).)

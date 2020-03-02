@@ -21,6 +21,10 @@ _minted-*
 
 ############################################################# Python
 
+# Awkward directory at top-level is temporary
+/awkward1/
+/localbuild/
+
 # Byte-compiled / optimized / DLL files
 __pycache__
 *.py[cod]

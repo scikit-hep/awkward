@@ -10,6 +10,8 @@ import numpy
 
 import awkward1
 
+pytest.skip("Disabling for now.", allow_module_level=True)
+
 def test_basic():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
     content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
