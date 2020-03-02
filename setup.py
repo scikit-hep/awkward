@@ -98,12 +98,12 @@ if platform.system() == "Windows":
             super(Install, self).run()
             for x in os.listdir(os.path.join(self.build_lib, "lib")):
                 shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "awkward1", x))
-        print("==========================================================")
-        print("From", os.path.join(self.build_lib, "lib") + ":")
-        print("\n".join(os.listdir(os.path.join(self.build_lib, "lib"))))
-        print("To", os.path.join(self.prefix, "awkward1") + ":")
-        print("\n".join(os.path.join(self.prefix, "awkward1")))
-        print("==========================================================")
+            print("==========================================================")
+            print("From", os.path.join(self.build_lib, "lib") + ":")
+            print("\n".join(os.listdir(os.path.join(self.build_lib, "lib"))))
+            print("To", os.path.join(self.prefix, "awkward1") + ":")
+            print("\n".join(os.path.join(self.prefix, "awkward1")))
+            print("==========================================================")
 
 else:
     # Libraries do not exist yet, so they cannot be determined with a glob pattern.
