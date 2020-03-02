@@ -108,7 +108,8 @@ if platform.system() == "Windows":
             for x in os.listdir(os.path.join(self.build_lib, "lib")):
                 shutil.copyfile(os.path.join(self.build_lib, "lib", x), os.path.join(self.prefix, "awkward1", x))
             print("To", os.path.join(self.prefix, "awkward1") + ":")
-            print("\n".join(os.path.join(self.prefix, "awkward1")))
+            print("\n".join(os.listdir(os.path.join(self.prefix, "awkward1"))))
+            subprocess.check_call(["ls", "-R", self.prefix])
             print("==========================================================")
 
 else:
