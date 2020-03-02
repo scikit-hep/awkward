@@ -1022,6 +1022,16 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::rpad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: IndexedArray::rpad");
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::rpad_and_clip(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: IndexedArray::rpad_and_clip");
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     int64_t numnull;
     struct Error err1 = util::awkward_indexedarray_numnull<T>(

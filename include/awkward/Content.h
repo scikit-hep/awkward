@@ -63,6 +63,8 @@ namespace awkward {
     virtual bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const = 0;
     virtual const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const = 0;
     virtual const std::shared_ptr<SliceItem> asslice() const = 0;
+    virtual const std::shared_ptr<Content> rpad(int64_t length, int64_t axis) const = 0;
+    virtual const std::shared_ptr<Content> rpad_and_clip(int64_t length, int64_t axis) const = 0;
     virtual const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const = 0;
 
     const std::string tostring() const;

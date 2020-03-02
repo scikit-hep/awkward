@@ -823,6 +823,16 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::rpad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: ListArray::rpad");
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::rpad_and_clip(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: ListArray::rpad_and_clip");
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }

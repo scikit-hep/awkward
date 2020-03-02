@@ -1094,6 +1094,16 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: UnionArray::rpad");
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad_and_clip(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: UnionArray::rpad_and_clip");
+  }
+
+  template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> simplified = simplify(true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||

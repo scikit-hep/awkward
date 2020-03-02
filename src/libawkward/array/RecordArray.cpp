@@ -657,6 +657,14 @@ namespace awkward {
     throw std::invalid_argument("cannot use records as a slice");
   }
 
+  const std::shared_ptr<Content> RecordArray::rpad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: RecordArray::rpad");
+  }
+
+  const std::shared_ptr<Content> RecordArray::rpad_and_clip(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: RecordArray::rpad_and_clip");
+  }
+
   const std::shared_ptr<Content> RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     if (contents_.empty()) {
       return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), outlength, istuple());

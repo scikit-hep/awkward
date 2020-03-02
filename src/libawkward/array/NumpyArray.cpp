@@ -1378,6 +1378,14 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> NumpyArray::rpad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: NumpyArray::rpad");
+  }
+
+  const std::shared_ptr<Content> NumpyArray::rpad_and_clip(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: NumpyArray::rpad_and_clip");
+  }
+
   const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     if (shape_.empty()) {
       throw std::runtime_error("attempting to reduce a scalar");

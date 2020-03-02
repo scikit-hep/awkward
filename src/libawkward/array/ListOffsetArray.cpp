@@ -837,6 +837,16 @@ namespace awkward {
     return toListOffsetArray64().get()->asslice();
   }
 
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: ListOffsetArray::rpad");
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad_and_clip(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: ListOffsetArray::rpad_and_clip");
+  }
+
   template <>
   const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::pair<bool, int64_t> branchdepth = branch_depth();

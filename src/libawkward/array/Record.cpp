@@ -232,6 +232,14 @@ namespace awkward {
     throw std::invalid_argument("cannot use a record as a slice");
   }
 
+  const std::shared_ptr<Content> Record::rpad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: Record::rpad");
+  }
+
+  const std::shared_ptr<Content> Record::rpad_and_clip(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: Record::rpad_and_clip");
+  }
+
   const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> trimmed = array_.get()->getitem_range_nowrap(at_, at_ + 1);
     return trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);

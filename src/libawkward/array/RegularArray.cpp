@@ -515,6 +515,14 @@ namespace awkward {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
+  const std::shared_ptr<Content> RegularArray::rpad(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: RegularArray::rpad");
+  }
+
+  const std::shared_ptr<Content> RegularArray::rpad_and_clip(int64_t length, int64_t axis) const {
+    throw std::runtime_error("FIXME: RegularArray::rpad_and_clip");
+  }
+
   const std::shared_ptr<Content> RegularArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
