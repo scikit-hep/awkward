@@ -7,6 +7,15 @@ import ctypes
 import ctypes.util
 
 libpath = ctypes.util.find_library("awkward")
+if libpath is None:
+    if platform.system() == "Windows":
+        name = "awkward.lib"
+    elif platform.system() == "Darwin":
+        name = "libawkward.dylib"
+    else:
+        name = "libawkward.so"
+    import pkg_resources
+    libpath = pkg_resources.resource_filename("awkward1", "libawkward.so")
 lib = ctypes.cdll.LoadLibrary(libpath)
 
 # bool awkward_ArrayBuilder_length(void* fillablearray, int64_t* result);
