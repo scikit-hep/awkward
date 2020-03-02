@@ -133,10 +133,10 @@ jobs:
           python -m pytest -vv -rs tests
         displayName: "Test"
 
-      - script: |
-          cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
-        workingDirectory: dependent-project
-        displayName: "Test dependent project"
+      # - script: |
+      #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
+      #   workingDirectory: dependent-project
+      #   displayName: "Test dependent project"
 
   - job: Linux
 
@@ -200,7 +200,8 @@ jobs:
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
-      - script: |
-          cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
-        workingDirectory: dependent-project
-        displayName: "Test dependent project"
+
+      # - script: |
+      #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
+      #   workingDirectory: dependent-project
+      #   displayName: "Test dependent project"
