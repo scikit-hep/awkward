@@ -11,7 +11,7 @@
 #include "awkward/builder/UnknownBuilder.h"
 
 namespace awkward {
-  class ArrayBuilder {
+  class EXPORT_SYMBOL ArrayBuilder {
   public:
     ArrayBuilder(const ArrayBuilderOptions& options);
 

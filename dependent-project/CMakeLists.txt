@@ -7,8 +7,8 @@ include_directories(${CMAKE_PREFIX_PATH}/include)
 
 add_subdirectory(../pybind11 cmake_pybind11)
 
-find_library(CPU-KERNELS awkward-cpu-kernels-static HINTS ${CMAKE_PREFIX_PATH}/lib)
-find_library(LIBAWKWARD awkward-static HINTS ${CMAKE_PREFIX_PATH}/lib)
+find_library(CPU-KERNELS awkward-cpu-kernels HINTS ${CMAKE_PREFIX_PATH}/lib)
+find_library(LIBAWKWARD awkward HINTS ${CMAKE_PREFIX_PATH}/lib)
 message(STATUS "Libraries: ${LIBAWKWARD} ${CPU-KERNELS}")
 
 pybind11_add_module(dependent dependent.cpp)

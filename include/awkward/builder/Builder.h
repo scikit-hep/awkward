@@ -11,7 +11,7 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
-  class Builder {
+  class EXPORT_SYMBOL Builder {
   public:
     virtual ~Builder();
 
