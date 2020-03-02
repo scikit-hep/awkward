@@ -12,18 +12,11 @@ import glob
 
 arguments = argparse.ArgumentParser()
 arguments.add_argument("--clean", default=False, action="store_true")
-arguments.add_argument("--ctest", default=True, action="store_true")
+arguments.add_argument("--release", action="store_true")
 arguments.add_argument("--no-ctest", action="store_true")
-arguments.add_argument("--buildpython", default=True, action="store_true")
 arguments.add_argument("--no-buildpython", action="store_true")
 arguments.add_argument("--pytest", default=None)
 args = arguments.parse_args()
-
-if args.ctest == args.no_ctest:
-    arguments.error("cannot pass --ctest and --no-ctest")
-
-if args.buildpython == args.no_buildpython:
-    arguments.error("cannot pass --buildpython and --no-buildpython")
 
 args.ctest = not args.no_ctest
 args.buildpython = not args.no_buildpython
@@ -42,7 +35,10 @@ if args.clean:
             shutil.rmtree(x)
     sys.exit()
 
-thisstate = {"ctest": args.ctest, "buildpython": args.buildpython, "python_executable": sys.executable}
+thisstate = {"release": args.release,
+             "ctest": args.ctest,
+             "buildpython": args.buildpython,
+             "python_executable": sys.executable}
 
 try:
     localbuild_time = os.stat("localbuild").st_mtime
@@ -54,8 +50,9 @@ except:
     laststate = None
 
 # Refresh the directory if any configuration has changed.
-if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
-    os.stat("localbuild.py").st_mtime >= localbuild_time or
+if (# os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
+    # os.stat("localbuild.py").st_mtime >= localbuild_time or
+    # os.stat("setup.py").st_mtime >= localbuild_time or
     thisstate != laststate):
 
     subprocess.check_call(["pip", "install",
@@ -68,10 +65,18 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
         shutil.rmtree("localbuild")
 
     newdir_args = ["cmake", "-S", ".", "-B", "localbuild"]
+
+    if args.release:
+        newdir_args.append("-DCMAKE_BUILD_TYPE=Release")
+    else:
+        newdir_args.append("-DCMAKE_BUILD_TYPE=Debug")
+
     if args.ctest:
         newdir_args.append("-DBUILD_TESTING=ON")
+
     if args.buildpython:
         newdir_args.extend(["-DPYTHON_EXECUTABLE=" + thisstate["python_executable"], "-DPYBUILD=ON"])
+
     subprocess.check_call(newdir_args)
     json.dump(thisstate, open("localbuild/lastargs.json", "w"))
 
@@ -98,27 +103,24 @@ if args.buildpython:
             shutil.copyfile(x, newfile)
 
     # The extension modules must be copied over.
-    for x in glob.glob("localbuild/layout*") + glob.glob("localbuild/types*") + glob.glob("localbuild/_io*"):
+    for x in glob.glob("localbuild/layout*") + glob.glob("localbuild/types*") + glob.glob("localbuild/_io*") + glob.glob("localbuild/libawkward*"):
         shutil.copyfile(x, os.path.join("awkward1", os.path.split(x)[1]))
 
     # localbuild must be in the library path for some operations.
     env = dict(os.environ)
     reminder = False
-    if "localbuild" not in env.get("LD_LIBRARY_PATH", ""):
-        env["LD_LIBRARY_PATH"] = "localbuild:" + env.get("LD_LIBRARY_PATH", "")
+    if "awkward1" not in env.get("LD_LIBRARY_PATH", ""):
+        env["LD_LIBRARY_PATH"] = "awkward1:" + env.get("LD_LIBRARY_PATH", "")
         reminder = True
-
-    # for x in glob.glob("localbuild/lib*.so") + glob.glob("localbuild/lib*.a") + glob.glob("localbuild/lib*.dylib") + glob.glob("localbuild/*.lib") + glob.glob("localbuild/*.dll") + glob.glob("localbuild/*.exp"):
-    #     shutil.copyfile(x, os.path.split(x)[1])
 
     # Run pytest on all or a subset of tests.
     if args.pytest is not None:
         subprocess.check_call(["python", "-m", "pytest", "-vv", "-rs", args.pytest], env=env)
 
-    # If you'll be using it interactively, you'll need localbuild in the library path (for some operations).
+    # If you'll be using it interactively, you'll need awkward1 in the library path (for some operations).
     if reminder:
         print("")
         print("Remember to")
         print("")
-        print("    export LD_LIBRARY_PATH=localbuild:$LD_LIBRARY_PATH")
+        print("    export LD_LIBRARY_PATH=awkward1:$LD_LIBRARY_PATH")
         print("")
