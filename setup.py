@@ -91,7 +91,9 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 if platform.system() == "Windows":
     libraries = []
 else:
-    libdir = os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1]), "awkward1")
+    libdir_base = os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1]))
+    libdir1 = os.path.join(libdir_base, "lib")
+    libdir2 = os.path.join(libdir_base, "awkward1")
     prefix = "lib"
     static = ".a"
     if platform.system() == "Windows":
@@ -102,10 +104,10 @@ else:
         shared = ".dylib"
     else:
         shared = ".so"
-    libraries = [("lib", [os.path.join(libdir, prefix + "awkward-cpu-kernels-static" + static),
-                          os.path.join(libdir, prefix + "awkward-cpu-kernels" + shared),
-                          os.path.join(libdir, prefix + "awkward-static" + static),
-                          os.path.join(libdir, prefix + "awkward" + shared)])]
+    libraries = [("lib", [os.path.join(libdir1, prefix + "awkward-cpu-kernels-static" + static),
+                          os.path.join(libdir2, prefix + "awkward-cpu-kernels" + shared),
+                          os.path.join(libdir1, prefix + "awkward-static" + static),
+                          os.path.join(libdir2, prefix + "awkward" + shared)])]
 
 setup(name = "awkward1",
       packages = setuptools.find_packages(where="src"),

@@ -84,6 +84,6 @@ if (PYBUILD)
   set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
   target_link_libraries(_io PRIVATE awkward-static)
 
-  install(TARGETS awkward-cpu-kernels awkward-cpu-kernels-static awkward awkward-static layout types _io LIBRARY DESTINATION "awkward1")
+  install(TARGETS layout types _io LIBRARY DESTINATION "awkward1")
 
 endif()
