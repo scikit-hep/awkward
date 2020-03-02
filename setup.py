@@ -81,39 +81,22 @@ if platform.system() == "Windows":
 
     class Install(setuptools.command.install.install):
         def run(self):
-            print("==========================================================")
-            print("From", os.path.join(self.build_lib, "bin") + ":")
-            print("\n".join(os.listdir(os.path.join(self.build_lib, "bin"))))
             for x in os.listdir(os.path.join(self.build_lib, "bin")):
                 shutil.copyfile(os.path.join(self.build_lib, "bin", x), os.path.join(self.build_lib, "awkward1", x))
-            print("To", os.path.join(self.build_lib, "awkward1") + ":")
-            print("\n".join(os.listdir(os.path.join(self.build_lib, "awkward1"))))
-            print("==========================================================")
-
-            super(Install, self).run()
+            setuptools.command.install.install.run(self)
 
 else:
     # Libraries do not exist yet, so they cannot be determined with a glob pattern.
     libdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "lib")
-    prefix = "lib"
     static = ".a"
     if platform.system() == "Darwin":
         shared = ".dylib"
     else:
         shared = ".so"
-    libraries = [("lib", [os.path.join(libdir, prefix + "awkward-cpu-kernels-static" + static),
-                          os.path.join(libdir, prefix + "awkward-cpu-kernels" + shared),
-                          os.path.join(libdir, prefix + "awkward-static" + static),
-                          os.path.join(libdir, prefix + "awkward" + shared)])]
-
-    # class Install(setuptools.command.install.install):
-    #     def run(self):
-    #         print("==========================================================")
-    #         open(os.path.join(self.build_lib, "awkward1/silly.dll"), "w").write("whatever\n")
-    #         print(open(os.path.join(self.build_lib, "awkward1/silly.dll")).read())
-    #         os.system("tree {0}".format(self.build_lib))
-    #         print("==========================================================")
-    #         super(Install, self).run()
+    libraries = [("lib", [os.path.join(libdir, "libawkward-cpu-kernels-static" + static),
+                          os.path.join(libdir, "libawkward-cpu-kernels" + shared),
+                          os.path.join(libdir, "libawkward-static" + static),
+                          os.path.join(libdir, "libawkward" + shared)])]
 
     Install = setuptools.command.install.install
 
