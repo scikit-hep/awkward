@@ -500,23 +500,33 @@ def toawkward0(array, keeplayout=False):
 
         elif isinstance(layout, awkward1.layout.IndexedOptionArray32):
             # index, content
-            raise NotImplementedError
+            index = numpy.asarray(layout.index)
+            toosmall = (index < -1)
+            if toosmall.any():
+                index = index.copy()
+                index[toosmall] = -1
+            return awkward0.IndexedMaskedArray(index, recurse(layout.content))
 
         elif isinstance(layout, awkward1.layout.IndexedOptionArray64):
             # index, content
-            raise NotImplementedError
+            index = numpy.asarray(layout.index)
+            toosmall = (index < -1)
+            if toosmall.any():
+                index = index.copy()
+                index[toosmall] = -1
+            return awkward0.IndexedMaskedArray(index, recurse(layout.content))
 
         elif isinstance(layout, awkward1.layout.IndexedArray32):
             # index, content
-            raise NotImplementedError
+            return awkward0.IndexedArray(numpy.asarray(layout.index), recurse(layout.content))
 
         elif isinstance(layout, awkward1.layout.IndexedArrayU32):
             # index, content
-            raise NotImplementedError
+            return awkward0.IndexedArray(numpy.asarray(layout.index), recurse(layout.content))
 
         elif isinstance(layout, awkward1.layout.IndexedArray64):
             # index, content
-            raise NotImplementedError
+            return awkward0.IndexedArray(numpy.asarray(layout.index), recurse(layout.content))
 
         else:
             raise TypeError("missing converter for {0}".format(type(layout).__name__))

@@ -46,4 +46,11 @@ def test_toawkward0():
     assert awkward1.toawkward0(array).tolist() == [0.0, [], 1.1, [1], 2.2, [2, 2], 3.3, [3, 3, 3]]
 
     array = awkward1.Array([1.1, 2.2, None, None, 3.3, None, 4.4])
+    assert isinstance(awkward1.toawkward0(array), awkward0.IndexedMaskedArray)
+    assert awkward1.toawkward0(array).tolist() == [1.1, 2.2, None, None, 3.3, None, 4.4]
 
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    index = awkward1.layout.Index64(numpy.array([3, 2, 2, 5, 0], dtype=numpy.int64))
+    array = awkward1.layout.IndexedArray64(index, content)
+    assert isinstance(awkward1.toawkward0(array), awkward0.IndexedArray)
+    assert awkward1.toawkward0(array).tolist() == [3.3, 2.2, 2.2, 5.5, 0.0]
