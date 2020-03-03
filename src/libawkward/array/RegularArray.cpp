@@ -551,16 +551,28 @@ namespace awkward {
       return next.get()->simplify();
     }
     else if (toaxis == 1) {
-      int64_t tolength = (target > size_ ? target : size_);
-      Index64 index(length() * tolength);
+      Index64 index(length() * target);
       struct Error err = awkward_RegularArray_rpad_and_clip_axis1_64(
         index.ptr().get(),
-        (size_ < tolength ? size_ : tolength),
-        tolength,
+        target,
+        size_,
         length());
       util::handle_error(err, classname(), identities_.get());
       std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content());
       return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
+
+
+
+      // int64_t tolength = (target > size_ ? target : size_);
+      // Index64 index(length() * tolength);
+      // struct Error err = awkward_RegularArray_rpad_and_clip_axis1_64(
+      //   index.ptr().get(),
+      //   (size_ < tolength ? size_ : tolength),
+      //   tolength,
+      //   length());
+      // util::handle_error(err, classname(), identities_.get());
+      // std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content());
+      // return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
 
 // 2 * 3 * float64
 // [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]                            which is RegularArray(NumpyArray)
