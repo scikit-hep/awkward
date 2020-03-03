@@ -69,7 +69,7 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
     if os.path.exists("localbuild"):
         shutil.rmtree("localbuild")
 
-    newdir_args = ["cmake", "-S", ".", "-B", "localbuild"]
+    newdir_args = ["-S", ".", "-B", "localbuild"]
 
     if args.release:
         newdir_args.append("-DCMAKE_BUILD_TYPE=Release")
@@ -82,7 +82,7 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
     if args.buildpython:
         newdir_args.extend(["-DPYTHON_EXECUTABLE=" + thisstate["python_executable"], "-DPYBUILD=ON"])
 
-    check_call(newdir_args)
+    check_call(["cmake"] + newdir_args)
     json.dump(thisstate, open("localbuild/lastargs.json", "w"))
 
 # Build C++ normally; this might be a no-op if make/ninja determines that the build is up-to-date.
@@ -96,18 +96,10 @@ if args.buildpython:
     if os.path.exists("awkward1"):
         shutil.rmtree("awkward1")
 
-    # Maybe someday they can be symlinks.
-    for x in glob.glob("src/awkward1/**", recursive=True):
-        olddir, oldfile = os.path.split(x)
-        newdir  = olddir[3 + len(os.sep):]
-        newfile = x[3 + len(os.sep):]
-        if not os.path.exists(newdir):
-            os.mkdir(newdir)
-        if not os.path.isdir(x):
-            # os.symlink(x, newfile)
-            shutil.copyfile(x, newfile)
+    # Copy (don't link) the Python files into a built directory.
+    shutil.copytree("src/awkward1", "awkward1")
 
-    # The extension modules must be copied over.
+    # The extension modules must be copied into the same directory.
     for x in glob.glob("localbuild/layout*") + glob.glob("localbuild/types*") + glob.glob("localbuild/_io*") + glob.glob("localbuild/libawkward*"):
         shutil.copyfile(x, os.path.join("awkward1", os.path.split(x)[1]))
 
