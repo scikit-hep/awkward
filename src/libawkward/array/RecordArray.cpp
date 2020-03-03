@@ -154,12 +154,11 @@ namespace awkward {
         util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
       }
       if (istuple()) {
+        Identities::FieldLoc original = identities.get()->fieldloc();
         for (size_t j = 0;  j < contents_.size();  j++) {
-          Identities::FieldLoc oldfieldloc = identities.get()->fieldloc();
-          Identities::FieldLoc fieldloc(oldfieldloc.begin(), oldfieldloc.end());
+          Identities::FieldLoc fieldloc(original.begin(), original.end());
           fieldloc.push_back(std::pair<int64_t, std::string>(identities.get()->width() - 1, std::to_string(j)));
-          // contents_[j].get()->setidentities(identities.get()->withfieldloc(fieldloc));
-          contents_[j].get()->setidentities(identities.get()->shallow_copy());
+          contents_[j].get()->setidentities(identities.get()->withfieldloc(fieldloc));
         }
       }
       else {
