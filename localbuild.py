@@ -16,12 +16,14 @@ arguments.add_argument("--clean", default=False, action="store_true")
 arguments.add_argument("--release", action="store_true")
 arguments.add_argument("--no-ctest", action="store_true")
 arguments.add_argument("--no-buildpython", action="store_true")
+arguments.add_argument("--no-dependencies", action="store_true")
 arguments.add_argument("-j", default=str(multiprocessing.cpu_count()))
 arguments.add_argument("--pytest", default=None)
 args = arguments.parse_args()
 
 args.ctest = not args.no_ctest
 args.buildpython = not args.no_buildpython
+args.dependencies = not args.no_dependencies
 
 try:
     git_config = open(".git/config").read()
@@ -61,7 +63,8 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
     os.stat("setup.py").st_mtime >= localbuild_time or
     thisstate != laststate):
 
-    check_call(["pip", "install", "-r", "requirements.txt", "-r", "requirements-test.txt", "-r", "requirements-docs.txt", "-r", "requirements-dev.txt"])
+    if args.dependencies:
+        check_call(["pip", "install", "-r", "requirements.txt", "-r", "requirements-test.txt"])
 
     if os.path.exists("localbuild"):
         shutil.rmtree("localbuild")
