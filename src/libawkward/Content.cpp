@@ -350,14 +350,9 @@ namespace awkward {
   }
 
   const int64_t Content::axis_wrap_if_negative(int64_t axis) const {
-    int64_t mindepth = minmax_depth().first;
-    int64_t maxdepth = minmax_depth().second;
-    int64_t depth = purelist_depth();
-    if (axis < 0  &&  mindepth == depth  &&  maxdepth == depth) {
-      return (depth - 1 + axis);
+    if (axis < 0) {
+      throw std::runtime_error("FIXME: negative axis not implemented yet");
     }
-    else {
-      return axis;
-    }
+    return axis;
   }
 }

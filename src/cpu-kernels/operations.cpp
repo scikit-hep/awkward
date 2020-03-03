@@ -682,3 +682,17 @@ ERROR awkward_unionarray8_U32_simplify_one_to8_64(int8_t* totags, int64_t* toind
 ERROR awkward_unionarray8_64_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base) {
   return awkward_unionarray_simplify_one<int8_t, int64_t, int8_t, int64_t>(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, towhich, fromwhich, length, base);
 }
+
+template <typename T>
+ERROR awkward_index_rpad_and_clip_axis0(T* toindex, int64_t fromlength, int64_t tolength) {
+  for (int64_t i = 0; i < fromlength; i++) {
+    toindex[i] = i;
+  }
+  for (int64_t i = fromlength; i < tolength; i++) {
+    toindex[i] = -1;
+  }
+  return success();
+}
+ERROR awkward_index_rpad_and_clip_axis0_64(int64_t* toindex, int64_t fromlength, int64_t tolength) {
+  return awkward_index_rpad_and_clip_axis0<int64_t>(toindex, fromlength, tolength);
+}
