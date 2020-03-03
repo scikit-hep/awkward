@@ -515,12 +515,63 @@ namespace awkward {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
-  const std::shared_ptr<Content> RegularArray::rpad(int64_t length, int64_t axis) const {
-    throw std::runtime_error("FIXME: RegularArray::rpad");
+  const std::shared_ptr<Content> RegularArray::rpad(int64_t target, int64_t axis) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == 0) {
+      if (target < this->length()) {
+        return shallow_copy();
+      }
+      else {
+        return rpad_and_clip(target, toaxis);
+      }
+    }
+    else if (toaxis == 1) {
+      if (target < size_) {
+        return shallow_copy();
+      }
+      else {
+        return rpad_and_clip(target, toaxis);
+      }
+    }
+    else {
+      throw std::runtime_error("FIXME: RegularArray::rpad axis > 1");
+    }
   }
 
-  const std::shared_ptr<Content> RegularArray::rpad_and_clip(int64_t length, int64_t axis) const {
-    throw std::runtime_error("FIXME: RegularArray::rpad_and_clip");
+  const std::shared_ptr<Content> RegularArray::rpad_and_clip(int64_t target, int64_t axis) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == 0) {
+      int64_t tolength = (target > this->length() ? target : this->length());
+      Index64 index(tolength);
+      struct Error err = awkward_index_rpad_and_clip_axis0_64(
+        index.ptr().get(),
+        this->length(),
+        tolength);
+      util::handle_error(err, classname(), identities_.get());
+      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+      return next.get()->simplify();
+    }
+    else if (toaxis == 1) {
+      int64_t tolength = (target > size_ ? target : size_);
+      Index64 index(length() * tolength);
+      struct Error err = awkward_RegularArray_rpad_and_clip_axis1_64(
+        index.ptr().get(),
+        (size_ < tolength ? size_ : tolength),
+        tolength,
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content());
+      return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
+
+// 2 * 3 * float64
+// [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]                            which is RegularArray(NumpyArray)
+// 2 * 5 * ?float64
+// [[1.1, 2.2, 3.3, None, None], [4.4, 5.5, 6.6, None, None]]    which is RegularArray(IndexedOptionArray(NumpyArray))
+
+    }
+    else {
+      throw std::runtime_error("FIXME: RegularArray::rpad_and_clip axis > 1");
+    }
   }
 
   const std::shared_ptr<Content> RegularArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {

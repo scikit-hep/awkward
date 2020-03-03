@@ -696,3 +696,19 @@ ERROR awkward_index_rpad_and_clip_axis0(T* toindex, int64_t fromlength, int64_t 
 ERROR awkward_index_rpad_and_clip_axis0_64(int64_t* toindex, int64_t fromlength, int64_t tolength) {
   return awkward_index_rpad_and_clip_axis0<int64_t>(toindex, fromlength, tolength);
 }
+
+template <typename T>
+ERROR awkward_RegularArray_rpad_and_clip_axis1(T* toindex, int64_t clippedsize, int64_t tolength, int64_t outerlength) {
+  for (int64_t i = 0;  i < outerlength;  i++) {
+    for (int64_t j = 0;  j < clippedsize;  j++) {
+      toindex[i*tolength + j] = i*clippedsize + j;
+    }
+    for (int64_t j = clippedsize;  j < tolength;  j++) {
+      toindex[i*tolength + j] = -1;
+    }
+  }
+  return success();
+}
+ERROR awkward_RegularArray_rpad_and_clip_axis1_64(int64_t* toindex, int64_t clippedsize, int64_t tolength, int64_t outerlength) {
+  return awkward_RegularArray_rpad_and_clip_axis1<int64_t>(toindex, clippedsize, tolength, outerlength);
+}

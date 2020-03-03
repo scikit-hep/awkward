@@ -1378,38 +1378,41 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::rpad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> NumpyArray::rpad(int64_t target, int64_t axis) const {
     if (ndim() == 0) {
       throw std::runtime_error("cannot rpad a scalar");
     }
     else if (ndim() > 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->rpad(length, axis);
-    }
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (length < (int64_t)shape_[toaxis]) {
-      return shallow_copy();
-    }
-    else {
-      return rpad_and_clip(length, toaxis);
-    }
-  }
-
-  const std::shared_ptr<Content> NumpyArray::rpad_and_clip(int64_t length, int64_t axis) const {
-    if (ndim() == 0) {
-      throw std::runtime_error("cannot rpad a scalar");
-    }
-    else if (ndim() > 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->rpad_and_clip(length, axis);
+      return toRegularArray().get()->rpad(target, axis);
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis != 0) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
-    int64_t tolength = (length > this->length() ? length : this->length());
+    if (target < length()) {
+      return shallow_copy();
+    }
+    else {
+      return rpad_and_clip(target, toaxis);
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::rpad_and_clip(int64_t target, int64_t axis) const {
+    if (ndim() == 0) {
+      throw std::runtime_error("cannot rpad a scalar");
+    }
+    else if (ndim() > 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->rpad_and_clip(target, axis);
+    }
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis != 0) {
+      throw std::invalid_argument("axis exceeds the depth of this array");
+    }
+    int64_t tolength = (target > length() ? target : length());
     Index64 index(tolength);
     struct Error err = awkward_index_rpad_and_clip_axis0_64(
       index.ptr().get(),
-      this->length(),
+      length(),
       tolength);
     util::handle_error(err, classname(), identities_.get());
     return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
