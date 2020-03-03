@@ -35,6 +35,7 @@ import awkward1
 def test_rpad_numpy_array():
     array = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     print(awkward1.tolist(array.rpad(10, 0)))
+    print(array.rpad(10, 0))
     raise Exception
 
 
