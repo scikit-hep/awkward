@@ -530,7 +530,7 @@ namespace awkward {
         return shallow_copy();
       }
       else {
-        return rpad_and_clip(target, toaxis);
+        return rpad_and_clip(target, toaxis, depth);
       }
     }
     else {
