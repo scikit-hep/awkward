@@ -397,7 +397,7 @@ namespace awkward {
       return std::pair<int64_t, int64_t>(1, 1);
     }
 
-    const std::pair<bool, int64_t> branch_depth() const {
+    const std::pair<bool, int64_t> branch_depth() const override {
       return std::pair<bool, int64_t>(false, 1);
     }
 
