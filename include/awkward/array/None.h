@@ -3,7 +3,6 @@
 #ifndef AWKWARD_NONE_H_
 #define AWKWARD_NONE_H_
 
-#include <cassert>
 #include <string>
 #include <memory>
 #include <vector>

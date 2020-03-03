@@ -834,7 +834,9 @@ namespace awkward {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
     }
 
-    assert(advanced.length() == 0);
+    if (advanced.length() != 0) {
+      throw std::runtime_error("ListArray::getitem_next(SliceAt): advanced.length() != 0");
+    }
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     Index64 nextcarry(lenstarts);

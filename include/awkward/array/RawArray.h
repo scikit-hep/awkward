@@ -3,7 +3,6 @@
 #ifndef AWKWARD_RAWARRAY_H_
 #define AWKWARD_RAWARRAY_H_
 
-#include <cassert>
 #include <cstring>
 #include <vector>
 #include <string>
@@ -539,7 +538,9 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override {
-      assert(advanced.length() == 0);
+      if (advanced.length() != 0) {
+        throw std::runtime_error("RawArray::getitem_next(SliceAt): advanced.length() != 0");
+      }
       if (array.shape().size() != 1) {
         throw std::runtime_error("array.ndim != 1");
       }

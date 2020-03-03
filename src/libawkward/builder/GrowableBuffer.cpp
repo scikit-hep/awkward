@@ -95,7 +95,6 @@ namespace awkward {
 
   template <typename T>
   void GrowableBuffer<T>::append(T datum) {
-    assert(length_ <= reserved_);
     if (length_ == reserved_) {
       set_reserved((int64_t)ceil(reserved_ * options_.resize()));
     }

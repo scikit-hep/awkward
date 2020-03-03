@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include <cstring>
-#include <cassert>
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/builder/ArrayBuilderOptions.h"

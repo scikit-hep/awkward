@@ -959,7 +959,9 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    assert(advanced.length() == 0);
+    if (advanced.length() != 0) {
+      throw std::runtime_error("ListOffsetArray::getitem_next(SliceAt): advanced.length() != 0");
+    }
     int64_t lenstarts = offsets_.length() - 1;
     IndexOf<T> starts = util::make_starts(offsets_);
     IndexOf<T> stops = util::make_stops(offsets_);

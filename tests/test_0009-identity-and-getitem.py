@@ -7,8 +7,6 @@ import numpy
 
 import awkward1
 
-pytest.skip("Disabling for now.", allow_module_level=True)
-
 def test_identity():
     a = numpy.arange(10)
     b = awkward1.layout.NumpyArray(a)

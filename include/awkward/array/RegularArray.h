@@ -3,7 +3,6 @@
 #ifndef AWKWARD_REGULARARRAY_H_
 #define AWKWARD_REGULARARRAY_H_
 
-#include <cassert>
 #include <string>
 #include <memory>
 #include <vector>

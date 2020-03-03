@@ -3,7 +3,6 @@
 #ifndef AWKWARD_NUMPYARRAY_H_
 #define AWKWARD_NUMPYARRAY_H_
 
-#include <cassert>
 #include <string>
 #include <unordered_map>
 #include <memory>
