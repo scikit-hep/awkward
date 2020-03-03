@@ -155,8 +155,8 @@ namespace awkward {
       }
       if (istuple()) {
         for (size_t j = 0;  j < contents_.size();  j++) {
-          // Identities::FieldLoc fieldloc(identities.get()->fieldloc().begin(), identities.get()->fieldloc().end());
-          // fieldloc.push_back(std::pair<int64_t, std::string>(identities.get()->width() - 1, std::to_string(j)));
+          Identities::FieldLoc fieldloc(identities.get()->fieldloc().begin(), identities.get()->fieldloc().end());
+          fieldloc.push_back(std::pair<int64_t, std::string>(identities.get()->width() - 1, std::to_string(j)));
           // contents_[j].get()->setidentities(identities.get()->withfieldloc(fieldloc));
           contents_[j].get()->setidentities(identities.get()->shallow_copy());
         }
