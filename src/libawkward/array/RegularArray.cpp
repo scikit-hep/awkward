@@ -560,25 +560,6 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
       std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content());
       return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
-
-
-
-      // int64_t tolength = (target > size_ ? target : size_);
-      // Index64 index(length() * tolength);
-      // struct Error err = awkward_RegularArray_rpad_and_clip_axis1_64(
-      //   index.ptr().get(),
-      //   (size_ < tolength ? size_ : tolength),
-      //   tolength,
-      //   length());
-      // util::handle_error(err, classname(), identities_.get());
-      // std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content());
-      // return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
-
-// 2 * 3 * float64
-// [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]                            which is RegularArray(NumpyArray)
-// 2 * 5 * ?float64
-// [[1.1, 2.2, 3.3, None, None], [4.4, 5.5, 6.6, None, None]]    which is RegularArray(IndexedOptionArray(NumpyArray))
-
     }
     else {
       throw std::runtime_error("FIXME: RegularArray::rpad_and_clip axis > 1");
