@@ -515,9 +515,9 @@ namespace awkward {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
-  const std::shared_ptr<Content> RegularArray::rpad(int64_t target, int64_t axis) const {
+  const std::shared_ptr<Content> RegularArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == 0) {
+    if (toaxis == depth) {
       if (target < this->length()) {
         return shallow_copy();
       }
@@ -525,7 +525,7 @@ namespace awkward {
         return rpad_and_clip(target, toaxis);
       }
     }
-    else if (toaxis == 1) {
+    else if (toaxis == depth + 1) {
       if (target < size_) {
         return shallow_copy();
       }
@@ -538,9 +538,9 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RegularArray::rpad_and_clip(int64_t target, int64_t axis) const {
+  const std::shared_ptr<Content> RegularArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == 0) {
+    if (toaxis == depth) {
       Index64 index(target);
       struct Error err = awkward_index_rpad_and_clip_axis0_64(
         index.ptr().get(),
@@ -550,7 +550,7 @@ namespace awkward {
       std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
       return next.get()->simplify();
     }
-    else if (toaxis == 1) {
+    else if (toaxis == depth + 1) {
       Index64 index(length() * target);
       struct Error err = awkward_RegularArray_rpad_and_clip_axis1_64(
         index.ptr().get(),

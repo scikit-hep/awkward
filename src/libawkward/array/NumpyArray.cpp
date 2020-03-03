@@ -1378,26 +1378,26 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::rpad(int64_t target, int64_t axis) const {
+  const std::shared_ptr<Content> NumpyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     if (ndim() == 0) {
       throw std::runtime_error("cannot rpad a scalar");
     }
     else if (ndim() > 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->rpad(target, axis);
+      return toRegularArray().get()->rpad(target, axis, depth);
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis != 0) {
+    if (toaxis != depth) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
     if (target < length()) {
       return shallow_copy();
     }
     else {
-      return rpad_and_clip(target, toaxis);
+      return rpad_and_clip(target, toaxis, depth);
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::rpad_and_clip(int64_t target, int64_t axis) const {
+  const std::shared_ptr<Content> NumpyArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
     if (ndim() == 0) {
       throw std::runtime_error("cannot rpad a scalar");
     }
@@ -1405,7 +1405,7 @@ namespace awkward {
       return toRegularArray().get()->rpad_and_clip(target, axis);
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis != 0) {
+    if (toaxis != depth) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
     Index64 index(target);

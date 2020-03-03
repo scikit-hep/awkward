@@ -1094,12 +1094,12 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad(int64_t length, int64_t axis, int64_t depth) const {
     throw std::runtime_error("FIXME: UnionArray::rpad");
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad_and_clip(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
     throw std::runtime_error("FIXME: UnionArray::rpad_and_clip");
   }
 

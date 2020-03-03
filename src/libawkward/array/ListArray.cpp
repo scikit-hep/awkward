@@ -823,12 +823,12 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::rpad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> ListArrayOf<T>::rpad(int64_t length, int64_t axis, int64_t depth) const {
     throw std::runtime_error("FIXME: ListArray::rpad");
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::rpad_and_clip(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> ListArrayOf<T>::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
     throw std::runtime_error("FIXME: ListArray::rpad_and_clip");
   }
 

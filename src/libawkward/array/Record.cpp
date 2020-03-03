@@ -232,11 +232,11 @@ namespace awkward {
     throw std::invalid_argument("cannot use a record as a slice");
   }
 
-  const std::shared_ptr<Content> Record::rpad(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> Record::rpad(int64_t length, int64_t axis, int64_t depth) const {
     throw std::runtime_error("FIXME: Record::rpad");
   }
 
-  const std::shared_ptr<Content> Record::rpad_and_clip(int64_t length, int64_t axis) const {
+  const std::shared_ptr<Content> Record::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
     throw std::runtime_error("FIXME: Record::rpad_and_clip");
   }
 
