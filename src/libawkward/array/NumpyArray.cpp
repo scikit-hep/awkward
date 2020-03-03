@@ -1405,7 +1405,7 @@ namespace awkward {
     if (toaxis != 0) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
-    int64_t tolength = (length < this->length() ? length : this->length());
+    int64_t tolength = (length > this->length() ? length : this->length());
     Index64 index(tolength);
     struct Error err = awkward_index_rpad_and_clip_axis0_64(
       index.ptr().get(),
