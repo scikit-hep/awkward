@@ -194,12 +194,12 @@ def test_getitem_next():
     assert awkward1.tolist(listoffsetarray2[2, 1, ["two", "four"], 1]) == {"two": 8.8, "four": 8}
     assert awkward1.tolist(listoffsetarray2[2, 1, ["two", "four"], 1:]) == {"two": [8.8, 9.9], "four": [8, 9]}
 
-content1_a = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
-content2_a = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
-offsets_a = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
-listoffsetarray_a = awkward1.layout.ListOffsetArray64(offsets_a, content2_a)
-recordarray_a = awkward1.layout.RecordArray([content1_a, listoffsetarray_a])
-recordarray_a.setidentities()
+# content1_a = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
+# content2_a = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+# offsets_a = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
+# listoffsetarray_a = awkward1.layout.ListOffsetArray64(offsets_a, content2_a)
+# recordarray_a = awkward1.layout.RecordArray([content1_a, listoffsetarray_a])
+# recordarray_a.setidentities()
 
 # content1_b = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
 # content2_b = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
