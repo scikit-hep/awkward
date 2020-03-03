@@ -37,20 +37,8 @@ def test_rpad_numpy_array():
     assert awkward1.tolist(array.rpad(10, 0)) == [1.1, 2.2, 3.3, 4.4, 5.5, None, None, None, None, None]
 
     array = awkward1.layout.NumpyArray(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
-
-    print(array.rpad(5, 0))
-    print(awkward1.tolist(array.rpad(5, 0)))
-
-    # [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], None, None, None]
-
-    print(array.rpad(5, 1))
-    print(awkward1.tolist(array.rpad(5, 1)))
-
-    # [[1.1, 2.2, 3.3, None, None], [4.4, 5.5, 6.6, None, None]]
-
-
-    raise Exception
-
+    assert awkward1.tolist(array.rpad(5, 0)) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], None, None, None]
+    assert awkward1.tolist(array.rpad(5, 1)) == [[1.1, 2.2, 3.3, None, None], [4.4, 5.5, 6.6, None, None]]
 
     # array = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
     # assert awkward1.tolist(array) == [[[ 0,  1,  2,  3,  4], [ 5,  6,  7,  8,  9], [10, 11, 12, 13, 14]],
