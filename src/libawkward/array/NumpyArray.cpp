@@ -1402,7 +1402,7 @@ namespace awkward {
       throw std::runtime_error("cannot rpad a scalar");
     }
     else if (ndim() > 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->rpad_and_clip(target, axis);
+      return toRegularArray().get()->rpad_and_clip(target, axis, depth);
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis != depth) {
