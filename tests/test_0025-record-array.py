@@ -194,68 +194,105 @@ def test_getitem_next():
     assert awkward1.tolist(listoffsetarray2[2, 1, ["two", "four"], 1]) == {"two": 8.8, "four": 8}
     assert awkward1.tolist(listoffsetarray2[2, 1, ["two", "four"], 1:]) == {"two": [8.8, 9.9], "four": [8, 9]}
 
-@pytest.mark.skip(reason="skip this for now")
-def test_setidentities():
-    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
-    content2 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
-    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
-    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
+content1_a = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5]))
+content2_a = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+offsets_a = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
+listoffsetarray_a = awkward1.layout.ListOffsetArray64(offsets_a, content2_a)
 
-    recordarray = awkward1.layout.RecordArray([content1, listoffsetarray])
-    recordarray.setidentities()
+recordarray_a = awkward1.layout.RecordArray([content1_a, listoffsetarray_a])
+recordarray_a.setidentities()
 
-    recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
-    recordarray.setidentities()
-    assert recordarray["one"].identities.fieldloc == [(0, "one")]
-    assert recordarray["two"].identities.fieldloc == [(0, "two")]
-    assert recordarray["one", 1] == 2
-    assert recordarray[1, "one"] == 2
-    assert recordarray["two", 2, 1] == 5.5
-    assert recordarray[2, "two", 1] == 5.5
+recordarray_b = awkward1.layout.RecordArray({"one": content1_a, "two": listoffsetarray_a})
+recordarray_b.setidentities()
 
-    recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
-    recordarray2 = awkward1.layout.RecordArray({"outer": recordarray})
-    recordarray2.setidentities()
-    assert recordarray2["outer"].identities.fieldloc == [(0, "outer")]
-    assert recordarray2["outer", "one"].identities.fieldloc == [(0, "outer"), (0, "one")]
-    assert recordarray2["outer", "two"].identities.fieldloc == [(0, "outer"), (0, "two")]
-    assert recordarray2["outer", "one", 1] == 2
-    assert recordarray2["outer", 1, "one"] == 2
-    assert recordarray2[1, "outer", "one"] == 2
-    assert recordarray2["outer", "two", 2, 1] == 5.5
-    assert recordarray2["outer", 2, "two", 1] == 5.5
-    assert recordarray2[2, "outer", "two", 1] == 5.5
+# @pytest.mark.skip(reason="skip this for now")
+def test_setidentities_1():
+    assert recordarray_b["one"].identities.fieldloc == [(0, "one")]
+def test_setidentities_2():
+    assert recordarray_b["two"].identities.fieldloc == [(0, "two")]
+def test_setidentities_3():
+    assert recordarray_b["one", 1] == 2
+def test_setidentities_4():
+    assert recordarray_b[1, "one"] == 2
+def test_setidentities_5():
+    assert recordarray_b["two", 2, 1] == 5.5
+def test_setidentities_6():
+    assert recordarray_b[2, "two", 1] == 5.5
+
+recordarray_c = awkward1.layout.RecordArray({"one": content1_a, "two": listoffsetarray_a})
+recordarray2_c = awkward1.layout.RecordArray({"outer": recordarray_c})
+recordarray2_c.setidentities()
+def test_setidentities_7():
+    assert recordarray2_c["outer"].identities.fieldloc == [(0, "outer")]
+def test_setidentities_8():
+    assert recordarray2_c["outer", "one"].identities.fieldloc == [(0, "outer"), (0, "one")]
+def test_setidentities_9():
+    assert recordarray2_c["outer", "two"].identities.fieldloc == [(0, "outer"), (0, "two")]
+def test_setidentities_10():
+    assert recordarray2_c["outer", "one", 1] == 2
+def test_setidentities_11():
+    assert recordarray2_c["outer", 1, "one"] == 2
+def test_setidentities_12():
+    assert recordarray2_c[1, "outer", "one"] == 2
+def test_setidentities_13():
+    assert recordarray2_c["outer", "two", 2, 1] == 5.5
+def test_setidentities_14():
+    assert recordarray2_c["outer", 2, "two", 1] == 5.5
+def test_setidentities_15():
+    assert recordarray2_c[2, "outer", "two", 1] == 5.5
+def test_setidentities_16():
     with pytest.raises(ValueError) as excinfo:
-        recordarray2["outer", "two", 0, 99]
+        recordarray2_c["outer", "two", 0, 99]
     assert str(excinfo.value) == 'in ListArray64 with identity [0, "outer", "two"] attempting to get 99, index out of range'
-    assert recordarray2.identity == ()
-    assert recordarray2[2].identity == (2,)
-    assert recordarray2[2, "outer"].identity == (2, "outer")
-    assert recordarray2[2, "outer", "two"].identity == (2, "outer", "two")
+def test_setidentities_17():
+    assert recordarray2_c.identity == ()
+def test_setidentities_18():
+    assert recordarray2_c[2].identity == (2,)
+def test_setidentities_19():
+    assert recordarray2_c[2, "outer"].identity == (2, "outer")
+def test_setidentities_20():
+    assert recordarray2_c[2, "outer", "two"].identity == (2, "outer", "two")
 
-    recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
-    recordarray2 = awkward1.layout.RecordArray({"outer": awkward1.layout.RegularArray(recordarray, 1)})
-    recordarray2.setidentities()
-    assert recordarray2["outer"].identities.fieldloc == [(0, "outer")]
-    assert recordarray2["outer", 0, "one"].identities.fieldloc == [(0, "outer"), (1, "one")]
-    assert recordarray2["outer", 0, "two"].identities.fieldloc == [(0, "outer"), (1, "two")]
-    assert recordarray2["outer", "one", 0].identities.fieldloc == [(0, "outer"), (1, "one")]
-    assert recordarray2["outer", "two", 0].identities.fieldloc == [(0, "outer"), (1, "two")]
-    assert recordarray2["outer", "one", 1, 0] == 2
-    assert recordarray2["outer", 1, "one", 0] == 2
-    assert recordarray2["outer", 1, 0, "one"] == 2
-    assert recordarray2[1, "outer", "one", 0] == 2
-    assert recordarray2[1, "outer", 0, "one"] == 2
-    assert recordarray2[1, 0, "outer", "one"] == 2
+recordarray_d = awkward1.layout.RecordArray({"one": content1_a, "two": listoffsetarray_a})
+recordarray2_d = awkward1.layout.RecordArray({"outer": awkward1.layout.RegularArray(recordarray_d, 1)})
+recordarray2_d.setidentities()
+def test_setidentities_21():
+    assert recordarray2_d["outer"].identities.fieldloc == [(0, "outer")]
+def test_setidentities_22():
+    assert recordarray2_d["outer", 0, "one"].identities.fieldloc == [(0, "outer"), (1, "one")]
+def test_setidentities_23():
+    assert recordarray2_d["outer", 0, "two"].identities.fieldloc == [(0, "outer"), (1, "two")]
+def test_setidentities_24():
+    assert recordarray2_d["outer", "one", 0].identities.fieldloc == [(0, "outer"), (1, "one")]
+def test_setidentities_25():
+    assert recordarray2_d["outer", "two", 0].identities.fieldloc == [(0, "outer"), (1, "two")]
+def test_setidentities_26():
+    assert recordarray2_d["outer", "one", 1, 0] == 2
+def test_setidentities_27():
+    assert recordarray2_d["outer", 1, "one", 0] == 2
+def test_setidentities_28():
+    assert recordarray2_d["outer", 1, 0, "one"] == 2
+def test_setidentities_29():
+    assert recordarray2_d[1, "outer", "one", 0] == 2
+def test_setidentities_30():
+    assert recordarray2_d[1, "outer", 0, "one"] == 2
+def test_setidentities_31():
+    assert recordarray2_d[1, 0, "outer", "one"] == 2
 
+def test_setidentities_1():
     with pytest.raises(ValueError) as excinfo:
-        recordarray2["outer", 2, "two", 0, 99]
+        recordarray2_d["outer", 2, "two", 0, 99]
     assert str(excinfo.value) == 'in ListArray64 with identity [2, "outer", 0, "two"] attempting to get 99, index out of range'
-    assert recordarray2.identity == ()
-    assert recordarray2[2].identity == (2,)
-    assert recordarray2[2, "outer"].identity == (2, "outer")
-    assert recordarray2[2, "outer", 0].identity == (2, "outer", 0)
-    assert recordarray2[2, "outer", 0, "two"].identity == (2, "outer", 0, "two")
+def test_setidentities_1():
+    assert recordarray2_d.identity == ()
+def test_setidentities_1():
+    assert recordarray2_d[2].identity == (2,)
+def test_setidentities_1():
+    assert recordarray2_d[2, "outer"].identity == (2, "outer")
+def test_setidentities_1():
+    assert recordarray2_d[2, "outer", 0].identity == (2, "outer", 0)
+def test_setidentities_1():
+    assert recordarray2_d[2, "outer", 0, "two"].identity == (2, "outer", 0, "two")
 
 def test_builder_tuple():
     builder = awkward1.layout.ArrayBuilder()
