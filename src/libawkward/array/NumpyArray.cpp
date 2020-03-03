@@ -1382,7 +1382,7 @@ namespace awkward {
     if (ndim() == 0) {
       throw std::runtime_error("cannot rpad a scalar");
     }
-    else if (ndim() > 1  ||  !contiguous()) {
+    else if (ndim() > 1  ||  !iscontiguous()) {
       return toRegularArray().get()->rpad(length, axis);
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
@@ -1398,7 +1398,7 @@ namespace awkward {
     if (ndim() == 0) {
       throw std::runtime_error("cannot rpad a scalar");
     }
-    else if (ndim() > 1  ||  !contiguous()) {
+    else if (ndim() > 1  ||  !iscontiguous()) {
       return toRegularArray().get()->rpad_and_clip(length, axis);
     }
     int64_t toaxis = axis_wrap_if_negative(axis);
