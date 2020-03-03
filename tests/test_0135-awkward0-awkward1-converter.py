@@ -33,3 +33,17 @@ def test_toawkward0():
     assert awkward1.toawkward0(array[2])["x"] == 2.2
     assert isinstance(awkward1.toawkward0(array[2])["y"], numpy.ndarray)
     assert awkward1.toawkward0(array[2])["y"].tolist() == [2, 2]
+
+    assert isinstance(awkward1.toawkward0(array), awkward0.Table)
+    assert awkward1.toawkward0(array).tolist() == [{"x": 0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]
+
+    array = awkward1.Array([(0, []), (1.1, [1]), (2.2, [2, 2]), (3.3, [3, 3, 3])])
+    assert isinstance(awkward1.toawkward0(array), awkward0.Table)
+    assert awkward1.toawkward0(array).tolist() == [(0, []), (1.1, [1]), (2.2, [2, 2]), (3.3, [3, 3, 3])]
+
+    array = awkward1.Array([0.0, [], 1.1, [1], 2.2, [2, 2], 3.3, [3, 3, 3]])
+    assert isinstance(awkward1.toawkward0(array), awkward0.UnionArray)
+    assert awkward1.toawkward0(array).tolist() == [0.0, [], 1.1, [1], 2.2, [2, 2], 3.3, [3, 3, 3]]
+
+    array = awkward1.Array([1.1, 2.2, None, None, 3.3, None, 4.4])
+

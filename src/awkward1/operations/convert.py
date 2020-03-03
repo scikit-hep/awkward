@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import sys
 import numbers
 import json
+import collections
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -326,7 +327,7 @@ def regularize_numpyarray(array, allowempty=True, highlevel=True):
     else:
         return out
 
-def fromawkward0(array, highlevel=True):
+def fromawkward0(array, highlevel=True, keeplayout=False):
     import awkward as awkward0
 
     def recurse(array):
@@ -418,7 +419,7 @@ def fromawkward0(array, highlevel=True):
     else:
         return out
 
-def toawkward0(array):
+def toawkward0(array, keeplayout=False):
     import awkward as awkward0
 
     def recurse(layout):
@@ -430,6 +431,8 @@ def toawkward0(array):
 
         elif isinstance(layout, awkward1.layout.RegularArray):
             # content, size
+            if keeplayout:
+                raise TypeError("awkward0 has no equivalent of RegularArray; try keeplayout=True")
             offsets = numpy.arange(0, (len(layout) + 1)*layout.size, layout.size)
             return awkward0.JaggedArray.fromoffsets(offsets, recurse(layout.content))
 
@@ -473,19 +476,27 @@ def toawkward0(array):
 
         elif isinstance(layout, awkward1.layout.RecordArray):
             # istuple, numfields, field(i)
-            raise NotImplementedError
+            if layout.numfields == 0 and len(layout) != 0:
+                raise ValueError("cannot convert zero-field, nonzero-length RecordArray to awkward0.Table (limitation in awkward0)")
+            keys = layout.keys()
+            values = [recurse(x) for x in layout.contents]
+            pairs = collections.OrderedDict(zip(keys, values))
+            out = awkward0.Table(pairs)
+            if layout.istuple:
+                out._rowname = "tuple"
+            return out
 
         elif isinstance(layout, awkward1.layout.UnionArray8_32):
             # tags, index, numcontents, content(i)
-            raise NotImplementedError
+            return awkward0.UnionArray(numpy.asarray(layout.tags), numpy.asarray(layout.index), [recurse(x) for x in layout.contents])
 
         elif isinstance(layout, awkward1.layout.UnionArray8_U32):
             # tags, index, numcontents, content(i)
-            raise NotImplementedError
+            return awkward0.UnionArray(numpy.asarray(layout.tags), numpy.asarray(layout.index), [recurse(x) for x in layout.contents])
 
         elif isinstance(layout, awkward1.layout.UnionArray8_64):
             # tags, index, numcontents, content(i)
-            raise NotImplementedError
+            return awkward0.UnionArray(numpy.asarray(layout.tags), numpy.asarray(layout.index), [recurse(x) for x in layout.contents])
 
         elif isinstance(layout, awkward1.layout.IndexedOptionArray32):
             # index, content
