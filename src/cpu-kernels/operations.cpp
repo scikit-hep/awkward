@@ -684,17 +684,18 @@ ERROR awkward_unionarray8_64_simplify_one_to8_64(int8_t* totags, int64_t* toinde
 }
 
 template <typename T>
-ERROR awkward_index_rpad_and_clip_axis0(T* toindex, int64_t fromlength, int64_t tolength) {
-  for (int64_t i = 0; i < fromlength; i++) {
+ERROR awkward_index_rpad_and_clip_axis0(T* toindex, int64_t target, int64_t length) {
+  int64_t shorter = (target < length ? target : length);
+  for (int64_t i = 0; i < shorter; i++) {
     toindex[i] = i;
   }
-  for (int64_t i = fromlength; i < tolength; i++) {
+  for (int64_t i = shorter; i < target; i++) {
     toindex[i] = -1;
   }
   return success();
 }
-ERROR awkward_index_rpad_and_clip_axis0_64(int64_t* toindex, int64_t fromlength, int64_t tolength) {
-  return awkward_index_rpad_and_clip_axis0<int64_t>(toindex, fromlength, tolength);
+ERROR awkward_index_rpad_and_clip_axis0_64(int64_t* toindex, int64_t target, int64_t length) {
+  return awkward_index_rpad_and_clip_axis0<int64_t>(toindex, target, length);
 }
 
 template <typename T>

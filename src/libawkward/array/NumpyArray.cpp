@@ -1408,12 +1408,11 @@ namespace awkward {
     if (toaxis != 0) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
-    int64_t tolength = (target > length() ? target : length());
-    Index64 index(tolength);
+    Index64 index(target);
     struct Error err = awkward_index_rpad_and_clip_axis0_64(
       index.ptr().get(),
-      (length() < tolength ? length() : tolength),
-      tolength);
+      target,
+      length());
     util::handle_error(err, classname(), identities_.get());
     return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
   }

@@ -541,12 +541,11 @@ namespace awkward {
   const std::shared_ptr<Content> RegularArray::rpad_and_clip(int64_t target, int64_t axis) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == 0) {
-      int64_t tolength = (target > this->length() ? target : this->length());
-      Index64 index(tolength);
+      Index64 index(target);
       struct Error err = awkward_index_rpad_and_clip_axis0_64(
         index.ptr().get(),
-        (length() < tolength ? length() : tolength),
-        tolength);
+        target,
+        length());
       util::handle_error(err, classname(), identities_.get());
       std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
       return next.get()->simplify();
