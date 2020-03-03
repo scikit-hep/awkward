@@ -80,8 +80,8 @@ def test_rpad_and_clip_regular_array():
     array = awkward1.layout.RegularArray(indexedarray, 3)
     print(awkward1.tolist(array))
 
-    assert awkward1.tolist(array.rpad_and_clip(5, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], [None, None, None], [None, None, None]]
-    assert awkward1.tolist(array.rpad_and_clip(4, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], [None, None, None]]
+    assert awkward1.tolist(array.rpad_and_clip(5, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], None, None]
+    assert awkward1.tolist(array.rpad_and_clip(4, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], None]
     assert awkward1.tolist(array.rpad_and_clip(3, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7]]
     assert awkward1.tolist(array.rpad_and_clip(2, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6]]
     assert awkward1.tolist(array.rpad_and_clip(1, 0)) == [[6.9, 3.9, 6.9]]
