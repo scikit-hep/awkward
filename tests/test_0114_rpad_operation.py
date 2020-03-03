@@ -90,6 +90,7 @@ def test_rpad_and_clip_regular_array():
     index = awkward1.layout.Index64(numpy.array([13, 9, 13, 4, 8, 3, 15, -1, 16, 2, 8], dtype=numpy.int64))
     indexedarray = awkward1.layout.IndexedOptionArray64(index, content)
     array = awkward1.layout.RegularArray(indexedarray, 3)
+    print(awkward1.tolist(array))
 
     assert awkward1.tolist(array.rpad_and_clip(5, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], [None, None, None], [None, None, None]]
     assert awkward1.tolist(array.rpad_and_clip(4, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], [None, None, None]]
