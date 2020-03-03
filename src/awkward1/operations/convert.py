@@ -330,7 +330,27 @@ def fromawkward0(array, highlevel=True):
     import awkward as awkward0
 
     def recurse(array):
-        if isinstance(array, numpy.ma.MaskedArray):
+        if isinstance(array, dict):
+            keys = []
+            values = []
+            for n, x in array.items():
+                keys.append(n)
+                if isinstance(x, (dict, tuple, numpy.ma.MaskedArray, numpy.ndarray, awkward0.array.base.AwkwardArray)):
+                    values.append(recurse(x)[numpy.newaxis])
+                else:
+                    values.append(awkward1.layout.NumpyArray(numpy.array([x])))
+            return awkward1.layout.RecordArray(values, keys)[0]
+
+        elif isinstance(array, tuple):
+            values = []
+            for x in array:
+                if isinstance(x, (dict, tuple, numpy.ma.MaskedArray, numpy.ndarray, awkward0.array.base.AwkwardArray)):
+                    values.append(recurse(x)[numpy.newaxis])
+                else:
+                    values.append(awkward1.layout.NumpyArray(numpy.array([x])))
+            return awkward1.layout.RecordArray(values)[0]
+
+        elif isinstance(array, numpy.ma.MaskedArray):
             raise NotImplementedError
 
         elif isinstance(array, numpy.ndarray):
@@ -439,7 +459,17 @@ def toawkward0(array):
 
         elif isinstance(layout, awkward1.layout.Record):
             # istuple, numfields, field(i)
-            raise NotImplementedError
+            out = []
+            for i in range(layout.numfields):
+                content = layout.field(i)
+                if isinstance(content, (awkward1.layout.Content, awkward1.layout.Record)):
+                    out.append(recurse(content))
+                else:
+                    out.append(content)
+            if layout.istuple:
+                return tuple(out)
+            else:
+                return dict(zip(layout.keys(), out))
 
         elif isinstance(layout, awkward1.layout.RecordArray):
             # istuple, numfields, field(i)
