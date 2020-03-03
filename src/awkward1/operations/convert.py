@@ -327,7 +327,7 @@ def regularize_numpyarray(array, allowempty=True, highlevel=True):
     else:
         return out
 
-def fromawkward0(array, highlevel=True, keeplayout=False):
+def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, behavior=None):
     import awkward as awkward0
 
     def recurse(array):
@@ -352,15 +352,43 @@ def fromawkward0(array, highlevel=True, keeplayout=False):
             return awkward1.layout.RecordArray(values)[0]
 
         elif isinstance(array, numpy.ma.MaskedArray):
-            raise NotImplementedError
+            return fromnumpy(array, regulararray=regulararray, highlevel=False)
 
         elif isinstance(array, numpy.ndarray):
-            raise NotImplementedError
+            return fromnumpy(array, regulararray=regulararray, highlevel=False)
 
         elif isinstance(array, awkward0.JaggedArray):
             # starts, stops, content
             # offsetsaliased(starts, stops)
-            raise NotImplementedError
+            startsmax = numpy.iinfo(array.starts.dtype.type).max
+            stopsmax = numpy.iinfo(array.stops.dtype.type).max
+            if len(array.starts.shape) == 1 and len(array.stops.shape) == 1 and awkward0.JaggedArray.offsetsaliased(array.starts, array.stops):
+                if startsmax >= fromawkward0.int64max:
+                    offsets = awkward1.layout.Index64(array.offsets)
+                    return awkward1.layout.ListOffsetArray64(offsets, recurse(array.content))
+                elif startsmax >= fromawkward0.uint32max:
+                    offsets = awkward1.layout.IndexU32(array.offsets)
+                    return awkward1.layout.ListOffsetArrayU32(offsets, recurse(array.content))
+                else:
+                    offsets = awkward1.layout.Index32(array.offsets)
+                    return awkward1.layout.ListOffsetArray32(offsets, recurse(array.content))
+
+            else:
+                if startsmax >= fromawkward0.int64max or stopsmax >= fromawkward0.int64max:
+                    starts = awkward1.layout.Index64(array.starts.reshape(-1))
+                    stops = awkward1.layout.Index64(array.stops.reshape(-1))
+                    out = awkward1.layout.ListArray64(starts, stops, recurse(array.content))
+                elif startsmax >= fromawkward0.uint32max or stopsmax >= fromawkward0.uint32max:
+                    starts = awkward1.layout.IndexU32(array.starts.reshape(-1))
+                    stops = awkward1.layout.IndexU32(array.stops.reshape(-1))
+                    out = awkward1.layout.ListArrayU32(starts, stops, recurse(array.content))
+                else:
+                    starts = awkward1.layout.Index32(array.starts.reshape(-1))
+                    stops = awkward1.layout.Index32(array.stops.reshape(-1))
+                    out = awkward1.layout.ListArray32(starts, stops, recurse(array.content))
+                for size in array.starts.shape[:0:-1]:
+                    out = awkward1.layout.RegularArray(out, size)
+                return out
 
         elif isinstance(array, Table):
             # contents
@@ -415,9 +443,14 @@ def fromawkward0(array, highlevel=True, keeplayout=False):
 
     out = recurse(array)
     if highlevel:
-        return awkward1._util.wrap(out, None)
+        return awkward1._util.wrap(out, behavior)
     else:
         return out
+
+fromawkward0.int8max = numpy.iinfo(numpy.int8).max
+fromawkward0.int32max = numpy.iinfo(numpy.int32).max
+fromawkward0.uint32max = numpy.iinfo(numpy.uint32).max
+fromawkward0.int64max = numpy.iinfo(numpy.int64).max
 
 def toawkward0(array, keeplayout=False):
     import awkward as awkward0

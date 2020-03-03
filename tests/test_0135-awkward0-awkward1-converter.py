@@ -40,6 +40,9 @@ def test_toawkward0():
     array = awkward1.Array([(0, []), (1.1, [1]), (2.2, [2, 2]), (3.3, [3, 3, 3])])
     assert isinstance(awkward1.toawkward0(array), awkward0.Table)
     assert awkward1.toawkward0(array).tolist() == [(0, []), (1.1, [1]), (2.2, [2, 2]), (3.3, [3, 3, 3])]
+    assert isinstance(awkward1.toawkward0(array[2]), tuple)
+    assert awkward1.toawkward0(array[2])[0] == 2.2
+    assert awkward1.toawkward0(array[2])[1].tolist() == [2, 2]
 
     array = awkward1.Array([0.0, [], 1.1, [1], 2.2, [2, 2], 3.3, [3, 3, 3]])
     assert isinstance(awkward1.toawkward0(array), awkward0.UnionArray)
@@ -54,3 +57,23 @@ def test_toawkward0():
     array = awkward1.layout.IndexedArray64(index, content)
     assert isinstance(awkward1.toawkward0(array), awkward0.IndexedArray)
     assert awkward1.toawkward0(array).tolist() == [3.3, 2.2, 2.2, 5.5, 0.0]
+
+def test_fromawkward0():
+    array = numpy.array([1.1, 2.2, 3.3, 4.4, 5.5])
+    assert isinstance(awkward1.fromawkward0(array), awkward1.highlevel.Array)
+    assert isinstance(awkward1.fromawkward0(array).layout, awkward1.layout.NumpyArray)
+    assert awkward1.tolist(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+    array = (123, numpy.array([1.1, 2.2, 3.3]))
+    assert isinstance(awkward1.fromawkward0(array), awkward1.highlevel.Record)
+    assert isinstance(awkward1.fromawkward0(array).layout, awkward1.layout.Record)
+    assert awkward1.tolist(awkward1.fromawkward0(array)) == (123, [1.1, 2.2, 3.3])
+
+    array = {"x": 123, "y": numpy.array([1.1, 2.2, 3.3])}
+    assert isinstance(awkward1.fromawkward0(array), awkward1.highlevel.Record)
+    assert isinstance(awkward1.fromawkward0(array).layout, awkward1.layout.Record)
+    assert awkward1.tolist(awkward1.fromawkward0(array)) == {"x": 123, "y": [1.1, 2.2, 3.3]}
+
+    array = awkward0.fromiter([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    assert isinstance(awkward1.fromawkward0(array).layout, (awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64))
+    assert awkward1.tolist(awkward1.fromawkward0(array)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
