@@ -547,7 +547,7 @@ namespace awkward {
       return toListOffsetArray64().get()->rpad(length, toaxis);
     }
     else {
-      return toListOffsetArray64().get()->rpad(length, toaxis);
+      out = out.get()->rpad(length, toaxis - 1);
       return std::make_shared<RegularArray>(identities_, parameters_, out, size_);
     }
   }
