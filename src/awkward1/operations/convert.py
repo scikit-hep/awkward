@@ -326,4 +326,161 @@ def regularize_numpyarray(array, allowempty=True, highlevel=True):
     else:
         return out
 
+def fromawkward0(array, highlevel=True):
+    import awkward as awkward0
+
+    def recurse(array):
+        if isinstance(array, numpy.ma.MaskedArray):
+            raise NotImplementedError
+
+        elif isinstance(array, numpy.ndarray):
+            raise NotImplementedError
+
+        elif isinstance(array, awkward0.JaggedArray):
+            # starts, stops, content
+            # offsetsaliased(starts, stops)
+            raise NotImplementedError
+
+        elif isinstance(array, Table):
+            # contents
+            raise NotImplementedError
+
+        elif isinstance(array, UnionArray):
+            # tags, index, contents
+            raise NotImplementedError
+
+        elif isinstance(array, awkward0.MaskedArray):
+            # mask, content, maskedwhen
+            raise NotImplementedError
+
+        elif isinstance(array, awkward0.BitMaskedArray):
+            # mask, content, maskedwhen, lsborder
+            raise NotImplementedError
+
+        elif isinstance(array, IndexedMaskedArray):
+            # mask, content, maskedwhen
+            raise NotImplementedError
+
+        elif isinstance(array, awkward0.IndexedArray):
+            # index, content
+            raise NotImplementedError
+
+        elif isinstance(array, awkward0.SparseArray):
+            # length, index, content, default
+            raise NotImplementedError
+
+        elif isinstance(array, StringArray):
+            # starts, stops, content, encoding
+            raise NotImplementedError
+
+        elif isinstance(array, ObjectArray):
+            # content, generator, args, kwargs
+            raise NotImplementedError
+
+        if isinstance(array, awkward0.ChunkedArray):
+            # chunks, chunksizes
+            raise NotImplementedError
+
+        elif isinstance(array, awkward0.AppendableArray):
+            # chunkshape, dtype, chunks
+            raise NotImplementedError
+
+        elif isinstance(array, VirtualArray):
+            # generator, args, kwargs, cache, persistentkey, type, nbytes, persistvirtual
+            raise NotImplementedError
+
+        else:
+            raise TypeError("not an awkward0 array: {0}".format(repr(array)))
+
+    out = recurse(array)
+    if highlevel:
+        return awkward1._util.wrap(out, None)
+    else:
+        return out
+
+def toawkward0(array):
+    import awkward as awkward0
+
+    def recurse(layout):
+        if isinstance(layout, awkward1.layout.NumpyArray):
+            return numpy.asarray(layout)
+
+        elif isinstance(layout, awkward1.layout.EmptyArray):
+            return numpy.array([])
+
+        elif isinstance(layout, awkward1.layout.RegularArray):
+            # content, size
+            offsets = numpy.arange(0, (len(layout) + 1)*layout.size, layout.size)
+            return awkward0.JaggedArray.fromoffsets(offsets, recurse(layout.content))
+
+        elif isinstance(layout, awkward1.layout.ListArray32):
+            # starts, stops, content
+            return awkward0.JaggedArray(numpy.asarray(layout.starts), numpy.asarray(layout.stops), recurse(layout.content))
+
+        elif isinstance(layout, awkward1.layout.ListArrayU32):
+            # starts, stops, content
+            return awkward0.JaggedArray(numpy.asarray(layout.starts), numpy.asarray(layout.stops), recurse(layout.content))
+
+        elif isinstance(layout, awkward1.layout.ListArray64):
+            # starts, stops, content
+            return awkward0.JaggedArray(numpy.asarray(layout.starts), numpy.asarray(layout.stops), recurse(layout.content))
+
+        elif isinstance(layout, awkward1.layout.ListOffsetArray32):
+            # offsets, content
+            return awkward0.JaggedArray.fromoffsets(numpy.asarray(layout.offsets), recurse(layout.content))
+
+        elif isinstance(layout, awkward1.layout.ListOffsetArrayU32):
+            # offsets, content
+            return awkward0.JaggedArray.fromoffsets(numpy.asarray(layout.offsets), recurse(layout.content))
+
+        elif isinstance(layout, awkward1.layout.ListOffsetArray64):
+            # offsets, content
+            return awkward0.JaggedArray.fromoffsets(numpy.asarray(layout.offsets), recurse(layout.content))
+
+        elif isinstance(layout, awkward1.layout.Record):
+            # istuple, numfields, field(i)
+            raise NotImplementedError
+
+        elif isinstance(layout, awkward1.layout.RecordArray):
+            # istuple, numfields, field(i)
+            raise NotImplementedError
+
+        elif isinstance(layout, awkward1.layout.UnionArray8_32):
+            # tags, index, numcontents, content(i)
+            raise NotImplementedError
+
+        elif isinstance(layout, awkward1.layout.UnionArray8_U32):
+            # tags, index, numcontents, content(i)
+            raise NotImplementedError
+
+        elif isinstance(layout, awkward1.layout.UnionArray8_64):
+            # tags, index, numcontents, content(i)
+            raise NotImplementedError
+
+        elif isinstance(layout, awkward1.layout.IndexedOptionArray32):
+            # index, content
+            raise NotImplementedError
+
+        elif isinstance(layout, awkward1.layout.IndexedOptionArray64):
+            # index, content
+            raise NotImplementedError
+
+        elif isinstance(layout, awkward1.layout.IndexedArray32):
+            # index, content
+            raise NotImplementedError
+
+        elif isinstance(layout, awkward1.layout.IndexedArrayU32):
+            # index, content
+            raise NotImplementedError
+
+        elif isinstance(layout, awkward1.layout.IndexedArray64):
+            # index, content
+            raise NotImplementedError
+
+        else:
+            raise TypeError("missing converter for {0}".format(type(layout).__name__))
+
+    layout = tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.generic,))
+    return recurse(layout)
+
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "json", "Iterable", "numpy", "awkward1")]
