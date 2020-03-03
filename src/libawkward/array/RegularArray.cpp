@@ -545,7 +545,7 @@ namespace awkward {
       Index64 index(tolength);
       struct Error err = awkward_index_rpad_and_clip_axis0_64(
         index.ptr().get(),
-        this->length(),
+        (length() < tolength ? length() : tolength),
         tolength);
       util::handle_error(err, classname(), identities_.get());
       std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
