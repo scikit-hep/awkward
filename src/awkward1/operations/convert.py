@@ -390,11 +390,19 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
                     out = awkward1.layout.RegularArray(out, size)
                 return out
 
-        elif isinstance(array, Table):
+        elif isinstance(array, awkward0.Table):
             # contents
-            raise NotImplementedError
+            if array.istuple:
+                return awkward1.layout.RecordArray([recurse(x) for x in array.contents.values()])
+            else:
+                keys = []
+                values = []
+                for n, x in array.contents.items():
+                    keys.append(n)
+                    values.append(recurse(x))
+                return awkward1.layout.RecordArray(values, keys)
 
-        elif isinstance(array, UnionArray):
+        elif isinstance(array, awkward0.UnionArray):
             # tags, index, contents
             raise NotImplementedError
 
@@ -418,11 +426,11 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
             # length, index, content, default
             raise NotImplementedError
 
-        elif isinstance(array, StringArray):
+        elif isinstance(array, awkward0.StringArray):
             # starts, stops, content, encoding
             raise NotImplementedError
 
-        elif isinstance(array, ObjectArray):
+        elif isinstance(array, awkward0.ObjectArray):
             # content, generator, args, kwargs
             raise NotImplementedError
 
@@ -434,7 +442,7 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
             # chunkshape, dtype, chunks
             raise NotImplementedError
 
-        elif isinstance(array, VirtualArray):
+        elif isinstance(array, awkward0.VirtualArray):
             # generator, args, kwargs, cache, persistentkey, type, nbytes, persistvirtual
             raise NotImplementedError
 

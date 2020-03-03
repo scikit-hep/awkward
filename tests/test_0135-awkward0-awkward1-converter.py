@@ -77,3 +77,15 @@ def test_fromawkward0():
     array = awkward0.fromiter([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     assert isinstance(awkward1.fromawkward0(array).layout, (awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64))
     assert awkward1.tolist(awkward1.fromawkward0(array)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+    array = awkward0.fromiter([{"x": 0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}])
+    assert isinstance(awkward1.fromawkward0(array).layout, awkward1.layout.RecordArray)
+    assert not awkward1.fromawkward0(array).layout.istuple
+    assert awkward1.fromawkward0(array).layout.keys() == ["x", "y"]
+    assert awkward1.tolist(awkward1.fromawkward0(array)) == [{"x": 0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}]
+
+    array = awkward0.Table([0.0, 1.1, 2.2], awkward0.fromiter([[], [1], [2, 2]]))
+    assert isinstance(awkward1.fromawkward0(array).layout, awkward1.layout.RecordArray)
+    assert awkward1.fromawkward0(array).layout.istuple
+    assert awkward1.fromawkward0(array).layout.keys() == ["0", "1"]
+    assert awkward1.tolist(awkward1.fromawkward0(array)) == [(0.0, []), (1.1, [1]), (2.2, [2, 2])]
