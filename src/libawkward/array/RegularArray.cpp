@@ -562,7 +562,7 @@ namespace awkward {
       return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
     }
     else {
-      throw std::runtime_error("FIXME: RegularArray::rpad_and_clip axis > 1");
+      return content_.get()->rpad_and_clip(target, axis, depth + 1);
     }
   }
 
