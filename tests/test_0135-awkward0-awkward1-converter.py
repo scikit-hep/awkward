@@ -27,3 +27,9 @@ def test_toawkward0():
     array = awkward1.layout.ListArray64(awkward1.layout.Index64(numpy.array([4, 999, 1], dtype=numpy.int64)), awkward1.layout.Index64(numpy.array([7, 999, 3], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([3.14, 4.4, 5.5, 123, 1.1, 2.2, 3.3, 321])))
     assert isinstance(awkward1.toawkward0(array), awkward0.JaggedArray)
     assert awkward1.toawkward0(array).tolist() == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+    array = awkward1.Array([{"x": 0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}])
+    assert isinstance(awkward1.toawkward0(array[2]), dict)
+    assert awkward1.toawkward0(array[2])["x"] == 2.2
+    assert isinstance(awkward1.toawkward0(array[2])["y"], numpy.ndarray)
+    assert awkward1.toawkward0(array[2])["y"].tolist() == [2, 2]
