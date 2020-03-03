@@ -91,6 +91,26 @@ def test_rpad_and_clip_regular_array():
     assert awkward1.tolist(array.rpad_and_clip(2, 1)) == [[6.9, 3.9], [2.2, 1.5], [3.6, None]]
     assert awkward1.tolist(array.rpad_and_clip(1, 1)) == [[6.9], [2.2], [3.6]]
 
+    array = awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(2, 3, 5))
+    assert awkward1.tolist(array) == [[[ 0,  1,  2,  3,  4],
+                                       [ 5,  6,  7,  8,  9],
+                                       [10, 11, 12, 13, 14]],
+                                      [[15, 16, 17, 18, 19],
+                                       [20, 21, 22, 23, 24],
+                                       [25, 26, 27, 28, 29]]]
+
+    print(array.rpad_and_clip(7, 2))
+    print(awkward1.tolist(array.rpad_and_clip(7, 2)))
+
+    assert awkward1.tolist(array.rpad_and_clip(7, 2)) == [[[ 0,  1,  2,  3,  4, None, None],
+                                                           [ 5,  6,  7,  8,  9, None, None],
+                                                           [10, 11, 12, 13, 14, None, None]],
+                                                          [[15, 16, 17, 18, 19, None, None],
+                                                           [20, 21, 22, 23, 24, None, None],
+                                                           [25, 26, 27, 28, 29, None, None]]]
+
+    raise Exception
+
 #     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
 #     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
 #     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
