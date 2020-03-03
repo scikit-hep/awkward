@@ -562,7 +562,7 @@ namespace awkward {
       return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
     }
     else {
-      return content_.get()->rpad_and_clip(target, axis, depth + 1);
+      return std::make_shared<RegularArray>(Identities::none(), parameters_, content_.get()->rpad_and_clip(target, axis, depth + 1), size_);
     }
   }
 
