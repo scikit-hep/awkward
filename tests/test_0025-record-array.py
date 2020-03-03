@@ -200,7 +200,7 @@ def test_setidentities():
     # offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 9]))
     # listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content2)
 
-    recordarray = awkward1.layout.RecordArray([content1, content2])
+    recordarray = awkward1.layout.RecordArray([content1])
     recordarray.setidentities()
 
     # recordarray = awkward1.layout.RecordArray({"one": content1, "two": listoffsetarray})
