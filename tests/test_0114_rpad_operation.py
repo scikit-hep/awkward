@@ -37,11 +37,14 @@ def test_rpad_numpy_array():
     assert awkward1.tolist(array.rpad(10, 0)) == [1.1, 2.2, 3.3, 4.4, 5.5, None, None, None, None, None]
 
     array = awkward1.layout.NumpyArray(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+
     print(array.rpad(5, 0))
+    print(awkward1.tolist(array.rpad(5, 0)))
 
     # [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], None, None, None]
 
     print(array.rpad(5, 1))
+    print(awkward1.tolist(array.rpad(5, 1)))
 
     # [[1.1, 2.2, 3.3, None, None], [4.4, 5.5, 6.6, None, None]]
 
@@ -81,24 +84,24 @@ def test_rpad_numpy_array():
 #
 #     assert awkward1.tolist(array.rpad(2, 2)) == [[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
 #                                                  [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]
-#
-# def test_rpad_and_clip_regular_array():
-#     content = awkward1.layout.NumpyArray(numpy.array([2.1, 8.4, 7.4, 1.6, 2.2, 3.4, 6.2, 5.4, 1.5, 3.9, 3.8, 3.0, 8.5, 6.9, 4.3, 3.6, 6.7, 1.8, 3.2]))
-#     index = awkward1.layout.Index64(numpy.array([13, 9, 13, 4, 8, 3, 15, -1, 16, 2, 8], dtype=numpy.int64))
-#     indexedarray = awkward1.layout.IndexedOptionArray64(index, content)
-#     array = awkward1.layout.RegularArray(indexedarray, 3)
-#
-#     assert awkward1.tolist(array.rpad_and_clip(5, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], [None, None, None], [None, None, None]]
-#     assert awkward1.tolist(array.rpad_and_clip(4, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], [None, None, None]]
-#     assert awkward1.tolist(array.rpad_and_clip(3, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7]]
-#     assert awkward1.tolist(array.rpad_and_clip(2, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6]]
-#     assert awkward1.tolist(array.rpad_and_clip(1, 0)) == [[6.9, 3.9, 6.9]]
-#     assert awkward1.tolist(array.rpad_and_clip(5, 1)) == [[6.9, 3.9, 6.9, None, None], [2.2, 1.5, 1.6, None, None], [3.6, None, 6.7, None, None]]
-#     assert awkward1.tolist(array.rpad_and_clip(4, 1)) == [[6.9, 3.9, 6.9, None], [2.2, 1.5, 1.6, None], [3.6, None, 6.7, None]]
-#     assert awkward1.tolist(array.rpad_and_clip(3, 1)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7]]
-#     assert awkward1.tolist(array.rpad_and_clip(2, 1)) == [[6.9, 3.9], [2.2, 1.5], [3.6, None]]
-#     assert awkward1.tolist(array.rpad_and_clip(1, 1)) == [[6.9], [2.2], [3.6]]
-#
+
+def test_rpad_and_clip_regular_array():
+    content = awkward1.layout.NumpyArray(numpy.array([2.1, 8.4, 7.4, 1.6, 2.2, 3.4, 6.2, 5.4, 1.5, 3.9, 3.8, 3.0, 8.5, 6.9, 4.3, 3.6, 6.7, 1.8, 3.2]))
+    index = awkward1.layout.Index64(numpy.array([13, 9, 13, 4, 8, 3, 15, -1, 16, 2, 8], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedOptionArray64(index, content)
+    array = awkward1.layout.RegularArray(indexedarray, 3)
+
+    assert awkward1.tolist(array.rpad_and_clip(5, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], [None, None, None], [None, None, None]]
+    assert awkward1.tolist(array.rpad_and_clip(4, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], [None, None, None]]
+    assert awkward1.tolist(array.rpad_and_clip(3, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7]]
+    assert awkward1.tolist(array.rpad_and_clip(2, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6]]
+    assert awkward1.tolist(array.rpad_and_clip(1, 0)) == [[6.9, 3.9, 6.9]]
+    assert awkward1.tolist(array.rpad_and_clip(5, 1)) == [[6.9, 3.9, 6.9, None, None], [2.2, 1.5, 1.6, None, None], [3.6, None, 6.7, None, None]]
+    assert awkward1.tolist(array.rpad_and_clip(4, 1)) == [[6.9, 3.9, 6.9, None], [2.2, 1.5, 1.6, None], [3.6, None, 6.7, None]]
+    assert awkward1.tolist(array.rpad_and_clip(3, 1)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7]]
+    assert awkward1.tolist(array.rpad_and_clip(2, 1)) == [[6.9, 3.9], [2.2, 1.5], [3.6, None]]
+    assert awkward1.tolist(array.rpad_and_clip(1, 1)) == [[6.9], [2.2], [3.6]]
+
 #     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
 #     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
 #     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
