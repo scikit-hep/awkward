@@ -446,15 +446,43 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
 
         elif isinstance(array, IndexedMaskedArray):
             # mask, content, maskedwhen
-            raise NotImplementedError
+            indexmax = numpy.iinfo(array.index.dtype.type).max
+            if indexmax >= fromawkward0.int64max:
+                index = awkward1.layout.Index64(array.index.reshape(-1))
+                out = awkward1.layout.IndexedOptionArray64(index, recurse(array.content))
+            elif indexmax >= fromawkward0.uint32max:
+                index = awkward1.layout.IndexU32(array.index.reshape(-1))
+                out = awkward1.layout.IndexedOptionArrayU32(index, recurse(array.content))
+            else:
+                index = awkward1.layout.Index32(array.index.reshape(-1))
+                out = awkward1.layout.IndexedOptionArray32(index, recurse(array.content))
+
+            for size in array.tags.shape[:0:-1]:
+                out = awkward1.layout.RegularArray(out, size)
+            return out
 
         elif isinstance(array, awkward0.IndexedArray):
             # index, content
-            raise NotImplementedError
+            indexmax = numpy.iinfo(array.index.dtype.type).max
+            if indexmax >= fromawkward0.int64max:
+                index = awkward1.layout.Index64(array.index.reshape(-1))
+                out = awkward1.layout.IndexedArray64(index, recurse(array.content))
+            elif indexmax >= fromawkward0.uint32max:
+                index = awkward1.layout.IndexU32(array.index.reshape(-1))
+                out = awkward1.layout.IndexedArrayU32(index, recurse(array.content))
+            else:
+                index = awkward1.layout.Index32(array.index.reshape(-1))
+                out = awkward1.layout.IndexedArray32(index, recurse(array.content))
+
+            for size in array.tags.shape[:0:-1]:
+                out = awkward1.layout.RegularArray(out, size)
+            return out
 
         elif isinstance(array, awkward0.SparseArray):
             # length, index, content, default
-            raise NotImplementedError
+            if keeplayout:
+                raise ValueError("awkward1.SparseArray hasn't been written (if at all); try keeplayout=False to convert it to the nearest equivalent")
+            return recurse(array.dense)
 
         elif isinstance(array, awkward0.StringArray):
             # starts, stops, content, encoding
