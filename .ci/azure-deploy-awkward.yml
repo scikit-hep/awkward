@@ -59,6 +59,10 @@ jobs:
         displayName: "Build"
 
       - script: |
+          cp wheelhouse/awkward1*.whl dist/.
+        displayName: "Copy wheels to dist"
+
+      - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
 
@@ -132,8 +136,12 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python -m pip wheel .
+          python -m pip wheel . -w wheelhouse/
         displayName: "Build"
+
+      - script: |
+          cp wheelhouse/awkward1*.whl dist/.
+        displayName: "Copy wheels to dist"
 
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
@@ -212,8 +220,12 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python -m pip wheel .
+          python -m pip wheel . -w wheelhouse/
         displayName: "Build"
+
+      - script: |
+          cp wheelhouse/awkward1*.whl dist/.
+        displayName: "Copy wheels to dist"
 
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose

@@ -1,32 +1,40 @@
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 cmake_minimum_required(VERSION 3.10...3.16)
-message(STATUS "CMake version ${CMAKE_VERSION}")
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-  message("-- Debug")
-elseif (CMAKE_BUILD_TYPE MATCHES Release)
-  message("-- Release")
-else()
-  message("-- CMAKE_BUILD_TYPE = " ${CMAKE_BUILD_TYPE})
-endif()
+
+# Project must be near the top
 project(awkward LANGUAGES CXX)
 
+message(STATUS "CMake version ${CMAKE_VERSION}")
+
+set(SIMPLE_TYPES Debug Release)
+if(CMAKE_BUILD_TYPE IN_LIST SIMPLE_TYPES)
+  message(STATUS "${CMAKE_BUILD_TYPE}")
+else()
+  message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+endif()
+
 # This is a C++11 project, but Windows starts at C++14.
-set(CMAKE_CXX_STANDARD 11)
+if(MSVC)
+  set(CMAKE_CXX_STANDARD 14)
+else()
+  set(CMAKE_CXX_STANDARD 11)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-if (MSVC)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
 
 # VERSION_INFO is the version stamp for everything (all C++, all Python).
 file(READ "VERSION_INFO" VERSION_INFO)
 string(STRIP ${VERSION_INFO} VERSION_INFO)
 add_definitions(-DVERSION_INFO="${VERSION_INFO}")
 
+# Let CMake know the version too
+project(awkward LANGUAGES CXX VERSION ${VERSION_INFO})
+
 # Three tiers: cpu-kernels (extern "C" interface), libawkward (C++), and Python modules.
 file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp")
 file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
+
 include_directories(include)
 
 # C++ dependencies (header-only): RapidJSON and pybind11.
@@ -36,7 +44,7 @@ include_directories(rapidjson/include)
 include(CTest)
 
 macro(addtest name filename)
-  if (BUILD_TESTING)
+  if(BUILD_TESTING)
     add_executable(${name} ${filename})
     target_link_libraries(${name} PRIVATE awkward-static awkward-cpu-kernels-static)
     set_target_properties(${name} PROPERTIES CXX_VISIBILITY_PRESET hidden)
@@ -71,7 +79,14 @@ addtest(test0016 tests/test_0016-finish-getitem-for-rawarray.cpp)
 addtest(test0019 tests/test_0019-use-json-library.cpp)
 addtest(test0030 tests/test_0030-recordarray-in-numba.cpp)
 
-install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static LIBRARY DESTINATION "lib")
+install(
+  TARGETS
+    awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
+  LIBRARY DESTINATION
+    lib
+  ARCHIVE DESTINATION
+    lib
+  )
 
 # Third tier: Python modules.
 
@@ -91,6 +106,15 @@ if (PYBUILD)
   set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
   target_link_libraries(_io PRIVATE awkward-static)
 
-  install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static layout types _io LIBRARY DESTINATION "awkward1")
+
+  # Double-installs files listed in first install command
+  install(
+    TARGETS
+      awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static layout types _io
+    LIBRARY DESTINATION
+      awkward1
+    ARCHIVE DESTINATION
+      awkward1
+  )
 
 endif()
