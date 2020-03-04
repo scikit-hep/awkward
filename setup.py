@@ -30,7 +30,7 @@ class CMakeExtension(Extension):
         self.sourcedir = os.path.abspath(sourcedir)
 
 class CMakeBuild(setuptools.command.build_ext.build_ext):
-    def run(self):
+    def build_extensions(self):
         try:
             out = subprocess.check_output(["cmake", "--version"])
         except OSError:
@@ -40,13 +40,19 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             self.build_extension(x)
 
     def build_extension(self, ext):
-        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
 
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = ["-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
-                      "-DPYTHON_EXECUTABLE=" + sys.executable,
+                      "-DPYTHON_EXECUTABLE={0}".format(sys.executable),
+                      "-DPYBUILD=ON",
                       "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
                       "-DPYBUILD=ON",
                       "-DBUILD_TESTING=OFF"]
+        try:
+           compiler_path = self.compiler.compiler_cxx
+           cmake_args.append("-DCMAKE_CXX_COMPILER={0}".format(compiler_path))
+        except AttributeError:
+            print("Not able to access compiler path (on Windows), using CMake default")
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
