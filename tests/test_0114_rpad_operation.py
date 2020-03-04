@@ -78,7 +78,6 @@ def test_rpad_and_clip_regular_array():
     index = awkward1.layout.Index64(numpy.array([13, 9, 13, 4, 8, 3, 15, -1, 16, 2, 8], dtype=numpy.int64))
     indexedarray = awkward1.layout.IndexedOptionArray64(index, content)
     array = awkward1.layout.RegularArray(indexedarray, 3)
-    print(awkward1.tolist(array))
 
     assert awkward1.tolist(array.rpad_and_clip(5, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], None, None]
     assert awkward1.tolist(array.rpad_and_clip(4, 0)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7], None]
@@ -99,17 +98,12 @@ def test_rpad_and_clip_regular_array():
                                        [20, 21, 22, 23, 24],
                                        [25, 26, 27, 28, 29]]]
 
-    print(array.rpad_and_clip(7, 2))
-    print(awkward1.tolist(array.rpad_and_clip(7, 2)))
-
     assert awkward1.tolist(array.rpad_and_clip(7, 2)) == [[[ 0,  1,  2,  3,  4, None, None],
                                                            [ 5,  6,  7,  8,  9, None, None],
                                                            [10, 11, 12, 13, 14, None, None]],
                                                           [[15, 16, 17, 18, 19, None, None],
                                                            [20, 21, 22, 23, 24, None, None],
                                                            [25, 26, 27, 28, 29, None, None]]]
-
-    raise Exception
 
 #     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
 #     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))

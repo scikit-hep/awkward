@@ -534,7 +534,7 @@ namespace awkward {
       }
     }
     else {
-      throw std::runtime_error("FIXME: RegularArray::rpad axis > 1");
+      return std::make_shared<RegularArray>(Identities::none(), parameters_, content_.get()->rpad(target, axis, depth + 1), size_);
     }
   }
 
