@@ -44,6 +44,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
         cmake_args = ["-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
                       "-DPYTHON_EXECUTABLE=" + sys.executable,
+                      "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
                       "-DPYBUILD=ON",
                       "-DBUILD_TESTING=OFF"]
 
