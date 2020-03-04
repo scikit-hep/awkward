@@ -46,6 +46,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
                       "-DPYTHON_EXECUTABLE=" + sys.executable,
                       "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
                       "-DPYBUILD=ON",
+                      "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
                       "-DBUILD_TESTING=OFF"]
 
         cfg = "Debug" if self.debug else "Release"
