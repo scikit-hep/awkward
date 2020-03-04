@@ -79,17 +79,7 @@ addtest(test0016 tests/test_0016-finish-getitem-for-rawarray.cpp)
 addtest(test0019 tests/test_0019-use-json-library.cpp)
 addtest(test0030 tests/test_0030-recordarray-in-numba.cpp)
 
-install(
-  TARGETS
-    awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
-  LIBRARY DESTINATION
-    lib
-  ARCHIVE DESTINATION
-    lib
-  )
-
 # Third tier: Python modules.
-
 if (PYBUILD)
   add_subdirectory(pybind11)
 
@@ -106,15 +96,13 @@ if (PYBUILD)
   set_target_properties(_io PROPERTIES CXX_VISIBILITY_PRESET hidden)
   target_link_libraries(_io PRIVATE awkward-static)
 
+  install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
+          layout types _io
+          LIBRARY DESTINATION awkward1 ARCHIVE DESTINATION awkward1)
 
-  # Double-installs files listed in first install command
-  install(
-    TARGETS
-      awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static layout types _io
-    LIBRARY DESTINATION
-      awkward1
-    ARCHIVE DESTINATION
-      awkward1
-  )
+# Third tier: install without Python modules.
+else()
+  install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
+          LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
 endif()
