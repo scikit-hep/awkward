@@ -114,6 +114,17 @@ def test_fromawkward0():
     assert awkward1.tolist(awkward1.fromawkward0(array)) == [{"x": 1.1, "y": 10}, {"x": 2.2, "y": 20}, {"x": 3.3, "y": 30}]
     assert "__record__" in awkward1.fromawkward0(array).layout.parameters
 
-    # array = awkward0.ChunkedArray([awkward0.fromiter([[1.1, 2.2, 3.3], [], [4.4, 5.5]]), awkward0.fromiter([[6.6]]), awkward0.fromiter([[7.7, 8.8], [9.9, 10.0]])])
-    # print(repr(array))
-    # raise Exception
+    array = awkward0.ChunkedArray([awkward0.fromiter([[1.1, 2.2, 3.3], [], [4.4, 5.5]]), awkward0.fromiter([[6.6]]), awkward0.fromiter([[7.7, 8.8], [9.9, 10.0, 11.1, 12.2]])])
+    assert awkward1.tolist(awkward1.fromawkward0(array)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8], [9.9, 10.0, 11.1, 12.2]]
+
+    def generate1():
+        return awkward0.fromiter([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+
+    def generate2():
+        return awkward0.fromiter([[6.6]])
+
+    def generate3():
+        return awkward0.fromiter([[7.7, 8.8], [9.9, 10.0, 11.1, 12.2]])
+
+    array = awkward0.ChunkedArray([awkward0.VirtualArray(generate1), awkward0.VirtualArray(generate2), awkward0.VirtualArray(generate3)])
+    assert awkward1.tolist(awkward1.fromawkward0(array)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8], [9.9, 10.0, 11.1, 12.2]]

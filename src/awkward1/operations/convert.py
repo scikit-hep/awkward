@@ -505,7 +505,7 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
         elif isinstance(array, awkward0.ObjectArray):
             # content, generator, args, kwargs
             if keeplayout:
-                raise ValueError("there is (and won't ever be) an awkward1 equivalent of awkward0.ObjectArray; try keeplayout=False")
+                raise ValueError("there isn't (and won't ever be) an awkward1 equivalent of awkward0.ObjectArray; try keeplayout=False")
             out = recurse(array.content)
             out.setparameter("__record__", getattr(array.generator, "__qualname__", getattr(array.generator, "__name__", repr(array.generator))))
             return out
@@ -518,11 +518,13 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
 
         elif isinstance(array, awkward0.AppendableArray):
             # chunkshape, dtype, chunks
-            raise NotImplementedError
+            raise ValueError("the awkward1 equivalent of awkward0.AppendableArray is awkward1.ArrayBuilder, but it is not a Content type, not mixable with immutable array elements")
 
         elif isinstance(array, awkward0.VirtualArray):
             # generator, args, kwargs, cache, persistentkey, type, nbytes, persistvirtual
-            raise NotImplementedError
+            if keeplayout:
+                raise ValueError("awkward1.VirtualArray hasn't been written yet; try keeplayout=False")
+            return recurse(array.array)
 
         else:
             raise TypeError("not an awkward0 array: {0}".format(repr(array)))
