@@ -88,7 +88,7 @@ if platform.system() == "Windows":
     class Install(setuptools.command.install.install):
         def run(self):
             print("----------------------------------------------------------------")
-            tree(self.build_lib)
+            tree("build")
             print("----------------------------------------------------------------")
 
             for x in os.listdir(os.path.join(self.build_lib, "bin")):
