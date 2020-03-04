@@ -9,5 +9,21 @@ import numpy
 
 import awkward1
 
-def test():
-    pass
+numba = pytest.importorskip("numba")
+
+def test_string():
+    array = awkward1.Array(["one", "two", "three", "four", "five"])
+
+    @numba.njit
+    def f1(x, i):
+        return x[i]
+
+    assert f1(array, 0) == "one"
+    assert f1(array, 1) == "two"
+    assert f1(array, 2) == "three"
+
+    @numba.njit
+    def f2(x, i, j):
+        return x[i] + x[j]
+
+    assert f2(array, 1, 3) == "twofour"
