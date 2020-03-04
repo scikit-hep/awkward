@@ -65,6 +65,13 @@ jobs:
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
+        condition: contains(variables['Build.SourceBranch'], 'tags')
+
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+          targetPath: 'dist'
+
 
   - job: Windows
 
@@ -146,6 +153,13 @@ jobs:
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
+        condition: contains(variables['Build.SourceBranch'], 'tags')
+
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+          targetPath: 'dist'
+
 
   - job: MacOS
 
@@ -230,3 +244,10 @@ jobs:
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
+        condition: contains(variables['Build.SourceBranch'], 'tags')
+
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+          targetPath: 'dist'
+
