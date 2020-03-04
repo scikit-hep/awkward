@@ -98,8 +98,8 @@ if platform.system() == "Windows":
             for x in os.listdir(dlldir):
                 print("file", x)
                 if x.startswith("awkward"):
-                    print("    IS AWKWARD")
-                    shutil.copyfile(dlldir, os.path.join(self.build_lib, "awkward1", x))
+                    print("    is Awkward, copy to", os.path.join(self.build_lib, "awkward1", x))
+                    shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
                     print("    COPIED!")
 
             print("----------------------------------------------------------------")
