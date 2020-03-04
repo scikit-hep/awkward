@@ -97,3 +97,23 @@ def test_fromawkward0():
     array = awkward0.fromiter([1.1, 2.2, None, None, 3.3, None, 4.4])
     assert isinstance(awkward1.fromawkward0(array).layout, awkward1.layout.IndexedOptionArray64)   # until awkward1 has a MaskedArray
     assert awkward1.tolist(awkward1.fromawkward0(array)) == [1.1, 2.2, None, None, 3.3, None, 4.4]
+
+    array = awkward0.fromiter(["hello", "you", "guys"])
+    assert isinstance(awkward1.fromawkward0(array).layout, (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64))
+    assert awkward1.fromawkward0(array).layout.parameters["__array__"] in ("string", "bytes")
+    assert awkward1.fromawkward0(array).layout.content.parameters["__array__"] in ("utf8", "char")
+    assert awkward1.tolist(awkward1.fromawkward0(array)) == ["hello", "you", "guys"]
+
+    class Point(object):
+        def __init__(self, x, y):
+            self.x, self.y = x, y
+        def __repr__(self):
+            return "Point({0}, {1})".format(self.x, self.y)
+
+    array = awkward0.fromiter([Point(1.1, 10), Point(2.2, 20), Point(3.3, 30)])
+    assert awkward1.tolist(awkward1.fromawkward0(array)) == [{"x": 1.1, "y": 10}, {"x": 2.2, "y": 20}, {"x": 3.3, "y": 30}]
+    assert "__record__" in awkward1.fromawkward0(array).layout.parameters
+
+    # array = awkward0.ChunkedArray([awkward0.fromiter([[1.1, 2.2, 3.3], [], [4.4, 5.5]]), awkward0.fromiter([[6.6]]), awkward0.fromiter([[7.7, 8.8], [9.9, 10.0]])])
+    # print(repr(array))
+    # raise Exception

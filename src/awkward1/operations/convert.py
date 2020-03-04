@@ -328,6 +328,7 @@ def regularize_numpyarray(array, allowempty=True, highlevel=True):
         return out
 
 def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, behavior=None):
+    # See https://github.com/scikit-hep/awkward-0.x/blob/405b7eaeea51b60947a79c782b1abf0d72f6729b/specification.adoc
     import awkward as awkward0
 
     def recurse(array):
@@ -425,7 +426,7 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
         elif isinstance(array, awkward0.MaskedArray):
             # mask, content, maskedwhen
             if keeplayout:
-                raise ValueError("awkward1.MaskedArray hasn't been written yet; try keeplayout=False to convert it to the nearest equivalent")
+                raise ValueError("awkward1.MaskedArray hasn't been written yet; try keeplayout=False")
             ismasked = array.boolmask(maskedwhen=True).reshape(-1)
             index = numpy.arange(len(ismasked))
             index[ismasked] = -1
@@ -438,13 +439,13 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
         elif isinstance(array, awkward0.BitMaskedArray):
             # mask, content, maskedwhen, lsborder
             if keeplayout:
-                raise ValueError("awkward1.BitMaskedArray hasn't been written yet; try keeplayout=False to convert it to the nearest equivalent")
+                raise ValueError("awkward1.BitMaskedArray hasn't been written yet; try keeplayout=False")
             ismasked = array.boolmask(maskedwhen=True)
             index = numpy.arange(len(ismasked))
             index[ismasked] = -1
             return awkward1.layout.IndexedOptionArray64(awkward1.layout.Index64(index), recurse(array.content))
 
-        elif isinstance(array, IndexedMaskedArray):
+        elif isinstance(array, awkward0.IndexedMaskedArray):
             # mask, content, maskedwhen
             indexmax = numpy.iinfo(array.index.dtype.type).max
             if indexmax >= fromawkward0.int64max:
@@ -481,20 +482,39 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
         elif isinstance(array, awkward0.SparseArray):
             # length, index, content, default
             if keeplayout:
-                raise ValueError("awkward1.SparseArray hasn't been written (if at all); try keeplayout=False to convert it to the nearest equivalent")
+                raise ValueError("awkward1.SparseArray hasn't been written (if at all); try keeplayout=False")
             return recurse(array.dense)
 
         elif isinstance(array, awkward0.StringArray):
             # starts, stops, content, encoding
-            raise NotImplementedError
+            out = recurse(array._content)
+            out.content.setparameter("__array__", "char")
+            out.content.setparameter("encoding", array.encoding)
+            out.setparameter("__array__", "string")
+            if array.encoding == "utf-8":
+                out.content.setparameter("__typestr__", "utf8")
+                out.setparameter("__typestr__", "string")
+            elif array.encoding is None:
+                out.content.setparameter("__typestr__", "byte")
+                out.setparameter("__typestr__", "bytes")
+            else:
+                out.content.setparameter("__typestr__", "char[" + array.encoding + "]")
+                out.setparameter("__typestr__", "string[" + array.encoding + "]")
+            return out
 
         elif isinstance(array, awkward0.ObjectArray):
             # content, generator, args, kwargs
-            raise NotImplementedError
+            if keeplayout:
+                raise ValueError("there is (and won't ever be) an awkward1 equivalent of awkward0.ObjectArray; try keeplayout=False")
+            out = recurse(array.content)
+            out.setparameter("__record__", getattr(array.generator, "__qualname__", getattr(array.generator, "__name__", repr(array.generator))))
+            return out
 
         if isinstance(array, awkward0.ChunkedArray):
             # chunks, chunksizes
-            raise NotImplementedError
+            if keeplayout:
+                raise ValueError("awkward1.ChunkedArray hasn't been written yet; try keeplayout=False")
+            return awkward1.operations.structure.concatenate([recurse(x) for x in array.chunks])
 
         elif isinstance(array, awkward0.AppendableArray):
             # chunkshape, dtype, chunks
@@ -519,6 +539,7 @@ fromawkward0.uint32max = numpy.iinfo(numpy.uint32).max
 fromawkward0.int64max = numpy.iinfo(numpy.int64).max
 
 def toawkward0(array, keeplayout=False):
+    # See https://github.com/scikit-hep/awkward-0.x/blob/405b7eaeea51b60947a79c782b1abf0d72f6729b/specification.adoc
     import awkward as awkward0
 
     def recurse(layout):
@@ -531,7 +552,7 @@ def toawkward0(array, keeplayout=False):
         elif isinstance(layout, awkward1.layout.RegularArray):
             # content, size
             if keeplayout:
-                raise ValueError("awkward0 has no equivalent of RegularArray; try keeplayout=False to convert it to the nearest equivalent")
+                raise ValueError("awkward0 has no equivalent of RegularArray; try keeplayout=False")
             offsets = numpy.arange(0, (len(layout) + 1)*layout.size, layout.size)
             return awkward0.JaggedArray.fromoffsets(offsets, recurse(layout.content))
 
