@@ -1022,13 +1022,37 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::rpad(int64_t length, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: IndexedArray::rpad");
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::rpad(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      if (target < length()) {
+        return shallow_copy();
+      }
+      else {
+        return rpad_and_clip(target, toaxis, depth);
+      }
+    }
+    else {
+      throw std::runtime_error("FIXME: IndexedArray::rpad");
+    }
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: IndexedArray::rpad_and_clip");
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      Index64 index(target);
+      struct Error err = awkward_index_rpad_and_clip_axis0_64(
+        index.ptr().get(),
+        target,
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+      return next.get()->simplify();
+    }
+    else {
+      throw std::runtime_error("FIXME: IndexedArray::rpad_and_clip");
+    }
   }
 
   template <typename T, bool ISOPTION>

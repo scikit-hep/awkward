@@ -233,11 +233,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::rpad(int64_t length, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: Record::rpad");
+    throw std::invalid_argument("Record cannot be padded because it is not an array");
   }
 
   const std::shared_ptr<Content> Record::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: Record::rpad_and_clip");
+    throw std::invalid_argument("Record cannot be padded because it is not an array");
   }
 
   const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {

@@ -1094,13 +1094,23 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad(int64_t length, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: UnionArray::rpad");
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad(int64_t target, int64_t axis, int64_t depth) const {
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.emplace_back(content.get()->rpad(target, axis, depth));
+    }
+    UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+    return out.simplify(false);
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: UnionArray::rpad_and_clip");
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.emplace_back(content.get()->rpad_and_clip(target, axis, depth));
+    }
+    UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+    return out.simplify(false);
   }
 
   template <typename T, typename I>

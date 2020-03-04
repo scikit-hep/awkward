@@ -4,8 +4,10 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ArrayType.h"
+#include "awkward/array/IndexedArray.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/RegularArray.h"
 
@@ -193,12 +195,19 @@ namespace awkward {
     return std::make_shared<SliceArray64>(index, shape, strides, false);
   }
 
-  const std::shared_ptr<Content> EmptyArray::rpad(int64_t length, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: EmptyArray::rpad");
+  const std::shared_ptr<Content> EmptyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
+    return rpad_and_clip(target, axis, depth);
   }
 
-  const std::shared_ptr<Content> EmptyArray::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: EmptyArray::rpad_and_clip");
+  const std::shared_ptr<Content> EmptyArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+    Index64 index(target);
+    struct Error err = awkward_index_rpad_and_clip_axis0_64(
+      index.ptr().get(),
+      target,
+      length());
+    util::handle_error(err, classname(), identities_.get());
+    std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+    return next.get()->simplify();
   }
 
   const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {

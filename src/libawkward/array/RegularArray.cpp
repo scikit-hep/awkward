@@ -518,7 +518,7 @@ namespace awkward {
   const std::shared_ptr<Content> RegularArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      if (target < this->length()) {
+      if (target < length()) {
         return shallow_copy();
       }
       else {
@@ -562,7 +562,7 @@ namespace awkward {
       return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
     }
     else {
-      return std::make_shared<RegularArray>(Identities::none(), parameters_, content_.get()->rpad_and_clip(target, axis, depth + 1), size_);
+      return std::make_shared<RegularArray>(Identities::none(), parameters_, content_.get()->rpad_and_clip(target, toaxis, depth + 1), size_);
     }
   }
 
