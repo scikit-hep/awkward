@@ -89,3 +89,11 @@ def test_fromawkward0():
     assert awkward1.fromawkward0(array).layout.istuple
     assert awkward1.fromawkward0(array).layout.keys() == ["0", "1"]
     assert awkward1.tolist(awkward1.fromawkward0(array)) == [(0.0, []), (1.1, [1]), (2.2, [2, 2])]
+
+    array = awkward0.fromiter([0.0, [], 1.1, [1], 2.2, [2, 2], 3.3, [3, 3, 3]])
+    assert isinstance(awkward1.fromawkward0(array).layout, (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64))
+    assert awkward1.tolist(awkward1.fromawkward0(array)) == [0.0, [], 1.1, [1], 2.2, [2, 2], 3.3, [3, 3, 3]]
+
+    array = awkward0.fromiter([1.1, 2.2, None, None, 3.3, None, 4.4])
+    assert isinstance(awkward1.fromawkward0(array).layout, awkward1.layout.IndexedOptionArray64)   # until awkward1 has a MaskedArray
+    assert awkward1.tolist(awkward1.fromawkward0(array)) == [1.1, 2.2, None, None, 3.3, None, 4.4]

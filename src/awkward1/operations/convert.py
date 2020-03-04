@@ -404,15 +404,45 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
 
         elif isinstance(array, awkward0.UnionArray):
             # tags, index, contents
-            raise NotImplementedError
+            indexmax = numpy.iinfo(array.index.dtype.type).max
+            if indexmax >= fromawkward0.int64max:
+                tags = awkward1.layout.Index8(array.tags.reshape(-1))
+                index = awkward1.layout.Index64(array.index.reshape(-1))
+                out = awkward1.layout.UnionArray8_64(tags, index, [recurse(x) for x in array.contents])
+            elif indexmax >= fromawkward0.uint32max:
+                tags = awkward1.layout.Index8(array.tags.reshape(-1))
+                index = awkward1.layout.IndexU32(array.index.reshape(-1))
+                out = awkward1.layout.UnionArray8_U32(tags, index, [recurse(x) for x in array.contents])
+            else:
+                tags = awkward1.layout.Index8(array.tags.reshape(-1))
+                index = awkward1.layout.Index32(array.index.reshape(-1))
+                out = awkward1.layout.UnionArray8_32(tags, index, [recurse(x) for x in array.contents])
+
+            for size in array.tags.shape[:0:-1]:
+                out = awkward1.layout.RegularArray(out, size)
+            return out
 
         elif isinstance(array, awkward0.MaskedArray):
             # mask, content, maskedwhen
-            raise NotImplementedError
+            if keeplayout:
+                raise ValueError("awkward1.MaskedArray hasn't been written yet; try keeplayout=False to convert it to the nearest equivalent")
+            ismasked = array.boolmask(maskedwhen=True).reshape(-1)
+            index = numpy.arange(len(ismasked))
+            index[ismasked] = -1
+            out = awkward1.layout.IndexedOptionArray64(awkward1.layout.Index64(index), recurse(array.content))
+
+            for size in array.mask.shape[:0:-1]:
+                out = awkward1.layout.RegularArray(out, size)
+            return out
 
         elif isinstance(array, awkward0.BitMaskedArray):
             # mask, content, maskedwhen, lsborder
-            raise NotImplementedError
+            if keeplayout:
+                raise ValueError("awkward1.BitMaskedArray hasn't been written yet; try keeplayout=False to convert it to the nearest equivalent")
+            ismasked = array.boolmask(maskedwhen=True)
+            index = numpy.arange(len(ismasked))
+            index[ismasked] = -1
+            return awkward1.layout.IndexedOptionArray64(awkward1.layout.Index64(index), recurse(array.content))
 
         elif isinstance(array, IndexedMaskedArray):
             # mask, content, maskedwhen
@@ -473,7 +503,7 @@ def toawkward0(array, keeplayout=False):
         elif isinstance(layout, awkward1.layout.RegularArray):
             # content, size
             if keeplayout:
-                raise TypeError("awkward0 has no equivalent of RegularArray; try keeplayout=True")
+                raise ValueError("awkward0 has no equivalent of RegularArray; try keeplayout=False to convert it to the nearest equivalent")
             offsets = numpy.arange(0, (len(layout) + 1)*layout.size, layout.size)
             return awkward0.JaggedArray.fromoffsets(offsets, recurse(layout.content))
 
@@ -570,7 +600,7 @@ def toawkward0(array, keeplayout=False):
             return awkward0.IndexedArray(numpy.asarray(layout.index), recurse(layout.content))
 
         else:
-            raise TypeError("missing converter for {0}".format(type(layout).__name__))
+            raise AssertionError("missing converter for {0}".format(type(layout).__name__))
 
     layout = tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.generic,))
     return recurse(layout)
