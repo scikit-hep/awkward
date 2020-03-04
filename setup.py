@@ -96,11 +96,8 @@ if platform.system() == "Windows":
             print("----------------------------------------------------------------")
 
             for x in os.listdir(dlldir):
-                print("file", x)
                 if x.startswith("awkward"):
-                    print("    is Awkward, copy to", os.path.join(self.build_lib, "awkward1", x))
                     shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
-                    print("    COPIED!")
 
             print("----------------------------------------------------------------")
             setuptools.command.install.install.run(self)
