@@ -914,6 +914,9 @@ py::class_<ak::EmptyArray, std::shared_ptr<ak::EmptyArray>, ak::Content> make_Em
       .def(py::init([](const py::object& identities, const py::object& parameters) -> ak::EmptyArray {
         return ak::EmptyArray(unbox_identities_none(identities), dict2parameters(parameters));
       }), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
+      .def("toNumpyArray", [](const ak::EmptyArray& self) -> py::object {
+        return box(self.toNumpyArray("d", sizeof(double)));
+      })
   );
 }
 
