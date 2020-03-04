@@ -79,15 +79,30 @@ if platform.system() == "Windows":
     # Libraries are not installed system-wide on Windows, but they do have to be in the awkward1 directory.
     libraries = []
 
+    def tree(x):
+        print(x + (" (dir)" if os.path.isdir(x) else ""))
+        if os.path.isdir(x):
+            for y in os.listdir(x):
+                tree(os.path.join(x, y))
+
     class Install(setuptools.command.install.install):
         def run(self):
-            for x in os.listdir(os.path.join(self.build_lib, "bin")):
-                shutil.copyfile(os.path.join(self.build_lib, "bin", x), os.path.join(self.build_lib, "awkward1", x))
+            print("----------------------------------------------------------------")
+            tree("build")
+            print("----------------------------------------------------------------")
+
+            dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release", "Release")
+            tree(dlldir)
+            print("----------------------------------------------------------------")
+            for x in os.listdir(dlldir):
+                if x.startswith("awkward"):
+                    shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
+            print("----------------------------------------------------------------")
             setuptools.command.install.install.run(self)
 
 else:
     # Libraries do not exist yet, so they cannot be determined with a glob pattern.
-    libdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "lib")
+    libdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "awkward1")
     static = ".a"
     if platform.system() == "Darwin":
         shared = ".dylib"

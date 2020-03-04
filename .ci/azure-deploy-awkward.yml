@@ -54,13 +54,29 @@ jobs:
       - script: |
           if [[ $PLAT = "manylinux2010_x86_64" ]]; then
             python setup.py sdist
+          else
+            # Disable manylinux1 pyproject build since cmake is not packaged for Python 3.8 + manylinux1
+            rm pyproject.toml
+            python -m pip install "setuptools>=42.0.0" "wheel==0.34.2"
           fi
           docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
         displayName: "Build"
 
       - script: |
+          mkdir -p dist
+          cp wheelhouse/awkward1*.whl dist/.
+        displayName: "Copy wheels to dist"
+
+      - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
+        condition: contains(variables['Build.SourceBranch'], 'tags')
+
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+          targetPath: 'dist'
+
 
   - job: Windows
 
@@ -132,12 +148,24 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python -m pip wheel .
+          python -m pip wheel . -w wheelhouse/
         displayName: "Build"
+
+      - script: |
+          if not exist "dist" mkdir dist
+          cp wheelhouse/awkward1*.whl dist/.
+        displayName: "Copy wheels to dist"
 
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
+        condition: contains(variables['Build.SourceBranch'], 'tags')
+
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+          targetPath: 'dist'
+
 
   - job: MacOS
 
@@ -212,9 +240,21 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python -m pip wheel .
+          python -m pip wheel . -w wheelhouse/
         displayName: "Build"
+
+      - script: |
+          mkdir -p dist
+          cp wheelhouse/awkward1*.whl dist/.
+        displayName: "Copy wheels to dist"
 
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
+        condition: contains(variables['Build.SourceBranch'], 'tags')
+
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+          targetPath: 'dist'
+
