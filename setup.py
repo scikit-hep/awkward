@@ -92,9 +92,17 @@ if platform.system() == "Windows":
             print("----------------------------------------------------------------")
 
             dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release", "Release")
+            tree(dlldir)
+            print("----------------------------------------------------------------")
+
             for x in os.listdir(dlldir):
+                print("file", x)
                 if x.startswith("awkward"):
+                    print("    IS AWKWARD")
                     shutil.copyfile(dlldir, os.path.join(self.build_lib, "awkward1", x))
+                    print("    COPIED!")
+
+            print("----------------------------------------------------------------")
             setuptools.command.install.install.run(self)
 
 else:
