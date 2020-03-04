@@ -16,7 +16,7 @@ for PYBIN in /opt/python/*/bin; do
     echo "========================================================="
     echo $PYBIN
     echo "========================================================="
-    "${PYBIN}/pip" wheel /io/ -v -w wheelhouse/
+    "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 done
 
 # Bundle external shared libraries into the wheels
