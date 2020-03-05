@@ -38,7 +38,10 @@ def test_count_indexed_array():
     assert awkward1.tolist(indexedarray) == [[3.3, 4.4], [0.0, 1.1, 2.2], [], [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]
     assert count(awkward1.tolist(indexedarray), 0) == [2, 3, 0, 1, 1, 4]
     assert awkward1.tolist(indexedarray.sizes(0)) == [2, 3, 0, 1, 1, 4]
-    assert awkward1.tolist(indexedarray.sizes(-1)) == [2, 3, 0, 1, 1, 4]
+    with pytest.raises(RuntimeError) as err:
+        awkward1.tolist(indexedarray.sizes(-1)) == [2, 3, 0, 1, 1, 4]
+    assert str(err.value) == "FIXME: negative axis not implemented yet"
+
 
 def test_count_list_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -49,7 +52,9 @@ def test_count_list_array():
     assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
     assert count(awkward1.tolist(array), 0) == [3, 0, 2, 3, 1]
     assert awkward1.tolist(array.sizes(0)) == [3, 0, 2, 3, 1]
-    assert awkward1.tolist(array.sizes(-1)) == [3, 0, 2, 3, 1]
+    with pytest.raises(RuntimeError) as err:
+        awkward1.tolist(array.sizes(-1)) == [3, 0, 2, 3, 1]
+    assert str(err.value) == "FIXME: negative axis not implemented yet"
 
     with pytest.raises(ValueError) as err:
         count(awkward1.tolist(array), 1)
@@ -63,7 +68,10 @@ def test_count_list_offset_array():
     assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
     assert count(awkward1.tolist(array), 0) == [3, 0, 2, 1, 4]
     assert awkward1.tolist(array.sizes(0)) == [3, 0, 2, 1, 4]
-    assert awkward1.tolist(array.sizes(-1)) == [3, 0, 2, 1, 4]
+    with pytest.raises(RuntimeError) as err:
+        awkward1.tolist(array.sizes(-1)) == [3, 0, 2, 1, 4]
+    assert str(err.value) == "FIXME: negative axis not implemented yet"
+
 
     with pytest.raises(ValueError) as err:
         count(awkward1.tolist(array), 1) == [3, 0, 2, 1, 4]
@@ -80,8 +88,14 @@ def test_count_numpy_array():
     assert count(awkward1.tolist(array), 1) == [[5, 5, 5], [5, 5, 5]]
     assert awkward1.tolist(array.sizes(1)) == [[5, 5, 5], [5, 5, 5]]
     assert awkward1.tolist(array.sizes(2)) == [30]
-    assert awkward1.tolist(array.sizes(-1)) == [[5, 5, 5], [5, 5, 5]]
-    assert awkward1.tolist(array.sizes(-2)) == [3, 3]
+    with pytest.raises(RuntimeError) as err:
+        awkward1.tolist(array.sizes(-1)) == [[5, 5, 5], [5, 5, 5]]
+    assert str(err.value) == "FIXME: negative axis not implemented yet"
+
+    with pytest.raises(RuntimeError) as err:
+        awkward1.tolist(array.sizes(-2)) == [3, 3]
+    assert str(err.value) == "FIXME: negative axis not implemented yet"
+
 
     array2 = awkward1.layout.NumpyArray(numpy.arange(2*3*5*3, dtype=numpy.int64).reshape(2, 3, 5, 3))
     assert awkward1.tolist(array2) == [[[[0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11], [12, 13, 14]],
@@ -99,10 +113,19 @@ def test_count_numpy_array():
     assert awkward1.tolist(array2.sizes(2)) == [[[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]],
                                                 [[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]]]
     assert awkward1.tolist(array2.sizes(3)) == [90]
-    assert awkward1.tolist(array2.sizes(-1)) == [[[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]],
-                                                [[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]]]
-    assert awkward1.tolist(array2.sizes(-2)) == [[5, 5, 5], [5, 5, 5]]
-    assert awkward1.tolist(array2.sizes(-3)) == [3, 3]
+    with pytest.raises(RuntimeError) as err:
+        awkward1.tolist(array2.sizes(-1)) == [[[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]],
+                                              [[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]]]
+    assert str(err.value) == "FIXME: negative axis not implemented yet"
+
+    with pytest.raises(RuntimeError) as err:
+        awkward1.tolist(array2.sizes(-2)) == [[5, 5, 5], [5, 5, 5]]
+    assert str(err.value) == "FIXME: negative axis not implemented yet"
+
+    with pytest.raises(RuntimeError) as err:
+        awkward1.tolist(array2.sizes(-3)) == [3, 3]
+    assert str(err.value) == "FIXME: negative axis not implemented yet"
+
 
 ## def test_count_raw_array():
     ## RawArrayOf<T> is usable only in C++
@@ -142,8 +165,14 @@ def test_count_regular_array():
     assert awkward1.tolist(regulararray.sizes(0)) == [2, 2, 2]
     assert count(awkward1.tolist(regulararray), 1) == [[3, 0], [2, 1], [4, 0]]
     assert awkward1.tolist(regulararray.sizes(1)) == [[3, 0], [2, 1], [4, 0]]
-    assert awkward1.tolist(regulararray.sizes(-1)) == [[3, 0], [2, 1], [4, 0]]
-    assert awkward1.tolist(regulararray.sizes(-2)) == [2, 2, 2]
+    with pytest.raises(RuntimeError) as err:
+        awkward1.tolist(regulararray.sizes(-1)) == [[3, 0], [2, 1], [4, 0]]
+    assert str(err.value) == "FIXME: negative axis not implemented yet"
+
+    with pytest.raises(RuntimeError) as err:
+        awkward1.tolist(regulararray.sizes(-2)) == [2, 2, 2]
+    assert str(err.value) == "FIXME: negative axis not implemented yet"
+
 
 def test_count_union_array():
     content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
@@ -152,7 +181,10 @@ def test_count_union_array():
     index = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
     array = awkward1.layout.UnionArray8_32(tags, index, [content0, content1])
     assert awkward1.tolist(array.sizes(0)) == [3, 3, 3, 0, 5, 2, 4, 4]
-    assert awkward1.tolist(array.sizes(-1)) == [3, 3, 3, 0, 5, 2, 4, 4]
+    with pytest.raises(RuntimeError) as err:
+        awkward1.tolist(array.sizes(-1)) == [3, 3, 3, 0, 5, 2, 4, 4]
+    assert str(err.value) == "FIXME: negative axis not implemented yet"
+
 
     with pytest.raises(ValueError) as err:
         count(awkward1.tolist(array), 0)
