@@ -49,7 +49,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
                       "-DPYBUILD=ON",
                       "-DBUILD_TESTING=OFF"]
         try:
-           compiler_path = self.compiler.compiler_cxx
+           compiler_path = self.compiler.compiler_cxx[0]
            cmake_args.append("-DCMAKE_CXX_COMPILER={0}".format(compiler_path))
         except AttributeError:
             print("Not able to access compiler path (on Windows), using CMake default")
