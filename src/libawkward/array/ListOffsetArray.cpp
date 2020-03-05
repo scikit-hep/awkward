@@ -854,6 +854,7 @@ namespace awkward {
       struct Error err1 = util::awkward_ListOffsetArray_rpad_length_axis1<T>(
         offsets.ptr().get(),
         offsets_.ptr().get(),
+        offsets_.offset(),
         offsets_.length() - 1,
         target,
         &tolength);
@@ -863,7 +864,8 @@ namespace awkward {
       struct Error err2 = util::awkward_ListOffsetArray_rpad_axis1_64<T>(
         outindex.ptr().get(),
         offsets_.ptr().get(),
-        offsets_.length(),
+        offsets_.offset(),
+        offsets_.length() - 1,
         target);
       util::handle_error(err2, classname(), identities_.get());
 
@@ -903,7 +905,8 @@ namespace awkward {
       struct Error err2 = util::awkward_ListOffsetArray_rpad_and_clip_axis1_64<T>(
         outindex.ptr().get(),
         offsets_.ptr().get(),
-        offsets_.length(),
+        offsets_.offset(),
+        offsets_.length() - 1,
         target);
       util::handle_error(err2, classname(), identities_.get());
 

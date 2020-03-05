@@ -160,17 +160,17 @@ namespace awkward {
     template <typename T>
     ERROR awkward_ListArray_min_range(int64_t* tomin, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>
-    ERROR awkward_ListArray_rpad_and_clip_length_axis1(int64_t* tolength, const T* fromstarts, const T* fromstops, int64_t target, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-    template <typename T>
     ERROR awkward_ListArray_rpad_axis1_64(int64_t* toindex, const T* fromstarts, const T* fromstops, T* tostarts, T* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
+    template <typename T>
+    ERROR awkward_ListArray_rpad_and_clip_length_axis1(int64_t* tolength, const T* fromstarts, const T* fromstops, int64_t target, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>
     ERROR awkward_ListArray_rpad_and_clip_axis1_64(int64_t* toindex, const T* fromstarts, const T* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>
-    ERROR awkward_ListOffsetArray_rpad_and_clip_axis1_64(int64_t* toindex, const T* fromoffsets, int64_t length, int64_t target);
+    ERROR awkward_ListOffsetArray_rpad_length_axis1(T* tooffsets, const T* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target, int64_t* tolength);
     template <typename T>
-    ERROR awkward_ListOffsetArray_rpad_length_axis1(T* tooffsets, const T* fromoffsets, int64_t fromlength, int64_t length, int64_t* tocount);
+    ERROR awkward_ListOffsetArray_rpad_axis1_64(int64_t* toindex, const T* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target);
     template <typename T>
-    ERROR awkward_ListOffsetArray_rpad_axis1_64(int64_t* toindex, const T* fromoffsets, int64_t fromlength, int64_t target);
+    ERROR awkward_ListOffsetArray_rpad_and_clip_axis1_64(int64_t* toindex, const T* fromoffsets, int64_t offsetsoffset, int64_t length, int64_t target);
 
   }
 }
