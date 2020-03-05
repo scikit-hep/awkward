@@ -431,7 +431,7 @@ namespace awkward {
     for (auto item : contents_) {
       types.push_back(item.get()->type(typestrs));
     }
-    return std::make_shared<UnionType>(parameters_, types);
+    return std::make_shared<UnionType>(parameters_, util::gettypestr(parameters_, typestrs), types);
   }
 
   template <typename T, typename I>

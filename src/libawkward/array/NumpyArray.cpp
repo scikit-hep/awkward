@@ -288,59 +288,59 @@ namespace awkward {
   const std::shared_ptr<Type> NumpyArray::type(const std::map<std::string, std::string>& typestrs) const {
     std::shared_ptr<Type> out;
     if (format_.compare("d") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float64);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float64);
     }
     else if (format_.compare("f") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float32);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float32);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("q") == 0) {
 #else
     else if (format_.compare("l") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int64);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int64);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("Q") == 0) {
 #else
     else if (format_.compare("L") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint64);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint64);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("l") == 0) {
 #else
     else if (format_.compare("i") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int32);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int32);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("L") == 0) {
 #else
     else if (format_.compare("I") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint32);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint32);
     }
     else if (format_.compare("h") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int16);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int16);
     }
     else if (format_.compare("H") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint16);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint16);
     }
     else if (format_.compare("b") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int8);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int8);
     }
     else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint8);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint8);
     }
     else if (format_.compare("?") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::boolean);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::boolean);
     }
     else {
       throw std::invalid_argument(std::string("Numpy format \"") + format_ + std::string("\" cannot be expressed as a PrimitiveType"));
     }
     for (std::size_t i = shape_.size() - 1;  i > 0;  i--) {
-      out = std::make_shared<RegularType>(util::Parameters(), out, (int64_t)shape_[i]);
+      out = std::make_shared<RegularType>(util::Parameters(), util::gettypestr(parameters_, typestrs), out, (int64_t)shape_[i]);
     }
     return out;
   }

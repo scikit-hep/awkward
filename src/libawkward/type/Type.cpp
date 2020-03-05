@@ -16,8 +16,9 @@ namespace awkward {
     return std::shared_ptr<Type>(nullptr);
   }
 
-  Type::Type(const util::Parameters& parameters)
-      : parameters_(parameters) { }
+  Type::Type(const util::Parameters& parameters, const std::string& typestr)
+      : parameters_(parameters)
+      , typestr_(typestr) { }
 
   Type::~Type() { }
 

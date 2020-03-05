@@ -14,8 +14,8 @@
 namespace awkward {
   class EXPORT_SYMBOL RecordType: public Type {
   public:
-    RecordType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup);
-    RecordType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types);
+    RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup);
+    RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<std::shared_ptr<Type>>& types);
 
     const std::vector<std::shared_ptr<Type>> types() const;
     const std::shared_ptr<util::RecordLookup> recordlookup() const;

@@ -166,6 +166,10 @@ namespace awkward {
       return true;
     }
 
+    std::string gettypestr(const Parameters& parameters, const std::map<std::string, std::string>& typestrs) {
+      return std::string();
+    }
+
     template <>
     Error awkward_identities32_from_listoffsetarray<int32_t>(int32_t* toptr, const int32_t* fromptr, const int32_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
       return awkward_identities32_from_listoffsetarray32(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);

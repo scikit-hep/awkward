@@ -160,7 +160,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RegularArray::type(const std::map<std::string, std::string>& typestrs) const {
-    return std::make_shared<RegularType>(parameters_, content_.get()->type(typestrs), size_);
+    return std::make_shared<RegularType>(parameters_, util::gettypestr(parameters_, typestrs), content_.get()->type(typestrs), size_);
   }
 
   const std::string RegularArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {

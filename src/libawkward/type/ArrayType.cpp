@@ -5,8 +5,8 @@
 #include "awkward/type/ArrayType.h"
 
 namespace awkward {
-  ArrayType::ArrayType(const util::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t length)
-      : Type(parameters)
+  ArrayType::ArrayType(const util::Parameters& parameters, const std::string& typestr, const std::shared_ptr<Type>& type, int64_t length)
+      : Type(parameters, typestr)
       , type_(type)
       , length_(length) { }
 
@@ -20,7 +20,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> ArrayType::shallow_copy() const {
-    return std::make_shared<ArrayType>(parameters_, type_, length_);
+    return std::make_shared<ArrayType>(parameters_, typestr_, type_, length_);
   }
 
   bool ArrayType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {

@@ -12,8 +12,8 @@
 #include "awkward/type/OptionType.h"
 
 namespace awkward {
-  OptionType::OptionType(const util::Parameters& parameters, const std::shared_ptr<Type>& type)
-      : Type(parameters)
+  OptionType::OptionType(const util::Parameters& parameters, const std::string& typestr, const std::shared_ptr<Type>& type)
+      : Type(parameters, typestr)
       , type_(type) { }
 
   std::string OptionType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
@@ -39,7 +39,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> OptionType::shallow_copy() const {
-    return std::make_shared<OptionType>(parameters_, type_);
+    return std::make_shared<OptionType>(parameters_, typestr_, type_);
   }
 
   bool OptionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {

@@ -178,7 +178,7 @@ namespace awkward {
     for (auto item : contents_) {
       types.push_back(item.get()->type(typestrs));
     }
-    return std::make_shared<RecordType>(parameters_, types, recordlookup_);
+    return std::make_shared<RecordType>(parameters_, util::gettypestr(parameters_, typestrs), types, recordlookup_);
   }
 
   const std::string RecordArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
