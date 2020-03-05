@@ -107,7 +107,7 @@ def string_numba_lower(context, builder, rettype, viewtype, viewval, viewproxy, 
     stop = awkward1._numba.layout.getat(context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype)
 
     baseptr = awkward1._numba.layout.getat(context, builder, viewproxy.arrayptrs, whichnextpos)
-    rawptr = builder.add(baseptr, start)
+    rawptr = builder.add(baseptr, awkward1._numba.castint(context, builder, viewtype.type.indextype.dtype, numba.intp, start))
     rawptr_cast = builder.inttoptr(rawptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(numba.intp.bitwidth // 8)))
     strsize = builder.sub(stop, start)
 
