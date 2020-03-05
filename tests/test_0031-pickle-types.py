@@ -18,8 +18,6 @@ def test_pickle():
     t = awkward1.types.UnknownType(); assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.types.PrimitiveType("int32"); assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.types.PrimitiveType("float64"); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.utf8; assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.string; assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.types.ArrayType(awkward1.types.PrimitiveType("int32"), 100); assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.types.ListType(awkward1.types.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
     t = awkward1.types.RegularType(awkward1.types.PrimitiveType("int32"), 5); assert pickle.loads(pickle.dumps(t)) == t

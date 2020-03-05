@@ -25,25 +25,20 @@ def test_parameters_on_arrays():
     assert b.content.parameters == {"one": ["two", 3, {"four": 5}]}
 
 def test_string2():
-    content = awkward1.layout.NumpyArray(numpy.array([ord(x) for x in "heythere"], dtype=numpy.uint8), parameters=awkward1.utf8.parameters)
-    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 8])), content, parameters=awkward1.string.parameters)
+    content = awkward1.layout.NumpyArray(numpy.array([ord(x) for x in "heythere"], dtype=numpy.uint8), parameters={"__array__": "char", "encoding": "utf-8"})
+    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 8])), content, parameters={"__array__": "string"})
     a = awkward1.Array(listoffsetarray)
 
     assert isinstance(a, awkward1.Array)
     assert awkward1.tolist(a) == ['hey', '', 'there']
 
-    assert repr(a.type) == "3 * string"
-    assert repr(a[0].type) == "3 * utf8"
-    assert repr(a[1].type) == "0 * utf8"
-    assert repr(a[2].type) == "5 * utf8"
-
     if py27:
-        assert repr(a) == "<Array [u'hey', u'', u'there'] type='3 * string'>"
+        assert str(a) == "[u'hey', u'', u'there']"
         assert repr(a[0]) == "u'hey'"
         assert repr(a[1]) == "u''"
         assert repr(a[2]) == "u'there'"
     else:
-        assert repr(a) == "<Array ['hey', '', 'there'] type='3 * string'>"
+        assert str(a) == "['hey', '', 'there']"
         assert repr(a[0]) == "'hey'"
         assert repr(a[1]) == "''"
         assert repr(a[2]) == "'there'"

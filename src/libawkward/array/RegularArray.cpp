@@ -163,20 +163,6 @@ namespace awkward {
     return std::make_shared<RegularType>(parameters_, content_.get()->type(), size_);
   }
 
-  const std::shared_ptr<Content> RegularArray::astype(const std::shared_ptr<Type>& type) const {
-    if (RegularType* raw = dynamic_cast<RegularType*>(type.get())) {
-      if (raw->size() == size_) {
-        return std::make_shared<RegularArray>(identities_, type.get()->parameters(), content_.get()->astype(raw->type()), size_);
-      }
-      else {
-        throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because sizes do not match"));
-      }
-    }
-    else {
-      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
-    }
-  }
-
   const std::string RegularArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " size=\"" << size_ << "\">\n";

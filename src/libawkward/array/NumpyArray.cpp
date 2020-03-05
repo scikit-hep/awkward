@@ -345,13 +345,6 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Content> NumpyArray::astype(const std::shared_ptr<Type>& type) const {
-    // FIXME: if the unwrapped_type does not match the format_, actually convert it!
-    // Maybe also change the shape_ if there's a different RegularType nesting (less strict than unwrap_regulartype).
-    std::shared_ptr<Type> unwrapped_type = unwrap_regulartype(type, shape_);
-    return std::make_shared<NumpyArray>(identities_, unwrapped_type.get()->parameters(), ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
-  }
-
   const std::string NumpyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " format=" << util::quote(format_, true) << " shape=\"";

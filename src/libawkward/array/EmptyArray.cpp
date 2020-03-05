@@ -39,10 +39,6 @@ namespace awkward {
     return std::make_shared<UnknownType>(parameters_);
   }
 
-  const std::shared_ptr<Content> EmptyArray::astype(const std::shared_ptr<Type>& type) const {
-    return type.get()->empty();
-  }
-
   const std::string EmptyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname();

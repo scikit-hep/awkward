@@ -832,9 +832,6 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def_property_readonly("type", [](const T& self) -> std::shared_ptr<ak::Type> {
             return self.type();
           })
-          .def("astype", [](const T& self, const std::shared_ptr<ak::Type>& type) -> py::object {
-            return box(self.astype(type));
-          })
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
           .def("__iter__", &iter<T>)
@@ -1061,9 +1058,6 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle
       .def("setparameter", &setparameter<ak::Record>)
       .def("parameter", &parameter<ak::Record>)
       .def("purelist_parameter", &purelist_parameter<ak::Record>)
-      .def("astype", [](const ak::Record& self, const std::shared_ptr<ak::Type>& type) -> py::object {
-        return box(self.astype(type));
-      })
       .def("tojson", &tojson_string<ak::Record>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
 

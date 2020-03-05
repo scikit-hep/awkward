@@ -171,11 +171,6 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override {
-    // FIXME: if the type does not match T, actually convert it!
-      return std::make_shared<RawArrayOf<T>>(identities_, type.get()->parameters(), ptr_, offset_, length_, itemsize_);
-    }
-
     const std::string tostring() {
       return tostring_part("", "", "");
     }

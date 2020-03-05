@@ -394,21 +394,6 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::astype(const std::shared_ptr<Type>& type) const {
-    if (ISOPTION) {
-      if (OptionType* raw = dynamic_cast<OptionType*>(type.get())) {
-        return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, type.get()->parameters(), index_, content_.get()->astype(raw->type()));
-      }
-      else {
-        throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
-      }
-    }
-    else {
-      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, content_.get()->astype(type));
-    }
-  }
-
-  template <typename T, bool ISOPTION>
   const std::string IndexedArrayOf<T, ISOPTION>::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << ">\n";
