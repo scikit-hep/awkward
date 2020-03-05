@@ -164,7 +164,7 @@ namespace awkward {
     template <typename T>
     ERROR awkward_ListArray_rpad_axis1_64(int64_t* toindex, const T* fromstarts, const T* fromstops, T* tostarts, T* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>
-    ERROR awkward_ListArray_rpad_and_clip_axis1_64(int64_t* toindex, const T* fromstarts, const T* fromstops, T* tostarts, T* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
+    ERROR awkward_ListArray_rpad_and_clip_axis1_64(int64_t* toindex, const T* fromstarts, const T* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>
     ERROR awkward_ListOffsetArray_rpad_and_clip_axis1_64(int64_t* toindex, const T* fromoffsets, int64_t length, int64_t target);
     template <typename T>

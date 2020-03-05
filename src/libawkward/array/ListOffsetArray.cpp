@@ -841,7 +841,7 @@ namespace awkward {
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      if (target < this->length()) {
+      if (target <= this->length()) {
         return shallow_copy();
       }
       else {
@@ -889,6 +889,16 @@ namespace awkward {
       return next.get()->simplify();
     }
     else if (toaxis == depth + 1) {
+      Index64 starts(offsets_.length() - 1);
+      Index64 stops(offsets_.length() - 1);
+
+      struct Error err1 = awkward_index_rpad_and_clip_axis1_64(
+        starts.ptr().get(),
+        stops.ptr().get(),
+        target,
+        starts.length());
+      util::handle_error(err1, classname(), identities_.get());
+
       Index64 outindex(target*(offsets_.length() - 1));
       struct Error err2 = util::awkward_ListOffsetArray_rpad_and_clip_axis1_64<T>(
         outindex.ptr().get(),
@@ -897,8 +907,8 @@ namespace awkward {
         target);
       util::handle_error(err2, classname(), identities_.get());
 
-      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, content());
-      return std::make_shared<RegularArray>(identities_, parameters_, next.get()->simplify(), target);
+      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, content());
+      return std::make_shared<ListArray64>(Identities::none(), parameters_, starts, stops, next.get()->simplify());
     }
     else {
       return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), parameters_, offsets_, content_.get()->rpad(target, toaxis, depth + 1));

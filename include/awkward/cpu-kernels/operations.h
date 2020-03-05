@@ -143,6 +143,7 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_unionarray8_64_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
 
   EXPORT_SYMBOL struct Error awkward_index_rpad_and_clip_axis0_64(int64_t* toindex, int64_t target, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_index_rpad_and_clip_axis1_64(int64_t* tostarts, int64_t* tostops, int64_t target, int64_t length);
   EXPORT_SYMBOL struct Error awkward_RegularArray_rpad_and_clip_axis1_64(int64_t* toindex, int64_t target, int64_t size, int64_t length);
   EXPORT_SYMBOL struct Error awkward_ListArray32_min_range(int64_t* tomin, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
   EXPORT_SYMBOL struct Error awkward_ListArrayU32_min_range(int64_t* tomin, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
@@ -153,9 +154,9 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_ListArray32_rpad_axis1_64(int64_t* toindex, const int32_t* fromstarts, const int32_t* fromstops, int32_t* tostarts, int32_t* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
   EXPORT_SYMBOL struct Error awkward_ListArrayU32_rpad_axis1_64(int64_t* toindex, const uint32_t* fromstarts, const uint32_t* fromstops, uint32_t* tostarts, uint32_t* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
   EXPORT_SYMBOL struct Error awkward_ListArray64_rpad_axis1_64(int64_t* toindex, const int64_t* fromstarts, const int64_t* fromstops, int64_t* tostarts, int64_t* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_ListArray32_rpad_and_clip_axis1_64(int64_t* toindex, const int32_t* fromstarts, const int32_t* fromstops, int32_t* tostarts, int32_t* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_ListArrayU32_rpad_and_clip_axis1_64(int64_t* toindex, const uint32_t* fromstarts, const uint32_t* fromstops, uint32_t* tostarts, uint32_t* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_ListArray64_rpad_and_clip_axis1_64(int64_t* toindex, const int64_t* fromstarts, const int64_t* fromstops, int64_t* tostarts, int64_t* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_ListArray32_rpad_and_clip_axis1_64(int64_t* toindex, const int32_t* fromstarts, const int32_t* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_ListArrayU32_rpad_and_clip_axis1_64(int64_t* toindex, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_ListArray64_rpad_and_clip_axis1_64(int64_t* toindex, const int64_t* fromstarts, const int64_t* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);
   EXPORT_SYMBOL struct Error awkward_ListOffsetArray32_rpad_and_clip_axis1_64(int64_t* toindex, const int32_t* fromoffsets, int64_t length, int64_t target);
   EXPORT_SYMBOL struct Error awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64(int64_t* toindex, const uint32_t* fromoffsets, int64_t length, int64_t target);
   EXPORT_SYMBOL struct Error awkward_ListOffsetArray64_rpad_and_clip_axis1_64(int64_t* toindex, const int64_t* fromoffsets, int64_t length, int64_t target);
