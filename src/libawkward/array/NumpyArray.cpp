@@ -285,7 +285,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> NumpyArray::type() const {
+  const std::shared_ptr<Type> NumpyArray::type(const std::map<std::string, std::string>& typestrs) const {
     std::shared_ptr<Type> out;
     if (format_.compare("d") == 0) {
       out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float64);

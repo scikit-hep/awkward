@@ -173,10 +173,10 @@ namespace awkward {
     identities_ = identities;
   }
 
-  const std::shared_ptr<Type> RecordArray::type() const {
+  const std::shared_ptr<Type> RecordArray::type(const std::map<std::string, std::string>& typestrs) const {
     std::vector<std::shared_ptr<Type>> types;
     for (auto item : contents_) {
-      types.push_back(item.get()->type());
+      types.push_back(item.get()->type(typestrs));
     }
     return std::make_shared<RecordType>(parameters_, types, recordlookup_);
   }

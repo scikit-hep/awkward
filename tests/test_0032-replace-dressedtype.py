@@ -63,6 +63,7 @@ def test_typestr():
     assert repr(t2) == "var * something"
 
 def test_record_name():
+    typestrs = {}
     builder = awkward1.layout.ArrayBuilder()
 
     builder.beginrecord("Dummy")
@@ -80,8 +81,8 @@ def test_record_name():
     builder.endrecord()
 
     a = builder.snapshot()
-    assert repr(a.type) == 'struct[["one", "two"], [int64, float64], parameters={"__record__": "Dummy"}]'
-    assert a.type.parameters == {"__record__": "Dummy"}
+    assert repr(a.type(typestrs)) == 'struct[["one", "two"], [int64, float64], parameters={"__record__": "Dummy"}]'
+    assert a.type(typestrs).parameters == {"__record__": "Dummy"}
 
 def test_builder_string():
     builder = awkward1.ArrayBuilder()

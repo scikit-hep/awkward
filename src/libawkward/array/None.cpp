@@ -29,7 +29,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::setidentities()");
   }
 
-  const std::shared_ptr<Type> None::type() const {
+  const std::shared_ptr<Type> None::type(const std::map<std::string, std::string>& typestrs) const {
     throw std::runtime_error("undefined operation: None::type()");
   }
 

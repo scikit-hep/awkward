@@ -572,7 +572,7 @@ py::class_<ak::ArrayBuilder> make_ArrayBuilder(const py::handle& m, const std::s
       .def("__repr__", &ak::ArrayBuilder::tostring)
       .def("__len__", &ak::ArrayBuilder::length)
       .def("clear", &ak::ArrayBuilder::clear)
-      .def_property_readonly("type", &ak::ArrayBuilder::type)
+      .def("type", &ak::ArrayBuilder::type)
       .def("snapshot", [](const ak::ArrayBuilder& self) -> py::object {
         return box(self.snapshot());
       })
@@ -829,8 +829,8 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("setparameter", &setparameter<T>)
           .def("parameter", &parameter<T>)
           .def("purelist_parameter", &purelist_parameter<T>)
-          .def_property_readonly("type", [](const T& self) -> std::shared_ptr<ak::Type> {
-            return self.type();
+          .def("type", [](const T& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
+            return self.type(typestrs);
           })
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
@@ -1051,8 +1051,8 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("identities", [](const ak::Record& self) -> py::object { return box(self.identities()); })
       .def("__getitem__", &getitem<ak::Record>)
-      .def_property_readonly("type", [](const ak::Record& self) -> std::shared_ptr<ak::Type> {
-        return self.type();
+      .def("type", [](const ak::Record& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
+        return self.type(typestrs);
       })
       .def_property("parameters", &getparameters<ak::Record>, &setparameters<ak::Record>)
       .def("setparameter", &setparameter<ak::Record>)

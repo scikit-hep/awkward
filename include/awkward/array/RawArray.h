@@ -132,7 +132,7 @@ namespace awkward {
       identities_ = identities;
     }
 
-    const std::shared_ptr<Type> type() const override {
+    const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const override {
       if (std::is_same<T, double>::value) {
         return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float64);
       }

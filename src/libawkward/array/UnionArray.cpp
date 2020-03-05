@@ -426,10 +426,10 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Type> UnionArrayOf<T, I>::type() const {
+  const std::shared_ptr<Type> UnionArrayOf<T, I>::type(const std::map<std::string, std::string>& typestrs) const {
     std::vector<std::shared_ptr<Type>> types;
     for (auto item : contents_) {
-      types.push_back(item.get()->type());
+      types.push_back(item.get()->type(typestrs));
     }
     return std::make_shared<UnionType>(parameters_, types);
   }

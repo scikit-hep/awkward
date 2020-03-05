@@ -382,12 +382,12 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Type> IndexedArrayOf<T, ISOPTION>::type() const {
+  const std::shared_ptr<Type> IndexedArrayOf<T, ISOPTION>::type(const std::map<std::string, std::string>& typestrs) const {
     if (ISOPTION) {
-      return std::make_shared<OptionType>(parameters_, content_.get()->type());
+      return std::make_shared<OptionType>(parameters_, content_.get()->type(typestrs));
     }
     else {
-      std::shared_ptr<Type> out = content_.get()->type();
+      std::shared_ptr<Type> out = content_.get()->type(typestrs);
       out.get()->setparameters(parameters_);
       return out;
     }

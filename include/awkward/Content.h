@@ -25,7 +25,7 @@ namespace awkward {
     virtual const std::shared_ptr<Identities> identities() const;
     virtual void setidentities() = 0;
     virtual void setidentities(const std::shared_ptr<Identities>& identities) = 0;
-    virtual const std::shared_ptr<Type> type() const = 0;
+    virtual const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const = 0;
     virtual const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
     virtual void tojson_part(ToJson& builder) const = 0;
     virtual void nbytes_part(std::map<size_t, int64_t>& largest) const = 0;

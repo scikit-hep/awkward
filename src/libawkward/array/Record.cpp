@@ -65,8 +65,8 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::setidentities");
   }
 
-  const std::shared_ptr<Type> Record::type() const {
-    std::shared_ptr<Type> out = array_.get()->type();
+  const std::shared_ptr<Type> Record::type(const std::map<std::string, std::string>& typestrs) const {
+    std::shared_ptr<Type> out = array_.get()->type(typestrs);
     out.get()->setparameters(parameters_);
     return out;
   }

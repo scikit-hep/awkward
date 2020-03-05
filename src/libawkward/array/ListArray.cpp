@@ -206,8 +206,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListArrayOf<T>::type() const {
-    return std::make_shared<ListType>(parameters_, content_.get()->type());
+  const std::shared_ptr<Type> ListArrayOf<T>::type(const std::map<std::string, std::string>& typestrs) const {
+    return std::make_shared<ListType>(parameters_, content_.get()->type(typestrs));
   }
 
   template <typename T>
