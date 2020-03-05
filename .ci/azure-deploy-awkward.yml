@@ -63,8 +63,9 @@ jobs:
         displayName: "Build"
 
       - script: |
+          ls wheelhouse
           mkdir -p dist
-          cp wheelhouse/awkward1*.whl dist/.
+          cp wheelhouse/awkward1*manylinux*.whl dist/.
         displayName: "Copy wheels to dist"
 
       - script: |
@@ -148,7 +149,7 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python -m pip wheel . -w wheelhouse/
+          python -m pip wheel . -v -w wheelhouse/
         displayName: "Build"
 
       - script: |
@@ -240,7 +241,8 @@ jobs:
         displayName: "Install"
 
       - script: |
-          python -m pip wheel . -w wheelhouse/
+          python --version
+          python -m pip wheel . -v -w wheelhouse/
         displayName: "Build"
 
       - script: |
