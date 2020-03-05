@@ -110,7 +110,7 @@ if platform.system() == "Windows":
 
             outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
             for x in os.listdir(outerdir):
-                if x.endswith(".dll"):
+                if x.endswith(".pyd"):
                     print("deleting", os.path.join(outerdir, x))
                     os.remove(os.path.join(outerdir, x))
 
