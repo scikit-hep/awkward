@@ -106,13 +106,15 @@ def string_numba_lower(context, builder, rettype, viewtype, viewval, viewproxy, 
     stopsarraypos = builder.add(viewproxy.start, atval)
     stop = awkward1._numba.layout.getat(context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype)
 
-    rawptr = builder.add(awkward1._numba.layout.getat(context, builder, viewproxy.arrayptrs, whichnextpos), start)
+    baseptr = awkward1._numba.layout.getat(context, builder, viewproxy.arrayptrs, whichnextpos)
+    rawptr = builder.add(baseptr, start)
+    rawptr_cast = builder.inttoptr(rawptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(numba.intp.bitwidth // 8)))
     strsize = builder.sub(stop, start)
 
     pyapi = context.get_python_api(builder)
     gil = pyapi.gil_ensure()
 
-    strptr = builder.bitcast(builder.inttoptr(rawptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(8))), pyapi.cstring)
+    strptr = builder.bitcast(rawptr_cast, pyapi.cstring)
     kind = context.get_constant(numba.types.int32, pyapi.py_unicode_1byte_kind)
     pystr = pyapi.string_from_kind_and_data(kind, strptr, strsize)
 
