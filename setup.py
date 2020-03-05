@@ -94,17 +94,27 @@ if platform.system() == "Windows":
 
     class Install(setuptools.command.install.install):
         def run(self):
-            print("----------------------------------------------------------------")
+            print("--- build directory --------------------------------------------")
             tree("build")
-            print("----------------------------------------------------------------")
 
+            print("--- specifically, the dlldir -----------------------------------")
             dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release", "Release")
             tree(dlldir)
-            print("----------------------------------------------------------------")
+
+            print("--- copying ----------------------------------------------------")
             for x in os.listdir(dlldir):
                 if x.startswith("awkward"):
+                    print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward1", x))
                     shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
-            print("----------------------------------------------------------------")
+            print("--- deleting ---------------------------------------------------")
+
+            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+            for x in os.listdir(outerdir):
+                if x.endswith(".dll"):
+                    print("deleting", os.path.join(outerdir, x))
+                    os.remove(os.path.join(outerdir, x))
+
+            print("--- begin normal install ---------------------------------------")
             setuptools.command.install.install.run(self)
 
 else:
