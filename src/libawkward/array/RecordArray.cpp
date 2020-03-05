@@ -405,12 +405,11 @@ namespace awkward {
     // This operation can only be performed if the axis doesn't
     // flatten the structure immediately within the RecordArray
     std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      int64_t lenght = content.get()->length();
+    for (const auto& content : contents_) {
+      int64_t length = content.get()->length();
       contents.push_back(content.get()->flatten(axis));
-      int64_t tolenght = contents.back().get()->length();
-      if (lenght != tolenght) {
-        return std::make_shared<RecordArray>(identities_, parameters_, contents_, recordlookup_);
+      if (length != contents.back().get()->length()) {
+        return shallow_copy();
       }
     }
     return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
