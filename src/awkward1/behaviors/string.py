@@ -87,7 +87,43 @@ def string_numba_typer(viewtype):
     return numba.types.string
 
 def string_numba_lower(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
-    raise Exception("FIXME: what goes here?")
+    import numba
+    import llvmlite.llvmpy.core
+    import awkward1._numba.layout
+
+    whichpos = awkward1._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.CONTENT)
+    nextpos = awkward1._numba.layout.getat(context, builder, viewproxy.arrayptrs, whichpos)
+
+    whichnextpos = awkward1._numba.layout.posat(context, builder, nextpos, viewtype.type.contenttype.ARRAY)
+
+    startspos = awkward1._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.STARTS)
+    startsptr = awkward1._numba.layout.getat(context, builder, viewproxy.arrayptrs, startspos)
+    startsarraypos = builder.add(viewproxy.start, atval)
+    start = awkward1._numba.layout.getat(context, builder, startsptr, startsarraypos, viewtype.type.indextype.dtype)
+
+    stopspos = awkward1._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.STOPS)
+    stopsptr = awkward1._numba.layout.getat(context, builder, viewproxy.arrayptrs, stopspos)
+    stopsarraypos = builder.add(viewproxy.start, atval)
+    stop = awkward1._numba.layout.getat(context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype)
+
+    baseptr = awkward1._numba.layout.getat(context, builder, viewproxy.arrayptrs, whichnextpos)
+    rawptr = builder.add(baseptr, awkward1._numba.castint(context, builder, viewtype.type.indextype.dtype, numba.intp, start))
+    rawptr_cast = builder.inttoptr(rawptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(numba.intp.bitwidth // 8)))
+    strsize = builder.sub(stop, start)
+    strsize_cast = awkward1._numba.castint(context, builder, viewtype.type.indextype.dtype, numba.intp, strsize)
+
+    pyapi = context.get_python_api(builder)
+    gil = pyapi.gil_ensure()
+
+    strptr = builder.bitcast(rawptr_cast, pyapi.cstring)
+    kind = context.get_constant(numba.types.int32, pyapi.py_unicode_1byte_kind)
+    pystr = pyapi.string_from_kind_and_data(kind, strptr, strsize_cast)
+
+    out = pyapi.to_native_value(rettype, pystr).value
+
+    pyapi.gil_release(gil)
+
+    return out
 
 awkward1.behavior["__numba_typer__", "string"] = string_numba_typer
 awkward1.behavior["__numba_lower__", "string"] = string_numba_lower
