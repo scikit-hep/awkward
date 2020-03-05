@@ -12,72 +12,71 @@ pr:
       - "*"
 
 jobs:
-  - job: Linux
+  # - job: Linux
 
-    pool:
-      vmImage: "ubuntu-16.04"
+  #   pool:
+  #     vmImage: "ubuntu-16.04"
 
-    strategy:
-      matrix:
-        manylinux1_i686:
-          DOCKER_IMAGE: quay.io/pypa/manylinux1_i686
-          PLAT: manylinux1_i686
-        manylinux1_x86_64:
-          DOCKER_IMAGE: quay.io/pypa/manylinux1_x86_64
-          PLAT: manylinux1_x86_64
-        manylinux2010:
-          DOCKER_IMAGE: quay.io/pypa/manylinux2010_x86_64
-          PLAT: manylinux2010_x86_64
+  #   strategy:
+  #     matrix:
+  #       manylinux1_i686:
+  #         DOCKER_IMAGE: quay.io/pypa/manylinux1_i686
+  #         PLAT: manylinux1_i686
+  #       manylinux1_x86_64:
+  #         DOCKER_IMAGE: quay.io/pypa/manylinux1_x86_64
+  #         PLAT: manylinux1_x86_64
+  #       manylinux2010:
+  #         DOCKER_IMAGE: quay.io/pypa/manylinux2010_x86_64
+  #         PLAT: manylinux2010_x86_64
 
-    steps:
-      - checkout: self
-        submodules: recursive
+  #   steps:
+  #     - checkout: self
+  #       submodules: recursive
 
-      - task: DownloadSecureFile@1
-        name: pypirc
-        inputs:
-          secureFile: pivarski-pypirc
-        displayName: "Credentials"
+  #     - task: DownloadSecureFile@1
+  #       name: pypirc
+  #       inputs:
+  #         secureFile: pivarski-pypirc
+  #       displayName: "Credentials"
 
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: "3.7"
-          architecture: "x64"
-        displayName: "Python 3.7 for twine"
+  #     - task: UsePythonVersion@0
+  #       inputs:
+  #         versionSpec: "3.7"
+  #         architecture: "x64"
+  #       displayName: "Python 3.7 for twine"
 
-      - script: |
-          python -m pip install --upgrade pip
-          python -m pip install twine scikit-build cmake
-          docker pull $(DOCKER_IMAGE)
-        displayName: "Install"
+  #     - script: |
+  #         python -m pip install --upgrade pip
+  #         python -m pip install twine scikit-build cmake
+  #         docker pull $(DOCKER_IMAGE)
+  #       displayName: "Install"
 
-      - script: |
-          if [[ $PLAT = "manylinux2010_x86_64" ]]; then
-            python setup.py sdist
-          else
-            # Disable manylinux1 pyproject build since cmake is not packaged for Python 3.8 + manylinux1
-            rm pyproject.toml
-            python -m pip install "setuptools>=42.0.0" "wheel==0.34.2"
-          fi
-          docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
-        displayName: "Build"
+  #     - script: |
+  #         if [[ $PLAT = "manylinux2010_x86_64" ]]; then
+  #           python setup.py sdist
+  #         else
+  #           # Disable manylinux1 pyproject build since cmake is not packaged for Python 3.8 + manylinux1
+  #           rm pyproject.toml
+  #           python -m pip install "setuptools>=42.0.0" "wheel==0.34.2"
+  #         fi
+  #         docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
+  #       displayName: "Build"
 
-      - script: |
-          ls wheelhouse
-          mkdir -p dist
-          cp wheelhouse/awkward1*manylinux*.whl dist/.
-        displayName: "Copy wheels to dist"
+  #     - script: |
+  #         ls wheelhouse
+  #         mkdir -p dist
+  #         cp wheelhouse/awkward1*manylinux*.whl dist/.
+  #       displayName: "Copy wheels to dist"
 
-      - script: |
-          python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
-        displayName: "Deploy"
-        condition: contains(variables['Build.SourceBranch'], 'tags')
+  #     - script: |
+  #         python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+  #       displayName: "Deploy"
+  #       condition: contains(variables['Build.SourceBranch'], 'tags')
 
-      - task: PublishPipelineArtifact@0
-        inputs:
-          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
-          targetPath: 'dist'
-
+  #     - task: PublishPipelineArtifact@0
+  #       inputs:
+  #         artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+  #         targetPath: 'dist'
 
   - job: Windows
 
@@ -167,96 +166,95 @@ jobs:
           artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
           targetPath: 'dist'
 
+  # - job: MacOS
 
-  - job: MacOS
+  #   pool:
+  #     vmImage: "macOS-10.14"
 
-    pool:
-      vmImage: "macOS-10.14"
+  #   strategy:
+  #     matrix:
+  #       "py27":
+  #         python.version: "2.7"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
+  #       "py36":
+  #         python.version: "3.6"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
+  #       "py37":
+  #         python.version: "3.7"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
+  #       "py38":
+  #         python.version: "3.8"
+  #         python.architecture: "x64"
+  #         numpy.version: "latest"
 
-    strategy:
-      matrix:
-        "py27":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py36":
-          python.version: "3.6"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py37":
-          python.version: "3.7"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py38":
-          python.version: "3.8"
-          python.architecture: "x64"
-          numpy.version: "latest"
+  #   steps:
+  #     - checkout: self
+  #       submodules: recursive
 
-    steps:
-      - checkout: self
-        submodules: recursive
+  #     - task: DownloadSecureFile@1
+  #       name: pypirc
+  #       inputs:
+  #         secureFile: pivarski-pypirc
+  #       displayName: "Credentials"
 
-      - task: DownloadSecureFile@1
-        name: pypirc
-        inputs:
-          secureFile: pivarski-pypirc
-        displayName: "Credentials"
+  #     - script: |
+  #         case $(python.version) in
+  #         2.7)
+  #           FULL_VERSION=2.7.17
+  #           ;;
+  #         3.6)
+  #           FULL_VERSION=3.6.8
+  #           ;;
+  #         3.7)
+  #           FULL_VERSION=3.7.5
+  #           ;;
+  #         3.8)
+  #           FULL_VERSION=3.8.0
+  #           ;;
+  #         esac
 
-      - script: |
-          case $(python.version) in
-          2.7)
-            FULL_VERSION=2.7.17
-            ;;
-          3.6)
-            FULL_VERSION=3.6.8
-            ;;
-          3.7)
-            FULL_VERSION=3.7.5
-            ;;
-          3.8)
-            FULL_VERSION=3.8.0
-            ;;
-          esac
+  #         INSTALLER_NAME=python-$FULL_VERSION-macosx10.9.pkg
+  #         URL=https://www.python.org/ftp/python/$FULL_VERSION/$INSTALLER_NAME
 
-          INSTALLER_NAME=python-$FULL_VERSION-macosx10.9.pkg
-          URL=https://www.python.org/ftp/python/$FULL_VERSION/$INSTALLER_NAME
+  #         PY_PREFIX=/Library/Frameworks/Python.framework/Versions
 
-          PY_PREFIX=/Library/Frameworks/Python.framework/Versions
+  #         set -e -x
 
-          set -e -x
+  #         curl $URL > $INSTALLER_NAME
 
-          curl $URL > $INSTALLER_NAME
+  #         sudo installer -pkg $INSTALLER_NAME -target /
 
-          sudo installer -pkg $INSTALLER_NAME -target /
+  #         sudo rm /usr/local/bin/python
+  #         sudo ln -s /usr/local/bin/python$PYTHON_VERSION /usr/local/bin/python
 
-          sudo rm /usr/local/bin/python
-          sudo ln -s /usr/local/bin/python$PYTHON_VERSION /usr/local/bin/python
+  #       displayName: 'Python $(python.version)'
 
-        displayName: 'Python $(python.version)'
+  #     - script: |
+  #         python -m ensurepip
+  #         python -m pip install --upgrade pip
+  #         python -m pip install setuptools twine wheel
+  #       displayName: "Install"
 
-      - script: |
-          python -m ensurepip
-          python -m pip install --upgrade pip
-          python -m pip install setuptools twine wheel
-        displayName: "Install"
+  #     - script: |
+  #         python --version
+  #         python -m pip wheel . -v -w wheelhouse/
+  #       displayName: "Build"
 
-      - script: |
-          python --version
-          python -m pip wheel . -v -w wheelhouse/
-        displayName: "Build"
+  #     - script: |
+  #         mkdir -p dist
+  #         cp wheelhouse/awkward1*.whl dist/.
+  #       displayName: "Copy wheels to dist"
 
-      - script: |
-          mkdir -p dist
-          cp wheelhouse/awkward1*.whl dist/.
-        displayName: "Copy wheels to dist"
+  #     - script: |
+  #         python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+  #       displayName: "Deploy"
+  #       condition: contains(variables['Build.SourceBranch'], 'tags')
 
-      - script: |
-          python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
-        displayName: "Deploy"
-        condition: contains(variables['Build.SourceBranch'], 'tags')
-
-      - task: PublishPipelineArtifact@0
-        inputs:
-          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
-          targetPath: 'dist'
+  #     - task: PublishPipelineArtifact@0
+  #       inputs:
+  #         artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+  #         targetPath: 'dist'
 
