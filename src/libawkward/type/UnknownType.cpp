@@ -7,8 +7,8 @@
 #include "awkward/type/UnknownType.h"
 
 namespace awkward {
-  UnknownType::UnknownType(const util::Parameters& parameters)
-      : Type(parameters) { }
+  UnknownType::UnknownType(const util::Parameters& parameters, const std::string& typestr)
+      : Type(parameters, typestr) { }
 
   std::string UnknownType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
     std::string typestr;
@@ -27,7 +27,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnknownType::shallow_copy() const {
-    return std::make_shared<UnknownType>(parameters_);
+    return std::make_shared<UnknownType>(parameters_, typestr_);
   }
 
   bool UnknownType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {

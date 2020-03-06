@@ -10,7 +10,7 @@
 namespace awkward {
   class EXPORT_SYMBOL RegularType: public Type {
   public:
-    RegularType(const util::Parameters& parameters, const std::shared_ptr<Type>& type, int64_t size);
+    RegularType(const util::Parameters& parameters, const std::string& typestr, const std::shared_ptr<Type>& type, int64_t size);
 
     std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> shallow_copy() const override;

@@ -16,7 +16,7 @@ namespace awkward {
   public:
     static std::shared_ptr<Type> none();
 
-    Type(const util::Parameters& parameters);
+    Type(const util::Parameters& parameters, const std::string& typestr);
     virtual ~Type();
 
     virtual std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const = 0;
@@ -38,11 +38,14 @@ namespace awkward {
     const std::string tostring() const;
     const std::string compare(std::shared_ptr<Type> supertype);
 
+    const std::string typestr() const;
+
   protected:
     bool get_typestr(std::string& output) const;
     const std::string string_parameters() const;
 
     util::Parameters parameters_;
+    const std::string typestr_;
   };
 }
 

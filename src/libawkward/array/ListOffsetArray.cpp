@@ -209,18 +209,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListOffsetArrayOf<T>::type() const {
-    return std::make_shared<ListType>(parameters_, content_.get()->type());
-  }
-
-  template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::astype(const std::shared_ptr<Type>& type) const {
-    if (ListType* raw = dynamic_cast<ListType*>(type.get())) {
-      return std::make_shared<ListOffsetArrayOf<T>>(identities_, type.get()->parameters(), offsets_, content_.get()->astype(raw->type()));
-    }
-    else {
-      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
-    }
+  const std::shared_ptr<Type> ListOffsetArrayOf<T>::type(const std::map<std::string, std::string>& typestrs) const {
+    return std::make_shared<ListType>(parameters_, util::gettypestr(parameters_, typestrs), content_.get()->type(typestrs));
   }
 
   template <typename T>

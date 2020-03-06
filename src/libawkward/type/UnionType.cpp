@@ -10,8 +10,8 @@
 #include "awkward/type/UnionType.h"
 
 namespace awkward {
-  UnionType::UnionType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
-      : Type(parameters)
+  UnionType::UnionType(const util::Parameters& parameters, const std::string& typestr, const std::vector<std::shared_ptr<Type>>& types)
+      : Type(parameters, typestr)
       , types_(types) { }
 
   std::string UnionType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
@@ -36,7 +36,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> UnionType::shallow_copy() const {
-    return std::make_shared<UnionType>(parameters_, types_);
+    return std::make_shared<UnionType>(parameters_, typestr_, types_);
   }
 
   bool UnionType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {

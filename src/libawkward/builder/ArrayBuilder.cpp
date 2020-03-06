@@ -9,8 +9,11 @@ namespace awkward {
       : builder_(UnknownBuilder::fromempty(options)) { }
 
   const std::string ArrayBuilder::tostring() const {
+    std::map<std::string, std::string> typestrs;
+    typestrs["char"] = "char";
+    typestrs["string"] = "string";
     std::stringstream out;
-    out << "<ArrayBuilder length=\"" << length() << "\" type=\"" << type().get()->tostring() << "\"/>";
+    out << "<ArrayBuilder length=\"" << length() << "\" type=\"" << type(typestrs).get()->tostring() << "\"/>";
     return out.str();
   }
 
@@ -22,8 +25,8 @@ namespace awkward {
     builder_.get()->clear();
   }
 
-  const std::shared_ptr<Type> ArrayBuilder::type() const {
-    return builder_.get()->snapshot().get()->type();
+  const std::shared_ptr<Type> ArrayBuilder::type(const std::map<std::string, std::string>& typestrs) const {
+    return builder_.get()->snapshot().get()->type(typestrs);
   }
 
   const std::shared_ptr<Content> ArrayBuilder::snapshot() const {

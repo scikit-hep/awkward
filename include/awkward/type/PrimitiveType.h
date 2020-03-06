@@ -23,7 +23,7 @@ namespace awkward {
       numtypes
     };
 
-    PrimitiveType(const util::Parameters& parameters, DType dtype);
+    PrimitiveType(const util::Parameters& parameters, const std::string& typestr, DType dtype);
 
     std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> shallow_copy() const override;

@@ -426,30 +426,12 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Type> UnionArrayOf<T, I>::type() const {
+  const std::shared_ptr<Type> UnionArrayOf<T, I>::type(const std::map<std::string, std::string>& typestrs) const {
     std::vector<std::shared_ptr<Type>> types;
     for (auto item : contents_) {
-      types.push_back(item.get()->type());
+      types.push_back(item.get()->type(typestrs));
     }
-    return std::make_shared<UnionType>(parameters_, types);
-  }
-
-  template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::astype(const std::shared_ptr<Type>& type) const {
-    if (UnionType* raw = dynamic_cast<UnionType*>(type.get())) {
-      std::vector<std::shared_ptr<Content>> contents;
-      for (int64_t i = 0;  i < raw->numtypes();  i++) {
-        // FIXME: union equivalence could be defined much more flexibly than this, but do it later...
-        if (i >= (int64_t)contents_.size()) {
-          throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because the number of possibilities doesn't match"));
-        }
-        contents.push_back(contents_[(size_t)i].get()->astype(raw->type(i)));
-      }
-      return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents);
-    }
-    else {
-      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
-    }
+    return std::make_shared<UnionType>(parameters_, util::gettypestr(parameters_, typestrs), types);
   }
 
   template <typename T, typename I>

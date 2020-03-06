@@ -155,11 +155,3 @@ def test_json():
 
     assert awkward1.tolist(awkward1.Array("[null, null, null, null, null]")) == [None, None, None, None, None]
     assert awkward1.tolist(awkward1.Array("[[null, null, null], [], [null, null]]")) == [[None, None, None], [], [None, None]]
-
-def test_emptyarray():
-    array = awkward1.layout.EmptyArray()
-    assert isinstance(array.astype(awkward1.types.OptionType(awkward1.types.PrimitiveType("float32"))), awkward1.layout.IndexedOptionArray64)
-
-    offsets = awkward1.layout.Index64(numpy.array([0], dtype=numpy.int64))
-    array = awkward1.layout.ListOffsetArray64(offsets, awkward1.layout.EmptyArray())
-    assert isinstance(array.astype(awkward1.types.ListType(awkward1.types.OptionType(awkward1.types.PrimitiveType("float32")))).content, awkward1.layout.IndexedOptionArray64)

@@ -166,6 +166,38 @@ namespace awkward {
       return true;
     }
 
+    std::string gettypestr(const Parameters& parameters, const std::map<std::string, std::string>& typestrs) {
+      auto item = parameters.find("__record__");
+      if (item != parameters.end()) {
+        std::string source = item->second;
+        rj::Document recname;
+        recname.Parse<rj::kParseNanAndInfFlag>(source.c_str());
+        if (recname.IsString()) {
+          std::string name = recname.GetString();
+          for (auto pair : typestrs) {
+            if (pair.first == name) {
+              return pair.second;
+            }
+          }
+        }
+      }
+      item = parameters.find("__array__");
+      if (item != parameters.end()) {
+        std::string source = item->second;
+        rj::Document recname;
+        recname.Parse<rj::kParseNanAndInfFlag>(source.c_str());
+        if (recname.IsString()) {
+          std::string name = recname.GetString();
+          for (auto pair : typestrs) {
+            if (pair.first == name) {
+              return pair.second;
+            }
+          }
+        }
+      }
+      return std::string();
+    }
+
     template <>
     Error awkward_identities32_from_listoffsetarray<int32_t>(int32_t* toptr, const int32_t* fromptr, const int32_t* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth) {
       return awkward_identities32_from_listoffsetarray32(toptr, fromptr, fromoffsets, fromptroffset, offsetsoffset, tolength, fromlength, fromwidth);

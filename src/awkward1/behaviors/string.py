@@ -9,44 +9,53 @@ import numpy
 import awkward1.highlevel
 import awkward1.operations.convert
 
+class ByteBehavior(awkward1.highlevel.Array):
+    def __bytes__(self):
+        return numpy.asarray(self.layout).tostring()
+
+    def __str__(self):
+        return str(self.__bytes__())
+
+    def __repr__(self):
+        return repr(self.__bytes__())
+
+    def __iter__(self):
+        for x in self.__bytes__():
+            yield x
+
 class CharBehavior(awkward1.highlevel.Array):
     def __bytes__(self):
         return numpy.asarray(self.layout).tostring()
 
     def __str__(self):
-        encoding = self.layout.type.parameters.get("encoding")
-        if encoding is None:
-            return str(self.__bytes__())
-        else:
-            return self.__bytes__().decode(encoding, "surrogateescape")
+        return self.__bytes__().decode("utf-8", "surrogateescape")
 
     def __repr__(self):
-        encoding = self.layout.type.parameters.get("encoding")
-        if encoding is None:
-            return repr(self.__bytes__())
-        else:
-            return repr(self.__bytes__().decode(encoding, "surrogateescape"))
+        return repr(self.__bytes__().decode("utf-8", "surrogateescape"))
 
     def __iter__(self):
-        for x in str(self):
+        for x in self.__str__():
             yield x
 
+awkward1.behavior["byte"] = ByteBehavior
+awkward1.behavior["__typestr__", "byte"] = "byte"
 awkward1.behavior["char"] = CharBehavior
-byte = awkward1.types.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "byte", "encoding": None})
-utf8 = awkward1.types.PrimitiveType("uint8", {"__array__": "char", "__typestr__": "utf8", "encoding": "utf-8"})
+awkward1.behavior["__typestr__", "char"] = "char"
+
+class ByteStringBehavior(awkward1.highlevel.Array):
+    def __iter__(self):
+        for x in super(ByteStringBehavior, self).__iter__():
+            yield x.__bytes__()
 
 class StringBehavior(awkward1.highlevel.Array):
     def __iter__(self):
-        if self.layout.type.type.parameters.get("encoding") is None:
-            for x in super(StringBehavior, self).__iter__():
-                yield x.__bytes__()
-        else:
-            for x in super(StringBehavior, self).__iter__():
-                yield x.__str__()
+        for x in super(StringBehavior, self).__iter__():
+            yield x.__str__()
 
+awkward1.behavior["bytestring"] = ByteStringBehavior
+awkward1.behavior["__typestr__", "bytestring"] = "bytes"
 awkward1.behavior["string"] = StringBehavior
-bytestring = awkward1.types.ListType(byte, {"__array__": "string", "__typestr__": "bytes"})
-string = awkward1.types.ListType(utf8, {"__array__": "string", "__typestr__": "string"})
+awkward1.behavior["__typestr__", "string"] = "string"
 
 def string_equal(one, two):
     # first condition: string lengths must be the same
@@ -80,6 +89,7 @@ def string_equal(one, two):
 
     return awkward1.layout.NumpyArray(out)
 
+awkward1.behavior[numpy.equal, "bytestring", "bytestring"] = string_equal
 awkward1.behavior[numpy.equal, "string", "string"] = string_equal
 
 def string_numba_typer(viewtype):
@@ -125,5 +135,7 @@ def string_numba_lower(context, builder, rettype, viewtype, viewval, viewproxy, 
 
     return out
 
+# awkward1.behavior["__numba_typer__", "bytestring"] = string_numba_typer
+# awkward1.behavior["__numba_lower__", "bytestring"] = string_numba_lower
 awkward1.behavior["__numba_typer__", "string"] = string_numba_typer
 awkward1.behavior["__numba_lower__", "string"] = string_numba_lower

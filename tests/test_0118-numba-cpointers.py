@@ -109,6 +109,9 @@ def test_ArrayBuilder_append():
     builder.append(array, 5)
     builder.endlist()
 
+    print(builder._layout.snapshot())
+
+
     assert awkward1.tolist(builder.snapshot()) == [["one", "two", "three"], [], ["four", "five"]]
 
     builder.append(array, -1)

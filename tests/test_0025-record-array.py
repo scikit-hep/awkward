@@ -257,8 +257,9 @@ def test_setidentities():
     assert recordarray2[2, "outer", 0, "two"].identity == (2, "outer", 0, "two")
 
 def test_builder_tuple():
+    typestrs = {}
     builder = awkward1.layout.ArrayBuilder()
-    assert str(builder.type) == 'unknown'
+    assert str(builder.type(typestrs)) == 'unknown'
     assert awkward1.tolist(builder.snapshot()) == []
 
     builder.begintuple(0)
@@ -270,7 +271,7 @@ def test_builder_tuple():
     builder.begintuple(0)
     builder.endtuple()
 
-    assert str(builder.type) == '()'
+    assert str(builder.type(typestrs)) == '()'
     assert awkward1.tolist(builder.snapshot()) == [(), (), ()]
 
     builder = awkward1.layout.ArrayBuilder()
@@ -311,12 +312,13 @@ def test_builder_tuple():
     builder.boolean(True)
     builder.endtuple()
 
-    assert str(builder.type) == '(bool, var * int64, float64)'
+    assert str(builder.type(typestrs)) == '(bool, var * int64, float64)'
     assert awkward1.tolist(builder.snapshot()) == [(True, [1], 1.1), (False, [2, 2], 2.2), (True, [3, 3, 3], 3.3)]
 
 def test_builder_record():
+    typestrs = {}
     builder = awkward1.layout.ArrayBuilder()
-    assert str(builder.type) == 'unknown'
+    assert str(builder.type(typestrs)) == 'unknown'
     assert awkward1.tolist(builder.snapshot()) == []
 
     builder.beginrecord()
@@ -328,7 +330,7 @@ def test_builder_record():
     builder.beginrecord()
     builder.endrecord()
 
-    assert str(builder.type) == '{}'
+    assert str(builder.type(typestrs)) == '{}'
     assert awkward1.tolist(builder.snapshot()) == [{}, {}, {}]
 
     builder = awkward1.layout.ArrayBuilder()
@@ -354,7 +356,7 @@ def test_builder_record():
     builder.real(3.3)
     builder.endrecord()
 
-    assert str(builder.type) == '{"one": int64, "two": float64}'
+    assert str(builder.type(typestrs)) == '{"one": int64, "two": float64}'
     assert awkward1.tolist(builder.snapshot()) == [{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}]
 
 def test_fromiter():

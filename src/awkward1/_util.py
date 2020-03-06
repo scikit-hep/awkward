@@ -101,6 +101,16 @@ def recordclass(layout, behavior):
             return cls
     return awkward1.highlevel.Record
 
+def typestrs(behavior):
+    import awkward1
+    if behavior is None:
+        behavior = awkward1.behavior
+    out = {}
+    for key, typestr in behavior.items():
+        if isinstance(key, tuple) and len(key) == 2 and key[0] == "__typestr__" and (isinstance(key[1], str) or (py27 and isinstance(key[1], unicode))) and (isinstance(typestr, str) or (py27 and isinstance(typestr, unicode))):
+            out[key[1]] = typestr
+    return out
+
 def numba_record_typer(layouttype, behavior):
     import awkward1
     if behavior is None:
@@ -435,7 +445,7 @@ def broadcast_and_apply(inputs, getfunction):
                         nextinputs.append(awkward1.layout.RegularArray(x, 1).broadcast_tooffsets64(offsets).content)
                     else:
                         nextinputs.append(x)
-                    
+
                 outcontent = apply(nextinputs, depth + 1)
                 assert isinstance(outcontent, tuple)
                 return tuple(awkward1.layout.ListOffsetArray64(offsets, x) for x in outcontent)
