@@ -45,18 +45,6 @@ namespace awkward {
       , recordlookup_(istuple ? nullptr : new util::RecordLookup)
       , length_(length) { }
 
-  RecordArray::RecordArray(const std::shared_ptr<Content>& content, const std::string& key)
-      : Content(Identities::none(), util::Parameters())
-      , contents_({ content })
-      , recordlookup_(new util::RecordLookup({ key }))
-      , length_(0) { }
-
-  RecordArray::RecordArray(const std::shared_ptr<Content>& content)
-      : Content(Identities::none(), util::Parameters())
-      , contents_({ content })
-      , recordlookup_(nullptr)
-      , length_(0) { }
-
   const std::vector<std::shared_ptr<Content>> RecordArray::contents() const {
     return contents_;
   }
