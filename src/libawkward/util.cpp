@@ -953,6 +953,7 @@ namespace awkward {
       return awkward_ListOffsetArray64_rpad_and_clip_axis1_64(toindex, fromoffsets, offsetsoffset, length, target);
     }
 
+    template <>
     Error awkward_listarray_validity<int32_t>(const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length, int64_t lencontent) {
       return awkward_listarray32_validity(starts, startsoffset, stops, stopsoffset, length, lencontent);
     }
