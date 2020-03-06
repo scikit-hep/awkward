@@ -183,7 +183,7 @@ def test_rpad_and_clip_listoffset_array():
     assert str(awkward1.typeof(listoffsetarray.rpad_and_clip(5, 1))) == "5 * ?float64"
 
     assert awkward1.tolist(listoffsetarray.rpad_and_clip(1,1)) == [[0.0], [None], [3.3], [5.5], [6.6], [None]]
-    
+
     content = awkward1.layout.NumpyArray(numpy.array([1.5, 3.3]))
     index = awkward1.layout.Index64(numpy.array([0, -3, 1, -2, 1, 0, 0, -3, -13, 0, 1, 1, 0, 1, 1, 1, 1, -10, 0, -1, 0, 0, 0, 1, -1, 1, 1]))
     indexedarray = awkward1.layout.IndexedOptionArray64(index, content)
@@ -290,6 +290,17 @@ def test_rpad_indexed_array():
     assert awkward1.tolist(indexedarray) == [[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]
 
     assert awkward1.tolist(backward.rpad(4, 1)) == awkward1.tolist(indexedarray.rpad(4, 1))
+
+def test_rpad_indexed_option_array():
+    listoffsetarray = awkward1.Array([[0.0, None, None], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
+    backward = awkward1.Array([[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], [], [0.0, None, None]]).layout
+
+    index = awkward1.layout.Index64(numpy.array([4, 3, 2, -1, 0], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedOptionArray64(index, listoffsetarray)
+    assert awkward1.tolist(indexedarray) == [[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], None, [0.0, None, None]]
+
+    assert awkward1.tolist(backward.rpad(4, 1)) == awkward1.tolist(indexedarray.rpad(4, 1))
+
     # etc. for other axis and rpad/rpad_and_clip cases
 
 def test_rpad_recordarray():

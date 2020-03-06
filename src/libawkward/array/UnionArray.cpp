@@ -1077,22 +1077,48 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad(int64_t target, int64_t axis, int64_t depth) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.emplace_back(content.get()->rpad(target, axis, depth));
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      Index64 index(target);
+      struct Error err = awkward_index_rpad_and_clip_axis0_64(
+        index.ptr().get(),
+        target,
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+      return next.get()->simplify();
     }
-    UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
-    return out.simplify(false);
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.emplace_back(content.get()->rpad(target, axis, depth));
+      }
+      UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+      return out.simplify(false);
+    }
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.emplace_back(content.get()->rpad_and_clip(target, axis, depth));
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      Index64 index(target);
+      struct Error err = awkward_index_rpad_and_clip_axis0_64(
+        index.ptr().get(),
+        target,
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+      return next.get()->simplify();
     }
-    UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
-    return out.simplify(false);
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.emplace_back(content.get()->rpad_and_clip(target, axis, depth));
+      }
+      UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+      return out.simplify(false);
+    }
   }
 
   template <typename T, typename I>

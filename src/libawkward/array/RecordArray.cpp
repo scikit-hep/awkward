@@ -5,6 +5,7 @@
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/Record.h"
@@ -628,28 +629,54 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->rpad(target, axis, depth));
-    }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      Index64 index(target);
+      struct Error err = awkward_index_rpad_and_clip_axis0_64(
+        index.ptr().get(),
+        target,
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+      return next.get()->simplify();
     }
     else {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->rpad(target, toaxis, depth));
+      }
+      if (contents.empty()) {
+        return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+      }
+      else {
+        return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+      }
     }
   }
 
   const std::shared_ptr<Content> RecordArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->rpad_and_clip(target, axis, depth));
-    }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      Index64 index(target);
+      struct Error err = awkward_index_rpad_and_clip_axis0_64(
+        index.ptr().get(),
+        target,
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+      return next.get()->simplify();
     }
     else {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->rpad_and_clip(target, toaxis, depth));
+      }
+      if (contents.empty()) {
+        return std::make_shared<RecordArray>(identities_, parameters_, length(), istuple());
+      }
+      else {
+        return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+      }
     }
   }
 

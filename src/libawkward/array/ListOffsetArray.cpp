@@ -901,7 +901,7 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
 
       std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, content());
-      return std::make_shared<ListArray64>(Identities::none(), parameters_, starts, stops, next.get()->simplify());
+      return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
     }
     else {
       return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), parameters_, offsets_, content_.get()->rpad(target, toaxis, depth + 1));
