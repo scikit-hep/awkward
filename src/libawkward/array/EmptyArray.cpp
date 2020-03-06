@@ -161,7 +161,7 @@ namespace awkward {
   }
 
   const std::string EmptyArray::validity(const std::string& path) const {
-    throw std::runtime_error("FIXME: EmptyArray::validity");
+    return std::string();
   }
 
   const Index64 EmptyArray::count64() const {

@@ -25,7 +25,11 @@ namespace awkward {
       : Content(identities, parameters)
       , starts_(starts)
       , stops_(stops)
-      , content_(content) { }
+      , content_(content) {
+    if (stops.length() < starts.length()) {
+      throw std::invalid_argument("ListArray stops must not be shorter than its starts");
+    }
+  }
 
   template <typename T>
   const IndexOf<T> ListArrayOf<T>::starts() const {
@@ -439,7 +443,19 @@ namespace awkward {
 
   template <typename T>
   const std::string ListArrayOf<T>::validity(const std::string& path) const {
-    throw std::runtime_error("FIXME: ListArray::validity");
+    struct Error err = util::awkward_listarray_validity<T>(
+      starts_.ptr().get(),
+      starts_.offset(),
+      stops_.ptr().get(),
+      stops_.offset(),
+      starts_.length(),
+      content_.get()->length());
+    if (err.str == nullptr) {
+      return content_.get()->validity(path + std::string(".content"));
+    }
+    else {
+      return std::string("at ") + path + std::string(" (") + classname() + std::string("): ") + std::string(err.str) + std::string("at i=") + std::to_string(err.identity);
+    }
   }
 
   template <typename T>

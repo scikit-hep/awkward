@@ -23,7 +23,11 @@ namespace awkward {
   RegularArray::RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<Content>& content, int64_t size)
       : Content(identities, parameters)
       , content_(content)
-      , size_(size) { }
+      , size_(size) {
+    if (size < 0) {
+      throw std::invalid_argument("RegularArray size must be non-negative");
+    }
+  }
 
   const std::shared_ptr<Content> RegularArray::content() const {
     return content_;
@@ -329,7 +333,7 @@ namespace awkward {
   }
 
   const std::string RegularArray::validity(const std::string& path) const {
-    throw std::runtime_error("FIXME: RegularArray::validity");
+    return content_.get()->validity(path + std::string(".content"));
   }
 
   const Index64 RegularArray::count64() const {

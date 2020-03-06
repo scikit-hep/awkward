@@ -663,7 +663,18 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const std::string IndexedArrayOf<T, ISOPTION>::validity(const std::string& path) const {
-    throw std::runtime_error("FIXME: IndexedArray::validity");
+    struct Error err = util::awkward_indexedarray_validity<T>(
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length(),
+      content_.get()->length(),
+      ISOPTION);
+    if (err.str == nullptr) {
+      return content_.get()->validity(path + std::string(".content"));
+    }
+    else {
+      return std::string("at ") + path + std::string(" (") + classname() + std::string("): ") + std::string(err.str) + std::string("at i=") + std::to_string(err.identity);
+    }
   }
 
   template <typename T, bool ISOPTION>

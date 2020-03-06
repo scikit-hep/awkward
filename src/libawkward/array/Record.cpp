@@ -13,7 +13,11 @@ namespace awkward {
   Record::Record(const std::shared_ptr<const RecordArray> array, int64_t at)
       : Content(Identities::none(), array.get()->parameters())
       , array_(array)
-      , at_(at) { }
+      , at_(at) {
+    if (!(0 <= at  &&  at < array.get()->length())) {
+      throw std::invalid_argument(std::string("at=") + std::to_string(at) + std::string(" is out of range for recordarray"));
+    }
+  }
 
   const std::shared_ptr<const RecordArray> Record::array() const {
     return array_;
@@ -199,7 +203,7 @@ namespace awkward {
   }
 
   const std::string Record::validity(const std::string& path) const {
-    throw std::runtime_error("FIXME: Record::validity");
+    return array_.get()->validity(path + std::string(".array"));
   }
 
   const Index64 Record::count64() const {

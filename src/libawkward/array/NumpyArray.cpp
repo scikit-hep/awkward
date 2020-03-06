@@ -62,7 +62,7 @@ namespace awkward {
       , itemsize_(itemsize)
       , format_(format) {
     if (shape.size() != strides.size()) {
-      throw std::runtime_error(std::string("len(shape), which is ") + std::to_string(shape.size()) + std::string(", must be equal to len(strides), which is ") + std::to_string(strides.size()));
+      throw std::invalid_argument(std::string("len(shape), which is ") + std::to_string(shape.size()) + std::string(", must be equal to len(strides), which is ") + std::to_string(strides.size()));
     }
   }
 
@@ -745,7 +745,20 @@ namespace awkward {
   }
 
   const std::string NumpyArray::validity(const std::string& path) const {
-    throw std::runtime_error("FIXME: NumpyArray::validity");
+    if (shape_.empty()) {
+      return std::string("at ") + path + std::string(" (") + classname() + std::string("): shape is zero-dimensional");
+    }
+    for (size_t i = 0;  i < shape_.size();  i++) {
+      if (shape_[i] < 0) {
+        return std::string("at ") + path + std::string(" (") + classname() + std::string("): shape[") + std::to_string(i) + ("] < 0");
+      }
+    }
+    for (size_t i = 0;  i < strides_.size();  i++) {
+      if (strides_[i] % itemsize_ != 0) {
+        return std::string("at ") + path + std::string(" (") + classname() + std::string("): shape[") + std::to_string(i) + ("] % itemsize != 0");
+      }
+    }
+    return std::string();
   }
 
   const Index64 NumpyArray::count64() const {

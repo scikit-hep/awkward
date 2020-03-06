@@ -54,7 +54,7 @@ namespace awkward {
         , length_(length)
         , itemsize_(itemsize) {
       if (sizeof(T) != itemsize) {
-        throw std::runtime_error("sizeof(T) != itemsize");
+        throw std::invalid_argument("sizeof(T) != itemsize");
       }
     }
 
@@ -418,7 +418,7 @@ namespace awkward {
     // operations
 
     const std::string validity(const std::string& path) const override {
-      throw std::runtime_error("FIXME: RawArray::validity");
+      return std::string();
     }
 
     const Index64 count64() const override {

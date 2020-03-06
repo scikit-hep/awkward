@@ -142,6 +142,18 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_unionarray8_U32_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
   EXPORT_SYMBOL struct Error awkward_unionarray8_64_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
 
+  EXPORT_SYMBOL struct Error awkward_listarray32_validity(const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length, int64_t lencontent);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_validity(const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length, int64_t lencontent);
+  EXPORT_SYMBOL struct Error awkward_listarray64_validity(const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length, int64_t lencontent);
+
+  EXPORT_SYMBOL struct Error awkward_indexedarray32_validity(const int32_t* index, int64_t indexoffset, int64_t length, int64_t lencontent, bool isoption);
+  EXPORT_SYMBOL struct Error awkward_indexedarrayU32_validity(const uint32_t* index, int64_t indexoffset, int64_t length, int64_t lencontent, bool isoption);
+  EXPORT_SYMBOL struct Error awkward_indexedarray64_validity(const int64_t* index, int64_t indexoffset, int64_t length, int64_t lencontent, bool isoption);
+
+  EXPORT_SYMBOL struct Error awkward_unionarray8_32_validity(const int8_t* tags, int64_t tagsoffset, const int32_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents);
+  EXPORT_SYMBOL struct Error awkward_unionarray8_U32_validity(const int8_t* tags, int64_t tagsoffset, const uint32_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents);
+  EXPORT_SYMBOL struct Error awkward_unionarray8_64_validity(const int8_t* tags, int64_t tagsoffset, const int64_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents);
+
 }
 
 #endif // AWKWARDCPU_GETITEM_H_
