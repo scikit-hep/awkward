@@ -1397,13 +1397,7 @@ namespace awkward {
     if (toaxis != depth) {
       throw std::invalid_argument("axis exceeds the depth of this array");
     }
-    Index64 index(target);
-    struct Error err = awkward_index_rpad_and_clip_axis0_64(
-      index.ptr().get(),
-      target,
-      length());
-    util::handle_error(err, classname(), identities_.get());
-    return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+    return rpad_axis0(target, true);
   }
 
   const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {

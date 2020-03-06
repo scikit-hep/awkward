@@ -29,6 +29,17 @@ namespace awkward {
     return identities_;
   }
 
+  const std::shared_ptr<Content> Content::rpad_axis0(int64_t target, bool clip) const {
+    Index64 index(target);
+    struct Error err = awkward_index_rpad_and_clip_axis0_64(
+      index.ptr().get(),
+      target,
+      length());
+    util::handle_error(err, classname(), identities_.get());
+    std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+    return next.get()->simplify();
+  }
+
   const std::string Content::tostring() const {
     return tostring_part("", "", "");
   }
