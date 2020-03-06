@@ -468,7 +468,7 @@ namespace awkward {
   // }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::count(int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::sizes(int64_t axis, int64_t depth) const {
     throw std::runtime_error("FIXME: ListOffsetArray::sizes");
     // int64_t toaxis = axis_wrap_if_negative(axis);
     // if (toaxis == 0) {

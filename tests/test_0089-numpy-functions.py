@@ -143,6 +143,7 @@ def test_where():
 
     assert awkward1.tolist(awkward1.where(condition, one, two)) == awkward1.tolist(numpy.where(numpy.asarray(condition), numpy.asarray(one), numpy.asarray(two)))
 
+@pytest.mark.skip(reason="finalizing sizes operation")
 def test_string_equal():
     one = awkward1.Array(["one", "two", "three"], checkvalid=True)
     two = awkward1.Array(["ONE", "two", "four"], checkvalid=True)
