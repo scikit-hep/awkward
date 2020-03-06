@@ -1,6 +1,5 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include <cassert>
 #include <sstream>
 #include <set>
 
@@ -23,7 +22,6 @@ namespace awkward {
         std::stringstream out;
         out << "in " << classname;
         if (err.identity != kSliceNone  &&  identities != nullptr) {
-          assert(err.identity > 0);
           if (0 <= err.identity  &&  err.identity < identities->length()) {
             out << " with identity [" << identities->identity_at(err.identity) << "]";
           }
@@ -166,6 +164,38 @@ namespace awkward {
         }
       }
       return true;
+    }
+
+    std::string gettypestr(const Parameters& parameters, const std::map<std::string, std::string>& typestrs) {
+      auto item = parameters.find("__record__");
+      if (item != parameters.end()) {
+        std::string source = item->second;
+        rj::Document recname;
+        recname.Parse<rj::kParseNanAndInfFlag>(source.c_str());
+        if (recname.IsString()) {
+          std::string name = recname.GetString();
+          for (auto pair : typestrs) {
+            if (pair.first == name) {
+              return pair.second;
+            }
+          }
+        }
+      }
+      item = parameters.find("__array__");
+      if (item != parameters.end()) {
+        std::string source = item->second;
+        rj::Document recname;
+        recname.Parse<rj::kParseNanAndInfFlag>(source.c_str());
+        if (recname.IsString()) {
+          std::string name = recname.GetString();
+          for (auto pair : typestrs) {
+            if (pair.first == name) {
+              return pair.second;
+            }
+          }
+        }
+      }
+      return std::string();
     }
 
     template <>

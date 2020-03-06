@@ -1,6 +1,5 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include <cassert>
 #include <cstring>
 #include <atomic>
 #include <iomanip>
@@ -133,7 +132,9 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Identities> IdentitiesOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    assert(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop < length_);
+    if (!(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop <= length_)  &&  start != stop) {
+      throw std::runtime_error("Identities::getitem_range_nowrap with illegal start:stop for this length");
+    }
     return std::make_shared<IdentitiesOf<T>>(ref_, fieldloc_, offset_ + width_*start*(start != stop), width_, (stop - start), ptr_);
   }
 
@@ -222,7 +223,9 @@ namespace awkward {
 
   template <typename T>
   const std::vector<T> IdentitiesOf<T>::getitem_at_nowrap(int64_t at) const {
-    assert(0 <= at  &&  at < length_);
+    if (!(0 <= at  &&  at < length_)) {
+      throw std::runtime_error("Identities::getitem_at_nowrap with illegal index for this length");
+    }
     std::vector<T> out;
     for (size_t i = (size_t)(offset_ + at);  i < (size_t)(offset_ + at + width_);  i++) {
       out.push_back(ptr_.get()[i]);

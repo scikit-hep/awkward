@@ -110,13 +110,11 @@ namespace awkward {
 
   template <typename T>
   T IndexOf<T>::getitem_at_nowrap(int64_t at) const {
-    assert(0 <= at  &&  at < length_);
     return ptr_.get()[(size_t)(offset_ + at)];
   }
 
   template <typename T>
   void IndexOf<T>::setitem_at_nowrap(int64_t at, T value) const {
-    assert(0 <= at  &&  at < length_);
     ptr_.get()[(size_t)(offset_ + at)] = value;
   }
 
@@ -130,7 +128,9 @@ namespace awkward {
 
   template <typename T>
   IndexOf<T> IndexOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    assert(0 <= start  &&  start < length_  &&  start <= stop  &&  stop <= length_);
+    if (!(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop <= length_)  &&  start != stop) {
+      throw std::runtime_error("Index::getitem_range_nowrap with illegal start:stop for this length");
+    }
     return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
   }
 

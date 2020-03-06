@@ -11,8 +11,8 @@
 #include "awkward/type/RecordType.h"
 
 namespace awkward {
-  RecordType::RecordType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup)
-      : Type(parameters)
+  RecordType::RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<std::shared_ptr<Type>>& types, const std::shared_ptr<util::RecordLookup>& recordlookup)
+      : Type(parameters, typestr)
       , types_(types)
       , recordlookup_(recordlookup) {
     if (recordlookup_.get() != nullptr  &&  recordlookup_.get()->size() != types_.size()) {
@@ -20,8 +20,8 @@ namespace awkward {
     }
   }
 
-  RecordType::RecordType(const util::Parameters& parameters, const std::vector<std::shared_ptr<Type>>& types)
-      : Type(parameters)
+  RecordType::RecordType(const util::Parameters& parameters, const std::string& typestr, const std::vector<std::shared_ptr<Type>>& types)
+      : Type(parameters, typestr)
       , types_(types)
       , recordlookup_(nullptr) { }
 
@@ -99,7 +99,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RecordType::shallow_copy() const {
-    return std::make_shared<RecordType>(parameters_, types_, recordlookup_);
+    return std::make_shared<RecordType>(parameters_, typestr_, types_, recordlookup_);
   }
 
   bool RecordType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {
@@ -202,7 +202,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> RecordType::astuple() const {
-    return std::make_shared<RecordType>(parameters_, types_, std::shared_ptr<util::RecordLookup>(nullptr));
+    return std::make_shared<RecordType>(parameters_, typestr_, types_, std::shared_ptr<util::RecordLookup>(nullptr));
   }
 
 }

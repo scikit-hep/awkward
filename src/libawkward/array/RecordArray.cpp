@@ -154,8 +154,9 @@ namespace awkward {
         util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
       }
       if (istuple()) {
+        Identities::FieldLoc original = identities.get()->fieldloc();
         for (size_t j = 0;  j < contents_.size();  j++) {
-          Identities::FieldLoc fieldloc(identities.get()->fieldloc().begin(), identities.get()->fieldloc().end());
+          Identities::FieldLoc fieldloc(original.begin(), original.end());
           fieldloc.push_back(std::pair<int64_t, std::string>(identities.get()->width() - 1, std::to_string(j)));
           contents_[j].get()->setidentities(identities.get()->withfieldloc(fieldloc));
         }
@@ -172,43 +173,12 @@ namespace awkward {
     identities_ = identities;
   }
 
-  const std::shared_ptr<Type> RecordArray::type() const {
+  const std::shared_ptr<Type> RecordArray::type(const std::map<std::string, std::string>& typestrs) const {
     std::vector<std::shared_ptr<Type>> types;
     for (auto item : contents_) {
-      types.push_back(item.get()->type());
+      types.push_back(item.get()->type(typestrs));
     }
-    return std::make_shared<RecordType>(parameters_, types, recordlookup_);
-  }
-
-  const std::shared_ptr<Content> RecordArray::astype(const std::shared_ptr<Type>& type) const {
-    if (RecordType* raw = dynamic_cast<RecordType*>(type.get())) {
-      std::vector<std::shared_ptr<Content>> contents;
-      if (raw->recordlookup().get() == nullptr) {
-        for (int64_t i = 0;  i < raw->numfields();  i++) {
-          if (i >= numfields()) {
-            throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because tuple lengths don't match"));
-          }
-          contents.push_back(contents_[(size_t)i].get()->astype(raw->field(i)));
-        }
-      }
-      else {
-        for (auto key : raw->keys()) {
-          if (!haskey(key)) {
-            throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because the array doesn't have key ") + util::quote(key, true));
-          }
-          contents.push_back(contents_[(size_t)fieldindex(key)].get()->astype(raw->field(key)));
-        }
-      }
-      if (contents.empty()) {
-        return std::make_shared<RecordArray>(identities_, type.get()->parameters(), length(), istuple());
-      }
-      else {
-        return std::make_shared<RecordArray>(identities_, type.get()->parameters(), contents, raw->recordlookup());
-      }
-    }
-    else {
-      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
-    }
+    return std::make_shared<RecordType>(parameters_, util::gettypestr(parameters_, typestrs), types, recordlookup_);
   }
 
   const std::string RecordArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {

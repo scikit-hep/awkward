@@ -12,8 +12,6 @@ import awkward1._pandas
 
 py27 = (sys.version_info[0] < 3)
 
-pytest.skip("Disabling for now.", allow_module_level=True)
-
 pandas = pytest.importorskip("pandas")
 
 def test_basic():

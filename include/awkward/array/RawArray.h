@@ -3,7 +3,6 @@
 #ifndef AWKWARD_RAWARRAY_H_
 #define AWKWARD_RAWARRAY_H_
 
-#include <cassert>
 #include <cstring>
 #include <vector>
 #include <string>
@@ -133,48 +132,43 @@ namespace awkward {
       identities_ = identities;
     }
 
-    const std::shared_ptr<Type> type() const override {
+    const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const override {
       if (std::is_same<T, double>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float64);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float64);
       }
       else if (std::is_same<T, float>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float32);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float32);
       }
       else if (std::is_same<T, int64_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int64);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int64);
       }
       else if (std::is_same<T, uint64_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint64);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint64);
       }
       else if (std::is_same<T, int32_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int32);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int32);
       }
       else if (std::is_same<T, uint32_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint32);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint32);
       }
       else if (std::is_same<T, int16_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int16);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int16);
       }
       else if (std::is_same<T, uint16_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint16);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint16);
       }
       else if (std::is_same<T, int8_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int8);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int8);
       }
       else if (std::is_same<T, uint8_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint8);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint8);
       }
       else if (std::is_same<T, bool>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::boolean);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::boolean);
       }
       else {
         throw std::invalid_argument(std::string("RawArrayOf<") + typeid(T).name() + std::string("> does not have a known type"));
       }
-    }
-
-    const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override {
-    // FIXME: if the type does not match T, actually convert it!
-      return std::make_shared<RawArrayOf<T>>(identities_, type.get()->parameters(), ptr_, offset_, length_, itemsize_);
     }
 
     const std::string tostring() {
@@ -567,7 +561,9 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override {
-      assert(advanced.length() == 0);
+      if (advanced.length() != 0) {
+        throw std::runtime_error("RawArray::getitem_next(SliceAt): advanced.length() != 0");
+      }
       if (array.shape().size() != 1) {
         throw std::runtime_error("array.ndim != 1");
       }

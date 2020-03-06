@@ -210,7 +210,7 @@ std::shared_ptr<ak::Identities> unbox_identities_none(const py::handle& obj) {
 /////////////////////////////////////////////////////////////// slicing
 
 bool handle_as_numpy(const std::shared_ptr<ak::Content>& content) {
-  // if (content.get()->parameter_equals("__array__", "\"string\"")) {
+  // if (content.get()->parameter_equals("__array__", "\"string\"")  ||  content.get()->parameter_equals("__array__", "\"bytestring\"")) {
   //   return true;
   // }
   if (ak::NumpyArray* raw = dynamic_cast<ak::NumpyArray*>(content.get())) {
@@ -367,7 +367,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
       }
 
       if (content.get() != nullptr  &&  !handle_as_numpy(content)) {
-        if (content.get()->parameter_equals("__array__", "\"string\"")) {
+        if (content.get()->parameter_equals("__array__", "\"string\"")  ||  content.get()->parameter_equals("__array__", "\"bytestring\"")) {
           obj = box(content);
           obj = py::module::import("awkward1").attr("tolist")(obj);
           std::vector<std::string> strings;
@@ -572,7 +572,7 @@ py::class_<ak::ArrayBuilder> make_ArrayBuilder(const py::handle& m, const std::s
       .def("__repr__", &ak::ArrayBuilder::tostring)
       .def("__len__", &ak::ArrayBuilder::length)
       .def("clear", &ak::ArrayBuilder::clear)
-      .def_property_readonly("type", &ak::ArrayBuilder::type)
+      .def("type", &ak::ArrayBuilder::type)
       .def("snapshot", [](const ak::ArrayBuilder& self) -> py::object {
         return box(self.snapshot());
       })
@@ -829,11 +829,8 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("setparameter", &setparameter<T>)
           .def("parameter", &parameter<T>)
           .def("purelist_parameter", &purelist_parameter<T>)
-          .def_property_readonly("type", [](const T& self) -> std::shared_ptr<ak::Type> {
-            return self.type();
-          })
-          .def("astype", [](const T& self, const std::shared_ptr<ak::Type>& type) -> py::object {
-            return box(self.astype(type));
+          .def("type", [](const T& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
+            return self.type(typestrs);
           })
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
@@ -920,6 +917,9 @@ py::class_<ak::EmptyArray, std::shared_ptr<ak::EmptyArray>, ak::Content> make_Em
       .def(py::init([](const py::object& identities, const py::object& parameters) -> ak::EmptyArray {
         return ak::EmptyArray(unbox_identities_none(identities), dict2parameters(parameters));
       }), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
+      .def("toNumpyArray", [](const ak::EmptyArray& self) -> py::object {
+        return box(self.toNumpyArray("d", sizeof(double)));
+      })
   );
 }
 
@@ -1057,16 +1057,13 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("identities", [](const ak::Record& self) -> py::object { return box(self.identities()); })
       .def("__getitem__", &getitem<ak::Record>)
-      .def_property_readonly("type", [](const ak::Record& self) -> std::shared_ptr<ak::Type> {
-        return self.type();
+      .def("type", [](const ak::Record& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
+        return self.type(typestrs);
       })
       .def_property("parameters", &getparameters<ak::Record>, &setparameters<ak::Record>)
       .def("setparameter", &setparameter<ak::Record>)
       .def("parameter", &parameter<ak::Record>)
       .def("purelist_parameter", &purelist_parameter<ak::Record>)
-      .def("astype", [](const ak::Record& self, const std::shared_ptr<ak::Type>& type) -> py::object {
-        return box(self.astype(type));
-      })
       .def("tojson", &tojson_string<ak::Record>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
 

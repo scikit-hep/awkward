@@ -35,8 +35,12 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const ArrayBuilderOptions& options) {
-    assert(depth > 0);
-    assert(rawdata.ndim() == 1);
+    if (depth <= 0) {
+      throw std::runtime_error("FromROOT_nestedvector: depth <= 0");
+    }
+    if (rawdata.ndim() != 1) {
+      throw std::runtime_error("FromROOT_nestedvector: rawdata.ndim() != 1");
+    }
 
     Index64 level0(byteoffsets.length());
     level0.setitem_at_nowrap(0, 0);

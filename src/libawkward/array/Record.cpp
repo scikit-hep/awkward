@@ -65,20 +65,10 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::setidentities");
   }
 
-  const std::shared_ptr<Type> Record::type() const {
-    std::shared_ptr<Type> out = array_.get()->type();
+  const std::shared_ptr<Type> Record::type(const std::map<std::string, std::string>& typestrs) const {
+    std::shared_ptr<Type> out = array_.get()->type(typestrs);
     out.get()->setparameters(parameters_);
     return out;
-  }
-
-  const std::shared_ptr<Content> Record::astype(const std::shared_ptr<Type>& type) const {
-    std::shared_ptr<Content> record = array_.get()->astype(type);
-    if (RecordArray* raw = dynamic_cast<RecordArray*>(record.get())) {
-      return std::make_shared<Record>(array_, at_);
-    }
-    else {
-      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
-    }
   }
 
   const std::string Record::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {

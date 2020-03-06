@@ -157,10 +157,10 @@ namespace awkward {
   const std::shared_ptr<Content> IndexedGenericBuilder::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     if (hasnull_) {
-      return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->parameters(), index, array_);
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_);
     }
     else {
-      return std::make_shared<IndexedArray64>(Identities::none(), array_.get()->parameters(), index, array_);
+      return std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), index, array_);
     }
   }
 

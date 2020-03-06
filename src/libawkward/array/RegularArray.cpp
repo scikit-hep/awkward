@@ -159,22 +159,8 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> RegularArray::type() const {
-    return std::make_shared<RegularType>(parameters_, content_.get()->type(), size_);
-  }
-
-  const std::shared_ptr<Content> RegularArray::astype(const std::shared_ptr<Type>& type) const {
-    if (RegularType* raw = dynamic_cast<RegularType*>(type.get())) {
-      if (raw->size() == size_) {
-        return std::make_shared<RegularArray>(identities_, type.get()->parameters(), content_.get()->astype(raw->type()), size_);
-      }
-      else {
-        throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because sizes do not match"));
-      }
-    }
-    else {
-      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
-    }
+  const std::shared_ptr<Type> RegularArray::type(const std::map<std::string, std::string>& typestrs) const {
+    return std::make_shared<RegularType>(parameters_, util::gettypestr(parameters_, typestrs), content_.get()->type(typestrs), size_);
   }
 
   const std::string RegularArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
@@ -571,8 +557,9 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    assert(advanced.length() == 0);
-
+    if (advanced.length() != 0) {
+      throw std::runtime_error("RegularArray::getitem_next(SliceAt): advanced.length() != 0");
+    }
     int64_t len = length();
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -594,7 +581,9 @@ namespace awkward {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
-    assert(range.step() != 0);
+    if (range.step() == 0) {
+      throw std::runtime_error("RegularArray::getitem_next(SliceRange): range.step() == 0");
+    }
     int64_t regular_start = range.start();
     int64_t regular_stop = range.stop();
     int64_t regular_step = std::abs(range.step());

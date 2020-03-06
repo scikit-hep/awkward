@@ -227,7 +227,6 @@ namespace awkward {
   }
 
   void NumpyArray::setidentities() {
-    assert(!isscalar());
     if (length() <= kMaxInt32) {
       std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
       Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
@@ -286,75 +285,67 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> NumpyArray::type() const {
+  const std::shared_ptr<Type> NumpyArray::type(const std::map<std::string, std::string>& typestrs) const {
     std::shared_ptr<Type> out;
     if (format_.compare("d") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float64);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float64);
     }
     else if (format_.compare("f") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float32);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float32);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("q") == 0) {
 #else
     else if (format_.compare("l") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int64);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int64);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("Q") == 0) {
 #else
     else if (format_.compare("L") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint64);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint64);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("l") == 0) {
 #else
     else if (format_.compare("i") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int32);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int32);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("L") == 0) {
 #else
     else if (format_.compare("I") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint32);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint32);
     }
     else if (format_.compare("h") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int16);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int16);
     }
     else if (format_.compare("H") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint16);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint16);
     }
     else if (format_.compare("b") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int8);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int8);
     }
     else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint8);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint8);
     }
     else if (format_.compare("?") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::boolean);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::boolean);
     }
     else {
       throw std::invalid_argument(std::string("Numpy format \"") + format_ + std::string("\" cannot be expressed as a PrimitiveType"));
     }
     for (std::size_t i = shape_.size() - 1;  i > 0;  i--) {
-      out = std::make_shared<RegularType>(util::Parameters(), out, (int64_t)shape_[i]);
+      out = std::make_shared<RegularType>(util::Parameters(), util::gettypestr(parameters_, typestrs), out, (int64_t)shape_[i]);
     }
     return out;
   }
 
-  const std::shared_ptr<Content> NumpyArray::astype(const std::shared_ptr<Type>& type) const {
-    // FIXME: if the unwrapped_type does not match the format_, actually convert it!
-    // Maybe also change the shape_ if there's a different RegularType nesting (less strict than unwrap_regulartype).
-    std::shared_ptr<Type> unwrapped_type = unwrap_regulartype(type, shape_);
-    return std::make_shared<NumpyArray>(identities_, unwrapped_type.get()->parameters(), ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
-  }
-
   const std::string NumpyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
-    assert(!isscalar());
     std::stringstream out;
     out << indent << pre << "<" << classname() << " format=" << util::quote(format_, true) << " shape=\"";
     for (std::size_t i = 0;  i < shape_.size();  i++) {
@@ -445,7 +436,10 @@ namespace awkward {
 
   void NumpyArray::tojson_part(ToJson& builder) const {
     check_for_iteration();
-    if (parameter_equals("__array__", "\"char\"")) {
+    if (parameter_equals("__array__", "\"byte\"")) {
+      tojson_string(builder);
+    }
+    else if (parameter_equals("__array__", "\"char\"")) {
       tojson_string(builder);
     }
     else if (format_.compare("d") == 0) {
@@ -566,7 +560,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_at(int64_t at) const {
-    assert(!isscalar());
     int64_t regular_at = at;
     if (regular_at < 0) {
       regular_at += shape_[0];
@@ -592,7 +585,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_range(int64_t start, int64_t stop) const {
-    assert(!isscalar());
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), shape_[0]);
@@ -687,7 +679,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
-    assert(!isscalar());
     Index64 carry(shape_[0]);
     struct Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
     util::handle_error(err, classname(), identities_.get());
@@ -695,8 +686,6 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::carry(const Index64& carry) const {
-    assert(!isscalar());
-
     std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*strides_[0])], util::array_deleter<uint8_t>());
     struct Error err = awkward_numpyarray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
@@ -1722,7 +1711,6 @@ namespace awkward {
 
   const NumpyArray NumpyArray::getitem_bystrides(const SliceEllipsis& ellipsis, const Slice& tail, int64_t length) const {
     std::pair<int64_t, int64_t> minmax = minmax_depth();
-    assert(minmax.first == minmax.second);
     int64_t mindepth = minmax.first;
 
     if (tail.length() == 0  ||  mindepth - 1 == tail.dimlength()) {
@@ -1818,9 +1806,6 @@ namespace awkward {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
 
-    // if we had any array slices, this int would become an array
-    assert(advanced.length() == 0);
-
     int64_t regular_at = at.at();
     if (regular_at < 0) {
       regular_at += shape_[1];
@@ -1914,7 +1899,6 @@ namespace awkward {
 
   const NumpyArray NumpyArray::getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& carry, const Index64& advanced, int64_t length, int64_t stride, bool first) const {
     std::pair<int64_t, int64_t> minmax = minmax_depth();
-    assert(minmax.first == minmax.second);
     int64_t mindepth = minmax.first;
 
     if (tail.length() == 0  ||  mindepth - 1 == tail.dimlength()) {

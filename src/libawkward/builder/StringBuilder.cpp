@@ -46,28 +46,18 @@ namespace awkward {
 
   const std::shared_ptr<Content> StringBuilder::snapshot() const {
     util::Parameters char_parameters;
-    char_parameters["__array__"] = std::string("\"char\"");
-
     util::Parameters string_parameters;
-    string_parameters["__array__"] = std::string("\"string\"");
 
     if (encoding_ == nullptr) {
-      char_parameters["__typestr__"] = std::string("\"byte\"");
-      char_parameters["encoding"] = std::string("null");
-      string_parameters["__typestr__"] = std::string("\"bytes\"");
+      char_parameters["__array__"] = std::string("\"byte\"");
+      string_parameters["__array__"] = std::string("\"bytestring\"");
+    }
+    else if (std::string(encoding_) == std::string("utf-8")) {
+      char_parameters["__array__"] = std::string("\"char\"");
+      string_parameters["__array__"] = std::string("\"string\"");
     }
     else {
-      std::string quoted = util::quote(encoding_, true);
-      std::string slashquoted = std::string("\\\"") + quoted.substr(1, quoted.length() - 2) + std::string("\\\"");
-      if (std::string(encoding_) == std::string("utf-8")) {
-        char_parameters["__typestr__"] = std::string("\"utf8\"");
-      string_parameters["__typestr__"] = std::string("\"string\"");
-      }
-      else {
-        char_parameters["__typestr__"] = std::string("\"char[") + slashquoted + std::string("]\"");
-        string_parameters["__typestr__"] = std::string("\"string[") + slashquoted + std::string("]\"");
-      }
-      char_parameters["encoding"] = std::string(quoted);
+      throw std::invalid_argument(std::string("unsupported encoding: ") + util::quote(encoding_, false));
     }
 
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());

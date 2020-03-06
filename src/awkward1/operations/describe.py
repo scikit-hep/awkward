@@ -47,7 +47,7 @@ def typeof(array):
         return array.type
 
     elif isinstance(array, awkward1.layout.Record):
-        return array.type
+        return array.type(awkward1._util.typestrs(None))
 
     elif isinstance(array, numpy.ndarray):
         if len(array.shape) == 0:
@@ -59,10 +59,10 @@ def typeof(array):
             return awkward1.types.ArrayType(out, array.shape[0])
 
     elif isinstance(array, awkward1.layout.ArrayBuilder):
-        return array.type
+        return array.type(awkward1._util.typestrs(None))
 
     elif isinstance(array, awkward1.layout.Content):
-        return array.type
+        return array.type(awkward1._util.typestrs(None))
 
     else:
         raise TypeError("unrecognized array type: {0}".format(repr(array)))

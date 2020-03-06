@@ -12,8 +12,6 @@ import awkward1
 
 py27 = (sys.version_info[0] < 3)
 
-pytest.skip("Disabling for now.", allow_module_level=True)
-
 content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))
 offsetsA = numpy.arange(0, 2*3*5 + 5, 5)
 offsetsB = numpy.arange(0, 2*3 + 3, 3)

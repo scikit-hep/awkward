@@ -14,14 +14,13 @@ import multiprocessing
 arguments = argparse.ArgumentParser()
 arguments.add_argument("--clean", default=False, action="store_true")
 arguments.add_argument("--release", action="store_true")
-arguments.add_argument("--no-ctest", action="store_true")
+arguments.add_argument("--ctest", action="store_true")
 arguments.add_argument("--no-buildpython", action="store_true")
 arguments.add_argument("--no-dependencies", action="store_true")
 arguments.add_argument("-j", default=str(multiprocessing.cpu_count()))
 arguments.add_argument("--pytest", default=None)
 args = arguments.parse_args()
 
-args.ctest = not args.no_ctest
 args.buildpython = not args.no_buildpython
 args.dependencies = not args.no_dependencies
 
@@ -39,6 +38,7 @@ if args.clean:
             shutil.rmtree(x)
     sys.exit()
 
+# Changes that would trigger a recompilation.
 thisstate = {"release": args.release,
              "ctest": args.ctest,
              "buildpython": args.buildpython,
@@ -49,7 +49,7 @@ try:
 except:
     localbuild_time = 0
 try:
-    laststate = json.load(open("localbuild/lastargs.json"))
+    laststate = json.load(open("localbuild/laststate.json"))
 except:
     laststate = None
 
@@ -83,7 +83,7 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
         newdir_args.extend(["-DPYTHON_EXECUTABLE=" + thisstate["python_executable"], "-DPYBUILD=ON"])
 
     check_call(["cmake"] + newdir_args)
-    json.dump(thisstate, open("localbuild/lastargs.json", "w"))
+    json.dump(thisstate, open("localbuild/laststate.json", "w"))
 
 # Build C++ normally; this might be a no-op if make/ninja determines that the build is up-to-date.
 check_call(["cmake", "--build", "localbuild", "-j", args.j])
@@ -120,4 +120,6 @@ if args.buildpython:
         print("Remember to")
         print("")
         print("    export LD_LIBRARY_PATH=awkward1:$LD_LIBRARY_PATH")
+        print("")
+        print("if you plan to use awkward1 outside of this tool.")
         print("")

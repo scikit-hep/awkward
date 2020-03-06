@@ -10,6 +10,8 @@ import numpy
 
 import awkward1
 
+numba = pytest.importorskip("numba")
+
 awkward1_numba_arrayview = pytest.importorskip("awkward1._numba.arrayview")
 
 def test_ArrayBuilder_append():
@@ -107,6 +109,9 @@ def test_ArrayBuilder_append():
     builder.append(array, 5)
     builder.endlist()
 
+    print(builder._layout.snapshot())
+
+
     assert awkward1.tolist(builder.snapshot()) == [["one", "two", "three"], [], ["four", "five"]]
 
     builder.append(array, -1)
@@ -161,8 +166,6 @@ def test_ArrayBuilder_append():
     builder.append(array3, 0)
     array4 = builder.snapshot()
     assert isinstance(array4.layout.content, awkward1.layout.ListOffsetArray64)
-
-numba = pytest.importorskip("numba")
 
 def test_views():
     assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])).toarray()) == [1.1, 2.2, 3.3, 4.4, 5.5]
@@ -891,24 +894,6 @@ def test_ArrayBuilder_list():
     assert awkward1.tolist(a.snapshot()) == []
     assert awkward1.tolist(b.snapshot()) == []
     assert awkward1.tolist(c.snapshot()) == []
-
-# def test_string():
-#     array = awkward1.Array(["one", "two", "three", "four", "five"])
-
-#     @numba.njit
-#     def f1(x, i):
-#         return x[i]
-
-#     assert f1(array, 0) == "one"
-#     assert f1(array, 1) == "two"
-#     assert f1(array, 2) == "three"
-
-#     @numba.njit
-#     def f2(x, i, j):
-#         return x[i] + x[j]
-
-#     print(f2(array, 1, 3))
-#     raise Exception
 
 def dummy_typer(viewtype):
     return numba.float64

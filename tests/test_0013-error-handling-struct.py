@@ -11,8 +11,6 @@ import awkward1
 
 py27 = (sys.version_info[0] < 3)
 
-pytest.skip("Disabling for now.", allow_module_level=True)
-
 def test_numpyarray():
     array = awkward1.layout.NumpyArray(numpy.arange(10)*1.1)
 

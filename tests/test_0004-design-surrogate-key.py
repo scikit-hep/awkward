@@ -12,8 +12,6 @@ import awkward1
 
 py27 = 2 if sys.version_info[0] < 3 else 1
 
-pytest.skip("Disabling for now.", allow_module_level=True)
-
 def test_refcount1():
     i = numpy.arange(12, dtype="i4").reshape(3, 4)
     assert sys.getrefcount(i) == 2

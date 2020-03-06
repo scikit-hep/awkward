@@ -18,7 +18,7 @@ namespace awkward {
     const std::string tostring() const;
     int64_t length() const;
     void clear();
-    const std::shared_ptr<Type> type() const;
+    const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const;
     const std::shared_ptr<Content> snapshot() const;
     const std::shared_ptr<Content> getitem_at(int64_t at) const;
     const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;

@@ -206,18 +206,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListArrayOf<T>::type() const {
-    return std::make_shared<ListType>(parameters_, content_.get()->type());
-  }
-
-  template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::astype(const std::shared_ptr<Type>& type) const {
-    if (ListType* raw = dynamic_cast<ListType*>(type.get())) {
-      return std::make_shared<ListArrayOf<T>>(identities_, type.get()->parameters(), starts_, stops_, content_.get()->astype(raw->type()));
-    }
-    else {
-      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
-    }
+  const std::shared_ptr<Type> ListArrayOf<T>::type(const std::map<std::string, std::string>& typestrs) const {
+    return std::make_shared<ListType>(parameters_, util::gettypestr(parameters_, typestrs), content_.get()->type(typestrs));
   }
 
   template <typename T>
@@ -938,7 +928,9 @@ namespace awkward {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
     }
 
-    assert(advanced.length() == 0);
+    if (advanced.length() != 0) {
+      throw std::runtime_error("ListArray::getitem_next(SliceAt): advanced.length() != 0");
+    }
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     Index64 nextcarry(lenstarts);

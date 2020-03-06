@@ -1,6 +1,5 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include <cassert>
 #include <sstream>
 
 #include "awkward/array/NumpyArray.h"
@@ -10,8 +9,8 @@
 #include "awkward/type/PrimitiveType.h"
 
 namespace awkward {
-  PrimitiveType::PrimitiveType(const util::Parameters& parameters, DType dtype)
-      : Type(parameters)
+  PrimitiveType::PrimitiveType(const util::Parameters& parameters, const std::string& typestr, DType dtype)
+      : Type(parameters, typestr)
       , dtype_(dtype) { }
 
   std::string PrimitiveType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
@@ -34,7 +33,7 @@ namespace awkward {
       case uint64:  s = "uint64"; break;
       case float32: s = "float32"; break;
       case float64: s = "float64"; break;
-      default:      assert(dtype_ < numtypes);
+      default:      s = "unknown"; break;
     }
     if (parameters_.empty()) {
       out << indent << pre << s << post;
@@ -46,7 +45,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> PrimitiveType::shallow_copy() const {
-    return std::make_shared<PrimitiveType>(parameters_, dtype_);
+    return std::make_shared<PrimitiveType>(parameters_, typestr_, dtype_);
   }
 
   bool PrimitiveType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {

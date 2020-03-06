@@ -16,5 +16,13 @@ for PYBIN in /opt/python/*/bin; do
     echo "========================================================="
     echo $PYBIN
     echo "========================================================="
-    "${PYBIN}/python" setup.py bdist_wheel -p $PLAT
+    "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 done
+
+# Bundle external shared libraries into the wheels
+# And make sure they are manylinux ready
+for whl in wheelhouse/awkward*.whl; do
+    auditwheel show "$whl"
+    auditwheel repair --plat $PLAT "$whl" -w /io/wheelhouse/
+done
+

@@ -3,7 +3,6 @@
 #ifndef AWKWARD_REGULARARRAY_H_
 #define AWKWARD_REGULARARRAY_H_
 
-#include <cassert>
 #include <string>
 #include <memory>
 #include <vector>
@@ -26,8 +25,7 @@ namespace awkward {
     const std::string classname() const override;
     void setidentities() override;
     void setidentities(const std::shared_ptr<Identities>& identities) override;
-    const std::shared_ptr<Type> type() const override;
-    const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
+    const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     void tojson_part(ToJson& builder) const override;
     void nbytes_part(std::map<size_t, int64_t>& largest) const override;

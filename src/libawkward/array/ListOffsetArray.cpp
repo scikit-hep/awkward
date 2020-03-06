@@ -209,18 +209,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Type> ListOffsetArrayOf<T>::type() const {
-    return std::make_shared<ListType>(parameters_, content_.get()->type());
-  }
-
-  template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::astype(const std::shared_ptr<Type>& type) const {
-    if (ListType* raw = dynamic_cast<ListType*>(type.get())) {
-      return std::make_shared<ListOffsetArrayOf<T>>(identities_, type.get()->parameters(), offsets_, content_.get()->astype(raw->type()));
-    }
-    else {
-      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
-    }
+  const std::shared_ptr<Type> ListOffsetArrayOf<T>::type(const std::map<std::string, std::string>& typestrs) const {
+    return std::make_shared<ListType>(parameters_, util::gettypestr(parameters_, typestrs), content_.get()->type(typestrs));
   }
 
   template <typename T>
@@ -1040,7 +1030,9 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    assert(advanced.length() == 0);
+    if (advanced.length() != 0) {
+      throw std::runtime_error("ListOffsetArray::getitem_next(SliceAt): advanced.length() != 0");
+    }
     int64_t lenstarts = offsets_.length() - 1;
     IndexOf<T> starts = util::make_starts(offsets_);
     IndexOf<T> stops = util::make_stops(offsets_);

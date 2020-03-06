@@ -3,7 +3,6 @@
 #ifndef AWKWARD_SLICE_H_
 #define AWKWARD_SLICE_H_
 
-#include <cassert>
 #include <string>
 #include <vector>
 #include <memory>

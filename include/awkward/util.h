@@ -50,6 +50,8 @@ namespace awkward {
     bool parameter_equals(const Parameters& parameters, const std::string& key, const std::string& value);
     bool parameters_equal(const Parameters& self, const Parameters& other);
 
+    std::string gettypestr(const Parameters& parameters, const std::map<std::string, std::string>& typestrs);
+
     template <typename T>
     ERROR awkward_identities32_from_listoffsetarray(int32_t* toptr, const int32_t* fromptr, const T* fromoffsets, int64_t fromptroffset, int64_t offsetsoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth);
     template <typename T>
