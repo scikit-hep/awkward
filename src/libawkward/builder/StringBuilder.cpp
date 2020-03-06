@@ -57,7 +57,7 @@ namespace awkward {
       string_parameters["__array__"] = std::string("\"string\"");
     }
     else {
-      throw std::invalid_argument(std::string("unsupported encoding: ") + util::quote(encoding_, true));
+      throw std::invalid_argument(std::string("unsupported encoding: ") + util::quote(encoding_, false));
     }
 
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());

@@ -488,18 +488,14 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
         elif isinstance(array, awkward0.StringArray):
             # starts, stops, content, encoding
             out = recurse(array._content)
-            out.content.setparameter("__array__", "char")
-            out.content.setparameter("encoding", array.encoding)
-            out.setparameter("__array__", "string")
-            if array.encoding == "utf-8":
-                out.content.setparameter("__typestr__", "utf8")
-                out.setparameter("__typestr__", "string")
-            elif array.encoding is None:
-                out.content.setparameter("__typestr__", "byte")
-                out.setparameter("__typestr__", "bytes")
+            if array.encoding is None:
+                out.content.setparameter("__array__", "byte")
+                out.setparameter("__array__", "bytestring")
+            elif array.encoding == "utf-8":
+                out.content.setparameter("__array__", "char")
+                out.setparameter("__array__", "string")
             else:
-                out.content.setparameter("__typestr__", "char[" + array.encoding + "]")
-                out.setparameter("__typestr__", "string[" + array.encoding + "]")
+                raise ValueError("unsupported encoding: {0}".format(repr(array.encoding)))
             return out
 
         elif isinstance(array, awkward0.ObjectArray):

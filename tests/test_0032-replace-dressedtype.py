@@ -44,7 +44,6 @@ def test_dress():
 
     x = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     x.setparameter("__array__", "Dummy")
-    x.setparameter("__typestr__", "D[5 * float64]")
     a = awkward1.Array(x, behavior=ns)
     assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
