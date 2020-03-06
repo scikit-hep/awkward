@@ -467,18 +467,15 @@ def broadcast_and_apply(inputs, getfunction):
                     if not x.istuple:
                         istuple = False
 
-            if len(keys) == 0:
-                return awkward1.layout.RecordArray(length, istuple)
-            else:
-                outcontents = []
-                numoutputs = None
-                for key in keys:
-                    outcontents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs], depth))
-                    assert isinstance(outcontents[-1], tuple)
-                    if numoutputs is not None:
-                        assert numoutputs == len(outcontents[-1])
-                    numoutputs = len(outcontents[-1])
-                return tuple(awkward1.layout.RecordArray([x[i] for x in outcontents], keys) for i in range(numoutputs))
+            outcontents = []
+            numoutputs = None
+            for key in keys:
+                outcontents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs], depth))
+                assert isinstance(outcontents[-1], tuple)
+                if numoutputs is not None:
+                    assert numoutputs == len(outcontents[-1])
+                numoutputs = len(outcontents[-1])
+            return tuple(awkward1.layout.RecordArray([x[i] for x in outcontents], None if istuple else keys, length) for i in range(numoutputs))
 
         else:
             raise ValueError("cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs)))
@@ -569,10 +566,7 @@ def recursively_apply(layout, getfunction):
         return awkward1.layout.IndexedOptionArray64(layout.index, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
 
     elif isinstance(layout, awkward1.layout.RecordArray):
-        if len(layout.contents) == 0:
-            return awkward1.layout.RecordArray(len(layout), layout.recordlookup is None, layout.identities, layout.parameters)
-        else:
-            return awkward1.layout.RecordArray([recursively_apply(x, getfunction) for x in layout.contents], layout.recordlookup, layout.identities, layout.parameters)
+        return awkward1.layout.RecordArray([recursively_apply(x, getfunction) for x in layout.contents], layout.recordlookup, len(layout), layout.identities, layout.parameters)
 
     elif isinstance(layout, awkward1.layout.Record):
         return awkward1.layout.Record(recursively_apply(layout.array, getfunction), layout.at)
