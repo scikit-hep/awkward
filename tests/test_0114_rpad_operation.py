@@ -39,7 +39,6 @@ def test_rpad_numpy_array():
     assert awkward1.tolist(array.rpad(5, 0)) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], None, None, None]
     assert awkward1.tolist(array.rpad(5, 1)) == [[1.1, 2.2, 3.3, None, None], [4.4, 5.5, 6.6, None, None]]
 
-###
     array = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
     assert awkward1.tolist(array) == [[[ 0,  1,  2,  3,  4], [ 5,  6,  7,  8,  9], [10, 11, 12, 13, 14]],
                                       [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]
@@ -170,22 +169,20 @@ def test_rpad_and_clip_listoffset_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
-
     assert awkward1.tolist(listoffsetarray) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], []]
 
     assert awkward1.tolist(listoffsetarray.rpad_and_clip(3,0)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4]]
-    assert str('option[') + str(awkward1.typeof(listoffsetarray)) + str(']') == str(awkward1.typeof(listoffsetarray.rpad_and_clip(3,0)))
+    assert str("option[") + str(awkward1.typeof(listoffsetarray)) + str("]") == str(awkward1.typeof(listoffsetarray.rpad_and_clip(3,0)))
 
     assert awkward1.tolist(listoffsetarray.rpad_and_clip(7,0)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], [], None]
-    assert str('option[') + str(awkward1.typeof(listoffsetarray)) + str(']') == str(awkward1.typeof(listoffsetarray.rpad_and_clip(7,0)))
+    assert str("option[") + str(awkward1.typeof(listoffsetarray)) + str("]") == str(awkward1.typeof(listoffsetarray.rpad_and_clip(7,0)))
 
     assert awkward1.tolist(listoffsetarray.rpad_and_clip(5,1)) == [[0.0, 1.1, 2.2, None, None], [None, None, None, None, None], [3.3, 4.4, None, None, None], [5.5, None, None, None, None], [6.6, 7.7, 8.8, 9.9, None], [None, None, None, None, None]]
-    # assert str(awkward1.typeof(listoffsetarray)) == str(awkward1.typeof(listoffsetarray.rpad_and_clip(5,1)))
-    # AssertionError: assert 'var * float64' == 'var * ?float64'
+
+    assert str(awkward1.typeof(listoffsetarray.rpad(5, 1))) == "var * ?float64"
+    assert str(awkward1.typeof(listoffsetarray.rpad_and_clip(5, 1))) == "5 * ?float64"
 
     assert awkward1.tolist(listoffsetarray.rpad_and_clip(1,1)) == [[0.0], [None], [3.3], [5.5], [6.6], [None]]
-    # assert str(awkward1.typeof(listoffsetarray)) == str(awkward1.typeof(listoffsetarray.rpad_and_clip(1,1)))
-    # AssertionError: assert 'var * float64' == 'var * ?float64'
     
     content = awkward1.layout.NumpyArray(numpy.array([1.5, 3.3]))
     index = awkward1.layout.Index64(numpy.array([0, -3, 1, -2, 1, 0, 0, -3, -13, 0, 1, 1, 0, 1, 1, 1, 1, -10, 0, -1, 0, 0, 0, 1, -1, 1, 1]))
@@ -208,15 +205,11 @@ def test_rpad_listoffset_array():
     assert str(awkward1.typeof(listoffsetarray)) == str(awkward1.typeof(listoffsetarray.rpad(3,0)))
 
     assert awkward1.tolist(listoffsetarray.rpad(7,0)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], [], None]
-    assert str('option[') + str(awkward1.typeof(listoffsetarray)) + str(']') == str(awkward1.typeof(listoffsetarray.rpad(7,0)))
+    assert str("option[") + str(awkward1.typeof(listoffsetarray)) + str("]") == str(awkward1.typeof(listoffsetarray.rpad(7,0)))
 
     assert awkward1.tolist(listoffsetarray.rpad(5,1)) == [[0.0, 1.1, 2.2, None, None], [None, None, None, None, None], [3.3, 4.4, None, None, None], [5.5, None, None, None, None], [6.6, 7.7, 8.8, 9.9, None], [None, None, None, None, None]]
-    # assert str(awkward1.typeof(listoffsetarray)) == str(awkward1.typeof(listoffsetarray.rpad(5,1)))
-    # AssertionError: assert 'var * float64' == 'var * ?float64'
 
     assert awkward1.tolist(listoffsetarray.rpad(1,1)) == [[0.0, 1.1, 2.2], [None], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], [None]]
-    # assert str(awkward1.typeof(listoffsetarray)) == str(awkward1.typeof(listoffsetarray.rpad(1,1)))
-    # AssertionError: assert 'var * float64' == 'var * ?float64'
 
     content = awkward1.layout.NumpyArray(numpy.array([1.5, 3.3]))
     index = awkward1.layout.Index64(numpy.array([0, -3, 1, -2, 1, 0, 0, -3, -13, 0, 1, 1, 0, 1, 1, 1, 1, -10, 0, -1, 0, 0, 0, 1, -1, 1, 1]))
@@ -233,25 +226,16 @@ def test_rpad_listoffset_array():
     assert str(awkward1.typeof(listoffsetarray)) == str(awkward1.typeof(listoffsetarray.rpad(6,0)))
 
     assert awkward1.tolist(listoffsetarray.rpad(7,0)) == [[3.3], [], [], [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3], [], [], None]
-    assert str('option[') + str(awkward1.typeof(listoffsetarray)) + str(']') == str(awkward1.typeof(listoffsetarray.rpad(7,0)))
+    assert str("option[") + str(awkward1.typeof(listoffsetarray)) + str("]") == str(awkward1.typeof(listoffsetarray.rpad(7,0)))
 
     assert awkward1.tolist(listoffsetarray.rpad(9,0)) == [[3.3], [], [], [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3], [], [], None, None, None]
-    assert str('option[') + str(awkward1.typeof(listoffsetarray)) + str(']') == str(awkward1.typeof(listoffsetarray.rpad(9,0)))
+    assert str("option[") + str(awkward1.typeof(listoffsetarray)) + str("]") == str(awkward1.typeof(listoffsetarray.rpad(9,0)))
 
     assert awkward1.tolist(listoffsetarray.rpad(1,1)) == [[3.3], [None], [None], [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3], [None], [None]]
     assert str(awkward1.typeof(listoffsetarray)) == str(awkward1.typeof(listoffsetarray.rpad(1,1)))
 
     assert awkward1.tolist(listoffsetarray.rpad(4,1)) == [[3.3, None, None, None], [None, None, None, None], [None, None, None, None], [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3], [None, None, None, None], [None, None, None, None]]
     assert str(awkward1.typeof(listoffsetarray)) == str(awkward1.typeof(listoffsetarray.rpad(4,1)))
-
-    # [[1, 2, 3], [], [4, 5]]
-    # rpad 5 at axis=1:  [[1, 2, 3, None, None], [None, None, None, None, None], [4, 5, None, None, None]]
-    #                    made out of ListArray(IndexedOptionArray(???))
-    # rpad-and-clip 5 at axis=1: [[1, 2, 3, None, None], [None, None, None, None, None], [4, 5, None, None, None]]
-    #                            made out of RegularArray(IndexedOptionArray(???))
-
-    # str(awkward1.typeof(array.rpad(???))) == "10 * var * ?float64"
-    # str(awkward1.typeof(array.rpad(???))) == "10 * 5 * ?float64"
 
 def test_rpad_list_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -267,23 +251,15 @@ def test_rpad_list_array():
     assert str(awkward1.typeof(array)) == str(awkward1.typeof(array.rpad(2,0)))
 
     assert awkward1.tolist(array.rpad(7,0)) == [[0.0, 1.1, 2.2], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8], None, None]
-    assert str('option[') + str(awkward1.typeof(array)) + str(']') == str(awkward1.typeof(array.rpad(7,0)))
+    assert str("option[") + str(awkward1.typeof(array)) + str("]") == str(awkward1.typeof(array.rpad(7,0)))
 
     assert awkward1.tolist(array.rpad(1,1)) == [[0.0, 1.1, 2.2], [None], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
-    # assert str(awkward1.typeof(array)) == str(awkward1.typeof(array.rpad(1,1)))
-    # AssertionError: assert 'var * float64' == 'var * ?float64'
 
     assert awkward1.tolist(array.rpad(2,1)) == [[0.0, 1.1, 2.2], [None, None], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8, None]]
-    # assert str(awkward1.typeof(array)) == str(awkward1.typeof(array.rpad(2,1)))
-    # AssertionError: assert 'var * float64' == 'var * ?float64'
 
     assert awkward1.tolist(array.rpad(3,1)) == [[0.0, 1.1, 2.2], [None, None, None], [4.4, 5.5, None], [5.5, 6.6, 7.7], [8.8, None, None]]
-    # assert str(awkward1.typeof(array)) == str(awkward1.typeof(array.rpad(3,1)))
-    # AssertionError: assert 'var * float64' == 'var * ?float64'
 
     assert awkward1.tolist(array.rpad(4,1)) == [[0.0, 1.1, 2.2, None], [None, None, None, None], [4.4, 5.5, None, None], [5.5, 6.6, 7.7, None], [8.8, None, None, None]]
-    # assert str(awkward1.typeof(array)) == str(awkward1.typeof(array.rpad(4,1)))
-    # AssertionError: assert 'var * float64' == 'var * ?float64'
 
 def test_rpad_and_clip_list_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -293,18 +269,44 @@ def test_rpad_and_clip_list_array():
 
     assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
     assert awkward1.tolist(array.rpad_and_clip(1,0)) == [[0.0, 1.1, 2.2]]
-    assert str('option[') + str(awkward1.typeof(array)) + str(']') == str(awkward1.typeof(array.rpad_and_clip(1,0)))
+    assert str("option[") + str(awkward1.typeof(array)) + str("]") == str(awkward1.typeof(array.rpad_and_clip(1,0)))
 
     assert awkward1.tolist(array.rpad_and_clip(2,0)) == [[0.0, 1.1, 2.2], []]
-    assert str('option[') + str(awkward1.typeof(array)) + str(']') == str(awkward1.typeof(array.rpad_and_clip(2,0)))
+    assert str("option[") + str(awkward1.typeof(array)) + str("]") == str(awkward1.typeof(array.rpad_and_clip(2,0)))
 
     assert awkward1.tolist(array.rpad_and_clip(7,0)) == [[0.0, 1.1, 2.2], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8], None, None]
-    assert str('option[') + str(awkward1.typeof(array)) + str(']') == str(awkward1.typeof(array.rpad_and_clip(7,0)))
+    assert str("option[") + str(awkward1.typeof(array)) + str("]") == str(awkward1.typeof(array.rpad_and_clip(7,0)))
 
     assert awkward1.tolist(array.rpad_and_clip(1,1)) == [[0.0], [None], [4.4], [5.5], [8.8]]
-    # assert str(awkward1.typeof(array)) == str(awkward1.typeof(array.rpad_and_clip(1,1)))
-    # AssertionError: assert 'var * float64' == 'var * ?float64'
 
     assert awkward1.tolist(array.rpad_and_clip(2,1)) == [[0.0, 1.1], [None, None], [4.4, 5.5], [5.5, 6.6], [8.8, None]]
-    # assert str(awkward1.typeof(array)) == str(awkward1.typeof(array.rpad_and_clip(2,1)))
-    # AssertionError: assert 'var * float64' == 'var * ?float64'
+
+def test_rpad_indexed_array():
+    listoffsetarray = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
+    backward = awkward1.Array([[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]).layout
+
+    index = awkward1.layout.Index64(numpy.array([4, 3, 2, 1, 0], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedArray64(index, listoffsetarray)
+    assert awkward1.tolist(indexedarray) == [[6.6, 7.7, 8.8, 9.9], [5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]
+
+    assert awkward1.tolist(backward.rpad(4, 1)) == awkward1.tolist(indexedarray.rpad(4, 1))
+    # etc. for other axis and rpad/rpad_and_clip cases
+
+def test_rpad_recordarray():
+    array = awkward1.Array([{"x": [], "y": [2, 2]}, {"x": [1.1], "y": [1]}, {"x": [2.2, 2.2], "y": []}]).layout
+
+    assert awkward1.tolist(array.rpad(5, 0)) == [{"x": [], "y": [2, 2]}, {"x": [1.1], "y": [1]}, {"x": [2.2, 2.2], "y": []}, None, None]
+
+    assert awkward1.tolist(array.rpad(2, 1)) == [{"x": [None, None], "y": [2, 2]}, {"x": [1.1, None], "y": [1, None]}, {"x": [2.2, 2.2], "y": [None, None]}]
+
+def test_rpad_unionarray():
+    content1 = awkward1.Array([[], [1.1], [2.2, 2.2]]).layout
+    content2 = awkward1.Array([[2, 2], [1], []]).layout
+    tags = awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 1], dtype=numpy.int8))
+    index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2], dtype=numpy.int64))
+    array = awkward1.layout.UnionArray8_64(tags, index, [content1, content2])
+    assert awkward1.tolist(array) == [[], [2, 2], [1.1], [1], [2.2, 2.2], []]
+
+    assert awkward1.tolist(array.rpad(7, 0)) == [[], [2, 2], [1.1], [1], [2.2, 2.2], [], None]
+
+    assert awkward1.tolist(array.rpad(2, 1)) == [[None, None], [2, 2], [1.1, None], [1, None], [2.2, 2.2], [None, None]]
