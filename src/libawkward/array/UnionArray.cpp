@@ -1095,14 +1095,7 @@ namespace awkward {
   const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      Index64 index(target);
-      struct Error err = awkward_index_rpad_and_clip_axis0_64(
-        index.ptr().get(),
-        target,
-        length());
-      util::handle_error(err, classname(), identities_.get());
-      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
-      return next.get()->simplify();
+      return rpad_axis0(target, true);
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;

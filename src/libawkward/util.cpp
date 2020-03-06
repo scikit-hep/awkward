@@ -941,19 +941,6 @@ namespace awkward {
     }
 
     template <>
-    ERROR awkward_ListArray_rpad_and_clip_axis1_64<int32_t>(int64_t* toindex, const int32_t* fromstarts, const int32_t* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
-      return awkward_ListArray32_rpad_and_clip_axis1_64(toindex, fromstarts, fromstops, target, length, startsoffset, stopsoffset);
-    }
-    template <>
-    ERROR awkward_ListArray_rpad_and_clip_axis1_64<uint32_t>(int64_t* toindex, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
-      return awkward_ListArrayU32_rpad_and_clip_axis1_64(toindex, fromstarts, fromstops, target, length, startsoffset, stopsoffset);
-    }
-    template <>
-    ERROR awkward_ListArray_rpad_and_clip_axis1_64<int64_t>(int64_t* toindex, const int64_t* fromstarts, const int64_t* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
-      return awkward_ListArray64_rpad_and_clip_axis1_64(toindex, fromstarts, fromstops, target, length, startsoffset, stopsoffset);
-    }
-
-    template <>
     ERROR awkward_ListOffsetArray_rpad_and_clip_axis1_64<int32_t>(int64_t* toindex, const int32_t* fromoffsets, int64_t offsetsoffset, int64_t length, int64_t target) {
       return awkward_ListOffsetArray32_rpad_and_clip_axis1_64(toindex, fromoffsets, offsetsoffset, length, target);
     }

@@ -816,12 +816,7 @@ namespace awkward {
   const std::shared_ptr<Content> ListArrayOf<T>::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      if (target < length()) {
-        return shallow_copy();
-      }
-      else {
-        return rpad_and_clip(target, toaxis, depth);
-      }
+      return rpad_axis0(target, false);
     }
     else if (toaxis == depth + 1) {
       int64_t min = target;

@@ -684,6 +684,23 @@ ERROR awkward_unionarray8_64_simplify_one_to8_64(int8_t* totags, int64_t* toinde
 }
 
 template <typename T>
+ERROR awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(T* toindex, const int8_t* frommask, int64_t length) {
+  int64_t count = 0;
+  for (int64_t i = 0; i < length; i++) {
+    if(frommask[i]) {
+      toindex[i] = -1;
+    }
+    else {
+      toindex[i] = count++;
+    }
+  }
+  return success();
+}
+ERROR awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(int64_t* toindex, const int8_t* frommask, int64_t length) {
+  return awkward_IndexedOptionArray_rpad_and_clip_mask_axis1<int64_t>(toindex, frommask, length);
+}
+
+template <typename T>
 ERROR awkward_index_rpad_and_clip_axis0(T* toindex, int64_t target, int64_t length) {
   int64_t shorter = (target < length ? target : length);
   for (int64_t i = 0; i < shorter; i++) {
@@ -794,30 +811,6 @@ ERROR awkward_ListArrayU32_rpad_axis1_64(int64_t* toindex, const uint32_t* froms
 }
 ERROR awkward_ListArray64_rpad_axis1_64(int64_t* toindex, const int64_t* fromstarts, const int64_t* fromstops, int64_t* tostarts, int64_t* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
   return awkward_ListArray_rpad_axis1<int64_t, int64_t>(toindex, fromstarts, fromstops, tostarts, tostops, target, length, startsoffset, stopsoffset);
-}
-
-template <typename T, typename C>
-ERROR awkward_ListArray_rpad_and_clip_axis1(T* toindex, const C* fromstarts, const C* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
-  for (int64_t i = 0; i < length; i++) {
-    int64_t range = fromstops[startsoffset + i] - fromstarts[stopsoffset + i];
-    int64_t shorter = (target < range) ? target : range;
-     for (int64_t j = 0; j < shorter; j++) {
-       toindex[i*target + j] = fromstarts[startsoffset + i] + j;
-     }
-     for (int64_t j = shorter; j < target; j++) {
-       toindex[i*target + j] = -1;
-     }
-   }
-  return success();
-}
-ERROR awkward_ListArray32_rpad_and_clip_axis1_64(int64_t* toindex, const int32_t* fromstarts, const int32_t* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_ListArray_rpad_and_clip_axis1<int64_t, int32_t>(toindex, fromstarts, fromstops, target, length, startsoffset, stopsoffset);
-}
-ERROR awkward_ListArrayU32_rpad_and_clip_axis1_64(int64_t* toindex, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_ListArray_rpad_and_clip_axis1<int64_t, uint32_t>(toindex, fromstarts, fromstops, target, length, startsoffset, stopsoffset);
-}
-ERROR awkward_ListArray64_rpad_and_clip_axis1_64(int64_t* toindex, const int64_t* fromstarts, const int64_t* fromstops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_ListArray_rpad_and_clip_axis1<int64_t, int64_t>(toindex, fromstarts, fromstops, target, length, startsoffset, stopsoffset);
 }
 
 template <typename T, typename C>
