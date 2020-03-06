@@ -37,7 +37,7 @@ class Dummy(awkward1.highlevel.Array):
 
 def test_string1():
     a = awkward1.Array(numpy.array([ord(x) for x in "hey there"], dtype=numpy.uint8))
-    a.__class__ = awkward1.behaviors.string.CharBehavior
+    a.__class__ = awkward1.behaviors.string.ByteBehavior
     assert str(a) == str(b"hey there")
     assert repr(a) == repr(b"hey there")
 

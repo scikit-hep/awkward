@@ -91,17 +91,17 @@ def tonumpy(array):
     elif isinstance(array, awkward1.layout.ArrayBuilder):
         return tonumpy(array.snapshot())
 
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "byte":
+        return tonumpy(array.__bytes__())
+
     elif awkward1.operations.describe.parameters(array).get("__array__") == "char":
-        if awkward1.operations.describe.parameters(array).get("encoding") is None:
-            return tonumpy(array.__bytes__())
-        else:
-            return tonumpy(array.__str__())
+        return tonumpy(array.__str__())
+
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "bytestring":
+        return numpy.array([awkward1.behaviors.string.ByteBehavior(array[i]).__bytes__() for i in range(len(array))])
 
     elif awkward1.operations.describe.parameters(array).get("__array__") == "string":
-        if awkward1.operations.describe.parameters(array.content).get("encoding") is None:
-            return numpy.array([awkward1.behaviors.string.CharBehavior(array[i]).__bytes__() for i in range(len(array))])
-        else:
-            return numpy.array([awkward1.behaviors.string.CharBehavior(array[i]).__str__() for i in range(len(array))])
+        return numpy.array([awkward1.behaviors.string.CharBehavior(array[i]).__str__() for i in range(len(array))])
 
     elif isinstance(array, awkward1._util.unknowntypes):
         return numpy.array([])
@@ -175,17 +175,17 @@ def tolist(array):
     elif isinstance(array, numpy.ndarray):
         return array.tolist()
 
+    elif isinstance(array, awkward1.behaviors.string.ByteBehavior):
+        return array.__bytes__()
+
     elif isinstance(array, awkward1.behaviors.string.CharBehavior):
-        if array.layout.parameters.get("encoding") is None:
-            return array.__bytes__()
-        else:
-            return array.__str__()
+        return array.__str__()
+
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "byte":
+        return awkward1.behaviors.string.CharBehavior(array).__bytes__()
 
     elif awkward1.operations.describe.parameters(array).get("__array__") == "char":
-        if awkward1.operations.describe.parameters(array).get("encoding") is None:
-            return awkward1.behaviors.string.CharBehavior(array).__bytes__()
-        else:
-            return awkward1.behaviors.string.CharBehavior(array).__str__()
+        return awkward1.behaviors.string.CharBehavior(array).__str__()
 
     elif isinstance(array, awkward1.highlevel.Array):
         return [tolist(x) for x in array]
