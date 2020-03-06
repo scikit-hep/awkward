@@ -206,12 +206,8 @@ namespace awkward {
     return array_.get()->validityerror(path + std::string(".array"));
   }
 
-  const Index64 Record::count64() const {
-    throw std::invalid_argument("Record cannot be counted because it is not an array");
-  }
-
-  const std::shared_ptr<Content> Record::count(int64_t axis) const {
-    throw std::invalid_argument("Record cannot be counted because it is not an array");
+  const std::shared_ptr<Content> Record::sizes(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: Record::sizes");
   }
 
   const std::shared_ptr<Content> Record::flatten(int64_t axis) const {

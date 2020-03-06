@@ -59,8 +59,7 @@ namespace awkward {
 
     // operations
     const std::string validityerror(const std::string& path) const override;
-    const Index64 count64() const override;
-    const std::shared_ptr<Content> count(int64_t axis) const override;
+    const std::shared_ptr<Content> sizes(int64_t axis, int64_t depth) const override;
     const std::shared_ptr<Content> flatten(int64_t axis) const override;
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
     const std::shared_ptr<Content> reverse_merge(const std::shared_ptr<Content>& other) const;

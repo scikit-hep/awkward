@@ -164,14 +164,8 @@ namespace awkward {
     return std::string();
   }
 
-  const Index64 EmptyArray::count64() const {
-    return Index64(0);
-  }
-
-  const std::shared_ptr<Content> EmptyArray::count(int64_t axis) const {
-    Index64 tocount = count64();
-
-    return std::make_shared<NumpyArray>(tocount);
+  const std::shared_ptr<Content> EmptyArray::sizes(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: EmptyArray::sizes");
   }
 
   const std::shared_ptr<Content> EmptyArray::flatten(int64_t axis) const {

@@ -455,35 +455,36 @@ namespace awkward {
     }
   }
 
-  template <typename T>
-  const Index64 ListOffsetArrayOf<T>::count64() const {
-    int64_t len = offsets_.length() - 1;
-    Index64 tocount(len);
-    struct Error err = util::awkward_listoffsetarray_count_64(
-      tocount.ptr().get(),
-      offsets_.ptr().get(),
-      len);
-    util::handle_error(err, classname(), identities_.get());
-    return tocount;
-  }
+  // template <typename T>
+  // const Index64 ListOffsetArrayOf<T>::count64() const {
+  //   int64_t len = offsets_.length() - 1;
+  //   Index64 tocount(len);
+  //   struct Error err = util::awkward_listoffsetarray_count_64(
+  //     tocount.ptr().get(),
+  //     offsets_.ptr().get(),
+  //     len);
+  //   util::handle_error(err, classname(), identities_.get());
+  //   return tocount;
+  // }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::count(int64_t axis) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == 0) {
-      int64_t len = offsets_.length() - 1;
-      IndexOf<T> tocount(len);
-      struct Error err = util::awkward_listoffsetarray_count(
-        tocount.ptr().get(),
-        offsets_.ptr().get(),
-        len);
-      util::handle_error(err, classname(), identities_.get());
-
-      return std::make_shared<NumpyArray>(tocount);
-    }
-    else {
-      return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), util::Parameters(), offsets_, content_.get()->count(toaxis - 1));
-    }
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::count(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: ListOffsetArray::sizes");
+    // int64_t toaxis = axis_wrap_if_negative(axis);
+    // if (toaxis == 0) {
+    //   int64_t len = offsets_.length() - 1;
+    //   IndexOf<T> tocount(len);
+    //   struct Error err = util::awkward_listoffsetarray_count(
+    //     tocount.ptr().get(),
+    //     offsets_.ptr().get(),
+    //     len);
+    //   util::handle_error(err, classname(), identities_.get());
+    //
+    //   return std::make_shared<NumpyArray>(tocount);
+    // }
+    // else {
+    //   return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), util::Parameters(), offsets_, content_.get()->count(toaxis - 1));
+    // }
   }
 
   template <typename T>

@@ -418,30 +418,32 @@ namespace awkward {
     return std::string();
   }
 
-  const Index64 RecordArray::count64() const {
-    int64_t len = (int64_t)contents_.size();
-    Index64 tocount(len);
-    int64_t indx(0);
-    for (auto content : contents_) {
-      Index64 toappend = content.get()->count64();
-      tocount.ptr().get()[indx++] = toappend.length();
-    }
-    return tocount;
-  }
+  // const Index64 RecordArray::count64() const {
+  //   int64_t len = (int64_t)contents_.size();
+  //   Index64 tocount(len);
+  //   int64_t indx(0);
+  //   for (auto content : contents_) {
+  //     Index64 toappend = content.get()->count64();
+  //     tocount.ptr().get()[indx++] = toappend.length();
+  //   }
+  //   return tocount;
+  // }
 
-  const std::shared_ptr<Content> RecordArray::count(int64_t axis) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
+  const std::shared_ptr<Content> RecordArray::sizes(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: RecordArray::sizes");
 
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->count(toaxis));
-    }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
-    }
-    else {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
-    }
+    // int64_t toaxis = axis_wrap_if_negative(axis);
+    //
+    // std::vector<std::shared_ptr<Content>> contents;
+    // for (auto content : contents_) {
+    //   contents.push_back(content.get()->count(toaxis));
+    // }
+    // if (contents.empty()) {
+    //   return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
+    // }
+    // else {
+    //   return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    // }
   }
 
   const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {

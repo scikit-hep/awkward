@@ -336,34 +336,36 @@ namespace awkward {
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
-  const Index64 RegularArray::count64() const {
-    int64_t len = length();
-    Index64 tocount(len);
-    struct Error err = awkward_regulararray_count(
-      tocount.ptr().get(),
-      size_,
-      len);
-    util::handle_error(err, classname(), identities_.get());
-    return tocount;
-  }
+  // const Index64 RegularArray::count64() const {
+  //   int64_t len = length();
+  //   Index64 tocount(len);
+  //   struct Error err = awkward_regulararray_count(
+  //     tocount.ptr().get(),
+  //     size_,
+  //     len);
+  //   util::handle_error(err, classname(), identities_.get());
+  //   return tocount;
+  // }
 
-  const std::shared_ptr<Content> RegularArray::count(int64_t axis) const {
-#if defined _MSC_VER || defined __i386__
-    std::string format = "q";
-#else
-    std::string format = "l";
-#endif
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == 0) {
-      Index64 tocount = count64();
-      std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
-      std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+  const std::shared_ptr<Content> RegularArray::sizes(int64_t axis, int64_t) const {
+    throw std::runtime_error("FIXME: RegularArray::sizes");
 
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
-    }
-    else {
-      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), content_.get()->count(toaxis - 1), size_);
-    }
+// #if defined _MSC_VER || defined __i386__
+//     std::string format = "q";
+// #else
+//     std::string format = "l";
+// #endif
+//     int64_t toaxis = axis_wrap_if_negative(axis);
+//     if (toaxis == 0) {
+//       Index64 tocount = count64();
+//       std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
+//       std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
+//
+//       return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+//     }
+//     else {
+//       return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), content_.get()->count(toaxis - 1), size_);
+//     }
   }
 
   const std::shared_ptr<Content> RegularArray::flatten(int64_t axis) const {

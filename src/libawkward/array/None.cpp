@@ -137,12 +137,8 @@ namespace awkward {
     throw std::runtime_error("undefined operatino: None::validityerror");
   }
 
-  const Index64 None::count64() const {
-    throw std::runtime_error("undefined operation: None::count64");
-  }
-
-  const std::shared_ptr<Content> None::count(int64_t axis) const {
-    throw std::runtime_error("undefined operation: None::count");
+  const std::shared_ptr<Content> None::sizes(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("undefined operation: None::sizes");
   }
 
   const std::shared_ptr<Content> None::flatten(int64_t axis) const {

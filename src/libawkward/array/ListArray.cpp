@@ -458,47 +458,48 @@ namespace awkward {
     }
   }
 
-  template <typename T>
-  const Index64 ListArrayOf<T>::count64() const {
-    int64_t lenstarts = starts_.length();
-    if (stops_.length() < lenstarts) {
-      util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
-    }
-    Index64 tocount(starts_.length());
-    struct Error err = util::awkward_listarray_count_64(
-      tocount.ptr().get(),
-      starts_.ptr().get(),
-      stops_.ptr().get(),
-      lenstarts,
-      starts_.offset(),
-      stops_.offset());
-    util::handle_error(err, classname(), identities_.get());
-    return tocount;
-  }
+  // template <typename T>
+  // const Index64 ListArrayOf<T>::count64() const {
+  //   int64_t lenstarts = starts_.length();
+  //   if (stops_.length() < lenstarts) {
+  //     util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+  //   }
+  //   Index64 tocount(starts_.length());
+  //   struct Error err = util::awkward_listarray_count_64(
+  //     tocount.ptr().get(),
+  //     starts_.ptr().get(),
+  //     stops_.ptr().get(),
+  //     lenstarts,
+  //     starts_.offset(),
+  //     stops_.offset());
+  //   util::handle_error(err, classname(), identities_.get());
+  //   return tocount;
+  // }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::count(int64_t axis) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == 0) {
-      int64_t lenstarts = starts_.length();
-      if (stops_.length() < lenstarts) {
-        util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
-      }
-      IndexOf<T> tocount(lenstarts);
-      struct Error err = util::awkward_listarray_count(
-        tocount.ptr().get(),
-        starts_.ptr().get(),
-        stops_.ptr().get(),
-        lenstarts,
-        starts_.offset(),
-        stops_.offset());
-      util::handle_error(err, classname(), identities_.get());
-
-      return std::make_shared<NumpyArray>(tocount);
-    }
-    else {
-      return std::make_shared<ListArrayOf<T>>(Identities::none(), util::Parameters(), starts_, stops_, content_.get()->count(toaxis - 1));
-    }
+  const std::shared_ptr<Content> ListArrayOf<T>::sizes(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: ListArray::sizes");
+    // int64_t toaxis = axis_wrap_if_negative(axis);
+    // if (toaxis == 0) {
+    //   int64_t lenstarts = starts_.length();
+    //   if (stops_.length() < lenstarts) {
+    //     util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
+    //   }
+    //   IndexOf<T> tocount(lenstarts);
+    //   struct Error err = util::awkward_listarray_count(
+    //     tocount.ptr().get(),
+    //     starts_.ptr().get(),
+    //     stops_.ptr().get(),
+    //     lenstarts,
+    //     starts_.offset(),
+    //     stops_.offset());
+    //   util::handle_error(err, classname(), identities_.get());
+    //
+    //   return std::make_shared<NumpyArray>(tocount);
+    // }
+    // else {
+    //   return std::make_shared<ListArrayOf<T>>(Identities::none(), util::Parameters(), starts_, stops_, content_.get()->count(toaxis - 1));
+    // }
   }
 
   template <typename T>

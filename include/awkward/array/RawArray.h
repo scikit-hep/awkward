@@ -421,12 +421,8 @@ namespace awkward {
       return std::string();
     }
 
-    const Index64 count64() const override {
-      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
-    }
-
-    const std::shared_ptr<Content> count(int64_t axis) const override {
-      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
+    const std::shared_ptr<Content> sizes(int64_t axis, int64_t depth) const override {
+      throw std::runtime_error("FIXME: RawArray::sizes");
     }
 
     const std::shared_ptr<Content> flatten(int64_t axis) const override {
