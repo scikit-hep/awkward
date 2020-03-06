@@ -107,51 +107,51 @@ def test_missing():
 def test_highlevel():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4]))
     index = awkward1.layout.Index64(numpy.array([2, 2, 0, -1, 4], dtype=numpy.int64))
-    array = awkward1.Array(awkward1.layout.IndexedOptionArray64(index, content))
+    array = awkward1.Array(awkward1.layout.IndexedOptionArray64(index, content), checkvalid=True)
     assert awkward1.tolist(array) == [2.2, 2.2, 0.0, None, 4.4]
     assert str(array) == "[2.2, 2.2, 0, None, 4.4]"
     assert repr(array) == "<Array [2.2, 2.2, 0, None, 4.4] type='5 * ?float64'>"
 
 def test_builder():
-    assert awkward1.tolist(awkward1.Array([1.1, 2.2, 3.3, None, 4.4])) == [1.1, 2.2, 3.3, None, 4.4]
-    assert awkward1.tolist(awkward1.Array([None, 2.2, 3.3, None, 4.4])) == [None, 2.2, 3.3, None, 4.4]
+    assert awkward1.tolist(awkward1.Array([1.1, 2.2, 3.3, None, 4.4], checkvalid=True)) == [1.1, 2.2, 3.3, None, 4.4]
+    assert awkward1.tolist(awkward1.Array([None, 2.2, 3.3, None, 4.4], checkvalid=True)) == [None, 2.2, 3.3, None, 4.4]
 
-    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], [], [None, 4.4]])) == [[1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], [], None, [None, 4.4]])) == [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], None, [], [None, 4.4]])) == [[1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], None, [], [None, 4.4]])) != [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], [], [None, 4.4]], checkvalid=True)) == [[1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], [], None, [None, 4.4]], checkvalid=True)) == [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], None, [], [None, 4.4]], checkvalid=True)) == [[1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[1.1, 2.2, 3.3], None, [], [None, 4.4]], checkvalid=True)) != [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], [], [None, 4.4]])) == [[None, 1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]])) == [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]])) == [[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]])) != [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], [], [None, 4.4]], checkvalid=True)) == [[None, 1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]], checkvalid=True)) == [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]], checkvalid=True)) == [[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]], checkvalid=True)) != [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], [], [None, 4.4]])) == [None, [1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], [], None, [None, 4.4]])) == [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], None, [], [None, 4.4]])) == [None, [1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], None, [], [None, 4.4]])) != [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], [], [None, 4.4]], checkvalid=True)) == [None, [1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], [], None, [None, 4.4]], checkvalid=True)) == [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], None, [], [None, 4.4]], checkvalid=True)) == [None, [1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array([None, [1.1, 2.2, 3.3], None, [], [None, 4.4]], checkvalid=True)) != [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert awkward1.tolist(awkward1.Array([None, None, None, None, None])) == [None, None, None, None, None]
-    assert awkward1.tolist(awkward1.Array([[None, None, None], [], [None, None]])) == [[None, None, None], [], [None, None]]
+    assert awkward1.tolist(awkward1.Array([None, None, None, None, None], checkvalid=True)) == [None, None, None, None, None]
+    assert awkward1.tolist(awkward1.Array([[None, None, None], [], [None, None]], checkvalid=True)) == [[None, None, None], [], [None, None]]
 
 def test_json():
-    assert awkward1.tolist(awkward1.Array("[1.1, 2.2, 3.3, null, 4.4]")) == [1.1, 2.2, 3.3, None, 4.4]
-    assert awkward1.tolist(awkward1.Array("[null, 2.2, 3.3, null, 4.4]")) == [None, 2.2, 3.3, None, 4.4]
+    assert awkward1.tolist(awkward1.Array("[1.1, 2.2, 3.3, null, 4.4]", checkvalid=True)) == [1.1, 2.2, 3.3, None, 4.4]
+    assert awkward1.tolist(awkward1.Array("[null, 2.2, 3.3, null, 4.4]", checkvalid=True)) == [None, 2.2, 3.3, None, 4.4]
 
-    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], [], [null, 4.4]]")) == [[1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], [], null, [null, 4.4]]")) == [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], null, [], [null, 4.4]]")) == [[1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], null, [], [null, 4.4]]")) != [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], [], [null, 4.4]]", checkvalid=True)) == [[1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], [], null, [null, 4.4]]", checkvalid=True)) == [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], null, [], [null, 4.4]]", checkvalid=True)) == [[1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[1.1, 2.2, 3.3], null, [], [null, 4.4]]", checkvalid=True)) != [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], [], [null, 4.4]]")) == [[None, 1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], [], null, [null, 4.4]]")) == [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], null, [], [null, 4.4]]")) == [[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], null, [], [null, 4.4]]")) != [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], [], [null, 4.4]]", checkvalid=True)) == [[None, 1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], [], null, [null, 4.4]]", checkvalid=True)) == [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], null, [], [null, 4.4]]", checkvalid=True)) == [[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[[null, 1.1, 2.2, 3.3], null, [], [null, 4.4]]", checkvalid=True)) != [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], [], [null, 4.4]]")) == [None, [1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], [], null, [null, 4.4]]")) == [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], null, [], [null, 4.4]]")) == [None, [1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], null, [], [null, 4.4]]")) != [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], [], [null, 4.4]]", checkvalid=True)) == [None, [1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], [], null, [null, 4.4]]", checkvalid=True)) == [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], null, [], [null, 4.4]]", checkvalid=True)) == [None, [1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert awkward1.tolist(awkward1.Array("[null, [1.1, 2.2, 3.3], null, [], [null, 4.4]]", checkvalid=True)) != [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert awkward1.tolist(awkward1.Array("[null, null, null, null, null]")) == [None, None, None, None, None]
-    assert awkward1.tolist(awkward1.Array("[[null, null, null], [], [null, null]]")) == [[None, None, None], [], [None, None]]
+    assert awkward1.tolist(awkward1.Array("[null, null, null, null, null]", checkvalid=True)) == [None, None, None, None, None]
+    assert awkward1.tolist(awkward1.Array("[[null, null, null], [], [null, null]]", checkvalid=True)) == [[None, None, None], [], [None, None]]

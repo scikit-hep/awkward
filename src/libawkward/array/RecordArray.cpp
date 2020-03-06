@@ -22,7 +22,7 @@ namespace awkward {
       , recordlookup_(recordlookup)
       , length_(length) {
     if (recordlookup_.get() != nullptr  &&  recordlookup_.get()->size() != contents_.size()) {
-      throw std::runtime_error("recordlookup and contents must have the same number of fields");
+      throw std::invalid_argument("recordlookup and contents must have the same number of fields");
     }
   }
 
@@ -401,6 +401,21 @@ namespace awkward {
 
   const std::vector<std::string> RecordArray::keys() const {
     return util::keys(recordlookup_, numfields());
+  }
+
+  const std::string RecordArray::validityerror(const std::string& path) const {
+    for (int64_t i = 0;  i < numfields();  i++) {
+      if (field(i).get()->length() < length_) {
+        return std::string("at ") + path + std::string(" (") + classname() + std::string("): len(field(") + std::to_string(i) + (")) < len(recordarray)");
+      }
+    }
+    for (int64_t i = 0;  i < numfields();  i++) {
+      std::string sub = field(i).get()->validityerror(path + std::string(".field(") + std::to_string(i) + (")"));
+      if (!sub.empty()) {
+        return sub;
+      }
+    }
+    return std::string();
   }
 
   const Index64 RecordArray::count64() const {

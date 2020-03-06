@@ -12,15 +12,15 @@ import awkward1
 numexpr = pytest.importorskip("numexpr")
 
 def test_numexpr():
-    a = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-    b = awkward1.Array([100, 200, 300])
+    a = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True)
+    b = awkward1.Array([100, 200, 300], checkvalid=True)
     assert awkward1.tolist(awkward1.numexpr.evaluate("a + b")) == [[101.1, 102.2, 103.3], [], [304.4, 305.5]]
     a = [1, 2, 3]
     assert awkward1.tolist(awkward1.numexpr.re_evaluate()) == [101, 202, 303]
 
 def test_broadcast_arrays():
-    a = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-    b = awkward1.Array([100, 200, 300])
+    a = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True)
+    b = awkward1.Array([100, 200, 300], checkvalid=True)
 
     out = awkward1.broadcast_arrays(a, b)
     assert awkward1.tolist(out[0]) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]

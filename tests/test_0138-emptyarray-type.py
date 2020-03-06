@@ -10,9 +10,9 @@ import numpy
 import awkward1
 
 def test():
-    empty1 = awkward1.Array(awkward1.layout.EmptyArray())
-    empty2 = awkward1.Array(awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 0, 0, 0], dtype=numpy.int64)), awkward1.layout.EmptyArray()))
-    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    empty1 = awkward1.Array(awkward1.layout.EmptyArray(), checkvalid=True)
+    empty2 = awkward1.Array(awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 0, 0, 0], dtype=numpy.int64)), awkward1.layout.EmptyArray()), checkvalid=True)
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True)
 
     awkward1.tonumpy(empty1).dtype.type is numpy.float64
 

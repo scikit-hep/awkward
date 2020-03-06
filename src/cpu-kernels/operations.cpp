@@ -682,3 +682,103 @@ ERROR awkward_unionarray8_U32_simplify_one_to8_64(int8_t* totags, int64_t* toind
 ERROR awkward_unionarray8_64_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base) {
   return awkward_unionarray_simplify_one<int8_t, int64_t, int8_t, int64_t>(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, towhich, fromwhich, length, base);
 }
+
+template <typename C>
+ERROR awkward_listarray_validity(const C* starts, int64_t startsoffset, const C* stops, int64_t stopsoffset, int64_t length, int64_t lencontent) {
+  for (int64_t i = 0;  i < length;  i++) {
+    C start = starts[startsoffset + i];
+    C stop = stops[stopsoffset + i];
+    if (start != stop) {
+      if (start > stop) {
+        return failure("start[i] > stop[i]", i, kSliceNone);
+      }
+      if (start < 0) {
+        return failure("start[i] < 0", i, kSliceNone);
+      }
+      if (stop > lencontent) {
+        return failure("stop[i] > len(content)", i, kSliceNone);
+      }
+    }
+  }
+  return success();
+}
+ERROR awkward_listarray32_validity(const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length, int64_t lencontent) {
+  return awkward_listarray_validity<int32_t>(starts, startsoffset, stops, stopsoffset, length, lencontent);
+}
+ERROR awkward_listarrayU32_validity(const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length, int64_t lencontent) {
+  return awkward_listarray_validity<uint32_t>(starts, startsoffset, stops, stopsoffset, length, lencontent);
+}
+ERROR awkward_listarray64_validity(const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length, int64_t lencontent) {
+  return awkward_listarray_validity<int64_t>(starts, startsoffset, stops, stopsoffset, length, lencontent);
+}
+
+template <typename C, bool ISOPTION>
+ERROR awkward_indexedarray_validity(const C* index, int64_t indexoffset, int64_t length, int64_t lencontent) {
+  for (int64_t i = 0;  i < length;  i++) {
+    C idx = index[indexoffset + i];
+    if (!ISOPTION) {
+      if (idx < 0) {
+        return failure("index[i] < 0", i, kSliceNone);
+      }
+    }
+    if (idx >= lencontent) {
+      return failure("index[i] >= len(content)", i, kSliceNone);
+    }
+  }
+  return success();
+}
+ERROR awkward_indexedarray32_validity(const int32_t* index, int64_t indexoffset, int64_t length, int64_t lencontent, bool isoption) {
+  if (isoption) {
+    return awkward_indexedarray_validity<int32_t, true>(index, indexoffset, length, lencontent);
+  }
+  else {
+    return awkward_indexedarray_validity<int32_t, false>(index, indexoffset, length, lencontent);
+  }
+}
+ERROR awkward_indexedarrayU32_validity(const uint32_t* index, int64_t indexoffset, int64_t length, int64_t lencontent, bool isoption) {
+  if (isoption) {
+    return awkward_indexedarray_validity<uint32_t, true>(index, indexoffset, length, lencontent);
+  }
+  else {
+    return awkward_indexedarray_validity<uint32_t, false>(index, indexoffset, length, lencontent);
+  }
+}
+ERROR awkward_indexedarray64_validity(const int64_t* index, int64_t indexoffset, int64_t length, int64_t lencontent, bool isoption) {
+  if (isoption) {
+    return awkward_indexedarray_validity<int64_t, true>(index, indexoffset, length, lencontent);
+  }
+  else {
+    return awkward_indexedarray_validity<int64_t, false>(index, indexoffset, length, lencontent);
+  }
+}
+
+template <typename T, typename I>
+ERROR awkward_unionarray_validity(const T* tags, int64_t tagsoffset, const I* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents) {
+  for (int64_t i = 0;  i < length;  i++) {
+    T tag = tags[tagsoffset + i];
+    I idx = index[indexoffset + i];
+    if (tag < 0) {
+      return failure("tags[i] < 0", i, kSliceNone);
+    }
+    if (idx < 0) {
+      return failure("index[i] < 0", i, kSliceNone);
+    }
+    if (tag >= numcontents) {
+      return failure("tags[i] >= len(contents)", i, kSliceNone);
+    }
+    int64_t lencontent = lencontents[tag];
+    if (idx >= lencontent) {
+      return failure("index[i] >= len(content[tags[i]])", i, kSliceNone);
+    }
+  }
+  return success();
+}
+ERROR awkward_unionarray8_32_validity(const int8_t* tags, int64_t tagsoffset, const int32_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents) {
+  return awkward_unionarray_validity<int8_t, int32_t>(tags, tagsoffset, index, indexoffset, length, numcontents, lencontents);
+}
+ERROR awkward_unionarray8_U32_validity(const int8_t* tags, int64_t tagsoffset, const uint32_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents) {
+  return awkward_unionarray_validity<int8_t, uint32_t>(tags, tagsoffset, index, indexoffset, length, numcontents, lencontents);
+}
+ERROR awkward_unionarray8_64_validity(const int8_t* tags, int64_t tagsoffset, const int64_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents) {
+  return awkward_unionarray_validity<int8_t, int64_t>(tags, tagsoffset, index, indexoffset, length, numcontents, lencontents);
+}
