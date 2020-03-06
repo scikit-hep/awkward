@@ -7,6 +7,10 @@ import numbers
 import re
 import sys
 import os
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 
 import numpy
 
@@ -27,84 +31,110 @@ listtypes = (awkward1.layout.RegularArray, awkward1.layout.ListArray32, awkward1
 
 recordtypes = (awkward1.layout.RecordArray,)
 
+class Behavior(Mapping):
+    def __init__(self, defaults, overrides):
+        self.defaults = defaults
+        if overrides is None:
+            self.overrides = {}
+        else:
+            self.overrides = overrides
+
+    def __getitem__(self, where):
+        try:
+            return self.overrides[where]
+        except KeyError:
+            try:
+                return self.defaults[where]
+            except KeyError:
+                return None
+
+    def items(self):
+        for n, x in self.overrides.items():
+            yield n, x
+        for n, x in self.defaults.items():
+            if n not in self.overrides:
+                yield n, x
+
+    def __iter__(self):
+        for n, x in self.items():
+            yield n
+
+    def __len__(self):
+        return len(set(self.defaults) | set(self.overrides))
+
 def arrayclass(layout, behavior):
     import awkward1
-    if behavior is None:
-        behavior = awkward1.behavior
+    behavior = Behavior(awkward1.behavior, behavior)
     arr = layout.parameter("__array__")
     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
-        cls = behavior.get(arr)
+        cls = behavior[arr]
         if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
             return cls
     rec = layout.parameter("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-        cls = behavior.get((".", rec))
+        cls = behavior[".", rec]
         if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
             return cls
     deeprec = layout.purelist_parameter("__record__")
     if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
-        cls = behavior.get(("*", deeprec))
+        cls = behavior["*", deeprec]
         if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
             return cls
     return awkward1.highlevel.Array
 
 def numba_array_typer(layouttype, behavior):
     import awkward1
-    if behavior is None:
-        behavior = awkward1.behavior
+    behavior = Behavior(awkward1.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
-        typer = behavior.get(("__numba_typer__", arr))
+        typer = behavior["__numba_typer__", arr]
         if callable(typer):
             return typer
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-        typer = behavior.get(("__numba_typer__", ".", rec))
+        typer = behavior["__numba_typer__", ".", rec]
         if callable(typer):
             return typer
     deeprec = layouttype.parameters.get("__record__")
     if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
-        typer = behavior.get(("__numba_typer__", "*", deeprec))
+        typer = behavior["__numba_typer__", "*", deeprec]
         if callable(typer):
             return typer
     return None
 
 def numba_array_lower(layouttype, behavior):
     import awkward1
-    if behavior is None:
-        behavior = awkward1.behavior
+    behavior = Behavior(awkward1.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
-        lower = behavior.get(("__numba_lower__", arr))
+        lower = behavior["__numba_lower__", arr]
         if callable(lower):
             return lower
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-        lower = behavior.get(("__numba_lower__", ".", rec))
+        lower = behavior["__numba_lower__", ".", rec]
         if callable(lower):
             return lower
     deeprec = layouttype.parameters.get("__record__")
     if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
-        lower = behavior.get(("__numba_lower__", "*", deeprec))
+        lower = behavior["__numba_lower__", "*", deeprec]
         if callable(lower):
             return lower
     return None
 
 def recordclass(layout, behavior):
     import awkward1
-    if behavior is None:
-        behavior = awkward1.behavior
+    behavior = Behavior(awkward1.behavior, behavior)
     rec = layout.parameter("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-        cls = behavior.get(rec)
+        cls = behavior[rec]
         if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Record):
             return cls
     return awkward1.highlevel.Record
 
 def typestrs(behavior):
     import awkward1
-    if behavior is None:
-        behavior = awkward1.behavior
+    behavior = Behavior(awkward1.behavior, behavior)
     out = {}
     for key, typestr in behavior.items():
         if isinstance(key, tuple) and len(key) == 2 and key[0] == "__typestr__" and (isinstance(key[1], str) or (py27 and isinstance(key[1], unicode))) and (isinstance(typestr, str) or (py27 and isinstance(typestr, unicode))):
@@ -113,59 +143,53 @@ def typestrs(behavior):
 
 def numba_record_typer(layouttype, behavior):
     import awkward1
-    if behavior is None:
-        behavior = awkward1.behavior
+    behavior = Behavior(awkward1.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-        typer = behavior.get(("__numba_typer__", rec))
+        typer = behavior["__numba_typer__", rec]
         if callable(typer):
             return typer
     return None
 
 def numba_record_lower(layouttype, behavior):
     import awkward1
-    if behavior is None:
-        behavior = awkward1.behavior
+    behavior = Behavior(awkward1.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-        lower = behavior.get(("__numba_lower__", rec))
+        lower = behavior["__numba_lower__", rec]
         if callable(lower):
             return lower
     return None
 
 def overload(behavior, signature):
     import awkward1
-    if behavior is None:
-        behavior = awkward1.behavior
-    return behavior.get(signature)
+    behavior = Behavior(awkward1.behavior, behavior)
+    return behavior[signature]
 
 def numba_attrs(layouttype, behavior):
     import awkward1
-    if behavior is None:
-        behavior = awkward1.behavior
+    behavior = Behavior(awkward1.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
         for key, typer in behavior.items():
             if isinstance(key, tuple) and len(key) == 3 and key[0] == "__numba_typer__" and key[1] == rec:
-                lower = behavior.get(("__numba_lower__", key[1], key[2]))
+                lower = behavior["__numba_lower__", key[1], key[2]]
                 yield key[2], typer, lower
 
 def numba_methods(layouttype, behavior):
     import awkward1
-    if behavior is None:
-        behavior = awkward1.behavior
+    behavior = Behavior(awkward1.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
         for key, typer in behavior.items():
             if isinstance(key, tuple) and len(key) == 4 and key[0] == "__numba_typer__" and key[1] == rec and key[3] == ():
-                lower = behavior.get(("__numba_lower__", key[1], key[2], ()))
+                lower = behavior["__numba_lower__", key[1], key[2], ()]
                 yield key[2], typer, lower
 
 def numba_unaryops(unaryop, left, behavior):
     import awkward1
     import awkward1._numba.layout
-    if behavior is None:
-        behavior = awkward1.behavior
+    behavior = Behavior(awkward1.behavior, behavior)
     done = False
 
     if isinstance(left, awkward1._numba.layout.ContentType):
@@ -176,14 +200,13 @@ def numba_unaryops(unaryop, left, behavior):
     if not done:
         for key, typer in behavior.items():
             if isinstance(key, tuple) and len(key) == 3 and key[0] == "__numba_typer__" and key[1] == unaryop and key[2] == left:
-                lower = behavior.get(("__numba_lower__", key[1], key[2]))
+                lower = behavior["__numba_lower__", key[1], key[2]]
                 yield typer, lower
 
 def numba_binops(binop, left, right, behavior):
     import awkward1
     import awkward1._numba.layout
-    if behavior is None:
-        behavior = awkward1.behavior
+    behavior = Behavior(awkward1.behavior, behavior)
     done = False
 
     if isinstance(left, awkward1._numba.layout.ContentType):
@@ -199,7 +222,7 @@ def numba_binops(binop, left, right, behavior):
     if not done:
         for key, typer in behavior.items():
             if isinstance(key, tuple) and len(key) == 4 and key[0] == "__numba_typer__" and key[1] == left and key[2] == binop and key[3] == right:
-                lower = behavior.get(("__numba_lower__", key[1], key[2], key[3]))
+                lower = behavior["__numba_lower__", key[1], key[2], key[3]]
                 yield typer, lower
 
 def behaviorof(*arrays):
@@ -467,18 +490,15 @@ def broadcast_and_apply(inputs, getfunction):
                     if not x.istuple:
                         istuple = False
 
-            if len(keys) == 0:
-                return awkward1.layout.RecordArray(length, istuple)
-            else:
-                outcontents = []
-                numoutputs = None
-                for key in keys:
-                    outcontents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs], depth))
-                    assert isinstance(outcontents[-1], tuple)
-                    if numoutputs is not None:
-                        assert numoutputs == len(outcontents[-1])
-                    numoutputs = len(outcontents[-1])
-                return tuple(awkward1.layout.RecordArray([x[i] for x in outcontents], keys) for i in range(numoutputs))
+            outcontents = []
+            numoutputs = None
+            for key in keys:
+                outcontents.append(apply([x if not isinstance(x, recordtypes) else x[key] for x in inputs], depth))
+                assert isinstance(outcontents[-1], tuple)
+                if numoutputs is not None:
+                    assert numoutputs == len(outcontents[-1])
+                numoutputs = len(outcontents[-1])
+            return tuple(awkward1.layout.RecordArray([x[i] for x in outcontents], None if istuple else keys, length) for i in range(numoutputs))
 
         else:
             raise ValueError("cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs)))
@@ -569,10 +589,7 @@ def recursively_apply(layout, getfunction):
         return awkward1.layout.IndexedOptionArray64(layout.index, recursively_apply(layout.content, getfunction), layout.identities, layout.parameters)
 
     elif isinstance(layout, awkward1.layout.RecordArray):
-        if len(layout.contents) == 0:
-            return awkward1.layout.RecordArray(len(layout), layout.recordlookup is None, layout.identities, layout.parameters)
-        else:
-            return awkward1.layout.RecordArray([recursively_apply(x, getfunction) for x in layout.contents], layout.recordlookup, layout.identities, layout.parameters)
+        return awkward1.layout.RecordArray([recursively_apply(x, getfunction) for x in layout.contents], layout.recordlookup, len(layout), layout.identities, layout.parameters)
 
     elif isinstance(layout, awkward1.layout.Record):
         return awkward1.layout.Record(recursively_apply(layout.array, getfunction), layout.at)

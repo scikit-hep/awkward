@@ -953,5 +953,44 @@ namespace awkward {
       return awkward_ListOffsetArray64_rpad_and_clip_axis1_64(toindex, fromoffsets, offsetsoffset, length, target);
     }
 
+    Error awkward_listarray_validity<int32_t>(const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length, int64_t lencontent) {
+      return awkward_listarray32_validity(starts, startsoffset, stops, stopsoffset, length, lencontent);
+    }
+    template <>
+    Error awkward_listarray_validity<uint32_t>(const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length, int64_t lencontent) {
+      return awkward_listarrayU32_validity(starts, startsoffset, stops, stopsoffset, length, lencontent);
+    }
+    template <>
+    Error awkward_listarray_validity<int64_t>(const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length, int64_t lencontent) {
+      return awkward_listarray64_validity(starts, startsoffset, stops, stopsoffset, length, lencontent);
+    }
+
+    template <>
+    Error awkward_indexedarray_validity<int32_t>(const int32_t* index, int64_t indexoffset, int64_t length, int64_t lencontent, bool isoption) {
+      return awkward_indexedarray32_validity(index, indexoffset, length, lencontent, isoption);
+    }
+    template <>
+    Error awkward_indexedarray_validity<uint32_t>(const uint32_t* index, int64_t indexoffset, int64_t length, int64_t lencontent, bool isoption) {
+      return awkward_indexedarrayU32_validity(index, indexoffset, length, lencontent, isoption);
+    }
+    template <>
+    Error awkward_indexedarray_validity<int64_t>(const int64_t* index, int64_t indexoffset, int64_t length, int64_t lencontent, bool isoption) {
+      return awkward_indexedarray64_validity(index, indexoffset, length, lencontent, isoption);
+    }
+
+    template <>
+    Error awkward_unionarray_validity<int8_t, int32_t>(const int8_t* tags, int64_t tagsoffset, const int32_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents) {
+      return awkward_unionarray8_32_validity(tags, tagsoffset, index, indexoffset, length, numcontents, lencontents);
+    }
+    template <>
+    Error awkward_unionarray_validity<int8_t, uint32_t>(const int8_t* tags, int64_t tagsoffset, const uint32_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents) {
+      return awkward_unionarray8_U32_validity(tags, tagsoffset, index, indexoffset, length, numcontents, lencontents);
+    }
+    template <>
+    Error awkward_unionarray_validity<int8_t, int64_t>(const int8_t* tags, int64_t tagsoffset, const int64_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents) {
+      return awkward_unionarray8_64_validity(tags, tagsoffset, index, indexoffset, length, numcontents, lencontents);
+    }
+
+
   }
 }

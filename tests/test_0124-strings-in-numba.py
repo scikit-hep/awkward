@@ -12,7 +12,7 @@ import awkward1
 numba = pytest.importorskip("numba")
 
 def test_string():
-    array = awkward1.Array(["one", "two", "three", "four", "five"])
+    array = awkward1.Array(["one", "two", "three", "four", "five"], checkvalid=True)
 
     @numba.njit
     def f1(x, i):

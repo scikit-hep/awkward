@@ -54,7 +54,7 @@ namespace awkward {
         , length_(length)
         , itemsize_(itemsize) {
       if (sizeof(T) != itemsize) {
-        throw std::runtime_error("sizeof(T) != itemsize");
+        throw std::invalid_argument("sizeof(T) != itemsize");
       }
     }
 
@@ -416,6 +416,10 @@ namespace awkward {
     }
 
     // operations
+
+    const std::string validityerror(const std::string& path) const override {
+      return std::string();
+    }
 
     const Index64 count64() const override {
       throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");

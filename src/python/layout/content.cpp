@@ -853,6 +853,16 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           })
 
           // operations
+          .def("validityerror", [](const T& self) -> py::object {
+            std::string out = self.validityerror(std::string("layout"));
+            if (out.empty()) {
+              return py::none();
+            }
+            else {
+              py::str pyvalue(PyUnicode_DecodeUTF8(out.data(), out.length(), "surrogateescape"));
+              return pyvalue;
+            }
+          })
           .def("sizes", [](const T& self, int64_t axis) -> py::object {
             return box(self.count(axis));
           }, py::arg("axis") = 0)
@@ -1108,32 +1118,33 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle
   ;
 }
 
-ak::RecordArray iterable_to_RecordArray(const py::iterable& contents, const py::object& keys, const py::object& identities, const py::object& parameters) {
+ak::RecordArray iterable_to_RecordArray(const py::iterable& contents, const py::object& keys, const py::object& length, const py::object& identities, const py::object& parameters) {
   std::vector<std::shared_ptr<ak::Content>> out;
   for (auto x : contents) {
     out.push_back(unbox_content(x));
   }
-  if (out.empty()) {
-    throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
-  }
-  if (keys.is(py::none())) {
-    return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, std::shared_ptr<ak::util::RecordLookup>(nullptr));
-  }
-  else {
-    std::shared_ptr<ak::util::RecordLookup> recordlookup = std::make_shared<ak::util::RecordLookup>();
+  std::shared_ptr<ak::util::RecordLookup> recordlookup(nullptr);
+  if (!keys.is(py::none())) {
+    recordlookup = std::make_shared<ak::util::RecordLookup>();
     for (auto x : keys.cast<py::iterable>()) {
       recordlookup.get()->push_back(x.cast<std::string>());
     }
     if (out.size() != recordlookup.get()->size()) {
       throw std::invalid_argument("if provided, 'keys' must have the same length as 'types'");
     }
+  }
+  if (length.is(py::none())) {
     return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, recordlookup);
+  }
+  else {
+    int64_t intlength = length.cast<int64_t>();
+    return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, recordlookup, intlength);
   }
 }
 
 py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_RecordArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content>(m, name.c_str())
-      .def(py::init([](const py::dict& contents, const py::object& identities, const py::object& parameters) -> ak::RecordArray {
+      .def(py::init([](const py::dict& contents, const py::object& length, const py::object& identities, const py::object& parameters) -> ak::RecordArray {
         std::shared_ptr<ak::util::RecordLookup> recordlookup = std::make_shared<ak::util::RecordLookup>();
         std::vector<std::shared_ptr<ak::Content>> out;
         for (auto x : contents) {
@@ -1141,15 +1152,15 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
           recordlookup.get()->push_back(key);
           out.push_back(unbox_content(x.second));
         }
-        if (out.empty()) {
-          throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
+        if (length.is(py::none())) {
+          return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, recordlookup);
         }
-        return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, recordlookup);
-      }), py::arg("contents"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
-      .def(py::init(&iterable_to_RecordArray), py::arg("contents"), py::arg("keys") = py::none(), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
-      .def(py::init([](int64_t length, bool istuple, const py::object& identities, const py::object& parameters) -> ak::RecordArray {
-        return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), length, istuple);
-      }), py::arg("length"), py::arg("istuple") = false, py::arg("identities") = py::none(), py::arg("parameters") = py::none())
+        else {
+          int64_t intlength = length.cast<int64_t>();
+          return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, recordlookup, intlength);
+        }
+      }), py::arg("contents"), py::arg("length") = py::none(), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
+      .def(py::init(&iterable_to_RecordArray), py::arg("contents"), py::arg("keys") = py::none(), py::arg("length") = py::none(), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
       .def_property_readonly("recordlookup", [](const ak::RecordArray& self) -> py::object {
         std::shared_ptr<ak::util::RecordLookup> recordlookup = self.recordlookup();

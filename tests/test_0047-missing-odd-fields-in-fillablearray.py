@@ -31,6 +31,6 @@ def test():
     ss = out.snapshot()
     assert awkward1.tolist(ss) == [{"x": 3, "extreme": {"pt": 3.3, "charge": -1, "iso": 100}}, {"x": 3, "extreme": None}]
 
-    assert awkward1.tolist(awkward1.Array([{"x": 3, "extreme": {"pt": 3.3, "charge": -1, "iso": 100}}, {"x": 3}])) == [{"x": 3, "extreme": {"pt": 3.3, "charge": -1, "iso": 100}}, {"x": 3, "extreme": None}]
+    assert awkward1.tolist(awkward1.Array([{"x": 3, "extreme": {"pt": 3.3, "charge": -1, "iso": 100}}, {"x": 3}], checkvalid=True)) == [{"x": 3, "extreme": {"pt": 3.3, "charge": -1, "iso": 100}}, {"x": 3, "extreme": None}]
 
-    assert awkward1.tolist(awkward1.Array([{"x": 3, "extreme": {"pt": 3.3, "charge": -1, "iso": 100}}, {"x": 3, "what": 3}])) == [{"x": 3, "extreme": {"pt": 3.3, "charge": -1, "iso": 100}, "what": None}, {"x": 3, "extreme": None, "what": 3}]
+    assert awkward1.tolist(awkward1.Array([{"x": 3, "extreme": {"pt": 3.3, "charge": -1, "iso": 100}}, {"x": 3, "what": 3}], checkvalid=True)) == [{"x": 3, "extreme": {"pt": 3.3, "charge": -1, "iso": 100}, "what": None}, {"x": 3, "extreme": None, "what": 3}]

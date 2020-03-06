@@ -40,6 +40,9 @@ namespace awkward {
     if (contents_.empty()) {
       throw std::invalid_argument("UnionArray must have at least one content");
     }
+    if (index.length() < tags.length()) {
+      throw std::invalid_argument("UnionArray index must not be shorter than its tags");
+    }
   }
 
   template <typename T, typename I>
@@ -778,6 +781,32 @@ namespace awkward {
       }
     }
     return out;
+  }
+
+  template <typename T, typename I>
+  const std::string UnionArrayOf<T, I>::validityerror(const std::string& path) const {
+    std::vector<int64_t> lencontents;
+    for (int64_t i = 0;  i < numcontents();  i++) {
+      lencontents.push_back(content(i).get()->length());
+    }
+    struct Error err = util::awkward_unionarray_validity<T, I>(
+      tags_.ptr().get(),
+      tags_.offset(),
+      index_.ptr().get(),
+      index_.offset(),
+      tags_.length(),
+      numcontents(),
+      lencontents.data());
+    if (err.str != nullptr) {
+      return std::string("at ") + path + std::string(" (") + classname() + std::string("): ") + std::string(err.str) + std::string(" at i=") + std::to_string(err.identity);
+    }
+    for (int64_t i = 0;  i < numcontents();  i++) {
+      std::string sub = content(i).get()->validityerror(path + std::string(".content(") + std::to_string(i) + (")"));
+      if (!sub.empty()) {
+        return sub;
+      }
+    }
+    return std::string();
   }
 
   template <typename T, typename I>

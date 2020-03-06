@@ -56,12 +56,7 @@ namespace awkward {
     for (size_t i = 0;  i < contents_.size();  i++) {
       contents.push_back(contents_[i].get()->snapshot());
     }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), length_, true);
-    }
-    else {
-      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents);
-    }
+    return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, std::shared_ptr<util::RecordLookup>(nullptr), length_);
   }
 
   bool TupleBuilder::active() const {

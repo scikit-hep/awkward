@@ -44,11 +44,11 @@ def test_dress():
 
     x = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     x.setparameter("__array__", "Dummy")
-    a = awkward1.Array(x, behavior=ns)
+    a = awkward1.Array(x, behavior=ns, checkvalid=True)
     assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
     x2 = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64)), awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"__array__": "Dummy"}))
-    a2 = awkward1.Array(x2, behavior=ns)
+    a2 = awkward1.Array(x2, behavior=ns, checkvalid=True)
     assert repr(a2) == "<Array [<Dummy [1.1, 2.2, 3.3]>, ... ] type='3 * var * float64[parameters={\"__ar...'>"
     assert repr(a2[0]) == "<Dummy [1.1, 2.2, 3.3]>"
     assert repr(a2[1]) == "<Dummy []>"

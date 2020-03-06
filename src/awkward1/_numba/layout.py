@@ -540,7 +540,7 @@ class RecordArrayType(ContentType):
                 layout = contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENTS + i], fields)
                 contents.append(layout)
             if len(contents) == 0:
-                return awkward1.layout.RecordArray(numpy.iinfo(numpy.int64).max, self.recordlookup is None, parameters=self.parameters)
+                return awkward1.layout.RecordArray(contents, self.recordlookup, numpy.iinfo(numpy.int64).max, parameters=self.parameters)
             else:
                 return awkward1.layout.RecordArray(contents, self.recordlookup, parameters=self.parameters)
 

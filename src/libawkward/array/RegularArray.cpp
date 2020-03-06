@@ -23,7 +23,11 @@ namespace awkward {
   RegularArray::RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<Content>& content, int64_t size)
       : Content(identities, parameters)
       , content_(content)
-      , size_(size) { }
+      , size_(size) {
+    if (size < 0) {
+      throw std::invalid_argument("RegularArray size must be non-negative");
+    }
+  }
 
   const std::shared_ptr<Content> RegularArray::content() const {
     return content_;
@@ -326,6 +330,10 @@ namespace awkward {
 
   const std::vector<std::string> RegularArray::keys() const {
     return content_.get()->keys();
+  }
+
+  const std::string RegularArray::validityerror(const std::string& path) const {
+    return content_.get()->validityerror(path + std::string(".content"));
   }
 
   const Index64 RegularArray::count64() const {

@@ -563,11 +563,11 @@ def test_UnionArray():
     content1 = awkward1.Array([
         [[  2,   3,   5,   7,  11],
          [ 13,  17,  19,  23,  29],
-         [ 31,  37,  41,  43,  47]]]).layout
+         [ 31,  37,  41,  43,  47]]], checkvalid=True).layout
     content2 = awkward1.Array([
         [[ 53,  59,  61,  67,  71],
          [ 73,  79,  83,  89,  97],
-         [101, 103, 107, 109, 113]]]).layout
+         [101, 103, 107, 109, 113]]], checkvalid=True).layout
 
     tags = awkward1.layout.Index8(numpy.array([0, 1], dtype=numpy.int8))
     index = awkward1.layout.Index64(numpy.array([0, 0], dtype=numpy.int64))
@@ -1039,7 +1039,7 @@ def test_highlevel():
          [13       ]],
         [],
         [[17, 19   ],
-         [23       ]]])
+         [23       ]]], checkvalid=True)
 
     assert awkward1.count(array) == 9
     assert awkward1.tolist(awkward1.count(array, axis=-1)) == [
@@ -1124,7 +1124,7 @@ def test_highlevel():
          [ True             ]],
         [],
         [[False,  True      ],
-         [ True             ]]])
+         [ True             ]]], checkvalid=True)
 
     assert awkward1.any(array) == True
     assert awkward1.tolist(awkward1.any(array, axis=-1)) == [
@@ -1147,8 +1147,8 @@ def test_highlevel():
         [False, True]]
 
 def test_nonreducers():
-    x = awkward1.Array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]])
-    y = awkward1.Array([[1.1, 2.2, 2.9, 4.0, 5.1], [0.9, 2.1, 3.2, 4.1, 4.9]])
+    x = awkward1.Array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]], checkvalid=True)
+    y = awkward1.Array([[1.1, 2.2, 2.9, 4.0, 5.1], [0.9, 2.1, 3.2, 4.1, 4.9]], checkvalid=True)
 
     assert awkward1.mean(y) == numpy.mean(awkward1.tonumpy(y))
     assert awkward1.var(y) == numpy.var(awkward1.tonumpy(y))
@@ -1182,5 +1182,5 @@ def test_nonreducers():
     assert awkward1.tolist(fit[1]) == pytest.approx({"intercept": 0.04000000000000228, "slope": 0.9999999999999994, "intercept_error": 1.0488088481701516, "slope_error": 0.31622776601683794})
 
 def test_softmax():
-    array = awkward1.Array([[numpy.log(2), numpy.log(2), numpy.log(4)], [], [numpy.log(5), numpy.log(5)]])
+    array = awkward1.Array([[numpy.log(2), numpy.log(2), numpy.log(4)], [], [numpy.log(5), numpy.log(5)]], checkvalid=True)
     assert awkward1.tolist(awkward1.softmax(array, axis=-1)) == [pytest.approx([0.25, 0.25, 0.5]), [], pytest.approx([0.5, 0.5])]

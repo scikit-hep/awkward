@@ -84,11 +84,8 @@ def test_listarray_numpyarray():
     starts  = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6]))
     stops   = awkward1.layout.Index64(numpy.array([3, 3, 5, 6]))
     content = awkward1.layout.NumpyArray(numpy.arange(10)*1.1)
-    array   = awkward1.layout.ListArray64(starts, stops, content)
-
     with pytest.raises(ValueError) as excinfo:
-        array[4]
-    assert str(excinfo.value) == "in ListArray64, len(stops) < len(starts)"
+        array   = awkward1.layout.ListArray64(starts, stops, content)
 
     starts  = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6]))
     stops   = awkward1.layout.Index64(numpy.array([3, 3, 5, 6, 10]))

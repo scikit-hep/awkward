@@ -662,6 +662,22 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::string IndexedArrayOf<T, ISOPTION>::validityerror(const std::string& path) const {
+    struct Error err = util::awkward_indexedarray_validity<T>(
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length(),
+      content_.get()->length(),
+      ISOPTION);
+    if (err.str == nullptr) {
+      return content_.get()->validityerror(path + std::string(".content"));
+    }
+    else {
+      return std::string("at ") + path + std::string(" (") + classname() + std::string("): ") + std::string(err.str) + std::string(" at i=") + std::to_string(err.identity);
+    }
+  }
+
+  template <typename T, bool ISOPTION>
   const Index64 IndexedArrayOf<T, ISOPTION>::count64() const {
     Index64 contentcount = content_.get()->count64();
     Index64 tocount(index_.length());

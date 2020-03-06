@@ -172,6 +172,15 @@ namespace awkward {
     template <typename T>
     ERROR awkward_ListOffsetArray_rpad_and_clip_axis1_64(int64_t* toindex, const T* fromoffsets, int64_t offsetsoffset, int64_t length, int64_t target);
 
+    template <typename T>
+    ERROR awkward_listarray_validity(const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length, int64_t lencontent);
+
+    template <typename T>
+    ERROR awkward_indexedarray_validity(const T* index, int64_t indexoffset, int64_t length, int64_t lencontent, bool isoption);
+
+    template <typename T, typename I>
+    ERROR awkward_unionarray_validity(const T* tags, int64_t tagsoffset, const I* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents);
+
   }
 }
 
