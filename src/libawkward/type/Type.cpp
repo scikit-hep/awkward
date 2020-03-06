@@ -26,6 +26,10 @@ namespace awkward {
     return parameters_;
   }
 
+  const std::string Type::typestr() const {
+    return typestr_;
+  }
+
   void Type::setparameters(const util::Parameters& parameters) {
     parameters_ = parameters;
   }
