@@ -210,7 +210,7 @@ std::shared_ptr<ak::Identities> unbox_identities_none(const py::handle& obj) {
 /////////////////////////////////////////////////////////////// slicing
 
 bool handle_as_numpy(const std::shared_ptr<ak::Content>& content) {
-  // if (content.get()->parameter_equals("__array__", "\"string\"")) {
+  // if (content.get()->parameter_equals("__array__", "\"string\"")  ||  content.get()->parameter_equals("__array__", "\"bytestring\"")) {
   //   return true;
   // }
   if (ak::NumpyArray* raw = dynamic_cast<ak::NumpyArray*>(content.get())) {
@@ -367,7 +367,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
       }
 
       if (content.get() != nullptr  &&  !handle_as_numpy(content)) {
-        if (content.get()->parameter_equals("__array__", "\"string\"")) {
+        if (content.get()->parameter_equals("__array__", "\"string\"")  ||  content.get()->parameter_equals("__array__", "\"bytestring\"")) {
           obj = box(content);
           obj = py::module::import("awkward1").attr("tolist")(obj);
           std::vector<std::string> strings;
