@@ -64,8 +64,7 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
 
     @property
     def type(self):
-        typestrs = {}
-        return awkward1.types.ArrayType(self._layout.type(typestrs), len(self._layout))
+        return awkward1.types.ArrayType(self._layout.type(awkward1._util.typestrs(self._behavior)), len(self._layout))
 
     def __len__(self):
         return len(self._layout)
@@ -207,8 +206,7 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
 
     @property
     def type(self):
-        typestrs = {}
-        return self._layout.type(typestrs)
+        return self._layout.type(awkward1._util.typestrs(self._behavior))
 
     def __getitem__(self, where):
         return awkward1._util.wrap(self._layout[where], self._behavior)
@@ -317,8 +315,7 @@ class ArrayBuilder(Sequence):
     @property
     def type(self):
         tmp = self._layout.snapshot()
-        typestrs = {}
-        return awkward1.types.ArrayType(tmp.type(typestrs), len(tmp))
+        return awkward1.types.ArrayType(tmp.type(awkward1._util.typestrs(self._behavior)), len(tmp))
 
     def __len__(self):
         return len(self._layout)
@@ -340,8 +337,7 @@ class ArrayBuilder(Sequence):
         value = self.__str__(limit_value=limit_value, snapshot=snapshot)
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
-        typestrs = {}
-        type = repr(str(snapshot.type(typestrs)))
+        type = repr(str(snapshot.type(awkward1._util.typestrs(self._behavior))))
         if len(type) > limit_type:
             type = type[:(limit_type - 4)] + "..." + type[-1]
 

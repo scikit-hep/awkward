@@ -64,16 +64,13 @@ namespace awkward {
   }
 
   bool Type::get_typestr(std::string& output) const {
-    auto typestr = parameters_.find(std::string("__typestr__"));
-    if (typestr != parameters_.end()) {
-      rj::Document mine;
-      mine.Parse<rj::kParseNanAndInfFlag>(typestr->second.c_str());
-      if (mine.IsString()) {
-        output = std::string(mine.GetString());
-        return true;
-      }
+    if (typestr_.empty()) {
+      return false;
     }
-    return false;
+    else {
+      output.assign(typestr_);
+      return true;
+    }
   }
 
   const std::string Type::string_parameters() const {

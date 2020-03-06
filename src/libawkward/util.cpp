@@ -167,6 +167,34 @@ namespace awkward {
     }
 
     std::string gettypestr(const Parameters& parameters, const std::map<std::string, std::string>& typestrs) {
+      auto item = parameters.find("__record__");
+      if (item != parameters.end()) {
+        std::string source = item->second;
+        rj::Document recname;
+        recname.Parse<rj::kParseNanAndInfFlag>(source.c_str());
+        if (recname.IsString()) {
+          std::string name = recname.GetString();
+          for (auto pair : typestrs) {
+            if (pair.first == name) {
+              return pair.second;
+            }
+          }
+        }
+      }
+      item = parameters.find("__array__");
+      if (item != parameters.end()) {
+        std::string source = item->second;
+        rj::Document recname;
+        recname.Parse<rj::kParseNanAndInfFlag>(source.c_str());
+        if (recname.IsString()) {
+          std::string name = recname.GetString();
+          for (auto pair : typestrs) {
+            if (pair.first == name) {
+              return pair.second;
+            }
+          }
+        }
+      }
       return std::string();
     }
 
