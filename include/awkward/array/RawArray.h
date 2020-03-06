@@ -422,7 +422,7 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> sizes(int64_t axis, int64_t depth) const override {
-      throw std::runtime_error("FIXME: RawArray::sizes");
+      throw std::invalid_argument("'axis' out of range for 'sizes'");
     }
 
     const std::shared_ptr<Content> flatten(int64_t axis) const override {

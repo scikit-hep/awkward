@@ -781,7 +781,29 @@ namespace awkward {
   // }
 
   const std::shared_ptr<Content> NumpyArray::sizes(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: NumpyArray::sizes");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    int64_t reps = 1;
+    int64_t size = length();
+    int64_t i = 0;
+    while (i < ndim() - 1  &&  depth < toaxis) {
+      reps *= shape_[(size_t)i];
+      size = shape_[(size_t)i + 1];
+      i++;
+      depth++;
+    }
+    if (i == 0  ||  toaxis > depth) {
+      throw std::invalid_argument("'axis' out of range for 'sizes'");
+    }
+
+    Index64 tosizes(reps);
+    struct Error err = awkward_regulararray_sizes_64(
+      tosizes.ptr().get(),
+      size,
+      reps);
+    util::handle_error(err, classname(), identities_.get());
+
+    return std::make_shared<NumpyArray>(tosizes);
+
 //     int64_t toaxis = axis_wrap_if_negative(axis);
 //     ssize_t offset = (ssize_t)toaxis;
 //     if (offset > ndim()) {

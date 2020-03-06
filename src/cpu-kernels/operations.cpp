@@ -56,12 +56,16 @@
 //   return awkward_listoffsetarray_count<int64_t, int64_t>(tocount, fromoffsets, lenoffsets);
 // }
 
-// ERROR awkward_regulararray_count(int64_t* tocount, int64_t size, int64_t length) {
-//   for (int64_t i = 0;  i < length;  i++) {
-//     tocount[i] = size;
-//   }
-//   return success();
-// }
+template <typename T>
+ERROR awkward_regulararray_sizes(T* tosizes, int64_t size, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    tosizes[i] = size;
+  }
+  return success();
+}
+ERROR awkward_regulararray_sizes_64(int64_t* tosizes, int64_t size, int64_t length) {
+  return awkward_regulararray_sizes<int64_t>(tosizes, size, length);
+}
 
 // template <typename C>
 // ERROR awkward_indexedarray_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const C* fromindex, int64_t lenindex, int64_t indexoffset) {

@@ -165,7 +165,13 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::sizes(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: EmptyArray::sizes");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (depth == toaxis) {
+      return std::make_shared<NumpyArray>(Index64(0));
+    }
+    else {
+      throw std::invalid_argument("'axis' out of range for 'sizes'");
+    }
   }
 
   const std::shared_ptr<Content> EmptyArray::flatten(int64_t axis) const {
