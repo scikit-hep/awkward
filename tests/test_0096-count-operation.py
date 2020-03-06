@@ -146,8 +146,8 @@ def test_count_regular_array():
     assert awkward1.tolist(regulararray.sizes(-2)) == [2, 2, 2]
 
 def test_count_union_array():
-    content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    content1 = awkward1.Array(["one", "two", "three", "four", "five"]).layout
+    content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True).layout
+    content1 = awkward1.Array(["one", "two", "three", "four", "five"], checkvalid=True).layout
     tags = awkward1.layout.Index8(numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
     index = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
     array = awkward1.layout.UnionArray8_32(tags, index, [content0, content1])

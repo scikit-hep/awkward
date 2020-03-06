@@ -853,8 +853,8 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           })
 
           // operations
-          .def("validity", [](const T& self) -> py::object {
-            std::string out = self.validity(std::string("layout"));
+          .def("validityerror", [](const T& self) -> py::object {
+            std::string out = self.validityerror(std::string("layout"));
             if (out.empty()) {
               return py::none();
             }

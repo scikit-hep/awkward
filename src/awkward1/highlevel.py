@@ -19,7 +19,7 @@ import awkward1.operations.convert
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin, Sequence):
-    def __init__(self, data, behavior=None):
+    def __init__(self, data, behavior=None, checkvalid=False):
         if isinstance(data, awkward1.layout.Content):
             layout = data
         elif isinstance(data, Array):
@@ -38,6 +38,8 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
 
         self.layout = layout
         self.behavior = behavior
+        if checkvalid:
+            awkward1.operations.describe.validityerror(self, exception=True)
 
     @property
     def layout(self):
@@ -169,7 +171,7 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
         return numba.typeof(self._numbaview)
 
 class Record(awkward1._numpy.NDArrayOperatorsMixin):
-    def __init__(self, data, behavior=None):
+    def __init__(self, data, behavior=None, checkvalid=False):
         # FIXME: more checks here
         layout = data
         if not isinstance(layout, awkward1.layout.Record):
@@ -180,6 +182,8 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
 
         self.layout = layout
         self.behavior = behavior
+        if checkvalid:
+            awkward1.operations.describe.validityerror(self, exception=True)
 
     @property
     def layout(self):

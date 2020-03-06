@@ -332,8 +332,8 @@ namespace awkward {
     return content_.get()->keys();
   }
 
-  const std::string RegularArray::validity(const std::string& path) const {
-    return content_.get()->validity(path + std::string(".content"));
+  const std::string RegularArray::validityerror(const std::string& path) const {
+    return content_.get()->validityerror(path + std::string(".content"));
   }
 
   const Index64 RegularArray::count64() const {

@@ -56,7 +56,7 @@ namespace awkward {
     virtual const std::vector<std::string> keys() const = 0;
 
     // operations
-    virtual const std::string validity(const std::string& path) const = 0;
+    virtual const std::string validityerror(const std::string& path) const = 0;
     virtual const Index64 count64() const = 0;
     virtual const std::shared_ptr<Content> count(int64_t axis) const = 0;
     virtual const std::shared_ptr<Content> flatten(int64_t axis) const = 0;

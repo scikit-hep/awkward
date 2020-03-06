@@ -403,14 +403,14 @@ namespace awkward {
     return util::keys(recordlookup_, numfields());
   }
 
-  const std::string RecordArray::validity(const std::string& path) const {
+  const std::string RecordArray::validityerror(const std::string& path) const {
     for (int64_t i = 0;  i < numfields();  i++) {
       if (field(i).get()->length() < length_) {
         return std::string("at ") + path + std::string(" (") + classname() + std::string("): len(field(") + std::to_string(i) + (")) < len(recordarray)");
       }
     }
     for (int64_t i = 0;  i < numfields();  i++) {
-      std::string sub = field(i).get()->validity(path + std::string(".field(") + std::to_string(i) + (")"));
+      std::string sub = field(i).get()->validityerror(path + std::string(".field(") + std::to_string(i) + (")"));
       if (!sub.empty()) {
         return sub;
       }

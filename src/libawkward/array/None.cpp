@@ -133,8 +133,8 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::keys");
   }
 
-  const std::string None::validity(const std::string& path) const {
-    throw std::runtime_error("undefined operatino: None::validity");
+  const std::string None::validityerror(const std::string& path) const {
+    throw std::runtime_error("undefined operatino: None::validityerror");
   }
 
   const Index64 None::count64() const {

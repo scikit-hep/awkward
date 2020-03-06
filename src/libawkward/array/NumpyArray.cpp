@@ -744,7 +744,7 @@ namespace awkward {
     return std::vector<std::string>();
   }
 
-  const std::string NumpyArray::validity(const std::string& path) const {
+  const std::string NumpyArray::validityerror(const std::string& path) const {
     if (shape_.empty()) {
       return std::string("at ") + path + std::string(" (") + classname() + std::string("): shape is zero-dimensional");
     }

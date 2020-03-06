@@ -784,7 +784,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::string UnionArrayOf<T, I>::validity(const std::string& path) const {
+  const std::string UnionArrayOf<T, I>::validityerror(const std::string& path) const {
     std::vector<int64_t> lencontents;
     for (int64_t i = 0;  i < numcontents();  i++) {
       lencontents.push_back(content(i).get()->length());
@@ -798,10 +798,10 @@ namespace awkward {
       numcontents(),
       lencontents.data());
     if (err.str != nullptr) {
-      return std::string("at ") + path + std::string(" (") + classname() + std::string("): ") + std::string(err.str) + std::string("at i=") + std::to_string(err.identity);
+      return std::string("at ") + path + std::string(" (") + classname() + std::string("): ") + std::string(err.str) + std::string(" at i=") + std::to_string(err.identity);
     }
     for (int64_t i = 0;  i < numcontents();  i++) {
-      std::string sub = content(i).get()->validity(path + std::string(".content(") + std::to_string(i) + (")"));
+      std::string sub = content(i).get()->validityerror(path + std::string(".content(") + std::to_string(i) + (")"));
       if (!sub.empty()) {
         return sub;
       }

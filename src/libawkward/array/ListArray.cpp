@@ -442,7 +442,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::string ListArrayOf<T>::validity(const std::string& path) const {
+  const std::string ListArrayOf<T>::validityerror(const std::string& path) const {
     struct Error err = util::awkward_listarray_validity<T>(
       starts_.ptr().get(),
       starts_.offset(),
@@ -451,10 +451,10 @@ namespace awkward {
       starts_.length(),
       content_.get()->length());
     if (err.str == nullptr) {
-      return content_.get()->validity(path + std::string(".content"));
+      return content_.get()->validityerror(path + std::string(".content"));
     }
     else {
-      return std::string("at ") + path + std::string(" (") + classname() + std::string("): ") + std::string(err.str) + std::string("at i=") + std::to_string(err.identity);
+      return std::string("at ") + path + std::string(" (") + classname() + std::string("): ") + std::string(err.str) + std::string(" at i=") + std::to_string(err.identity);
     }
   }
 

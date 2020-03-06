@@ -417,7 +417,7 @@ namespace awkward {
 
     // operations
 
-    const std::string validity(const std::string& path) const override {
+    const std::string validityerror(const std::string& path) const override {
       return std::string();
     }
 

@@ -202,8 +202,8 @@ namespace awkward {
     return array_.get()->keys();
   }
 
-  const std::string Record::validity(const std::string& path) const {
-    return array_.get()->validity(path + std::string(".array"));
+  const std::string Record::validityerror(const std::string& path) const {
+    return array_.get()->validityerror(path + std::string(".array"));
   }
 
   const Index64 Record::count64() const {

@@ -160,7 +160,7 @@ namespace awkward {
     return std::vector<std::string>();
   }
 
-  const std::string EmptyArray::validity(const std::string& path) const {
+  const std::string EmptyArray::validityerror(const std::string& path) const {
     return std::string();
   }
 

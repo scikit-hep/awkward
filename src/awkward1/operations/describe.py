@@ -40,9 +40,6 @@ def typeof(array):
     elif isinstance(array, (numpy.int8, numpy.int16, numpy.int32, numpy.int64, numpy.uint8, numpy.uint16, numpy.uint32, numpy.uint64, numpy.float32, numpy.float64)):
         return awkward1.types.PrimitiveType(typeof.dtype2primitive[array.dtype.type])
 
-    elif isinstance(array, numpy.generic):
-        raise ValueError("cannot describe {0} as a PrimitiveType".format(type(array)))
-
     elif isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record, awkward1.highlevel.ArrayBuilder)):
         return array.type
 
@@ -79,5 +76,29 @@ typeof.dtype2primitive = {
     numpy.float32: "float32",
     numpy.float64: "float64",
 }
+
+def validityerror(array, exception=False):
+    if isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
+        return validityerror(array.layout, exception=exception)
+
+    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
+        return validityerror(array.snapshot().layout, exception=exception)
+
+    elif isinstance(array, (awkward1.layout.Content, awkward1.layout.Record)):
+        out = array.validityerror()
+        if out is not None and exception:
+            raise ValueError(out)
+        else:
+            return out
+
+    elif isinstance(array, awkward1.layout.ArrayBuilder):
+        return validityerror(array.snapshot(), exception=exception)
+
+    else:
+        raise TypeError("not an awkward array: {0}".format(repr(array)))
+
+def isvalid(array, exception=False):
+    out = validityerror(array, exception=exception)
+    return out is None
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numbers", "numpy", "awkward1")]
