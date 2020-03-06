@@ -85,7 +85,7 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
         self._numbaview = None
 
     def __getattr__(self, where):
-        if where in dir(super(Array, self)):
+        if where in dir(type(self)):
             return super(Array, self).__getattribute__(where)
         else:
             if where in self._layout.keys():
@@ -222,7 +222,7 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
         self._numbaview = None
 
     def __getattr__(self, where):
-        if where in dir(super(Record, self)):
+        if where in dir(type(self)):
             return super(Record, self).__getattribute__(where)
         else:
             if where in self._layout.keys():
