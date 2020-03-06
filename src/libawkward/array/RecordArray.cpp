@@ -403,6 +403,10 @@ namespace awkward {
     return util::keys(recordlookup_, numfields());
   }
 
+  const std::string RecordArray::validity(const std::string& path) const {
+    throw std::runtime_error("FIXME: RecordArray::validity");
+  }
+
   const Index64 RecordArray::count64() const {
     int64_t len = (int64_t)contents_.size();
     Index64 tocount(len);

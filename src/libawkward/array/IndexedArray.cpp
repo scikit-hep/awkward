@@ -662,6 +662,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::string IndexedArrayOf<T, ISOPTION>::validity(const std::string& path) const {
+    throw std::runtime_error("FIXME: IndexedArray::validity");
+  }
+
+  template <typename T, bool ISOPTION>
   const Index64 IndexedArrayOf<T, ISOPTION>::count64() const {
     Index64 contentcount = content_.get()->count64();
     Index64 tocount(index_.length());

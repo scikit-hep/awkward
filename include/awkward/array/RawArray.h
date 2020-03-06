@@ -417,6 +417,10 @@ namespace awkward {
 
     // operations
 
+    const std::string validity(const std::string& path) const override {
+      throw std::runtime_error("FIXME: RawArray::validity");
+    }
+
     const Index64 count64() const override {
       throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
     }

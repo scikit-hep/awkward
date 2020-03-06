@@ -744,6 +744,10 @@ namespace awkward {
     return std::vector<std::string>();
   }
 
+  const std::string NumpyArray::validity(const std::string& path) const {
+    throw std::runtime_error("FIXME: NumpyArray::validity");
+  }
+
   const Index64 NumpyArray::count64() const {
     if (ndim() < 1) {
       throw std::invalid_argument(std::string("NumpyArray cannot be counted because it has ") + std::to_string(ndim()) + std::string(" dimensions"));

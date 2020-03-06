@@ -781,6 +781,11 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::string UnionArrayOf<T, I>::validity(const std::string& path) const {
+    throw std::runtime_error("FIXME: UnionArray::validity");
+  }
+
+  template <typename T, typename I>
   const Index64 UnionArrayOf<T, I>::count64() const {
     int64_t len = contents_.size();
     Index64 tocount(len);

@@ -433,6 +433,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::string ListOffsetArrayOf<T>::validity(const std::string& path) const {
+    throw std::runtime_error("FIXME: ListOffsetArray::validity");
+  }
+
+  template <typename T>
   const Index64 ListOffsetArrayOf<T>::count64() const {
     int64_t len = offsets_.length() - 1;
     Index64 tocount(len);

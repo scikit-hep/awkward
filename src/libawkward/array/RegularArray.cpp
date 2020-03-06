@@ -328,6 +328,10 @@ namespace awkward {
     return content_.get()->keys();
   }
 
+  const std::string RegularArray::validity(const std::string& path) const {
+    throw std::runtime_error("FIXME: RegularArray::validity");
+  }
+
   const Index64 RegularArray::count64() const {
     int64_t len = length();
     Index64 tocount(len);

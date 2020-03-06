@@ -160,6 +160,10 @@ namespace awkward {
     return std::vector<std::string>();
   }
 
+  const std::string EmptyArray::validity(const std::string& path) const {
+    throw std::runtime_error("FIXME: EmptyArray::validity");
+  }
+
   const Index64 EmptyArray::count64() const {
     return Index64(0);
   }

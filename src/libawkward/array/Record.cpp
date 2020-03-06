@@ -198,6 +198,10 @@ namespace awkward {
     return array_.get()->keys();
   }
 
+  const std::string Record::validity(const std::string& path) const {
+    throw std::runtime_error("FIXME: Record::validity");
+  }
+
   const Index64 Record::count64() const {
     throw std::invalid_argument("Record cannot be counted because it is not an array");
   }

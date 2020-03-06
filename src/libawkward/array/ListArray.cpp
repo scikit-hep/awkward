@@ -438,6 +438,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::string ListArrayOf<T>::validity(const std::string& path) const {
+    throw std::runtime_error("FIXME: ListArray::validity");
+  }
+
+  template <typename T>
   const Index64 ListArrayOf<T>::count64() const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {

@@ -853,6 +853,16 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           })
 
           // operations
+          .def("validity", [](const T& self) -> py::object {
+            std::string out = self.validity(std::string("layout"));
+            if (out.empty()) {
+              return py::none();
+            }
+            else {
+              py::str pyvalue(PyUnicode_DecodeUTF8(out.data(), out.length(), "surrogateescape"));
+              return pyvalue;
+            }
+          })
           .def("sizes", [](const T& self, int64_t axis) -> py::object {
             return box(self.count(axis));
           }, py::arg("axis") = 0)
