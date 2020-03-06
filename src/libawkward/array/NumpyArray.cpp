@@ -785,13 +785,13 @@ namespace awkward {
     int64_t reps = 1;
     int64_t size = length();
     int64_t i = 0;
-    while (i < ndim() - 1  &&  depth < toaxis) {
+    while (i < ndim() - 1  &&  depth <= toaxis) {
       reps *= shape_[(size_t)i];
       size = shape_[(size_t)i + 1];
       i++;
       depth++;
     }
-    if (i == 0  ||  toaxis > depth) {
+    if (toaxis >= depth) {
       throw std::invalid_argument("'axis' out of range for 'sizes'");
     }
 
