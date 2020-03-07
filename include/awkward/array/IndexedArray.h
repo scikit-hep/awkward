@@ -79,6 +79,8 @@ namespace awkward {
     template <typename S>
     const std::shared_ptr<Content> getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const;
 
+    const std::pair<Index64, IndexOf<T>> nextcarry_outindex(int64_t& numnull) const;
+
   private:
     const IndexOf<T> index_;
     const std::shared_ptr<Content> content_;

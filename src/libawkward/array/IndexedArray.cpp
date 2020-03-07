@@ -531,23 +531,9 @@ namespace awkward {
     else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())  ||  dynamic_cast<SliceJagged64*>(head.get())) {
       if (ISOPTION) {
         int64_t numnull;
-        struct Error err1 = util::awkward_indexedarray_numnull<T>(
-          &numnull,
-          index_.ptr().get(),
-          index_.offset(),
-          index_.length());
-        util::handle_error(err1, classname(), identities_.get());
-
-        Index64 nextcarry(length() - numnull);
-        IndexOf<T> outindex(length());
-        struct Error err2 = util::awkward_indexedarray_getitem_nextcarry_outindex_64<T>(
-          nextcarry.ptr().get(),
-          outindex.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
-          index_.length(),
-          content_.get()->length());
-        util::handle_error(err2, classname(), identities_.get());
+        std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
+        Index64 nextcarry = pair.first;
+        IndexOf<T> outindex = pair.second;
 
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
         std::shared_ptr<Content> out = next.get()->getitem_next(head, tail, advanced);
@@ -688,23 +674,9 @@ namespace awkward {
     }
     else if (ISOPTION) {
       int64_t numnull;
-      struct Error err1 = util::awkward_indexedarray_numnull<T>(
-        &numnull,
-        index_.ptr().get(),
-        index_.offset(),
-        index_.length());
-      util::handle_error(err1, classname(), identities_.get());
-
-      Index64 nextcarry(length() - numnull);
-      IndexOf<T> outindex(length());
-      struct Error err2 = util::awkward_indexedarray_getitem_nextcarry_outindex_64<T>(
-        nextcarry.ptr().get(),
-        outindex.ptr().get(),
-        index_.ptr().get(),
-        index_.offset(),
-        index_.length(),
-        content_.get()->length());
-      util::handle_error(err2, classname(), identities_.get());
+      std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
+      Index64 nextcarry = pair.first;
+      IndexOf<T> outindex = pair.second;
 
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> out = next.get()->sizes(axis, depth);
@@ -1105,23 +1077,9 @@ namespace awkward {
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
     if (ISOPTION) {
       int64_t numnull;
-      struct Error err1 = util::awkward_indexedarray_numnull<T>(
-        &numnull,
-        index_.ptr().get(),
-        index_.offset(),
-        index_.length());
-      util::handle_error(err1, classname(), identities_.get());
-
-      Index64 nextcarry(length() - numnull);
-      IndexOf<T> outindex(length());
-      struct Error err2 = util::awkward_indexedarray_getitem_nextcarry_outindex_64<T>(
-        nextcarry.ptr().get(),
-        outindex.ptr().get(),
-        index_.ptr().get(),
-        index_.offset(),
-        index_.length(),
-        content_.get()->length());
-      util::handle_error(err2, classname(), identities_.get());
+      std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
+      Index64 nextcarry = pair.first;
+      IndexOf<T> outindex = pair.second;
 
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> out = next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
@@ -1141,6 +1099,29 @@ namespace awkward {
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
       return next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
     }
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::pair<Index64, IndexOf<T>> IndexedArrayOf<T, ISOPTION>::nextcarry_outindex(int64_t& numnull) const {
+    struct Error err1 = util::awkward_indexedarray_numnull<T>(
+      &numnull,
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length());
+    util::handle_error(err1, classname(), identities_.get());
+
+    Index64 nextcarry(length() - numnull);
+    IndexOf<T> outindex(length());
+    struct Error err2 = util::awkward_indexedarray_getitem_nextcarry_outindex_64<T>(
+      nextcarry.ptr().get(),
+      outindex.ptr().get(),
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length(),
+      content_.get()->length());
+    util::handle_error(err2, classname(), identities_.get());
+
+    return std::pair<Index64, IndexOf<T>>(nextcarry, outindex);
   }
 
   template class IndexedArrayOf<int32_t, false>;
