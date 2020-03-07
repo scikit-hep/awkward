@@ -166,11 +166,13 @@ namespace awkward {
 
   const std::shared_ptr<Content> EmptyArray::sizes(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (depth == toaxis) {
-      return std::make_shared<NumpyArray>(Index64(0));
+    if (toaxis == depth) {
+      Index64 out(1);
+      out.ptr().get()[0] = length();
+      return NumpyArray(out).getitem_at_nowrap(0);
     }
     else {
-      throw std::invalid_argument("'axis' out of range for 'sizes'");
+      return std::make_shared<NumpyArray>(Index64(0));
     }
   }
 
