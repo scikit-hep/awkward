@@ -687,15 +687,29 @@ namespace awkward {
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     else if (ISOPTION) {
+      int64_t numnull;
+      struct Error err1 = util::awkward_indexedarray_numnull<T>(
+        &numnull,
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length());
+      util::handle_error(err1, classname(), identities_.get());
 
-      std::cout << "bytemask" << std::endl;
-      std::cout << bytemask().tostring() << std::endl << std::endl;
-      std::cout << "project" << std::endl;
-      std::cout << project().get()->tostring() << std::endl << std::endl;
-      std::cout << "project(bytemask)" << std::endl;
-      std::cout << project(bytemask()).get()->tostring() << std::endl << std::endl;
+      Index64 nextcarry(length() - numnull);
+      IndexOf<T> outindex(length());
+      struct Error err2 = util::awkward_indexedarray_getitem_nextcarry_outindex_64<T>(
+        nextcarry.ptr().get(),
+        outindex.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        index_.length(),
+        content_.get()->length());
+      util::handle_error(err2, classname(), identities_.get());
 
-      throw std::runtime_error("FIXME: IndexedArray::sizes");
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      std::shared_ptr<Content> out = next.get()->sizes(axis, depth);
+      IndexedArrayOf<T, ISOPTION> out2(Identities::none(), util::Parameters(), outindex, out);
+      return out2.simplify();
     }
     else {
       return project().get()->sizes(axis, depth);

@@ -119,14 +119,11 @@ def test_indexedoptionarray():
          [[ 6,  7], [ 8,  9], [10, 11]],
          [[12, 13], [14, 15], [16, 17]]]]
 
-    print(array.sizes(1))
-    raise Exception
+    assert awkward1.tolist(array.sizes(0)) == 6
+    assert awkward1.tolist(array.sizes(1)) == [2, None, 2, 0, None, 3]
+    assert awkward1.tolist(array.sizes(2)) == [[3, 3], None, [3, 3], [], None, [3, 3, 3]]
+    assert awkward1.tolist(array.sizes(3)) == [[[2, 2, 2], [2, 2, 2]], None, [[2, 2, 2], [2, 2, 2]], [], None, [[2, 2, 2], [2, 2, 2], [2, 2, 2]]]
 
-    # assert awkward1.tolist(array.sizes(0)) == 4
-    # assert awkward1.tolist(array.sizes(1)) == [2, 2, 0, 3]
-    # assert awkward1.tolist(array.sizes(2)) == [[3, 3], [3, 3], [], [3, 3, 3]]
-    # assert awkward1.tolist(array.sizes(3)) == [[[2, 2, 2], [2, 2, 2]], [[2, 2, 2], [2, 2, 2]], [], [[2, 2, 2], [2, 2, 2], [2, 2, 2]]]
-    #
-    # with pytest.raises(ValueError) as err:
-    #     array.sizes(4)
-    # assert str(err.value) == "'axis' out of range for 'sizes'"
+    with pytest.raises(ValueError) as err:
+        array.sizes(4)
+    assert str(err.value) == "'axis' out of range for 'sizes'"
