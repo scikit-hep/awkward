@@ -141,3 +141,15 @@ def test_recordarray():
     assert awkward1.tolist(array.sizes(0)) == {"x": 4, "y": 4}
     assert awkward1.tolist(array.sizes(1)) == [{"x": 1, "y": 0}, {"x": 1, "y": 1}, {"x": 1, "y": 2}, {"x": 1, "y": 3}]
     assert awkward1.tolist(array.sizes(1)[2]) == {"x": 1, "y": 2}
+
+def test_unionarray():
+    content1 = awkward1.Array([[], [1], [2, 2], [3, 3, 3]]).layout
+    content2 = awkward1.Array([[3.3, 3.3, 3.3], [2.2, 2.2], [1.1], []]).layout
+    tags = awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 1, 0, 1], dtype=numpy.int8))
+    index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=numpy.int64))
+    array = awkward1.layout.UnionArray8_64(tags, index, [content1, content2])
+    assert awkward1.tolist(array) == [[], [3.3, 3.3, 3.3], [1], [2.2, 2.2], [2, 2], [1.1], [3, 3, 3], []]
+
+    assert array.sizes(0) == 8
+    assert isinstance(array.sizes(1), awkward1.layout.NumpyArray)
+    assert awkward1.tolist(array.sizes(1)) == [0, 3, 1, 2, 2, 1, 3, 0]

@@ -809,30 +809,22 @@ namespace awkward {
     return std::string();
   }
 
-  // template <typename T, typename I>
-  // const Index64 UnionArrayOf<T, I>::count64() const {
-  //   int64_t len = contents_.size();
-  //   Index64 tocount(len);
-  //   int64_t indx(0);
-  //   for (auto content : contents_) {
-  //     Index64 toappend = content.get()->count64();
-  //     tocount.ptr().get()[indx++] = toappend.length();
-  //   }
-  //   return tocount;
-  // }
-
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::sizes(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: UnionArray::sizes");
-
-    // int64_t toaxis = axis_wrap_if_negative(axis);
-    //
-    // std::vector<std::shared_ptr<Content>> contents;
-    // for (auto content : contents_) {
-    //   contents.emplace_back(content.get()->count(toaxis));
-    // }
-    // UnionArrayOf<T, I>unionarray(Identities::none(), util::Parameters(), tags_, index_, contents);
-    // return unionarray.simplify(false);
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      Index64 out(1);
+      out.ptr().get()[0] = length();
+      return NumpyArray(out).getitem_at_nowrap(0);
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->sizes(axis, depth));
+      }
+      UnionArrayOf<T, I> out(Identities::none(), util::Parameters(), tags_, index_, contents);
+      return out.simplify(false);
+    }
   }
 
   template <typename T, typename I>
