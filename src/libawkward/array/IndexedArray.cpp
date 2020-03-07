@@ -13,6 +13,7 @@
 #include "awkward/array/None.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/UnionArray.h"
+#include "awkward/array/NumpyArray.h"
 
 #include "awkward/array/IndexedArray.h"
 
@@ -677,27 +678,28 @@ namespace awkward {
     }
   }
 
-  // template <typename T, bool ISOPTION>
-  // const Index64 IndexedArrayOf<T, ISOPTION>::count64() const {
-  //   Index64 contentcount = content_.get()->count64();
-  //   Index64 tocount(index_.length());
-  //   struct Error err = util::awkward_indexedarray_count(
-  //     tocount.ptr().get(),
-  //     contentcount.ptr().get(),
-  //     contentcount.length(),
-  //     index_.ptr().get(),
-  //     index_.length(),
-  //     index_.offset());
-  //   util::handle_error(err, classname(), identities_.get());
-  //   return tocount;
-  // }
-
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::sizes(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: IndexedArray::sizes");
-    // int64_t toaxis = axis_wrap_if_negative(axis);
-    // IndexedArrayOf<T, ISOPTION> out(Identities::none(), util::Parameters(), index_, content_.get()->count(toaxis));
-    // return out.simplify();
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      Index64 out(1);
+      out.ptr().get()[0] = length();
+      return NumpyArray(out).getitem_at_nowrap(0);
+    }
+    else if (ISOPTION) {
+
+      std::cout << "bytemask" << std::endl;
+      std::cout << bytemask().tostring() << std::endl << std::endl;
+      std::cout << "project" << std::endl;
+      std::cout << project().get()->tostring() << std::endl << std::endl;
+      std::cout << "project(bytemask)" << std::endl;
+      std::cout << project(bytemask()).get()->tostring() << std::endl << std::endl;
+
+      throw std::runtime_error("FIXME: IndexedArray::sizes");
+    }
+    else {
+      return project().get()->sizes(axis, depth);
+    }
   }
 
   template <typename T, bool ISOPTION>

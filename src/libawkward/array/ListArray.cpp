@@ -479,9 +479,7 @@ namespace awkward {
       return std::make_shared<NumpyArray>(tosizes);
     }
     else {
-      std::shared_ptr<Content> next = content_.get()->sizes(axis, depth + 1);
-      Index64 offsets = compact_offsets64();
-      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), offsets, next);
+      return toListOffsetArray64().get()->sizes(axis, depth);
     }
   }
 
