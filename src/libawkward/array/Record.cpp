@@ -207,7 +207,14 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::sizes(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: Record::sizes");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("cannot call 'sizes' with an 'axis' of 0 on a Record");
+    }
+    else {
+      std::shared_ptr<Content> singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
+      return singleton.get()->sizes(axis, depth).get()->getitem_at_nowrap(0);
+    }
   }
 
   const std::shared_ptr<Content> Record::flatten(int64_t axis) const {

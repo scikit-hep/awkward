@@ -418,32 +418,26 @@ namespace awkward {
     return std::string();
   }
 
-  // const Index64 RecordArray::count64() const {
-  //   int64_t len = (int64_t)contents_.size();
-  //   Index64 tocount(len);
-  //   int64_t indx(0);
-  //   for (auto content : contents_) {
-  //     Index64 toappend = content.get()->count64();
-  //     tocount.ptr().get()[indx++] = toappend.length();
-  //   }
-  //   return tocount;
-  // }
-
   const std::shared_ptr<Content> RecordArray::sizes(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: RecordArray::sizes");
-
-    // int64_t toaxis = axis_wrap_if_negative(axis);
-    //
-    // std::vector<std::shared_ptr<Content>> contents;
-    // for (auto content : contents_) {
-    //   contents.push_back(content.get()->count(toaxis));
-    // }
-    // if (contents.empty()) {
-    //   return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
-    // }
-    // else {
-    //   return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
-    // }
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      Index64 single(1);
+      single.ptr().get()[0] = length_;
+      std::shared_ptr<Content> singleton = std::make_shared<NumpyArray>(single);
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(singleton);
+      }
+      std::shared_ptr<Content> record = std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, 1);
+      return record.get()->getitem_at_nowrap(0);
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->sizes(axis, depth));
+      }
+      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, length_);
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {

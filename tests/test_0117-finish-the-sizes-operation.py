@@ -127,3 +127,17 @@ def test_indexedoptionarray():
     with pytest.raises(ValueError) as err:
         array.sizes(4)
     assert str(err.value) == "'axis' out of range for 'sizes'"
+
+def test_recordarray():
+    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]).layout
+    assert awkward1.tolist(array.sizes(0)) == {"x": 4, "y": 4}
+
+    array = awkward1.Array([{"x": [3.3, 3.3, 3.3], "y": []}, {"x": [2.2, 2.2], "y": [1]}, {"x": [1.1], "y": [2, 2]}, {"x": [], "y": [3, 3, 3]}]).layout
+    assert awkward1.tolist(array.sizes(0)) == {"x": 4, "y": 4}
+    assert awkward1.tolist(array.sizes(1)) == [{"x": 3, "y": 0}, {"x": 2, "y": 1}, {"x": 1, "y": 2}, {"x": 0, "y": 3}]
+    assert awkward1.tolist(array.sizes(1)[2]) == {"x": 1, "y": 2}
+
+    array = awkward1.Array([{"x": [[3.3, 3.3, 3.3]], "y": []}, {"x": [[2.2, 2.2]], "y": [1]}, {"x": [[1.1]], "y": [2, 2]}, {"x": [[]], "y": [3, 3, 3]}]).layout
+    assert awkward1.tolist(array.sizes(0)) == {"x": 4, "y": 4}
+    assert awkward1.tolist(array.sizes(1)) == [{"x": 1, "y": 0}, {"x": 1, "y": 1}, {"x": 1, "y": 2}, {"x": 1, "y": 3}]
+    assert awkward1.tolist(array.sizes(1)[2]) == {"x": 1, "y": 2}
