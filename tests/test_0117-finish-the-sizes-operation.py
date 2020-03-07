@@ -25,6 +25,16 @@ def test_numpyarray():
         array.sizes(4)
     assert str(err.value) == "'axis' out of range for 'sizes'"
 
+def test_regulararray():
+    array = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)).toRegularArray()
+    assert array.sizes(0) == 2
+    assert awkward1.tolist(array.sizes(1)) == [3, 3]
+    assert awkward1.tolist(array.sizes(2)) == [[5, 5, 5], [5, 5, 5]]
+    assert awkward1.tolist(array.sizes(3)) == [[[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]], [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]]]
+    with pytest.raises(ValueError) as err:
+        array.sizes(4)
+    assert str(err.value) == "'axis' out of range for 'sizes'"
+
 def test_listarray():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(5, 3, 2))
     starts = awkward1.layout.Index64(numpy.array([0, 3, 3], dtype=numpy.int64))
