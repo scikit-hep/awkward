@@ -88,15 +88,8 @@ namespace awkward {
     ERROR awkward_listarray_getitem_next_array_advanced_64(int64_t* tocarry, int64_t* toadvanced, const T* fromstarts, const T* fromstops, const int64_t* fromarray, const int64_t* fromadvanced, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lenarray, int64_t lencontent);
     template <typename T>
     ERROR awkward_listarray_getitem_carry_64(T* tostarts, T* tostops, const T* fromstarts, const T* fromstops, const int64_t* fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry);
-    // template <typename T>
-    // ERROR awkward_listarray_count(T* tocount, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-    // template <typename T>
-    // ERROR awkward_listarray_count_64(int64_t* tocount, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-    // template <typename T>
-    // ERROR awkward_listoffsetarray_count(T* tocount, const T* fromoffsets, int64_t lenoffsets);
-    // template <typename T>
-    // ERROR awkward_listoffsetarray_count_64(int64_t* tocount, const T* fromoffsets, int64_t lenoffsets);
-    // template <typename T>
+    template <typename T>
+    ERROR awkward_listarray_sizes_64(int64_t* tosizes, const T* fromstarts, int64_t startsoffset, const T* fromstops, int64_t stopsoffset, int64_t length);
     // ERROR awkward_indexedarray_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const T* fromindex, int64_t lenindex, int64_t indexoffset);
     template <typename T>
     ERROR awkward_listarray_flatten_length(int64_t* tolen, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);

@@ -444,57 +444,18 @@ namespace awkward {
       return awkward_listarray64_getitem_carry_64(tostarts, tostops, fromstarts, fromstops, fromcarry, startsoffset, stopsoffset, lenstarts, lencarry);
     }
 
-    // template <>
-    // Error awkward_listarray_count<int32_t>(int32_t* tocount, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-    //   return awkward_listarray32_count(tocount, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-    // }
-    // template <>
-    // Error awkward_listarray_count<uint32_t>(uint32_t* tocount, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-    //   return awkward_listarrayU32_count(tocount, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-    // }
-    // template <>
-    // Error awkward_listarray_count<int64_t>(int64_t* tocount, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-    //   return awkward_listarray64_count(tocount, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-    // }
-
-    // template <>
-    // Error awkward_listarray_count_64<int32_t>(int64_t* tocount, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-    //   return awkward_listarray32_count_64(tocount, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-    // }
-    // template <>
-    // Error awkward_listarray_count_64<uint32_t>(int64_t* tocount, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-    //   return awkward_listarrayU32_count_64(tocount, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-    // }
-    // template <>
-    // Error awkward_listarray_count_64<int64_t>(int64_t* tocount, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-    //   return awkward_listarray64_count_64(tocount, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-    // }
-
-    // template <>
-    // Error awkward_listoffsetarray_count<int32_t>(int32_t* tocount, const int32_t* fromoffsets, int64_t lenoffsets) {
-    //   return awkward_listoffsetarray32_count(tocount, fromoffsets, lenoffsets);
-    // }
-    // template <>
-    // Error awkward_listoffsetarray_count<uint32_t>(uint32_t* tocount, const uint32_t* fromoffsets, int64_t lenoffsets) {
-    //   return awkward_listoffsetarrayU32_count(tocount, fromoffsets, lenoffsets);
-    // }
-    // template <>
-    // Error awkward_listoffsetarray_count<int64_t>(int64_t* tocount, const int64_t* fromoffsets, int64_t lenoffsets) {
-    //   return awkward_listoffsetarray64_count(tocount, fromoffsets, lenoffsets);
-    // }
-
-    // template <>
-    // Error awkward_listoffsetarray_count_64<int32_t>(int64_t* tocount, const int32_t* fromoffsets, int64_t lenoffsets) {
-    //   return awkward_listoffsetarray32_count_64(tocount, fromoffsets, lenoffsets);
-    // }
-    // template <>
-    // Error awkward_listoffsetarray_count_64<uint32_t>(int64_t* tocount, const uint32_t* fromoffsets, int64_t lenoffsets) {
-    //   return awkward_listoffsetarrayU32_count_64(tocount, fromoffsets, lenoffsets);
-    // }
-    // template <>
-    // Error awkward_listoffsetarray_count_64<int64_t>(int64_t* tocount, const int64_t* fromoffsets, int64_t lenoffsets) {
-    //   return awkward_listoffsetarray64_count_64(tocount, fromoffsets, lenoffsets);
-    // }
+    template <>
+    Error awkward_listarray_sizes_64<int32_t>(int64_t* tosizes, const int32_t* fromstarts, int64_t startsoffset, const int32_t* fromstops, int64_t stopsoffset, int64_t length) {
+      return awkward_listarray32_sizes_64(tosizes, fromstarts, startsoffset, fromstops, stopsoffset, length);
+    }
+    template <>
+    Error awkward_listarray_sizes_64<uint32_t>(int64_t* tosizes, const uint32_t* fromstarts, int64_t startsoffset, const uint32_t* fromstops, int64_t stopsoffset, int64_t length) {
+      return awkward_listarrayU32_sizes_64(tosizes, fromstarts, startsoffset, fromstops, stopsoffset, length);
+    }
+    template <>
+    Error awkward_listarray_sizes_64<int64_t>(int64_t* tosizes, const int64_t* fromstarts, int64_t startsoffset, const int64_t* fromstops, int64_t stopsoffset, int64_t length) {
+      return awkward_listarray64_sizes_64(tosizes, fromstarts, startsoffset, fromstops, stopsoffset, length);
+    }
 
     // template <>
     // Error awkward_indexedarray_count<int32_t>(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const int32_t* fromindex, int64_t lenindex, int64_t indexoffset) {
