@@ -761,7 +761,7 @@ namespace awkward {
     return std::string();
   }
 
-  const std::shared_ptr<Content> NumpyArray::sizes(int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> NumpyArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
@@ -780,7 +780,7 @@ namespace awkward {
       depth++;
     }
     if (toaxis > depth) {
-      throw std::invalid_argument("'axis' out of range for 'sizes'");
+      throw std::invalid_argument("'axis' out of range for 'num'");
     }
 
     ssize_t x = sizeof(int64_t);
@@ -790,14 +790,14 @@ namespace awkward {
       x *= shape[(size_t)(j - 1)];
     }
 
-    Index64 tosizes(reps);
-    struct Error err = awkward_regulararray_sizes_64(
-      tosizes.ptr().get(),
+    Index64 tonum(reps);
+    struct Error err = awkward_regulararray_num_64(
+      tonum.ptr().get(),
       size,
       reps);
     util::handle_error(err, classname(), identities_.get());
 
-    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tosizes.ptr(), shape, strides, 0, sizeof(int64_t), format_map.at(std::type_index(typeid(int64_t))));
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tonum.ptr(), shape, strides, 0, sizeof(int64_t), format_map.at(std::type_index(typeid(int64_t))));
   }
 
   const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {

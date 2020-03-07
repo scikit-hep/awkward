@@ -456,7 +456,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::sizes(int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
@@ -466,19 +466,19 @@ namespace awkward {
     else if (toaxis == depth + 1) {
       IndexOf<T> starts = util::make_starts(offsets_);
       IndexOf<T> stops = util::make_stops(offsets_);
-      Index64 tosizes(length());
-      struct Error err = util::awkward_listarray_sizes_64<T>(
-        tosizes.ptr().get(),
+      Index64 tonum(length());
+      struct Error err = util::awkward_listarray_num_64<T>(
+        tonum.ptr().get(),
         starts.ptr().get(),
         starts.offset(),
         stops.ptr().get(),
         stops.offset(),
         length());
       util::handle_error(err, classname(), identities_.get());
-      return std::make_shared<NumpyArray>(tosizes);
+      return std::make_shared<NumpyArray>(tonum);
     }
     else {
-      std::shared_ptr<Content> next = content_.get()->sizes(axis, depth + 1);
+      std::shared_ptr<Content> next = content_.get()->num(axis, depth + 1);
       Index64 offsets = compact_offsets64();
       return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), offsets, next);
     }

@@ -6,15 +6,15 @@
 #include "awkward/cpu-kernels/util.h"
 
 extern "C" {
-  EXPORT_SYMBOL struct Error awkward_listarray32_sizes_64(int64_t* tosizes, const int32_t* fromstarts, int64_t startsoffset, const int32_t* fromstops, int64_t stopsoffset, int64_t length);
-  EXPORT_SYMBOL struct Error awkward_listarrayU32_sizes_64(int64_t* tosizes, const uint32_t* fromstarts, int64_t startsoffset, const uint32_t* fromstops, int64_t stopsoffset, int64_t length);
-  EXPORT_SYMBOL struct Error awkward_listarray64_sizes_64(int64_t* tosizes, const int64_t* fromstarts, int64_t startsoffset, const int64_t* fromstops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarray32_num_64(int64_t* tonum, const int32_t* fromstarts, int64_t startsoffset, const int32_t* fromstops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_num_64(int64_t* tonum, const uint32_t* fromstarts, int64_t startsoffset, const uint32_t* fromstops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarray64_num_64(int64_t* tonum, const int64_t* fromstarts, int64_t startsoffset, const int64_t* fromstops, int64_t stopsoffset, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_listoffsetarray32_count_64(int64_t* tocount, const int32_t* fromoffsets, int64_t lenoffsets);
   EXPORT_SYMBOL struct Error awkward_listoffsetarrayU32_count_64(int64_t* tocount, const uint32_t* fromoffsets, int64_t lenoffsets);
   EXPORT_SYMBOL struct Error awkward_listoffsetarray64_count_64(int64_t* tocount, const int64_t* fromoffsets, int64_t lenoffsets);
 
-  EXPORT_SYMBOL struct Error awkward_regulararray_sizes_64(int64_t* tosizes, int64_t size, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_regulararray_num_64(int64_t* tonum, int64_t size, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_listarray32_flatten_length(int64_t* tolen, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
   EXPORT_SYMBOL struct Error awkward_listarrayU32_flatten_length(int64_t* tolen, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);

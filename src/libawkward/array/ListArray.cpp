@@ -459,7 +459,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::sizes(int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> ListArrayOf<T>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
@@ -467,19 +467,19 @@ namespace awkward {
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     else if (toaxis == depth + 1) {
-      Index64 tosizes(length());
-      struct Error err = util::awkward_listarray_sizes_64<T>(
-        tosizes.ptr().get(),
+      Index64 tonum(length());
+      struct Error err = util::awkward_listarray_num_64<T>(
+        tonum.ptr().get(),
         starts_.ptr().get(),
         starts_.offset(),
         stops_.ptr().get(),
         stops_.offset(),
         length());
       util::handle_error(err, classname(), identities_.get());
-      return std::make_shared<NumpyArray>(tosizes);
+      return std::make_shared<NumpyArray>(tonum);
     }
     else {
-      return toListOffsetArray64().get()->sizes(axis, depth);
+      return toListOffsetArray64().get()->num(axis, depth);
     }
   }
 

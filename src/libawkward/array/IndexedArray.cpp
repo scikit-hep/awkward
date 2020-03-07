@@ -665,7 +665,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::sizes(int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
@@ -679,12 +679,12 @@ namespace awkward {
       IndexOf<T> outindex = pair.second;
 
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-      std::shared_ptr<Content> out = next.get()->sizes(axis, depth);
+      std::shared_ptr<Content> out = next.get()->num(axis, depth);
       IndexedArrayOf<T, ISOPTION> out2(Identities::none(), util::Parameters(), outindex, out);
       return out2.simplify();
     }
     else {
-      return project().get()->sizes(axis, depth);
+      return project().get()->num(axis, depth);
     }
   }
 

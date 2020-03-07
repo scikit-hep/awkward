@@ -89,7 +89,7 @@ namespace awkward {
     template <typename T>
     ERROR awkward_listarray_getitem_carry_64(T* tostarts, T* tostops, const T* fromstarts, const T* fromstops, const int64_t* fromcarry, int64_t startsoffset, int64_t stopsoffset, int64_t lenstarts, int64_t lencarry);
     template <typename T>
-    ERROR awkward_listarray_sizes_64(int64_t* tosizes, const T* fromstarts, int64_t startsoffset, const T* fromstops, int64_t stopsoffset, int64_t length);
+    ERROR awkward_listarray_num_64(int64_t* tonum, const T* fromstarts, int64_t startsoffset, const T* fromstops, int64_t stopsoffset, int64_t length);
     template <typename T>
     ERROR awkward_listarray_flatten_length(int64_t* tolen, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>

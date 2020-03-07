@@ -336,7 +336,7 @@ namespace awkward {
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
-  const std::shared_ptr<Content> RegularArray::sizes(int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> RegularArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
@@ -344,16 +344,16 @@ namespace awkward {
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     else if (toaxis == depth + 1) {
-      Index64 tosizes(length());
-      struct Error err = awkward_regulararray_sizes_64(
-        tosizes.ptr().get(),
+      Index64 tonum(length());
+      struct Error err = awkward_regulararray_num_64(
+        tonum.ptr().get(),
         size_,
         length());
       util::handle_error(err, classname(), identities_.get());
-      return std::make_shared<NumpyArray>(tosizes);
+      return std::make_shared<NumpyArray>(tonum);
     }
     else {
-      std::shared_ptr<Content> next = content_.get()->sizes(axis, depth + 1);
+      std::shared_ptr<Content> next = content_.get()->num(axis, depth + 1);
       return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), next, size_);
     }
   }

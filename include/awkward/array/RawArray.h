@@ -421,7 +421,7 @@ namespace awkward {
       return std::string();
     }
 
-    const std::shared_ptr<Content> sizes(int64_t axis, int64_t depth) const override {
+    const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis == depth) {
         Index64 out(1);
@@ -429,7 +429,7 @@ namespace awkward {
         return std::make_shared<RawArrayOf<int64_t>>(Identities::none(), util::Parameters(), out.ptr(), 0, 1, sizeof(int64_t));
       }
       else {
-        throw std::invalid_argument("'axis' out of range for 'sizes'");
+        throw std::invalid_argument("'axis' out of range for 'num'");
       }
     }
 

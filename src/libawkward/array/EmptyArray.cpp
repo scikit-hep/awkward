@@ -164,7 +164,7 @@ namespace awkward {
     return std::string();
   }
 
-  const std::shared_ptr<Content> EmptyArray::sizes(int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> EmptyArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);

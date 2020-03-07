@@ -206,14 +206,14 @@ namespace awkward {
     return array_.get()->validityerror(path + std::string(".array"));
   }
 
-  const std::shared_ptr<Content> Record::sizes(int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> Record::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      throw std::invalid_argument("cannot call 'sizes' with an 'axis' of 0 on a Record");
+      throw std::invalid_argument("cannot call 'num' with an 'axis' of 0 on a Record");
     }
     else {
       std::shared_ptr<Content> singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
-      return singleton.get()->sizes(axis, depth).get()->getitem_at_nowrap(0);
+      return singleton.get()->num(axis, depth).get()->getitem_at_nowrap(0);
     }
   }
 

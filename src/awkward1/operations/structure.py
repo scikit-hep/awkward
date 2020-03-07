@@ -57,6 +57,11 @@ def isna(array):
 def notna(array):
     return ~isna(array)
 
+def num(array, axis=1):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False)
+    out = layout.num(axis=axis)
+    return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+
 @awkward1._numpy.implements(numpy.size)
 def size(array, axis=None):
     if axis is not None and axis < 0:

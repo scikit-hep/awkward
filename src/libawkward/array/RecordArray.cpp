@@ -418,7 +418,7 @@ namespace awkward {
     return std::string();
   }
 
-  const std::shared_ptr<Content> RecordArray::sizes(int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> RecordArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 single(1);
@@ -434,7 +434,7 @@ namespace awkward {
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->sizes(axis, depth));
+        contents.push_back(content.get()->num(axis, depth));
       }
       return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, length_);
     }

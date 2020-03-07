@@ -5,60 +5,34 @@
 #include "awkward/cpu-kernels/operations.h"
 
 template <typename T, typename C>
-ERROR awkward_listarray_sizes(T* tosizes, const C* fromstarts, int64_t startsoffset, const C* fromstops, int64_t stopsoffset, int64_t length) {
+ERROR awkward_listarray_num(T* tonum, const C* fromstarts, int64_t startsoffset, const C* fromstops, int64_t stopsoffset, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     C start = fromstarts[startsoffset + i];
     C stop = fromstops[stopsoffset + i];
-    tosizes[i] = (T)(stop - start);
+    tonum[i] = (T)(stop - start);
   }
   return success();
 }
-ERROR awkward_listarray32_sizes_64(int64_t* tosizes, const int32_t* fromstarts, int64_t startsoffset, const int32_t* fromstops, int64_t stopsoffset, int64_t length) {
-  return awkward_listarray_sizes<int64_t, int32_t>(tosizes, fromstarts, startsoffset, fromstops, stopsoffset, length);
+ERROR awkward_listarray32_num_64(int64_t* tonum, const int32_t* fromstarts, int64_t startsoffset, const int32_t* fromstops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_num<int64_t, int32_t>(tonum, fromstarts, startsoffset, fromstops, stopsoffset, length);
 }
-ERROR awkward_listarrayU32_sizes_64(int64_t* tosizes, const uint32_t* fromstarts, int64_t startsoffset, const uint32_t* fromstops, int64_t stopsoffset, int64_t length) {
-  return awkward_listarray_sizes<int64_t, uint32_t>(tosizes, fromstarts, startsoffset, fromstops, stopsoffset, length);
+ERROR awkward_listarrayU32_num_64(int64_t* tonum, const uint32_t* fromstarts, int64_t startsoffset, const uint32_t* fromstops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_num<int64_t, uint32_t>(tonum, fromstarts, startsoffset, fromstops, stopsoffset, length);
 }
-ERROR awkward_listarray64_sizes_64(int64_t* tosizes, const int64_t* fromstarts, int64_t startsoffset, const int64_t* fromstops, int64_t stopsoffset, int64_t length) {
-  return awkward_listarray_sizes<int64_t, int64_t>(tosizes, fromstarts, startsoffset, fromstops, stopsoffset, length);
+ERROR awkward_listarray64_num_64(int64_t* tonum, const int64_t* fromstarts, int64_t startsoffset, const int64_t* fromstops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_num<int64_t, int64_t>(tonum, fromstarts, startsoffset, fromstops, stopsoffset, length);
 }
 
 template <typename T>
-ERROR awkward_regulararray_sizes(T* tosizes, int64_t size, int64_t length) {
+ERROR awkward_regulararray_num(T* tonum, int64_t size, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
-    tosizes[i] = size;
+    tonum[i] = size;
   }
   return success();
 }
-ERROR awkward_regulararray_sizes_64(int64_t* tosizes, int64_t size, int64_t length) {
-  return awkward_regulararray_sizes<int64_t>(tosizes, size, length);
+ERROR awkward_regulararray_num_64(int64_t* tonum, int64_t size, int64_t length) {
+  return awkward_regulararray_num<int64_t>(tonum, size, length);
 }
-
-// template <typename C>
-// ERROR awkward_indexedarray_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const C* fromindex, int64_t lenindex, int64_t indexoffset) {
-//   for (int64_t i = 0;  i < lenindex;  i++) {
-//     C j = fromindex[indexoffset + i];
-//     if (j >= lencontent) {
-//       return failure("index out of range", i, j);
-//     }
-//     else if (j < 0) {
-//       tocount[i] = 0;
-//     }
-//     else {
-//       tocount[i] = contentcount[j];
-//     }
-//   }
-//   return success();
-// }
-// ERROR awkward_indexedarray32_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const int32_t* fromindex, int64_t lenindex, int64_t indexoffset) {
-//   return awkward_indexedarray_count<int32_t>(tocount, contentcount, lencontent, fromindex, lenindex, indexoffset);
-// }
-// ERROR awkward_indexedarrayU32_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const uint32_t* fromindex, int64_t lenindex, int64_t indexoffset) {
-//   return awkward_indexedarray_count<uint32_t>(tocount, contentcount, lencontent, fromindex, lenindex, indexoffset);
-// }
-// ERROR awkward_indexedarray64_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const int64_t* fromindex, int64_t lenindex, int64_t indexoffset) {
-//   return awkward_indexedarray_count<int64_t>(tocount, contentcount, lencontent, fromindex, lenindex, indexoffset);
-// }
 
 template <typename C>
 ERROR awkward_listarray_flatten_length(int64_t* tolen, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
