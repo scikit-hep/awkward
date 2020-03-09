@@ -694,7 +694,7 @@ namespace awkward {
     if (toaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
-    else {
+    else if (ISOPTION) {
       int64_t numnull;
       std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
       Index64 nextcarry = pair.first;
@@ -722,6 +722,9 @@ namespace awkward {
         util::handle_error(err, classname(), identities_.get());
         return std::pair<Index64, std::shared_ptr<Content>>(outoffsets, flattened);
       }
+    }
+    else {
+      return project().get()->offsets_and_flattened(axis, depth);
     }
   }
 

@@ -210,4 +210,15 @@ def test_flatten_IndexedArray():
     array = awkward1.Array([[[0.0, 1.1, None, 2.2], None, [], None, [3.3, 4.4]], None, [], [[5.5]], None, [[], [6.6, None, 7.7, 8.8, 9.9], None]])
     assert awkward1.tolist(awkward1.flatten(array)) == [[0.0, 1.1, None, 2.2], None, [], None, [3.3, 4.4], [5.5], [], [6.6, None, 7.7, 8.8, 9.9], None]
     assert awkward1.tolist(awkward1.flatten(array, axis=2)) == [[0.0, 1.1, None, 2.2, 3.3, 4.4], None, [], [5.5], None, [6.6, None, 7.7, 8.8, 9.9]]
-    raise Exception
+
+    content = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
+    index = awkward1.layout.Index64(numpy.array([2, 1, 0, 3, 3, 4], dtype=numpy.int64))
+    array = awkward1.Array(awkward1.layout.IndexedArray64(index, content))
+    assert awkward1.tolist(array) == [[3.3, 4.4], [], [0.0, 1.1, 2.2], [5.5], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(awkward1.flatten(array)) == [3.3, 4.4, 0.0, 1.1, 2.2, 5.5, 5.5, 6.6, 7.7, 8.8, 9.9]
+
+    content = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[], [6.6, 7.7, 8.8, 9.9]]]).layout
+    index = awkward1.layout.Index64(numpy.array([2, 2, 1, 0, 3], dtype=numpy.int64))
+    array = awkward1.Array(awkward1.layout.IndexedArray64(index, content))
+    assert awkward1.tolist(array) == [[[5.5]], [[5.5]], [], [[0.0, 1.1, 2.2], [], [3.3, 4.4]], [[], [6.6, 7.7, 8.8, 9.9]]]
+    assert awkward1.tolist(awkward1.flatten(array, axis=2)) == [[5.5], [5.5], [], [0.0, 1.1, 2.2, 3.3, 4.4], [6.6, 7.7, 8.8, 9.9]]
