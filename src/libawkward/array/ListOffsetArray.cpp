@@ -486,7 +486,16 @@ namespace awkward {
 
   template <typename T>
   const std::pair<Index64, std::shared_ptr<Content>> ListOffsetArrayOf<T>::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: ListOffsetArray::offsets_and_flattened");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == 0) {
+      throw std::runtime_error("axis=0 not allowed for flatten");
+    }
+    if (toaxis == 1) {
+      throw std::runtime_error("FIXME: ListOffsetArray::offsets_and_flattened");
+    }
+    else {
+      throw std::runtime_error("FIXME: ListOffsetArray::offsets_and_flattened");
+    }
 
     // int64_t toaxis = axis_wrap_if_negative(axis);
     // if (toaxis == 0) {

@@ -34,81 +34,81 @@ ERROR awkward_regulararray_num_64(int64_t* tonum, int64_t size, int64_t length) 
   return awkward_regulararray_num<int64_t>(tonum, size, length);
 }
 
-template <typename C>
-ERROR awkward_listarray_flatten_length(int64_t* tolen, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  *tolen = 0;
-  for (int64_t i = 0; i < lenstarts; i++) {
-    int64_t start = (C)fromstarts[startsoffset + i];
-    int64_t stop = (C)fromstops[stopsoffset + i];
-    if (start < 0  ||  stop < 0) {
-      return failure("all start and stop values must be non-negative", kSliceNone, i);
-    }
-    int64_t length = stop - start;
-    *tolen += length;
-  }
-  return success();
-}
-ERROR awkward_listarray32_flatten_length(int64_t* tolen, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_listarray_flatten_length<int32_t>(tolen, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-}
-ERROR awkward_listarrayU32_flatten_length(int64_t* tolen, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_listarray_flatten_length<uint32_t>(tolen, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-}
-ERROR awkward_listarray64_flatten_length(int64_t* tolen, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_listarray_flatten_length<int64_t>(tolen, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-}
+// template <typename C>
+// ERROR awkward_listarray_flatten_length(int64_t* tolen, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   *tolen = 0;
+//   for (int64_t i = 0; i < lenstarts; i++) {
+//     int64_t start = (C)fromstarts[startsoffset + i];
+//     int64_t stop = (C)fromstops[stopsoffset + i];
+//     if (start < 0  ||  stop < 0) {
+//       return failure("all start and stop values must be non-negative", kSliceNone, i);
+//     }
+//     int64_t length = stop - start;
+//     *tolen += length;
+//   }
+//   return success();
+// }
+// ERROR awkward_listarray32_flatten_length(int64_t* tolen, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   return awkward_listarray_flatten_length<int32_t>(tolen, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+// }
+// ERROR awkward_listarrayU32_flatten_length(int64_t* tolen, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   return awkward_listarray_flatten_length<uint32_t>(tolen, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+// }
+// ERROR awkward_listarray64_flatten_length(int64_t* tolen, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   return awkward_listarray_flatten_length<int64_t>(tolen, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+// }
 
-template <typename C, typename T>
-ERROR awkward_listarray_flatten(T* tocarry, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  int64_t at = 0;
-  for (int64_t i = 0; i < lenstarts; i++) {
-    int64_t start = (C)fromstarts[startsoffset + i];
-    int64_t stop = (C)fromstops[stopsoffset + i];
-    if (start < 0 || stop < 0) {
-      return failure("all start and stop values must be non-negative", kSliceNone, i);
-    }
-    int64_t length = stop - start;
-    if (length > 0) {
-      for(int64_t l = 0; l < length; l++) {
-        tocarry[at] = start + l;
-        ++at;
-      }
-    }
-  }
-  return success();
-}
-ERROR awkward_listarray32_flatten_64(int64_t* tocarry, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_listarray_flatten<int32_t, int64_t>(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-}
-ERROR awkward_listarrayU32_flatten_64(int64_t* tocarry, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_listarray_flatten<uint32_t, int64_t>(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-}
-ERROR awkward_listarray64_flatten_64(int64_t* tocarry, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_listarray_flatten<int64_t, int64_t>(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-}
+// template <typename C, typename T>
+// ERROR awkward_listarray_flatten(T* tocarry, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   int64_t at = 0;
+//   for (int64_t i = 0; i < lenstarts; i++) {
+//     int64_t start = (C)fromstarts[startsoffset + i];
+//     int64_t stop = (C)fromstops[stopsoffset + i];
+//     if (start < 0 || stop < 0) {
+//       return failure("all start and stop values must be non-negative", kSliceNone, i);
+//     }
+//     int64_t length = stop - start;
+//     if (length > 0) {
+//       for(int64_t l = 0; l < length; l++) {
+//         tocarry[at] = start + l;
+//         ++at;
+//       }
+//     }
+//   }
+//   return success();
+// }
+// ERROR awkward_listarray32_flatten_64(int64_t* tocarry, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   return awkward_listarray_flatten<int32_t, int64_t>(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+// }
+// ERROR awkward_listarrayU32_flatten_64(int64_t* tocarry, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   return awkward_listarray_flatten<uint32_t, int64_t>(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+// }
+// ERROR awkward_listarray64_flatten_64(int64_t* tocarry, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   return awkward_listarray_flatten<int64_t, int64_t>(tocarry, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+// }
 
-template <typename C, typename T>
-ERROR awkward_listarray_flatten_scale(C* tostarts, C* tostops, const T* scale, const C* fromstarts, const C* fromstops,  int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  for (int64_t i = 0; i < lenstarts; i++) {
-    int64_t start = (C)fromstarts[startsoffset + i];
-    int64_t stop = (C)fromstops[stopsoffset + i];
-    if (start < 0  ||  stop < 0) {
-      return failure("all start and stop values must be non-negative", kSliceNone, i);
-    }
-    tostarts[i] = (C)(start * scale[i]);
-    tostops[i] = (C)(stop * scale[i]);
-  }
-  return success();
-}
-ERROR awkward_listarray32_flatten_scale_64(int32_t* tostarts, int32_t* tostops, const int64_t* scale, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_listarray_flatten_scale<int32_t, int64_t>(tostarts, tostops, scale, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-}
-ERROR awkward_listarrayU32_flatten_scale_64(uint32_t* tostarts, uint32_t* tostops, const int64_t* scale, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_listarray_flatten_scale<uint32_t, int64_t>(tostarts, tostops, scale, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-}
-ERROR awkward_listarray64_flatten_scale_64(int64_t* tostarts, int64_t* tostops, const int64_t* scale, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
-  return awkward_listarray_flatten_scale<int64_t, int64_t>(tostarts, tostops, scale, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
-}
+// template <typename C, typename T>
+// ERROR awkward_listarray_flatten_scale(C* tostarts, C* tostops, const T* scale, const C* fromstarts, const C* fromstops,  int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   for (int64_t i = 0; i < lenstarts; i++) {
+//     int64_t start = (C)fromstarts[startsoffset + i];
+//     int64_t stop = (C)fromstops[stopsoffset + i];
+//     if (start < 0  ||  stop < 0) {
+//       return failure("all start and stop values must be non-negative", kSliceNone, i);
+//     }
+//     tostarts[i] = (C)(start * scale[i]);
+//     tostops[i] = (C)(stop * scale[i]);
+//   }
+//   return success();
+// }
+// ERROR awkward_listarray32_flatten_scale_64(int32_t* tostarts, int32_t* tostops, const int64_t* scale, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   return awkward_listarray_flatten_scale<int32_t, int64_t>(tostarts, tostops, scale, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+// }
+// ERROR awkward_listarrayU32_flatten_scale_64(uint32_t* tostarts, uint32_t* tostops, const int64_t* scale, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   return awkward_listarray_flatten_scale<uint32_t, int64_t>(tostarts, tostops, scale, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+// }
+// ERROR awkward_listarray64_flatten_scale_64(int64_t* tostarts, int64_t* tostops, const int64_t* scale, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+//   return awkward_listarray_flatten_scale<int64_t, int64_t>(tostarts, tostops, scale, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+// }
 
 template <typename C, typename T>
 ERROR awkward_indexedarray_flatten_nextcarry(T* tocarry, const C* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent) {
