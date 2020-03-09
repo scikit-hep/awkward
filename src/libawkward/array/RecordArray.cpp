@@ -442,7 +442,21 @@ namespace awkward {
   }
 
   const std::pair<Index64, std::shared_ptr<Content>> RecordArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: RecordArray::offsets_and_flattened");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("axis=0 not allowed for flatten");
+    }
+    else {
+      // std::vector<Index64> offsets;
+      // std::vector<std::shared_ptr<Content>> contents;
+      // for (auto content : contents_) {
+      //
+      // }
+
+      // HERE: This must verify that all offsets are identical (either length == 0 or having exactly the same lengths and values) before passing them on. Be sure to trim contents to the length before computing such offsets.
+
+      throw std::runtime_error("FIXME: RecordArray::offsets_and_flattened");
+    }
 
     // std::vector<std::shared_ptr<Content>> contents;
     // for (auto content : contents_) {
