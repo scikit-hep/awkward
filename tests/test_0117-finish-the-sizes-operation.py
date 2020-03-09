@@ -196,3 +196,16 @@ def test_flatten_ListOffsetArray():
     assert awkward1.tolist(awkward1.flatten(array, axis=1)) == numpy.arange(2*3*5*7).reshape(2 * 3, 5, 7).tolist()
     assert awkward1.tolist(awkward1.flatten(array, axis=2)) == numpy.arange(2*3*5*7).reshape(2, 3 * 5, 7).tolist()
     assert awkward1.tolist(awkward1.flatten(array, axis=3)) == numpy.arange(2*3*5*7).reshape(2, 3, 5 * 7).tolist()
+
+def test_flatten_IndexedArray():
+    # array = awkward1.Array([[1.1, 2.2, None, 3.3], None, [], None, [4.4, 5.5], None])
+    # assert awkward1.tolist(awkward1.flatten(array)) == [1.1, 2.2, None, 3.3, 4.4, 5.5]
+
+    array = awkward1.Array([[[0.0, 1.1, 2.2], None, [3.3, 4.4]], [], [[5.5]], [[], [6.6, 7.7, 8.8, 9.9]]])
+    print(awkward1.tolist(awkward1.flatten(array, axis=2)))
+    raise Exception
+
+    # array = awkward1.Array([[[0.0, 1.1, None, 2.2], None, [], None, [3.3, 4.4]], None, [], [[5.5]], None, [[], [6.6, None, 7.7, 8.8, 9.9], None]])
+    # assert awkward1.tolist(awkward1.flatten(array)) == [[0.0, 1.1, None, 2.2], None, [], None, [3.3, 4.4], [5.5], [], [6.6, None, 7.7, 8.8, 9.9], None]
+    # print(awkward1.tolist(awkward1.flatten(array, axis=2)))
+    # raise Exception

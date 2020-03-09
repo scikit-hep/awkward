@@ -519,6 +519,15 @@ namespace awkward {
         return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets_, pair.second));
       }
       else {
+        std::cout << "this" << std::endl;
+        std::cout << tostring() << std::endl;
+
+        std::cout << "offsets " << offsets_.tostring() << std::endl;
+        std::cout << "inneroffsets " << inneroffsets.tostring() << std::endl;
+
+        std::cout << "pair.second" << std::endl;
+        std::cout << pair.second.get()->tostring() << std::endl;
+
         Index64 tooffsets(offsets_.length());
         struct Error err = util::awkward_listoffsetarray_flatten_offsets_64<T>(
           tooffsets.ptr().get(),
@@ -529,7 +538,10 @@ namespace awkward {
           inneroffsets.offset(),
           inneroffsets.length());
         util::handle_error(err, classname(), identities_.get());
-        return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), tooffsets, pair.second));
+
+        std::cout << "tooffsets " << tooffsets.tostring() << std::endl;
+
+        return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<ListOffsetArray64>(identities_, parameters_, tooffsets, pair.second));
       }
     }
   }

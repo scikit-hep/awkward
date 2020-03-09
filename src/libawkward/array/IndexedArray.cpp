@@ -690,7 +690,127 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const std::pair<Index64, std::shared_ptr<Content>> IndexedArrayOf<T, ISOPTION>::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: IndexedArray::offsets_and_flattened");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("axis=0 not allowed for flatten");
+    }
+    else if (toaxis == depth + 1) {
+      int64_t numnull;
+      std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
+      Index64 nextcarry = pair.first;
+      IndexOf<T> outindex = pair.second;
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+
+      std::pair<Index64, std::shared_ptr<Content>> offsets_flattened = next.get()->offsets_and_flattened(axis, depth);
+      Index64 offsets = offsets_flattened.first;
+      std::shared_ptr<Content> flattened = offsets_flattened.second;
+
+      std::cout << "flattened" << std::endl;
+      std::cout << flattened.get()->tostring() << std::endl;
+      std::cout << "offsets " << offsets.tostring() << std::endl;
+
+      Index64 outoffsets(offsets.length() + numnull);
+      struct Error err = awkward_indexedarray_flatten_none2empty(
+        outoffsets.ptr().get(),
+        outindex.ptr().get(),
+        outindex.offset(),
+        outindex.length(),
+        offsets.ptr().get(),
+        offsets.offset(),
+        offsets.length());
+      util::handle_error(err, classname(), identities_.get());
+
+
+      throw std::runtime_error("STOP");
+    }
+    else {
+      throw std::runtime_error("HALT");
+
+      // int64_t numnull;
+      // std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
+      // Index64 nextcarry = pair.first;
+      // IndexOf<T> outindex = pair.second;
+      //
+      // std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      //
+      // std::cout << "next" << std::endl;
+      // std::cout << next.get()->tostring() << std::endl;
+      //
+      // std::pair<Index64, std::shared_ptr<Content>> offsets_flattened = next.get()->offsets_and_flattened(axis, depth);
+      // Index64 offsets = offsets_flattened.first;
+      // std::shared_ptr<Content> flattened = offsets_flattened.second;
+      //
+      // std::cout << "offsets " << offsets.tostring() << std::endl;
+      // std::cout << "flattened" << std::endl;
+      // std::cout << flattened.get()->tostring() << std::endl;
+      //
+      // Index64 reindex(flattened.get()->length() + numnull);
+      // Index64 reoffsets(offsets.length());
+      // struct Error err = util::awkward_indexedarray_flatten_reindex_64<T>(
+      //   reindex.ptr().get(),
+      //   reindex.length(),
+      //   reoffsets.ptr().get(),
+      //   outindex.ptr().get(),
+      //   outindex.offset(),
+      //   outindex.length(),
+      //   offsets.ptr().get(),
+      //   offsets.offset(),
+      //   offsets.length());
+      // util::handle_error(err, classname(), identities_.get());
+      //
+      //
+      // throw std::runtime_error("STOP");
+    }
+
+
+    // else if (toaxis == depth + 1) {
+    //   std::cout << "ONE" << std::endl;
+    //   std::shared_ptr<Content> next = project();
+    //
+    //   std::cout << "next" << std::endl;
+    //   std::cout << next.get()->tostring() << std::endl;
+    //
+    //   return next.get()->offsets_and_flattened(axis, depth);
+    // }
+    // else {
+    //   throw std::runtime_error("STOP");
+    //
+    //   std::cout << "TWO" << std::endl;
+    //
+    //   std::cout << "content" << std::endl;
+    //   std::cout << content_.get()->tostring() << std::endl;
+    //
+    //   std::pair<Index64, std::shared_ptr<Content>> pair = content_.get()->offsets_and_flattened(axis, depth);
+    //   Index64 inneroffsets = pair.first;
+    //   std::shared_ptr<Content> innercontent = pair.second;
+    //
+    //   std::cout << "innercontent" << std::endl;
+    //   std::cout << innercontent.get()->tostring() << std::endl;
+    //
+    //   if (inneroffsets.length() == 0) {
+    //     std::cout << "THREE" << std::endl;
+    //
+    //     return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, innercontent));
+    //   }
+    //
+    //   throw std::runtime_error("STOP");
+    //
+    //   Index64 toindex(innercontent.get()->length());
+    //   Index64 tooffsets(inneroffsets.length());
+    //   struct Error err = util::awkward_indexedarray_flatten_reindex_64(
+    //     toindex.ptr().get(),
+    //     toindex.length(),
+    //     tooffsets.ptr().get(),
+    //     index_.ptr().get(),
+    //     index_.offset(),
+    //     index_.length(),
+    //     inneroffsets.ptr().get(),
+    //     inneroffsets.offset(),
+    //     inneroffsets.length());
+    //   util::handle_error(err, classname(), identities_.get());
+    //   return std::pair<Index64, std::shared_ptr<Content>>(tooffsets, std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(Identities::none(), parameters_, toindex, innercontent));
+    // }
 
     // int64_t toaxis = axis_wrap_if_negative(axis);
     // if (toaxis == 0) {
