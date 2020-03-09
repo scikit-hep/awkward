@@ -95,8 +95,6 @@ namespace awkward {
     template <typename T>
     ERROR awkward_indexedarray_flatten_none2empty_64(int64_t* outoffsets, const T* outindex, int64_t outindexoffset, int64_t outindexlength, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslength);
     template <typename T>
-    ERROR awkward_indexedarray_flatten_reindex_64(int64_t* toindex, int64_t toindexlen, int64_t* tooffsets, const T* fromindex, int64_t fromindexoffset, int64_t fromindexlen, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslen);
-    template <typename T>
     ERROR awkward_indexedarray_flatten_nextcarry_64(int64_t* tocarry, const T* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
     template <typename T>
     ERROR awkward_indexedarray_numnull(int64_t* numnull, const T* fromindex, int64_t indexoffset, int64_t lenindex);

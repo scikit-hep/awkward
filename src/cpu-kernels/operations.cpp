@@ -37,8 +37,6 @@ ERROR awkward_regulararray_num_64(int64_t* tonum, int64_t size, int64_t length) 
 template <typename T, typename C>
 ERROR awkward_listoffsetarray_flatten_offsets(T* tooffsets, const C* outeroffsets, int64_t outeroffsetsoffset, int64_t outeroffsetslen, const T* inneroffsets, int64_t inneroffsetsoffset, int64_t inneroffsetslen) {
   for (int64_t i = 0;  i < outeroffsetslen;  i++) {
-    std::cout << "i " << i << " outer " << outeroffsets[outeroffsetsoffset + i] << " inner " << inneroffsets[inneroffsetsoffset + outeroffsets[outeroffsetsoffset + i]] << std::endl;
-
     tooffsets[i] = inneroffsets[inneroffsetsoffset + outeroffsets[outeroffsetsoffset + i]];
   }
   return success();
@@ -82,28 +80,6 @@ ERROR awkward_indexedarrayU32_flatten_none2empty_64(int64_t* outoffsets, const u
 }
 ERROR awkward_indexedarray64_flatten_none2empty_64(int64_t* outoffsets, const int64_t* outindex, int64_t outindexoffset, int64_t outindexlength, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslength) {
   return awkward_indexedarray_flatten_none2empty<int64_t, int64_t>(outoffsets, outindex, outindexoffset, outindexlength, offsets, offsetsoffset, offsetslength);
-}
-
-template <typename T, typename C>
-ERROR awkward_indexedarray_flatten_reindex(T* toindex, int64_t toindexlen, T* tooffsets, const C* fromindex, int64_t fromindexoffset, int64_t fromindexlen, const T* offsets, int64_t offsetsoffset, int64_t offsetslen) {
-  for (int64_t i = 0;  i < offsetslen;  i++) {
-    std::cout << "offsets " << offsets[offsetsoffset + i] << std::endl;
-  }
-  std::cout << std::endl;
-  for (int64_t j = 0;  j < fromindexlen;  j++) {
-    std::cout << "index   " << fromindex[fromindexoffset + j] << std::endl;
-  }
-  std::cout << std::endl;
-  return failure("hello", 0, kSliceNone);
-}
-ERROR awkward_indexedarray32_flatten_reindex_64(int64_t* toindex, int64_t toindexlen, int64_t* tooffsets, const int32_t* fromindex, int64_t fromindexoffset, int64_t fromindexlen, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslen) {
-  return awkward_indexedarray_flatten_reindex<int64_t, int32_t>(toindex, toindexlen, tooffsets, fromindex, fromindexoffset, fromindexlen, offsets, offsetsoffset, offsetslen);
-}
-ERROR awkward_indexedarrayU32_flatten_reindex_64(int64_t* toindex, int64_t toindexlen, int64_t* tooffsets, const uint32_t* fromindex, int64_t fromindexoffset, int64_t fromindexlen, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslen) {
-  return awkward_indexedarray_flatten_reindex<int64_t, uint32_t>(toindex, toindexlen, tooffsets, fromindex, fromindexoffset, fromindexlen, offsets, offsetsoffset, offsetslen);
-}
-ERROR awkward_indexedarray64_flatten_reindex_64(int64_t* toindex, int64_t toindexlen, int64_t* tooffsets, const int64_t* fromindex, int64_t fromindexoffset, int64_t fromindexlen, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslen) {
-  return awkward_indexedarray_flatten_reindex<int64_t, int64_t>(toindex, toindexlen, tooffsets, fromindex, fromindexoffset, fromindexlen, offsets, offsetsoffset, offsetslen);
 }
 
 template <typename C, typename T>
