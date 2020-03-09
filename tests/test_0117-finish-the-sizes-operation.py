@@ -162,6 +162,37 @@ def test_flatten_ListOffsetArray():
     array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     assert awkward1.tolist(awkward1.flatten(array)) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    array = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [[5.5]], [[], [6.6, 7.7, 8.8, 9.9]]])
+    array = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[], [6.6, 7.7, 8.8, 9.9]]])
     assert awkward1.tolist(awkward1.flatten(array)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [], [6.6, 7.7, 8.8, 9.9]]
-    assert awkward1.tolist(awkward1.flatten(array, axis=2)) == [[0.0, 1.1, 2.2, 3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(awkward1.flatten(array, axis=2)) == [[0.0, 1.1, 2.2, 3.3, 4.4], [], [5.5], [6.6, 7.7, 8.8, 9.9]]
+
+    array = awkward1.Array(numpy.arange(2*3*5*7).reshape(2, 3, 5, 7).tolist())
+    assert awkward1.tolist(awkward1.flatten(array, axis=1)) == numpy.arange(2*3*5*7).reshape(2 * 3, 5, 7).tolist()
+    assert awkward1.tolist(awkward1.flatten(array, axis=2)) == numpy.arange(2*3*5*7).reshape(2, 3 * 5, 7).tolist()
+    assert awkward1.tolist(awkward1.flatten(array, axis=3)) == numpy.arange(2*3*5*7).reshape(2, 3, 5 * 7).tolist()
+
+    def toListArray(x):
+        if isinstance(x, awkward1.layout.ListOffsetArray64):
+            starts = awkward1.layout.Index64(numpy.asarray(x.offsets)[:-1])
+            stops  = awkward1.layout.Index64(numpy.asarray(x.offsets)[1:])
+            return awkward1.layout.ListArray64(starts, stops, toListArray(x.content))
+        elif isinstance(x, awkward1.layout.ListOffsetArray32):
+            starts = awkward1.layout.Index64(numpy.asarray(x.offsets)[:-1])
+            stops  = awkward1.layout.Index64(numpy.asarray(x.offsets)[1:])
+            return awkward1.layout.ListArray32(starts, stops, toListArray(x.content))
+        elif isinstance(x, awkward1.layout.ListOffsetArrayU32):
+            starts = awkward1.layout.Index64(numpy.asarray(x.offsets)[:-1])
+            stops  = awkward1.layout.Index64(numpy.asarray(x.offsets)[1:])
+            return awkward1.layout.ListArrayU32(starts, stops, toListArray(x.content))
+        else:
+            return x
+
+    array = awkward1.Array(toListArray(awkward1.Array(numpy.arange(2*3*5*7).reshape(2, 3, 5, 7).tolist()).layout))
+    assert awkward1.tolist(awkward1.flatten(array, axis=1)) == numpy.arange(2*3*5*7).reshape(2 * 3, 5, 7).tolist()
+    assert awkward1.tolist(awkward1.flatten(array, axis=2)) == numpy.arange(2*3*5*7).reshape(2, 3 * 5, 7).tolist()
+    assert awkward1.tolist(awkward1.flatten(array, axis=3)) == numpy.arange(2*3*5*7).reshape(2, 3, 5 * 7).tolist()
+
+    array = awkward1.Array(numpy.arange(2*3*5*7).reshape(2, 3, 5, 7))
+    assert awkward1.tolist(awkward1.flatten(array, axis=1)) == numpy.arange(2*3*5*7).reshape(2 * 3, 5, 7).tolist()
+    assert awkward1.tolist(awkward1.flatten(array, axis=2)) == numpy.arange(2*3*5*7).reshape(2, 3 * 5, 7).tolist()
+    assert awkward1.tolist(awkward1.flatten(array, axis=3)) == numpy.arange(2*3*5*7).reshape(2, 3, 5 * 7).tolist()

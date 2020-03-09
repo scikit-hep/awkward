@@ -516,7 +516,7 @@ namespace awkward {
       std::pair<Index64, std::shared_ptr<Content>> pair = content_.get()->offsets_and_flattened(axis, depth + 1);
       Index64 inneroffsets = pair.first;
       if (inneroffsets.length() == 0) {
-        return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets_, content_));
+        return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets_, pair.second));
       }
       else {
         Index64 tooffsets(offsets_.length());
