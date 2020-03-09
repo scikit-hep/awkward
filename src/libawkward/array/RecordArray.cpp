@@ -441,17 +441,19 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->flatten(axis));
-    }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
-    }
-    else {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
-    }
+  const std::pair<Index64, std::shared_ptr<Content>> RecordArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: RecordArray::offsets_and_flattened");
+
+    // std::vector<std::shared_ptr<Content>> contents;
+    // for (auto content : contents_) {
+    //   contents.push_back(content.get()->flatten(axis));
+    // }
+    // if (contents.empty()) {
+    //   return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
+    // }
+    // else {
+    //   return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    // }
   }
 
   bool RecordArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {

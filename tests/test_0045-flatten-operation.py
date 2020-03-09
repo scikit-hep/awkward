@@ -9,6 +9,7 @@ import numpy
 
 import awkward1
 
+@pytest.mark.skip(reason="revamping flatten")
 def flatten(data, axis=0):
     if axis < 0:
         raise NotImplementedError("axis < 0 is much harder for untyped data...")
@@ -25,13 +26,14 @@ def flatten(data, axis=0):
     else:
         raise ValueError("cannot flatten {0} objects".format(type(data)))
 
+@pytest.mark.skip(reason="revamping flatten")
 def test_flatten_empty_array():
     empty = awkward1.layout.EmptyArray()
 
     assert awkward1.tolist(empty) == []
     assert awkward1.tolist(empty.flatten()) == []
 
-@pytest.mark.skip(reason="finalizing sizes operation")
+@pytest.mark.skip(reason="revamping flatten")
 def test_flatten_list_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     starts  = awkward1.layout.Index64(numpy.array([0, 3, 4, 5, 8]))
@@ -61,6 +63,7 @@ def test_flatten_list_array():
     assert flatten(awkward1.tolist(array)) == [4, 5, 6, 0, 0, 1, 2, 3, 1, 2, 3, 4, 7, 8, 9]
     assert awkward1.tolist(array.flatten()) == [4, 5, 6, 0, 0, 1, 2, 3, 1, 2, 3, 4, 7, 8, 9]
 
+@pytest.mark.skip(reason="revamping flatten")
 def test_flatten_list_offset_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10], dtype=numpy.int64))
@@ -75,6 +78,7 @@ def test_flatten_list_offset_array():
     array2 = array[2:-1]
     assert awkward1.tolist(array2.flatten()) == [3.3, 4.4, 5.5]
 
+@pytest.mark.skip(reason="revamping flatten")
 def test_flatten_numpy_array():
     array = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
     assert awkward1.tolist(array) == [[[ 0,  1,  2,  3,  4], [ 5,  6,  7,  8,  9], [10, 11, 12, 13, 14]],
@@ -100,6 +104,7 @@ def test_flatten_numpy_array():
     assert awkward1.tolist(another_arr) == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
     assert awkward1.tolist(another_arr.flatten()) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
 
+@pytest.mark.skip(reason="revamping flatten")
 def test_fail_flatten_numpy_array():
     # Fail if axis == shape.size()
     array = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
@@ -115,11 +120,13 @@ def test_fail_flatten_numpy_array():
 ## def test_flatten_raw_array():
     ## RawArrayOf<T> is usable only in C++
 
+@pytest.mark.skip(reason="revamping flatten")
 def test_flatten_record():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10], dtype=numpy.int64))
     #FIXME: array   = awkward1.layout.Record()
 
+@pytest.mark.skip(reason="revamping flatten")
 def test_flatten_record_array():
     array = awkward1.layout.NumpyArray(numpy.arange(2*3*5, dtype=numpy.int64).reshape(2, 3, 5))
 
@@ -139,7 +146,7 @@ def test_flatten_record_array():
     assert awkward1.tolist(recordarray1.flatten()) == [{'one': [0, 1, 2, 3, 4], 'two': 1.1}, {'one': [5, 6, 7, 8, 9], 'two': 2.2}, {'one': [10, 11, 12, 13, 14], 'two': 3.3}, {'one': [15, 16, 17, 18, 19], 'two': 4.4}, {'one': [20, 21, 22, 23, 24], 'two': 5.5}, {'one': [25, 26, 27, 28, 29], 'two': 6.6}]
     ##assert awkward1.tolist(recordarray.flatten()) == [{'one': [1, 2, 3, 4, 5], 'two': [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]}]
 
-@pytest.mark.skip(reason="finalizing sizes operation")
+@pytest.mark.skip(reason="revamping flatten")
 def test_flatten_regular_array():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))

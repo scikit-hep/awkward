@@ -217,8 +217,9 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Record::flatten(int64_t axis) const {
-    throw std::invalid_argument("Record cannot be flattened because it is not an array");
+  const std::pair<Index64, std::shared_ptr<Content>> Record::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: Record::offsets_and_flattened");
+    // throw std::invalid_argument("Record cannot be flattened because it is not an array");
   }
 
   bool Record::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {

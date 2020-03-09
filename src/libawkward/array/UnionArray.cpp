@@ -828,13 +828,14 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::flatten(int64_t axis) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.emplace_back(content.get()->flatten(axis));
-    }
-    UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
-    return out.simplify(false);
+  const std::pair<Index64, std::shared_ptr<Content>> UnionArrayOf<T, I>::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: UnionArray::offsets_and_flattened");
+    // std::vector<std::shared_ptr<Content>> contents;
+    // for (auto content : contents_) {
+    //   contents.emplace_back(content.get()->flatten(axis));
+    // }
+    // UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+    // return out.simplify(false);
   }
 
   template <typename T, typename I>

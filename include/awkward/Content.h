@@ -58,7 +58,7 @@ namespace awkward {
     // operations
     virtual const std::string validityerror(const std::string& path) const = 0;
     virtual const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const = 0;
-    virtual const std::shared_ptr<Content> flatten(int64_t axis) const = 0;
+    virtual const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const = 0;
     virtual bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const = 0;
     virtual const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const = 0;
     virtual const std::shared_ptr<SliceItem> asslice() const = 0;

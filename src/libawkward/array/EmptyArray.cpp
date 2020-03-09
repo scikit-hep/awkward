@@ -178,8 +178,9 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> EmptyArray::flatten(int64_t axis) const {
-    return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
+  const std::pair<Index64, std::shared_ptr<Content>> EmptyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: EmptyArray::offsets_and_flattened");
+    // return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
   }
 
   bool EmptyArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {

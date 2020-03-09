@@ -853,20 +853,22 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (shape_.size() <= 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
-    }
-    if (toaxis >= (int64_t)shape_.size() - 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because axis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
-    }
-    if (iscontiguous()) {
-      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_, toaxis), flatten_strides(strides_, toaxis), byteoffset_, itemsize_, format_);
-    }
-    else {
-      return contiguous().flatten(toaxis);
-    }
+  const std::pair<Index64, std::shared_ptr<Content>> NumpyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: NumpyArray::offsets_and_flattened");
+
+    // int64_t toaxis = axis_wrap_if_negative(axis);
+    // if (shape_.size() <= 1) {
+    //   throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    // }
+    // if (toaxis >= (int64_t)shape_.size() - 1) {
+    //   throw std::invalid_argument(std::string("NumpyArray cannot be flattened because axis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
+    // }
+    // if (iscontiguous()) {
+    //   return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_, toaxis), flatten_strides(strides_, toaxis), byteoffset_, itemsize_, format_);
+    // }
+    // else {
+    //   return contiguous().flatten(toaxis);
+    // }
   }
 
   bool NumpyArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {

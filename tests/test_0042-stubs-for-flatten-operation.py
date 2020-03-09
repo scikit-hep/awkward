@@ -9,6 +9,7 @@ import numpy
 
 import awkward1
 
+@pytest.mark.skip(reason="revamping flatten")
 def test_flatten():
     content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10], dtype=numpy.int64))

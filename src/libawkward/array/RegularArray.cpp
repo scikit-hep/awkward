@@ -358,8 +358,8 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RegularArray::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: RegularArray::flatten used count64");
+  const std::pair<Index64, std::shared_ptr<Content>> RegularArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: RegularArray::offsets_and_flattened");
 
     // int64_t toaxis = axis_wrap_if_negative(axis);
     // if (toaxis == 0) {

@@ -689,47 +689,49 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::flatten(int64_t axis) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == 0) {
-      if (ISOPTION) {
-        int64_t numnull;
-        struct Error err1 = util::awkward_indexedarray_numnull<T>(
-          &numnull,
-          index_.ptr().get(),
-          index_.offset(),
-          index_.length());
-          util::handle_error(err1, classname(), identities_.get());
+  const std::pair<Index64, std::shared_ptr<Content>> IndexedArrayOf<T, ISOPTION>::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: IndexedArray::offsets_and_flattened");
 
-        Index64 nextcarry(length() - numnull);
-        struct Error err2 = util::awkward_indexedarray_flatten_nextcarry_64<T>(
-          nextcarry.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
-          index_.length(),
-          content_.get()->length());
-          util::handle_error(err2, classname(), identities_.get());
-
-        std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-        return next.get()->flatten(toaxis);
-      }
-      else {
-        Index64 nextcarry(length());
-        struct Error err = util::awkward_indexedarray_getitem_nextcarry_64<T>(
-          nextcarry.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
-          index_.length(),
-          content_.get()->length());
-        util::handle_error(err, classname(), identities_.get());
-
-        std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-        return next.get()->flatten(toaxis);
-      }
-    }
-    else {
-      return content_.get()->flatten(toaxis - 1);
-    }
+    // int64_t toaxis = axis_wrap_if_negative(axis);
+    // if (toaxis == 0) {
+    //   if (ISOPTION) {
+    //     int64_t numnull;
+    //     struct Error err1 = util::awkward_indexedarray_numnull<T>(
+    //       &numnull,
+    //       index_.ptr().get(),
+    //       index_.offset(),
+    //       index_.length());
+    //       util::handle_error(err1, classname(), identities_.get());
+    //
+    //     Index64 nextcarry(length() - numnull);
+    //     struct Error err2 = util::awkward_indexedarray_flatten_nextcarry_64<T>(
+    //       nextcarry.ptr().get(),
+    //       index_.ptr().get(),
+    //       index_.offset(),
+    //       index_.length(),
+    //       content_.get()->length());
+    //       util::handle_error(err2, classname(), identities_.get());
+    //
+    //     std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+    //     return next.get()->flatten(toaxis);
+    //   }
+    //   else {
+    //     Index64 nextcarry(length());
+    //     struct Error err = util::awkward_indexedarray_getitem_nextcarry_64<T>(
+    //       nextcarry.ptr().get(),
+    //       index_.ptr().get(),
+    //       index_.offset(),
+    //       index_.length(),
+    //       content_.get()->length());
+    //     util::handle_error(err, classname(), identities_.get());
+    //
+    //     std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+    //     return next.get()->flatten(toaxis);
+    //   }
+    // }
+    // else {
+    //   return content_.get()->flatten(toaxis - 1);
+    // }
   }
 
   template <typename T, bool ISOPTION>

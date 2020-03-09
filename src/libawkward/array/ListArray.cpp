@@ -484,8 +484,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::flatten(int64_t axis) const {
-    throw std::runtime_error("FIXME: ListArray::flatten used count64");
+  const std::pair<Index64, std::shared_ptr<Content>> ListArrayOf<T>::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: ListArray::offsets_and_flattened");
 
     // int64_t toaxis = axis_wrap_if_negative(axis);
     // if (toaxis == 0) {

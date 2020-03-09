@@ -141,8 +141,8 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::num");
   }
 
-  const std::shared_ptr<Content> None::flatten(int64_t axis) const {
-    throw std::runtime_error("undefined operation: None::flatten");
+  const std::pair<Index64, std::shared_ptr<Content>> None::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("undefined operation: None::offsets_and_flattened");
   }
 
   bool None::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {

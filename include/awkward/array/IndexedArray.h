@@ -60,7 +60,7 @@ namespace awkward {
     // operations
     const std::string validityerror(const std::string& path) const override;
     const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override;
-    const std::shared_ptr<Content> flatten(int64_t axis) const override;
+    const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override;
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
     const std::shared_ptr<Content> reverse_merge(const std::shared_ptr<Content>& other) const;
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
