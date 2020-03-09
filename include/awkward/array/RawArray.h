@@ -434,7 +434,13 @@ namespace awkward {
     }
 
     const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override {
-      throw std::runtime_error("FIXME: RawArray::offsets_and_flattened");
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis == depth) {
+        throw std::invalid_argument("axis=0 not allowed for flatten");
+      }
+      else {
+        throw std::invalid_argument("axis out of range for flatten");
+      }
     }
 
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override {

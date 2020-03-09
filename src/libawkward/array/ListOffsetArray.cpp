@@ -505,7 +505,7 @@ namespace awkward {
   const std::pair<Index64, std::shared_ptr<Content>> ListOffsetArrayOf<T>::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      throw std::runtime_error("axis=0 not allowed for flatten");
+      throw std::invalid_argument("axis=0 not allowed for flatten");
     }
     else if (toaxis == depth + 1) {
       std::shared_ptr<Content> listoffsetarray = toListOffsetArray64();
@@ -532,16 +532,6 @@ namespace awkward {
         return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), tooffsets, pair.second));
       }
     }
-
-    // int64_t toaxis = axis_wrap_if_negative(axis);
-    // if (toaxis == 0) {
-    //   int64_t start = offsets_.getitem_at_nowrap(0);
-    //   int64_t stop = offsets_.getitem_at_nowrap(offsets_.length() - 1);
-    //   return content_.get()->getitem_range_nowrap(start, stop);
-    // }
-    // else {
-    //   return content_.get()->flatten(toaxis - 1);
-    // }
   }
 
   template <typename T>

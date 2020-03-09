@@ -181,7 +181,7 @@ namespace awkward {
   const std::pair<Index64, std::shared_ptr<Content>> EmptyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      throw std::runtime_error("axis=0 not allowed for flatten");
+      throw std::invalid_argument("axis=0 not allowed for flatten");
     }
     else {
       Index64 offsets(1);
