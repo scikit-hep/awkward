@@ -1023,6 +1023,62 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::rpad(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return rpad_axis0(target, false);
+    }
+    else if (toaxis == depth + 1) {
+      if (ISOPTION) {
+        Index8 mask = bytemask();
+        Index64 index(mask.length());
+        struct Error err = awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+          index.ptr().get(),
+          mask.ptr().get(),
+          mask.length());
+        util::handle_error(err, classname(), identities_.get());
+
+        std::shared_ptr<Content> next = project().get()->rpad(target, toaxis, depth);
+        return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify();
+      }
+      else {
+        return project().get()->rpad(target, toaxis, depth);
+      }
+    }
+    else {
+      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->rpad(target, toaxis, depth + 1));
+    }
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return rpad_axis0(target, true);
+    }
+    else if (toaxis == depth + 1) {
+      if (ISOPTION) {
+        Index8 mask = bytemask();
+        Index64 index(mask.length());
+        struct Error err = awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+          index.ptr().get(),
+          mask.ptr().get(),
+          mask.length());
+        util::handle_error(err, classname(), identities_.get());
+
+        std::shared_ptr<Content> next = project().get()->rpad_and_clip(target, toaxis, depth);
+        return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify();
+      }
+      else {
+        return project().get()->rpad_and_clip(target, toaxis, depth);
+      }
+    }
+    else {
+      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->rpad_and_clip(target, toaxis, depth + 1));
+    }
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     int64_t numnull;
     struct Error err1 = util::awkward_indexedarray_numnull<T>(

@@ -509,6 +509,45 @@ namespace awkward {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
+  const std::shared_ptr<Content> RegularArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return rpad_axis0(target, false);
+    }
+    else if (toaxis == depth + 1) {
+      if (target < size_) {
+        return shallow_copy();
+      }
+      else {
+        return rpad_and_clip(target, toaxis, depth);
+      }
+    }
+    else {
+      return std::make_shared<RegularArray>(Identities::none(), parameters_, content_.get()->rpad(target, axis, depth + 1), size_);
+    }
+  }
+
+  const std::shared_ptr<Content> RegularArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return rpad_axis0(target, true);
+    }
+    else if (toaxis == depth + 1) {
+      Index64 index(length() * target);
+      struct Error err = awkward_RegularArray_rpad_and_clip_axis1_64(
+        index.ptr().get(),
+        target,
+        size_,
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content());
+      return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
+    }
+    else {
+      return std::make_shared<RegularArray>(Identities::none(), parameters_, content_.get()->rpad_and_clip(target, toaxis, depth + 1), size_);
+    }
+  }
+
   const std::shared_ptr<Content> RegularArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }

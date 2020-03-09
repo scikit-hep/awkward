@@ -702,6 +702,7 @@ ERROR awkward_listarray_validity(const C* starts, int64_t startsoffset, const C*
   }
   return success();
 }
+
 ERROR awkward_listarray32_validity(const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length, int64_t lencontent) {
   return awkward_listarray_validity<int32_t>(starts, startsoffset, stops, stopsoffset, length, lencontent);
 }
@@ -781,4 +782,206 @@ ERROR awkward_unionarray8_U32_validity(const int8_t* tags, int64_t tagsoffset, c
 }
 ERROR awkward_unionarray8_64_validity(const int8_t* tags, int64_t tagsoffset, const int64_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents) {
   return awkward_unionarray_validity<int8_t, int64_t>(tags, tagsoffset, index, indexoffset, length, numcontents, lencontents);
+}
+
+template <typename T>
+ERROR awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(T* toindex, const int8_t* frommask, int64_t length) {
+  int64_t count = 0;
+  for (int64_t i = 0; i < length; i++) {
+    if(frommask[i]) {
+      toindex[i] = -1;
+    }
+    else {
+      toindex[i] = count++;
+    }
+  }
+  return success();
+}
+ERROR awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(int64_t* toindex, const int8_t* frommask, int64_t length) {
+  return awkward_IndexedOptionArray_rpad_and_clip_mask_axis1<int64_t>(toindex, frommask, length);
+}
+
+template <typename T>
+ERROR awkward_index_rpad_and_clip_axis0(T* toindex, int64_t target, int64_t length) {
+  int64_t shorter = (target < length ? target : length);
+  for (int64_t i = 0; i < shorter; i++) {
+    toindex[i] = i;
+  }
+  for (int64_t i = shorter; i < target; i++) {
+    toindex[i] = -1;
+  }
+  return success();
+}
+ERROR awkward_index_rpad_and_clip_axis0_64(int64_t* toindex, int64_t target, int64_t length) {
+  return awkward_index_rpad_and_clip_axis0<int64_t>(toindex, target, length);
+}
+
+template <typename T>
+ERROR awkward_index_rpad_and_clip_axis1(T* tostarts, T* tostops, int64_t target, int64_t length) {
+  int64_t offset = 0;
+  for (int64_t i = 0; i < length; i++) {
+    tostarts[i] = offset;
+    offset = offset + target;
+    tostops[i] = offset;
+   }
+  return success();
+}
+ERROR awkward_index_rpad_and_clip_axis1_64(int64_t* tostarts, int64_t* tostops, int64_t target, int64_t length) {
+  return awkward_index_rpad_and_clip_axis1<int64_t>(tostarts, tostops, target, length);
+}
+
+template <typename T>
+ERROR awkward_RegularArray_rpad_and_clip_axis1(T* toindex, int64_t target, int64_t size, int64_t length) {
+  int64_t shorter = (target < size ? target : size);
+  for (int64_t i = 0;  i < length;  i++) {
+    for (int64_t j = 0;  j < shorter;  j++) {
+      toindex[i*target + j] = i*size + j;
+    }
+    for (int64_t j = shorter;  j < target;  j++) {
+      toindex[i*target + j] = -1;
+    }
+  }
+  return success();
+}
+ERROR awkward_RegularArray_rpad_and_clip_axis1_64(int64_t* toindex, int64_t target, int64_t size, int64_t length) {
+  return awkward_RegularArray_rpad_and_clip_axis1<int64_t>(toindex, target, size, length);
+}
+
+template <typename C>
+ERROR awkward_ListArray_min_range(int64_t* tomin, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  int64_t shorter = fromstops[stopsoffset + 0] - fromstarts[startsoffset + 0];
+  for (int64_t i = 1;  i < lenstarts;  i++) {
+    int64_t range = fromstops[startsoffset + i] - fromstarts[stopsoffset + i];
+    shorter = (shorter < range) ? shorter : range;
+  }
+  *tomin = shorter;
+  return success();
+}
+ERROR awkward_ListArray32_min_range(int64_t* tomin, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_ListArray_min_range<int32_t>(tomin, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+}
+ERROR awkward_ListArrayU32_min_range(int64_t* tomin, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_ListArray_min_range<uint32_t>(tomin, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+}
+ERROR awkward_ListArray64_min_range(int64_t* tomin, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_ListArray_min_range<int64_t>(tomin, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
+}
+
+template <typename C>
+ERROR awkward_ListArray_rpad_and_clip_length_axis1(int64_t* tolength, const C* fromstarts, const C* fromstops, int64_t target, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  int64_t length = 0;
+  for (int64_t i = 0;  i < lenstarts;  i++) {
+    int64_t range = fromstops[startsoffset + i] - fromstarts[stopsoffset + i];
+    length += (target > range) ? target : range;
+  }
+  *tolength = length;
+  return success();
+}
+ERROR awkward_ListArray32_rpad_and_clip_length_axis1(int64_t* tomin, const int32_t* fromstarts, const int32_t* fromstops, int64_t target, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_ListArray_rpad_and_clip_length_axis1<int32_t>(tomin, fromstarts, fromstops, target, lenstarts, startsoffset, stopsoffset);
+}
+ERROR awkward_ListArrayU32_rpad_and_clip_length_axis1(int64_t* tomin, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t target, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_ListArray_rpad_and_clip_length_axis1<uint32_t>(tomin, fromstarts, fromstops, target, lenstarts, startsoffset, stopsoffset);
+}
+ERROR awkward_ListArray64_rpad_and_clip_length_axis1(int64_t* tomin, const int64_t* fromstarts, const int64_t* fromstops, int64_t target, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_ListArray_rpad_and_clip_length_axis1<int64_t>(tomin, fromstarts, fromstops, target, lenstarts, startsoffset, stopsoffset);
+}
+
+template <typename T, typename C>
+ERROR awkward_ListArray_rpad_axis1(T* toindex, const C* fromstarts, const C* fromstops, C* tostarts, C* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
+  int64_t offset = 0;
+  for (int64_t i = 0; i < length; i++) {
+    tostarts[i] = offset;
+    int64_t range = fromstops[startsoffset + i] - fromstarts[stopsoffset + i];
+    for (int64_t j = 0; j < range; j++) {
+     toindex[offset + j] = fromstarts[startsoffset + i] + j;
+    }
+    for (int64_t j = range; j < target; j++) {
+     toindex[offset + j] = -1;
+    }
+    offset = (target > range) ? tostarts[i] + target : tostarts[i] + range;
+    tostops[i] = offset;
+   }
+  return success();
+}
+ERROR awkward_ListArray32_rpad_axis1_64(int64_t* toindex, const int32_t* fromstarts, const int32_t* fromstops, int32_t* tostarts, int32_t* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_ListArray_rpad_axis1<int64_t, int32_t>(toindex, fromstarts, fromstops, tostarts, tostops, target, length, startsoffset, stopsoffset);
+}
+ERROR awkward_ListArrayU32_rpad_axis1_64(int64_t* toindex, const uint32_t* fromstarts, const uint32_t* fromstops, uint32_t* tostarts, uint32_t* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_ListArray_rpad_axis1<int64_t, uint32_t>(toindex, fromstarts, fromstops, tostarts, tostops, target, length, startsoffset, stopsoffset);
+}
+ERROR awkward_ListArray64_rpad_axis1_64(int64_t* toindex, const int64_t* fromstarts, const int64_t* fromstops, int64_t* tostarts, int64_t* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset) {
+  return awkward_ListArray_rpad_axis1<int64_t, int64_t>(toindex, fromstarts, fromstops, tostarts, tostops, target, length, startsoffset, stopsoffset);
+}
+
+template <typename T, typename C>
+ERROR awkward_ListOffsetArray_rpad_and_clip_axis1(T* toindex, const C* fromoffsets, int64_t offsetsoffset, int64_t length, int64_t target) {
+  for (int64_t i = 0; i < length; i++) {
+    int64_t range = (T)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
+    int64_t shorter = (target < range) ? target : range;
+    for (int64_t j = 0; j < shorter; j++) {
+      toindex[i*target + j] = (T)fromoffsets[offsetsoffset + i] + j;
+    }
+    for (int64_t j = shorter; j < target; j++) {
+      toindex[i*target + j] = -1;
+    }
+  }
+  return success();
+}
+ERROR awkward_ListOffsetArray32_rpad_and_clip_axis1_64(int64_t* toindex, const int32_t* fromoffsets, int64_t offsetsoffset, int64_t length, int64_t target) {
+  return awkward_ListOffsetArray_rpad_and_clip_axis1<int64_t, int32_t>(toindex, fromoffsets, offsetsoffset, length, target);
+}
+ERROR awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64(int64_t* toindex, const uint32_t* fromoffsets, int64_t offsetsoffset, int64_t length, int64_t target) {
+  return awkward_ListOffsetArray_rpad_and_clip_axis1<int64_t, uint32_t>(toindex, fromoffsets, offsetsoffset, length, target);
+}
+ERROR awkward_ListOffsetArray64_rpad_and_clip_axis1_64(int64_t* toindex, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t length, int64_t target) {
+  return awkward_ListOffsetArray_rpad_and_clip_axis1<int64_t, int64_t>(toindex, fromoffsets, offsetsoffset, length, target);
+}
+
+template <typename C>
+ERROR awkward_ListOffsetArray_rpad_length_axis1(C* tooffsets, const C* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target, int64_t* tolength) {
+  int64_t length = 0;
+  tooffsets[0] = 0;
+  for (int64_t i = 0; i < fromlength; i++) {
+    int64_t range = fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i];
+    int64_t longer = (target < range) ? range : target;
+    length = length + longer;
+    tooffsets[i + 1] = tooffsets[i] + longer;
+  }
+  *tolength = length;
+
+  return success();
+}
+ERROR awkward_ListOffsetArray32_rpad_length_axis1(int32_t* tooffsets, const int32_t* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target, int64_t* tolength) {
+  return awkward_ListOffsetArray_rpad_length_axis1<int32_t>(tooffsets, fromoffsets, offsetsoffset, fromlength, target, tolength);
+}
+ERROR awkward_ListOffsetArrayU32_rpad_length_axis1(uint32_t* tooffsets, const uint32_t* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target, int64_t* tolength) {
+  return awkward_ListOffsetArray_rpad_length_axis1<uint32_t>(tooffsets, fromoffsets, offsetsoffset, fromlength, target, tolength);
+}
+ERROR awkward_ListOffsetArray64_rpad_length_axis1(int64_t* tooffsets, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target, int64_t* tolength) {
+  return awkward_ListOffsetArray_rpad_length_axis1<int64_t>(tooffsets, fromoffsets, offsetsoffset, fromlength, target, tolength);
+}
+
+template <typename T, typename C>
+ERROR awkward_ListOffsetArray_rpad_axis1(T* toindex, const C* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target) {
+  int64_t count = 0;
+  for (int64_t i = 0; i < fromlength; i++) {
+    int64_t range = (T)(fromoffsets[offsetsoffset + i + 1] - fromoffsets[offsetsoffset + i]);
+    for (int64_t j = 0; j < range; j++) {
+      toindex[count++] = (T)fromoffsets[offsetsoffset + i] + j;
+    }
+    for (int64_t j = range; j < target; j++) {
+      toindex[count++] = -1;
+    }
+  }
+  return success();
+}
+ERROR awkward_ListOffsetArray32_rpad_axis1_64(int64_t* toindex, const int32_t* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target) {
+  return awkward_ListOffsetArray_rpad_axis1<int64_t, int32_t>(toindex, fromoffsets, offsetsoffset, fromlength, target);
+}
+ERROR awkward_ListOffsetArrayU32_rpad_axis1_64(int64_t* toindex, const uint32_t* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target) {
+  return awkward_ListOffsetArray_rpad_axis1<int64_t, uint32_t>(toindex, fromoffsets, offsetsoffset, fromlength, target);
+}
+ERROR awkward_ListOffsetArray64_rpad_axis1_64(int64_t* toindex, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target) {
+  return awkward_ListOffsetArray_rpad_axis1<int64_t, int64_t>(toindex, fromoffsets, offsetsoffset, fromlength, target);
 }

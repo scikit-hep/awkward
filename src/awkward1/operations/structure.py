@@ -213,4 +213,12 @@ def flatten(array, axis=0):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     return awkward1._util.wrap(layout.flatten(axis), behavior)
 
+def rpad(array, length, axis=1, clip=False):
+    behavior = awkward1._util.behaviorof(array)
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
+    if clip:
+        return awkward1._util.wrap(layout.rpad_and_clip(length, axis), behavior)
+    else:
+        return awkward1._util.wrap(layout.rpad(length, axis), behavior)
+
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numpy", "awkward1")]

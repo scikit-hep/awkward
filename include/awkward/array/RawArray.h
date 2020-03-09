@@ -391,7 +391,7 @@ namespace awkward {
       return std::pair<int64_t, int64_t>(1, 1);
     }
 
-    const std::pair<bool, int64_t> branch_depth() const {
+    const std::pair<bool, int64_t> branch_depth() const override {
       return std::pair<bool, int64_t>(false, 1);
     }
 
@@ -494,6 +494,34 @@ namespace awkward {
 
     const std::shared_ptr<SliceItem> asslice() const override {
       throw std::invalid_argument("cannot use RawArray as a slice");
+    }
+
+    const std::shared_ptr<Content> rpad(int64_t target, int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis != depth) {
+        throw std::invalid_argument("axis exceeds the depth of this array");
+      }
+      if (target < length()) {
+        return shallow_copy();
+      }
+      else {
+        return rpad_and_clip(target, toaxis, depth);
+      }
+    }
+
+    const std::shared_ptr<Content> rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis != depth) {
+        throw std::invalid_argument("axis exceeds the depth of this array");
+      }
+      Index64 index(target);
+      struct Error err = awkward_index_rpad_and_clip_axis0_64(
+        index.ptr().get(),
+        target,
+        length());
+      util::handle_error(err, classname(), identities_.get());
+
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
     }
 
     const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {

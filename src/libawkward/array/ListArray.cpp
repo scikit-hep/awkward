@@ -834,6 +834,67 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::rpad(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return rpad_axis0(target, false);
+    }
+    else if (toaxis == depth + 1) {
+      int64_t min = target;
+      struct Error err1 = util::awkward_ListArray_min_range<T>(
+        &min,
+        starts_.ptr().get(),
+        stops_.ptr().get(),
+        starts_.length(),
+        starts_.offset(),
+        stops_.offset());
+      util::handle_error(err1, classname(), identities_.get());
+      if (target < min) {
+        return shallow_copy();
+      }
+      else {
+        int64_t tolength = 0;
+        struct Error err2 = util::awkward_ListArray_rpad_and_clip_length_axis1<T>(
+          &tolength,
+          starts_.ptr().get(),
+          stops_.ptr().get(),
+          target,
+          starts_.length(),
+          starts_.offset(),
+          stops_.offset()
+        );
+        util::handle_error(err2, classname(), identities_.get());
+
+        Index64 index(tolength);
+        IndexOf<T> starts(starts_.length());
+        IndexOf<T> stops(starts_.length());
+        struct Error err3 = util::awkward_ListArray_rpad_axis1_64<T>(
+          index.ptr().get(),
+          starts_.ptr().get(),
+          stops_.ptr().get(),
+          starts.ptr().get(),
+          stops.ptr().get(),
+          target,
+          starts_.length(),
+          starts_.offset(),
+          stops_.offset());
+        util::handle_error(err3, classname(), identities_.get());
+
+        std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content());
+        return std::make_shared<ListArrayOf<T>>(Identities::none(), parameters_, starts, stops, next.get()->simplify());
+      }
+    }
+    else {
+      return std::make_shared<ListArrayOf<T>>(Identities::none(), parameters_, starts_, stops_, content_.get()->rpad(target, toaxis, depth + 1));
+    }
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+    return toListOffsetArray64().get()->rpad_and_clip(target, axis, depth);
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
