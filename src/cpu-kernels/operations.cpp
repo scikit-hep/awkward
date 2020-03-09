@@ -55,14 +55,24 @@ ERROR awkward_listoffsetarray64_flatten_offsets_64(int64_t* tooffsets, const int
 
 template <typename T, typename C>
 ERROR awkward_indexedarray_flatten_none2empty(T* outoffsets, const C* outindex, int64_t outindexoffset, int64_t outindexlength, const T* offsets, int64_t offsetsoffset, int64_t offsetslength) {
+  outoffsets[0] = offsets[offsetsoffset + 0];
+  int64_t k = 1;
   for (int64_t i = 0;  i < outindexlength;  i++) {
-    std::cout << "outindex " << outindex[outindexoffset + i] << std::endl;
+    C idx = outindex[outindexoffset + i];
+    if (idx < 0) {
+      outoffsets[k] = outoffsets[k - 1];
+      k++;
+    }
+    else if (offsetsoffset + idx + 1 >= offsetslength) {
+      return failure("flattening offset out of range", i, kSliceNone);
+    }
+    else {
+      T count = offsets[offsetsoffset + idx + 1] - offsets[offsetsoffset + idx];
+      outoffsets[k] = outoffsets[k - 1] + count;
+      k++;
+    }
   }
-  for (int64_t j = 0;  j < offsetslength;  j++) {
-    std::cout << "offsets  " << offsets[offsetsoffset + j] << std::endl;
-  }
-
-  return failure("hey there", 0, kSliceNone);
+  return success();
 }
 ERROR awkward_indexedarray32_flatten_none2empty_64(int64_t* outoffsets, const int32_t* outindex, int64_t outindexoffset, int64_t outindexlength, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslength) {
   return awkward_indexedarray_flatten_none2empty<int64_t, int32_t>(outoffsets, outindex, outindexoffset, outindexlength, offsets, offsetsoffset, offsetslength);

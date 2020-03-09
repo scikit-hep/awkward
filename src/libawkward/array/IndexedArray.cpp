@@ -706,10 +706,6 @@ namespace awkward {
       Index64 offsets = offsets_flattened.first;
       std::shared_ptr<Content> flattened = offsets_flattened.second;
 
-      std::cout << "flattened" << std::endl;
-      std::cout << flattened.get()->tostring() << std::endl;
-      std::cout << "offsets " << offsets.tostring() << std::endl;
-
       Index64 outoffsets(offsets.length() + numnull);
       struct Error err = util::awkward_indexedarray_flatten_none2empty_64<T>(
         outoffsets.ptr().get(),
@@ -721,11 +717,33 @@ namespace awkward {
         offsets.length());
       util::handle_error(err, classname(), identities_.get());
 
-
-      throw std::runtime_error("STOP");
+      return std::pair<Index64, std::shared_ptr<Content>>(outoffsets, flattened);
     }
     else {
-      throw std::runtime_error("HALT");
+      int64_t numnull;
+      std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
+      Index64 nextcarry = pair.first;
+      IndexOf<T> outindex = pair.second;
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+
+      std::pair<Index64, std::shared_ptr<Content>> offsets_flattened = next.get()->offsets_and_flattened(axis, depth);
+      Index64 offsets = offsets_flattened.first;
+      std::shared_ptr<Content> flattened = offsets_flattened.second;
+
+      if (offsets.length() == 0) {
+        return std::pair<Index64, std::shared_ptr<Content>>(offsets, std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), util::Parameters(), index_, flattened));
+      }
+      else {
+        std::cout << "self" << std::endl;
+        std::cout << tostring() << std::endl;
+        std::cout << "outindex " << outindex.tostring() << std::endl;
+        std::cout << "offsets  " << offsets.tostring() << std::endl;
+        std::cout << "flattened" << std::endl;
+        std::cout << flattened.get()->tostring() << std::endl;
+
+        throw std::runtime_error("HALT");
+      }
 
       // int64_t numnull;
       // std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
