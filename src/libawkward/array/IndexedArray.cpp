@@ -711,7 +711,7 @@ namespace awkward {
       std::cout << "offsets " << offsets.tostring() << std::endl;
 
       Index64 outoffsets(offsets.length() + numnull);
-      struct Error err = awkward_indexedarray_flatten_none2empty(
+      struct Error err = util::awkward_indexedarray_flatten_none2empty_64<T>(
         outoffsets.ptr().get(),
         outindex.ptr().get(),
         outindex.offset(),

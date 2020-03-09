@@ -53,8 +53,8 @@ ERROR awkward_listoffsetarray64_flatten_offsets_64(int64_t* tooffsets, const int
   return awkward_listoffsetarray_flatten_offsets<int64_t, int64_t>(tooffsets, outeroffsets, outeroffsetsoffset, outeroffsetslen, inneroffsets, inneroffsetsoffset, inneroffsetslen);
 }
 
-template <typename T>
-ERROR awkward_indexedarray_flatten_none2empty(T* outoffsets, const T* outindex, int64_t outindexoffset, int64_t outindexlength, const T* offsets, int64_t offsetsoffset, int64_t offsetslength) {
+template <typename T, typename C>
+ERROR awkward_indexedarray_flatten_none2empty(T* outoffsets, const C* outindex, int64_t outindexoffset, int64_t outindexlength, const T* offsets, int64_t offsetsoffset, int64_t offsetslength) {
   for (int64_t i = 0;  i < outindexlength;  i++) {
     std::cout << "outindex " << outindex[outindexoffset + i] << std::endl;
   }
@@ -64,8 +64,14 @@ ERROR awkward_indexedarray_flatten_none2empty(T* outoffsets, const T* outindex, 
 
   return failure("hey there", 0, kSliceNone);
 }
-ERROR awkward_indexedarray_flatten_none2empty_64(int64_t* outoffsets, const int64_t* outindex, int64_t outindexoffset, int64_t outindexlength, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslength) {
-  return awkward_indexedarray_flatten_none2empty<int64_t>(outoffsets, outindex, outindexoffset, outindexlength, offsets, offsetsoffset, offsetslength);
+ERROR awkward_indexedarray32_flatten_none2empty_64(int64_t* outoffsets, const int32_t* outindex, int64_t outindexoffset, int64_t outindexlength, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslength) {
+  return awkward_indexedarray_flatten_none2empty<int64_t, int32_t>(outoffsets, outindex, outindexoffset, outindexlength, offsets, offsetsoffset, offsetslength);
+}
+ERROR awkward_indexedarrayU32_flatten_none2empty_64(int64_t* outoffsets, const uint32_t* outindex, int64_t outindexoffset, int64_t outindexlength, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslength) {
+  return awkward_indexedarray_flatten_none2empty<int64_t, uint32_t>(outoffsets, outindex, outindexoffset, outindexlength, offsets, offsetsoffset, offsetslength);
+}
+ERROR awkward_indexedarray64_flatten_none2empty_64(int64_t* outoffsets, const int64_t* outindex, int64_t outindexoffset, int64_t outindexlength, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslength) {
+  return awkward_indexedarray_flatten_none2empty<int64_t, int64_t>(outoffsets, outindex, outindexoffset, outindexlength, offsets, offsetsoffset, offsetslength);
 }
 
 template <typename T, typename C>
