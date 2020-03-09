@@ -29,6 +29,20 @@ namespace awkward {
     return identities_;
   }
 
+  const std::shared_ptr<Content> Content::rpad_axis0(int64_t target, bool clip) const {
+    if (!clip  &&  target < length()) {
+      return shallow_copy();
+    }
+    Index64 index(target);
+    struct Error err = awkward_index_rpad_and_clip_axis0_64(
+      index.ptr().get(),
+      target,
+      length());
+    util::handle_error(err, classname(), identities_.get());
+    std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+    return next.get()->simplify();
+  }
+
   const std::string Content::tostring() const {
     return tostring_part("", "", "");
   }
@@ -350,14 +364,9 @@ namespace awkward {
   }
 
   const int64_t Content::axis_wrap_if_negative(int64_t axis) const {
-    int64_t mindepth = minmax_depth().first;
-    int64_t maxdepth = minmax_depth().second;
-    int64_t depth = purelist_depth();
-    if (axis < 0  &&  mindepth == depth  &&  maxdepth == depth) {
-      return (depth - 1 + axis);
+    if (axis < 0) {
+      throw std::runtime_error("FIXME: negative axis not implemented yet");
     }
-    else {
-      return axis;
-    }
+    return axis;
   }
 }

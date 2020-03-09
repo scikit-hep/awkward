@@ -5,6 +5,7 @@
 
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/Record.h"
@@ -587,6 +588,44 @@ namespace awkward {
 
   const std::shared_ptr<SliceItem> RecordArray::asslice() const {
     throw std::invalid_argument("cannot use records as a slice");
+  }
+
+  const std::shared_ptr<Content> RecordArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return rpad_axis0(target, false);
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->rpad(target, toaxis, depth));
+      }
+      if (contents.empty()) {
+        return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
+      }
+      else {
+        return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+      }
+    }
+  }
+
+  const std::shared_ptr<Content> RecordArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return rpad_axis0(target, true);
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->rpad_and_clip(target, toaxis, depth));
+      }
+      if (contents.empty()) {
+        return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
+      }
+      else {
+        return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+      }
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {

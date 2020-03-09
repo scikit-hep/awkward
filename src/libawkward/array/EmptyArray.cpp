@@ -4,8 +4,10 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "awkward/cpu-kernels/operations.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ArrayType.h"
+#include "awkward/array/IndexedArray.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/RegularArray.h"
 
@@ -193,6 +195,26 @@ namespace awkward {
     std::vector<int64_t> shape({ 0 });
     std::vector<int64_t> strides({ 1 });
     return std::make_shared<SliceArray64>(index, shape, strides, false);
+  }
+
+  const std::shared_ptr<Content> EmptyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis != depth) {
+      throw std::invalid_argument("axis exceeds the depth of this array");
+    }
+    else {
+      return rpad_and_clip(target, axis, depth);
+    }
+  }
+
+  const std::shared_ptr<Content> EmptyArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis != depth) {
+      throw std::invalid_argument("axis exceeds the depth of this array");
+    }
+    else {
+      return rpad_axis0(target, true);
+    }
   }
 
   const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {

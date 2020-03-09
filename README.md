@@ -200,7 +200,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `awkward.where` (issue [#75](https://github.com/scikit-hep/awkward-1.0/issues/75)): like `numpy.where`; old doesn't have this yet, but we'll need it.
       * [X] `awkward.concatenate` (issue [#76](https://github.com/scikit-hep/awkward-1.0/issues/76)): same as old, but supporting `axis` at any depth.
       * [ ] `awkward.zip` (issue [#77](https://github.com/scikit-hep/awkward-1.0/issues/77)): makes jagged tables; this is a naive version of `awkward.join` below.
-      * [ ] `awkward.pad` (issue [#73](https://github.com/scikit-hep/awkward-1.0/issues/73)): same as old, but without the `clip` option (use slicing instead).
+      * [X] `awkward.pad` (issue [#73](https://github.com/scikit-hep/awkward-1.0/issues/73)): same as old, but without the `clip` option (use slicing instead).
       * [ ] `awkward.fillna` (issue [#72](https://github.com/scikit-hep/awkward-1.0/issues/72)): same as old.
       * [ ] `awkward.cross` (and `awkward.argcross`, issue [#78](https://github.com/scikit-hep/awkward-1.0/issues/78)): to make combinations by cross-joining multiple arrays; option to use `Identity` index.
       * [ ] `awkward.choose` (and `awkward.argchoose`, issue [#79](https://github.com/scikit-hep/awkward-1.0/issues/79)): to make combinations by choosing a fixed number from a single array; option to use `Identity` index and an option to include same-object combinations.
