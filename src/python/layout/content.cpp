@@ -866,9 +866,10 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("num", [](const T& self, int64_t axis) -> py::object {
             return box(self.num(axis, 0));
           }, py::arg("axis") = 0)
-          // .def("flatten", [](const T& self, int64_t axis) -> py::object {
-          //   return box(self.flatten(axis));
-          // }, py::arg("axis") = 0)
+          .def("flatten", [](const T& self, int64_t axis) -> py::object {
+            std::pair<ak::Index64, std::shared_ptr<ak::Content>> offsets_and_flattened = self.offsets_and_flattened(axis, 0);
+            return box(offsets_and_flattened.second);
+          }, py::arg("axis") = 0)
           .def("rpad", [](const T&self, int64_t length, int64_t axis) -> py::object {
             return box(self.rpad(length, axis, 0));
           })

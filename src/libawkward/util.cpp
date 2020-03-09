@@ -457,6 +457,19 @@ namespace awkward {
       return awkward_listarray64_num_64(tonum, fromstarts, startsoffset, fromstops, stopsoffset, length);
     }
 
+    template <>
+    Error awkward_listoffsetarray_flatten_offsets_64<int32_t>(int64_t* tooffsets, const int32_t* outeroffsets, int64_t outeroffsetsoffset, int64_t outeroffsetslen, const int64_t* inneroffsets, int64_t inneroffsetsoffset, int64_t inneroffsetslen) {
+      awkward_listoffsetarray32_flatten_offsets_64(tooffsets, outeroffsets, outeroffsetsoffset, outeroffsetslen, inneroffsets, inneroffsetsoffset, inneroffsetslen);
+    }
+    template <>
+    Error awkward_listoffsetarray_flatten_offsets_64<uint32_t>(int64_t* tooffsets, const uint32_t* outeroffsets, int64_t outeroffsetsoffset, int64_t outeroffsetslen, const int64_t* inneroffsets, int64_t inneroffsetsoffset, int64_t inneroffsetslen) {
+      awkward_listoffsetarrayU32_flatten_offsets_64(tooffsets, outeroffsets, outeroffsetsoffset, outeroffsetslen, inneroffsets, inneroffsetsoffset, inneroffsetslen);
+    }
+    template <>
+    Error awkward_listoffsetarray_flatten_offsets_64<int64_t>(int64_t* tooffsets, const int64_t* outeroffsets, int64_t outeroffsetsoffset, int64_t outeroffsetslen, const int64_t* inneroffsets, int64_t inneroffsetsoffset, int64_t inneroffsetslen) {
+      awkward_listoffsetarray64_flatten_offsets_64(tooffsets, outeroffsets, outeroffsetsoffset, outeroffsetslen, inneroffsets, inneroffsetsoffset, inneroffsetslen);
+    }
+
     // template <>
     // Error awkward_listarray_flatten_length<int32_t>(int64_t* tolen, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
     //   return awkward_listarray32_flatten_length(tolen, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);

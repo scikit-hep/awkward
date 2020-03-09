@@ -854,7 +854,12 @@ namespace awkward {
   }
 
   const std::pair<Index64, std::shared_ptr<Content>> NumpyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: NumpyArray::offsets_and_flattened");
+    if (shape_.size() != 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->offsets_and_flattened(axis, depth);
+    }
+    else {
+      throw std::runtime_error("FIXME: NumpyArray::offsets_and_flattened");
+    }
 
     // int64_t toaxis = axis_wrap_if_negative(axis);
     // if (shape_.size() <= 1) {

@@ -34,6 +34,23 @@ ERROR awkward_regulararray_num_64(int64_t* tonum, int64_t size, int64_t length) 
   return awkward_regulararray_num<int64_t>(tonum, size, length);
 }
 
+template <typename T, typename C>
+ERROR awkward_listoffsetarray_flatten_offsets(T* tooffsets, const C* outeroffsets, int64_t outeroffsetsoffset, int64_t outeroffsetslen, const T* inneroffsets, int64_t inneroffsetsoffset, int64_t inneroffsetslen) {
+
+
+
+  return failure("hello", 0, 0);
+}
+ERROR awkward_listoffsetarray32_flatten_offsets_64(int64_t* tooffsets, const int32_t* outeroffsets, int64_t outeroffsetsoffset, int64_t outeroffsetslen, const int64_t* inneroffsets, int64_t inneroffsetsoffset, int64_t inneroffsetslen) {
+  return awkward_listoffsetarray_flatten_offsets<int64_t, int32_t>(tooffsets, outeroffsets, outeroffsetsoffset, outeroffsetslen, inneroffsets, inneroffsetsoffset, inneroffsetslen);
+}
+ERROR awkward_listoffsetarrayU32_flatten_offsets_64(int64_t* tooffsets, const uint32_t* outeroffsets, int64_t outeroffsetsoffset, int64_t outeroffsetslen, const int64_t* inneroffsets, int64_t inneroffsetsoffset, int64_t inneroffsetslen) {
+  return awkward_listoffsetarray_flatten_offsets<int64_t, uint32_t>(tooffsets, outeroffsets, outeroffsetsoffset, outeroffsetslen, inneroffsets, inneroffsetsoffset, inneroffsetslen);
+}
+ERROR awkward_listoffsetarray64_flatten_offsets_64(int64_t* tooffsets, const int64_t* outeroffsets, int64_t outeroffsetsoffset, int64_t outeroffsetslen, const int64_t* inneroffsets, int64_t inneroffsetsoffset, int64_t inneroffsetslen) {
+  return awkward_listoffsetarray_flatten_offsets<int64_t, int64_t>(tooffsets, outeroffsets, outeroffsetsoffset, outeroffsetslen, inneroffsets, inneroffsetsoffset, inneroffsetslen);
+}
+
 // template <typename C>
 // ERROR awkward_listarray_flatten_length(int64_t* tolen, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
 //   *tolen = 0;

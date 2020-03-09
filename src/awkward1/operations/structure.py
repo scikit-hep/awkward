@@ -208,10 +208,10 @@ def where(condition, *args, **kwargs):
     else:
         raise TypeError("where() takes from 1 to 3 positional arguments but {0} were given".format(len(args) + 1))
 
-# def flatten(array, axis=0):
-#     behavior = awkward1._util.behaviorof(array)
-#     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-#     return awkward1._util.wrap(layout.flatten(axis), behavior)
+def flatten(array, axis=1):
+    behavior = awkward1._util.behaviorof(array)
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
+    return awkward1._util.wrap(layout.flatten(axis), behavior)
 
 def rpad(array, length, axis=1, clip=False):
     behavior = awkward1._util.behaviorof(array)

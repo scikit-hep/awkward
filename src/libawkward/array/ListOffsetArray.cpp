@@ -51,9 +51,26 @@ namespace awkward {
     return content_;
   }
 
+  template <>
+  Index64 ListOffsetArrayOf<int64_t>::compact_offsets64() const {
+    if (offsets_.ptr().get()[0] == 0) {
+      return offsets_;
+    }
+    else {
+      int64_t len = offsets_.length() - 1;
+      Index64 out(len + 1);
+      struct Error err = util::awkward_listoffsetarray_compact_offsets64<int64_t>(
+        out.ptr().get(),
+        offsets_.ptr().get(),
+        offsets_.offset(),
+        len);
+      util::handle_error(err, classname(), identities_.get());
+      return out;
+    }
+  }
+
   template <typename T>
   Index64 ListOffsetArrayOf<T>::compact_offsets64() const {
-    // FIXME: if offsets_[0] == 0 and std::is_same<T, int64_t>::value, just return offsets_
     int64_t len = offsets_.length() - 1;
     Index64 out(len + 1);
     struct Error err = util::awkward_listoffsetarray_compact_offsets64<T>(
@@ -487,14 +504,33 @@ namespace awkward {
   template <typename T>
   const std::pair<Index64, std::shared_ptr<Content>> ListOffsetArrayOf<T>::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == 0) {
+    if (toaxis == depth) {
       throw std::runtime_error("axis=0 not allowed for flatten");
     }
-    if (toaxis == 1) {
-      throw std::runtime_error("FIXME: ListOffsetArray::offsets_and_flattened");
+    else if (toaxis == depth + 1) {
+      std::shared_ptr<Content> listoffsetarray = toListOffsetArray64();
+      ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
+      return std::pair<Index64, std::shared_ptr<Content>>(raw->offsets(), raw->content());
     }
     else {
-      throw std::runtime_error("FIXME: ListOffsetArray::offsets_and_flattened");
+      std::pair<Index64, std::shared_ptr<Content>> pair = content_.get()->offsets_and_flattened(axis, depth + 1);
+      Index64 inneroffsets = pair.first;
+      if (inneroffsets.length() == 0) {
+        return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets_, content_));
+      }
+      else {
+        Index64 tooffsets(offsets_.length());
+        struct Error err = util::awkward_listoffsetarray_flatten_offsets_64<T>(
+          tooffsets.ptr().get(),
+          offsets_.ptr().get(),
+          offsets_.offset(),
+          offsets_.length(),
+          inneroffsets.ptr().get(),
+          inneroffsets.offset(),
+          inneroffsets.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), tooffsets, pair.second));
+      }
     }
 
     // int64_t toaxis = axis_wrap_if_negative(axis);
