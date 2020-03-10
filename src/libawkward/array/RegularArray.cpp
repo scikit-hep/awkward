@@ -37,7 +37,7 @@ namespace awkward {
     return size_;
   }
 
-  Index64 RegularArray::compact_offsets64() const {
+  Index64 RegularArray::compact_offsets64(bool start_at_zero) const {
     int64_t len = length();
     Index64 out(len + 1);
     struct Error err = awkward_regulararray_compact_offsets64(
@@ -90,8 +90,8 @@ namespace awkward {
     return shallow_copy();
   }
 
-  const std::shared_ptr<Content> RegularArray::toListOffsetArray64() const {
-    Index64 offsets = compact_offsets64();
+  const std::shared_ptr<Content> RegularArray::toListOffsetArray64(bool start_at_zero) const {
+    Index64 offsets = compact_offsets64(start_at_zero);
     return broadcast_tooffsets64(offsets);
   }
 
@@ -336,63 +336,30 @@ namespace awkward {
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
-  const Index64 RegularArray::count64() const {
-    int64_t len = length();
-    Index64 tocount(len);
-    struct Error err = awkward_regulararray_count(
-      tocount.ptr().get(),
-      size_,
-      len);
-    util::handle_error(err, classname(), identities_.get());
-    return tocount;
-  }
-
-  const std::shared_ptr<Content> RegularArray::count(int64_t axis) const {
-#if defined _MSC_VER || defined __i386__
-    std::string format = "q";
-#else
-    std::string format = "l";
-#endif
+  const std::shared_ptr<Content> RegularArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == 0) {
-      Index64 tocount = count64();
-      std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
-      std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
-
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+    if (toaxis == depth) {
+      Index64 out(1);
+      out.ptr().get()[0] = length();
+      return NumpyArray(out).getitem_at_nowrap(0);
+    }
+    else if (toaxis == depth + 1) {
+      Index64 tonum(length());
+      struct Error err = awkward_regulararray_num_64(
+        tonum.ptr().get(),
+        size_,
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      return std::make_shared<NumpyArray>(tonum);
     }
     else {
-      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), content_.get()->count(toaxis - 1), size_);
+      std::shared_ptr<Content> next = content_.get()->num(axis, depth + 1);
+      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), next, size_);
     }
   }
 
-  const std::shared_ptr<Content> RegularArray::flatten(int64_t axis) const {
-    int64_t toaxis = axis_wrap_if_negative(axis);
-    if (toaxis == 0) {
-      if (content_.get()->length() % size_ != 0) {
-        return content_.get()->getitem_range_nowrap(0, length()*size_);
-      }
-      else {
-        return content_;
-      }
-    }
-    else {
-      Index64 count = count64();
-      Index64 ccount = content_.get()->count64();
-      Index64 offsets(length() + 1);
-      offsets.ptr().get()[0] = 0;
-      for (ssize_t i = 0; i < length(); i++) {
-        int64_t l = 0;
-        for (int64_t j = 0; j < count.ptr().get()[i]; j++) {
-          l += ccount.ptr().get()[j + i*size_];
-        }
-        offsets.ptr().get()[i + 1] = l + offsets.ptr().get()[i];
-      }
-
-      std::shared_ptr<Content> nextcontent = content_.get()->flatten(toaxis - 1);
-
-      return std::make_shared<ListOffsetArray64>(identities_, parameters_, offsets, nextcontent);
-    }
+  const std::pair<Index64, std::shared_ptr<Content>> RegularArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    return toListOffsetArray64(true).get()->offsets_and_flattened(axis, depth);
   }
 
   bool RegularArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
@@ -489,7 +456,7 @@ namespace awkward {
         return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), content, size_);
       }
       else {
-        return toListOffsetArray64().get()->merge(other);
+        return toListOffsetArray64(true).get()->merge(other);
       }
     }
     else if (dynamic_cast<ListArray32*>(other.get())  ||
@@ -498,7 +465,7 @@ namespace awkward {
              dynamic_cast<ListOffsetArray32*>(other.get())  ||
              dynamic_cast<ListOffsetArrayU32*>(other.get())  ||
              dynamic_cast<ListOffsetArray64*>(other.get())) {
-      return toListOffsetArray64().get()->merge(other);
+      return toListOffsetArray64(true).get()->merge(other);
     }
     else {
       throw std::invalid_argument(std::string("cannot merge ") + classname() + std::string(" with ") + other.get()->classname());
@@ -549,7 +516,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
-    return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+    return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
@@ -707,17 +674,17 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
-    std::shared_ptr<Content> self = toListOffsetArray64();
+    std::shared_ptr<Content> self = toListOffsetArray64(true);
     return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
-    std::shared_ptr<Content> self = toListOffsetArray64();
+    std::shared_ptr<Content> self = toListOffsetArray64(true);
     return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
   const std::shared_ptr<Content> RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
-    std::shared_ptr<Content> self = toListOffsetArray64();
+    std::shared_ptr<Content> self = toListOffsetArray64(true);
     return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 

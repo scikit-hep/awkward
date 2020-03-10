@@ -306,7 +306,7 @@ def completely_flatten(array):
         return completely_flatten(array.project())
 
     elif isinstance(array, listtypes):
-        return completely_flatten(array.flatten())
+        return completely_flatten(array.flatten(axis=1))
 
     elif isinstance(array, recordtypes):
         out = ()

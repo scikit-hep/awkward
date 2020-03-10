@@ -68,8 +68,8 @@ def string_equal(one, two):
     possible = numpy.logical_and(out, counts1)
     possible_counts = counts1[possible]
 
-    chars1 = numpy.asarray(one[possible].flatten())
-    chars2 = numpy.asarray(two[possible].flatten())
+    chars1 = numpy.asarray(one[possible].flatten(axis=1))
+    chars2 = numpy.asarray(two[possible].flatten(axis=1))
     samechars = (chars1 == chars2)
 
     # ufunc.reduceat requires a weird "offsets" that

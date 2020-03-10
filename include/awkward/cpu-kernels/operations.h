@@ -6,38 +6,31 @@
 #include "awkward/cpu-kernels/util.h"
 
 extern "C" {
-  EXPORT_SYMBOL struct Error awkward_listarray32_count(int32_t* tocount, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_listarrayU32_count(uint32_t* tocount, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_listarray64_count(int64_t* tocount, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-
-  EXPORT_SYMBOL struct Error awkward_listarray32_count_64(int64_t* tocount, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_listarrayU32_count_64(int64_t* tocount, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_listarray64_count_64(int64_t* tocount, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-
-  EXPORT_SYMBOL struct Error awkward_listoffsetarray32_count(int32_t* tocount, const int32_t* fromoffsets, int64_t lenoffsets);
-  EXPORT_SYMBOL struct Error awkward_listoffsetarrayU32_count(uint32_t* tocount, const uint32_t* fromoffsets, int64_t lenoffsets);
-  EXPORT_SYMBOL struct Error awkward_listoffsetarray64_count(int64_t* tocount, const int64_t* fromoffsets, int64_t lenoffsets);
+  EXPORT_SYMBOL struct Error awkward_listarray32_num_64(int64_t* tonum, const int32_t* fromstarts, int64_t startsoffset, const int32_t* fromstops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_num_64(int64_t* tonum, const uint32_t* fromstarts, int64_t startsoffset, const uint32_t* fromstops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarray64_num_64(int64_t* tonum, const int64_t* fromstarts, int64_t startsoffset, const int64_t* fromstops, int64_t stopsoffset, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_listoffsetarray32_count_64(int64_t* tocount, const int32_t* fromoffsets, int64_t lenoffsets);
   EXPORT_SYMBOL struct Error awkward_listoffsetarrayU32_count_64(int64_t* tocount, const uint32_t* fromoffsets, int64_t lenoffsets);
   EXPORT_SYMBOL struct Error awkward_listoffsetarray64_count_64(int64_t* tocount, const int64_t* fromoffsets, int64_t lenoffsets);
 
-  EXPORT_SYMBOL struct Error awkward_indexedarray32_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const int32_t* fromindex, int64_t lenindex, int64_t indexoffset);
-  EXPORT_SYMBOL struct Error awkward_indexedarrayU32_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const uint32_t* fromindex, int64_t lenindex, int64_t indexoffset);
-  EXPORT_SYMBOL struct Error awkward_indexedarray64_count(int64_t* tocount, const int64_t* contentcount, int64_t lencontent, const int64_t* fromindex, int64_t lenindex, int64_t indexoffset);
+  EXPORT_SYMBOL struct Error awkward_regulararray_num_64(int64_t* tonum, int64_t size, int64_t length);
 
-  EXPORT_SYMBOL struct Error awkward_regulararray_count(int64_t* tocount, int64_t size, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listoffsetarray32_flatten_offsets_64(int64_t* tooffsets, const int32_t* outeroffsets, int64_t outeroffsetsoffset, int64_t outeroffsetslen, const int64_t* inneroffsets, int64_t inneroffsetsoffset, int64_t inneroffsetslen);
+  EXPORT_SYMBOL struct Error awkward_listoffsetarrayU32_flatten_offsets_64(int64_t* tooffsets, const uint32_t* outeroffsets, int64_t outeroffsetsoffset, int64_t outeroffsetslen, const int64_t* inneroffsets, int64_t inneroffsetsoffset, int64_t inneroffsetslen);
+  EXPORT_SYMBOL struct Error awkward_listoffsetarray64_flatten_offsets_64(int64_t* tooffsets, const int64_t* outeroffsets, int64_t outeroffsetsoffset, int64_t outeroffsetslen, const int64_t* inneroffsets, int64_t inneroffsetsoffset, int64_t inneroffsetslen);
 
-  EXPORT_SYMBOL struct Error awkward_listarray32_flatten_length(int64_t* tolen, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_listarrayU32_flatten_length(int64_t* tolen, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_listarray64_flatten_length(int64_t* tolen, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_listarray32_flatten_64(int64_t* tocarry, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_listarrayU32_flatten_64(int64_t* tocarry, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_listarray64_flatten_64(int64_t* tocarry, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_indexedarray32_flatten_none2empty_64(int64_t* outoffsets, const int32_t* outindex, int64_t outindexoffset, int64_t outindexlength, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslength);
+  EXPORT_SYMBOL struct Error awkward_indexedarrayU32_flatten_none2empty_64(int64_t* outoffsets, const uint32_t* outindex, int64_t outindexoffset, int64_t outindexlength, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslength);
+  EXPORT_SYMBOL struct Error awkward_indexedarray64_flatten_none2empty_64(int64_t* outoffsets, const int64_t* outindex, int64_t outindexoffset, int64_t outindexlength, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslength);
 
-  EXPORT_SYMBOL struct Error awkward_listarray32_flatten_scale_64(int32_t* tostarts, int32_t* tostops, const int64_t* scale, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_listarrayU32_flatten_scale_64(uint32_t* tostarts, uint32_t* tostops, const int64_t* scale, const uint32_t* fromstarts, const uint32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
-  EXPORT_SYMBOL struct Error awkward_listarray64_flatten_scale_64(int64_t* tostarts, int64_t* tostops, const int64_t* scale, const int64_t* fromstarts, const int64_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
+  EXPORT_SYMBOL struct Error awkward_unionarray32_flatten_length_64(int64_t* total_length, const int8_t* fromtags, int64_t fromtagsoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets);
+  EXPORT_SYMBOL struct Error awkward_unionarrayU32_flatten_length_64(int64_t* total_length, const int8_t* fromtags, int64_t fromtagsoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets);
+  EXPORT_SYMBOL struct Error awkward_unionarray64_flatten_length_64(int64_t* total_length, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets);
+
+  EXPORT_SYMBOL struct Error awkward_unionarray32_flatten_combine_64(int8_t* totags, int64_t* toindex, int64_t* tooffsets, const int8_t* fromtags, int64_t fromtagsoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets);
+  EXPORT_SYMBOL struct Error awkward_unionarrayU32_flatten_combine_64(int8_t* totags, int64_t* toindex, int64_t* tooffsets, const int8_t* fromtags, int64_t fromtagsoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets);
+  EXPORT_SYMBOL struct Error awkward_unionarray64_flatten_combine_64(int8_t* totags, int64_t* toindex, int64_t* tooffsets, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets);
 
   EXPORT_SYMBOL struct Error awkward_indexedarray32_flatten_nextcarry_64(int64_t* tocarry, const int32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);
   EXPORT_SYMBOL struct Error awkward_indexedarrayU32_flatten_nextcarry_64(int64_t* tocarry, const uint32_t* fromindex, int64_t indexoffset, int64_t lenindex, int64_t lencontent);

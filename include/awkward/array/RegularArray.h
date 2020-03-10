@@ -17,10 +17,10 @@ namespace awkward {
     RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<Content>& content, int64_t size);
     const std::shared_ptr<Content> content() const;
     int64_t size() const;
-    Index64 compact_offsets64() const;
+    Index64 compact_offsets64(bool start_at_zero) const;
     const std::shared_ptr<Content> broadcast_tooffsets64(const Index64& offsets) const;
     const std::shared_ptr<Content> toRegularArray() const;
-    const std::shared_ptr<Content> toListOffsetArray64() const;
+    const std::shared_ptr<Content> toListOffsetArray64(bool start_at_zero) const;
 
     const std::string classname() const override;
     void setidentities() override;
@@ -54,9 +54,8 @@ namespace awkward {
 
     // operations
     const std::string validityerror(const std::string& path) const override;
-    const Index64 count64() const override;
-    const std::shared_ptr<Content> count(int64_t axis) const override;
-    const std::shared_ptr<Content> flatten(int64_t axis) const override;
+    const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override;
+    const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override;
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
     const std::shared_ptr<SliceItem> asslice() const override;

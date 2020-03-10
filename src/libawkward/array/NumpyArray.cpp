@@ -761,75 +761,43 @@ namespace awkward {
     return std::string();
   }
 
-  const Index64 NumpyArray::count64() const {
-    if (ndim() < 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be counted because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
-    }
-    else if (ndim() == 1) {
-      Index64 tocount(1);
-      tocount.ptr().get()[0] = length();
-      return tocount;
-    }
-    int64_t len = length();
-    Index64 tocount(len);
-    struct Error err = awkward_regulararray_count(
-      tocount.ptr().get(),
-      (int64_t)shape_[1],
-      len);
-    util::handle_error(err, classname(), identities_.get());
-    return tocount;
-  }
-
-  const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
+  const std::shared_ptr<Content> NumpyArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    ssize_t offset = (ssize_t)toaxis;
-    if (offset > ndim()) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be counted in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    if (toaxis == depth) {
+      Index64 out(1);
+      out.ptr().get()[0] = length();
+      return NumpyArray(out).getitem_at_nowrap(0);
+    }
+    std::vector<ssize_t> shape;
+    int64_t reps = 1;
+    int64_t size = length();
+    int64_t i = 0;
+    while (i < ndim() - 1  &&  depth < toaxis) {
+      shape.push_back(shape_[(size_t)i]);
+      reps *= shape_[(size_t)i];
+      size = shape_[(size_t)i + 1];
+      i++;
+      depth++;
+    }
+    if (toaxis > depth) {
+      throw std::invalid_argument("'axis' out of range for 'num'");
     }
 
-#if defined _MSC_VER || defined __i386__
-    std::string format = "q";
-#else
-    std::string format = "l";
-#endif
-    if (offset == 0) {
-      Index64 tocount = count64();
-      std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
-      std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
-
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+    ssize_t x = sizeof(int64_t);
+    std::vector<ssize_t> strides;
+    for (int64_t j = (int64_t)shape.size();  j > 0;  j--) {
+      strides.insert(strides.begin(), x);
+      x *= shape[(size_t)(j - 1)];
     }
-    else if (offset + 1 == ndim()) {
-      Index64 tocount(1);
-      tocount.ptr().get()[0] = std::accumulate(std::begin(shape_), std::end(shape_), 1, std::multiplies<ssize_t>());
-      std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
-      std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
 
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
-    }
-    else {
-      // From studies/flatten.py:
-      // # content = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
-      // # index = [0] * self.shape[0] * self.shape[1]
-      // # return RegularArray(IndexedArray(index, content), self.shape[1])
+    Index64 tonum(reps);
+    struct Error err = awkward_regulararray_num_64(
+      tonum.ptr().get(),
+      size,
+      reps);
+    util::handle_error(err, classname(), identities_.get());
 
-      std::vector<ssize_t> nextshape = std::vector<ssize_t>(std::begin(shape_) + 1, std::end(shape_));
-      std::vector<ssize_t> nextstrides = std::vector<ssize_t>(std::begin(strides_) + 1, std::end(strides_));
-
-      std::shared_ptr<Content> content = (NumpyArray(identities_, parameters_, ptr_, nextshape, nextstrides, byteoffset_, itemsize_, format_)).count(offset - 1);
-
-      int64_t len = shape_[0]*shape_[1];
-      Index64 tocount(len);
-      struct Error err = awkward_regulararray_count(
-        tocount.ptr().get(),
-        (int64_t)0,
-        len);
-      util::handle_error(err, classname(), identities_.get());
-
-      std::shared_ptr<IndexedArray64> indexed = std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), tocount, content);
-
-      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), indexed, shape_[1]);
-    }
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tonum.ptr(), shape, strides, 0, sizeof(int64_t), format_map.at(std::type_index(typeid(int64_t))));
   }
 
   const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
@@ -885,19 +853,16 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
+  const std::pair<Index64, std::shared_ptr<Content>> NumpyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (shape_.size() <= 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    if (toaxis == depth) {
+      throw std::invalid_argument("axis=0 not allowed for flatten");
     }
-    if (toaxis >= (int64_t)shape_.size() - 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because axis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
-    }
-    if (iscontiguous()) {
-      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_, toaxis), flatten_strides(strides_, toaxis), byteoffset_, itemsize_, format_);
+    else if (shape_.size() != 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->offsets_and_flattened(axis, depth);
     }
     else {
-      return contiguous().flatten(toaxis);
+      throw std::invalid_argument("axis out of range for flatten");
     }
   }
 

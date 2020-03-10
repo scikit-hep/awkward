@@ -421,16 +421,26 @@ namespace awkward {
       return std::string();
     }
 
-    const Index64 count64() const override {
-      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
+    const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis == depth) {
+        Index64 out(1);
+        out.ptr().get()[0] = length();
+        return std::make_shared<RawArrayOf<int64_t>>(Identities::none(), util::Parameters(), out.ptr(), 0, 1, sizeof(int64_t));
+      }
+      else {
+        throw std::invalid_argument("'axis' out of range for 'num'");
+      }
     }
 
-    const std::shared_ptr<Content> count(int64_t axis) const override {
-      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
-    }
-
-    const std::shared_ptr<Content> flatten(int64_t axis) const override {
-      throw std::invalid_argument("RawArray cannot be flattened because it is one-dimentional");
+    const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis == depth) {
+        throw std::invalid_argument("axis=0 not allowed for flatten");
+      }
+      else {
+        throw std::invalid_argument("axis out of range for flatten");
+      }
     }
 
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override {

@@ -419,42 +419,47 @@ namespace awkward {
     return std::string();
   }
 
-  const Index64 RecordArray::count64() const {
-    int64_t len = (int64_t)contents_.size();
-    Index64 tocount(len);
-    int64_t indx(0);
-    for (auto content : contents_) {
-      Index64 toappend = content.get()->count64();
-      tocount.ptr().get()[indx++] = toappend.length();
-    }
-    return tocount;
-  }
-
-  const std::shared_ptr<Content> RecordArray::count(int64_t axis) const {
+  const std::shared_ptr<Content> RecordArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->count(toaxis));
-    }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
+    if (toaxis == depth) {
+      Index64 single(1);
+      single.ptr().get()[0] = length_;
+      std::shared_ptr<Content> singleton = std::make_shared<NumpyArray>(single);
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(singleton);
+      }
+      std::shared_ptr<Content> record = std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, 1);
+      return record.get()->getitem_at_nowrap(0);
     }
     else {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->num(axis, depth));
+      }
+      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, length_);
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->flatten(axis));
+  const std::pair<Index64, std::shared_ptr<Content>> RecordArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("axis=0 not allowed for flatten");
     }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
+    else if (toaxis == depth + 1) {
+      throw std::invalid_argument("arrays of records cannot be flattened (but their contents can be; try a different 'axis')");
     }
     else {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        std::shared_ptr<Content> trimmed = content.get()->getitem_range(0, length());
+        std::pair<Index64, std::shared_ptr<Content>> pair = trimmed.get()->offsets_and_flattened(axis, depth);
+        if (pair.first.length() != 0) {
+          throw std::runtime_error("RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened");
+        }
+        contents.push_back(pair.second);
+      }
+      return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_));
     }
   }
 

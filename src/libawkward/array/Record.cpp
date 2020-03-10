@@ -206,15 +206,18 @@ namespace awkward {
     return array_.get()->validityerror(path + std::string(".array"));
   }
 
-  const Index64 Record::count64() const {
-    throw std::invalid_argument("Record cannot be counted because it is not an array");
+  const std::shared_ptr<Content> Record::num(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("cannot call 'num' with an 'axis' of 0 on a Record");
+    }
+    else {
+      std::shared_ptr<Content> singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
+      return singleton.get()->num(axis, depth).get()->getitem_at_nowrap(0);
+    }
   }
 
-  const std::shared_ptr<Content> Record::count(int64_t axis) const {
-    throw std::invalid_argument("Record cannot be counted because it is not an array");
-  }
-
-  const std::shared_ptr<Content> Record::flatten(int64_t axis) const {
+  const std::pair<Index64, std::shared_ptr<Content>> Record::offsets_and_flattened(int64_t axis, int64_t depth) const {
     throw std::invalid_argument("Record cannot be flattened because it is not an array");
   }
 

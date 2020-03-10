@@ -863,12 +863,13 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
               return pyvalue;
             }
           })
-          .def("sizes", [](const T& self, int64_t axis) -> py::object {
-            return box(self.count(axis));
+          .def("num", [](const T& self, int64_t axis) -> py::object {
+            return box(self.num(axis, 0));
           }, py::arg("axis") = 0)
           .def("flatten", [](const T& self, int64_t axis) -> py::object {
-            return box(self.flatten(axis));
-          }, py::arg("axis") = 0)
+            std::pair<ak::Index64, std::shared_ptr<ak::Content>> offsets_and_flattened = self.offsets_and_flattened(axis, 0);
+            return box(offsets_and_flattened.second);
+          }, py::arg("axis") = 1)
           .def("rpad", [](const T&self, int64_t length, int64_t axis) -> py::object {
             return box(self.rpad(length, axis, 0));
           })
@@ -978,7 +979,7 @@ py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content>
       .def_property_readonly("starts", &ak::ListArrayOf<T>::starts)
       .def_property_readonly("stops", &ak::ListArrayOf<T>::stops)
       .def_property_readonly("content", &ak::ListArrayOf<T>::content)
-      .def("compact_offsets64", &ak::ListArrayOf<T>::compact_offsets64)
+      .def("compact_offsets64", &ak::ListArrayOf<T>::compact_offsets64, py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::ListArrayOf<T>::broadcast_tooffsets64)
       .def("toRegularArray", &ak::ListArrayOf<T>::toRegularArray)
   );
@@ -1001,7 +1002,7 @@ py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, 
       .def_property_readonly("stops", &ak::ListOffsetArrayOf<T>::stops)
       .def_property_readonly("offsets", &ak::ListOffsetArrayOf<T>::offsets)
       .def_property_readonly("content", &ak::ListOffsetArrayOf<T>::content)
-      .def("compact_offsets64", &ak::ListOffsetArrayOf<T>::compact_offsets64)
+      .def("compact_offsets64", &ak::ListOffsetArrayOf<T>::compact_offsets64, py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::ListOffsetArrayOf<T>::broadcast_tooffsets64)
       .def("toRegularArray", &ak::ListOffsetArrayOf<T>::toRegularArray)
   );
@@ -1242,7 +1243,7 @@ py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> mak
 
       .def_property_readonly("size", &ak::RegularArray::size)
       .def_property_readonly("content", &ak::RegularArray::content)
-      .def("compact_offsets64", &ak::RegularArray::compact_offsets64)
+      .def("compact_offsets64", &ak::RegularArray::compact_offsets64, py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::RegularArray::broadcast_tooffsets64)
   );
 }
