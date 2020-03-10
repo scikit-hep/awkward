@@ -53,7 +53,7 @@ namespace awkward {
 
   template <>
   Index64 ListOffsetArrayOf<int64_t>::compact_offsets64() const {
-    if (offsets_.ptr().get()[0] == 0) {
+    if (offsets_.ptr().get()[offsets_.offset()] == 0) {
       return offsets_;
     }
     else {
@@ -136,7 +136,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::toListOffsetArray64() const {
-    if (std::is_same<T, int64_t>::value) {
+    if (std::is_same<T, int64_t>::value  &&  offsets_.ptr().get()[offsets_.offset()] == 0) {
       return shallow_copy();
     }
     else {

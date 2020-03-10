@@ -64,11 +64,9 @@ def test_behaviors():
     assert type(array3["outer"]) is DeepDummyArray
     assert repr(array3["outer"]) == "<DeepDummyArray <DummyArray <1.1> <2.2> <3.3>> <DummyArray > <DummyArray <4.4> <5.5>>>"
 
-@pytest.mark.skip(reason="revamping flatten")
 def test_flatten():
-    assert awkward1.tolist(awkward1.flatten(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True), axis=0)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(awkward1.flatten(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True), axis=1)) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-@pytest.mark.skip(reason="revamping flatten")
 def test_string_equal():
     trials = [
         (["one", "two", "", "three", "four", "", "five", "six", ""],
@@ -105,6 +103,5 @@ def test_string_equal():
     for left, right in trials:
         assert awkward1.tolist(awkward1.Array(left, checkvalid=True) == awkward1.Array(right, checkvalid=True)) == [x == y for x, y in zip(left, right)]
 
-@pytest.mark.skip(reason="finalizing sizes operation")
 def test_string_equal2():
     assert awkward1.tolist(awkward1.Array(["one", "two", "three", "two", "two", "one"], checkvalid=True) == "two") == [False, True, False, True, True, False]

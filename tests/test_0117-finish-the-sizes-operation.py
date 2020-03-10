@@ -161,10 +161,15 @@ def test_highlevel():
 def test_flatten_ListOffsetArray():
     array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     assert awkward1.tolist(awkward1.flatten(array)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(awkward1.flatten(array[1:])) == [4.4, 5.5]
 
     array = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[], [6.6, 7.7, 8.8, 9.9]]])
     assert awkward1.tolist(awkward1.flatten(array)) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(awkward1.flatten(array[1:])) == [[5.5], [], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(awkward1.flatten(array[:, 1:])) == [[], [3.3, 4.4], [6.6, 7.7, 8.8, 9.9]]
     assert awkward1.tolist(awkward1.flatten(array, axis=2)) == [[0.0, 1.1, 2.2, 3.3, 4.4], [], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(awkward1.flatten(array[1:], axis=2)) == [[], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(awkward1.flatten(array[:, 1:], axis=2)) == [[3.3, 4.4], [], [], [6.6, 7.7, 8.8, 9.9]]
 
     array = awkward1.Array(numpy.arange(2*3*5*7).reshape(2, 3, 5, 7).tolist())
     assert awkward1.tolist(awkward1.flatten(array, axis=1)) == numpy.arange(2*3*5*7).reshape(2 * 3, 5, 7).tolist()

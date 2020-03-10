@@ -452,7 +452,8 @@ namespace awkward {
     else {
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
-        std::pair<Index64, std::shared_ptr<Content>> pair = content.get()->offsets_and_flattened(axis, depth);
+        std::shared_ptr<Content> trimmed = content.get()->getitem_range(0, length());
+        std::pair<Index64, std::shared_ptr<Content>> pair = trimmed.get()->offsets_and_flattened(axis, depth);
         if (pair.first.length() != 0) {
           throw std::runtime_error("RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened");
         }

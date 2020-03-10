@@ -1031,7 +1031,6 @@ def test_keepdims():
     assert awkward1.tolist(depth2.prod(axis=-2, keepdims=True)) == awkward1.tolist(nparray.prod(axis=-2, keepdims=True))
     assert awkward1.tolist(depth2.prod(axis=-3, keepdims=True)) == awkward1.tolist(nparray.prod(axis=-3, keepdims=True))
 
-@pytest.mark.skip(reason="revamping flatten")
 def test_highlevel():
     array = awkward1.Array([
         [[ 2,  3, 5],
@@ -1147,7 +1146,6 @@ def test_highlevel():
         [],
         [False, True]]
 
-@pytest.mark.skip(reason="revamping flatten")
 def test_nonreducers():
     x = awkward1.Array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]], checkvalid=True)
     y = awkward1.Array([[1.1, 2.2, 2.9, 4.0, 5.1], [0.9, 2.1, 3.2, 4.1, 4.9]], checkvalid=True)
