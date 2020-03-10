@@ -240,13 +240,57 @@ def multiindex(array):
     register()
     pandas = get_pandas()
 
+    def recurse(layout, row_arrays, col_names):
+        if layout.purelist_depth > 1:
+            offsets, flattened = layout.offsets_and_flatten(axis=1)
+            offsets = numpy.asarray(offsets)
+            counts = offsets[1:] - offsets[:-1]
+            if awkward1._util.win:
+                counts = counts.astype(numpy.int32)
+            index = numpy.arange(len(counts), dtype=counts.dtype)
+            parents = numpy.repeat(index, counts)
+            return recurse(flattened, [numpy.repeat(x, counts) for x in row_arrays + [index]], col_names)
+
+        elif isinstance(layout, awkward1.layout.RecordArray):
+            return sum([recurse(layout.field(n), row_arrays, col_names + (n,)) for n in layout.keys()], [])
+
+        else:
+            try:
+                return [(awkward1.operations.convert.tonumpy(layout), row_arrays, col_names)]
+            except:
+                return [(layout, row_arrays, col_names)]
+
     behavior = awkward1._util.behaviorof(array)
-    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=True, allowother=False)
+    if isinstance(layout, awkward1.layout.Record):
+        layout = layout.array[layout.at : layout.at + 1]
 
+    tables = []
+    last_row_arrays = None
+    for column, row_arrays, col_names in recurse(layout, [], ()):
+        columns = pandas.MultiIndex.from_tuples([col_names])
 
+        if last_row_arrays is not None and len(last_row_arrays) == len(row_arrays) and all(numpy.array_equal(x, y) for x, y in zip(last_row_arrays, row_arrays)):
+            oldcolumns = tables[-1].columns
+            numold = len(oldcolumns.levels)
+            numnew = len(columns.levels)
+            maxnum = max(numold, numnew)
+            if numold != maxnum:
+                oldcolumns = pandas.MultiIndex.from_tuples([x + ("",)*(maxnum - numold) for x in oldcolumns])
+                tables[-1].columns = oldcolumns
+            if numnew != maxnum:
+                columns = pandas.MultiIndex.from_tuples([x + ("",)*(maxnum - numold) for x in columns])
 
+            newframe = pandas.DataFrame(data=column, index=tables[-1].index, columns=columns)
+            tables[-1] = pandas.concat([tables[-1], newframe], axis=1)
 
+        else:
+            if len(row_arrays) == 1:
+                index = pandas.Index(row_arrays[0])
+            else:
+                index = pandas.MultiIndex.from_arrays(row_arrays)
+            tables.append(pandas.DataFrame(data=column, index=index, columns=columns))
 
+        last_row_arrays = row_arrays
 
-
-    raise NotImplementedError
+    return tables
