@@ -12,6 +12,9 @@ import awkward1
 
 pandas = pytest.importorskip("pandas")
 
+# FIXME: this ought to be a check on the Pandas version, not the Python version, but I don't know which Pandas version is producing the bad JSON.
+
+@pytest.mark.skipif(sys.version_info < (3, 6), reason="Test Pandas in 3.6+ only.")
 def test():
     def key(n):
         if n == "values":
