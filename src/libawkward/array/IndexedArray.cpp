@@ -1026,7 +1026,6 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::fillna(int64_t value) const {
     if (ISOPTION) {
-      Index8 mask = bytemask();
 
 #if defined _MSC_VER || defined __i386__
       std::string format = "q";
@@ -1037,26 +1036,25 @@ namespace awkward {
       ptr.get()[0] = value;
       std::vector<ssize_t> shape({ 1 });
       std::vector<ssize_t> strides({ 1 });
-      std::shared_ptr<NumpyArray> fillwith = std::make_shared<NumpyArray>(Identities::none(), parameters_, ptr, shape, strides, 0, sizeof(int64_t), format);
+      std::shared_ptr<NumpyArray> value_array = std::make_shared<NumpyArray>(Identities::none(), parameters_, ptr, shape, strides, 0, sizeof(int64_t), format);
 
       std::vector<std::shared_ptr<Content>> contents;
-      contents.emplace_back(project());
-      contents.emplace_back(fillwith);
+      contents.emplace_back(content());
+      contents.emplace_back(value_array);
 
-      Index64 index(mask.length());
-      for (int64_t i = 0; i < mask.length(); i++)
-      {
-        if(index_.ptr().get()[i] != (int64_t)(-1)) {
-          index.ptr().get()[i] = index_.ptr().get()[i];
-        }
-        else {
-          index.ptr().get()[i] = (int64_t)0;
-        }
-      }
-      return std::make_shared<UnionArray8_64>(Identities::none(), parameters_, mask, index, contents);
+      Index8 tags = bytemask();
+      Index64 index(tags.length());
+      struct Error err = util::awkward_UnionArray_fillna_64<T>(
+        index.ptr().get(),
+        index_.ptr().get(),
+        tags.length());
+      util::handle_error(err, classname(), identities_.get());
+
+      std::shared_ptr<UnionArray8_64> out = std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
+      return out;
     }
     else {
-      throw std::runtime_error("FIXME: IndexedArrayOf<T, false>::fillna is not implemented");
+      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->fillna(value));
     }
   }
 

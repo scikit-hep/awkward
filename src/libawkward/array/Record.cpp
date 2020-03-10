@@ -231,7 +231,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Record::fillna(int64_t value) const {
-    throw std::runtime_error("FIXME: Record::fillna is not implemented");
+    return array_.get()->fillna(value);
   }
 
   const std::shared_ptr<Content> Record::rpad(int64_t length, int64_t axis, int64_t depth) const {

@@ -595,7 +595,16 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RecordArray::fillna(int64_t value) const {
-    throw std::runtime_error("FIXME: RecordArray::fillna is not implemented");
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->fillna(value));
+    }
+    if (contents.empty()) {
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
+    }
+    else {
+      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::rpad(int64_t target, int64_t axis, int64_t depth) const {

@@ -196,7 +196,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::fillna(int64_t value) const {
-    throw std::runtime_error("FIXME: EmptyArray::fillna is not implemented");
+    return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
   }
 
   const std::shared_ptr<Content> EmptyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {

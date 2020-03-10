@@ -510,7 +510,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> RegularArray::fillna(int64_t value) const {
-    return content().get()->fillna(value);
+    return std::make_shared<RegularArray>(Identities::none(), parameters_, content().get()->fillna(value), size_);
   }
 
   const std::shared_ptr<Content> RegularArray::rpad(int64_t target, int64_t axis, int64_t depth) const {

@@ -1436,18 +1436,23 @@ namespace awkward {
       return shallow_copy();
     }
     else  if (format_.compare("O") == 0) {
+      void* source = byteptr();
+      ssize_t blength = bytelength();
+      std::cout << "bytelength: " << blength << ", itemsize: " << itemsize_ << "\n";
+
       throw std::runtime_error("FIXME: NumpyArray::fillna is not implemented");
       std::shared_ptr<int64_t> ptr(new int64_t[1], util::array_deleter<int64_t>());
       ptr.get()[0] = value;
       std::vector<ssize_t> shape({ 1 });
       std::vector<ssize_t> strides({ 1 });
-      std::shared_ptr<NumpyArray> fillwith = std::make_shared<NumpyArray>(Identities::none(), parameters_, ptr, shape, strides, 0, itemsize_, format_);
+      std::shared_ptr<NumpyArray> value_array = std::make_shared<NumpyArray>(Identities::none(), parameters_, ptr, shape, strides, 0, itemsize_, format_);
 
       std::vector<std::shared_ptr<Content>> contents;
       contents.emplace_back(shallow_copy());
-      contents.emplace_back(fillwith);
+      contents.emplace_back(value_array);
 
       int64_t numnull = 0;
+      // FIXME: count all None's
       Index8 tags(length() + numnull);
       Index64 index(length() + numnull);
 

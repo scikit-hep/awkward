@@ -1106,7 +1106,12 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::fillna(int64_t value) const {
-    throw std::runtime_error("FIXME: UnionArrayOf<T, I>::fillna is not implemented");
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.emplace_back(content.get()->fillna(value));
+    }
+    UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+    return out.simplify(false);
   }
 
   template <typename T, typename I>

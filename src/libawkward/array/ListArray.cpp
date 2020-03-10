@@ -835,7 +835,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::fillna(int64_t value) const {
-    throw std::runtime_error("FIXME: ListArrayOf<T>::fillna is not implemented");
+    return toListOffsetArray64().get()->fillna(value);
   }
 
   template <typename T>

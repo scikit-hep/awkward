@@ -852,7 +852,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::fillna(int64_t value) const {
-    throw std::runtime_error("FIXME: ListOffsetArrayOf<T>::fillna is not implemented");
+    return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), parameters_, offsets_, content().get()->fillna(value));
   }
 
   template <typename T>

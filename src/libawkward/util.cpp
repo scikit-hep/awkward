@@ -876,6 +876,20 @@ namespace awkward {
     }
 
     template <>
+    ERROR awkward_UnionArray_fillna_64<int32_t>(int64_t* toindex, const int32_t* fromindex, int64_t length) {
+      return awkward_UnionArray_fillna_from32_to64(toindex, fromindex, length);
+    }
+    template <>
+    ERROR awkward_UnionArray_fillna_64<uint32_t>(int64_t* toindex, const uint32_t* fromindex, int64_t length) {
+      return awkward_UnionArray_fillna_fromU32_to64(toindex, fromindex, length);
+    }
+    template <>
+    ERROR awkward_UnionArray_fillna_64<int64_t>(int64_t* toindex, const int64_t* fromindex, int64_t length) {
+      return awkward_UnionArray_fillna_from64_to64(toindex, fromindex, length);
+    }
+
+
+    template <>
     ERROR awkward_ListArray_min_range<int32_t>(int64_t* tomin, const int32_t* fromstarts, const int32_t* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset) {
       return awkward_ListArray32_min_range(tomin, fromstarts, fromstops, lenstarts, startsoffset, stopsoffset);
     }
