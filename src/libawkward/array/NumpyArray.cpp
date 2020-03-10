@@ -9,6 +9,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
 #include "awkward/cpu-kernels/reducers.h"
+#include "awkward/Iterator.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
@@ -1381,6 +1382,79 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument("only arrays of integers or booleans may be used as a slice");
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::fillna(int64_t value) const {
+    if (format_.compare("?") == 0) {
+      return shallow_copy();
+    }
+    else if (format_.compare("b") == 0) {
+      return shallow_copy();
+    }
+    else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
+      return shallow_copy();
+    }
+    else if (format_.compare("h") == 0) {
+      return shallow_copy();
+    }
+    else if (format_.compare("H") == 0) {
+      return shallow_copy();
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("l") == 0) {
+#else
+    else if (format_.compare("i") == 0) {
+#endif
+      return shallow_copy();
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("L") == 0) {
+#else
+    else if (format_.compare("I") == 0) {
+#endif
+      return shallow_copy();
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("q") == 0) {
+#else
+    else if (format_.compare("l") == 0) {
+#endif
+      return shallow_copy();
+    }
+#if defined _MSC_VER || defined __i386__
+    else if (format_.compare("Q") == 0) {
+#else
+    else if (format_.compare("L") == 0) {
+#endif
+      return shallow_copy();
+    }
+    else if (format_.compare("f") == 0) {
+      return shallow_copy();
+    }
+    else if (format_.compare("d") == 0) {
+      return shallow_copy();
+    }
+    else  if (format_.compare("O") == 0) {
+      throw std::runtime_error("FIXME: NumpyArray::fillna is not implemented");
+      std::shared_ptr<int64_t> ptr(new int64_t[1], util::array_deleter<int64_t>());
+      ptr.get()[0] = value;
+      std::vector<ssize_t> shape({ 1 });
+      std::vector<ssize_t> strides({ 1 });
+      std::shared_ptr<NumpyArray> fillwith = std::make_shared<NumpyArray>(Identities::none(), parameters_, ptr, shape, strides, 0, itemsize_, format_);
+
+      std::vector<std::shared_ptr<Content>> contents;
+      contents.emplace_back(shallow_copy());
+      contents.emplace_back(fillwith);
+
+      int64_t numnull = 0;
+      Index8 tags(length() + numnull);
+      Index64 index(length() + numnull);
+
+      return std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
+    }
+    else {
+      throw std::invalid_argument(std::string("cannot apply fillna to NumpyArray with format \"") + format_ + std::string("\""));
     }
   }
 

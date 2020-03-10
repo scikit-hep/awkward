@@ -195,6 +195,10 @@ namespace awkward {
     return std::make_shared<SliceArray64>(index, shape, strides, false);
   }
 
+  const std::shared_ptr<Content> EmptyArray::fillna(int64_t value) const {
+    throw std::runtime_error("FIXME: EmptyArray::fillna is not implemented");
+  }
+
   const std::shared_ptr<Content> EmptyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis != depth) {

@@ -12,6 +12,7 @@
 #include "awkward/Slice.h"
 #include "awkward/array/None.h"
 #include "awkward/array/EmptyArray.h"
+#include "awkward/array/NumpyArray.h"
 #include "awkward/array/UnionArray.h"
 
 #include "awkward/array/IndexedArray.h"
@@ -1019,6 +1020,43 @@ namespace awkward {
     }
     else {
       return project().get()->asslice();
+    }
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::fillna(int64_t value) const {
+    if (ISOPTION) {
+      Index8 mask = bytemask();
+
+#if defined _MSC_VER || defined __i386__
+      std::string format = "q";
+#else
+      std::string format = "l";
+#endif
+      std::shared_ptr<int64_t> ptr(new int64_t[1], util::array_deleter<int64_t>());
+      ptr.get()[0] = value;
+      std::vector<ssize_t> shape({ 1 });
+      std::vector<ssize_t> strides({ 1 });
+      std::shared_ptr<NumpyArray> fillwith = std::make_shared<NumpyArray>(Identities::none(), parameters_, ptr, shape, strides, 0, sizeof(int64_t), format);
+
+      std::vector<std::shared_ptr<Content>> contents;
+      contents.emplace_back(project());
+      contents.emplace_back(fillwith);
+
+      Index64 index(mask.length());
+      for (int64_t i = 0; i < mask.length(); i++)
+      {
+        if(index_.ptr().get()[i] != (int64_t)(-1)) {
+          index.ptr().get()[i] = index_.ptr().get()[i];
+        }
+        else {
+          index.ptr().get()[i] = (int64_t)0;
+        }
+      }
+      return std::make_shared<UnionArray8_64>(Identities::none(), parameters_, mask, index, contents);
+    }
+    else {
+      throw std::runtime_error("FIXME: IndexedArrayOf<T, false>::fillna is not implemented");
     }
   }
 

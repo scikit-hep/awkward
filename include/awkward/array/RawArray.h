@@ -496,6 +496,10 @@ namespace awkward {
       throw std::invalid_argument("cannot use RawArray as a slice");
     }
 
+    const std::shared_ptr<Content> fillna(int64_t value) const override {
+      throw std::runtime_error("FIXME: fillna is not implemented");
+    }
+
     const std::shared_ptr<Content> rpad(int64_t target, int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis != depth) {

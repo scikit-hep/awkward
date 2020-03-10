@@ -230,6 +230,10 @@ namespace awkward {
     throw std::invalid_argument("cannot use a record as a slice");
   }
 
+  const std::shared_ptr<Content> Record::fillna(int64_t value) const {
+    throw std::runtime_error("FIXME: Record::fillna is not implemented");
+  }
+
   const std::shared_ptr<Content> Record::rpad(int64_t length, int64_t axis, int64_t depth) const {
     throw std::invalid_argument("Record cannot be padded because it is not an array");
   }

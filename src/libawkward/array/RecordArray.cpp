@@ -594,6 +594,10 @@ namespace awkward {
     throw std::invalid_argument("cannot use records as a slice");
   }
 
+  const std::shared_ptr<Content> RecordArray::fillna(int64_t value) const {
+    throw std::runtime_error("FIXME: RecordArray::fillna is not implemented");
+  }
+
   const std::shared_ptr<Content> RecordArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {

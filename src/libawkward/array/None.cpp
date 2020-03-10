@@ -161,6 +161,10 @@ namespace awkward {
     throw std::runtime_error("undefined opteration: None::asslice");
   }
 
+  const std::shared_ptr<Content> None::fillna(int64_t value) const {
+    throw std::runtime_error("undefined opteration: None::fillna");
+  }
+
   const std::shared_ptr<Content> None::rpad(int64_t length, int64_t axis, int64_t depth) const {
     throw std::runtime_error("undefined operation: None::rpad");
   }
