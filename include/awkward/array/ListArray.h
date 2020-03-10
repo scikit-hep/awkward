@@ -18,10 +18,10 @@ namespace awkward {
     const IndexOf<T> starts() const;
     const IndexOf<T> stops() const;
     const std::shared_ptr<Content> content() const;
-    Index64 compact_offsets64() const;
+    Index64 compact_offsets64(bool start_at_zero) const;
     const std::shared_ptr<Content> broadcast_tooffsets64(const Index64& offsets) const;
     const std::shared_ptr<Content> toRegularArray() const;
-    const std::shared_ptr<Content> toListOffsetArray64() const;
+    const std::shared_ptr<Content> toListOffsetArray64(bool start_at_zero) const;
 
     const std::string classname() const override;
     void setidentities() override;

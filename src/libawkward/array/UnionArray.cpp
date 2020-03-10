@@ -835,7 +835,6 @@ namespace awkward {
     }
     else {
       bool has_offsets = false;
-      int64_t total_length = 0;
       std::vector<std::shared_ptr<int64_t>> offsetsptrs;
       std::vector<int64_t*> offsetsraws;
       std::vector<int64_t> offsetsoffsets;
@@ -848,14 +847,25 @@ namespace awkward {
         offsetsoffsets.push_back(offsets.offset());
         contents.push_back(pair.second);
         has_offsets = (offsets.length() != 0);
-        total_length += pair.second.get()->length();
       }
 
       if (has_offsets) {
+        int64_t total_length;
+        struct Error err1 = util::awkward_unionarray_flatten_length_64<T, I>(
+          &total_length,
+          tags_.ptr().get(),
+          tags_.offset(),
+          index_.ptr().get(),
+          index_.offset(),
+          tags_.length(),
+          offsetsraws.data(),
+          offsetsoffsets.data());
+        util::handle_error(err1, classname(), identities_.get());
+
         Index8 totags(total_length);
         Index64 toindex(total_length);
         Index64 tooffsets(tags_.length() + 1);
-        struct Error err = util::awkward_unionarray_flatten_combine_64<T, I>(
+        struct Error err2 = util::awkward_unionarray_flatten_combine_64<T, I>(
           totags.ptr().get(),
           toindex.ptr().get(),
           tooffsets.ptr().get(),
@@ -866,7 +876,7 @@ namespace awkward {
           tags_.length(),
           offsetsraws.data(),
           offsetsoffsets.data());
-        util::handle_error(err, classname(), identities_.get());
+        util::handle_error(err2, classname(), identities_.get());
         return std::pair<Index64, std::shared_ptr<Content>>(tooffsets, std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), totags, toindex, contents));
       }
       else {

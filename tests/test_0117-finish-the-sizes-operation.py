@@ -250,7 +250,10 @@ def test_flatten_UnionArray():
     assert awkward1.tolist(array) == [[1.1], [[3, 3, 3], [3, 3, 3], [3, 3, 3]], [2.2, 2.2], [[2, 2], [2, 2]], [3.3, 3.3, 3.3], [[1]]]
     assert awkward1.tolist(array[1:]) == [[[3, 3, 3], [3, 3, 3], [3, 3, 3]], [2.2, 2.2], [[2, 2], [2, 2]], [3.3, 3.3, 3.3], [[1]]]
     assert awkward1.tolist(awkward1.flatten(array)) == [1.1, [3, 3, 3], [3, 3, 3], [3, 3, 3], 2.2, 2.2, [2, 2], [2, 2], 3.3, 3.3, 3.3, [1]]
+    assert awkward1.tolist(awkward1.flatten(array[1:])) == [[3, 3, 3], [3, 3, 3], [3, 3, 3], 2.2, 2.2, [2, 2], [2, 2], 3.3, 3.3, 3.3, [1]]
 
     array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content2, content2]))
     assert awkward1.tolist(array) == [[[3, 3, 3], [3, 3, 3], [3, 3, 3]], [[3, 3, 3], [3, 3, 3], [3, 3, 3]], [[2, 2], [2, 2]], [[2, 2], [2, 2]], [[1]], [[1]]]
     assert awkward1.tolist(awkward1.flatten(array, axis=2)) == [[3, 3, 3, 3, 3, 3, 3, 3, 3], [3, 3, 3, 3, 3, 3, 3, 3, 3], [2, 2, 2, 2], [2, 2, 2, 2], [1], [1]]
+    assert awkward1.tolist(awkward1.flatten(array[1:], axis=2)) == [[3, 3, 3, 3, 3, 3, 3, 3, 3], [2, 2, 2, 2], [2, 2, 2, 2], [1], [1]]
+    assert awkward1.tolist(awkward1.flatten(array[:, 1:], axis=2)) == [[3, 3, 3, 3, 3, 3], [3, 3, 3, 3, 3, 3], [2, 2], [2, 2], [], []]

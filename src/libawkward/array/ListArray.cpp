@@ -47,7 +47,7 @@ namespace awkward {
   }
 
   template <typename T>
-  Index64 ListArrayOf<T>::compact_offsets64() const {
+  Index64 ListArrayOf<T>::compact_offsets64(bool start_at_zero) const {
     int64_t len = starts_.length();
     Index64 out(len + 1);
     struct Error err = util::awkward_listarray_compact_offsets64<T>(
@@ -95,15 +95,15 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::toRegularArray() const {
-    Index64 offsets = compact_offsets64();
+    Index64 offsets = compact_offsets64(true);
     std::shared_ptr<Content> listoffsetarray64 = broadcast_tooffsets64(offsets);
     ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(listoffsetarray64.get());
     return raw->toRegularArray();
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::toListOffsetArray64() const {
-    Index64 offsets = compact_offsets64();
+  const std::shared_ptr<Content> ListArrayOf<T>::toListOffsetArray64(bool start_at_zero) const {
+    Index64 offsets = compact_offsets64(start_at_zero);
     return broadcast_tooffsets64(offsets);
   }
 
@@ -479,13 +479,13 @@ namespace awkward {
       return std::make_shared<NumpyArray>(tonum);
     }
     else {
-      return toListOffsetArray64().get()->num(axis, depth);
+      return toListOffsetArray64(true).get()->num(axis, depth);
     }
   }
 
   template <typename T>
   const std::pair<Index64, std::shared_ptr<Content>> ListArrayOf<T>::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    return toListOffsetArray64().get()->offsets_and_flattened(axis, depth);
+    return toListOffsetArray64(true).get()->offsets_and_flattened(axis, depth);
   }
 
   template <typename T>
@@ -732,7 +732,7 @@ namespace awkward {
       util::handle_error(err, rawother->classname(), rawother->identities().get());
     }
     else if (RegularArray* rawregulararray = dynamic_cast<RegularArray*>(other.get())) {
-      std::shared_ptr<Content> listoffsetarray = rawregulararray->toListOffsetArray64();
+      std::shared_ptr<Content> listoffsetarray = rawregulararray->toListOffsetArray64(true);
       ListOffsetArray64* rawother = dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
       content = content_.get()->merge(rawother->content());
       Index64 other_starts = rawother->starts();
@@ -759,7 +759,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<SliceItem> ListArrayOf<T>::asslice() const {
-    return toListOffsetArray64().get()->asslice();
+    return toListOffsetArray64(true).get()->asslice();
   }
 
   template <typename T>
@@ -820,12 +820,12 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
-    return toListOffsetArray64().get()->rpad_and_clip(target, axis, depth);
+    return toListOffsetArray64(true).get()->rpad_and_clip(target, axis, depth);
   }
 
   template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
-    return toListOffsetArray64().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+    return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
   template <typename T>
