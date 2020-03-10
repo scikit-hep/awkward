@@ -13,18 +13,18 @@ pandas = pytest.importorskip("pandas")
 
 def test():
     array = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], None, [[], None, [6.6, None, 8.8, 9.9]]])
-    # array = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [[5.5]], [[6.6, None, 8.8, 9.9]]])
-    # array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, None, 8.8, 9.9]])
+    array = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [[5.5]], [[6.6, None, 8.8, 9.9]]])
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, None, 8.8, 9.9]])
 
-    print(awkward1.tolist(array))
-    print(awkward1.pandas.dfs(array)[0])
+    # print(awkward1.pandas.dfs(array)[0])
 
     array = awkward1.Array([[[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]], [], [[{"x": 5.5, "y": [5, 5, 5, 5, 5]}]]])
 
     # for df in awkward1.pandas.dfs(array):
     #     print(df)
 
-    # print(awkward1.pandas.df(array))
+    print(awkward1.tolist(array))
+    print(awkward1.pandas.df(array))
 
     array = awkward1.Array([[[{"x": 0.0, "y": 0}, {"x": 1.1, "y": 1}, {"x": 2.2, "y": 2}], [], [{"x": 3.3, "y": 3}, {"x": 4.4, "y": 4}]], [], [[{"x": 5.5, "y": 5}]]])
 

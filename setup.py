@@ -157,7 +157,7 @@ setup(name = "awkward1",
       download_url = "https://github.com/jpivarski/awkward1/releases",
       license = "BSD 3-clause",
       entry_points = {
-        "numba_extensions": ["init = awkward1._numba:register"]
+        "numba_extensions": ["init = awkward1._connect._numba:register"]
       },
       test_suite = "tests",
       python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
