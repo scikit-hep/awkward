@@ -240,4 +240,13 @@ def multiindex(array):
     register()
     pandas = get_pandas()
 
+    behavior = awkward1._util.behaviorof(array)
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
+
+
+
+
+
+
+
     raise NotImplementedError

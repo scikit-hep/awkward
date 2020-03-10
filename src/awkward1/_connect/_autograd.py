@@ -6,7 +6,7 @@ import numpy
 
 import awkward1.layout
 import awkward1.operations.convert
-import awkward1._numpy
+import awkward1._connect._numpy
 import awkward1._util
 
 NEP13Box = None
@@ -16,7 +16,7 @@ def register():
     global NEP13Box
 
     if NEP13Box is None:
-        class NEP13Box(autograd.extend.Box, awkward1._numpy.NDArrayOperatorsMixin):
+        class NEP13Box(autograd.extend.Box, awkward1._connect._numpy.NDArrayOperatorsMixin):
             def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
                 import autograd
 

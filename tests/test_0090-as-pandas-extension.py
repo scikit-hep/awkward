@@ -8,7 +8,7 @@ import pytest
 import numpy
 
 import awkward1
-import awkward1._pandas
+import awkward1._connect._pandas
 
 py27 = (sys.version_info[0] < 3)
 
@@ -59,7 +59,7 @@ pandas_tests_extension_base = pytest.importorskip("pandas.tests.extension.base")
 @pytest.fixture
 def dtype():
     """A fixture providing the ExtensionDtype to validate."""
-    return awkward1._pandas.get_dtype()()
+    return awkward1._connect._pandas.get_dtype()()
 
 @pytest.fixture
 def data():

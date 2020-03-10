@@ -12,4 +12,7 @@ import awkward1
 pandas = pytest.importorskip("pandas")
 
 def test():
-    pass
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+
+    # print(awkward1.pandas.multiindex(array))
+    # raise Exception
