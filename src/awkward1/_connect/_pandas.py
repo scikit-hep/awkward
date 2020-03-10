@@ -236,7 +236,18 @@ class PandasMixin(PandasNotImportedYet):
     #     register()
     #     raise NotImplementedError
 
-def multiindex(array):
+def df(array, how="inner"):
+    register()
+    pandas = get_pandas()
+    out = None
+    for df in dfs(array):
+        if out is None:
+            out = df
+        else:
+            out = pandas.merge(out, df, how=how, left_index=True, right_index=True)
+    return out
+
+def dfs(array):
     register()
     pandas = get_pandas()
 
@@ -244,12 +255,16 @@ def multiindex(array):
         if layout.purelist_depth > 1:
             offsets, flattened = layout.offsets_and_flatten(axis=1)
             offsets = numpy.asarray(offsets)
-            counts = offsets[1:] - offsets[:-1]
+            starts, stops = offsets[:-1], offsets[1:]
+            counts = stops - starts
             if awkward1._util.win:
                 counts = counts.astype(numpy.int32)
-            index = numpy.arange(len(counts), dtype=counts.dtype)
-            parents = numpy.repeat(index, counts)
-            return recurse(flattened, [numpy.repeat(x, counts) for x in row_arrays + [index]], col_names)
+            if len(row_arrays) == 0:
+                newrows = [numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)]
+            else:
+                newrows = [numpy.repeat(x, counts) for x in row_arrays]
+            newrows.append(numpy.arange(offsets[-1], dtype=counts.dtype) - numpy.repeat(starts, counts))
+            return recurse(flattened, newrows, col_names)
 
         elif isinstance(layout, awkward1.layout.RecordArray):
             return sum([recurse(layout.field(n), row_arrays, col_names + (n,)) for n in layout.keys()], [])
@@ -268,7 +283,10 @@ def multiindex(array):
     tables = []
     last_row_arrays = None
     for column, row_arrays, col_names in recurse(layout, [], ()):
-        columns = pandas.MultiIndex.from_tuples([col_names])
+        if len(col_names) == 0:
+            columns = ["values"]
+        else:
+            columns = pandas.MultiIndex.from_tuples([col_names])
 
         if last_row_arrays is not None and len(last_row_arrays) == len(row_arrays) and all(numpy.array_equal(x, y) for x, y in zip(last_row_arrays, row_arrays)):
             oldcolumns = tables[-1].columns
@@ -285,10 +303,7 @@ def multiindex(array):
             tables[-1] = pandas.concat([tables[-1], newframe], axis=1)
 
         else:
-            if len(row_arrays) == 1:
-                index = pandas.Index(row_arrays[0])
-            else:
-                index = pandas.MultiIndex.from_arrays(row_arrays)
+            index = pandas.MultiIndex.from_arrays(row_arrays, names=["sub"*i + "entry" for i in range(len(row_arrays))])
             tables.append(pandas.DataFrame(data=column, index=index, columns=columns))
 
         last_row_arrays = row_arrays

@@ -36,7 +36,8 @@ numba.register = awkward1._connect._numba.register
 import awkward1._connect._pandas
 pandas = type(awkward1.highlevel)("pandas")
 pandas.register = awkward1._connect._pandas.register
-pandas.multiindex = awkward1._connect._pandas.multiindex
+pandas.df = awkward1._connect._pandas.df
+pandas.dfs = awkward1._connect._pandas.dfs
 
 import awkward1._connect._numexpr
 numexpr = type(awkward1.highlevel)("numexpr")
