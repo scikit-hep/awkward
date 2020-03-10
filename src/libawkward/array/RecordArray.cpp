@@ -446,28 +446,20 @@ namespace awkward {
     if (toaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
-    else {
-      // std::vector<Index64> offsets;
-      // std::vector<std::shared_ptr<Content>> contents;
-      // for (auto content : contents_) {
-      //
-      // }
-
-      // HERE: This must verify that all offsets are identical (either length == 0 or having exactly the same lengths and values) before passing them on. Be sure to trim contents to the length before computing such offsets.
-
-      throw std::runtime_error("FIXME: RecordArray::offsets_and_flattened");
+    else if (toaxis == depth + 1) {
+      throw std::invalid_argument("arrays of records cannot be flattened (but their contents can be; try a different 'axis')");
     }
-
-    // std::vector<std::shared_ptr<Content>> contents;
-    // for (auto content : contents_) {
-    //   contents.push_back(content.get()->flatten(axis));
-    // }
-    // if (contents.empty()) {
-    //   return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
-    // }
-    // else {
-    //   return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
-    // }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        std::pair<Index64, std::shared_ptr<Content>> pair = content.get()->offsets_and_flattened(axis, depth);
+        if (pair.first.length() != 0) {
+          throw std::runtime_error("RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened");
+        }
+        contents.push_back(pair.second);
+      }
+      return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_));
+    }
   }
 
   bool RecordArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {

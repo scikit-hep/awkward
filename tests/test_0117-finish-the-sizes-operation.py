@@ -222,3 +222,7 @@ def test_flatten_IndexedArray():
     array = awkward1.Array(awkward1.layout.IndexedArray64(index, content))
     assert awkward1.tolist(array) == [[[5.5]], [[5.5]], [], [[0.0, 1.1, 2.2], [], [3.3, 4.4]], [[], [6.6, 7.7, 8.8, 9.9]]]
     assert awkward1.tolist(awkward1.flatten(array, axis=2)) == [[5.5], [5.5], [], [0.0, 1.1, 2.2, 3.3, 4.4], [6.6, 7.7, 8.8, 9.9]]
+
+def test_flatten_RecordArray():
+    array = awkward1.Array([{"x": [], "y": [[3, 3, 3]]}, {"x": [[1]], "y": [[2, 2]]}, {"x": [[2], [2]], "y": [[1]]}, {"x": [[3], [3], [3]], "y": [[]]}])
+    assert awkward1.tolist(awkward1.flatten(array, axis=2)) == [{"x": [], "y": [3, 3, 3]}, {"x": [1], "y": [2, 2]}, {"x": [2, 2], "y": [1]}, {"x": [3, 3, 3], "y": []}]
