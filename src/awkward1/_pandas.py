@@ -235,3 +235,9 @@ class PandasMixin(PandasNotImportedYet):
     #         ("skipna", True)])
     #     register()
     #     raise NotImplementedError
+
+def multiindex(array):
+    register()
+    pandas = get_pandas()
+
+    raise NotImplementedError
