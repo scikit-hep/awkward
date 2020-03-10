@@ -6,7 +6,7 @@ import numpy
 
 import awkward1._util
 import awkward1.layout
-import awkward1._numpy
+import awkward1._connect._numpy
 import awkward1.operations.convert
 
 def withfield(base, what, where=None):
@@ -62,7 +62,7 @@ def num(array, axis=1):
     out = layout.num(axis=axis)
     return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
 
-@awkward1._numpy.implements(numpy.size)
+@awkward1._connect._numpy.implements(numpy.size)
 def size(array, axis=None):
     if axis is not None and axis < 0:
         raise NotImplementedError("ak.size with axis < 0")
@@ -131,11 +131,11 @@ def size(array, axis=None):
         else:
             return sizes[-1]
 
-@awkward1._numpy.implements(numpy.atleast_1d)
+@awkward1._connect._numpy.implements(numpy.atleast_1d)
 def atleast_1d(*arrays):
     return numpy.atleast_1d(*[awkward1.operations.convert.tonumpy(x) for x in arrays])
 
-@awkward1._numpy.implements(numpy.concatenate)
+@awkward1._connect._numpy.implements(numpy.concatenate)
 def concatenate(arrays, axis=0, mergebool=True):
     import awkward1.highlevel
 
@@ -157,7 +157,7 @@ def concatenate(arrays, axis=0, mergebool=True):
 
     return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*arrays))
 
-@awkward1._numpy.implements(numpy.broadcast_arrays)
+@awkward1._connect._numpy.implements(numpy.broadcast_arrays)
 def broadcast_arrays(*arrays):
     inputs = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=False) for x in arrays]
 
@@ -171,7 +171,7 @@ def broadcast_arrays(*arrays):
     assert isinstance(out, tuple)
     return [awkward1._util.wrap(x, awkward1._util.behaviorof(arrays)) for x in out]
 
-@awkward1._numpy.implements(numpy.where)
+@awkward1._connect._numpy.implements(numpy.where)
 def where(condition, *args, **kwargs):
     import awkward1.highlevel
 

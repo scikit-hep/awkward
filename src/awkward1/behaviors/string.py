@@ -99,28 +99,28 @@ def string_numba_typer(viewtype):
 def string_numba_lower(context, builder, rettype, viewtype, viewval, viewproxy, attype, atval):
     import numba
     import llvmlite.llvmpy.core
-    import awkward1._numba.layout
+    import awkward1._connect._numba.layout
 
-    whichpos = awkward1._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.CONTENT)
-    nextpos = awkward1._numba.layout.getat(context, builder, viewproxy.arrayptrs, whichpos)
+    whichpos = awkward1._connect._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.CONTENT)
+    nextpos = awkward1._connect._numba.layout.getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-    whichnextpos = awkward1._numba.layout.posat(context, builder, nextpos, viewtype.type.contenttype.ARRAY)
+    whichnextpos = awkward1._connect._numba.layout.posat(context, builder, nextpos, viewtype.type.contenttype.ARRAY)
 
-    startspos = awkward1._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.STARTS)
-    startsptr = awkward1._numba.layout.getat(context, builder, viewproxy.arrayptrs, startspos)
+    startspos = awkward1._connect._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.STARTS)
+    startsptr = awkward1._connect._numba.layout.getat(context, builder, viewproxy.arrayptrs, startspos)
     startsarraypos = builder.add(viewproxy.start, atval)
-    start = awkward1._numba.layout.getat(context, builder, startsptr, startsarraypos, viewtype.type.indextype.dtype)
+    start = awkward1._connect._numba.layout.getat(context, builder, startsptr, startsarraypos, viewtype.type.indextype.dtype)
 
-    stopspos = awkward1._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.STOPS)
-    stopsptr = awkward1._numba.layout.getat(context, builder, viewproxy.arrayptrs, stopspos)
+    stopspos = awkward1._connect._numba.layout.posat(context, builder, viewproxy.pos, viewtype.type.STOPS)
+    stopsptr = awkward1._connect._numba.layout.getat(context, builder, viewproxy.arrayptrs, stopspos)
     stopsarraypos = builder.add(viewproxy.start, atval)
-    stop = awkward1._numba.layout.getat(context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype)
+    stop = awkward1._connect._numba.layout.getat(context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype)
 
-    baseptr = awkward1._numba.layout.getat(context, builder, viewproxy.arrayptrs, whichnextpos)
-    rawptr = builder.add(baseptr, awkward1._numba.castint(context, builder, viewtype.type.indextype.dtype, numba.intp, start))
+    baseptr = awkward1._connect._numba.layout.getat(context, builder, viewproxy.arrayptrs, whichnextpos)
+    rawptr = builder.add(baseptr, awkward1._connect._numba.castint(context, builder, viewtype.type.indextype.dtype, numba.intp, start))
     rawptr_cast = builder.inttoptr(rawptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(numba.intp.bitwidth // 8)))
     strsize = builder.sub(stop, start)
-    strsize_cast = awkward1._numba.castint(context, builder, viewtype.type.indextype.dtype, numba.intp, strsize)
+    strsize_cast = awkward1._connect._numba.castint(context, builder, viewtype.type.indextype.dtype, numba.intp, strsize)
 
     pyapi = context.get_python_api(builder)
     gil = pyapi.gil_ensure()

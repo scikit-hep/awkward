@@ -9,7 +9,7 @@ import numba
 
 import awkward1.operations.convert
 import awkward1._util
-import awkward1._numba.layout
+import awkward1._connect._numba.layout
 
 class Lookup(object):
     def __init__(self, layout):
@@ -37,28 +37,28 @@ def tolookup(layout, positions, sharedptrs, arrays):
     import awkward1.layout
 
     if isinstance(layout, awkward1.layout.NumpyArray):
-        return awkward1._numba.layout.NumpyArrayType.tolookup(layout, positions, sharedptrs, arrays)
+        return awkward1._connect._numba.layout.NumpyArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, awkward1.layout.RegularArray):
-        return awkward1._numba.layout.RegularArrayType.tolookup(layout, positions, sharedptrs, arrays)
+        return awkward1._connect._numba.layout.RegularArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, (awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)):
-        return awkward1._numba.layout.ListArrayType.tolookup(layout, positions, sharedptrs, arrays)
+        return awkward1._connect._numba.layout.ListArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, (awkward1.layout.IndexedArray32, awkward1.layout.IndexedArrayU32, awkward1.layout.IndexedArray64)):
-        return awkward1._numba.layout.IndexedArrayType.tolookup(layout, positions, sharedptrs, arrays)
+        return awkward1._connect._numba.layout.IndexedArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)):
-        return awkward1._numba.layout.IndexedOptionArrayType.tolookup(layout, positions, sharedptrs, arrays)
+        return awkward1._connect._numba.layout.IndexedOptionArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, awkward1.layout.RecordArray):
-        return awkward1._numba.layout.RecordArrayType.tolookup(layout, positions, sharedptrs, arrays)
+        return awkward1._connect._numba.layout.RecordArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, awkward1.layout.Record):
-        return awkward1._numba.layout.RecordType.tolookup(layout, positions, sharedptrs, arrays)
+        return awkward1._connect._numba.layout.RecordType.tolookup(layout, positions, sharedptrs, arrays)
 
     elif isinstance(layout, (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)):
-        return awkward1._numba.layout.UnionArrayType.tolookup(layout, positions, sharedptrs, arrays)
+        return awkward1._connect._numba.layout.UnionArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
     else:
         raise AssertionError("unrecognized layout type: {0}".format(type(layout)))
@@ -128,7 +128,7 @@ def wrap(type, viewtype, fields):
 
 class ArrayViewType(numba.types.Type):
     def __init__(self, type, behavior, fields):
-        super(ArrayViewType, self).__init__(name="awkward1.ArrayView({0}, {1}, {2})".format(type.name, awkward1._numba.repr_behavior(behavior), repr(fields)))
+        super(ArrayViewType, self).__init__(name="awkward1.ArrayView({0}, {1}, {2})".format(type.name, awkward1._connect._numba.repr_behavior(behavior), repr(fields)))
         self.type = type
         self.behavior = behavior
         self.fields = fields

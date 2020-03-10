@@ -11,14 +11,14 @@ except:
 
 import numpy
 
-import awkward1._numpy
-import awkward1._pandas
+import awkward1._connect._numpy
+import awkward1._connect._pandas
 import awkward1.layout
 import awkward1.operations.convert
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
-class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin, Sequence):
+class Array(awkward1._connect._numpy.NDArrayOperatorsMixin, awkward1._connect._pandas.PandasMixin, Sequence):
     def __init__(self, data, behavior=None, checkvalid=False):
         if isinstance(data, awkward1.layout.Content):
             layout = data
@@ -146,31 +146,31 @@ class Array(awkward1._numpy.NDArrayOperatorsMixin, awkward1._pandas.PandasMixin,
     def __array__(self, *args, **kwargs):
         if awkward1._util.called_by_module("pandas"):
             try:
-                return awkward1._numpy.convert_to_array(self._layout, args, kwargs)
+                return awkward1._connect._numpy.convert_to_array(self._layout, args, kwargs)
             except:
                 out = numpy.empty(len(self._layout), dtype="O")
                 for i, x in enumerate(self._layout):
                     out[i] = awkward1._util.wrap(x, self._behavior)
                 return out
         else:
-            return awkward1._numpy.convert_to_array(self._layout, args, kwargs)
+            return awkward1._connect._numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
-        return awkward1._numpy.array_function(func, types, args, kwargs)
+        return awkward1._connect._numpy.array_function(func, types, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
+        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
 
     @property
     def numbatype(self):
         import numba
-        import awkward1._numba
-        awkward1._numba.register()
+        import awkward1._connect._numba
+        awkward1._connect._numba.register()
         if self._numbaview is None:
-            self._numbaview = awkward1._numba.arrayview.ArrayView.fromarray(self)
+            self._numbaview = awkward1._connect._numba.arrayview.ArrayView.fromarray(self)
         return numba.typeof(self._numbaview)
 
-class Record(awkward1._numpy.NDArrayOperatorsMixin):
+class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     def __init__(self, data, behavior=None, checkvalid=False):
         # FIXME: more checks here
         layout = data
@@ -281,15 +281,15 @@ class Record(awkward1._numpy.NDArrayOperatorsMixin):
         return "<Record {0} type={1}>".format(value, type)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
+        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
 
     @property
     def numbatype(self):
         import numba
         import awkward1._numba
-        awkward1._numba.register()
+        awkward1._connect._numba.register()
         if self._numbaview is None:
-            self._numbaview = awkward1._numba.arrayview.RecordView.fromrecord(self)
+            self._numbaview = awkward1._connect._numba.arrayview.RecordView.fromrecord(self)
         return numba.typeof(self._numbaview)
 
 class ArrayBuilder(Sequence):
@@ -348,20 +348,20 @@ class ArrayBuilder(Sequence):
         return "<ArrayBuilder {0} type={1}>".format(value, type)
 
     def __array__(self, *args, **kwargs):
-        return awkward1._numpy.convert_to_array(self._layout.snapshot(), args, kwargs)
+        return awkward1._connect._numpy.convert_to_array(self._layout.snapshot(), args, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
-        return awkward1._numpy.array_function(func, types, args, kwargs)
+        return awkward1._connect._numpy.array_function(func, types, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return awkward1._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
+        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs, self._behavior)
 
     @property
     def numbatype(self):
         import numba
-        import awkward1._numba.builder
-        awkward1._numba.register()
-        return awkward1._numba.builder.ArrayBuilderType(self._behavior)
+        import awkward1._connect._numba.builder
+        awkward1._connect._numba.register()
+        return awkward1._connect._numba.builder.ArrayBuilderType(self._behavior)
 
     def snapshot(self):
         return awkward1._util.wrap(self._layout.snapshot(), self._behavior)
