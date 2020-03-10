@@ -707,7 +707,7 @@ namespace awkward {
       std::shared_ptr<Content> flattened = offsets_flattened.second;
 
       if (offsets.length() == 0) {
-        return std::pair<Index64, std::shared_ptr<Content>>(offsets, std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), util::Parameters(), index_, flattened));
+        return std::pair<Index64, std::shared_ptr<Content>>(offsets, std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), util::Parameters(), outindex, flattened));
       }
       else {
         Index64 outoffsets(offsets.length() + numnull);
