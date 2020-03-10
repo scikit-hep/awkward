@@ -228,10 +228,10 @@ def test_flatten_RecordArray():
     assert awkward1.tolist(awkward1.flatten(array, axis=2)) == [{"x": [], "y": [3, 3, 3]}, {"x": [1], "y": [2, 2]}, {"x": [2, 2], "y": [1]}, {"x": [3, 3, 3], "y": []}]
 
 def test_flatten_UnionArray():
-    content1 = awkward1.Array([[], [1.1], [2.2, 2.2], [3.3, 3.3, 3.3]]).layout
-    content2 = awkward1.Array([[[]], [[1]], [[2], [2]], [[3], [3], [3]]]).layout
-    tags = awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 1, 0, 1], dtype=numpy.int8))
-    index= awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=numpy.int64))
+    content1 = awkward1.Array([[1.1], [2.2, 2.2], [3.3, 3.3, 3.3]]).layout
+    content2 = awkward1.Array([[[1]], [[2], [2]], [[3], [3], [3]]]).layout
+    tags = awkward1.layout.Index8(numpy.array([0, 1, 0, 1, 0, 1], dtype=numpy.int8))
+    index= awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2], dtype=numpy.int64))
     array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content1, content2]))
-    assert awkward1.tolist(array) == [[], [[]], [1.1], [[1]], [2.2, 2.2], [[2], [2]], [3.3, 3.3, 3.3], [[3], [3], [3]]]
-    assert awkward1.tolist(awkward1.flatten(array)) == [[], 1.1, [1], 2.2, 2.2, [2, 2], 3.3, 3.3, 3.3, [3, 3, 3]]
+    assert awkward1.tolist(array) == [[1.1], [[1]], [2.2, 2.2], [[2], [2]], [3.3, 3.3, 3.3], [[3], [3], [3]]]
+    assert awkward1.tolist(awkward1.flatten(array)) == [1.1, [1], 2.2, 2.2, [2, 2], 3.3, 3.3, 3.3, [3, 3, 3]]

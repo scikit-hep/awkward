@@ -859,11 +859,8 @@ namespace awkward {
           else if (offsets_length != offsets.length()) {
             throw std::runtime_error("union's contents return different non-zero offsets lengths in flatten");
           }
-          total_length += offsets.length() - 1;
         }
-        else {
-          total_length += content.get()->length();
-        }
+        total_length += pair.second.get()->length();
 
         std::cout << "offsets i: " << offsets.tostring() << std::endl;
         std::cout << "content i length " << pair.second.get()->length() << std::endl;
