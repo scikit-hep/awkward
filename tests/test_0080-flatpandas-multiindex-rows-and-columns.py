@@ -17,7 +17,7 @@ def test():
         if n == "values":
             return n
         else:
-            return tuple(eval(n.replace("nan", "None")))
+            return tuple(eval(n.replace("nan", "None").replace("null", "None")))
 
     def regularize(data):
         if isinstance(data, dict):
