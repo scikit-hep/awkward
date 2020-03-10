@@ -484,16 +484,16 @@ namespace awkward {
     }
 
     template <>
-    Error awkward_unionarray_flatten_combine_64<int8_t, int32_t>(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets, int64_t* offsetslengths) {
-      return awkward_unionarray32_flatten_combine_64(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets, offsetslengths);
+    Error awkward_unionarray_flatten_combine_64<int8_t, int32_t>(int8_t* totags, int64_t* toindex, int64_t* tooffsets, const int8_t* fromtags, int64_t fromtagsoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets) {
+      return awkward_unionarray32_flatten_combine_64(totags, toindex, tooffsets, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets);
     }
     template <>
-    Error awkward_unionarray_flatten_combine_64<int8_t, uint32_t>(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets, int64_t* offsetslength) {
-      return awkward_unionarrayU32_flatten_combine_64(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets, offsetslength);
+    Error awkward_unionarray_flatten_combine_64<int8_t, uint32_t>(int8_t* totags, int64_t* toindex, int64_t* tooffsets, const int8_t* fromtags, int64_t fromtagsoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets) {
+      return awkward_unionarrayU32_flatten_combine_64(totags, toindex, tooffsets, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets);
     }
     template <>
-    Error awkward_unionarray_flatten_combine_64<int8_t, int64_t>(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets, int64_t* offsetslength) {
-      return awkward_unionarray64_flatten_combine_64(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets, offsetslength);
+    Error awkward_unionarray_flatten_combine_64<int8_t, int64_t>(int8_t* totags, int64_t* toindex, int64_t* tooffsets, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets) {
+      return awkward_unionarray64_flatten_combine_64(totags, toindex, tooffsets, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets);
     }
 
     template <>

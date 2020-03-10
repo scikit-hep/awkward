@@ -834,15 +834,11 @@ namespace awkward {
       throw std::invalid_argument("axis=0 not allowed for flatten");
     }
     else {
-      std::cout << "self" << std::endl;
-      std::cout << tostring() << std::endl;
-
-      int64_t offsets_length = -1;
+      bool has_offsets = false;
       int64_t total_length = 0;
       std::vector<std::shared_ptr<int64_t>> offsetsptrs;
       std::vector<int64_t*> offsetsraws;
       std::vector<int64_t> offsetsoffsets;
-      std::vector<int64_t> offsetslengths;
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {
         std::pair<Index64, std::shared_ptr<Content>> pair = content.get()->offsets_and_flattened(axis, depth);
@@ -850,44 +846,32 @@ namespace awkward {
         offsetsptrs.push_back(offsets.ptr());
         offsetsraws.push_back(offsets.ptr().get());
         offsetsoffsets.push_back(offsets.offset());
-        offsetslengths.push_back(offsets.length());
         contents.push_back(pair.second);
-        if (offsets.length() != 0) {
-          if (offsets_length == -1) {
-            offsets_length = offsets.length();
-          }
-          else if (offsets_length != offsets.length()) {
-            throw std::runtime_error("union's contents return different non-zero offsets lengths in flatten");
-          }
-        }
+        has_offsets = (offsets.length() != 0);
         total_length += pair.second.get()->length();
-
-        std::cout << "offsets i: " << offsets.tostring() << std::endl;
-        std::cout << "content i length " << pair.second.get()->length() << std::endl;
-        std::cout << pair.second.get()->tostring() << std::endl;
       }
-      Index8 totags(total_length);
-      Index64 toindex(total_length);
 
-      std::cout << "total_length " << total_length << std::endl;
-
-      struct Error err = util::awkward_unionarray_flatten_combine_64<T, I>(
-        totags.ptr().get(),
-        toindex.ptr().get(),
-        tags_.ptr().get(),
-        tags_.offset(),
-        index_.ptr().get(),
-        index_.offset(),
-        tags_.length(),
-        offsetsraws.data(),
-        offsetsoffsets.data(),
-        offsetslengths.data());
-      util::handle_error(err, classname(), identities_.get());
-
-      std::cout << "totags " << totags.tostring() << std::endl;
-      std::cout << "toindex " << toindex.tostring() << std::endl;
-
-      throw std::runtime_error("STOP");
+      if (has_offsets) {
+        Index8 totags(total_length);
+        Index64 toindex(total_length);
+        Index64 tooffsets(tags_.length() + 1);
+        struct Error err = util::awkward_unionarray_flatten_combine_64<T, I>(
+          totags.ptr().get(),
+          toindex.ptr().get(),
+          tooffsets.ptr().get(),
+          tags_.ptr().get(),
+          tags_.offset(),
+          index_.ptr().get(),
+          index_.offset(),
+          tags_.length(),
+          offsetsraws.data(),
+          offsetsoffsets.data());
+        util::handle_error(err, classname(), identities_.get());
+        return std::pair<Index64, std::shared_ptr<Content>>(tooffsets, std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), totags, toindex, contents));
+      }
+      else {
+        return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<UnionArrayOf<T, I>>(Identities::none(), util::Parameters(), tags_, index_, contents));
+      }
     }
   }
 

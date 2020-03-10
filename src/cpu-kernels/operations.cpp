@@ -83,48 +83,31 @@ ERROR awkward_indexedarray64_flatten_none2empty_64(int64_t* outoffsets, const in
 }
 
 template <typename FROMTAGS, typename FROMINDEX, typename TOTAGS, typename TOINDEX, typename T>
-ERROR awkward_unionarray_flatten_combine(TOTAGS* totags, TOINDEX* toindex, const FROMTAGS* fromtags, int64_t fromtagsoffset, const FROMINDEX* fromindex, int64_t fromindexoffset, int64_t length, T** offsetsraws, int64_t* offsetsoffsets, int64_t* offsetslengths) {
+ERROR awkward_unionarray_flatten_combine(TOTAGS* totags, TOINDEX* toindex, T* tooffsets, const FROMTAGS* fromtags, int64_t fromtagsoffset, const FROMINDEX* fromindex, int64_t fromindexoffset, int64_t length, T** offsetsraws, int64_t* offsetsoffsets) {
+  tooffsets[0] = 0;
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {
     FROMTAGS tag = fromtags[fromtagsoffset + i];
     FROMINDEX idx = fromindex[fromindexoffset + i];
-
-    std::cout << "from tag " << (int)tag << " idx " << idx << std::endl;
-
-    // if (offsetslengths[tag] == 0) {
-    //   totags[k] = tag;
-    //   toindex[k] = idx;
-    //
-    //   std::cout << "copy tag " << (int)tag << " idx " << idx << std::endl;
-    //
-    //   k++;
-    // }
-    // else {
-    //   T start = offsetsraws[tag][offsetsoffsets[tag] + i];
-    //   T stop = offsetsraws[tag][offsetsoffsets[tag] + i + 1];
-    //
-    //   std::cout << "j range: " << start << " " << stop << std::endl;
-    //
-    //   for (int64_t j = start;  j < stop;  j++) {
-    //     totags[k] = tag;
-    //     toindex[k] = j;
-    //
-    //     std::cout << "     tag " << (int)tag << " idx " << j << std::endl;
-    //
-    //     k++;
-    //   }
-    // }
+    T start = offsetsraws[tag][offsetsoffsets[tag] + idx];
+    T stop = offsetsraws[tag][offsetsoffsets[tag] + idx + 1];
+    tooffsets[i + 1] = tooffsets[i] + (stop - start);
+    for (int64_t j = start;  j < stop;  j++) {
+      totags[k] = tag;
+      toindex[k] = j;
+      k++;
+    }
   }
   return success();
 }
-ERROR awkward_unionarray32_flatten_combine_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets, int64_t* offsetslengths) {
-  return awkward_unionarray_flatten_combine<int8_t, int32_t, int8_t, int64_t, int64_t>(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets, offsetslengths);
+ERROR awkward_unionarray32_flatten_combine_64(int8_t* totags, int64_t* toindex, int64_t* tooffsets, const int8_t* fromtags, int64_t fromtagsoffset, const int32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets) {
+  return awkward_unionarray_flatten_combine<int8_t, int32_t, int8_t, int64_t, int64_t>(totags, toindex, tooffsets, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets);
 }
-ERROR awkward_unionarrayU32_flatten_combine_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets, int64_t* offsetslengths) {
-  return awkward_unionarray_flatten_combine<int8_t, uint32_t, int8_t, int64_t, int64_t>(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets, offsetslengths);
+ERROR awkward_unionarrayU32_flatten_combine_64(int8_t* totags, int64_t* toindex, int64_t* tooffsets, const int8_t* fromtags, int64_t fromtagsoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets) {
+  return awkward_unionarray_flatten_combine<int8_t, uint32_t, int8_t, int64_t, int64_t>(totags, toindex, tooffsets, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets);
 }
-ERROR awkward_unionarray64_flatten_combine_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets, int64_t* offsetslengths) {
-  return awkward_unionarray_flatten_combine<int8_t, int64_t, int8_t, int64_t, int64_t>(totags, toindex, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets, offsetslengths);
+ERROR awkward_unionarray64_flatten_combine_64(int8_t* totags, int64_t* toindex, int64_t* tooffsets, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets) {
+  return awkward_unionarray_flatten_combine<int8_t, int64_t, int8_t, int64_t, int64_t>(totags, toindex, tooffsets, fromtags, fromtagsoffset, fromindex, fromindexoffset, length, offsetsraws, offsetsoffsets);
 }
 
 template <typename C, typename T>
