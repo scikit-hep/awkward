@@ -236,18 +236,18 @@ class PandasMixin(PandasNotImportedYet):
     #     register()
     #     raise NotImplementedError
 
-def df(array, how="inner"):
+def df(array, how="inner", levelname=lambda i: "sub"*i + "entry", anonymous="values"):
     register()
     pandas = get_pandas()
     out = None
-    for df in dfs(array):
+    for df in dfs(array, levelname=levelname, anonymous=anonymous):
         if out is None:
             out = df
         else:
             out = pandas.merge(out, df, how=how, left_index=True, right_index=True)
     return out
 
-def dfs(array):
+def dfs(array, levelname=lambda i: "sub"*i + "entry", anonymous="values"):
     register()
     pandas = get_pandas()
 
@@ -284,7 +284,7 @@ def dfs(array):
     last_row_arrays = None
     for column, row_arrays, col_names in recurse(layout, [], ()):
         if len(col_names) == 0:
-            columns = ["values"]
+            columns = [anonymous]
         else:
             columns = pandas.MultiIndex.from_tuples([col_names])
 
@@ -303,7 +303,7 @@ def dfs(array):
             tables[-1] = pandas.concat([tables[-1], newframe], axis=1)
 
         else:
-            index = pandas.MultiIndex.from_arrays(row_arrays, names=["sub"*i + "entry" for i in range(len(row_arrays))])
+            index = pandas.MultiIndex.from_arrays(row_arrays, names=[levelname(i) for i in range(len(row_arrays))])
             tables.append(pandas.DataFrame(data=column, index=index, columns=columns))
 
         last_row_arrays = row_arrays
