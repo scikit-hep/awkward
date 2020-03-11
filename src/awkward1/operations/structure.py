@@ -9,7 +9,7 @@ import awkward1.layout
 import awkward1._connect._numpy
 import awkward1.operations.convert
 
-def withfield(base, what, where=None):
+def withfield(base, what, where=None, highlevel=True):
     base = awkward1.operations.convert.tolayout(base, allowrecord=True, allowother=False)
     what = awkward1.operations.convert.tolayout(what, allowrecord=True, allowother=True)
 
@@ -24,11 +24,12 @@ def withfield(base, what, where=None):
 
     out = awkward1._util.broadcast_and_apply([base, what], getfunction)
     assert isinstance(out, tuple) and len(out) == 1
-    return awkward1._util.wrap(out[0], behavior=awkward1._util.behaviorof(base, what))
+    if highlevel:
+        return awkward1._util.wrap(out[0], behavior=awkward1._util.behaviorof(base, what))
+    else:
+        return out[0]
 
-def isna(array):
-    import awkward1.highlevel
-
+def isna(array, highlevel=True):
     def apply(layout):
         if isinstance(layout, awkward1._util.unknowntypes):
             return apply(awkward1.layout.NumpyArray(numpy.array([])))
@@ -52,15 +53,21 @@ def isna(array):
             return numpy.zeros(len(layout), dtype=numpy.bool_)
 
     out = apply(awkward1.operations.convert.tolayout(array, allowrecord=False))
-    return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+    if highlevel:
+        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
 
-def notna(array):
-    return ~isna(array)
+def notna(array, highlevel=True):
+    return ~isna(array, highlevel=highlevel)
 
-def num(array, axis=1):
+def num(array, axis=1, highlevel=True):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False)
     out = layout.num(axis=axis)
-    return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+    if highlevel:
+        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
 
 @awkward1._connect._numpy.implements(numpy.size)
 def size(array, axis=None):
@@ -136,9 +143,7 @@ def atleast_1d(*arrays):
     return numpy.atleast_1d(*[awkward1.operations.convert.tonumpy(x) for x in arrays])
 
 @awkward1._connect._numpy.implements(numpy.concatenate)
-def concatenate(arrays, axis=0, mergebool=True):
-    import awkward1.highlevel
-
+def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     if axis != 0:
         raise NotImplementedError("axis={0}".format(axis))
 
@@ -155,10 +160,13 @@ def concatenate(arrays, axis=0, mergebool=True):
         if isinstance(out, awkward1._util.uniontypes):
             out = out.simplify(mergebool=mergebool)
 
-    return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*arrays))
+    if highlevel:
+        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*arrays))
+    else:
+        return out
 
 @awkward1._connect._numpy.implements(numpy.broadcast_arrays)
-def broadcast_arrays(*arrays):
+def broadcast_arrays(*arrays, highlevel=True):
     inputs = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=False) for x in arrays]
 
     def getfunction(inputs, depth):
@@ -169,63 +177,74 @@ def broadcast_arrays(*arrays):
 
     out = awkward1._util.broadcast_and_apply(inputs, getfunction)
     assert isinstance(out, tuple)
-    return [awkward1._util.wrap(x, awkward1._util.behaviorof(arrays)) for x in out]
+    if highlevel:
+        return [awkward1._util.wrap(x, awkward1._util.behaviorof(arrays)) for x in out]
+    else:
+        return list(out)
 
 @awkward1._connect._numpy.implements(numpy.where)
 def where(condition, *args, **kwargs):
-    import awkward1.highlevel
+    mergebool, highlevel = awkward1._util.extra((), kwargs, [
+        ("mergebool", True),
+        ("highlevel", True)])
 
-    condition = awkward1.operations.convert.tonumpy(condition)
+    npcondition = awkward1.operations.convert.tonumpy(condition)
 
     if len(args) == 0:
-        out = numpy.nonzero(condition)
-        return tuple(awkward1.highlevel.Array(x) for x in out)
+        out = numpy.nonzero(npcondition)
+        if highlevel:
+            return tuple(awkward1._util.wrap(awkward1.layout.NumpyArray(x), awkward1._util.behaviorof(condition)) for x in out)
+        else:
+            return tuple(awkward1.layout.NumpyArray(x) for x in out)
 
     elif len(args) == 1:
         raise ValueError("either both or neither of x and y should be given")
 
     elif len(args) == 2:
-        if len(condition.shape) != 1:
+        if len(npcondition.shape) != 1:
             raise NotImplementedError("FIXME: ak.where(condition, x, y) where condition is not 1-d")
 
         x = awkward1.operations.convert.tolayout(args[0], allowrecord=False)
         y = awkward1.operations.convert.tolayout(args[1], allowrecord=False)
-        mergebool, = awkward1._util.extra((), kwargs, [
-            ("mergebool", True)])
 
-        tags = (condition == 0)
+        tags = (npcondition == 0)
         assert tags.itemsize == 1
         index = numpy.empty(len(tags), dtype=numpy.int64)
-        index = numpy.arange(len(condition), dtype=numpy.int64)
+        index = numpy.arange(len(npcondition), dtype=numpy.int64)
 
         tags = awkward1.layout.Index8(tags.view(numpy.int8))
         index = awkward1.layout.Index64(index)
         tmp = awkward1.layout.UnionArray8_64(tags, index, [x, y])
         out = tmp.simplify(mergebool=mergebool)
 
-        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*((condition,) + args)))
+        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*((npcondition,) + args)))
 
     else:
         raise TypeError("where() takes from 1 to 3 positional arguments but {0} were given".format(len(args) + 1))
 
-def flatten(array, axis=1):
-    behavior = awkward1._util.behaviorof(array)
+def flatten(array, axis=1, highlevel=True):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
-    return awkward1._util.wrap(layout.flatten(axis), behavior)
+    out = layout.flatten(axis)
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
 
-def rpad(array, length, axis=1, clip=False):
-    behavior = awkward1._util.behaviorof(array)
+def rpad(array, length, axis=1, clip=False, highlevel=True):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if clip:
-        return awkward1._util.wrap(layout.rpad_and_clip(length, axis), behavior)
+        out = layout.rpad_and_clip(length, axis)
     else:
-        return awkward1._util.wrap(layout.rpad(length, axis), behavior)
+        out = layout.rpad(length, axis)
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
 
-def zip(arrays, depthlimit=None, parameters=None):
+def zip(arrays, depthlimit=None, parameters=None, highlevel=True):
     if depthlimit is not None and depthlimit <= 0:
         raise ValueError("depthlimit must be None or at least 1")
 
-    behavior = awkward1._util.behaviorof(*arrays)
     if isinstance(arrays, dict):
         recordlookup = []
         layouts = []
@@ -246,7 +265,10 @@ def zip(arrays, depthlimit=None, parameters=None):
 
     out = awkward1._util.broadcast_and_apply(layouts, getfunction)
     assert isinstance(out, tuple) and len(out) == 1
-    return awkward1._util.wrap(out[0], behavior)
+    if highlevel:
+        return awkward1._util.wrap(out[0], awkward1._util.behaviorof(*arrays))
+    else:
+        return out[0]
 
 def unzip(array):
     keys = awkward1.operations.describe.keys(array)
@@ -255,15 +277,83 @@ def unzip(array):
     else:
         return tuple(array[n] for n in keys)
 
-# def cross(arrays, axis=1, nested=None, parameters=None):
-#     if axis < 0:
-#         raise ValueError("cross 'axis' must be non-negative")
-#
-#     elif axis == 0:
-#         raise NotImplementedError
-#
-#     else:
+def cross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
+    if axis < 0:
+        raise ValueError("cross's 'axis' must be non-negative")
 
+    elif axis == 0:
+        raise NotImplementedError
 
+    else:
+        def newaxis(layout, i):
+            if i == 0:
+                return layout
+            else:
+                return awkward1.layout.RegularArray(newaxis(layout, i - 1), 1)
+
+        def getfunction1(layout, depth, i):
+            if depth == 2:
+                return lambda: newaxis(layout, i)
+            else:
+                return None
+
+        def getfunction2(layout, depth, i):
+            if depth == axis:
+                inside = len(arrays) - i - 1
+                outside = i
+                return lambda: newaxis(awkward1._util.recursively_apply(layout, getfunction1, args=(inside,)), outside)
+            else:
+                return None
+
+        def apply(x, i):
+            return awkward1._util.recursively_apply(awkward1.operations.convert.tolayout(x, allowrecord=False, allowother=False), getfunction2, args=(i,))
+
+        toflatten = []
+        if nested is None or nested is False:
+            nested = []
+
+        if isinstance(arrays, dict):
+            if nested is True:
+                nested = list(arrays.keys())   # includes the last key, but it's ignored below
+            if any(not (isinstance(n, str) and n in arrays) for x in nested):
+                raise ValueError("cross's 'nested' must be dict keys for a dict of arrays")
+            recordlookup = []
+            layouts = []
+            for i, (n, x) in enumerate(arrays.items()):
+                recordlookup.append(n)
+                layouts.append(apply(x, i))
+                if i < len(arrays) - 1 and n not in nested:
+                    toflatten.append(axis + i + 1)
+
+        else:
+            if nested is True:
+                nested = list(range(len(arrays) - 1))
+            if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1) for x in nested):
+                raise ValueError("cross's 'nested' must be integers in [0, len(arrays) - 1) for an iterable of arrays")
+            recordlookup = None
+            layouts = []
+            for i, x in enumerate(arrays):
+                layouts.append(apply(x, i))
+                if i < len(arrays) - 1 and i not in nested:
+                    toflatten.append(axis + i + 1)
+
+    def getfunction3(inputs, depth):
+        if depth == axis + len(arrays):
+            return lambda: (awkward1.layout.RecordArray(inputs, recordlookup, parameters=parameters),)
+        else:
+            return None
+
+    out = awkward1._util.broadcast_and_apply(layouts, getfunction3)
+    assert isinstance(out, tuple) and len(out) == 1
+    result = out[0]
+
+    while len(toflatten) != 0:
+        axis = toflatten.pop()
+        result = flatten(result, axis=axis, highlevel=False)
+
+    if highlevel:
+        return awkward1._util.wrap(result, awkward1._util.behaviorof(*arrays))
+    else:
+        return result
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numpy", "awkward1")]
