@@ -876,6 +876,27 @@ namespace awkward {
     }
 
     template <>
+    ERROR awkward_IndexedOptionArray_fillna<int32_t>(int64_t* toindex, const int32_t* fromptr, int64_t outlength) {
+      return awkward_IndexedOptionArray_fillna_from32_64(toindex, fromptr, outlength);
+    }
+    template <>
+    ERROR awkward_IndexedOptionArray_fillna<uint32_t>(int64_t* toindex, const uint32_t* fromptr, int64_t outlength) {
+      return awkward_IndexedOptionArray_fillna_fromU32_64(toindex, fromptr, outlength);
+    }
+    template <>
+    ERROR awkward_IndexedOptionArray_fillna<int64_t>(int64_t* toindex, const int64_t* fromptr, int64_t outlength) {
+      return awkward_IndexedOptionArray_fillna_from64_64(toindex, fromptr, outlength);
+    }
+    template <>
+    ERROR awkward_IndexedOptionArray_fillna<float>(int64_t* toindex, const float* fromptr, int64_t outlength) {
+      return awkward_IndexedOptionArray_fillna_fromfloat_64(toindex, fromptr, outlength);
+    }
+    template <>
+    ERROR awkward_IndexedOptionArray_fillna<double>(int64_t* toindex, const double* fromptr, int64_t outlength) {
+      return awkward_IndexedOptionArray_fillna_fromdouble_64(toindex, fromptr, outlength);
+    }
+
+    template <>
     ERROR awkward_UnionArray_fillna_64<int32_t>(int64_t* toindex, const int32_t* fromindex, int64_t length) {
       return awkward_UnionArray_fillna_from32_to64(toindex, fromindex, length);
     }

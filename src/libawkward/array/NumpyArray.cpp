@@ -9,7 +9,6 @@
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
 #include "awkward/cpu-kernels/reducers.h"
-#include "awkward/Iterator.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"

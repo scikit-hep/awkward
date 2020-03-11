@@ -497,7 +497,14 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> fillna(int64_t value) const override {
-      throw std::runtime_error("FIXME: fillna is not implemented");
+      Index64 result(length());
+      struct Error err = util::awkward_IndexedOptionArray_fillna<T>(
+        result.ptr().get(),
+        reinterpret_cast<T*>(ptr_.get()),
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, shallow_copy());
+      return next->fillna(value);
     }
 
     const std::shared_ptr<Content> rpad(int64_t target, int64_t axis, int64_t depth) const override {
