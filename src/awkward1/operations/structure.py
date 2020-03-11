@@ -248,4 +248,22 @@ def zip(arrays, depthlimit=None, parameters=None):
     assert isinstance(out, tuple) and len(out) == 1
     return awkward1._util.wrap(out[0], behavior)
 
+def unzip(array):
+    keys = awkward1.operations.describe.keys(array)
+    if len(keys) == 0:
+        return (array,)
+    else:
+        return tuple(array[n] for n in keys)
+
+# def cross(arrays, axis=1, nested=None, parameters=None):
+#     if axis < 0:
+#         raise ValueError("cross 'axis' must be non-negative")
+#
+#     elif axis == 0:
+#         raise NotImplementedError
+#
+#     else:
+
+
+
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numpy", "awkward1")]

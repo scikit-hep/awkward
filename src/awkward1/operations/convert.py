@@ -319,7 +319,7 @@ def tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,
         return array
 
 def regularize_numpyarray(array, allowempty=True, highlevel=True):
-    def getfunction(layout):
+    def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.NumpyArray) and layout.ndim != 1:
             return lambda: layout.toRegularArray()
         elif isinstance(layout, awkward1.layout.EmptyArray) and not allowempty:
