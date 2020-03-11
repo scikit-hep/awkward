@@ -280,6 +280,23 @@ def unzip(array):
     else:
         return tuple(array[n] for n in keys)
 
+def argcross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
+    if axis < 0:
+        raise ValueError("argcross's 'axis' must be non-negative")
+
+    else:
+        if isinstance(arrays, dict):
+            layouts = dict((n, awkward1.operations.convert.tolayout(x, allowrecord=False, allowother=False).localindex(axis)) for n, x in arrays.items())
+        else:
+            layouts = [awkward1.operations.convert.tolayout(x, allowrecord=False, allowother=False).localindex(axis) for x in arrays]
+
+        result = cross(layouts, axis=axis, nested=nested, parameters=parameters, highlevel=False)
+
+        if highlevel:
+            return awkward1._util.wrap(result, awkward1._util.behaviorof(*arrays))
+        else:
+            return result
+
 def cross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
     if axis < 0:
         raise ValueError("cross's 'axis' must be non-negative")

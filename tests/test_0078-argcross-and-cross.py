@@ -63,8 +63,18 @@ def test_axis2():
 
 def test_localindex():
     array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
-    assert awkward1.tolist(array.localindex(0)) == [[0, 1, 2], [], [0, 1], [0], [0, 1, 2, 3]]
+    assert awkward1.tolist(array.localindex(0)) == [0, 1, 2, 3, 4]
+    assert awkward1.tolist(array.localindex(1)) == [[0, 1, 2], [], [0, 1], [0], [0, 1, 2, 3]]
 
     array = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[6.6, 7.7, 8.8, 9.9]]]).layout
-    assert awkward1.tolist(array.localindex(0)) == [[0, 1, 2], [], [0], [0]]
-    assert awkward1.tolist(array.localindex(1)) == [[[0, 1, 2], [], [0, 1]], [], [[0]], [[0, 1, 2, 3]]]
+    assert awkward1.tolist(array.localindex(0)) == [0, 1, 2, 3]
+    assert awkward1.tolist(array.localindex(1)) == [[0, 1, 2], [], [0], [0]]
+    assert awkward1.tolist(array.localindex(2)) == [[[0, 1, 2], [], [0, 1]], [], [[0]], [[0, 1, 2, 3]]]
+
+def test_argcross():
+    one = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4]])
+    two = awkward1.Array([[100, 200], [300], [400, 500]])
+
+    assert awkward1.tolist(awkward1.argcross([one, two])) == [[(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1)], [], [(0, 0), (0, 1), (1, 0), (1, 1)]]
+    if not py27 and not py35:
+        assert awkward1.tolist(awkward1.argcross({"x": one, "y": two})) == [[{"x": 0, "y": 0}, {"x": 0, "y": 1}, {"x": 1, "y": 0}, {"x": 1, "y": 1}, {"x": 2, "y": 0}, {"x": 2, "y": 1}], [], [{"x": 0, "y": 0}, {"x": 0, "y": 1}, {"x": 1, "y": 0}, {"x": 1, "y": 1}]]

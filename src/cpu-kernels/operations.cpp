@@ -955,7 +955,10 @@ ERROR awkward_ListOffsetArray64_rpad_axis1_64(int64_t* toindex, const int64_t* f
 
 template <typename T>
 ERROR awkward_localindex(T* toindex, int64_t length) {
-  return failure("FIXME: awkward_localindex", 0, kSliceNone);
+  for (int64_t i = 0;  i < length;  i++) {
+    toindex[i] = i;
+  }
+  return success();
 }
 ERROR awkward_localindex_64(int64_t* toindex, int64_t length) {
   return awkward_localindex<int64_t>(toindex, length);
