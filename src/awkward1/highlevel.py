@@ -300,7 +300,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     @property
     def numbatype(self):
         import numba
-        import awkward1._numba
+        import awkward1._connect._numba
         awkward1._connect._numba.register()
         if self._numbaview is None:
             self._numbaview = awkward1._connect._numba.arrayview.RecordView.fromrecord(self)

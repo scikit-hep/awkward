@@ -13,12 +13,12 @@ def withfield(base, what, where=None):
     base = awkward1.operations.convert.tolayout(base, allowrecord=True, allowother=False)
     what = awkward1.operations.convert.tolayout(what, allowrecord=True, allowother=True)
 
-    def getfunction(inputs):
+    def getfunction(inputs, depth):
         base, what = inputs
         if isinstance(base, awkward1.layout.RecordArray):
             if not isinstance(what, awkward1.layout.Content):
                 what = awkward1.layout.NumpyArray(numpy.lib.stride_tricks.as_strided([what], shape=(len(base),), strides=(0,)))
-            return lambda depth: (base.setitem_field(where, what),)
+            return lambda: (base.setitem_field(where, what),)
         else:
             return None
 
@@ -161,9 +161,9 @@ def concatenate(arrays, axis=0, mergebool=True):
 def broadcast_arrays(*arrays):
     inputs = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=False) for x in arrays]
 
-    def getfunction(inputs):
+    def getfunction(inputs, depth):
         if all(isinstance(x, awkward1.layout.NumpyArray) for x in inputs):
-            return lambda depth: tuple(inputs)
+            return lambda: tuple(inputs)
         else:
             return None
 
