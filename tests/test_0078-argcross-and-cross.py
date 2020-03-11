@@ -71,6 +71,11 @@ def test_localindex():
     assert awkward1.tolist(array.localindex(1)) == [[0, 1, 2], [], [0], [0]]
     assert awkward1.tolist(array.localindex(2)) == [[[0, 1, 2], [], [0, 1]], [], [[0]], [[0, 1, 2, 3]]]
 
+    array = awkward1.fromnumpy(numpy.arange(2*3*5).reshape(2, 3, 5), regulararray=True, highlevel=False)
+    assert awkward1.tolist(array.localindex(0)) == [0, 1]
+    assert awkward1.tolist(array.localindex(1)) == [[0, 1, 2], [0, 1, 2]]
+    assert awkward1.tolist(array.localindex(2)) == [[[0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4]], [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4]]]
+
 def test_argcross():
     one = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4]])
     two = awkward1.Array([[100, 200], [300], [400, 500]])

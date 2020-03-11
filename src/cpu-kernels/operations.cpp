@@ -987,7 +987,12 @@ ERROR awkward_listarray64_localindex_64(int64_t* toindex, const int64_t* offsets
 
 template <typename T>
 ERROR awkward_regulararray_localindex(T* toindex, int64_t size, int64_t length) {
-  return failure("FIXME: awkward_regulararray_localindex", 0, kSliceNone);
+  for (int64_t i = 0;  i < length;  i++) {
+    for (int64_t j = 0;  j < size;  j++) {
+      toindex[i*size + j] = j;
+    }
+  }
+  return success();
 }
 ERROR awkward_regulararray_localindex_64(int64_t* toindex, int64_t size, int64_t length) {
   return awkward_regulararray_localindex<int64_t>(toindex, size, length);
