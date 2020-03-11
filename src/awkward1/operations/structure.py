@@ -166,7 +166,10 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
         return out
 
 @awkward1._connect._numpy.implements(numpy.broadcast_arrays)
-def broadcast_arrays(*arrays, highlevel=True):
+def broadcast_arrays(*arrays, **kwargs):
+    highlevel, = awkward1._util.extra((), kwargs, [
+        ("highlevel", True)])
+
     inputs = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=False) for x in arrays]
 
     def getfunction(inputs, depth):
