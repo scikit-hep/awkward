@@ -231,7 +231,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::localindex(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: EmptyArray:localindex");
+    return std::make_shared<NumpyArray>(Index64(0));
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
