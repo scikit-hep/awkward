@@ -35,10 +35,10 @@ def test_fillna_regular_array():
     assert awkward1.tolist(regarray.fillna(666)) ==  [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, 666, 6.7]]
 
 def test_fillna_listarray_array():
-    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, None, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, -1000, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     starts  = awkward1.layout.Index64(numpy.array([0, 3, 4, 5, 8]))
     stops   = awkward1.layout.Index64(numpy.array([3, 3, 6, 8, 9]))
     listarray   = awkward1.layout.ListArray64(starts, stops, content)
 
-    assert awkward1.tolist(listarray) == [[0.0, 1.1, None], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
-    assert awkward1.tolist(listarray.fillna(-1000)) == [[0.0, 1.1, -1000], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
+    assert awkward1.tolist(listarray) == [[0.0, 1.1, -1000], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]
+    assert awkward1.tolist(listarray.fillna(55)) == [[0.0, 1.1, 55], [], [4.4, 5.5], [5.5, 6.6, 7.7], [8.8]]

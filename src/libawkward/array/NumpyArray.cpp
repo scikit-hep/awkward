@@ -1386,6 +1386,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> NumpyArray::fillna(int64_t value) const {
+    Index64 result(length());
+    struct Error err;
     if (format_.compare("?") == 0) {
       return shallow_copy();
     }
@@ -1433,34 +1435,18 @@ namespace awkward {
       return shallow_copy();
     }
     else if (format_.compare("d") == 0) {
-      return shallow_copy();
-    }
-    else  if (format_.compare("O") == 0) {
-      void* source = byteptr();
-      ssize_t blength = bytelength();
-      std::cout << "bytelength: " << blength << ", itemsize: " << itemsize_ << "\n";
-
-      throw std::runtime_error("FIXME: NumpyArray::fillna is not implemented");
-      std::shared_ptr<int64_t> ptr(new int64_t[1], util::array_deleter<int64_t>());
-      ptr.get()[0] = value;
-      std::vector<ssize_t> shape({ 1 });
-      std::vector<ssize_t> strides({ 1 });
-      std::shared_ptr<NumpyArray> value_array = std::make_shared<NumpyArray>(Identities::none(), parameters_, ptr, shape, strides, 0, itemsize_, format_);
-
-      std::vector<std::shared_ptr<Content>> contents;
-      contents.emplace_back(shallow_copy());
-      contents.emplace_back(value_array);
-
-      int64_t numnull = 0;
-      // FIXME: count all None's
-      Index8 tags(length() + numnull);
-      Index64 index(length() + numnull);
-
-      return std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
+      err = awkward_IndexedOptionArray_fillna_double_64(
+        result.ptr().get(),
+        reinterpret_cast<double*>(ptr_.get()),
+        length());
     }
     else {
-      throw std::invalid_argument(std::string("cannot apply fillna to NumpyArray with format \"") + format_ + std::string("\""));
+      throw std::invalid_argument(std::string("don't know how apply fillna to NumpyArray with format \"") + format_ + std::string("\""));
     }
+    util::handle_error(err, classname(), identities_.get());
+
+    std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, shallow_copy());
+    return next->fillna(value);
   }
 
   const std::shared_ptr<Content> NumpyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {

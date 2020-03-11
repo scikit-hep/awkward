@@ -784,6 +784,22 @@ ERROR awkward_unionarray8_64_validity(const int8_t* tags, int64_t tagsoffset, co
   return awkward_unionarray_validity<int8_t, int64_t>(tags, tagsoffset, index, indexoffset, length, numcontents, lencontents);
 }
 
+template <typename IN>
+ERROR awkward_IndexedOptionArray_fillna(int64_t* toindex, const IN* fromptr, int64_t outlength) {
+  for (int64_t i = 0; i < outlength; i++) {
+    if (fromptr[i] == -1000) {
+      toindex[i] = -1;
+    }
+    else {
+      toindex[i] = i;
+    }
+  }
+  return success();
+}
+ERROR awkward_IndexedOptionArray_fillna_double_64(int64_t* toindex, const double* fromptr, int64_t outlength) {
+  return awkward_IndexedOptionArray_fillna<double>(toindex, fromptr, outlength);
+}
+
 template <typename T, typename C>
 ERROR awkward_UnionArray_fillna(T* toindex, const C* fromindex, int64_t length) {
   for (int64_t i = 0; i < length; i++)
