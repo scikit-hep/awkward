@@ -952,3 +952,47 @@ ERROR awkward_ListOffsetArrayU32_rpad_axis1_64(int64_t* toindex, const uint32_t*
 ERROR awkward_ListOffsetArray64_rpad_axis1_64(int64_t* toindex, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target) {
   return awkward_ListOffsetArray_rpad_axis1<int64_t, int64_t>(toindex, fromoffsets, offsetsoffset, fromlength, target);
 }
+
+template <typename T>
+ERROR awkward_localindex(T* toindex, int64_t length) {
+  return failure("FIXME: awkward_localindex", 0, kSliceNone);
+}
+ERROR awkward_localindex_64(int64_t* toindex, int64_t length) {
+  return awkward_localindex<int64_t>(toindex, length);
+}
+
+template <typename C>
+ERROR awkward_listarray_localindex_indexlength(int64_t* indexlength, const C* starts, int64_t startsoffset, const C* stops, int64_t stopsoffset, int64_t length) {
+  return failure("FIXME: awkward_listarray_localindex_indexlength", 0, kSliceNone);
+}
+ERROR awkward_listarray32_localindex_indexlength_64(int64_t* indexlength, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_localindex_indexlength<int32_t>(indexlength, starts, startsoffset, stops, stopsoffset, length);
+}
+ERROR awkward_listarrayU32_localindex_indexlength_64(int64_t* indexlength, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_localindex_indexlength<uint32_t>(indexlength, starts, startsoffset, stops, stopsoffset, length);
+}
+ERROR awkward_listarray64_localindex_indexlength_64(int64_t* indexlength, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_localindex_indexlength<int64_t>(indexlength, starts, startsoffset, stops, stopsoffset, length);
+}
+
+template <typename C, typename T>
+ERROR awkward_listarray_localindex(T* toindex, const C* starts, int64_t startsoffset, const C* stops, int64_t stopsoffset, int64_t length) {
+  return failure("FIXME: awkward_listarray_localindex", 0, kSliceNone);
+}
+ERROR awkward_listarray32_localindex_64(int64_t* toindex, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_localindex<int32_t, int64_t>(toindex, starts, startsoffset, stops, stopsoffset, length);
+}
+ERROR awkward_listarrayU32_localindex_64(int64_t* toindex, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_localindex<uint32_t, int64_t>(toindex, starts, startsoffset, stops, stopsoffset, length);
+}
+ERROR awkward_listarray64_localindex_64(int64_t* toindex, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_localindex<int64_t, int64_t>(toindex, starts, startsoffset, stops, stopsoffset, length);
+}
+
+template <typename T>
+ERROR awkward_regulararray_localindex(T* toindex, int64_t size, int64_t length) {
+  return failure("FIXME: awkward_regulararray_localindex", 0, kSliceNone);
+}
+ERROR awkward_regulararray_localindex_64(int64_t* toindex, int64_t size, int64_t length) {
+  return awkward_regulararray_localindex<int64_t>(toindex, size, length);
+}

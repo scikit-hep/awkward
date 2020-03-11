@@ -1090,6 +1090,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::localindex(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: IndexedArray:localindex");
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: IndexedArray::getitem_next(at)");
   }

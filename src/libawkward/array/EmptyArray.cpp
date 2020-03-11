@@ -230,6 +230,10 @@ namespace awkward {
     return asnumpy.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
+  const std::shared_ptr<Content> EmptyArray::localindex(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: EmptyArray:localindex");
+  }
+
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy

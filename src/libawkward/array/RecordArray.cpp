@@ -647,6 +647,10 @@ namespace awkward {
     return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, outlength);
   }
 
+  const std::shared_ptr<Content> RecordArray::localindex(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: RecordArray:localindex");
+  }
+
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
     if (fieldindex >= numfields()) {
       throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields()) + std::string(" fields")));

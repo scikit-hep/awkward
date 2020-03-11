@@ -953,6 +953,31 @@ namespace awkward {
       return awkward_unionarray8_64_validity(tags, tagsoffset, index, indexoffset, length, numcontents, lencontents);
     }
 
+    template <>
+    Error awkward_listarray_localindex_indexlength_64<int32_t>(int64_t* indexlength, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length) {
+      return awkward_listarray32_localindex_indexlength_64(indexlength, starts, startsoffset, stops, stopsoffset, length);
+    }
+    template <>
+    Error awkward_listarray_localindex_indexlength_64<uint32_t>(int64_t* indexlength, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length) {
+      return awkward_listarrayU32_localindex_indexlength_64(indexlength, starts, startsoffset, stops, stopsoffset, length);
+    }
+    template <>
+    Error awkward_listarray_localindex_indexlength_64<int64_t>(int64_t* indexlength, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length) {
+      return awkward_listarray64_localindex_indexlength_64(indexlength, starts, startsoffset, stops, stopsoffset, length);
+    }
+
+    template <>
+    Error awkward_listarray_localindex_64<int32_t>(int64_t* toindex, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length) {
+      return awkward_listarray32_localindex_64(toindex, starts, startsoffset, stops, stopsoffset, length);
+    }
+    template <>
+    Error awkward_listarray_localindex_64<uint32_t>(int64_t* toindex, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length) {
+      return awkward_listarrayU32_localindex_64(toindex, starts, startsoffset, stops, stopsoffset, length);
+    }
+    template <>
+    Error awkward_listarray_localindex_64<int64_t>(int64_t* toindex, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length) {
+      return awkward_listarray64_localindex_64(toindex, starts, startsoffset, stops, stopsoffset, length);
+    }
 
   }
 }

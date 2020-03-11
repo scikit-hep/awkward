@@ -535,7 +535,11 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {
-      throw std::runtime_error("FIXME: Raw:reduce_next");
+      throw std::runtime_error("FIXME: RawArray:reduce_next");
+    }
+
+    const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const override {
+      throw std::runtime_error("FIXME: RawArray:localindex");
     }
 
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {

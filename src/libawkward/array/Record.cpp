@@ -246,6 +246,10 @@ namespace awkward {
     return trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
+  const std::shared_ptr<Content> Record::localindex(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: Record:localindex");
+  }
+
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
     return array_.get()->field(fieldindex).get()->getitem_at_nowrap(at_);
   }
