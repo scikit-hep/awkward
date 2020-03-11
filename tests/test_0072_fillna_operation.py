@@ -21,8 +21,12 @@ def test_fillna_numpy_array():
     assert awkward1.tolist(array) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], None]
     assert awkward1.tolist(array.fillna(0)) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], 0]
 
+    array = content.rpad(5,1)
+    assert awkward1.tolist(array) == [[1.1, 2.2, 3.3, None, None], [4.4, 5.5, 6.6, None, None]]
+    assert awkward1.tolist(array.fillna(0)) == [[1.1, 2.2, 3.3, 0, 0], [4.4, 5.5, 6.6, 0, 0]]
+
 # def test_fillna_numpy_O_array():
-#     optarray = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, None, 5.5, 6.6, None]))
+#     pyobject_array = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, None, 5.5, 6.6, None]))
 #     assert awkward1.tolist(optarray.fillna(0)) == [1.1, 2.2, 3.3, 0, 5.5, 6.6, 0]
 
 def test_fillna_regular_array():

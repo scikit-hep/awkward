@@ -1389,53 +1389,83 @@ namespace awkward {
     Index64 result(length());
     struct Error err;
     if (format_.compare("?") == 0) {
-      return shallow_copy();
+      err = awkward_IndexedOptionArray_fillna_frombool_64(
+        result.ptr().get(),
+        reinterpret_cast<bool*>(ptr_.get()),
+        length());
     }
     else if (format_.compare("b") == 0) {
-      return shallow_copy();
+      err = awkward_IndexedOptionArray_fillna_from8_64(
+        result.ptr().get(),
+        reinterpret_cast<int8_t*>(ptr_.get()),
+        length());
     }
     else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      return shallow_copy();
+      err = awkward_IndexedOptionArray_fillna_fromU8_64(
+        result.ptr().get(),
+        reinterpret_cast<uint8_t*>(ptr_.get()),
+        length());
     }
     else if (format_.compare("h") == 0) {
-      return shallow_copy();
+      err = awkward_IndexedOptionArray_fillna_from16_64(
+        result.ptr().get(),
+        reinterpret_cast<int16_t*>(ptr_.get()),
+        length());
     }
     else if (format_.compare("H") == 0) {
-      return shallow_copy();
+      err = awkward_IndexedOptionArray_fillna_fromU16_64(
+        result.ptr().get(),
+        reinterpret_cast<uint16_t*>(ptr_.get()),
+        length());
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("l") == 0) {
 #else
     else if (format_.compare("i") == 0) {
 #endif
-      return shallow_copy();
+      err = awkward_IndexedOptionArray_fillna_from32_64(
+        result.ptr().get(),
+        reinterpret_cast<int32_t*>(ptr_.get()),
+        length());
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("L") == 0) {
 #else
     else if (format_.compare("I") == 0) {
 #endif
-      return shallow_copy();
+      err = awkward_IndexedOptionArray_fillna_fromU32_64(
+        result.ptr().get(),
+        reinterpret_cast<uint32_t*>(ptr_.get()),
+        length());
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("q") == 0) {
 #else
     else if (format_.compare("l") == 0) {
 #endif
-      return shallow_copy();
+      err = awkward_IndexedOptionArray_fillna_from64_64(
+        result.ptr().get(),
+        reinterpret_cast<int64_t*>(ptr_.get()),
+        length());
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("Q") == 0) {
 #else
     else if (format_.compare("L") == 0) {
 #endif
-      return shallow_copy();
+      err = awkward_IndexedOptionArray_fillna_fromU64_64(
+        result.ptr().get(),
+        reinterpret_cast<uint64_t*>(ptr_.get()),
+        length());
     }
     else if (format_.compare("f") == 0) {
-      return shallow_copy();
+      err = awkward_IndexedOptionArray_fillna_fromfloat_64(
+        result.ptr().get(),
+        reinterpret_cast<float*>(ptr_.get()),
+        length());
     }
     else if (format_.compare("d") == 0) {
-      err = awkward_IndexedOptionArray_fillna_double_64(
+      err = awkward_IndexedOptionArray_fillna_fromdouble_64(
         result.ptr().get(),
         reinterpret_cast<double*>(ptr_.get()),
         length());

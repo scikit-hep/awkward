@@ -796,7 +796,37 @@ ERROR awkward_IndexedOptionArray_fillna(int64_t* toindex, const IN* fromptr, int
   }
   return success();
 }
-ERROR awkward_IndexedOptionArray_fillna_double_64(int64_t* toindex, const double* fromptr, int64_t outlength) {
+ERROR awkward_IndexedOptionArray_fillna_frombool_64(int64_t* toindex, const bool* fromptr, int64_t outlength) {
+  return awkward_IndexedOptionArray_fillna<bool>(toindex, fromptr, outlength);
+}
+ERROR awkward_IndexedOptionArray_fillna_from8_64(int64_t* toindex, const int8_t* fromptr, int64_t outlength) {
+  return awkward_IndexedOptionArray_fillna<int8_t>(toindex, fromptr, outlength);
+}
+ERROR awkward_IndexedOptionArray_fillna_fromU8_64(int64_t* toindex, const uint8_t* fromptr, int64_t outlength) {
+  return awkward_IndexedOptionArray_fillna<uint8_t>(toindex, fromptr, outlength);
+}
+ERROR awkward_IndexedOptionArray_fillna_from16_64(int64_t* toindex, const int16_t* fromptr, int64_t outlength) {
+  return awkward_IndexedOptionArray_fillna<int16_t>(toindex, fromptr, outlength);
+}
+ERROR awkward_IndexedOptionArray_fillna_fromU16_64(int64_t* toindex, const uint16_t* fromptr, int64_t outlength) {
+  return awkward_IndexedOptionArray_fillna<uint16_t>(toindex, fromptr, outlength);
+}
+ERROR awkward_IndexedOptionArray_fillna_from32_64(int64_t* toindex, const int32_t* fromptr, int64_t outlength) {
+  return awkward_IndexedOptionArray_fillna<int32_t>(toindex, fromptr, outlength);
+}
+ERROR awkward_IndexedOptionArray_fillna_fromU32_64(int64_t* toindex, const uint32_t* fromptr, int64_t outlength) {
+  return awkward_IndexedOptionArray_fillna<uint32_t>(toindex, fromptr, outlength);
+}
+ERROR awkward_IndexedOptionArray_fillna_from64_64(int64_t* toindex, const int64_t* fromptr, int64_t outlength) {
+  return awkward_IndexedOptionArray_fillna<int64_t>(toindex, fromptr, outlength);
+}
+ERROR awkward_IndexedOptionArray_fillna_fromU64_64(int64_t* toindex, const uint64_t* fromptr, int64_t outlength) {
+  return awkward_IndexedOptionArray_fillna<uint64_t>(toindex, fromptr, outlength);
+}
+ERROR awkward_IndexedOptionArray_fillna_fromfloat_64(int64_t* toindex, const float* fromptr, int64_t outlength) {
+  return awkward_IndexedOptionArray_fillna<float>(toindex, fromptr, outlength);
+}
+ERROR awkward_IndexedOptionArray_fillna_fromdouble_64(int64_t* toindex, const double* fromptr, int64_t outlength) {
   return awkward_IndexedOptionArray_fillna<double>(toindex, fromptr, outlength);
 }
 
