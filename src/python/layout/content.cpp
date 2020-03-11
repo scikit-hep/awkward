@@ -510,23 +510,23 @@ py::object getitem(const T& self, const py::object& obj) {
 /////////////////////////////////////////////////////////////// ArrayBuilder
 
 void builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
-  if (py::isinstance<py::float_>(obj)) {
-    self.real(obj.cast<double>());
-  }
-  else if (py::isinstance<py::int_>(obj)) {
-    self.integer(obj.cast<int64_t>());
+  if (obj.is(py::none())) {
+    self.null();
   }
   else if (py::isinstance<py::bool_>(obj)) {
     self.boolean(obj.cast<bool>());
   }
-  else if (obj.is(py::none())) {
-    self.null();
+  else if (py::isinstance<py::int_>(obj)) {
+    self.integer(obj.cast<int64_t>());
   }
-  else if (py::isinstance<py::str>(obj)) {
-    self.string(obj.cast<std::string>());
+  else if (py::isinstance<py::float_>(obj)) {
+    self.real(obj.cast<double>());
   }
   else if (py::isinstance<py::bytes>(obj)) {
     self.bytestring(obj.cast<std::string>());
+  }
+  else if (py::isinstance<py::str>(obj)) {
+    self.string(obj.cast<std::string>());
   }
   else if (py::isinstance<py::tuple>(obj)) {
     py::tuple tup = obj.cast<py::tuple>();
@@ -566,14 +566,14 @@ void builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     }
     self.endlist();
   }
-  else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
-    self.real(obj.cast<double>());
+  else if (py::isinstance(obj, py::module::import("numpy").attr("bool_"))) {
+    self.boolean(obj.cast<bool>());
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("integer"))) {
     self.integer(obj.cast<int64_t>());
   }
-  else if (py::isinstance(obj, py::module::import("numpy").attr("bool_"))) {
-    self.boolean(obj.cast<bool>());
+  else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
+    self.real(obj.cast<double>());
   }
   else {
     throw std::invalid_argument(std::string("cannot convert ") + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ") + obj.attr("__class__").attr("__name__").cast<std::string>() + std::string(") to an array element"));
