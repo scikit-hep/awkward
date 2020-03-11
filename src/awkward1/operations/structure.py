@@ -282,7 +282,41 @@ def cross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
         raise ValueError("cross's 'axis' must be non-negative")
 
     elif axis == 0:
-        raise NotImplementedError
+        if nested is None or nested is False:
+            nested = []
+
+        if isinstance(arrays, dict):
+            if nested is True:
+                nested = list(arrays.keys())   # includes the last key, but it's ignored below
+            if any(not (isinstance(n, str) and n in arrays) for x in nested):
+                raise ValueError("cross's 'nested' must be dict keys for a dict of arrays")
+            recordlookup = []
+            layouts = []
+            tonested = []
+            for i, (n, x) in enumerate(arrays.items()):
+                recordlookup.append(n)
+                layouts.append(awkward1.operations.convert.tolayout(x, allowrecord=False, allowother=False))
+                if n in nested:
+                    tonested.append(i)
+            nested = tonested
+
+        else:
+            if nested is True:
+                nested = list(range(len(arrays) - 1))
+            if any(not (isinstance(x, int) and 0 <= x < len(arrays) - 1) for x in nested):
+                raise ValueError("cross's 'nested' must be integers in [0, len(arrays) - 1) for an iterable of arrays")
+            recordlookup = None
+            layouts = []
+            for x in arrays:
+                layouts.append(awkward1.operations.convert.tolayout(x, allowrecord=False, allowother=False))
+
+        indexes = [awkward1.layout.Index64(x.reshape(-1)) for x in numpy.meshgrid(*[numpy.arange(len(x), dtype=numpy.int64) for x in layouts], indexing="ij")]
+        outs = [awkward1.layout.IndexedArray64(x, y) for x, y in __builtins__["zip"](indexes, layouts)]
+
+        result = awkward1.layout.RecordArray(outs, recordlookup, parameters=parameters)
+        for i in range(len(arrays) - 1, -1, -1):
+            if i in nested:
+                result = awkward1.layout.RegularArray(result, len(layouts[i + 1]))
 
     else:
         def newaxis(layout, i):
@@ -337,19 +371,19 @@ def cross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
                 if i < len(arrays) - 1 and i not in nested:
                     toflatten.append(axis + i + 1)
 
-    def getfunction3(inputs, depth):
-        if depth == axis + len(arrays):
-            return lambda: (awkward1.layout.RecordArray(inputs, recordlookup, parameters=parameters),)
-        else:
-            return None
+        def getfunction3(inputs, depth):
+            if depth == axis + len(arrays):
+                return lambda: (awkward1.layout.RecordArray(inputs, recordlookup, parameters=parameters),)
+            else:
+                return None
 
-    out = awkward1._util.broadcast_and_apply(layouts, getfunction3)
-    assert isinstance(out, tuple) and len(out) == 1
-    result = out[0]
+        out = awkward1._util.broadcast_and_apply(layouts, getfunction3)
+        assert isinstance(out, tuple) and len(out) == 1
+        result = out[0]
 
-    while len(toflatten) != 0:
-        axis = toflatten.pop()
-        result = flatten(result, axis=axis, highlevel=False)
+        while len(toflatten) != 0:
+            axis = toflatten.pop()
+            result = flatten(result, axis=axis, highlevel=False)
 
     if highlevel:
         return awkward1._util.wrap(result, awkward1._util.behaviorof(*arrays))
