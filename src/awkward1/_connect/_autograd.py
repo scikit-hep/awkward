@@ -46,9 +46,9 @@ def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
     def broadcast(*args, **kwargs):
         nextargs = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=True) for x in args]
 
-        def getfunction(inputs):
+        def getfunction(inputs, depth):
             if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-                return lambda depth: (awkward1.layout.NumpyArray(gradfun(*inputs)),)
+                return lambda: (awkward1.layout.NumpyArray(gradfun(*inputs)),)
             else:
                 return None
 

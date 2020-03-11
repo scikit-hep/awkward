@@ -6,8 +6,10 @@ import re
 import keyword
 try:
     from collections.abc import Sequence
+    from collections.abc import Iterable
 except:
     from collections import Sequence
+    from collections import Iterable
 
 import numpy
 
@@ -25,11 +27,13 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin, awkward1._connect._p
         elif isinstance(data, Array):
             layout = data.layout
         elif isinstance(data, numpy.ndarray):
-            layout = awkward1.operations.convert.fromnumpy(data).layout
+            layout = awkward1.operations.convert.fromnumpy(data, highlevel=False)
         elif isinstance(data, str):
-            layout = awkward1.operations.convert.fromjson(data).layout
+            layout = awkward1.operations.convert.fromjson(data, highlevel=False)
+        elif isinstance(data, dict):
+            raise TypeError("could not convert dict into an awkward1.Array; try awkward1.Record")
         else:
-            layout = awkward1.operations.convert.fromiter(data).layout
+            layout = awkward1.operations.convert.fromiter(data, highlevel=False, allowrecord=False)
         if not isinstance(layout, awkward1.layout.Content):
             raise TypeError("could not convert data into an awkward1.Array")
 
@@ -172,8 +176,18 @@ class Array(awkward1._connect._numpy.NDArrayOperatorsMixin, awkward1._connect._p
 
 class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     def __init__(self, data, behavior=None, checkvalid=False):
-        # FIXME: more checks here
-        layout = data
+        if isinstance(data, awkward1.layout.Record):
+            layout = data
+        elif isinstance(data, Record):
+            layout = data.layout
+        elif isinstance(data, str):
+            layout = awkward1.operations.convert.fromjson(data, highlevel=False)
+        elif isinstance(data, dict):
+            layout = awkward1.operations.convert.fromiter([data], highlevel=False)[0]
+        elif isinstance(data, Iterable):
+            raise TypeError("could not convert non-dict into an awkward1.Record; try awkward1.Array")
+        else:
+            layout = None
         if not isinstance(layout, awkward1.layout.Record):
             raise TypeError("could not convert data into an awkward1.Record")
 
@@ -286,7 +300,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     @property
     def numbatype(self):
         import numba
-        import awkward1._numba
+        import awkward1._connect._numba
         awkward1._connect._numba.register()
         if self._numbaview is None:
             self._numbaview = awkward1._connect._numba.arrayview.RecordView.fromrecord(self)

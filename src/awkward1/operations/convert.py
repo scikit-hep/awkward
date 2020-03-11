@@ -49,7 +49,12 @@ def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
     else:
         return layout
 
-def fromiter(iterable, highlevel=True, behavior=None, initial=1024, resize=2.0):
+def fromiter(iterable, highlevel=True, behavior=None, allowrecord=True, initial=1024, resize=2.0):
+    if isinstance(iterable, dict):
+        if allowrecord:
+            return fromiter([iterable], highlevel=highlevel, behavior=behavior, initial=initial, resize=resize)[0]
+        else:
+            raise ValueError("cannot produce an array from a dict")
     out = awkward1.layout.ArrayBuilder(initial=initial, resize=resize)
     for x in iterable:
         out.fromiter(x)

@@ -188,11 +188,11 @@ def numba_methods(layouttype, behavior):
 
 def numba_unaryops(unaryop, left, behavior):
     import awkward1
-    import awkward1._numba.layout
+    import awkward1._connect._numba.layout
     behavior = Behavior(awkward1.behavior, behavior)
     done = False
 
-    if isinstance(left, awkward1._numba.layout.ContentType):
+    if isinstance(left, awkward1._connect._numba.layout.ContentType):
         left = left.parameters.get("__record__")
         if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
             done = True
@@ -205,16 +205,16 @@ def numba_unaryops(unaryop, left, behavior):
 
 def numba_binops(binop, left, right, behavior):
     import awkward1
-    import awkward1._numba.layout
+    import awkward1._connect._numba.layout
     behavior = Behavior(awkward1.behavior, behavior)
     done = False
 
-    if isinstance(left, awkward1._numba.layout.ContentType):
+    if isinstance(left, awkward1._connect._numba.layout.ContentType):
         left = left.parameters.get("__record__")
         if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
             done = True
 
-    if isinstance(right, awkward1._numba.layout.ContentType):
+    if isinstance(right, awkward1._connect._numba.layout.ContentType):
         right = right.parameters.get("__record__")
         if not (isinstance(right, str) or (py27 and isinstance(right, unicode))):
             done = True
@@ -344,11 +344,11 @@ def broadcast_and_apply(inputs, getfunction):
         # now all lengths must agree
         checklength([x for x in inputs if isinstance(x, awkward1.layout.Content)])
 
-        function = getfunction(inputs)
+        function = getfunction(inputs, depth)
 
         # the rest of this is one switch statement
         if function is not None:
-            return function(depth)
+            return function()
 
         elif any(isinstance(x, unknowntypes) for x in inputs):
             return apply([x if not isinstance(x, unknowntypes) else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.bool_)) for x in inputs], depth)

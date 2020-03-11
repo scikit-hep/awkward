@@ -558,8 +558,25 @@ void builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     }
     self.endlist();
   }
+  else if (py::isinstance<py::array>(obj)) {
+    py::iterable seq = obj.attr("tolist")().cast<py::iterable>();
+    self.beginlist();
+    for (auto x : seq) {
+      builder_fromiter(self, x);
+    }
+    self.endlist();
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("bool_"))) {
+    self.boolean(obj.cast<bool>());
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("integer"))) {
+    self.integer(obj.cast<int64_t>());
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
+    self.real(obj.cast<double>());
+  }
   else {
-    throw std::invalid_argument(std::string("cannot convert ") + obj.attr("__repr__")().cast<std::string>() + std::string(" to an array element"));
+    throw std::invalid_argument(std::string("cannot convert ") + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ") + obj.attr("__class__").attr("__name__").cast<std::string>() + std::string(") to an array element"));
   }
 }
 
