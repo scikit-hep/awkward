@@ -647,6 +647,25 @@ namespace awkward {
     return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, outlength);
   }
 
+  const std::shared_ptr<Content> RecordArray::localindex(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (axis == depth) {
+      Index64 localindex(length());
+      struct Error err = awkward_localindex_64(
+        localindex.ptr().get(),
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      return std::make_shared<NumpyArray>(localindex);
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->localindex(axis, depth));
+      }
+      return std::make_shared<RecordArray>(identities_, util::Parameters(), contents, recordlookup_, length_);
+    }
+  }
+
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
     if (fieldindex >= numfields()) {
       throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields()) + std::string(" fields")));

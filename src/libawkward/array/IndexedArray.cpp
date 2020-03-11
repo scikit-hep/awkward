@@ -1090,6 +1090,35 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::localindex(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (axis == depth) {
+      Index64 localindex(length());
+      struct Error err = awkward_localindex_64(
+        localindex.ptr().get(),
+        length());
+      util::handle_error(err, classname(), identities_.get());
+      return std::make_shared<NumpyArray>(localindex);
+    }
+    else {
+      if (ISOPTION) {
+        int64_t numnull;
+        std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
+        Index64 nextcarry = pair.first;
+        IndexOf<T> outindex = pair.second;
+
+        std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+        std::shared_ptr<Content> out = next.get()->localindex(axis, depth);
+        IndexedArrayOf<T, ISOPTION> out2(identities_, util::Parameters(), outindex, out);
+        return out2.simplify();
+      }
+      else {
+        return project().get()->localindex(axis, depth);
+      }
+    }
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: IndexedArray::getitem_next(at)");
   }

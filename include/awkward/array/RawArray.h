@@ -22,6 +22,7 @@
 #include "awkward/Content.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
+#include "awkward/array/NumpyArray.h"
 
 namespace awkward {
   void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
@@ -535,7 +536,22 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {
-      throw std::runtime_error("FIXME: Raw:reduce_next");
+      throw std::runtime_error("FIXME: RawArray:reduce_next");
+    }
+
+    const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (axis == depth) {
+        Index64 localindex(length());
+        struct Error err = awkward_localindex_64(
+          localindex.ptr().get(),
+          length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<NumpyArray>(localindex);
+      }
+      else {
+        throw std::invalid_argument("'axis' out of range for localindex");
+      }
     }
 
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {

@@ -953,6 +953,18 @@ namespace awkward {
       return awkward_unionarray8_64_validity(tags, tagsoffset, index, indexoffset, length, numcontents, lencontents);
     }
 
+    template <>
+    Error awkward_listarray_localindex_64<int32_t>(int64_t* toindex, const int32_t* offsets, int64_t offsetsoffset, int64_t length) {
+      return awkward_listarray32_localindex_64(toindex, offsets, offsetsoffset, length);
+    }
+    template <>
+    Error awkward_listarray_localindex_64<uint32_t>(int64_t* toindex, const uint32_t* offsets, int64_t offsetsoffset, int64_t length) {
+      return awkward_listarrayU32_localindex_64(toindex, offsets, offsetsoffset, length);
+    }
+    template <>
+    Error awkward_listarray_localindex_64<int64_t>(int64_t* toindex, const int64_t* offsets, int64_t offsetsoffset, int64_t length) {
+      return awkward_listarray64_localindex_64(toindex, offsets, offsetsoffset, length);
+    }
 
   }
 }

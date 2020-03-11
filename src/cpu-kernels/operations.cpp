@@ -952,3 +952,48 @@ ERROR awkward_ListOffsetArrayU32_rpad_axis1_64(int64_t* toindex, const uint32_t*
 ERROR awkward_ListOffsetArray64_rpad_axis1_64(int64_t* toindex, const int64_t* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target) {
   return awkward_ListOffsetArray_rpad_axis1<int64_t, int64_t>(toindex, fromoffsets, offsetsoffset, fromlength, target);
 }
+
+template <typename T>
+ERROR awkward_localindex(T* toindex, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toindex[i] = i;
+  }
+  return success();
+}
+ERROR awkward_localindex_64(int64_t* toindex, int64_t length) {
+  return awkward_localindex<int64_t>(toindex, length);
+}
+
+template <typename C, typename T>
+ERROR awkward_listarray_localindex(T* toindex, const C* offsets, int64_t offsetsoffset, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    int64_t start = (int64_t)offsets[offsetsoffset + i];
+    int64_t stop = (int64_t)offsets[offsetsoffset + i + 1];
+    for (int64_t j = start;  j < stop;  j++) {
+      toindex[j] = j - start;
+    }
+  }
+  return success();
+}
+ERROR awkward_listarray32_localindex_64(int64_t* toindex, const int32_t* offsets, int64_t offsetsoffset, int64_t length) {
+  return awkward_listarray_localindex<int32_t, int64_t>(toindex, offsets, offsetsoffset, length);
+}
+ERROR awkward_listarrayU32_localindex_64(int64_t* toindex, const uint32_t* offsets, int64_t offsetsoffset, int64_t length) {
+  return awkward_listarray_localindex<uint32_t, int64_t>(toindex, offsets, offsetsoffset, length);
+}
+ERROR awkward_listarray64_localindex_64(int64_t* toindex, const int64_t* offsets, int64_t offsetsoffset, int64_t length) {
+  return awkward_listarray_localindex<int64_t, int64_t>(toindex, offsets, offsetsoffset, length);
+}
+
+template <typename T>
+ERROR awkward_regulararray_localindex(T* toindex, int64_t size, int64_t length) {
+  for (int64_t i = 0;  i < length;  i++) {
+    for (int64_t j = 0;  j < size;  j++) {
+      toindex[i*size + j] = j;
+    }
+  }
+  return success();
+}
+ERROR awkward_regulararray_localindex_64(int64_t* toindex, int64_t size, int64_t length) {
+  return awkward_regulararray_localindex<int64_t>(toindex, size, length);
+}

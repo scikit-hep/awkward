@@ -175,6 +175,9 @@ namespace awkward {
     template <typename T, typename I>
     ERROR awkward_unionarray_validity(const T* tags, int64_t tagsoffset, const I* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents);
 
+    template <typename T>
+    ERROR awkward_listarray_localindex_64(int64_t* toindex, const T* offsets, int64_t offsetsoffset, int64_t length);
+
   }
 }
 

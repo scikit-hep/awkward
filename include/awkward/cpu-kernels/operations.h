@@ -178,6 +178,14 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_unionarray8_U32_validity(const int8_t* tags, int64_t tagsoffset, const uint32_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents);
   EXPORT_SYMBOL struct Error awkward_unionarray8_64_validity(const int8_t* tags, int64_t tagsoffset, const int64_t* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents);
 
+  EXPORT_SYMBOL struct Error awkward_localindex_64(int64_t* toindex, int64_t length);
+
+  EXPORT_SYMBOL struct Error awkward_listarray32_localindex_64(int64_t* toindex, const int32_t* offsets, int64_t offsetsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_localindex_64(int64_t* toindex, const uint32_t* offsets, int64_t offsetsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarray64_localindex_64(int64_t* toindex, const int64_t* offsets, int64_t offsetsoffset, int64_t length);
+
+  EXPORT_SYMBOL struct Error awkward_regulararray_localindex_64(int64_t* toindex, int64_t size, int64_t length);
+
 }
 
 #endif // AWKWARDCPU_GETITEM_H_

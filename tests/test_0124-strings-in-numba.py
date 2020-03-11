@@ -11,6 +11,8 @@ import awkward1
 
 numba = pytest.importorskip("numba")
 
+py27 = (sys.version_info[0] < 3)
+
 def test_string():
     array = awkward1.Array(["one", "two", "three", "four", "five"], checkvalid=True)
 
@@ -22,8 +24,9 @@ def test_string():
     assert f1(array, 1) == "two"
     assert f1(array, 2) == "three"
 
-    @numba.njit
-    def f2(x, i, j):
-        return x[i] + x[j]
+    if not py27:
+        @numba.njit
+        def f2(x, i, j):
+            return x[i] + x[j]
 
-    assert f2(array, 1, 3) == "twofour"
+        assert f2(array, 1, 3) == "twofour"
