@@ -180,13 +180,9 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_localindex_64(int64_t* toindex, int64_t length);
 
-  EXPORT_SYMBOL struct Error awkward_listarray32_localindex_indexlength_64(int64_t* indexlength, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length);
-  EXPORT_SYMBOL struct Error awkward_listarrayU32_localindex_indexlength_64(int64_t* indexlength, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length);
-  EXPORT_SYMBOL struct Error awkward_listarray64_localindex_indexlength_64(int64_t* indexlength, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length);
-
-  EXPORT_SYMBOL struct Error awkward_listarray32_localindex_64(int64_t* toindex, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length);
-  EXPORT_SYMBOL struct Error awkward_listarrayU32_localindex_64(int64_t* toindex, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length);
-  EXPORT_SYMBOL struct Error awkward_listarray64_localindex_64(int64_t* toindex, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarray32_localindex_64(int64_t* toindex, const int32_t* offsets, int64_t offsetsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_localindex_64(int64_t* toindex, const uint32_t* offsets, int64_t offsetsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarray64_localindex_64(int64_t* toindex, const int64_t* offsets, int64_t offsetsoffset, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_regulararray_localindex_64(int64_t* toindex, int64_t size, int64_t length);
 

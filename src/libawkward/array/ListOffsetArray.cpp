@@ -1071,7 +1071,22 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::localindex(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: ListOffsetArray:localindex");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (axis == depth) {
+      Index64 offsets = compact_offsets64(true);
+      int64_t innerlength = offsets.ptr().get()[offsets.offset() + offsets.length() - 1];
+      Index64 localindex(innerlength);
+      struct Error err = util::awkward_listarray_localindex_64(
+        localindex.ptr().get(),
+        offsets.ptr().get(),
+        offsets.offset(),
+        offsets.length() - 1);
+      util::handle_error(err, classname(), identities_.get());
+      return std::make_shared<ListOffsetArray64>(identities_, util::Parameters(), offsets, std::make_shared<NumpyArray>(localindex));
+    }
+    else {
+      return std::make_shared<ListOffsetArrayOf<T>>(identities_, util::Parameters(), offsets_, content_.get()->localindex(axis, depth + 1));
+    }
   }
 
   template <typename T>

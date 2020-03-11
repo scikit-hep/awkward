@@ -60,3 +60,11 @@ def test_axis2():
     two = awkward1.Array([[[100, 200], [300], [400, 500]], [[100, 200], [300], [400, 500]]])
 
     assert awkward1.tolist(awkward1.cross([one, two], axis=2)) == [[[(0, 100), (0, 200), (1, 100), (1, 200), (2, 100), (2, 200)], [], [(3, 400), (3, 500), (4, 400), (4, 500)]], [[(0, 100), (0, 200), (1, 100), (1, 200), (2, 100), (2, 200)], [], [(3, 400), (3, 500), (4, 400), (4, 500)]]]
+
+def test_localindex():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
+    assert awkward1.tolist(array.localindex(0)) == [[0, 1, 2], [], [0, 1], [0], [0, 1, 2, 3]]
+
+    array = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[6.6, 7.7, 8.8, 9.9]]]).layout
+    assert awkward1.tolist(array.localindex(0)) == [[0, 1, 2], [], [0], [0]]
+    assert awkward1.tolist(array.localindex(1)) == [[[0, 1, 2], [], [0, 1]], [], [[0]], [[0, 1, 2, 3]]]
