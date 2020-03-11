@@ -221,4 +221,31 @@ def rpad(array, length, axis=1, clip=False):
     else:
         return awkward1._util.wrap(layout.rpad(length, axis), behavior)
 
+def zip(arrays, depthlimit=None, parameters=None):
+    if depthlimit is not None and depthlimit <= 0:
+        raise ValueError("depthlimit must be None or at least 1")
+
+    behavior = awkward1._util.behaviorof(*arrays)
+    if isinstance(arrays, dict):
+        recordlookup = []
+        layouts = []
+        for n, x in arrays.items():
+            recordlookup.append(n)
+            layouts.append(awkward1.operations.convert.tolayout(x, allowrecord=False, allowother=False))
+    else:
+        recordlookup = None
+        layouts = []
+        for x in arrays:
+            layouts.append(awkward1.operations.convert.tolayout(x, allowrecord=False, allowother=False))
+
+    def getfunction(inputs, depth):
+        if (depthlimit is None and any(x.purelist_depth == 1 for x in inputs)) or (depthlimit == depth):
+            return lambda: (awkward1.layout.RecordArray(inputs, recordlookup, parameters=parameters),)
+        else:
+            return None
+
+    out = awkward1._util.broadcast_and_apply(layouts, getfunction)
+    assert isinstance(out, tuple) and len(out) == 1
+    return awkward1._util.wrap(out[0], behavior)
+
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numpy", "awkward1")]
