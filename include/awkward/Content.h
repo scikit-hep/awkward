@@ -82,6 +82,8 @@ namespace awkward {
     bool parameters_equal(const util::Parameters& other) const;
     const std::shared_ptr<Content> merge_as_union(const std::shared_ptr<Content>& other) const;
     const std::shared_ptr<Content> rpad_axis0(int64_t target, bool clip) const;
+    const std::shared_ptr<Content> localindex_axis0() const;
+    const std::shared_ptr<Content> choose_axis0(int64_t n) const;
 
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const = 0;
     virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const = 0;

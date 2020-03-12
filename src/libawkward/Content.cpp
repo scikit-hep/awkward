@@ -183,6 +183,14 @@ namespace awkward {
     return next.get()->simplify();
   }
 
+  const std::shared_ptr<Content> Content::localindex_axis0() const {
+    throw std::runtime_error("FIXME: Content::localindex_axis0");
+  }
+
+  const std::shared_ptr<Content> Content::choose_axis0(int64_t n) const {
+    throw std::runtime_error("FIXME: Content::choose_axis0");
+  }
+
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
     std::shared_ptr<Content> next = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), shallow_copy(), length());
 
