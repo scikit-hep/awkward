@@ -10,6 +10,6 @@ import numpy
 import awkward1
 
 def test():
-    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-    # print(awkward1.choose(array, 2))
+    array = awkward1.Array([[]])
+    # print(awkward1.choose(array, 3, diagonal=False))
     # raise Exception

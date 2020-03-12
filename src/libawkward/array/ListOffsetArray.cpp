@@ -17,6 +17,7 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
+#include "awkward/array/RecordArray.h"
 
 #include "awkward/array/ListOffsetArray.h"
 
@@ -1099,16 +1100,62 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return choose_axis0(n);
     }
+
     else if (toaxis == depth + 1) {
       IndexOf<T> starts = util::make_starts(offsets_);
       IndexOf<T> stops = util::make_stops(offsets_);
 
-      throw std::runtime_error("FIXME: ListOffsetArray::choose stuff");
+      int64_t totallen;
+      struct Error err1 = util::awkward_listarray_choose_length<T>(
+        &totallen,
+        n,
+        diagonal,
+        starts.ptr().get(),
+        starts.offset(),
+        stops.ptr().get(),
+        stops.offset(),
+        length());
+      util::handle_error(err1, classname(), identities_.get());
+
+      std::vector<std::shared_ptr<int64_t>> tocarry;
+      std::vector<int64_t*> tocarryraw;
+      for (int64_t j = 0;  j < n;  j++) {
+        std::shared_ptr<int64_t> ptr(new int64_t[(size_t)totallen], util::array_deleter<int64_t>());
+        tocarry.push_back(ptr);
+        tocarryraw.push_back(ptr.get());
+      }
+      struct Error err2 = util::awkward_listarray_choose_64<T>(
+        tocarryraw.data(),
+        n,
+        diagonal,
+        starts.ptr().get(),
+        starts.offset(),
+        stops.ptr().get(),
+        stops.offset(),
+        length());
+      util::handle_error(err2, classname(), identities_.get());
+
+#if defined _MSC_VER || defined __i386__
+      std::string format("q");
+#else
+      std::string format("l");
+#endif
+
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto ptr : tocarry) {
+        contents.push_back(std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, std::vector<ssize_t>({ (ssize_t)totallen }), std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }), 0, sizeof(int64_t), format));
+      }
+      return std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
     }
+
     else {
       std::shared_ptr<Content> next = content_.get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
       Index64 offsets = compact_offsets64(true);
