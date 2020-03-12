@@ -857,6 +857,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::choose(int64_t n, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: ListArray::choose");
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {

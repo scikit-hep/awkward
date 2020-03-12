@@ -234,6 +234,10 @@ namespace awkward {
     return std::make_shared<NumpyArray>(Index64(0));
   }
 
+  const std::shared_ptr<Content> EmptyArray::choose(int64_t n, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: EmptyArray::choose");
+  }
+
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy

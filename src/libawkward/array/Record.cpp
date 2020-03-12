@@ -257,6 +257,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> Record::choose(int64_t n, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: Record::choose");
+  }
+
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
     return array_.get()->field(fieldindex).get()->getitem_at_nowrap(at_);
   }

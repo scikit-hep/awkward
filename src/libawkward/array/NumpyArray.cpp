@@ -1485,6 +1485,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> NumpyArray::choose(int64_t n, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: NumpyArray::choose");
+  }
+
   const std::shared_ptr<Content> NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: NumpyArray::getitem_next(at) (without 'length', 'stride', and 'first')");
   }

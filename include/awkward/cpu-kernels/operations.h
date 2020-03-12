@@ -186,6 +186,22 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_regulararray_localindex_64(int64_t* toindex, int64_t size, int64_t length);
 
+  EXPORT_SYMBOL struct Error awkward_choose_64(int64_t* toindex, int64_t n, int64_t singlelen);
+
+  EXPORT_SYMBOL struct Error awkward_listarray32_choose_length(int64_t* totallen, int64_t n, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_choose_length(int64_t* totallen, int64_t n, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarray64_choose_length(int64_t* totallen, int64_t n, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length);
+
+  EXPORT_SYMBOL struct Error awkward_listarray32_choose_64(int64_t* tocarry, int64_t n, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_choose_64(int64_t* tocarry, int64_t n, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarray64_choose_64(int64_t* tocarry, int64_t n, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length);
+
+  EXPORT_SYMBOL struct Error awkward_listarray32_choose_borders_64(int64_t* tooffsets, int64_t k, int64_t n, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarrayU32_choose_borders_64(int64_t* tooffsets, int64_t k, int64_t n, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_listarray64_choose_borders_64(int64_t* tooffsets, int64_t k, int64_t n, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length);
+
+  EXPORT_SYMBOL struct Error awkward_regulararray_choose_64(int64_t* tocarry, int64_t n, int64_t size, int64_t length);
+
 }
 
 #endif // AWKWARDCPU_GETITEM_H_

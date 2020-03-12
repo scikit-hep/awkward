@@ -1098,6 +1098,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::choose(int64_t n, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: ListOffsetArray::choose");
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t length, bool mask, bool keepdims) const {
     return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, parents, length, mask, keepdims);
   }

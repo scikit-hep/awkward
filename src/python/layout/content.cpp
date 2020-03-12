@@ -882,7 +882,7 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           })
           .def("num", [](const T& self, int64_t axis) -> py::object {
             return box(self.num(axis, 0));
-          }, py::arg("axis") = 0)
+          }, py::arg("axis") = 1)
           .def("flatten", [](const T& self, int64_t axis) -> py::object {
             std::pair<ak::Index64, std::shared_ptr<ak::Content>> pair = self.offsets_and_flattened(axis, 0);
             return box(pair.second);
@@ -940,7 +940,10 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           }, py::arg("axis") = -1, py::arg("mask") = true, py::arg("keepdims") = false)
           .def("localindex", [](const T& self, int64_t axis) -> py::object {
             return box(self.localindex(axis, 0));
-          }, py::arg("axis") = 0)
+          }, py::arg("axis") = 1)
+          .def("choose", [](const T& self, int64_t n, int64_t axis) -> py::object {
+            return box(self.choose(n, axis, 0));
+          }, py::arg("n"), py::arg("axis") = 1)
 
   ;
 }

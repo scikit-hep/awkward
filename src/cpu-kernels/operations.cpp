@@ -997,3 +997,61 @@ ERROR awkward_regulararray_localindex(T* toindex, int64_t size, int64_t length) 
 ERROR awkward_regulararray_localindex_64(int64_t* toindex, int64_t size, int64_t length) {
   return awkward_regulararray_localindex<int64_t>(toindex, size, length);
 }
+
+template <typename T>
+ERROR awkward_choose(T* toindex, int64_t n, int64_t singlelen) {
+  return failure("FIXME: awkward_choose", 0, kSliceNone);
+}
+ERROR awkward_choose_64(int64_t* toindex, int64_t n, int64_t singlelen) {
+  return awkward_choose<int64_t>(toindex, n, singlelen);
+}
+
+template <typename C>
+ERROR awkward_listarray_choose_length(int64_t* totallen, int64_t n, const C* starts, int64_t startsoffset, const C* stops, int64_t stopsoffset, int64_t length) {
+  return failure("FIXME: awkward_listarray_choose_length", 0, kSliceNone);
+}
+ERROR awkward_listarray32_choose_length(int64_t* totallen, int64_t n, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose_length<int32_t>(totallen, n, starts, startsoffset, stops, stopsoffset, length);
+}
+ERROR awkward_listarrayU32_choose_length(int64_t* totallen, int64_t n, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose_length<uint32_t>(totallen, n, starts, startsoffset, stops, stopsoffset, length);
+}
+ERROR awkward_listarray64_choose_length(int64_t* totallen, int64_t n, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose_length<int64_t>(totallen, n, starts, startsoffset, stops, stopsoffset, length);
+}
+
+template <typename C, typename T>
+ERROR awkward_listarray_choose(T* tocarry, int64_t n, const C* starts, int64_t startsoffset, const C* stops, int64_t stopsoffset, int64_t length) {
+  return failure("FIXME: awkward_listarray_choose", 0, kSliceNone);
+}
+ERROR awkward_listarray32_choose_64(int64_t* tocarry, int64_t n, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose<int32_t, int64_t>(tocarry, n, starts, startsoffset, stops, stopsoffset, length);
+}
+ERROR awkward_listarrayU32_choose_64(int64_t* tocarry, int64_t n, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose<uint32_t, int64_t>(tocarry, n, starts, startsoffset, stops, stopsoffset, length);
+}
+ERROR awkward_listarray64_choose_64(int64_t* tocarry, int64_t n, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose<int64_t, int64_t>(tocarry, n, starts, startsoffset, stops, stopsoffset, length);
+}
+
+template <typename C, typename T>
+ERROR awkward_listarray_choose_borders(T* tooffsets, int64_t k, int64_t n, const C* starts, int64_t startsoffset, const C* stops, int64_t stopsoffset, int64_t length) {
+  return failure("FIXME: awkward_listarray_choose_borders", 0, kSliceNone);
+}
+ERROR awkward_listarray32_choose_borders_64(int64_t* tooffsets, int64_t k, int64_t n, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose_borders<int32_t, int64_t>(tooffsets, k, n, starts, startsoffset, stops, stopsoffset, length);
+}
+ERROR awkward_listarrayU32_choose_borders_64(int64_t* tooffsets, int64_t k, int64_t n, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose_borders<uint32_t, int64_t>(tooffsets, k, n, starts, startsoffset, stops, stopsoffset, length);
+}
+ERROR awkward_listarray64_choose_borders_64(int64_t* tooffsets, int64_t k, int64_t n, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose_borders<int64_t, int64_t>(tooffsets, k, n, starts, startsoffset, stops, stopsoffset, length);
+}
+
+template <typename C, typename T>
+ERROR awkward_regulararray_choose(T* tocarry, int64_t n, int64_t size, int64_t length) {
+  return failure("FIXME: awkward_regulararray_choose", 0, kSliceNone);
+}
+ERROR awkward_regulararray_choose_64(int64_t* tocarry, int64_t n, int64_t size, int64_t length) {
+  return awkward_regulararray_choose<int32_t, int64_t>(tocarry, n, size, length);
+}

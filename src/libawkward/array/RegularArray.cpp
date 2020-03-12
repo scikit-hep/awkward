@@ -543,6 +543,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> RegularArray::choose(int64_t n, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: RegularArray::choose");
+  }
+
   const std::shared_ptr<Content> RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::runtime_error("RegularArray::getitem_next(SliceAt): advanced.length() != 0");

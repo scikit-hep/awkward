@@ -554,6 +554,10 @@ namespace awkward {
       }
     }
 
+    const std::shared_ptr<Content> choose(int64_t n, int64_t axis, int64_t depth) const override {
+      throw std::runtime_error("FIXME: RawArray::choose");
+    }
+
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
       return getitem_at(at.at());
     }
