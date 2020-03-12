@@ -866,8 +866,8 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("sizes", [](const T& self, int64_t axis) -> py::object {
             return box(self.count(axis));
           }, py::arg("axis") = 0)
-          .def("fillna", [](const T&self, int64_t value) -> py::object {
-            return box(self.fillna(value));
+          .def("fillna", [](const T&self, const py::object&  value) -> py::object {
+            return box(self.fillna(unbox_content(value)));
           })
           .def("flatten", [](const T& self, int64_t axis) -> py::object {
             return box(self.flatten(axis));

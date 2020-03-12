@@ -834,8 +834,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::fillna(int64_t value) const {
-    return toListOffsetArray64().get()->fillna(value);
+  const std::shared_ptr<Content> ListArrayOf<T>::fillna(const std::shared_ptr<Content>& value) const {
+    return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_.get()->fillna(value));
   }
 
   template <typename T>

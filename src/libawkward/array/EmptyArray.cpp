@@ -195,7 +195,7 @@ namespace awkward {
     return std::make_shared<SliceArray64>(index, shape, strides, false);
   }
 
-  const std::shared_ptr<Content> EmptyArray::fillna(int64_t value) const {
+  const std::shared_ptr<Content> EmptyArray::fillna(const std::shared_ptr<Content>& value) const {
     return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
   }
 

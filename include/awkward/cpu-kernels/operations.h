@@ -142,17 +142,9 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_unionarray8_U32_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const uint32_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
   EXPORT_SYMBOL struct Error awkward_unionarray8_64_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const int8_t* fromtags, int64_t fromtagsoffset, const int64_t* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
 
-  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_frombool_64(int64_t* toindex, const bool* fromptr, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_from8_64(int64_t* toindex, const int8_t* fromptr, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_fromU8_64(int64_t* toindex, const uint8_t* fromptr, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_from16_64(int64_t* toindex, const int16_t* fromptr, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_fromU16_64(int64_t* toindex, const uint16_t* fromptr, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_from32_64(int64_t* toindex, const int32_t* fromptr, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_fromU32_64(int64_t* toindex, const uint32_t* fromptr, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_from64_64(int64_t* toindex, const int64_t* fromptr, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_fromU64_64(int64_t* toindex, const uint64_t* fromptr, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_fromfloat_64(int64_t* toindex, const float* fromptr, int64_t outlength);
-  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_fromdouble_64(int64_t* toindex, const double* fromptr, int64_t outlength);
+  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_from32_64(int64_t* toindex, const int32_t* fromindex, int64_t offset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_fromU32_64(int64_t* toindex, const uint32_t* fromindex, int64_t offset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_IndexedOptionArray_fillna_from64_64(int64_t* toindex, const int64_t* fromindex, int64_t offset, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_UnionArray_fillna_from32_to64(int64_t* toindex, const int32_t* fromindex, int64_t length);
   EXPORT_SYMBOL struct Error awkward_UnionArray_fillna_fromU32_to64(int64_t* toindex, const uint32_t* fromindex, int64_t length);

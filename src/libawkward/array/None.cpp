@@ -161,7 +161,7 @@ namespace awkward {
     throw std::runtime_error("undefined opteration: None::asslice");
   }
 
-  const std::shared_ptr<Content> None::fillna(int64_t value) const {
+  const std::shared_ptr<Content> None::fillna(const std::shared_ptr<Content>& value) const {
     throw std::runtime_error("undefined opteration: None::fillna");
   }
 

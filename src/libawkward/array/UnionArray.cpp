@@ -1105,7 +1105,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::fillna(int64_t value) const {
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::fillna(const std::shared_ptr<Content>& value) const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {
       contents.emplace_back(content.get()->fillna(value));

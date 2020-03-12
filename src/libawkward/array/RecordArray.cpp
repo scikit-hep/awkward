@@ -594,17 +594,12 @@ namespace awkward {
     throw std::invalid_argument("cannot use records as a slice");
   }
 
-  const std::shared_ptr<Content> RecordArray::fillna(int64_t value) const {
+  const std::shared_ptr<Content> RecordArray::fillna(const std::shared_ptr<Content>& value) const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->fillna(value));
     }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
-    }
-    else {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
-    }
+    return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
   }
 
   const std::shared_ptr<Content> RecordArray::rpad(int64_t target, int64_t axis, int64_t depth) const {

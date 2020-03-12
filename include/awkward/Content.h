@@ -63,7 +63,7 @@ namespace awkward {
     virtual bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const = 0;
     virtual const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const = 0;
     virtual const std::shared_ptr<SliceItem> asslice() const = 0;
-    virtual const std::shared_ptr<Content> fillna(int64_t value) const = 0;
+    virtual const std::shared_ptr<Content> fillna(const std::shared_ptr<Content>& value) const = 0;
     virtual const std::shared_ptr<Content> rpad(int64_t length, int64_t axis, int64_t depth) const = 0;
     virtual const std::shared_ptr<Content> rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const = 0;
     const std::shared_ptr<Content> rpad_axis0(int64_t target, bool clip) const;
