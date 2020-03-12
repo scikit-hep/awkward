@@ -278,11 +278,16 @@ def dfs(array, levelname=lambda i: "sub"*i + "entry", anonymous="values"):
     behavior = awkward1._util.behaviorof(array)
     layout = awkward1.operations.convert.tolayout(array, allowrecord=True, allowother=False)
     if isinstance(layout, awkward1.layout.Record):
-        layout = layout.array[layout.at : layout.at + 1]
+        layout2 = layout.array[layout.at : layout.at + 1]
+    else:
+        layout2 = layout
 
     tables = []
     last_row_arrays = None
-    for column, row_arrays, col_names in recurse(layout, [], ()):
+    for column, row_arrays, col_names in recurse(layout2, [], ()):
+        if isinstance(layout, awkward1.layout.Record):
+            row_arrays = row_arrays[1:]   # this Record was presented as a RecordArray of one element
+
         if len(col_names) == 0:
             columns = [anonymous]
         else:
