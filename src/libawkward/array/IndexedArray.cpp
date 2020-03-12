@@ -1029,34 +1029,21 @@ namespace awkward {
       throw std::invalid_argument(std::string("fillna value length (") + std::to_string(value.get()->length()) + std::string(") is not equal to 1"));
     }
     if (ISOPTION) {
-      if (value.get()->mergeable(content_, true)) {
-        std::shared_ptr<Content> shifteddata = value.get()->merge(content_);
-        Index64 shiftedindex(length());
-        struct Error err = util::awkward_IndexedOptionArray_fillna_64<T>(
-          shiftedindex.ptr().get(),
-          index_.ptr().get(),
-          index_.offset(),
-          length());
-        util::handle_error(err, classname(), identities_.get());
+      std::vector<std::shared_ptr<Content>> contents;
+      contents.emplace_back(content());
+      contents.emplace_back(value);
 
-        return shifteddata.get()->carry(shiftedindex);
-      }
-      else {
-        std::vector<std::shared_ptr<Content>> contents;
-        contents.emplace_back(content());
-        contents.emplace_back(value);
+      Index8 tags = bytemask();
+      Index64 index(tags.length());
+      struct Error err = util::awkward_UnionArray_fillna_64<T>(
+        index.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        tags.length());
+      util::handle_error(err, classname(), identities_.get());
 
-        Index8 tags = bytemask();
-        Index64 index(tags.length());
-        struct Error err = util::awkward_UnionArray_fillna_64<T>(
-          index.ptr().get(),
-          index_.ptr().get(),
-          tags.length());
-        util::handle_error(err, classname(), identities_.get());
-
-        std::shared_ptr<UnionArray8_64> out = std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
-        return out.get()->simplify(false);
-      }
+      std::shared_ptr<UnionArray8_64> out = std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
+      return out.get()->simplify(true);
     }
     else {
       return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->fillna(value));
