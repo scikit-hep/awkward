@@ -66,7 +66,7 @@ namespace awkward {
     virtual const std::shared_ptr<Content> rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const = 0;
     virtual const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const = 0;
     virtual const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const = 0;
-    virtual const std::shared_ptr<Content> choose(int64_t n, int64_t axis, int64_t depth) const = 0;
+    virtual const std::shared_ptr<Content> choose(int64_t n, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const = 0;
 
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;

@@ -410,4 +410,17 @@ def cross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
     else:
         return result
 
+def choose(array, n, axis=1, nested=None, keys=None, parameters=None, highlevel=True):
+    if nested is not None:
+        raise NotImplementedError
+    if parameters is None:
+        parameters = {}
+
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False)
+    out = layout.choose(n, keys=keys, parameters=parameters, axis=axis)
+    if highlevel:
+        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
+
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numpy", "awkward1")]

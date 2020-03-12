@@ -941,9 +941,19 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("localindex", [](const T& self, int64_t axis) -> py::object {
             return box(self.localindex(axis, 0));
           }, py::arg("axis") = 1)
-          .def("choose", [](const T& self, int64_t n, int64_t axis) -> py::object {
-            return box(self.choose(n, axis, 0));
-          }, py::arg("n"), py::arg("axis") = 1)
+          .def("choose", [](const T& self, int64_t n, py::object keys, py::object parameters, int64_t axis) -> py::object {
+            std::shared_ptr<ak::util::RecordLookup> recordlookup(nullptr);
+            if (!keys.is(py::none())) {
+              recordlookup = std::make_shared<ak::util::RecordLookup>();
+              for (auto x : keys.cast<py::iterable>()) {
+                recordlookup.get()->push_back(x.cast<std::string>());
+              }
+              if (n != recordlookup.get()->size()) {
+                throw std::invalid_argument("if provided, the length of 'keys' must be 'n'");
+              }
+            }
+            return box(self.choose(n, recordlookup, dict2parameters(parameters), axis, 0));
+          }, py::arg("n"), py::arg("keys") = py::none(), py::arg("parameters") = py::none(), py::arg("axis") = 1)
 
   ;
 }

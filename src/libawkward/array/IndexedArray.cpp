@@ -1119,7 +1119,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::choose(int64_t n, int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::choose(int64_t n, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     throw std::runtime_error("FIXME: IndexedArray::choose");
   }
 
