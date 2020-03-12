@@ -173,7 +173,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None:localindex");
   }
 
-  const std::shared_ptr<Content> None::choose(int64_t n, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> None::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     throw std::runtime_error("undefined operation: None::choose");
   }
 

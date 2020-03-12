@@ -1098,8 +1098,22 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::choose(int64_t n, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: ListOffsetArray::choose");
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return choose_axis0(n);
+    }
+    else if (toaxis == depth + 1) {
+      IndexOf<T> starts = util::make_starts(offsets_);
+      IndexOf<T> stops = util::make_stops(offsets_);
+
+      throw std::runtime_error("FIXME: ListOffsetArray::choose stuff");
+    }
+    else {
+      std::shared_ptr<Content> next = content_.get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
+      Index64 offsets = compact_offsets64(true);
+      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), offsets, next);
+    }
   }
 
   template <typename T>

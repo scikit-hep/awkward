@@ -234,7 +234,7 @@ namespace awkward {
     return std::make_shared<NumpyArray>(Index64(0));
   }
 
-  const std::shared_ptr<Content> EmptyArray::choose(int64_t n, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const std::shared_ptr<Content> EmptyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     throw std::runtime_error("FIXME: EmptyArray::choose");
   }
 

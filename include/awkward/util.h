@@ -169,11 +169,11 @@ namespace awkward {
     template <typename T>
     ERROR awkward_listarray_localindex_64(int64_t* toindex, const T* offsets, int64_t offsetsoffset, int64_t length);
     template <typename T>
-    ERROR awkward_listarray_choose_length(int64_t* totallen, int64_t n, const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length);
+    ERROR awkward_listarray_choose_length(int64_t* totallen, int64_t n, bool diagonal, const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length);
     template <typename T>
-    ERROR awkward_listarray_choose_64(int64_t* tocarry, int64_t n, const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length);
+    ERROR awkward_listarray_choose_64(int64_t* tocarry, int64_t n, bool diagonal, const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length);
     template <typename T>
-    ERROR awkward_listarray_choose_borders_64(int64_t* tooffsets, int64_t k, int64_t n, const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length);
+    ERROR awkward_listarray_choose_borders_64(int64_t* tooffsets, int64_t k, int64_t n, bool diagonal, const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length);
 
   }
 }

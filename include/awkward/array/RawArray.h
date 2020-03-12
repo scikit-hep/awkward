@@ -554,7 +554,7 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<Content> choose(int64_t n, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override {
+    const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override {
       throw std::runtime_error("FIXME: RawArray::choose");
     }
 
