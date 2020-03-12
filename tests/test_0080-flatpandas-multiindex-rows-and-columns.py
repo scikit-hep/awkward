@@ -13,7 +13,7 @@ import awkward1
 
 pandas = pytest.importorskip("pandas")
 
-@pytest.mark.skipif(distutils.version.LooseVersion(pandas.__version__) <= distutils.version.LooseVersion("0.25"), reason="Test Pandas in 0.25+ only.")
+@pytest.mark.skipif(distutils.version.LooseVersion(pandas.__version__) < distutils.version.LooseVersion("1.0"), reason="Test Pandas in 1.0+ because they had to fix their JSON format.")
 def test():
     def key(n):
         if n == "values":
