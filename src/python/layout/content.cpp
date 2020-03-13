@@ -1063,6 +1063,30 @@ py::class_<ak::BitMaskedArray, std::shared_ptr<ak::BitMaskedArray>, ak::Content>
   );
 }
 
+/////////////////////////////////////////////////////////////// UnmaskedArray
+
+py::class_<ak::UnmaskedArray, std::shared_ptr<ak::UnmaskedArray>, ak::Content> make_UnmaskedArray(const py::handle& m, const std::string& name) {
+  return content_methods(py::class_<ak::UnmaskedArray, std::shared_ptr<ak::UnmaskedArray>, ak::Content>(m, name.c_str())
+      .def(py::init([](const py::object& content, const py::object& identities, const py::object& parameters) -> ak::UnmaskedArray {
+        return ak::UnmaskedArray(unbox_identities_none(identities), dict2parameters(parameters), std::shared_ptr<ak::Content>(unbox_content(content)));
+      }), py::arg("content"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
+
+      .def_property_readonly("content", &ak::BitMaskedArray::content)
+      .def("project", [](const ak::BitMaskedArray& self, const py::object& mask) {
+        if (mask.is(py::none())) {
+          return box(self.project());
+        }
+        else {
+          return box(self.project(mask.cast<ak::Index8>()));
+        }
+      }, py::arg("mask") = py::none())
+      .def("bytemask", &ak::BitMaskedArray::bytemask)
+      .def("simplify", [](const ak::BitMaskedArray& self) {
+        return box(self.simplify());
+      })
+  );
+}
+
 /////////////////////////////////////////////////////////////// ListArray
 
 template <typename T>

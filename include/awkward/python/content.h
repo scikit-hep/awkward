@@ -13,6 +13,7 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/None.h"
@@ -52,6 +53,7 @@ py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T
 
 py::class_<ak::ByteMaskedArray, std::shared_ptr<ak::ByteMaskedArray>, ak::Content> make_ByteMaskedArray(const py::handle& m, const std::string& name);
 py::class_<ak::BitMaskedArray,  std::shared_ptr<ak::BitMaskedArray>,  ak::Content> make_BitMaskedArray( const py::handle& m, const std::string& name);
+py::class_<ak::UnmaskedArray,   std::shared_ptr<ak::UnmaskedArray>,   ak::Content> make_UnmaskedArray(  const py::handle& m, const std::string& name);
 
 template <typename T>
 py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content> make_ListArrayOf(const py::handle& m, const std::string& name);

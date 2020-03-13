@@ -104,7 +104,7 @@ namespace awkward {
   }
 
   int64_t BitMaskedArray::length() const {
-    return mask_.length();
+    return length_;
   }
 
   const std::shared_ptr<Content> BitMaskedArray::shallow_copy() const {

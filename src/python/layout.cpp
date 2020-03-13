@@ -44,6 +44,7 @@ PYBIND11_MODULE(layout, m) {
 
   make_ByteMaskedArray(m,  "ByteMaskedArray");
   make_BitMaskedArray(m,   "BitMaskedArray");
+  make_UnmaskedArray(m,    "UnmaskedArray");
 
   make_ListArrayOf<int32_t>(m,  "ListArray32");
   make_ListArrayOf<uint32_t>(m, "ListArrayU32");
