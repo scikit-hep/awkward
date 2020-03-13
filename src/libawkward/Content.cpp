@@ -10,6 +10,7 @@
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/RecordArray.h"
+#include "awkward/array/NumpyArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -184,7 +185,12 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::localindex_axis0() const {
-    throw std::runtime_error("FIXME: Content::localindex_axis0");
+    Index64 localindex(length());
+    struct Error err = awkward_localindex_64(
+      localindex.ptr().get(),
+      length());
+    util::handle_error(err, classname(), identities_.get());
+    return std::make_shared<NumpyArray>(localindex);
   }
 
   const std::shared_ptr<Content> Content::choose_axis0(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters) const {

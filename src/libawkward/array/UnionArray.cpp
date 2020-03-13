@@ -1193,12 +1193,7 @@ namespace awkward {
   const std::shared_ptr<Content> UnionArrayOf<T, I>::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
-      Index64 localindex(length());
-      struct Error err = awkward_localindex_64(
-        localindex.ptr().get(),
-        length());
-      util::handle_error(err, classname(), identities_.get());
-      return std::make_shared<NumpyArray>(localindex);
+      return localindex_axis0();
     }
     else {
       std::vector<std::shared_ptr<Content>> contents;
