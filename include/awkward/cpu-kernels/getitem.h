@@ -147,6 +147,9 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_bytemaskedarray_numnull(int64_t* numnull, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen);
   EXPORT_SYMBOL struct Error awkward_bytemaskedarray_getitem_nextcarry_outindex_64(int64_t* tocarry, int64_t* outindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen);
+
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_toindexedarray_64(int64_t* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen);
+
 }
 
 #endif // AWKWARDCPU_GETITEM_H_

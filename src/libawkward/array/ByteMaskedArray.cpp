@@ -23,7 +23,11 @@ namespace awkward {
       : Content(identities, parameters)
       , mask_(mask)
       , content_(content)
-      , validwhen_(validwhen != 0) { }
+      , validwhen_(validwhen != 0) {
+    if (content.get()->length() < mask.length()) {
+      throw std::invalid_argument("ByteMaskedArray content must not be shorter than its mask");
+    }
+  }
 
   const Index8 ByteMaskedArray::mask() const {
     return mask_;
@@ -51,6 +55,18 @@ namespace awkward {
 
   const std::shared_ptr<Content> ByteMaskedArray::simplify() const {
     throw std::runtime_error("FIXME: ByteMaskedArray::simplify");
+  }
+
+  const std::shared_ptr<Content> ByteMaskedArray::toIndexedOptionArray64() const {
+    Index64 index(length());
+    struct Error err = awkward_bytemaskedarray_toindexedarray_64(
+      index.ptr().get(),
+      mask_.ptr().get(),
+      mask_.offset(),
+      mask_.length(),
+      validwhen_);
+    util::handle_error(err, classname(), identities_.get());
+    return std::make_shared<IndexedOptionArray64>(identities_, parameters_, index, content_);
   }
 
   const std::string ByteMaskedArray::classname() const {
@@ -289,7 +305,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> ByteMaskedArray::asslice() const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::asslice");
+    return toIndexedOptionArray64().get()->asslice();
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::rpad(int64_t target, int64_t axis, int64_t depth) const {

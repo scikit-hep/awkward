@@ -1125,3 +1125,14 @@ ERROR awkward_bytemaskedarray_getitem_nextcarry_outindex(T* tocarry, T* toindex,
 ERROR awkward_bytemaskedarray_getitem_nextcarry_outindex_64(int64_t* tocarry, int64_t* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
   return awkward_bytemaskedarray_getitem_nextcarry_outindex<int64_t>(tocarry, toindex, mask, maskoffset, length, validwhen);
 }
+
+template <typename T>
+ERROR awkward_bytemaskedarray_toindexedarray(T* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toindex[i] = ((mask[maskoffset + i] != 0) == validwhen ? i : -1);
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_toindexedarray_64(int64_t* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  return awkward_bytemaskedarray_toindexedarray<int64_t>(toindex, mask, maskoffset, length, validwhen);
+}
