@@ -1157,7 +1157,7 @@ namespace awkward {
     else {
       std::shared_ptr<Content> next = content_.get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
       Index64 offsets = compact_offsets64(true);
-      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), offsets, next);
+      return std::make_shared<ListOffsetArray64>(identities_, util::Parameters(), offsets, next);
     }
   }
 
