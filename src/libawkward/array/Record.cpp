@@ -13,7 +13,11 @@ namespace awkward {
   Record::Record(const std::shared_ptr<const RecordArray> array, int64_t at)
       : Content(Identities::none(), array.get()->parameters())
       , array_(array)
-      , at_(at) { }
+      , at_(at) {
+    if (!(0 <= at  &&  at < array.get()->length())) {
+      throw std::invalid_argument(std::string("at=") + std::to_string(at) + std::string(" is out of range for recordarray"));
+    }
+  }
 
   const std::shared_ptr<const RecordArray> Record::array() const {
     return array_;
@@ -65,20 +69,10 @@ namespace awkward {
     throw std::runtime_error("undefined operation: Record::setidentities");
   }
 
-  const std::shared_ptr<Type> Record::type() const {
-    std::shared_ptr<Type> out = array_.get()->type();
+  const std::shared_ptr<Type> Record::type(const std::map<std::string, std::string>& typestrs) const {
+    std::shared_ptr<Type> out = array_.get()->type(typestrs);
     out.get()->setparameters(parameters_);
     return out;
-  }
-
-  const std::shared_ptr<Content> Record::astype(const std::shared_ptr<Type>& type) const {
-    std::shared_ptr<Content> record = array_.get()->astype(type);
-    if (RecordArray* raw = dynamic_cast<RecordArray*>(record.get())) {
-      return std::make_shared<Record>(array_, at_);
-    }
-    else {
-      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
-    }
   }
 
   const std::string Record::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
@@ -208,15 +202,22 @@ namespace awkward {
     return array_.get()->keys();
   }
 
-  const Index64 Record::count64() const {
-    throw std::invalid_argument("Record cannot be counted because it is not an array");
+  const std::string Record::validityerror(const std::string& path) const {
+    return array_.get()->validityerror(path + std::string(".array"));
   }
 
-  const std::shared_ptr<Content> Record::count(int64_t axis) const {
-    throw std::invalid_argument("Record cannot be counted because it is not an array");
+  const std::shared_ptr<Content> Record::num(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("cannot call 'num' with an 'axis' of 0 on a Record");
+    }
+    else {
+      std::shared_ptr<Content> singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
+      return singleton.get()->num(axis, depth).get()->getitem_at_nowrap(0);
+    }
   }
 
-  const std::shared_ptr<Content> Record::flatten(int64_t axis) const {
+  const std::pair<Index64, std::shared_ptr<Content>> Record::offsets_and_flattened(int64_t axis, int64_t depth) const {
     throw std::invalid_argument("Record cannot be flattened because it is not an array");
   }
 
@@ -232,9 +233,42 @@ namespace awkward {
     throw std::invalid_argument("cannot use a record as a slice");
   }
 
+  const std::shared_ptr<Content> Record::rpad(int64_t length, int64_t axis, int64_t depth) const {
+    throw std::invalid_argument("Record cannot be padded because it is not an array");
+  }
+
+  const std::shared_ptr<Content> Record::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
+    throw std::invalid_argument("Record cannot be padded because it is not an array");
+  }
+
   const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> trimmed = array_.get()->getitem_range_nowrap(at_, at_ + 1);
     return trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+  }
+
+  const std::shared_ptr<Content> Record::localindex(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("cannot call 'localindex' with an 'axis' of 0 on a Record");
+    }
+    else {
+      std::shared_ptr<Content> singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
+      return singleton.get()->localindex(axis, depth).get()->getitem_at_nowrap(0);
+    }
+  }
+
+  const std::shared_ptr<Content> Record::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("cannot call 'choose' with an 'axis' of 0 on a Record");
+    }
+    else {
+      std::shared_ptr<Content> singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
+      return singleton.get()->choose(n, diagonal, recordlookup, parameters, axis, depth).get()->getitem_at_nowrap(0);
+    }
   }
 
   const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {

@@ -10,10 +10,12 @@ import numpy
 
 import awkward1
 
-awkward1_numba_arrayview = pytest.importorskip("awkward1._numba.arrayview")
+numba = pytest.importorskip("numba")
+
+awkward1_numba_arrayview = pytest.importorskip("awkward1._connect._numba.arrayview")
 
 def test_ArrayBuilder_append():
-    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True)
 
     builder = awkward1.ArrayBuilder()
     builder.append(array, 3)
@@ -41,8 +43,8 @@ def test_ArrayBuilder_append():
     builder.null()
     assert awkward1.tolist(builder.snapshot()) == [None, None, None, [5.5], [3.3, 4.4], [3.3, 4.4], [6.6, 7.7, 8.8, 9.9], None]
 
-    one = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
-    two = awkward1.Array([[3.3, 2.2, 1.1, 0.0], [5.5, 4.4], [], [6.6]])
+    one = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True)
+    two = awkward1.Array([[3.3, 2.2, 1.1, 0.0], [5.5, 4.4], [], [6.6]], checkvalid=True)
 
     builder = awkward1.ArrayBuilder()
     builder.append(one, 2)
@@ -93,7 +95,7 @@ def test_ArrayBuilder_append():
     builder.append(one, 0)
     assert awkward1.tolist(builder.snapshot()) == [None, [3.3, 4.4], None, "there", None, [0.0, 1.1, 2.2]]
 
-    array = awkward1.Array(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"])
+    array = awkward1.Array(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"], checkvalid=True)
     builder = awkward1.ArrayBuilder()
     builder.beginlist()
     builder.append(array, 1)
@@ -107,12 +109,15 @@ def test_ArrayBuilder_append():
     builder.append(array, 5)
     builder.endlist()
 
+    print(builder._layout.snapshot())
+
+
     assert awkward1.tolist(builder.snapshot()) == [["one", "two", "three"], [], ["four", "five"]]
 
     builder.append(array, -1)
     assert awkward1.tolist(builder.snapshot()) == [["one", "two", "three"], [], ["four", "five"], "nine"]
 
-    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}])
+    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}], checkvalid=True)
     builder = awkward1.ArrayBuilder()
     builder.append(array[2])
     builder.append(array[2])
@@ -139,7 +144,7 @@ def test_ArrayBuilder_append():
     assert awkward1.tolist(tmp) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, 999, [1, 2, 3, 4, 5]]
     assert isinstance(tmp.layout, awkward1.layout.UnionArray8_64)
 
-    array1 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    array1 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True)
 
     builder = awkward1.ArrayBuilder()
     builder.append(array1, 2)
@@ -162,25 +167,23 @@ def test_ArrayBuilder_append():
     array4 = builder.snapshot()
     assert isinstance(array4.layout.content, awkward1.layout.ListOffsetArray64)
 
-numba = pytest.importorskip("numba")
-
 def test_views():
-    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])).toarray()) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], checkvalid=True)).toarray()) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))).toarray()) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
+    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]), checkvalid=True)).toarray()) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
 
-    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])).toarray()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True)).toarray()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
-    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([1.1, 2.2, None, 3.3, None, 4.4, 5.5])).toarray()) == [1.1, 2.2, None, 3.3, None, 4.4, 5.5]
+    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([1.1, 2.2, None, 3.3, None, 4.4, 5.5], checkvalid=True)).toarray()) == [1.1, 2.2, None, 3.3, None, 4.4, 5.5]
 
-    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1, 1]}, {"x": 2.2, "y": [2, 2, 2]}])).toarray()) == [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1, 1]}, {"x": 2.2, "y": [2, 2, 2]}]
+    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1, 1]}, {"x": 2.2, "y": [2, 2, 2]}], checkvalid=True)).toarray()) == [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1, 1]}, {"x": 2.2, "y": [2, 2, 2]}]
 
-    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([(0.0, []), (1.1, [1, 1]), (2.2, [2, 2, 2])])).toarray()) == [(0.0, []), (1.1, [1, 1]), (2.2, [2, 2, 2])]
+    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([(0.0, []), (1.1, [1, 1]), (2.2, [2, 2, 2])], checkvalid=True)).toarray()) == [(0.0, []), (1.1, [1, 1]), (2.2, [2, 2, 2])]
 
-    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([1.1, 2.2, 3.3, [], [1], [2, 2]])).toarray()) == [1.1, 2.2, 3.3, [], [1], [2, 2]]
+    assert awkward1.tolist(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([1.1, 2.2, 3.3, [], [1], [2, 2]], checkvalid=True)).toarray()) == [1.1, 2.2, 3.3, [], [1], [2, 2]]
 
 def test_unbox():
-    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True)
 
     @numba.njit
     def f1(x):
@@ -189,7 +192,7 @@ def test_unbox():
     assert f1(array) == 3.14
 
 def test_box():
-    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True)
 
     @numba.njit
     def f1(x):
@@ -198,7 +201,7 @@ def test_box():
     assert awkward1.tolist(f1(array)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
 def test_refcount():
-    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True)
     array.numbatype
     assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.positions, array._numbaview.lookup.arrayptrs)]
 
@@ -230,7 +233,7 @@ def test_refcount():
             assert [sys.getrefcount(x) == 2 for x in (array._numbaview, array._numbaview.lookup, array._numbaview.lookup.positions, array._numbaview.lookup.arrayptrs)]
 
 def test_len():
-    array = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    array = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], checkvalid=True)
 
     @numba.njit
     def f1(x):
@@ -239,7 +242,7 @@ def test_len():
     assert f1(array) == 5
 
 def test_NumpyArray_getitem():
-    array = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    array = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], checkvalid=True)
 
     @numba.njit
     def f1(x, i):
@@ -323,7 +326,7 @@ def test_NumpyArray_getitem():
     assert awkward1.tolist(f3(array, 0,  0)) == [             ]
 
 def test_RegularArray_getitem():
-    array = awkward1.Array(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+    array = awkward1.Array(numpy.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]), checkvalid=True)
 
     @numba.njit
     def f1(x, i):
@@ -350,7 +353,7 @@ def test_RegularArray_getitem():
     assert f2(array, 1, -2) == 5.5
     assert f2(array, 1, -1) == 6.6
 
-    array = awkward1.Array(numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+    array = awkward1.Array(numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]), checkvalid=True)
 
     @numba.njit
     def f3(x, i1, i2):
@@ -373,7 +376,7 @@ def test_RegularArray_getitem():
     assert awkward1.tolist(f3(array, 0, -3)) == [                                  ]
 
 def test_ListArray_getitem():
-    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True)
 
     @numba.njit
     def f1(x, i):
@@ -392,9 +395,9 @@ def test_ListArray_getitem():
     assert awkward1.tolist(f2(array, 1, 4)) == [[], [3.3, 4.4], [5.5]]
 
 def test_IndexedArray_getitem():
-    content = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]).layout
+    content = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], checkvalid=True).layout
     index = awkward1.layout.Index64(numpy.array([3, 2, 2, 5, 0, 7], dtype=numpy.int64))
-    array = awkward1.Array(awkward1.layout.IndexedArray64(index, content))
+    array = awkward1.Array(awkward1.layout.IndexedArray64(index, content), checkvalid=True)
 
     @numba.njit
     def f1(x, i):
@@ -409,7 +412,7 @@ def test_IndexedArray_getitem():
     assert awkward1.tolist(f2(array, 1, 5)) == [2.2, 2.2, 5.5, 0]
 
 def test_IndexedOptionArray_getitem():
-    array = awkward1.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+    array = awkward1.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5], checkvalid=True)
 
     @numba.njit
     def f1(x, i):
@@ -424,7 +427,7 @@ def test_IndexedOptionArray_getitem():
     assert awkward1.tolist(f2(array, 1, 5)) == [2.2, None, 3.3, None]
 
 def test_RecordView_unbox_box():
-    record = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}])[3]
+    record = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}], checkvalid=True)[3]
 
     assert awkward1.tolist(awkward1_numba_arrayview.RecordView.fromrecord(record).torecord()) == {"x": 3.3, "y": [3, 3, 3]}
 
@@ -441,7 +444,7 @@ def test_RecordView_unbox_box():
     assert awkward1.tolist(f2(record)) == {"x": 3.3, "y": [3, 3, 3]}
 
 def test_RecordView_refcount():
-    record = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}])[3]
+    record = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}], checkvalid=True)[3]
     record.numbatype
     assert [sys.getrefcount(x) == 2 for x in (record._numbaview, record._numbaview.arrayview, record._numbaview.arrayview.lookup, record._numbaview.arrayview.lookup.positions, record._numbaview.arrayview.lookup.arrayptrs)]
 
@@ -473,7 +476,7 @@ def test_RecordView_refcount():
             assert [sys.getrefcount(x) == 2 for x in (record._numbaview, record._numbaview.arrayview, record._numbaview.arrayview.lookup, record._numbaview.arrayview.lookup.positions, record._numbaview.arrayview.lookup.arrayptrs)]
 
 def test_Record_getitem():
-    record = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}])[3]
+    record = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}], checkvalid=True)[3]
     @numba.njit
     def f1(x):
         return x["x"]
@@ -499,7 +502,7 @@ def test_Record_getitem():
     assert awkward1.tolist(f4(record)) == [3, 3, 3]
 
 def test_RecordArray_getitem():
-    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}])
+    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}], checkvalid=True)
 
     @numba.njit
     def f1(x, i):
@@ -515,7 +518,7 @@ def test_RecordArray_getitem():
 
     assert awkward1.tolist(f2(array, 1, 4)) == [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]
 
-    array = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]])
+    array = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]], checkvalid=True)
 
     @numba.njit
     def f3(x, i, j):
@@ -524,7 +527,7 @@ def test_RecordArray_getitem():
     assert awkward1.tolist(f3(array, 2, -2)) == {"x": 3.3, "y": [3, 3, 3]}
 
 def test_RecordArray_getitem_field():
-    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}])
+    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}], checkvalid=True)
 
     @numba.njit
     def f1(x):
@@ -551,7 +554,7 @@ def test_RecordArray_getitem_field():
     assert awkward1.tolist(f4(array)) == [[1], [2, 2], [3, 3, 3]]
 
 def test_ListArray_getitem_field():
-    array = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}], [{"x": 5.5, "y": [5, 5, 5, 5, 5]}], [{"x": 6.6, "y": [6, 6, 6, 6, 6, 6]}, {"x": 7.7, "y": [7, 7, 7, 7, 7, 7, 7]}, {"x": 8.8, "y": [8, 8, 8, 8, 8, 8, 8, 8]}, {"x": 9.9, "y": [9, 9, 9, 9, 9, 9, 9, 9, 9]}]])
+    array = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}], [{"x": 5.5, "y": [5, 5, 5, 5, 5]}], [{"x": 6.6, "y": [6, 6, 6, 6, 6, 6]}, {"x": 7.7, "y": [7, 7, 7, 7, 7, 7, 7]}, {"x": 8.8, "y": [8, 8, 8, 8, 8, 8, 8, 8]}, {"x": 9.9, "y": [9, 9, 9, 9, 9, 9, 9, 9, 9]}]], checkvalid=True)
 
     @numba.njit
     def f1(x):
@@ -650,7 +653,7 @@ def test_ListArray_getitem_field():
     assert awkward1.tolist(f14b(array)) == 7
 
 def test_RecordArray_deep_field():
-    array = awkward1.Array([{"x": {"y": {"z": 1.1}}}, {"x": {"y": {"z": 2.2}}}, {"x": {"y": {"z": 3.3}}}])
+    array = awkward1.Array([{"x": {"y": {"z": 1.1}}}, {"x": {"y": {"z": 2.2}}}, {"x": {"y": {"z": 3.3}}}], checkvalid=True)
 
     @numba.njit
     def f1(x):
@@ -701,14 +704,17 @@ def test_RecordArray_deep_field():
     assert awkward1.tolist(f8(array)) == [{"y": {"z": 1.1}}, {"y": {"z": 2.2}}, {"y": {"z": 3.3}}]
 
 def test_ListArray_deep_at():
-    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 12.2, 13.3, 14.4, 15.5, 16.6]))
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 12.2, 13.3, 14.4, 15.5, 16.6, 17.7, 18.8, 19.9]))
     offsets1 = awkward1.layout.Index32(numpy.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18], dtype=numpy.int32))
     listarray1 = awkward1.layout.ListOffsetArray32(offsets1, content)
     offsets2 = awkward1.layout.Index64(numpy.array([0, 2, 4, 6, 8], dtype=numpy.int64))
     listarray2 = awkward1.layout.ListOffsetArray64(offsets2, listarray1)
     offsets3 = awkward1.layout.Index32(numpy.array([0, 2, 4], dtype=numpy.int32))
     listarray3 = awkward1.layout.ListOffsetArray32(offsets3, listarray2)
-    array = awkward1.Array(listarray3)
+
+    print(listarray3)
+
+    array = awkward1.Array(listarray3, checkvalid=True)
 
     @numba.njit
     def f1(x):
@@ -742,7 +748,7 @@ def test_IndexedArray_deep_at():
     indexedarray2 = awkward1.layout.IndexedArray64(index2, indexedarray1)
     index3 = awkward1.layout.Index32(numpy.array([1, 2], dtype=numpy.int32))
     indexedarray3 = awkward1.layout.IndexedArray32(index3, indexedarray2)
-    array = awkward1.Array(indexedarray3)
+    array = awkward1.Array(indexedarray3, checkvalid=True)
 
     @numba.njit
     def f1(x):
@@ -751,7 +757,7 @@ def test_IndexedArray_deep_at():
     assert f1(array) == 5.5
 
 def test_iterator():
-    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True)
 
     @numba.njit
     def f1(a):
@@ -892,24 +898,6 @@ def test_ArrayBuilder_list():
     assert awkward1.tolist(b.snapshot()) == []
     assert awkward1.tolist(c.snapshot()) == []
 
-# def test_string():
-#     array = awkward1.Array(["one", "two", "three", "four", "five"])
-
-#     @numba.njit
-#     def f1(x, i):
-#         return x[i]
-
-#     assert f1(array, 0) == "one"
-#     assert f1(array, 1) == "two"
-#     assert f1(array, 2) == "three"
-
-#     @numba.njit
-#     def f2(x, i, j):
-#         return x[i] + x[j]
-
-#     print(f2(array, 1, 3))
-#     raise Exception
-
 def dummy_typer(viewtype):
     return numba.float64
 
@@ -923,7 +911,7 @@ def test_custom_record():
     behavior["__numba_typer__", "Dummy"] = dummy_typer
     behavior["__numba_lower__", "Dummy"] = dummy_lower
 
-    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior)
+    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior, checkvalid=True)
     array.layout.setparameter("__record__", "Dummy")
 
     @numba.njit
@@ -946,7 +934,7 @@ def test_custom_record2():
     behavior["__numba_typer__", "Dummy", "stuff"] = dummy_typer2
     behavior["__numba_lower__", "Dummy", "stuff"] = dummy_lower2
 
-    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior)
+    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior, checkvalid=True)
     array.layout.setparameter("__record__", "Dummy")
 
     @numba.njit
@@ -969,7 +957,7 @@ def test_custom_record3():
     behavior["__numba_typer__", "Dummy", "stuff", ()] = dummy_typer3
     behavior["__numba_lower__", "Dummy", "stuff", ()] = dummy_lower3
 
-    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior)
+    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior, checkvalid=True)
     array.layout.setparameter("__record__", "Dummy")
 
     @numba.njit
@@ -994,7 +982,7 @@ def test_custom_record4():
     behavior["__numba_typer__", "Dummy", operator.eq, "Dummy"] = dummy_typer4
     behavior["__numba_lower__", "Dummy", operator.eq, "Dummy"] = dummy_lower4
 
-    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior)
+    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior, checkvalid=True)
     array.layout.setparameter("__record__", "Dummy")
 
     @numba.njit
@@ -1024,7 +1012,7 @@ def test_custom_record5():
     behavior["__numba_typer__", operator.neg, "Dummy"] = dummy_typer5
     behavior["__numba_lower__", operator.neg, "Dummy"] = dummy_lower5
 
-    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": -2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior)
+    array = awkward1.Array([{"x": 1.1, "y": 100}, {"x": -2.2, "y": 200}, {"x": 3.3, "y": 300}], behavior=behavior, checkvalid=True)
     array.layout.setparameter("__record__", "Dummy")
 
     @numba.njit
@@ -1051,7 +1039,7 @@ def test_ArrayBuilder_append_numba():
         builder.append(array, 1)
         builder.append(array, -1)
 
-    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True)
     builder = awkward1.ArrayBuilder()
 
     f1(array, builder)
@@ -1068,7 +1056,7 @@ def test_ArrayBuilder_append_numba2():
         builder.append(array[1])
         builder.append(array[-1])
 
-    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}])
+    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}], checkvalid=True)
     builder = awkward1.ArrayBuilder()
 
     f1(array, builder)
@@ -1085,7 +1073,7 @@ def test_ArrayBuilder_append_numba3():
         builder.extend(array[1])
         builder.extend(array[-1])
 
-    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True)
     builder = awkward1.ArrayBuilder()
 
     f1(array, builder)
@@ -1102,7 +1090,7 @@ def test_ArrayBuilder_append_numba4():
         builder.append(array[1])
         builder.append(array[-1])
 
-    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True)
     builder = awkward1.ArrayBuilder()
 
     f1(array, builder)

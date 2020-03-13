@@ -10,8 +10,8 @@
 #include "awkward/type/ListType.h"
 
 namespace awkward {
-  ListType::ListType(const util::Parameters& parameters, const std::shared_ptr<Type>& type)
-      : Type(parameters)
+  ListType::ListType(const util::Parameters& parameters, const std::string& typestr, const std::shared_ptr<Type>& type)
+      : Type(parameters, typestr)
       , type_(type) { }
 
   std::string ListType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
@@ -31,7 +31,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> ListType::shallow_copy() const {
-    return std::make_shared<ListType>(parameters_, type_);
+    return std::make_shared<ListType>(parameters_, typestr_, type_);
   }
 
   bool ListType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {

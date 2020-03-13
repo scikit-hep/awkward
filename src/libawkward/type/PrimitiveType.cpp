@@ -9,8 +9,8 @@
 #include "awkward/type/PrimitiveType.h"
 
 namespace awkward {
-  PrimitiveType::PrimitiveType(const util::Parameters& parameters, DType dtype)
-      : Type(parameters)
+  PrimitiveType::PrimitiveType(const util::Parameters& parameters, const std::string& typestr, DType dtype)
+      : Type(parameters, typestr)
       , dtype_(dtype) { }
 
   std::string PrimitiveType::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
@@ -45,7 +45,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Type> PrimitiveType::shallow_copy() const {
-    return std::make_shared<PrimitiveType>(parameters_, dtype_);
+    return std::make_shared<PrimitiveType>(parameters_, typestr_, dtype_);
   }
 
   bool PrimitiveType::equal(const std::shared_ptr<Type>& other, bool check_parameters) const {

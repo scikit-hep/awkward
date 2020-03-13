@@ -6,7 +6,7 @@ import numpy
 
 import awkward1.layout
 import awkward1.operations.convert
-import awkward1._numpy
+import awkward1._connect._numpy
 import awkward1._util
 
 NEP13Box = None
@@ -16,7 +16,7 @@ def register():
     global NEP13Box
 
     if NEP13Box is None:
-        class NEP13Box(autograd.extend.Box, awkward1._numpy.NDArrayOperatorsMixin):
+        class NEP13Box(autograd.extend.Box, awkward1._connect._numpy.NDArrayOperatorsMixin):
             def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
                 import autograd
 
@@ -46,9 +46,9 @@ def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
     def broadcast(*args, **kwargs):
         nextargs = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=True) for x in args]
 
-        def getfunction(inputs):
+        def getfunction(inputs, depth):
             if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-                return lambda depth: (awkward1.layout.NumpyArray(gradfun(*inputs)),)
+                return lambda: (awkward1.layout.NumpyArray(gradfun(*inputs)),)
             else:
                 return None
 

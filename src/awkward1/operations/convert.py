@@ -49,7 +49,12 @@ def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
     else:
         return layout
 
-def fromiter(iterable, highlevel=True, behavior=None, initial=1024, resize=2.0):
+def fromiter(iterable, highlevel=True, behavior=None, allowrecord=True, initial=1024, resize=2.0):
+    if isinstance(iterable, dict):
+        if allowrecord:
+            return fromiter([iterable], highlevel=highlevel, behavior=behavior, initial=initial, resize=resize)[0]
+        else:
+            raise ValueError("cannot produce an array from a dict")
     out = awkward1.layout.ArrayBuilder(initial=initial, resize=resize)
     for x in iterable:
         out.fromiter(x)
@@ -91,17 +96,17 @@ def tonumpy(array):
     elif isinstance(array, awkward1.layout.ArrayBuilder):
         return tonumpy(array.snapshot())
 
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "byte":
+        return tonumpy(array.__bytes__())
+
     elif awkward1.operations.describe.parameters(array).get("__array__") == "char":
-        if awkward1.operations.describe.parameters(array).get("encoding") is None:
-            return tonumpy(array.__bytes__())
-        else:
-            return tonumpy(array.__str__())
+        return tonumpy(array.__str__())
+
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "bytestring":
+        return numpy.array([awkward1.behaviors.string.ByteBehavior(array[i]).__bytes__() for i in range(len(array))])
 
     elif awkward1.operations.describe.parameters(array).get("__array__") == "string":
-        if awkward1.operations.describe.parameters(array.content).get("encoding") is None:
-            return numpy.array([awkward1.behaviors.string.CharBehavior(array[i]).__bytes__() for i in range(len(array))])
-        else:
-            return numpy.array([awkward1.behaviors.string.CharBehavior(array[i]).__str__() for i in range(len(array))])
+        return numpy.array([awkward1.behaviors.string.CharBehavior(array[i]).__str__() for i in range(len(array))])
 
     elif isinstance(array, awkward1._util.unknowntypes):
         return numpy.array([])
@@ -175,17 +180,17 @@ def tolist(array):
     elif isinstance(array, numpy.ndarray):
         return array.tolist()
 
+    elif isinstance(array, awkward1.behaviors.string.ByteBehavior):
+        return array.__bytes__()
+
     elif isinstance(array, awkward1.behaviors.string.CharBehavior):
-        if array.layout.parameters.get("encoding") is None:
-            return array.__bytes__()
-        else:
-            return array.__str__()
+        return array.__str__()
+
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "byte":
+        return awkward1.behaviors.string.CharBehavior(array).__bytes__()
 
     elif awkward1.operations.describe.parameters(array).get("__array__") == "char":
-        if awkward1.operations.describe.parameters(array).get("encoding") is None:
-            return awkward1.behaviors.string.CharBehavior(array).__bytes__()
-        else:
-            return awkward1.behaviors.string.CharBehavior(array).__str__()
+        return awkward1.behaviors.string.CharBehavior(array).__str__()
 
     elif isinstance(array, awkward1.highlevel.Array):
         return [tolist(x) for x in array]
@@ -314,7 +319,7 @@ def tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,
         return array
 
 def regularize_numpyarray(array, allowempty=True, highlevel=True):
-    def getfunction(layout):
+    def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.NumpyArray) and layout.ndim != 1:
             return lambda: layout.toRegularArray()
         elif isinstance(layout, awkward1.layout.EmptyArray) and not allowempty:
@@ -488,18 +493,14 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
         elif isinstance(array, awkward0.StringArray):
             # starts, stops, content, encoding
             out = recurse(array._content)
-            out.content.setparameter("__array__", "char")
-            out.content.setparameter("encoding", array.encoding)
-            out.setparameter("__array__", "string")
-            if array.encoding == "utf-8":
-                out.content.setparameter("__typestr__", "utf8")
-                out.setparameter("__typestr__", "string")
-            elif array.encoding is None:
-                out.content.setparameter("__typestr__", "byte")
-                out.setparameter("__typestr__", "bytes")
+            if array.encoding is None:
+                out.content.setparameter("__array__", "byte")
+                out.setparameter("__array__", "bytestring")
+            elif array.encoding == "utf-8":
+                out.content.setparameter("__array__", "char")
+                out.setparameter("__array__", "string")
             else:
-                out.content.setparameter("__typestr__", "char[" + array.encoding + "]")
-                out.setparameter("__typestr__", "string[" + array.encoding + "]")
+                raise ValueError("unsupported encoding: {0}".format(repr(array.encoding)))
             return out
 
         elif isinstance(array, awkward0.ObjectArray):

@@ -9,8 +9,8 @@ import numba.typing.ctypes_utils
 import awkward1.operations.convert
 import awkward1._util
 import awkward1._libawkward
-import awkward1._numba.layout
-import awkward1._numba.arrayview
+import awkward1._connect._numba.layout
+import awkward1._connect._numba.arrayview
 import awkward1._libawkward
 
 dynamic_addrs = {}
@@ -24,7 +24,7 @@ def globalstring(context, builder, pyvalue):
 
 class ArrayBuilderType(numba.types.Type):
     def __init__(self, behavior):
-        super(ArrayBuilderType, self).__init__(name="awkward1.ArrayBuilderType({0})".format(awkward1._numba.repr_behavior(behavior)))
+        super(ArrayBuilderType, self).__init__(name="awkward1.ArrayBuilderType({0})".format(awkward1._connect._numba.repr_behavior(behavior)))
         self.behavior = behavior
 
 @numba.extending.register_model(ArrayBuilderType)
@@ -88,7 +88,7 @@ def lower_len(context, builder, sig, args):
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     result = numba.cgutils.alloca_once(builder, context.get_value_type(numba.int64))
     call(context, builder, awkward1._libawkward.ArrayBuilder_length, (proxyin.rawptr, result))
-    return awkward1._numba.castint(context, builder, numba.int64, numba.intp, builder.load(result))
+    return awkward1._connect._numba.castint(context, builder, numba.int64, numba.intp, builder.load(result))
 
 @numba.typing.templates.infer_getattr
 class type_methods(numba.typing.templates.AttributeTemplate):
@@ -191,13 +191,13 @@ class type_methods(numba.typing.templates.AttributeTemplate):
     def resolve_append(self, arraybuildertype, args, kwargs):
         import awkward1.highlevel
 
-        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], (awkward1._numba.arrayview.ArrayViewType, awkward1._numba.arrayview.RecordViewType, numba.types.Boolean, numba.types.Integer, numba.types.Float)):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], (awkward1._connect._numba.arrayview.ArrayViewType, awkward1._connect._numba.arrayview.RecordViewType, numba.types.Boolean, numba.types.Integer, numba.types.Float)):
             return numba.types.none(args[0])
         elif len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.Optional) and isinstance(args[0].type, (numba.types.Boolean, numba.types.Integer, numba.types.Float)):
             return numba.types.none(args[0])
         elif len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], numba.types.NoneType):
             return numba.types.none(args[0])
-        elif len(args) == 2 and len(kwargs) == 0 and isinstance(args[0], awkward1._numba.arrayview.ArrayViewType) and isinstance(args[1], numba.types.Integer):
+        elif len(args) == 2 and len(kwargs) == 0 and isinstance(args[0], awkward1._connect._numba.arrayview.ArrayViewType) and isinstance(args[1], numba.types.Integer):
             return numba.types.none(args[0], args[1])
         else:
             if len(args) == 1 and arraybuildertype.behavior is not None:
@@ -210,7 +210,7 @@ class type_methods(numba.typing.templates.AttributeTemplate):
 
     @numba.typing.templates.bound_function("extend")
     def resolve_extend(self, arraybuildertype, args, kwargs):
-        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], awkward1._numba.arrayview.ArrayViewType):
+        if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], awkward1._connect._numba.arrayview.ArrayViewType):
             return numba.types.none(args[0])
         else:
             raise TypeError("wrong number or types of arguments for ArrayBuilder.extend")
@@ -245,7 +245,7 @@ def lower_integer(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    x = awkward1._numba.castint(context, builder, xtype, numba.int64, xval)
+    x = awkward1._connect._numba.castint(context, builder, xtype, numba.int64, xval)
     call(context, builder, awkward1._libawkward.ArrayBuilder_integer, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
@@ -289,7 +289,7 @@ def lower_begintuple(context, builder, sig, args):
     arraybuildertype, numfieldstype = sig.args
     arraybuilderval, numfieldsval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    numfields = awkward1._numba.castint(context, builder, numfieldstype, numba.int64, numfieldsval)
+    numfields = awkward1._connect._numba.castint(context, builder, numfieldstype, numba.int64, numfieldsval)
     call(context, builder, awkward1._libawkward.ArrayBuilder_begintuple, (proxyin.rawptr, numfields))
     return context.get_dummy_value()
 
@@ -298,7 +298,7 @@ def lower_index(context, builder, sig, args):
     arraybuildertype, indextype = sig.args
     arraybuilderval, indexval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    index = awkward1._numba.castint(context, builder, indextype, numba.int64, indexval)
+    index = awkward1._connect._numba.castint(context, builder, indextype, numba.int64, indexval)
     call(context, builder, awkward1._libawkward.ArrayBuilder_index, (proxyin.rawptr, index))
     return context.get_dummy_value()
 
@@ -344,22 +344,22 @@ def lower_endrecord(context, builder, sig, args):
     call(context, builder, awkward1._libawkward.ArrayBuilder_endrecord, (proxyin.rawptr,))
     return context.get_dummy_value()
 
-@numba.extending.lower_builtin("append", ArrayBuilderType, awkward1._numba.arrayview.ArrayViewType, numba.types.Integer)
+@numba.extending.lower_builtin("append", ArrayBuilderType, awkward1._connect._numba.arrayview.ArrayViewType, numba.types.Integer)
 def lower_append_array_at(context, builder, sig, args):
     arraybuildertype, viewtype, attype = sig.args
     arraybuilderval, viewval, atval = args
 
     viewproxy = context.make_helper(builder, viewtype, viewval)
-    atval = awkward1._numba.layout.regularize_atval(context, builder, viewproxy, attype, atval, True, True)
-    atval = awkward1._numba.castint(context, builder, numba.intp, numba.int64, atval)
+    atval = awkward1._connect._numba.layout.regularize_atval(context, builder, viewproxy, attype, atval, True, True)
+    atval = awkward1._connect._numba.castint(context, builder, numba.intp, numba.int64, atval)
 
-    sharedptr = awkward1._numba.layout.getat(context, builder, viewproxy.sharedptrs, viewproxy.pos)
+    sharedptr = awkward1._connect._numba.layout.getat(context, builder, viewproxy.sharedptrs, viewproxy.pos)
 
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     call(context, builder, awkward1._libawkward.ArrayBuilder_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
     return context.get_dummy_value()
 
-@numba.extending.lower_builtin("append", ArrayBuilderType, awkward1._numba.arrayview.ArrayViewType)
+@numba.extending.lower_builtin("append", ArrayBuilderType, awkward1._connect._numba.arrayview.ArrayViewType)
 def lower_append_array(context, builder, sig, args):
     arraybuildertype, viewtype = sig.args
     arraybuilderval, viewval = args
@@ -373,7 +373,7 @@ def lower_append_array(context, builder, sig, args):
 
     return context.get_dummy_value()
 
-@numba.extending.lower_builtin("append", ArrayBuilderType, awkward1._numba.arrayview.RecordViewType)
+@numba.extending.lower_builtin("append", ArrayBuilderType, awkward1._connect._numba.arrayview.RecordViewType)
 def lower_append_record(context, builder, sig, args):
     arraybuildertype, recordviewtype = sig.args
     arraybuilderval, recordviewval = args
@@ -381,9 +381,9 @@ def lower_append_record(context, builder, sig, args):
     recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
 
     arrayviewproxy = context.make_helper(builder, recordviewtype.arrayviewtype, recordviewproxy.arrayview)
-    atval = awkward1._numba.castint(context, builder, numba.intp, numba.int64, recordviewproxy.at)
+    atval = awkward1._connect._numba.castint(context, builder, numba.intp, numba.int64, recordviewproxy.at)
 
-    sharedptr = awkward1._numba.layout.getat(context, builder, arrayviewproxy.sharedptrs, arrayviewproxy.pos)
+    sharedptr = awkward1._connect._numba.layout.getat(context, builder, arrayviewproxy.sharedptrs, arrayviewproxy.pos)
 
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     call(context, builder, awkward1._libawkward.ArrayBuilder_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
@@ -429,18 +429,18 @@ def lower_append_optional(context, builder, sig, args):
 def lower_append_none(context, builder, sig, args):
     return lower_null(context, builder, sig.return_type(sig.args[0]), (args[0],))
 
-@numba.extending.lower_builtin("extend", ArrayBuilderType, awkward1._numba.arrayview.ArrayViewType)
+@numba.extending.lower_builtin("extend", ArrayBuilderType, awkward1._connect._numba.arrayview.ArrayViewType)
 def lower_extend_array(context, builder, sig, args):
     arraybuildertype, viewtype = sig.args
     arraybuilderval, viewval = args
 
     viewproxy = context.make_helper(builder, viewtype, viewval)
 
-    sharedptr = awkward1._numba.layout.getat(context, builder, viewproxy.sharedptrs, viewproxy.pos)
+    sharedptr = awkward1._connect._numba.layout.getat(context, builder, viewproxy.sharedptrs, viewproxy.pos)
 
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     with numba.cgutils.for_range(builder, viewproxy.stop, viewproxy.start) as loop:
-        atval = awkward1._numba.castint(context, builder, numba.intp, numba.int64, loop.index)
+        atval = awkward1._connect._numba.castint(context, builder, numba.intp, numba.int64, loop.index)
         call(context, builder, awkward1._libawkward.ArrayBuilder_append_nowrap, (proxyin.rawptr, builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)), atval))
 
     return context.get_dummy_value()

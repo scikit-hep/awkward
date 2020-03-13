@@ -16,11 +16,13 @@ arguments.add_argument("--clean", default=False, action="store_true")
 arguments.add_argument("--release", action="store_true")
 arguments.add_argument("--ctest", action="store_true")
 arguments.add_argument("--no-buildpython", action="store_true")
+arguments.add_argument("--no-dependencies", action="store_true")
 arguments.add_argument("-j", default=str(multiprocessing.cpu_count()))
 arguments.add_argument("--pytest", default=None)
 args = arguments.parse_args()
 
 args.buildpython = not args.no_buildpython
+args.dependencies = not args.no_dependencies
 
 try:
     git_config = open(".git/config").read()
@@ -47,7 +49,7 @@ try:
 except:
     localbuild_time = 0
 try:
-    laststate = json.load(open("localbuild/lastargs.json"))
+    laststate = json.load(open("localbuild/laststate.json"))
 except:
     laststate = None
 
@@ -61,12 +63,13 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
     os.stat("setup.py").st_mtime >= localbuild_time or
     thisstate != laststate):
 
-    check_call(["pip", "install", "-r", "requirements.txt", "-r", "requirements-test.txt", "-r", "requirements-docs.txt", "-r", "requirements-dev.txt"])
+    if args.dependencies:
+        check_call(["pip", "install", "-r", "requirements.txt", "-r", "requirements-test.txt"])
 
     if os.path.exists("localbuild"):
         shutil.rmtree("localbuild")
 
-    newdir_args = ["cmake", "-S", ".", "-B", "localbuild"]
+    newdir_args = ["-S", ".", "-B", "localbuild"]
 
     if args.release:
         newdir_args.append("-DCMAKE_BUILD_TYPE=Release")
@@ -79,32 +82,24 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
     if args.buildpython:
         newdir_args.extend(["-DPYTHON_EXECUTABLE=" + thisstate["python_executable"], "-DPYBUILD=ON"])
 
-    check_call(newdir_args)
-    json.dump(thisstate, open("localbuild/lastargs.json", "w"))
+    check_call(["cmake"] + newdir_args)
+    json.dump(thisstate, open("localbuild/laststate.json", "w"))
 
 # Build C++ normally; this might be a no-op if make/ninja determines that the build is up-to-date.
 check_call(["cmake", "--build", "localbuild", "-j", args.j])
 
 if args.ctest:
-    check_call(["cmake", "--build", "localbuild", "--target", "test", "--", "CTEST_OUTPUT_ON_FAILURE=1"])
+    check_call(["cmake", "--build", "localbuild", "--target", "test", "--", "CTEST_OUTPUT_ON_FAILURE=1", "--no-print-directory"])
 
 # Build Python (copy sources to executable tree).
 if args.buildpython:
     if os.path.exists("awkward1"):
         shutil.rmtree("awkward1")
 
-    # Maybe someday they can be symlinks.
-    for x in glob.glob("src/awkward1/**", recursive=True):
-        olddir, oldfile = os.path.split(x)
-        newdir  = olddir[3 + len(os.sep):]
-        newfile = x[3 + len(os.sep):]
-        if not os.path.exists(newdir):
-            os.mkdir(newdir)
-        if not os.path.isdir(x):
-            # os.symlink(x, newfile)
-            shutil.copyfile(x, newfile)
+    # Copy (don't link) the Python files into a built directory.
+    shutil.copytree("src/awkward1", "awkward1")
 
-    # The extension modules must be copied over.
+    # The extension modules must be copied into the same directory.
     for x in glob.glob("localbuild/layout*") + glob.glob("localbuild/types*") + glob.glob("localbuild/_io*") + glob.glob("localbuild/libawkward*"):
         shutil.copyfile(x, os.path.join("awkward1", os.path.split(x)[1]))
 

@@ -14,11 +14,8 @@
 namespace awkward {
   class EXPORT_SYMBOL RecordArray: public Content, public std::enable_shared_from_this<RecordArray> {
   public:
+    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup, int64_t length);
     RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
-    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents);
-    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, int64_t length, bool istuple);
-    RecordArray(const std::shared_ptr<Content>& content, const std::string& key);
-    RecordArray(const std::shared_ptr<Content>& content);
 
     const std::vector<std::shared_ptr<Content>> contents() const;
     const std::shared_ptr<util::RecordLookup> recordlookup() const;
@@ -30,8 +27,7 @@ namespace awkward {
     void setidentities() override;
     void setidentities(const std::shared_ptr<Identities>& identities) override;
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
-    const std::shared_ptr<Type> type() const override;
-    const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override;
+    const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const override;
     void tojson_part(ToJson& builder) const override;
     void nbytes_part(std::map<size_t, int64_t>& largest) const override;
     int64_t length() const override;
@@ -59,13 +55,17 @@ namespace awkward {
     const std::vector<std::string> keys() const override;
 
     // operations
-    const Index64 count64() const override;
-    const std::shared_ptr<Content> count(int64_t axis) const override;
-    const std::shared_ptr<Content> flatten(int64_t axis) const override;
+    const std::string validityerror(const std::string& path) const override;
+    const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override;
+    const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override;
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
     const std::shared_ptr<SliceItem> asslice() const override;
+    const std::shared_ptr<Content> rpad(int64_t length, int64_t axis, int64_t depth) const override;
+    const std::shared_ptr<Content> rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const override;
     const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override;
+    const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const override;
+    const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override;
 
     const std::shared_ptr<Content> field(int64_t fieldindex) const;
     const std::shared_ptr<Content> field(const std::string& key) const;

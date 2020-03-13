@@ -62,7 +62,7 @@ namespace awkward {
       , itemsize_(itemsize)
       , format_(format) {
     if (shape.size() != strides.size()) {
-      throw std::runtime_error(std::string("len(shape), which is ") + std::to_string(shape.size()) + std::string(", must be equal to len(strides), which is ") + std::to_string(strides.size()));
+      throw std::invalid_argument(std::string("len(shape), which is ") + std::to_string(shape.size()) + std::string(", must be equal to len(strides), which is ") + std::to_string(strides.size()));
     }
   }
 
@@ -285,71 +285,64 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Type> NumpyArray::type() const {
+  const std::shared_ptr<Type> NumpyArray::type(const std::map<std::string, std::string>& typestrs) const {
     std::shared_ptr<Type> out;
     if (format_.compare("d") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float64);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float64);
     }
     else if (format_.compare("f") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float32);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float32);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("q") == 0) {
 #else
     else if (format_.compare("l") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int64);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int64);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("Q") == 0) {
 #else
     else if (format_.compare("L") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint64);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint64);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("l") == 0) {
 #else
     else if (format_.compare("i") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int32);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int32);
     }
 #if defined _MSC_VER || defined __i386__
     else if (format_.compare("L") == 0) {
 #else
     else if (format_.compare("I") == 0) {
 #endif
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint32);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint32);
     }
     else if (format_.compare("h") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int16);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int16);
     }
     else if (format_.compare("H") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint16);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint16);
     }
     else if (format_.compare("b") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int8);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int8);
     }
     else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint8);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint8);
     }
     else if (format_.compare("?") == 0) {
-      out = std::make_shared<PrimitiveType>(parameters_, PrimitiveType::boolean);
+      out = std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::boolean);
     }
     else {
       throw std::invalid_argument(std::string("Numpy format \"") + format_ + std::string("\" cannot be expressed as a PrimitiveType"));
     }
     for (std::size_t i = shape_.size() - 1;  i > 0;  i--) {
-      out = std::make_shared<RegularType>(util::Parameters(), out, (int64_t)shape_[i]);
+      out = std::make_shared<RegularType>(util::Parameters(), util::gettypestr(parameters_, typestrs), out, (int64_t)shape_[i]);
     }
     return out;
-  }
-
-  const std::shared_ptr<Content> NumpyArray::astype(const std::shared_ptr<Type>& type) const {
-    // FIXME: if the unwrapped_type does not match the format_, actually convert it!
-    // Maybe also change the shape_ if there's a different RegularType nesting (less strict than unwrap_regulartype).
-    std::shared_ptr<Type> unwrapped_type = unwrap_regulartype(type, shape_);
-    return std::make_shared<NumpyArray>(identities_, unwrapped_type.get()->parameters(), ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
 
   const std::string NumpyArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
@@ -443,7 +436,10 @@ namespace awkward {
 
   void NumpyArray::tojson_part(ToJson& builder) const {
     check_for_iteration();
-    if (parameter_equals("__array__", "\"char\"")) {
+    if (parameter_equals("__array__", "\"byte\"")) {
+      tojson_string(builder);
+    }
+    else if (parameter_equals("__array__", "\"char\"")) {
       tojson_string(builder);
     }
     else if (format_.compare("d") == 0) {
@@ -748,75 +744,60 @@ namespace awkward {
     return std::vector<std::string>();
   }
 
-  const Index64 NumpyArray::count64() const {
-    if (ndim() < 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be counted because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+  const std::string NumpyArray::validityerror(const std::string& path) const {
+    if (shape_.empty()) {
+      return std::string("at ") + path + std::string(" (") + classname() + std::string("): shape is zero-dimensional");
     }
-    else if (ndim() == 1) {
-      Index64 tocount(1);
-      tocount.ptr().get()[0] = length();
-      return tocount;
+    for (size_t i = 0;  i < shape_.size();  i++) {
+      if (shape_[i] < 0) {
+        return std::string("at ") + path + std::string(" (") + classname() + std::string("): shape[") + std::to_string(i) + ("] < 0");
+      }
     }
-    int64_t len = length();
-    Index64 tocount(len);
-    struct Error err = awkward_regulararray_count(
-      tocount.ptr().get(),
-      (int64_t)shape_[1],
-      len);
-    util::handle_error(err, classname(), identities_.get());
-    return tocount;
+    for (size_t i = 0;  i < strides_.size();  i++) {
+      if (strides_[i] % itemsize_ != 0) {
+        return std::string("at ") + path + std::string(" (") + classname() + std::string("): shape[") + std::to_string(i) + ("] % itemsize != 0");
+      }
+    }
+    return std::string();
   }
 
-  const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
+  const std::shared_ptr<Content> NumpyArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    ssize_t offset = (ssize_t)toaxis;
-    if (offset > ndim()) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be counted in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    if (toaxis == depth) {
+      Index64 out(1);
+      out.ptr().get()[0] = length();
+      return NumpyArray(out).getitem_at_nowrap(0);
+    }
+    std::vector<ssize_t> shape;
+    int64_t reps = 1;
+    int64_t size = length();
+    int64_t i = 0;
+    while (i < ndim() - 1  &&  depth < toaxis) {
+      shape.push_back(shape_[(size_t)i]);
+      reps *= shape_[(size_t)i];
+      size = shape_[(size_t)i + 1];
+      i++;
+      depth++;
+    }
+    if (toaxis > depth) {
+      throw std::invalid_argument("'axis' out of range for 'num'");
     }
 
-#if defined _MSC_VER || defined __i386__
-    std::string format = "q";
-#else
-    std::string format = "l";
-#endif
-    if (offset == 0) {
-      Index64 tocount = count64();
-      std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
-      std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
-
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+    ssize_t x = sizeof(int64_t);
+    std::vector<ssize_t> strides;
+    for (int64_t j = (int64_t)shape.size();  j > 0;  j--) {
+      strides.insert(strides.begin(), x);
+      x *= shape[(size_t)(j - 1)];
     }
-    else if (offset + 1 == ndim()) {
-      Index64 tocount(1);
-      tocount.ptr().get()[0] = std::accumulate(std::begin(shape_), std::end(shape_), 1, std::multiplies<ssize_t>());
-      std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
-      std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
 
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
-    }
-    else {
-      // From studies/flatten.py:
-      // # content = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
-      // # index = [0] * self.shape[0] * self.shape[1]
-      // # return RegularArray(IndexedArray(index, content), self.shape[1])
+    Index64 tonum(reps);
+    struct Error err = awkward_regulararray_num_64(
+      tonum.ptr().get(),
+      size,
+      reps);
+    util::handle_error(err, classname(), identities_.get());
 
-      std::vector<ssize_t> nextshape = std::vector<ssize_t>(std::begin(shape_) + 1, std::end(shape_));
-      std::vector<ssize_t> nextstrides = std::vector<ssize_t>(std::begin(strides_) + 1, std::end(strides_));
-
-      std::shared_ptr<Content> content = (NumpyArray(identities_, parameters_, ptr_, nextshape, nextstrides, byteoffset_, itemsize_, format_)).count(offset - 1);
-
-      int64_t len = shape_[0]*shape_[1];
-      Index64 tocount(len);
-      struct Error err = awkward_regulararray_count(
-        tocount.ptr().get(),
-        (int64_t)0,
-        len);
-      util::handle_error(err, classname(), identities_.get());
-
-      std::shared_ptr<IndexedArray64> indexed = std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), tocount, content);
-
-      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), indexed, shape_[1]);
-    }
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tonum.ptr(), shape, strides, 0, sizeof(int64_t), format_map.at(std::type_index(typeid(int64_t))));
   }
 
   const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
@@ -872,19 +853,16 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
+  const std::pair<Index64, std::shared_ptr<Content>> NumpyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (shape_.size() <= 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    if (toaxis == depth) {
+      throw std::invalid_argument("axis=0 not allowed for flatten");
     }
-    if (toaxis >= (int64_t)shape_.size() - 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because axis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
-    }
-    if (iscontiguous()) {
-      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_, toaxis), flatten_strides(strides_, toaxis), byteoffset_, itemsize_, format_);
+    else if (shape_.size() != 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->offsets_and_flattened(axis, depth);
     }
     else {
-      return contiguous().flatten(toaxis);
+      throw std::invalid_argument("axis out of range for flatten");
     }
   }
 
@@ -1371,6 +1349,39 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> NumpyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
+    if (ndim() == 0) {
+      throw std::runtime_error("cannot rpad a scalar");
+    }
+    else if (ndim() > 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->rpad(target, axis, depth);
+    }
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis != depth) {
+      throw std::invalid_argument("axis exceeds the depth of this array");
+    }
+    if (target < length()) {
+      return shallow_copy();
+    }
+    else {
+      return rpad_and_clip(target, toaxis, depth);
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+    if (ndim() == 0) {
+      throw std::runtime_error("cannot rpad a scalar");
+    }
+    else if (ndim() > 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->rpad_and_clip(target, axis, depth);
+    }
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis != depth) {
+      throw std::invalid_argument("axis exceeds the depth of this array");
+    }
+    return rpad_axis0(target, true);
+  }
+
   const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     if (shape_.empty()) {
       throw std::runtime_error("attempting to reduce a scalar");
@@ -1456,6 +1467,38 @@ namespace awkward {
       }
 
       return out;
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::localindex(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (axis == depth) {
+      return localindex_axis0();
+    }
+    else if (shape_.size() <= 1) {
+      throw std::invalid_argument("'axis' out of range for localindex");
+    }
+    else {
+      return toRegularArray().get()->localindex(axis, depth);
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return choose_axis0(n, diagonal, recordlookup, parameters);
+    }
+
+    else if (shape_.size() <= 1) {
+      throw std::invalid_argument("'axis' out of range for choose");
+    }
+
+    else {
+      return toRegularArray().get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
     }
   }
 

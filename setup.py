@@ -30,7 +30,7 @@ class CMakeExtension(Extension):
         self.sourcedir = os.path.abspath(sourcedir)
 
 class CMakeBuild(setuptools.command.build_ext.build_ext):
-    def run(self):
+    def build_extensions(self):
         try:
             out = subprocess.check_output(["cmake", "--version"])
         except OSError:
@@ -40,13 +40,19 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             self.build_extension(x)
 
     def build_extension(self, ext):
-        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
 
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = ["-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
-                      "-DPYTHON_EXECUTABLE=" + sys.executable,
+                      "-DPYTHON_EXECUTABLE={0}".format(sys.executable),
+                      "-DPYBUILD=ON",
                       "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
                       "-DPYBUILD=ON",
                       "-DBUILD_TESTING=OFF"]
+        try:
+           compiler_path = self.compiler.compiler_cxx[0]
+           cmake_args.append("-DCMAKE_CXX_COMPILER={0}".format(compiler_path))
+        except AttributeError:
+            print("Not able to access compiler path (on Windows), using CMake default")
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
@@ -88,17 +94,27 @@ if platform.system() == "Windows":
 
     class Install(setuptools.command.install.install):
         def run(self):
-            print("----------------------------------------------------------------")
+            print("--- build directory -------------------------------------------")
             tree("build")
-            print("----------------------------------------------------------------")
 
+            print("--- specifically, the dlldir ----------------------------------")
             dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release", "Release")
             tree(dlldir)
-            print("----------------------------------------------------------------")
+
+            print("--- copying ---------------------------------------------------")
             for x in os.listdir(dlldir):
                 if x.startswith("awkward"):
+                    print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward1", x))
                     shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
-            print("----------------------------------------------------------------")
+            print("--- deleting --------------------------------------------------")
+
+            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+            for x in os.listdir(outerdir):
+                if x.endswith(".pyd"):
+                    print("deleting", os.path.join(outerdir, x))
+                    os.remove(os.path.join(outerdir, x))
+
+            print("--- begin normal install --------------------------------------")
             setuptools.command.install.install.run(self)
 
 else:
@@ -141,7 +157,7 @@ setup(name = "awkward1",
       download_url = "https://github.com/jpivarski/awkward1/releases",
       license = "BSD 3-clause",
       entry_points = {
-        "numba_extensions": ["init = awkward1._numba:register"]
+        "numba_extensions": ["init = awkward1._connect._numba:register"]
       },
       test_suite = "tests",
       python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",

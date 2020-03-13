@@ -22,6 +22,7 @@
 #include "awkward/Content.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
+#include "awkward/array/NumpyArray.h"
 
 namespace awkward {
   void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
@@ -54,7 +55,7 @@ namespace awkward {
         , length_(length)
         , itemsize_(itemsize) {
       if (sizeof(T) != itemsize) {
-        throw std::runtime_error("sizeof(T) != itemsize");
+        throw std::invalid_argument("sizeof(T) != itemsize");
       }
     }
 
@@ -132,48 +133,43 @@ namespace awkward {
       identities_ = identities;
     }
 
-    const std::shared_ptr<Type> type() const override {
+    const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const override {
       if (std::is_same<T, double>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float64);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float64);
       }
       else if (std::is_same<T, float>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::float32);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::float32);
       }
       else if (std::is_same<T, int64_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int64);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int64);
       }
       else if (std::is_same<T, uint64_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint64);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint64);
       }
       else if (std::is_same<T, int32_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int32);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int32);
       }
       else if (std::is_same<T, uint32_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint32);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint32);
       }
       else if (std::is_same<T, int16_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int16);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int16);
       }
       else if (std::is_same<T, uint16_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint16);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint16);
       }
       else if (std::is_same<T, int8_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::int8);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::int8);
       }
       else if (std::is_same<T, uint8_t>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::uint8);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::uint8);
       }
       else if (std::is_same<T, bool>::value) {
-        return std::make_shared<PrimitiveType>(parameters_, PrimitiveType::boolean);
+        return std::make_shared<PrimitiveType>(parameters_, util::gettypestr(parameters_, typestrs), PrimitiveType::boolean);
       }
       else {
         throw std::invalid_argument(std::string("RawArrayOf<") + typeid(T).name() + std::string("> does not have a known type"));
       }
-    }
-
-    const std::shared_ptr<Content> astype(const std::shared_ptr<Type>& type) const override {
-    // FIXME: if the type does not match T, actually convert it!
-      return std::make_shared<RawArrayOf<T>>(identities_, type.get()->parameters(), ptr_, offset_, length_, itemsize_);
     }
 
     const std::string tostring() {
@@ -396,7 +392,7 @@ namespace awkward {
       return std::pair<int64_t, int64_t>(1, 1);
     }
 
-    const std::pair<bool, int64_t> branch_depth() const {
+    const std::pair<bool, int64_t> branch_depth() const override {
       return std::pair<bool, int64_t>(false, 1);
     }
 
@@ -422,16 +418,30 @@ namespace awkward {
 
     // operations
 
-    const Index64 count64() const override {
-      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
+    const std::string validityerror(const std::string& path) const override {
+      return std::string();
     }
 
-    const std::shared_ptr<Content> count(int64_t axis) const override {
-      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
+    const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis == depth) {
+        Index64 out(1);
+        out.ptr().get()[0] = length();
+        return std::make_shared<RawArrayOf<int64_t>>(Identities::none(), util::Parameters(), out.ptr(), 0, 1, sizeof(int64_t));
+      }
+      else {
+        throw std::invalid_argument("'axis' out of range for 'num'");
+      }
     }
 
-    const std::shared_ptr<Content> flatten(int64_t axis) const override {
-      throw std::invalid_argument("RawArray cannot be flattened because it is one-dimentional");
+    const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis == depth) {
+        throw std::invalid_argument("axis=0 not allowed for flatten");
+      }
+      else {
+        throw std::invalid_argument("axis out of range for flatten");
+      }
     }
 
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override {
@@ -497,8 +507,59 @@ namespace awkward {
       throw std::invalid_argument("cannot use RawArray as a slice");
     }
 
+    const std::shared_ptr<Content> rpad(int64_t target, int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis != depth) {
+        throw std::invalid_argument("axis exceeds the depth of this array");
+      }
+      if (target < length()) {
+        return shallow_copy();
+      }
+      else {
+        return rpad_and_clip(target, toaxis, depth);
+      }
+    }
+
+    const std::shared_ptr<Content> rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis != depth) {
+        throw std::invalid_argument("axis exceeds the depth of this array");
+      }
+      Index64 index(target);
+      struct Error err = awkward_index_rpad_and_clip_axis0_64(
+        index.ptr().get(),
+        target,
+        length());
+      util::handle_error(err, classname(), identities_.get());
+
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
+    }
+
     const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {
-      throw std::runtime_error("FIXME: Raw:reduce_next");
+      throw std::runtime_error("FIXME: RawArray:reduce_next");
+    }
+
+    const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (axis == depth) {
+        return localindex_axis0();
+      }
+      else {
+        throw std::invalid_argument("'axis' out of range for localindex");
+      }
+    }
+
+    const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override {
+      if (n < 1) {
+        throw std::invalid_argument("in choose, 'n' must be at least 1");
+      }
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis == depth) {
+        return choose_axis0(n, diagonal, recordlookup, parameters);
+      }
+      else {
+        throw std::invalid_argument("'axis' out of range for choose");
+      }
     }
 
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {

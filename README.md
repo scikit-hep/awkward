@@ -191,8 +191,8 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `awkward.fromiter`: same as before.
       * [X] `awkward.typeof`: reports the high-level type (accepting some non-awkward objects).
       * [X] `awkward.tonumpy` (issue [#65](https://github.com/scikit-hep/awkward-1.0/issues/65)): to force conversion to Numpy, if possible. Neither Layer 1 nor Layer 2 will have an `__array__` method; in the Numpy sense, they are not "array-like" or "array-compatible."
-      * [ ] `awkward.flatpandas` (issue [#80](https://github.com/scikit-hep/awkward-1.0/issues/80)): flattening jaggedness into `MultiIndex` rows and nested records into `MultiIndex` columns. This is distinct from the arrays' inheritance from Pandas, distinct from the natural ability to use any one of them as DataFrame columns.
-      * [ ] `awkward.flatten`: same as old with an `axis` parameter (issue [#51](https://github.com/scikit-hep/awkward-1.0/issues/51)).
+      * [X] `awkward.flatpandas` (issue [#80](https://github.com/scikit-hep/awkward-1.0/issues/80)): flattening jaggedness into `MultiIndex` rows and nested records into `MultiIndex` columns. This is distinct from the arrays' inheritance from Pandas, distinct from the natural ability to use any one of them as DataFrame columns.
+      * [X] `awkward.flatten`: same as old with an `axis` parameter (issue [#51](https://github.com/scikit-hep/awkward-1.0/issues/51)).
       * [X] Reducers, such as `awkward.sum`, `awkward.max`, etc., supporting an `axis` method (issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
       * [X] The non-reducers: `awkward.moment`, `awkward.mean`, `awkward.var`, `awkward.std` (addendum to issue [#69](https://github.com/scikit-hep/awkward-1.0/issues/69)).
       * [ ] `awkward.argmin`, `awkward.argmax` (issue [#70](https://github.com/scikit-hep/awkward-1.0/issues/70)): return values and `None` instead of singleton and empty lists.
@@ -200,7 +200,7 @@ Completed items are ☑check-marked. See [closed PRs](https://github.com/scikit-
       * [X] `awkward.where` (issue [#75](https://github.com/scikit-hep/awkward-1.0/issues/75)): like `numpy.where`; old doesn't have this yet, but we'll need it.
       * [X] `awkward.concatenate` (issue [#76](https://github.com/scikit-hep/awkward-1.0/issues/76)): same as old, but supporting `axis` at any depth.
       * [ ] `awkward.zip` (issue [#77](https://github.com/scikit-hep/awkward-1.0/issues/77)): makes jagged tables; this is a naive version of `awkward.join` below.
-      * [ ] `awkward.pad` (issue [#73](https://github.com/scikit-hep/awkward-1.0/issues/73)): same as old, but without the `clip` option (use slicing instead).
+      * [X] `awkward.pad` (issue [#73](https://github.com/scikit-hep/awkward-1.0/issues/73)): same as old, but without the `clip` option (use slicing instead).
       * [ ] `awkward.fillna` (issue [#72](https://github.com/scikit-hep/awkward-1.0/issues/72)): same as old.
       * [ ] `awkward.cross` (and `awkward.argcross`, issue [#78](https://github.com/scikit-hep/awkward-1.0/issues/78)): to make combinations by cross-joining multiple arrays; option to use `Identity` index.
       * [ ] `awkward.choose` (and `awkward.argchoose`, issue [#79](https://github.com/scikit-hep/awkward-1.0/issues/79)): to make combinations by choosing a fixed number from a single array; option to use `Identity` index and an option to include same-object combinations.

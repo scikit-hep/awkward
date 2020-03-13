@@ -10,8 +10,8 @@ import numpy
 import awkward1
 
 def test_getitem():
-    content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    content1 = awkward1.Array(["one", "two", "three", "four", "five"]).layout
+    content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True).layout
+    content1 = awkward1.Array(["one", "two", "three", "four", "five"], checkvalid=True).layout
     tags = awkward1.layout.Index8(numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
 
     assert numpy.asarray(awkward1.layout.UnionArray8_32.regular_index(tags)).tolist() == [0, 1, 0, 1, 2, 2, 3, 4]
@@ -52,8 +52,8 @@ def test_getitem():
     assert awkward1.tolist(array[::2, 1:]) == ["ne", [2.2, 3.3], "hree", "ive"]
     assert awkward1.tolist(array[:, :-1]) == ["on", "tw", [1.1, 2.2], [], "thre", [4.4], "fiv", "fou"]
 
-    content2 = awkward1.Array([{"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2, "y": [1.1, 2.2]}]).layout
-    content3 = awkward1.Array([{"x": 0.0, "y": "zero", "z": False}, {"x": 1.1, "y": "one", "z": True}, {"x": 2.2, "y": "two", "z": False}, {"x": 3.3, "y": "three", "z": True}, {"x": 4.4, "y": "four", "z": False}]).layout
+    content2 = awkward1.Array([{"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2, "y": [1.1, 2.2]}], checkvalid=True).layout
+    content3 = awkward1.Array([{"x": 0.0, "y": "zero", "z": False}, {"x": 1.1, "y": "one", "z": True}, {"x": 2.2, "y": "two", "z": False}, {"x": 3.3, "y": "three", "z": True}, {"x": 4.4, "y": "four", "z": False}], checkvalid=True).layout
     array2 = awkward1.layout.UnionArray8_32(tags, index, [content2, content3])
     assert awkward1.tolist(array2) == [{"x": 0.0, "y": "zero", "z": False}, {"x": 1.1, "y": "one", "z": True}, {"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2.2, "y": "two", "z": False}, {"x": 2, "y": [1.1, 2.2]}, {"x": 4.4, "y": "four", "z": False}, {"x": 3.3, "y": "three", "z": True}]
     assert awkward1.tolist(array2["x"]) == [0.0, 1.1, 0, 1, 2.2, 2, 4.4, 3.3]
@@ -76,8 +76,8 @@ def test_getitem():
     assert array4.keys() == []
 
 def test_identities():
-    content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    content1 = awkward1.Array(["one", "two", "three", "four", "five"]).layout
+    content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], checkvalid=True).layout
+    content1 = awkward1.Array(["one", "two", "three", "four", "five"], checkvalid=True).layout
     tags = awkward1.layout.Index8(numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
     index = awkward1.layout.Index32(numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
     array = awkward1.layout.UnionArray8_32(tags, index, [content0, content1])

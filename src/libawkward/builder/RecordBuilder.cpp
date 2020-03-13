@@ -79,12 +79,7 @@ namespace awkward {
       contents.push_back(contents_[i].get()->snapshot());
       recordlookup.get()->push_back(keys_[i]);
     }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(Identities::none(), parameters, length_, false);
-    }
-    else {
-      return std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
-    }
+    return std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup, length_);
   }
 
   bool RecordBuilder::active() const {

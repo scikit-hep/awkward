@@ -40,6 +40,9 @@ namespace awkward {
     if (contents_.empty()) {
       throw std::invalid_argument("UnionArray must have at least one content");
     }
+    if (index.length() < tags.length()) {
+      throw std::invalid_argument("UnionArray index must not be shorter than its tags");
+    }
   }
 
   template <typename T, typename I>
@@ -426,30 +429,12 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Type> UnionArrayOf<T, I>::type() const {
+  const std::shared_ptr<Type> UnionArrayOf<T, I>::type(const std::map<std::string, std::string>& typestrs) const {
     std::vector<std::shared_ptr<Type>> types;
     for (auto item : contents_) {
-      types.push_back(item.get()->type());
+      types.push_back(item.get()->type(typestrs));
     }
-    return std::make_shared<UnionType>(parameters_, types);
-  }
-
-  template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::astype(const std::shared_ptr<Type>& type) const {
-    if (UnionType* raw = dynamic_cast<UnionType*>(type.get())) {
-      std::vector<std::shared_ptr<Content>> contents;
-      for (int64_t i = 0;  i < raw->numtypes();  i++) {
-        // FIXME: union equivalence could be defined much more flexibly than this, but do it later...
-        if (i >= (int64_t)contents_.size()) {
-          throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring() + std::string(" because the number of possibilities doesn't match"));
-        }
-        contents.push_back(contents_[(size_t)i].get()->astype(raw->type(i)));
-      }
-      return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, index_, contents);
-    }
-    else {
-      throw std::invalid_argument(classname() + std::string(" cannot be converted to type ") + type.get()->tostring());
-    }
+    return std::make_shared<UnionType>(parameters_, util::gettypestr(parameters_, typestrs), types);
   }
 
   template <typename T, typename I>
@@ -799,37 +784,105 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const Index64 UnionArrayOf<T, I>::count64() const {
-    int64_t len = contents_.size();
-    Index64 tocount(len);
-    int64_t indx(0);
-    for (auto content : contents_) {
-      Index64 toappend = content.get()->count64();
-      tocount.ptr().get()[indx++] = toappend.length();
+  const std::string UnionArrayOf<T, I>::validityerror(const std::string& path) const {
+    std::vector<int64_t> lencontents;
+    for (int64_t i = 0;  i < numcontents();  i++) {
+      lencontents.push_back(content(i).get()->length());
     }
-    return tocount;
+    struct Error err = util::awkward_unionarray_validity<T, I>(
+      tags_.ptr().get(),
+      tags_.offset(),
+      index_.ptr().get(),
+      index_.offset(),
+      tags_.length(),
+      numcontents(),
+      lencontents.data());
+    if (err.str != nullptr) {
+      return std::string("at ") + path + std::string(" (") + classname() + std::string("): ") + std::string(err.str) + std::string(" at i=") + std::to_string(err.identity);
+    }
+    for (int64_t i = 0;  i < numcontents();  i++) {
+      std::string sub = content(i).get()->validityerror(path + std::string(".content(") + std::to_string(i) + (")"));
+      if (!sub.empty()) {
+        return sub;
+      }
+    }
+    return std::string();
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::count(int64_t axis) const {
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.emplace_back(content.get()->count(toaxis));
+    if (toaxis == depth) {
+      Index64 out(1);
+      out.ptr().get()[0] = length();
+      return NumpyArray(out).getitem_at_nowrap(0);
     }
-    UnionArrayOf<T, I>unionarray(Identities::none(), util::Parameters(), tags_, index_, contents);
-    return unionarray.simplify(false);
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->num(axis, depth));
+      }
+      UnionArrayOf<T, I> out(Identities::none(), util::Parameters(), tags_, index_, contents);
+      return out.simplify(false);
+    }
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::flatten(int64_t axis) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.emplace_back(content.get()->flatten(axis));
+  const std::pair<Index64, std::shared_ptr<Content>> UnionArrayOf<T, I>::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("axis=0 not allowed for flatten");
     }
-    UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
-    return out.simplify(false);
+    else {
+      bool has_offsets = false;
+      std::vector<std::shared_ptr<int64_t>> offsetsptrs;
+      std::vector<int64_t*> offsetsraws;
+      std::vector<int64_t> offsetsoffsets;
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        std::pair<Index64, std::shared_ptr<Content>> pair = content.get()->offsets_and_flattened(axis, depth);
+        Index64 offsets = pair.first;
+        offsetsptrs.push_back(offsets.ptr());
+        offsetsraws.push_back(offsets.ptr().get());
+        offsetsoffsets.push_back(offsets.offset());
+        contents.push_back(pair.second);
+        has_offsets = (offsets.length() != 0);
+      }
+
+      if (has_offsets) {
+        int64_t total_length;
+        struct Error err1 = util::awkward_unionarray_flatten_length_64<T, I>(
+          &total_length,
+          tags_.ptr().get(),
+          tags_.offset(),
+          index_.ptr().get(),
+          index_.offset(),
+          tags_.length(),
+          offsetsraws.data(),
+          offsetsoffsets.data());
+        util::handle_error(err1, classname(), identities_.get());
+
+        Index8 totags(total_length);
+        Index64 toindex(total_length);
+        Index64 tooffsets(tags_.length() + 1);
+        struct Error err2 = util::awkward_unionarray_flatten_combine_64<T, I>(
+          totags.ptr().get(),
+          toindex.ptr().get(),
+          tooffsets.ptr().get(),
+          tags_.ptr().get(),
+          tags_.offset(),
+          index_.ptr().get(),
+          index_.offset(),
+          tags_.length(),
+          offsetsraws.data(),
+          offsetsoffsets.data());
+        util::handle_error(err2, classname(), identities_.get());
+        return std::pair<Index64, std::shared_ptr<Content>>(tooffsets, std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), totags, toindex, contents));
+      }
+      else {
+        return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<UnionArrayOf<T, I>>(Identities::none(), util::Parameters(), tags_, index_, contents));
+      }
+    }
   }
 
   template <typename T, typename I>
@@ -1094,6 +1147,38 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return rpad_axis0(target, false);
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.emplace_back(content.get()->rpad(target, axis, depth));
+      }
+      UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+      return out.simplify(false);
+    }
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return rpad_axis0(target, true);
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.emplace_back(content.get()->rpad_and_clip(target, axis, depth));
+      }
+      UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+      return out.simplify(false);
+    }
+  }
+
+  template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> simplified = simplify(true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
@@ -1102,6 +1187,39 @@ namespace awkward {
       throw std::invalid_argument(std::string("cannot reduce (call '") + reducer.name() + std::string("' on) an irreducible ") + classname());
     }
     return simplified.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::localindex(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (axis == depth) {
+      return localindex_axis0();
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->localindex(axis, depth));
+      }
+      return std::make_shared<UnionArrayOf<T, I>>(identities_, util::Parameters(), tags_, index_, contents);
+    }
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (axis == depth) {
+      return choose_axis0(n, diagonal, recordlookup, parameters);
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->choose(n, diagonal, recordlookup, parameters, axis, depth));
+      }
+      return std::make_shared<UnionArrayOf<T, I>>(identities_, util::Parameters(), tags_, index_, contents);
+    }
   }
 
   template <typename T, typename I>

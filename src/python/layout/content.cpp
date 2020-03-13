@@ -210,7 +210,7 @@ std::shared_ptr<ak::Identities> unbox_identities_none(const py::handle& obj) {
 /////////////////////////////////////////////////////////////// slicing
 
 bool handle_as_numpy(const std::shared_ptr<ak::Content>& content) {
-  // if (content.get()->parameter_equals("__array__", "\"string\"")) {
+  // if (content.get()->parameter_equals("__array__", "\"string\"")  ||  content.get()->parameter_equals("__array__", "\"bytestring\"")) {
   //   return true;
   // }
   if (ak::NumpyArray* raw = dynamic_cast<ak::NumpyArray*>(content.get())) {
@@ -367,7 +367,7 @@ void toslice_part(ak::Slice& slice, py::object obj) {
       }
 
       if (content.get() != nullptr  &&  !handle_as_numpy(content)) {
-        if (content.get()->parameter_equals("__array__", "\"string\"")) {
+        if (content.get()->parameter_equals("__array__", "\"string\"")  ||  content.get()->parameter_equals("__array__", "\"bytestring\"")) {
           obj = box(content);
           obj = py::module::import("awkward1").attr("tolist")(obj);
           std::vector<std::string> strings;
@@ -558,8 +558,25 @@ void builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     }
     self.endlist();
   }
+  else if (py::isinstance<py::array>(obj)) {
+    py::iterable seq = obj.attr("tolist")().cast<py::iterable>();
+    self.beginlist();
+    for (auto x : seq) {
+      builder_fromiter(self, x);
+    }
+    self.endlist();
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("bool_"))) {
+    self.boolean(obj.cast<bool>());
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("integer"))) {
+    self.integer(obj.cast<int64_t>());
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
+    self.real(obj.cast<double>());
+  }
   else {
-    throw std::invalid_argument(std::string("cannot convert ") + obj.attr("__repr__")().cast<std::string>() + std::string(" to an array element"));
+    throw std::invalid_argument(std::string("cannot convert ") + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ") + obj.attr("__class__").attr("__name__").cast<std::string>() + std::string(") to an array element"));
   }
 }
 
@@ -572,7 +589,7 @@ py::class_<ak::ArrayBuilder> make_ArrayBuilder(const py::handle& m, const std::s
       .def("__repr__", &ak::ArrayBuilder::tostring)
       .def("__len__", &ak::ArrayBuilder::length)
       .def("clear", &ak::ArrayBuilder::clear)
-      .def_property_readonly("type", &ak::ArrayBuilder::type)
+      .def("type", &ak::ArrayBuilder::type)
       .def("snapshot", [](const ak::ArrayBuilder& self) -> py::object {
         return box(self.snapshot());
       })
@@ -829,11 +846,8 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("setparameter", &setparameter<T>)
           .def("parameter", &parameter<T>)
           .def("purelist_parameter", &purelist_parameter<T>)
-          .def_property_readonly("type", [](const T& self) -> std::shared_ptr<ak::Type> {
-            return self.type();
-          })
-          .def("astype", [](const T& self, const std::shared_ptr<ak::Type>& type) -> py::object {
-            return box(self.astype(type));
+          .def("type", [](const T& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
+            return self.type(typestrs);
           })
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
@@ -856,12 +870,33 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           })
 
           // operations
-          .def("sizes", [](const T& self, int64_t axis) -> py::object {
-            return box(self.count(axis));
-          }, py::arg("axis") = 0)
+          .def("validityerror", [](const T& self) -> py::object {
+            std::string out = self.validityerror(std::string("layout"));
+            if (out.empty()) {
+              return py::none();
+            }
+            else {
+              py::str pyvalue(PyUnicode_DecodeUTF8(out.data(), out.length(), "surrogateescape"));
+              return pyvalue;
+            }
+          })
+          .def("num", [](const T& self, int64_t axis) -> py::object {
+            return box(self.num(axis, 0));
+          }, py::arg("axis") = 1)
           .def("flatten", [](const T& self, int64_t axis) -> py::object {
-            return box(self.flatten(axis));
-          }, py::arg("axis") = 0)
+            std::pair<ak::Index64, std::shared_ptr<ak::Content>> pair = self.offsets_and_flattened(axis, 0);
+            return box(pair.second);
+          }, py::arg("axis") = 1)
+          .def("offsets_and_flatten", [](const T& self, int64_t axis) -> py::object {
+            std::pair<ak::Index64, std::shared_ptr<ak::Content>> pair = self.offsets_and_flattened(axis, 0);
+            return py::make_tuple(py::cast(pair.first), box(pair.second));
+          }, py::arg("axis") = 1)
+          .def("rpad", [](const T&self, int64_t length, int64_t axis) -> py::object {
+            return box(self.rpad(length, axis, 0));
+          })
+          .def("rpad_and_clip", [](const T&self, int64_t length, int64_t axis) -> py::object {
+            return box(self.rpad_and_clip(length, axis, 0));
+          })
           .def("mergeable", [](const T& self, const py::object& other, bool mergebool) -> bool {
             return self.mergeable(unbox_content(other), mergebool);
           }, py::arg("other"), py::arg("mergebool") = false)
@@ -903,6 +938,22 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
             ak::ReducerMax reducer;
             return box(self.reduce(reducer, axis, mask, keepdims));
           }, py::arg("axis") = -1, py::arg("mask") = true, py::arg("keepdims") = false)
+          .def("localindex", [](const T& self, int64_t axis) -> py::object {
+            return box(self.localindex(axis, 0));
+          }, py::arg("axis") = 1)
+          .def("choose", [](const T& self, int64_t n, bool diagonal, py::object keys, py::object parameters, int64_t axis) -> py::object {
+            std::shared_ptr<ak::util::RecordLookup> recordlookup(nullptr);
+            if (!keys.is(py::none())) {
+              recordlookup = std::make_shared<ak::util::RecordLookup>();
+              for (auto x : keys.cast<py::iterable>()) {
+                recordlookup.get()->push_back(x.cast<std::string>());
+              }
+              if (n != recordlookup.get()->size()) {
+                throw std::invalid_argument("if provided, the length of 'keys' must be 'n'");
+              }
+            }
+            return box(self.choose(n, diagonal, recordlookup, dict2parameters(parameters), axis, 0));
+          }, py::arg("n"), py::arg("diagonal") = false, py::arg("keys") = py::none(), py::arg("parameters") = py::none(), py::arg("axis") = 1)
 
   ;
 }
@@ -965,7 +1016,7 @@ py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content>
       .def_property_readonly("starts", &ak::ListArrayOf<T>::starts)
       .def_property_readonly("stops", &ak::ListArrayOf<T>::stops)
       .def_property_readonly("content", &ak::ListArrayOf<T>::content)
-      .def("compact_offsets64", &ak::ListArrayOf<T>::compact_offsets64)
+      .def("compact_offsets64", &ak::ListArrayOf<T>::compact_offsets64, py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::ListArrayOf<T>::broadcast_tooffsets64)
       .def("toRegularArray", &ak::ListArrayOf<T>::toRegularArray)
   );
@@ -988,7 +1039,7 @@ py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, 
       .def_property_readonly("stops", &ak::ListOffsetArrayOf<T>::stops)
       .def_property_readonly("offsets", &ak::ListOffsetArrayOf<T>::offsets)
       .def_property_readonly("content", &ak::ListOffsetArrayOf<T>::content)
-      .def("compact_offsets64", &ak::ListOffsetArrayOf<T>::compact_offsets64)
+      .def("compact_offsets64", &ak::ListOffsetArrayOf<T>::compact_offsets64, py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::ListOffsetArrayOf<T>::broadcast_tooffsets64)
       .def("toRegularArray", &ak::ListOffsetArrayOf<T>::toRegularArray)
   );
@@ -1054,16 +1105,13 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle
       .def("__repr__", &repr<ak::Record>)
       .def_property_readonly("identities", [](const ak::Record& self) -> py::object { return box(self.identities()); })
       .def("__getitem__", &getitem<ak::Record>)
-      .def_property_readonly("type", [](const ak::Record& self) -> std::shared_ptr<ak::Type> {
-        return self.type();
+      .def("type", [](const ak::Record& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
+        return self.type(typestrs);
       })
       .def_property("parameters", &getparameters<ak::Record>, &setparameters<ak::Record>)
       .def("setparameter", &setparameter<ak::Record>)
       .def("parameter", &parameter<ak::Record>)
       .def("purelist_parameter", &purelist_parameter<ak::Record>)
-      .def("astype", [](const ak::Record& self, const std::shared_ptr<ak::Type>& type) -> py::object {
-        return box(self.astype(type));
-      })
       .def("tojson", &tojson_string<ak::Record>, py::arg("pretty") = false, py::arg("maxdecimals") = py::none())
       .def("tojson", &tojson_file<ak::Record>, py::arg("destination"), py::arg("pretty") = false, py::arg("maxdecimals") = py::none(), py::arg("buffersize") = 65536)
 
@@ -1108,32 +1156,33 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle
   ;
 }
 
-ak::RecordArray iterable_to_RecordArray(const py::iterable& contents, const py::object& keys, const py::object& identities, const py::object& parameters) {
+ak::RecordArray iterable_to_RecordArray(const py::iterable& contents, const py::object& keys, const py::object& length, const py::object& identities, const py::object& parameters) {
   std::vector<std::shared_ptr<ak::Content>> out;
   for (auto x : contents) {
     out.push_back(unbox_content(x));
   }
-  if (out.empty()) {
-    throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
-  }
-  if (keys.is(py::none())) {
-    return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, std::shared_ptr<ak::util::RecordLookup>(nullptr));
-  }
-  else {
-    std::shared_ptr<ak::util::RecordLookup> recordlookup = std::make_shared<ak::util::RecordLookup>();
+  std::shared_ptr<ak::util::RecordLookup> recordlookup(nullptr);
+  if (!keys.is(py::none())) {
+    recordlookup = std::make_shared<ak::util::RecordLookup>();
     for (auto x : keys.cast<py::iterable>()) {
       recordlookup.get()->push_back(x.cast<std::string>());
     }
     if (out.size() != recordlookup.get()->size()) {
       throw std::invalid_argument("if provided, 'keys' must have the same length as 'types'");
     }
+  }
+  if (length.is(py::none())) {
     return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, recordlookup);
+  }
+  else {
+    int64_t intlength = length.cast<int64_t>();
+    return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, recordlookup, intlength);
   }
 }
 
 py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_RecordArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content>(m, name.c_str())
-      .def(py::init([](const py::dict& contents, const py::object& identities, const py::object& parameters) -> ak::RecordArray {
+      .def(py::init([](const py::dict& contents, const py::object& length, const py::object& identities, const py::object& parameters) -> ak::RecordArray {
         std::shared_ptr<ak::util::RecordLookup> recordlookup = std::make_shared<ak::util::RecordLookup>();
         std::vector<std::shared_ptr<ak::Content>> out;
         for (auto x : contents) {
@@ -1141,15 +1190,15 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
           recordlookup.get()->push_back(key);
           out.push_back(unbox_content(x.second));
         }
-        if (out.empty()) {
-          throw std::invalid_argument("construct RecordArrays without fields using RecordArray(length) where length is an integer");
+        if (length.is(py::none())) {
+          return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, recordlookup);
         }
-        return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, recordlookup);
-      }), py::arg("contents"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
-      .def(py::init(&iterable_to_RecordArray), py::arg("contents"), py::arg("keys") = py::none(), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
-      .def(py::init([](int64_t length, bool istuple, const py::object& identities, const py::object& parameters) -> ak::RecordArray {
-        return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), length, istuple);
-      }), py::arg("length"), py::arg("istuple") = false, py::arg("identities") = py::none(), py::arg("parameters") = py::none())
+        else {
+          int64_t intlength = length.cast<int64_t>();
+          return ak::RecordArray(unbox_identities_none(identities), dict2parameters(parameters), out, recordlookup, intlength);
+        }
+      }), py::arg("contents"), py::arg("length") = py::none(), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
+      .def(py::init(&iterable_to_RecordArray), py::arg("contents"), py::arg("keys") = py::none(), py::arg("length") = py::none(), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
 
       .def_property_readonly("recordlookup", [](const ak::RecordArray& self) -> py::object {
         std::shared_ptr<ak::util::RecordLookup> recordlookup = self.recordlookup();
@@ -1231,7 +1280,7 @@ py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> mak
 
       .def_property_readonly("size", &ak::RegularArray::size)
       .def_property_readonly("content", &ak::RegularArray::content)
-      .def("compact_offsets64", &ak::RegularArray::compact_offsets64)
+      .def("compact_offsets64", &ak::RegularArray::compact_offsets64, py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::RegularArray::broadcast_tooffsets64)
   );
 }
