@@ -1113,9 +1113,9 @@ namespace awkward {
       IndexOf<T> starts = util::make_starts(offsets_);
       IndexOf<T> stops = util::make_stops(offsets_);
 
-      int64_t totallen;
+      std::shared_ptr<int64_t> totallen(new int64_t[(size_t)n], util::array_deleter<int64_t>());
       struct Error err1 = util::awkward_listarray_choose_length<T>(
-        &totallen,
+        totallen.get(),
         n,
         diagonal,
         starts.ptr().get(),
@@ -1125,10 +1125,14 @@ namespace awkward {
         length());
       util::handle_error(err1, classname(), identities_.get());
 
+      for (int64_t k = 0;  k < n;  k++) {
+        std::cout << "totallen.get()[" << k << "] = " << totallen.get()[k] << std::endl;
+      }
+
       std::vector<std::shared_ptr<int64_t>> tocarry;
       std::vector<int64_t*> tocarryraw;
       for (int64_t j = 0;  j < n;  j++) {
-        std::shared_ptr<int64_t> ptr(new int64_t[(size_t)totallen], util::array_deleter<int64_t>());
+        std::shared_ptr<int64_t> ptr(new int64_t[(size_t)totallen.get()[n - 1]], util::array_deleter<int64_t>());
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
@@ -1143,15 +1147,9 @@ namespace awkward {
         length());
       util::handle_error(err2, classname(), identities_.get());
 
-#if defined _MSC_VER || defined __i386__
-      std::string format("q");
-#else
-      std::string format("l");
-#endif
-
       std::vector<std::shared_ptr<Content>> contents;
       for (auto ptr : tocarry) {
-        contents.push_back(std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, std::vector<ssize_t>({ (ssize_t)totallen }), std::vector<ssize_t>({ (ssize_t)sizeof(int64_t) }), 0, sizeof(int64_t), format));
+        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen.get()[n - 1])));
       }
       return std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
     }
