@@ -410,12 +410,9 @@ def cross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
     else:
         return result
 
-def choose(array, n, diagonal=False, axis=1, nested=None, keys=None, parameters=None, highlevel=True):
-    if nested is not None:
-        raise NotImplementedError
+def choose(array, n, diagonal=False, axis=1, keys=None, parameters=None, highlevel=True):
     if parameters is None:
         parameters = {}
-
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False)
     out = layout.choose(n, diagonal=diagonal, keys=keys, parameters=parameters, axis=axis)
     if highlevel:

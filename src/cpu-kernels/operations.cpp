@@ -1006,49 +1006,46 @@ ERROR awkward_choose_64(int64_t* toindex, int64_t n, bool diagonal, int64_t sing
   return awkward_choose<int64_t>(toindex, n, diagonal, singlelen);
 }
 
-int64_t awkward_listarray_choose_factorial(int64_t a, int64_t b) {
-  // (a choose b) == a! / (b! * (a - b)!)
-  if (b > a) {
-    return 0;
-  }
-  else if (b == 0  ||  b == a) {
-    return 1;
-  }
-  else {
-    if (b * 2 > a) {
-      b = a - b;
-    }
-    int64_t out = a;
-    for (int64_t j = 2;  j <= b;  j++) {
-      out *= (a - j + 1);
-      out /= j;
-    }
-    return out;
-  }
-}
-
-template <typename C>
-ERROR awkward_listarray_choose_length(int64_t* totallen, int64_t n, bool diagonal, const C* starts, int64_t startsoffset, const C* stops, int64_t stopsoffset, int64_t length) {
-  for (int64_t k = 0;  k < n;  k++) {
-    totallen[k] = 0;
-  }
+template <typename C, typename T>
+ERROR awkward_listarray_choose_length(int64_t* totallen, T* tooffsets, int64_t n, bool diagonal, const C* starts, int64_t startsoffset, const C* stops, int64_t stopsoffset, int64_t length) {
+  *totallen = 0;
+  tooffsets[0] = 0;
   for (int64_t i = 0;  i < length;  i++) {
     int64_t count = (int64_t)(stops[stopsoffset + i] - starts[startsoffset + i]);
     if (diagonal) {
       count += (n - 1);
     }
-    totallen[n - 1] = totallen[n - 1] + awkward_listarray_choose_factorial(count, n);
+    int64_t thisn = n;
+    int64_t size;
+    if (thisn > count) {
+      size = 0;
+    }
+    else if (thisn == count) {
+      size = 1;
+    }
+    else {
+      if (thisn * 2 > count) {
+        thisn = count - thisn;
+      }
+      size = count;
+      for (int64_t j = 2;  j <= thisn;  j++) {
+        size *= (count - j + 1);
+        size /= j;
+      }
+    }
+    *totallen = *totallen + size;
+    tooffsets[i + 1] = tooffsets[i] + size;
   }
   return success();
 }
-ERROR awkward_listarray32_choose_length(int64_t* totallen, int64_t n, bool diagonal, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length) {
-  return awkward_listarray_choose_length<int32_t>(totallen, n, diagonal, starts, startsoffset, stops, stopsoffset, length);
+ERROR awkward_listarray32_choose_length_64(int64_t* totallen, int64_t* tooffsets, int64_t n, bool diagonal, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose_length<int32_t, int64_t>(totallen, tooffsets, n, diagonal, starts, startsoffset, stops, stopsoffset, length);
 }
-ERROR awkward_listarrayU32_choose_length(int64_t* totallen, int64_t n, bool diagonal, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length) {
-  return awkward_listarray_choose_length<uint32_t>(totallen, n, diagonal, starts, startsoffset, stops, stopsoffset, length);
+ERROR awkward_listarrayU32_choose_length_64(int64_t* totallen, int64_t* tooffsets, int64_t n, bool diagonal, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose_length<uint32_t, int64_t>(totallen, tooffsets, n, diagonal, starts, startsoffset, stops, stopsoffset, length);
 }
-ERROR awkward_listarray64_choose_length(int64_t* totallen, int64_t n, bool diagonal, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length) {
-  return awkward_listarray_choose_length<int64_t>(totallen, n, diagonal, starts, startsoffset, stops, stopsoffset, length);
+ERROR awkward_listarray64_choose_length_64(int64_t* totallen, int64_t* tooffsets, int64_t n, bool diagonal, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length) {
+  return awkward_listarray_choose_length<int64_t, int64_t>(totallen, tooffsets, n, diagonal, starts, startsoffset, stops, stopsoffset, length);
 }
 
 template <typename T>
@@ -1103,27 +1100,6 @@ ERROR awkward_listarrayU32_choose_64(int64_t** tocarry, int64_t n, bool diagonal
 }
 ERROR awkward_listarray64_choose_64(int64_t** tocarry, int64_t n, bool diagonal, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length) {
   return awkward_listarray_choose<int64_t, int64_t>(tocarry, n, diagonal, starts, startsoffset, stops, stopsoffset, length);
-}
-
-template <typename C, typename T>
-ERROR awkward_listarray_choose_offsets(T** tooffsets, int64_t n, bool diagonal, const C* starts, int64_t startsoffset, const C* stops, int64_t stopsoffset, int64_t length) {
-
-
-
-
-
-
-
-  return failure("FIXME: awkward_listarray_choose_offsets", 0, kSliceNone);
-}
-ERROR awkward_listarray32_choose_offsets_64(int64_t** tooffsets, int64_t n, bool diagonal, const int32_t* starts, int64_t startsoffset, const int32_t* stops, int64_t stopsoffset, int64_t length) {
-  return awkward_listarray_choose_offsets<int32_t, int64_t>(tooffsets, n, diagonal, starts, startsoffset, stops, stopsoffset, length);
-}
-ERROR awkward_listarrayU32_choose_offsets_64(int64_t** tooffsets, int64_t n, bool diagonal, const uint32_t* starts, int64_t startsoffset, const uint32_t* stops, int64_t stopsoffset, int64_t length) {
-  return awkward_listarray_choose_offsets<uint32_t, int64_t>(tooffsets, n, diagonal, starts, startsoffset, stops, stopsoffset, length);
-}
-ERROR awkward_listarray64_choose_offsets_64(int64_t** tooffsets, int64_t n, bool diagonal, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length) {
-  return awkward_listarray_choose_offsets<int64_t, int64_t>(tooffsets, n, diagonal, starts, startsoffset, stops, stopsoffset, length);
 }
 
 template <typename C, typename T>
