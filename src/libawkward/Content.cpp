@@ -187,8 +187,50 @@ namespace awkward {
     throw std::runtime_error("FIXME: Content::localindex_axis0");
   }
 
-  const std::shared_ptr<Content> Content::choose_axis0(int64_t n) const {
-    throw std::runtime_error("FIXME: Content::choose_axis0");
+  const std::shared_ptr<Content> Content::choose_axis0(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters) const {
+    int64_t size = length();
+    if (diagonal) {
+      size += (n - 1);
+    }
+    int64_t thisn = n;
+    int64_t chooselen;
+    if (thisn > size) {
+      chooselen = 0;
+    }
+    else if (thisn == size) {
+      chooselen = 1;
+    }
+    else {
+      if (thisn * 2 > size) {
+        thisn = size - thisn;
+      }
+      chooselen = size;
+      for (int64_t j = 2;  j <= thisn;  j++) {
+        chooselen *= (size - j + 1);
+        chooselen /= j;
+      }
+    }
+
+    std::vector<std::shared_ptr<int64_t>> tocarry;
+    std::vector<int64_t*> tocarryraw;
+    for (int64_t j = 0;  j < n;  j++) {
+      std::shared_ptr<int64_t> ptr(new int64_t[(size_t)chooselen], util::array_deleter<int64_t>());
+      tocarry.push_back(ptr);
+      tocarryraw.push_back(ptr.get());
+    }
+    struct Error err = awkward_regulararray_choose_64(
+      tocarryraw.data(),
+      n,
+      diagonal,
+      length(),
+      1);
+    util::handle_error(err, classname(), identities_.get());
+
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto ptr : tocarry) {
+      contents.push_back(std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), Index64(ptr, 0, chooselen), shallow_copy()));
+    }
+    return std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
   }
 
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {

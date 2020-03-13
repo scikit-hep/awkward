@@ -1495,7 +1495,7 @@ namespace awkward {
 
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
-      return choose_axis0(n);
+      return choose_axis0(n, diagonal, recordlookup, parameters);
     }
 
     else if (shape_.size() <= 1) {
