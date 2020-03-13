@@ -1108,6 +1108,21 @@ ERROR awkward_bytemaskedarray_numnull(int64_t* numnull, const int8_t* mask, int6
 }
 
 template <typename T>
+ERROR awkward_bytemaskedarray_getitem_nextcarry(T* tocarry, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    if ((mask[maskoffset + i] != 0) == validwhen) {
+      tocarry[k] = i;
+      k++;
+    }
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_getitem_nextcarry_64(int64_t* tocarry, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  return awkward_bytemaskedarray_getitem_nextcarry<int64_t>(tocarry, mask, maskoffset, length, validwhen);
+}
+
+template <typename T>
 ERROR awkward_bytemaskedarray_getitem_nextcarry_outindex(T* tocarry, T* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {

@@ -161,12 +161,7 @@ template <typename C, typename M, typename TO>
 ERROR awkward_indexedarray_overlay_mask(TO* toindex, const M* mask, int64_t maskoffset, const C* fromindex, int64_t indexoffset, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     M m = mask[maskoffset + i];
-    if (m) {
-      toindex[i] = -1;
-    }
-    else {
-      toindex[i] = fromindex[indexoffset + i];
-    }
+    toindex[i] = (m ? -1 : fromindex[indexoffset + i]);
   }
   return success();
 }
@@ -1135,20 +1130,15 @@ ERROR awkward_regulararray_choose_64(int64_t** tocarry, int64_t n, bool diagonal
   return awkward_regulararray_choose<int32_t, int64_t>(tocarry, n, diagonal, size, length);
 }
 
-// ERROR awkward_bytemaskedarray_numnull(int64_t* numnull, int8_t mask, int64_t maskoffset, int64_t length, bool validwhen) {
-//   *numnull = 0;
-//   for (int64_t i = 0;  i < length;  i++) {
-//     if ((mask[maskoffset + i] != 0) == validwhen) {
-//
-//     }
-//   }
-//   return success();
-// }
-//
-// template <typename T>
-// ERROR awkward_bytemaskedarray_project(T* tocarry, int8_t mask, int64_t maskoffset, int64_t length) {
-//   for (int64_t i = 0;  i < length;  i++) {
-//
-//   }
-//   return success();
-// }
+template <typename M>
+ERROR awkward_bytemaskedarray_overlay_mask(M* tomask, const M* theirmask, int64_t theirmaskoffset, const M* mymask, int64_t mymaskoffset, int64_t length, bool validwhen) {
+  for (int64_t i = 0;  i < length;  i++) {
+    bool theirs = theirmask[theirmaskoffset + i];
+    bool mine = ((mymask[mymaskoffset + i] != 0) != validwhen);
+    tomask[i] = (theirs | mine ? 1 : 0);
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_overlay_mask8(int8_t* tomask, const int8_t* theirmask, int64_t theirmaskoffset, const int8_t* mymask, int64_t mymaskoffset, int64_t length, bool validwhen) {
+  return awkward_bytemaskedarray_overlay_mask<int8_t>(tomask, theirmask, theirmaskoffset, mymask, mymaskoffset, length, validwhen);
+}

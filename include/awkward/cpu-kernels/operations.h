@@ -200,6 +200,8 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_regulararray_choose_64(int64_t** tocarry, int64_t n, bool diagonal, int64_t size, int64_t length);
 
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_overlay_mask8(int8_t* tomask, const int8_t* theirmask, int64_t theirmaskoffset, const int8_t* mymask, int64_t mymaskoffset, int64_t length, bool validwhen);
+
 }
 
 #endif // AWKWARDCPU_GETITEM_H_

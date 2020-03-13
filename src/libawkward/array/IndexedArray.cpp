@@ -1178,6 +1178,13 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   template <typename S>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
+
+    std::cout << classname() << "::getitem_next_jagged_generic" << std::endl;
+    std::cout << tostring() << std::endl;
+    std::cout << "slicestarts  " << slicestarts.tostring() << std::endl;
+    std::cout << "slicestops   " << slicestops.tostring() << std::endl;
+    std::cout << "slicecontent " << slicecontent.tostring() << std::endl;
+
     if (ISOPTION) {
       int64_t numnull;
       std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);

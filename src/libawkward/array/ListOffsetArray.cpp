@@ -1299,6 +1299,9 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     ListArrayOf<T> listarray(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), content_);
+
+    std::cout << "ListOffsetArray::getitem_next(jagged)" << std::endl;
+
     return listarray.getitem_next(jagged, tail, advanced);
   }
 

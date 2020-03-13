@@ -42,11 +42,45 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::project() const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::project");
+    int64_t numnull;
+    struct Error err1 = awkward_bytemaskedarray_numnull(
+      &numnull,
+      mask_.ptr().get(),
+      mask_.offset(),
+      length(),
+      validwhen_);
+    util::handle_error(err1, classname(), identities_.get());
+
+    Index64 nextcarry(length() - numnull);
+    struct Error err2 = awkward_bytemaskedarray_getitem_nextcarry_64(
+      nextcarry.ptr().get(),
+      mask_.ptr().get(),
+      mask_.offset(),
+      length(),
+      validwhen_);
+    util::handle_error(err2, classname(), identities_.get());
+
+    return content_.get()->carry(nextcarry);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::project(const Index8& mask) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::project(mask)");
+    if (length() != mask.length()) {
+      throw std::invalid_argument(std::string("mask length (") + std::to_string(mask.length()) + std::string(") is not equal to ") + classname() + std::string(" length (") + std::to_string(length()) + std::string(")"));
+    }
+
+    Index8 nextmask(length());
+    struct Error err = awkward_bytemaskedarray_overlay_mask8(
+      nextmask.ptr().get(),
+      mask.ptr().get(),
+      mask.offset(),
+      mask_.ptr().get(),
+      mask_.offset(),
+      length(),
+      validwhen_);
+    util::handle_error(err, classname(), identities_.get());
+
+    ByteMaskedArray next(identities_, parameters_, nextmask, content_, false);  // validwhen=false
+    return next.project();
   }
 
   const Index8 ByteMaskedArray::bytemask() const {
@@ -359,19 +393,26 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_next_jagged(array)");
+    return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_next_jagged(missing)");
+    return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_next_jagged(jagged)");
+    return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename S>
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
+
+    std::cout << classname() << "::getitem_next_jagged_generic" << std::endl;
+    std::cout << tostring() << std::endl;
+    std::cout << "slicestarts  " << slicestarts.tostring() << std::endl;
+    std::cout << "slicestops   " << slicestops.tostring() << std::endl;
+    std::cout << "slicecontent " << slicecontent.tostring() << std::endl;
+
     throw std::runtime_error("FIXME: ByteMaskedArray::getitem_next_jagged_generic");
   }
 
