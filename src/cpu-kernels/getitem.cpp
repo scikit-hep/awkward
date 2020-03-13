@@ -146,6 +146,19 @@ ERROR awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_
   return awkward_slicearray_ravel<int64_t>(toptr, fromptr, ndim, shape, strides);
 }
 
+ERROR awkward_slicemissing_check_same(bool* same, const int8_t* bytemask, int64_t bytemaskoffset, const int64_t* missingindex, int64_t missingindexoffset, int64_t length) {
+  *same = true;
+  for (int64_t i = 0;  i < length;  i++) {
+    bool left = (bytemask[bytemaskoffset + i] != 0);
+    bool right = (missingindex[missingindexoffset + i] < 0);
+    if (left != right) {
+      *same = false;
+      return success();
+    }
+  }
+  return success();
+}
+
 template <typename T>
 ERROR awkward_carry_arange(T* toptr, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {

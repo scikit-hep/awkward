@@ -28,6 +28,8 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_t ndim, const int64_t* shape, const int64_t* strides);
 
+  EXPORT_SYMBOL struct Error awkward_slicemissing_check_same(bool* same, const int8_t* bytemask, int64_t bytemaskoffset, const int64_t* missingindex, int64_t missingindexoffset, int64_t length);
+
   EXPORT_SYMBOL struct Error awkward_carry_arange_64(int64_t* toptr, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_identities32_getitem_carry_64(int32_t* newidentitiesptr, const int32_t* identitiesptr, const int64_t* carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length);

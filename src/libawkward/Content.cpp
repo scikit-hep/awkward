@@ -364,12 +364,56 @@ namespace awkward {
     return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify(), index.length());
   }
 
+  bool check_missing_jagged_same(const std::shared_ptr<Content>& that, const Index8& bytemask, const SliceMissing64& missing) {
+    if (bytemask.length() != missing.length()) {
+      return false;
+    }
+    Index64 missingindex = missing.index();
+    bool same;
+    struct Error err = awkward_slicemissing_check_same(
+      &same,
+      bytemask.ptr().get(),
+      bytemask.offset(),
+      missingindex.ptr().get(),
+      missingindex.offset(),
+      bytemask.length());
+    util::handle_error(err, that.get()->classname(), that.get()->identities().get());
+    return same;
+  }
+
+  const std::shared_ptr<Content> check_missing_jagged(const std::shared_ptr<Content>& that, const SliceMissing64& missing) {
+    if (that.get()->length() == 1  &&  dynamic_cast<SliceJagged64*>(missing.content().get())) {
+      std::shared_ptr<Content> tmp1 = that.get()->getitem_at_nowrap(0);
+      std::shared_ptr<Content> tmp2(nullptr);
+      if (IndexedOptionArray32* rawtmp1 = dynamic_cast<IndexedOptionArray32*>(tmp1.get())) {
+        tmp2 = rawtmp1->project();
+        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
+          return that;
+        }
+      }
+      else if (IndexedOptionArray64* rawtmp1 = dynamic_cast<IndexedOptionArray64*>(tmp1.get())) {
+        tmp2 = rawtmp1->project();
+        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
+          return that;
+        }
+      }
+
+      if (tmp2.get() != nullptr) {
+        return std::make_shared<RegularArray>(Identities::none(), that.get()->parameters(), tmp2, tmp2.get()->length());
+      }
+    }
+    return that;
+  }
+
   const std::shared_ptr<Content> Content::getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::invalid_argument("cannot mix missing values in slice with NumPy-style advanced indexing");
     }
 
-    std::shared_ptr<Content> next = getitem_next(missing.content(), tail, advanced);
+    // std::shared_ptr<Content> next = getitem_next(missing.content(), tail, advanced);
+
+    std::shared_ptr<Content> next = check_missing_jagged(shallow_copy(), missing).get()->getitem_next(missing.content(), tail, advanced);
+
     if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
       return getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname());
     }
