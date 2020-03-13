@@ -143,6 +143,10 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_listarrayU32_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const uint32_t* fromstarts, int64_t fromstartsoffset, const uint32_t* fromstops, int64_t fromstopsoffset);
   EXPORT_SYMBOL struct Error awkward_listarray64_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset);
 
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_getitem_carry_64(int8_t* tomask, const int8_t* frommask, int64_t frommaskoffset, int64_t lenmask, const int64_t* fromcarry, int64_t lencarry);
+
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_numnull(int64_t* numnull, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen);
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_getitem_nextcarry_outindex_64(int64_t* tocarry, int64_t* outindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen);
 }
 
 #endif // AWKWARDCPU_GETITEM_H_

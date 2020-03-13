@@ -1123,3 +1123,21 @@ ERROR awkward_regulararray_choose(T** tocarry, int64_t n, bool diagonal, int64_t
 ERROR awkward_regulararray_choose_64(int64_t** tocarry, int64_t n, bool diagonal, int64_t size, int64_t length) {
   return awkward_regulararray_choose<int32_t, int64_t>(tocarry, n, diagonal, size, length);
 }
+
+// ERROR awkward_bytemaskedarray_numnull(int64_t* numnull, int8_t mask, int64_t maskoffset, int64_t length, bool validwhen) {
+//   *numnull = 0;
+//   for (int64_t i = 0;  i < length;  i++) {
+//     if ((mask[maskoffset + i] != 0) == validwhen) {
+//
+//     }
+//   }
+//   return success();
+// }
+//
+// template <typename T>
+// ERROR awkward_bytemaskedarray_project(T* tocarry, int8_t mask, int64_t maskoffset, int64_t length) {
+//   for (int64_t i = 0;  i < length;  i++) {
+//
+//   }
+//   return success();
+// }

@@ -23,7 +23,7 @@ namespace awkward {
       : Content(identities, parameters)
       , mask_(mask)
       , content_(content)
-      , validwhen_(validwhen) { }
+      , validwhen_(validwhen != 0) { }
 
   const Index8 ByteMaskedArray::mask() const {
     return mask_;
@@ -70,7 +70,18 @@ namespace awkward {
   }
 
   const std::string ByteMaskedArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::tostring_part");
+    std::stringstream out;
+    out << indent << pre << "<" << classname() << " validwhen=\"" << (validwhen_ ? "true" : "false") << "\">\n";
+    if (identities_.get() != nullptr) {
+      out << identities_.get()->tostring_part(indent + std::string("    "), "", "\n");
+    }
+    if (!parameters_.empty()) {
+      out << parameters_tostring(indent + std::string("    "), "", "\n");
+    }
+    out << mask_.tostring_part(indent + std::string("    "), "<mask>", "</mask>\n");
+    out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
+    out << indent << "</" << classname() << ">" << post;
+    return out.str();
   }
 
   void ByteMaskedArray::tojson_part(ToJson& builder) const {
@@ -96,7 +107,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::shallow_copy() const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::shallow_copy");
+    return std::make_shared<ByteMaskedArray>(identities_, parameters_, mask_, content_, validwhen_);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
@@ -104,7 +115,9 @@ namespace awkward {
   }
 
   void ByteMaskedArray::check_for_iteration() const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::check_for_iteration");
+    if (identities_.get() != nullptr  &&  identities_.get()->length() < length()) {
+      util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);
+    }
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_nothing() const {
@@ -112,35 +125,103 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_at(int64_t at) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_at");
+    int64_t regular_at = at;
+    if (regular_at < 0) {
+      regular_at += length();
+    }
+    if (!(0 <= regular_at  &&  regular_at < length())) {
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
+    }
+    return getitem_at_nowrap(regular_at);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_at_nowrap(int64_t at) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_at_nowrap");
+    bool msk = (mask_.getitem_at_nowrap(at) != 0);
+    if (msk == validwhen_) {
+      return content_.get()->getitem_at_nowrap(at);
+    }
+    else {
+      return none;
+    }
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_range(int64_t start, int64_t stop) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_range");
+    int64_t regular_start = start;
+    int64_t regular_stop = stop;
+    awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
+    if (identities_.get() != nullptr  &&  regular_stop > identities_.get()->length()) {
+      util::handle_error(failure("index out of range", kSliceNone, stop), identities_.get()->classname(), nullptr);
+    }
+    return getitem_range_nowrap(regular_start, regular_stop);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_range_nowrap");
+    std::shared_ptr<Identities> identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_range_nowrap(start, stop);
+    }
+    return std::make_shared<ByteMaskedArray>(identities, parameters_, mask_.getitem_range_nowrap(start, stop), content_.get()->getitem_range_nowrap(start, stop), validwhen_);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_field(const std::string& key) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_field");
+    return std::make_shared<ByteMaskedArray>(identities_, util::Parameters(), mask_, content_.get()->getitem_field(key), validwhen_);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_fields");
+    return std::make_shared<ByteMaskedArray>(identities_, util::Parameters(), mask_, content_.get()->getitem_fields(keys), validwhen_);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_next");
+    if (head.get() == nullptr) {
+      return shallow_copy();
+    }
+    else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())  ||  dynamic_cast<SliceJagged64*>(head.get())) {
+      int64_t numnull;
+      std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
+      Index64 nextcarry = pair.first;
+      Index64 outindex = pair.second;
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+
+      std::shared_ptr<Content> out = next.get()->getitem_next(head, tail, advanced);
+      IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
+      return out2.simplify();
+    }
+    else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
+      return Content::getitem_next(*ellipsis, tail, advanced);
+    }
+    else if (SliceNewAxis* newaxis = dynamic_cast<SliceNewAxis*>(head.get())) {
+      return Content::getitem_next(*newaxis, tail, advanced);
+    }
+    else if (SliceField* field = dynamic_cast<SliceField*>(head.get())) {
+      return Content::getitem_next(*field, tail, advanced);
+    }
+    else if (SliceFields* fields = dynamic_cast<SliceFields*>(head.get())) {
+      return Content::getitem_next(*fields, tail, advanced);
+    }
+    else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      return Content::getitem_next(*missing, tail, advanced);
+    }
+    else {
+      throw std::runtime_error("unrecognized slice type");
+    }
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::carry(const Index64& carry) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::carry");
+    Index8 nextmask(carry.length());
+    struct Error err = awkward_bytemaskedarray_getitem_carry_64(
+      nextmask.ptr().get(),
+      mask_.ptr().get(),
+      mask_.offset(),
+      mask_.length(),
+      carry.ptr().get(),
+      carry.length());
+    util::handle_error(err, classname(), identities_.get());
+    std::shared_ptr<Identities> identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->getitem_carry_64(carry);
+    }
+    return std::make_shared<ByteMaskedArray>(identities, parameters_, nextmask, content_.get()->carry(carry), validwhen_);
   }
 
   const std::string ByteMaskedArray::purelist_parameter(const std::string& key) const {
@@ -232,19 +313,19 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: should this be an undefined operation: IndexedArray::getitem_next(at)");
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(at)");
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: should this be an undefined operation: IndexedArray::getitem_next(range)");
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(range)");
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: should this be an undefined operation: IndexedArray::getitem_next(array)");
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(array)");
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: should this be an undefined operation: IndexedArray::getitem_next(jagged)");
+    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(jagged)");
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
@@ -262,6 +343,29 @@ namespace awkward {
   template <typename S>
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
     throw std::runtime_error("FIXME: ByteMaskedArray::getitem_next_jagged_generic");
+  }
+
+  const std::pair<Index64, Index64> ByteMaskedArray::nextcarry_outindex(int64_t& numnull) const {
+    struct Error err1 = awkward_bytemaskedarray_numnull(
+      &numnull,
+      mask_.ptr().get(),
+      mask_.offset(),
+      mask_.length(),
+      validwhen_);
+    util::handle_error(err1, classname(), identities_.get());
+
+    Index64 nextcarry(length() - numnull);
+    Index64 outindex(length());
+    struct Error err2 = awkward_bytemaskedarray_getitem_nextcarry_outindex_64(
+      nextcarry.ptr().get(),
+      outindex.ptr().get(),
+      mask_.ptr().get(),
+      mask_.offset(),
+      mask_.length(),
+      validwhen_);
+    util::handle_error(err2, classname(), identities_.get());
+
+    return std::pair<Index64, Index64>(nextcarry, outindex);
   }
 
 }

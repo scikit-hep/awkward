@@ -1082,3 +1082,46 @@ ERROR awkward_listarrayU32_getitem_jagged_descend_64(int64_t* tooffsets, const i
 ERROR awkward_listarray64_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset) {
   return awkward_listarray_getitem_jagged_descend<int64_t, int64_t>(tooffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset);
 }
+
+template <typename T>
+ERROR awkward_bytemaskedarray_getitem_carry(int8_t* tomask, const int8_t* frommask, int64_t frommaskoffset, int64_t lenmask, const T* fromcarry, int64_t lencarry) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    if (fromcarry[i] >= lenmask) {
+      return failure("index out of range", i, fromcarry[i]);
+    }
+    tomask[i] = frommask[frommaskoffset + fromcarry[i]];
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_getitem_carry_64(int8_t* tomask, const int8_t* frommask, int64_t frommaskoffset, int64_t lenmask, const int64_t* fromcarry, int64_t lencarry) {
+  return awkward_bytemaskedarray_getitem_carry(tomask, frommask, frommaskoffset, lenmask, fromcarry, lencarry);
+}
+
+ERROR awkward_bytemaskedarray_numnull(int64_t* numnull, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  *numnull = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    if ((mask[maskoffset + i] != 0) != validwhen) {
+      *numnull = *numnull + 1;
+    }
+  }
+  return success();
+}
+
+template <typename T>
+ERROR awkward_bytemaskedarray_getitem_nextcarry_outindex(T* tocarry, T* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    if ((mask[maskoffset + i] != 0) == validwhen) {
+      tocarry[k] = i;
+      toindex[i] = (T)k;
+      k++;
+    }
+    else {
+      toindex[i] = -1;
+    }
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_getitem_nextcarry_outindex_64(int64_t* tocarry, int64_t* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  return awkward_bytemaskedarray_getitem_nextcarry_outindex<int64_t>(tocarry, toindex, mask, maskoffset, length, validwhen);
+}
