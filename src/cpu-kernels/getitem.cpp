@@ -147,6 +147,46 @@ ERROR awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_
 }
 
 template <typename T>
+ERROR awkward_slicejagged_tocarrylen_tooffsets(int64_t* tocarrylen, T* tooffsets, const T* fromoffsets, int64_t fromoffsetsoffset, int64_t fromoffsetslen, const T* fromcarry, int64_t fromcarryoffset, int64_t fromcarrylen) {
+  *tocarrylen = 0;
+  tooffsets[0] = 0;
+  for (int64_t i = 0;  i < fromcarrylen;  i++) {
+    int64_t j = (int64_t)fromcarry[fromcarryoffset + i];
+    if (!(0 <= j  &&  j < fromoffsetslen - 1)) {
+      return failure("index out of range", i, kSliceNone);
+    }
+    T count = fromoffsets[fromoffsetsoffset + j + 1] - fromoffsets[fromoffsetsoffset + j];
+    *tocarrylen = *tocarrylen + count;
+    tooffsets[i + 1] = tooffsets[i] + count;
+  }
+  return success();
+}
+ERROR awkward_slicejagged_tocarrylen_tooffsets_64(int64_t* tocarrylen, int64_t* tooffsets, const int64_t* fromoffsets, int64_t fromoffsetsoffset, int64_t fromoffsetslen, const int64_t* fromcarry, int64_t fromcarryoffset, int64_t fromcarrylen) {
+  return awkward_slicejagged_tocarrylen_tooffsets(tocarrylen, tooffsets, fromoffsets, fromoffsetsoffset, fromoffsetslen, fromcarry, fromcarryoffset, fromcarrylen);
+}
+
+template <typename T>
+ERROR awkward_slicejagged_tocarry(T* tocarry, const T* fromoffsets, int64_t fromoffsetsoffset, int64_t fromoffsetslen, const T* fromcarry, int64_t fromcarryoffset, int64_t fromcarrylen) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < fromcarrylen;  i++) {
+    int64_t j = (int64_t)fromcarry[fromcarryoffset + i];
+    if (!(0 <= j  &&  j < fromoffsetslen - 1)) {
+      return failure("index out of range", i, kSliceNone);
+    }
+    int64_t start = (int64_t)fromoffsets[fromoffsetsoffset + j];
+    int64_t stop = (int64_t)fromoffsets[fromoffsetsoffset + j + 1];
+    for (int64_t jj = start;  jj < stop;  jj++) {
+      tocarry[k] = jj;
+      k++;
+    }
+  }
+  return success();
+}
+ERROR awkward_slicejagged_tocarry_64(int64_t* tocarry, const int64_t* fromoffsets, int64_t fromoffsetsoffset, int64_t fromoffsetslen, const int64_t* fromcarry, int64_t fromcarryoffset, int64_t fromcarrylen) {
+  return awkward_slicejagged_tocarry<int64_t>(tocarry, fromoffsets, fromoffsetsoffset, fromoffsetslen, fromcarry, fromcarryoffset, fromcarrylen);
+}
+
+template <typename T>
 ERROR awkward_carry_arange(T* toptr, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     toptr[i] = i;

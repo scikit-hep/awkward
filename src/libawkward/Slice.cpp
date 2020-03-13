@@ -4,6 +4,9 @@
 #include <sstream>
 #include <type_traits>
 
+#include "awkward/cpu-kernels/getitem.h"
+#include "awkward/util.h"
+
 #include "awkward/Slice.h"
 
 namespace awkward {
@@ -27,7 +30,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> SliceAt::carry(const Index64& carry) const {
-    return shallow_copy();
+    throw std::runtime_error("undefined operation: SliceAt::carry");
   }
 
   const std::string SliceAt::tostring() const {
@@ -74,7 +77,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> SliceRange::carry(const Index64& carry) const {
-    return shallow_copy();
+    throw std::runtime_error("undefined operation: SliceRange::carry");
   }
 
   const std::string SliceRange::tostring() const {
@@ -105,7 +108,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> SliceEllipsis::carry(const Index64& carry) const {
-    return shallow_copy();
+    throw std::runtime_error("undefined operation: SliceEllipsis::carry");
   }
 
   const std::string SliceEllipsis::tostring() const {
@@ -125,7 +128,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> SliceNewAxis::carry(const Index64& carry) const {
-    return shallow_copy();
+    throw std::runtime_error("undefined operation: SliceNewAxis::carry");
   }
 
   const std::string SliceNewAxis::tostring() const {
@@ -189,7 +192,19 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<SliceItem> SliceArrayOf<T>::carry(const Index64& carry) const {
-    throw std::runtime_error("FIXME: SliceArray::carry");
+    if (shape_.size() != 1) {
+      throw std::runtime_error("undefined operation: SliceArray::carry for ndim != 1");
+    }
+    Index64 toindex(carry.length());
+    struct Error err = awkward_index64_carry_64(
+      toindex.ptr().get(),
+      index_.ptr().get(),
+      carry.ptr().get(),
+      index_.offset(),
+      index_.length(),
+      carry.length());
+    util::handle_error(err, "SliceArray", nullptr);
+    return std::make_shared<SliceArrayOf<T>>(toindex, std::vector<int64_t>({ carry.length() }), std::vector<int64_t>({ 1 }), frombool_);
   }
 
   template <typename T>
@@ -302,7 +317,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> SliceField::carry(const Index64& carry) const {
-    return shallow_copy();
+    throw std::runtime_error("undefined operation: SliceField::carry");
   }
 
   const std::string SliceField::tostring() const {
@@ -327,7 +342,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> SliceFields::carry(const Index64& carry) const {
-    return shallow_copy();
+    throw std::runtime_error("undefined operation: SliceFields::carry");
   }
 
   const std::string SliceFields::tostring() const {
@@ -387,7 +402,25 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<SliceItem> SliceMissingOf<T>::carry(const Index64& carry) const {
-    throw std::runtime_error("FIXME: SliceMissing::carry");
+    Index64 toindex(carry.length());
+    struct Error err1 = awkward_index64_carry_64(
+      toindex.ptr().get(),
+      index_.ptr().get(),
+      carry.ptr().get(),
+      index_.offset(),
+      index_.length(),
+      carry.length());
+    util::handle_error(err1, "SliceMissing", nullptr);
+    Index8 tomask(carry.length());
+    struct Error err2 = awkward_index8_carry_64(
+      tomask.ptr().get(),
+      originalmask_.ptr().get(),
+      carry.ptr().get(),
+      originalmask_.offset(),
+      originalmask_.length(),
+      carry.length());
+    util::handle_error(err2, "SliceMissing", nullptr);
+    return std::make_shared<SliceMissingOf<T>>(toindex, tomask, content_);
   }
 
   template <typename T>
@@ -462,7 +495,29 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<SliceItem> SliceJaggedOf<T>::carry(const Index64& carry) const {
-    throw std::runtime_error("FIXME: SliceJagged::carry");
+    int64_t nextcarrylen;
+    Index64 nextoffsets(carry.length() + 1);
+    struct Error err1 = awkward_slicejagged_tocarrylen_tooffsets_64(
+      &nextcarrylen,
+      nextoffsets.ptr().get(),
+      offsets_.ptr().get(),
+      offsets_.offset(),
+      offsets_.length(),
+      carry.ptr().get(),
+      carry.offset(),
+      carry.length());
+    util::handle_error(err1, "SliceJagged", nullptr);
+    Index64 nextcarry(nextcarrylen);
+    struct Error err2 = awkward_slicejagged_tocarry_64(
+      nextcarry.ptr().get(),
+      offsets_.ptr().get(),
+      offsets_.offset(),
+      offsets_.length(),
+      carry.ptr().get(),
+      carry.offset(),
+      carry.length());
+    util::handle_error(err2, "SliceJagged", nullptr);
+    return std::make_shared<SliceJaggedOf<T>>(nextoffsets, content_.get()->carry(nextcarry));
   }
 
   template <typename T>
