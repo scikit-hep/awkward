@@ -52,6 +52,9 @@ py::object box(const std::shared_ptr<ak::Content>& content) {
   else if (ak::IndexedOptionArray64* raw = dynamic_cast<ak::IndexedOptionArray64*>(content.get())) {
     return py::cast(*raw);
   }
+  else if (ak::ByteMaskedArray* raw = dynamic_cast<ak::ByteMaskedArray*>(content.get())) {
+    return py::cast(*raw);
+  }
   else if (ak::ListArray32* raw = dynamic_cast<ak::ListArray32*>(content.get())) {
     return py::cast(*raw);
   }
@@ -137,6 +140,10 @@ std::shared_ptr<ak::Content> unbox_content(const py::handle& obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::IndexedOptionArray64*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::ByteMaskedArray*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   try {
@@ -1003,6 +1010,58 @@ template py::class_<ak::IndexedArrayU32, std::shared_ptr<ak::IndexedArrayU32>, a
 template py::class_<ak::IndexedArray64, std::shared_ptr<ak::IndexedArray64>, ak::Content> make_IndexedArrayOf(const py::handle& m, const std::string& name);
 template py::class_<ak::IndexedOptionArray32, std::shared_ptr<ak::IndexedOptionArray32>, ak::Content> make_IndexedArrayOf(const py::handle& m, const std::string& name);
 template py::class_<ak::IndexedOptionArray64, std::shared_ptr<ak::IndexedOptionArray64>, ak::Content> make_IndexedArrayOf(const py::handle& m, const std::string& name);
+
+/////////////////////////////////////////////////////////////// ByteMaskedArray
+
+py::class_<ak::ByteMaskedArray, std::shared_ptr<ak::ByteMaskedArray>, ak::Content> make_ByteMaskedArray(const py::handle& m, const std::string& name) {
+  return content_methods(py::class_<ak::ByteMaskedArray, std::shared_ptr<ak::ByteMaskedArray>, ak::Content>(m, name.c_str())
+      .def(py::init([](const ak::Index8& mask, const py::object& content, bool validwhen, const py::object& identities, const py::object& parameters) -> ak::ByteMaskedArray {
+        return ak::ByteMaskedArray(unbox_identities_none(identities), dict2parameters(parameters), mask, std::shared_ptr<ak::Content>(unbox_content(content)), validwhen);
+      }), py::arg("mask"), py::arg("content"), py::arg("validwhen"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
+
+      .def_property_readonly("mask", &ak::ByteMaskedArray::mask)
+      .def_property_readonly("content", &ak::ByteMaskedArray::content)
+      .def_property_readonly("validwhen", &ak::ByteMaskedArray::validwhen)
+      .def("project", [](const ak::ByteMaskedArray& self, const py::object& mask) {
+        if (mask.is(py::none())) {
+          return box(self.project());
+        }
+        else {
+          return box(self.project(mask.cast<ak::Index8>()));
+        }
+      }, py::arg("mask") = py::none())
+      .def("bytemask", &ak::ByteMaskedArray::bytemask)
+      .def("simplify", [](const ak::ByteMaskedArray& self) {
+        return box(self.simplify());
+      })
+  );
+}
+
+/////////////////////////////////////////////////////////////// BitMaskedArray
+
+py::class_<ak::BitMaskedArray, std::shared_ptr<ak::BitMaskedArray>, ak::Content> make_BitMaskedArray(const py::handle& m, const std::string& name) {
+  return content_methods(py::class_<ak::BitMaskedArray, std::shared_ptr<ak::BitMaskedArray>, ak::Content>(m, name.c_str())
+      .def(py::init([](const ak::IndexU8& mask, const py::object& content, bool validwhen, int64_t length, bool lsb_order, const py::object& identities, const py::object& parameters) -> ak::BitMaskedArray {
+        return ak::BitMaskedArray(unbox_identities_none(identities), dict2parameters(parameters), mask, std::shared_ptr<ak::Content>(unbox_content(content)), validwhen, length, lsb_order);
+      }), py::arg("mask"), py::arg("content"), py::arg("validwhen"), py::arg("length"), py::arg("lsb_order"), py::arg("identities") = py::none(), py::arg("parameters") = py::none())
+
+      .def_property_readonly("mask", &ak::BitMaskedArray::mask)
+      .def_property_readonly("content", &ak::BitMaskedArray::content)
+      .def_property_readonly("validwhen", &ak::BitMaskedArray::validwhen)
+      .def("project", [](const ak::BitMaskedArray& self, const py::object& mask) {
+        if (mask.is(py::none())) {
+          return box(self.project());
+        }
+        else {
+          return box(self.project(mask.cast<ak::Index8>()));
+        }
+      }, py::arg("mask") = py::none())
+      .def("bytemask", &ak::BitMaskedArray::bytemask)
+      .def("simplify", [](const ak::BitMaskedArray& self) {
+        return box(self.simplify());
+      })
+  );
+}
 
 /////////////////////////////////////////////////////////////// ListArray
 

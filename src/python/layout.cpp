@@ -39,8 +39,11 @@ PYBIND11_MODULE(layout, m) {
   make_IndexedArrayOf<int32_t, false>(m,  "IndexedArray32");
   make_IndexedArrayOf<uint32_t, false>(m, "IndexedArrayU32");
   make_IndexedArrayOf<int64_t, false>(m,  "IndexedArray64");
-  make_IndexedArrayOf<int32_t, true>(m,  "IndexedOptionArray32");
-  make_IndexedArrayOf<int64_t, true>(m,  "IndexedOptionArray64");
+  make_IndexedArrayOf<int32_t, true>(m,   "IndexedOptionArray32");
+  make_IndexedArrayOf<int64_t, true>(m,   "IndexedOptionArray64");
+
+  make_ByteMaskedArray(m,  "ByteMaskedArray");
+  make_BitMaskedArray(m,   "BitMaskedArray");
 
   make_ListArrayOf<int32_t>(m,  "ListArray32");
   make_ListArrayOf<uint32_t>(m, "ListArrayU32");
@@ -52,7 +55,7 @@ PYBIND11_MODULE(layout, m) {
 
   make_NumpyArray(m, "NumpyArray");
 
-  make_Record(m, "Record");
+  make_Record(m,      "Record");
   make_RecordArray(m, "RecordArray");
 
   make_RegularArray(m, "RegularArray");
