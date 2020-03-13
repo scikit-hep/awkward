@@ -10,6 +10,7 @@
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/RecordArray.h"
+#include "awkward/array/NumpyArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -181,6 +182,61 @@ namespace awkward {
     util::handle_error(err, classname(), identities_.get());
     std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
     return next.get()->simplify();
+  }
+
+  const std::shared_ptr<Content> Content::localindex_axis0() const {
+    Index64 localindex(length());
+    struct Error err = awkward_localindex_64(
+      localindex.ptr().get(),
+      length());
+    util::handle_error(err, classname(), identities_.get());
+    return std::make_shared<NumpyArray>(localindex);
+  }
+
+  const std::shared_ptr<Content> Content::choose_axis0(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters) const {
+    int64_t size = length();
+    if (diagonal) {
+      size += (n - 1);
+    }
+    int64_t thisn = n;
+    int64_t chooselen;
+    if (thisn > size) {
+      chooselen = 0;
+    }
+    else if (thisn == size) {
+      chooselen = 1;
+    }
+    else {
+      if (thisn * 2 > size) {
+        thisn = size - thisn;
+      }
+      chooselen = size;
+      for (int64_t j = 2;  j <= thisn;  j++) {
+        chooselen *= (size - j + 1);
+        chooselen /= j;
+      }
+    }
+
+    std::vector<std::shared_ptr<int64_t>> tocarry;
+    std::vector<int64_t*> tocarryraw;
+    for (int64_t j = 0;  j < n;  j++) {
+      std::shared_ptr<int64_t> ptr(new int64_t[(size_t)chooselen], util::array_deleter<int64_t>());
+      tocarry.push_back(ptr);
+      tocarryraw.push_back(ptr.get());
+    }
+    struct Error err = awkward_regulararray_choose_64(
+      tocarryraw.data(),
+      n,
+      diagonal,
+      length(),
+      1);
+    util::handle_error(err, classname(), identities_.get());
+
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto ptr : tocarry) {
+      contents.push_back(std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), Index64(ptr, 0, chooselen), shallow_copy()));
+    }
+    return std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
   }
 
   const std::shared_ptr<Content> Content::getitem(const Slice& where) const {

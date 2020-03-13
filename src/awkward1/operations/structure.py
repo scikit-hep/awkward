@@ -62,7 +62,7 @@ def notna(array, highlevel=True):
     return ~isna(array, highlevel=highlevel)
 
 def num(array, axis=1, highlevel=True):
-    layout = awkward1.operations.convert.tolayout(array, allowrecord=False)
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     out = layout.num(axis=axis)
     if highlevel:
         return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
@@ -409,5 +409,28 @@ def cross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
         return awkward1._util.wrap(result, awkward1._util.behaviorof(*arrays))
     else:
         return result
+
+def argchoose(array, n, diagonal=False, axis=1, keys=None, parameters=None, highlevel=True):
+    if parameters is None:
+        parameters = {}
+    if axis < 0:
+        raise ValueError("argchoose's 'axis' must be non-negative")
+    else:
+        layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False).localindex(axis)
+        out = layout.choose(n, diagonal=diagonal, keys=keys, parameters=parameters, axis=axis)
+        if highlevel:
+            return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+        else:
+            return out
+
+def choose(array, n, diagonal=False, axis=1, keys=None, parameters=None, highlevel=True):
+    if parameters is None:
+        parameters = {}
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
+    out = layout.choose(n, diagonal=diagonal, keys=keys, parameters=parameters, axis=axis)
+    if highlevel:
+        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+    else:
+        return out
 
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numpy", "awkward1")]

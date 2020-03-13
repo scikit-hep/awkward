@@ -16,6 +16,7 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
+#include "awkward/array/RecordArray.h"
 
 #include "awkward/array/RegularArray.h"
 
@@ -522,12 +523,7 @@ namespace awkward {
   const std::shared_ptr<Content> RegularArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
-      Index64 localindex(length());
-      struct Error err = awkward_localindex_64(
-        localindex.ptr().get(),
-        length());
-      util::handle_error(err, classname(), identities_.get());
-      return std::make_shared<NumpyArray>(localindex);
+      return localindex_axis0();
     }
     else if (axis == depth + 1) {
       Index64 localindex(length()*size_);
@@ -540,6 +536,72 @@ namespace awkward {
     }
     else {
       return std::make_shared<RegularArray>(identities_, util::Parameters(), content_.get()->localindex(axis, depth + 1), size_);
+    }
+  }
+
+  const std::shared_ptr<Content> RegularArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return choose_axis0(n, diagonal, recordlookup, parameters);
+    }
+
+    else if (toaxis == depth + 1) {
+      int64_t size = size_;
+      if (diagonal) {
+        size += (n - 1);
+      }
+      int64_t thisn = n;
+      int64_t chooselen;
+      if (thisn > size) {
+        chooselen = 0;
+      }
+      else if (thisn == size) {
+        chooselen = 1;
+      }
+      else {
+        if (thisn * 2 > size) {
+          thisn = size - thisn;
+        }
+        chooselen = size;
+        for (int64_t j = 2;  j <= thisn;  j++) {
+          chooselen *= (size - j + 1);
+          chooselen /= j;
+        }
+      }
+
+      int64_t totallen = chooselen * length();
+
+      std::vector<std::shared_ptr<int64_t>> tocarry;
+      std::vector<int64_t*> tocarryraw;
+      for (int64_t j = 0;  j < n;  j++) {
+        std::shared_ptr<int64_t> ptr(new int64_t[(size_t)totallen], util::array_deleter<int64_t>());
+        tocarry.push_back(ptr);
+        tocarryraw.push_back(ptr.get());
+      }
+      struct Error err = awkward_regulararray_choose_64(
+        tocarryraw.data(),
+        n,
+        diagonal,
+        size_,
+        length());
+      util::handle_error(err, classname(), identities_.get());
+
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto ptr : tocarry) {
+        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen)));
+      }
+      std::shared_ptr<Content> recordarray = std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
+
+      return std::make_shared<RegularArray>(identities_, util::Parameters(), recordarray, chooselen);
+    }
+
+    else {
+      std::shared_ptr<Content> next = content_.get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
+      return std::make_shared<RegularArray>(identities_, util::Parameters(), next, size_);
     }
   }
 

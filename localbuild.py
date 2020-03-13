@@ -89,7 +89,7 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
 check_call(["cmake", "--build", "localbuild", "-j", args.j])
 
 if args.ctest:
-    check_call(["cmake", "--build", "localbuild", "--target", "test", "--", "CTEST_OUTPUT_ON_FAILURE=1"])
+    check_call(["cmake", "--build", "localbuild", "--target", "test", "--", "CTEST_OUTPUT_ON_FAILURE=1", "--no-print-directory"])
 
 # Build Python (copy sources to executable tree).
 if args.buildpython:

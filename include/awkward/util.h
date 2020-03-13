@@ -95,7 +95,7 @@ namespace awkward {
     template <typename T>
     ERROR awkward_indexedarray_flatten_none2empty_64(int64_t* outoffsets, const T* outindex, int64_t outindexoffset, int64_t outindexlength, const int64_t* offsets, int64_t offsetsoffset, int64_t offsetslength);
     template <typename T, typename I>
-    Error awkward_unionarray_flatten_length_64(int64_t* total_length, const T* fromtags, int64_t fromtagsoffset, const I* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets);
+    ERROR awkward_unionarray_flatten_length_64(int64_t* total_length, const T* fromtags, int64_t fromtagsoffset, const I* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets);
     template <typename T, typename I>
     ERROR awkward_unionarray_flatten_combine_64(int8_t* totags, int64_t* toindex, int64_t* tooffsets, const T* fromtags, int64_t fromtagsoffset, const I* fromindex, int64_t fromindexoffset, int64_t length, int64_t** offsetsraws, int64_t* offsetsoffsets);
     template <typename T>
@@ -140,19 +140,14 @@ namespace awkward {
     ERROR awkward_unionarray_simplify8_64_to8_64(int8_t* totags, int64_t* toindex, const T* outertags, int64_t outertagsoffset, const I* outerindex, int64_t outerindexoffset, const int8_t* innertags, int64_t innertagsoffset, const int64_t* innerindex, int64_t innerindexoffset, int64_t towhich, int64_t innerwhich, int64_t outerwhich, int64_t length, int64_t base);
     template <typename T, typename I>
     ERROR awkward_unionarray_simplify_one_to8_64(int8_t* totags, int64_t* toindex, const T* fromtags, int64_t fromtagsoffset, const I* fromindex, int64_t fromindexoffset, int64_t towhich, int64_t fromwhich, int64_t length, int64_t base);
-
     template <typename T>
-    Error awkward_listarray_getitem_jagged_expand_64(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t* tocarry, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset, int64_t jaggedsize, int64_t length);
-
+    ERROR awkward_listarray_getitem_jagged_expand_64(int64_t* multistarts, int64_t* multistops, const int64_t* singleoffsets, int64_t* tocarry, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset, int64_t jaggedsize, int64_t length);
     template <typename T>
     ERROR awkward_listarray_getitem_jagged_apply_64(int64_t* tooffsets, int64_t* tocarry, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* sliceindex, int64_t sliceindexoffset, int64_t sliceinnerlen, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset, int64_t contentlen);
-
     template <typename T>
     ERROR awkward_listarray_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset);
-
     template <typename T>
     ERROR awkward_indexedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const T* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length);
-
     template <typename T>
     ERROR awkward_ListArray_min_range(int64_t* tomin, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>
@@ -165,18 +160,18 @@ namespace awkward {
     ERROR awkward_ListOffsetArray_rpad_axis1_64(int64_t* toindex, const T* fromoffsets, int64_t offsetsoffset, int64_t fromlength, int64_t target);
     template <typename T>
     ERROR awkward_ListOffsetArray_rpad_and_clip_axis1_64(int64_t* toindex, const T* fromoffsets, int64_t offsetsoffset, int64_t length, int64_t target);
-
     template <typename T>
     ERROR awkward_listarray_validity(const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length, int64_t lencontent);
-
     template <typename T>
     ERROR awkward_indexedarray_validity(const T* index, int64_t indexoffset, int64_t length, int64_t lencontent, bool isoption);
-
     template <typename T, typename I>
     ERROR awkward_unionarray_validity(const T* tags, int64_t tagsoffset, const I* index, int64_t indexoffset, int64_t length, int64_t numcontents, const int64_t* lencontents);
-
     template <typename T>
     ERROR awkward_listarray_localindex_64(int64_t* toindex, const T* offsets, int64_t offsetsoffset, int64_t length);
+    template <typename T>
+    ERROR awkward_listarray_choose_length_64(int64_t* totallen, int64_t* tooffsets, int64_t n, bool diagonal, const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length);
+    template <typename T>
+    ERROR awkward_listarray_choose_64(int64_t** tocarry, int64_t n, bool diagonal, const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length);
 
   }
 }

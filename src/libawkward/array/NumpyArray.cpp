@@ -1473,15 +1473,32 @@ namespace awkward {
   const std::shared_ptr<Content> NumpyArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
-      Index64 localindex(length());
-      struct Error err = awkward_localindex_64(
-        localindex.ptr().get(),
-        length());
-      util::handle_error(err, classname(), identities_.get());
-      return std::make_shared<NumpyArray>(localindex);
+      return localindex_axis0();
+    }
+    else if (shape_.size() <= 1) {
+      throw std::invalid_argument("'axis' out of range for localindex");
     }
     else {
-      throw std::invalid_argument("'axis' out of range for localindex");
+      return toRegularArray().get()->localindex(axis, depth);
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return choose_axis0(n, diagonal, recordlookup, parameters);
+    }
+
+    else if (shape_.size() <= 1) {
+      throw std::invalid_argument("'axis' out of range for choose");
+    }
+
+    else {
+      return toRegularArray().get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
     }
   }
 

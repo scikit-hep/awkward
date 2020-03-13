@@ -234,6 +234,13 @@ namespace awkward {
     return std::make_shared<NumpyArray>(Index64(0));
   }
 
+  const std::shared_ptr<Content> EmptyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+    return std::make_shared<EmptyArray>(identities_, util::Parameters());
+  }
+
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
