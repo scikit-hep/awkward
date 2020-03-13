@@ -235,7 +235,10 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> EmptyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: EmptyArray::choose");
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+    return std::make_shared<EmptyArray>(identities_, util::Parameters());
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

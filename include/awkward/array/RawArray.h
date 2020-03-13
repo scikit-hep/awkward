@@ -550,7 +550,16 @@ namespace awkward {
     }
 
     const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override {
-      throw std::runtime_error("FIXME: RawArray::choose");
+      if (n < 1) {
+        throw std::invalid_argument("in choose, 'n' must be at least 1");
+      }
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis == depth) {
+        return choose_axis0(n, diagonal, recordlookup, parameters);
+      }
+      else {
+        throw std::invalid_argument("'axis' out of range for choose");
+      }
     }
 
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
