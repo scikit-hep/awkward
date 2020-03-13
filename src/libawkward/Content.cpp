@@ -256,6 +256,8 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+    std::cout << "Content::getitem_next(" << (head.get() == nullptr ? "nullptr": head.get()->tostring()) << ") on " << classname() << std::endl;
+
     if (head.get() == nullptr) {
       return shallow_copy();
     }
@@ -281,9 +283,13 @@ namespace awkward {
       return getitem_next(*fields, tail, advanced);
     }
     else if (SliceMissing64* missing = dynamic_cast<SliceMissing64*>(head.get())) {
+      std::cout << "ONE" << std::endl;
+
       return getitem_next(*missing, tail, advanced);
     }
     else if (SliceJagged64* jagged = dynamic_cast<SliceJagged64*>(head.get())) {
+      std::cout << "TWO" << std::endl;
+
       return getitem_next(*jagged, tail, advanced);
     }
     else {
@@ -368,6 +374,8 @@ namespace awkward {
     if (advanced.length() != 0) {
       throw std::invalid_argument("cannot mix missing values in slice with NumPy-style advanced indexing");
     }
+
+    std::cout << "HERE" << std::endl;
 
     std::shared_ptr<Content> next = getitem_next(missing.content(), tail, advanced);
 

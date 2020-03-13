@@ -241,13 +241,13 @@ def test_indexedarray():
     assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [], [1, 1]], checkvalid=True)]) == [[6.6, 9.9], [5.5], None, [], [1.1, 1.1]]
     assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [None], [1, None, 1]], checkvalid=True)]) == [[6.6, 9.9], [5.5], None, [None], [1.1, None, 1.1]]
 
-@pytest.mark.skip("there was no way to do jagged indexing on an array that contained None")
 def test_indexedarray2():
     array = awkward1.Array([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True).layout
     index = awkward1.layout.Index64(numpy.array([3, 2, -1, 0], dtype=numpy.int64))
     indexedarray = awkward1.layout.IndexedOptionArray64(index, array)
     assert awkward1.tolist(indexedarray) == [[6.6, 7.7, 8.8, 9.9], [5.5], None, [0.0, 1.1, 2.2]]
     assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [1, 1]])]) == [[6.6, 9.9], [5.5], None, [1.1, 1.1]]
+    raise Exception
 
 def test_sequential():
     array = awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5).tolist(), checkvalid=True)

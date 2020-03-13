@@ -26,6 +26,10 @@ namespace awkward {
     return std::make_shared<SliceAt>(at_);
   }
 
+  const std::shared_ptr<SliceItem> SliceAt::carry(const Index64& carry) const {
+    return shallow_copy();
+  }
+
   const std::string SliceAt::tostring() const {
     return std::to_string(at_);
   }
@@ -69,6 +73,10 @@ namespace awkward {
     return std::make_shared<SliceRange>(start_, stop_, step_);
   }
 
+  const std::shared_ptr<SliceItem> SliceRange::carry(const Index64& carry) const {
+    return shallow_copy();
+  }
+
   const std::string SliceRange::tostring() const {
     std::stringstream out;
     if (hasstart()) {
@@ -96,6 +104,10 @@ namespace awkward {
     return std::make_shared<SliceEllipsis>();
   }
 
+  const std::shared_ptr<SliceItem> SliceEllipsis::carry(const Index64& carry) const {
+    return shallow_copy();
+  }
+
   const std::string SliceEllipsis::tostring() const {
     return std::string("...");
   }
@@ -110,6 +122,10 @@ namespace awkward {
 
   const std::shared_ptr<SliceItem> SliceNewAxis::shallow_copy() const {
     return std::make_shared<SliceNewAxis>();
+  }
+
+  const std::shared_ptr<SliceItem> SliceNewAxis::carry(const Index64& carry) const {
+    return shallow_copy();
   }
 
   const std::string SliceNewAxis::tostring() const {
@@ -169,6 +185,11 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<SliceItem> SliceArrayOf<T>::shallow_copy() const {
     return std::make_shared<SliceArrayOf<T>>(index_, shape_, strides_, frombool_);
+  }
+
+  template <typename T>
+  const std::shared_ptr<SliceItem> SliceArrayOf<T>::carry(const Index64& carry) const {
+    throw std::runtime_error("FIXME: SliceArray::carry");
   }
 
   template <typename T>
@@ -280,6 +301,10 @@ namespace awkward {
     return std::make_shared<SliceField>(key_);
   }
 
+  const std::shared_ptr<SliceItem> SliceField::carry(const Index64& carry) const {
+    return shallow_copy();
+  }
+
   const std::string SliceField::tostring() const {
     return util::quote(key_, true);
   }
@@ -299,6 +324,10 @@ namespace awkward {
 
   const std::shared_ptr<SliceItem> SliceFields::shallow_copy() const {
     return std::make_shared<SliceFields>(keys_);
+  }
+
+  const std::shared_ptr<SliceItem> SliceFields::carry(const Index64& carry) const {
+    return shallow_copy();
   }
 
   const std::string SliceFields::tostring() const {
@@ -347,8 +376,18 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<SliceItem> SliceMissingOf<T>::project() const {
+
+  }
+
+  template <typename T>
   const std::shared_ptr<SliceItem> SliceMissingOf<T>::shallow_copy() const {
     return std::make_shared<SliceMissingOf<T>>(index_, originalmask_, content_);
+  }
+
+  template <typename T>
+  const std::shared_ptr<SliceItem> SliceMissingOf<T>::carry(const Index64& carry) const {
+    throw std::runtime_error("FIXME: SliceMissing::carry");
   }
 
   template <typename T>
@@ -419,6 +458,11 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<SliceItem> SliceJaggedOf<T>::shallow_copy() const {
     return std::make_shared<SliceJaggedOf<T>>(offsets_, content_);
+  }
+
+  template <typename T>
+  const std::shared_ptr<SliceItem> SliceJaggedOf<T>::carry(const Index64& carry) const {
+    throw std::runtime_error("FIXME: SliceJagged::carry");
   }
 
   template <typename T>
