@@ -29,10 +29,6 @@ namespace awkward {
     return std::make_shared<SliceAt>(at_);
   }
 
-  const std::shared_ptr<SliceItem> SliceAt::carry(const Index64& carry) const {
-    throw std::runtime_error("undefined operation: SliceAt::carry");
-  }
-
   const std::string SliceAt::tostring() const {
     return std::to_string(at_);
   }
@@ -76,10 +72,6 @@ namespace awkward {
     return std::make_shared<SliceRange>(start_, stop_, step_);
   }
 
-  const std::shared_ptr<SliceItem> SliceRange::carry(const Index64& carry) const {
-    throw std::runtime_error("undefined operation: SliceRange::carry");
-  }
-
   const std::string SliceRange::tostring() const {
     std::stringstream out;
     if (hasstart()) {
@@ -107,10 +99,6 @@ namespace awkward {
     return std::make_shared<SliceEllipsis>();
   }
 
-  const std::shared_ptr<SliceItem> SliceEllipsis::carry(const Index64& carry) const {
-    throw std::runtime_error("undefined operation: SliceEllipsis::carry");
-  }
-
   const std::string SliceEllipsis::tostring() const {
     return std::string("...");
   }
@@ -125,10 +113,6 @@ namespace awkward {
 
   const std::shared_ptr<SliceItem> SliceNewAxis::shallow_copy() const {
     return std::make_shared<SliceNewAxis>();
-  }
-
-  const std::shared_ptr<SliceItem> SliceNewAxis::carry(const Index64& carry) const {
-    throw std::runtime_error("undefined operation: SliceNewAxis::carry");
   }
 
   const std::string SliceNewAxis::tostring() const {
@@ -188,23 +172,6 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<SliceItem> SliceArrayOf<T>::shallow_copy() const {
     return std::make_shared<SliceArrayOf<T>>(index_, shape_, strides_, frombool_);
-  }
-
-  template <typename T>
-  const std::shared_ptr<SliceItem> SliceArrayOf<T>::carry(const Index64& carry) const {
-    if (shape_.size() != 1) {
-      throw std::runtime_error("undefined operation: SliceArray::carry for ndim != 1");
-    }
-    Index64 toindex(carry.length());
-    struct Error err = awkward_index64_carry_64(
-      toindex.ptr().get(),
-      index_.ptr().get(),
-      carry.ptr().get(),
-      index_.offset(),
-      index_.length(),
-      carry.length());
-    util::handle_error(err, "SliceArray", nullptr);
-    return std::make_shared<SliceArrayOf<T>>(toindex, std::vector<int64_t>({ carry.length() }), std::vector<int64_t>({ 1 }), frombool_);
   }
 
   template <typename T>
@@ -316,10 +283,6 @@ namespace awkward {
     return std::make_shared<SliceField>(key_);
   }
 
-  const std::shared_ptr<SliceItem> SliceField::carry(const Index64& carry) const {
-    throw std::runtime_error("undefined operation: SliceField::carry");
-  }
-
   const std::string SliceField::tostring() const {
     return util::quote(key_, true);
   }
@@ -339,10 +302,6 @@ namespace awkward {
 
   const std::shared_ptr<SliceItem> SliceFields::shallow_copy() const {
     return std::make_shared<SliceFields>(keys_);
-  }
-
-  const std::shared_ptr<SliceItem> SliceFields::carry(const Index64& carry) const {
-    throw std::runtime_error("undefined operation: SliceFields::carry");
   }
 
   const std::string SliceFields::tostring() const {
@@ -391,55 +350,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<SliceItem> SliceMissingOf<T>::project() const {
-    return content_.get()->carry(projection());
-  }
-
-  template <typename T>
-  const IndexOf<T> SliceMissingOf<T>::projection() const {
-    int64_t numnull;
-    struct Error err1 = awkward_slicemasked_project_numnull_64(
-      &numnull,
-      index_.ptr().get(),
-      index_.offset(),
-      index_.length());
-    util::handle_error(err1, "SliceMissing", nullptr);
-    Index64 nextcarry(length() - numnull);
-    struct Error err2 = awkward_slicemasked_project_nextcarry_64(
-      nextcarry.ptr().get(),
-      index_.ptr().get(),
-      index_.offset(),
-      index_.length());
-    util::handle_error(err2, "SliceMissing", nullptr);
-    return nextcarry;
-  }
-
-  template <typename T>
   const std::shared_ptr<SliceItem> SliceMissingOf<T>::shallow_copy() const {
     return std::make_shared<SliceMissingOf<T>>(index_, originalmask_, content_);
-  }
-
-  template <typename T>
-  const std::shared_ptr<SliceItem> SliceMissingOf<T>::carry(const Index64& carry) const {
-    Index64 toindex(carry.length());
-    struct Error err1 = awkward_index64_carry_64(
-      toindex.ptr().get(),
-      index_.ptr().get(),
-      carry.ptr().get(),
-      index_.offset(),
-      index_.length(),
-      carry.length());
-    util::handle_error(err1, "SliceMissing", nullptr);
-    Index8 tomask(carry.length());
-    struct Error err2 = awkward_index8_carry_64(
-      tomask.ptr().get(),
-      originalmask_.ptr().get(),
-      carry.ptr().get(),
-      originalmask_.offset(),
-      originalmask_.length(),
-      carry.length());
-    util::handle_error(err2, "SliceMissing", nullptr);
-    return std::make_shared<SliceMissingOf<T>>(toindex, tomask, content_);
   }
 
   template <typename T>
@@ -510,33 +422,6 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<SliceItem> SliceJaggedOf<T>::shallow_copy() const {
     return std::make_shared<SliceJaggedOf<T>>(offsets_, content_);
-  }
-
-  template <typename T>
-  const std::shared_ptr<SliceItem> SliceJaggedOf<T>::carry(const Index64& carry) const {
-    int64_t nextcarrylen;
-    Index64 nextoffsets(carry.length() + 1);
-    struct Error err1 = awkward_slicejagged_tocarrylen_tooffsets_64(
-      &nextcarrylen,
-      nextoffsets.ptr().get(),
-      offsets_.ptr().get(),
-      offsets_.offset(),
-      offsets_.length(),
-      carry.ptr().get(),
-      carry.offset(),
-      carry.length());
-    util::handle_error(err1, "SliceJagged", nullptr);
-    Index64 nextcarry(nextcarrylen);
-    struct Error err2 = awkward_slicejagged_tocarry_64(
-      nextcarry.ptr().get(),
-      offsets_.ptr().get(),
-      offsets_.offset(),
-      offsets_.length(),
-      carry.ptr().get(),
-      carry.offset(),
-      carry.length());
-    util::handle_error(err2, "SliceJagged", nullptr);
-    return std::make_shared<SliceJaggedOf<T>>(nextoffsets, content_.get()->carry(nextcarry));
   }
 
   template <typename T>

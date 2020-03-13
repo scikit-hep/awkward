@@ -738,10 +738,6 @@ namespace awkward {
       throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
     }
 
-    std::cout << "RegularArray::getitem_next(jagged)" << std::endl;
-    std::cout << tostring() << std::endl;
-    std::cout << "slice: " << jagged.tostring() << std::endl;
-
     if (jagged.length() != size_) {
       throw std::invalid_argument(std::string("cannot fit jagged slice with length ") + std::to_string(jagged.length()) + std::string(" into ") + classname() + std::string(" of size ") + std::to_string(size_));
     }
