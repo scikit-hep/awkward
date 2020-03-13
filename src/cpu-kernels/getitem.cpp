@@ -187,6 +187,36 @@ ERROR awkward_slicejagged_tocarry_64(int64_t* tocarry, const int64_t* fromoffset
 }
 
 template <typename T>
+ERROR awkward_slicemasked_project_numnull(int64_t* numnull, const T* index, int64_t indexoffset, int64_t length) {
+  *numnull = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    if (index[indexoffset + i] < 0) {
+      *numnull = *numnull + 1;
+    }
+  }
+  return success();
+}
+ERROR awkward_slicemasked_project_numnull_64(int64_t* numnull, const int64_t* index, int64_t indexoffset, int64_t length) {
+  return awkward_slicemasked_project_numnull<int64_t>(numnull, index, indexoffset, length);
+}
+
+template <typename T>
+ERROR awkward_slicemasked_project_nextcarry(T* tocarry, const T* index, int64_t indexoffset, int64_t length) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    T idx = index[indexoffset + i];
+    if (idx >= 0) {
+      tocarry[k] = i;
+      k++;
+    }
+  }
+  return success();
+}
+ERROR awkward_slicemasked_project_nextcarry_64(int64_t* tocarry, const int64_t* index, int64_t indexoffset, int64_t length) {
+  return awkward_slicemasked_project_nextcarry<int64_t>(tocarry, index, indexoffset, length);
+}
+
+template <typename T>
 ERROR awkward_carry_arange(T* toptr, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     toptr[i] = i;

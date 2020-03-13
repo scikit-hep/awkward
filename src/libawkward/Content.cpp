@@ -375,33 +375,53 @@ namespace awkward {
       throw std::invalid_argument("cannot mix missing values in slice with NumPy-style advanced indexing");
     }
 
-    std::cout << "HERE" << std::endl;
+    std::cout << std::endl;
+    std::cout << "HERE  " << missing.tostring() << std::endl;
+    std::cout << "THERE " << missing.projection().tostring() << std::endl;
 
-    std::shared_ptr<Content> next = getitem_next(missing.content(), tail, advanced);
+    std::cout << tostring() << std::endl;
+    std::cout << std::endl;
 
-    if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
-      return getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname());
+    if (const RegularArray* raw = dynamic_cast<const RegularArray*>(this)) {
+      std::shared_ptr<Content> nextcontent = raw->content().get()->carry(missing.projection());
+      std::cout << nextcontent.get()->tostring() << std::endl;
+      std::cout << std::endl;
+
+      std::shared_ptr<Content> wrapped = std::make_shared<RegularArray>(raw->identities(), raw->parameters(), nextcontent, nextcontent.get()->length());
+
+      std::shared_ptr<Content> next = wrapped.get()->getitem_next(missing.content(), tail, advanced);
+      RegularArray* raw2 = dynamic_cast<RegularArray*>(next.get());
+
+      return getitem_next_regular_missing(missing, tail, advanced, raw2, length(), classname());
     }
-
-    else if (RecordArray* rec = dynamic_cast<RecordArray*>(next.get())) {
-      if (rec->numfields() == 0) {
-        return next;
-      }
-      std::vector<std::shared_ptr<Content>> contents;
-      for (auto content : rec->contents()) {
-        if (RegularArray* raw = dynamic_cast<RegularArray*>(content.get())) {
-          contents.push_back(getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname()));
-        }
-        else {
-          throw std::runtime_error(std::string("FIXME: unhandled case of SliceMissing with RecordArray containing\n") + content.get()->tostring());
-        }
-      }
-      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, rec->recordlookup());
-    }
-
     else {
-      throw std::runtime_error(std::string("FIXME: unhandled case of SliceMissing with\n") + next.get()->tostring());
+      throw std::runtime_error(std::string("FIXME: unhandled case of SliceMissing with\n") + tostring());
     }
+
+    // std::shared_ptr<Content> next = getitem_next(missing.content(), tail, advanced);
+    // if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
+    //   return getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname());
+    // }
+    //
+    // else if (RecordArray* rec = dynamic_cast<RecordArray*>(next.get())) {
+    //   if (rec->numfields() == 0) {
+    //     return next;
+    //   }
+    //   std::vector<std::shared_ptr<Content>> contents;
+    //   for (auto content : rec->contents()) {
+    //     if (RegularArray* raw = dynamic_cast<RegularArray*>(content.get())) {
+    //       contents.push_back(getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname()));
+    //     }
+    //     else {
+    //       throw std::runtime_error(std::string("FIXME: unhandled case of SliceMissing with RecordArray containing\n") + content.get()->tostring());
+    //     }
+    //   }
+    //   return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, rec->recordlookup());
+    // }
+    //
+    // else {
+    //   throw std::runtime_error(std::string("FIXME: unhandled case of SliceMissing with\n") + next.get()->tostring());
+    // }
   }
 
   const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const {

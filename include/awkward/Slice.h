@@ -128,6 +128,7 @@ namespace awkward {
     const Index8 originalmask() const;
     const std::shared_ptr<SliceItem> content() const;
     const std::shared_ptr<SliceItem> project() const;
+    const IndexOf<T> projection() const;
     const std::shared_ptr<SliceItem> shallow_copy() const override;
     const std::shared_ptr<SliceItem> carry(const Index64& carry) const override;
     const std::string tostring() const override;

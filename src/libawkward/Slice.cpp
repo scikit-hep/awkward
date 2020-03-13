@@ -392,7 +392,26 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<SliceItem> SliceMissingOf<T>::project() const {
+    return content_.get()->carry(projection());
+  }
 
+  template <typename T>
+  const IndexOf<T> SliceMissingOf<T>::projection() const {
+    int64_t numnull;
+    struct Error err1 = awkward_slicemasked_project_numnull_64(
+      &numnull,
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length());
+    util::handle_error(err1, "SliceMissing", nullptr);
+    Index64 nextcarry(length() - numnull);
+    struct Error err2 = awkward_slicemasked_project_nextcarry_64(
+      nextcarry.ptr().get(),
+      index_.ptr().get(),
+      index_.offset(),
+      index_.length());
+    util::handle_error(err2, "SliceMissing", nullptr);
+    return nextcarry;
   }
 
   template <typename T>

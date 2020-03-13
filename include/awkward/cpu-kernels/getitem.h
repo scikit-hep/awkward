@@ -31,6 +31,9 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_slicejagged_tocarrylen_tooffsets_64(int64_t* tocarrylen, int64_t* tooffsets, const int64_t* fromoffsets, int64_t fromoffsetsoffset, int64_t fromoffsetslen, const int64_t* fromcarry, int64_t fromcarryoffset, int64_t fromcarrylen);
   EXPORT_SYMBOL struct Error awkward_slicejagged_tocarry_64(int64_t* tocarry, const int64_t* fromoffsets, int64_t fromoffsetsoffset, int64_t fromoffsetslen, const int64_t* fromcarry, int64_t fromcarryoffset, int64_t fromcarrylen);
 
+  EXPORT_SYMBOL struct Error awkward_slicemasked_project_numnull_64(int64_t* numnull, const int64_t* index, int64_t indexoffset, int64_t length);
+  EXPORT_SYMBOL struct Error awkward_slicemasked_project_nextcarry_64(int64_t* tocarry, const int64_t* index, int64_t indexoffset, int64_t length);
+
   EXPORT_SYMBOL struct Error awkward_carry_arange_64(int64_t* toptr, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_identities32_getitem_carry_64(int32_t* newidentitiesptr, const int32_t* identitiesptr, const int64_t* carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length);
