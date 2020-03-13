@@ -50,7 +50,15 @@ namespace awkward {
   }
 
   const Index8 ByteMaskedArray::bytemask() const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::bytemask");
+    Index8 out(length());
+    struct Error err = awkward_bytemaskedarray_mask8(
+      out.ptr().get(),
+      mask_.ptr().get(),
+      mask_.offset(),
+      mask_.length(),
+      validwhen_);
+    util::handle_error(err, classname(), identities_.get());
+    return out;
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::simplify() const {
@@ -241,23 +249,29 @@ namespace awkward {
   }
 
   const std::string ByteMaskedArray::purelist_parameter(const std::string& key) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::purelist_parameter");
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
   }
 
   bool ByteMaskedArray::purelist_isregular() const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::purelist_isregular");
+    return content_.get()->purelist_isregular();
   }
 
   int64_t ByteMaskedArray::purelist_depth() const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::purelist_depth");
+    return content_.get()->purelist_depth();
   }
 
   const std::pair<int64_t, int64_t> ByteMaskedArray::minmax_depth() const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::minmax_depth");
+    return content_.get()->minmax_depth();
   }
 
   const std::pair<bool, int64_t> ByteMaskedArray::branch_depth() const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::branch_depth");
+    return content_.get()->branch_depth();
   }
 
   int64_t ByteMaskedArray::numfields() const {

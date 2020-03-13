@@ -198,6 +198,17 @@ ERROR awkward_indexedarray64_mask8(int8_t* tomask, const int64_t* fromindex, int
 }
 
 template <typename M>
+ERROR awkward_bytemaskedarray_mask(M* tomask, const M* frommask, int64_t maskoffset, int64_t length, bool validwhen) {
+  for (int64_t i = 0;  i < length;  i++) {
+    tomask[i] = ((frommask[maskoffset + i] != 0) != validwhen);
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_mask8(int8_t* tomask, const int8_t* frommask, int64_t maskoffset, int64_t length, bool validwhen) {
+  return awkward_bytemaskedarray_mask(tomask, frommask, maskoffset, length, validwhen);
+}
+
+template <typename M>
 ERROR awkward_zero_mask(M* tomask, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     tomask[i] = 0;

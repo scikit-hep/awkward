@@ -28,7 +28,19 @@ def test_ByteMaskedArray():
     assert awkward1.tolist(array["x"]) == [0.0, 1.1, None, None, 4.4]
     assert awkward1.tolist(array[["x", "y"]]) == [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, None, None, {"x": 4.4, "y": [4, 4, 4, 4]}]
 
-def test_ByteMaskedArray_slice():
+def test_ByteMaskedArray_jaggedslice():
+    model = awkward1.Array([[0.0, 1.1, None, 2.2], [], [3.3, None, 4.4], [5.5], [6.6, 7.7, None, 8.8, 9.9]])
+    assert model[awkward1.Array([[3, 2, 1, 1, 0], [], [1], [0, 0], [1, 2]])] == [[2.2, None, 1.1, 1.1, 0.0], [], [None], [5.5, 5.5], [7.7, None]]
+
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 999, 2.2, 3.3, 123, 4.4, 5.5, 6.6, 7.7, 321, 8.8, 9.9]))
+    mask = awkward1.layout.Index8(numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], dtype=numpy.int8))
+    maskedarray = awkward1.layout.ByteMaskedArray(mask, content, validwhen=False)
+    offsets = awkward1.layout.Index64(numpy.array([0, 4, 4, 7, 8, 13], dtype=numpy.int64))
+    listarray = awkward1.Array(awkward1.layout.ListOffsetArray64(offsets, maskedarray))
+    assert awkward1.tolist(listarray) == awkward1.tolist(model)
+    # assert listarray[awkward1.Array([[3, 2, 1, 1, 0], [], [1], [0, 0], [1, 2]])] == [[2.2, None, 1.1, 1.1, 0.0], [], [None], [5.5, 5.5], [7.7, None]]
+
+def test_ByteMaskedArray_to_slice():
     content = awkward1.layout.NumpyArray(numpy.array([5, 2, 999, 3, 9, 123, 1], dtype=numpy.int64))
     mask = awkward1.layout.Index8(numpy.array([0, 0, 1, 0, 0, 1, 0], dtype=numpy.int8))
     maskedarray = awkward1.layout.ByteMaskedArray(mask, content, validwhen=False)

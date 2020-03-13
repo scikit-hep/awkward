@@ -39,6 +39,18 @@ def typeof(obj, c):
 def typeof(obj, c):
     return IndexedOptionArrayType(numba.typeof(numpy.asarray(obj.index)), numba.typeof(obj.content), numba.typeof(obj.identities), obj.parameters)
 
+@numba.extending.typeof_impl.register(awkward1.layout.ByteMaskedArray)
+def typeof(obj, c):
+    return ByteMaskedArrayType(numba.typeof(numpy.asarray(obj.mask)), numba.typeof(obj.content), obj.validwhen, numba.typeof(obj.identities), obj.parameters)
+
+@numba.extending.typeof_impl.register(awkward1.layout.BitMaskedArray)
+def typeof(obj, c):
+    return BitMaskedArrayType(numba.typeof(numpy.asarray(obj.mask)), numba.typeof(obj.content), obj.validwhen, obj.lsb_order, numba.typeof(obj.identities), obj.parameters)
+
+@numba.extending.typeof_impl.register(awkward1.layout.UnmaskedArray)
+def typeof(obj, c):
+    return UnmaskedArrayType(numba.typeof(obj.content), numba.typeof(obj.identities), obj.parameters)
+
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
 def typeof(obj, c):
     return RecordArrayType(tuple(numba.typeof(x) for x in obj.contents), obj.recordlookup, numba.typeof(obj.identities), obj.parameters)
@@ -490,6 +502,29 @@ class IndexedOptionArrayType(ContentType):
                 output.data = outdata
 
         return output._getvalue()
+
+class ByteMaskedArrayType(ContentType):
+    IDENTITIES = 0
+    MASK = 1
+    CONTENT = 2
+
+    def __init__(self, masktype, contenttype, validwhen, identitiestype, parameters):
+        raise NotImplementedError
+
+class BitMaskedArrayType(ContentType):
+    IDENTITIES = 0
+    MASK = 1
+    CONTENT = 2
+
+    def __init__(self, masktype, contenttype, validwhen, lsb_order, identitiestype, parameters):
+        raise NotImplementedError
+
+class UnmaskedArrayType(ContentType):
+    IDENTITIES = 0
+    CONTENT = 1
+
+    def __init__(self, contenttype, identitiestype, parameters):
+        raise NotImplementedError
 
 class RecordArrayType(ContentType):
     IDENTITIES = 0

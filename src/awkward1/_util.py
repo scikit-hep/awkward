@@ -25,7 +25,7 @@ indexedtypes = (awkward1.layout.IndexedArray32, awkward1.layout.IndexedArrayU32,
 
 uniontypes = (awkward1.layout.UnionArray8_32, awkward1.layout.UnionArray8_U32, awkward1.layout.UnionArray8_64)
 
-optiontypes = (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)
+optiontypes = (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64, awkward1.layout.ByteMaskedArray, awkward1.layout.BitMaskedArray, awkward1.layout.UnmaskedArray)
 
 listtypes = (awkward1.layout.RegularArray, awkward1.layout.ListArray32, awkward1.layout.ListArrayU32, awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray32, awkward1.layout.ListOffsetArrayU32, awkward1.layout.ListOffsetArray64)
 
@@ -402,8 +402,8 @@ def broadcast_and_apply(inputs, getfunction):
         elif any(isinstance(x, optiontypes) for x in inputs):
             mask = None
             for x in inputs:
-                if isinstance(x, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)):
-                    m = numpy.asarray(x.index) < 0
+                if isinstance(x, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64, awkward1.layout.ByteMaskedArray, awkward1.layout.BitMaskedArray, awkward1.layout.UnmaskedArray)):
+                    m = numpy.asarray(x.bytemask()).view(numpy.bool_)
                     if mask is None:
                         mask = m
                     else:
@@ -587,6 +587,15 @@ def recursively_apply(layout, getfunction, args=(), depth=1):
 
     elif isinstance(layout, awkward1.layout.IndexedOptionArray64):
         return awkward1.layout.IndexedOptionArray64(layout.index, recursively_apply(layout.content, getfunction, args, depth), layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.ByteMaskedArray):
+        return awkward1.layout.ByteMaskedArray(layout.mask, recursively_apply(layout.content, getfunction, args, depth), layout.validwhen, layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.BitMaskedArray):
+        return awkward1.layout.BitMaskedArray(layout.mask, recursively_apply(layout.content, getfunction, args, depth), layout.validwhen, layout.lsb_order, layout.identities, layout.parameters)
+
+    elif isinstance(layout, awkward1.layout.UnmaskedArray):
+        return awkward1.layout.UnmaskedArray(recursively_apply(layout.content, getfunction, args, depth), layout.identities, layout.parameters)
 
     elif isinstance(layout, awkward1.layout.RecordArray):
         return awkward1.layout.RecordArray([recursively_apply(x, getfunction, args, depth) for x in layout.contents], layout.recordlookup, len(layout), layout.identities, layout.parameters)

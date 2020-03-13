@@ -44,6 +44,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_indexedarrayU32_mask8(int8_t* tomask, const uint32_t* fromindex, int64_t indexoffset, int64_t length);
   EXPORT_SYMBOL struct Error awkward_indexedarray64_mask8(int8_t* tomask, const int64_t* fromindex, int64_t indexoffset, int64_t length);
 
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_mask8(int8_t* tomask, const int8_t* frommask, int64_t maskoffset, int64_t length, bool validwhen);
+
   EXPORT_SYMBOL struct Error awkward_zero_mask8(int8_t* tomask, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_indexedarray32_simplify32_to64(int64_t* toindex, const int32_t* outerindex, int64_t outeroffset, int64_t outerlength, const int32_t* innerindex, int64_t inneroffset, int64_t innerlength);

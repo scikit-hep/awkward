@@ -28,6 +28,7 @@ def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
             data = awkward1.layout.NumpyArray(array)
 
         if index is not None:
+            # FIXME-ByteMaskedArray: this is a good place for ByteMaskedArray
             return awkward1.layout.IndexedOptionArray64(index, data)
         else:
             return data
@@ -437,6 +438,8 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
             index[ismasked] = -1
             out = awkward1.layout.IndexedOptionArray64(awkward1.layout.Index64(index), recurse(array.content))
 
+            # FIXME-ByteMaskedArray: this is a good place for ByteMaskedArray
+
             for size in array.mask.shape[:0:-1]:
                 out = awkward1.layout.RegularArray(out, size)
             return out
@@ -448,6 +451,9 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
             ismasked = array.boolmask(maskedwhen=True)
             index = numpy.arange(len(ismasked))
             index[ismasked] = -1
+
+            # FIXME-ByteMaskedArray: this is a good place for ByteMaskedArray
+
             return awkward1.layout.IndexedOptionArray64(awkward1.layout.Index64(index), recurse(array.content))
 
         elif isinstance(array, awkward0.IndexedMaskedArray):
@@ -650,6 +656,18 @@ def toawkward0(array, keeplayout=False):
         elif isinstance(layout, awkward1.layout.IndexedArray64):
             # index, content
             return awkward0.IndexedArray(numpy.asarray(layout.index), recurse(layout.content))
+
+        elif isinstance(layout, awkward1.layout.ByteMaskedArray):
+            # mask, content, validwhen
+            raise NotImplementedError
+
+        elif isinstance(layout, awkward1.layout.BitMaskedArray):
+            # mask, content, validwhen, length, lsb_order
+            raise NotImplementedError
+
+        elif isinstance(layout, awkward1.layout.UnmaskedArray):
+            # content
+            raise NotImplementedError
 
         else:
             raise AssertionError("missing converter for {0}".format(type(layout).__name__))
