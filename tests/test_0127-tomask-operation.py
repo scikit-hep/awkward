@@ -28,9 +28,20 @@ def test_ByteMaskedArray():
     assert awkward1.tolist(array["x"]) == [0.0, 1.1, None, None, 4.4]
     assert awkward1.tolist(array[["x", "y"]]) == [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, None, None, {"x": 4.4, "y": [4, 4, 4, 4]}]
 
-# def test_ByteMaskedArray_jaggedslice0():
-#     model = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], None, [5.5], None, [6.6, 7.7, 8.8, 9.9]])
-#     print(awkward1.tolist(model[awkward1.Array([[2, 1, 1, 0], [], [1], None, [0, 0], None, [1, 2]])]))
+@pytest.mark.skip("Finally, we're triggering ByteMaskedArray::getitem_next_jagged_generic")
+def test_ByteMaskedArray_jaggedslice0():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True).layout
+    index = awkward1.layout.Index64(numpy.array([0, 1, 2, 3], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedOptionArray64(index, array)
+    assert awkward1.tolist(indexedarray) == [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], [], [1, 1]])]) == [[0.0, 2.2], [3.3], [], [7.7, 7.7]]
+
+    mask = awkward1.layout.Index8(numpy.array([0, 0, 0, 0], dtype=numpy.int8))
+    maskedarray = awkward1.layout.ByteMaskedArray(mask, array, validwhen=False)
+    assert awkward1.tolist(maskedarray) == [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(maskedarray[awkward1.Array([[0, -1], [0], [], [1, 1]])]) == [[0.0, 2.2], [3.3], [], [7.7, 7.7]]
+
+    raise Exception
 
 def test_ByteMaskedArray_jaggedslice1():
     model = awkward1.Array([[0.0, 1.1, None, 2.2], [], [3.3, None, 4.4], [5.5], [6.6, 7.7, None, 8.8, 9.9]])
