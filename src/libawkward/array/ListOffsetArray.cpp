@@ -18,6 +18,9 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/RecordArray.h"
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
 
 #include "awkward/array/ListOffsetArray.h"
 
@@ -562,6 +565,15 @@ namespace awkward {
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
       return mergeable(rawother->content(), mergebool);
     }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
 
     if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
@@ -611,6 +623,15 @@ namespace awkward {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
