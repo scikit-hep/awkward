@@ -408,7 +408,39 @@ namespace awkward {
   }
 
   const std::pair<Index64, std::shared_ptr<Content>> ByteMaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::offsets_and_flattened");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("axis=0 not allowed for flatten");
+    }
+    else {
+      int64_t numnull;
+      std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
+      Index64 nextcarry = pair.first;
+      Index64 outindex = pair.second;
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+
+      std::pair<Index64, std::shared_ptr<Content>> offsets_flattened = next.get()->offsets_and_flattened(axis, depth);
+      Index64 offsets = offsets_flattened.first;
+      std::shared_ptr<Content> flattened = offsets_flattened.second;
+
+      if (offsets.length() == 0) {
+        return std::pair<Index64, std::shared_ptr<Content>>(offsets, std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, flattened));
+      }
+      else {
+        Index64 outoffsets(offsets.length() + numnull);
+        struct Error err = util::awkward_indexedarray_flatten_none2empty_64<int64_t>(
+          outoffsets.ptr().get(),
+          outindex.ptr().get(),
+          outindex.offset(),
+          outindex.length(),
+          offsets.ptr().get(),
+          offsets.offset(),
+          offsets.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::pair<Index64, std::shared_ptr<Content>>(outoffsets, flattened);
+      }
+    }
   }
 
   bool ByteMaskedArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
