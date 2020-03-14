@@ -116,11 +116,59 @@ namespace awkward {
   }
 
   void ByteMaskedArray::setidentities(const std::shared_ptr<Identities>& identities) {
-    throw std::runtime_error("FIXME: ByteMaskedArray::setidentities(identities)");
+    if (identities.get() == nullptr) {
+      content_.get()->setidentities(identities);
+    }
+    else {
+      if (length() != identities.get()->length()) {
+        util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
+      }
+      if (Identities32* rawidentities = dynamic_cast<Identities32*>(identities.get())) {
+        std::shared_ptr<Identities32> subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content_.get()->length());
+        Identities32* rawsubidentities = reinterpret_cast<Identities32*>(subidentities.get());
+        struct Error err = awkward_identities32_extend(
+          rawsubidentities->ptr().get(),
+          rawidentities->ptr().get(),
+          rawidentities->offset(),
+          rawidentities->length(),
+          content_.get()->length());
+        util::handle_error(err, classname(), identities_.get());
+        content_.get()->setidentities(subidentities);
+      }
+      else if (Identities64* rawidentities = dynamic_cast<Identities64*>(identities.get())) {
+        std::shared_ptr<Identities64> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content_.get()->length());
+        Identities64* rawsubidentities = reinterpret_cast<Identities64*>(subidentities.get());
+        struct Error err = awkward_identities64_extend(
+          rawsubidentities->ptr().get(),
+          rawidentities->ptr().get(),
+          rawidentities->offset(),
+          rawidentities->length(),
+          content_.get()->length());
+        util::handle_error(err, classname(), identities_.get());
+        content_.get()->setidentities(subidentities);
+      }
+      else {
+        throw std::runtime_error("unrecognized Identities specialization");
+      }
+    }
+    identities_ = identities;
   }
 
   void ByteMaskedArray::setidentities() {
-    throw std::runtime_error("FIXME: ByteMaskedArray::setidentities");
+    if (length() <= kMaxInt32) {
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
+      struct Error err = awkward_new_identities32(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
+    }
+    else {
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
+      struct Error err = awkward_new_identities64(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
+    }
   }
 
   const std::shared_ptr<Type> ByteMaskedArray::type(const std::map<std::string, std::string>& typestrs) const {

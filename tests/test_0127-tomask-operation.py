@@ -97,3 +97,12 @@ def test_ByteMaskedArray_as_slice():
     slicearray = awkward1.layout.ByteMaskedArray(slicemask, slicecontent, validwhen=False)
 
     assert awkward1.tolist(array[slicearray]) == [3.3, 6.6, None, None, 8.8, 6.6]
+
+def test_ByteMaskedArray_setidentities():
+    content = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], [321]]).layout
+    mask = awkward1.layout.Index8(numpy.array([0, 0, 1, 1, 0], dtype=numpy.int8))
+    array = awkward1.layout.ByteMaskedArray(mask, content, validwhen=False)
+    assert awkward1.tolist(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
+    array.setidentities()
+    assert numpy.asarray(array.identities).tolist() == [[0], [1], [2], [3], [4]]
+    assert numpy.asarray(array.content.identities).tolist() ==[[0], [1], [2], [3], [4], [-1]]

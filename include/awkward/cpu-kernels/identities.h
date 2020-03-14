@@ -42,6 +42,9 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_identities64_from_unionarray8_U32(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const int8_t* fromtags, const uint32_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which);
   EXPORT_SYMBOL struct Error awkward_identities64_from_unionarray8_64(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const int8_t* fromtags, const int64_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which);
 
+  EXPORT_SYMBOL struct Error awkward_identities32_extend(int32_t* toptr, const int32_t* fromptr, int64_t fromoffset, int64_t fromlength, int64_t tolength);
+  EXPORT_SYMBOL struct Error awkward_identities64_extend(int64_t* toptr, const int64_t* fromptr, int64_t fromoffset, int64_t fromlength, int64_t tolength);
+
 }
 
 #endif // AWKWARDCPU_IDENTITIES_H_
