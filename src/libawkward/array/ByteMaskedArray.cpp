@@ -105,7 +105,18 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::simplify() const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::simplify");
+    if (dynamic_cast<IndexedArray32*>(content_.get())        ||
+        dynamic_cast<IndexedArrayU32*>(content_.get())       ||
+        dynamic_cast<IndexedArray64*>(content_.get())        ||
+        dynamic_cast<IndexedOptionArray32*>(content_.get())  ||
+        dynamic_cast<IndexedOptionArray64*>(content_.get())  ||
+        dynamic_cast<ByteMaskedArray*>(content_.get())       ||
+        dynamic_cast<BitMaskedArray*>(content_.get())        ||
+        dynamic_cast<UnmaskedArray*>(content_.get())) {
+      std::shared_ptr<Content> step1 = toIndexedOptionArray64();
+      IndexedOptionArray64* step2 = dynamic_cast<IndexedOptionArray64*>(step1.get());
+      return step2->simplify();
+    }
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::toIndexedOptionArray64() const {
