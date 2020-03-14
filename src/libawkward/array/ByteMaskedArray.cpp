@@ -406,7 +406,15 @@ namespace awkward {
 
   template <typename S>
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_next_jagged_generic");
+      int64_t numnull;
+      std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
+      Index64 nextcarry = pair.first;
+      Index64 outindex = pair.second;
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      std::shared_ptr<Content> out = next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
+      IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
+      return out2.simplify();
   }
 
   const std::pair<Index64, Index64> ByteMaskedArray::nextcarry_outindex(int64_t& numnull) const {
