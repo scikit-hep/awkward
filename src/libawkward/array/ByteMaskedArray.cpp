@@ -6,6 +6,7 @@
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
+#include "awkward/cpu-kernels/reducers.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -509,7 +510,30 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::reduce_next");
+    int64_t numnull;
+    struct Error err1 = awkward_bytemaskedarray_numnull(
+      &numnull,
+      mask_.ptr().get(),
+      mask_.offset(),
+      length(),
+      validwhen_);
+    util::handle_error(err1, classname(), identities_.get());
+
+    Index64 nextparents(length() - numnull);
+    Index64 nextcarry(length() - numnull);
+    struct Error err2 = awkward_bytemaskedarray_reduce_next_64(
+      nextcarry.ptr().get(),
+      nextparents.ptr().get(),
+      mask_.ptr().get(),
+      mask_.offset(),
+      parents.ptr().get(),
+      parents.offset(),
+      length(),
+      validwhen_);
+    util::handle_error(err2, classname(), identities_.get());
+
+    std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+    return next.get()->reduce_next(reducer, negaxis, nextparents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::localindex(int64_t axis, int64_t depth) const {

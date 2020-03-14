@@ -533,3 +533,15 @@ ERROR awkward_numpyarray_reduce_mask_indexedoptionarray64(int64_t* toptr, const 
   }
   return success();
 }
+
+ERROR awkward_bytemaskedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const int8_t* mask, int64_t maskoffset, const int64_t* parents, int64_t parentsoffset, int64_t length, bool validwhen) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    if ((mask[maskoffset + i] != 0) == validwhen) {
+      nextcarry[k] = i;
+      nextparents[k] = parents[parentsoffset + i];
+      k++;
+    }
+  }
+  return success();
+}

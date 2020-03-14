@@ -147,3 +147,70 @@ def test_ByteMaskedArray_rpad():
     assert awkward1.tolist(awkward1.rpad(array, 3, axis=0, clip=True)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None]
     assert awkward1.tolist(awkward1.rpad(array, 2, axis=1, clip=True)) == [[[0.0, 1.1, 2.2], []], [None, None], None, None, [[], [10.0, 11.1, 12.2]]]
     assert awkward1.tolist(awkward1.rpad(array, 2, axis=2, clip=True)) == [[[0.0, 1.1], [None, None], [3.3, 4.4]], [], None, None, [[None, None], [10.0, 11.1]]]
+
+def test_ByteMaskedArray_reduce():
+    content = awkward1.layout.NumpyArray(numpy.array([2, 3, 5, 7, 11, 0, 0, 0, 0, 0, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 0, 0, 0, 0, 0, 101, 103, 107, 109, 113], dtype=numpy.int64))
+    offsets1 = awkward1.layout.Index64(numpy.array([0, 5, 10, 15, 20, 25, 30], dtype=numpy.int64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets1, content)
+    # index = awkward1.layout.Index64(numpy.array([0, -1, 2, 3, -1, 5], dtype=numpy.int64))
+    # optionarray = awkward1.layout.IndexedOptionArray64(index, listoffsetarray)
+    mask = awkward1.layout.Index8(numpy.array([0, 1, 0, 0, 1, 0], dtype=numpy.int8))
+    optionarray = awkward1.layout.ByteMaskedArray(mask, listoffsetarray, validwhen=False)
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 6], dtype=numpy.int64))
+    depth2 = awkward1.layout.ListOffsetArray64(offsets2, optionarray)
+    assert awkward1.tolist(depth2) == [
+        [[  2,   3,   5,   7,  11],
+         None,
+         [ 31,  37,  41,  43,  47]],
+        [[ 53,  59,  61,  67,  71],
+         None,
+         [101, 103, 107, 109, 113]]]
+
+    assert awkward1.tolist(depth2.prod(-1)) == [
+        [  2 *   3 *   5 *   7 *  11,
+          31 *  37 *  41 *  43 *  47],
+        [ 53 *  59 *  61 *  67 *  71,
+         101 * 103 * 107 * 109 * 113]]
+
+    assert awkward1.tolist(depth2.prod(-2)) == [
+        [  31*2,   37*3,   41*5,   43*7,  47*11],
+        [101*53, 103*59, 107*61, 109*67, 113*71]]
+
+    assert awkward1.tolist(depth2.prod(-3)) == [
+        [  53*2,   59*3,   61*5,   67*7,  71*11],
+        [],
+        [101*31, 103*37, 107*41, 109*43, 113*47]]
+
+    content = awkward1.layout.NumpyArray(numpy.array([2, 3, 5, 7, 11, 0, 0, 0, 0, 0, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 0, 0, 0, 0, 0, 101, 103, 107, 109, 113], dtype=numpy.int64))
+    # index = awkward1.layout.Index64(numpy.array([0, 1, 2, 3, 4, -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, -1, -1, -1, -1, -1, 25, 26, 27, 28, 29], dtype=numpy.int64))
+    # optionarray = awkward1.layout.IndexedOptionArray64(index, content)
+    mask = awkward1.layout.Index8(numpy.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0], dtype=numpy.int8))
+    optionarray = awkward1.layout.ByteMaskedArray(mask, content, validwhen=False)
+    offsets1 = awkward1.layout.Index64(numpy.array([0, 5, 10, 15, 20, 25, 30], dtype=numpy.int64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets1, optionarray)
+    offsets2 = awkward1.layout.Index64(numpy.array([0, 3, 6], dtype=numpy.int64))
+    depth2 = awkward1.layout.ListOffsetArray64(offsets2, listoffsetarray)
+    assert awkward1.tolist(depth2) == [
+        [[   2,    3,    5,    7,   11],
+         [None, None, None, None, None],
+         [  31,   37,   41,   43,   47]],
+        [[  53,   59,   61,   67,   71],
+         [None, None, None, None, None],
+         [ 101,  103,  107,  109,  113]]]
+
+    assert awkward1.tolist(depth2.prod(-1)) == [
+        [  2 *   3 *   5 *   7 *  11,
+           1 *   1 *   1 *   1 *   1,
+          31 *  37 *  41 *  43 *  47],
+        [ 53 *  59 *  61 *  67 *  71,
+           1 *   1 *   1 *   1 *   1,
+         101 * 103 * 107 * 109 * 113]]
+
+    assert awkward1.tolist(depth2.prod(-2)) == [
+        [  31*2,   37*3,   41*5,   43*7,  47*11],
+        [101*53, 103*59, 107*61, 109*67, 113*71]]
+
+    assert awkward1.tolist(depth2.prod(-3)) == [
+        [  53*2,   59*3,   61*5,   67*7,  71*11],
+        [     1,      1,      1,      1,      1],
+        [101*31, 103*37, 107*41, 109*43, 113*47]]
