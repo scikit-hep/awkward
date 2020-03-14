@@ -217,7 +217,13 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::deep_copy");
+    Index8 mask = copyindexes ? mask_.deep_copy() : mask_;
+    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<ByteMaskedArray>(identities, parameters_, mask, content, validwhen_);
   }
 
   void ByteMaskedArray::check_for_iteration() const {
