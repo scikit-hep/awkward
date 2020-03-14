@@ -214,3 +214,12 @@ def test_ByteMaskedArray_reduce():
         [  53*2,   59*3,   61*5,   67*7,  71*11],
         [     1,      1,      1,      1,      1],
         [101*31, 103*37, 107*41, 109*43, 113*47]]
+
+def test_ByteMaskedArray_localindex():
+    content = awkward1.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[6.6, 7.7, 8.8, 9.9]], [[], [10.0, 11.1, 12.2]]]).layout
+    mask = awkward1.layout.Index8(numpy.array([0, 0, 1, 1, 0], dtype=numpy.int8))
+    array = awkward1.layout.ByteMaskedArray(mask, content, validwhen=False)
+    assert awkward1.tolist(array) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None, None, [[], [10.0, 11.1, 12.2]]]
+    assert awkward1.tolist(array.localindex(axis=0)) == [0, 1, 2, 3, 4]
+    assert awkward1.tolist(array.localindex(axis=1)) == [[0, 1, 2], [], None, None, [0, 1]]
+    assert awkward1.tolist(array.localindex(axis=2)) == [[[0, 1, 2], [], [0, 1]], [], None, None, [[], [0, 1, 2]]]
