@@ -106,3 +106,5 @@ def test_ByteMaskedArray_setidentities():
     array.setidentities()
     assert numpy.asarray(array.identities).tolist() == [[0], [1], [2], [3], [4]]
     assert numpy.asarray(array.content.identities).tolist() ==[[0], [1], [2], [3], [4], [-1]]
+
+    assert awkward1.isvalid(awkward1.Array(array))

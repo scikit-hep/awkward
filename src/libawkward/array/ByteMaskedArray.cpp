@@ -233,7 +233,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_nothing() const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::getitem_nothing");
+    return content_.get()->getitem_range_nowrap(0, 0);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_at(int64_t at) const {
@@ -383,7 +383,7 @@ namespace awkward {
   }
 
   const std::string ByteMaskedArray::validityerror(const std::string& path) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::validityerror");
+    return content_.get()->validityerror(path + std::string(".content"));
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::num(int64_t axis, int64_t depth) const {

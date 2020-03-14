@@ -382,6 +382,15 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> check_missing_jagged(const std::shared_ptr<Content>& that, const SliceMissing64& missing) {
+    // FIXME: This function is insufficiently general. While working on something else,
+    // I noticed that it wasn't possible to slice option-type data with a jagged array.
+    // This handles the case where that happens at top-level; the most likely case
+    // for physics analysis, but it should be more deeply considered in general.
+    //
+    // Note that it only replaces the Content that would be passed to
+    // getitem_next(missing.content()) in getitem_next(SliceMissing64) in a particular
+    // scenario; it can probably be generalized by handling more general scenarios.
+
     if (that.get()->length() == 1  &&  dynamic_cast<SliceJagged64*>(missing.content().get())) {
       std::shared_ptr<Content> tmp1 = that.get()->getitem_at_nowrap(0);
       std::shared_ptr<Content> tmp2(nullptr);
@@ -409,8 +418,6 @@ namespace awkward {
     if (advanced.length() != 0) {
       throw std::invalid_argument("cannot mix missing values in slice with NumPy-style advanced indexing");
     }
-
-    // std::shared_ptr<Content> next = getitem_next(missing.content(), tail, advanced);
 
     std::shared_ptr<Content> next = check_missing_jagged(shallow_copy(), missing).get()->getitem_next(missing.content(), tail, advanced);
 
