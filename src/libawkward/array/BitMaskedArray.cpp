@@ -15,7 +15,6 @@
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/IndexedArray.h"
-#include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
 
 #include "awkward/array/BitMaskedArray.h"
@@ -27,8 +26,11 @@ namespace awkward {
       , content_(content)
       , validwhen_(validwhen)
       , length_(length)
-      , lsb_order_(lsb_order)
-      , asByteMaskedArray_(nullptr) { }
+      , lsb_order_(lsb_order) {
+    if (content.get()->length() < length) {
+      throw std::invalid_argument("BitMaskedArray content must not be shorter than its length");
+    }
+  }
 
   const IndexU8 BitMaskedArray::mask() const {
     return mask_;
@@ -46,8 +48,16 @@ namespace awkward {
     return lsb_order_;
   }
 
-  const std::shared_ptr<Content> BitMaskedArray::toByteMaskedArray() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::toByteMaskedArray");
+  const std::shared_ptr<ByteMaskedArray> BitMaskedArray::toByteMaskedArray() const {
+    Index8 bytemask(mask_.length() * 8);
+    struct Error err = awkward_bitmaskedarray_to_bytemaskedarray(
+      bytemask.ptr().get(),
+      mask_.ptr().get(),
+      mask_.offset(),
+      mask_.length(),
+      lsb_order_);
+    util::handle_error(err, classname(), identities_.get());
+    return std::make_shared<ByteMaskedArray>(identities_, parameters_, bytemask.getitem_range_nowrap(0, length_), content_, validwhen_);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::project() const {
@@ -59,7 +69,7 @@ namespace awkward {
   }
 
   const Index8 BitMaskedArray::bytemask() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::bytemask");
+    return toByteMaskedArray().get()->bytemask();
   }
 
   const std::shared_ptr<Content> BitMaskedArray::simplify_optiontype() const {

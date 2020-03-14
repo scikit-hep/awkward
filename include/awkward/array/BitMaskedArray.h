@@ -11,6 +11,7 @@
 #include "awkward/Slice.h"
 #include "awkward/Index.h"
 #include "awkward/Content.h"
+#include "awkward/array/ByteMaskedArray.h"
 
 namespace awkward {
   class EXPORT_SYMBOL BitMaskedArray: public Content {
@@ -20,7 +21,7 @@ namespace awkward {
     const std::shared_ptr<Content> content() const;
     bool validwhen() const;
     bool lsb_order() const;
-    const std::shared_ptr<Content> toByteMaskedArray() const;
+    const std::shared_ptr<ByteMaskedArray> toByteMaskedArray() const;
     const std::shared_ptr<Content> project() const;
     const std::shared_ptr<Content> project(const Index8& mask) const;
     const Index8 bytemask() const;
@@ -91,8 +92,6 @@ namespace awkward {
     const bool validwhen_;
     const int64_t length_;
     const bool lsb_order_;
-
-    std::shared_ptr<Content> asByteMaskedArray_;
   };
 
 }

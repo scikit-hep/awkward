@@ -202,6 +202,8 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_bytemaskedarray_overlay_mask8(int8_t* tomask, const int8_t* theirmask, int64_t theirmaskoffset, const int8_t* mymask, int64_t mymaskoffset, int64_t length, bool validwhen);
 
+  EXPORT_SYMBOL struct Error awkward_bitmaskedarray_to_bytemaskedarray(int8_t* tobytemask, const uint8_t* frombitmask, int64_t bitmaskoffset, int64_t bitmasklength, bool lsb_order);
+
 }
 
 #endif // AWKWARDCPU_GETITEM_H_
