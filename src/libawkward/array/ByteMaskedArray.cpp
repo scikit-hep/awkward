@@ -84,15 +84,20 @@ namespace awkward {
   }
 
   const Index8 ByteMaskedArray::bytemask() const {
-    Index8 out(length());
-    struct Error err = awkward_bytemaskedarray_mask8(
-      out.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
-      mask_.length(),
-      validwhen_);
-    util::handle_error(err, classname(), identities_.get());
-    return out;
+    if (!validwhen_) {
+      return mask_;
+    }
+    else {
+      Index8 out(length());
+      struct Error err = awkward_bytemaskedarray_mask8(
+        out.ptr().get(),
+        mask_.ptr().get(),
+        mask_.offset(),
+        mask_.length(),
+        validwhen_);
+      util::handle_error(err, classname(), identities_.get());
+      return out;
+    }
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::simplify() const {
@@ -460,11 +465,47 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::rpad");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return rpad_axis0(target, false);
+    }
+    else if (toaxis == depth + 1) {
+      Index8 mask = bytemask();
+      Index64 index(mask.length());
+      struct Error err = awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+        index.ptr().get(),
+        mask.ptr().get(),
+        mask.length());
+      util::handle_error(err, classname(), identities_.get());
+
+      std::shared_ptr<Content> next = project().get()->rpad(target, toaxis, depth);
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify();
+    }
+    else {
+      return std::make_shared<ByteMaskedArray>(Identities::none(), parameters_, mask_, content_.get()->rpad(target, toaxis, depth), validwhen_);
+    }
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::rpad_and_clip");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return rpad_axis0(target, true);
+    }
+    else if (toaxis == depth + 1) {
+      Index8 mask = bytemask();
+      Index64 index(mask.length());
+      struct Error err = awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
+        index.ptr().get(),
+        mask.ptr().get(),
+        mask.length());
+      util::handle_error(err, classname(), identities_.get());
+
+      std::shared_ptr<Content> next = project().get()->rpad_and_clip(target, toaxis, depth);
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify();
+    }
+    else {
+      return std::make_shared<ByteMaskedArray>(Identities::none(), parameters_, mask_, content_.get()->rpad_and_clip(target, toaxis, depth), validwhen_);
+    }
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {

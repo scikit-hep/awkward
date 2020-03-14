@@ -1031,7 +1031,7 @@ namespace awkward {
       }
     }
     else {
-      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->rpad(target, toaxis, depth + 1));
+      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->rpad(target, toaxis, depth));
     }
   }
 
@@ -1059,7 +1059,7 @@ namespace awkward {
       }
     }
     else {
-      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->rpad_and_clip(target, toaxis, depth + 1));
+      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->rpad_and_clip(target, toaxis, depth));
     }
   }
 

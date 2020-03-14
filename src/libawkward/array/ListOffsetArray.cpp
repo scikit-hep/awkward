@@ -951,7 +951,7 @@ namespace awkward {
       return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
     }
     else {
-      return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), parameters_, offsets_, content_.get()->rpad(target, toaxis, depth + 1));
+      return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), parameters_, offsets_, content_.get()->rpad_and_clip(target, toaxis, depth + 1));
     }
   }
 
