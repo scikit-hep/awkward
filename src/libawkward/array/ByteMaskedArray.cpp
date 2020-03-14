@@ -387,7 +387,24 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::num(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::num");
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      Index64 out(1);
+      out.ptr().get()[0] = length();
+      return NumpyArray(out).getitem_at_nowrap(0);
+    }
+    else {
+      int64_t numnull;
+      std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
+      Index64 nextcarry = pair.first;
+      Index64 outindex = pair.second;
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+
+      std::shared_ptr<Content> out = next.get()->num(axis, depth);
+      IndexedOptionArray64 out2(Identities::none(), util::Parameters(), outindex, out);
+      return out2.simplify();
+    }
   }
 
   const std::pair<Index64, std::shared_ptr<Content>> ByteMaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
