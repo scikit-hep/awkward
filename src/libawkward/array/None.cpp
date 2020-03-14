@@ -134,7 +134,11 @@ namespace awkward {
   }
 
   const std::string None::validityerror(const std::string& path) const {
-    throw std::runtime_error("undefined operatino: None::validityerror");
+    throw std::runtime_error("undefined operation: None::validityerror");
+  }
+
+  const std::shared_ptr<Content> None::shallow_simplify() const {
+    throw std::runtime_error("undefined operation: None::shallow_simplify");
   }
 
   const std::shared_ptr<Content> None::num(int64_t axis, int64_t depth) const {

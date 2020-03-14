@@ -41,7 +41,7 @@ namespace awkward {
     throw std::runtime_error("FIXME: UnmaskedArray::bytemask");
   }
 
-  const std::shared_ptr<Content> UnmaskedArray::simplify() const {
+  const std::shared_ptr<Content> UnmaskedArray::simplify_optiontype() const {
     if (dynamic_cast<IndexedArray32*>(content_.get())        ||
         dynamic_cast<IndexedArrayU32*>(content_.get())       ||
         dynamic_cast<IndexedArray64*>(content_.get())        ||
@@ -50,9 +50,7 @@ namespace awkward {
         dynamic_cast<ByteMaskedArray*>(content_.get())       ||
         dynamic_cast<BitMaskedArray*>(content_.get())        ||
         dynamic_cast<UnmaskedArray*>(content_.get())) {
-      std::shared_ptr<Content> step1 = toIndexedOptionArray64();
-      IndexedOptionArray64* step2 = dynamic_cast<IndexedOptionArray64*>(step1.get());
-      return step2->simplify();
+      return content_;
     }
   }
 
@@ -182,6 +180,10 @@ namespace awkward {
 
   const std::string UnmaskedArray::validityerror(const std::string& path) const {
     throw std::runtime_error("FIXME: UnmaskedArray::validityerror");
+  }
+
+  const std::shared_ptr<Content> UnmaskedArray::shallow_simplify() const {
+    return simplify_optiontype();
   }
 
   const std::shared_ptr<Content> UnmaskedArray::num(int64_t axis, int64_t depth) const {

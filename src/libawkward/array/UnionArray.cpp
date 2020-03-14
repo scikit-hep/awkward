@@ -99,7 +99,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::shared_ptr<Content> UnionArrayOf<T, I>::simplify(bool mergebool) const {
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::simplify_uniontype(bool mergebool) const {
     int64_t len = length();
     if (index_.length() < len) {
       util::handle_error(failure("len(index) < len(tags)", kSliceNone, kSliceNone), classname(), identities_.get());
@@ -810,6 +810,11 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::shallow_simplify() const {
+    return simplify_uniontype(false);
+  }
+
+  template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
@@ -823,7 +828,7 @@ namespace awkward {
         contents.push_back(content.get()->num(axis, depth));
       }
       UnionArrayOf<T, I> out(Identities::none(), util::Parameters(), tags_, index_, contents);
-      return out.simplify(false);
+      return out.simplify_uniontype(false);
     }
   }
 
@@ -1116,7 +1121,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::shared_ptr<SliceItem> UnionArrayOf<T, I>::asslice() const {
-    std::shared_ptr<Content> simplified = simplify(false);
+    std::shared_ptr<Content> simplified = simplify_uniontype(false);
     if (UnionArray8_32* raw = dynamic_cast<UnionArray8_32*>(simplified.get())) {
       if (raw->numcontents() == 1) {
         return raw->content(0).get()->asslice();
@@ -1158,7 +1163,7 @@ namespace awkward {
         contents.emplace_back(content.get()->rpad(target, axis, depth));
       }
       UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
-      return out.simplify(false);
+      return out.simplify_uniontype(false);
     }
   }
 
@@ -1174,13 +1179,13 @@ namespace awkward {
         contents.emplace_back(content.get()->rpad_and_clip(target, axis, depth));
       }
       UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
-      return out.simplify(false);
+      return out.simplify_uniontype(false);
     }
   }
 
   template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
-    std::shared_ptr<Content> simplified = simplify(true);
+    std::shared_ptr<Content> simplified = simplify_uniontype(true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
@@ -1260,7 +1265,7 @@ namespace awkward {
   template <typename T, typename I>
   template <typename S>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
-    std::shared_ptr<Content> simplified = simplify(false);
+    std::shared_ptr<Content> simplified = simplify_uniontype(false);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {

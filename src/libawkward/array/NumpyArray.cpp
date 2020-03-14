@@ -660,7 +660,7 @@ namespace awkward {
     }
 
     else {
-      NumpyArray safe = contiguous();   // maybe become_contiguous() to change in-place?
+      NumpyArray safe = contiguous();
 
       std::vector<ssize_t> nextshape = { 1 };
       nextshape.insert(nextshape.end(), safe.shape_.begin(), safe.shape_.end());
@@ -762,6 +762,10 @@ namespace awkward {
       }
     }
     return std::string();
+  }
+
+  const std::shared_ptr<Content> NumpyArray::shallow_simplify() const {
+    return shallow_copy();
   }
 
   const std::shared_ptr<Content> NumpyArray::num(int64_t axis, int64_t depth) const {
@@ -1589,17 +1593,6 @@ namespace awkward {
       x *= shape_[i];
     }
     return true;  // true for isscalar(), too
-  }
-
-  void NumpyArray::become_contiguous() {
-    if (!iscontiguous()) {
-      NumpyArray x = contiguous();
-      identities_ = x.identities_;
-      ptr_ = x.ptr_;
-      shape_ = x.shape_;
-      strides_ = x.strides_;
-      byteoffset_ = x.byteoffset_;
-    }
   }
 
   const NumpyArray NumpyArray::contiguous() const {

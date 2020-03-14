@@ -181,7 +181,7 @@ namespace awkward {
       length());
     util::handle_error(err, classname(), identities_.get());
     std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
-    return next.get()->simplify();
+    return next.get()->simplify_optiontype();
   }
 
   const std::shared_ptr<Content> Content::localindex_axis0() const {
@@ -361,7 +361,7 @@ namespace awkward {
     util::handle_error(err, classname, nullptr);
 
     IndexedOptionArray64 out(Identities::none(), util::Parameters(), outindex, raw->content());
-    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify(), index.length());
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify_optiontype(), index.length());
   }
 
   bool check_missing_jagged_same(const std::shared_ptr<Content>& that, const Index8& bytemask, const SliceMissing64& missing) {

@@ -463,6 +463,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::shallow_simplify() const {
+    return shallow_copy();
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
@@ -832,7 +837,7 @@ namespace awkward {
         util::handle_error(err3, classname(), identities_.get());
 
         std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content());
-        return std::make_shared<ListArrayOf<T>>(Identities::none(), parameters_, starts, stops, next.get()->simplify());
+        return std::make_shared<ListArrayOf<T>>(Identities::none(), parameters_, starts, stops, next.get()->simplify_optiontype());
       }
     }
     else {
@@ -1203,7 +1208,7 @@ namespace awkward {
     if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get())) {
       std::shared_ptr<Content> content = raw->content();
       IndexedOptionArray64 indexedoptionarray(Identities::none(), util::Parameters(), missing, content);
-      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), largeoffsets, indexedoptionarray.simplify());
+      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), largeoffsets, indexedoptionarray.simplify_optiontype());
     }
     else {
       throw std::runtime_error(std::string("expected ListOffsetArray64 from ListArray::getitem_next_jagged, got ") + out.get()->classname());

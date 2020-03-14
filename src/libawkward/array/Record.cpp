@@ -206,6 +206,10 @@ namespace awkward {
     return array_.get()->validityerror(path + std::string(".array"));
   }
 
+  const std::shared_ptr<Content> Record::shallow_simplify() const {
+    return shallow_copy();
+  }
+
   const std::shared_ptr<Content> Record::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {

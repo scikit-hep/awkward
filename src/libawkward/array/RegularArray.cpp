@@ -340,6 +340,10 @@ namespace awkward {
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
+  const std::shared_ptr<Content> RegularArray::shallow_simplify() const {
+    return shallow_copy();
+  }
+
   const std::shared_ptr<Content> RegularArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
@@ -530,7 +534,7 @@ namespace awkward {
         length());
       util::handle_error(err, classname(), identities_.get());
       std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content());
-      return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
+      return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify_optiontype(), target);
     }
     else {
       return std::make_shared<RegularArray>(Identities::none(), parameters_, content_.get()->rpad_and_clip(target, toaxis, depth + 1), size_);

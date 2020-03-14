@@ -104,7 +104,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> ByteMaskedArray::simplify() const {
+  const std::shared_ptr<Content> ByteMaskedArray::simplify_optiontype() const {
     if (dynamic_cast<IndexedArray32*>(content_.get())        ||
         dynamic_cast<IndexedArrayU32*>(content_.get())       ||
         dynamic_cast<IndexedArray64*>(content_.get())        ||
@@ -115,7 +115,7 @@ namespace awkward {
         dynamic_cast<UnmaskedArray*>(content_.get())) {
       std::shared_ptr<Content> step1 = toIndexedOptionArray64();
       IndexedOptionArray64* step2 = dynamic_cast<IndexedOptionArray64*>(step1.get());
-      return step2->simplify();
+      return step2->simplify_optiontype();
     }
   }
 
@@ -317,7 +317,7 @@ namespace awkward {
 
       std::shared_ptr<Content> out = next.get()->getitem_next(head, tail, advanced);
       IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
-      return out2.simplify();
+      return out2.simplify_optiontype();
     }
     else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
       return Content::getitem_next(*ellipsis, tail, advanced);
@@ -406,6 +406,10 @@ namespace awkward {
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
+  const std::shared_ptr<Content> ByteMaskedArray::shallow_simplify() const {
+    return simplify_optiontype();
+  }
+
   const std::shared_ptr<Content> ByteMaskedArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
@@ -423,7 +427,7 @@ namespace awkward {
 
       std::shared_ptr<Content> out = next.get()->num(axis, depth);
       IndexedOptionArray64 out2(Identities::none(), util::Parameters(), outindex, out);
-      return out2.simplify();
+      return out2.simplify_optiontype();
     }
   }
 
@@ -533,7 +537,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
 
       std::shared_ptr<Content> next = project().get()->rpad(target, toaxis, depth);
-      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify();
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify_optiontype();
     }
     else {
       return std::make_shared<ByteMaskedArray>(Identities::none(), parameters_, mask_, content_.get()->rpad(target, toaxis, depth), validwhen_);
@@ -555,7 +559,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
 
       std::shared_ptr<Content> next = project().get()->rpad_and_clip(target, toaxis, depth);
-      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify();
+      return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify_optiontype();
     }
     else {
       return std::make_shared<ByteMaskedArray>(Identities::none(), parameters_, mask_, content_.get()->rpad_and_clip(target, toaxis, depth), validwhen_);
@@ -603,7 +607,7 @@ namespace awkward {
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> out = next.get()->localindex(axis, depth);
       IndexedOptionArray64 out2(Identities::none(), util::Parameters(), outindex, out);
-      return out2.simplify();
+      return out2.simplify_optiontype();
     }
   }
 
@@ -624,7 +628,7 @@ namespace awkward {
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> out = next.get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
       IndexedOptionArray64 out2(Identities::none(), util::Parameters(), outindex, out);
-      return out2.simplify();
+      return out2.simplify_optiontype();
     }
   }
 
@@ -666,7 +670,7 @@ namespace awkward {
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> out = next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
       IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
-      return out2.simplify();
+      return out2.simplify_optiontype();
   }
 
   const std::pair<Index64, Index64> ByteMaskedArray::nextcarry_outindex(int64_t& numnull) const {

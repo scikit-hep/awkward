@@ -121,7 +121,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::simplify() const {
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::simplify_optiontype() const {
     if (ISOPTION) {
       if (IndexedArray32* rawcontent = dynamic_cast<IndexedArray32*>(content_.get())) {
         Index32 inner = rawcontent->index();
@@ -637,7 +637,7 @@ namespace awkward {
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
         std::shared_ptr<Content> out = next.get()->getitem_next(head, tail, advanced);
         IndexedArrayOf<T, ISOPTION> out2(identities_, parameters_, outindex, out);
-        return out2.simplify();
+        return out2.simplify_optiontype();
       }
       else {
         Index64 nextcarry(length());
@@ -764,6 +764,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::shallow_simplify() const {
+    return simplify_optiontype();
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
@@ -780,7 +785,7 @@ namespace awkward {
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> out = next.get()->num(axis, depth);
       IndexedArrayOf<T, ISOPTION> out2(Identities::none(), util::Parameters(), outindex, out);
-      return out2.simplify();
+      return out2.simplify_optiontype();
     }
     else {
       return project().get()->num(axis, depth);
@@ -1132,7 +1137,7 @@ namespace awkward {
         util::handle_error(err, classname(), identities_.get());
 
         std::shared_ptr<Content> next = project().get()->rpad(target, toaxis, depth);
-        return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify();
+        return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify_optiontype();
       }
       else {
         return project().get()->rpad(target, toaxis, depth);
@@ -1160,7 +1165,7 @@ namespace awkward {
         util::handle_error(err, classname(), identities_.get());
 
         std::shared_ptr<Content> next = project().get()->rpad_and_clip(target, toaxis, depth);
-        return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify();
+        return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify_optiontype();
       }
       else {
         return project().get()->rpad_and_clip(target, toaxis, depth);
@@ -1213,7 +1218,7 @@ namespace awkward {
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
         std::shared_ptr<Content> out = next.get()->localindex(axis, depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_, util::Parameters(), outindex, out);
-        return out2.simplify();
+        return out2.simplify_optiontype();
       }
       else {
         return project().get()->localindex(axis, depth);
@@ -1240,7 +1245,7 @@ namespace awkward {
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
         std::shared_ptr<Content> out = next.get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_, util::Parameters(), outindex, out);
-        return out2.simplify();
+        return out2.simplify_optiontype();
       }
       else {
         return project().get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
@@ -1295,7 +1300,7 @@ namespace awkward {
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> out = next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
       IndexedArrayOf<T, ISOPTION> out2(identities_, parameters_, outindex, out);
-      return out2.simplify();
+      return out2.simplify_optiontype();
     }
     else {
       Index64 nextcarry(length());

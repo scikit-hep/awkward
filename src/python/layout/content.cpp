@@ -975,6 +975,9 @@ py::class_<ak::EmptyArray, std::shared_ptr<ak::EmptyArray>, ak::Content> make_Em
       .def("toNumpyArray", [](const ak::EmptyArray& self) -> py::object {
         return box(self.toNumpyArray("d", sizeof(double)));
       })
+      .def("simplify", [](const ak::EmptyArray& self) {
+        return box(self.shallow_simplify());
+      })
   );
 }
 
@@ -1000,7 +1003,7 @@ py::class_<ak::IndexedArrayOf<T, ISOPTION>, std::shared_ptr<ak::IndexedArrayOf<T
       }, py::arg("mask") = py::none())
       .def("bytemask", &ak::IndexedArrayOf<T, ISOPTION>::bytemask)
       .def("simplify", [](const ak::IndexedArrayOf<T, ISOPTION>& self) {
-        return box(self.simplify());
+        return box(self.simplify_optiontype());
       })
   );
 }
@@ -1032,7 +1035,7 @@ py::class_<ak::ByteMaskedArray, std::shared_ptr<ak::ByteMaskedArray>, ak::Conten
       }, py::arg("mask") = py::none())
       .def("bytemask", &ak::ByteMaskedArray::bytemask)
       .def("simplify", [](const ak::ByteMaskedArray& self) {
-        return box(self.simplify());
+        return box(self.simplify_optiontype());
       })
   );
 }
@@ -1058,7 +1061,7 @@ py::class_<ak::BitMaskedArray, std::shared_ptr<ak::BitMaskedArray>, ak::Content>
       }, py::arg("mask") = py::none())
       .def("bytemask", &ak::BitMaskedArray::bytemask)
       .def("simplify", [](const ak::BitMaskedArray& self) {
-        return box(self.simplify());
+        return box(self.simplify_optiontype());
       })
   );
 }
@@ -1082,7 +1085,7 @@ py::class_<ak::UnmaskedArray, std::shared_ptr<ak::UnmaskedArray>, ak::Content> m
       }, py::arg("mask") = py::none())
       .def("bytemask", &ak::UnmaskedArray::bytemask)
       .def("simplify", [](const ak::UnmaskedArray& self) {
-        return box(self.simplify());
+        return box(self.simplify_optiontype());
       })
   );
 }
@@ -1102,6 +1105,9 @@ py::class_<ak::ListArrayOf<T>, std::shared_ptr<ak::ListArrayOf<T>>, ak::Content>
       .def("compact_offsets64", &ak::ListArrayOf<T>::compact_offsets64, py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::ListArrayOf<T>::broadcast_tooffsets64)
       .def("toRegularArray", &ak::ListArrayOf<T>::toRegularArray)
+      .def("simplify", [](const ak::ListArrayOf<T>& self) {
+        return box(self.shallow_simplify());
+      })
   );
 }
 
@@ -1125,6 +1131,9 @@ py::class_<ak::ListOffsetArrayOf<T>, std::shared_ptr<ak::ListOffsetArrayOf<T>>, 
       .def("compact_offsets64", &ak::ListOffsetArrayOf<T>::compact_offsets64, py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::ListOffsetArrayOf<T>::broadcast_tooffsets64)
       .def("toRegularArray", &ak::ListOffsetArrayOf<T>::toRegularArray)
+      .def("simplify", [](const ak::ListOffsetArrayOf<T>& self) {
+        return box(self.shallow_simplify());
+      })
   );
 }
 
@@ -1174,7 +1183,9 @@ py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content> make_Nu
 
       .def_property_readonly("iscontiguous", &ak::NumpyArray::iscontiguous)
       .def("contiguous", &ak::NumpyArray::contiguous)
-      .def("become_contiguous", &ak::NumpyArray::become_contiguous)
+      .def("simplify", [](const ak::NumpyArray& self) {
+        return box(self.shallow_simplify());
+      })
   );
 }
 
@@ -1235,6 +1246,9 @@ py::class_<ak::Record, std::shared_ptr<ak::Record>> make_Record(const py::handle
         return box(self.astuple());
       })
      .def_property_readonly("identity", &identity<ak::Record>)
+     .def("simplify", [](const ak::Record& self) {
+       return box(self.shallow_simplify());
+     })
 
   ;
 }
@@ -1349,6 +1363,9 @@ py::class_<ak::RecordArray, std::shared_ptr<ak::RecordArray>, ak::Content> make_
       .def_property_readonly("astuple", [](const ak::RecordArray& self) -> py::object {
         return box(self.astuple());
       })
+      .def("simplify", [](const ak::RecordArray& self) {
+        return box(self.shallow_simplify());
+      })
 
   );
 }
@@ -1365,6 +1382,9 @@ py::class_<ak::RegularArray, std::shared_ptr<ak::RegularArray>, ak::Content> mak
       .def_property_readonly("content", &ak::RegularArray::content)
       .def("compact_offsets64", &ak::RegularArray::compact_offsets64, py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::RegularArray::broadcast_tooffsets64)
+      .def("simplify", [](const ak::RegularArray& self) {
+        return box(self.shallow_simplify());
+      })
   );
 }
 
@@ -1389,7 +1409,7 @@ py::class_<ak::UnionArrayOf<T, I>, std::shared_ptr<ak::UnionArrayOf<T, I>>, ak::
       .def("content", &ak::UnionArrayOf<T, I>::content)
       .def("project", &ak::UnionArrayOf<T, I>::project)
       .def("simplify", [](const ak::UnionArrayOf<T, I>& self, bool mergebool) -> py::object {
-        return box(self.simplify(mergebool));
+        return box(self.simplify_uniontype(mergebool));
       }, py::arg("mergebool") = false)
 
   );
