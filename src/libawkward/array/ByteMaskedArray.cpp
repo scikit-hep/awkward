@@ -16,6 +16,9 @@
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/IndexedArray.h"
+#include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/UnionArray.h"
 
 #include "awkward/array/ByteMaskedArray.h"
 
@@ -450,15 +453,54 @@ namespace awkward {
   }
 
   bool ByteMaskedArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::mergeable");
+    if (!parameters_equal(other.get()->parameters())) {
+      return false;
+    }
+
+    if (dynamic_cast<EmptyArray*>(other.get())  ||
+        dynamic_cast<UnionArray8_32*>(other.get())  ||
+        dynamic_cast<UnionArray8_U32*>(other.get())  ||
+        dynamic_cast<UnionArray8_64*>(other.get())) {
+      return true;
+    }
+
+    if (IndexedArray32* rawother = dynamic_cast<IndexedArray32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedArrayU32* rawother = dynamic_cast<IndexedArrayU32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedArray64* rawother = dynamic_cast<IndexedArray64*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedOptionArray32* rawother = dynamic_cast<IndexedOptionArray32*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else {
+      return content_.get()->mergeable(other, mergebool);
+    }
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::reverse_merge(const std::shared_ptr<Content>& other) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::reverse_merge");
+    std::shared_ptr<Content> indexedoptionarray = toIndexedOptionArray64();
+    IndexedOptionArray64* raw = dynamic_cast<IndexedOptionArray64*>(indexedoptionarray.get());
+    return raw->reverse_merge(other);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::merge(const std::shared_ptr<Content>& other) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::merge");
+    return toIndexedOptionArray64().get()->merge(other);
   }
 
   const std::shared_ptr<SliceItem> ByteMaskedArray::asslice() const {

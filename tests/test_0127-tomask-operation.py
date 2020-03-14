@@ -241,3 +241,16 @@ def test_IndexedOptionArray_choose():
     assert awkward1.tolist(awkward1.choose(array, 2, axis=0)) == [([[0, 1, 2], [], [3, 4]], []), ([[0, 1, 2], [], [3, 4]], None), ([[0, 1, 2], [], [3, 4]], None), ([[0, 1, 2], [], [3, 4]], [[], [10, 11, 12]]), ([], None), ([], None), ([], [[], [10, 11, 12]]), (None, None), (None, [[], [10, 11, 12]]), (None, [[], [10, 11, 12]])]
     assert awkward1.tolist(awkward1.choose(array, 2, axis=1)) == [[([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])], [], None, None, [([], [10, 11, 12])]]
     assert awkward1.tolist(awkward1.choose(array, 2, axis=2)) == [[[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]], [], None, None, [[], [(10, 11), (10, 12), (11, 12)]]]
+
+def test_merge():
+    content = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]).layout
+    mask = awkward1.layout.Index8(numpy.array([0, 0, 1, 1, 0], dtype=numpy.int8))
+    array1 = awkward1.layout.ByteMaskedArray(mask, content, validwhen=False)
+    assert awkward1.tolist(array1) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
+    array2 = awkward1.Array([[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]])
+    array12 = awkward1.concatenate([array1, array2])
+    assert awkward1.tolist(array12) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9], [0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
+    assert isinstance(array12.layout, awkward1.layout.IndexedOptionArray64)
+    assert isinstance(array12.layout.content, (awkward1.layout.ListArray64, awkward1.layout.ListOffsetArray64))
+    assert isinstance(array12.layout.content.content, awkward1.layout.NumpyArray)
+    assert awkward1.tolist(array12.layout.content.content) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 0.0, 1.1, 2.2, 6.6, 7.7, 8.8, 9.9]
