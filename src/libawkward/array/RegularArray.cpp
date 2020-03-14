@@ -600,7 +600,7 @@ namespace awkward {
     }
 
     else {
-      std::shared_ptr<Content> next = content_.get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
+      std::shared_ptr<Content> next = content_.get()->getitem_range_nowrap(0, length()*size_).get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
       return std::make_shared<RegularArray>(identities_, util::Parameters(), next, size_);
     }
   }

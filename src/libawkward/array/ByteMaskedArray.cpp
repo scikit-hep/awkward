@@ -555,7 +555,24 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: ByteMaskedArray::choose");
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (axis == depth) {
+      return choose_axis0(n, diagonal, recordlookup, parameters);
+    }
+    else {
+      int64_t numnull;
+      std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
+      Index64 nextcarry = pair.first;
+      Index64 outindex = pair.second;
+
+      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      std::shared_ptr<Content> out = next.get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
+      IndexedOptionArray64 out2(Identities::none(), util::Parameters(), outindex, out);
+      return out2.simplify();
+    }
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

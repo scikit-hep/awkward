@@ -1150,9 +1150,10 @@ namespace awkward {
     }
 
     else {
-      std::shared_ptr<Content> next = content_.get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
-      Index64 offsets = compact_offsets64(true);
-      return std::make_shared<ListOffsetArray64>(identities_, util::Parameters(), offsets, next);
+      std::shared_ptr<Content> compact = toListOffsetArray64(true);
+      ListOffsetArray64* rawcompact = dynamic_cast<ListOffsetArray64*>(compact.get());
+      std::shared_ptr<Content> next = rawcompact->content().get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
+      return std::make_shared<ListOffsetArray64>(identities_, util::Parameters(), rawcompact->offsets(), next);
     }
   }
 
@@ -1299,9 +1300,6 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     ListArrayOf<T> listarray(identities_, parameters_, util::make_starts(offsets_), util::make_stops(offsets_), content_);
-
-    std::cout << "ListOffsetArray::getitem_next(jagged)" << std::endl;
-
     return listarray.getitem_next(jagged, tail, advanced);
   }
 

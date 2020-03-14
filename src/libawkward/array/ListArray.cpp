@@ -906,9 +906,10 @@ namespace awkward {
     }
 
     else {
-      std::shared_ptr<Content> next = content_.get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
-      Index64 offsets = compact_offsets64(true);
-      return std::make_shared<ListOffsetArray64>(identities_, util::Parameters(), offsets, next);
+      std::shared_ptr<Content> compact = toListOffsetArray64(true);
+      ListOffsetArray64* rawcompact = dynamic_cast<ListOffsetArray64*>(compact.get());
+      std::shared_ptr<Content> next = rawcompact->content().get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
+      return std::make_shared<ListOffsetArray64>(identities_, util::Parameters(), rawcompact->offsets(), next);
     }
   }
 

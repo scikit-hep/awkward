@@ -223,3 +223,21 @@ def test_ByteMaskedArray_localindex():
     assert awkward1.tolist(array.localindex(axis=0)) == [0, 1, 2, 3, 4]
     assert awkward1.tolist(array.localindex(axis=1)) == [[0, 1, 2], [], None, None, [0, 1]]
     assert awkward1.tolist(array.localindex(axis=2)) == [[[0, 1, 2], [], [0, 1]], [], None, None, [[], [0, 1, 2]]]
+
+def test_ByteMaskedArray_choose():
+    content = awkward1.Array([[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]]).layout
+    mask = awkward1.layout.Index8(numpy.array([0, 0, 1, 1, 0], dtype=numpy.int8))
+    array = awkward1.Array(awkward1.layout.ByteMaskedArray(mask, content, validwhen=False))
+    assert awkward1.tolist(array) == [[[0, 1, 2], [], [3, 4]], [], None, None, [[], [10, 11, 12]]]
+    assert awkward1.tolist(awkward1.choose(array, 2, axis=0)) == [([[0, 1, 2], [], [3, 4]], []), ([[0, 1, 2], [], [3, 4]], None), ([[0, 1, 2], [], [3, 4]], None), ([[0, 1, 2], [], [3, 4]], [[], [10, 11, 12]]), ([], None), ([], None), ([], [[], [10, 11, 12]]), (None, None), (None, [[], [10, 11, 12]]), (None, [[], [10, 11, 12]])]
+    assert awkward1.tolist(awkward1.choose(array, 2, axis=1)) == [[([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])], [], None, None, [([], [10, 11, 12])]]
+    assert awkward1.tolist(awkward1.choose(array, 2, axis=2)) == [[[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]], [], None, None, [[], [(10, 11), (10, 12), (11, 12)]]]
+
+def test_IndexedOptionArray_choose():
+    content = awkward1.Array([[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]]).layout
+    index = awkward1.layout.Index64(numpy.array([0, 1, -1, -1, 4], dtype=numpy.int64))
+    array = awkward1.Array(awkward1.layout.IndexedOptionArray64(index, content))
+    assert awkward1.tolist(array) == [[[0, 1, 2], [], [3, 4]], [], None, None, [[], [10, 11, 12]]]
+    assert awkward1.tolist(awkward1.choose(array, 2, axis=0)) == [([[0, 1, 2], [], [3, 4]], []), ([[0, 1, 2], [], [3, 4]], None), ([[0, 1, 2], [], [3, 4]], None), ([[0, 1, 2], [], [3, 4]], [[], [10, 11, 12]]), ([], None), ([], None), ([], [[], [10, 11, 12]]), (None, None), (None, [[], [10, 11, 12]]), (None, [[], [10, 11, 12]])]
+    assert awkward1.tolist(awkward1.choose(array, 2, axis=1)) == [[([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])], [], None, None, [([], [10, 11, 12])]]
+    assert awkward1.tolist(awkward1.choose(array, 2, axis=2)) == [[[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]], [], None, None, [[], [(10, 11), (10, 12), (11, 12)]]]
