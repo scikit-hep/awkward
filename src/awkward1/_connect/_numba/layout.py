@@ -613,6 +613,49 @@ class BitMaskedArrayType(ContentType):
     def getitem_at(self, viewtype):
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+
+        atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
+        bitatval = builder.sdiv(atval, context.get_constant(numba.intp, 8))
+        shiftval = awkward1._connect._numba.castint(context, builder, numba.intp, numba.uint8, builder.srem(atval, context.get_constant(numba.intp, 8)))
+
+        maskpos = posat(context, builder, viewproxy.pos, self.MASK)
+        maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
+        maskarraypos = builder.add(viewproxy.start, bitatval)
+        byte = getat(context, builder, maskptr, maskarraypos, self.masktype.dtype)
+        if self.lsb_order:
+            # ((byte >> ((uint8_t)shift)) & ((uint8_t)1))
+            asbool = builder.and_(builder.lshr(byte, shiftval), context.get_constant(numba.uint8, 1))
+        else:
+            # ((byte << ((uint8_t)shift)) & ((uint8_t)128))
+            asbool = builder.and_(builder.shl(byte, shiftval), context.get_constant(numba.uint8, 128))
+
+        output = context.make_helper(builder, rettype)
+
+        with builder.if_else(builder.icmp_signed("==", builder.icmp_signed("!=", asbool, context.get_constant(numba.uint8, 0)), context.get_constant(numba.uint8, int(self.validwhen)))) as (isvalid, isnone):
+            with isvalid:
+                nextviewtype = awkward1._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+                proxynext = context.make_helper(builder, nextviewtype)
+                proxynext.pos        = nextpos
+                proxynext.start      = viewproxy.start
+                proxynext.stop       = viewproxy.stop
+                proxynext.arrayptrs  = viewproxy.arrayptrs
+                proxynext.sharedptrs = viewproxy.sharedptrs
+                proxynext.pylookup   = viewproxy.pylookup
+
+                outdata = self.contenttype.lower_getitem_at_check(context, builder, rettype.type, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, atval, False, False)
+
+                output.valid = numba.cgutils.true_bit
+                output.data = outdata
+
+            with isnone:
+                output.valid = numba.cgutils.false_bit
+                output.data = numba.cgutils.get_null_value(output.data.type)
+
+        return output._getvalue()
+
 class UnmaskedArrayType(ContentType):
     IDENTITIES = 0
     CONTENT = 1

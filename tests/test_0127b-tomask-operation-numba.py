@@ -45,9 +45,6 @@ def test_BitMaskedArray():
     content = awkward1.layout.NumpyArray(numpy.arange(13))
     mask = awkward1.layout.IndexU8(numpy.array([58, 59], dtype=numpy.uint8))
     array = awkward1.Array(awkward1.layout.BitMaskedArray(mask, content, validwhen=True, length=13, lsb_order=True))
-    assert numpy.asarray(array.layout.bytemask()).tolist() == [1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0]
-    assert numpy.asarray(array.layout.toByteMaskedArray().mask).tolist() == [0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1]
-    assert numpy.asarray(array.layout.toIndexedOptionArray64().index).tolist() == [-1, 1, -1, 3, 4, 5, -1, -1, 8, 9, -1, 11, 12]
     assert awkward1.tolist(array) == [None, 1, None, 3, 4, 5, None, None, 8, 9, None, 11, 12]
 
     @numba.njit
@@ -63,6 +60,17 @@ def test_BitMaskedArray():
     y = f2(array)
     assert isinstance(y.layout, awkward1.layout.BitMaskedArray)
     assert awkward1.tolist(y) == awkward1.tolist(array)
+
+    @numba.njit
+    def f3(x, i):
+        return x[i]
+
+    assert [f3(array, i) for i in range(len(array))] == [None, 1, None, 3, 4, 5, None, None, 8, 9, None, 11, 12]
+
+    array = awkward1.Array(awkward1.layout.BitMaskedArray(mask, content, validwhen=True, length=13, lsb_order=False))
+    assert awkward1.tolist(array) == [None, None, 2, 3, 4, None, 6, None, None, None, 10, 11, 12]
+
+    assert [f3(array, i) for i in range(len(array))] == [None, None, 2, 3, 4, None, 6, None, None, None, 10, 11, 12]
 
 def test_UnmaskedArray():
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
