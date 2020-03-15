@@ -633,19 +633,19 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(at)");
+    throw std::runtime_error("undefined operation: ByteMaskedArray::getitem_next(at)");
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(range)");
+    throw std::runtime_error("undefined operation: ByteMaskedArray::getitem_next(range)");
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(array)");
+    throw std::runtime_error("undefined operation: ByteMaskedArray::getitem_next(array)");
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: IndexedArray::getitem_next(jagged)");
+    throw std::runtime_error("undefined operation: ByteMaskedArray::getitem_next(jagged)");
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {

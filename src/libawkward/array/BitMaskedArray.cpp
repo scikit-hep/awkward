@@ -27,6 +27,10 @@ namespace awkward {
       , validwhen_(validwhen != 0)
       , length_(length)
       , lsb_order_(lsb_order) {
+    int64_t bitlength = ((length / 8) + ((length % 8) != 0));
+    if (mask.length() < bitlength) {
+      throw std::invalid_argument("BitMaskedArray mask must not be shorter than its ceil(length / 8.0)");
+    }
     if (content.get()->length() < length) {
       throw std::invalid_argument("BitMaskedArray content must not be shorter than its length");
     }
@@ -289,39 +293,45 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_field(const std::string& key) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_field");
+    return std::make_shared<BitMaskedArray>(identities_, util::Parameters(), mask_, content_.get()->getitem_field(key), validwhen_, length_, lsb_order_);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_fields");
+    return std::make_shared<BitMaskedArray>(identities_, util::Parameters(), mask_, content_.get()->getitem_fields(keys), validwhen_, length_, lsb_order_);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_next");
+    return toByteMaskedArray().get()->getitem_next(head, tail, advanced);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::carry(const Index64& carry) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::carry");
+    return toByteMaskedArray().get()->carry(carry);
   }
 
   const std::string BitMaskedArray::purelist_parameter(const std::string& key) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::purelist_parameter");
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      return content_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
   }
 
   bool BitMaskedArray::purelist_isregular() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::purelist_isregular");
+    return content_.get()->purelist_isregular();
   }
 
   int64_t BitMaskedArray::purelist_depth() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::purelist_depth");
+    return content_.get()->purelist_depth();
   }
 
   const std::pair<int64_t, int64_t> BitMaskedArray::minmax_depth() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::minmax_depth");
+    return content_.get()->minmax_depth();
   }
 
   const std::pair<bool, int64_t> BitMaskedArray::branch_depth() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::branch_depth");
+    return content_.get()->branch_depth();
   }
 
   int64_t BitMaskedArray::numfields() const {
@@ -345,7 +355,7 @@ namespace awkward {
   }
 
   const std::string BitMaskedArray::validityerror(const std::string& path) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::validityerror");
+    return content_.get()->validityerror(path + std::string(".content"));
   }
 
   const std::shared_ptr<Content> BitMaskedArray::shallow_simplify() const {
@@ -353,11 +363,11 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> BitMaskedArray::num(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::num");
+    return toByteMaskedArray().get()->num(axis, depth);
   }
 
   const std::pair<Index64, std::shared_ptr<Content>> BitMaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::offsets_and_flattened");
+    return toByteMaskedArray().get()->offsets_and_flattened(axis, depth);
   }
 
   bool BitMaskedArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
@@ -412,60 +422,55 @@ namespace awkward {
   }
 
   const std::shared_ptr<SliceItem> BitMaskedArray::asslice() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::asslice");
+    return toIndexedOptionArray64().get()->asslice();
   }
 
   const std::shared_ptr<Content> BitMaskedArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::rpad");
+    return toByteMaskedArray().get()->rpad(target, axis, depth);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::rpad_and_clip");
+    return toByteMaskedArray().get()->rpad_and_clip(target, axis, depth);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::reduce_next");
+    return toByteMaskedArray().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::localindex(int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::localindex");
+    return toByteMaskedArray().get()->localindex(axis, depth);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::choose");
+    return toByteMaskedArray().get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: should this be an undefined operation: IndexedArray::getitem_next(at)");
+    throw std::runtime_error("undefined operation: BitMaskedArray::getitem_next(at)");
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: should this be an undefined operation: IndexedArray::getitem_next(range)");
+    throw std::runtime_error("undefined operation: BitMaskedArray::getitem_next(range)");
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: should this be an undefined operation: IndexedArray::getitem_next(array)");
+    throw std::runtime_error("undefined operation: BitMaskedArray::getitem_next(array)");
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
-    throw std::runtime_error("FIXME: should this be an undefined operation: IndexedArray::getitem_next(jagged)");
+    throw std::runtime_error("undefined operation: BitMaskedArray::getitem_next(jagged)");
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_next_jagged(array)");
+    return toByteMaskedArray().get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_next_jagged(missing)");
+    return toByteMaskedArray().get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_next_jagged(jagged)");
-  }
-
-  template <typename S>
-  const std::shared_ptr<Content> BitMaskedArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_next_jagged_generic");
+    return toByteMaskedArray().get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
 }

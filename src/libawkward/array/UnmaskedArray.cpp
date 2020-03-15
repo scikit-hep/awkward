@@ -297,9 +297,4 @@ namespace awkward {
     throw std::runtime_error("FIXME: UnmaskedArray::getitem_next_jagged(jagged)");
   }
 
-  template <typename S>
-  const std::shared_ptr<Content> UnmaskedArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
-    throw std::runtime_error("FIXME: UnmaskedArray::getitem_next_jagged_generic");
-  }
-
 }
