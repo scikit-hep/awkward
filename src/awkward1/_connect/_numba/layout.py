@@ -534,6 +534,47 @@ class ByteMaskedArrayType(ContentType):
         content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
         return awkward1.layout.ByteMaskedArray(mask, content, self.validwhen, parameters=self.parameters)
 
+    def hasfield(self, key):
+        return self.contenttype.hasfield(key)
+
+    def getitem_at(self, viewtype):
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
+
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+
+        atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
+
+        maskpos = posat(context, builder, viewproxy.pos, self.MASK)
+        maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
+        maskarraypos = builder.add(viewproxy.start, atval)
+        byte = getat(context, builder, maskptr, maskarraypos, self.masktype.dtype)
+
+        output = context.make_helper(builder, rettype)
+
+        with builder.if_else(builder.icmp_signed("==", builder.icmp_signed("!=", byte, context.get_constant(numba.int8, 0)), context.get_constant(numba.int8, int(self.validwhen)))) as (isvalid, isnone):
+            with isvalid:
+                nextviewtype = awkward1._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+                proxynext = context.make_helper(builder, nextviewtype)
+                proxynext.pos        = nextpos
+                proxynext.start      = viewproxy.start
+                proxynext.stop       = viewproxy.stop
+                proxynext.arrayptrs  = viewproxy.arrayptrs
+                proxynext.sharedptrs = viewproxy.sharedptrs
+                proxynext.pylookup   = viewproxy.pylookup
+
+                outdata = self.contenttype.lower_getitem_at_check(context, builder, rettype.type, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, atval, False, False)
+
+                output.valid = numba.cgutils.true_bit
+                output.data = outdata
+
+            with isnone:
+                output.valid = numba.cgutils.false_bit
+                output.data = numba.cgutils.get_null_value(output.data.type)
+
+        return output._getvalue()
+
 class BitMaskedArrayType(ContentType):
     IDENTITIES = 0
     MASK = 1
@@ -566,6 +607,12 @@ class BitMaskedArrayType(ContentType):
         content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
         return awkward1.layout.BitMaskedArray(mask, content, self.validwhen, len(content), self.lsb_order, parameters=self.parameters)
 
+    def hasfield(self, key):
+        return self.contenttype.hasfield(key)
+
+    def getitem_at(self, viewtype):
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
+
 class UnmaskedArrayType(ContentType):
     IDENTITIES = 0
     CONTENT = 1
@@ -589,6 +636,12 @@ class UnmaskedArrayType(ContentType):
     def tolayout(self, lookup, pos, fields):
         content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
         return awkward1.layout.UnmaskedArray(content, parameters=self.parameters)
+
+    def hasfield(self, key):
+        return self.contenttype.hasfield(key)
+
+    def getitem_at(self, viewtype):
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
 class RecordArrayType(ContentType):
     IDENTITIES = 0

@@ -31,6 +31,16 @@ def test_ByteMaskedArray():
     assert isinstance(y.layout, awkward1.layout.ByteMaskedArray)
     assert awkward1.tolist(y) == awkward1.tolist(array)
 
+    @numba.njit
+    def f3(x, i):
+        return x[i]
+
+    assert awkward1.tolist(f3(array, 0)) == [0.0, 1.1, 2.2]
+    assert awkward1.tolist(f3(array, 1)) == []
+    assert f3(array, 2) is None
+    assert f3(array, 3) is None
+    assert awkward1.tolist(f3(array, 4)) == [6.6, 7.7, 8.8, 9.9]
+
 def test_BitMaskedArray():
     content = awkward1.layout.NumpyArray(numpy.arange(13))
     mask = awkward1.layout.IndexU8(numpy.array([58, 59], dtype=numpy.uint8))
