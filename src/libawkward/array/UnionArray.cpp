@@ -596,7 +596,8 @@ namespace awkward {
         outcontents.push_back(projection.get()->getitem_next(head, tail, advanced));
       }
       IndexOf<I> outindex = regular_index(tags_);
-      return std::make_shared<UnionArrayOf<T, I>>(identities_, parameters_, tags_, outindex, outcontents);
+      UnionArrayOf<T, I> out(identities_, parameters_, tags_, outindex, outcontents);
+      return out.simplify_uniontype(false);
     }
     else if (SliceEllipsis* ellipsis = dynamic_cast<SliceEllipsis*>(head.get())) {
       return Content::getitem_next(*ellipsis, tail, advanced);

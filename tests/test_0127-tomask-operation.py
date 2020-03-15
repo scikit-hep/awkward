@@ -285,3 +285,12 @@ def test_BitMaskedArray():
     assert awkward1.tolist(array[5:-5]) == [None, 6, None]
     assert awkward1.tolist(array[6:-6]) == [6]
     assert awkward1.tolist(array[8:]) == [None, None, 10, 11, 12]
+
+def test_UnmaskedArray():
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
+    array = awkward1.layout.UnmaskedArray(content)
+    assert awkward1.tolist(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert str(awkward1.typeof(content)) == "float64"
+    assert str(awkward1.typeof(awkward1.Array(content))) == "5 * float64"
+    assert str(awkward1.typeof(array)) == "?float64"
+    assert str(awkward1.typeof(awkward1.Array(array))) == "5 * ?float64"
