@@ -263,9 +263,25 @@ def test_BitMaskedArray():
     assert numpy.asarray(array.toByteMaskedArray().mask).tolist() == [0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1]
     assert numpy.asarray(array.toIndexedOptionArray64().index).tolist() == [-1, 1, -1, 3, 4, 5, -1, -1, 8, 9, -1, 11, 12]
     assert awkward1.tolist(array) == [None, 1, None, 3, 4, 5, None, None, 8, 9, None, 11, 12]
+    assert awkward1.tojson(array) == "[null,1,null,3,4,5,null,null,8,9,null,11,12]"
+    assert awkward1.tolist(array[1:-1]) == [1, None, 3, 4, 5, None, None, 8, 9, None, 11]
+    assert awkward1.tolist(array[2:-2]) == [None, 3, 4, 5, None, None, 8, 9, None]
+    assert awkward1.tolist(array[3:-3]) == [3, 4, 5, None, None, 8, 9]
+    assert awkward1.tolist(array[4:-4]) == [4, 5, None, None, 8]
+    assert awkward1.tolist(array[5:-5]) == [5, None, None]
+    assert awkward1.tolist(array[6:-6]) == [None]
+    assert awkward1.tolist(array[8:]) == [8, 9, None, 11, 12]
 
     array = awkward1.layout.BitMaskedArray(mask, content, validwhen=True, length=13, lsb_order=False)
     assert numpy.asarray(array.bytemask()).tolist() == [1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0]
     assert numpy.asarray(array.toByteMaskedArray().mask).tolist() == [0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1]
     assert numpy.asarray(array.toIndexedOptionArray64().index).tolist() == [-1, -1, 2, 3, 4, -1, 6, -1, -1, -1, 10, 11, 12]
     assert awkward1.tolist(array) == [None, None, 2, 3, 4, None, 6, None, None, None, 10, 11, 12]
+    assert awkward1.tojson(array) == "[null,null,2,3,4,null,6,null,null,null,10,11,12]"
+    assert awkward1.tolist(array[1:-1]) == [None, 2, 3, 4, None, 6, None, None, None, 10, 11]
+    assert awkward1.tolist(array[2:-2]) == [2, 3, 4, None, 6, None, None, None, 10]
+    assert awkward1.tolist(array[3:-3]) == [3, 4, None, 6, None, None, None]
+    assert awkward1.tolist(array[4:-4]) == [4, None, 6, None, None]
+    assert awkward1.tolist(array[5:-5]) == [None, 6, None]
+    assert awkward1.tolist(array[6:-6]) == [6]
+    assert awkward1.tolist(array[8:]) == [None, None, 10, 11, 12]

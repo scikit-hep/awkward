@@ -55,6 +55,12 @@ py::object box(const std::shared_ptr<ak::Content>& content) {
   else if (ak::ByteMaskedArray* raw = dynamic_cast<ak::ByteMaskedArray*>(content.get())) {
     return py::cast(*raw);
   }
+  else if (ak::BitMaskedArray* raw = dynamic_cast<ak::BitMaskedArray*>(content.get())) {
+    return py::cast(*raw);
+  }
+  else if (ak::UnmaskedArray* raw = dynamic_cast<ak::UnmaskedArray*>(content.get())) {
+    return py::cast(*raw);
+  }
   else if (ak::ListArray32* raw = dynamic_cast<ak::ListArray32*>(content.get())) {
     return py::cast(*raw);
   }
@@ -144,6 +150,14 @@ std::shared_ptr<ak::Content> unbox_content(const py::handle& obj) {
   catch (py::cast_error err) { }
   try {
     return obj.cast<ak::ByteMaskedArray*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::BitMaskedArray*>()->shallow_copy();
+  }
+  catch (py::cast_error err) { }
+  try {
+    return obj.cast<ak::UnmaskedArray*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
   try {

@@ -115,11 +115,59 @@ namespace awkward {
   }
 
   void BitMaskedArray::setidentities(const std::shared_ptr<Identities>& identities) {
-    throw std::runtime_error("FIXME: BitMaskedArray::setidentities(identities)");
+    if (identities.get() == nullptr) {
+      content_.get()->setidentities(identities);
+    }
+    else {
+      if (length() != identities.get()->length()) {
+        util::handle_error(failure("content and its identities must have the same length", kSliceNone, kSliceNone), classname(), identities_.get());
+      }
+      if (Identities32* rawidentities = dynamic_cast<Identities32*>(identities.get())) {
+        std::shared_ptr<Identities32> subidentities = std::make_shared<Identities32>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content_.get()->length());
+        Identities32* rawsubidentities = reinterpret_cast<Identities32*>(subidentities.get());
+        struct Error err = awkward_identities32_extend(
+          rawsubidentities->ptr().get(),
+          rawidentities->ptr().get(),
+          rawidentities->offset(),
+          rawidentities->length(),
+          content_.get()->length());
+        util::handle_error(err, classname(), identities_.get());
+        content_.get()->setidentities(subidentities);
+      }
+      else if (Identities64* rawidentities = dynamic_cast<Identities64*>(identities.get())) {
+        std::shared_ptr<Identities64> subidentities = std::make_shared<Identities64>(Identities::newref(), rawidentities->fieldloc(), rawidentities->width(), content_.get()->length());
+        Identities64* rawsubidentities = reinterpret_cast<Identities64*>(subidentities.get());
+        struct Error err = awkward_identities64_extend(
+          rawsubidentities->ptr().get(),
+          rawidentities->ptr().get(),
+          rawidentities->offset(),
+          rawidentities->length(),
+          content_.get()->length());
+        util::handle_error(err, classname(), identities_.get());
+        content_.get()->setidentities(subidentities);
+      }
+      else {
+        throw std::runtime_error("unrecognized Identities specialization");
+      }
+    }
+    identities_ = identities;
   }
 
   void BitMaskedArray::setidentities() {
-    throw std::runtime_error("FIXME: BitMaskedArray::setidentities");
+    if (length() <= kMaxInt32) {
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities32>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities32* rawidentities = reinterpret_cast<Identities32*>(newidentities.get());
+      struct Error err = awkward_new_identities32(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
+    }
+    else {
+      std::shared_ptr<Identities> newidentities = std::make_shared<Identities64>(Identities::newref(), Identities::FieldLoc(), 1, length());
+      Identities64* rawidentities = reinterpret_cast<Identities64*>(newidentities.get());
+      struct Error err = awkward_new_identities64(rawidentities->ptr().get(), length());
+      util::handle_error(err, classname(), identities_.get());
+      setidentities(newidentities);
+    }
   }
 
   const std::shared_ptr<Type> BitMaskedArray::type(const std::map<std::string, std::string>& typestrs) const {
@@ -127,7 +175,18 @@ namespace awkward {
   }
 
   const std::string BitMaskedArray::tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::tostring_part");
+    std::stringstream out;
+    out << indent << pre << "<" << classname() << " validwhen=\"" << (validwhen_ ? "true" : "false") << "\" length=\"" << length_ << "\" lsb_order=\"" << (lsb_order_ ? "true" : "false") << "\">\n";
+    if (identities_.get() != nullptr) {
+      out << identities_.get()->tostring_part(indent + std::string("    "), "", "\n");
+    }
+    if (!parameters_.empty()) {
+      out << parameters_tostring(indent + std::string("    "), "", "\n");
+    }
+    out << mask_.tostring_part(indent + std::string("    "), "<mask>", "</mask>\n");
+    out << content_.get()->tostring_part(indent + std::string("    "), "<content>", "</content>\n");
+    out << indent << "</" << classname() << ">" << post;
+    return out.str();
   }
 
   void BitMaskedArray::tojson_part(ToJson& builder) const {
@@ -157,7 +216,13 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> BitMaskedArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::deep_copy");
+    IndexU8 mask = copyindexes ? mask_.deep_copy() : mask_;
+    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+    std::shared_ptr<Identities> identities = identities_;
+    if (copyidentities  &&  identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<BitMaskedArray>(identities, parameters_, mask, content, validwhen_, length_, lsb_order_);
   }
 
   void BitMaskedArray::check_for_iteration() const {
@@ -195,11 +260,32 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_range(int64_t start, int64_t stop) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_range");
+    int64_t regular_start = start;
+    int64_t regular_stop = stop;
+    awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
+    if (identities_.get() != nullptr  &&  regular_stop > identities_.get()->length()) {
+      util::handle_error(failure("index out of range", kSliceNone, stop), identities_.get()->classname(), nullptr);
+    }
+    return getitem_range_nowrap(regular_start, regular_stop);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_range_nowrap");
+    int64_t bitstart = start / 8;
+    int64_t remainder = start % 8;
+    if (remainder == 0) {
+      std::shared_ptr<Identities> identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->getitem_range_nowrap(start, stop);
+      }
+      int64_t length = stop - start;
+      int64_t bitlength = length / 8;
+      int64_t remainder = length % 8;
+      int64_t bitstop = bitstart + (bitlength + (remainder != 0));
+      return std::make_shared<BitMaskedArray>(identities, parameters_, mask_.getitem_range_nowrap(bitstart, bitstop), content_.get()->getitem_range_nowrap(start, stop), validwhen_, length, lsb_order_);
+    }
+    else {
+      return toByteMaskedArray().get()->getitem_range_nowrap(start, stop);
+    }
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_field(const std::string& key) const {
