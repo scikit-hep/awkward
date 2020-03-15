@@ -686,6 +686,30 @@ class UnmaskedArrayType(ContentType):
     def getitem_at(self, viewtype):
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
+    def lower_getitem_at(self, context, builder, rettype, viewtype, viewval, viewproxy, attype, atval, wrapneg, checkbounds):
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+
+        atval = regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds)
+
+        output = context.make_helper(builder, rettype)
+
+        nextviewtype = awkward1._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+        proxynext = context.make_helper(builder, nextviewtype)
+        proxynext.pos        = nextpos
+        proxynext.start      = viewproxy.start
+        proxynext.stop       = viewproxy.stop
+        proxynext.arrayptrs  = viewproxy.arrayptrs
+        proxynext.sharedptrs = viewproxy.sharedptrs
+        proxynext.pylookup   = viewproxy.pylookup
+
+        outdata = self.contenttype.lower_getitem_at_check(context, builder, rettype.type, nextviewtype, proxynext._getvalue(), proxynext, numba.intp, atval, False, False)
+
+        output.valid = numba.cgutils.true_bit
+        output.data = outdata
+
+        return output._getvalue()
+
 class RecordArrayType(ContentType):
     IDENTITIES = 0
     CONTENTS = 1

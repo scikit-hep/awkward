@@ -92,3 +92,9 @@ def test_UnmaskedArray():
     assert isinstance(y.layout, awkward1.layout.UnmaskedArray)
     assert awkward1.tolist(y) == awkward1.tolist(array)
     assert str(awkward1.typeof(y)) == str(awkward1.typeof(array))
+
+    @numba.njit
+    def f3(x, i):
+        return x[i]
+
+    assert [f3(array, i) for i in range(len(array))] == [1.1, 2.2, 3.3, 4.4, 5.5]
