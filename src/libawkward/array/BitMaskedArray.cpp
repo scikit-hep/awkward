@@ -143,7 +143,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> BitMaskedArray::shallow_copy() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::shallow_copy");
+    return std::make_shared<BitMaskedArray>(identities_, parameters_, mask_, content_, validwhen_, length_, lsb_order_);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
@@ -151,19 +151,37 @@ namespace awkward {
   }
 
   void BitMaskedArray::check_for_iteration() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::check_for_iteration");
+    if (identities_.get() != nullptr  &&  identities_.get()->length() < length()) {
+      util::handle_error(failure("len(identities) < len(array)", kSliceNone, kSliceNone), identities_.get()->classname(), nullptr);
+    }
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_nothing() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_nothing");
+    return content_.get()->getitem_range_nowrap(0, 0);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_at(int64_t at) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_at");
+    int64_t regular_at = at;
+    if (regular_at < 0) {
+      regular_at += length();
+    }
+    if (!(0 <= regular_at  &&  regular_at < length())) {
+      util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
+    }
+    return getitem_at_nowrap(regular_at);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_at_nowrap(int64_t at) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::getitem_at_nowrap");
+    int64_t bitat = at / 8;
+    int64_t shift = at % 8;
+    uint8_t byte = mask_.getitem_at_nowrap(bitat);
+    uint8_t asbool = (lsb_order_ ? ((byte >> ((uint8_t)shift)) & ((uint8_t)1)) : ((byte << ((uint8_t)shift)) & ((uint8_t)128)));
+    if ((asbool != 0) == validwhen_) {
+      return content_.get()->getitem_at_nowrap(at);
+    }
+    else {
+      return none;
+    }
   }
 
   const std::shared_ptr<Content> BitMaskedArray::getitem_range(int64_t start, int64_t stop) const {

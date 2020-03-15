@@ -256,10 +256,16 @@ def test_merge():
     assert awkward1.tolist(array12.layout.content.content) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 0.0, 1.1, 2.2, 6.6, 7.7, 8.8, 9.9]
 
 def test_BitMaskedArray():
-    content = awkward1.layout.NumpyArray(numpy.arange(16))
+    content = awkward1.layout.NumpyArray(numpy.arange(13))
     mask = awkward1.layout.IndexU8(numpy.array([58, 59], dtype=numpy.uint8))
-    array = awkward1.layout.BitMaskedArray(mask, content, validwhen=True, length=16, lsb_order=True)
-    assert numpy.asarray(array.bytemask()).tolist() == [1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1]
+    array = awkward1.layout.BitMaskedArray(mask, content, validwhen=True, length=13, lsb_order=True)
+    assert numpy.asarray(array.bytemask()).tolist() == [1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0]
+    assert numpy.asarray(array.toByteMaskedArray().mask).tolist() == [0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1]
+    assert numpy.asarray(array.toIndexedOptionArray64().index).tolist() == [-1, 1, -1, 3, 4, 5, -1, -1, 8, 9, -1, 11, 12]
+    assert awkward1.tolist(array) == [None, 1, None, 3, 4, 5, None, None, 8, 9, None, 11, 12]
 
-    array = awkward1.layout.BitMaskedArray(mask, content, validwhen=True, length=16, lsb_order=False)
-    assert numpy.asarray(array.bytemask()).tolist() == [1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0]
+    array = awkward1.layout.BitMaskedArray(mask, content, validwhen=True, length=13, lsb_order=False)
+    assert numpy.asarray(array.bytemask()).tolist() == [1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0]
+    assert numpy.asarray(array.toByteMaskedArray().mask).tolist() == [0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1]
+    assert numpy.asarray(array.toIndexedOptionArray64().index).tolist() == [-1, -1, 2, 3, 4, -1, 6, -1, -1, -1, 10, 11, 12]
+    assert awkward1.tolist(array) == [None, None, 2, 3, 4, None, 6, None, None, None, 10, 11, 12]
