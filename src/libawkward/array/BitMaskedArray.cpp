@@ -49,15 +49,24 @@ namespace awkward {
   }
 
   const std::shared_ptr<Content> BitMaskedArray::project() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::project");
+    return toByteMaskedArray().get()->project();
   }
 
   const std::shared_ptr<Content> BitMaskedArray::project(const Index8& mask) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::project(mask)");
+    return toByteMaskedArray().get()->project(mask);
   }
 
   const Index8 BitMaskedArray::bytemask() const {
-    return toByteMaskedArray().get()->bytemask();
+    Index8 bytemask(mask_.length() * 8);
+    struct Error err = awkward_bitmaskedarray_to_bytemaskedarray(
+      bytemask.ptr().get(),
+      mask_.ptr().get(),
+      mask_.offset(),
+      mask_.length(),
+      false,
+      lsb_order_);
+    util::handle_error(err, classname(), identities_.get());
+    return bytemask.getitem_range_nowrap(0, length_);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::simplify_optiontype() const {
@@ -82,6 +91,7 @@ namespace awkward {
       mask_.ptr().get(),
       mask_.offset(),
       mask_.length(),
+      validwhen_,
       lsb_order_);
     util::handle_error(err, classname(), identities_.get());
     return std::make_shared<ByteMaskedArray>(identities_, parameters_, bytemask.getitem_range_nowrap(0, length_), content_, validwhen_);
