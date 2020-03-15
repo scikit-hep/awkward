@@ -1065,6 +1065,7 @@ py::class_<ak::BitMaskedArray, std::shared_ptr<ak::BitMaskedArray>, ak::Content>
       .def_property_readonly("mask", &ak::BitMaskedArray::mask)
       .def_property_readonly("content", &ak::BitMaskedArray::content)
       .def_property_readonly("validwhen", &ak::BitMaskedArray::validwhen)
+      .def_property_readonly("lsb_order", &ak::BitMaskedArray::lsb_order)
       .def("project", [](const ak::BitMaskedArray& self, const py::object& mask) {
         if (mask.is(py::none())) {
           return box(self.project());

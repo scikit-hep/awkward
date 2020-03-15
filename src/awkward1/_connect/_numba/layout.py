@@ -508,23 +508,87 @@ class ByteMaskedArrayType(ContentType):
     MASK = 1
     CONTENT = 2
 
+    @classmethod
+    def tolookup(cls, layout, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.tolookup_identities(layout, positions, sharedptrs, arrays)
+        sharedptrs[-1] = layout._persistent_shared_ptr
+        arrays.append(numpy.asarray(layout.mask))
+        positions.append(arrays[-1])
+        sharedptrs.append(None)
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(layout.content, positions, sharedptrs, arrays)
+        return pos
+
     def __init__(self, masktype, contenttype, validwhen, identitiestype, parameters):
-        raise NotImplementedError
+        super(ByteMaskedArrayType, self).__init__(name="awkward1.ByteMaskedArrayType({0}, {1}, {2}, {3}, {4})".format(masktype.name, contenttype.name, validwhen, identitiestype.name, json.dumps(parameters)))
+        self.masktype = masktype
+        self.contenttype = contenttype
+        self.validwhen = validwhen
+        self.identitiestype = identitiestype
+        self.parameters = parameters
+
+    def tolayout(self, lookup, pos, fields):
+        mask = self.IndexOf(self.masktype)(lookup.arrays[lookup.positions[pos + self.MASK]])
+        content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
+        return awkward1.layout.ByteMaskedArray(mask, content, self.validwhen, parameters=self.parameters)
 
 class BitMaskedArrayType(ContentType):
     IDENTITIES = 0
     MASK = 1
     CONTENT = 2
 
+    @classmethod
+    def tolookup(cls, layout, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.tolookup_identities(layout, positions, sharedptrs, arrays)
+        sharedptrs[-1] = layout._persistent_shared_ptr
+        arrays.append(numpy.asarray(layout.mask))
+        positions.append(arrays[-1])
+        sharedptrs.append(None)
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(layout.content, positions, sharedptrs, arrays)
+        return pos
+
     def __init__(self, masktype, contenttype, validwhen, lsb_order, identitiestype, parameters):
-        raise NotImplementedError
+        super(BitMaskedArrayType, self).__init__(name="awkward1.BitMaskedArrayType({0}, {1}, {2}, {3}, {4}, {5})".format(masktype.name, contenttype.name, validwhen, lsb_order, identitiestype.name, json.dumps(parameters)))
+        self.masktype = masktype
+        self.contenttype = contenttype
+        self.validwhen = validwhen
+        self.lsb_order = lsb_order
+        self.identitiestype = identitiestype
+        self.parameters = parameters
+
+    def tolayout(self, lookup, pos, fields):
+        mask = self.IndexOf(self.masktype)(lookup.arrays[lookup.positions[pos + self.MASK]])
+        content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
+        return awkward1.layout.BitMaskedArray(mask, content, self.validwhen, len(content), self.lsb_order, parameters=self.parameters)
 
 class UnmaskedArrayType(ContentType):
     IDENTITIES = 0
     CONTENT = 1
 
+    @classmethod
+    def tolookup(cls, layout, positions, sharedptrs, arrays):
+        pos = len(positions)
+        cls.tolookup_identities(layout, positions, sharedptrs, arrays)
+        sharedptrs[-1] = layout._persistent_shared_ptr
+        positions.append(None)
+        sharedptrs.append(None)
+        positions[pos + cls.CONTENT] = awkward1._connect._numba.arrayview.tolookup(layout.content, positions, sharedptrs, arrays)
+        return pos
+
     def __init__(self, contenttype, identitiestype, parameters):
-        raise NotImplementedError
+        super(UnmaskedArrayType, self).__init__(name="awkward1.UnmaskedArrayType({0}, {1}, {2})".format(contenttype.name, identitiestype.name, json.dumps(parameters)))
+        self.contenttype = contenttype
+        self.identitiestype = identitiestype
+        self.parameters = parameters
+
+    def tolayout(self, lookup, pos, fields):
+        content = self.contenttype.tolayout(lookup, lookup.positions[pos + self.CONTENT], fields)
+        return awkward1.layout.UnmaskedArray(content, parameters=self.parameters)
 
 class RecordArrayType(ContentType):
     IDENTITIES = 0
