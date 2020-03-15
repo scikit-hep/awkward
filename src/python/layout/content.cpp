@@ -1063,6 +1063,8 @@ py::class_<ak::BitMaskedArray, std::shared_ptr<ak::BitMaskedArray>, ak::Content>
       .def("simplify", [](const ak::BitMaskedArray& self) {
         return box(self.simplify_optiontype());
       })
+      .def("toByteMaskedArray", &ak::BitMaskedArray::toByteMaskedArray)
+      .def("toIndexedOptionArray64", &ak::BitMaskedArray::toIndexedOptionArray64)
   );
 }
 

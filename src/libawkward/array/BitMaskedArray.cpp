@@ -24,7 +24,7 @@ namespace awkward {
       : Content(identities, parameters)
       , mask_(mask)
       , content_(content)
-      , validwhen_(validwhen)
+      , validwhen_(validwhen != 0)
       , length_(length)
       , lsb_order_(lsb_order) {
     if (content.get()->length() < length) {
@@ -46,18 +46,6 @@ namespace awkward {
 
   bool BitMaskedArray::lsb_order() const {
     return lsb_order_;
-  }
-
-  const std::shared_ptr<ByteMaskedArray> BitMaskedArray::toByteMaskedArray() const {
-    Index8 bytemask(mask_.length() * 8);
-    struct Error err = awkward_bitmaskedarray_to_bytemaskedarray(
-      bytemask.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
-      mask_.length(),
-      lsb_order_);
-    util::handle_error(err, classname(), identities_.get());
-    return std::make_shared<ByteMaskedArray>(identities_, parameters_, bytemask.getitem_range_nowrap(0, length_), content_, validwhen_);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::project() const {
@@ -87,8 +75,29 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> BitMaskedArray::toIndexedOptionArray64() const {
-    throw std::runtime_error("FIXME: BitMaskedArray::toIndexedOptionArray64");
+  const std::shared_ptr<ByteMaskedArray> BitMaskedArray::toByteMaskedArray() const {
+    Index8 bytemask(mask_.length() * 8);
+    struct Error err = awkward_bitmaskedarray_to_bytemaskedarray(
+      bytemask.ptr().get(),
+      mask_.ptr().get(),
+      mask_.offset(),
+      mask_.length(),
+      lsb_order_);
+    util::handle_error(err, classname(), identities_.get());
+    return std::make_shared<ByteMaskedArray>(identities_, parameters_, bytemask.getitem_range_nowrap(0, length_), content_, validwhen_);
+  }
+
+  const std::shared_ptr<IndexedOptionArray64> BitMaskedArray::toIndexedOptionArray64() const {
+    Index64 index(mask_.length() * 8);
+    struct Error err = awkward_bitmaskedarray_to_indexedoptionarray_64(
+      index.ptr().get(),
+      mask_.ptr().get(),
+      mask_.offset(),
+      mask_.length(),
+      validwhen_,
+      lsb_order_);
+    util::handle_error(err, classname(), identities_.get());
+    return std::make_shared<IndexedOptionArray64>(identities_, parameters_, index.getitem_range_nowrap(0, length_), content_);
   }
 
   const std::string BitMaskedArray::classname() const {

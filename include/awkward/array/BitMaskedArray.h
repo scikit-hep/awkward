@@ -12,6 +12,7 @@
 #include "awkward/Index.h"
 #include "awkward/Content.h"
 #include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/IndexedArray.h"
 
 namespace awkward {
   class EXPORT_SYMBOL BitMaskedArray: public Content {
@@ -21,12 +22,12 @@ namespace awkward {
     const std::shared_ptr<Content> content() const;
     bool validwhen() const;
     bool lsb_order() const;
-    const std::shared_ptr<ByteMaskedArray> toByteMaskedArray() const;
     const std::shared_ptr<Content> project() const;
     const std::shared_ptr<Content> project(const Index8& mask) const;
     const Index8 bytemask() const;
     const std::shared_ptr<Content> simplify_optiontype() const;
-    const std::shared_ptr<Content> toIndexedOptionArray64() const;
+    const std::shared_ptr<ByteMaskedArray> toByteMaskedArray() const;
+    const std::shared_ptr<IndexedOptionArray64> toIndexedOptionArray64() const;
 
     const std::string classname() const override;
     void setidentities() override;

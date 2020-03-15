@@ -1186,3 +1186,131 @@ ERROR awkward_bitmaskedarray_to_bytemaskedarray(int8_t* tobytemask, const uint8_
   }
   return success();
 }
+
+template <typename T>
+ERROR awkward_bitmaskedarray_to_indexedoptionarray(T* toindex, const uint8_t* frombitmask, int64_t bitmaskoffset, int64_t bitmasklength, bool validwhen, bool lsb_order) {
+  if (lsb_order) {
+    for (int64_t i = 0;  i < bitmasklength;  i++) {
+      uint8_t byte = frombitmask[bitmaskoffset + i];
+      if (byte & ((uint8_t)1) == validwhen) {
+        toindex[i*8 + 0] = i*8 + 0;
+      }
+      else {
+        toindex[i*8 + 0] = -1;
+      }
+      byte >>= 1;
+      if (byte & ((uint8_t)1) == validwhen) {
+        toindex[i*8 + 1] = i*8 + 1;
+      }
+      else {
+        toindex[i*8 + 1] = -1;
+      }
+      byte >>= 1;
+      if (byte & ((uint8_t)1) == validwhen) {
+        toindex[i*8 + 2] = i*8 + 2;
+      }
+      else {
+        toindex[i*8 + 2] = -1;
+      }
+      byte >>= 1;
+      if (byte & ((uint8_t)1) == validwhen) {
+        toindex[i*8 + 3] = i*8 + 3;
+      }
+      else {
+        toindex[i*8 + 3] = -1;
+      }
+      byte >>= 1;
+      if (byte & ((uint8_t)1) == validwhen) {
+        toindex[i*8 + 4] = i*8 + 4;
+      }
+      else {
+        toindex[i*8 + 4] = -1;
+      }
+      byte >>= 1;
+      if (byte & ((uint8_t)1) == validwhen) {
+        toindex[i*8 + 5] = i*8 + 5;
+      }
+      else {
+        toindex[i*8 + 5] = -1;
+      }
+      byte >>= 1;
+      if (byte & ((uint8_t)1) == validwhen) {
+        toindex[i*8 + 6] = i*8 + 6;
+      }
+      else {
+        toindex[i*8 + 6] = -1;
+      }
+      byte >>= 1;
+      if (byte & ((uint8_t)1) == validwhen) {
+        toindex[i*8 + 7] = i*8 + 7;
+      }
+      else {
+        toindex[i*8 + 7] = -1;
+      }
+    }
+  }
+  else {
+    for (int64_t i = 0;  i < bitmasklength;  i++) {
+      uint8_t byte = frombitmask[bitmaskoffset + i];
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 0] = i*8 + 0;
+      }
+      else {
+        toindex[i*8 + 0] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 1] = i*8 + 1;
+      }
+      else {
+        toindex[i*8 + 1] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 2] = i*8 + 2;
+      }
+      else {
+        toindex[i*8 + 2] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 3] = i*8 + 3;
+      }
+      else {
+        toindex[i*8 + 3] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 4] = i*8 + 4;
+      }
+      else {
+        toindex[i*8 + 4] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 5] = i*8 + 5;
+      }
+      else {
+        toindex[i*8 + 5] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 6] = i*8 + 6;
+      }
+      else {
+        toindex[i*8 + 6] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 7] = i*8 + 7;
+      }
+      else {
+        toindex[i*8 + 7] = -1;
+      }
+    }
+  }
+  return success();
+}
+ERROR awkward_bitmaskedarray_to_indexedoptionarray_64(int64_t* toindex, const uint8_t* frombitmask, int64_t bitmaskoffset, int64_t bitmasklength, bool validwhen, bool lsb_order) {
+  return awkward_bitmaskedarray_to_indexedoptionarray<int64_t>(toindex, frombitmask, bitmaskoffset, bitmasklength, validwhen, lsb_order);
+}
