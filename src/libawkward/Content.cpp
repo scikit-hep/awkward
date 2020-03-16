@@ -99,13 +99,16 @@ namespace awkward {
       }
     }
 
+    Index64 starts(1);
+    starts.ptr().get()[0] = 0;
+
     Index64 parents(length());
     struct Error err = awkward_content_reduce_zeroparents_64(
       parents.ptr().get(),
       length());
     util::handle_error(err, classname(), identities_.get());
 
-    std::shared_ptr<Content> next = reduce_next(reducer, negaxis, parents, 1, mask, keepdims);
+    std::shared_ptr<Content> next = reduce_next(reducer, negaxis, starts, parents, 1, mask, keepdims);
     return next.get()->getitem_at_nowrap(0);
   }
 

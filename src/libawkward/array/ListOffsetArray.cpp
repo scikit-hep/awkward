@@ -982,10 +982,12 @@ namespace awkward {
   }
 
   template <>
-  const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      std::cout << "A" << std::endl;
+
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error("offsets_.length() - 1 != parents.length()");
       }
@@ -1032,7 +1034,7 @@ namespace awkward {
       util::handle_error(err3, classname(), identities_.get());
 
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-      std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, nextparents, maxnextparents + 1, mask, false);
+      std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, starts, nextparents, maxnextparents + 1, mask, false);
 
       Index64 gaps(outlength);
       struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
@@ -1062,6 +1064,8 @@ namespace awkward {
     }
 
     else {
+      std::cout << "B" << std::endl;
+
       int64_t globalstart;
       int64_t globalstop;
       struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
@@ -1081,7 +1085,7 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
 
       std::shared_ptr<Content> trimmed = content_.get()->getitem_range_nowrap(globalstart, globalstop);
-      std::shared_ptr<Content> outcontent = trimmed.get()->reduce_next(reducer, negaxis, nextparents, offsets_.length() - 1, mask, keepdims);
+      std::shared_ptr<Content> outcontent = trimmed.get()->reduce_next(reducer, negaxis, starts, nextparents, offsets_.length() - 1, mask, keepdims);
 
       Index64 outoffsets(outlength + 1);
       struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(
@@ -1094,6 +1098,11 @@ namespace awkward {
 
       return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), outoffsets, outcontent);
     }
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t length, bool mask, bool keepdims) const {
+    return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, starts, parents, length, mask, keepdims);
   }
 
   template <typename T>
@@ -1181,11 +1190,6 @@ namespace awkward {
       std::shared_ptr<Content> next = rawcompact->content().get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
       return std::make_shared<ListOffsetArray64>(identities_, util::Parameters(), rawcompact->offsets(), next);
     }
-  }
-
-  template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t length, bool mask, bool keepdims) const {
-    return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, parents, length, mask, keepdims);
   }
 
   template <typename T>
