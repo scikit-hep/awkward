@@ -4,6 +4,7 @@
 #define AWKWARDCPU_GETITEM_H_
 
 #include "awkward/cpu-kernels/util.h"
+#include <memory>
 
 extern "C" {
   EXPORT_SYMBOL void awkward_regularize_rangeslice(int64_t* start, int64_t* stop, bool posstep, bool hasstart, bool hasstop, int64_t length);
@@ -144,5 +145,11 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_listarray64_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset);
 
 }
+
+template<typename T>
+EXPORT_SYMBOL T getitem_at_nowrap_cpu(const std::shared_ptr<T> ptr_, size_t at);
+
+template<typename T>
+EXPORT_SYMBOL void setitem_at_nowrap_cpu(const std::shared_ptr<T> ptr_, size_t at, T value);
 
 #endif // AWKWARDCPU_GETITEM_H_
