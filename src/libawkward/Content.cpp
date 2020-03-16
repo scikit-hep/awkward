@@ -11,6 +11,8 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/RecordArray.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -181,7 +183,7 @@ namespace awkward {
       length());
     util::handle_error(err, classname(), identities_.get());
     std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
-    return next.get()->simplify();
+    return next.get()->simplify_optiontype();
   }
 
   const std::shared_ptr<Content> Content::localindex_axis0() const {
@@ -361,7 +363,69 @@ namespace awkward {
     util::handle_error(err, classname, nullptr);
 
     IndexedOptionArray64 out(Identities::none(), util::Parameters(), outindex, raw->content());
-    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify(), index.length());
+    return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify_optiontype(), index.length());
+  }
+
+  bool check_missing_jagged_same(const std::shared_ptr<Content>& that, const Index8& bytemask, const SliceMissing64& missing) {
+    if (bytemask.length() != missing.length()) {
+      return false;
+    }
+    Index64 missingindex = missing.index();
+    bool same;
+    struct Error err = awkward_slicemissing_check_same(
+      &same,
+      bytemask.ptr().get(),
+      bytemask.offset(),
+      missingindex.ptr().get(),
+      missingindex.offset(),
+      bytemask.length());
+    util::handle_error(err, that.get()->classname(), that.get()->identities().get());
+    return same;
+  }
+
+  const std::shared_ptr<Content> check_missing_jagged(const std::shared_ptr<Content>& that, const SliceMissing64& missing) {
+    // FIXME: This function is insufficiently general. While working on something else,
+    // I noticed that it wasn't possible to slice option-type data with a jagged array.
+    // This handles the case where that happens at top-level; the most likely case
+    // for physics analysis, but it should be more deeply considered in general.
+    //
+    // Note that it only replaces the Content that would be passed to
+    // getitem_next(missing.content()) in getitem_next(SliceMissing64) in a particular
+    // scenario; it can probably be generalized by handling more general scenarios.
+
+    if (that.get()->length() == 1  &&  dynamic_cast<SliceJagged64*>(missing.content().get())) {
+      std::shared_ptr<Content> tmp1 = that.get()->getitem_at_nowrap(0);
+      std::shared_ptr<Content> tmp2(nullptr);
+      if (IndexedOptionArray32* rawtmp1 = dynamic_cast<IndexedOptionArray32*>(tmp1.get())) {
+        tmp2 = rawtmp1->project();
+        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
+          return that;
+        }
+      }
+      else if (IndexedOptionArray64* rawtmp1 = dynamic_cast<IndexedOptionArray64*>(tmp1.get())) {
+        tmp2 = rawtmp1->project();
+        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
+          return that;
+        }
+      }
+      else if (ByteMaskedArray* rawtmp1 = dynamic_cast<ByteMaskedArray*>(tmp1.get())) {
+        tmp2 = rawtmp1->project();
+        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
+          return that;
+        }
+      }
+      else if (BitMaskedArray* rawtmp1 = dynamic_cast<BitMaskedArray*>(tmp1.get())) {
+        tmp2 = rawtmp1->project();
+        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
+          return that;
+        }
+      }
+
+      if (tmp2.get() != nullptr) {
+        return std::make_shared<RegularArray>(Identities::none(), that.get()->parameters(), tmp2, tmp2.get()->length());
+      }
+    }
+    return that;
   }
 
   const std::shared_ptr<Content> Content::getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const {
@@ -369,7 +433,7 @@ namespace awkward {
       throw std::invalid_argument("cannot mix missing values in slice with NumPy-style advanced indexing");
     }
 
-    std::shared_ptr<Content> next = getitem_next(missing.content(), tail, advanced);
+    std::shared_ptr<Content> next = check_missing_jagged(shallow_copy(), missing).get()->getitem_next(missing.content(), tail, advanced);
 
     if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
       return getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname());

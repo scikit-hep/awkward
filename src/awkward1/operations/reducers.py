@@ -9,7 +9,7 @@ import awkward1._connect._numpy
 import awkward1.layout
 import awkward1.operations.convert
 
-def count(array, axis=None, keepdims=False):
+def count(array, axis=None, keepdims=False, maskidentity=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         def reduce(xs):
@@ -20,10 +20,10 @@ def count(array, axis=None, keepdims=False):
         return reduce([numpy.size(x) for x in awkward1._util.completely_flatten(layout)])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.count(axis=axis, mask=False, keepdims=keepdims), behavior)
+        return awkward1._util.wrap(layout.count(axis=axis, mask=maskidentity, keepdims=keepdims), behavior)
 
 @awkward1._connect._numpy.implements(numpy.count_nonzero)
-def count_nonzero(array, axis=None, keepdims=False):
+def count_nonzero(array, axis=None, keepdims=False, maskidentity=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         def reduce(xs):
@@ -34,10 +34,10 @@ def count_nonzero(array, axis=None, keepdims=False):
         return reduce([numpy.count_nonzero(x) for x in awkward1._util.completely_flatten(layout)])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.count_nonzero(axis=axis, mask=False, keepdims=keepdims), behavior)
+        return awkward1._util.wrap(layout.count_nonzero(axis=axis, mask=maskidentity, keepdims=keepdims), behavior)
 
 @awkward1._connect._numpy.implements(numpy.sum)
-def sum(array, axis=None, keepdims=False):
+def sum(array, axis=None, keepdims=False, maskidentity=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         def reduce(xs):
@@ -48,10 +48,10 @@ def sum(array, axis=None, keepdims=False):
         return reduce([numpy.sum(x) for x in awkward1._util.completely_flatten(layout)])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.sum(axis=axis, mask=False, keepdims=keepdims), behavior)
+        return awkward1._util.wrap(layout.sum(axis=axis, mask=maskidentity, keepdims=keepdims), behavior)
 
 @awkward1._connect._numpy.implements(numpy.prod)
-def prod(array, axis=None, keepdims=False):
+def prod(array, axis=None, keepdims=False, maskidentity=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         def reduce(xs):
@@ -62,10 +62,10 @@ def prod(array, axis=None, keepdims=False):
         return reduce([numpy.prod(x) for x in awkward1._util.completely_flatten(layout)])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.prod(axis=axis, mask=False, keepdims=keepdims), behavior)
+        return awkward1._util.wrap(layout.prod(axis=axis, mask=maskidentity, keepdims=keepdims), behavior)
 
 @awkward1._connect._numpy.implements(numpy.any)
-def any(array, axis=None, keepdims=False):
+def any(array, axis=None, keepdims=False, maskidentity=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         def reduce(xs):
@@ -76,10 +76,10 @@ def any(array, axis=None, keepdims=False):
         return reduce([numpy.any(x) for x in awkward1._util.completely_flatten(layout)])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.any(axis=axis, mask=False, keepdims=keepdims), behavior)
+        return awkward1._util.wrap(layout.any(axis=axis, mask=maskidentity, keepdims=keepdims), behavior)
 
 @awkward1._connect._numpy.implements(numpy.all)
-def all(array, axis=None, keepdims=False):
+def all(array, axis=None, keepdims=False, maskidentity=False):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         def reduce(xs):
@@ -90,10 +90,10 @@ def all(array, axis=None, keepdims=False):
         return reduce([numpy.all(x) for x in awkward1._util.completely_flatten(layout)])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.all(axis=axis, mask=False, keepdims=keepdims), behavior)
+        return awkward1._util.wrap(layout.all(axis=axis, mask=maskidentity, keepdims=keepdims), behavior)
 
 @awkward1._connect._numpy.implements(numpy.min)
-def min(array, axis=None, keepdims=False):
+def min(array, axis=None, keepdims=False, maskidentity=True):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         def reduce(xs):
@@ -108,10 +108,10 @@ def min(array, axis=None, keepdims=False):
         return reduce([numpy.min(x) for x in tmp if len(x) > 0])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.min(axis=axis, mask=True, keepdims=keepdims), behavior)
+        return awkward1._util.wrap(layout.min(axis=axis, mask=maskidentity, keepdims=keepdims), behavior)
 
 @awkward1._connect._numpy.implements(numpy.max)
-def max(array, axis=None, keepdims=False):
+def max(array, axis=None, keepdims=False, maskidentity=True):
     layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
     if axis is None:
         def reduce(xs):
@@ -126,7 +126,7 @@ def max(array, axis=None, keepdims=False):
         return reduce([numpy.max(x) for x in tmp if len(x) > 0])
     else:
         behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(layout.max(axis=axis, mask=True, keepdims=keepdims), behavior)
+        return awkward1._util.wrap(layout.max(axis=axis, mask=maskidentity, keepdims=keepdims), behavior)
 
 ### The following are not strictly reducers, but are defined in terms of reducers and ufuncs.
 

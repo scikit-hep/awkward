@@ -51,6 +51,15 @@ def tolookup(layout, positions, sharedptrs, arrays):
     elif isinstance(layout, (awkward1.layout.IndexedOptionArray32, awkward1.layout.IndexedOptionArray64)):
         return awkward1._connect._numba.layout.IndexedOptionArrayType.tolookup(layout, positions, sharedptrs, arrays)
 
+    elif isinstance(layout, awkward1.layout.ByteMaskedArray):
+        return awkward1._connect._numba.layout.ByteMaskedArrayType.tolookup(layout, positions, sharedptrs, arrays)
+
+    elif isinstance(layout, awkward1.layout.BitMaskedArray):
+        return awkward1._connect._numba.layout.BitMaskedArrayType.tolookup(layout, positions, sharedptrs, arrays)
+
+    elif isinstance(layout, awkward1.layout.UnmaskedArray):
+        return awkward1._connect._numba.layout.UnmaskedArrayType.tolookup(layout, positions, sharedptrs, arrays)
+
     elif isinstance(layout, awkward1.layout.RecordArray):
         return awkward1._connect._numba.layout.RecordArrayType.tolookup(layout, positions, sharedptrs, arrays)
 

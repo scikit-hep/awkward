@@ -14,6 +14,9 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
 
 #include "awkward/array/IndexedArray.h"
 
@@ -118,7 +121,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::simplify() const {
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::simplify_optiontype() const {
     if (ISOPTION) {
       if (IndexedArray32* rawcontent = dynamic_cast<IndexedArray32*>(content_.get())) {
         Index32 inner = rawcontent->index();
@@ -177,6 +180,54 @@ namespace awkward {
         return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
       }
       else if (IndexedOptionArray64* rawcontent = dynamic_cast<IndexedOptionArray64*>(content_.get())) {
+        Index64 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify64_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (ByteMaskedArray* step1 = dynamic_cast<ByteMaskedArray*>(content_.get())) {
+        std::shared_ptr<Content> step2 = step1->toIndexedOptionArray64();
+        IndexedOptionArray64* rawcontent = dynamic_cast<IndexedOptionArray64*>(step2.get());
+        Index64 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify64_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (BitMaskedArray* step1 = dynamic_cast<BitMaskedArray*>(content_.get())) {
+        std::shared_ptr<Content> step2 = step1->toIndexedOptionArray64();
+        IndexedOptionArray64* rawcontent = dynamic_cast<IndexedOptionArray64*>(step2.get());
+        Index64 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify64_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (UnmaskedArray* step1 = dynamic_cast<UnmaskedArray*>(content_.get())) {
+        std::shared_ptr<Content> step2 = step1->toIndexedOptionArray64();
+        IndexedOptionArray64* rawcontent = dynamic_cast<IndexedOptionArray64*>(step2.get());
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -252,6 +303,54 @@ namespace awkward {
         return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
       }
       else if (IndexedOptionArray64* rawcontent = dynamic_cast<IndexedOptionArray64*>(content_.get())) {
+        Index64 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify64_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (ByteMaskedArray* step1 = dynamic_cast<ByteMaskedArray*>(content_.get())) {
+        std::shared_ptr<Content> step2 = step1->toIndexedOptionArray64();
+        IndexedOptionArray64* rawcontent = dynamic_cast<IndexedOptionArray64*>(step2.get());
+        Index64 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify64_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (BitMaskedArray* step1 = dynamic_cast<BitMaskedArray*>(content_.get())) {
+        std::shared_ptr<Content> step2 = step1->toIndexedOptionArray64();
+        IndexedOptionArray64* rawcontent = dynamic_cast<IndexedOptionArray64*>(step2.get());
+        Index64 inner = rawcontent->index();
+        Index64 result(index_.length());
+        struct Error err = util::awkward_indexedarray_simplify64_to64(
+          result.ptr().get(),
+          index_.ptr().get(),
+          index_.offset(),
+          index_.length(),
+          inner.ptr().get(),
+          inner.offset(),
+          inner.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::make_shared<IndexedOptionArray64>(identities_, parameters_, result, rawcontent->content());
+      }
+      else if (UnmaskedArray* step1 = dynamic_cast<UnmaskedArray*>(content_.get())) {
+        std::shared_ptr<Content> step2 = step1->toIndexedOptionArray64();
+        IndexedOptionArray64* rawcontent = dynamic_cast<IndexedOptionArray64*>(step2.get());
         Index64 inner = rawcontent->index();
         Index64 result(index_.length());
         struct Error err = util::awkward_indexedarray_simplify64_to64(
@@ -538,7 +637,7 @@ namespace awkward {
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
         std::shared_ptr<Content> out = next.get()->getitem_next(head, tail, advanced);
         IndexedArrayOf<T, ISOPTION> out2(identities_, parameters_, outindex, out);
-        return out2.simplify();
+        return out2.simplify_optiontype();
       }
       else {
         Index64 nextcarry(length());
@@ -665,6 +764,11 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::shallow_simplify() const {
+    return simplify_optiontype();
+  }
+
+  template <typename T, bool ISOPTION>
   const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
@@ -681,7 +785,7 @@ namespace awkward {
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> out = next.get()->num(axis, depth);
       IndexedArrayOf<T, ISOPTION> out2(Identities::none(), util::Parameters(), outindex, out);
-      return out2.simplify();
+      return out2.simplify_optiontype();
     }
     else {
       return project().get()->num(axis, depth);
@@ -754,6 +858,15 @@ namespace awkward {
       return content_.get()->mergeable(rawother->content(), mergebool);
     }
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
     }
     else {
@@ -1024,14 +1137,14 @@ namespace awkward {
         util::handle_error(err, classname(), identities_.get());
 
         std::shared_ptr<Content> next = project().get()->rpad(target, toaxis, depth);
-        return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify();
+        return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify_optiontype();
       }
       else {
         return project().get()->rpad(target, toaxis, depth);
       }
     }
     else {
-      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->rpad(target, toaxis, depth + 1));
+      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->rpad(target, toaxis, depth));
     }
   }
 
@@ -1052,14 +1165,14 @@ namespace awkward {
         util::handle_error(err, classname(), identities_.get());
 
         std::shared_ptr<Content> next = project().get()->rpad_and_clip(target, toaxis, depth);
-        return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify();
+        return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify_optiontype();
       }
       else {
         return project().get()->rpad_and_clip(target, toaxis, depth);
       }
     }
     else {
-      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->rpad_and_clip(target, toaxis, depth + 1));
+      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->rpad_and_clip(target, toaxis, depth));
     }
   }
 
@@ -1105,7 +1218,7 @@ namespace awkward {
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
         std::shared_ptr<Content> out = next.get()->localindex(axis, depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_, util::Parameters(), outindex, out);
-        return out2.simplify();
+        return out2.simplify_optiontype();
       }
       else {
         return project().get()->localindex(axis, depth);
@@ -1132,7 +1245,7 @@ namespace awkward {
         std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
         std::shared_ptr<Content> out = next.get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
         IndexedArrayOf<T, ISOPTION> out2(identities_, util::Parameters(), outindex, out);
-        return out2.simplify();
+        return out2.simplify_optiontype();
       }
       else {
         return project().get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
@@ -1187,7 +1300,7 @@ namespace awkward {
       std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> out = next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
       IndexedArrayOf<T, ISOPTION> out2(identities_, parameters_, outindex, out);
-      return out2.simplify();
+      return out2.simplify_optiontype();
     }
     else {
       Index64 nextcarry(length());

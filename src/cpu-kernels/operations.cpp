@@ -161,12 +161,7 @@ template <typename C, typename M, typename TO>
 ERROR awkward_indexedarray_overlay_mask(TO* toindex, const M* mask, int64_t maskoffset, const C* fromindex, int64_t indexoffset, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     M m = mask[maskoffset + i];
-    if (m) {
-      toindex[i] = -1;
-    }
-    else {
-      toindex[i] = fromindex[indexoffset + i];
-    }
+    toindex[i] = (m ? -1 : fromindex[indexoffset + i]);
   }
   return success();
 }
@@ -195,6 +190,17 @@ ERROR awkward_indexedarrayU32_mask8(int8_t* tomask, const uint32_t* fromindex, i
 }
 ERROR awkward_indexedarray64_mask8(int8_t* tomask, const int64_t* fromindex, int64_t indexoffset, int64_t length) {
   return awkward_indexedarray_mask<int64_t, int8_t>(tomask, fromindex, indexoffset, length);
+}
+
+template <typename M>
+ERROR awkward_bytemaskedarray_mask(M* tomask, const M* frommask, int64_t maskoffset, int64_t length, bool validwhen) {
+  for (int64_t i = 0;  i < length;  i++) {
+    tomask[i] = ((frommask[maskoffset + i] != 0) != validwhen);
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_mask8(int8_t* tomask, const int8_t* frommask, int64_t maskoffset, int64_t length, bool validwhen) {
+  return awkward_bytemaskedarray_mask(tomask, frommask, maskoffset, length, validwhen);
 }
 
 template <typename M>
@@ -1122,4 +1128,189 @@ ERROR awkward_regulararray_choose(T** tocarry, int64_t n, bool diagonal, int64_t
 }
 ERROR awkward_regulararray_choose_64(int64_t** tocarry, int64_t n, bool diagonal, int64_t size, int64_t length) {
   return awkward_regulararray_choose<int32_t, int64_t>(tocarry, n, diagonal, size, length);
+}
+
+template <typename M>
+ERROR awkward_bytemaskedarray_overlay_mask(M* tomask, const M* theirmask, int64_t theirmaskoffset, const M* mymask, int64_t mymaskoffset, int64_t length, bool validwhen) {
+  for (int64_t i = 0;  i < length;  i++) {
+    bool theirs = theirmask[theirmaskoffset + i];
+    bool mine = ((mymask[mymaskoffset + i] != 0) != validwhen);
+    tomask[i] = (theirs | mine ? 1 : 0);
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_overlay_mask8(int8_t* tomask, const int8_t* theirmask, int64_t theirmaskoffset, const int8_t* mymask, int64_t mymaskoffset, int64_t length, bool validwhen) {
+  return awkward_bytemaskedarray_overlay_mask<int8_t>(tomask, theirmask, theirmaskoffset, mymask, mymaskoffset, length, validwhen);
+}
+
+ERROR awkward_bitmaskedarray_to_bytemaskedarray(int8_t* tobytemask, const uint8_t* frombitmask, int64_t bitmaskoffset, int64_t bitmasklength, bool validwhen, bool lsb_order) {
+  if (lsb_order) {
+    for (int64_t i = 0;  i < bitmasklength;  i++) {
+      uint8_t byte = frombitmask[bitmaskoffset + i];
+      tobytemask[i*8 + 0] = ((byte & ((uint8_t)1)) != validwhen);
+      byte >>= 1;
+      tobytemask[i*8 + 1] = ((byte & ((uint8_t)1)) != validwhen);
+      byte >>= 1;
+      tobytemask[i*8 + 2] = ((byte & ((uint8_t)1)) != validwhen);
+      byte >>= 1;
+      tobytemask[i*8 + 3] = ((byte & ((uint8_t)1)) != validwhen);
+      byte >>= 1;
+      tobytemask[i*8 + 4] = ((byte & ((uint8_t)1)) != validwhen);
+      byte >>= 1;
+      tobytemask[i*8 + 5] = ((byte & ((uint8_t)1)) != validwhen);
+      byte >>= 1;
+      tobytemask[i*8 + 6] = ((byte & ((uint8_t)1)) != validwhen);
+      byte >>= 1;
+      tobytemask[i*8 + 7] = ((byte & ((uint8_t)1)) != validwhen);
+    }
+  }
+  else {
+    for (int64_t i = 0;  i < bitmasklength;  i++) {
+      uint8_t byte = frombitmask[bitmaskoffset + i];
+      tobytemask[i*8 + 0] = (((byte & ((uint8_t)128)) != 0) != validwhen);
+      byte <<= 1;
+      tobytemask[i*8 + 1] = (((byte & ((uint8_t)128)) != 0) != validwhen);
+      byte <<= 1;
+      tobytemask[i*8 + 2] = (((byte & ((uint8_t)128)) != 0) != validwhen);
+      byte <<= 1;
+      tobytemask[i*8 + 3] = (((byte & ((uint8_t)128)) != 0) != validwhen);
+      byte <<= 1;
+      tobytemask[i*8 + 4] = (((byte & ((uint8_t)128)) != 0) != validwhen);
+      byte <<= 1;
+      tobytemask[i*8 + 5] = (((byte & ((uint8_t)128)) != 0) != validwhen);
+      byte <<= 1;
+      tobytemask[i*8 + 6] = (((byte & ((uint8_t)128)) != 0) != validwhen);
+      byte <<= 1;
+      tobytemask[i*8 + 7] = (((byte & ((uint8_t)128)) != 0) != validwhen);
+    }
+  }
+  return success();
+}
+
+template <typename T>
+ERROR awkward_bitmaskedarray_to_indexedoptionarray(T* toindex, const uint8_t* frombitmask, int64_t bitmaskoffset, int64_t bitmasklength, bool validwhen, bool lsb_order) {
+  if (lsb_order) {
+    for (int64_t i = 0;  i < bitmasklength;  i++) {
+      uint8_t byte = frombitmask[bitmaskoffset + i];
+      if ((byte & ((uint8_t)1)) == validwhen) {
+        toindex[i*8 + 0] = i*8 + 0;
+      }
+      else {
+        toindex[i*8 + 0] = -1;
+      }
+      byte >>= 1;
+      if ((byte & ((uint8_t)1)) == validwhen) {
+        toindex[i*8 + 1] = i*8 + 1;
+      }
+      else {
+        toindex[i*8 + 1] = -1;
+      }
+      byte >>= 1;
+      if ((byte & ((uint8_t)1)) == validwhen) {
+        toindex[i*8 + 2] = i*8 + 2;
+      }
+      else {
+        toindex[i*8 + 2] = -1;
+      }
+      byte >>= 1;
+      if ((byte & ((uint8_t)1)) == validwhen) {
+        toindex[i*8 + 3] = i*8 + 3;
+      }
+      else {
+        toindex[i*8 + 3] = -1;
+      }
+      byte >>= 1;
+      if ((byte & ((uint8_t)1)) == validwhen) {
+        toindex[i*8 + 4] = i*8 + 4;
+      }
+      else {
+        toindex[i*8 + 4] = -1;
+      }
+      byte >>= 1;
+      if ((byte & ((uint8_t)1)) == validwhen) {
+        toindex[i*8 + 5] = i*8 + 5;
+      }
+      else {
+        toindex[i*8 + 5] = -1;
+      }
+      byte >>= 1;
+      if ((byte & ((uint8_t)1)) == validwhen) {
+        toindex[i*8 + 6] = i*8 + 6;
+      }
+      else {
+        toindex[i*8 + 6] = -1;
+      }
+      byte >>= 1;
+      if ((byte & ((uint8_t)1)) == validwhen) {
+        toindex[i*8 + 7] = i*8 + 7;
+      }
+      else {
+        toindex[i*8 + 7] = -1;
+      }
+    }
+  }
+  else {
+    for (int64_t i = 0;  i < bitmasklength;  i++) {
+      uint8_t byte = frombitmask[bitmaskoffset + i];
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 0] = i*8 + 0;
+      }
+      else {
+        toindex[i*8 + 0] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 1] = i*8 + 1;
+      }
+      else {
+        toindex[i*8 + 1] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 2] = i*8 + 2;
+      }
+      else {
+        toindex[i*8 + 2] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 3] = i*8 + 3;
+      }
+      else {
+        toindex[i*8 + 3] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 4] = i*8 + 4;
+      }
+      else {
+        toindex[i*8 + 4] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 5] = i*8 + 5;
+      }
+      else {
+        toindex[i*8 + 5] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 6] = i*8 + 6;
+      }
+      else {
+        toindex[i*8 + 6] = -1;
+      }
+      byte <<= 1;
+      if (((byte & ((uint8_t)128)) != 0) == validwhen) {
+        toindex[i*8 + 7] = i*8 + 7;
+      }
+      else {
+        toindex[i*8 + 7] = -1;
+      }
+    }
+  }
+  return success();
+}
+ERROR awkward_bitmaskedarray_to_indexedoptionarray_64(int64_t* toindex, const uint8_t* frombitmask, int64_t bitmaskoffset, int64_t bitmasklength, bool validwhen, bool lsb_order) {
+  return awkward_bitmaskedarray_to_indexedoptionarray<int64_t>(toindex, frombitmask, bitmaskoffset, bitmasklength, validwhen, lsb_order);
 }

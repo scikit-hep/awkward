@@ -17,6 +17,9 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/RecordArray.h"
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
 
 #include "awkward/array/ListArray.h"
 
@@ -460,6 +463,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::shallow_simplify() const {
+    return shallow_copy();
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
@@ -516,6 +524,15 @@ namespace awkward {
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
       return mergeable(rawother->content(), mergebool);
     }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
 
     if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
@@ -565,6 +582,15 @@ namespace awkward {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
@@ -811,7 +837,7 @@ namespace awkward {
         util::handle_error(err3, classname(), identities_.get());
 
         std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content());
-        return std::make_shared<ListArrayOf<T>>(Identities::none(), parameters_, starts, stops, next.get()->simplify());
+        return std::make_shared<ListArrayOf<T>>(Identities::none(), parameters_, starts, stops, next.get()->simplify_optiontype());
       }
     }
     else {
@@ -906,9 +932,10 @@ namespace awkward {
     }
 
     else {
-      std::shared_ptr<Content> next = content_.get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
-      Index64 offsets = compact_offsets64(true);
-      return std::make_shared<ListOffsetArray64>(identities_, util::Parameters(), offsets, next);
+      std::shared_ptr<Content> compact = toListOffsetArray64(true);
+      ListOffsetArray64* rawcompact = dynamic_cast<ListOffsetArray64*>(compact.get());
+      std::shared_ptr<Content> next = rawcompact->content().get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
+      return std::make_shared<ListOffsetArray64>(identities_, util::Parameters(), rawcompact->offsets(), next);
     }
   }
 
@@ -1181,7 +1208,7 @@ namespace awkward {
     if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get())) {
       std::shared_ptr<Content> content = raw->content();
       IndexedOptionArray64 indexedoptionarray(Identities::none(), util::Parameters(), missing, content);
-      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), largeoffsets, indexedoptionarray.simplify());
+      return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), largeoffsets, indexedoptionarray.simplify_optiontype());
     }
     else {
       throw std::runtime_error(std::string("expected ListOffsetArray64 from ListArray::getitem_next_jagged, got ") + out.get()->classname());

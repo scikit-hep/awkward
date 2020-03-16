@@ -44,6 +44,8 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_indexedarrayU32_mask8(int8_t* tomask, const uint32_t* fromindex, int64_t indexoffset, int64_t length);
   EXPORT_SYMBOL struct Error awkward_indexedarray64_mask8(int8_t* tomask, const int64_t* fromindex, int64_t indexoffset, int64_t length);
 
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_mask8(int8_t* tomask, const int8_t* frommask, int64_t maskoffset, int64_t length, bool validwhen);
+
   EXPORT_SYMBOL struct Error awkward_zero_mask8(int8_t* tomask, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_indexedarray32_simplify32_to64(int64_t* toindex, const int32_t* outerindex, int64_t outeroffset, int64_t outerlength, const int32_t* innerindex, int64_t inneroffset, int64_t innerlength);
@@ -197,6 +199,11 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_listarray64_choose_64(int64_t** tocarry, int64_t n, bool diagonal, const int64_t* starts, int64_t startsoffset, const int64_t* stops, int64_t stopsoffset, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_regulararray_choose_64(int64_t** tocarry, int64_t n, bool diagonal, int64_t size, int64_t length);
+
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_overlay_mask8(int8_t* tomask, const int8_t* theirmask, int64_t theirmaskoffset, const int8_t* mymask, int64_t mymaskoffset, int64_t length, bool validwhen);
+
+  EXPORT_SYMBOL struct Error awkward_bitmaskedarray_to_bytemaskedarray(int8_t* tobytemask, const uint8_t* frombitmask, int64_t bitmaskoffset, int64_t bitmasklength, bool validwhen, bool lsb_order);
+  EXPORT_SYMBOL struct Error awkward_bitmaskedarray_to_indexedoptionarray_64(int64_t* toindex, const uint8_t* frombitmask, int64_t bitmaskoffset, int64_t bitmasklength, bool validwhen, bool lsb_order);
 
 }
 

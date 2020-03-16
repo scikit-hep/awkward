@@ -433,4 +433,26 @@ def choose(array, n, diagonal=False, axis=1, keys=None, parameters=None, highlev
     else:
         return out
 
+def tomask(array, mask, validwhen=True, highlevel=True):
+    def getfunction(inputs, depth):
+        layoutarray, layoutmask = inputs
+        if isinstance(layoutmask, awkward1.layout.NumpyArray):
+            m = numpy.asarray(layoutmask)
+            if not issubclass(m.dtype.type, (numpy.bool, numpy.bool_)):
+                raise ValueError("mask must have boolean type, not {0}".format(repr(m.dtype)))
+            bytemask = awkward1.layout.Index8(m.view(numpy.int8))
+            return lambda: (awkward1.layout.ByteMaskedArray(bytemask, layoutarray, validwhen=validwhen),)
+        else:
+            return None
+
+    layoutarray = awkward1.operations.convert.tolayout(array, allowrecord=True, allowother=False)
+    layoutmask = awkward1.operations.convert.tolayout(mask, allowrecord=True, allowother=False)
+
+    out = awkward1._util.broadcast_and_apply([layoutarray, layoutmask], getfunction)
+    assert isinstance(out, tuple) and len(out) == 1
+    if highlevel:
+        return awkward1._util.wrap(out[0], awkward1._util.behaviorof(array, mask))
+    else:
+        return out[0]
+
 __all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numpy", "awkward1")]

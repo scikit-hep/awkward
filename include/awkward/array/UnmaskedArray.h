@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_REGULARARRAY_H_
-#define AWKWARD_REGULARARRAY_H_
+#ifndef AWKWARD_UNMASKEDARRAY_H_
+#define AWKWARD_UNMASKEDARRAY_H_
 
 #include <string>
 #include <memory>
@@ -9,18 +9,19 @@
 
 #include "awkward/cpu-kernels/util.h"
 #include "awkward/Slice.h"
+#include "awkward/Index.h"
 #include "awkward/Content.h"
 
 namespace awkward {
-  class EXPORT_SYMBOL RegularArray: public Content {
+  class EXPORT_SYMBOL UnmaskedArray: public Content {
   public:
-    RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<Content>& content, int64_t size);
+    UnmaskedArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<Content>& content);
     const std::shared_ptr<Content> content() const;
-    int64_t size() const;
-    Index64 compact_offsets64(bool start_at_zero) const;
-    const std::shared_ptr<Content> broadcast_tooffsets64(const Index64& offsets) const;
-    const std::shared_ptr<Content> toRegularArray() const;
-    const std::shared_ptr<Content> toListOffsetArray64(bool start_at_zero) const;
+    const std::shared_ptr<Content> project() const;
+    const std::shared_ptr<Content> project(const Index8& mask) const;
+    const Index8 bytemask() const;
+    const std::shared_ptr<Content> simplify_optiontype() const;
+    const std::shared_ptr<Content> toIndexedOptionArray64() const;
 
     const std::string classname() const override;
     void setidentities() override;
@@ -40,6 +41,7 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const override;
     const std::shared_ptr<Content> getitem_field(const std::string& key) const override;
     const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const override;
+    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> carry(const Index64& carry) const override;
     const std::string purelist_parameter(const std::string& key) const override;
     bool purelist_isregular() const override;
@@ -58,6 +60,7 @@ namespace awkward {
     const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override;
     const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override;
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
+    const std::shared_ptr<Content> reverse_merge(const std::shared_ptr<Content>& other) const;
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
     const std::shared_ptr<SliceItem> asslice() const override;
     const std::shared_ptr<Content> rpad(int64_t length, int64_t axis, int64_t depth) const override;
@@ -74,10 +77,14 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const override;
     const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const override;
 
+  protected:
+    template <typename S>
+    const std::shared_ptr<Content> getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const;
+
   private:
     const std::shared_ptr<Content> content_;
-    int64_t size_;
   };
+
 }
 
-#endif // AWKWARD_REGULARARRAY_H_
+#endif // AWKWARD_UNMASKEDARRAY_H_

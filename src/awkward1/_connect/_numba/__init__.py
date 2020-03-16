@@ -21,6 +21,9 @@ def register():
     awkward1.numba.ListArrayType = awkward1._connect._numba.layout.ListArrayType
     awkward1.numba.IndexedArrayType = awkward1._connect._numba.layout.IndexedArrayType
     awkward1.numba.IndexedOptionArrayType = awkward1._connect._numba.layout.IndexedOptionArrayType
+    awkward1.numba.ByteMaskedArrayType = awkward1._connect._numba.layout.ByteMaskedArrayType
+    awkward1.numba.BitMaskedArrayType = awkward1._connect._numba.layout.BitMaskedArrayType
+    awkward1.numba.UnmaskedArrayType = awkward1._connect._numba.layout.UnmaskedArrayType
     awkward1.numba.RecordArrayType = awkward1._connect._numba.layout.RecordArrayType
     awkward1.numba.UnionArrayType = awkward1._connect._numba.layout.UnionArrayType
     awkward1.numba.ArrayBuilderType = awkward1._connect._numba.builder.ArrayBuilderType

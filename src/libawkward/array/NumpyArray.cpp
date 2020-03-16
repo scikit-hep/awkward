@@ -16,6 +16,9 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
 #include "awkward/util.h"
 
 #include "awkward/array/NumpyArray.h"
@@ -657,7 +660,7 @@ namespace awkward {
     }
 
     else {
-      NumpyArray safe = contiguous();   // maybe become_contiguous() to change in-place?
+      NumpyArray safe = contiguous();
 
       std::vector<ssize_t> nextshape = { 1 };
       nextshape.insert(nextshape.end(), safe.shape_.begin(), safe.shape_.end());
@@ -759,6 +762,10 @@ namespace awkward {
       }
     }
     return std::string();
+  }
+
+  const std::shared_ptr<Content> NumpyArray::shallow_simplify() const {
+    return shallow_copy();
   }
 
   const std::shared_ptr<Content> NumpyArray::num(int64_t axis, int64_t depth) const {
@@ -892,6 +899,15 @@ namespace awkward {
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
       return mergeable(rawother->content(), mergebool);
     }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
 
     if (ndim() == 0) {
       return false;
@@ -948,6 +964,15 @@ namespace awkward {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
@@ -1451,15 +1476,15 @@ namespace awkward {
       std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
 
       if (mask) {
-        Index64 index(outlength);
-        struct Error err = awkward_numpyarray_reduce_mask_indexedoptionarray64(
-          index.ptr().get(),
+        Index8 mask(outlength);
+        struct Error err = awkward_numpyarray_reduce_mask_bytemaskedarray(
+          mask.ptr().get(),
           parents.ptr().get(),
           parents.offset(),
           parents.length(),
           outlength);
         util::handle_error(err, classname(), nullptr);
-        out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, out);
+        out = std::make_shared<ByteMaskedArray>(Identities::none(), util::Parameters(), mask, out, false);
       }
 
       if (keepdims) {
@@ -1568,17 +1593,6 @@ namespace awkward {
       x *= shape_[i];
     }
     return true;  // true for isscalar(), too
-  }
-
-  void NumpyArray::become_contiguous() {
-    if (!iscontiguous()) {
-      NumpyArray x = contiguous();
-      identities_ = x.identities_;
-      ptr_ = x.ptr_;
-      shape_ = x.shape_;
-      strides_ = x.strides_;
-      byteoffset_ = x.byteoffset_;
-    }
   }
 
   const NumpyArray NumpyArray::contiguous() const {
