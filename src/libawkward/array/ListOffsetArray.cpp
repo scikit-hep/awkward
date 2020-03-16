@@ -1013,13 +1013,11 @@ namespace awkward {
 
       Index64 nextcarry(nextlen);
       Index64 nextparents(nextlen);
-      Index64 nextstarts(nextlen);
-      int64_t maxnextparents = 0;
+      int64_t maxnextparents;
       Index64 distincts(maxcount * outlength);
       struct Error err3 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
         nextcarry.ptr().get(),
         nextparents.ptr().get(),
-        nextstarts.ptr().get(),
         nextlen,
         &maxnextparents,
         distincts.ptr().get(),
@@ -1033,26 +1031,33 @@ namespace awkward {
         maxcount);
       util::handle_error(err3, classname(), identities_.get());
 
+      Index64 nextstarts(maxnextparents + 1);
+      struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_nextstarts_64(
+        nextstarts.ptr().get(),
+        nextparents.ptr().get(),
+        nextlen);
+      util::handle_error(err4, classname(), identities_.get());
+
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
       std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, nextstarts, nextparents, maxnextparents + 1, mask, false);
 
       Index64 gaps(outlength);
-      struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
+      struct Error err5 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
         gaps.ptr().get(),
         parents.ptr().get(),
         parents.offset(),
         parents.length());
-      util::handle_error(err4, classname(), identities_.get());
+      util::handle_error(err5, classname(), identities_.get());
 
       Index64 outstarts(outlength);
       Index64 outstops(outlength);
-      struct Error err5 = awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
+      struct Error err6 = awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
         outstarts.ptr().get(),
         outstops.ptr().get(),
         distincts.ptr().get(),
         maxcount * outlength,
         gaps.ptr().get());
-      util::handle_error(err5, classname(), identities_.get());
+      util::handle_error(err6, classname(), identities_.get());
 
       std::shared_ptr<Content> out = std::make_shared<ListArray64>(Identities::none(), util::Parameters(), outstarts, outstops, outcontent);
 

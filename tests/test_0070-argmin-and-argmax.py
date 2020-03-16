@@ -35,3 +35,19 @@ def test_3d():
     assert awkward1.tolist(array.argmin(axis=2)) == [
         [3, 2, 1],
         [2, 3, 4]]
+
+def test_jagged():
+    array = awkward1.Array([[2.2, 1.1, 3.3], [], [4.4, 5.5], [5.5], [-4.4, -5.5, -6.6]]).layout
+    assert awkward1.tolist(array.argmin(axis=1)) == [1, None, 0, 0, 2]
+
+    index2 = awkward1.layout.Index64(numpy.array([4, 3, 2, 1, 0], dtype=numpy.int64))
+    array2 = awkward1.layout.IndexedArray64(index2, array)
+    assert awkward1.tolist(array2.argmin(axis=1)) == [2, 0, 0, None, 1]
+
+    index3 = awkward1.layout.Index64(numpy.array([4, 3, -1, 4, 0], dtype=numpy.int64))
+    array2 = awkward1.layout.IndexedArray64(index3, array)
+    assert awkward1.tolist(array2.argmin(axis=1)) == [2, 0, 2, 1]
+
+def test_missing():
+    array = awkward1.Array([[[2.2, 1.1, 3.3]], [[]], [None, None, None], [[-4.4, -5.5, -6.6]]]).layout
+    assert awkward1.tolist(array.argmin(axis=2)) == [[1], [None], [], [2]]

@@ -524,13 +524,12 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(int64_t* m
   return success();
 }
 
-ERROR awkward_listoffsetarray_reduce_nonlocal_preparenext_64(int64_t* nextcarry, int64_t* nextparents, int64_t* nextstarts, int64_t nextlen, int64_t* maxnextparents, int64_t* distincts, int64_t distinctslen, int64_t* offsetscopy, const int64_t* offsets, int64_t offsetsoffset, int64_t length, const int64_t* parents, int64_t parentsoffset, int64_t maxcount) {
+ERROR awkward_listoffsetarray_reduce_nonlocal_preparenext_64(int64_t* nextcarry, int64_t* nextparents, int64_t nextlen, int64_t* maxnextparents, int64_t* distincts, int64_t distinctslen, int64_t* offsetscopy, const int64_t* offsets, int64_t offsetsoffset, int64_t length, const int64_t* parents, int64_t parentsoffset, int64_t maxcount) {
   *maxnextparents = 0;
   for (int64_t i = 0;  i < distinctslen;  i++) {
     distincts[i] = -1;
   }
 
-  int64_t lastnextparent = -1;
   int64_t k = 0;
   while (k < nextlen) {
     int64_t j = 0;
@@ -542,12 +541,6 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_preparenext_64(int64_t* nextcarry,
 
         nextcarry[k] = offsetscopy[i];
         nextparents[k] = parent*maxcount + diff;
-        int64_t nextparent = nextparents[k];
-
-        if (nextparent != lastnextparent) {
-          nextstarts[nextparent] = k;
-        }
-        lastnextparent = nextparent;
 
         if (*maxnextparents < nextparents[k]) {
           *maxnextparents = nextparents[k];
@@ -562,6 +555,17 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_preparenext_64(int64_t* nextcarry,
         offsetscopy[i]++;
       }
     }
+  }
+  return success();
+}
+
+ERROR awkward_listoffsetarray_reduce_nonlocal_nextstarts_64(int64_t* nextstarts, const int64_t* nextparents, int64_t nextlen) {
+  int64_t lastnextparent = -1;
+  for (int64_t k = 0;  k < nextlen;  k++) {
+    if (nextparents[k] != lastnextparent) {
+      nextstarts[nextparents[k]] = k;
+    }
+    lastnextparent = nextparents[k];
   }
   return success();
 }
