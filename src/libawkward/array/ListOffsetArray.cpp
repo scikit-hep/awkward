@@ -986,8 +986,6 @@ namespace awkward {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
-      std::cout << "A" << std::endl;
-
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error("offsets_.length() - 1 != parents.length()");
       }
@@ -1015,11 +1013,13 @@ namespace awkward {
 
       Index64 nextcarry(nextlen);
       Index64 nextparents(nextlen);
+      Index64 nextstarts(nextlen);
       int64_t maxnextparents = 0;
       Index64 distincts(maxcount * outlength);
       struct Error err3 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
         nextcarry.ptr().get(),
         nextparents.ptr().get(),
+        nextstarts.ptr().get(),
         nextlen,
         &maxnextparents,
         distincts.ptr().get(),
@@ -1034,7 +1034,7 @@ namespace awkward {
       util::handle_error(err3, classname(), identities_.get());
 
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-      std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, starts, nextparents, maxnextparents + 1, mask, false);
+      std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, nextstarts, nextparents, maxnextparents + 1, mask, false);
 
       Index64 gaps(outlength);
       struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
@@ -1064,8 +1064,6 @@ namespace awkward {
     }
 
     else {
-      std::cout << "B" << std::endl;
-
       int64_t globalstart;
       int64_t globalstop;
       struct Error err1 = awkward_listoffsetarray_reduce_global_startstop_64(
@@ -1085,7 +1083,7 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
 
       std::shared_ptr<Content> trimmed = content_.get()->getitem_range_nowrap(globalstart, globalstop);
-      std::shared_ptr<Content> outcontent = trimmed.get()->reduce_next(reducer, negaxis, starts, nextparents, offsets_.length() - 1, mask, keepdims);
+      std::shared_ptr<Content> outcontent = trimmed.get()->reduce_next(reducer, negaxis, util::make_starts(offsets_), nextparents, offsets_.length() - 1, mask, keepdims);
 
       Index64 outoffsets(outlength + 1);
       struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(

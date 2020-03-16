@@ -392,19 +392,10 @@ ERROR awkward_reduce_argmin(OUT* toptr, const IN* fromptr, int64_t fromptroffset
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-
-    std::cout << "i " << i << " parent " << parent << " current " << toptr[parent];
-    if (toptr[parent] != -1) {
-      std::cout << " old " << fromptr[fromptroffset + toptr[parent]];
+    int64_t start = starts[parent];
+    if (toptr[parent] == -1  ||  fromptr[fromptroffset + i] < fromptr[fromptroffset + toptr[parent] + start]) {
+      toptr[parent] = i - start;
     }
-    std::cout << " new " << fromptr[fromptroffset + i];
-
-    if (toptr[parent] == -1  ||  fromptr[fromptroffset + i] < fromptr[fromptroffset + toptr[parent]]) {
-      toptr[parent] = i;
-      std::cout << " CHANGED!";
-    }
-
-    std::cout << std::endl;
   }
   return success();
 }
@@ -533,12 +524,13 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_maxcount_offsetscopy_64(int64_t* m
   return success();
 }
 
-ERROR awkward_listoffsetarray_reduce_nonlocal_preparenext_64(int64_t* nextcarry, int64_t* nextparents, int64_t nextlen, int64_t* maxnextparents, int64_t* distincts, int64_t distinctslen, int64_t* offsetscopy, const int64_t* offsets, int64_t offsetsoffset, int64_t length, const int64_t* parents, int64_t parentsoffset, int64_t maxcount) {
+ERROR awkward_listoffsetarray_reduce_nonlocal_preparenext_64(int64_t* nextcarry, int64_t* nextparents, int64_t* nextstarts, int64_t nextlen, int64_t* maxnextparents, int64_t* distincts, int64_t distinctslen, int64_t* offsetscopy, const int64_t* offsets, int64_t offsetsoffset, int64_t length, const int64_t* parents, int64_t parentsoffset, int64_t maxcount) {
   *maxnextparents = 0;
   for (int64_t i = 0;  i < distinctslen;  i++) {
     distincts[i] = -1;
   }
 
+  int64_t lastnextparent = -1;
   int64_t k = 0;
   while (k < nextlen) {
     int64_t j = 0;
@@ -546,9 +538,17 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_preparenext_64(int64_t* nextcarry,
       if (offsetscopy[i] < offsets[offsetsoffset + i + 1]) {
         int64_t count = offsets[offsetsoffset + i + 1] - offsets[offsetsoffset + i];
         int64_t diff = offsetscopy[i] - offsets[offsetsoffset + i];
+        int64_t parent = parents[parentsoffset + i];
 
         nextcarry[k] = offsetscopy[i];
-        nextparents[k] = parents[parentsoffset + i]*maxcount + diff;
+        nextparents[k] = parent*maxcount + diff;
+        int64_t nextparent = nextparents[k];
+
+        if (nextparent != lastnextparent) {
+          nextstarts[nextparent] = k;
+        }
+        lastnextparent = nextparent;
+
         if (*maxnextparents < nextparents[k]) {
           *maxnextparents = nextparents[k];
         }

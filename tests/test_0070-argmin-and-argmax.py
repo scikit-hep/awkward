@@ -9,15 +9,29 @@ import numpy
 
 import awkward1
 
-# def test():
-#     array = awkward1.Array([
-#         [3.3, 2.2, 5.5, 1.1, 4.4],
-#         [4.4, 2.2, 1.1, 3.3, 5.5],
-#         [2.2, 1.1, 4.4, 3.3, 5.5]]).layout
-#     print(awkward1.tolist(array.argmin(axis=0)))
-#     print(awkward1.tolist(array.argmin(axis=1)))
-#     raise Exception
-#
-# #          0    1    2    3    4
-# #          5    6    7    8    9
-# #         10   11   12   13   14
+def test_2d():
+    array = awkward1.Array([
+        [3.3, 2.2, 5.5, 1.1, 4.4],
+        [4.4, 2.2, 1.1, 3.3, 5.5],
+        [2.2, 1.1, 4.4, 3.3, 5.5]]).layout
+    assert awkward1.tolist(array.argmin(axis=0)) == [2, 2, 1, 0, 0]
+    assert awkward1.tolist(array.argmin(axis=1)) == [3, 2, 1]
+
+def test_3d():
+    array = awkward1.Array([
+        [[ 3.3,  2.2,  5.5,  1.1,  4.4],
+         [ 4.4,  2.2,  1.1,  3.3,  5.5],
+         [ 2.2,  1.1,  4.4,  3.3,  5.5]],
+        [[-3.3,  2.2, -5.5,  1.1,  4.4],
+         [ 4.4, -2.2,  1.1, -3.3,  5.5],
+         [ 2.2,  1.1,  4.4,  3.3, -5.5]]]).layout
+    assert awkward1.tolist(array.argmin(axis=0)) == [
+        [1, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0],
+        [0, 0, 0, 0, 1]]
+    assert awkward1.tolist(array.argmin(axis=1)) == [
+        [2, 2, 1, 0, 0],
+        [0, 1, 0, 1, 2]]
+    assert awkward1.tolist(array.argmin(axis=2)) == [
+        [3, 2, 1],
+        [2, 3, 4]]
