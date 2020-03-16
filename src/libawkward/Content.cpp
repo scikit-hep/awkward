@@ -11,6 +11,8 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/RecordArray.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
 #include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
@@ -401,6 +403,18 @@ namespace awkward {
         }
       }
       else if (IndexedOptionArray64* rawtmp1 = dynamic_cast<IndexedOptionArray64*>(tmp1.get())) {
+        tmp2 = rawtmp1->project();
+        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
+          return that;
+        }
+      }
+      else if (ByteMaskedArray* rawtmp1 = dynamic_cast<ByteMaskedArray*>(tmp1.get())) {
+        tmp2 = rawtmp1->project();
+        if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
+          return that;
+        }
+      }
+      else if (BitMaskedArray* rawtmp1 = dynamic_cast<BitMaskedArray*>(tmp1.get())) {
         tmp2 = rawtmp1->project();
         if (!check_missing_jagged_same(that, rawtmp1->bytemask(), missing)) {
           return that;

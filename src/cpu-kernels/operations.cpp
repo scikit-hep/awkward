@@ -1147,41 +1147,41 @@ ERROR awkward_bitmaskedarray_to_bytemaskedarray(int8_t* tobytemask, const uint8_
   if (lsb_order) {
     for (int64_t i = 0;  i < bitmasklength;  i++) {
       uint8_t byte = frombitmask[bitmaskoffset + i];
-      tobytemask[i*8 + 0] = ((byte & ((uint8_t)1)) == validwhen);
+      tobytemask[i*8 + 0] = ((byte & ((uint8_t)1)) != validwhen);
       byte >>= 1;
-      tobytemask[i*8 + 1] = ((byte & ((uint8_t)1)) == validwhen);
+      tobytemask[i*8 + 1] = ((byte & ((uint8_t)1)) != validwhen);
       byte >>= 1;
-      tobytemask[i*8 + 2] = ((byte & ((uint8_t)1)) == validwhen);
+      tobytemask[i*8 + 2] = ((byte & ((uint8_t)1)) != validwhen);
       byte >>= 1;
-      tobytemask[i*8 + 3] = ((byte & ((uint8_t)1)) == validwhen);
+      tobytemask[i*8 + 3] = ((byte & ((uint8_t)1)) != validwhen);
       byte >>= 1;
-      tobytemask[i*8 + 4] = ((byte & ((uint8_t)1)) == validwhen);
+      tobytemask[i*8 + 4] = ((byte & ((uint8_t)1)) != validwhen);
       byte >>= 1;
-      tobytemask[i*8 + 5] = ((byte & ((uint8_t)1)) == validwhen);
+      tobytemask[i*8 + 5] = ((byte & ((uint8_t)1)) != validwhen);
       byte >>= 1;
-      tobytemask[i*8 + 6] = ((byte & ((uint8_t)1)) == validwhen);
+      tobytemask[i*8 + 6] = ((byte & ((uint8_t)1)) != validwhen);
       byte >>= 1;
-      tobytemask[i*8 + 7] = ((byte & ((uint8_t)1)) == validwhen);
+      tobytemask[i*8 + 7] = ((byte & ((uint8_t)1)) != validwhen);
     }
   }
   else {
     for (int64_t i = 0;  i < bitmasklength;  i++) {
       uint8_t byte = frombitmask[bitmaskoffset + i];
-      tobytemask[i*8 + 0] = (((byte & ((uint8_t)128)) != 0) == validwhen);
+      tobytemask[i*8 + 0] = (((byte & ((uint8_t)128)) != 0) != validwhen);
       byte <<= 1;
-      tobytemask[i*8 + 1] = (((byte & ((uint8_t)128)) != 0) == validwhen);
+      tobytemask[i*8 + 1] = (((byte & ((uint8_t)128)) != 0) != validwhen);
       byte <<= 1;
-      tobytemask[i*8 + 2] = (((byte & ((uint8_t)128)) != 0) == validwhen);
+      tobytemask[i*8 + 2] = (((byte & ((uint8_t)128)) != 0) != validwhen);
       byte <<= 1;
-      tobytemask[i*8 + 3] = (((byte & ((uint8_t)128)) != 0) == validwhen);
+      tobytemask[i*8 + 3] = (((byte & ((uint8_t)128)) != 0) != validwhen);
       byte <<= 1;
-      tobytemask[i*8 + 4] = (((byte & ((uint8_t)128)) != 0) == validwhen);
+      tobytemask[i*8 + 4] = (((byte & ((uint8_t)128)) != 0) != validwhen);
       byte <<= 1;
-      tobytemask[i*8 + 5] = (((byte & ((uint8_t)128)) != 0) == validwhen);
+      tobytemask[i*8 + 5] = (((byte & ((uint8_t)128)) != 0) != validwhen);
       byte <<= 1;
-      tobytemask[i*8 + 6] = (((byte & ((uint8_t)128)) != 0) == validwhen);
+      tobytemask[i*8 + 6] = (((byte & ((uint8_t)128)) != 0) != validwhen);
       byte <<= 1;
-      tobytemask[i*8 + 7] = (((byte & ((uint8_t)128)) != 0) == validwhen);
+      tobytemask[i*8 + 7] = (((byte & ((uint8_t)128)) != 0) != validwhen);
     }
   }
   return success();
@@ -1192,56 +1192,56 @@ ERROR awkward_bitmaskedarray_to_indexedoptionarray(T* toindex, const uint8_t* fr
   if (lsb_order) {
     for (int64_t i = 0;  i < bitmasklength;  i++) {
       uint8_t byte = frombitmask[bitmaskoffset + i];
-      if (byte & ((uint8_t)1) == validwhen) {
+      if ((byte & ((uint8_t)1)) == validwhen) {
         toindex[i*8 + 0] = i*8 + 0;
       }
       else {
         toindex[i*8 + 0] = -1;
       }
       byte >>= 1;
-      if (byte & ((uint8_t)1) == validwhen) {
+      if ((byte & ((uint8_t)1)) == validwhen) {
         toindex[i*8 + 1] = i*8 + 1;
       }
       else {
         toindex[i*8 + 1] = -1;
       }
       byte >>= 1;
-      if (byte & ((uint8_t)1) == validwhen) {
+      if ((byte & ((uint8_t)1)) == validwhen) {
         toindex[i*8 + 2] = i*8 + 2;
       }
       else {
         toindex[i*8 + 2] = -1;
       }
       byte >>= 1;
-      if (byte & ((uint8_t)1) == validwhen) {
+      if ((byte & ((uint8_t)1)) == validwhen) {
         toindex[i*8 + 3] = i*8 + 3;
       }
       else {
         toindex[i*8 + 3] = -1;
       }
       byte >>= 1;
-      if (byte & ((uint8_t)1) == validwhen) {
+      if ((byte & ((uint8_t)1)) == validwhen) {
         toindex[i*8 + 4] = i*8 + 4;
       }
       else {
         toindex[i*8 + 4] = -1;
       }
       byte >>= 1;
-      if (byte & ((uint8_t)1) == validwhen) {
+      if ((byte & ((uint8_t)1)) == validwhen) {
         toindex[i*8 + 5] = i*8 + 5;
       }
       else {
         toindex[i*8 + 5] = -1;
       }
       byte >>= 1;
-      if (byte & ((uint8_t)1) == validwhen) {
+      if ((byte & ((uint8_t)1)) == validwhen) {
         toindex[i*8 + 6] = i*8 + 6;
       }
       else {
         toindex[i*8 + 6] = -1;
       }
       byte >>= 1;
-      if (byte & ((uint8_t)1) == validwhen) {
+      if ((byte & ((uint8_t)1)) == validwhen) {
         toindex[i*8 + 7] = i*8 + 7;
       }
       else {

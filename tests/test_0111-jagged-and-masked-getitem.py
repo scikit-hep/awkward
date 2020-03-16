@@ -248,6 +248,27 @@ def test_indexedarray2():
     assert awkward1.tolist(indexedarray) == [[6.6, 7.7, 8.8, 9.9], [5.5], None, [0.0, 1.1, 2.2]]
     assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [1, 1]])]) == [[6.6, 9.9], [5.5], None, [1.1, 1.1]]
 
+def test_indexedarray2b():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True).layout
+    index = awkward1.layout.Index64(numpy.array([0, -1, 2, 3], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedOptionArray64(index, array)
+    assert awkward1.tolist(indexedarray) == [[0.0, 1.1, 2.2], None, [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(indexedarray[awkward1.Array([[1, 1], None, [0], [0, -1]])]) == [[1.1, 1.1], None, [5.5], [6.6, 9.9]]
+
+def test_bytemaskedarray2b():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True).layout
+    mask = awkward1.layout.Index8(numpy.array([0, 1, 0, 0], dtype=numpy.int8))
+    maskedarray = awkward1.layout.ByteMaskedArray(mask, array, validwhen=False)
+    assert awkward1.tolist(maskedarray) == [[0.0, 1.1, 2.2], None, [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(maskedarray[awkward1.Array([[1, 1], None, [0], [0, -1]])]) == [[1.1, 1.1], None, [5.5], [6.6, 9.9]]
+
+def test_bitmaskedarray2b():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True).layout
+    mask = awkward1.layout.IndexU8(numpy.array([66], dtype=numpy.uint8))
+    maskedarray = awkward1.layout.BitMaskedArray(mask, array, validwhen=False, length=4, lsb_order=True)  # lsb_order is irrelevant in this example
+    assert awkward1.tolist(maskedarray) == [[0.0, 1.1, 2.2], None, [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(maskedarray[awkward1.Array([[1, 1], None, [0], [0, -1]])]) == [[1.1, 1.1], None, [5.5], [6.6, 9.9]]
+
 def test_indexedarray3():
     array = awkward1.Array([0.0, 1.1, 2.2, None, 4.4, None, None, 7.7])
     assert awkward1.tolist(array[awkward1.Array([4, 3, 2])]) == [4.4, None, 2.2]
