@@ -560,7 +560,7 @@ namespace awkward {
       return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
     }
 
-    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims, bool semigroup) const override {
+    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {
       throw std::runtime_error("FIXME: RawArray:reduce_next");
     }
 

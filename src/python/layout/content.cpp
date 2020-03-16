@@ -927,38 +927,38 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
           .def("merge_as_union", [](const T& self, const py::object& other) -> py::object {
             return box(self.merge_as_union(unbox_content(other)));
           })
-          .def("count", [](const T& self, int64_t axis, bool mask, bool keepdims, bool semigroup) -> py::object {
+          .def("count", [](const T& self, int64_t axis, bool mask, bool keepdims) -> py::object {
             ak::ReducerCount reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims, semigroup));
-          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false, py::arg("semigroup") = false)
-          .def("count_nonzero", [](const T& self, int64_t axis, bool mask, bool keepdims, bool semigroup) -> py::object {
+            return box(self.reduce(reducer, axis, mask, keepdims));
+          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false)
+          .def("count_nonzero", [](const T& self, int64_t axis, bool mask, bool keepdims) -> py::object {
             ak::ReducerCountNonzero reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims, semigroup));
-          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false, py::arg("semigroup") = false)
-          .def("sum", [](const T& self, int64_t axis, bool mask, bool keepdims, bool semigroup) -> py::object {
+            return box(self.reduce(reducer, axis, mask, keepdims));
+          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false)
+          .def("sum", [](const T& self, int64_t axis, bool mask, bool keepdims) -> py::object {
             ak::ReducerSum reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims, semigroup));
-          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false, py::arg("semigroup") = false)
-          .def("prod", [](const T& self, int64_t axis, bool mask, bool keepdims, bool semigroup) -> py::object {
+            return box(self.reduce(reducer, axis, mask, keepdims));
+          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false)
+          .def("prod", [](const T& self, int64_t axis, bool mask, bool keepdims) -> py::object {
             ak::ReducerProd reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims, semigroup));
-          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false, py::arg("semigroup") = false)
-          .def("any", [](const T& self, int64_t axis, bool mask, bool keepdims, bool semigroup) -> py::object {
+            return box(self.reduce(reducer, axis, mask, keepdims));
+          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false)
+          .def("any", [](const T& self, int64_t axis, bool mask, bool keepdims) -> py::object {
             ak::ReducerAny reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims, semigroup));
-          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false, py::arg("semigroup") = false)
-          .def("all", [](const T& self, int64_t axis, bool mask, bool keepdims, bool semigroup) -> py::object {
+            return box(self.reduce(reducer, axis, mask, keepdims));
+          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false)
+          .def("all", [](const T& self, int64_t axis, bool mask, bool keepdims) -> py::object {
             ak::ReducerAll reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims, semigroup));
-          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false, py::arg("semigroup") = false)
-          .def("min", [](const T& self, int64_t axis, bool mask, bool keepdims, bool semigroup) -> py::object {
+            return box(self.reduce(reducer, axis, mask, keepdims));
+          }, py::arg("axis") = -1, py::arg("mask") = false, py::arg("keepdims") = false)
+          .def("min", [](const T& self, int64_t axis, bool mask, bool keepdims) -> py::object {
             ak::ReducerMin reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims, semigroup));
-          }, py::arg("axis") = -1, py::arg("mask") = true, py::arg("keepdims") = false, py::arg("semigroup") = true)
-          .def("max", [](const T& self, int64_t axis, bool mask, bool keepdims, bool semigroup) -> py::object {
+            return box(self.reduce(reducer, axis, mask, keepdims));
+          }, py::arg("axis") = -1, py::arg("mask") = true, py::arg("keepdims") = false)
+          .def("max", [](const T& self, int64_t axis, bool mask, bool keepdims) -> py::object {
             ak::ReducerMax reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims, semigroup));
-          }, py::arg("axis") = -1, py::arg("mask") = true, py::arg("keepdims") = false, py::arg("semigroup") = true)
+            return box(self.reduce(reducer, axis, mask, keepdims));
+          }, py::arg("axis") = -1, py::arg("mask") = true, py::arg("keepdims") = false)
           .def("localindex", [](const T& self, int64_t axis) -> py::object {
             return box(self.localindex(axis, 0));
           }, py::arg("axis") = 1)

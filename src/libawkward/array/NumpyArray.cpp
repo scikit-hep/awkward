@@ -1407,12 +1407,12 @@ namespace awkward {
     return rpad_axis0(target, true);
   }
 
-  const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims, bool semigroup) const {
+  const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     if (shape_.empty()) {
       throw std::runtime_error("attempting to reduce a scalar");
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims, semigroup);
+      return toRegularArray().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
     }
     else {
       std::shared_ptr<void> ptr;

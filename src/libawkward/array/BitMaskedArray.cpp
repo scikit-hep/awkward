@@ -433,8 +433,8 @@ namespace awkward {
     return toByteMaskedArray().get()->rpad_and_clip(target, axis, depth);
   }
 
-  const std::shared_ptr<Content> BitMaskedArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims, bool semigroup) const {
-    return toByteMaskedArray().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims, semigroup);
+  const std::shared_ptr<Content> BitMaskedArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+    return toByteMaskedArray().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> BitMaskedArray::localindex(int64_t axis, int64_t depth) const {

@@ -245,9 +245,9 @@ namespace awkward {
     throw std::invalid_argument("Record cannot be padded because it is not an array");
   }
 
-  const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims, bool semigroup) const {
+  const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> trimmed = array_.get()->getitem_range_nowrap(at_, at_ + 1);
-    return trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims, semigroup);
+    return trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> Record::localindex(int64_t axis, int64_t depth) const {
