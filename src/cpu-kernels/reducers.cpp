@@ -405,8 +405,9 @@ ERROR awkward_reduce_argmin_bool_64(int64_t* toptr, const bool* fromptr, int64_t
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-    if (toptr[parent] == -1  ||  (fromptr[fromptroffset + i] != 0) < (fromptr[fromptroffset + toptr[parent]] != 0)) {
-      toptr[parent] = i;
+    int64_t start = starts[parent];
+    if (toptr[parent] == -1  ||  (fromptr[fromptroffset + i] != 0) < (fromptr[fromptroffset + toptr[parent] + start] != 0)) {
+      toptr[parent] = i - start;
     }
   }
   return success();
@@ -449,8 +450,9 @@ ERROR awkward_reduce_argmax(OUT* toptr, const IN* fromptr, int64_t fromptroffset
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-    if (toptr[parent] == -1  ||  fromptr[fromptroffset + i] > fromptr[fromptroffset + toptr[parent]]) {
-      toptr[parent] = i;
+    int64_t start = starts[parent];
+    if (toptr[parent] == -1  ||  fromptr[fromptroffset + i] > fromptr[fromptroffset + toptr[parent] + start]) {
+      toptr[parent] = i - start;
     }
   }
   return success();
@@ -461,8 +463,9 @@ ERROR awkward_reduce_argmax_bool_64(int64_t* toptr, const bool* fromptr, int64_t
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[parentsoffset + i];
-    if (toptr[parent] == -1  ||  (fromptr[fromptroffset + i] != 0) > (fromptr[fromptroffset + toptr[parent]] != 0)) {
-      toptr[parent] = i;
+    int64_t start = starts[parent];
+    if (toptr[parent] == -1  ||  (fromptr[fromptroffset + i] != 0) > (fromptr[fromptroffset + toptr[parent] + start] != 0)) {
+      toptr[parent] = i - start;
     }
   }
   return success();

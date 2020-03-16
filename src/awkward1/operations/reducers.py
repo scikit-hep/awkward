@@ -128,6 +128,26 @@ def max(array, axis=None, keepdims=False, maskidentity=True):
         behavior = awkward1._util.behaviorof(array)
         return awkward1._util.wrap(layout.max(axis=axis, mask=maskidentity, keepdims=keepdims), behavior)
 
+@awkward1._connect._numpy.implements(numpy.argmin)
+def argmin(array, axis=None, keepdims=False, maskidentity=True):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
+    if axis is None:
+        tmp = awkward1._util.completely_flatten(layout)
+        return numpy.argmin(tmp, axis=None)
+    else:
+        behavior = awkward1._util.behaviorof(array)
+        return awkward1._util.wrap(layout.argmin(axis=axis, mask=maskidentity, keepdims=keepdims), behavior)
+
+@awkward1._connect._numpy.implements(numpy.argmax)
+def argmax(array, axis=None, keepdims=False, maskidentity=True):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=False, allowother=False)
+    if axis is None:
+        tmp = awkward1._util.completely_flatten(layout)
+        return numpy.argmax(tmp, axis=None)
+    else:
+        behavior = awkward1._util.behaviorof(array)
+        return awkward1._util.wrap(layout.argmax(axis=axis, mask=maskidentity, keepdims=keepdims), behavior)
+
 ### The following are not strictly reducers, but are defined in terms of reducers and ufuncs.
 
 def moment(x, n, weight=None, axis=None, keepdims=False):

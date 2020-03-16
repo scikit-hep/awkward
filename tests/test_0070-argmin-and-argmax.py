@@ -51,3 +51,15 @@ def test_jagged():
 def test_missing():
     array = awkward1.Array([[[2.2, 1.1, 3.3]], [[]], [None, None, None], [[-4.4, -5.5, -6.6]]]).layout
     assert awkward1.tolist(array.argmin(axis=2)) == [[1], [None], [], [2]]
+
+def test_highlevel():
+    array = awkward1.Array([
+        [3.3, 1.1,  5.5, 1.1, 4.4],
+        [4.4, 2.2,  1.1, 6.6     ],
+        [2.2, 3.3, -1.1          ]])
+    assert awkward1.argmin(array) == 11
+    assert awkward1.argmax(array) == 8
+    assert awkward1.tolist(awkward1.argmin(array, axis=0)) == [2, 0, 2, 0, 0]
+    assert awkward1.tolist(awkward1.argmax(array, axis=0)) == [1, 2, 0, 1, 0]
+    assert awkward1.tolist(awkward1.argmin(array, axis=1)) == [1, 2, 2]
+    assert awkward1.tolist(awkward1.argmax(array, axis=1)) == [2, 3, 1]
