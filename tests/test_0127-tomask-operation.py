@@ -284,3 +284,13 @@ def test_UnmaskedArray():
     assert str(awkward1.typeof(awkward1.Array(content))) == "5 * float64"
     assert str(awkward1.typeof(array)) == "?float64"
     assert str(awkward1.typeof(awkward1.Array(array))) == "5 * ?float64"
+
+def test_tomask():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+    mask1 = awkward1.Array([True, True, False, False, True])
+    assert awkward1.tolist(array[mask1]) == [[0.0, 1.1, 2.2], [], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(awkward1.tomask(array, mask1)) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
+
+    mask2 = awkward1.Array([[False, True, False], [], [True, True], [False], [True, False, False, True]])
+    assert awkward1.tolist(array[mask2]) == [[1.1], [], [3.3, 4.4], [], [6.6, 9.9]]
+    assert awkward1.tolist(awkward1.tomask(array, mask2)) == [[None, 1.1, None], [], [3.3, 4.4], [None], [6.6, None, None, 9.9]]
