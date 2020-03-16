@@ -524,12 +524,12 @@ ERROR awkward_indexedarray64_reduce_next_64(int64_t* nextcarry, int64_t* nextpar
   return awkward_indexedarray_reduce_next_64<int64_t>(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
 }
 
-ERROR awkward_numpyarray_reduce_mask_indexedoptionarray64(int64_t* toptr, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+ERROR awkward_numpyarray_reduce_mask_bytemaskedarray(int8_t* toptr, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
   for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = -1;
+    toptr[i] = 1;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[parentsoffset + i]] = parents[parentsoffset + i];
+    toptr[parents[parentsoffset + i]] = 0;
   }
   return success();
 }

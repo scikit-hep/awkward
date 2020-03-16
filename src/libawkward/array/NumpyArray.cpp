@@ -1476,15 +1476,15 @@ namespace awkward {
       std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
 
       if (mask) {
-        Index64 index(outlength);
-        struct Error err = awkward_numpyarray_reduce_mask_indexedoptionarray64(
-          index.ptr().get(),
+        Index8 mask(outlength);
+        struct Error err = awkward_numpyarray_reduce_mask_bytemaskedarray(
+          mask.ptr().get(),
           parents.ptr().get(),
           parents.offset(),
           parents.length(),
           outlength);
         util::handle_error(err, classname(), nullptr);
-        out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, out);
+        out = std::make_shared<ByteMaskedArray>(Identities::none(), util::Parameters(), mask, out, false);
       }
 
       if (keepdims) {
