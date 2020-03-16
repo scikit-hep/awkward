@@ -423,7 +423,7 @@ namespace awkward {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 single(1);
-      single.ptr().get()[0] = length_;
+      single.setitem_at_nowrap(0, length_);
       std::shared_ptr<Content> singleton = std::make_shared<NumpyArray>(single);
       std::vector<std::shared_ptr<Content>> contents;
       for (auto content : contents_) {

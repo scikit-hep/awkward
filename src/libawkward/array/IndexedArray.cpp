@@ -669,7 +669,7 @@ namespace awkward {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
-      out.ptr().get()[0] = length();
+      out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     else if (ISOPTION) {

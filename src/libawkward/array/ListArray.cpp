@@ -464,7 +464,7 @@ namespace awkward {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
-      out.ptr().get()[0] = length();
+      out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     else if (toaxis == depth + 1) {
@@ -837,7 +837,7 @@ namespace awkward {
     }
     else if (axis == depth + 1) {
       Index64 offsets = compact_offsets64(true);
-      int64_t innerlength = offsets.ptr().get()[offsets.offset() + offsets.length() - 1];
+      int64_t innerlength = offsets.getitem_at_nowrap(offsets.offset() + offsets.length() - 1);
       Index64 localindex(innerlength);
       struct Error err = util::awkward_listarray_localindex_64(
         localindex.ptr().get(),

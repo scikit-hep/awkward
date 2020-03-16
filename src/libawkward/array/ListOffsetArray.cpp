@@ -54,7 +54,7 @@ namespace awkward {
 
   template <>
   Index64 ListOffsetArrayOf<int64_t>::compact_offsets64(bool start_at_zero) const {
-    if (!start_at_zero  ||  offsets_.ptr().get()[offsets_.offset()] == 0) {
+    if (!start_at_zero  ||  offsets_.getitem_at_nowrap(offsets_.offset()) == 0) {
       return offsets_;
     }
     else {
@@ -137,7 +137,7 @@ namespace awkward {
 
   template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::toListOffsetArray64(bool start_at_zero) const {
-    if (std::is_same<T, int64_t>::value  &&  (!start_at_zero  ||  offsets_.ptr().get()[offsets_.offset()] == 0)) {
+    if (std::is_same<T, int64_t>::value  &&  (!start_at_zero  ||  offsets_.getitem_at_nowrap(offsets_.offset()) == 0)) {
       return shallow_copy();
     }
     else {
@@ -478,7 +478,7 @@ namespace awkward {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
-      out.ptr().get()[0] = length();
+      out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     else if (toaxis == depth + 1) {
@@ -1078,7 +1078,7 @@ namespace awkward {
     }
     else if (axis == depth + 1) {
       Index64 offsets = compact_offsets64(true);
-      int64_t innerlength = offsets.ptr().get()[offsets.offset() + offsets.length() - 1];
+      int64_t innerlength = offsets.getitem_at_nowrap(offsets.offset() + offsets.length() - 1);
       Index64 localindex(innerlength);
       struct Error err = util::awkward_listarray_localindex_64(
         localindex.ptr().get(),
