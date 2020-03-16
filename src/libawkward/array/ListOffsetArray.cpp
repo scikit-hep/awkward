@@ -982,7 +982,7 @@ namespace awkward {
   }
 
   template <>
-  const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims, bool semigroup) const {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -1032,7 +1032,7 @@ namespace awkward {
       util::handle_error(err3, classname(), identities_.get());
 
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-      std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, nextparents, maxnextparents + 1, mask, false);
+      std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, nextparents, maxnextparents + 1, mask, false, semigroup);
 
       Index64 gaps(outlength);
       struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
@@ -1081,7 +1081,7 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
 
       std::shared_ptr<Content> trimmed = content_.get()->getitem_range_nowrap(globalstart, globalstop);
-      std::shared_ptr<Content> outcontent = trimmed.get()->reduce_next(reducer, negaxis, nextparents, offsets_.length() - 1, mask, keepdims);
+      std::shared_ptr<Content> outcontent = trimmed.get()->reduce_next(reducer, negaxis, nextparents, offsets_.length() - 1, mask, keepdims, semigroup);
 
       Index64 outoffsets(outlength + 1);
       struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(
@@ -1184,8 +1184,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t length, bool mask, bool keepdims) const {
-    return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, parents, length, mask, keepdims);
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t length, bool mask, bool keepdims, bool semigroup) const {
+    return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, parents, length, mask, keepdims, semigroup);
   }
 
   template <typename T>

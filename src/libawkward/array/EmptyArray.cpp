@@ -229,9 +229,9 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims, bool semigroup) const {
     std::shared_ptr<Content> asnumpy = toNumpyArray(reducer.preferred_type(), reducer.preferred_typesize());
-    return asnumpy.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+    return asnumpy.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims, semigroup);
   }
 
   const std::shared_ptr<Content> EmptyArray::localindex(int64_t axis, int64_t depth) const {

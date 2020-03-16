@@ -566,7 +566,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> ByteMaskedArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> ByteMaskedArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims, bool semigroup) const {
     int64_t numnull;
     struct Error err1 = awkward_bytemaskedarray_numnull(
       &numnull,
@@ -590,7 +590,7 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-    return next.get()->reduce_next(reducer, negaxis, nextparents, outlength, mask, keepdims);
+    return next.get()->reduce_next(reducer, negaxis, nextparents, outlength, mask, keepdims, semigroup);
   }
 
   const std::shared_ptr<Content> ByteMaskedArray::localindex(int64_t axis, int64_t depth) const {

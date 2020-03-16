@@ -169,7 +169,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::rpad_and_clip");
   }
 
-  const std::shared_ptr<Content> None::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> None::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims, bool semigroup) const {
     throw std::runtime_error("undefined operation: None::reduce_next");
   }
 

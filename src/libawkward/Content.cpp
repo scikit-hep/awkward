@@ -76,7 +76,7 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Content> Content::reduce(const Reducer& reducer, int64_t axis, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> Content::reduce(const Reducer& reducer, int64_t axis, bool mask, bool keepdims, bool semigroup) const {
     int64_t negaxis = -axis;
     std::pair<bool, int64_t> branchdepth = branch_depth();
     bool branch = branchdepth.first;
@@ -105,7 +105,7 @@ namespace awkward {
       length());
     util::handle_error(err, classname(), identities_.get());
 
-    std::shared_ptr<Content> next = reduce_next(reducer, negaxis, parents, 1, mask, keepdims);
+    std::shared_ptr<Content> next = reduce_next(reducer, negaxis, parents, 1, mask, keepdims, semigroup);
     return next.get()->getitem_at_nowrap(0);
   }
 
