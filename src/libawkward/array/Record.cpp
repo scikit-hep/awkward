@@ -206,6 +206,10 @@ namespace awkward {
     return array_.get()->validityerror(path + std::string(".array"));
   }
 
+  const std::shared_ptr<Content> Record::shallow_simplify() const {
+    return shallow_copy();
+  }
+
   const std::shared_ptr<Content> Record::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
@@ -241,9 +245,9 @@ namespace awkward {
     throw std::invalid_argument("Record cannot be padded because it is not an array");
   }
 
-  const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> trimmed = array_.get()->getitem_range_nowrap(at_, at_ + 1);
-    return trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+    return trimmed.get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> Record::localindex(int64_t axis, int64_t depth) const {

@@ -166,6 +166,10 @@ namespace awkward {
     return std::string();
   }
 
+  const std::shared_ptr<Content> EmptyArray::shallow_simplify() const {
+    return shallow_copy();
+  }
+
   const std::shared_ptr<Content> EmptyArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
@@ -225,9 +229,9 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> asnumpy = toNumpyArray(reducer.preferred_type(), reducer.preferred_typesize());
-    return asnumpy.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+    return asnumpy.get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> EmptyArray::localindex(int64_t axis, int64_t depth) const {

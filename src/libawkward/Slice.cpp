@@ -4,6 +4,9 @@
 #include <sstream>
 #include <type_traits>
 
+#include "awkward/cpu-kernels/getitem.h"
+#include "awkward/util.h"
+
 #include "awkward/Slice.h"
 
 namespace awkward {

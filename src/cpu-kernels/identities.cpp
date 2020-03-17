@@ -221,3 +221,21 @@ ERROR awkward_identities64_from_unionarray8_U32(bool* uniquecontents, int64_t* t
 ERROR awkward_identities64_from_unionarray8_64(bool* uniquecontents, int64_t* toptr, const int64_t* fromptr, const int8_t* fromtags, const int64_t* fromindex, int64_t fromptroffset, int64_t tagsoffset, int64_t indexoffset, int64_t tolength, int64_t fromlength, int64_t fromwidth, int64_t which) {
   return awkward_identities_from_unionarray<int64_t, int8_t, int64_t>(uniquecontents, toptr, fromptr, fromtags, fromindex, fromptroffset, tagsoffset, indexoffset, tolength, fromlength, fromwidth, which);
 }
+
+template <typename ID>
+ERROR awkward_identities_extend(ID* toptr, const ID* fromptr, int64_t fromoffset, int64_t fromlength, int64_t tolength) {
+  int64_t i = 0;
+  for (;  i < fromlength;  i++) {
+    toptr[i] = fromptr[fromoffset + i];
+  }
+  for (;  i < tolength;  i++) {
+    toptr[i] = -1;
+  }
+  return success();
+}
+ERROR awkward_identities32_extend(int32_t* toptr, const int32_t* fromptr, int64_t fromoffset, int64_t fromlength, int64_t tolength) {
+  return awkward_identities_extend<int32_t>(toptr, fromptr, fromoffset, fromlength, tolength);
+}
+ERROR awkward_identities64_extend(int64_t* toptr, const int64_t* fromptr, int64_t fromoffset, int64_t fromlength, int64_t tolength) {
+  return awkward_identities_extend<int64_t>(toptr, fromptr, fromoffset, fromlength, tolength);
+}

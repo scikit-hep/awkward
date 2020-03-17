@@ -17,6 +17,9 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/RecordArray.h"
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
 
 #include "awkward/array/RegularArray.h"
 
@@ -337,6 +340,10 @@ namespace awkward {
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
+  const std::shared_ptr<Content> RegularArray::shallow_simplify() const {
+    return shallow_copy();
+  }
+
   const std::shared_ptr<Content> RegularArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
@@ -389,6 +396,15 @@ namespace awkward {
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
       return mergeable(rawother->content(), mergebool);
     }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
 
     if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
@@ -437,6 +453,15 @@ namespace awkward {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
@@ -509,15 +534,15 @@ namespace awkward {
         length());
       util::handle_error(err, classname(), identities_.get());
       std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content());
-      return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
+      return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify_optiontype(), target);
     }
     else {
       return std::make_shared<RegularArray>(Identities::none(), parameters_, content_.get()->rpad_and_clip(target, toaxis, depth + 1), size_);
     }
   }
 
-  const std::shared_ptr<Content> RegularArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
-    return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+  const std::shared_ptr<Content> RegularArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+    return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
   }
 
   const std::shared_ptr<Content> RegularArray::localindex(int64_t axis, int64_t depth) const {
@@ -600,7 +625,7 @@ namespace awkward {
     }
 
     else {
-      std::shared_ptr<Content> next = content_.get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
+      std::shared_ptr<Content> next = content_.get()->getitem_range_nowrap(0, length()*size_).get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
       return std::make_shared<RegularArray>(identities_, util::Parameters(), next, size_);
     }
   }

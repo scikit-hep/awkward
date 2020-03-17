@@ -146,6 +146,19 @@ ERROR awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_
   return awkward_slicearray_ravel<int64_t>(toptr, fromptr, ndim, shape, strides);
 }
 
+ERROR awkward_slicemissing_check_same(bool* same, const int8_t* bytemask, int64_t bytemaskoffset, const int64_t* missingindex, int64_t missingindexoffset, int64_t length) {
+  *same = true;
+  for (int64_t i = 0;  i < length;  i++) {
+    bool left = (bytemask[bytemaskoffset + i] != 0);
+    bool right = (missingindex[missingindexoffset + i] < 0);
+    if (left != right) {
+      *same = false;
+      return success();
+    }
+  }
+  return success();
+}
+
 template <typename T>
 ERROR awkward_carry_arange(T* toptr, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
@@ -1115,4 +1128,71 @@ void awkward_index64_setitem_at_nowrap(int64_t* ptr, int64_t offset, int64_t at,
   ptr[(size_t)(offset + at)] = value;
 }
 
+template <typename T>
+ERROR awkward_bytemaskedarray_getitem_carry(int8_t* tomask, const int8_t* frommask, int64_t frommaskoffset, int64_t lenmask, const T* fromcarry, int64_t lencarry) {
+  for (int64_t i = 0;  i < lencarry;  i++) {
+    if (fromcarry[i] >= lenmask) {
+      return failure("index out of range", i, fromcarry[i]);
+    }
+    tomask[i] = frommask[frommaskoffset + fromcarry[i]];
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_getitem_carry_64(int8_t* tomask, const int8_t* frommask, int64_t frommaskoffset, int64_t lenmask, const int64_t* fromcarry, int64_t lencarry) {
+  return awkward_bytemaskedarray_getitem_carry(tomask, frommask, frommaskoffset, lenmask, fromcarry, lencarry);
+}
 
+ERROR awkward_bytemaskedarray_numnull(int64_t* numnull, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  *numnull = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    if ((mask[maskoffset + i] != 0) != validwhen) {
+      *numnull = *numnull + 1;
+    }
+  }
+  return success();
+}
+
+template <typename T>
+ERROR awkward_bytemaskedarray_getitem_nextcarry(T* tocarry, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    if ((mask[maskoffset + i] != 0) == validwhen) {
+      tocarry[k] = i;
+      k++;
+    }
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_getitem_nextcarry_64(int64_t* tocarry, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  return awkward_bytemaskedarray_getitem_nextcarry<int64_t>(tocarry, mask, maskoffset, length, validwhen);
+}
+
+template <typename T>
+ERROR awkward_bytemaskedarray_getitem_nextcarry_outindex(T* tocarry, T* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    if ((mask[maskoffset + i] != 0) == validwhen) {
+      tocarry[k] = i;
+      toindex[i] = (T)k;
+      k++;
+    }
+    else {
+      toindex[i] = -1;
+    }
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_getitem_nextcarry_outindex_64(int64_t* tocarry, int64_t* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  return awkward_bytemaskedarray_getitem_nextcarry_outindex<int64_t>(tocarry, toindex, mask, maskoffset, length, validwhen);
+}
+
+template <typename T>
+ERROR awkward_bytemaskedarray_toindexedarray(T* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  for (int64_t i = 0;  i < length;  i++) {
+    toindex[i] = ((mask[maskoffset + i] != 0) == validwhen ? i : -1);
+  }
+  return success();
+}
+ERROR awkward_bytemaskedarray_toindexedarray_64(int64_t* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen) {
+  return awkward_bytemaskedarray_toindexedarray<int64_t>(toindex, mask, maskoffset, length, validwhen);
+}

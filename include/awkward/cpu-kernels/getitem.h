@@ -29,6 +29,8 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_slicearray_ravel_64(int64_t* toptr, const int64_t* fromptr, int64_t ndim, const int64_t* shape, const int64_t* strides);
 
+  EXPORT_SYMBOL struct Error awkward_slicemissing_check_same(bool* same, const int8_t* bytemask, int64_t bytemaskoffset, const int64_t* missingindex, int64_t missingindexoffset, int64_t length);
+
   EXPORT_SYMBOL struct Error awkward_carry_arange_64(int64_t* toptr, int64_t length);
 
   EXPORT_SYMBOL struct Error awkward_identities32_getitem_carry_64(int32_t* newidentitiesptr, const int32_t* identitiesptr, const int64_t* carryptr, int64_t lencarry, int64_t offset, int64_t width, int64_t length);
@@ -156,5 +158,14 @@ extern "C" {
   EXPORT_SYMBOL void awkward_indexU32_setitem_at_nowrap(uint32_t* ptr, int64_t offset, int64_t at, uint32_t value);
   EXPORT_SYMBOL void awkward_index64_setitem_at_nowrap(int64_t* ptr, int64_t offset, int64_t at, int64_t value);
 
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_getitem_carry_64(int8_t* tomask, const int8_t* frommask, int64_t frommaskoffset, int64_t lenmask, const int64_t* fromcarry, int64_t lencarry);
+
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_numnull(int64_t* numnull, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen);
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_getitem_nextcarry_64(int64_t* tocarry, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen);
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_getitem_nextcarry_outindex_64(int64_t* tocarry, int64_t* outindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen);
+
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_toindexedarray_64(int64_t* toindex, const int8_t* mask, int64_t maskoffset, int64_t length, bool validwhen);
+
 }
+
 #endif // AWKWARDCPU_GETITEM_H_

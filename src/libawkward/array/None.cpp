@@ -134,7 +134,11 @@ namespace awkward {
   }
 
   const std::string None::validityerror(const std::string& path) const {
-    throw std::runtime_error("undefined operatino: None::validityerror");
+    throw std::runtime_error("undefined operation: None::validityerror");
+  }
+
+  const std::shared_ptr<Content> None::shallow_simplify() const {
+    throw std::runtime_error("undefined operation: None::shallow_simplify");
   }
 
   const std::shared_ptr<Content> None::num(int64_t axis, int64_t depth) const {
@@ -165,7 +169,7 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::rpad_and_clip");
   }
 
-  const std::shared_ptr<Content> None::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> None::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     throw std::runtime_error("undefined operation: None::reduce_next");
   }
 

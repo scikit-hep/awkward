@@ -18,6 +18,9 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/RecordArray.h"
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
 
 #include "awkward/array/ListOffsetArray.h"
 
@@ -474,6 +477,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::shallow_simplify() const {
+    return shallow_copy();
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
@@ -562,6 +570,15 @@ namespace awkward {
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
       return mergeable(rawother->content(), mergebool);
     }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
 
     if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
@@ -611,6 +628,15 @@ namespace awkward {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
@@ -914,7 +940,7 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
 
       std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(identities_, parameters_, outindex, content());
-      return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets, next.get()->simplify());
+      return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets, next.get()->simplify_optiontype());
     }
     else {
       return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), parameters_, offsets_, content_.get()->rpad(target, toaxis, depth + 1));
@@ -948,15 +974,15 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
 
       std::shared_ptr<IndexedOptionArray64> next = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, content());
-      return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify(), target);
+      return std::make_shared<RegularArray>(Identities::none(), parameters_, next.get()->simplify_optiontype(), target);
     }
     else {
-      return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), parameters_, offsets_, content_.get()->rpad(target, toaxis, depth + 1));
+      return std::make_shared<ListOffsetArrayOf<T>>(Identities::none(), parameters_, offsets_, content_.get()->rpad_and_clip(target, toaxis, depth + 1));
     }
   }
 
   template <>
-  const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> ListOffsetArrayOf<int64_t>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -987,7 +1013,7 @@ namespace awkward {
 
       Index64 nextcarry(nextlen);
       Index64 nextparents(nextlen);
-      int64_t maxnextparents = 0;
+      int64_t maxnextparents;
       Index64 distincts(maxcount * outlength);
       struct Error err3 = awkward_listoffsetarray_reduce_nonlocal_preparenext_64(
         nextcarry.ptr().get(),
@@ -1005,26 +1031,33 @@ namespace awkward {
         maxcount);
       util::handle_error(err3, classname(), identities_.get());
 
+      Index64 nextstarts(maxnextparents + 1);
+      struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_nextstarts_64(
+        nextstarts.ptr().get(),
+        nextparents.ptr().get(),
+        nextlen);
+      util::handle_error(err4, classname(), identities_.get());
+
       std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
-      std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, nextparents, maxnextparents + 1, mask, false);
+      std::shared_ptr<Content> outcontent = nextcontent.get()->reduce_next(reducer, negaxis - 1, nextstarts, nextparents, maxnextparents + 1, mask, false);
 
       Index64 gaps(outlength);
-      struct Error err4 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
+      struct Error err5 = awkward_listoffsetarray_reduce_nonlocal_findgaps_64(
         gaps.ptr().get(),
         parents.ptr().get(),
         parents.offset(),
         parents.length());
-      util::handle_error(err4, classname(), identities_.get());
+      util::handle_error(err5, classname(), identities_.get());
 
       Index64 outstarts(outlength);
       Index64 outstops(outlength);
-      struct Error err5 = awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
+      struct Error err6 = awkward_listoffsetarray_reduce_nonlocal_outstartsstops_64(
         outstarts.ptr().get(),
         outstops.ptr().get(),
         distincts.ptr().get(),
         maxcount * outlength,
         gaps.ptr().get());
-      util::handle_error(err5, classname(), identities_.get());
+      util::handle_error(err6, classname(), identities_.get());
 
       std::shared_ptr<Content> out = std::make_shared<ListArray64>(Identities::none(), util::Parameters(), outstarts, outstops, outcontent);
 
@@ -1055,7 +1088,7 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
 
       std::shared_ptr<Content> trimmed = content_.get()->getitem_range_nowrap(globalstart, globalstop);
-      std::shared_ptr<Content> outcontent = trimmed.get()->reduce_next(reducer, negaxis, nextparents, offsets_.length() - 1, mask, keepdims);
+      std::shared_ptr<Content> outcontent = trimmed.get()->reduce_next(reducer, negaxis, util::make_starts(offsets_), nextparents, offsets_.length() - 1, mask, keepdims);
 
       Index64 outoffsets(outlength + 1);
       struct Error err3 = awkward_listoffsetarray_reduce_local_outoffsets_64(
@@ -1068,6 +1101,11 @@ namespace awkward {
 
       return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), outoffsets, outcontent);
     }
+  }
+
+  template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t length, bool mask, bool keepdims) const {
+    return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, starts, parents, length, mask, keepdims);
   }
 
   template <typename T>
@@ -1150,15 +1188,11 @@ namespace awkward {
     }
 
     else {
-      std::shared_ptr<Content> next = content_.get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
-      Index64 offsets = compact_offsets64(true);
-      return std::make_shared<ListOffsetArray64>(identities_, util::Parameters(), offsets, next);
+      std::shared_ptr<Content> compact = toListOffsetArray64(true);
+      ListOffsetArray64* rawcompact = dynamic_cast<ListOffsetArray64*>(compact.get());
+      std::shared_ptr<Content> next = rawcompact->content().get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
+      return std::make_shared<ListOffsetArray64>(identities_, util::Parameters(), rawcompact->offsets(), next);
     }
-  }
-
-  template <typename T>
-  const std::shared_ptr<Content> ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t length, bool mask, bool keepdims) const {
-    return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, parents, length, mask, keepdims);
   }
 
   template <typename T>

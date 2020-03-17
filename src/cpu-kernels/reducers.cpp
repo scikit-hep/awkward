@@ -385,6 +385,122 @@ ERROR awkward_reduce_max_float64_float64_64(double* toptr, const double* fromptr
   return awkward_reduce_max<double, double>(toptr, fromptr, fromptroffset, parents, parentsoffset, lenparents, outlength, identity);
 }
 
+template <typename OUT, typename IN>
+ERROR awkward_reduce_argmin(OUT* toptr, const IN* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  for (int64_t i = 0;  i < outlength;  i++) {
+    toptr[i] = -1;
+  }
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    int64_t parent = parents[parentsoffset + i];
+    int64_t start = starts[parent];
+    if (toptr[parent] == -1  ||  fromptr[fromptroffset + i] < fromptr[fromptroffset + toptr[parent] + start]) {
+      toptr[parent] = i - start;
+    }
+  }
+  return success();
+}
+ERROR awkward_reduce_argmin_bool_64(int64_t* toptr, const bool* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  for (int64_t i = 0;  i < outlength;  i++) {
+    toptr[i] = -1;
+  }
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    int64_t parent = parents[parentsoffset + i];
+    int64_t start = starts[parent];
+    if (toptr[parent] == -1  ||  (fromptr[fromptroffset + i] != 0) < (fromptr[fromptroffset + toptr[parent] + start] != 0)) {
+      toptr[parent] = i - start;
+    }
+  }
+  return success();
+}
+ERROR awkward_reduce_argmin_int8_64(int64_t* toptr, const int8_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmin<int64_t, int8_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmin_uint8_64(int64_t* toptr, const uint8_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmin<int64_t, uint8_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmin_int16_64(int64_t* toptr, const int16_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmin<int64_t, int16_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmin_uint16_64(int64_t* toptr, const uint16_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmin<int64_t, uint16_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmin_int32_64(int64_t* toptr, const int32_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmin<int64_t, int32_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmin_uint32_64(int64_t* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmin<int64_t, uint32_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmin_int64_64(int64_t* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmin<int64_t, int64_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmin_uint64_64(int64_t* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmin<int64_t, uint64_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmin_float32_64(int64_t* toptr, const float* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmin<int64_t, float>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmin_float64_64(int64_t* toptr, const double* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmin<int64_t, double>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+
+template <typename OUT, typename IN>
+ERROR awkward_reduce_argmax(OUT* toptr, const IN* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  for (int64_t i = 0;  i < outlength;  i++) {
+    toptr[i] = -1;
+  }
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    int64_t parent = parents[parentsoffset + i];
+    int64_t start = starts[parent];
+    if (toptr[parent] == -1  ||  fromptr[fromptroffset + i] > fromptr[fromptroffset + toptr[parent] + start]) {
+      toptr[parent] = i - start;
+    }
+  }
+  return success();
+}
+ERROR awkward_reduce_argmax_bool_64(int64_t* toptr, const bool* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  for (int64_t i = 0;  i < outlength;  i++) {
+    toptr[i] = -1;
+  }
+  for (int64_t i = 0;  i < lenparents;  i++) {
+    int64_t parent = parents[parentsoffset + i];
+    int64_t start = starts[parent];
+    if (toptr[parent] == -1  ||  (fromptr[fromptroffset + i] != 0) > (fromptr[fromptroffset + toptr[parent] + start] != 0)) {
+      toptr[parent] = i - start;
+    }
+  }
+  return success();
+}
+ERROR awkward_reduce_argmax_int8_64(int64_t* toptr, const int8_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmax<int64_t, int8_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmax_uint8_64(int64_t* toptr, const uint8_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmax<int64_t, uint8_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmax_int16_64(int64_t* toptr, const int16_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmax<int64_t, int16_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmax_uint16_64(int64_t* toptr, const uint16_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmax<int64_t, uint16_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmax_int32_64(int64_t* toptr, const int32_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmax<int64_t, int32_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmax_uint32_64(int64_t* toptr, const uint32_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmax<int64_t, uint32_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmax_int64_64(int64_t* toptr, const int64_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmax<int64_t, int64_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmax_uint64_64(int64_t* toptr, const uint64_t* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmax<int64_t, uint64_t>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmax_float32_64(int64_t* toptr, const float* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmax<int64_t, float>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+ERROR awkward_reduce_argmax_float64_64(int64_t* toptr, const double* fromptr, int64_t fromptroffset, const int64_t* starts, int64_t startsoffset, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+  return awkward_reduce_argmax<int64_t, double>(toptr, fromptr, fromptroffset, starts, startsoffset, parents, parentsoffset, lenparents, outlength);
+}
+
 ERROR awkward_content_reduce_zeroparents_64(int64_t* toparents, int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     toparents[i] = 0;
@@ -424,9 +540,11 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_preparenext_64(int64_t* nextcarry,
       if (offsetscopy[i] < offsets[offsetsoffset + i + 1]) {
         int64_t count = offsets[offsetsoffset + i + 1] - offsets[offsetsoffset + i];
         int64_t diff = offsetscopy[i] - offsets[offsetsoffset + i];
+        int64_t parent = parents[parentsoffset + i];
 
         nextcarry[k] = offsetscopy[i];
-        nextparents[k] = parents[parentsoffset + i]*maxcount + diff;
+        nextparents[k] = parent*maxcount + diff;
+
         if (*maxnextparents < nextparents[k]) {
           *maxnextparents = nextparents[k];
         }
@@ -440,6 +558,17 @@ ERROR awkward_listoffsetarray_reduce_nonlocal_preparenext_64(int64_t* nextcarry,
         offsetscopy[i]++;
       }
     }
+  }
+  return success();
+}
+
+ERROR awkward_listoffsetarray_reduce_nonlocal_nextstarts_64(int64_t* nextstarts, const int64_t* nextparents, int64_t nextlen) {
+  int64_t lastnextparent = -1;
+  for (int64_t k = 0;  k < nextlen;  k++) {
+    if (nextparents[k] != lastnextparent) {
+      nextstarts[nextparents[k]] = k;
+    }
+    lastnextparent = nextparents[k];
   }
   return success();
 }
@@ -524,12 +653,24 @@ ERROR awkward_indexedarray64_reduce_next_64(int64_t* nextcarry, int64_t* nextpar
   return awkward_indexedarray_reduce_next_64<int64_t>(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
 }
 
-ERROR awkward_numpyarray_reduce_mask_indexedoptionarray64(int64_t* toptr, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
+ERROR awkward_numpyarray_reduce_mask_bytemaskedarray(int8_t* toptr, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
   for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = -1;
+    toptr[i] = 1;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[parentsoffset + i]] = parents[parentsoffset + i];
+    toptr[parents[parentsoffset + i]] = 0;
+  }
+  return success();
+}
+
+ERROR awkward_bytemaskedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const int8_t* mask, int64_t maskoffset, const int64_t* parents, int64_t parentsoffset, int64_t length, bool validwhen) {
+  int64_t k = 0;
+  for (int64_t i = 0;  i < length;  i++) {
+    if ((mask[maskoffset + i] != 0) == validwhen) {
+      nextcarry[k] = i;
+      nextparents[k] = parents[parentsoffset + i];
+      k++;
+    }
   }
   return success();
 }

@@ -23,7 +23,7 @@ namespace awkward {
     const std::shared_ptr<Content> project() const;
     const std::shared_ptr<Content> project(const Index8& mask) const;
     const Index8 bytemask() const;
-    const std::shared_ptr<Content> simplify() const;
+    const std::shared_ptr<Content> simplify_optiontype() const;
     T index_at_nowrap(int64_t at) const;
 
     const std::string classname() const override;
@@ -59,6 +59,7 @@ namespace awkward {
 
     // operations
     const std::string validityerror(const std::string& path) const override;
+    const std::shared_ptr<Content> shallow_simplify() const override;
     const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override;
     const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override;
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
@@ -67,7 +68,7 @@ namespace awkward {
     const std::shared_ptr<SliceItem> asslice() const override;
     const std::shared_ptr<Content> rpad(int64_t length, int64_t axis, int64_t depth) const override;
     const std::shared_ptr<Content> rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const override;
-    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override;
+    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override;
     const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const override;
     const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override;
 

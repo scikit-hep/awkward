@@ -1,33 +1,33 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_RECORDARRAY_H_
-#define AWKWARD_RECORDARRAY_H_
+#ifndef AWKWARD_UNMASKEDARRAY_H_
+#define AWKWARD_UNMASKEDARRAY_H_
 
-#include <memory>
 #include <string>
-#include <unordered_map>
+#include <memory>
+#include <vector>
 
 #include "awkward/cpu-kernels/util.h"
-#include "awkward/Identities.h"
+#include "awkward/Slice.h"
+#include "awkward/Index.h"
 #include "awkward/Content.h"
 
 namespace awkward {
-  class EXPORT_SYMBOL RecordArray: public Content, public std::enable_shared_from_this<RecordArray> {
+  class EXPORT_SYMBOL UnmaskedArray: public Content {
   public:
-    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup, int64_t length);
-    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<std::shared_ptr<Content>>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
-
-    const std::vector<std::shared_ptr<Content>> contents() const;
-    const std::shared_ptr<util::RecordLookup> recordlookup() const;
-    bool istuple() const;
-    const std::shared_ptr<Content> setitem_field(int64_t where, const std::shared_ptr<Content>& what) const;
-    const std::shared_ptr<Content> setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const;
+    UnmaskedArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::shared_ptr<Content>& content);
+    const std::shared_ptr<Content> content() const;
+    const std::shared_ptr<Content> project() const;
+    const std::shared_ptr<Content> project(const Index8& mask) const;
+    const Index8 bytemask() const;
+    const std::shared_ptr<Content> simplify_optiontype() const;
+    const std::shared_ptr<Content> toIndexedOptionArray64() const;
 
     const std::string classname() const override;
     void setidentities() override;
     void setidentities(const std::shared_ptr<Identities>& identities) override;
-    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const override;
+    const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const override;
     void tojson_part(ToJson& builder) const override;
     void nbytes_part(std::map<size_t, int64_t>& largest) const override;
     int64_t length() const override;
@@ -60,6 +60,7 @@ namespace awkward {
     const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override;
     const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override;
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override;
+    const std::shared_ptr<Content> reverse_merge(const std::shared_ptr<Content>& other) const;
     const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override;
     const std::shared_ptr<SliceItem> asslice() const override;
     const std::shared_ptr<Content> rpad(int64_t length, int64_t axis, int64_t depth) const override;
@@ -68,17 +69,9 @@ namespace awkward {
     const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const override;
     const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override;
 
-    const std::shared_ptr<Content> field(int64_t fieldindex) const;
-    const std::shared_ptr<Content> field(const std::string& key) const;
-    const std::vector<std::shared_ptr<Content>> fields() const;
-    const std::vector<std::pair<std::string, std::shared_ptr<Content>>> fielditems() const;
-    const std::shared_ptr<RecordArray> astuple() const;
-
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const override;
-    const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const override;
     const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const override;
     const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const override;
@@ -89,10 +82,9 @@ namespace awkward {
     const std::shared_ptr<Content> getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const;
 
   private:
-    const std::vector<std::shared_ptr<Content>> contents_;
-    const std::shared_ptr<util::RecordLookup> recordlookup_;
-    int64_t length_;
+    const std::shared_ptr<Content> content_;
   };
+
 }
 
-#endif // AWKWARD_RECORDARRAY_H_
+#endif // AWKWARD_UNMASKEDARRAY_H_
