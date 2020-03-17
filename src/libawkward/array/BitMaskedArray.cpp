@@ -86,6 +86,9 @@ namespace awkward {
       IndexedOptionArray64* step2 = dynamic_cast<IndexedOptionArray64*>(step1.get());
       return step2->simplify_optiontype();
     }
+    else {
+      return shallow_copy();
+    }
   }
 
   const std::shared_ptr<ByteMaskedArray> BitMaskedArray::toByteMaskedArray() const {
