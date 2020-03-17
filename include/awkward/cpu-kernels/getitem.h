@@ -4,7 +4,6 @@
 #define AWKWARDCPU_GETITEM_H_
 
 #include "awkward/cpu-kernels/util.h"
-#include <memory>
 
 extern "C" {
   EXPORT_SYMBOL void awkward_regularize_rangeslice(int64_t* start, int64_t* stop, bool posstep, bool hasstart, bool hasstop, int64_t length);
