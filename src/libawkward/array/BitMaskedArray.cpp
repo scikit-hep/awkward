@@ -425,6 +425,10 @@ namespace awkward {
     return toIndexedOptionArray64().get()->asslice();
   }
 
+  const std::shared_ptr<Content> BitMaskedArray::fillna(const std::shared_ptr<Content>& value) const {
+    return toIndexedOptionArray64().get()->fillna(value);
+  }
+
   const std::shared_ptr<Content> BitMaskedArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     return toByteMaskedArray().get()->rpad(target, axis, depth);
   }

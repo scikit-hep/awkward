@@ -1159,7 +1159,7 @@ namespace awkward {
       contents.emplace_back(content.get()->fillna(value));
     }
     UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
-    return out.simplify(false);
+    return out.simplify_uniontype(false);
   }
 
   template <typename T, typename I>

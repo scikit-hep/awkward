@@ -1141,7 +1141,7 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
 
       std::shared_ptr<UnionArray8_64> out = std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
-      return out.get()->simplify(true);
+      return out.get()->simplify_uniontype(true);
     }
     else {
       return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->fillna(value));

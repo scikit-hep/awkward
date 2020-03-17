@@ -397,6 +397,10 @@ namespace awkward {
     return content_.get()->asslice();
   }
 
+  const std::shared_ptr<Content> UnmaskedArray::fillna(const std::shared_ptr<Content>& value) const {
+    return content_.get()->fillna(value);
+  }
+
   const std::shared_ptr<Content> UnmaskedArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
