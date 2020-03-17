@@ -57,6 +57,9 @@ namespace awkward {
         dynamic_cast<UnmaskedArray*>(content_.get())) {
       return content_;
     }
+    else {
+      return shallow_copy();
+    }
   }
 
   const std::shared_ptr<Content> UnmaskedArray::toIndexedOptionArray64() const {
@@ -395,6 +398,10 @@ namespace awkward {
 
   const std::shared_ptr<SliceItem> UnmaskedArray::asslice() const {
     return content_.get()->asslice();
+  }
+
+  const std::shared_ptr<Content> UnmaskedArray::fillna(const std::shared_ptr<Content>& value) const {
+    return content_.get()->fillna(value);
   }
 
   const std::shared_ptr<Content> UnmaskedArray::rpad(int64_t target, int64_t axis, int64_t depth) const {

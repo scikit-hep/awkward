@@ -1153,6 +1153,16 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::shared_ptr<Content> UnionArrayOf<T, I>::fillna(const std::shared_ptr<Content>& value) const {
+    std::vector<std::shared_ptr<Content>> contents;
+    for (auto content : contents_) {
+      contents.emplace_back(content.get()->fillna(value));
+    }
+    UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
+    return out.simplify_uniontype(false);
+  }
+
+  template <typename T, typename I>
   const std::shared_ptr<Content> UnionArrayOf<T, I>::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {

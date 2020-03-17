@@ -12,6 +12,7 @@
 #include "awkward/Slice.h"
 #include "awkward/array/None.h"
 #include "awkward/array/EmptyArray.h"
+#include "awkward/array/NumpyArray.h"
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ByteMaskedArray.h"
@@ -1117,6 +1118,33 @@ namespace awkward {
     }
     else {
       return project().get()->asslice();
+    }
+  }
+
+  template <typename T, bool ISOPTION>
+  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::fillna(const std::shared_ptr<Content>& value) const {
+    if (value.get()->length() != 1) {
+      throw std::invalid_argument(std::string("fillna value length (") + std::to_string(value.get()->length()) + std::string(") is not equal to 1"));
+    }
+    if (ISOPTION) {
+      std::vector<std::shared_ptr<Content>> contents;
+      contents.emplace_back(content());
+      contents.emplace_back(value);
+
+      Index8 tags = bytemask();
+      Index64 index(tags.length());
+      struct Error err = util::awkward_UnionArray_fillna_64<T>(
+        index.ptr().get(),
+        index_.ptr().get(),
+        index_.offset(),
+        tags.length());
+      util::handle_error(err, classname(), identities_.get());
+
+      std::shared_ptr<UnionArray8_64> out = std::make_shared<UnionArray8_64>(Identities::none(), parameters_, tags, index, contents);
+      return out.get()->simplify_uniontype(true);
+    }
+    else {
+      return std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(), parameters_, index_, content_.get()->fillna(value));
     }
   }
 

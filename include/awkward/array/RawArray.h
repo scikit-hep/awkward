@@ -532,6 +532,10 @@ namespace awkward {
       throw std::invalid_argument("cannot use RawArray as a slice");
     }
 
+    const std::shared_ptr<Content> fillna(const std::shared_ptr<Content>& value) const override {
+      return shallow_copy();
+    }
+
     const std::shared_ptr<Content> rpad(int64_t target, int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis != depth) {

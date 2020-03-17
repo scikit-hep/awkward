@@ -913,6 +913,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::fillna(const std::shared_ptr<Content>& value) const {
+    return std::make_shared<ListOffsetArrayOf<T>>(identities_, parameters_, offsets_, content().get()->fillna(value));
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {

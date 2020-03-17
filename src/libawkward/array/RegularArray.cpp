@@ -502,6 +502,10 @@ namespace awkward {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
+  const std::shared_ptr<Content> RegularArray::fillna(const std::shared_ptr<Content>& value) const {
+    return std::make_shared<RegularArray>(identities_, parameters_, content().get()->fillna(value), size_);
+  }
+
   const std::shared_ptr<Content> RegularArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {

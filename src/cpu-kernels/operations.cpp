@@ -757,6 +757,24 @@ ERROR awkward_unionarray8_64_validity(const int8_t* tags, int64_t tagsoffset, co
   return awkward_unionarray_validity<int8_t, int64_t>(tags, tagsoffset, index, indexoffset, length, numcontents, lencontents);
 }
 
+template <typename T, typename C>
+ERROR awkward_UnionArray_fillna(T* toindex, const C* fromindex, int64_t offset, int64_t length) {
+  for (int64_t i = 0; i < length; i++)
+  {
+    toindex[i] = fromindex[offset + i] >= 0 ? fromindex[offset + i] : 0;
+  }
+  return success();
+}
+ERROR awkward_UnionArray_fillna_from32_to64(int64_t* toindex, const int32_t* fromindex, int64_t offset, int64_t length) {
+  return awkward_UnionArray_fillna<int64_t, int32_t>(toindex, fromindex, offset, length);
+}
+ERROR awkward_UnionArray_fillna_fromU32_to64(int64_t* toindex, const uint32_t* fromindex, int64_t offset, int64_t length) {
+  return awkward_UnionArray_fillna<int64_t, uint32_t>(toindex, fromindex, offset, length);
+}
+ERROR awkward_UnionArray_fillna_from64_to64(int64_t* toindex, const int64_t* fromindex, int64_t offset, int64_t length) {
+  return awkward_UnionArray_fillna<int64_t, int64_t>(toindex, fromindex, offset, length);
+}
+
 template <typename T>
 ERROR awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(T* toindex, const int8_t* frommask, int64_t length) {
   int64_t count = 0;

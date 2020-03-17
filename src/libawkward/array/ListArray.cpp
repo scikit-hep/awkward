@@ -790,6 +790,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::fillna(const std::shared_ptr<Content>& value) const {
+    return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_.get()->fillna(value));
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {

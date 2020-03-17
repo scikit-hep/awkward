@@ -149,6 +149,9 @@ namespace awkward {
     template <typename T>
     ERROR awkward_indexedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const T* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length);
     template <typename T>
+    ERROR awkward_UnionArray_fillna_64(int64_t* toindex, const T* fromindex, int64_t offset, int64_t length);
+
+    template <typename T>
     ERROR awkward_ListArray_min_range(int64_t* tomin, const T* fromstarts, const T* fromstops, int64_t lenstarts, int64_t startsoffset, int64_t stopsoffset);
     template <typename T>
     ERROR awkward_ListArray_rpad_axis1_64(int64_t* toindex, const T* fromstarts, const T* fromstops, T* tostarts, T* tostops, int64_t target, int64_t length, int64_t startsoffset, int64_t stopsoffset);

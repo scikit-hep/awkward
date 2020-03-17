@@ -901,6 +901,9 @@ py::class_<T, std::shared_ptr<T>, ak::Content> content_methods(py::class_<T, std
               return pyvalue;
             }
           })
+          .def("fillna", [](const T&self, const py::object&  value) -> py::object {
+            return box(self.fillna(unbox_content(value)));
+          })
           .def("num", [](const T& self, int64_t axis) -> py::object {
             return box(self.num(axis, 0));
           }, py::arg("axis") = 1)

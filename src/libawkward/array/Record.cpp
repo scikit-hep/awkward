@@ -237,6 +237,11 @@ namespace awkward {
     throw std::invalid_argument("cannot use a record as a slice");
   }
 
+  const std::shared_ptr<Content> Record::fillna(const std::shared_ptr<Content>& value) const {
+    //                   get a RecordArray of just this element    fillna               get the only element
+    return array_.get()->getitem_range_nowrap(at_, at_ + 1).get()->fillna(value).get()->getitem_at_nowrap(0);
+  }
+
   const std::shared_ptr<Content> Record::rpad(int64_t length, int64_t axis, int64_t depth) const {
     throw std::invalid_argument("Record cannot be padded because it is not an array");
   }

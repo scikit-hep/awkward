@@ -1374,6 +1374,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> NumpyArray::fillna(const std::shared_ptr<Content>& value) const {
+    return shallow_copy();
+  }
+
   const std::shared_ptr<Content> NumpyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     if (ndim() == 0) {
       throw std::runtime_error("cannot rpad a scalar");
