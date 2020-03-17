@@ -586,6 +586,10 @@ namespace awkward {
         throw std::invalid_argument("'axis' out of range for choose");
       }
     }
+    
+    const std::shared_ptr<Content> argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const override {
+      throw std::runtime_error("FIXME: RawArray::argsort is not implemened");
+    }
 
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
       return getitem_at(at.at());

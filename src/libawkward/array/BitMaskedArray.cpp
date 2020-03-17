@@ -445,6 +445,10 @@ namespace awkward {
     return toByteMaskedArray().get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
   }
 
+  const std::shared_ptr<Content> BitMaskedArray::argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: BitMaskedArray::argsort is not implemened");
+  }
+
   const std::shared_ptr<Content> BitMaskedArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: BitMaskedArray::getitem_next(at)");
   }

@@ -940,6 +940,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListArrayOf<T>::argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: ListArrayOf<T>::argsort is not implemened");
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {

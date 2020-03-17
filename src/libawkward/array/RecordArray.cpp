@@ -739,6 +739,10 @@ namespace awkward {
     return std::make_shared<RecordArray>(identities_, parameters_, contents_, std::shared_ptr<util::RecordLookup>(nullptr), length_);
   }
 
+  const std::shared_ptr<Content> RecordArray::argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: RecordArray::argsort is not implemened");
+  }
+
   const std::shared_ptr<Content> RecordArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();

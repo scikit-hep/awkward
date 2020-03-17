@@ -314,6 +314,10 @@ namespace awkward {
     return std::make_shared<Record>(array_.get()->astuple(), at_);
   }
 
+  const std::shared_ptr<Content> Record::argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: Record::argsort is not implemened");
+  }
+
   const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(at)");
   }

@@ -1196,6 +1196,11 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::shared_ptr<Content> ListOffsetArrayOf<T>::argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: ListOffsetArrayOf<T>::argsort is not implemened");
+  }
+
+  template <typename T>
   const std::shared_ptr<Content> ListOffsetArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::runtime_error("ListOffsetArray::getitem_next(SliceAt): advanced.length() != 0");

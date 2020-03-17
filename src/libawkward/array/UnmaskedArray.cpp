@@ -450,6 +450,10 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<Content> UnmaskedArray::argsort(bool ascending, const std::string& kind, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("FIXME: UnmaskedArray::argsort is not implemened");
+  }
+
   const std::shared_ptr<Content> UnmaskedArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: UnmaskedArray::getitem_next(at)");
   }
