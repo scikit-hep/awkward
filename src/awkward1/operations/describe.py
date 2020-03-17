@@ -8,6 +8,10 @@ import numpy
 
 import awkward1.layout
 
+def keys(array):
+    layout = awkward1.operations.convert.tolayout(array, allowrecord=True, allowother=False)
+    return layout.keys()
+
 def parameters(array):
     if isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
         return array.layout.parameters

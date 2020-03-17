@@ -21,7 +21,7 @@ def getArguments(names, local_dict=None, global_dict=None):
         if global_dict is None:
             global_dict = frame_globals
 
-        # If `call_frame` is the top frame of the interpreter we can't clear its 
+        # If `call_frame` is the top frame of the interpreter we can't clear its
         # `local_dict`, because it is actually the `global_dict`.
         clear_local_dict = clear_local_dict and not frame_globals is local_dict
 
@@ -53,9 +53,9 @@ def evaluate(expression, local_dict=None, global_dict=None, order="K", casting="
 
     arrays = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=True) for x in arguments]
 
-    def getfunction(inputs):
+    def getfunction(inputs, depth):
         if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-            return lambda depth: (awkward1.layout.NumpyArray(numexpr.evaluate(expression, dict(zip(names, inputs)), {}, order=order, casting=casting, **kwargs)),)
+            return lambda: (awkward1.layout.NumpyArray(numexpr.evaluate(expression, dict(zip(names, inputs)), {}, order=order, casting=casting, **kwargs)),)
         else:
             return None
 
@@ -77,12 +77,11 @@ def re_evaluate(local_dict=None):
 
     arrays = [awkward1.operations.convert.tolayout(x, allowrecord=True, allowother=True) for x in arguments]
 
-    def getfunction(inputs):
+    def getfunction(inputs, depth):
         if all(isinstance(x, awkward1.layout.NumpyArray) or not isinstance(x, awkward1.layout.Content) for x in inputs):
-
-            return lambda depth: (awkward1.layout.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),)
-
-        return None
+            return lambda: (awkward1.layout.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),)
+        else:
+            return None
 
     out = awkward1._util.broadcast_and_apply(arrays, getfunction)
     assert isinstance(out, tuple) and len(out) == 1

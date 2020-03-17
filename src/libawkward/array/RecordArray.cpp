@@ -12,8 +12,11 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
-
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
 #include "awkward/array/NumpyArray.h"
+
 #include "awkward/array/RecordArray.h"
 
 namespace awkward {
@@ -419,42 +422,51 @@ namespace awkward {
     return std::string();
   }
 
-  const Index64 RecordArray::count64() const {
-    int64_t len = (int64_t)contents_.size();
-    Index64 tocount(len);
-    int64_t indx(0);
-    for (auto content : contents_) {
-      Index64 toappend = content.get()->count64();
-      tocount.ptr().get()[indx++] = toappend.length();
-    }
-    return tocount;
+  const std::shared_ptr<Content> RecordArray::shallow_simplify() const {
+    return shallow_copy();
   }
 
-  const std::shared_ptr<Content> RecordArray::count(int64_t axis) const {
+  const std::shared_ptr<Content> RecordArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->count(toaxis));
-    }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
+    if (toaxis == depth) {
+      Index64 single(1);
+      single.ptr().get()[0] = length_;
+      std::shared_ptr<Content> singleton = std::make_shared<NumpyArray>(single);
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(singleton);
+      }
+      std::shared_ptr<Content> record = std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, 1);
+      return record.get()->getitem_at_nowrap(0);
     }
     else {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->num(axis, depth));
+      }
+      return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, length_);
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::flatten(int64_t axis) const {
-    std::vector<std::shared_ptr<Content>> contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->flatten(axis));
+  const std::pair<Index64, std::shared_ptr<Content>> RecordArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("axis=0 not allowed for flatten");
     }
-    if (contents.empty()) {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
+    else if (toaxis == depth + 1) {
+      throw std::invalid_argument("arrays of records cannot be flattened (but their contents can be; try a different 'axis')");
     }
     else {
-      return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_);
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        std::shared_ptr<Content> trimmed = content.get()->getitem_range(0, length());
+        std::pair<Index64, std::shared_ptr<Content>> pair = trimmed.get()->offsets_and_flattened(axis, depth);
+        if (pair.first.length() != 0) {
+          throw std::runtime_error("RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened");
+        }
+        contents.push_back(pair.second);
+      }
+      return std::pair<Index64, std::shared_ptr<Content>>(Index64(0), std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_));
     }
   }
 
@@ -482,6 +494,15 @@ namespace awkward {
       return mergeable(rawother->content(), mergebool);
     }
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
       return mergeable(rawother->content(), mergebool);
     }
 
@@ -538,6 +559,15 @@ namespace awkward {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
@@ -640,14 +670,45 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {
       std::shared_ptr<Content> trimmed = content.get()->getitem_range_nowrap(0, length());
-      std::shared_ptr<Content> next = trimmed.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+      std::shared_ptr<Content> next = trimmed.get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
       contents.push_back(next);
     }
     return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, outlength);
+  }
+
+  const std::shared_ptr<Content> RecordArray::localindex(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (axis == depth) {
+      return localindex_axis0();
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->localindex(axis, depth));
+      }
+      return std::make_shared<RecordArray>(identities_, util::Parameters(), contents, recordlookup_, length_);
+    }
+  }
+
+  const std::shared_ptr<Content> RecordArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (axis == depth) {
+      return choose_axis0(n, diagonal, recordlookup, parameters);
+    }
+    else {
+      std::vector<std::shared_ptr<Content>> contents;
+      for (auto content : contents_) {
+        contents.push_back(content.get()->choose(n, diagonal, recordlookup, parameters, axis, depth));
+      }
+      return std::make_shared<RecordArray>(identities_, util::Parameters(), contents, recordlookup_, length_);
+    }
   }
 
   const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {

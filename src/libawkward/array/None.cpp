@@ -134,19 +134,19 @@ namespace awkward {
   }
 
   const std::string None::validityerror(const std::string& path) const {
-    throw std::runtime_error("undefined operatino: None::validityerror");
+    throw std::runtime_error("undefined operation: None::validityerror");
   }
 
-  const Index64 None::count64() const {
-    throw std::runtime_error("undefined operation: None::count64");
+  const std::shared_ptr<Content> None::shallow_simplify() const {
+    throw std::runtime_error("undefined operation: None::shallow_simplify");
   }
 
-  const std::shared_ptr<Content> None::count(int64_t axis) const {
-    throw std::runtime_error("undefined operation: None::count");
+  const std::shared_ptr<Content> None::num(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("undefined operation: None::num");
   }
 
-  const std::shared_ptr<Content> None::flatten(int64_t axis) const {
-    throw std::runtime_error("undefined operation: None::flatten");
+  const std::pair<Index64, std::shared_ptr<Content>> None::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("undefined operation: None::offsets_and_flattened");
   }
 
   bool None::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
@@ -173,8 +173,16 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::rpad_and_clip");
   }
 
-  const std::shared_ptr<Content> None::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
-    throw std::runtime_error("undefined opteration: None::reduce_next");
+  const std::shared_ptr<Content> None::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+    throw std::runtime_error("undefined operation: None::reduce_next");
+  }
+
+  const std::shared_ptr<Content> None::localindex(int64_t axis, int64_t depth) const {
+    throw std::runtime_error("undefined operation: None:localindex");
+  }
+
+  const std::shared_ptr<Content> None::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    throw std::runtime_error("undefined operation: None::choose");
   }
 
   const std::shared_ptr<Content> None::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

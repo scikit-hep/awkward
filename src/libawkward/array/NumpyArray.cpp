@@ -16,6 +16,9 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/UnionArray.h"
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
 #include "awkward/util.h"
 
 #include "awkward/array/NumpyArray.h"
@@ -657,7 +660,7 @@ namespace awkward {
     }
 
     else {
-      NumpyArray safe = contiguous();   // maybe become_contiguous() to change in-place?
+      NumpyArray safe = contiguous();
 
       std::vector<ssize_t> nextshape = { 1 };
       nextshape.insert(nextshape.end(), safe.shape_.begin(), safe.shape_.end());
@@ -761,75 +764,47 @@ namespace awkward {
     return std::string();
   }
 
-  const Index64 NumpyArray::count64() const {
-    if (ndim() < 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be counted because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
-    }
-    else if (ndim() == 1) {
-      Index64 tocount(1);
-      tocount.ptr().get()[0] = length();
-      return tocount;
-    }
-    int64_t len = length();
-    Index64 tocount(len);
-    struct Error err = awkward_regulararray_count(
-      tocount.ptr().get(),
-      (int64_t)shape_[1],
-      len);
-    util::handle_error(err, classname(), identities_.get());
-    return tocount;
+  const std::shared_ptr<Content> NumpyArray::shallow_simplify() const {
+    return shallow_copy();
   }
 
-  const std::shared_ptr<Content> NumpyArray::count(int64_t axis) const {
+  const std::shared_ptr<Content> NumpyArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    ssize_t offset = (ssize_t)toaxis;
-    if (offset > ndim()) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be counted in axis ") + std::to_string(offset) + (" because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    if (toaxis == depth) {
+      Index64 out(1);
+      out.ptr().get()[0] = length();
+      return NumpyArray(out).getitem_at_nowrap(0);
+    }
+    std::vector<ssize_t> shape;
+    int64_t reps = 1;
+    int64_t size = length();
+    int64_t i = 0;
+    while (i < ndim() - 1  &&  depth < toaxis) {
+      shape.push_back(shape_[(size_t)i]);
+      reps *= shape_[(size_t)i];
+      size = shape_[(size_t)i + 1];
+      i++;
+      depth++;
+    }
+    if (toaxis > depth) {
+      throw std::invalid_argument("'axis' out of range for 'num'");
     }
 
-#if defined _MSC_VER || defined __i386__
-    std::string format = "q";
-#else
-    std::string format = "l";
-#endif
-    if (offset == 0) {
-      Index64 tocount = count64();
-      std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
-      std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
-
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
+    ssize_t x = sizeof(int64_t);
+    std::vector<ssize_t> strides;
+    for (int64_t j = (int64_t)shape.size();  j > 0;  j--) {
+      strides.insert(strides.begin(), x);
+      x *= shape[(size_t)(j - 1)];
     }
-    else if (offset + 1 == ndim()) {
-      Index64 tocount(1);
-      tocount.ptr().get()[0] = std::accumulate(std::begin(shape_), std::end(shape_), 1, std::multiplies<ssize_t>());
-      std::vector<ssize_t> shape({ (ssize_t)tocount.length() });
-      std::vector<ssize_t> strides({ (ssize_t)sizeof(int64_t) });
 
-      return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tocount.ptr(), shape, strides, 0, sizeof(int64_t), format);
-    }
-    else {
-      // From studies/flatten.py:
-      // # content = NumpyArray(self.ptr, self.shape[1:], self.strides[1:], self.offset).count(axis - 1)
-      // # index = [0] * self.shape[0] * self.shape[1]
-      // # return RegularArray(IndexedArray(index, content), self.shape[1])
+    Index64 tonum(reps);
+    struct Error err = awkward_regulararray_num_64(
+      tonum.ptr().get(),
+      size,
+      reps);
+    util::handle_error(err, classname(), identities_.get());
 
-      std::vector<ssize_t> nextshape = std::vector<ssize_t>(std::begin(shape_) + 1, std::end(shape_));
-      std::vector<ssize_t> nextstrides = std::vector<ssize_t>(std::begin(strides_) + 1, std::end(strides_));
-
-      std::shared_ptr<Content> content = (NumpyArray(identities_, parameters_, ptr_, nextshape, nextstrides, byteoffset_, itemsize_, format_)).count(offset - 1);
-
-      int64_t len = shape_[0]*shape_[1];
-      Index64 tocount(len);
-      struct Error err = awkward_regulararray_count(
-        tocount.ptr().get(),
-        (int64_t)0,
-        len);
-      util::handle_error(err, classname(), identities_.get());
-
-      std::shared_ptr<IndexedArray64> indexed = std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), tocount, content);
-
-      return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), indexed, shape_[1]);
-    }
+    return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), tonum.ptr(), shape, strides, 0, sizeof(int64_t), format_map.at(std::type_index(typeid(int64_t))));
   }
 
   const std::vector<ssize_t> flatten_shape(const std::vector<ssize_t> shape) {
@@ -885,19 +860,16 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> NumpyArray::flatten(int64_t axis) const {
+  const std::pair<Index64, std::shared_ptr<Content>> NumpyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
-    if (shape_.size() <= 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because it has ") + std::to_string(ndim()) + std::string(" dimensions"));
+    if (toaxis == depth) {
+      throw std::invalid_argument("axis=0 not allowed for flatten");
     }
-    if (toaxis >= (int64_t)shape_.size() - 1) {
-      throw std::invalid_argument(std::string("NumpyArray cannot be flattened because axis is ") + std::to_string(axis) + std::string(" exeeds its ") + std::to_string(ndim()) + std::string(" dimensions"));
-    }
-    if (iscontiguous()) {
-      return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, flatten_shape(shape_, toaxis), flatten_strides(strides_, toaxis), byteoffset_, itemsize_, format_);
+    else if (shape_.size() != 1  ||  !iscontiguous()) {
+      return toRegularArray().get()->offsets_and_flattened(axis, depth);
     }
     else {
-      return contiguous().flatten(toaxis);
+      throw std::invalid_argument("axis out of range for flatten");
     }
   }
 
@@ -925,6 +897,15 @@ namespace awkward {
       return mergeable(rawother->content(), mergebool);
     }
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return mergeable(rawother->content(), mergebool);
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
       return mergeable(rawother->content(), mergebool);
     }
 
@@ -983,6 +964,15 @@ namespace awkward {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return rawother->reverse_merge(shallow_copy());
+    }
+    else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
       return rawother->reverse_merge(shallow_copy());
     }
     else if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
@@ -1421,63 +1411,63 @@ namespace awkward {
     return rpad_axis0(target, true);
   }
 
-  const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     if (shape_.empty()) {
       throw std::runtime_error("attempting to reduce a scalar");
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+      return toRegularArray().get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
     }
     else {
       std::shared_ptr<void> ptr;
       if (format_.compare("?") == 0) {
-        ptr = reducer.apply_bool(reinterpret_cast<bool*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_bool(reinterpret_cast<bool*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength);
       }
       else if (format_.compare("b") == 0) {
-        ptr = reducer.apply_int8(reinterpret_cast<int8_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_int8(reinterpret_cast<int8_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength);
       }
       else if (format_.compare("B") == 0  ||  format_.compare("c") == 0) {
-        ptr = reducer.apply_uint8(reinterpret_cast<uint8_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_uint8(reinterpret_cast<uint8_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength);
       }
       else if (format_.compare("h") == 0) {
-        ptr = reducer.apply_int16(reinterpret_cast<int16_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_int16(reinterpret_cast<int16_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength);
       }
       else if (format_.compare("H") == 0) {
-        ptr = reducer.apply_uint16(reinterpret_cast<uint16_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_uint16(reinterpret_cast<uint16_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("l") == 0) {
 #else
       else if (format_.compare("i") == 0) {
 #endif
-        ptr = reducer.apply_int32(reinterpret_cast<int32_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_int32(reinterpret_cast<int32_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("L") == 0) {
 #else
       else if (format_.compare("I") == 0) {
 #endif
-        ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("q") == 0) {
 #else
       else if (format_.compare("l") == 0) {
 #endif
-        ptr = reducer.apply_int64(reinterpret_cast<int64_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_int64(reinterpret_cast<int64_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength);
       }
 #if defined _MSC_VER || defined __i386__
       else if (format_.compare("Q") == 0) {
 #else
       else if (format_.compare("L") == 0) {
 #endif
-        ptr = reducer.apply_uint64(reinterpret_cast<uint64_t*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_uint64(reinterpret_cast<uint64_t*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength);
       }
       else if (format_.compare("f") == 0) {
-        ptr = reducer.apply_float32(reinterpret_cast<float*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_float32(reinterpret_cast<float*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength);
       }
       else if (format_.compare("d") == 0) {
-        ptr = reducer.apply_float64(reinterpret_cast<double*>(ptr_.get()), byteoffset_ / itemsize_, parents, outlength);
+        ptr = reducer.apply_float64(reinterpret_cast<double*>(ptr_.get()), byteoffset_ / itemsize_, starts, parents, outlength);
       }
       else {
         throw std::invalid_argument(std::string("cannot apply reducers to NumpyArray with format \"") + format_ + std::string("\""));
@@ -1490,15 +1480,15 @@ namespace awkward {
       std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
 
       if (mask) {
-        Index64 index(outlength);
-        struct Error err = awkward_numpyarray_reduce_mask_indexedoptionarray64(
-          index.ptr().get(),
+        Index8 mask(outlength);
+        struct Error err = awkward_numpyarray_reduce_mask_bytemaskedarray(
+          mask.ptr().get(),
           parents.ptr().get(),
           parents.offset(),
           parents.length(),
           outlength);
         util::handle_error(err, classname(), nullptr);
-        out = std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, out);
+        out = std::make_shared<ByteMaskedArray>(Identities::none(), util::Parameters(), mask, out, false);
       }
 
       if (keepdims) {
@@ -1506,6 +1496,38 @@ namespace awkward {
       }
 
       return out;
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::localindex(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (axis == depth) {
+      return localindex_axis0();
+    }
+    else if (shape_.size() <= 1) {
+      throw std::invalid_argument("'axis' out of range for localindex");
+    }
+    else {
+      return toRegularArray().get()->localindex(axis, depth);
+    }
+  }
+
+  const std::shared_ptr<Content> NumpyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      return choose_axis0(n, diagonal, recordlookup, parameters);
+    }
+
+    else if (shape_.size() <= 1) {
+      throw std::invalid_argument("'axis' out of range for choose");
+    }
+
+    else {
+      return toRegularArray().get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
     }
   }
 
@@ -1575,17 +1597,6 @@ namespace awkward {
       x *= shape_[i];
     }
     return true;  // true for isscalar(), too
-  }
-
-  void NumpyArray::become_contiguous() {
-    if (!iscontiguous()) {
-      NumpyArray x = contiguous();
-      identities_ = x.identities_;
-      ptr_ = x.ptr_;
-      shape_ = x.shape_;
-      strides_ = x.strides_;
-      byteoffset_ = x.byteoffset_;
-    }
   }
 
   const NumpyArray NumpyArray::contiguous() const {

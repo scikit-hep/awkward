@@ -18,38 +18,45 @@ import awkward1._io
 import awkward1._util
 
 def fromnumpy(array, regulararray=False, highlevel=True, behavior=None):
-    def recurse(array, index):
+    def recurse(array, mask):
         if regulararray and len(array.shape) > 1:
-            return awkward1.layout.RegularArray(recurse(array.reshape((-1,) + array.shape[2:]), index), array.shape[1])
+            return awkward1.layout.RegularArray(recurse(array.reshape((-1,) + array.shape[2:]), mask), array.shape[1])
 
         if len(array.shape) == 0:
             data = awkward1.layout.NumpyArray(array.reshape(1))
         else:
             data = awkward1.layout.NumpyArray(array)
 
-        if index is not None:
-            return awkward1.layout.IndexedOptionArray64(index, data)
-        else:
+        if mask is None:
             return data
+        elif mask is False:
+            # NumPy's MaskedArray with mask == False is an UnmaskedArray
+            return awkward1.layout.UnmaskedArray(data)
+        else:
+            # NumPy's MaskedArray is a ByteMaskedArray with validwhen=False
+            return awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(mask), data, validwhen=False)
 
     if isinstance(array, numpy.ma.MaskedArray):
-        mask = numpy.ma.getmaskarray(array)
+        mask = numpy.ma.getmask(array)
         array = numpy.ma.getdata(array)
-        index = numpy.arange(array.size, dtype=numpy.int64)
-        index[mask.reshape(-1)] = -1
-        index = awkward1.layout.Index64(index)
-        if len(mask.shape) > 1:
+        if isinstance(mask, numpy.ndarray) and len(mask.shape) > 1:
             regulararray = True
+            mask = mask.reshape(-1)
     else:
-        index = None
+        mask = None
 
-    layout = recurse(array, index)
+    layout = recurse(array, mask)
     if highlevel:
         return awkward1._util.wrap(layout, behavior)
     else:
         return layout
 
-def fromiter(iterable, highlevel=True, behavior=None, initial=1024, resize=2.0):
+def fromiter(iterable, highlevel=True, behavior=None, allowrecord=True, initial=1024, resize=2.0):
+    if isinstance(iterable, dict):
+        if allowrecord:
+            return fromiter([iterable], highlevel=highlevel, behavior=behavior, initial=initial, resize=resize)[0]
+        else:
+            raise ValueError("cannot produce an array from a dict")
     out = awkward1.layout.ArrayBuilder(initial=initial, resize=resize)
     for x in iterable:
         out.fromiter(x)
@@ -283,12 +290,12 @@ def tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,
         return array
 
     elif isinstance(array, numpy.ma.MaskedArray):
-        mask = numpy.ma.getmaskarray(array).reshape(-1)
-        index = numpy.full(len(mask), -1, dtype=numpy.int64)
-        index[~mask] = numpy.arange(len(mask) - numpy.count_nonzero(mask), dtype=numpy.int64)
-        index = awkward1.layout.Index64(index)
+        mask = numpy.ma.getmask(array)
         data = numpy.ma.getdata(array)
-        out = awkward1.layout.IndexedOptionArray(index, awkward1.layout.NumpyArray(data.reshape(-1)))
+        if mask is False:
+            out = awkward1.layout.UnmaskedArray(awkward1.layout.NumpyArray(data.reshape(-1)))
+        else:
+            out = awkward1.layout.ByteMaskedArray(awkwrad1.layout.Index8(mask.reshape(-1)), awkward1.layout.NumpyArray(data.reshape(-1)))
         for size in array.shape[:0:-1]:
             out = awkward1.layout.RegularArray(out, size)
         return out
@@ -314,7 +321,7 @@ def tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,
         return array
 
 def regularize_numpyarray(array, allowempty=True, highlevel=True):
-    def getfunction(layout):
+    def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.NumpyArray) and layout.ndim != 1:
             return lambda: layout.toRegularArray()
         elif isinstance(layout, awkward1.layout.EmptyArray) and not allowempty:
@@ -425,25 +432,16 @@ def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, be
 
         elif isinstance(array, awkward0.MaskedArray):
             # mask, content, maskedwhen
-            if keeplayout:
-                raise ValueError("awkward1.MaskedArray hasn't been written yet; try keeplayout=False")
-            ismasked = array.boolmask(maskedwhen=True).reshape(-1)
-            index = numpy.arange(len(ismasked))
-            index[ismasked] = -1
-            out = awkward1.layout.IndexedOptionArray64(awkward1.layout.Index64(index), recurse(array.content))
-
+            mask = awkward1.layout.Index8(array.mask.view(numpy.int8).reshape(-1))
+            out = awkward1.layout.ByteMaskedArray(mask, recurse(array.content), validwhen=(not array.maskedwhen))
             for size in array.mask.shape[:0:-1]:
                 out = awkward1.layout.RegularArray(out, size)
             return out
 
         elif isinstance(array, awkward0.BitMaskedArray):
             # mask, content, maskedwhen, lsborder
-            if keeplayout:
-                raise ValueError("awkward1.BitMaskedArray hasn't been written yet; try keeplayout=False")
-            ismasked = array.boolmask(maskedwhen=True)
-            index = numpy.arange(len(ismasked))
-            index[ismasked] = -1
-            return awkward1.layout.IndexedOptionArray64(awkward1.layout.Index64(index), recurse(array.content))
+            mask = awkward.layout.IndexU8(array.mask.view(numpy.uint8))
+            return awkward1.layout.BitMaskedArray(mask, recurse(array.content), validwhen=(not array.maskedwhen), length=len(array.content), lsb_order=array.lsborder)
 
         elif isinstance(array, awkward0.IndexedMaskedArray):
             # mask, content, maskedwhen
@@ -645,6 +643,18 @@ def toawkward0(array, keeplayout=False):
         elif isinstance(layout, awkward1.layout.IndexedArray64):
             # index, content
             return awkward0.IndexedArray(numpy.asarray(layout.index), recurse(layout.content))
+
+        elif isinstance(layout, awkward1.layout.ByteMaskedArray):
+            # mask, content, validwhen
+            return awkward0.MaskedArray(numpy.asarray(layout.mask), recurse(layout.content), maskedwhen=(not layout.validwhen))
+
+        elif isinstance(layout, awkward1.layout.BitMaskedArray):
+            # mask, content, validwhen, length, lsb_order
+            return awkward0.BitMaskedArray(numpy.asarray(layout.mask), recurse(layout.content), maskedwhen=(not layout.validwhen), lsborder=layout.lsb_order)
+
+        elif isinstance(layout, awkward1.layout.UnmaskedArray):
+            # content
+            return recurse(layout.content)   # awkward0 didn't agressively track array types
 
         else:
             raise AssertionError("missing converter for {0}".format(type(layout).__name__))

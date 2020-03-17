@@ -166,18 +166,32 @@ namespace awkward {
     return std::string();
   }
 
-  const Index64 EmptyArray::count64() const {
-    return Index64(0);
+  const std::shared_ptr<Content> EmptyArray::shallow_simplify() const {
+    return shallow_copy();
   }
 
-  const std::shared_ptr<Content> EmptyArray::count(int64_t axis) const {
-    Index64 tocount = count64();
-
-    return std::make_shared<NumpyArray>(tocount);
+  const std::shared_ptr<Content> EmptyArray::num(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      Index64 out(1);
+      out.ptr().get()[0] = length();
+      return NumpyArray(out).getitem_at_nowrap(0);
+    }
+    else {
+      return std::make_shared<NumpyArray>(Index64(0));
+    }
   }
 
-  const std::shared_ptr<Content> EmptyArray::flatten(int64_t axis) const {
-    return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
+  const std::pair<Index64, std::shared_ptr<Content>> EmptyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    int64_t toaxis = axis_wrap_if_negative(axis);
+    if (toaxis == depth) {
+      throw std::invalid_argument("axis=0 not allowed for flatten");
+    }
+    else {
+      Index64 offsets(1);
+      offsets.ptr().get()[0] = 0;
+      return std::pair<Index64, std::shared_ptr<Content>>(offsets, std::make_shared<EmptyArray>(Identities::none(), util::Parameters()));
+    }
   }
 
   bool EmptyArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
@@ -219,9 +233,20 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> asnumpy = toNumpyArray(reducer.preferred_type(), reducer.preferred_typesize());
-    return asnumpy.get()->reduce_next(reducer, negaxis, parents, outlength, mask, keepdims);
+    return asnumpy.get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
+  }
+
+  const std::shared_ptr<Content> EmptyArray::localindex(int64_t axis, int64_t depth) const {
+    return std::make_shared<NumpyArray>(Index64(0));
+  }
+
+  const std::shared_ptr<Content> EmptyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+    if (n < 1) {
+      throw std::invalid_argument("in choose, 'n' must be at least 1");
+    }
+    return std::make_shared<EmptyArray>(identities_, util::Parameters());
   }
 
   const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {

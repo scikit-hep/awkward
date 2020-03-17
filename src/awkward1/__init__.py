@@ -29,11 +29,26 @@ from awkward1.operations.reducers import *
 from awkward1.behaviors.string import *
 
 # third-party connectors
-from awkward1._numexpr import evaluate as numexpr
-from awkward1._autograd import elementwise_grad as autograd
-#    awkward1._pandas is imported by highlevel (without importing pandas before it's necessary)
-import awkward1.numba
-#    awkward1.numba.register is called by an entry_point the first time Numba compiles a function
+import awkward1._connect._numba
+numba = type(awkward1.highlevel)("numba")
+numba.register = awkward1._connect._numba.register
+
+import awkward1._connect._pandas
+pandas = type(awkward1.highlevel)("pandas")
+pandas.register = awkward1._connect._pandas.register
+pandas.df = awkward1._connect._pandas.df
+pandas.dfs = awkward1._connect._pandas.dfs
+
+import awkward1._connect._numexpr
+numexpr = type(awkward1.highlevel)("numexpr")
+numexpr.evaluate = awkward1._connect._numexpr.evaluate
+numexpr.re_evaluate = awkward1._connect._numexpr.re_evaluate
+
+import awkward1._connect._autograd
+autograd = type(awkward1.highlevel)("autograd")
+autograd.elementwise_grad = awkward1._connect._autograd.elementwise_grad
 
 # version
 __version__ = awkward1.layout.__version__
+
+__all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("distutils", "numpy")]

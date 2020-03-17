@@ -22,6 +22,10 @@
 #include "awkward/Content.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
+#include "awkward/array/NumpyArray.h"
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
 
 namespace awkward {
   void tojson_boolean(ToJson& builder, bool* array, int64_t length) {
@@ -421,16 +425,30 @@ namespace awkward {
       return std::string();
     }
 
-    const Index64 count64() const override {
-      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
+    const std::shared_ptr<Content> shallow_simplify() const override {
+      return shallow_copy();
     }
 
-    const std::shared_ptr<Content> count(int64_t axis) const override {
-      throw std::invalid_argument("RawArray cannot be counted because it is one-dimentional");
+    const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis == depth) {
+        Index64 out(1);
+        out.ptr().get()[0] = length();
+        return std::make_shared<RawArrayOf<int64_t>>(Identities::none(), util::Parameters(), out.ptr(), 0, 1, sizeof(int64_t));
+      }
+      else {
+        throw std::invalid_argument("'axis' out of range for 'num'");
+      }
     }
 
-    const std::shared_ptr<Content> flatten(int64_t axis) const override {
-      throw std::invalid_argument("RawArray cannot be flattened because it is one-dimentional");
+    const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis == depth) {
+        throw std::invalid_argument("axis=0 not allowed for flatten");
+      }
+      else {
+        throw std::invalid_argument("axis out of range for flatten");
+      }
     }
 
     bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override {
@@ -450,6 +468,15 @@ namespace awkward {
         return mergeable(rawother->content(), mergebool);
       }
       else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+        return mergeable(rawother->content(), mergebool);
+      }
+      else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+        return mergeable(rawother->content(), mergebool);
+      }
+      else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+        return mergeable(rawother->content(), mergebool);
+      }
+      else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
         return mergeable(rawother->content(), mergebool);
       }
 
@@ -478,6 +505,15 @@ namespace awkward {
         return rawother->reverse_merge(shallow_copy());
       }
       else if (IndexedOptionArray64* rawother = dynamic_cast<IndexedOptionArray64*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy());
+      }
+      else if (ByteMaskedArray* rawother = dynamic_cast<ByteMaskedArray*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy());
+      }
+      else if (BitMaskedArray* rawother = dynamic_cast<BitMaskedArray*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy());
+      }
+      else if (UnmaskedArray* rawother = dynamic_cast<UnmaskedArray*>(other.get())) {
         return rawother->reverse_merge(shallow_copy());
       }
 
@@ -528,8 +564,31 @@ namespace awkward {
       return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
     }
 
-    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {
-      throw std::runtime_error("FIXME: Raw:reduce_next");
+    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {
+      throw std::runtime_error("FIXME: RawArray:reduce_next");
+    }
+
+    const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const override {
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (axis == depth) {
+        return localindex_axis0();
+      }
+      else {
+        throw std::invalid_argument("'axis' out of range for localindex");
+      }
+    }
+
+    const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override {
+      if (n < 1) {
+        throw std::invalid_argument("in choose, 'n' must be at least 1");
+      }
+      int64_t toaxis = axis_wrap_if_negative(axis);
+      if (toaxis == depth) {
+        return choose_axis0(n, diagonal, recordlookup, parameters);
+      }
+      else {
+        throw std::invalid_argument("'axis' out of range for choose");
+      }
     }
 
     const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {

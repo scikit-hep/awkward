@@ -241,6 +241,51 @@ def test_indexedarray():
     assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [], [1, 1]], checkvalid=True)]) == [[6.6, 9.9], [5.5], None, [], [1.1, 1.1]]
     assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [None], [1, None, 1]], checkvalid=True)]) == [[6.6, 9.9], [5.5], None, [None], [1.1, None, 1.1]]
 
+def test_indexedarray2():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True).layout
+    index = awkward1.layout.Index64(numpy.array([3, 2, -1, 0], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedOptionArray64(index, array)
+    assert awkward1.tolist(indexedarray) == [[6.6, 7.7, 8.8, 9.9], [5.5], None, [0.0, 1.1, 2.2]]
+    assert awkward1.tolist(indexedarray[awkward1.Array([[0, -1], [0], None, [1, 1]])]) == [[6.6, 9.9], [5.5], None, [1.1, 1.1]]
+
+def test_indexedarray2b():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True).layout
+    index = awkward1.layout.Index64(numpy.array([0, -1, 2, 3], dtype=numpy.int64))
+    indexedarray = awkward1.layout.IndexedOptionArray64(index, array)
+    assert awkward1.tolist(indexedarray) == [[0.0, 1.1, 2.2], None, [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(indexedarray[awkward1.Array([[1, 1], None, [0], [0, -1]])]) == [[1.1, 1.1], None, [5.5], [6.6, 9.9]]
+
+def test_bytemaskedarray2b():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True).layout
+    mask = awkward1.layout.Index8(numpy.array([0, 1, 0, 0], dtype=numpy.int8))
+    maskedarray = awkward1.layout.ByteMaskedArray(mask, array, validwhen=False)
+    assert awkward1.tolist(maskedarray) == [[0.0, 1.1, 2.2], None, [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(maskedarray[awkward1.Array([[1, 1], None, [0], [0, -1]])]) == [[1.1, 1.1], None, [5.5], [6.6, 9.9]]
+
+def test_bitmaskedarray2b():
+    array = awkward1.Array([[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True).layout
+    mask = awkward1.layout.IndexU8(numpy.array([66], dtype=numpy.uint8))
+    maskedarray = awkward1.layout.BitMaskedArray(mask, array, validwhen=False, length=4, lsb_order=True)  # lsb_order is irrelevant in this example
+    assert awkward1.tolist(maskedarray) == [[0.0, 1.1, 2.2], None, [5.5], [6.6, 7.7, 8.8, 9.9]]
+    assert awkward1.tolist(maskedarray[awkward1.Array([[1, 1], None, [0], [0, -1]])]) == [[1.1, 1.1], None, [5.5], [6.6, 9.9]]
+
+def test_indexedarray3():
+    array = awkward1.Array([0.0, 1.1, 2.2, None, 4.4, None, None, 7.7])
+    assert awkward1.tolist(array[awkward1.Array([4, 3, 2])]) == [4.4, None, 2.2]
+    assert awkward1.tolist(array[awkward1.Array([4, 3, 2, None, 1])]) == [4.4, None, 2.2, None, 1.1]
+
+    array = awkward1.Array([[0.0, 1.1, None, 2.2], [3.3, None, 4.4], [5.5]])
+    assert awkward1.tolist(array[awkward1.Array([[3, 2, 2, 1], [1, 2], []])]) == [[2.2, None, None, 1.1], [None, 4.4], []]
+
+    array = awkward1.Array([[0.0, 1.1, 2.2], [3.3, 4.4], None, [5.5]])
+    assert awkward1.tolist(array[awkward1.Array([3, 2, 1])]) == [[5.5], None, [3.3, 4.4]]
+    assert awkward1.tolist(array[awkward1.Array([3, 2, 1, None, 0])]) == [[5.5], None, [3.3, 4.4], None, [0.0, 1.1, 2.2]]
+
+    assert (awkward1.tolist(array[awkward1.Array([[2, 1, 1, 0], [1], None, [0]])])) == [[2.2, 1.1, 1.1, 0.0], [4.4], None, [5.5]]
+
+    with pytest.raises(ValueError):
+        array[awkward1.Array([[2, 1, 1, 0], None, [1], [0]])]
+
 def test_sequential():
     array = awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5).tolist(), checkvalid=True)
     assert awkward1.tolist(array[awkward1.Array([[2, 1, 0], [2, 1, 0]], checkvalid=True)]) == [[[10, 11, 12, 13, 14], [5, 6, 7, 8, 9], [0, 1, 2, 3, 4]], [[25, 26, 27, 28, 29], [20, 21, 22, 23, 24], [15, 16, 17, 18, 19]]]

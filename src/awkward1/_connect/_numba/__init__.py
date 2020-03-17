@@ -7,24 +7,27 @@ import awkward1.layout
 import numpy
 
 def register():
-    import awkward1._numba.arrayview
-    import awkward1._numba.layout
-    import awkward1._numba.builder
+    import awkward1._connect._numba.arrayview
+    import awkward1._connect._numba.layout
+    import awkward1._connect._numba.builder
 
-    awkward1.numba.ArrayViewType = awkward1._numba.arrayview.ArrayViewType
-    awkward1.numba.ArrayViewModel = awkward1._numba.arrayview.ArrayViewModel
-    awkward1.numba.RecordViewType = awkward1._numba.arrayview.RecordViewType
-    awkward1.numba.RecordViewModel = awkward1._numba.arrayview.RecordViewModel
-    awkward1.numba.ContentType = awkward1._numba.layout.ContentType
-    awkward1.numba.NumpyArrayType = awkward1._numba.layout.NumpyArrayType
-    awkward1.numba.RegularArrayType = awkward1._numba.layout.RegularArrayType
-    awkward1.numba.ListArrayType = awkward1._numba.layout.ListArrayType
-    awkward1.numba.IndexedArrayType = awkward1._numba.layout.IndexedArrayType
-    awkward1.numba.IndexedOptionArrayType = awkward1._numba.layout.IndexedOptionArrayType
-    awkward1.numba.RecordArrayType = awkward1._numba.layout.RecordArrayType
-    awkward1.numba.UnionArrayType = awkward1._numba.layout.UnionArrayType
-    awkward1.numba.ArrayBuilderType = awkward1._numba.builder.ArrayBuilderType
-    awkward1.numba.ArrayBuilderModel = awkward1._numba.builder.ArrayBuilderModel
+    awkward1.numba.ArrayViewType = awkward1._connect._numba.arrayview.ArrayViewType
+    awkward1.numba.ArrayViewModel = awkward1._connect._numba.arrayview.ArrayViewModel
+    awkward1.numba.RecordViewType = awkward1._connect._numba.arrayview.RecordViewType
+    awkward1.numba.RecordViewModel = awkward1._connect._numba.arrayview.RecordViewModel
+    awkward1.numba.ContentType = awkward1._connect._numba.layout.ContentType
+    awkward1.numba.NumpyArrayType = awkward1._connect._numba.layout.NumpyArrayType
+    awkward1.numba.RegularArrayType = awkward1._connect._numba.layout.RegularArrayType
+    awkward1.numba.ListArrayType = awkward1._connect._numba.layout.ListArrayType
+    awkward1.numba.IndexedArrayType = awkward1._connect._numba.layout.IndexedArrayType
+    awkward1.numba.IndexedOptionArrayType = awkward1._connect._numba.layout.IndexedOptionArrayType
+    awkward1.numba.ByteMaskedArrayType = awkward1._connect._numba.layout.ByteMaskedArrayType
+    awkward1.numba.BitMaskedArrayType = awkward1._connect._numba.layout.BitMaskedArrayType
+    awkward1.numba.UnmaskedArrayType = awkward1._connect._numba.layout.UnmaskedArrayType
+    awkward1.numba.RecordArrayType = awkward1._connect._numba.layout.RecordArrayType
+    awkward1.numba.UnionArrayType = awkward1._connect._numba.layout.UnionArrayType
+    awkward1.numba.ArrayBuilderType = awkward1._connect._numba.builder.ArrayBuilderType
+    awkward1.numba.ArrayBuilderModel = awkward1._connect._numba.builder.ArrayBuilderModel
 
 try:
     import numba

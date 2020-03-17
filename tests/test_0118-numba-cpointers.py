@@ -12,7 +12,7 @@ import awkward1
 
 numba = pytest.importorskip("numba")
 
-awkward1_numba_arrayview = pytest.importorskip("awkward1._numba.arrayview")
+awkward1_numba_arrayview = pytest.importorskip("awkward1._connect._numba.arrayview")
 
 def test_ArrayBuilder_append():
     array = awkward1.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], checkvalid=True)

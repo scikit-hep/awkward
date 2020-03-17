@@ -57,17 +57,18 @@ namespace awkward {
 
     // operations
     virtual const std::string validityerror(const std::string& path) const = 0;
-    virtual const Index64 count64() const = 0;
-    virtual const std::shared_ptr<Content> count(int64_t axis) const = 0;
-    virtual const std::shared_ptr<Content> flatten(int64_t axis) const = 0;
+    virtual const std::shared_ptr<Content> shallow_simplify() const = 0;
+    virtual const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const = 0;
+    virtual const std::pair<Index64, std::shared_ptr<Content>> offsets_and_flattened(int64_t axis, int64_t depth) const = 0;
     virtual bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const = 0;
     virtual const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const = 0;
     virtual const std::shared_ptr<SliceItem> asslice() const = 0;
     virtual const std::shared_ptr<Content> fillna(const std::shared_ptr<Content>& value) const = 0;
     virtual const std::shared_ptr<Content> rpad(int64_t length, int64_t axis, int64_t depth) const = 0;
     virtual const std::shared_ptr<Content> rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const = 0;
-    const std::shared_ptr<Content> rpad_axis0(int64_t target, bool clip) const;
-    virtual const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const = 0;
+    virtual const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const = 0;
+    virtual const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const = 0;
+    virtual const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const = 0;
 
     const std::string tostring() const;
     const std::string tojson(bool pretty, int64_t maxdecimals) const;
@@ -82,6 +83,9 @@ namespace awkward {
     bool parameter_equals(const std::string& key, const std::string& value) const;
     bool parameters_equal(const util::Parameters& other) const;
     const std::shared_ptr<Content> merge_as_union(const std::shared_ptr<Content>& other) const;
+    const std::shared_ptr<Content> rpad_axis0(int64_t target, bool clip) const;
+    const std::shared_ptr<Content> localindex_axis0() const;
+    const std::shared_ptr<Content> choose_axis0(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters) const;
 
     virtual const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const = 0;
     virtual const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const = 0;
