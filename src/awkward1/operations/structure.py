@@ -2,6 +2,11 @@
 
 from __future__ import absolute_import
 
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 import numpy
 
 import awkward1._util
@@ -239,6 +244,26 @@ def rpad(array, length, axis=1, clip=False, highlevel=True):
         out = layout.rpad_and_clip(length, axis)
     else:
         out = layout.rpad(length, axis)
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
+def fillna(array, value, highlevel=True):
+    arraylayout = awkward1.operations.convert.tolayout(array, allowrecord=True, allowother=False)
+    if isinstance(value, Iterable):
+        valuelayout = awkward1.operations.convert.tolayout(value, allowrecord=True, allowother=False)
+        if isinstance(valuelayout, awkward1.layout.Record):
+            valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
+        elif len(valuelayout) == 0:
+            offsets = awkward1.layout.Index64(numpy.array([0, 0], dtype=numpy.int64))
+            valuelayout = awkward1.layout.ListOffsetArray64(offsets, valuelayout)
+        else:
+            valuelayout = awkward1.layout.RegularArray(valuelayout, len(valuelayout))
+    else:
+        valuelayout = awkward1.operations.convert.tolayout([value], allowrecord=True, allowother=False)
+
+    out = arraylayout.fillna(valuelayout)
     if highlevel:
         return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:

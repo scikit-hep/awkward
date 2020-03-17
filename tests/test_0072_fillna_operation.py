@@ -64,3 +64,16 @@ def test_fillna_unionarray():
     assert awkward1.tolist(padded_array) == [[None, None], [2, 2], [1.1, None], [1, None], [2.2, 2.2], [None, None]]
     value = awkward1.layout.NumpyArray(numpy.array([777]))
     assert awkward1.tolist(padded_array.fillna(value)) == [[777, 777], [2, 2], [1.1, 777], [1, 777], [2.2, 2.2], [777, 777]]
+
+def test_highlevel():
+    array = awkward1.Array([[1.1, 2.2, None, 3.3], [], [4.4, None, 5.5]])
+    assert awkward1.tolist(awkward1.fillna(array, 999)) == [[1.1, 2.2, 999, 3.3], [], [4.4, 999, 5.5]]
+    assert awkward1.tolist(awkward1.fillna(array, [1, 2, 3])) == [[1.1, 2.2, [1, 2, 3], 3.3], [], [4.4, [1, 2, 3], 5.5]]
+    assert awkward1.tolist(awkward1.fillna(array, [])) == [[1.1, 2.2, [], 3.3], [], [4.4, [], 5.5]]
+    assert awkward1.tolist(awkward1.fillna(array, {"x": 999})) == [[1.1, 2.2, {"x": 999}, 3.3], [], [4.4, {"x": 999}, 5.5]]
+
+    array = awkward1.Array([[1.1, 2.2, 3.3], None, [], None, [4.4, 5.5]])
+    assert awkward1.tolist(awkward1.fillna(array, 999)) == [[1.1, 2.2, 3.3], 999, [], 999, [4.4, 5.5]]
+    assert awkward1.tolist(awkward1.fillna(array, [1, 2, 3])) == [[1.1, 2.2, 3.3], [1, 2, 3], [], [1, 2, 3], [4.4, 5.5]]
+    assert awkward1.tolist(awkward1.fillna(array, {"x": 999})) == [[1.1, 2.2, 3.3], {"x": 999}, [], {"x": 999}, [4.4, 5.5]]
+    assert awkward1.tolist(awkward1.fillna(array, [])) == [[1.1, 2.2, 3.3], [], [], [], [4.4, 5.5]]
