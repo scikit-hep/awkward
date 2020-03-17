@@ -110,13 +110,12 @@ namespace awkward {
 
   template <typename T>
   T IndexOf<T>::getitem_at_nowrap(int64_t at) const {
-    T content = getitem_at_nowrap_cpu<T>(ptr_, (size_t)(offset_ + at));
-    return content;
+    return util::awkward_index_getitem_at_nowrap<T>(ptr_.get(), offset_, at);
   }
 
   template <typename T>
   void IndexOf<T>::setitem_at_nowrap(int64_t at, T value) const {
-    setitem_at_nowrap_cpu(ptr_, (size_t)(offset_ + at), value);
+    util::awkward_index_setitem_at_nowrap<T>(ptr_.get(), offset_, at, value);
   }
 
   template <typename T>

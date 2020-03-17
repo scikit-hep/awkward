@@ -144,12 +144,17 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_listarrayU32_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const uint32_t* fromstarts, int64_t fromstartsoffset, const uint32_t* fromstops, int64_t fromstopsoffset);
   EXPORT_SYMBOL struct Error awkward_listarray64_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const int64_t* fromstarts, int64_t fromstartsoffset, const int64_t* fromstops, int64_t fromstopsoffset);
 
+  EXPORT_SYMBOL int8_t awkward_index8_getitem_at_nowrap(const int8_t* ptr, int64_t offset, int64_t at);
+  EXPORT_SYMBOL uint8_t awkward_indexU8_getitem_at_nowrap(const uint8_t* ptr, int64_t offset, int64_t at);
+  EXPORT_SYMBOL int32_t awkward_index32_getitem_at_nowrap(const int32_t* ptr, int64_t offset, int64_t at);
+  EXPORT_SYMBOL uint32_t awkward_indexU32_getitem_at_nowrap(const uint32_t* ptr, int64_t offset, int64_t at);
+  EXPORT_SYMBOL int64_t awkward_index64_getitem_at_nowrap(const int64_t* ptr, int64_t offset, int64_t at);
+
+  EXPORT_SYMBOL void awkward_index8_setitem_at_nowrap(int8_t* ptr, int64_t offset, int64_t at, int8_t value);
+  EXPORT_SYMBOL void awkward_indexU8_setitem_at_nowrap(uint8_t* ptr, int64_t offset, int64_t at, uint8_t value);
+  EXPORT_SYMBOL void awkward_index32_setitem_at_nowrap(int32_t* ptr, int64_t offset, int64_t at, int32_t value);
+  EXPORT_SYMBOL void awkward_indexU32_setitem_at_nowrap(uint32_t* ptr, int64_t offset, int64_t at, uint32_t value);
+  EXPORT_SYMBOL void awkward_index64_setitem_at_nowrap(int64_t* ptr, int64_t offset, int64_t at, int64_t value);
+
 }
-
-template<typename T>
-EXPORT_SYMBOL T getitem_at_nowrap_cpu(const std::shared_ptr<T> ptr_, size_t at);
-
-template<typename T>
-EXPORT_SYMBOL void setitem_at_nowrap_cpu(const std::shared_ptr<T> ptr_, size_t at, T value);
-
 #endif // AWKWARDCPU_GETITEM_H_

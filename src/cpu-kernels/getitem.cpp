@@ -1083,24 +1083,36 @@ ERROR awkward_listarray64_getitem_jagged_descend_64(int64_t* tooffsets, const in
   return awkward_listarray_getitem_jagged_descend<int64_t, int64_t>(tooffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset);
 }
 
-template<typename T>
-EXPORT_SYMBOL T getitem_at_nowrap_cpu(const std::shared_ptr<T> ptr_, size_t at) {
-  return ptr_.get()[at];
+int8_t awkward_index8_getitem_at_nowrap(const int8_t* ptr, int64_t offset, int64_t at) {
+  return ptr[(size_t)(offset + at)];
+}
+uint8_t awkward_indexU8_getitem_at_nowrap(const uint8_t* ptr, int64_t offset, int64_t at) {
+  return ptr[(size_t)(offset + at)];
+}
+int32_t awkward_index32_getitem_at_nowrap(const int32_t* ptr, int64_t offset, int64_t at) {
+  return ptr[(size_t)(offset + at)];
+}
+uint32_t awkward_indexU32_getitem_at_nowrap(const uint32_t* ptr, int64_t offset, int64_t at) {
+  return ptr[(size_t)(offset + at)];
+}
+int64_t awkward_index64_getitem_at_nowrap(const int64_t* ptr, int64_t offset, int64_t at) {
+  return ptr[(size_t)(offset + at)];
 }
 
-template<typename T>
-EXPORT_SYMBOL void setitem_at_nowrap_cpu(const std::shared_ptr<T> ptr_, size_t at, T value) {
-  ptr_.get()[at] = value;
+void awkward_index8_setitem_at_nowrap(int8_t* ptr, int64_t offset, int64_t at, int8_t value) {
+  ptr[(size_t)(offset + at)] = value;
+}
+void awkward_indexU8_setitem_at_nowrap(uint8_t* ptr, int64_t offset, int64_t at, uint8_t value) {
+  ptr[(size_t)(offset + at)] = value;
+}
+void awkward_index32_setitem_at_nowrap(int32_t* ptr, int64_t offset, int64_t at, int32_t value) {
+  ptr[(size_t)(offset + at)] = value;
+}
+void awkward_indexU32_setitem_at_nowrap(uint32_t* ptr, int64_t offset, int64_t at, uint32_t value) {
+  ptr[(size_t)(offset + at)] = value;
+}
+void awkward_index64_setitem_at_nowrap(int64_t* ptr, int64_t offset, int64_t at, int64_t value) {
+  ptr[(size_t)(offset + at)] = value;
 }
 
-template EXPORT_SYMBOL int8_t getitem_at_nowrap_cpu<int8_t>(const std::shared_ptr<int8_t> ptr_, size_t at);
-template EXPORT_SYMBOL uint8_t getitem_at_nowrap_cpu<uint8_t>(const std::shared_ptr<uint8_t> ptr_, size_t at);
-template EXPORT_SYMBOL int32_t getitem_at_nowrap_cpu<int32_t>(const std::shared_ptr<int32_t> ptr_, size_t at);
-template EXPORT_SYMBOL uint32_t getitem_at_nowrap_cpu<uint32_t>(const std::shared_ptr<uint32_t> ptr_, size_t at);
-template EXPORT_SYMBOL int64_t getitem_at_nowrap_cpu<int64_t>(const std::shared_ptr<int64_t> ptr_, size_t at);
 
-template EXPORT_SYMBOL void setitem_at_nowrap_cpu<int8_t>(const std::shared_ptr<int8_t> ptr_, size_t at, int8_t value);
-template EXPORT_SYMBOL void setitem_at_nowrap_cpu<uint8_t>(const std::shared_ptr<uint8_t> ptr_, size_t at, uint8_t value);
-template EXPORT_SYMBOL void setitem_at_nowrap_cpu<int32_t>(const std::shared_ptr<int32_t> ptr_, size_t at, int32_t value);
-template EXPORT_SYMBOL void setitem_at_nowrap_cpu<uint32_t>(const std::shared_ptr<uint32_t> ptr_, size_t at, uint32_t value);
-template EXPORT_SYMBOL void setitem_at_nowrap_cpu<int64_t>(const std::shared_ptr<int64_t> ptr_, size_t at, int64_t value);
