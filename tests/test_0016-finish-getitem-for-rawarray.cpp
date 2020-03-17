@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
+#include <iostream>
 
 #include "awkward/Identities.h"
 #include "awkward/array/RawArray.h"
@@ -75,19 +76,19 @@ int main(int, char**) {
   }
 
   Index32 offsetsA(6);
-  offsetsA.ptr().get()[0] = 0;
-  offsetsA.ptr().get()[1] = 3;
-  offsetsA.ptr().get()[2] = 3;
-  offsetsA.ptr().get()[3] = 5;
-  offsetsA.ptr().get()[4] = 6;
-  offsetsA.ptr().get()[5] = 10;
+  offsetsA.setitem_at_nowrap(0, 0);
+  offsetsA.setitem_at_nowrap(1, 3);
+  offsetsA.setitem_at_nowrap(2, 3);
+  offsetsA.setitem_at_nowrap(3, 5);
+  offsetsA.setitem_at_nowrap(4, 6);
+  offsetsA.setitem_at_nowrap(5, 10);
 
   Index32 offsetsB(5);
-  offsetsB.ptr().get()[0] = 0;
-  offsetsB.ptr().get()[1] = 3;
-  offsetsB.ptr().get()[2] = 4;
-  offsetsB.ptr().get()[3] = 4;
-  offsetsB.ptr().get()[4] = 5;
+  offsetsB.setitem_at_nowrap(0, 0);
+  offsetsB.setitem_at_nowrap(1, 3);
+  offsetsB.setitem_at_nowrap(2, 4);
+  offsetsB.setitem_at_nowrap(3, 4);
+  offsetsB.setitem_at_nowrap(4, 5);
 
   std::shared_ptr<Content> content(new RawArrayOf<double>(rawdouble));
   if (tostring(content) != "[0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]") {
@@ -110,10 +111,10 @@ int main(int, char**) {
   }
 
   Index64 array1(4);
-  array1.ptr().get()[0] = 2;
-  array1.ptr().get()[1] = 0;
-  array1.ptr().get()[2] = 0;
-  array1.ptr().get()[3] = -1;
+  array1.setitem_at_nowrap(0, 2);
+  array1.setitem_at_nowrap(1, 0);
+  array1.setitem_at_nowrap(2, 0);
+  array1.setitem_at_nowrap(3, -1);
   if (tostring(content.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1}), false)))) != "[2.2, 0, 0, 9.9]") {
     return -1;
   }
@@ -139,10 +140,10 @@ int main(int, char**) {
   }
 
   Index64 array2(4);
-  array2.ptr().get()[0] = 1;
-  array2.ptr().get()[1] = -1;
-  array2.ptr().get()[2] = 2;
-  array2.ptr().get()[3] = 0;
+  array2.setitem_at_nowrap(0, 1);
+  array2.setitem_at_nowrap(1, -1);
+  array2.setitem_at_nowrap(2, 2);
+  array2.setitem_at_nowrap(3, 0);
   if (tostring(listA.get()->getitem(slice(new SliceArray64(array1, std::vector<int64_t>({4}), std::vector<int64_t>({1}), false), new SliceArray64(array2, std::vector<int64_t>({4}), std::vector<int64_t>({1}), false)))) != "[4.4, 2.2, 2.2, 6.6]") {
     return -1;
   }

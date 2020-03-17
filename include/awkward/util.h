@@ -172,7 +172,10 @@ namespace awkward {
     ERROR awkward_listarray_choose_length_64(int64_t* totallen, int64_t* tooffsets, int64_t n, bool diagonal, const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length);
     template <typename T>
     ERROR awkward_listarray_choose_64(int64_t** tocarry, int64_t n, bool diagonal, const T* starts, int64_t startsoffset, const T* stops, int64_t stopsoffset, int64_t length);
-
+    template<typename T>
+    T awkward_index_getitem_at_nowrap(const T* ptr, int64_t offset, int64_t at);
+    template<typename T>
+    void awkward_index_setitem_at_nowrap(T* ptr, int64_t offset, int64_t at, T value);
   }
 }
 

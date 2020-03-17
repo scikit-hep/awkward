@@ -992,5 +992,47 @@ namespace awkward {
       return awkward_listarray64_choose_64(tocarry, n, diagonal, starts, startsoffset, stops, stopsoffset, length);
     }
 
+    template<>
+    int8_t awkward_index_getitem_at_nowrap<int8_t>(const int8_t* ptr, int64_t offset, int64_t at) {
+      return awkward_index8_getitem_at_nowrap(ptr, offset, at);
+    }
+    template<>
+    uint8_t awkward_index_getitem_at_nowrap<uint8_t>(const uint8_t* ptr, int64_t offset, int64_t at) {
+      return awkward_indexU8_getitem_at_nowrap(ptr, offset, at);
+    }
+    template<>
+    int32_t awkward_index_getitem_at_nowrap<int32_t>(const int32_t* ptr, int64_t offset, int64_t at) {
+      return awkward_index32_getitem_at_nowrap(ptr, offset, at);
+    }
+    template<>
+    uint32_t awkward_index_getitem_at_nowrap<uint32_t>(const uint32_t* ptr, int64_t offset, int64_t at) {
+      return awkward_indexU32_getitem_at_nowrap(ptr, offset, at);
+    }
+    template<>
+    int64_t awkward_index_getitem_at_nowrap<int64_t>(const int64_t* ptr, int64_t offset, int64_t at) {
+      return awkward_index64_getitem_at_nowrap(ptr, offset, at);
+    }
+
+    template<>
+    void awkward_index_setitem_at_nowrap<int8_t>(int8_t* ptr, int64_t offset, int64_t at, int8_t value) {
+      awkward_index8_setitem_at_nowrap(ptr, offset, at, value);
+    }
+    template<>
+    void awkward_index_setitem_at_nowrap<uint8_t>(uint8_t* ptr, int64_t offset, int64_t at, uint8_t value) {
+      awkward_indexU8_setitem_at_nowrap(ptr, offset, at, value);
+    }
+    template<>
+    void awkward_index_setitem_at_nowrap<int32_t>(int32_t* ptr, int64_t offset, int64_t at, int32_t value) {
+      awkward_index32_setitem_at_nowrap(ptr, offset, at, value);
+    }
+    template<>
+    void awkward_index_setitem_at_nowrap<uint32_t>(uint32_t* ptr, int64_t offset, int64_t at, uint32_t value) {
+      awkward_indexU32_setitem_at_nowrap(ptr, offset, at, value);
+    }
+    template<>
+    void awkward_index_setitem_at_nowrap<int64_t>(int64_t* ptr, int64_t offset, int64_t at, int64_t value) {
+      awkward_index64_setitem_at_nowrap(ptr, offset, at, value);
+    }
+
   }
 }

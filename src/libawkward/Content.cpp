@@ -100,7 +100,7 @@ namespace awkward {
     }
 
     Index64 starts(1);
-    starts.ptr().get()[0] = 0;
+    starts.setitem_at_nowrap(0, 0);
 
     Index64 parents(length());
     struct Error err = awkward_content_reduce_zeroparents_64(

@@ -671,7 +671,7 @@ namespace awkward {
       std::shared_ptr<SliceItem> nexthead = where.head();
       Slice nexttail = where.tail();
       Index64 nextcarry(1);
-      nextcarry.ptr().get()[0] = 0;
+      nextcarry.setitem_at_nowrap(0, 0);
       Index64 nextadvanced(0);
       NumpyArray out = next.getitem_next(nexthead, nexttail, nextcarry, nextadvanced, 1, next.strides_[0], true);
 
@@ -772,7 +772,7 @@ namespace awkward {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
-      out.ptr().get()[0] = length();
+      out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     std::vector<ssize_t> shape;

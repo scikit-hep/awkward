@@ -603,7 +603,7 @@ namespace awkward {
       for (size_t i = 0;  i < items_.size();  i++) {
         if (SliceAt* at = dynamic_cast<SliceAt*>(items_[i].get())) {
           Index64 index(1);
-          index.ptr().get()[0] = at->at();
+          index.setitem_at_nowrap(0, at->at());
           std::vector<int64_t> strides;
           for (size_t j = 0;  j < shape.size();  j++) {
             strides.push_back(0);

@@ -174,7 +174,7 @@ namespace awkward {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
-      out.ptr().get()[0] = length();
+      out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     else {
@@ -189,7 +189,7 @@ namespace awkward {
     }
     else {
       Index64 offsets(1);
-      offsets.ptr().get()[0] = 0;
+      offsets.setitem_at_nowrap(0, 0);
       return std::pair<Index64, std::shared_ptr<Content>>(offsets, std::make_shared<EmptyArray>(Identities::none(), util::Parameters()));
     }
   }

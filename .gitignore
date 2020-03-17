@@ -10,7 +10,8 @@ dependent-project/cmake_install.cmake
 dependent-project/cmake_pybind11
 
 ############################################################# IDEs
-
+.idea
+cmake-build-debug
 # ...
 
 ############################################################# LaTeX

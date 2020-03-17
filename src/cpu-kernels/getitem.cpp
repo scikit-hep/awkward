@@ -1096,6 +1096,38 @@ ERROR awkward_listarray64_getitem_jagged_descend_64(int64_t* tooffsets, const in
   return awkward_listarray_getitem_jagged_descend<int64_t, int64_t>(tooffsets, slicestarts, slicestartsoffset, slicestops, slicestopsoffset, sliceouterlen, fromstarts, fromstartsoffset, fromstops, fromstopsoffset);
 }
 
+int8_t awkward_index8_getitem_at_nowrap(const int8_t* ptr, int64_t offset, int64_t at) {
+  return ptr[(size_t)(offset + at)];
+}
+uint8_t awkward_indexU8_getitem_at_nowrap(const uint8_t* ptr, int64_t offset, int64_t at) {
+  return ptr[(size_t)(offset + at)];
+}
+int32_t awkward_index32_getitem_at_nowrap(const int32_t* ptr, int64_t offset, int64_t at) {
+  return ptr[(size_t)(offset + at)];
+}
+uint32_t awkward_indexU32_getitem_at_nowrap(const uint32_t* ptr, int64_t offset, int64_t at) {
+  return ptr[(size_t)(offset + at)];
+}
+int64_t awkward_index64_getitem_at_nowrap(const int64_t* ptr, int64_t offset, int64_t at) {
+  return ptr[(size_t)(offset + at)];
+}
+
+void awkward_index8_setitem_at_nowrap(int8_t* ptr, int64_t offset, int64_t at, int8_t value) {
+  ptr[(size_t)(offset + at)] = value;
+}
+void awkward_indexU8_setitem_at_nowrap(uint8_t* ptr, int64_t offset, int64_t at, uint8_t value) {
+  ptr[(size_t)(offset + at)] = value;
+}
+void awkward_index32_setitem_at_nowrap(int32_t* ptr, int64_t offset, int64_t at, int32_t value) {
+  ptr[(size_t)(offset + at)] = value;
+}
+void awkward_indexU32_setitem_at_nowrap(uint32_t* ptr, int64_t offset, int64_t at, uint32_t value) {
+  ptr[(size_t)(offset + at)] = value;
+}
+void awkward_index64_setitem_at_nowrap(int64_t* ptr, int64_t offset, int64_t at, int64_t value) {
+  ptr[(size_t)(offset + at)] = value;
+}
+
 template <typename T>
 ERROR awkward_bytemaskedarray_getitem_carry(int8_t* tomask, const int8_t* frommask, int64_t frommaskoffset, int64_t lenmask, const T* fromcarry, int64_t lencarry) {
   for (int64_t i = 0;  i < lencarry;  i++) {

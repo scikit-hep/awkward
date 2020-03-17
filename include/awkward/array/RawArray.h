@@ -433,7 +433,7 @@ namespace awkward {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis == depth) {
         Index64 out(1);
-        out.ptr().get()[0] = length();
+        out.setitem_at_nowrap(0, length());
         return std::make_shared<RawArrayOf<int64_t>>(Identities::none(), util::Parameters(), out.ptr(), 0, 1, sizeof(int64_t));
       }
       else {
