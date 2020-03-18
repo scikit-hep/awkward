@@ -16,30 +16,29 @@
 
 #######################################################################################
 # Jekyll site settings
-title: YOUR BOOK NAME
-author: YOUR AUTHOR NAME
-email: YOUR EMAIL
+title: Awkward Array
+author: Jim Pivarski
+email: pivarski@princeton.edu
 description: >-
-  This is an example book built with Jupyter Books.
+  HERE
 
 baseurl: /  # the subpath of your site, e.g. /blog. If there is no subpath for your site, use an empty string ""
-url: YOUR URL                  # the base hostname & protocol for your site, e.g. http://example.com
+url: https://awkward-array.org
 
 
 #######################################################################################
 # Jupyter Book settings
 
 # Main page settings
-footer_text: This page was created by <a href="https://github.com/jupyter/jupyter-book/graphs/contributors">The
-  Jupyter Book Community</a>
+# footer_text: 
 
 # Sidebar settings
 show_sidebar: true                # Show the sidebar. Only set to false if your only wish to host a single page.
 collapse_inactive_chapters: true  # Whether to collapse the inactive chapters in the sidebar
 collapse_inactive_sections: true  # Whether to collapse the sub-sections within a non-active section in the sidebar
 textbook_logo: images/logo/logo.png               # A logo to be displayed at the top of your textbook sidebar. Should be square
-textbook_logo_link: https://jupyterbook.org/                    # A link for the logo.
-sidebar_footer_text: Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+textbook_logo_link: https://awkward-array.org/
+# sidebar_footer_text: 
 number_toc_chapters: true         # Whether to add numbers to chapterse in your Table of Contents. If true, you can control this at the Chapter level in _data/toc.yml
 
 # Search settings
@@ -124,7 +123,7 @@ defaults:
     toc_icon: list-ul
     excerpt: ''
 
-favicon_path: images/logo/favicon.ico
+# favicon_path: 
 
 # Markdown Processing
 markdown: kramdown
