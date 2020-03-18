@@ -657,24 +657,11 @@ ERROR awkward_indexedarray64_reduce_next_64(int64_t* nextcarry, int64_t* nextpar
   return awkward_indexedarray_reduce_next_64<int64_t>(nextcarry, nextparents, outindex, index, indexoffset, parents, parentsoffset, length);
 }
 
-ERROR awkward_indexedarray_reduce_next_adjust_offsets_64(int64_t* outoffsets, const int64_t* offsets, int64_t offsetsoffset, const int64_t* outindex, int64_t outindexoffset, int64_t outindexlength) {
-  int64_t withoutnulls = 0;
-  int64_t withnulls = 0;
-  int64_t k = 0;
-  for (int64_t i = 0;  i < outindexlength;  i++) {
-    while (offsets[offsetsoffset + k] == withoutnulls) {
-      outoffsets[k] = withnulls;
-      k++;
-    }
-    if (outindex[outindexoffset + i] < 0) {
-      withnulls++;
-    }
-    else {
-      withoutnulls++;
-      withnulls++;
-    }
+ERROR awkward_indexedarray_reduce_next_fix_offsets_64(int64_t* outoffsets, const int64_t* starts, int64_t startsoffset, int64_t startslength, int64_t outindexlength) {
+  for (int64_t i = 0;  i < startslength;  i++) {
+    outoffsets[i] = starts[startsoffset + i];
   }
-  outoffsets[k] = withnulls;
+  outoffsets[startsoffset + startslength] = outindexlength;
   return success();
 }
 

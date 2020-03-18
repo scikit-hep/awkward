@@ -144,7 +144,7 @@ extern "C" {
   EXPORT_SYMBOL struct Error awkward_indexedarrayU32_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, int64_t* outindex, const uint32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length);
   EXPORT_SYMBOL struct Error awkward_indexedarray64_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, int64_t* outindex, const int64_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length);
 
-  EXPORT_SYMBOL struct Error awkward_indexedarray_reduce_next_adjust_offsets_64(int64_t* outoffsets, const int64_t* offsets, int64_t offsetsoffset, const int64_t* outindex, int64_t outindexoffset, int64_t outindexlength);
+  EXPORT_SYMBOL struct Error awkward_indexedarray_reduce_next_fix_offsets_64(int64_t* outoffsets, const int64_t* starts, int64_t startsoffset, int64_t startslength, int64_t outindexlength);
 
   EXPORT_SYMBOL struct Error awkward_numpyarray_reduce_mask_bytemaskedarray(int8_t* toptr, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
 

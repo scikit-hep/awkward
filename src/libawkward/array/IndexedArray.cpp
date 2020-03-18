@@ -1244,14 +1244,15 @@ namespace awkward {
         out = raw->toListOffsetArray64(true);
       }
       if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get())) {
-        Index64 outoffsets(raw->length() + 1);
-        Index64 tmpoffsets = raw->offsets();
-        struct Error err3 = awkward_indexedarray_reduce_next_adjust_offsets_64(
+        Index64 outoffsets(starts.length() + 1);
+        if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
+          throw std::runtime_error("reduce_next with unbranching depth > negaxis expects a ListOffsetArray64 whose offsets start at zero");
+        }
+        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
           outoffsets.ptr().get(),
-          tmpoffsets.ptr().get(),
-          tmpoffsets.offset(),
-          outindex.ptr().get(),
-          outindex.offset(),
+          starts.ptr().get(),
+          starts.offset(),
+          starts.length(),
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
 
