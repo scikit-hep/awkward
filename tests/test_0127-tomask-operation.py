@@ -168,8 +168,10 @@ def test_ByteMaskedArray_reduce():
 
     assert awkward1.tolist(depth2.prod(-1)) == [
         [  2 *   3 *   5 *   7 *  11,
+         None,
           31 *  37 *  41 *  43 *  47],
         [ 53 *  59 *  61 *  67 *  71,
+         None,
          101 * 103 * 107 * 109 * 113]]
 
     assert awkward1.tolist(depth2.prod(-2)) == [
