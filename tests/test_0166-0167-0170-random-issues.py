@@ -104,6 +104,3 @@ def test_0167_bytestrings():
     assert awkward1.tolist([b"three", b"two", b"one", b"one", b"three"] == array) == [[False, False, True], [], [False], [False, True], [True]]
     assert awkward1.tolist(array == awkward1.Array([b"three", b"two", b"one", b"one", b"three"])) == [[False, False, True], [], [False], [False, True], [True]]
     assert awkward1.tolist(awkward1.Array([b"three", b"two", b"one", b"one", b"three"]) == array) == [[False, False, True], [], [False], [False, True], [True]]
-
-def test_0170():
-    pass
