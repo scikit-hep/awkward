@@ -9,11 +9,12 @@ dependent-project/Makefile
 dependent-project/cmake_install.cmake
 dependent-project/cmake_pybind11
 
-############################################################# JupyterBook
+############################################################# JupyterBook and Doxygen
 
-.sass-cache
+docs/book/.sass-cache
 docs/book/_build
 docs/book/_site
+docs/doxy/_site
 
 ############################################################# IDEs
 .idea

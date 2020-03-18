@@ -21,10 +21,8 @@
 #
 # See the links below for an example.
 
-# Top-level page
 - title: Introduction
-  url: /intro
+  url: /index
 
-# Adds a searchbar link
-- title: Search
-  search: true
+- title: Another
+  url: /another
