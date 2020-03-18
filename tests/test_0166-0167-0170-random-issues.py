@@ -51,16 +51,59 @@ def test_0166_ByteMaskedArray():
     assert awkward1.tolist(array) == [[6, None, 5], [], [7, 11], [13], [None, 17, 19]]
     assert awkward1.tolist(awkward1.prod(array, axis=-1)) == [30, 1, 77, 13, 323]
 
-def test_0167():
+def test_0167_strings():
     array = awkward1.Array(["one", "two", "three", "two", "two", "one", "three"])
     assert awkward1.tolist(array == "two") == [False, True, False, True, True, False, False]
+    assert awkward1.tolist("two" == array) == [False, True, False, True, True, False, False]
+    assert awkward1.tolist(array == ["two"]) == [False, True, False, True, True, False, False]
+    assert awkward1.tolist(["two"] == array) == [False, True, False, True, True, False, False]
+    assert awkward1.tolist(array == awkward1.Array(["two"])) == [False, True, False, True, True, False, False]
+    assert awkward1.tolist(awkward1.Array(["two"]) == array) == [False, True, False, True, True, False, False]
+    assert awkward1.tolist(array < array) == [[False, False, False], [False, False, False], [False, False, False, False, False], [False, False, False], [False, False, False], [False, False, False], [False, False, False, False, False]]
+    assert awkward1.tolist(array <= array) == [[True, True, True], [True, True, True], [True, True, True, True, True], [True, True, True], [True, True, True], [True, True, True], [True, True, True, True, True]]
 
     array = awkward1.Array([["one", "two", "three"], [], ["two"], ["two", "one"], ["three"]])
     assert awkward1.tolist(array == "two") == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist("two" == array) == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist(array == ["two"]) == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist(["two"] == array) == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist(array == awkward1.Array(["two"])) == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist(awkward1.Array(["two"]) == array) == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist(array < array) == [[[False, False, False], [False, False, False], [False, False, False, False, False]], [], [[False, False, False]], [[False, False, False], [False, False, False]], [[False, False, False, False, False]]]
+    assert awkward1.tolist(array <= array) == [[[True, True, True], [True, True, True], [True, True, True, True, True]], [], [[True, True, True]], [[True, True, True], [True, True, True]], [[True, True, True, True, True]]]
 
     array = awkward1.Array([["one", "two", "three"], [], ["two"], ["two", "one"], ["three"]])
     assert awkward1.tolist(array == ["three", "two", "one", "one", "three"]) == [[False, False, True], [], [False], [False, True], [True]]
-    # assert awkward1.tolist(array == awkward1.Array(["three", "two", "one", "one", "three"])) == [[False, False, True], [], [False], [False, True], [True]]
+    assert awkward1.tolist(["three", "two", "one", "one", "three"] == array) == [[False, False, True], [], [False], [False, True], [True]]
+    assert awkward1.tolist(array == awkward1.Array(["three", "two", "one", "one", "three"])) == [[False, False, True], [], [False], [False, True], [True]]
+    assert awkward1.tolist(awkward1.Array(["three", "two", "one", "one", "three"]) == array) == [[False, False, True], [], [False], [False, True], [True]]
+
+def test_0167_bytestrings():
+    array = awkward1.Array([b"one", b"two", b"three", b"two", b"two", b"one", b"three"])
+    assert awkward1.tolist(array == b"two") == [False, True, False, True, True, False, False]
+    assert awkward1.tolist(b"two" == array) == [False, True, False, True, True, False, False]
+    assert awkward1.tolist(array == [b"two"]) == [False, True, False, True, True, False, False]
+    assert awkward1.tolist([b"two"] == array) == [False, True, False, True, True, False, False]
+    assert awkward1.tolist(array == awkward1.Array([b"two"])) == [False, True, False, True, True, False, False]
+    assert awkward1.tolist(awkward1.Array([b"two"]) == array) == [False, True, False, True, True, False, False]
+    assert awkward1.tolist(array < array) == [[False, False, False], [False, False, False], [False, False, False, False, False], [False, False, False], [False, False, False], [False, False, False], [False, False, False, False, False]]
+    assert awkward1.tolist(array <= array) == [[True, True, True], [True, True, True], [True, True, True, True, True], [True, True, True], [True, True, True], [True, True, True], [True, True, True, True, True]]
+
+    array = awkward1.Array([[b"one", b"two", b"three"], [], [b"two"], [b"two", b"one"], [b"three"]])
+    assert awkward1.tolist(array == b"two") == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist(b"two" == array) == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist(array == [b"two"]) == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist([b"two"] == array) == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist(array == awkward1.Array([b"two"])) == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist(awkward1.Array([b"two"]) == array) == [[False, True, False], [], [True], [True, False], [False]]
+    assert awkward1.tolist(array < array) == [[[False, False, False], [False, False, False], [False, False, False, False, False]], [], [[False, False, False]], [[False, False, False], [False, False, False]], [[False, False, False, False, False]]]
+    assert awkward1.tolist(array <= array) == [[[True, True, True], [True, True, True], [True, True, True, True, True]], [], [[True, True, True]], [[True, True, True], [True, True, True]], [[True, True, True, True, True]]]
+
+    array = awkward1.Array([[b"one", b"two", b"three"], [], [b"two"], [b"two", b"one"], [b"three"]])
+    assert awkward1.tolist(array == [b"three", b"two", b"one", b"one", b"three"]) == [[False, False, True], [], [False], [False, True], [True]]
+    assert awkward1.tolist([b"three", b"two", b"one", b"one", b"three"] == array) == [[False, False, True], [], [False], [False, True], [True]]
+    assert awkward1.tolist(array == awkward1.Array([b"three", b"two", b"one", b"one", b"three"])) == [[False, False, True], [], [False], [False, True], [True]]
+    assert awkward1.tolist(awkward1.Array([b"three", b"two", b"one", b"one", b"three"]) == array) == [[False, False, True], [], [False], [False, True], [True]]
 
 def test_0170():
     pass

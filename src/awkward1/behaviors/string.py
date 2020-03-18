@@ -100,6 +100,7 @@ def string_broadcast(layout, offsets):
     parents = numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)
     return awkward1.layout.IndexedArray64(awkward1.layout.Index64(parents), layout).project()
 
+awkward1.behavior["__broadcast__", "bytestring"] = string_broadcast
 awkward1.behavior["__broadcast__", "string"] = string_broadcast
 
 def string_numba_typer(viewtype):

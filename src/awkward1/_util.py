@@ -468,19 +468,24 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                 return tuple(awkward1.layout.RegularArray(x, maxsize) for x in outcontent)
 
             else:
-                for x in inputs:
-                    if isinstance(x, listtypes) and not isinstance(x, awkward1.layout.RegularArray):
+                fcns = [custom_broadcast(x, behavior) if isinstance(x, awkward1.layout.Content) else None for x in inputs]
+                first, secondround = None, False
+                for x, fcn in zip(inputs, fcns):
+                    if isinstance(x, listtypes) and not isinstance(x, awkward1.layout.RegularArray) and fcn is None:
                         first = x
                         break
+                if first is None:
+                    secondround = True
+                    for x in inputs:
+                        if isinstance(x, listtypes) and not isinstance(x, awkward1.layout.RegularArray):
+                            first = x
+                            break
+
                 offsets = first.compact_offsets64()
 
                 nextinputs = []
-                for x in inputs:
-                    if isinstance(x, awkward1.layout.Content):
-                        fcn = custom_broadcast(x, behavior)
-                    else:
-                        fcn = None
-                    if callable(fcn):
+                for x, fcn in zip(inputs, fcns):
+                    if callable(fcn) and not secondround:
                         nextinputs.append(fcn(x, offsets))
                     elif isinstance(x, listtypes):
                         nextinputs.append(x.broadcast_tooffsets64(offsets).content)

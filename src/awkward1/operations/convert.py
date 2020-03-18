@@ -308,7 +308,7 @@ def tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,
             out = awkward1.layout.RegularArray(out, size)
         return out
 
-    elif isinstance(array, str) or (awkward1._util.py27 and isinstance(array, unicode)):
+    elif isinstance(array, (str, bytes)) or (awkward1._util.py27 and isinstance(array, unicode)):
         return fromiter([array], highlevel=False)
 
     elif isinstance(array, Iterable):
