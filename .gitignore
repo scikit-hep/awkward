@@ -9,6 +9,12 @@ dependent-project/Makefile
 dependent-project/cmake_install.cmake
 dependent-project/cmake_pybind11
 
+############################################################# JupyterBook
+
+.sass-cache
+docs/book/_build
+docs/book/_site
+
 ############################################################# IDEs
 .idea
 cmake-build-debug

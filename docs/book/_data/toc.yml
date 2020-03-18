@@ -22,19 +22,9 @@
 # See the links below for an example.
 
 # Top-level page
-- title: Awkward Array
+- title: Introduction
   url: /intro
-  not_numbered: true
-
-# External link
-- title: GitHub repository
-  url: "https://github.com/scikit-hep/awkward-1.0#readme"
-  external: true
-  not_numbered: true
 
 # Adds a searchbar link
 - title: Search
   search: true
-
-# Divider for meta-pages and content page
-- divider: true

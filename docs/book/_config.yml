@@ -45,7 +45,7 @@ number_toc_chapters: true         # Whether to add numbers to chapterse in your 
 search_max_words_in_content: 100   # In the search function, use at most this many words (too many words will make search slow)
 
 # Controlling page information
-page_titles: infer                      # Either `None`, `infer`, or `toc`
+page_titles: toc                      # Either `None`, `infer`, or `toc`
 page_authors: None                     # Either `None` or `infer`
 filename_title_split_character: _     # If inferring titles based on filename, splt on this character.
 
@@ -74,7 +74,7 @@ binderhub_interact_text: Interact              # The text that interact buttons 
 
 # Thebelab settings
 use_thebelab_button: true                # If 'true', display a button to allow in-page running code cells with Thebelab
-thebelab_button_text: Thebelab                 # The text to display inside the Thebelab initialization button
+thebelab_button_text: Interactive                 # The text to display inside the Thebelab initialization button
 codemirror_theme: abcdef                     # Theme for codemirror cells, for options see https://codemirror.net/doc/manual.html#config
 
 # nbinteract settings
@@ -123,7 +123,7 @@ defaults:
     toc_icon: list-ul
     excerpt: ''
 
-# favicon_path: 
+favicon_path: images/logo/favicon.ico
 
 # Markdown Processing
 markdown: kramdown
