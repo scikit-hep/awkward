@@ -82,6 +82,20 @@ def arrayclass(layout, behavior):
             return cls
     return awkward1.highlevel.Array
 
+def custom_broadcast(layout, behavior):
+    import awkward1
+    behavior = Behavior(awkward1.behavior, behavior)
+    custom = layout.parameter("__array__")
+    if not (isinstance(custom, str) or (py27 and isinstance(custom, unicode))):
+        custom = layout.parameter("__record__")
+    if not (isinstance(custom, str) or (py27 and isinstance(custom, unicode))):
+        custom = layout.purelist_parameter("__record__")
+    if (isinstance(custom, str) or (py27 and isinstance(custom, unicode))):
+        for key, fcn in behavior.items():
+            if isinstance(key, tuple) and len(key) == 2 and key[0] == "__broadcast__" and key[1] == custom:
+                return fcn
+    return None
+
 def numba_array_typer(layouttype, behavior):
     import awkward1
     behavior = Behavior(awkward1.behavior, behavior)
@@ -140,7 +154,7 @@ def typestrs(behavior):
         if isinstance(key, tuple) and len(key) == 2 and key[0] == "__typestr__" and (isinstance(key[1], str) or (py27 and isinstance(key[1], unicode))) and (isinstance(typestr, str) or (py27 and isinstance(typestr, unicode))):
             out[key[1]] = typestr
     return out
-
+    
 def numba_record_typer(layouttype, behavior):
     import awkward1
     behavior = Behavior(awkward1.behavior, behavior)
@@ -320,7 +334,7 @@ def completely_flatten(array):
     else:
         raise RuntimeError("cannot completely flatten: {0}".format(type(array)))
 
-def broadcast_and_apply(inputs, getfunction):
+def broadcast_and_apply(inputs, getfunction, behavior):
     def checklength(inputs):
         length = len(inputs[0])
         for x in inputs[1:]:
@@ -459,9 +473,16 @@ def broadcast_and_apply(inputs, getfunction):
                         first = x
                         break
                 offsets = first.compact_offsets64()
+
                 nextinputs = []
                 for x in inputs:
-                    if isinstance(x, listtypes):
+                    if isinstance(x, awkward1.layout.Content):
+                        fcn = custom_broadcast(x, behavior)
+                    else:
+                        fcn = None
+                    if callable(fcn):
+                        nextinputs.append(fcn(x, offsets))
+                    elif isinstance(x, listtypes):
                         nextinputs.append(x.broadcast_tooffsets64(offsets).content)
                     # handle implicit left-broadcasting (unlike NumPy)
                     elif isinstance(x, awkward1.layout.Content):

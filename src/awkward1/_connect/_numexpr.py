@@ -59,9 +59,10 @@ def evaluate(expression, local_dict=None, global_dict=None, order="K", casting="
         else:
             return None
 
-    out = awkward1._util.broadcast_and_apply(arrays, getfunction)
+    behavior = awkward1._util.behaviorof(*arrays)
+    out = awkward1._util.broadcast_and_apply(arrays, getfunction, behavior)
     assert isinstance(out, tuple) and len(out) == 1
-    return awkward1._util.wrap(out[0], awkward1._util.behaviorof(arrays))
+    return awkward1._util.wrap(out[0], behavior)
 
 evaluate.evaluate = evaluate
 
@@ -83,8 +84,9 @@ def re_evaluate(local_dict=None):
         else:
             return None
 
-    out = awkward1._util.broadcast_and_apply(arrays, getfunction)
+    behavior = awkward1._util.behaviorof(*arrays)
+    out = awkward1._util.broadcast_and_apply(arrays, getfunction, behavior)
     assert isinstance(out, tuple) and len(out) == 1
-    return awkward1._util.wrap(out[0], awkward1._util.behaviorof(arrays))
+    return awkward1._util.wrap(out[0], behavior)
 
 evaluate.re_evaluate = re_evaluate

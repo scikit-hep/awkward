@@ -52,7 +52,15 @@ def test_0166_ByteMaskedArray():
     assert awkward1.tolist(awkward1.prod(array, axis=-1)) == [30, 1, 77, 13, 323]
 
 def test_0167():
-    pass
+    array = awkward1.Array(["one", "two", "three", "two", "two", "one", "three"])
+    assert awkward1.tolist(array == "two") == [False, True, False, True, True, False, False]
+
+    array = awkward1.Array([["one", "two", "three"], [], ["two"], ["two", "one"], ["three"]])
+    assert awkward1.tolist(array == "two") == [[False, True, False], [], [True], [True, False], [False]]
+
+    array = awkward1.Array([["one", "two", "three"], [], ["two"], ["two", "one"], ["three"]])
+    assert awkward1.tolist(array == ["three", "two", "one", "one", "three"]) == [[False, False, True], [], [False], [False, True], [True]]
+    # assert awkward1.tolist(array == awkward1.Array(["three", "two", "one", "one", "three"])) == [[False, False, True], [], [False], [False, True], [True]]
 
 def test_0170():
     pass

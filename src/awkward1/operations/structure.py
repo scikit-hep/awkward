@@ -27,10 +27,11 @@ def withfield(base, what, where=None, highlevel=True):
         else:
             return None
 
-    out = awkward1._util.broadcast_and_apply([base, what], getfunction)
+    behavior = awkward1._util.behaviorof(base, what)
+    out = awkward1._util.broadcast_and_apply([base, what], getfunction, behavior)
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
-        return awkward1._util.wrap(out[0], behavior=awkward1._util.behaviorof(base, what))
+        return awkward1._util.wrap(out[0], behavior=behavior)
     else:
         return out[0]
 
@@ -183,10 +184,11 @@ def broadcast_arrays(*arrays, **kwargs):
         else:
             return None
 
-    out = awkward1._util.broadcast_and_apply(inputs, getfunction)
+    behavior = awkward1._util.behaviorof(*arrays)
+    out = awkward1._util.broadcast_and_apply(inputs, getfunction, behavior)
     assert isinstance(out, tuple)
     if highlevel:
-        return [awkward1._util.wrap(x, awkward1._util.behaviorof(arrays)) for x in out]
+        return [awkward1._util.wrap(x, behavior) for x in out]
     else:
         return list(out)
 
@@ -291,10 +293,11 @@ def zip(arrays, depthlimit=None, parameters=None, highlevel=True):
         else:
             return None
 
-    out = awkward1._util.broadcast_and_apply(layouts, getfunction)
+    behavior = awkward1._util.behaviorof(*arrays)
+    out = awkward1._util.broadcast_and_apply(layouts, getfunction, behavior)
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
-        return awkward1._util.wrap(out[0], awkward1._util.behaviorof(*arrays))
+        return awkward1._util.wrap(out[0], behavior)
     else:
         return out[0]
 
@@ -323,6 +326,8 @@ def argcross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
             return result
 
 def cross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
+    behavior = awkward1._util.behaviorof(*arrays)
+
     if axis < 0:
         raise ValueError("cross's 'axis' must be non-negative")
 
@@ -422,7 +427,7 @@ def cross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
             else:
                 return None
 
-        out = awkward1._util.broadcast_and_apply(layouts, getfunction3)
+        out = awkward1._util.broadcast_and_apply(layouts, getfunction3, behavior)
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]
 
@@ -431,7 +436,7 @@ def cross(arrays, axis=1, nested=None, parameters=None, highlevel=True):
             result = flatten(result, axis=axis, highlevel=False)
 
     if highlevel:
-        return awkward1._util.wrap(result, awkward1._util.behaviorof(*arrays))
+        return awkward1._util.wrap(result, behavior)
     else:
         return result
 
@@ -473,10 +478,11 @@ def tomask(array, mask, validwhen=True, highlevel=True):
     layoutarray = awkward1.operations.convert.tolayout(array, allowrecord=True, allowother=False)
     layoutmask = awkward1.operations.convert.tolayout(mask, allowrecord=True, allowother=False)
 
-    out = awkward1._util.broadcast_and_apply([layoutarray, layoutmask], getfunction)
+    behavior = awkward1._util.behaviorof(array, mask)
+    out = awkward1._util.broadcast_and_apply([layoutarray, layoutmask], getfunction, behavior)
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
-        return awkward1._util.wrap(out[0], awkward1._util.behaviorof(array, mask))
+        return awkward1._util.wrap(out[0], behavior)
     else:
         return out[0]
 
