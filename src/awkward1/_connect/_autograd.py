@@ -52,9 +52,10 @@ def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
             else:
                 return None
 
-        out = awkward1._util.broadcast_and_apply(nextargs, getfunction)
+        behavior = awkward1._util.behaviorof(*args)
+        out = awkward1._util.broadcast_and_apply(nextargs, getfunction, behavior)
         assert isinstance(out, tuple) and len(out) == 1
-        return awkward1._util.wrap(out[0], awkward1._util.behaviorof(args))
+        return awkward1._util.wrap(out[0], behavior)
 
     return broadcast
 

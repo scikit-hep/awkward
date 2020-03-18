@@ -147,7 +147,7 @@ namespace awkward {
     template <typename T>
     ERROR awkward_listarray_getitem_jagged_descend_64(int64_t* tooffsets, const int64_t* slicestarts, int64_t slicestartsoffset, const int64_t* slicestops, int64_t slicestopsoffset, int64_t sliceouterlen, const T* fromstarts, int64_t fromstartsoffset, const T* fromstops, int64_t fromstopsoffset);
     template <typename T>
-    ERROR awkward_indexedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const T* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length);
+    ERROR awkward_indexedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, int64_t* outindex, const T* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length);
     template <typename T>
     ERROR awkward_UnionArray_fillna_64(int64_t* toindex, const T* fromindex, int64_t offset, int64_t length);
 

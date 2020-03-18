@@ -6,6 +6,7 @@
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"
+#include "awkward/cpu-kernels/reducers.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -18,6 +19,8 @@
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/RegularArray.h"
+#include "awkward/array/ListOffsetArray.h"
 
 #include "awkward/array/IndexedArray.h"
 
@@ -1216,9 +1219,11 @@ namespace awkward {
 
     Index64 nextparents(index_.length() - numnull);
     Index64 nextcarry(index_.length() - numnull);
+    Index64 outindex(index_.length());
     struct Error err2 = util::awkward_indexedarray_reduce_next_64<T>(
       nextcarry.ptr().get(),
       nextparents.ptr().get(),
+      outindex.ptr().get(),
       index_.ptr().get(),
       index_.offset(),
       parents.ptr().get(),
@@ -1227,7 +1232,37 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-    return next.get()->reduce_next(reducer, negaxis, starts, nextparents, outlength, mask, keepdims);
+    std::shared_ptr<Content> out = next.get()->reduce_next(reducer, negaxis, starts, nextparents, outlength, mask, keepdims);
+
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      return out;
+    }
+    else {
+      if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
+        out = raw->toListOffsetArray64(true);
+      }
+      if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get())) {
+        Index64 outoffsets(starts.length() + 1);
+        if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
+          throw std::runtime_error("reduce_next with unbranching depth > negaxis expects a ListOffsetArray64 whose offsets start at zero");
+        }
+        struct Error err3 = awkward_indexedarray_reduce_next_fix_offsets_64(
+          outoffsets.ptr().get(),
+          starts.ptr().get(),
+          starts.offset(),
+          starts.length(),
+          outindex.length());
+        util::handle_error(err3, classname(), identities_.get());
+
+        return std::make_shared<ListOffsetArray64>(raw->identities(), raw->parameters(), outoffsets, std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, raw->content()));
+      }
+      else {
+        throw std::runtime_error(std::string("reduce_next with unbranching depth > negaxis is only expected to return RegularArray or ListOffsetArray64; instead, it returned ") + out.get()->classname());
+      }
+    }
+
+    return out;
   }
 
   template <typename T, bool ISOPTION>

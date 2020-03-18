@@ -632,25 +632,37 @@ ERROR awkward_listoffsetarray_reduce_local_outoffsets_64(int64_t* outoffsets, co
 }
 
 template <typename T>
-ERROR awkward_indexedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const T* index, int64_t indexoffset, const int64_t* parents, int64_t parentsoffset, int64_t length) {
+ERROR awkward_indexedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, int64_t* outindex, const T* index, int64_t indexoffset, const int64_t* parents, int64_t parentsoffset, int64_t length) {
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {
     if (index[indexoffset + i] >= 0) {
       nextcarry[k] = index[indexoffset + i];
       nextparents[k] = parents[parentsoffset + i];
+      outindex[i] = k;
       k++;
+    }
+    else {
+      outindex[i] = -1;
     }
   }
   return success();
 }
-ERROR awkward_indexedarray32_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const int32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
-  return awkward_indexedarray_reduce_next_64<int32_t>(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+ERROR awkward_indexedarray32_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, int64_t* outindex, const int32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+  return awkward_indexedarray_reduce_next_64<int32_t>(nextcarry, nextparents, outindex, index, indexoffset, parents, parentsoffset, length);
 }
-ERROR awkward_indexedarrayU32_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const uint32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
-  return awkward_indexedarray_reduce_next_64<uint32_t>(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+ERROR awkward_indexedarrayU32_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, int64_t* outindex, const uint32_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+  return awkward_indexedarray_reduce_next_64<uint32_t>(nextcarry, nextparents, outindex, index, indexoffset, parents, parentsoffset, length);
 }
-ERROR awkward_indexedarray64_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const int64_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
-  return awkward_indexedarray_reduce_next_64<int64_t>(nextcarry, nextparents, index, indexoffset, parents, parentsoffset, length);
+ERROR awkward_indexedarray64_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, int64_t* outindex, const int64_t* index, int64_t indexoffset, int64_t* parents, int64_t parentsoffset, int64_t length) {
+  return awkward_indexedarray_reduce_next_64<int64_t>(nextcarry, nextparents, outindex, index, indexoffset, parents, parentsoffset, length);
+}
+
+ERROR awkward_indexedarray_reduce_next_fix_offsets_64(int64_t* outoffsets, const int64_t* starts, int64_t startsoffset, int64_t startslength, int64_t outindexlength) {
+  for (int64_t i = 0;  i < startslength;  i++) {
+    outoffsets[i] = starts[startsoffset + i];
+  }
+  outoffsets[startsoffset + startslength] = outindexlength;
+  return success();
 }
 
 ERROR awkward_numpyarray_reduce_mask_bytemaskedarray(int8_t* toptr, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength) {
@@ -663,13 +675,17 @@ ERROR awkward_numpyarray_reduce_mask_bytemaskedarray(int8_t* toptr, const int64_
   return success();
 }
 
-ERROR awkward_bytemaskedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const int8_t* mask, int64_t maskoffset, const int64_t* parents, int64_t parentsoffset, int64_t length, bool validwhen) {
+ERROR awkward_bytemaskedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, int64_t* outindex, const int8_t* mask, int64_t maskoffset, const int64_t* parents, int64_t parentsoffset, int64_t length, bool validwhen) {
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {
     if ((mask[maskoffset + i] != 0) == validwhen) {
       nextcarry[k] = i;
       nextparents[k] = parents[parentsoffset + i];
+      outindex[i] = k;
       k++;
+    }
+    else {
+      outindex[i] = -1;
     }
   }
   return success();

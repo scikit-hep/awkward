@@ -308,7 +308,7 @@ def tolayout(array, allowrecord=True, allowother=False, numpytype=(numpy.number,
             out = awkward1.layout.RegularArray(out, size)
         return out
 
-    elif isinstance(array, str) or (awkward1._util.py27 and isinstance(array, unicode)):
+    elif isinstance(array, (str, bytes)) or (awkward1._util.py27 and isinstance(array, unicode)):
         return fromiter([array], highlevel=False)
 
     elif isinstance(array, Iterable):
@@ -337,6 +337,29 @@ def regularize_numpyarray(array, allowempty=True, highlevel=True):
 def fromawkward0(array, keeplayout=False, regulararray=False, highlevel=True, behavior=None):
     # See https://github.com/scikit-hep/awkward-0.x/blob/405b7eaeea51b60947a79c782b1abf0d72f6729b/specification.adoc
     import awkward as awkward0
+
+    # If a source of Awkward0 arrays ever starts emitting Awkward1 arrays (e.g. Uproot),
+    # this function turns into a pass-through.
+    if isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
+        if highlevel:
+            return array
+        else:
+            return array.layout
+    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
+        if highlevel:
+            return array.snapshot()
+        else:
+            return array._layout.snapshot()
+    elif isinstance(array, (awkward1.layout.Content, awkward1.layout.Record)):
+        if highlevel:
+            return awkward1._util.wrap(array, behavior)
+        else:
+            return array
+    elif isinstance(array, awkward1.layout.ArrayBuilder):
+        if highlevel:
+            return awkward1._util.wrap(array.snapshot(), behavior)
+        else:
+            return array.snapshot()
 
     def recurse(array):
         if isinstance(array, dict):

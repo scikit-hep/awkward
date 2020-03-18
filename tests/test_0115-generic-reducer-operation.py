@@ -482,8 +482,10 @@ def test_IndexedOptionArray():
 
     assert awkward1.tolist(depth2.prod(-1)) == [
         [101 * 103 * 107 * 109 * 113,
+         None,
           53 *  59 *  61 *  67 *  71],
         [ 31 *  37 *  41 *  43 *  47,
+         None,
            2 *   3 *   5 *   7 *  11]]
 
     assert awkward1.tolist(depth2.prod(-2)) == [

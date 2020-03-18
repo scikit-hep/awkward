@@ -92,6 +92,17 @@ def string_equal(one, two):
 awkward1.behavior[numpy.equal, "bytestring", "bytestring"] = string_equal
 awkward1.behavior[numpy.equal, "string", "string"] = string_equal
 
+def string_broadcast(layout, offsets):
+    offsets = numpy.asarray(offsets)
+    counts = offsets[1:] - offsets[:-1]
+    if awkward1._util.win:
+        counts = counts.astype(numpy.int32)
+    parents = numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)
+    return awkward1.layout.IndexedArray64(awkward1.layout.Index64(parents), layout).project()
+
+awkward1.behavior["__broadcast__", "bytestring"] = string_broadcast
+awkward1.behavior["__broadcast__", "string"] = string_broadcast
+
 def string_numba_typer(viewtype):
     import numba
     return numba.types.string
