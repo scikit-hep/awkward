@@ -1,0 +1,30 @@
+.memtitle {
+    border: none;
+    background-color: #ffffffff;
+    background-image: none;
+    background-repeat: none;
+}
+
+.memitem {
+    transition: none;
+}
+
+.memproto {
+    border: none;
+    background-color: #ffffffff;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.memdoc {
+    border: none;
+    background-image: none;
+    background-repeat: none;
+    background-color: #fffffff;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+h2.memtitle span.permalink {
+    display: none;
+}
