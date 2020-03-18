@@ -148,7 +148,7 @@ extern "C" {
 
   EXPORT_SYMBOL struct Error awkward_numpyarray_reduce_mask_bytemaskedarray(int8_t* toptr, const int64_t* parents, int64_t parentsoffset, int64_t lenparents, int64_t outlength);
 
-  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, const int8_t* mask, int64_t maskoffset, const int64_t* parents, int64_t parentsoffset, int64_t length, bool validwhen);
+  EXPORT_SYMBOL struct Error awkward_bytemaskedarray_reduce_next_64(int64_t* nextcarry, int64_t* nextparents, int64_t* outindex, const int8_t* mask, int64_t maskoffset, const int64_t* parents, int64_t parentsoffset, int64_t length, bool validwhen);
 
 }
 

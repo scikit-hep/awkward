@@ -1217,8 +1217,6 @@ namespace awkward {
       index_.length());
     util::handle_error(err1, classname(), identities_.get());
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
-
     Index64 nextparents(index_.length() - numnull);
     Index64 nextcarry(index_.length() - numnull);
     Index64 outindex(index_.length());
@@ -1236,6 +1234,7 @@ namespace awkward {
     std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
     std::shared_ptr<Content> out = next.get()->reduce_next(reducer, negaxis, starts, nextparents, outlength, mask, keepdims);
 
+    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       return out;
     }
