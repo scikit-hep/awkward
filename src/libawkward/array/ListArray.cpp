@@ -927,7 +927,7 @@ namespace awkward {
         length());
       util::handle_error(err2, classname(), identities_.get());
 
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto ptr : tocarry) {
         contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen)));
       }

@@ -88,7 +88,7 @@ namespace awkward {
   }
 
   const ContentPtr UnionType::empty() const {
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto type : types_) {
       contents.push_back(type.get()->empty());
     }

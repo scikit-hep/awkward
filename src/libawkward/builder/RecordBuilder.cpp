@@ -73,7 +73,7 @@ namespace awkward {
     if (nameptr_ != nullptr) {
       parameters["__record__"] = util::quote(name_, true);
     }
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     std::shared_ptr<util::RecordLookup> recordlookup = std::make_shared<util::RecordLookup>();
     for (size_t i = 0;  i < contents_.size();  i++) {
       contents.push_back(contents_[i].get()->snapshot());

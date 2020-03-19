@@ -20,7 +20,7 @@
 #include "awkward/array/RecordArray.h"
 
 namespace awkward {
-  RecordArray::RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<ContentPtr>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup, int64_t length)
+  RecordArray::RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const ContentPtrVec& contents, const std::shared_ptr<util::RecordLookup>& recordlookup, int64_t length)
       : Content(identities, parameters)
       , contents_(contents)
       , recordlookup_(recordlookup)
@@ -30,7 +30,7 @@ namespace awkward {
     }
   }
 
-  int64_t minlength(const std::vector<ContentPtr>& contents) {
+  int64_t minlength(const ContentPtrVec& contents) {
     if (contents.empty()) {
       return 0;
     }
@@ -46,10 +46,10 @@ namespace awkward {
     }
   }
 
-  RecordArray::RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<ContentPtr>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup)
+  RecordArray::RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const ContentPtrVec& contents, const std::shared_ptr<util::RecordLookup>& recordlookup)
       : RecordArray(identities, parameters, contents, recordlookup, minlength(contents)) { }
 
-  const std::vector<ContentPtr> RecordArray::contents() const {
+  const ContentPtrVec RecordArray::contents() const {
     return contents_;
   }
 
@@ -68,7 +68,7 @@ namespace awkward {
     if (what.get()->length() != length()) {
       throw std::invalid_argument(std::string("array of length ") + std::to_string(what.get()->length()) + std::string(" cannot be assigned to record array of length ") + std::to_string(length()));
     }
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (size_t i = 0;  i < contents_.size();  i++) {
       if (where == (int64_t)i) {
         contents.push_back(what);
@@ -98,7 +98,7 @@ namespace awkward {
     if (what.get()->length() != length()) {
       throw std::invalid_argument(std::string("array of length ") + std::to_string(what.get()->length()) + std::string(" cannot be assigned to record array of length ") + std::to_string(length()));
     }
-    std::vector<ContentPtr> contents(contents_.begin(), contents_.end());
+    ContentPtrVec contents(contents_.begin(), contents_.end());
     contents.push_back(what);
     std::shared_ptr<util::RecordLookup> recordlookup;
     if (recordlookup_.get() != nullptr) {
@@ -243,7 +243,7 @@ namespace awkward {
   }
 
   const ContentPtr RecordArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto x : contents_) {
       contents.push_back(x.get()->deep_copy(copyarrays, copyindexes, copyidentities));
     }
@@ -295,7 +295,7 @@ namespace awkward {
       return std::make_shared<RecordArray>(identities_, parameters_, contents_, recordlookup_, stop - start);
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_range_nowrap(start, stop));
       }
@@ -308,7 +308,7 @@ namespace awkward {
   }
 
   const ContentPtr RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     std::shared_ptr<util::RecordLookup> recordlookup(nullptr);
     if (recordlookup_.get() != nullptr) {
       recordlookup = std::make_shared<util::RecordLookup>();
@@ -323,7 +323,7 @@ namespace awkward {
   }
 
   const ContentPtr RecordArray::carry(const Index64& carry) const {
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->carry(carry));
     }
@@ -432,7 +432,7 @@ namespace awkward {
       Index64 single(1);
       single.setitem_at_nowrap(0, length_);
       ContentPtr singleton = std::make_shared<NumpyArray>(single);
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(singleton);
       }
@@ -440,7 +440,7 @@ namespace awkward {
       return record.get()->getitem_at_nowrap(0);
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->num(axis, depth));
       }
@@ -457,7 +457,7 @@ namespace awkward {
       throw std::invalid_argument("arrays of records cannot be flattened (but their contents can be; try a different 'axis')");
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         ContentPtr trimmed = content.get()->getitem_range(0, length());
         std::pair<Index64, ContentPtr> pair = trimmed.get()->offsets_and_flattened(axis, depth);
@@ -589,7 +589,7 @@ namespace awkward {
       }
       if (istuple()  &&  rawother->istuple()) {
         if (numfields() == rawother->numfields()) {
-          std::vector<ContentPtr> contents;
+          ContentPtrVec contents;
           for (int64_t i = 0;  i < numfields();  i++) {
             ContentPtr mine = field(i).get()->getitem_range_nowrap(0, mylength);
             ContentPtr theirs = rawother->field(i).get()->getitem_range_nowrap(0, theirlength);
@@ -604,7 +604,7 @@ namespace awkward {
         std::sort(self_keys.begin(), self_keys.end());
         std::sort(other_keys.begin(), other_keys.end());
         if (self_keys == other_keys) {
-          std::vector<ContentPtr> contents;
+          ContentPtrVec contents;
           for (auto key : keys()) {
             ContentPtr mine = field(key).get()->getitem_range_nowrap(0, mylength);
             ContentPtr theirs = rawother->field(key).get()->getitem_range_nowrap(0, theirlength);
@@ -625,7 +625,7 @@ namespace awkward {
   }
 
   const ContentPtr RecordArray::fillna(const ContentPtr& value) const {
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->fillna(value));
     }
@@ -638,7 +638,7 @@ namespace awkward {
       return rpad_axis0(target, false);
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->rpad(target, toaxis, depth));
       }
@@ -657,7 +657,7 @@ namespace awkward {
       return rpad_axis0(target, true);
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->rpad_and_clip(target, toaxis, depth));
       }
@@ -671,7 +671,7 @@ namespace awkward {
   }
 
   const ContentPtr RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto content : contents_) {
       ContentPtr trimmed = content.get()->getitem_range_nowrap(0, length());
       ContentPtr next = trimmed.get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
@@ -686,7 +686,7 @@ namespace awkward {
       return localindex_axis0();
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->localindex(axis, depth));
       }
@@ -703,7 +703,7 @@ namespace awkward {
       return choose_axis0(n, diagonal, recordlookup, parameters);
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->choose(n, diagonal, recordlookup, parameters, axis, depth));
       }
@@ -722,8 +722,8 @@ namespace awkward {
     return contents_[(size_t)fieldindex(key)];
   }
 
-  const std::vector<ContentPtr> RecordArray::fields() const {
-    return std::vector<ContentPtr>(contents_);
+  const ContentPtrVec RecordArray::fields() const {
+    return ContentPtrVec(contents_);
   }
 
   const std::vector<std::pair<std::string, ContentPtr>> RecordArray::fielditems() const {
@@ -768,7 +768,7 @@ namespace awkward {
       return Content::getitem_next(*missing, tail, advanced);
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_next(head, emptytail, advanced));
       }
@@ -827,7 +827,7 @@ namespace awkward {
       return shallow_copy();
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail));
       }

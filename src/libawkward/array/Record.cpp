@@ -27,8 +27,8 @@ namespace awkward {
     return at_;
   }
 
-  const std::vector<ContentPtr> Record::contents() const {
-    std::vector<ContentPtr> out;
+  const ContentPtrVec Record::contents() const {
+    ContentPtrVec out;
     for (auto item : array_.get()->contents()) {
       out.push_back(item.get()->getitem_at_nowrap(at_));
     }
@@ -95,7 +95,7 @@ namespace awkward {
         keys.get()->push_back(std::to_string(j));
       }
     }
-    std::vector<ContentPtr> contents = array_.get()->contents();
+    ContentPtrVec contents = array_.get()->contents();
     builder.beginrecord();
     for (size_t j = 0;  j < cols;  j++) {
       builder.field(keys.get()->at(j).c_str());
@@ -288,8 +288,8 @@ namespace awkward {
     return array_.get()->field(key).get()->getitem_at_nowrap(at_);
   }
 
-  const std::vector<ContentPtr> Record::fields() const {
-    std::vector<ContentPtr> out;
+  const ContentPtrVec Record::fields() const {
+    ContentPtrVec out;
     int64_t cols = numfields();
     for (int64_t j = 0;  j < cols;  j++) {
       out.push_back(array_.get()->field(j).get()->getitem_at_nowrap(at_));

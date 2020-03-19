@@ -162,7 +162,7 @@ namespace awkward {
   }
 
   const ContentPtr RecordType::empty() const {
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto type : types_) {
       contents.push_back(type.get()->empty());
     }

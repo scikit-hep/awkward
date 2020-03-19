@@ -18,10 +18,10 @@ namespace awkward {
   public:
     static const IndexOf<I> regular_index(const IndexOf<T>& tags);
 
-    UnionArrayOf<T, I>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T> tags, const IndexOf<I>& index, const std::vector<ContentPtr>& contents);
+    UnionArrayOf<T, I>(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T> tags, const IndexOf<I>& index, const ContentPtrVec& contents);
     const IndexOf<T> tags() const;
     const IndexOf<I> index() const;
-    const std::vector<ContentPtr> contents() const;
+    const ContentPtrVec contents() const;
     int64_t numcontents() const;
     const ContentPtr content(int64_t index) const;
     const ContentPtr project(int64_t index) const;
@@ -89,7 +89,7 @@ namespace awkward {
   private:
     const IndexOf<T> tags_;
     const IndexOf<I> index_;
-    const std::vector<ContentPtr> contents_;
+    const ContentPtrVec contents_;
   };
 
   typedef UnionArrayOf<int8_t, int32_t>  UnionArray8_32;

@@ -54,7 +54,7 @@ namespace awkward {
   const ContentPtr UnionBuilder::snapshot() const {
     Index8 tags(types_.ptr(), 0, types_.length());
     Index64 index(offsets_.ptr(), 0, offsets_.length());
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->snapshot());
     }

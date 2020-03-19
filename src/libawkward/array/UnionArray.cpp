@@ -32,7 +32,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  UnionArrayOf<T, I>::UnionArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T> tags, const IndexOf<I>& index, const std::vector<ContentPtr>& contents)
+  UnionArrayOf<T, I>::UnionArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T> tags, const IndexOf<I>& index, const ContentPtrVec& contents)
       : Content(identities, parameters)
       , tags_(tags)
       , index_(index)
@@ -56,7 +56,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::vector<ContentPtr> UnionArrayOf<T, I>::contents() const {
+  const ContentPtrVec UnionArrayOf<T, I>::contents() const {
     return contents_;
   }
 
@@ -106,13 +106,13 @@ namespace awkward {
     }
     Index8 tags(len);
     Index64 index(len);
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
 
     for (size_t i = 0;  i < contents_.size();  i++) {
       if (UnionArray8_32* rawcontent = dynamic_cast<UnionArray8_32*>(contents_[i].get())) {
         Index8 innertags = rawcontent->tags();
         Index32 innerindex = rawcontent->index();
-        std::vector<ContentPtr> innercontents = rawcontent->contents();
+        ContentPtrVec innercontents = rawcontent->contents();
         for (size_t j = 0;  j < innercontents.size();  j++) {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
@@ -164,7 +164,7 @@ namespace awkward {
       else if (UnionArray8_U32* rawcontent = dynamic_cast<UnionArray8_U32*>(contents_[i].get())) {
         Index8 innertags = rawcontent->tags();
         IndexU32 innerindex = rawcontent->index();
-        std::vector<ContentPtr> innercontents = rawcontent->contents();
+        ContentPtrVec innercontents = rawcontent->contents();
         for (size_t j = 0;  j < innercontents.size();  j++) {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
@@ -216,7 +216,7 @@ namespace awkward {
       else if (UnionArray8_64* rawcontent = dynamic_cast<UnionArray8_64*>(contents_[i].get())) {
         Index8 innertags = rawcontent->tags();
         Index64 innerindex = rawcontent->index();
-        std::vector<ContentPtr> innercontents = rawcontent->contents();
+        ContentPtrVec innercontents = rawcontent->contents();
         for (size_t j = 0;  j < innercontents.size();  j++) {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
@@ -493,7 +493,7 @@ namespace awkward {
   const ContentPtr UnionArrayOf<T, I>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     IndexOf<T> tags = copyindexes ? tags_.deep_copy() : tags_;
     IndexOf<I> index = copyindexes ? index_.deep_copy() : index_;
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto x : contents_) {
       contents.push_back(x.get()->deep_copy(copyarrays, copyindexes, copyidentities));
     }
@@ -568,7 +568,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr UnionArrayOf<T, I>::getitem_field(const std::string& key) const {
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->getitem_field(key));
     }
@@ -577,7 +577,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr UnionArrayOf<T, I>::getitem_fields(const std::vector<std::string>& keys) const {
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->getitem_fields(keys));
     }
@@ -590,7 +590,7 @@ namespace awkward {
       return shallow_copy();
     }
     else if (dynamic_cast<SliceAt*>(head.get())  ||  dynamic_cast<SliceRange*>(head.get())  ||  dynamic_cast<SliceArray64*>(head.get())  ||  dynamic_cast<SliceJagged64*>(head.get())) {
-      std::vector<ContentPtr> outcontents;
+      ContentPtrVec outcontents;
       for (int64_t i = 0;  i < numcontents();  i++) {
         ContentPtr projection = project(i);
         outcontents.push_back(projection.get()->getitem_next(head, tail, advanced));
@@ -824,7 +824,7 @@ namespace awkward {
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->num(axis, depth));
       }
@@ -844,7 +844,7 @@ namespace awkward {
       std::vector<std::shared_ptr<int64_t>> offsetsptrs;
       std::vector<int64_t*> offsetsraws;
       std::vector<int64_t> offsetsoffsets;
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         std::pair<Index64, ContentPtr> pair = content.get()->offsets_and_flattened(axis, depth);
         Index64 offsets = pair.first;
@@ -907,7 +907,7 @@ namespace awkward {
     Index8 tags(theirlength + mylength);
     Index64 index(theirlength + mylength);
 
-    std::vector<ContentPtr> contents({ other });
+    ContentPtrVec contents({ other });
     contents.insert(contents.end(), contents_.begin(), contents_.end());
 
     struct Error err1 = awkward_unionarray_filltags_to8_const(
@@ -1034,9 +1034,9 @@ namespace awkward {
       throw std::runtime_error("unrecognized UnionArray specialization");
     }
 
-    std::vector<ContentPtr> contents(contents_.begin(), contents_.end());
+    ContentPtrVec contents(contents_.begin(), contents_.end());
     if (UnionArray8_32* rawother = dynamic_cast<UnionArray8_32*>(other.get())) {
-      std::vector<ContentPtr> other_contents = rawother->contents();
+      ContentPtrVec other_contents = rawother->contents();
       contents.insert(contents.end(), other_contents.begin(), other_contents.end());
       Index8 other_tags = rawother->tags();
       struct Error err1 = awkward_unionarray_filltags_to8_from8(
@@ -1057,7 +1057,7 @@ namespace awkward {
       util::handle_error(err2, rawother->classname(), rawother->identities().get());
     }
     else if (UnionArray8_U32* rawother = dynamic_cast<UnionArray8_U32*>(other.get())) {
-      std::vector<ContentPtr> other_contents = rawother->contents();
+      ContentPtrVec other_contents = rawother->contents();
       contents.insert(contents.end(), other_contents.begin(), other_contents.end());
       Index8 other_tags = rawother->tags();
       struct Error err1 = awkward_unionarray_filltags_to8_from8(
@@ -1078,7 +1078,7 @@ namespace awkward {
       util::handle_error(err2, rawother->classname(), rawother->identities().get());
     }
     else if (UnionArray8_64* rawother = dynamic_cast<UnionArray8_64*>(other.get())) {
-      std::vector<ContentPtr> other_contents = rawother->contents();
+      ContentPtrVec other_contents = rawother->contents();
       contents.insert(contents.end(), other_contents.begin(), other_contents.end());
       Index8 other_tags = rawother->tags();
       struct Error err1 = awkward_unionarray_filltags_to8_from8(
@@ -1154,7 +1154,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr UnionArrayOf<T, I>::fillna(const ContentPtr& value) const {
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto content : contents_) {
       contents.emplace_back(content.get()->fillna(value));
     }
@@ -1169,7 +1169,7 @@ namespace awkward {
       return rpad_axis0(target, false);
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.emplace_back(content.get()->rpad(target, axis, depth));
       }
@@ -1185,7 +1185,7 @@ namespace awkward {
       return rpad_axis0(target, true);
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.emplace_back(content.get()->rpad_and_clip(target, axis, depth));
       }
@@ -1212,7 +1212,7 @@ namespace awkward {
       return localindex_axis0();
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->localindex(axis, depth));
       }
@@ -1230,7 +1230,7 @@ namespace awkward {
       return choose_axis0(n, diagonal, recordlookup, parameters);
     }
     else {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->choose(n, diagonal, recordlookup, parameters, axis, depth));
       }

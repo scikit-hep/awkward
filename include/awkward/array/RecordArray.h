@@ -14,10 +14,10 @@
 namespace awkward {
   class EXPORT_SYMBOL RecordArray: public Content, public std::enable_shared_from_this<RecordArray> {
   public:
-    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<ContentPtr>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup, int64_t length);
-    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const std::vector<ContentPtr>& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
+    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const ContentPtrVec& contents, const std::shared_ptr<util::RecordLookup>& recordlookup, int64_t length);
+    RecordArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const ContentPtrVec& contents, const std::shared_ptr<util::RecordLookup>& recordlookup);
 
-    const std::vector<ContentPtr> contents() const;
+    const ContentPtrVec contents() const;
     const std::shared_ptr<util::RecordLookup> recordlookup() const;
     bool istuple() const;
     const ContentPtr setitem_field(int64_t where, const ContentPtr& what) const;
@@ -71,7 +71,7 @@ namespace awkward {
 
     const ContentPtr field(int64_t fieldindex) const;
     const ContentPtr field(const std::string& key) const;
-    const std::vector<ContentPtr> fields() const;
+    const ContentPtrVec fields() const;
     const std::vector<std::pair<std::string, ContentPtr>> fielditems() const;
     const std::shared_ptr<RecordArray> astuple() const;
 
@@ -90,7 +90,7 @@ namespace awkward {
     const ContentPtr getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const;
 
   private:
-    const std::vector<ContentPtr> contents_;
+    const ContentPtrVec contents_;
     const std::shared_ptr<util::RecordLookup> recordlookup_;
     int64_t length_;
   };

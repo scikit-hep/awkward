@@ -146,7 +146,7 @@ namespace awkward {
     Index8 tags(mylength + theirlength);
     Index64 index(mylength + theirlength);
 
-    std::vector<ContentPtr> contents({ shallow_copy(), other });
+    ContentPtrVec contents({ shallow_copy(), other });
 
     struct Error err1 = awkward_unionarray_filltags_to8_const(
       tags.ptr().get(),
@@ -237,7 +237,7 @@ namespace awkward {
       1);
     util::handle_error(err, classname(), identities_.get());
 
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (auto ptr : tocarry) {
       contents.push_back(std::make_shared<IndexedArray64>(Identities::none(), util::Parameters(), Index64(ptr, 0, chooselen), shallow_copy()));
     }
@@ -446,7 +446,7 @@ namespace awkward {
       if (rec->numfields() == 0) {
         return next;
       }
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       for (auto content : rec->contents()) {
         if (RegularArray* raw = dynamic_cast<RegularArray*>(content.get())) {
           contents.push_back(getitem_next_regular_missing(missing, tail, advanced, raw, length(), classname()));

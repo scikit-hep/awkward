@@ -1130,7 +1130,7 @@ namespace awkward {
       throw std::invalid_argument(std::string("fillna value length (") + std::to_string(value.get()->length()) + std::string(") is not equal to 1"));
     }
     if (ISOPTION) {
-      std::vector<ContentPtr> contents;
+      ContentPtrVec contents;
       contents.emplace_back(content());
       contents.emplace_back(value);
 

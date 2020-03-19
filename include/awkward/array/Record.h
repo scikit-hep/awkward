@@ -11,7 +11,7 @@ namespace awkward {
     Record(const std::shared_ptr<const RecordArray> array, int64_t at);
     const std::shared_ptr<const RecordArray> array() const;
     int64_t at() const;
-    const std::vector<ContentPtr> contents() const;
+    const ContentPtrVec contents() const;
     const std::shared_ptr<util::RecordLookup> recordlookup() const;
     bool istuple() const;
 
@@ -64,7 +64,7 @@ namespace awkward {
 
     const ContentPtr field(int64_t fieldindex) const;
     const ContentPtr field(const std::string& key) const;
-    const std::vector<ContentPtr> fields() const;
+    const ContentPtrVec fields() const;
     const std::vector<std::pair<std::string, ContentPtr>> fielditems() const;
     const std::shared_ptr<Record> astuple() const;
 

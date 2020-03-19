@@ -52,7 +52,7 @@ namespace awkward {
     if (length_ == -1) {
       return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
     }
-    std::vector<ContentPtr> contents;
+    ContentPtrVec contents;
     for (size_t i = 0;  i < contents_.size();  i++) {
       contents.push_back(contents_[i].get()->snapshot());
     }
