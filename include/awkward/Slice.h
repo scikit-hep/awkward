@@ -13,7 +13,7 @@
 
 namespace awkward {
   class SliceItem;
-  typedef std::shared_ptr<SliceItem> SliceItemPtr;
+  using SliceItemPtr = std::shared_ptr<SliceItem>;
 
   class EXPORT_SYMBOL SliceItem {
   public:
@@ -90,7 +90,7 @@ namespace awkward {
     bool frombool_;
   };
 
-  typedef SliceArrayOf<int64_t> SliceArray64;
+  using SliceArray64 = SliceArrayOf<int64_t>;
 
   class EXPORT_SYMBOL SliceField: public SliceItem {
   public:
@@ -132,7 +132,7 @@ namespace awkward {
     const SliceItemPtr content_;
   };
 
-  typedef SliceMissingOf<int64_t> SliceMissing64;
+  using SliceMissing64 = SliceMissingOf<int64_t>;
 
   template <typename T>
   class EXPORT_SYMBOL SliceJaggedOf: public SliceItem {
@@ -150,7 +150,7 @@ namespace awkward {
     const SliceItemPtr content_;
   };
 
-  typedef SliceJaggedOf<int64_t> SliceJagged64;
+  using SliceJagged64 = SliceJaggedOf<int64_t>;
 
   class EXPORT_SYMBOL Slice {
   public:

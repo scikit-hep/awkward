@@ -49,11 +49,11 @@ namespace awkward {
     const int64_t length_;
   };
 
-  typedef IndexOf<int8_t>   Index8;
-  typedef IndexOf<uint8_t>  IndexU8;
-  typedef IndexOf<int32_t>  Index32;
-  typedef IndexOf<uint32_t> IndexU32;
-  typedef IndexOf<int64_t>  Index64;
+  using Index8   = IndexOf<int8_t>;
+  using IndexU8  = IndexOf<uint8_t>;
+  using Index32  = IndexOf<int32_t>;
+  using IndexU32 = IndexOf<uint32_t>;
+  using Index64  = IndexOf<int64_t>;
 }
 
 #endif // AWKWARD_INDEX_H_

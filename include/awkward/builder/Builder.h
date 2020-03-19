@@ -12,7 +12,7 @@
 
 namespace awkward {
   class Builder;
-  typedef std::shared_ptr<Builder> BuilderPtr;
+  using BuilderPtr = std::shared_ptr<Builder>;
 
   class EXPORT_SYMBOL Builder {
   public:

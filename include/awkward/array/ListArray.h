@@ -82,9 +82,9 @@ namespace awkward {
     const ContentPtr content_;
   };
 
-  typedef ListArrayOf<int32_t>  ListArray32;
-  typedef ListArrayOf<uint32_t> ListArrayU32;
-  typedef ListArrayOf<int64_t>  ListArray64;
+  using ListArray32  = ListArrayOf<int32_t>;
+  using ListArrayU32 = ListArrayOf<uint32_t>;
+  using ListArray64  = ListArrayOf<int64_t>;
 }
 
 #endif // AWKWARD_LISTARRAY_H_

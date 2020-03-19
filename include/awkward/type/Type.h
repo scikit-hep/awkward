@@ -11,9 +11,9 @@
 
 namespace awkward {
   class Content;
-  typedef std::shared_ptr<Content> ContentPtr;
+  using ContentPtr = std::shared_ptr<Content>;
   class Type;
-  typedef std::shared_ptr<Type> TypePtr;
+  using TypePtr = std::shared_ptr<Type>;
 
   class EXPORT_SYMBOL Type {
   public:

@@ -13,12 +13,12 @@
 
 namespace awkward {
   class Identities;
-  typedef std::shared_ptr<Identities> IdentitiesPtr;
+  using IdentitiesPtr = std::shared_ptr<Identities>;
 
   class EXPORT_SYMBOL Identities {
   public:
-    typedef int64_t Ref;
-    typedef std::vector<std::pair<int64_t, std::string>> FieldLoc;
+    using Ref = int64_t;
+    using FieldLoc = std::vector<std::pair<int64_t, std::string>>;
 
     static Ref newref();
     static IdentitiesPtr none();
@@ -80,8 +80,8 @@ namespace awkward {
     const std::shared_ptr<T> ptr_;
   };
 
-  typedef IdentitiesOf<int32_t> Identities32;
-  typedef IdentitiesOf<int64_t> Identities64;
+  using Identities32 = IdentitiesOf<int32_t>;
+  using Identities64 = IdentitiesOf<int64_t>;
 }
 
 #endif // AWKWARD_IDENTITIES_H_

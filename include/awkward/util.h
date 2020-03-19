@@ -39,15 +39,15 @@ namespace awkward {
     template <typename T>
     IndexOf<T> make_stops(const IndexOf<T>& offsets);
 
-    typedef std::vector<std::string> RecordLookup;
-    typedef std::shared_ptr<RecordLookup> RecordLookupPtr;
+    using RecordLookup    = std::vector<std::string>;
+    using RecordLookupPtr = std::shared_ptr<RecordLookup>;
     RecordLookupPtr init_recordlookup(int64_t numfields);
     int64_t fieldindex(const RecordLookupPtr& recordlookup, const std::string& key, int64_t numfields);
     const std::string key(const RecordLookupPtr& recordlookup, int64_t fieldindex, int64_t numfields);
     bool haskey(const RecordLookupPtr& recordlookup, const std::string& key, int64_t numfields);
     const std::vector<std::string> keys(const RecordLookupPtr& recordlookup, int64_t numfields);
 
-    typedef std::map<std::string, std::string> Parameters;
+    using Parameters = std::map<std::string, std::string>;
     bool parameter_equals(const Parameters& parameters, const std::string& key, const std::string& value);
     bool parameters_equal(const Parameters& self, const Parameters& other);
 

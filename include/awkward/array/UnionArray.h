@@ -92,9 +92,9 @@ namespace awkward {
     const ContentPtrVec contents_;
   };
 
-  typedef UnionArrayOf<int8_t, int32_t>  UnionArray8_32;
-  typedef UnionArrayOf<int8_t, uint32_t> UnionArray8_U32;
-  typedef UnionArrayOf<int8_t, int64_t>  UnionArray8_64;
+  using UnionArray8_32  = UnionArrayOf<int8_t, int32_t>;
+  using UnionArray8_U32 = UnionArrayOf<int8_t, uint32_t>;
+  using UnionArray8_64  = UnionArrayOf<int8_t, int64_t>;
 }
 
 #endif // AWKWARD_UNIONARRAY_H_

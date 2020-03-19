@@ -92,11 +92,11 @@ namespace awkward {
     const ContentPtr content_;
   };
 
-  typedef IndexedArrayOf<int32_t, false>  IndexedArray32;
-  typedef IndexedArrayOf<uint32_t, false> IndexedArrayU32;
-  typedef IndexedArrayOf<int64_t, false>  IndexedArray64;
-  typedef IndexedArrayOf<int32_t, true>   IndexedOptionArray32;
-  typedef IndexedArrayOf<int64_t, true>   IndexedOptionArray64;
+  using IndexedArray32       = IndexedArrayOf<int32_t, false>;
+  using IndexedArrayU32      = IndexedArrayOf<uint32_t, false>;
+  using IndexedArray64       = IndexedArrayOf<int64_t, false>;
+  using IndexedOptionArray32 = IndexedArrayOf<int32_t, true>;
+  using IndexedOptionArray64 = IndexedArrayOf<int64_t, true>;
 }
 
 #endif // AWKWARD_INDEXEDARRAY_H_

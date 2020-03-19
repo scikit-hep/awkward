@@ -83,9 +83,9 @@ namespace awkward {
     const ContentPtr content_;
   };
 
-  typedef ListOffsetArrayOf<int32_t>  ListOffsetArray32;
-  typedef ListOffsetArrayOf<uint32_t> ListOffsetArrayU32;
-  typedef ListOffsetArrayOf<int64_t>  ListOffsetArray64;
+  using ListOffsetArray32  = ListOffsetArrayOf<int32_t>;
+  using ListOffsetArrayU32 = ListOffsetArrayOf<uint32_t>;
+  using ListOffsetArray64  = ListOffsetArrayOf<int64_t>;
 }
 
 #endif // AWKWARD_LISTOFFSETARRAY_H_
