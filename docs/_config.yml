@@ -105,7 +105,6 @@ css_url: /assets/css                      # Path to static CSS files
 js_url: /assets/js                       # Path to JS files
 custom_static_url: /assets/custom            # Path to user's custom CSS/JS files
 
-
 #######################################################################################
 # Jekyll build settings (only modify if you know what you're doing)
 
