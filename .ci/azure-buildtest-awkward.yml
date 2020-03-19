@@ -9,6 +9,9 @@ trigger:
       - VERSION_INFO
       - .ci/azure-deploy-awkward.yml
       - .ci/linux-build.sh
+      - docs-demo-notebooks/*
+      - docs-doxygen/*
+      - docs-mkdocs/*
       - docs/*
       - studies/*
 
