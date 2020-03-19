@@ -14,7 +14,7 @@
 #include "awkward/array/NumpyArray.h"
 
 namespace awkward {
-  EXPORT_SYMBOL ContentPtr FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const ArrayBuilderOptions& options);
+  EXPORT_SYMBOL const ContentPtr FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const ArrayBuilderOptions& options);
 }
 
 #endif // AWKWARD_IO_ROOT_H_

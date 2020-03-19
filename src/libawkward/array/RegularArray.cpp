@@ -24,7 +24,7 @@
 #include "awkward/array/RegularArray.h"
 
 namespace awkward {
-  RegularArray::RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, ContentPtr& content, int64_t size)
+  RegularArray::RegularArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const ContentPtr& content, int64_t size)
       : Content(identities, parameters)
       , content_(content)
       , size_(size) {
@@ -33,7 +33,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr RegularArray::content() const {
+  const ContentPtr RegularArray::content() const {
     return content_;
   }
 
@@ -52,7 +52,7 @@ namespace awkward {
     return out;
   }
 
-  ContentPtr RegularArray::broadcast_tooffsets64(const Index64& offsets) const {
+  const ContentPtr RegularArray::broadcast_tooffsets64(const Index64& offsets) const {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument("broadcast_tooffsets64 can only be used with offsets that start at 0");
     }
@@ -76,7 +76,7 @@ namespace awkward {
         offsets.offset(),
         offsets.length());
       util::handle_error(err, classname(), identities_.get());
-      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry);
       return std::make_shared<ListOffsetArray64>(identities, parameters_, offsets, nextcontent);
     }
     else {
@@ -90,11 +90,11 @@ namespace awkward {
     }
   }
 
-  ContentPtr RegularArray::toRegularArray() const {
+  const ContentPtr RegularArray::toRegularArray() const {
     return shallow_copy();
   }
 
-  ContentPtr RegularArray::toListOffsetArray64(bool start_at_zero) const {
+  const ContentPtr RegularArray::toListOffsetArray64(bool start_at_zero) const {
     Index64 offsets = compact_offsets64(start_at_zero);
     return broadcast_tooffsets64(offsets);
   }
@@ -206,12 +206,12 @@ namespace awkward {
     return size_ == 0 ? 0 : content_.get()->length() / size_;   // floor of length / size
   }
 
-  ContentPtr RegularArray::shallow_copy() const {
+  const ContentPtr RegularArray::shallow_copy() const {
     return std::make_shared<RegularArray>(identities_, parameters_, content_, size_);
   }
 
-  ContentPtr RegularArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
-    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+  const ContentPtr RegularArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+    ContentPtr content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
     std::shared_ptr<Identities> identities = identities_;
     if (copyidentities  &&  identities_.get() != nullptr) {
       identities = identities_.get()->deep_copy();
@@ -225,11 +225,11 @@ namespace awkward {
     }
   }
 
-  ContentPtr RegularArray::getitem_nothing() const {
+  const ContentPtr RegularArray::getitem_nothing() const {
     return content_.get()->getitem_range_nowrap(0, 0);
   }
 
-  ContentPtr RegularArray::getitem_at(int64_t at) const {
+  const ContentPtr RegularArray::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     int64_t len = length();
     if (regular_at < 0) {
@@ -241,11 +241,11 @@ namespace awkward {
     return getitem_at_nowrap(regular_at);
   }
 
-  ContentPtr RegularArray::getitem_at_nowrap(int64_t at) const {
+  const ContentPtr RegularArray::getitem_at_nowrap(int64_t at) const {
     return content_.get()->getitem_range_nowrap(at*size_, (at + 1)*size_);
   }
 
-  ContentPtr RegularArray::getitem_range(int64_t start, int64_t stop) const {
+  const ContentPtr RegularArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
@@ -255,7 +255,7 @@ namespace awkward {
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
-  ContentPtr RegularArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  const ContentPtr RegularArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     std::shared_ptr<Identities> identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_range_nowrap(start, stop);
@@ -263,15 +263,15 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities_, parameters_, content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_);
   }
 
-  ContentPtr RegularArray::getitem_field(const std::string& key) const {
+  const ContentPtr RegularArray::getitem_field(const std::string& key) const {
     return std::make_shared<RegularArray>(identities_, util::Parameters(), content_.get()->getitem_field(key), size_);
   }
 
-  ContentPtr RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
+  const ContentPtr RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
     return std::make_shared<RegularArray>(identities_, util::Parameters(), content_.get()->getitem_fields(keys), size_);
   }
 
-  ContentPtr RegularArray::carry(const Index64& carry) const {
+  const ContentPtr RegularArray::carry(const Index64& carry) const {
     Index64 nextcarry(carry.length()*size_);
 
     struct Error err = awkward_regulararray_getitem_carry_64(
@@ -340,11 +340,11 @@ namespace awkward {
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
-  ContentPtr RegularArray::shallow_simplify() const {
+  const ContentPtr RegularArray::shallow_simplify() const {
     return shallow_copy();
   }
 
-  ContentPtr RegularArray::num(int64_t axis, int64_t depth) const {
+  const ContentPtr RegularArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
@@ -361,16 +361,16 @@ namespace awkward {
       return std::make_shared<NumpyArray>(tonum);
     }
     else {
-      std::shared_ptr<Content> next = content_.get()->num(axis, depth + 1);
+      ContentPtr next = content_.get()->num(axis, depth + 1);
       return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), next, size_);
     }
   }
 
-  const std::pair<Index64, std::shared_ptr<Content>> RegularArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+  const std::pair<Index64, ContentPtr> RegularArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     return toListOffsetArray64(true).get()->offsets_and_flattened(axis, depth);
   }
 
-  bool RegularArray::mergeable(ContentPtr& other, bool mergebool) const {
+  bool RegularArray::mergeable(const ContentPtr& other, bool mergebool) const {
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -432,7 +432,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr RegularArray::merge(ContentPtr& other) const {
+  const ContentPtr RegularArray::merge(const ContentPtr& other) const {
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }
@@ -476,9 +476,9 @@ namespace awkward {
 
     if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
       if (size_ == rawother->size()) {
-        std::shared_ptr<Content> mine = content_.get()->getitem_range_nowrap(0, size_*length());
-        std::shared_ptr<Content> theirs = rawother->content().get()->getitem_range_nowrap(0, rawother->size()*rawother->length());
-        std::shared_ptr<Content> content = mine.get()->merge(theirs);
+        ContentPtr mine = content_.get()->getitem_range_nowrap(0, size_*length());
+        ContentPtr theirs = rawother->content().get()->getitem_range_nowrap(0, rawother->size()*rawother->length());
+        ContentPtr content = mine.get()->merge(theirs);
         return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), content, size_);
       }
       else {
@@ -502,11 +502,11 @@ namespace awkward {
     throw std::invalid_argument("slice items can have all fixed-size dimensions (to follow NumPy's slice rules) or they can have all var-sized dimensions (for jagged indexing), but not both in the same slice item");
   }
 
-  ContentPtr RegularArray::fillna(ContentPtr& value) const {
+  const ContentPtr RegularArray::fillna(const ContentPtr& value) const {
     return std::make_shared<RegularArray>(identities_, parameters_, content().get()->fillna(value), size_);
   }
 
-  ContentPtr RegularArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
+  const ContentPtr RegularArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return rpad_axis0(target, false);
@@ -524,7 +524,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr RegularArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+  const ContentPtr RegularArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return rpad_axis0(target, true);
@@ -545,11 +545,11 @@ namespace awkward {
     }
   }
 
-  ContentPtr RegularArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const ContentPtr RegularArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
   }
 
-  ContentPtr RegularArray::localindex(int64_t axis, int64_t depth) const {
+  const ContentPtr RegularArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
       return localindex_axis0();
@@ -568,7 +568,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr RegularArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const ContentPtr RegularArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }
@@ -619,22 +619,22 @@ namespace awkward {
         length());
       util::handle_error(err, classname(), identities_.get());
 
-      std::vector<std::shared_ptr<Content>> contents;
+      std::vector<ContentPtr> contents;
       for (auto ptr : tocarry) {
         contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen)));
       }
-      std::shared_ptr<Content> recordarray = std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
+      ContentPtr recordarray = std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
 
       return std::make_shared<RegularArray>(identities_, util::Parameters(), recordarray, chooselen);
     }
 
     else {
-      std::shared_ptr<Content> next = content_.get()->getitem_range_nowrap(0, length()*size_).get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
+      ContentPtr next = content_.get()->getitem_range_nowrap(0, length()*size_).get()->choose(n, diagonal, recordlookup, parameters, axis, depth + 1);
       return std::make_shared<RegularArray>(identities_, util::Parameters(), next, size_);
     }
   }
 
-  ContentPtr RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr RegularArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::runtime_error("RegularArray::getitem_next(SliceAt): advanced.length() != 0");
     }
@@ -650,11 +650,11 @@ namespace awkward {
       size_);
     util::handle_error(err, classname(), identities_.get());
 
-    std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry);
     return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
   }
 
-  ContentPtr RegularArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr RegularArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     int64_t len = length();
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -693,7 +693,7 @@ namespace awkward {
       nextsize);
     util::handle_error(err, classname(), identities_.get());
 
-    std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+    ContentPtr nextcontent = content_.get()->carry(nextcarry);
 
     if (advanced.length() == 0) {
       return std::make_shared<RegularArray>(identities_, parameters_, nextcontent.get()->getitem_next(nexthead, nexttail, advanced), nextsize);
@@ -712,7 +712,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr RegularArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr RegularArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     int64_t len = length();
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -739,7 +739,7 @@ namespace awkward {
         size_);
       util::handle_error(err, classname(), identities_.get());
 
-      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry);
 
       return getitem_next_array_wrap(nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced), array.shape());
     }
@@ -757,12 +757,12 @@ namespace awkward {
         size_);
       util::handle_error(err, classname(), identities_.get());
 
-      std::shared_ptr<Content> nextcontent = content_.get()->carry(nextcarry);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry);
       return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
     }
   }
 
-  ContentPtr RegularArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr RegularArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
     }
@@ -783,23 +783,23 @@ namespace awkward {
       regularlength);
     util::handle_error(err, classname(), identities_.get());
 
-    std::shared_ptr<Content> down = content_.get()->getitem_next_jagged(multistarts, multistops, jagged.content(), tail);
+    ContentPtr down = content_.get()->getitem_next_jagged(multistarts, multistops, jagged.content(), tail);
 
     return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), down, jagged.length());
   }
 
-  ContentPtr RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
-    std::shared_ptr<Content> self = toListOffsetArray64(true);
+  const ContentPtr RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+    ContentPtr self = toListOffsetArray64(true);
     return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
-  ContentPtr RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
-    std::shared_ptr<Content> self = toListOffsetArray64(true);
+  const ContentPtr RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+    ContentPtr self = toListOffsetArray64(true);
     return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
-  ContentPtr RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
-    std::shared_ptr<Content> self = toListOffsetArray64(true);
+  const ContentPtr RegularArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+    ContentPtr self = toListOffsetArray64(true);
     return self.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 

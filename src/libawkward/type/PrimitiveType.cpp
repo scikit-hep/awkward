@@ -80,7 +80,7 @@ namespace awkward {
     throw std::invalid_argument("type contains no Records");
   }
 
-  ContentPtr PrimitiveType::empty() const {
+  const ContentPtr PrimitiveType::empty() const {
     std::shared_ptr<void> ptr(new uint8_t[0], util::array_deleter<uint8_t>());
     std::vector<ssize_t> shape({ 0 });
     std::vector<ssize_t> strides({ 0 });

@@ -67,8 +67,8 @@ namespace awkward {
     return type_.get()->keys();
   }
 
-  ContentPtr RegularType::empty() const {
-    std::shared_ptr<Content> content = type_.get()->empty();
+  const ContentPtr RegularType::empty() const {
+    ContentPtr content = type_.get()->empty();
     return std::make_shared<RegularArray>(Identities::none(), parameters_, content, size_);
   }
 

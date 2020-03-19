@@ -65,7 +65,7 @@ namespace awkward {
     nexttotry_ = 0;
   }
 
-  ContentPtr RecordBuilder::snapshot() const {
+  const ContentPtr RecordBuilder::snapshot() const {
     if (length_ == -1) {
       return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
     }
@@ -73,7 +73,7 @@ namespace awkward {
     if (nameptr_ != nullptr) {
       parameters["__record__"] = util::quote(name_, true);
     }
-    std::vector<std::shared_ptr<Content>> contents;
+    std::vector<ContentPtr> contents;
     std::shared_ptr<util::RecordLookup> recordlookup = std::make_shared<util::RecordLookup>();
     for (size_t i = 0;  i < contents_.size();  i++) {
       contents.push_back(contents_[i].get()->snapshot());
@@ -394,7 +394,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> RecordBuilder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> RecordBuilder::append(const ContentPtr& array, int64_t at) {
     if (!begun_) {
       std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);

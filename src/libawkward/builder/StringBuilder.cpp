@@ -44,7 +44,7 @@ namespace awkward {
     content_.clear();
   }
 
-  ContentPtr StringBuilder::snapshot() const {
+  const ContentPtr StringBuilder::snapshot() const {
     util::Parameters char_parameters;
     util::Parameters string_parameters;
 
@@ -63,7 +63,7 @@ namespace awkward {
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
     std::vector<ssize_t> shape = { (ssize_t)content_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(uint8_t) };
-    std::shared_ptr<Content> content;
+    ContentPtr content;
     content = std::make_shared<NumpyArray>(Identities::none(), char_parameters, content_.ptr(), shape, strides, 0, sizeof(uint8_t), "B");
     return std::make_shared<ListOffsetArray64>(Identities::none(), string_parameters, offsets, content);
   }
@@ -149,7 +149,7 @@ namespace awkward {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
-  const std::shared_ptr<Builder> StringBuilder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> StringBuilder::append(const ContentPtr& array, int64_t at) {
     std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
     out.get()->append(array, at);
     return out;

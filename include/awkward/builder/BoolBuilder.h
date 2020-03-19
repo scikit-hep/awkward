@@ -18,7 +18,7 @@ namespace awkward {
     const std::string classname() const override;
     int64_t length() const override;
     void clear() override;
-    ContentPtr snapshot() const override;
+    const ContentPtr snapshot() const override;
 
     bool active() const override;
     const std::shared_ptr<Builder> null() override;
@@ -34,7 +34,7 @@ namespace awkward {
     const std::shared_ptr<Builder> beginrecord(const char* name, bool check) override;
     const std::shared_ptr<Builder> field(const char* key, bool check) override;
     const std::shared_ptr<Builder> endrecord() override;
-    const std::shared_ptr<Builder> append(ContentPtr& array, int64_t at) override;
+    const std::shared_ptr<Builder> append(const ContentPtr& array, int64_t at) override;
 
   private:
     const ArrayBuilderOptions options_;

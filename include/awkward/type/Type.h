@@ -11,8 +11,7 @@
 
 namespace awkward {
   class Content;
-  typedef const std::shared_ptr<Content> ContentPtr;
-  typedef std::vector<std::shared_ptr<Content>> ContentPtrVec;
+  typedef std::shared_ptr<Content> ContentPtr;
 
   class EXPORT_SYMBOL Type {
   public:
@@ -29,7 +28,7 @@ namespace awkward {
     virtual const std::string key(int64_t fieldindex) const = 0;
     virtual bool haskey(const std::string& key) const = 0;
     virtual const std::vector<std::string> keys() const = 0;
-    virtual ContentPtr empty() const = 0;
+    virtual const ContentPtr empty() const = 0;
 
     const util::Parameters parameters() const;
     void setparameters(const util::Parameters& parameters);

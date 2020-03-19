@@ -197,7 +197,7 @@ namespace awkward {
     return *reinterpret_cast<double*>(byteptr(at));
   }
 
-  ContentPtr NumpyArray::toRegularArray() const {
+  const ContentPtr NumpyArray::toRegularArray() const {
     if (isscalar()) {
       return shallow_copy();
     }
@@ -207,7 +207,7 @@ namespace awkward {
       flatshape[0] = flatshape[0] * x;
     }
     std::vector<ssize_t> flatstrides({ itemsize_ });
-    std::shared_ptr<Content> out = std::make_shared<NumpyArray>(identities_, parameters_, contiguous_self.ptr(), flatshape, flatstrides, contiguous_self.byteoffset(), contiguous_self.itemsize(), contiguous_self.format());
+    ContentPtr out = std::make_shared<NumpyArray>(identities_, parameters_, contiguous_self.ptr(), flatshape, flatstrides, contiguous_self.byteoffset(), contiguous_self.itemsize(), contiguous_self.format());
     for (int64_t i = (int64_t)shape_.size() - 1;  i > 0;  i--) {
       out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, shape_[(size_t)i]);
     }
@@ -523,11 +523,11 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::shallow_copy() const {
+  const ContentPtr NumpyArray::shallow_copy() const {
     return std::make_shared<NumpyArray>(identities_, parameters_, ptr_, shape_, strides_, byteoffset_, itemsize_, format_);
   }
 
-  ContentPtr NumpyArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+  const ContentPtr NumpyArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     std::shared_ptr<void> ptr = ptr_;
     std::vector<ssize_t> shape = shape_;
     std::vector<ssize_t> strides = strides_;
@@ -552,7 +552,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::getitem_nothing() const {
+  const ContentPtr NumpyArray::getitem_nothing() const {
     const std::vector<ssize_t> shape({ 0 });
     const std::vector<ssize_t> strides({ itemsize_ });
     std::shared_ptr<Identities> identities;
@@ -562,7 +562,7 @@ namespace awkward {
     return std::make_shared<NumpyArray>(identities, parameters_, ptr_, shape, strides, byteoffset_, itemsize_, format_);
   }
 
-  ContentPtr NumpyArray::getitem_at(int64_t at) const {
+  const ContentPtr NumpyArray::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     if (regular_at < 0) {
       regular_at += shape_[0];
@@ -573,7 +573,7 @@ namespace awkward {
     return getitem_at_nowrap(regular_at);
   }
 
-  ContentPtr NumpyArray::getitem_at_nowrap(int64_t at) const {
+  const ContentPtr NumpyArray::getitem_at_nowrap(int64_t at) const {
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)at);
     const std::vector<ssize_t> shape(shape_.begin() + 1, shape_.end());
     const std::vector<ssize_t> strides(strides_.begin() + 1, strides_.end());
@@ -587,14 +587,14 @@ namespace awkward {
     return std::make_shared<NumpyArray>(identities, parameters_, ptr_, shape, strides, byteoffset, itemsize_, format_);
   }
 
-  ContentPtr NumpyArray::getitem_range(int64_t start, int64_t stop) const {
+  const ContentPtr NumpyArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), shape_[0]);
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
-  ContentPtr NumpyArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  const ContentPtr NumpyArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)start);
     std::vector<ssize_t> shape;
     shape.push_back((ssize_t)(stop - start));
@@ -609,11 +609,11 @@ namespace awkward {
     return std::make_shared<NumpyArray>(identities, parameters_, ptr_, shape, strides_, byteoffset, itemsize_, format_);
   }
 
-  ContentPtr NumpyArray::getitem_field(const std::string& key) const {
+  const ContentPtr NumpyArray::getitem_field(const std::string& key) const {
     throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
   }
 
-  ContentPtr NumpyArray::getitem_fields(const std::vector<std::string>& keys) const {
+  const ContentPtr NumpyArray::getitem_fields(const std::vector<std::string>& keys) const {
     throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
   }
 
@@ -629,7 +629,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::getitem(const Slice& where) const {
+  const ContentPtr NumpyArray::getitem(const Slice& where) const {
     if (isscalar()) {
       throw std::runtime_error("cannot get-item on a scalar");
     }
@@ -681,14 +681,14 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr NumpyArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
     Index64 carry(shape_[0]);
     struct Error err = awkward_carry_arange_64(carry.ptr().get(), shape_[0]);
     util::handle_error(err, classname(), identities_.get());
     return getitem_next(head, tail, carry, advanced, shape_[0], strides_[0], false).shallow_copy();
   }
 
-  ContentPtr NumpyArray::carry(const Index64& carry) const {
+  const ContentPtr NumpyArray::carry(const Index64& carry) const {
     std::shared_ptr<void> ptr(new uint8_t[(size_t)(carry.length()*strides_[0])], util::array_deleter<uint8_t>());
     struct Error err = awkward_numpyarray_getitem_next_null_64(
       reinterpret_cast<uint8_t*>(ptr.get()),
@@ -764,11 +764,11 @@ namespace awkward {
     return std::string();
   }
 
-  ContentPtr NumpyArray::shallow_simplify() const {
+  const ContentPtr NumpyArray::shallow_simplify() const {
     return shallow_copy();
   }
 
-  ContentPtr NumpyArray::num(int64_t axis, int64_t depth) const {
+  const ContentPtr NumpyArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
@@ -860,7 +860,7 @@ namespace awkward {
     }
   }
 
-  const std::pair<Index64, std::shared_ptr<Content>> NumpyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+  const std::pair<Index64, ContentPtr> NumpyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
@@ -873,7 +873,7 @@ namespace awkward {
     }
   }
 
-  bool NumpyArray::mergeable(ContentPtr& other, bool mergebool) const {
+  bool NumpyArray::mergeable(const ContentPtr& other, bool mergebool) const {
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -943,7 +943,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::merge(ContentPtr& other) const {
+  const ContentPtr NumpyArray::merge(const ContentPtr& other) const {
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }
@@ -1374,11 +1374,11 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::fillna(ContentPtr& value) const {
+  const ContentPtr NumpyArray::fillna(const ContentPtr& value) const {
     return shallow_copy();
   }
 
-  ContentPtr NumpyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
+  const ContentPtr NumpyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     if (ndim() == 0) {
       throw std::runtime_error("cannot rpad a scalar");
     }
@@ -1397,7 +1397,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+  const ContentPtr NumpyArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
     if (ndim() == 0) {
       throw std::runtime_error("cannot rpad a scalar");
     }
@@ -1411,7 +1411,7 @@ namespace awkward {
     return rpad_axis0(target, true);
   }
 
-  ContentPtr NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const ContentPtr NumpyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     if (shape_.empty()) {
       throw std::runtime_error("attempting to reduce a scalar");
     }
@@ -1477,7 +1477,7 @@ namespace awkward {
       ssize_t itemsize = reducer.return_typesize(format_);
       std::vector<ssize_t> shape({ (ssize_t)outlength });
       std::vector<ssize_t> strides({ itemsize });
-      std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
+      ContentPtr out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, itemsize, format);
 
       if (mask) {
         Index8 mask(outlength);
@@ -1499,7 +1499,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::localindex(int64_t axis, int64_t depth) const {
+  const ContentPtr NumpyArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
       return localindex_axis0();
@@ -1512,7 +1512,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const ContentPtr NumpyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }
@@ -1531,27 +1531,27 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr NumpyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: NumpyArray::getitem_next(at) (without 'length', 'stride', and 'first')");
   }
 
-  ContentPtr NumpyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr NumpyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: NumpyArray::getitem_next(range) (without 'length', 'stride', and 'first')");
   }
 
-  ContentPtr NumpyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr NumpyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: NumpyArray::getitem_next(array) (without 'length', 'stride', and 'first')");
   }
 
-  ContentPtr NumpyArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr NumpyArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: NumpyArray::getitem_next(field) (without 'length', 'stride', and 'first')");
   }
 
-  ContentPtr NumpyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr NumpyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: NumpyArray::getitem_next(fields) (without 'length', 'stride', and 'first')");
   }
 
-  ContentPtr NumpyArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr NumpyArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     if (shape_.size() != 1) {
       throw std::runtime_error("undefined operation: NumpyArray::getitem_next(jagged) with ndim != 1");
     }
@@ -1563,7 +1563,7 @@ namespace awkward {
     throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a jagged array because it is one-dimensional"));
   }
 
-  ContentPtr NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+  const ContentPtr NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     if (ndim() == 1) {
       throw std::invalid_argument("too many jagged slice dimensions for array");
     }
@@ -1572,7 +1572,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+  const ContentPtr NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     if (ndim() == 1) {
       throw std::invalid_argument("too many jagged slice dimensions for array");
     }
@@ -1581,7 +1581,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+  const ContentPtr NumpyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     if (ndim() == 1) {
       throw std::invalid_argument("too many jagged slice dimensions for array");
     }

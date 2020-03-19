@@ -29,27 +29,27 @@ namespace awkward {
     return builder_.get()->snapshot().get()->type(typestrs);
   }
 
-  ContentPtr ArrayBuilder::snapshot() const {
+  const ContentPtr ArrayBuilder::snapshot() const {
     return builder_.get()->snapshot();
   }
 
-  ContentPtr ArrayBuilder::getitem_at(int64_t at) const {
+  const ContentPtr ArrayBuilder::getitem_at(int64_t at) const {
     return snapshot().get()->getitem_at(at);
   }
 
-  ContentPtr ArrayBuilder::getitem_range(int64_t start, int64_t stop) const {
+  const ContentPtr ArrayBuilder::getitem_range(int64_t start, int64_t stop) const {
     return snapshot().get()->getitem_range(start, stop);
   }
 
-  ContentPtr ArrayBuilder::getitem_field(const std::string& key) const {
+  const ContentPtr ArrayBuilder::getitem_field(const std::string& key) const {
     return snapshot().get()->getitem_field(key);
   }
 
-  ContentPtr ArrayBuilder::getitem_fields(const std::vector<std::string>& keys) const {
+  const ContentPtr ArrayBuilder::getitem_fields(const std::vector<std::string>& keys) const {
     return snapshot().get()->getitem_fields(keys);
   }
 
-  ContentPtr ArrayBuilder::getitem(const Slice& where) const {
+  const ContentPtr ArrayBuilder::getitem(const Slice& where) const {
     return snapshot().get()->getitem(where);
   }
 
@@ -149,7 +149,7 @@ namespace awkward {
     maybeupdate(builder_.get()->endrecord());
   }
 
-  void ArrayBuilder::append(ContentPtr& array, int64_t at) {
+  void ArrayBuilder::append(const ContentPtr& array, int64_t at) {
     int64_t length = array.get()->length();
     int64_t regular_at = at;
     if (regular_at < 0) {
@@ -161,11 +161,11 @@ namespace awkward {
     return append_nowrap(array, regular_at);
   }
 
-  void ArrayBuilder::append_nowrap(ContentPtr& array, int64_t at) {
+  void ArrayBuilder::append_nowrap(const ContentPtr& array, int64_t at) {
     maybeupdate(builder_.get()->append(array, at));
   }
 
-  void ArrayBuilder::extend(ContentPtr& array) {
+  void ArrayBuilder::extend(const ContentPtr& array) {
     std::shared_ptr<Builder> tmp = builder_;
     for (int64_t i = 0;  i < array.get()->length();  i++) {
       tmp = builder_.get()->append(array, i);

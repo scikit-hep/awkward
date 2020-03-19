@@ -42,7 +42,7 @@ namespace awkward {
     nullcount_ = 0;
   }
 
-  ContentPtr UnknownBuilder::snapshot() const {
+  const ContentPtr UnknownBuilder::snapshot() const {
     if (nullcount_ == 0) {
       return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
     }
@@ -149,7 +149,7 @@ namespace awkward {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
-  const std::shared_ptr<Builder> UnknownBuilder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> UnknownBuilder::append(const ContentPtr& array, int64_t at) {
     std::shared_ptr<Builder> out = IndexedGenericBuilder::fromnulls(options_, nullcount_, array);
     out.get()->append(array, at);
     return out;

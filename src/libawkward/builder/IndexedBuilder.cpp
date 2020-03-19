@@ -122,7 +122,7 @@ namespace awkward {
   /////////////////////////////////////////////////////////////////////////////////////////////
   template class IndexedBuilder<Content>;
 
-  const std::shared_ptr<Builder> IndexedGenericBuilder::fromnulls(const ArrayBuilderOptions& options, int64_t nullcount, ContentPtr& array) {
+  const std::shared_ptr<Builder> IndexedGenericBuilder::fromnulls(const ArrayBuilderOptions& options, int64_t nullcount, const ContentPtr& array) {
     GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::full(options, -1, nullcount);
     std::shared_ptr<Builder> out;
     if (std::shared_ptr<IndexedArray32> ptr = std::dynamic_pointer_cast<IndexedArray32>(array)) {
@@ -147,14 +147,14 @@ namespace awkward {
     return out;
   }
 
-  IndexedGenericBuilder::IndexedGenericBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, ContentPtr& array, bool hasnull)
+  IndexedGenericBuilder::IndexedGenericBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, const ContentPtr& array, bool hasnull)
       : IndexedBuilder<Content>(options, index, array, hasnull) { }
 
   const std::string IndexedGenericBuilder::classname() const {
     return "IndexedGenericBuilder";
   };
 
-  ContentPtr IndexedGenericBuilder::snapshot() const {
+  const ContentPtr IndexedGenericBuilder::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     if (hasnull_) {
       return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, array_);
@@ -164,7 +164,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> IndexedGenericBuilder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> IndexedGenericBuilder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append(at);
     }
@@ -186,7 +186,7 @@ namespace awkward {
     return "IndexedI32Builder";
   };
 
-  ContentPtr IndexedI32Builder::snapshot() const {
+  const ContentPtr IndexedI32Builder::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     if (hasnull_) {
       return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
@@ -196,7 +196,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> IndexedI32Builder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> IndexedI32Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append((int64_t)array_.get()->index_at_nowrap(at));
     }
@@ -218,7 +218,7 @@ namespace awkward {
     return "IndexedIU32Builder";
   };
 
-  ContentPtr IndexedIU32Builder::snapshot() const {
+  const ContentPtr IndexedIU32Builder::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     if (hasnull_) {
       return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
@@ -228,7 +228,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> IndexedIU32Builder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> IndexedIU32Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append((int64_t)array_.get()->index_at_nowrap(at));
     }
@@ -250,7 +250,7 @@ namespace awkward {
     return "IndexedI64Builder";
   };
 
-  ContentPtr IndexedI64Builder::snapshot() const {
+  const ContentPtr IndexedI64Builder::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     if (hasnull_) {
       return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
@@ -260,7 +260,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> IndexedI64Builder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> IndexedI64Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append(array_.get()->index_at_nowrap(at));
     }
@@ -282,12 +282,12 @@ namespace awkward {
     return "IndexedIO32Builder";
   };
 
-  ContentPtr IndexedIO32Builder::snapshot() const {
+  const ContentPtr IndexedIO32Builder::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
   }
 
-  const std::shared_ptr<Builder> IndexedIO32Builder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> IndexedIO32Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append((int64_t)array_.get()->index_at_nowrap(at));
     }
@@ -309,12 +309,12 @@ namespace awkward {
     return "IndexedIO64Builder";
   };
 
-  ContentPtr IndexedIO64Builder::snapshot() const {
+  const ContentPtr IndexedIO64Builder::snapshot() const {
     Index64 index(index_.ptr(), 0, index_.length());
     return std::make_shared<IndexedOptionArray64>(Identities::none(), array_.get()->content().get()->parameters(), index, array_.get()->content());
   }
 
-  const std::shared_ptr<Builder> IndexedIO64Builder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> IndexedIO64Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
       index_.append(array_.get()->index_at_nowrap(at));
     }

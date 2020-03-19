@@ -62,7 +62,7 @@ namespace awkward {
     throw std::invalid_argument("type contains no Records");
   }
 
-  const std::shared_ptr<Content> UnknownType::empty() const {
+  const ContentPtr UnknownType::empty() const {
     return std::make_shared<EmptyArray>(Identities::none(), parameters_);
   }
 }

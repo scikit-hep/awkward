@@ -25,7 +25,7 @@
 #include "awkward/array/ByteMaskedArray.h"
 
 namespace awkward {
-  ByteMaskedArray::ByteMaskedArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const Index8& mask, ContentPtr& content, bool validwhen)
+  ByteMaskedArray::ByteMaskedArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const Index8& mask, const ContentPtr& content, bool validwhen)
       : Content(identities, parameters)
       , mask_(mask)
       , content_(content)
@@ -39,7 +39,7 @@ namespace awkward {
     return mask_;
   }
 
-  ContentPtr ByteMaskedArray::content() const {
+  const ContentPtr ByteMaskedArray::content() const {
     return content_;
   }
 
@@ -47,7 +47,7 @@ namespace awkward {
     return validwhen_;
   }
 
-  ContentPtr ByteMaskedArray::project() const {
+  const ContentPtr ByteMaskedArray::project() const {
     int64_t numnull;
     struct Error err1 = awkward_bytemaskedarray_numnull(
       &numnull,
@@ -69,7 +69,7 @@ namespace awkward {
     return content_.get()->carry(nextcarry);
   }
 
-  ContentPtr ByteMaskedArray::project(const Index8& mask) const {
+  const ContentPtr ByteMaskedArray::project(const Index8& mask) const {
     if (length() != mask.length()) {
       throw std::invalid_argument(std::string("mask length (") + std::to_string(mask.length()) + std::string(") is not equal to ") + classname() + std::string(" length (") + std::to_string(length()) + std::string(")"));
     }
@@ -106,7 +106,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr ByteMaskedArray::simplify_optiontype() const {
+  const ContentPtr ByteMaskedArray::simplify_optiontype() const {
     if (dynamic_cast<IndexedArray32*>(content_.get())        ||
         dynamic_cast<IndexedArrayU32*>(content_.get())       ||
         dynamic_cast<IndexedArray64*>(content_.get())        ||
@@ -115,7 +115,7 @@ namespace awkward {
         dynamic_cast<ByteMaskedArray*>(content_.get())       ||
         dynamic_cast<BitMaskedArray*>(content_.get())        ||
         dynamic_cast<UnmaskedArray*>(content_.get())) {
-      std::shared_ptr<Content> step1 = toIndexedOptionArray64();
+      ContentPtr step1 = toIndexedOptionArray64();
       IndexedOptionArray64* step2 = dynamic_cast<IndexedOptionArray64*>(step1.get());
       return step2->simplify_optiontype();
     }
@@ -124,7 +124,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr ByteMaskedArray::toIndexedOptionArray64() const {
+  const ContentPtr ByteMaskedArray::toIndexedOptionArray64() const {
     Index64 index(length());
     struct Error err = awkward_bytemaskedarray_toindexedarray_64(
       index.ptr().get(),
@@ -237,13 +237,13 @@ namespace awkward {
     return mask_.length();
   }
 
-  ContentPtr ByteMaskedArray::shallow_copy() const {
+  const ContentPtr ByteMaskedArray::shallow_copy() const {
     return std::make_shared<ByteMaskedArray>(identities_, parameters_, mask_, content_, validwhen_);
   }
 
-  ContentPtr ByteMaskedArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+  const ContentPtr ByteMaskedArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     Index8 mask = copyindexes ? mask_.deep_copy() : mask_;
-    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+    ContentPtr content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
     std::shared_ptr<Identities> identities = identities_;
     if (copyidentities  &&  identities_.get() != nullptr) {
       identities = identities_.get()->deep_copy();
@@ -257,11 +257,11 @@ namespace awkward {
     }
   }
 
-  ContentPtr ByteMaskedArray::getitem_nothing() const {
+  const ContentPtr ByteMaskedArray::getitem_nothing() const {
     return content_.get()->getitem_range_nowrap(0, 0);
   }
 
-  ContentPtr ByteMaskedArray::getitem_at(int64_t at) const {
+  const ContentPtr ByteMaskedArray::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     if (regular_at < 0) {
       regular_at += length();
@@ -272,7 +272,7 @@ namespace awkward {
     return getitem_at_nowrap(regular_at);
   }
 
-  ContentPtr ByteMaskedArray::getitem_at_nowrap(int64_t at) const {
+  const ContentPtr ByteMaskedArray::getitem_at_nowrap(int64_t at) const {
     bool msk = (mask_.getitem_at_nowrap(at) != 0);
     if (msk == validwhen_) {
       return content_.get()->getitem_at_nowrap(at);
@@ -282,7 +282,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr ByteMaskedArray::getitem_range(int64_t start, int64_t stop) const {
+  const ContentPtr ByteMaskedArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
@@ -292,7 +292,7 @@ namespace awkward {
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
-  ContentPtr ByteMaskedArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  const ContentPtr ByteMaskedArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     std::shared_ptr<Identities> identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_range_nowrap(start, stop);
@@ -300,15 +300,15 @@ namespace awkward {
     return std::make_shared<ByteMaskedArray>(identities, parameters_, mask_.getitem_range_nowrap(start, stop), content_.get()->getitem_range_nowrap(start, stop), validwhen_);
   }
 
-  ContentPtr ByteMaskedArray::getitem_field(const std::string& key) const {
+  const ContentPtr ByteMaskedArray::getitem_field(const std::string& key) const {
     return std::make_shared<ByteMaskedArray>(identities_, util::Parameters(), mask_, content_.get()->getitem_field(key), validwhen_);
   }
 
-  ContentPtr ByteMaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
+  const ContentPtr ByteMaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
     return std::make_shared<ByteMaskedArray>(identities_, util::Parameters(), mask_, content_.get()->getitem_fields(keys), validwhen_);
   }
 
-  ContentPtr ByteMaskedArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr ByteMaskedArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
@@ -318,9 +318,9 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry);
 
-      std::shared_ptr<Content> out = next.get()->getitem_next(head, tail, advanced);
+      ContentPtr out = next.get()->getitem_next(head, tail, advanced);
       IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
       return out2.simplify_optiontype();
     }
@@ -344,7 +344,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr ByteMaskedArray::carry(const Index64& carry) const {
+  const ContentPtr ByteMaskedArray::carry(const Index64& carry) const {
     Index8 nextmask(carry.length());
     struct Error err = awkward_bytemaskedarray_getitem_carry_64(
       nextmask.ptr().get(),
@@ -411,11 +411,11 @@ namespace awkward {
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
-  ContentPtr ByteMaskedArray::shallow_simplify() const {
+  const ContentPtr ByteMaskedArray::shallow_simplify() const {
     return simplify_optiontype();
   }
 
-  ContentPtr ByteMaskedArray::num(int64_t axis, int64_t depth) const {
+  const ContentPtr ByteMaskedArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
@@ -428,15 +428,15 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry);
 
-      std::shared_ptr<Content> out = next.get()->num(axis, depth);
+      ContentPtr out = next.get()->num(axis, depth);
       IndexedOptionArray64 out2(Identities::none(), util::Parameters(), outindex, out);
       return out2.simplify_optiontype();
     }
   }
 
-  const std::pair<Index64, std::shared_ptr<Content>> ByteMaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+  const std::pair<Index64, ContentPtr> ByteMaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       throw std::invalid_argument("axis=0 not allowed for flatten");
@@ -447,14 +447,14 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
+      ContentPtr next = content_.get()->carry(nextcarry);
 
-      std::pair<Index64, std::shared_ptr<Content>> offsets_flattened = next.get()->offsets_and_flattened(axis, depth);
+      std::pair<Index64, ContentPtr> offsets_flattened = next.get()->offsets_and_flattened(axis, depth);
       Index64 offsets = offsets_flattened.first;
-      std::shared_ptr<Content> flattened = offsets_flattened.second;
+      ContentPtr flattened = offsets_flattened.second;
 
       if (offsets.length() == 0) {
-        return std::pair<Index64, std::shared_ptr<Content>>(offsets, std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, flattened));
+        return std::pair<Index64, ContentPtr>(offsets, std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), outindex, flattened));
       }
       else {
         Index64 outoffsets(offsets.length() + numnull);
@@ -467,12 +467,12 @@ namespace awkward {
           offsets.offset(),
           offsets.length());
         util::handle_error(err, classname(), identities_.get());
-        return std::pair<Index64, std::shared_ptr<Content>>(outoffsets, flattened);
+        return std::pair<Index64, ContentPtr>(outoffsets, flattened);
       }
     }
   }
 
-  bool ByteMaskedArray::mergeable(ContentPtr& other, bool mergebool) const {
+  bool ByteMaskedArray::mergeable(const ContentPtr& other, bool mergebool) const {
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -513,13 +513,13 @@ namespace awkward {
     }
   }
 
-  ContentPtr ByteMaskedArray::reverse_merge(ContentPtr& other) const {
-    std::shared_ptr<Content> indexedoptionarray = toIndexedOptionArray64();
+  const ContentPtr ByteMaskedArray::reverse_merge(const ContentPtr& other) const {
+    ContentPtr indexedoptionarray = toIndexedOptionArray64();
     IndexedOptionArray64* raw = dynamic_cast<IndexedOptionArray64*>(indexedoptionarray.get());
     return raw->reverse_merge(other);
   }
 
-  ContentPtr ByteMaskedArray::merge(ContentPtr& other) const {
+  const ContentPtr ByteMaskedArray::merge(const ContentPtr& other) const {
     return toIndexedOptionArray64().get()->merge(other);
   }
 
@@ -527,11 +527,11 @@ namespace awkward {
     return toIndexedOptionArray64().get()->asslice();
   }
 
-  ContentPtr ByteMaskedArray::fillna(ContentPtr& value) const {
+  const ContentPtr ByteMaskedArray::fillna(const ContentPtr& value) const {
     return toIndexedOptionArray64().get()->fillna(value);
   }
 
-  ContentPtr ByteMaskedArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
+  const ContentPtr ByteMaskedArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return rpad_axis0(target, false);
@@ -545,7 +545,7 @@ namespace awkward {
         mask.length());
       util::handle_error(err, classname(), identities_.get());
 
-      std::shared_ptr<Content> next = project().get()->rpad(target, toaxis, depth);
+      ContentPtr next = project().get()->rpad(target, toaxis, depth);
       return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify_optiontype();
     }
     else {
@@ -553,7 +553,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr ByteMaskedArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+  const ContentPtr ByteMaskedArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return rpad_axis0(target, true);
@@ -567,7 +567,7 @@ namespace awkward {
         mask.length());
       util::handle_error(err, classname(), identities_.get());
 
-      std::shared_ptr<Content> next = project().get()->rpad_and_clip(target, toaxis, depth);
+      ContentPtr next = project().get()->rpad_and_clip(target, toaxis, depth);
       return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, next).get()->simplify_optiontype();
     }
     else {
@@ -575,7 +575,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr ByteMaskedArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const ContentPtr ByteMaskedArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     int64_t numnull;
     struct Error err1 = awkward_bytemaskedarray_numnull(
       &numnull,
@@ -600,8 +600,8 @@ namespace awkward {
       validwhen_);
     util::handle_error(err2, classname(), identities_.get());
 
-    std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-    std::shared_ptr<Content> out = next.get()->reduce_next(reducer, negaxis, starts, nextparents, outlength, mask, keepdims);
+    ContentPtr next = content_.get()->carry(nextcarry);
+    ContentPtr out = next.get()->reduce_next(reducer, negaxis, starts, nextparents, outlength, mask, keepdims);
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -632,7 +632,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr ByteMaskedArray::localindex(int64_t axis, int64_t depth) const {
+  const ContentPtr ByteMaskedArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return localindex_axis0();
@@ -643,14 +643,14 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-      std::shared_ptr<Content> out = next.get()->localindex(axis, depth);
+      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr out = next.get()->localindex(axis, depth);
       IndexedOptionArray64 out2(Identities::none(), util::Parameters(), outindex, out);
       return out2.simplify_optiontype();
     }
   }
 
-  ContentPtr ByteMaskedArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const ContentPtr ByteMaskedArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }
@@ -664,50 +664,50 @@ namespace awkward {
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-      std::shared_ptr<Content> out = next.get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
+      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr out = next.get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
       IndexedOptionArray64 out2(Identities::none(), util::Parameters(), outindex, out);
       return out2.simplify_optiontype();
     }
   }
 
-  ContentPtr ByteMaskedArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr ByteMaskedArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: ByteMaskedArray::getitem_next(at)");
   }
 
-  ContentPtr ByteMaskedArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr ByteMaskedArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: ByteMaskedArray::getitem_next(range)");
   }
 
-  ContentPtr ByteMaskedArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr ByteMaskedArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: ByteMaskedArray::getitem_next(array)");
   }
 
-  ContentPtr ByteMaskedArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr ByteMaskedArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: ByteMaskedArray::getitem_next(jagged)");
   }
 
-  ContentPtr ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+  const ContentPtr ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent, tail);
   }
 
-  ContentPtr ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+  const ContentPtr ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent, tail);
   }
 
-  ContentPtr ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+  const ContentPtr ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename S>
-  ContentPtr ByteMaskedArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
+  const ContentPtr ByteMaskedArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
       int64_t numnull;
       std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
-      std::shared_ptr<Content> next = content_.get()->carry(nextcarry);
-      std::shared_ptr<Content> out = next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
+      ContentPtr next = content_.get()->carry(nextcarry);
+      ContentPtr out = next.get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
       IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
       return out2.simplify_optiontype();
   }

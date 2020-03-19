@@ -13,8 +13,8 @@
 namespace awkward {
   class Content;
 
-  EXPORT_SYMBOL ContentPtr FromJsonString(const char* source, const ArrayBuilderOptions& options);
-  EXPORT_SYMBOL ContentPtr FromJsonFile(FILE* source, const ArrayBuilderOptions& options, int64_t buffersize);
+  EXPORT_SYMBOL const ContentPtr FromJsonString(const char* source, const ArrayBuilderOptions& options);
+  EXPORT_SYMBOL const ContentPtr FromJsonFile(FILE* source, const ArrayBuilderOptions& options, int64_t buffersize);
 
   class EXPORT_SYMBOL ToJson {
   public:

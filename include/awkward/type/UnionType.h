@@ -20,7 +20,7 @@ namespace awkward {
     const std::string key(int64_t fieldindex) const override;
     bool haskey(const std::string& key) const override;
     const std::vector<std::string> keys() const override;
-    ContentPtr empty() const override;
+    const ContentPtr empty() const override;
 
     int64_t numtypes() const;
     const std::vector<std::shared_ptr<Type>> types() const;

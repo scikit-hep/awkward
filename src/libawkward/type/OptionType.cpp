@@ -74,8 +74,8 @@ namespace awkward {
     return type_.get()->keys();
   }
 
-  ContentPtr OptionType::empty() const {
-    std::shared_ptr<Content> content = type_.get()->empty();
+  const ContentPtr OptionType::empty() const {
+    ContentPtr content = type_.get()->empty();
     Index64 index(0);
     return std::make_shared<IndexedOptionArray64>(Identities::none(), parameters_, index, content);
   }

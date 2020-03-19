@@ -55,7 +55,7 @@ namespace awkward {
     return type_.get()->keys();
   }
 
-  ContentPtr ArrayType::empty() const {
+  const ContentPtr ArrayType::empty() const {
     if (length_ != 0) {
       throw std::invalid_argument(std::string("ArrayType with length ") + std::to_string(length_) + std::string(" does not describe an empty array"));
     }

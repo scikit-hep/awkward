@@ -44,7 +44,7 @@ namespace awkward {
     buffer_.clear();
   }
 
-  ContentPtr Float64Builder::snapshot() const {
+  const ContentPtr Float64Builder::snapshot() const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(double) };
     return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), buffer_.ptr(), shape, strides, 0, sizeof(double), "d");
@@ -120,7 +120,7 @@ namespace awkward {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
-  const std::shared_ptr<Builder> Float64Builder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> Float64Builder::append(const ContentPtr& array, int64_t at) {
     std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
     out.get()->append(array, at);
     return out;

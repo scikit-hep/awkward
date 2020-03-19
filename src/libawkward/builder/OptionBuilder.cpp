@@ -42,7 +42,7 @@ namespace awkward {
     content_.get()->clear();
   }
 
-  ContentPtr OptionBuilder::snapshot() const {
+  const ContentPtr OptionBuilder::snapshot() const {
     Index64 index(offsets_.ptr(), 0, offsets_.length());
     return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, content_.get()->snapshot());
   }
@@ -201,7 +201,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> OptionBuilder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> OptionBuilder::append(const ContentPtr& array, int64_t at) {
     if (!content_.get()->active()) {
       int64_t length = content_.get()->length();
       maybeupdate(content_.get()->append(array, at));

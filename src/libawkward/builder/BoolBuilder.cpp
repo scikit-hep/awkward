@@ -31,7 +31,7 @@ namespace awkward {
     buffer_.clear();
   }
 
-  ContentPtr BoolBuilder::snapshot() const {
+  const ContentPtr BoolBuilder::snapshot() const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(bool) };
     return std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), buffer_.ptr(), shape, strides, 0, sizeof(bool), "?");
@@ -108,7 +108,7 @@ namespace awkward {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
-  const std::shared_ptr<Builder> BoolBuilder::append(ContentPtr& array, int64_t at) {
+  const std::shared_ptr<Builder> BoolBuilder::append(const ContentPtr& array, int64_t at) {
     std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
     out.get()->append(array, at);
     return out;

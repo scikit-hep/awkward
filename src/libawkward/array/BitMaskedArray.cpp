@@ -20,7 +20,7 @@
 #include "awkward/array/BitMaskedArray.h"
 
 namespace awkward {
-  BitMaskedArray::BitMaskedArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexU8& mask, ContentPtr& content, bool validwhen, int64_t length, bool lsb_order)
+  BitMaskedArray::BitMaskedArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexU8& mask, const ContentPtr& content, bool validwhen, int64_t length, bool lsb_order)
       : Content(identities, parameters)
       , mask_(mask)
       , content_(content)
@@ -40,7 +40,7 @@ namespace awkward {
     return mask_;
   }
 
-  ContentPtr BitMaskedArray::content() const {
+  const ContentPtr BitMaskedArray::content() const {
     return content_;
   }
 
@@ -52,11 +52,11 @@ namespace awkward {
     return lsb_order_;
   }
 
-  ContentPtr BitMaskedArray::project() const {
+  const ContentPtr BitMaskedArray::project() const {
     return toByteMaskedArray().get()->project();
   }
 
-  ContentPtr BitMaskedArray::project(const Index8& mask) const {
+  const ContentPtr BitMaskedArray::project(const Index8& mask) const {
     return toByteMaskedArray().get()->project(mask);
   }
 
@@ -73,7 +73,7 @@ namespace awkward {
     return bytemask.getitem_range_nowrap(0, length_);
   }
 
-  ContentPtr BitMaskedArray::simplify_optiontype() const {
+  const ContentPtr BitMaskedArray::simplify_optiontype() const {
     if (dynamic_cast<IndexedArray32*>(content_.get())        ||
         dynamic_cast<IndexedArrayU32*>(content_.get())       ||
         dynamic_cast<IndexedArray64*>(content_.get())        ||
@@ -82,7 +82,7 @@ namespace awkward {
         dynamic_cast<ByteMaskedArray*>(content_.get())       ||
         dynamic_cast<BitMaskedArray*>(content_.get())        ||
         dynamic_cast<UnmaskedArray*>(content_.get())) {
-      std::shared_ptr<Content> step1 = toIndexedOptionArray64();
+      ContentPtr step1 = toIndexedOptionArray64();
       IndexedOptionArray64* step2 = dynamic_cast<IndexedOptionArray64*>(step1.get());
       return step2->simplify_optiontype();
     }
@@ -218,13 +218,13 @@ namespace awkward {
     return length_;
   }
 
-  ContentPtr BitMaskedArray::shallow_copy() const {
+  const ContentPtr BitMaskedArray::shallow_copy() const {
     return std::make_shared<BitMaskedArray>(identities_, parameters_, mask_, content_, validwhen_, length_, lsb_order_);
   }
 
-  ContentPtr BitMaskedArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+  const ContentPtr BitMaskedArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     IndexU8 mask = copyindexes ? mask_.deep_copy() : mask_;
-    std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
+    ContentPtr content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
     std::shared_ptr<Identities> identities = identities_;
     if (copyidentities  &&  identities_.get() != nullptr) {
       identities = identities_.get()->deep_copy();
@@ -238,11 +238,11 @@ namespace awkward {
     }
   }
 
-  ContentPtr BitMaskedArray::getitem_nothing() const {
+  const ContentPtr BitMaskedArray::getitem_nothing() const {
     return content_.get()->getitem_range_nowrap(0, 0);
   }
 
-  ContentPtr BitMaskedArray::getitem_at(int64_t at) const {
+  const ContentPtr BitMaskedArray::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     if (regular_at < 0) {
       regular_at += length();
@@ -253,7 +253,7 @@ namespace awkward {
     return getitem_at_nowrap(regular_at);
   }
 
-  ContentPtr BitMaskedArray::getitem_at_nowrap(int64_t at) const {
+  const ContentPtr BitMaskedArray::getitem_at_nowrap(int64_t at) const {
     int64_t bitat = at / 8;
     int64_t shift = at % 8;
     uint8_t byte = mask_.getitem_at_nowrap(bitat);
@@ -266,7 +266,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr BitMaskedArray::getitem_range(int64_t start, int64_t stop) const {
+  const ContentPtr BitMaskedArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length());
@@ -276,7 +276,7 @@ namespace awkward {
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
-  ContentPtr BitMaskedArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  const ContentPtr BitMaskedArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     int64_t bitstart = start / 8;
     int64_t remainder = start % 8;
     if (remainder == 0) {
@@ -295,19 +295,19 @@ namespace awkward {
     }
   }
 
-  ContentPtr BitMaskedArray::getitem_field(const std::string& key) const {
+  const ContentPtr BitMaskedArray::getitem_field(const std::string& key) const {
     return std::make_shared<BitMaskedArray>(identities_, util::Parameters(), mask_, content_.get()->getitem_field(key), validwhen_, length_, lsb_order_);
   }
 
-  ContentPtr BitMaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
+  const ContentPtr BitMaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
     return std::make_shared<BitMaskedArray>(identities_, util::Parameters(), mask_, content_.get()->getitem_fields(keys), validwhen_, length_, lsb_order_);
   }
 
-  ContentPtr BitMaskedArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr BitMaskedArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
     return toByteMaskedArray().get()->getitem_next(head, tail, advanced);
   }
 
-  ContentPtr BitMaskedArray::carry(const Index64& carry) const {
+  const ContentPtr BitMaskedArray::carry(const Index64& carry) const {
     return toByteMaskedArray().get()->carry(carry);
   }
 
@@ -361,19 +361,19 @@ namespace awkward {
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
-  ContentPtr BitMaskedArray::shallow_simplify() const {
+  const ContentPtr BitMaskedArray::shallow_simplify() const {
     return simplify_optiontype();
   }
 
-  ContentPtr BitMaskedArray::num(int64_t axis, int64_t depth) const {
+  const ContentPtr BitMaskedArray::num(int64_t axis, int64_t depth) const {
     return toByteMaskedArray().get()->num(axis, depth);
   }
 
-  const std::pair<Index64, std::shared_ptr<Content>> BitMaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+  const std::pair<Index64, ContentPtr> BitMaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     return toByteMaskedArray().get()->offsets_and_flattened(axis, depth);
   }
 
-  bool BitMaskedArray::mergeable(ContentPtr& other, bool mergebool) const {
+  bool BitMaskedArray::mergeable(const ContentPtr& other, bool mergebool) const {
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -414,13 +414,13 @@ namespace awkward {
     }
   }
 
-  ContentPtr BitMaskedArray::reverse_merge(ContentPtr& other) const {
-    std::shared_ptr<Content> indexedoptionarray = toIndexedOptionArray64();
+  const ContentPtr BitMaskedArray::reverse_merge(const ContentPtr& other) const {
+    ContentPtr indexedoptionarray = toIndexedOptionArray64();
     IndexedOptionArray64* raw = dynamic_cast<IndexedOptionArray64*>(indexedoptionarray.get());
     return raw->reverse_merge(other);
   }
 
-  ContentPtr BitMaskedArray::merge(ContentPtr& other) const {
+  const ContentPtr BitMaskedArray::merge(const ContentPtr& other) const {
     return toIndexedOptionArray64().get()->merge(other);
   }
 
@@ -428,55 +428,55 @@ namespace awkward {
     return toIndexedOptionArray64().get()->asslice();
   }
 
-  ContentPtr BitMaskedArray::fillna(ContentPtr& value) const {
+  const ContentPtr BitMaskedArray::fillna(const ContentPtr& value) const {
     return toIndexedOptionArray64().get()->fillna(value);
   }
 
-  ContentPtr BitMaskedArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
+  const ContentPtr BitMaskedArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     return toByteMaskedArray().get()->rpad(target, axis, depth);
   }
 
-  ContentPtr BitMaskedArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+  const ContentPtr BitMaskedArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
     return toByteMaskedArray().get()->rpad_and_clip(target, axis, depth);
   }
 
-  ContentPtr BitMaskedArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  const ContentPtr BitMaskedArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     return toByteMaskedArray().get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
   }
 
-  ContentPtr BitMaskedArray::localindex(int64_t axis, int64_t depth) const {
+  const ContentPtr BitMaskedArray::localindex(int64_t axis, int64_t depth) const {
     return toByteMaskedArray().get()->localindex(axis, depth);
   }
 
-  ContentPtr BitMaskedArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  const ContentPtr BitMaskedArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     return toByteMaskedArray().get()->choose(n, diagonal, recordlookup, parameters, axis, depth);
   }
 
-  ContentPtr BitMaskedArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr BitMaskedArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: BitMaskedArray::getitem_next(at)");
   }
 
-  ContentPtr BitMaskedArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr BitMaskedArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: BitMaskedArray::getitem_next(range)");
   }
 
-  ContentPtr BitMaskedArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr BitMaskedArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: BitMaskedArray::getitem_next(array)");
   }
 
-  ContentPtr BitMaskedArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+  const ContentPtr BitMaskedArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: BitMaskedArray::getitem_next(jagged)");
   }
 
-  ContentPtr BitMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+  const ContentPtr BitMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     return toByteMaskedArray().get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
-  ContentPtr BitMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+  const ContentPtr BitMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     return toByteMaskedArray().get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 
-  ContentPtr BitMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+  const ContentPtr BitMaskedArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     return toByteMaskedArray().get()->getitem_next_jagged(slicestarts, slicestops, slicecontent, tail);
   }
 

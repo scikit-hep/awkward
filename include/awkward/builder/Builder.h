@@ -18,7 +18,7 @@ namespace awkward {
     virtual const std::string classname() const = 0;
     virtual int64_t length() const = 0;
     virtual void clear() = 0;
-    virtual ContentPtr snapshot() const = 0;
+    virtual const ContentPtr snapshot() const = 0;
 
     virtual bool active() const = 0;
     virtual const std::shared_ptr<Builder> null() = 0;
@@ -34,7 +34,7 @@ namespace awkward {
     virtual const std::shared_ptr<Builder> beginrecord(const char* name, bool check) = 0;
     virtual const std::shared_ptr<Builder> field(const char* key, bool check) = 0;
     virtual const std::shared_ptr<Builder> endrecord() = 0;
-    virtual const std::shared_ptr<Builder> append(ContentPtr& array, int64_t at) = 0;
+    virtual const std::shared_ptr<Builder> append(const ContentPtr& array, int64_t at) = 0;
 
     void setthat(const std::shared_ptr<Builder>& that);
 

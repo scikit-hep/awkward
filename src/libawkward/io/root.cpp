@@ -34,7 +34,7 @@ namespace awkward {
     }
   }
 
-  ContentPtr FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const ArrayBuilderOptions& options) {
+  const ContentPtr FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const ArrayBuilderOptions& options) {
     if (depth <= 0) {
       throw std::runtime_error("FromROOT_nestedvector: depth <= 0");
     }
@@ -70,7 +70,7 @@ namespace awkward {
 
     std::vector<ssize_t> shape = { (ssize_t)bytepos_tocopy.length() };
     std::vector<ssize_t> strides = { (ssize_t)itemsize };
-    std::shared_ptr<Content> out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, (ssize_t)itemsize, format);
+    ContentPtr out = std::make_shared<NumpyArray>(Identities::none(), util::Parameters(), ptr, shape, strides, 0, (ssize_t)itemsize, format);
 
     for (int64_t i = depth - 1;  i >= 0;  i--) {
       Index64 index(levels[(size_t)i].ptr(), 0, levels[(size_t)i].length());

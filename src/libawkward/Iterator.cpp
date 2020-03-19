@@ -5,13 +5,13 @@
 #include "awkward/Iterator.h"
 
 namespace awkward {
-  Iterator::Iterator(ContentPtr& content)
+  Iterator::Iterator(const ContentPtr& content)
     : content_(content)
     , at_(0) {
     content.get()->check_for_iteration();
   }
 
-  ContentPtr Iterator::content() const {
+  const ContentPtr Iterator::content() const {
     return content_;
   }
 
@@ -23,7 +23,7 @@ namespace awkward {
     return at_ >= content_.get()->length();
   }
 
-  ContentPtr Iterator::next() {
+  const ContentPtr Iterator::next() {
     return content_.get()->getitem_at_nowrap(at_++);
   }
 
