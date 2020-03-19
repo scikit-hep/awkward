@@ -11,9 +11,8 @@ dependent-project/cmake_pybind11
 
 ############################################################# JupyterBook and Doxygen
 
-docs-jupyterbook/.sass-cache
-docs-jupyterbook/_build
-docs-jupyterbook/_site
+docs/.sass-cache
+docs/_site
 docs-mkdocs/docs
 
 ############################################################# IDEs
@@ -78,9 +77,6 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
-
-# Sphinx documentation
-docs/_build/
 
 # Jupyter Notebook
 .ipynb_checkpoints

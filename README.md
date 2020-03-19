@@ -1,4 +1,4 @@
-<img src="docs-img/logo-300px.png">
+<img src="docs/content/images/logo/logo-300px.png">
 
 I'm in the process of writing documentation; the "first page" will go here.
 
@@ -79,6 +79,6 @@ Development of Awkward 1.0, to replace [scikit-hep/awkward-array](https://github
    * My [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
    * My [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
    * My [CHEP 2019 proceedings](https://arxiv.org/abs/2001.06307) (to be published in _EPJ Web of Conferences_).
-   * [Demo for Coffea developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs/demos/2019-12-20-coffea-demo.ipynb) on December 20, 2019.
-   * [Demo for Numba developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs/demos/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
+   * [Demo for Coffea developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs-demo-notebooks/2019-12-20-coffea-demo.ipynb) on December 20, 2019.
+   * [Demo for Numba developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs-demo-notebooks/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
 
