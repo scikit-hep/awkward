@@ -1,5 +1,9 @@
 version: 2
 
-mkdocs:
-  configuration: docs-mkdocs/mkdocs.yml
-  fail_on_warning: false
+sphinx:
+  configuration: docs-sphinx/conf.py
+
+python:
+  version: 3.7
+  install:
+    - requirements: docs-sphinx/requirements.txt
