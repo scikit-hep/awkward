@@ -36,7 +36,7 @@ namespace awkward {
     buffer_.clear();
   }
 
-  const std::shared_ptr<Content> Int64Builder::snapshot() const {
+  ContentPtr Int64Builder::snapshot() const {
     std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
 #if defined _MSC_VER || defined __i386__
@@ -117,7 +117,7 @@ namespace awkward {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
-  const std::shared_ptr<Builder> Int64Builder::append(const std::shared_ptr<Content>& array, int64_t at) {
+  const std::shared_ptr<Builder> Int64Builder::append(ContentPtr& array, int64_t at) {
     std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
     out.get()->append(array, at);
     return out;

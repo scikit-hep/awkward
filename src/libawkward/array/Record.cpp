@@ -112,11 +112,11 @@ namespace awkward {
     return -1;   // just like NumpyArray with ndim == 0, which is also a scalar
   }
 
-  const std::shared_ptr<Content> Record::shallow_copy() const {
+  ContentPtr Record::shallow_copy() const {
     return std::make_shared<Record>(array_, at_);
   }
 
-  const std::shared_ptr<Content> Record::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+  ContentPtr Record::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     std::shared_ptr<Content> out = array_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
     return std::make_shared<Record>(std::dynamic_pointer_cast<RecordArray>(out), at_);
   }
@@ -127,36 +127,36 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Record::getitem_nothing() const {
+  ContentPtr Record::getitem_nothing() const {
     throw std::runtime_error("undefined operation: Record::getitem_nothing");
   }
 
-  const std::shared_ptr<Content> Record::getitem_at(int64_t at) const {
+  ContentPtr Record::getitem_at(int64_t at) const {
     throw std::invalid_argument(std::string("scalar Record can only be sliced by field name (string); try ") + util::quote(std::to_string(at), true));
   }
 
-  const std::shared_ptr<Content> Record::getitem_at_nowrap(int64_t at) const {
+  ContentPtr Record::getitem_at_nowrap(int64_t at) const {
     throw std::invalid_argument(std::string("scalar Record can only be sliced by field name (string); try ") + util::quote(std::to_string(at), true));
   }
 
-  const std::shared_ptr<Content> Record::getitem_range(int64_t start, int64_t stop) const {
+  ContentPtr Record::getitem_range(int64_t start, int64_t stop) const {
     throw std::invalid_argument("scalar Record can only be sliced by field name (string)");
   }
 
-  const std::shared_ptr<Content> Record::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  ContentPtr Record::getitem_range_nowrap(int64_t start, int64_t stop) const {
     throw std::invalid_argument("scalar Record can only be sliced by field name (string)");
   }
 
-  const std::shared_ptr<Content> Record::getitem_field(const std::string& key) const {
+  ContentPtr Record::getitem_field(const std::string& key) const {
     return array_.get()->field(key).get()->getitem_at_nowrap(at_);
   }
 
-  const std::shared_ptr<Content> Record::getitem_fields(const std::vector<std::string>& keys) const {
+  ContentPtr Record::getitem_fields(const std::vector<std::string>& keys) const {
     std::shared_ptr<Content> recordarray = array_.get()->getitem_fields(keys);
     return recordarray.get()->getitem_at_nowrap(at_);
   }
 
-  const std::shared_ptr<Content> Record::carry(const Index64& carry) const {
+  ContentPtr Record::carry(const Index64& carry) const {
     throw std::runtime_error("undefined operation: Record::carry");
   }
 
@@ -206,11 +206,11 @@ namespace awkward {
     return array_.get()->validityerror(path + std::string(".array"));
   }
 
-  const std::shared_ptr<Content> Record::shallow_simplify() const {
+  ContentPtr Record::shallow_simplify() const {
     return shallow_copy();
   }
 
-  const std::shared_ptr<Content> Record::num(int64_t axis, int64_t depth) const {
+  ContentPtr Record::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       throw std::invalid_argument("cannot call 'num' with an 'axis' of 0 on a Record");
@@ -225,11 +225,11 @@ namespace awkward {
     throw std::invalid_argument("Record cannot be flattened because it is not an array");
   }
 
-  bool Record::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+  bool Record::mergeable(ContentPtr& other, bool mergebool) const {
     throw std::invalid_argument("Record cannot be merged because it is not an array");
   }
 
-  const std::shared_ptr<Content> Record::merge(const std::shared_ptr<Content>& other) const {
+  ContentPtr Record::merge(ContentPtr& other) const {
     throw std::invalid_argument("Record cannot be merged because it is not an array");
   }
 
@@ -237,25 +237,25 @@ namespace awkward {
     throw std::invalid_argument("cannot use a record as a slice");
   }
 
-  const std::shared_ptr<Content> Record::fillna(const std::shared_ptr<Content>& value) const {
+  ContentPtr Record::fillna(ContentPtr& value) const {
     //                   get a RecordArray of just this element    fillna               get the only element
     return array_.get()->getitem_range_nowrap(at_, at_ + 1).get()->fillna(value).get()->getitem_at_nowrap(0);
   }
 
-  const std::shared_ptr<Content> Record::rpad(int64_t length, int64_t axis, int64_t depth) const {
+  ContentPtr Record::rpad(int64_t length, int64_t axis, int64_t depth) const {
     throw std::invalid_argument("Record cannot be padded because it is not an array");
   }
 
-  const std::shared_ptr<Content> Record::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
+  ContentPtr Record::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
     throw std::invalid_argument("Record cannot be padded because it is not an array");
   }
 
-  const std::shared_ptr<Content> Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  ContentPtr Record::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> trimmed = array_.get()->getitem_range_nowrap(at_, at_ + 1);
     return trimmed.get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
   }
 
-  const std::shared_ptr<Content> Record::localindex(int64_t axis, int64_t depth) const {
+  ContentPtr Record::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       throw std::invalid_argument("cannot call 'localindex' with an 'axis' of 0 on a Record");
@@ -266,7 +266,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Record::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  ContentPtr Record::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }
@@ -280,11 +280,11 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Record::field(int64_t fieldindex) const {
+  ContentPtr Record::field(int64_t fieldindex) const {
     return array_.get()->field(fieldindex).get()->getitem_at_nowrap(at_);
   }
 
-  const std::shared_ptr<Content> Record::field(const std::string& key) const {
+  ContentPtr Record::field(const std::string& key) const {
     return array_.get()->field(key).get()->getitem_at_nowrap(at_);
   }
 
@@ -319,39 +319,39 @@ namespace awkward {
     return std::make_shared<Record>(array_.get()->astuple(), at_);
   }
 
-  const std::shared_ptr<Content> Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Record::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(at)");
   }
 
-  const std::shared_ptr<Content> Record::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Record::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(range)");
   }
 
-  const std::shared_ptr<Content> Record::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Record::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(array)");
   }
 
-  const std::shared_ptr<Content> Record::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Record::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(field)");
   }
 
-  const std::shared_ptr<Content> Record::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Record::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(fields)");
   }
 
-  const std::shared_ptr<Content> Record::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Record::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: Record::getitem_next(jagged)");
   }
 
-  const std::shared_ptr<Content> Record::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+  ContentPtr Record::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: Record::getitem_next_jagged(array)");
   }
 
-  const std::shared_ptr<Content> Record::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+  ContentPtr Record::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: Record::getitem_next_jagged(missing)");
   }
 
-  const std::shared_ptr<Content> Record::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+  ContentPtr Record::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: Record::getitem_next_jagged(jagged)");
   }
 

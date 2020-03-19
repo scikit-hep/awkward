@@ -40,7 +40,7 @@ namespace awkward {
     content_.get()->clear();
   }
 
-  const std::shared_ptr<Content> ListBuilder::snapshot() const {
+  ContentPtr ListBuilder::snapshot() const {
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
     return std::make_shared<ListOffsetArray64>(Identities::none(), util::Parameters(), offsets, content_.get()->snapshot());
   }
@@ -197,7 +197,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Builder> ListBuilder::append(const std::shared_ptr<Content>& array, int64_t at) {
+  const std::shared_ptr<Builder> ListBuilder::append(ContentPtr& array, int64_t at) {
     if (!begun_) {
       std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);

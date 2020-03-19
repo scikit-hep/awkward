@@ -26,7 +26,7 @@
 
 namespace awkward {
   template <typename T, bool ISOPTION>
-  IndexedArrayOf<T, ISOPTION>::IndexedArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& index, const std::shared_ptr<Content>& content)
+  IndexedArrayOf<T, ISOPTION>::IndexedArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& index, ContentPtr& content)
       : Content(identities, parameters)
       , index_(index)
       , content_(content) { }
@@ -37,7 +37,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::content() const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::content() const {
     return content_;
   }
 
@@ -47,7 +47,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::project() const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::project() const {
     if (ISOPTION) {
       int64_t numnull;
       struct Error err1 = util::awkward_indexedarray_numnull<T>(
@@ -83,7 +83,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::project(const Index8& mask) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::project(const Index8& mask) const {
     if (index_.length() != mask.length()) {
       throw std::invalid_argument(std::string("mask length (") + std::to_string(mask.length()) + std::string(") is not equal to ") + classname() + std::string(" length (") + std::to_string(index_.length()) + std::string(")"));
     }
@@ -125,7 +125,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::simplify_optiontype() const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::simplify_optiontype() const {
     if (ISOPTION) {
       if (IndexedArray32* rawcontent = dynamic_cast<IndexedArray32*>(content_.get())) {
         Index32 inner = rawcontent->index();
@@ -539,12 +539,12 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::shallow_copy() const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::shallow_copy() const {
     return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, parameters_, index_, content_);
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     IndexOf<T> index = copyindexes ? index_.deep_copy() : index_;
     std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
     std::shared_ptr<Identities> identities = identities_;
@@ -562,12 +562,12 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_nothing() const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_nothing() const {
     return content_.get()->getitem_range_nowrap(0, 0);
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_at(int64_t at) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     if (regular_at < 0) {
       regular_at += index_.length();
@@ -579,7 +579,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_at_nowrap(int64_t at) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_at_nowrap(int64_t at) const {
     int64_t index = (int64_t)index_.getitem_at_nowrap(at);
     if (index < 0) {
       if (ISOPTION) {
@@ -597,7 +597,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_range(int64_t start, int64_t stop) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), index_.length());
@@ -608,7 +608,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_range_nowrap(int64_t start, int64_t stop) const {
     std::shared_ptr<Identities> identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_range_nowrap(start, stop);
@@ -617,17 +617,17 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_field(const std::string& key) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_field(const std::string& key) const {
     return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, util::Parameters(), index_, content_.get()->getitem_field(key));
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_fields(const std::vector<std::string>& keys) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_fields(const std::vector<std::string>& keys) const {
     return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_, util::Parameters(), index_, content_.get()->getitem_fields(keys));
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
@@ -678,7 +678,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::carry(const Index64& carry) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::carry(const Index64& carry) const {
     IndexOf<T> nextindex(carry.length());
     struct Error err = util::awkward_indexedarray_getitem_carry_64<T>(
       nextindex.ptr().get(),
@@ -768,12 +768,12 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::shallow_simplify() const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::shallow_simplify() const {
     return simplify_optiontype();
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::num(int64_t axis, int64_t depth) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
@@ -837,7 +837,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  bool IndexedArrayOf<T, ISOPTION>::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+  bool IndexedArrayOf<T, ISOPTION>::mergeable(ContentPtr& other, bool mergebool) const {
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -879,7 +879,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reverse_merge(const std::shared_ptr<Content>& other) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::reverse_merge(ContentPtr& other) const {
     int64_t theirlength = other.get()->length();
     int64_t mylength = length();
     Index64 index(theirlength + mylength);
@@ -931,7 +931,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::merge(const std::shared_ptr<Content>& other) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::merge(ContentPtr& other) const {
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }
@@ -1125,7 +1125,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::fillna(const std::shared_ptr<Content>& value) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::fillna(ContentPtr& value) const {
     if (value.get()->length() != 1) {
       throw std::invalid_argument(std::string("fillna value length (") + std::to_string(value.get()->length()) + std::string(") is not equal to 1"));
     }
@@ -1152,7 +1152,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::rpad(int64_t target, int64_t axis, int64_t depth) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return rpad_axis0(target, false);
@@ -1180,7 +1180,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return rpad_axis0(target, true);
@@ -1208,7 +1208,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     int64_t numnull;
     struct Error err1 = util::awkward_indexedarray_numnull<T>(
       &numnull,
@@ -1266,7 +1266,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::localindex(int64_t axis, int64_t depth) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
       return localindex_axis0();
@@ -1290,7 +1290,7 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }
@@ -1317,43 +1317,43 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: IndexedArray::getitem_next(at)");
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: IndexedArray::getitem_next(range)");
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: IndexedArray::getitem_next(array)");
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: IndexedArray::getitem_next(jagged)");
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename T, bool ISOPTION>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename T, bool ISOPTION>
   template <typename S>
-  const std::shared_ptr<Content> IndexedArrayOf<T, ISOPTION>::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
+  ContentPtr IndexedArrayOf<T, ISOPTION>::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
     if (ISOPTION) {
       int64_t numnull;
       std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);

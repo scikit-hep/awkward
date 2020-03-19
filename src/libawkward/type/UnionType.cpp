@@ -87,7 +87,7 @@ namespace awkward {
     return types_;
   }
 
-  const std::shared_ptr<Content> UnionType::empty() const {
+  ContentPtr UnionType::empty() const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto type : types_) {
       contents.push_back(type.get()->empty());

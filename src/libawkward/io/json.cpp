@@ -326,7 +326,7 @@ namespace awkward {
   public:
     Handler(const ArrayBuilderOptions& options): builder_(options), depth_(0) { }
 
-    const std::shared_ptr<Content> snapshot() const {
+    ContentPtr snapshot() const {
       return builder_.snapshot();
     }
 
@@ -384,7 +384,7 @@ namespace awkward {
     int64_t depth_;
   };
 
-  const std::shared_ptr<Content> FromJsonString(const char* source, const ArrayBuilderOptions& options) {
+  ContentPtr FromJsonString(const char* source, const ArrayBuilderOptions& options) {
     Handler handler(options);
     rj::Reader reader;
     rj::StringStream stream(source);
@@ -396,7 +396,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> FromJsonFile(FILE* source, const ArrayBuilderOptions& options, int64_t buffersize) {
+  ContentPtr FromJsonFile(FILE* source, const ArrayBuilderOptions& options, int64_t buffersize) {
     Handler handler(options);
     rj::Reader reader;
     std::shared_ptr<char> buffer(new char[(size_t)buffersize], util::array_deleter<char>());

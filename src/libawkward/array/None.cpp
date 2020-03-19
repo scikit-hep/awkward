@@ -51,45 +51,45 @@ namespace awkward {
     return -1;
   }
 
-  const std::shared_ptr<Content> None::shallow_copy() const {
+  ContentPtr None::shallow_copy() const {
     return std::make_shared<None>();
   }
 
-  const std::shared_ptr<Content> None::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+  ContentPtr None::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     return std::make_shared<None>();
   }
 
   void None::check_for_iteration() const { }
 
-  const std::shared_ptr<Content> None::getitem_nothing() const {
+  ContentPtr None::getitem_nothing() const {
     throw std::runtime_error("undefined operation: None::getitem_nothing");
   }
 
-  const std::shared_ptr<Content> None::getitem_at(int64_t at) const {
+  ContentPtr None::getitem_at(int64_t at) const {
     throw std::runtime_error("undefined operation: None::getitem_at");
   }
 
-  const std::shared_ptr<Content> None::getitem_at_nowrap(int64_t at) const {
+  ContentPtr None::getitem_at_nowrap(int64_t at) const {
     throw std::runtime_error("undefined operation: None::getitem_at_nowrap");
   }
 
-  const std::shared_ptr<Content> None::getitem_range(int64_t start, int64_t stop) const {
+  ContentPtr None::getitem_range(int64_t start, int64_t stop) const {
     throw std::runtime_error("undefined operation: None::getitem_range");
   }
 
-  const std::shared_ptr<Content> None::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  ContentPtr None::getitem_range_nowrap(int64_t start, int64_t stop) const {
     throw std::runtime_error("undefined operation: None::getitem_range_nowrap");
   }
 
-  const std::shared_ptr<Content> None::getitem_field(const std::string& key) const {
+  ContentPtr None::getitem_field(const std::string& key) const {
     throw std::runtime_error("undefined operation: None::getitem_field");
   }
 
-  const std::shared_ptr<Content> None::getitem_fields(const std::vector<std::string>& keys) const {
+  ContentPtr None::getitem_fields(const std::vector<std::string>& keys) const {
     throw std::runtime_error("undefined operation: None::getitem_fields");
   }
 
-  const std::shared_ptr<Content> None::carry(const Index64& carry) const {
+  ContentPtr None::carry(const Index64& carry) const {
     throw std::runtime_error("undefined operation: None::carry");
   }
 
@@ -137,11 +137,11 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::validityerror");
   }
 
-  const std::shared_ptr<Content> None::shallow_simplify() const {
+  ContentPtr None::shallow_simplify() const {
     throw std::runtime_error("undefined operation: None::shallow_simplify");
   }
 
-  const std::shared_ptr<Content> None::num(int64_t axis, int64_t depth) const {
+  ContentPtr None::num(int64_t axis, int64_t depth) const {
     throw std::runtime_error("undefined operation: None::num");
   }
 
@@ -149,11 +149,11 @@ namespace awkward {
     throw std::runtime_error("undefined operation: None::offsets_and_flattened");
   }
 
-  bool None::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+  bool None::mergeable(ContentPtr& other, bool mergebool) const {
     throw std::runtime_error("undefined operation: None::mergeable");
   }
 
-  const std::shared_ptr<Content> None::merge(const std::shared_ptr<Content>& other) const {
+  ContentPtr None::merge(ContentPtr& other) const {
     throw std::runtime_error("undefined operation: None::merge");
   }
 
@@ -161,65 +161,65 @@ namespace awkward {
     throw std::runtime_error("undefined opteration: None::asslice");
   }
 
-  const std::shared_ptr<Content> None::fillna(const std::shared_ptr<Content>& value) const {
+  ContentPtr None::fillna(ContentPtr& value) const {
     throw std::runtime_error("undefined opteration: None::fillna");
   }
 
-  const std::shared_ptr<Content> None::rpad(int64_t length, int64_t axis, int64_t depth) const {
+  ContentPtr None::rpad(int64_t length, int64_t axis, int64_t depth) const {
     throw std::runtime_error("undefined operation: None::rpad");
   }
 
-  const std::shared_ptr<Content> None::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
+  ContentPtr None::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
     throw std::runtime_error("undefined operation: None::rpad_and_clip");
   }
 
-  const std::shared_ptr<Content> None::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  ContentPtr None::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     throw std::runtime_error("undefined operation: None::reduce_next");
   }
 
-  const std::shared_ptr<Content> None::localindex(int64_t axis, int64_t depth) const {
+  ContentPtr None::localindex(int64_t axis, int64_t depth) const {
     throw std::runtime_error("undefined operation: None:localindex");
   }
 
-  const std::shared_ptr<Content> None::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  ContentPtr None::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     throw std::runtime_error("undefined operation: None::choose");
   }
 
-  const std::shared_ptr<Content> None::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+  ContentPtr None::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: None::getitem_next(at)");
   }
 
-  const std::shared_ptr<Content> None::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+  ContentPtr None::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: None::getitem_next(range)");
   }
 
-  const std::shared_ptr<Content> None::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+  ContentPtr None::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: None::getitem_next(array)");
   }
 
-  const std::shared_ptr<Content> None::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+  ContentPtr None::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: None::getitem_next(field)");
   }
 
-  const std::shared_ptr<Content> None::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+  ContentPtr None::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: None::getitem_next(fields)");
   }
 
-  const std::shared_ptr<Content> None::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+  ContentPtr None::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     throw std::runtime_error("undefined operation: None::getitem_next(jagged)");
   }
 
-  const std::shared_ptr<Content> None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+  ContentPtr None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: None::getitem_next_jagged(array)");
   }
 
-  const std::shared_ptr<Content> None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+  ContentPtr None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: None::getitem_next_jagged(missing)");
   }
 
-  const std::shared_ptr<Content> None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+  ContentPtr None::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: None::getitem_next_jagged(jagged)");
   }
 
-  const std::shared_ptr<Content> none = std::make_shared<None>();
+  ContentPtr none = std::make_shared<None>();
 }

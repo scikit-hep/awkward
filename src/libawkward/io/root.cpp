@@ -34,7 +34,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const ArrayBuilderOptions& options) {
+  ContentPtr FromROOT_nestedvector(const Index64& byteoffsets, const NumpyArray& rawdata, int64_t depth, int64_t itemsize, std::string format, const ArrayBuilderOptions& options) {
     if (depth <= 0) {
       throw std::runtime_error("FromROOT_nestedvector: depth <= 0");
     }

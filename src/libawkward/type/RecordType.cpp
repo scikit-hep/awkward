@@ -161,7 +161,7 @@ namespace awkward {
     return util::keys(recordlookup_, numfields());
   }
 
-  const std::shared_ptr<Content> RecordType::empty() const {
+  ContentPtr RecordType::empty() const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto type : types_) {
       contents.push_back(type.get()->empty());

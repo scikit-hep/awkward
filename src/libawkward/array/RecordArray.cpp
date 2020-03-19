@@ -61,7 +61,7 @@ namespace awkward {
     return recordlookup_.get() == nullptr;
   }
 
-  const std::shared_ptr<Content> RecordArray::setitem_field(int64_t where, const std::shared_ptr<Content>& what) const {
+  ContentPtr RecordArray::setitem_field(int64_t where, ContentPtr& what) const {
     if (where < 0) {
       throw std::invalid_argument("where must be non-negative");
     }
@@ -94,7 +94,7 @@ namespace awkward {
     return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup);
   }
 
-  const std::shared_ptr<Content> RecordArray::setitem_field(const std::string& where, const std::shared_ptr<Content>& what) const {
+  ContentPtr RecordArray::setitem_field(const std::string& where, ContentPtr& what) const {
     if (what.get()->length() != length()) {
       throw std::invalid_argument(std::string("array of length ") + std::to_string(what.get()->length()) + std::string(" cannot be assigned to record array of length ") + std::to_string(length()));
     }
@@ -238,11 +238,11 @@ namespace awkward {
     return length_;
   }
 
-  const std::shared_ptr<Content> RecordArray::shallow_copy() const {
+  ContentPtr RecordArray::shallow_copy() const {
     return std::make_shared<RecordArray>(identities_, parameters_, contents_, recordlookup_, length_);
   }
 
-  const std::shared_ptr<Content> RecordArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+  ContentPtr RecordArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto x : contents_) {
       contents.push_back(x.get()->deep_copy(copyarrays, copyindexes, copyidentities));
@@ -260,11 +260,11 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_nothing() const {
+  ContentPtr RecordArray::getitem_nothing() const {
     return getitem_range_nowrap(0, 0);
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_at(int64_t at) const {
+  ContentPtr RecordArray::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     int64_t len = length();
     if (regular_at < 0) {
@@ -276,11 +276,11 @@ namespace awkward {
     return getitem_at_nowrap(regular_at);
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_at_nowrap(int64_t at) const {
+  ContentPtr RecordArray::getitem_at_nowrap(int64_t at) const {
     return std::make_shared<Record>(shared_from_this(), at);
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_range(int64_t start, int64_t stop) const {
+  ContentPtr RecordArray::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
@@ -290,7 +290,7 @@ namespace awkward {
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  ContentPtr RecordArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     if (contents_.empty()) {
       return std::make_shared<RecordArray>(identities_, parameters_, contents_, recordlookup_, stop - start);
     }
@@ -303,11 +303,11 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_field(const std::string& key) const {
+  ContentPtr RecordArray::getitem_field(const std::string& key) const {
     return field(key).get()->getitem_range_nowrap(0, length());
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
+  ContentPtr RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
     std::vector<std::shared_ptr<Content>> contents;
     std::shared_ptr<util::RecordLookup> recordlookup(nullptr);
     if (recordlookup_.get() != nullptr) {
@@ -322,7 +322,7 @@ namespace awkward {
     return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup);
   }
 
-  const std::shared_ptr<Content> RecordArray::carry(const Index64& carry) const {
+  ContentPtr RecordArray::carry(const Index64& carry) const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->carry(carry));
@@ -422,11 +422,11 @@ namespace awkward {
     return std::string();
   }
 
-  const std::shared_ptr<Content> RecordArray::shallow_simplify() const {
+  ContentPtr RecordArray::shallow_simplify() const {
     return shallow_copy();
   }
 
-  const std::shared_ptr<Content> RecordArray::num(int64_t axis, int64_t depth) const {
+  ContentPtr RecordArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 single(1);
@@ -470,7 +470,7 @@ namespace awkward {
     }
   }
 
-  bool RecordArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+  bool RecordArray::mergeable(ContentPtr& other, bool mergebool) const {
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -538,7 +538,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::merge(const std::shared_ptr<Content>& other) const {
+  ContentPtr RecordArray::merge(ContentPtr& other) const {
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }
@@ -624,7 +624,7 @@ namespace awkward {
     throw std::invalid_argument("cannot use records as a slice");
   }
 
-  const std::shared_ptr<Content> RecordArray::fillna(const std::shared_ptr<Content>& value) const {
+  ContentPtr RecordArray::fillna(ContentPtr& value) const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->fillna(value));
@@ -632,7 +632,7 @@ namespace awkward {
     return std::make_shared<RecordArray>(identities_, parameters_, contents, recordlookup_, length_);
   }
 
-  const std::shared_ptr<Content> RecordArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
+  ContentPtr RecordArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return rpad_axis0(target, false);
@@ -651,7 +651,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+  ContentPtr RecordArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return rpad_axis0(target, true);
@@ -670,7 +670,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  ContentPtr RecordArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::vector<std::shared_ptr<Content>> contents;
     for (auto content : contents_) {
       std::shared_ptr<Content> trimmed = content.get()->getitem_range_nowrap(0, length());
@@ -680,7 +680,7 @@ namespace awkward {
     return std::make_shared<RecordArray>(Identities::none(), util::Parameters(), contents, recordlookup_, outlength);
   }
 
-  const std::shared_ptr<Content> RecordArray::localindex(int64_t axis, int64_t depth) const {
+  ContentPtr RecordArray::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
       return localindex_axis0();
@@ -694,7 +694,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  ContentPtr RecordArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }
@@ -711,14 +711,14 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::field(int64_t fieldindex) const {
+  ContentPtr RecordArray::field(int64_t fieldindex) const {
     if (fieldindex >= numfields()) {
       throw std::invalid_argument(std::string("fieldindex ") + std::to_string(fieldindex) + std::string(" for record with only " + std::to_string(numfields()) + std::string(" fields")));
     }
     return contents_[(size_t)fieldindex];
   }
 
-  const std::shared_ptr<Content> RecordArray::field(const std::string& key) const {
+  ContentPtr RecordArray::field(const std::string& key) const {
     return contents_[(size_t)fieldindex(key)];
   }
 
@@ -747,7 +747,7 @@ namespace awkward {
     return std::make_shared<RecordArray>(identities_, parameters_, contents_, std::shared_ptr<util::RecordLookup>(nullptr), length_);
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+  ContentPtr RecordArray::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     Slice emptytail;
@@ -781,48 +781,48 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+  ContentPtr RecordArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     throw std::invalid_argument(std::string("undefined operation: RecordArray::getitem_next(at)"));
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+  ContentPtr RecordArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     throw std::invalid_argument(std::string("undefined operation: RecordArray::getitem_next(range)"));
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+  ContentPtr RecordArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     throw std::invalid_argument(std::string("undefined operation: RecordArray::getitem_next(array)"));
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+  ContentPtr RecordArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     return getitem_field(field.key()).get()->getitem_next(nexthead, nexttail, advanced);
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+  ContentPtr RecordArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+  ContentPtr RecordArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     throw std::invalid_argument(std::string("undefined operation: RecordArray::getitem_next(jagged)"));
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+  ContentPtr RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     return getitem_next_jagged_generic<SliceArray64>(slicestarts, slicestops, slicecontent, tail);
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+  ContentPtr RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     return getitem_next_jagged_generic<SliceMissing64>(slicestarts, slicestops, slicecontent, tail);
   }
 
-  const std::shared_ptr<Content> RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+  ContentPtr RecordArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     return getitem_next_jagged_generic<SliceJagged64>(slicestarts, slicestops, slicecontent, tail);
   }
 
   template <typename S>
-  const std::shared_ptr<Content> RecordArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
+  ContentPtr RecordArray::getitem_next_jagged_generic(const Index64& slicestarts, const Index64& slicestops, const S& slicecontent, const Slice& tail) const {
     if (contents_.empty()) {
       return shallow_copy();
     }

@@ -19,12 +19,12 @@ namespace awkward {
     int64_t length() const;
     void clear();
     const std::shared_ptr<Type> type(const std::map<std::string, std::string>& typestrs) const;
-    const std::shared_ptr<Content> snapshot() const;
-    const std::shared_ptr<Content> getitem_at(int64_t at) const;
-    const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const;
-    const std::shared_ptr<Content> getitem_field(const std::string& key) const;
-    const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const;
-    const std::shared_ptr<Content> getitem(const Slice& where) const;
+    ContentPtr snapshot() const;
+    ContentPtr getitem_at(int64_t at) const;
+    ContentPtr getitem_range(int64_t start, int64_t stop) const;
+    ContentPtr getitem_field(const std::string& key) const;
+    ContentPtr getitem_fields(const std::vector<std::string>& keys) const;
+    ContentPtr getitem(const Slice& where) const;
 
     void null();
     void boolean(bool x);
@@ -49,9 +49,9 @@ namespace awkward {
     void field_check(const char* key);
     void field_check(const std::string& key);
     void endrecord();
-    void append(const std::shared_ptr<Content>& array, int64_t at);
-    void append_nowrap(const std::shared_ptr<Content>& array, int64_t at);
-    void extend(const std::shared_ptr<Content>& array);
+    void append(ContentPtr& array, int64_t at);
+    void append_nowrap(ContentPtr& array, int64_t at);
+    void extend(ContentPtr& array);
 
   private:
     void maybeupdate(const std::shared_ptr<Builder>& tmp);

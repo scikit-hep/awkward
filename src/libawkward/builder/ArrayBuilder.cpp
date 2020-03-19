@@ -29,27 +29,27 @@ namespace awkward {
     return builder_.get()->snapshot().get()->type(typestrs);
   }
 
-  const std::shared_ptr<Content> ArrayBuilder::snapshot() const {
+  ContentPtr ArrayBuilder::snapshot() const {
     return builder_.get()->snapshot();
   }
 
-  const std::shared_ptr<Content> ArrayBuilder::getitem_at(int64_t at) const {
+  ContentPtr ArrayBuilder::getitem_at(int64_t at) const {
     return snapshot().get()->getitem_at(at);
   }
 
-  const std::shared_ptr<Content> ArrayBuilder::getitem_range(int64_t start, int64_t stop) const {
+  ContentPtr ArrayBuilder::getitem_range(int64_t start, int64_t stop) const {
     return snapshot().get()->getitem_range(start, stop);
   }
 
-  const std::shared_ptr<Content> ArrayBuilder::getitem_field(const std::string& key) const {
+  ContentPtr ArrayBuilder::getitem_field(const std::string& key) const {
     return snapshot().get()->getitem_field(key);
   }
 
-  const std::shared_ptr<Content> ArrayBuilder::getitem_fields(const std::vector<std::string>& keys) const {
+  ContentPtr ArrayBuilder::getitem_fields(const std::vector<std::string>& keys) const {
     return snapshot().get()->getitem_fields(keys);
   }
 
-  const std::shared_ptr<Content> ArrayBuilder::getitem(const Slice& where) const {
+  ContentPtr ArrayBuilder::getitem(const Slice& where) const {
     return snapshot().get()->getitem(where);
   }
 
@@ -149,7 +149,7 @@ namespace awkward {
     maybeupdate(builder_.get()->endrecord());
   }
 
-  void ArrayBuilder::append(const std::shared_ptr<Content>& array, int64_t at) {
+  void ArrayBuilder::append(ContentPtr& array, int64_t at) {
     int64_t length = array.get()->length();
     int64_t regular_at = at;
     if (regular_at < 0) {
@@ -161,11 +161,11 @@ namespace awkward {
     return append_nowrap(array, regular_at);
   }
 
-  void ArrayBuilder::append_nowrap(const std::shared_ptr<Content>& array, int64_t at) {
+  void ArrayBuilder::append_nowrap(ContentPtr& array, int64_t at) {
     maybeupdate(builder_.get()->append(array, at));
   }
 
-  void ArrayBuilder::extend(const std::shared_ptr<Content>& array) {
+  void ArrayBuilder::extend(ContentPtr& array) {
     std::shared_ptr<Builder> tmp = builder_;
     for (int64_t i = 0;  i < array.get()->length();  i++) {
       tmp = builder_.get()->append(array, i);

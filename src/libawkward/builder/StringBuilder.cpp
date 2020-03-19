@@ -44,7 +44,7 @@ namespace awkward {
     content_.clear();
   }
 
-  const std::shared_ptr<Content> StringBuilder::snapshot() const {
+  ContentPtr StringBuilder::snapshot() const {
     util::Parameters char_parameters;
     util::Parameters string_parameters;
 
@@ -149,7 +149,7 @@ namespace awkward {
     throw std::invalid_argument("called 'endrecord' without 'beginrecord' at the same level before it");
   }
 
-  const std::shared_ptr<Builder> StringBuilder::append(const std::shared_ptr<Content>& array, int64_t at) {
+  const std::shared_ptr<Builder> StringBuilder::append(ContentPtr& array, int64_t at) {
     std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
     out.get()->append(array, at);
     return out;

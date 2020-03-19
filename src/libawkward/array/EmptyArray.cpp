@@ -17,7 +17,7 @@ namespace awkward {
   EmptyArray::EmptyArray(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters)
       : Content(identities, parameters) { }
 
-  const std::shared_ptr<Content> EmptyArray::toNumpyArray(const std::string& format, ssize_t itemsize) const {
+  ContentPtr EmptyArray::toNumpyArray(const std::string& format, ssize_t itemsize) const {
     std::shared_ptr<void> ptr(new uint8_t[0], util::array_deleter<uint8_t>());
     std::vector<ssize_t> shape({ 0 });
     std::vector<ssize_t> strides({ itemsize });
@@ -76,11 +76,11 @@ namespace awkward {
     return 0;
   }
 
-  const std::shared_ptr<Content> EmptyArray::shallow_copy() const {
+  ContentPtr EmptyArray::shallow_copy() const {
     return std::make_shared<EmptyArray>(identities_, parameters_);
   }
 
-  const std::shared_ptr<Content> EmptyArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+  ContentPtr EmptyArray::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     std::shared_ptr<Identities> identities = identities_;
     if (copyidentities  &&  identities_.get() != nullptr) {
       identities = identities_.get()->deep_copy();
@@ -90,37 +90,37 @@ namespace awkward {
 
   void EmptyArray::check_for_iteration() const { }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_nothing() const {
+  ContentPtr EmptyArray::getitem_nothing() const {
     return shallow_copy();
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_at(int64_t at) const {
+  ContentPtr EmptyArray::getitem_at(int64_t at) const {
     util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_at_nowrap(int64_t at) const {
+  ContentPtr EmptyArray::getitem_at_nowrap(int64_t at) const {
     util::handle_error(failure("index out of range", kSliceNone, at), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_range(int64_t start, int64_t stop) const {
+  ContentPtr EmptyArray::getitem_range(int64_t start, int64_t stop) const {
     return shallow_copy();
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  ContentPtr EmptyArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
     return shallow_copy();
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_field(const std::string& key) const {
+  ContentPtr EmptyArray::getitem_field(const std::string& key) const {
     throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_fields(const std::vector<std::string>& keys) const {
+  ContentPtr EmptyArray::getitem_fields(const std::vector<std::string>& keys) const {
     throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
   }
 
-  const std::shared_ptr<Content> EmptyArray::carry(const Index64& carry) const {
+  ContentPtr EmptyArray::carry(const Index64& carry) const {
     return shallow_copy();
   }
 
@@ -166,11 +166,11 @@ namespace awkward {
     return std::string();
   }
 
-  const std::shared_ptr<Content> EmptyArray::shallow_simplify() const {
+  ContentPtr EmptyArray::shallow_simplify() const {
     return shallow_copy();
   }
 
-  const std::shared_ptr<Content> EmptyArray::num(int64_t axis, int64_t depth) const {
+  ContentPtr EmptyArray::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
@@ -194,11 +194,11 @@ namespace awkward {
     }
   }
 
-  bool EmptyArray::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+  bool EmptyArray::mergeable(ContentPtr& other, bool mergebool) const {
     return true;
   }
 
-  const std::shared_ptr<Content> EmptyArray::merge(const std::shared_ptr<Content>& other) const {
+  ContentPtr EmptyArray::merge(ContentPtr& other) const {
     return other;
   }
 
@@ -209,11 +209,11 @@ namespace awkward {
     return std::make_shared<SliceArray64>(index, shape, strides, false);
   }
 
-  const std::shared_ptr<Content> EmptyArray::fillna(const std::shared_ptr<Content>& value) const {
+  ContentPtr EmptyArray::fillna(ContentPtr& value) const {
     return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
   }
 
-  const std::shared_ptr<Content> EmptyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
+  ContentPtr EmptyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis != depth) {
       throw std::invalid_argument("axis exceeds the depth of this array");
@@ -223,7 +223,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> EmptyArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+  ContentPtr EmptyArray::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis != depth) {
       throw std::invalid_argument("axis exceeds the depth of this array");
@@ -233,61 +233,61 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  ContentPtr EmptyArray::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     std::shared_ptr<Content> asnumpy = toNumpyArray(reducer.preferred_type(), reducer.preferred_typesize());
     return asnumpy.get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
   }
 
-  const std::shared_ptr<Content> EmptyArray::localindex(int64_t axis, int64_t depth) const {
+  ContentPtr EmptyArray::localindex(int64_t axis, int64_t depth) const {
     return std::make_shared<NumpyArray>(Index64(0));
   }
 
-  const std::shared_ptr<Content> EmptyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  ContentPtr EmptyArray::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }
     return std::make_shared<EmptyArray>(identities_, util::Parameters());
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+  ContentPtr EmptyArray::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+  ContentPtr EmptyArray::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+  ContentPtr EmptyArray::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     util::handle_error(failure("too many dimensions in slice", kSliceNone, kSliceNone), classname(), identities_.get());
     return std::shared_ptr<Content>(nullptr);  // make Windows compiler happy
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+  ContentPtr EmptyArray::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
     throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a field name because it has no fields"));
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+  ContentPtr EmptyArray::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
     throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field names because it has no fields"));
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+  ContentPtr EmptyArray::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
     }
     throw std::runtime_error("FIXME: EmptyArray::getitem_next(jagged)");
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+  ContentPtr EmptyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: EmptyArray::getitem_next_jagged(array)");
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+  ContentPtr EmptyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: EmptyArray::getitem_next_jagged(missing)");
   }
 
-  const std::shared_ptr<Content> EmptyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+  ContentPtr EmptyArray::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     throw std::runtime_error("undefined operation: EmptyArray::getitem_next_jagged(jagged)");
   }
 

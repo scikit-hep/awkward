@@ -25,7 +25,7 @@
 
 namespace awkward {
   template <typename T>
-  ListArrayOf<T>::ListArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& starts, const IndexOf<T>& stops, const std::shared_ptr<Content>& content)
+  ListArrayOf<T>::ListArrayOf(const std::shared_ptr<Identities>& identities, const util::Parameters& parameters, const IndexOf<T>& starts, const IndexOf<T>& stops, ContentPtr& content)
       : Content(identities, parameters)
       , starts_(starts)
       , stops_(stops)
@@ -46,7 +46,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::content() const {
+  ContentPtr ListArrayOf<T>::content() const {
     return content_;
   }
 
@@ -66,7 +66,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::broadcast_tooffsets64(const Index64& offsets) const {
+  ContentPtr ListArrayOf<T>::broadcast_tooffsets64(const Index64& offsets) const {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument("broadcast_tooffsets64 can only be used with offsets that start at 0");
     }
@@ -98,7 +98,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::toRegularArray() const {
+  ContentPtr ListArrayOf<T>::toRegularArray() const {
     Index64 offsets = compact_offsets64(true);
     std::shared_ptr<Content> listoffsetarray64 = broadcast_tooffsets64(offsets);
     ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(listoffsetarray64.get());
@@ -106,7 +106,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::toListOffsetArray64(bool start_at_zero) const {
+  ContentPtr ListArrayOf<T>::toListOffsetArray64(bool start_at_zero) const {
     Index64 offsets = compact_offsets64(start_at_zero);
     return broadcast_tooffsets64(offsets);
   }
@@ -262,12 +262,12 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::shallow_copy() const {
+  ContentPtr ListArrayOf<T>::shallow_copy() const {
     return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_);
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
+  ContentPtr ListArrayOf<T>::deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const {
     IndexOf<T> starts = copyindexes ? starts_.deep_copy() : starts_;
     IndexOf<T> stops = copyindexes ? stops_.deep_copy() : stops_;
     std::shared_ptr<Content> content = content_.get()->deep_copy(copyarrays, copyindexes, copyidentities);
@@ -289,12 +289,12 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_nothing() const {
+  ContentPtr ListArrayOf<T>::getitem_nothing() const {
     return content_.get()->getitem_range_nowrap(0, 0);
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_at(int64_t at) const {
+  ContentPtr ListArrayOf<T>::getitem_at(int64_t at) const {
     int64_t regular_at = at;
     if (regular_at < 0) {
       regular_at += starts_.length();
@@ -309,7 +309,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_at_nowrap(int64_t at) const {
+  ContentPtr ListArrayOf<T>::getitem_at_nowrap(int64_t at) const {
     int64_t start = (int64_t)starts_.getitem_at_nowrap(at);
     int64_t stop = (int64_t)stops_.getitem_at_nowrap(at);
     int64_t lencontent = content_.get()->length();
@@ -329,7 +329,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_range(int64_t start, int64_t stop) const {
+  ContentPtr ListArrayOf<T>::getitem_range(int64_t start, int64_t stop) const {
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), starts_.length());
@@ -343,7 +343,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
+  ContentPtr ListArrayOf<T>::getitem_range_nowrap(int64_t start, int64_t stop) const {
     std::shared_ptr<Identities> identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_range_nowrap(start, stop);
@@ -352,17 +352,17 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_field(const std::string& key) const {
+  ContentPtr ListArrayOf<T>::getitem_field(const std::string& key) const {
     return std::make_shared<ListArrayOf<T>>(identities_, util::Parameters(), starts_, stops_, content_.get()->getitem_field(key));
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_fields(const std::vector<std::string>& keys) const {
+  ContentPtr ListArrayOf<T>::getitem_fields(const std::vector<std::string>& keys) const {
     return std::make_shared<ListArrayOf<T>>(identities_, util::Parameters(), starts_, stops_, content_.get()->getitem_fields(keys));
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::carry(const Index64& carry) const {
+  ContentPtr ListArrayOf<T>::carry(const Index64& carry) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
@@ -463,12 +463,12 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::shallow_simplify() const {
+  ContentPtr ListArrayOf<T>::shallow_simplify() const {
     return shallow_copy();
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::num(int64_t axis, int64_t depth) const {
+  ContentPtr ListArrayOf<T>::num(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       Index64 out(1);
@@ -498,7 +498,7 @@ namespace awkward {
   }
 
   template <typename T>
-  bool ListArrayOf<T>::mergeable(const std::shared_ptr<Content>& other, bool mergebool) const {
+  bool ListArrayOf<T>::mergeable(ContentPtr& other, bool mergebool) const {
     if (!parameters_equal(other.get()->parameters())) {
       return false;
     }
@@ -561,7 +561,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::merge(const std::shared_ptr<Content>& other) const {
+  ContentPtr ListArrayOf<T>::merge(ContentPtr& other) const {
     if (!parameters_equal(other.get()->parameters())) {
       return merge_as_union(other);
     }
@@ -790,12 +790,12 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::fillna(const std::shared_ptr<Content>& value) const {
+  ContentPtr ListArrayOf<T>::fillna(ContentPtr& value) const {
     return std::make_shared<ListArrayOf<T>>(identities_, parameters_, starts_, stops_, content_.get()->fillna(value));
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::rpad(int64_t target, int64_t axis, int64_t depth) const {
+  ContentPtr ListArrayOf<T>::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (toaxis == depth) {
       return rpad_axis0(target, false);
@@ -851,17 +851,17 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
+  ContentPtr ListArrayOf<T>::rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const {
     return toListOffsetArray64(true).get()->rpad_and_clip(target, axis, depth);
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
+  ContentPtr ListArrayOf<T>::reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const {
     return toListOffsetArray64(true).get()->reduce_next(reducer, negaxis, starts, parents, outlength, mask, keepdims);
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::localindex(int64_t axis, int64_t depth) const {
+  ContentPtr ListArrayOf<T>::localindex(int64_t axis, int64_t depth) const {
     int64_t toaxis = axis_wrap_if_negative(axis);
     if (axis == depth) {
       return localindex_axis0();
@@ -884,7 +884,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
+  ContentPtr ListArrayOf<T>::choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const {
     if (n < 1) {
       throw std::invalid_argument("in choose, 'n' must be at least 1");
     }
@@ -945,7 +945,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
+  ContentPtr ListArrayOf<T>::getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
@@ -971,7 +971,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
+  ContentPtr ListArrayOf<T>::getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
@@ -1037,7 +1037,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
+  ContentPtr ListArrayOf<T>::getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(failure("len(stops) < len(starts)", kSliceNone, kSliceNone), classname(), identities_.get());
@@ -1086,7 +1086,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
+  ContentPtr ListArrayOf<T>::getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::invalid_argument("cannot mix jagged slice with NumPy-style advanced indexing");
     }
@@ -1119,7 +1119,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
+  ContentPtr ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const {
     if (starts_.length() < slicestarts.length()) {
       util::handle_error(failure("jagged slice length differs from array length", kSliceNone, kSliceNone), classname(), identities_.get());
     }
@@ -1165,7 +1165,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
+  ContentPtr ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const {
     if (starts_.length() < slicestarts.length()) {
       util::handle_error(failure("jagged slice length differs from array length", kSliceNone, kSliceNone), classname(), identities_.get());
     }
@@ -1221,7 +1221,7 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::shared_ptr<Content> ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
+  ContentPtr ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const {
     if (starts_.length() < slicestarts.length()) {
       util::handle_error(failure("jagged slice length differs from array length", kSliceNone, kSliceNone), classname(), identities_.get());
     }

@@ -9,17 +9,17 @@
 namespace awkward {
   class EXPORT_SYMBOL Iterator {
   public:
-    Iterator(const std::shared_ptr<Content>& content);
+    Iterator(ContentPtr& content);
 
-    const std::shared_ptr<Content> content() const;
+    ContentPtr content() const;
     const int64_t at() const;
     const bool isdone() const;
-    const std::shared_ptr<Content> next();
+    ContentPtr next();
     const std::string tostring_part(const std::string& indent, const std::string& pre, const std::string& post) const;
     const std::string tostring() const;
 
   private:
-    const std::shared_ptr<Content> content_;
+    ContentPtr content_;
     int64_t at_;
   };
 }

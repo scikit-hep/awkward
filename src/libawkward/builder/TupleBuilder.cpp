@@ -48,7 +48,7 @@ namespace awkward {
     nextindex_ = -1;
   }
 
-  const std::shared_ptr<Content> TupleBuilder::snapshot() const {
+  ContentPtr TupleBuilder::snapshot() const {
     if (length_ == -1) {
       return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
     }
@@ -292,7 +292,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> TupleBuilder::append(const std::shared_ptr<Content>& array, int64_t at) {
+  const std::shared_ptr<Builder> TupleBuilder::append(ContentPtr& array, int64_t at) {
     if (!begun_) {
       std::shared_ptr<Builder> out = UnionBuilder::fromsingle(options_, that_);
       out.get()->append(array, at);

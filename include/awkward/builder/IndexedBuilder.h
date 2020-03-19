@@ -46,13 +46,13 @@ namespace awkward {
 
   class IndexedGenericBuilder: public IndexedBuilder<Content> {
   public:
-    static const std::shared_ptr<Builder> fromnulls(const ArrayBuilderOptions& options, int64_t nullcount, const std::shared_ptr<Content>& array);
+    static const std::shared_ptr<Builder> fromnulls(const ArrayBuilderOptions& options, int64_t nullcount, ContentPtr& array);
 
-    IndexedGenericBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<Content>& array, bool hasnull);
+    IndexedGenericBuilder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, ContentPtr& array, bool hasnull);
 
     const std::string classname() const override;
-    const std::shared_ptr<Content> snapshot() const override;
-    const std::shared_ptr<Builder> append(const std::shared_ptr<Content>& array, int64_t at) override;
+    ContentPtr snapshot() const override;
+    const std::shared_ptr<Builder> append(ContentPtr& array, int64_t at) override;
   };
 
   class IndexedI32Builder: public IndexedBuilder<IndexedArray32> {
@@ -60,8 +60,8 @@ namespace awkward {
     IndexedI32Builder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArray32>& array, bool hasnull);
 
     const std::string classname() const override;
-    const std::shared_ptr<Content> snapshot() const override;
-    const std::shared_ptr<Builder> append(const std::shared_ptr<Content>& array, int64_t at) override;
+    ContentPtr snapshot() const override;
+    const std::shared_ptr<Builder> append(ContentPtr& array, int64_t at) override;
   };
 
   class IndexedIU32Builder: public IndexedBuilder<IndexedArrayU32> {
@@ -69,8 +69,8 @@ namespace awkward {
     IndexedIU32Builder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArrayU32>& array, bool hasnull);
 
     const std::string classname() const override;
-    const std::shared_ptr<Content> snapshot() const override;
-    const std::shared_ptr<Builder> append(const std::shared_ptr<Content>& array, int64_t at) override;
+    ContentPtr snapshot() const override;
+    const std::shared_ptr<Builder> append(ContentPtr& array, int64_t at) override;
   };
 
   class IndexedI64Builder: public IndexedBuilder<IndexedArray64> {
@@ -78,8 +78,8 @@ namespace awkward {
     IndexedI64Builder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedArray64>& array, bool hasnull);
 
     const std::string classname() const override;
-    const std::shared_ptr<Content> snapshot() const override;
-    const std::shared_ptr<Builder> append(const std::shared_ptr<Content>& array, int64_t at) override;
+    ContentPtr snapshot() const override;
+    const std::shared_ptr<Builder> append(ContentPtr& array, int64_t at) override;
   };
 
   class IndexedIO32Builder: public IndexedBuilder<IndexedOptionArray32> {
@@ -87,8 +87,8 @@ namespace awkward {
     IndexedIO32Builder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedOptionArray32>& array, bool hasnull);
 
     const std::string classname() const override;
-    const std::shared_ptr<Content> snapshot() const override;
-    const std::shared_ptr<Builder> append(const std::shared_ptr<Content>& array, int64_t at) override;
+    ContentPtr snapshot() const override;
+    const std::shared_ptr<Builder> append(ContentPtr& array, int64_t at) override;
   };
 
   class IndexedIO64Builder: public IndexedBuilder<IndexedOptionArray64> {
@@ -96,8 +96,8 @@ namespace awkward {
     IndexedIO64Builder(const ArrayBuilderOptions& options, const GrowableBuffer<int64_t>& index, const std::shared_ptr<IndexedOptionArray64>& array, bool hasnull);
 
     const std::string classname() const override;
-    const std::shared_ptr<Content> snapshot() const override;
-    const std::shared_ptr<Builder> append(const std::shared_ptr<Content>& array, int64_t at) override;
+    ContentPtr snapshot() const override;
+    const std::shared_ptr<Builder> append(ContentPtr& array, int64_t at) override;
   };
 
 }

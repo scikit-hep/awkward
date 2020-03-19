@@ -76,7 +76,7 @@ namespace awkward {
     return out;
   }
 
-  const std::shared_ptr<Content> Content::reduce(const Reducer& reducer, int64_t axis, bool mask, bool keepdims) const {
+  ContentPtr Content::reduce(const Reducer& reducer, int64_t axis, bool mask, bool keepdims) const {
     int64_t negaxis = -axis;
     std::pair<bool, int64_t> branchdepth = branch_depth();
     bool branch = branchdepth.first;
@@ -140,7 +140,7 @@ namespace awkward {
     return util::parameters_equal(parameters_, other);
   }
 
-  const std::shared_ptr<Content> Content::merge_as_union(const std::shared_ptr<Content>& other) const {
+  ContentPtr Content::merge_as_union(ContentPtr& other) const {
     int64_t mylength = length();
     int64_t theirlength = other.get()->length();
     Index8 tags(mylength + theirlength);
@@ -175,7 +175,7 @@ namespace awkward {
     return std::make_shared<UnionArray8_64>(Identities::none(), util::Parameters(), tags, index, contents);
   }
 
-  const std::shared_ptr<Content> Content::rpad_axis0(int64_t target, bool clip) const {
+  ContentPtr Content::rpad_axis0(int64_t target, bool clip) const {
     if (!clip  &&  target < length()) {
       return shallow_copy();
     }
@@ -189,7 +189,7 @@ namespace awkward {
     return next.get()->simplify_optiontype();
   }
 
-  const std::shared_ptr<Content> Content::localindex_axis0() const {
+  ContentPtr Content::localindex_axis0() const {
     Index64 localindex(length());
     struct Error err = awkward_localindex_64(
       localindex.ptr().get(),
@@ -198,7 +198,7 @@ namespace awkward {
     return std::make_shared<NumpyArray>(localindex);
   }
 
-  const std::shared_ptr<Content> Content::choose_axis0(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters) const {
+  ContentPtr Content::choose_axis0(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters) const {
     int64_t size = length();
     if (diagonal) {
       size += (n - 1);
@@ -244,7 +244,7 @@ namespace awkward {
     return std::make_shared<RecordArray>(Identities::none(), parameters, contents, recordlookup);
   }
 
-  const std::shared_ptr<Content> Content::getitem(const Slice& where) const {
+  ContentPtr Content::getitem(const Slice& where) const {
     std::shared_ptr<Content> next = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), shallow_copy(), length());
 
     std::shared_ptr<SliceItem> nexthead = where.head();
@@ -260,7 +260,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Content::getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const {
     if (head.get() == nullptr) {
       return shallow_copy();
     }
@@ -296,7 +296,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent, const Slice& tail) const {
+  ContentPtr Content::getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const std::shared_ptr<SliceItem>& slicecontent, const Slice& tail) const {
     if (SliceArray64* array = dynamic_cast<SliceArray64*>(slicecontent.get())) {
       return getitem_next_jagged(slicestarts, slicestops, *array, tail);
     }
@@ -311,7 +311,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Content::getitem_next(const SliceEllipsis& ellipsis, const Slice& tail, const Index64& advanced) const {
     std::pair<int64_t, int64_t> minmax = minmax_depth();
     int64_t mindepth = minmax.first;
     int64_t maxdepth = minmax.second;
@@ -334,25 +334,25 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Content::getitem_next(const SliceNewAxis& newaxis, const Slice& tail, const Index64& advanced) const {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), getitem_next(nexthead, nexttail, advanced), 1);
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Content::getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     return getitem_field(field.key()).get()->getitem_next(nexthead, nexttail, advanced);
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Content::getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const {
     std::shared_ptr<SliceItem> nexthead = tail.head();
     Slice nexttail = tail.tail();
     return getitem_fields(fields.keys()).get()->getitem_next(nexthead, nexttail, advanced);
   }
 
-  const std::shared_ptr<Content> getitem_next_regular_missing(const SliceMissing64& missing, const Slice& tail, const Index64& advanced, const RegularArray* raw, int64_t length, const std::string& classname) {
+  ContentPtr getitem_next_regular_missing(const SliceMissing64& missing, const Slice& tail, const Index64& advanced, const RegularArray* raw, int64_t length, const std::string& classname) {
     Index64 index(missing.index());
     Index64 outindex(index.length()*length);
 
@@ -369,7 +369,7 @@ namespace awkward {
     return std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out.simplify_optiontype(), index.length());
   }
 
-  bool check_missing_jagged_same(const std::shared_ptr<Content>& that, const Index8& bytemask, const SliceMissing64& missing) {
+  bool check_missing_jagged_same(ContentPtr& that, const Index8& bytemask, const SliceMissing64& missing) {
     if (bytemask.length() != missing.length()) {
       return false;
     }
@@ -386,7 +386,7 @@ namespace awkward {
     return same;
   }
 
-  const std::shared_ptr<Content> check_missing_jagged(const std::shared_ptr<Content>& that, const SliceMissing64& missing) {
+  ContentPtr check_missing_jagged(ContentPtr& that, const SliceMissing64& missing) {
     // FIXME: This function is insufficiently general. While working on something else,
     // I noticed that it wasn't possible to slice option-type data with a jagged array.
     // This handles the case where that happens at top-level; the most likely case
@@ -431,7 +431,7 @@ namespace awkward {
     return that;
   }
 
-  const std::shared_ptr<Content> Content::getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const {
+  ContentPtr Content::getitem_next(const SliceMissing64& missing, const Slice& tail, const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::invalid_argument("cannot mix missing values in slice with NumPy-style advanced indexing");
     }
@@ -463,7 +463,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> Content::getitem_next_array_wrap(const std::shared_ptr<Content>& outcontent, const std::vector<int64_t>& shape) const {
+  ContentPtr Content::getitem_next_array_wrap(ContentPtr& outcontent, const std::vector<int64_t>& shape) const {
     std::shared_ptr<Content> out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), outcontent, (int64_t)shape[shape.size() - 1]);
     for (int64_t i = (int64_t)shape.size() - 2;  i >= 0;  i--) {
       out = std::make_shared<RegularArray>(Identities::none(), util::Parameters(), out, (int64_t)shape[(size_t)i]);

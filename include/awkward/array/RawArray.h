@@ -276,11 +276,11 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<Content> shallow_copy() const override {
+    ContentPtr shallow_copy() const override {
       return std::make_shared<RawArrayOf<T>>(identities_, parameters_, ptr_, offset_, length_, itemsize_);
     }
 
-    const std::shared_ptr<Content> deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const override {
+    ContentPtr deep_copy(bool copyarrays, bool copyindexes, bool copyidentities) const override {
       std::shared_ptr<T> ptr = ptr_;
       int64_t offset = offset_;
       if (copyarrays) {
@@ -301,11 +301,11 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<Content> getitem_nothing() const override {
+    ContentPtr getitem_nothing() const override {
       return getitem_range_nowrap(0, 0);
     }
 
-    const std::shared_ptr<Content> getitem_at(int64_t at) const override {
+    ContentPtr getitem_at(int64_t at) const override {
       int64_t regular_at = at;
       if (regular_at < 0) {
         regular_at += length_;
@@ -316,11 +316,11 @@ namespace awkward {
       return getitem_at_nowrap(regular_at);
     }
 
-    const std::shared_ptr<Content> getitem_at_nowrap(int64_t at) const override {
+    ContentPtr getitem_at_nowrap(int64_t at) const override {
       return getitem_range_nowrap(at, at + 1);
     }
 
-    const std::shared_ptr<Content> getitem_range(int64_t start, int64_t stop) const override {
+    ContentPtr getitem_range(int64_t start, int64_t stop) const override {
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, true, start != Slice::none(), stop != Slice::none(), length_);
@@ -330,7 +330,7 @@ namespace awkward {
       return getitem_range_nowrap(regular_start, regular_stop);
     }
 
-    const std::shared_ptr<Content> getitem_range_nowrap(int64_t start, int64_t stop) const override {
+    ContentPtr getitem_range_nowrap(int64_t start, int64_t stop) const override {
       std::shared_ptr<Identities> identities(nullptr);
       if (identities_.get() != nullptr) {
         identities = identities_.get()->getitem_range_nowrap(start, stop);
@@ -338,29 +338,29 @@ namespace awkward {
       return std::make_shared<RawArrayOf<T>>(identities, parameters_, ptr_, offset_ + start, stop - start, itemsize_);
     }
 
-    const std::shared_ptr<Content> getitem_field(const std::string& key) const override {
+    ContentPtr getitem_field(const std::string& key) const override {
       throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
     }
 
-    const std::shared_ptr<Content> getitem_fields(const std::vector<std::string>& keys) const override {
+    ContentPtr getitem_fields(const std::vector<std::string>& keys) const override {
       throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field name"));
     }
 
-    const std::shared_ptr<Content> getitem(const Slice& where) const override {
+    ContentPtr getitem(const Slice& where) const override {
       std::shared_ptr<SliceItem> nexthead = where.head();
       Slice nexttail = where.tail();
       Index64 nextadvanced(0);
       return getitem_next(nexthead, nexttail, nextadvanced);
     }
 
-    const std::shared_ptr<Content> getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const override {
+    ContentPtr getitem_next(const std::shared_ptr<SliceItem>& head, const Slice& tail, const Index64& advanced) const override {
       if (tail.length() != 0) {
         throw std::invalid_argument("too many indexes for array");
       }
       return Content::getitem_next(head, tail, advanced);
     }
 
-    const std::shared_ptr<Content> carry(const Index64& carry) const override {
+    ContentPtr carry(const Index64& carry) const override {
       std::shared_ptr<T> ptr(new T[(size_t)carry.length()], util::array_deleter<T>());
       struct Error err = awkward_numpyarray_getitem_next_null_64(
         reinterpret_cast<uint8_t*>(ptr.get()),
@@ -425,11 +425,11 @@ namespace awkward {
       return std::string();
     }
 
-    const std::shared_ptr<Content> shallow_simplify() const override {
+    ContentPtr shallow_simplify() const override {
       return shallow_copy();
     }
 
-    const std::shared_ptr<Content> num(int64_t axis, int64_t depth) const override {
+    ContentPtr num(int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis == depth) {
         Index64 out(1);
@@ -451,7 +451,7 @@ namespace awkward {
       }
     }
 
-    bool mergeable(const std::shared_ptr<Content>& other, bool mergebool) const override {
+    bool mergeable(ContentPtr& other, bool mergebool) const override {
       if (dynamic_cast<EmptyArray*>(other.get())) {
         return true;
       }
@@ -488,7 +488,7 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<Content> merge(const std::shared_ptr<Content>& other) const override {
+    ContentPtr merge(ContentPtr& other) const override {
       if (dynamic_cast<EmptyArray*>(other.get())) {
         return shallow_copy();
       }
@@ -532,11 +532,11 @@ namespace awkward {
       throw std::invalid_argument("cannot use RawArray as a slice");
     }
 
-    const std::shared_ptr<Content> fillna(const std::shared_ptr<Content>& value) const override {
+    ContentPtr fillna(ContentPtr& value) const override {
       return shallow_copy();
     }
 
-    const std::shared_ptr<Content> rpad(int64_t target, int64_t axis, int64_t depth) const override {
+    ContentPtr rpad(int64_t target, int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis != depth) {
         throw std::invalid_argument("axis exceeds the depth of this array");
@@ -549,7 +549,7 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<Content> rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const override {
+    ContentPtr rpad_and_clip(int64_t target, int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis != depth) {
         throw std::invalid_argument("axis exceeds the depth of this array");
@@ -564,11 +564,11 @@ namespace awkward {
       return std::make_shared<IndexedOptionArray64>(Identities::none(), util::Parameters(), index, shallow_copy());
     }
 
-    const std::shared_ptr<Content> reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {
+    ContentPtr reduce_next(const Reducer& reducer, int64_t negaxis, const Index64& starts, const Index64& parents, int64_t outlength, bool mask, bool keepdims) const override {
       throw std::runtime_error("FIXME: RawArray:reduce_next");
     }
 
-    const std::shared_ptr<Content> localindex(int64_t axis, int64_t depth) const override {
+    ContentPtr localindex(int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (axis == depth) {
         return localindex_axis0();
@@ -578,7 +578,7 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<Content> choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override {
+    ContentPtr choose(int64_t n, bool diagonal, const std::shared_ptr<util::RecordLookup>& recordlookup, const util::Parameters& parameters, int64_t axis, int64_t depth) const override {
       if (n < 1) {
         throw std::invalid_argument("in choose, 'n' must be at least 1");
       }
@@ -591,11 +591,11 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<Content> getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
+    ContentPtr getitem_next(const SliceAt& at, const Slice& tail, const Index64& advanced) const override {
       return getitem_at(at.at());
     }
 
-    const std::shared_ptr<Content> getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override {
+    ContentPtr getitem_next(const SliceRange& range, const Slice& tail, const Index64& advanced) const override {
       if (range.step() == Slice::none()  ||  range.step() == 1) {
         return getitem_range(range.start(), range.stop());
       }
@@ -627,7 +627,7 @@ namespace awkward {
       }
     }
 
-    const std::shared_ptr<Content> getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override {
+    ContentPtr getitem_next(const SliceArray64& array, const Slice& tail, const Index64& advanced) const override {
       if (advanced.length() != 0) {
         throw std::runtime_error("RawArray::getitem_next(SliceAt): advanced.length() != 0");
       }
@@ -643,27 +643,27 @@ namespace awkward {
       return carry(flathead);
     }
 
-    const std::shared_ptr<Content> getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const override {
+    ContentPtr getitem_next(const SliceField& field, const Slice& tail, const Index64& advanced) const override {
       throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a field name because it has no fields"));
     }
 
-    const std::shared_ptr<Content> getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override {
+    ContentPtr getitem_next(const SliceFields& fields, const Slice& tail, const Index64& advanced) const override {
       throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by field names because it has no fields"));
     }
 
-    const std::shared_ptr<Content> getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const override {
+    ContentPtr getitem_next(const SliceJagged64& jagged, const Slice& tail, const Index64& advanced) const override {
       throw std::invalid_argument(std::string("cannot slice ") + classname() + std::string(" by a jagged array because it is one-dimensional"));
     }
 
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const override {
+    ContentPtr getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceArray64& slicecontent, const Slice& tail) const override {
       throw std::runtime_error("undefined operation: RawArray::getitem_next_jagged(array)");
     }
 
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const override {
+    ContentPtr getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceMissing64& slicecontent, const Slice& tail) const override {
       throw std::runtime_error("undefined operation: RawArray::getitem_next_jagged(missing)");
     }
 
-    const std::shared_ptr<Content> getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const override {
+    ContentPtr getitem_next_jagged(const Index64& slicestarts, const Index64& slicestops, const SliceJagged64& slicecontent, const Slice& tail) const override {
       throw std::runtime_error("undefined operation: RawArray::getitem_next_jagged(jagged)");
     }
 

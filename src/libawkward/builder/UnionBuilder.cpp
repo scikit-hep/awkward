@@ -51,7 +51,7 @@ namespace awkward {
     }
   }
 
-  const std::shared_ptr<Content> UnionBuilder::snapshot() const {
+  ContentPtr UnionBuilder::snapshot() const {
     Index8 tags(types_.ptr(), 0, types_.length());
     Index64 index(offsets_.ptr(), 0, offsets_.length());
     std::vector<std::shared_ptr<Content>> contents;
@@ -341,7 +341,7 @@ namespace awkward {
     return that_;
   }
 
-  const std::shared_ptr<Builder> UnionBuilder::append(const std::shared_ptr<Content>& array, int64_t at) {
+  const std::shared_ptr<Builder> UnionBuilder::append(ContentPtr& array, int64_t at) {
     if (current_ == -1) {
       std::shared_ptr<Builder> tofill(nullptr);
       int8_t i = 0;
