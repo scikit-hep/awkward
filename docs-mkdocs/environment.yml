@@ -1,0 +1,5 @@
+name: mkdocs-doxygen
+channels:
+  - conda-forge
+dependencies:
+  - doxygen
