@@ -22,8 +22,8 @@ email: pivarski@princeton.edu
 description: >-
   HERE
 
-baseurl: /tutorials  # the subpath of your site, e.g. /blog. If there is no subpath for your site, use an empty string ""
-url: https://awkward-array.org
+baseurl: /tutorial  # the subpath of your site, e.g. /blog. If there is no subpath for your site, use an empty string ""
+url: /
 
 
 #######################################################################################
