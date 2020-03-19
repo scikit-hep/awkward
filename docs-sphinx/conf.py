@@ -47,6 +47,9 @@ html_theme = "alabaster"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
+# Additional stuff
+master_doc = "index"
+
 import os
 import subprocess
 subprocess.check_call(["doxygen", os.path.join("docs-doxygen", "Doxyfile")], cwd="..")
