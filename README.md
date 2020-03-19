@@ -1,7 +1,5 @@
 <img src="docs-img/logo-300px.png">
 
-# Awkward Array
-
 I'm in the process of writing documentation; the "first page" will go here.
 
 # Installation
