@@ -12,6 +12,7 @@ trigger:
       - docs-demo-notebooks/*
       - docs-doxygen/*
       - docs-mkdocs/*
+      - .readthedocs.yml
       - docs/*
       - studies/*
 
