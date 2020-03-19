@@ -25,7 +25,6 @@ description: >-
 baseurl: /  # the subpath of your site, e.g. /blog. If there is no subpath for your site, use an empty string ""
 url: /
 
-
 #######################################################################################
 # Jupyter Book settings
 
