@@ -22,7 +22,7 @@ email: pivarski@princeton.edu
 description: >-
   HERE
 
-baseurl: /tutorial  # the subpath of your site, e.g. /blog. If there is no subpath for your site, use an empty string ""
+baseurl: /  # the subpath of your site, e.g. /blog. If there is no subpath for your site, use an empty string ""
 url: /
 
 
@@ -37,7 +37,7 @@ show_sidebar: true                # Show the sidebar. Only set to false if your 
 collapse_inactive_chapters: true  # Whether to collapse the inactive chapters in the sidebar
 collapse_inactive_sections: true  # Whether to collapse the sub-sections within a non-active section in the sidebar
 textbook_logo: images/logo/logo.png               # A logo to be displayed at the top of your textbook sidebar. Should be square
-textbook_logo_link: https://awkward-array.org/
+textbook_logo_link: /
 # sidebar_footer_text: 
 number_toc_chapters: false         # Whether to add numbers to chapterse in your Table of Contents. If true, you can control this at the Chapter level in _data/toc.yml
 
@@ -45,7 +45,7 @@ number_toc_chapters: false         # Whether to add numbers to chapterse in your
 search_max_words_in_content: 100   # In the search function, use at most this many words (too many words will make search slow)
 
 # Controlling page information
-page_titles: infer                      # Either `None`, `infer`, or `toc`
+page_titles: toc                      # Either `None`, `infer`, or `toc`
 page_authors: None                     # Either `None` or `infer`
 filename_title_split_character: _     # If inferring titles based on filename, splt on this character.
 
@@ -82,8 +82,8 @@ use_show_widgets_button: true                # If 'true', display a button to al
 
 # Download settings
 use_download_button: true                # If 'true', display a button to download a zip file for the notebook
-download_button_text: Download                # The text that download buttons will contain
-download_page_header: Made with Jupyter Book                # A header that will be displayed at the top of and PDF-printed page
+download_button_text: "Download Page"                # The text that download buttons will contain
+download_page_header: "Awkward Array"                # A header that will be displayed at the top of and PDF-printed page
 
 #######################################################################################
 # Jupyter book extensions and additional features
