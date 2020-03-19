@@ -1,8 +1,0 @@
-name: mkdocs-doxygen
-channels:
-  - conda-forge
-dependencies:
-  - doxygen==1.8.16
-  - pip
-  - pip:
-      - doxypypy
